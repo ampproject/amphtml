@@ -19,15 +19,16 @@ import {
   getStoreService,
 } from './amp-story-store-service';
 import {AdvancementMode} from './story-analytics';
+import {CommonSignals} from '../../../src/common-signals';
 import {EventType, dispatch} from './events';
 import {devAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {renderAsElement} from './simple-template';
 
 /** @struct @typedef {{className: string, triggers: (string|undefined)}} */
-let ButtonStateDef;
+let ButtonState_1_0_Def; // eslint-disable-line google-camelcase/google-camelcase
 
-/** @const {!Object<string, !ButtonStateDef>} */
+/** @const {!Object<string, !ButtonState_1_0_Def>} */
 const BackButtonStates = {
   CLOSE_BOOKEND: {
     className: 'i-amphtml-story-back-close-bookend',
@@ -41,7 +42,7 @@ const BackButtonStates = {
   },
 };
 
-/** @const {!Object<string, !ButtonStateDef>} */
+/** @const {!Object<string, !ButtonState_1_0_Def>} */
 const ForwardButtonStates = {
   HIDDEN: {className: 'i-amphtml-story-button-hidden'},
   NEXT_PAGE: {
@@ -95,12 +96,12 @@ function setClassOnHover(hoverEl, targetEl, className) {
 class PaginationButton {
   /**
    * @param {!Document} doc
-   * @param {!ButtonStateDef} initialState
+   * @param {!ButtonState_1_0_Def} initialState
    * @param {!./amp-story-store-service.AmpStoryStoreService} storeService
    * @param {!Window} win
    */
   constructor(doc, initialState, storeService, win) {
-    /** @private {!ButtonStateDef} */
+    /** @private {!ButtonState_1_0_Def} */
     this.state_ = initialState;
 
     /** @public @const {!Element} */
@@ -117,7 +118,7 @@ class PaginationButton {
     this.win_ = win;
   }
 
-  /** @param {!ButtonStateDef} state */
+  /** @param {!ButtonState_1_0_Def} state */
   updateState(state) {
     if (state === this.state_) {
       return;
@@ -128,7 +129,7 @@ class PaginationButton {
   }
 
   /**
-   * @return {!ButtonStateDef}
+   * @return {!ButtonState_1_0_Def}
    */
   getState() {
     return this.state_;
@@ -166,10 +167,14 @@ class PaginationButton {
 /** Pagination buttons layer. */
 export class PaginationButtons {
   /**
-   * @param {!Window} win
+   * @param {!./amp-story.AmpStory} ampStory
    * @param {function():Promise<boolean>} hasBookend
    */
-  constructor(win, hasBookend) {
+  constructor(ampStory, hasBookend) {
+    /** @private @const {!./amp-story.AmpStory} */
+    this.ampStory_ = ampStory;
+
+    const {win} = this.ampStory_;
     const doc = win.document;
     this.storeService_ = getStoreService(win);
 
@@ -192,10 +197,10 @@ export class PaginationButtons {
     this.forwardButton_.element.classList.add('next-container');
     this.backButton_.element.classList.add('prev-container');
 
-    /** @private {?ButtonStateDef} */
+    /** @private {?ButtonState_1_0_Def} */
     this.backButtonStateToRestore_ = null;
 
-    /** @private {?ButtonStateDef} */
+    /** @private {?ButtonState_1_0_Def} */
     this.forwardButtonStateToRestore_ = null;
 
     /** @private {function():Promise<boolean>} */
@@ -205,12 +210,12 @@ export class PaginationButtons {
   }
 
   /**
-   * @param {!Window} win
+   * @param {!./amp-story.AmpStory} ampStory
    * @param {function():Promise<boolean>} hasBookend
    * @return {!PaginationButtons}
    */
-  static create(win, hasBookend) {
-    return new PaginationButtons(win, hasBookend);
+  static create(ampStory, hasBookend) {
+    return new PaginationButtons(ampStory, hasBookend);
   }
 
   /** @param {!Element} element */
@@ -245,6 +250,21 @@ export class PaginationButtons {
         this.onCurrentPageIndexUpdate_(pageIndex);
       }
     );
+
+    this.storeService_.subscribe(StateProperty.PAGE_IDS, () => {
+      // Since onCurrentPageIndexUpdate_ uses this.hasBookend_, and the bookend
+      // isn't initialized until after the story is laid out, we wait for the
+      // story to be laid out before calling this function.
+      this.ampStory_.element
+        .signals()
+        .whenSignal(CommonSignals.LOAD_END)
+        .then(() => {
+          const currentPageIndex = Number(
+            this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX)
+          );
+          this.onCurrentPageIndexUpdate_(currentPageIndex);
+        });
+    });
 
     this.storeService_.subscribe(
       StateProperty.SYSTEM_UI_IS_VISIBLE_STATE,
@@ -309,12 +329,12 @@ export class PaginationButtons {
   onSystemUiIsVisibleStateUpdate_(isVisible) {
     if (isVisible) {
       this.backButton_.updateState(
-        /** @type {!ButtonStateDef} */ (devAssert(
+        /** @type {!ButtonState_1_0_Def} */ (devAssert(
           this.backButtonStateToRestore_
         ))
       );
       this.forwardButton_.updateState(
-        /** @type {!ButtonStateDef} */ (devAssert(
+        /** @type {!ButtonState_1_0_Def} */ (devAssert(
           this.forwardButtonStateToRestore_
         ))
       );

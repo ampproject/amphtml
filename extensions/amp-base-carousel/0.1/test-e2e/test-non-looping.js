@@ -69,7 +69,7 @@ describes.endtoend(
       const snappedScrollLeft = scrollLeft + slideWidth;
       const requestedScrollLeft = snappedScrollLeft + 1;
 
-      await controller.scroll(el, {left: requestedScrollLeft});
+      await controller.scrollTo(el, {left: requestedScrollLeft});
       // We should have snapped to the edge of the slide rather than the
       // requested scroll position.
       await expect(prop(el, 'scrollLeft')).to.equal(snappedScrollLeft);

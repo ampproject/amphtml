@@ -142,7 +142,7 @@ export class TouchHandler {
       const msg = this.copyTouchEvent_(e);
       this.messaging_.sendRequest(e.type, msg, false);
     }
-    if (this.scrollLocked_) {
+    if (this.scrollLocked_ && e.cancelable) {
       e.preventDefault();
     }
   }

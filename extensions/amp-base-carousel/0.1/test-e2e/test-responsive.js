@@ -71,7 +71,7 @@ describes.endtoend(
       const el = await getScrollingElement(controller);
       const secondSlide = await getSlide(controller, 1);
 
-      await controller.scroll(el, {left: 333});
+      await controller.scrollTo(el, {left: 333});
       await expect(prop(el, 'scrollLeft')).to.equal(333);
       await controller.setWindowRect({
         width: 600,

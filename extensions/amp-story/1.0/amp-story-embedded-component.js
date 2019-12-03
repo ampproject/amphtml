@@ -22,7 +22,11 @@ import {
   UIType,
   getStoreService,
 } from './amp-story-store-service';
-import {AdvancementMode} from './story-analytics';
+import {
+  AdvancementMode,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
 import {LocalizedStringId} from '../../../src/localized-strings';
@@ -50,6 +54,16 @@ const ActionIcon = {
 const TOOLTIP_CLOSE_ANIMATION_MS = 100;
 
 /**
+ * Since we don't know the actual width of the content inside the iframe
+ * and in responsive environments the iframe takes the whole width, we
+ * hardcode a limit based on what we know of how the embed behaves (only true
+ * for Twitter embeds). See #22334.
+ * @const {number}
+ * @private
+ */
+const MAX_TWEET_WIDTH_PX = 500;
+
+/**
  * Components that can be expanded.
  * @const {!Object}
  * @private
@@ -71,7 +85,7 @@ export const EXPANDABLE_COMPONENTS = {
 const LAUNCHABLE_COMPONENTS = {
   'a': {
     actionIcon: ActionIcon.LAUNCH,
-    selector: 'a[href]',
+    selector: 'a[href]:not([affiliate-link-icon])',
   },
 };
 
@@ -193,19 +207,181 @@ const buildExpandedViewOverlay = element => htmlFor(element)`
 
 /**
  * Updates embed's corresponding <style> element with embedData.
+ * @param {!Element} target
  * @param {!Element} embedStyleEl
  * @param {!EmbedDataDef} embedData
  */
-function updateEmbedStyleEl(embedStyleEl, embedData) {
+function updateEmbedStyleEl(target, embedStyleEl, embedData) {
   const embedId = embedData.id;
+  embedStyleEl.textContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${embedId}"]
+  ${buildStringStyleFromEl(target, embedData)}`;
+}
 
-  embedStyleEl.textContent = `[${EMBED_ID_ATTRIBUTE_NAME}="${embedId}"] {
-      width: ${px(embedData.width)} !important;
-      height: ${px(embedData.height)} !important;
-      transform: ${embedData.transform} !important;
-      margin: ${embedData.verticalMargin}px ${embedData.horizontalMargin}px
-          !important;
-      }`;
+/**
+ * Builds a string containing the corresponding style depending on the
+ * element.
+ * @param {!Element} target
+ * @param {!EmbedDataDef} embedData
+ * @return {string}
+ */
+function buildStringStyleFromEl(target, embedData) {
+  switch (target.tagName.toLowerCase()) {
+    case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
+      return buildStringStyleForTweet(embedData);
+    default:
+      return buildDefaultStringStyle(embedData);
+  }
+}
+
+/**
+ * Builds string used in the <style> element for tweets. We ignore the height
+ * as its non-deterministic.
+ * @param {!EmbedDataDef} embedData
+ * @return {string}
+ */
+function buildStringStyleForTweet(embedData) {
+  return `{
+    width: ${px(embedData.width)} !important;
+    transform: ${embedData.transform} !important;
+    margin: 0 ${embedData.horizontalMargin}px !important;
+    }`;
+}
+
+/**
+ * Builds string used in the <style> element for default embeds.
+ * @param {!EmbedDataDef} embedData
+ * @return {string}
+ */
+function buildDefaultStringStyle(embedData) {
+  return `{
+    width: ${px(embedData.width)} !important;
+    height: ${px(embedData.height)} !important;
+    transform: ${embedData.transform} !important;
+    margin: ${embedData.verticalMargin}px ${
+    embedData.horizontalMargin
+  }px !important;
+    }`;
+}
+
+/**
+ * Measures syles for a given element in preparation for its expanded animation.
+ * @param {!Element} element
+ * @param {!Object} state
+ * @param {!DOMRect} pageRect
+ * @param {!DOMRect} elRect
+ * @return {!Object}
+ */
+function measureStyleForEl(element, state, pageRect, elRect) {
+  switch (element.tagName.toLowerCase()) {
+    case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
+      return measureStylesForTwitter(state, pageRect, elRect);
+    default:
+      return measureDefaultStyles(state, pageRect, elRect);
+  }
+}
+
+/**
+ * Since amp-twitter handles its own resize events for its height, we don't
+ * resize based on its height, but rather just based on its width.
+ * @param {!Object} state
+ * @param {!DOMRect} pageRect
+ * @param {!DOMRect} elRect
+ * @return {!Object}
+ */
+function measureStylesForTwitter(state, pageRect, elRect) {
+  // If screen is very wide and story has supports-landscape attribute,
+  // we don't want it to take the whole width. We take the maximum width
+  // that the tweet can actually use instead.
+  state.newWidth = Math.min(pageRect.width, MAX_TWEET_WIDTH_PX);
+
+  state.scaleFactor =
+    Math.min(elRect.width, MAX_TWEET_WIDTH_PX) / state.newWidth;
+
+  state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
+
+  return state;
+}
+
+/**
+ * Measures styles for a given element in preparation for its expanded
+ * animation.
+ * @param {!Object} state
+ * @param {!DOMRect} pageRect
+ * @param {!DOMRect} elRect
+ * @return {!Object}
+ */
+function measureDefaultStyles(state, pageRect, elRect) {
+  if (elRect.width >= elRect.height) {
+    state.newWidth = pageRect.width;
+    state.scaleFactor = elRect.width / state.newWidth;
+    state.newHeight = (elRect.height / elRect.width) * state.newWidth;
+  } else {
+    const maxHeight = pageRect.height - VERTICAL_PADDING;
+    state.newWidth = Math.min(
+      (elRect.width / elRect.height) * maxHeight,
+      pageRect.width
+    );
+    state.newHeight = (elRect.height / elRect.width) * state.newWidth;
+    state.scaleFactor = elRect.height / state.newHeight;
+  }
+
+  state.verticalMargin = -1 * ((state.newHeight - elRect.height) / 2);
+  state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
+
+  return state;
+}
+
+/**
+ * Gets updated style object for a given element.
+ * @param {!Element} element
+ * @param {number} elId
+ * @param {!Object} state
+ * @return {!Object}
+ */
+function updateStyleForEl(element, elId, state) {
+  switch (element.tagName.toLowerCase()) {
+    case EXPANDABLE_COMPONENTS['amp-twitter'].selector:
+      return updateStylesForTwitter(elId, state);
+    default:
+      return updateDefaultStyles(elId, state);
+  }
+}
+
+/**
+ * Gets style object for an embedded component, setting negative margins
+ * to make up for the expanded size in preparation of the expanded animation.
+ * @param {number} elId
+ * @param {!Object} state
+ * @return {!Object}
+ */
+function updateDefaultStyles(elId, state) {
+  return {
+    id: elId,
+    width: state.newWidth,
+    height: state.newHeight,
+    scaleFactor: state.scaleFactor,
+    transform: `scale(${state.scaleFactor})`,
+    verticalMargin: state.verticalMargin,
+    horizontalMargin: state.horizontalMargin,
+  };
+}
+
+/**
+ * Gets style object for twitter. Notice there is no height or vertical margin
+ * since we don't know the final height of tweets even after layout, so we just
+ * let the embed handle its own height.
+ * @param {number} elId
+ * @param {!Object} state
+ * @return {!Object}
+ */
+function updateStylesForTwitter(elId, state) {
+  return {
+    id: elId,
+    width: state.newWidth,
+    scaleFactor: state.scaleFactor,
+    transform: `scale(${state.scaleFactor})`,
+    horizontalMargin: state.horizontalMargin,
+  };
 }
 
 /**
@@ -283,8 +459,14 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
+
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
+
+    /** @private @const {!../../../src/service/owners-interface.OwnersInterface} */
+    this.owners_ = Services.ownersForDoc(getAmpdoc(this.win_.document));
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win_);
@@ -320,6 +502,12 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
+
+    /** @private {?Element} */
+    this.buttonLeft_ = null;
+
+    /** @private {?Element} */
+    this.buttonRight_ = null;
   }
 
   /**
@@ -375,6 +563,10 @@ export class AmpStoryEmbeddedComponent {
       case EmbeddedComponentState.FOCUSED:
         this.state_ = state;
         this.onFocusedStateUpdate_(component);
+        this.analyticsService_.triggerEvent(
+          StoryAnalyticsEvent.FOCUS,
+          this.triggeringTarget_
+        );
         break;
       case EmbeddedComponentState.HIDDEN:
         this.state_ = state;
@@ -401,7 +593,7 @@ export class AmpStoryEmbeddedComponent {
     // Resources that previously called `schedulePause` must also call
     // `scheduleResume`. Calling `scheduleResume` on resources that did not
     // previously call `schedulePause` has no effect.
-    this.resources_.scheduleResume(this.storyEl_, embedEl);
+    this.owners_.scheduleResume(this.storyEl_, embedEl);
     if (!this.embedsToBePaused_.includes(embedEl)) {
       this.embedsToBePaused_.push(embedEl);
     }
@@ -480,6 +672,7 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Builds the tooltip overlay and appends it to the provided story.
    * @private
+   * @return {Node}
    */
   buildFocusedState_() {
     this.shadowRoot_ = this.win_.document.createElement('div');
@@ -491,6 +684,18 @@ export class AmpStoryEmbeddedComponent {
 
     this.focusedStateOverlay_.addEventListener('click', event =>
       this.onOutsideTooltipClick_(event)
+    );
+
+    this.tooltip_.addEventListener(
+      'click',
+      event => {
+        event.stopPropagation();
+        this.analyticsService_.triggerEvent(
+          StoryAnalyticsEvent.CLICK_THROUGH,
+          this.triggeringTarget_
+        );
+      },
+      true /** capture */
     );
 
     return this.shadowRoot_;
@@ -596,7 +801,7 @@ export class AmpStoryEmbeddedComponent {
       // Pauses content inside embeds when a page change occurs.
       while (this.embedsToBePaused_.length > 0) {
         const embedEl = this.embedsToBePaused_.pop();
-        this.resources_.schedulePause(this.storyEl_, embedEl);
+        this.owners_.schedulePause(this.storyEl_, embedEl);
       }
     });
   }
@@ -633,6 +838,7 @@ export class AmpStoryEmbeddedComponent {
     this.updateTooltipText_(component.element, embedConfig);
     this.updateTooltipComponentIcon_(component.element, embedConfig);
     this.updateTooltipActionIcon_(embedConfig);
+    this.updateNavButtons_();
     this.positionTooltip_(component);
   }
 
@@ -677,13 +883,14 @@ export class AmpStoryEmbeddedComponent {
   /**
    * Gets href from an element containing a url.
    * @param {!Element} target
+   * @return {string}
    * @private
    */
   getElementHref_(target) {
     const elUrl = target.getAttribute('href');
     if (!isProtocolValid(elUrl)) {
       user().error(TAG, 'The tooltip url is invalid');
-      return;
+      return '';
     }
 
     return parseUrlDeprecated(elUrl).href;
@@ -722,10 +929,14 @@ export class AmpStoryEmbeddedComponent {
       `Failed to look up embed style element with ID ${embedId}`
     );
 
-    embedStyleEl[AMP_EMBED_DATA].transform = `scale(${
-      embedStyleEl[AMP_EMBED_DATA].scaleFactor
-    })`;
-    updateEmbedStyleEl(embedStyleEl, embedStyleEl[AMP_EMBED_DATA]);
+    embedStyleEl[
+      AMP_EMBED_DATA
+    ].transform = `scale(${embedStyleEl[AMP_EMBED_DATA].scaleFactor})`;
+    updateEmbedStyleEl(
+      this.triggeringTarget_,
+      embedStyleEl,
+      embedStyleEl[AMP_EMBED_DATA]
+    );
   }
 
   /**
@@ -751,6 +962,12 @@ export class AmpStoryEmbeddedComponent {
         // TODO(#20832): Store DOMRect for the page in the store to avoid
         // having to call getBoundingClientRect().
         const pageRect = this.componentPage_./*OK*/ getBoundingClientRect();
+        const realHeight = target./*OK*/ offsetHeight;
+        const maxHeight = pageRect.height - VERTICAL_PADDING;
+        state.scaleFactor = 1;
+        if (realHeight > maxHeight) {
+          state.scaleFactor = maxHeight / realHeight;
+        }
 
         // Gap on the left of the element between full-screen size and
         // current size.
@@ -763,11 +980,12 @@ export class AmpStoryEmbeddedComponent {
 
         // Gap on the top of the element between full-screen size and
         // current size.
-        const topGap = (embedData.height - targetRect.height) / 2;
+        const topGap = (realHeight * state.scaleFactor - targetRect.height) / 2;
         // Distance from top of page to what will be the top of the element in
         // full-screen.
         const fullScreenTop = targetRect.top - topGap - pageRect.top;
-        const centeredTop = pageRect.height / 2 - embedData.height / 2;
+        const centeredTop =
+          pageRect.height / 2 - (realHeight * state.scaleFactor) / 2;
         state.translateY = centeredTop - fullScreenTop;
       },
       /** mutate */
@@ -775,9 +993,9 @@ export class AmpStoryEmbeddedComponent {
         target.classList.toggle('i-amphtml-expanded-component', true);
 
         embedData.transform = `translate3d(${state.translateX}px,
-            ${state.translateY}px, 0) scale(1)`;
+            ${state.translateY}px, 0) scale(${state.scaleFactor})`;
 
-        updateEmbedStyleEl(embedStyleEl, embedData);
+        updateEmbedStyleEl(target, embedStyleEl, embedData);
       }
     );
   }
@@ -789,7 +1007,7 @@ export class AmpStoryEmbeddedComponent {
    * that content around stays put.
    * @param {!Element} pageEl
    * @param {!Element} element
-   * @param {!../../../src/service/resources-impl.Resources} resources
+   * @param {!../../../src/service/resources-interface.ResourcesInterface} resources
    */
   static prepareForAnimation(pageEl, element, resources) {
     let elId = null;
@@ -797,7 +1015,7 @@ export class AmpStoryEmbeddedComponent {
     // When a window resize happens, we must reset the styles and prepare the
     // animation again.
     if (element.hasAttribute(EMBED_ID_ATTRIBUTE_NAME)) {
-      elId = element.getAttribute(EMBED_ID_ATTRIBUTE_NAME);
+      elId = parseInt(element.getAttribute(EMBED_ID_ATTRIBUTE_NAME), 10);
       const embedStyleEl = dev().assertElement(
         embedStyleEls[elId],
         `Failed to look up embed style element with ID ${elId}`
@@ -806,30 +1024,14 @@ export class AmpStoryEmbeddedComponent {
       embedStyleEl[AMP_EMBED_DATA] = {};
     }
 
-    const state = {};
+    let state = {};
     resources.measureMutateElement(
       element,
       /** measure */
       () => {
         const pageRect = pageEl./*OK*/ getBoundingClientRect();
         const elRect = element./*OK*/ getBoundingClientRect();
-
-        if (elRect.width >= elRect.height) {
-          state.newWidth = pageRect.width;
-          state.scaleFactor = elRect.width / state.newWidth;
-          state.newHeight = (elRect.height / elRect.width) * state.newWidth;
-        } else {
-          const maxHeight = pageRect.height - VERTICAL_PADDING;
-          state.newWidth = Math.min(
-            (elRect.width / elRect.height) * maxHeight,
-            pageRect.width
-          );
-          state.newHeight = (elRect.height / elRect.width) * state.newWidth;
-          state.scaleFactor = elRect.height / state.newHeight;
-        }
-
-        state.verticalMargin = -1 * ((state.newHeight - elRect.height) / 2);
-        state.horizontalMargin = -1 * ((state.newWidth - elRect.width) / 2);
+        state = measureStyleForEl(element, state, pageRect, elRect);
       },
       /** mutate */
       () => {
@@ -848,22 +1050,14 @@ export class AmpStoryEmbeddedComponent {
 
         embedStyleEls[elId][AMP_EMBED_DATA] = Object.assign(
           {},
-          {
-            id: elId,
-            width: state.newWidth,
-            height: state.newHeight,
-            scaleFactor: state.scaleFactor,
-            transform: `scale(${state.scaleFactor})`,
-            verticalMargin: state.verticalMargin,
-            horizontalMargin: state.horizontalMargin,
-          }
+          updateStyleForEl(element, elId, state)
         );
 
         const embedStyleEl = dev().assertElement(
           embedStyleEls[elId],
           `Failed to look up embed style element with ID ${elId}`
         );
-        updateEmbedStyleEl(embedStyleEl, embedStyleEl[AMP_EMBED_DATA]);
+        updateEmbedStyleEl(element, embedStyleEl, embedStyleEl[AMP_EMBED_DATA]);
       }
     );
   }
@@ -947,6 +1141,32 @@ export class AmpStoryEmbeddedComponent {
         tooltipCustomIcon.classList.add(embedConfig.customIconClassName);
       }
     );
+  }
+
+  /**
+   * Show or hide arrows based on current page.
+   * @private
+   */
+  updateNavButtons_() {
+    if (!this.isLastPage_()) {
+      this.buttonLeft_.removeAttribute('hidden');
+      this.buttonRight_.removeAttribute('hidden');
+    } else {
+      this.storeService_.get(StateProperty.RTL_STATE)
+        ? this.buttonLeft_.setAttribute('hidden', true)
+        : this.buttonRight_.setAttribute('hidden', true);
+    }
+  }
+
+  /**
+   * Is last page.
+   * @return {boolean}
+   * @private
+   */
+  isLastPage_() {
+    const pageIndex = this.storeService_.get(StateProperty.CURRENT_PAGE_INDEX);
+    const pageCount = this.storeService_.get(StateProperty.PAGE_IDS).length;
+    return pageIndex + 1 === pageCount;
   }
 
   /**
@@ -1132,16 +1352,18 @@ export class AmpStoryEmbeddedComponent {
 
     this.tooltip_ = tooltip;
     this.tooltipArrow_ = arrow;
+    this.buttonLeft_ = buttonLeft;
+    this.buttonRight_ = buttonRight;
     const rtlState = this.storeService_.get(StateProperty.RTL_STATE);
 
-    buttonLeft.addEventListener('click', e =>
+    this.buttonLeft_.addEventListener('click', e =>
       this.onNavigationalClick_(
         e,
         rtlState ? EventType.NEXT_PAGE : EventType.PREVIOUS_PAGE
       )
     );
 
-    buttonRight.addEventListener('click', e =>
+    this.buttonRight_.addEventListener('click', e =>
       this.onNavigationalClick_(
         e,
         rtlState ? EventType.PREVIOUS_PAGE : EventType.NEXT_PAGE
@@ -1170,5 +1392,13 @@ export class AmpStoryEmbeddedComponent {
       undefined,
       {bubbles: true}
     );
+  }
+
+  /**
+   * @visibleForTesting
+   * @return {?Element}
+   */
+  getShadowRootForTesting() {
+    return this.shadowRoot_;
   }
 }

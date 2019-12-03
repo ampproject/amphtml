@@ -25,8 +25,11 @@ import {dict} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
 import {
   isAdLike,
+  isPausable,
   listenFor,
   looksLikeTrackingIframe,
+  makePausable,
+  setPaused,
 } from '../../../src/iframe-helper';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isExperimentOn} from '../../../src/experiments';
@@ -50,6 +53,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'frameborder',
   'referrerpolicy',
   'scrolling',
+  'tabindex',
 ];
 
 /** @type {number}  */
@@ -272,7 +276,11 @@ export class AmpIframe extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     if (this.iframeSrc) {
-      this.preconnect.url(this.iframeSrc, onLayout);
+      Services.preconnectFor(this.win).url(
+        this.getAmpDoc(),
+        this.iframeSrc,
+        onLayout
+      );
     }
   }
 
@@ -419,6 +427,13 @@ export class AmpIframe extends AMP.BaseElement {
     iframe.setAttribute('allow', allowVal);
 
     setSandbox(this.element, iframe, this.sandbox_);
+
+    // If "pausable-iframe" enabled, try to make the iframe pausable. It doesn't
+    // matter here whether this will succeed or not.
+    if (isExperimentOn(this.win, 'pausable-iframe')) {
+      makePausable(devAssert(this.iframe_));
+    }
+
     iframe.src = this.iframeSrc;
 
     if (!this.isTrackingFrame_) {
@@ -477,7 +492,33 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   unlayoutOnPause() {
-    return true;
+    return !this.isPausable_();
+  }
+
+  /** @override  */
+  pauseCallback() {
+    if (this.isPausable_()) {
+      setPaused(devAssert(this.iframe_), true);
+    }
+  }
+
+  /** @override  */
+  resumeCallback() {
+    if (this.isPausable_()) {
+      setPaused(devAssert(this.iframe_), false);
+    }
+  }
+
+  /**
+   * @return {boolean}
+   * @private
+   */
+  isPausable_() {
+    return (
+      isExperimentOn(this.win, 'pausable-iframe') &&
+      !!this.iframe_ &&
+      isPausable(this.iframe_)
+    );
   }
 
   /**
@@ -659,24 +700,20 @@ export class AmpIframe extends AMP.BaseElement {
 
     // Register action (even if targetOrigin_ is not available so we can
     // provide a helpful error message).
-    this.registerAction(
-      'postMessage',
-      invocation => {
-        if (this.targetOrigin_) {
-          this.iframe_.contentWindow./*OK*/ postMessage(
-            invocation.args,
-            this.targetOrigin_
-          );
-        } else {
-          user().error(
-            TAG_,
-            '"postMessage" action is only allowed with "src"' +
-              'attribute with an origin.'
-          );
-        }
-      },
-      ActionTrust.HIGH
-    );
+    this.registerAction('postMessage', invocation => {
+      if (this.targetOrigin_) {
+        this.iframe_.contentWindow./*OK*/ postMessage(
+          invocation.args,
+          this.targetOrigin_
+        );
+      } else {
+        user().error(
+          TAG_,
+          '"postMessage" action is only allowed with "src"' +
+            'attribute with an origin.'
+        );
+      }
+    });
 
     // However, don't listen for 'message' event if targetOrigin_ is null.
     if (!this.targetOrigin_) {

@@ -26,6 +26,7 @@ import {isArray, toWin} from '../../../src/types';
  *   attrs: (!JsonObject|undefined),
  *   localizedStringId: (!LocalizedStringId|undefined),
  *   unlocalizedString: (string|undefined),
+ *   localizedLabelId: (!LocalizedStringId|undefined),
  *   children: (!Array<!ElementDef>|undefined),
  * }}
  */
@@ -79,13 +80,27 @@ function renderSingle(doc, elementDef) {
       )
     : doc.createElement(elementDef.tag);
 
-  if (hasOwn(elementDef, 'localizedStringId')) {
+  const hasLocalizedTextContent = hasOwn(elementDef, 'localizedStringId');
+  const hasLocalizedLabel = hasOwn(elementDef, 'localizedLabelId');
+  if (hasLocalizedTextContent || hasLocalizedLabel) {
     const win = toWin(doc.defaultView);
     Services.localizationServiceForOrNull(win).then(localizationService => {
       devAssert(localizationService, 'Could not retrieve LocalizationService.');
-      el.textContent = localizationService.getLocalizedString(
-        /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
-      );
+
+      if (hasLocalizedTextContent) {
+        el.textContent = localizationService.getLocalizedString(
+          /** @type {!LocalizedStringId} */ (elementDef.localizedStringId)
+        );
+      }
+
+      if (hasLocalizedLabel) {
+        const labelString = localizationService.getLocalizedString(
+          /** @type {!LocalizedStringId} */ (elementDef.localizedLabelId)
+        );
+        if (labelString) {
+          el.setAttribute('aria-label', labelString);
+        }
+      }
     });
   }
 

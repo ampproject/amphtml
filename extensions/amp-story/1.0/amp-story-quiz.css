@@ -1,0 +1,162 @@
+/**
+ * Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
+
+.i-amphtml-story-quiz-container {
+    align-self: start;
+    --correct-color: #5BBA74 !important;
+    --correct-color-shaded: #2D8E42 !important;
+    --incorrect-color: #F34E4E !important;
+    --incorrect-color-shaded: #cc4141 !important;
+    --accent-color: #005AF0;
+    font-family: 'Poppins-bold', sans-serif !important;
+    background: var(--accent-color) !important;
+    border-radius: 32px !important;
+}
+
+.i-amphtml-story-quiz-prompt-container {
+    display: flex !important;
+    justify-items: center !important;
+    padding: 20px !important;
+    color: white !important;
+}
+
+.i-amphtml-story-quiz-prompt {
+    margin: 0px !important;
+    overflow : hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 4 !important;
+    -webkit-box-orient: vertical !important;
+    visibility: visible !important;
+}
+
+h1.i-amphtml-story-quiz-prompt {
+    font-size: 28px !important;
+    line-height: 36px !important;
+    max-height: 144px !important;
+}
+
+h2.i-amphtml-story-quiz-prompt {
+    font-size: 22px !important;
+    line-height: 28px !important;
+    max-height: 112px !important;
+}
+
+h3.i-amphtml-story-quiz-prompt {
+    font-size: 18px !important;
+    line-height: 24px !important;
+    max-height: 96px !important;
+}
+
+.i-amphtml-story-quiz-option-container {
+    display: flex !important;
+    flex-direction: column;
+    background-color: white !important;
+    border-radius: 32px !important;
+    padding: 8px 8px 0px 8px !important;
+}
+
+.i-amphtml-story-quiz-option {
+    display: flex !important;
+    justify-items: start !important;
+    align-items: center !important;
+    border-radius: 32px !important;
+    padding: 8px 16px 8px 8px !important;
+    background-color: inherit !important;
+    margin-bottom: 8px !important;
+    color: #5F6368 !important;
+    border: solid 1px #DADCE0 !important;
+    font-size: 16px !important;
+    line-height: 20px !important;
+}
+
+/* Truncate option text and add an ellipsis after 2 lines. */
+.i-amphtml-story-quiz-option-text {
+    max-height: 40px !important;
+    overflow : hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    visibility: visible !important;
+}
+
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected {
+    color: white !important;
+    border: solid 1px transparent !important;
+}
+
+.i-amphtml-story-quiz-answer-choice {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    height: 24px !important;
+    width: 24px !important;
+    min-width: 24px !important;
+    border-radius: 50% !important;
+    border: solid 2px !important;
+    padding: 5px !important;
+    margin-right: 16px !important;
+    color: var(--accent-color) !important;
+    font-size: 16px !important;
+    line-height: 16px !important;
+    font-weight: bold !important;
+}
+
+[dir=rtl ] .i-amphtml-story-quiz-answer-choice {
+    margin-left: 16px !important;
+    margin-right: 0px !important;
+}
+
+.i-amphtml-story-quiz-post-selection :not([correct]) > .i-amphtml-story-quiz-answer-choice {
+    color: var(--incorrect-color) !important;
+}
+
+.i-amphtml-story-quiz-post-selection [correct] > .i-amphtml-story-quiz-answer-choice {
+    color: var(--correct-color) !important;
+}
+
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected:not([correct]) {
+    background-color: var(--incorrect-color) !important;
+}
+
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected[correct] {
+    background-color: var(--correct-color) !important;
+}
+
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected > .i-amphtml-story-quiz-answer-choice {
+    border: solid 2px transparent !important;
+}
+
+/** TODO(jackbsteinberg): Use a more a11y-friendly approach than font-size: 0px; */
+
+.i-amphtml-story-quiz-post-selection [correct] > .i-amphtml-story-quiz-answer-choice {
+    background-color: white !important;
+    background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#5BBA74"><path fill="none" d="M0 0h24v24H0z"/><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>') !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    font-size: 0 !important;
+}
+
+.i-amphtml-story-quiz-post-selection :not([correct]) > .i-amphtml-story-quiz-answer-choice {
+    background-color: white !important;
+    background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="#F34E4E"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    font-size: 0 !important;
+}

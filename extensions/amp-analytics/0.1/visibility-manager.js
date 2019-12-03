@@ -23,16 +23,20 @@ import {Services} from '../../../src/services';
 import {VisibilityModel} from './visibility-model';
 import {dev, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {getFriendlyIframeEmbedOptional} from '../../../src/iframe-helper';
 import {getMinOpacity} from './opacity';
 import {getMode} from '../../../src/mode';
+import {getParentWindowFrameElement} from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {
   layoutPositionRelativeToScrolledViewport,
   layoutRectLtwh,
 } from '../../../src/layout-rect';
+import {rootNodeFor} from '../../../src/dom';
 
 const TAG = 'amp-analytics/visibility-manager';
 
+const PROP = '__AMP_VIS';
 const VISIBILITY_ID_PROP = '__AMP_VIS_ID';
 
 /** @type {number} */
@@ -49,6 +53,36 @@ function getElementId(element) {
     element[VISIBILITY_ID_PROP] = id;
   }
   return id;
+}
+
+/**
+ * @param {!Node} rootNode
+ * @return {!VisibilityManager}
+ */
+export function provideVisibilityManager(rootNode) {
+  if (!rootNode[PROP]) {
+    rootNode[PROP] = createVisibilityManager(rootNode);
+  }
+  return rootNode[PROP];
+}
+
+/**
+ * @param {!Node} rootNode
+ * @return {!VisibilityManager}
+ */
+function createVisibilityManager(rootNode) {
+  // TODO(#22733): cleanup when ampdoc-fie is launched.
+  const ampdoc = Services.ampdoc(rootNode);
+  const frame = getParentWindowFrameElement(rootNode);
+  const embed = frame && getFriendlyIframeEmbedOptional(frame);
+  const frameRootNode = frame && rootNodeFor(frame);
+  if (embed && frameRootNode) {
+    return new VisibilityManagerForEmbed(
+      provideVisibilityManager(frameRootNode),
+      embed
+    );
+  }
+  return new VisibilityManagerForDoc(ampdoc);
 }
 
 /**
@@ -542,13 +576,10 @@ export class VisibilityManagerForDoc extends VisibilityManager {
     super(/* parent */ null, ampdoc);
 
     /** @const @private */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
-
-    /** @const @private */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private {boolean} */
-    this.backgrounded_ = !this.viewer_.isVisible();
+    this.backgrounded_ = !ampdoc.isVisible();
 
     /** @const @private {boolean} */
     this.backgroundedAtStart_ = this.isBackgrounded();
@@ -576,11 +607,11 @@ export class VisibilityManagerForDoc extends VisibilityManager {
         this.observe(rootElement, this.setRootVisibility.bind(this))
       );
     } else {
-      // Main document: visibility is based on the viewer.
-      this.setRootVisibility(this.viewer_.isVisible() ? 1 : 0);
+      // Main document: visibility is based on the ampdoc.
+      this.setRootVisibility(this.ampdoc.isVisible() ? 1 : 0);
       this.unsubscribe(
-        this.viewer_.onVisibilityChanged(() => {
-          const isVisible = this.viewer_.isVisible();
+        this.ampdoc.onVisibilityChanged(() => {
+          const isVisible = this.ampdoc.isVisible();
           if (!isVisible) {
             this.backgrounded_ = true;
           }
@@ -601,7 +632,7 @@ export class VisibilityManagerForDoc extends VisibilityManager {
 
   /** @override */
   getStartTime() {
-    return dev().assertNumber(this.viewer_.getFirstVisibleTime());
+    return dev().assertNumber(this.ampdoc.getFirstVisibleTime());
   }
 
   /** @override */

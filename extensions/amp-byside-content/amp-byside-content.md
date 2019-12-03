@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays dynamic content from the BySide service.
 ---
+
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -25,14 +26,13 @@ limitations under the License.
 
 Displays dynamic content from the <a href="http://www.byside.com/">BySide service</a>.
 
-
 <table>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-byside-content" src="https://cdn.ampproject.org/v0/amp-byside-content-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
 </table>
@@ -44,17 +44,17 @@ displays dynamic content that can be retrieved from the [BySide](http://www.bysi
 
 Example:
 
-
 The `width` and `height` attributes determine the aspect ratio of the embedded BySide content in responsive layouts.
 
 ```html
 <amp-byside-content
-    data-webcare-id="D6604AE5D0"
-    data-label="amp-responsive"
-    data-lang="en"
-    width="1024"
-    height="500"
-    layout="responsive">
+  data-webcare-id="D6604AE5D0"
+  data-label="amp-responsive"
+  data-lang="en"
+  width="1024"
+  height="500"
+  layout="responsive"
+>
 </amp-byside-content>
 ```
 
@@ -83,7 +83,7 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 
@@ -91,8 +91,9 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
 
 [BySide](http://www.byside.com) is committed to respect and protect your privacy and developing technology that gives you the most powerful and safe online experience. BySide privacy statement and cookies policy can be found on the following url's:
 
-* [http://www.byside.com/privacy.html](http://www.byside.com/privacy.html)
-* [http://www.byside.com/cookies.html](http://www.byside.com/cookies.html)
+- [http://www.byside.com/privacy.html](http://www.byside.com/privacy.html)
+- [http://www.byside.com/cookies.html](http://www.byside.com/cookies.html)
 
 ## Validation
+
 See [amp-byside-content rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-byside-content/validator-amp-byside-content.protoascii) in the AMP validator specification.

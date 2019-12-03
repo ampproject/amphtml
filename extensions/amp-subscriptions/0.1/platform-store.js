@@ -243,6 +243,56 @@ export class PlatformStore {
   }
 
   /**
+   * Get scoreFactor states for each platform
+   * @return {!Promise<!JsonObject>}
+   *
+   * return value looks somethinglike this
+   * {
+   *   'subscribe.google.com': {
+   *     isReadyToPay: 1,
+   *     supportsViewer: 1,
+   *   },
+   *   local: {
+   *     isReadyToPay: 0,
+   *     supportsViewer: 0,
+   *   },
+   * }
+   */
+  getScoreFactorStates() {
+    const states = dict({});
+    return Promise.all(
+      this.serviceIds_.map(platformId => {
+        states[platformId] = dict();
+        return Promise.all(
+          Object.values(SubscriptionsScoreFactor).map(scoreFactor =>
+            this.getScoreFactorPromiseFor_(platformId, scoreFactor).then(
+              factorValue => {
+                states[platformId][scoreFactor] = factorValue;
+              }
+            )
+          )
+        );
+      })
+    ).then(() => states);
+  }
+
+  /**
+   * Return a score factor for a platform once it's resolved
+   * @param {string} serviceId
+   * @param {string} scoreFactor
+   * @return {!Promise<number>}
+   * @private
+   */
+  getScoreFactorPromiseFor_(serviceId, scoreFactor) {
+    // Make sure the platform is ready
+    return this.getEntitlementPromiseFor(serviceId).then(() => {
+      return this.subscriptionPlatforms_[serviceId].getSupportedScoreFactor(
+        scoreFactor
+      );
+    });
+  }
+
+  /**
    * @return {!Promise<boolean>}
    */
   getGrantStatus() {
@@ -266,7 +316,8 @@ export class PlatformStore {
       this.grantStatusPromise_.resolve(false);
     } else {
       // Listen if any upcoming entitlements unblock the reader
-      this.onChange(({entitlement}) => {
+      this.onChange(e => {
+        const {entitlement} = e;
         if (entitlement.granted) {
           this.grantStatusPromise_.resolve(true);
         } else if (this.areAllPlatformsResolved_()) {
@@ -522,10 +573,9 @@ export class PlatformStore {
    * @private
    */
   selectApplicablePlatformForFactor_(factor) {
-    /** @type {!Array<!PlatformWeightDef>} */
     const platformWeights = this.getAvailablePlatforms().map(platform => {
       const factorValue = platform.getSupportedScoreFactor(factor);
-      const weight = (typeof factorValue == 'number') ? factorValue : 0;
+      const weight = typeof factorValue == 'number' ? factorValue : 0;
       return {platform, weight};
     });
     return this.rankPlatformsByWeight_(platformWeights);

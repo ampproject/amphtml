@@ -71,6 +71,12 @@ function appnexusAst(global, data) {
     context.master.apntag.anq = context.master.apntag.anq || [];
     apntag = context.master.apntag;
 
+    context.master.adUnitTargetIds = context.master.adUnitTargetIds || [];
+
+    context.master.adUnitTargetIds = data.adUnits.map(
+      adUnit => adUnit.targetId
+    );
+
     apntag.anq.push(() => {
       if (data.pageOpts) {
         apntag.anq.push(() => {
@@ -110,6 +116,21 @@ function appnexusAst(global, data) {
     //preserve a global reference
     /** @type {{showTag: function(string, Object)}} global.apntag */
     global.apntag = context.master.apntag;
+  }
+
+  if (!context.isMaster && data.adUnits) {
+    const newAddUnits = data.adUnits.filter(adUnit => {
+      return context.master.adUnitTargetIds.indexOf(adUnit.targetId) === -1;
+    });
+    if (newAddUnits.length) {
+      apntag.anq.push(() => {
+        newAddUnits.forEach(adUnit => {
+          apntag.defineTag(adUnit);
+          context.master.adUnitTargetIds.push(adUnit.targetId);
+        });
+        apntag.loadTags();
+      });
+    }
   }
 
   // check for ad responses received for a slot but before listeners are

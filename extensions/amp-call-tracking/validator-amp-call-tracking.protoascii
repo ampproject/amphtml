@@ -21,7 +21,7 @@ tags: {  # amp-call-tracking
     name: "amp-call-tracking"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }
