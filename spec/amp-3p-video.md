@@ -2,17 +2,16 @@
 
 The generic [`amp-video`](https://go.amp.dev/c/amp-video) component plays videos directly on a page, much like a `<video>` tag.
 
-Some video cannot be embedded this way. AMP provides vendor-optimized components like [`amp-youtube`](https://go.amp.dev/c/amp-youtube),
-[`amp-ima-video`](https://go.amp.dev/c/amp-ima-video), amongst [others](./amp-video-interface.md).
-Under the hood, these load an iframe whose page communicates with the outer document to coordinate playback.
+Unfortunately, not all videos can be embedded this way. For these specialized cases, AMP provides vendor-optimized components like [`amp-youtube`](https://go.amp.dev/c/amp-youtube), [`amp-ima-video`](https://go.amp.dev/c/amp-ima-video), and [others](./amp-video-interface.md).
+Internally these players load an iframe whose page communicates with the outer document to coordinate playback.
 
-For custom video implementations, [`amp-video-iframe`](https://go.amp.dev/c/amp-video-iframe) is a generic component that can load any video document to coordinate its playback.
+We would prefer to not have additional custom video implementations. Instead we believe, [`amp-video-iframe`](https://go.amp.dev/c/amp-video-iframe) should be used instead, since it is a generic component that can load any video document to coordinate playback.
 
 ## I want to contribute my vendor-specific player
 
 You probaby do **_not_** need to build your own player.
 
-The `amp-video-iframe` playback interface supports the following methods, which are likely to cover all your bases:
+The `amp-video-iframe` playback interface supports the following methods, which we believe cover the vast majority of cases AMP documents necessitate:
 
 - `play`
 - `pause`
@@ -23,7 +22,9 @@ The `amp-video-iframe` playback interface supports the following methods, which 
 - `fullscreenenter`
 - `fullscreenexit`
 
-It can also [send custom namespaced analytics signals](<https://amp.dev/documentation/components/amp-video-iframe/#postanalyticsevent(eventtype[,-vars])>).
+`amp-video-iframe` can also [send custom namespaced analytics signals](<https://amp.dev/documentation/components/amp-video-iframe/#postanalyticsevent(eventtype[,-vars])>).
+
+(If there is a feature missing from this list that a custom player requires, we are happy to work on extending it as necessary.)
 
 If this is enough for your use case, you'd only need to build a playback document hosted on your server that's able to communicate with `amp-video-iframe`.
 For guidance on accomplishing this, [refer to the component documentation.](https://go.amp.dev/c/amp-video-iframe)
@@ -49,7 +50,7 @@ For example, these are some of the features that justify specific players:
 
 ### Understand the contribution process
 
-You'll need to go through [the standard AMP contribution process](../CONTRIBUTING.md) when creating and submitting your component.
+You'll need to go through [the standard AMP contribution process](../CONTRIBUTING.md) when creating and submitting your component. For large features, such as a video player, you need to file an [I2I (intent-to-implement) issue](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E) that describes the overall workings of your component.
 
 Your player component is also shipped as an extension, so you should [become familiar with the process of building one.](https://github.com/ampproject/amphtml/blob/master/contributing/building-an-amp-extension.md)
 
