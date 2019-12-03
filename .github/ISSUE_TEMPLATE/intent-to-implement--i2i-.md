@@ -20,7 +20,7 @@ If you haven't already done so, sign the Contributor License Agreement (CLA) as 
 - [ ] Ready for review
 
 <!--
-Issues that aren't marked "Ready for review" are considered drafts. Draft I2Is are encouraged for complex or cross functional proposals in order to promote broader community awareness and get earlier feedback.
+Issues that aren't marked "Ready for review" are considered drafts. Draft I2Is are encouraged for complex proposals and/or those expected to impact many stakeholders or parts of the project in order to promote promote broader community awareness and get earlier feedback.
 -->
 
 ## Summary
@@ -62,11 +62,14 @@ You should add a link to the launch tracker for this work here if applicable. On
 - [ ] Acceptance/success criteria for problem being solved is clear
 - [ ] Design socialized
 <!--
-Mark as done once this design has been presented at a [Design Review](https://github.com/ampproject/amphtml/blob/532dbbbc15c879a32e26e1e890b3a6b5b71cb123/contributing/design-reviews.md).
+Mark as done once this design has been presented at a [Design Review](https://github.com/ampproject/amphtml/blob/master/contributing/design-reviews.md).
 -->
 
 <!--
-Add anyone to this cc line that you want to notify about this I2I, including a reviewer once you have found one. See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md for help in finding a reviewer.
+Please cc those that you want to notify about this I2I, including a reviewer once you have found one. 
+For a list of potential WGs to cc please see https://github.com/ampproject/meta/tree/master/working-groups.
+Please note that the Approvers WG is cced below by default.
+See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md for help in finding a reviewer.
 -->
 
 /cc @ampproject/wg-approvers
