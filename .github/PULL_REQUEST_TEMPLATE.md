@@ -9,6 +9,8 @@
   - Mention the GitHub issue that is being addressed by the pull request.
   - The keywords `Fixes`, `Closes`, or `Resolves` followed the issue number will automatically close the issue.
 
+> NOTE: All non-trivial PRs should have an associated issue, and any new features or components must reference an [I2I (intent-to-implement)](https://github.com/ampproject/amphtml/issues/new?assignees=&labels=INTENT+TO+IMPLEMENT&template=intent-to-implement--i2i-.md&title=I2I:%20%3Cyour%20change/update%3E). Please [read through the contribution process](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md) for more information.
+
 # Example of a good description:
 
 - Implement aspect X
