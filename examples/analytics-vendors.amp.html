@@ -60,6 +60,7 @@
       <option>colanalytics</option>
       <option>comscore</option>
       <option>cxense</option>
+      <option>deepbi</option>
       <option>dynatrace</option>
       <option>epica</option>
       <option>euleriananalytics</option>
@@ -430,6 +431,24 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Cxense example -->
 
+<!-- Deep.BI tracking -->
+<amp-analytics type="deepbi" id="deepbi">
+<script type="application/json">
+{
+  "vars": {
+    "datasetKey": "aBcDeFgHiJkL",
+    "accessKey": "aBcDeFgHiJkLMn0123456789",
+    "gdpr":"true"
+  },
+  "extraUrlParams": {
+    "dimension1": "value1"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Deep.BI example -->
+
+
 <!-- dynatrace tracking -->
 <amp-analytics type="dynatrace" id="dynatrace">
 <script type="application/json">
@@ -607,7 +626,6 @@ For complete documentation and additional examples please see: https://marketing
 
 <!--
   INFOnline example
-
   Important: url needs to point to a copy of
   amp-analytics-infonline.html on a different subdomain
   than your AMP files.
