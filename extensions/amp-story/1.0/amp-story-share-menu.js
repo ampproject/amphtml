@@ -232,7 +232,7 @@ export class ShareMenu {
         this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
       });
     }
-    this.element_[ANALYTICS_TAG_NAME] = 'amp-social-share';
+    this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
     this.analyticsService_.triggerEvent(
       isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
       this.element_
