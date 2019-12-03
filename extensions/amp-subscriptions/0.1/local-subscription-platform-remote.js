@@ -64,11 +64,13 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
           'local'
         );
         if (encryptedDocumentKey) {
-          //TODO(chenshay): if crypt, switch to 'post'
           fetchUrl = addParamToUrl(fetchUrl, 'crypt', encryptedDocumentKey);
         }
         return this.xhr_
-          .fetchJson(fetchUrl, {credentials: 'include'})
+          .fetchJson(fetchUrl, {
+            credentials: 'include',
+            method: encryptedDocumentKey ? 'POST' : 'GET',
+          })
           .then(res => res.json())
           .then(resJson => {
             return Entitlement.parseFromJson(resJson);

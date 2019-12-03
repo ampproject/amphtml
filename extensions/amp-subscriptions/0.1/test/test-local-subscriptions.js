@@ -153,7 +153,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
 
     await localSubscriptionPlatform.getEntitlements();
     expect(urlBuildingStub).to.be.calledWith(configAuthUrl, false);
-    expect(fetchStub).to.be.calledWith(builtUrl, {credentials: 'include'});
+    expect(fetchStub).to.be.calledWith(builtUrl, {
+      credentials: 'include',
+      method: 'GET',
+    });
   });
 
   it('should call getEncryptedDocumentKey with local', async () => {
@@ -165,15 +168,18 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     expect(getEncryptedDocumentKeyStub).to.be.calledWith('local');
   });
 
-  it('should add encryptedDocumentKey parameter to url', async () => {
+  it('should add encryptedDocumentKey parameter to url and POST', async () => {
     const fetchStub = env.sandbox
       .stub(localSubscriptionPlatform.xhr_, 'fetchJson')
       .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
     getEncryptedDocumentKeyStub.callsFake(() => 'encryptedDocumentKey');
 
     await localSubscriptionPlatform.getEntitlements();
-    expect(fetchStub).to.be.calledWith(
-      'https://lipsum.com/login/authorize?rid=reader1&crypt=encryptedDocumentKey'
+    expect(
+      fetchStub
+    ).to.be.calledWith(
+      'https://lipsum.com/login/authorize?rid=reader1&crypt=encryptedDocumentKey',
+      {credentials: 'include', method: 'POST'}
     );
   });
 
