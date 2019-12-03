@@ -34,7 +34,7 @@ async function getListing(rootPath, basepath) {
   }
 
   try {
-    if ((await fs.promises.stat(path)).isDirectory()) {
+    if (fs.statSync(path).isDirectory()) {
       return fs.promises.readdir(path);
     }
   } catch (unusedE) {

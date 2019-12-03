@@ -42,7 +42,7 @@ async function serveIndex({url}, res, next) {
     return next();
   }
 
-  const css = (await fs.promises.readFile(mainCssFile)).toString();
+  const css = fs.readFileSync(mainCssFile).toString();
 
   const renderedHtml = renderTemplate({
     fileSet,

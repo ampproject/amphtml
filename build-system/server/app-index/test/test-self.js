@@ -111,7 +111,7 @@ describe('devdash', () => {
         const validDocPath = path.join(__dirname,
             '../../../../validator/testdata/feature_tests/minimum_valid_amp.html');
 
-        const validDoc = (await fs.promises.readFile(validDocPath)).toString();
+        const validDoc = fs.readFileSync(validDocPath).toString();
 
         expectValidAmphtml(await amphtmlValidator.getInstance(), validDoc);
       });
