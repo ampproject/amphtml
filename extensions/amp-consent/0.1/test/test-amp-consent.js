@@ -209,6 +209,16 @@ describes.realWin(
           'matchedGeoGroup': null,
         });
       });
+
+      it('read promptIfUnknown from server response', async () => {
+        await ampConsent.buildCallback();
+        await macroTask();
+        return ampConsent
+          .getConsentRequiredPromiseForTesting()
+          .then(isRequired => {
+            expect(isRequired).to.be.true;
+          });
+      });
     });
 
     describe('geo-override server communication', () => {
