@@ -41,7 +41,7 @@ const noop = () => {};
 
 const slotId = 'my-slot-element';
 
-describes.realWin('↗ 🔲', {amp: true}, env => {
+describes.realWin('video docking', {amp: true}, env => {
   let ampdoc;
   let manager;
   let viewport;
@@ -142,16 +142,14 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
   }
 
   function stubControls() {
-    const html = htmlFor(env.win.document);
     const controls = {
       positionOnVsync: env.sandbox.spy(),
       enable: env.sandbox.spy(),
       disable: env.sandbox.spy(),
       hide: env.sandbox.spy(),
       setVideo: env.sandbox.spy(),
-      overlay: html`
-        <div></div>
-      `,
+      overlay: env.win.document.createElement('div'),
+      container: env.win.document.createElement('div'),
     };
 
     env.sandbox.stub(docking, 'getControls_').returns(controls);
@@ -182,6 +180,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
     viewport = {
       getScrollTop: () => 0,
       getSize: () => viewportSize,
+      animateScrollIntoView: env.sandbox.spy(),
     };
 
     env.sandbox.stub(Services, 'viewportForDoc').returns(viewport);
@@ -233,7 +232,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       videoLayerElement = s => elementExists(video.element, s);
     });
 
-    it('delegates controls positioning', function*() {
+    it('delegates controls positioning', async () => {
       const {positionOnVsync} = stubControls();
 
       const x = 0;
@@ -242,12 +241,12 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const step = 1;
       const transitionDurationMs = 0;
 
-      yield docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       expect(positionOnVsync).to.have.been.calledOnce;
     });
 
-    it('reparents placeholder', function*() {
+    it('reparents placeholder', async () => {
       stubControls();
 
       const x = 30;
@@ -256,13 +255,13 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const step = 1;
       const transitionDurationMs = 0;
 
-      yield docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       expect(videoLayerElement('.amp-video-docked-placeholder-background')).to
         .be.ok;
     });
 
-    it('fills component area with placeholder elemenets', function*() {
+    it('fills component area with placeholder elemenets', async () => {
       stubControls();
 
       const x = 30;
@@ -271,7 +270,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const step = 1;
       const transitionDurationMs = 0;
 
-      yield docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       expect(
         video.applyFillContent.withArgs(
@@ -286,7 +285,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       ).to.have.been.calledOnce;
     });
 
-    it('styles and transforms elements into docked area', function*() {
+    it('styles and transforms elements into docked area', async () => {
       const {overlay} = stubControls();
 
       enableComputedStyle(video.element);
@@ -303,7 +302,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       placeElementLtwh(video, 0, 0, width, height);
 
-      yield docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       const shadow = bodyLayerElement('.amp-video-docked-shadow');
 
@@ -319,7 +318,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       });
     });
 
-    it('sets poster image', function*() {
+    it('sets poster image', async () => {
       const posterSrc = 'https://whatever.com/image.png';
 
       stubControls();
@@ -333,7 +332,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const step = 1;
       const transitionDurationMs = 0;
 
-      yield docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       const poster = videoLayerElement(
         '.amp-video-docked-placeholder-background-poster'
@@ -345,7 +344,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
     });
 
     for (let step = 0; step <= 1; step = Number((step + 0.1).toFixed(1))) {
-      it(`sets opacity = step @ step = ${step}`, function*() {
+      it(`sets opacity = step @ step = ${step}`, async () => {
         stubControls();
         enableComputedStyle(video.element);
 
@@ -354,7 +353,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
         const scale = 0.5;
         const transitionDurationMs = 0;
 
-        yield docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+        await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
         const shadow = bodyLayerElement('.amp-video-docked-shadow');
         const placeholder = videoLayerElement(
@@ -366,7 +365,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       });
     }
 
-    it('overrides overflow to render outside of component area', function*() {
+    it('overrides overflow to render outside of component area', async () => {
       stubControls();
       enableComputedStyle(video.element);
 
@@ -376,12 +375,12 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const step = 1;
       const transitionDurationMs = 0;
 
-      yield docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       expect(getComputedStyle(video.element)['overflow']).to.equal('visible');
     });
 
-    it('applies classname on internal element', function*() {
+    it('applies classname on internal element', async () => {
       stubControls();
 
       const x = 30;
@@ -390,7 +389,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       const step = 1;
       const transitionDurationMs = 0;
 
-      yield docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
+      await docking.placeAt_(video, x, y, scale, step, transitionDurationMs);
 
       expect(internalElement).to.have.class(BASE_CLASS_NAME);
     });
@@ -399,7 +398,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       {step: 0, fn: 'ease-in'},
       {step: 1, fn: 'ease-out'},
     ].forEach(({step, fn}) => {
-      it(`sets transition timing on elements for step = ${step}`, function*() {
+      it(`sets transition timing on elements for step = ${step}`, async () => {
         const {overlay} = stubControls();
 
         enableComputedStyle(video.element);
@@ -412,7 +411,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
         const durationMs = 260;
         const durationSecondsStr = '0.26s';
 
-        yield docking.placeAt_(video, x, y, scale, step, durationMs);
+        await docking.placeAt_(video, x, y, scale, step, durationMs);
 
         [
           internalElement,
@@ -444,7 +443,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       const step = 1;
 
-      it(`sets ${className} on icon @ ${width}px wide`, function*() {
+      it(`sets ${className} on icon @ ${width}px wide`, async () => {
         stubControls();
 
         const x = 30;
@@ -454,7 +453,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
         placeElementLtwh(video, 0, 0, width, 200);
 
-        yield docking.placeAt_(
+        await docking.placeAt_(
           video,
           x,
           y,
@@ -483,7 +482,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
           expectedIconX: -width + iconWidth + iconMargin * 2,
         },
       ].forEach(({relativeX, relativeXTextual, expectedIconX}) => {
-        it(`translates placeholder icon horizontally for posX=${relativeXTextual} in threshold for .${className}`, function*() {
+        it(`translates placeholder icon horizontally for posX=${relativeXTextual} in threshold for .${className}`, async () => {
           stubControls();
           enableComputedStyle(video.element);
 
@@ -500,7 +499,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
           placeElementLtwh(video, 0, 0, width, 200);
 
-          yield docking.placeAt_(
+          await docking.placeAt_(
             video,
             x,
             y,
@@ -522,43 +521,64 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
     [
       {
         relativeX: RelativeX.RIGHT,
-        relativeXTextual: 'right',
-        placeholderIconHasAmpRtl: false,
+        directionTextual: 'left to right',
+        hasAmpRtl: false,
       },
       {
         relativeX: RelativeX.LEFT,
-        relativeXTextual: 'left',
-        placeholderIconHasAmpRtl: true,
+        directionTextual: 'right to left',
+        hasAmpRtl: true,
       },
-    ].forEach(({relativeX, relativeXTextual, placeholderIconHasAmpRtl}) => {
-      const setsOrUnsets = placeholderIconHasAmpRtl ? 'sets' : 'unsets';
+    ].forEach(({relativeX, directionTextual, hasAmpRtl}) => {
+      const setsOrUnsets = hasAmpRtl ? 'sets' : 'unsets';
 
-      it(`${setsOrUnsets} RTL classname on icon transitioning to ${relativeXTextual}`, function*() {
-        stubControls();
-        enableComputedStyle(video.element);
+      it(
+        `${setsOrUnsets} amp-rtl classname on icon when docking from ` +
+          directionTextual,
+        async () => {
+          stubControls();
+          enableComputedStyle(video.element);
 
-        const x = 30;
-        const y = 60;
-        const scale = 0.5;
-        const step = 1;
-        const transitionDurationMs = 0;
+          await docking.placeAt_(
+            video,
+            /* x, irrelevant */ 30,
+            /* y, irrelevant */ 60,
+            /* scale, irrelevant */ 0.5,
+            /* step, irrelevant */ 1,
+            /* transitionDurationMs, irrelevant */ 0,
+            relativeX
+          );
 
-        yield docking.placeAt_(
-          video,
-          x,
-          y,
-          scale,
-          step,
-          transitionDurationMs,
-          relativeX
-        );
+          expect(
+            videoLayerElement(
+              '.amp-video-docked-placeholder-icon'
+            ).classList.contains('amp-rtl')
+          ).to.equal(hasAmpRtl);
+        }
+      );
 
-        expect(
-          videoLayerElement(
-            '.amp-video-docked-placeholder-icon'
-          ).classList.contains('amp-rtl')
-        ).to.equal(placeholderIconHasAmpRtl);
-      });
+      it(
+        `${setsOrUnsets} amp-rtl classname on controls layer when docking ` +
+          `from ${directionTextual}`,
+        async () => {
+          const controls = stubControls();
+          enableComputedStyle(video.element);
+
+          await docking.placeAt_(
+            video,
+            /* x, irrelevant */ 30,
+            /* y, irrelevant */ 60,
+            /* scale, irrelevant */ 0.5,
+            /* step, irrelevant */ 1,
+            /* transitionDurationMs, irrelevant */ 0,
+            relativeX
+          );
+
+          expect(controls.container.classList.contains('amp-rtl')).to.equal(
+            hasAmpRtl
+          );
+        }
+      );
     });
   });
 
@@ -618,7 +638,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
   describe('dockInTransferLayerStep_', () => {
     // Something weird causing this to flake in certain leftover states.
     // TODO(alanorozco): Unskip.
-    it.skip('should not overflow', function*() {
+    it.skip('should not overflow', async () => {
       const video = {};
       const target = {};
 
@@ -626,7 +646,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
         .stub(docking, 'dock_')
         .returns(Promise.resolve());
 
-      yield docking.dockInTransferLayerStep_(video, target);
+      await docking.dockInTransferLayerStep_(video, target);
 
       expect(dock).to.have.been.called;
     });
@@ -953,19 +973,23 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
         targetX: 0,
       },
     ].forEach(({expectedRelativeX, placementTextual, videoX, targetX}) => {
-      it(`returns relativeX=${placementTextual.toUpperCase()} when target placed ${placementTextual} of component`, () => {
-        const step = 1;
+      it(
+        `returns relativeX=${placementTextual.toUpperCase()} when target ` +
+          `placed ${placementTextual} of component`,
+        () => {
+          const step = 1;
 
-        placeElementLtwh(video, videoX, videoY, videoWidth, videoHeight);
+          placeElementLtwh(video, videoX, videoY, videoWidth, videoHeight);
 
-        targetAreaStub.returns(
-          layoutRectLtwh(targetX, targetY, targetWidth, targetHeight)
-        );
+          targetAreaStub.returns(
+            layoutRectLtwh(targetX, targetY, targetWidth, targetHeight)
+          );
 
-        expect(docking.getDims_(video, target, step).relativeX).to.equal(
-          expectedRelativeX
-        );
-      });
+          expect(docking.getDims_(video, target, step).relativeX).to.equal(
+            expectedRelativeX
+          );
+        }
+      );
     });
   });
 
@@ -991,19 +1015,19 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       env.sandbox.stub(docking, 'getDims_').returns(targetDims);
     });
 
-    it('sets currently docked', function*() {
+    it('sets currently docked', async () => {
       stubControls();
 
-      yield docking.dock_(video, target, step);
+      await docking.dock_(video, target, step);
 
       expect(setCurrentlyDocked.withArgs(video, target, step)).to.have.been
         .calledOnce;
     });
 
-    it('places element at the result of getDims_', function*() {
+    it('places element at the result of getDims_', async () => {
       stubControls();
 
-      yield docking.dock_(video, target, step);
+      await docking.dock_(video, target, step);
 
       const {x, y, scale, relativeX} = targetDims;
 
@@ -1020,24 +1044,24 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
       ).to.have.been.calledOnce;
     });
 
-    it('hides component controls', function*() {
-      yield docking.dock_(video, target, step);
+    it('hides component controls', async () => {
+      await docking.dock_(video, target, step);
 
       expect(video.hideControls).to.have.been.calledOnce;
     });
 
-    it('enables docked controls', function*() {
+    it('enables docked controls', async () => {
       const {enable} = stubControls();
 
-      yield docking.dock_(video, target, step);
+      await docking.dock_(video, target, step);
 
       expect(enable).to.have.been.calledOnce;
     });
 
-    it('does not enable docked controls if transferring layer', function*() {
+    it('does not enable docked controls if transferring layer', async () => {
       const {enable} = stubControls();
 
-      yield docking.dock_(video, target, step, /* isTransferLayerStep */ true);
+      await docking.dock_(video, target, step, /* isTransferLayerStep */ true);
 
       expect(enable).to.not.have.been.called;
     });
@@ -1143,15 +1167,15 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
         .returns(targetDims);
     });
 
-    it('triggers action', function*() {
+    it('triggers action', async () => {
       stubControls();
 
-      yield docking.undock_(video);
+      await docking.undock_(video);
 
       expect(trigger.withArgs(Actions.UNDOCK)).to.have.been.calledOnce;
     });
 
-    it('updates stale Y after undock', function*() {
+    it('updates stale Y after undock', async () => {
       const {promise, resolve} = new Deferred();
 
       placeAt.returns(promise);
@@ -1163,13 +1187,13 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       resolve();
 
-      yield done;
+      await done;
 
       expect(maybeUpdateStaleYAfterScroll.withArgs(video)).to.have.been
         .calledOnce;
     });
 
-    it('resets after undock', function*() {
+    it('resets after undock', async () => {
       const {promise, resolve} = new Deferred();
 
       placeAt.returns(promise);
@@ -1180,24 +1204,24 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
       resolve();
 
-      yield done;
+      await done;
 
       expect(resetOnUndock.withArgs(video)).to.have.been.calledOnce;
     });
 
-    it('hides and disables docked controls', function*() {
+    it('hides and disables docked controls', async () => {
       const {hide, disable} = stubControls();
 
-      yield docking.undock_(video);
+      await docking.undock_(video);
 
       expect(hide).to.have.been.calledOnce;
       expect(disable).to.have.been.calledOnce;
     });
 
-    it('places element at the result of getDims_', function*() {
+    it('places element at the result of getDims_', async () => {
       stubControls();
 
-      yield docking.undock_(video);
+      await docking.undock_(video);
 
       const {x, y, scale, relativeX} = targetDims;
 
@@ -1216,18 +1240,18 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
     const inlinePercVis = `${REVERT_TO_INLINE_RATIO * 100}% visible`;
 
-    it(`pauses video when < ${inlinePercVis}`, function*() {
+    it(`pauses video when < ${inlinePercVis}`, async () => {
       placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
 
-      yield docking.undock_(video);
+      await docking.undock_(video);
 
       expect(video.pause).to.have.been.calledOnce;
     });
 
-    it(`doesn't pause video when >= ${inlinePercVis}`, function*() {
+    it(`doesn't pause video when >= ${inlinePercVis}`, async () => {
       placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO);
 
-      yield docking.undock_(video);
+      await docking.undock_(video);
 
       expect(video.pause).to.not.have.been.called;
     });
@@ -1267,12 +1291,12 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
         });
       });
 
-      it(`does not animate transition when < ${inlinePercVis}`, function*() {
+      it(`does not animate transition when < ${inlinePercVis}`, async () => {
         const expectedTransitionDurationMs = 0;
 
         placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO - 0.1);
 
-        yield docking.undock_(video);
+        await docking.undock_(video);
 
         expect(
           placeAt.withArgs(
@@ -1286,7 +1310,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
         ).to.have.been.calledOnce;
       });
 
-      it(`animates transition when >= ${inlinePercVis}`, function*() {
+      it(`animates transition when >= ${inlinePercVis}`, async () => {
         const expectedTransitionDurationMs = 555;
 
         env.sandbox
@@ -1295,7 +1319,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
 
         placeElementLtwh(video, 0, 0, 400, 400, REVERT_TO_INLINE_RATIO);
 
-        yield docking.undock_(video);
+        await docking.undock_(video);
 
         expect(
           placeAt.withArgs(
@@ -1308,6 +1332,35 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
           )
         ).to.have.been.calledOnce;
       });
+    });
+  });
+
+  describe('scrollBack_', () => {
+    beforeEach(() => {
+      // Requests ampdoc when calling `setCurrentlyDocked_`. Node is detached
+      // and we don't care about callee's side effects.
+      env.sandbox.stub(docking, 'trigger_');
+    });
+
+    it('does not scroll when undocked', () => {
+      docking.scrollBack_();
+
+      expect(viewport.animateScrollIntoView).to.not.have.been.called;
+    });
+
+    it("scrolls back to video component's inline box when docked", () => {
+      const video = createVideo();
+
+      docking.setCurrentlyDocked_(
+        video,
+        /* target, irrelevant */ {},
+        /* step, irrelevant */ 1
+      );
+
+      docking.scrollBack_();
+
+      expect(viewport.animateScrollIntoView.withArgs(video.element, 'center'))
+        .to.have.been.calledOnce;
     });
   });
 

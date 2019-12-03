@@ -158,6 +158,20 @@ References a layer that draws an overlay background over the video and under
 the controls. It's displayed only when the controls are displayed. Its
 background can be overridden or removed.
 
+#### `.amp-video-docked-main-button-group`
+
+A controls group that contains a set of buttons. Only one of these elements are
+displayed at a time depending on the state of the video:
+
+- The **playback** set is displayed on most scenarios and contains play/pause,
+  mute/unmute and fullscreen buttons.
+
+- The **scroll back** set only contains a button to scroll the document back
+  to the video's inline position. This is displayed during ad playback in order
+  to allow user interaction.
+
+The dismiss button is **not** part of a controls set and is always displayed.
+
 #### `.amp-docked-video-button-group`
 
 A button "group" that usually contains two buttons, with only one displayed at
@@ -189,6 +203,24 @@ Represents the `unmute` button.
 #### `.amp-docked-video-fullscreen`
 
 Represents the `fullscreen` button.
+
+#### `.amp-docked-video-scroll-back`
+
+Represents a button to scroll the document back to the video's inline position
+during ad playback to allow user interaction.
+
+This button is different from the other control buttons in that the
+`amp-small`/`amp-large` classnames on the `.amp-docked-video-controls` container
+do not affect it. Because it's the only button in its set, it's also larger than
+the others, at 64 by 64 pixels. Other control buttons are sized at 40 by 40
+pixels.
+
+The icon for this button (set through the `background-image` CSS property)
+changes depending on the relative direction of the docked area. When the video
+docks from left-to-right, the `.amp-docked-video-controls` container gets no
+additional classnames, but it will get the `amp-rtl` classname when the video
+docks in the opposite direction. This allows the button to be drawn with an
+arrow pointing in the correct direction.
 
 #### `.amp-video-docked-placeholder-background`
 
