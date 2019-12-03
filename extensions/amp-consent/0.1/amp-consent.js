@@ -425,7 +425,6 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     this.passSharedData_();
-    this.maybeSetDirtyBit_();
     if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
       this.syncRemoteConsentState_();
     }
@@ -523,18 +522,6 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
-   * Set dirtyBit of the local consent value based on server response
-   */
-  maybeSetDirtyBit_() {
-    const responsePromise = this.getConsentRemote_();
-    responsePromise.then(response => {
-      if (response && !!response['forcePromptOnNext']) {
-        this.consentStateManager_.setDirtyBit();
-      }
-    });
-  }
-
-  /**
    * Clear cache for server side decision and then sync.
    */
   syncRemoteConsentState_() {
@@ -542,7 +529,8 @@ export class AmpConsent extends AMP.BaseElement {
       if (!response) {
         return;
       }
-      const expireCache = response['expireCache'];
+      const expireCache =
+        response['expireCache'] || response['forcePromptOnNext'];
       if (expireCache) {
         this.consentStateManager_.setDirtyBit();
         // Decision from promptUI takes precedence over consent decision from response
