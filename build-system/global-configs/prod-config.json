@@ -2,7 +2,6 @@
   "allow-doc-opt-in": ["amp-next-page"],
   "allow-url-opt-in": [
     "pump-early-frame",
-    "macro-after-long-task",
     "twitter-default-placeholder",
     "twitter-default-placeholder-fade",
     "twitter-default-placeholder-pulse"
@@ -34,7 +33,6 @@
   "hidden-mutation-observer": 1,
   "ios-fixed-no-transfer": 0,
   "layoutbox-invalidate-on-scroll": 0.05,
-  "macro-after-long-task": 0,
   "pump-early-frame": 1,
   "remove-viewer-query-params-on-navigate": 1,
   "swg-gpay-api": 0.1,
