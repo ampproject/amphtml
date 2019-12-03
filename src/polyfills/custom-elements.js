@@ -894,8 +894,9 @@ function setPrototypeOf(obj, prototype) {
  * created object.
  * @param {!Object} obj
  * @param {!Object} prototype
+ * @visibleForTesting
  */
-function copyProperties(Object, obj, prototype) {
+export function copyProperties(obj, prototype) {
   while (prototype) {
     if (Object.isPrototypeOf.call(prototype, obj)) {
       break;
@@ -908,7 +909,7 @@ function copyProperties(Object, obj, prototype) {
         continue;
       }
 
-      const desc = Object.getOwnPropertyDescriptor(prototype);
+      const desc = Object.getOwnPropertyDescriptor(prototype, prop);
       Object.defineProperty(obj, prop, desc);
     }
 
