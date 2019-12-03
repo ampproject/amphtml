@@ -56,6 +56,11 @@ Add any other information that may be relevant in determining if your feature ca
 This section describes considerations the implementor should keep in mind while building this technical solution.
 
 - [ ] Tests written
+<!--
+Have unit tests been written? Integration tests? Validator tests?
+Details on unit and integration tests:https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#testing-your-changes
+Details on validator tests: https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.mdo
+-->
 - [ ] Documentation present
 <!--
 Has reference documentation been added? Have examples been added? Has an example been made available on amp.dev?
@@ -76,14 +81,19 @@ Reach out to the UI and Accessibility WG for assistance. https://github.com/ampp
 -->
 - [ ] Performance Considerations
 <!--
-Reach out to the UI and Accessibility WG for assistance. https://github.com/ampproject/wg-performance
+Reach out to the Performance WG for assistance. https://github.com/ampproject/wg-performance
 -->
 - [ ] Privacy Considerations
+<!--
+Reach out to the Security and Privacy WG for assistance. https://github.com/ampproject/wg-security-privacy
+-->
 - [ ] Security Considerations
-- [ ] Internationalization Considerations
+<!--
+Reach out to the Security and Privacy WG for assistance. https://github.com/ampproject/wg-security-privacy
+-->
 - [ ] Analytics Considerations
 <!--
-Reach out to the UI and Accessibility WG for assistance. https://github.com/ampproject/wg-analytics
+Reach out to the Analytics WG for assistance. https://github.com/ampproject/wg-analytics
 -->
 
 ### Launch checklist
@@ -93,7 +103,10 @@ This section describes the final approvals needed before this feature can launch
 - [ ] TSC/Approvers WG approved
 
 <!--
-Add anyone to this cc line that you want to notify about this I2S, including the reviewer who you worked with on the I2I.
+Please cc those that you want to notify about this I2I, including a reviewer once you have found one. 
+For a list of potential WGs to cc please see https://github.com/ampproject/meta/tree/master/working-groups.
+Please note that the Approvers WG is cced below by default.
+See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md for help in finding a reviewer.
 -->
 
 /cc @ampproject/wg-approvers
