@@ -41,7 +41,7 @@ const noop = () => {};
 
 const slotId = 'my-slot-element';
 
-describes.realWin('↗ 🔲', {amp: true}, env => {
+describes.realWin('video docking', {amp: true}, env => {
   let ampdoc;
   let manager;
   let viewport;
@@ -540,6 +540,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
           enableComputedStyle(video.element);
 
           await docking.placeAt_(
+            video,
             /* x, irrelevant */ 30,
             /* y, irrelevant */ 60,
             /* scale, irrelevant */ 0.5,
@@ -564,6 +565,7 @@ describes.realWin('↗ 🔲', {amp: true}, env => {
           enableComputedStyle(video.element);
 
           await docking.placeAt_(
+            video,
             /* x, irrelevant */ 30,
             /* y, irrelevant */ 60,
             /* scale, irrelevant */ 0.5,
