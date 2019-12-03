@@ -261,6 +261,8 @@ export function convertEnumValueToState(value) {
     return CONSENT_ITEM_STATE.ACCEPTED;
   } else if (value === 'rejected') {
     return CONSENT_ITEM_STATE.REJECTED;
+  } else if (value === 'unknown') {
+    return CONSENT_ITEM_STATE.UNKNOWN;
   }
   return null;
 }
