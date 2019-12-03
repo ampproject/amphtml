@@ -16,6 +16,7 @@
 
 import {TAG as KEY_TAG} from './amp-embedly-key';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
@@ -115,6 +116,10 @@ export class AmpEmbedlyCard extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://cdn.embedly.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cdn.embedly.com',
+      opt_onLayout
+    );
   }
 }

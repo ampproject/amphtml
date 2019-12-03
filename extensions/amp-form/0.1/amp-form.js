@@ -31,7 +31,12 @@ import {
 import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
-import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
+import {
+  SOURCE_ORIGIN_PARAM,
+  addParamsToUrl,
+  isProxyOrigin,
+  parseQueryString,
+} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -62,6 +67,7 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
@@ -134,6 +140,9 @@ export class AmpForm {
     /** @const @private {!HTMLFormElement} */
     this.form_ = element;
 
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc}  */
+    this.ampdoc_ = Services.ampdoc(this.form_);
+
     /** @const @private {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(this.win_);
 
@@ -143,10 +152,10 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
+    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/viewer-impl.Viewer}  */
+    /** @const @private {!../../../src/service/viewer-interface.ViewerInterface}  */
     this.viewer_ = Services.viewerForDoc(this.form_);
 
     /**
@@ -211,6 +220,7 @@ export class AmpForm {
     );
     this.installEventHandlers_();
     this.installInputMasking_();
+    this.maybeInitializeFromUrl_();
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
@@ -322,7 +332,7 @@ export class AmpForm {
    * @private
    */
   actionHandler_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'submit') {
@@ -359,7 +369,7 @@ export class AmpForm {
 
   /** @private */
   installEventHandlers_() {
-    this.viewer_.whenNextVisible().then(() => {
+    this.ampdoc_.whenNextVisible().then(() => {
       const autofocus = this.form_.querySelector('[autofocus]');
       if (autofocus) {
         tryFocus(autofocus);
@@ -384,7 +394,8 @@ export class AmpForm {
     //  Form verification is not supported when SSRing templates is enabled.
     if (!this.ssrTemplateHelper_.isSupported()) {
       this.form_.addEventListener('change', e => {
-        this.verifier_.onCommit().then(({updatedElements, errors}) => {
+        this.verifier_.onCommit().then(updatedErrors => {
+          const {updatedElements, errors} = updatedErrors;
           updatedElements.forEach(checkUserValidityAfterInteraction_);
           // Tell the validation to reveal any input.validationMessage added
           // by the form verifier.
@@ -395,7 +406,11 @@ export class AmpForm {
             if (errors.length) {
               this.setState_(FormState.VERIFY_ERROR);
               this.renderTemplate_(dict({'verifyErrors': errors})).then(() => {
-                this.triggerAction_(FormEvents.VERIFY_ERROR, errors);
+                this.triggerAction_(
+                  FormEvents.VERIFY_ERROR,
+                  errors,
+                  ActionTrust.DEFAULT // DEFAULT because async after gesture.
+                );
               });
             } else {
               this.setState_(FormState.INITIAL);
@@ -453,7 +468,7 @@ export class AmpForm {
     if (this.state_ == FormState.SUBMITTING || !this.checkValidity_()) {
       return Promise.resolve(null);
     }
-    // `submit` has the same trust level as the AMP Action that caused it.
+    // "submit" has the same trust level as the action that caused it.
     return this.submit_(invocation.trust, null);
   }
 
@@ -578,26 +593,49 @@ export class AmpForm {
     // Set ourselves to the SUBMITTING State
     this.setState_(FormState.SUBMITTING);
 
+    // Promises to run before submit without timeout.
+    const requiredActionPromises = [];
     // Promises to run before submitting the form
     const presubmitPromises = [];
     presubmitPromises.push(this.doVarSubs_(varSubsFields));
     iterateCursor(asyncInputs, asyncInput => {
-      presubmitPromises.push(this.getValueForAsyncInput_(asyncInput));
+      const asyncCall = this.getValueForAsyncInput_(asyncInput);
+      if (
+        asyncInput.classList.contains(AsyncInputClasses.ASYNC_REQUIRED_ACTION)
+      ) {
+        requiredActionPromises.push(asyncCall);
+      } else {
+        presubmitPromises.push(asyncCall);
+      }
     });
 
-    return this.waitOnPromisesOrTimeout_(
-      presubmitPromises,
-      SUBMIT_TIMEOUT
-    ).then(
-      () => this.handlePresubmitSuccess_(trust),
-      error => {
-        const detail = dict();
-        if (error && error.message) {
-          detail['error'] = error.message;
-        }
-        return this.handleSubmitFailure_(error, detail);
-      }
+    return Promise.all(requiredActionPromises).then(
+      () => {
+        return this.waitOnPromisesOrTimeout_(
+          presubmitPromises,
+          SUBMIT_TIMEOUT
+        ).then(
+          () => this.handlePresubmitSuccess_(trust),
+          error => this.handlePresubmitError_(error, trust)
+        );
+      },
+      error => this.handlePresubmitError_(error, trust)
     );
+  }
+
+  /**
+   * Handle form error for presubmit async calls.
+   * @param {*} error
+   * @param {!ActionTrust} trust
+   * @return {Promise}
+   * @private
+   */
+  handlePresubmitError_(error, trust) {
+    const detail = dict();
+    if (error && error.message) {
+      detail['error'] = error.message;
+    }
+    return this.handleSubmitFailure_(error, detail, trust);
   }
 
   /**
@@ -636,7 +674,7 @@ export class AmpForm {
       return Promise.resolve();
     }
     this.setState_(FormState.VERIFYING);
-    this.triggerAction_(FormEvents.VERIFY, null);
+    this.triggerAction_(FormEvents.VERIFY, /* detail */ null, ActionTrust.HIGH);
 
     return this.doVarSubs_(this.getVarSubsFields_()).then(() =>
       this.doVerifyXhr_()
@@ -644,9 +682,9 @@ export class AmpForm {
   }
 
   /**
-   * @private
    * @param {ActionTrust} trust
    * @return {!Promise}
+   * @private
    */
   handleXhrSubmit_(trust) {
     let p;
@@ -655,8 +693,8 @@ export class AmpForm {
     } else {
       this.submittingWithTrust_(trust);
       p = this.doActionXhr_().then(
-        response => this.handleXhrSubmitSuccess_(response),
-        error => this.handleXhrSubmitFailure_(error)
+        response => this.handleXhrSubmitSuccess_(response, trust),
+        error => this.handleXhrSubmitFailure_(error, trust)
       );
     }
     if (getMode().test) {
@@ -703,20 +741,20 @@ export class AmpForm {
           request.xhrUrl,
           request.fetchOpt
         );
-        return this.ssrTemplateHelper_.fetchAndRenderTemplate(
+        return this.ssrTemplateHelper_.ssr(
           this.form_,
           request,
           this.templatesForSsr_()
         );
       })
       .then(
-        response => this.handleSsrTemplateSuccess_(response),
+        response => this.handleSsrTemplateResponse_(response, trust),
         error => {
           const detail = dict();
           if (error && error.message) {
             detail['error'] = error.message;
           }
-          return this.handleSubmitFailure_(error, detail);
+          return this.handleSubmitFailure_(error, detail, trust);
         }
       );
   }
@@ -744,13 +782,27 @@ export class AmpForm {
   }
 
   /**
-   * Transition the form to the submit success state.
+   * Transition the form to the submit-success or submit-error state depending on the response status.
    * @param {!JsonObject} response
+   * @param {!ActionTrust} trust
    * @return {!Promise}
    * @private
    */
-  handleSsrTemplateSuccess_(response) {
-    return this.handleSubmitSuccess_(tryResolve(() => response));
+  handleSsrTemplateResponse_(response, trust) {
+    const init = response['init'];
+    if (init) {
+      const status = init['status'];
+      if (status >= 300) {
+        /** HTTP status codes of 300+ mean redirects and errors. */
+        return this.handleSubmitFailure_(
+          status,
+          response,
+          trust,
+          response['body']
+        );
+      }
+    }
+    return this.handleSubmitSuccess_(response, trust, response['body']);
   }
 
   /**
@@ -870,45 +922,81 @@ export class AmpForm {
   }
 
   /**
+   * Returns the action trust for submit-success and submit-error events.
+   * @param {!ActionTrust} incomingTrust
+   * @return {!ActionTrust}
+   * @private
+   */
+  trustForSubmitResponse_(incomingTrust) {
+    // TODO(choumx): Remove this expected error before Q1 2020.
+    if (incomingTrust <= ActionTrust.DEFAULT) {
+      dev().expectedError(
+        TAG,
+        'Recursive form submissions are scheduled to be deprecated by 1/1/2020. ' +
+          'See https://github.com/ampproject/amphtml/issues/24894.'
+      );
+    }
+    const doc = this.form_.ownerDocument;
+    // Only degrade trust across form submission in AMP4EMAIL for now.
+    return doc && isAmp4Email(doc)
+      ? /** @type {!ActionTrust} */ (incomingTrust - 1)
+      : incomingTrust;
+  }
+
+  /**
    * @param {!Response} response
+   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
-  handleXhrSubmitSuccess_(response) {
-    const json = /** @type {!Promise<!JsonObject>} */ (response.json());
-    return this.handleSubmitSuccess_(json).then(() => {
-      this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
-      this.maybeHandleRedirect_(response);
-    });
+  handleXhrSubmitSuccess_(response, incomingTrust) {
+    return response
+      .json()
+      .then(
+        json =>
+          this.handleSubmitSuccess_(
+            /** @type {!JsonObject} */ (json),
+            incomingTrust
+          ),
+        error => user().error(TAG, 'Failed to parse response JSON: %s', error)
+      )
+      .then(() => {
+        this.triggerFormSubmitInAnalytics_('amp-form-submit-success');
+        this.maybeHandleRedirect_(response);
+      });
   }
 
   /**
    * Transition the form to the submit success state.
-   * @param {!Promise<!JsonObject>} jsonPromise
+   * @param {!JsonObject} result
+   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
+   * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
-   * @private visible for testing
+   * @private
    */
-  handleSubmitSuccess_(jsonPromise) {
-    return jsonPromise.then(
-      json => {
-        this.setState_(FormState.SUBMIT_SUCCESS);
-        this.renderTemplate_(json || {}).then(() => {
-          this.triggerAction_(FormEvents.SUBMIT_SUCCESS, json);
-          this.dirtinessHandler_.onSubmitSuccess();
-        });
-      },
-      error => {
-        user().error(TAG, 'Failed to parse response JSON: %s', error);
-      }
-    );
+  handleSubmitSuccess_(result, incomingTrust, opt_eventData) {
+    this.setState_(FormState.SUBMIT_SUCCESS);
+    // TODO: Investigate if `tryResolve()` can be removed here.
+    return tryResolve(() => {
+      this.renderTemplate_(result || {}).then(() => {
+        const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
+        this.triggerAction_(
+          FormEvents.SUBMIT_SUCCESS,
+          opt_eventData === undefined ? result : opt_eventData,
+          outgoingTrust
+        );
+        this.dirtinessHandler_.onSubmitSuccess();
+      });
+    });
   }
 
   /**
    * @param {*} e
+   * @param {!ActionTrust} incomingTrust Trust of the originating submit action.
    * @return {!Promise}
    * @private
    */
-  handleXhrSubmitFailure_(e) {
+  handleXhrSubmitFailure_(e, incomingTrust) {
     let promise;
     if (e && e.response) {
       const error = /** @type {!Error} */ (e);
@@ -918,7 +1006,7 @@ export class AmpForm {
     }
     return promise.then(responseJson => {
       this.triggerFormSubmitInAnalytics_('amp-form-submit-error');
-      this.handleSubmitFailure_(e, responseJson);
+      this.handleSubmitFailure_(e, responseJson, incomingTrust);
       this.maybeHandleRedirect_(e.response);
     });
   }
@@ -927,15 +1015,23 @@ export class AmpForm {
    * Transition the form the the submit error state.
    * @param {*} error
    * @param {!JsonObject} json
+   * @param {!ActionTrust} incomingTrust
+   * @param {?JsonObject=} opt_eventData
    * @return {!Promise}
    * @private
    */
-  handleSubmitFailure_(error, json) {
+  handleSubmitFailure_(error, json, incomingTrust, opt_eventData) {
     this.setState_(FormState.SUBMIT_ERROR);
     user().error(TAG, 'Form submission failed: %s', error);
+    // TODO: Investigate if `tryResolve()` can be removed here.
     return tryResolve(() => {
       this.renderTemplate_(json).then(() => {
-        this.triggerAction_(FormEvents.SUBMIT_ERROR, json);
+        const outgoingTrust = this.trustForSubmitResponse_(incomingTrust);
+        this.triggerAction_(
+          FormEvents.SUBMIT_ERROR,
+          opt_eventData === undefined ? json : opt_eventData,
+          outgoingTrust
+        );
         this.dirtinessHandler_.onSubmitError();
       });
     });
@@ -1052,18 +1148,19 @@ export class AmpForm {
   }
 
   /**
-   * Triggers either a submit-success or submit-error action with response data.
+   * Triggers an action e.g. submit success/error with response data.
    * @param {!FormEvents} name
    * @param {?JsonObject|!Array<{message: string, name: string}>} detail
+   * @param {!ActionTrust} trust
    * @private
    */
-  triggerAction_(name, detail) {
+  triggerAction_(name, detail, trust) {
     const event = createCustomEvent(
       this.win_,
       `${TAG}.${name}`,
       dict({'response': detail})
     );
-    this.actions_.trigger(this.form_, name, event, ActionTrust.HIGH);
+    this.actions_.trigger(this.form_, name, event, trust);
   }
 
   /**
@@ -1131,7 +1228,7 @@ export class AmpForm {
       container.setAttribute('aria-live', 'assertive');
       if (this.templates_.hasTemplate(container)) {
         p = this.ssrTemplateHelper_
-          .renderTemplate(devAssert(container), data)
+          .applySsrOrCsrTemplate(devAssert(container), data)
           .then(rendered => {
             rendered.id = messageId;
             rendered.setAttribute('i-amphtml-rendered', '');
@@ -1182,9 +1279,95 @@ export class AmpForm {
   }
 
   /**
+   * Initialize form fields from query parameter values if attribute
+   * 'data-initialize-from-url' is present on the form and attribute
+   * 'data-allow-initialization' is present on the field.
+   * @private
+   */
+  maybeInitializeFromUrl_() {
+    if (
+      isProxyOrigin(this.win_.location) ||
+      !this.form_.hasAttribute('data-initialize-from-url')
+    ) {
+      return;
+    }
+
+    const valueTags = ['SELECT', 'TEXTAREA'];
+    const valueInputTypes = [
+      'color',
+      'date',
+      'datetime-local',
+      'email',
+      'hidden',
+      'month',
+      'number',
+      'range',
+      'search',
+      'tel',
+      'text',
+      'time',
+      'url',
+      'week',
+    ];
+    const checkedInputTypes = ['checkbox', 'radio'];
+
+    const maybeFillField = (field, name) => {
+      // Do not interfere with form fields that utilize variable substitutions.
+      // These fields are populated at time of form submission.
+      if (field.hasAttribute('data-amp-replace')) {
+        return;
+      }
+      // Form fields must be whitelisted
+      if (!field.hasAttribute('data-allow-initialization')) {
+        return;
+      }
+
+      const value = queryParams[name] || '';
+      const type = field.getAttribute('type') || 'text';
+      const tag = field.tagName;
+
+      if (tag === 'INPUT') {
+        if (valueInputTypes.includes(type.toLocaleLowerCase())) {
+          if (field.value !== value) {
+            field.value = value;
+          }
+        } else if (checkedInputTypes.includes(type)) {
+          const checked = field.value === value;
+          if (field.checked !== checked) {
+            field.checked = checked;
+          }
+        }
+      } else if (valueTags.includes(tag)) {
+        if (field.value !== value) {
+          field.value = value;
+        }
+      }
+    };
+
+    const queryParams = parseQueryString(this.win_.location.search);
+    Object.keys(queryParams).forEach(key => {
+      // Typecast since Closure is missing NodeList union type in HTMLFormElement.elements.
+      const formControls = /** @type {(!Element|!NodeList)} */ (this.form_
+        .elements[key]);
+      if (!formControls) {
+        return;
+      }
+
+      if (formControls.nodeType === Node.ELEMENT_NODE) {
+        const field = dev().assertElement(formControls);
+        maybeFillField(field, key);
+      } else if (formControls.length) {
+        const fields = /** @type {!NodeList} */ (formControls);
+        iterateCursor(fields, field => maybeFillField(field, key));
+      }
+    });
+  }
+
+  /**
    * Returns a promise that resolves when tempalte render finishes. The promise
    * will be null if the template render has not started.
    * @visibleForTesting
+   * @return {*} TODO(#23582): Specify return type
    */
   renderTemplatePromiseForTesting() {
     return this.renderTemplatePromise_;
@@ -1194,6 +1377,7 @@ export class AmpForm {
    * Returns a promise that resolves when xhr submit finishes. The promise
    * will be null if xhr submit has not started.
    * @visibleForTesting
+   * @return {*} TODO(#23582): Specify return type
    */
   xhrSubmitPromiseForTesting() {
     return this.xhrSubmitPromise_;
@@ -1324,7 +1508,7 @@ function checkUserValidity(element, propagate = false) {
  * Responds to user interaction with an input by checking user validity of the
  * input and possibly its input-related ancestors (e.g. feildset, form).
  * @param {!Element} input
- * @private visible for testing.
+ * @private
  */
 export function checkUserValidityAfterInteraction_(input) {
   checkUserValidity(input, /* propagate */ true);

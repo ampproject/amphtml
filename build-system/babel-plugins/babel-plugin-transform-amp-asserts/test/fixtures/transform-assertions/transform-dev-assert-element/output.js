@@ -19,4 +19,3 @@
 let result =
 /** @type {!Element} */
 (element);
-let result2 = undefined;

@@ -51,8 +51,8 @@ export function internalListenImplementation(
     try {
       return localListener(event);
     } catch (e) {
-      // reportError is installed globally per window in the entry point.
-      self.reportError(e);
+      // __AMP_REPORT_ERROR is installed globally per window in the entry point.
+      self.__AMP_REPORT_ERROR(e);
       throw e;
     }
   };

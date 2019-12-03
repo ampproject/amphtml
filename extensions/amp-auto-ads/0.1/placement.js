@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+import {Attributes, getAttributesFromConfigObj} from './attributes';
 import {
   LayoutMarginsChangeDef,
   cloneLayoutMarginsChangeDef,
 } from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
+import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
 import {clamp} from '../../../src/utils/math';
 import {
   closestAncestorElementBySelector,
@@ -29,10 +31,22 @@ import {
 import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getAttributesFromConfigObj} from './attributes';
+import {getElementLayoutBox} from './utils';
+import {getExperimentBranch} from '../../../src/experiments';
 
 /** @const */
 const TAG = 'amp-auto-ads';
+
+/** @const {!{branch: string, control: string, experiment: string}}
+ */
+export const NO_OP_EXP = {
+  branch: 'amp-auto-ads-no-op-experiment',
+  control: '44710302',
+  experiment: '44710303',
+};
+
+/** @const */
+export const RESPONSIVE_SIZING_HOLDBACK_BRANCH = '368226533';
 
 /**
  * @typedef {{
@@ -105,27 +119,30 @@ INJECTORS[Position.LAST_CHILD] = (anchorElement, elementToInject) => {
 export class Placement {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../../../src/service/resources-impl.Resources} resources
    * @param {!Element} anchorElement
    * @param {!Position} position
    * @param {function(!Element, !Element)} injector
    * @param {!JsonObject<string, string>} attributes
+   * @param {?string} responsiveSizingBranch
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
   constructor(
     ampdoc,
-    resources,
     anchorElement,
     position,
     injector,
     attributes,
+    responsiveSizingBranch,
     opt_margins
   ) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!../../../src/service/resources-impl.Resources} */
-    this.resources_ = resources;
+    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
+    this.resources_ = Services.resourcesForDoc(anchorElement);
+
+    /** @const @private {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
+    this.viewport_ = Services.viewportForDoc(anchorElement);
 
     /** @const @private {!Element} */
     this.anchorElement_ = anchorElement;
@@ -144,6 +161,9 @@ export class Placement {
      * @private {!../../../src/layout-rect.LayoutMarginsChangeDef|undefined}
      */
     this.margins_ = opt_margins;
+
+    /** @const @private {?string} */
+    this.responsiveSizingBranch_ = responsiveSizingBranch;
 
     /** @private {?Element} */
     this.adElement_ = null;
@@ -166,11 +186,9 @@ export class Placement {
    * @return {!Promise<number>}
    */
   getEstimatedPosition() {
-    return this.resources_
-      .getElementLayoutBox(this.anchorElement_)
-      .then(layoutBox => {
-        return this.getEstimatedPositionFromAchorLayout_(layoutBox);
-      });
+    return getElementLayoutBox(this.anchorElement_).then(layoutBox => {
+      return this.getEstimatedPositionFromAchorLayout_(layoutBox);
+    });
   }
 
   /**
@@ -209,8 +227,43 @@ export class Placement {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        this.adElement_ = this.createAdElement_(baseAttributes, sizing.width);
+        const useResponsiveAdElement =
+          isResponsiveEnabled &&
+          this.responsiveSizingBranch_ != RESPONSIVE_SIZING_HOLDBACK_BRANCH;
+        this.adElement_ = useResponsiveAdElement
+          ? this.createResponsiveAdElement_(baseAttributes)
+          : this.createAdElement_(baseAttributes, sizing.width);
+        if (this.responsiveSizingBranch_) {
+          addExperimentIdToElement(
+            this.responsiveSizingBranch_,
+            this.adElement_
+          );
+        }
+        const noOpExpBranch = getExperimentBranch(
+          this.ampdoc.win,
+          NO_OP_EXP.branch
+        );
+        if (noOpExpBranch) {
+          addExperimentIdToElement(noOpExpBranch, this.adElement_);
+        }
         this.injector_(this.anchorElement_, this.getAdElement());
+
+        if (useResponsiveAdElement) {
+          return (
+            whenUpgradedToCustomElement(this.getAdElement())
+              // Responsive ads set their own size when built.
+              .then(() => this.getAdElement().whenBuilt())
+              .then(() => {
+                const resized = !this.getAdElement().classList.contains(
+                  'i-amphtml-layout-awaiting-size'
+                );
+                this.state_ = resized
+                  ? PlacementState.PLACED
+                  : PlacementState.RESIZE_FAILED;
+                return this.state_;
+              })
+          );
+        }
 
         return this.getPlacementSizing_(sizing, isResponsiveEnabled).then(
           placement => {
@@ -254,17 +307,15 @@ export class Placement {
    * @private
    */
   getPlacementSizing_(sizing, isResponsiveEnabled) {
-    const viewport = this.resources_.getViewport();
-    const viewportWidth = viewport.getWidth();
+    const viewportWidth = this.viewport_.getWidth();
     if (isResponsiveEnabled && viewportWidth <= MAXIMUM_RESPONSIVE_WIDTH) {
-      const viewportHeight = viewport.getHeight();
+      const viewportHeight = this.viewport_.getHeight();
       const responsiveHeight = getResponsiveHeightForContext_(
         viewportWidth,
         viewportHeight
       );
       let margins = cloneLayoutMarginsChangeDef(this.margins_);
-      return Services.resourcesForDoc(this.anchorElement_)
-        .getElementLayoutBox(this.anchorElement_)
+      return getElementLayoutBox(this.anchorElement_)
         .then(layoutBox => {
           const direction = computedStyle(this.ampdoc.win, this.anchorElement_)[
             'direction'
@@ -318,14 +369,44 @@ export class Placement {
       attributes
     );
   }
+
+  /**
+   * @param {!JsonObject<string, string>} baseAttributes
+   * @return {!Element}
+   * @private
+   */
+  createResponsiveAdElement_(baseAttributes) {
+    const attributes = /** @type {!JsonObject} */ (Object.assign(
+      dict({
+        'width': '100vw',
+        'height': '0',
+        'layout': 'fixed',
+        'class': 'i-amphtml-layout-awaiting-size',
+        'data-auto-format': 'rspv',
+        'data-full-width': '',
+      }),
+      baseAttributes,
+      this.attributes_
+    ));
+    return createElementWithAttributes(
+      this.ampdoc.win.document,
+      'amp-ad',
+      attributes
+    );
+  }
 }
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} configObj
+ * @param {?string} responsiveSizingBranch id of selected branch in responsive sizing experiment, if any.
  * @return {!Array<!Placement>}
  */
-export function getPlacementsFromConfigObj(ampdoc, configObj) {
+export function getPlacementsFromConfigObj(
+  ampdoc,
+  configObj,
+  responsiveSizingBranch
+) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
     user().info(TAG, 'No placements in config');
@@ -333,7 +414,12 @@ export function getPlacementsFromConfigObj(ampdoc, configObj) {
   }
   const placements = [];
   placementObjs.forEach(placementObj => {
-    getPlacementsFromObject(ampdoc, placementObj, placements);
+    getPlacementsFromObject(
+      ampdoc,
+      placementObj,
+      placements,
+      responsiveSizingBranch
+    );
   });
   return placements;
 }
@@ -344,8 +430,14 @@ export function getPlacementsFromConfigObj(ampdoc, configObj) {
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} placementObj
  * @param {!Array<!Placement>} placements
+ * @param {?string} responsiveSizingBranch
  */
-function getPlacementsFromObject(ampdoc, placementObj, placements) {
+function getPlacementsFromObject(
+  ampdoc,
+  placementObj,
+  placements,
+  responsiveSizingBranch
+) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
     user().warn(TAG, 'No injector for position');
@@ -376,15 +468,18 @@ function getPlacementsFromObject(ampdoc, placementObj, placements) {
     if (!isPositionValid(anchorElement, placementObj['pos'])) {
       return;
     }
-    const attributes = getAttributesFromConfigObj(placementObj);
+    const attributes = getAttributesFromConfigObj(
+      placementObj,
+      Attributes.BASE_ATTRIBUTES
+    );
     placements.push(
       new Placement(
         ampdoc,
-        Services.resourcesForDoc(anchorElement),
         anchorElement,
         placementObj['pos'],
         injector,
         attributes,
+        responsiveSizingBranch,
         margins
       )
     );

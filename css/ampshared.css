@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * We intentionally break with HTML5's default [hidden] styling to apply
+ * !important.
+ */
+[hidden] {
+  /* This must be !important, else the toggle helper system would break down
+     due to specificity */
+  display: none !important;
+}
+
 .i-amphtml-element {
   display: inline-block;
 }
-
 
 .i-amphtml-blurry-placeholder {
   transition: opacity 0.3s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
@@ -325,99 +334,9 @@ i-amphtml-scroll-container.amp-active, i-amp-scroll-container.amp-active {
   display: block !important;
 }
 
-/**
- * `i-amphtml-loading-container`, `i-amphtml-loader` and `i-amphtml-loader-dot` all support
- * a "loading indicator" usecase. `i-amphtml-loading-container` is mostly responsible
- * for aligning the loading indicator, while `i-amphtml-loader` and
- * `i-amphtml-loader-dot` are an implementation for a default loading indicator. The
- * default implementation includes the three-dot layout and animation.
- */
 .i-amphtml-loading-container.amp-hidden {
   visibility: hidden;
 }
-
-.i-amphtml-loader-line {
-  position: absolute;
-  top:0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  overflow: hidden !important;
-  background-color:rgba(151, 151, 151, 0.2);
-  display: block;
-}
-
-.i-amphtml-loader-moving-line {
-  display: block;
-  position: absolute;
-  width: 100%;
-  height: 100% !important;
-  background-color: rgba(151, 151, 151, 0.65);
-  z-index: 2;
-}
-
-@keyframes i-amphtml-loader-line-moving {
-  0% {transform: translateX(-100%);}
-  100% {transform: translateX(100%);}
-}
-
-.i-amphtml-loader-line.amp-active .i-amphtml-loader-moving-line {
-  animation: i-amphtml-loader-line-moving 4s ease infinite;
-}
-
-.i-amphtml-loader {
-  position: absolute;
-  display: block;
-  height: 10px;
-  top: 50%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-50%);
-  transform-origin: 50% 50%;
-  white-space: nowrap;
-}
-
-.i-amphtml-loader.amp-active .i-amphtml-loader-dot {
-  animation: i-amphtml-loader-dots 2s infinite;
-}
-
-.i-amphtml-loader-dot {
-  position: relative;
-  display: inline-block;
-
-  height: 10px;
-  width: 10px;
-  margin: 2px;
-  border-radius: 100%;
-  background-color: rgba(0, 0, 0, .3);
-
-  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
-  will-change: transform;
-}
-
-.i-amphtml-loader .i-amphtml-loader-dot:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.i-amphtml-loader .i-amphtml-loader-dot:nth-child(2) {
-  animation-delay: .1s;
-}
-
-.i-amphtml-loader .i-amphtml-loader-dot:nth-child(3) {
-  animation-delay: .2s;
-}
-
-@keyframes i-amphtml-loader-dots {
-  0%, 100% {
-    transform: scale(.7);
-    background-color: rgba(0, 0, 0, .3);
-  }
-
-  50% {
-    transform: scale(.8);
-    background-color: rgba(0, 0, 0, .5);
-  }
-}
-
 
 /**
  * "overflow" element is an element shown when more content is available but
@@ -485,6 +404,13 @@ html.i-amphtml-fie > amp-analytics {
 form [submitting],
 form [submit-success],
 form [submit-error] {
+  display: none;
+}
+
+/**
+ * amp-list error messaging container should be hidden at first.
+ */
+amp-list [fetch-error] {
   display: none;
 }
 

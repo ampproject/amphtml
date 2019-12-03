@@ -119,7 +119,11 @@ class AmpDelightPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    this.preconnect.url(this.baseURL_, onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.baseURL_,
+      onLayout
+    );
   }
 
   /** @override */

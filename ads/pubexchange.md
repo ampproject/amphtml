@@ -21,14 +21,17 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-embed width="640" height="320"
-    heights="(max-width:480px) 400%, (max-width:650px) 100%, 75%"
-    layout="responsive"
-    type="pubexchange"
-    data-publication="test_publication"
-    data-module-id="below_content"
-    data-module-num="2626"
-    data-test="true">
+<amp-embed
+  width="640"
+  height="320"
+  heights="(max-width:480px) 400%, (max-width:650px) 100%, 75%"
+  layout="responsive"
+  type="pubexchange"
+  data-publication="test_publication"
+  data-module-id="below_content"
+  data-module-num="2626"
+  data-test="true"
+>
 </amp-embed>
 ```
 

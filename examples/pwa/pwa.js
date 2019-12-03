@@ -242,12 +242,7 @@ class AmpViewer {
     this.amp_ = null;
 
     // Immediately install amp-shadow.js.
-    try {
-      // Install compiled version if it exists
-      this.installScript_('/dist/shadow-v0.js')
-    } catch (ex) {
-      this.installScript_('/dist/amp-shadow.js');      
-    }    
+    this.installScript_('/dist/shadow-v0.js', '/dist/amp-shadow.js');
   }
 
   /**
@@ -323,10 +318,11 @@ class AmpViewer {
 
   /**
    * @param {string} src
+   * @param {string=} fallbackSrc
    * @param {string=} customElement
    * @param {string=} customTemplate
    */
-  installScript_(src, customElement, customTemplate) {
+  installScript_(src, fallbackSrc, customElement, customTemplate) {
     const doc = this.win.document;
     const el = doc.createElement('script');
     el.setAttribute('src', src);
@@ -336,8 +332,17 @@ class AmpViewer {
     if (customTemplate) {
       el.setAttribute('custom-template', customTemplate);
     }
+    el.onload = () => {
+      log('- script added: ', src, el);
+    };
+    el.onerror = () => {
+      log('- script failed to load: ', src, el);
+      doc.head.removeChild(el);
+      if (fallbackSrc) {
+        this.installScript_(fallbackSrc, undefined, customElement, customTemplate);
+      }
+    };
     doc.head.appendChild(el);
-    log('- script added: ', src, el);
   }
 
   /**

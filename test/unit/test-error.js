@@ -37,7 +37,6 @@ import {
 import {user, userAssert} from '../../src/log';
 
 describes.fakeWin('installErrorReporting', {}, env => {
-  let sandbox;
   let win;
   let rejectedPromiseError;
   let rejectedPromiseEvent;
@@ -46,8 +45,7 @@ describes.fakeWin('installErrorReporting', {}, env => {
   beforeEach(() => {
     win = env.win;
     installErrorReporting(win);
-    sandbox = env.sandbox;
-    rejectedPromiseEventCancelledSpy = sandbox.spy();
+    rejectedPromiseEventCancelledSpy = env.sandbox.spy();
     rejectedPromiseError = new Error('error');
     rejectedPromiseEvent = {
       type: 'unhandledrejection',
@@ -100,7 +98,6 @@ describes.fakeWin('installErrorReporting', {}, env => {
 describe('reportErrorToServerOrViewer', () => {
   let win;
   let viewer;
-  let sandbox;
   let ampdocServiceForStub;
   let sendMessageStub;
   let createXhr;
@@ -114,15 +111,15 @@ describe('reportErrorToServerOrViewer', () => {
   );
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     const optedInDoc = window.document.implementation.createHTMLDocument('');
     optedInDoc.documentElement.setAttribute('report-errors-to-viewer', '');
 
-    ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
+    ampdocServiceForStub = window.sandbox.stub(Services, 'ampdocServiceFor');
+    const ampdoc = {getRootNode: () => optedInDoc};
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
-      getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+      getAmpDoc: () => ampdoc,
+      getSingleDoc: () => ampdoc,
     });
 
     viewer = {
@@ -130,15 +127,11 @@ describe('reportErrorToServerOrViewer', () => {
       isTrustedViewer: () => Promise.resolve(true),
       sendMessage: () => true,
     };
-    sendMessageStub = sandbox.stub(viewer, 'sendMessage');
+    sendMessageStub = window.sandbox.stub(viewer, 'sendMessage');
 
-    sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+    window.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-    createXhr = sandbox.spy(XMLHttpRequest.prototype, 'open');
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    createXhr = window.sandbox.spy(XMLHttpRequest.prototype, 'open');
   });
 
   it('should report to server if AMP doc is not single', () => {
@@ -151,9 +144,11 @@ describe('reportErrorToServerOrViewer', () => {
 
   it('should report to server if AMP doc is not opted in', () => {
     const nonOptedInDoc = window.document.implementation.createHTMLDocument('');
+    const ampdoc = {getRootNode: () => nonOptedInDoc};
     ampdocServiceForStub.returns({
       isSingleDoc: () => true,
-      getAmpDoc: () => ({getRootNode: () => nonOptedInDoc}),
+      getAmpDoc: () => ampdoc,
+      getSingleDoc: () => ampdoc,
     });
     return reportErrorToServerOrViewer(win, data).then(() => {
       expect(createXhr).to.be.calledOnce;
@@ -162,7 +157,7 @@ describe('reportErrorToServerOrViewer', () => {
   });
 
   it('should report to server if viewer is not capable', () => {
-    sandbox
+    window.sandbox
       .stub(viewer, 'hasCapability')
       .withArgs('errorReporting')
       .returns(false);
@@ -173,7 +168,9 @@ describe('reportErrorToServerOrViewer', () => {
   });
 
   it('should report to server if viewer is not trusted', () => {
-    sandbox.stub(viewer, 'isTrustedViewer').returns(Promise.resolve(false));
+    window.sandbox
+      .stub(viewer, 'isTrustedViewer')
+      .returns(Promise.resolve(false));
     return reportErrorToServerOrViewer(win, data).then(() => {
       expect(createXhr).to.be.calledOnce;
       expect(sendMessageStub).to.not.have.been.called;
@@ -194,6 +191,7 @@ describe('reportErrorToServerOrViewer', () => {
         expect(data['a']).to.not.be.undefined;
         expect(data['s']).to.not.be.undefined;
         expect(data['el']).to.not.be.undefined;
+        expect(data['ex']).to.not.be.undefined;
         expect(data['v']).to.not.be.undefined;
         expect(data['jse']).to.not.be.undefined;
       });
@@ -202,21 +200,18 @@ describe('reportErrorToServerOrViewer', () => {
 });
 
 describe('getErrorReportData', () => {
-  let sandbox;
   let onError;
   let nextRandomNumber;
 
   beforeEach(() => {
     onError = window.onerror;
-    sandbox = sinon.sandbox;
     nextRandomNumber = 0;
-    sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
-    self.AMP_MODE = undefined;
+    window.sandbox.stub(Math, 'random').callsFake(() => nextRandomNumber);
+    self.__AMP_MODE = undefined;
   });
 
   afterEach(() => {
     window.onerror = onError;
-    sandbox.restore();
     window.viewerState = undefined;
     resetExperimentTogglesForTesting(window);
   });
@@ -756,11 +751,11 @@ describe('getErrorReportData', () => {
   });
 });
 
-describes.sandboxed('reportError', {}, () => {
+describes.sandboxed('reportError', {}, env => {
   let clock;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
   });
 
   it('should accept Error type', () => {
@@ -773,7 +768,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept string and report incorrect use', () => {
-    window.AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {localDev: true, test: false};
     const result = reportError('error');
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('error');
@@ -785,7 +780,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept number and report incorrect use', () => {
-    window.AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {localDev: true, test: false};
     const result = reportError(101);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('101');
@@ -797,7 +792,7 @@ describes.sandboxed('reportError', {}, () => {
   });
 
   it('should accept null and report incorrect use', () => {
-    window.AMP_MODE = {localDev: true, test: false};
+    window.__AMP_MODE = {localDev: true, test: false};
     const result = reportError(null);
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('Unknown error');
@@ -868,22 +863,19 @@ describe.configure().run('detectJsEngineFromStack', () => {
 
 describes.fakeWin('user error reporting', {amp: true}, env => {
   let win;
-  let sandbox;
   const error = new Error('ERROR', 'user error');
   let analyticsEventSpy;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     win = env.win;
-    analyticsEventSpy = sandbox.spy(analytics, 'triggerAnalyticsEvent');
-    toggleExperiment(win, 'user-error-reporting', true);
+    analyticsEventSpy = env.sandbox.spy(analytics, 'triggerAnalyticsEvent');
   });
 
   it('should trigger triggerAnalyticsEvent with correct arguments', () => {
     reportErrorToAnalytics(error, win);
     expect(analyticsEventSpy).to.have.been.called;
     expect(analyticsEventSpy).to.have.been.calledWith(
-      sinon.match.any,
+      env.sandbox.match.any,
       'user-error',
       {errorName: error.name, errorMessage: error.message}
     );

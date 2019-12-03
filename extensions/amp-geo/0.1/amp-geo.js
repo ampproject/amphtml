@@ -107,7 +107,6 @@ export class AmpGeo extends AMP.BaseElement {
     this.matchedGroups_ = [];
     /** @private {Array<string>} */
     this.definedGroups_ = [];
-    /** @Private {} */
   }
 
   /** @override */
@@ -343,7 +342,9 @@ export class AmpGeo extends AMP.BaseElement {
               const {classList} = body;
               // Always remove the pending class
               classesToRemove.push('amp-geo-pending');
-              classesToRemove.forEach(toRemove => classList.remove(toRemove));
+              classesToRemove.forEach(toRemove => {
+                /** @type {!DOMTokenList} */ (classList).remove(toRemove);
+              });
 
               // add the new classes to <body>
               classesToAdd.forEach(toAdd => classList.add(toAdd));

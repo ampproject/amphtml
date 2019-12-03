@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const LINKPULSE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const LINKPULSE_CONFIG = jsonLiteral({
   'vars': {
     'id': '',
     'pageUrl': 'CANONICAL_URL',
@@ -84,3 +86,5 @@ export const LINKPULSE_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {LINKPULSE_CONFIG};

@@ -31,7 +31,6 @@ describe
       '/test/fixtures/served/iframe-intersection-outer.html';
 
     let testIframe;
-    let sandbox;
     let container;
 
     function insert(iframe) {
@@ -39,17 +38,12 @@ describe
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       return createIframePromise().then(c => {
         container = c;
         const i = c.doc.createElement('iframe');
         i.src = iframeSrc;
         testIframe = i;
       });
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('should assert src in iframe', () => {
@@ -212,9 +206,10 @@ describe
       });
     });
 
-    it('should set sentinel on postMessage data', () => {
+    // TODO(wg-runtime, #25587): Results in a cross-origin frame error.
+    it.skip('should set sentinel on postMessage data', () => {
       insert(testIframe);
-      const postMessageSpy = sinon /*OK*/
+      const postMessageSpy = window.sandbox /*OK*/
         .spy(testIframe.contentWindow, 'postMessage');
       IframeHelper.postMessage(
         testIframe,
@@ -228,5 +223,82 @@ describe
       // breaks loose.
       postMessageSpy /*OK*/
         .restore();
+    });
+
+    describe('pausable iframes', () => {
+      let iframe, featurePolicy;
+
+      class FeaturePolicyFake {
+        constructor() {
+          this.features_ = [];
+          this.allowed_ = {};
+        }
+
+        features() {
+          return this.features_;
+        }
+
+        allowedFeatures() {
+          return Object.keys(this.allowed_);
+        }
+
+        allowsFeature(feature) {
+          return (this.allowed_[feature] || []).indexOf("'none'") == -1;
+        }
+
+        getAllowlistForFeature(feature) {
+          return this.allowed_[feature] || [];
+        }
+      }
+
+      beforeEach(() => {
+        featurePolicy = new FeaturePolicyFake();
+        featurePolicy.features_.push('execution-while-not-rendered');
+        iframe = document.createElement('div');
+        iframe.featurePolicy = featurePolicy;
+      });
+
+      it('should configure pausable with no "allow"', () => {
+        IframeHelper.makePausable(iframe);
+        expect(iframe.getAttribute('allow')).to.equal(
+          "execution-while-not-rendered 'none';"
+        );
+      });
+
+      it('should configure pausable with an existing "allow"', () => {
+        iframe.setAttribute('allow', "sync-xhr 'none'");
+        IframeHelper.makePausable(iframe);
+        expect(iframe.getAttribute('allow')).to.equal(
+          "execution-while-not-rendered 'none';sync-xhr 'none'"
+        );
+      });
+
+      it('should be pausable', () => {
+        featurePolicy.allowed_['execution-while-not-rendered'] = "'none'";
+        expect(IframeHelper.isPausable(iframe)).to.be.true;
+      });
+
+      it('should be unpausable b/c feature is allowed', () => {
+        featurePolicy.allowed_['execution-while-not-rendered'] = "'*'";
+        expect(IframeHelper.isPausable(iframe)).to.be.false;
+      });
+
+      it('should be unpausable b/c feature is not supported', () => {
+        featurePolicy.features_ = [];
+        featurePolicy.allowed_['execution-while-not-rendered'] = "'none'";
+        expect(IframeHelper.isPausable(iframe)).to.be.false;
+      });
+
+      it('should be unpausable b/c feature policies are not supported', () => {
+        iframe.featurePolicy = null;
+        expect(IframeHelper.isPausable(iframe)).to.be.false;
+      });
+
+      it('should pause/resume', () => {
+        IframeHelper.setPaused(iframe, true);
+        expect(iframe).to.have.attribute('hidden');
+        IframeHelper.setPaused(iframe, false);
+        expect(iframe).to.not.have.attribute('hidden');
+      });
     });
   });

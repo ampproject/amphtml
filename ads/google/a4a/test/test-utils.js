@@ -16,8 +16,9 @@
 
 import '../../../../extensions/amp-ad/0.1/amp-ad-ui';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
+import * as IniLoad from '../../../../src/ini-load';
+import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {
-  ADX_ADY_EXP,
   EXPERIMENT_ATTRIBUTE,
   TRUNCATION_PARAM,
   ValidAdContainerTypes,
@@ -26,7 +27,6 @@ import {
   extractAmpAnalyticsConfig,
   extractHost,
   getAmpRuntimeTypeParameter,
-  getContainerWidth,
   getCorrelator,
   getCsiAmpAnalyticsVariables,
   getEnclosingContainerTypes,
@@ -37,7 +37,6 @@ import {
   maybeAppendErrorParameter,
   mergeExperimentIds,
 } from '../utils';
-import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {MockA4AImpl} from '../../../../extensions/amp-a4a/0.1/test/utils';
 import {Services} from '../../../../src/services';
 import {buildUrl} from '../shared/url-builder';
@@ -66,7 +65,7 @@ function setupForAdTesting(fixture) {
 // functions.
 function noopMethods(
   impl,
-  doc,
+  ampdoc,
   sandbox,
   pageLayoutBox = {
     top: 11,
@@ -81,7 +80,7 @@ function noopMethods(
   impl.element.build = noop;
   impl.element.getPlaceholder = noop;
   impl.element.createPlaceholder = noop;
-  sandbox.stub(impl, 'getAmpDoc').returns(doc);
+  sandbox.stub(impl, 'getAmpDoc').returns(ampdoc);
   sandbox.stub(impl, 'getPageLayoutBox').returns(pageLayoutBox);
 }
 
@@ -113,16 +112,6 @@ describe('Google A4A utils', () => {
   });
 
   describe('#ActiveView AmpAnalytics integration', () => {
-    let sandbox;
-
-    beforeEach(() => {
-      sandbox = sinon.sandbox;
-    });
-
-    afterEach(() => {
-      sandbox.restore();
-    });
-
     const builtConfig = {
       transport: {beacon: false, xhrpost: false},
       requests: {
@@ -195,7 +184,9 @@ describe('Google A4A utils', () => {
     });
 
     it('should add the correct CSI signals', () => {
-      sandbox.stub(Services, 'documentInfoForDoc').returns({pageViewId: 777});
+      window.sandbox
+        .stub(Services, 'documentInfoForDoc')
+        .returns({pageViewId: 777});
       const mockElement = {
         getAttribute: function(name) {
           switch (name) {
@@ -282,6 +273,14 @@ describe('Google A4A utils', () => {
         })
       ).to.equal('1');
     });
+    it('should specify that this is experimentA', () => {
+      expect(
+        getAmpRuntimeTypeParameter({
+          AMP_CONFIG: {type: 'experimentA'},
+          location: {origin: 'https://www-example-com.cdn.ampproject.org'},
+        })
+      ).to.equal('10');
+    });
     it('should not have `art` parameter when AMP_CONFIG is undefined', () => {
       expect(
         getAmpRuntimeTypeParameter({
@@ -308,16 +307,6 @@ describe('Google A4A utils', () => {
   });
 
   describe('#googleAdUrl', () => {
-    let sandbox;
-
-    beforeEach(() => {
-      sandbox = sinon.sandbox;
-    });
-
-    afterEach(() => {
-      sandbox.restore();
-    });
-
     it('should set ad position', function() {
       // When ran locally, this test tends to exceed 2000ms timeout.
       this.timeout(5000);
@@ -331,7 +320,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url1 => {
             expect(url1).to.match(/ady=11/);
@@ -352,7 +341,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         const getRect = () => {
           return {'width': 100, 'height': 200};
         };
@@ -361,7 +350,7 @@ describe('Google A4A utils', () => {
         };
         const getScrollLeft = () => 12;
         const getScrollTop = () => 34;
-        const viewportStub = sandbox.stub(Services, 'viewportForDoc');
+        const viewportStub = window.sandbox.stub(Services, 'viewportForDoc');
         viewportStub.returns({getRect, getSize, getScrollTop, getScrollLeft});
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, []).then(url1 => {
@@ -385,7 +374,7 @@ describe('Google A4A utils', () => {
           'data-experiment-id': '123,456',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, {}, ['789', '098']).then(url1 => {
             expect(url1).to.match(/eid=123%2C456%2C789%2C098/);
@@ -405,7 +394,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         impl.win.AMP_CONFIG = {type: 'production'};
         impl.win.location.hash = 'foo,deid=123456,654321,bar';
         return fixture.addElement(elem).then(() => {
@@ -427,7 +416,7 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         impl.win.gaGlobal = {cid: 'foo', hid: 'bar'};
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', 0, [], []).then(url => {
@@ -449,8 +438,8 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        const createElementStub = sandbox.stub(
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        const createElementStub = window.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -478,8 +467,8 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        const createElementStub = sandbox.stub(
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        const createElementStub = window.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -505,9 +494,9 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         impl.win.SVGElement = undefined;
-        const createElementStub = sandbox.stub(
+        const createElementStub = window.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -535,11 +524,11 @@ describe('Google A4A utils', () => {
           'height': '50',
         });
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
-        sandbox
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
+        window.sandbox
           .stub(Services.viewerForDoc(impl.getAmpDoc()), 'getReferrerUrl')
           .returns(new Promise(() => {}));
-        const createElementStub = sandbox.stub(
+        const createElementStub = window.sandbox.stub(
           impl.win.document,
           'createElement'
         );
@@ -564,44 +553,12 @@ describe('Google A4A utils', () => {
         doc.win = fixture.win;
         const elem = createElementWithAttributes(doc, 'amp-a4a', {});
         const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox);
+        noopMethods(impl, fixture.ampdoc, window.sandbox);
         return fixture.addElement(elem).then(() => {
           return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
             expect(url).to.match(/[&?]bdt=[1-9][0-9]*[&$]/);
           });
         });
-      });
-    });
-
-    it('should set adx/ady as 1 with experiment enabled', () => {
-      return createIframePromise().then(fixture => {
-        setupForAdTesting(fixture);
-        const {doc} = fixture;
-        doc.win = fixture.win;
-        const elem = createElementWithAttributes(doc, 'amp-a4a', {});
-        const impl = new MockA4AImpl(elem);
-        noopMethods(impl, doc, sandbox, {
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          width: 0,
-          height: 0,
-        });
-        return fixture.addElement(elem).then(() =>
-          googleAdUrl(impl, '', Date.now(), [], []).then(url => {
-            expect(url).to.match(/[&?]adx=0[&$]/);
-            expect(url).to.match(/[&?]adx=0[&$]/);
-            elem.setAttribute(
-              'data-experiment-id',
-              `123,${ADX_ADY_EXP.experiment},789`
-            );
-            return googleAdUrl(impl, '', Date.now(), [], []).then(url => {
-              expect(url).to.match(/[&?]adx=1[&$]/);
-              expect(url).to.match(/[&?]adx=1[&$]/);
-            });
-          })
-        );
       });
     });
   });
@@ -688,11 +645,11 @@ describe('Google A4A utils', () => {
     });
   });
 
-  describes.fakeWin('#getIdentityTokenRequestUrl', {}, () => {
+  describes.fakeWin('#getIdentityTokenRequestUrl', {}, env => {
     let doc;
     let fakeWin;
     beforeEach(() => {
-      const documentInfoStub = sandbox.stub(Services, 'documentInfoForDoc');
+      const documentInfoStub = env.sandbox.stub(Services, 'documentInfoForDoc');
       doc = {};
       fakeWin = {location: {}};
       documentInfoStub
@@ -744,7 +701,7 @@ describe('Google A4A utils', () => {
   describes.fakeWin('#getIdentityToken', {amp: true, mockFetch: true}, env => {
     beforeEach(() => {
       installXhrService(env.win);
-      const documentInfoStub = sandbox.stub(Services, 'documentInfoForDoc');
+      const documentInfoStub = env.sandbox.stub(Services, 'documentInfoForDoc');
       documentInfoStub
         .withArgs(env.ampdoc)
         .returns({canonicalUrl: 'http://f.blah.com?some_site'});
@@ -843,7 +800,7 @@ describe('Google A4A utils', () => {
     });
 
     it('should handle fetch error', () => {
-      sandbox
+      env.sandbox
         .stub(Services, 'xhrFor')
         .returns({fetchJson: () => Promise.reject('some network failure')});
       return getIdentityToken(env.win, env.ampdoc).then(result =>
@@ -862,7 +819,7 @@ describe('Google A4A utils', () => {
           validLifetimeSecs: '5678',
         })
       );
-      sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
         Promise.resolve({
           whenPolicyResolved: () => CONSENT_POLICY_STATE.SUFFICIENT,
         })
@@ -875,7 +832,7 @@ describe('Google A4A utils', () => {
     it.configure()
       .skipFirefox()
       .run('should not fetch if INSUFFICIENT consent', () => {
-        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
           Promise.resolve({
             whenPolicyResolved: () => CONSENT_POLICY_STATE.INSUFFICIENT,
           })
@@ -888,7 +845,7 @@ describe('Google A4A utils', () => {
     it.configure()
       .skipFirefox()
       .run('should not fetch if UNKNOWN consent', () => {
-        sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
+        env.sandbox.stub(Services, 'consentPolicyServiceForDocOrNull').returns(
           Promise.resolve({
             whenPolicyResolved: () => CONSENT_POLICY_STATE.UNKNOWN,
           })
@@ -901,10 +858,9 @@ describe('Google A4A utils', () => {
 
   describe('variables for amp-analytics', () => {
     let a4a;
-    let sandbox;
+    let ampdoc;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       return createIframePromise().then(fixture => {
         setupForAdTesting(fixture);
         const element = createElementWithAttributes(fixture.doc, 'amp-a4a', {
@@ -913,13 +869,10 @@ describe('Google A4A utils', () => {
           'type': 'adsense',
           'data-amp-slot-index': '4',
         });
-        element.getAmpDoc = () => fixture.doc;
+        ampdoc = fixture.ampdoc;
+        element.getAmpDoc = () => ampdoc;
         a4a = new MockA4AImpl(element);
       });
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('should include the correlator', () => {
@@ -957,9 +910,7 @@ describe('Google A4A utils', () => {
     });
 
     it('should include viewer lastVisibleTime', () => {
-      const getLastVisibleTime = () => 300;
-      const viewerStub = sandbox.stub(Services, 'viewerForDoc');
-      viewerStub.returns({getLastVisibleTime});
+      window.sandbox.stub(ampdoc, 'getLastVisibleTime').returns(300);
 
       const vars = getCsiAmpAnalyticsVariables('trigger', a4a, null);
       expect(vars['viewerLastVisibleTime']).to.be.a('number');
@@ -1008,7 +959,7 @@ describe('Google A4A utils', () => {
 
     it('should calculate correlator from PVID and CID if possible', () => {
       const pageViewId = '818181';
-      sandbox.stub(Services, 'documentInfoForDoc').callsFake(() => {
+      env.sandbox.stub(Services, 'documentInfoForDoc').callsFake(() => {
         return {pageViewId};
       });
       const cid = '12345678910';
@@ -1026,10 +977,11 @@ describe('Google A4A utils', () => {
 });
 
 describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
-  let doc, win;
+  let doc, win, ampdoc;
   beforeEach(() => {
     win = env.win;
     doc = win.document;
+    ampdoc = env.ampdoc;
   });
 
   function createResource(config, tagName = 'amp-ad', parent = doc.body) {
@@ -1045,17 +997,21 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       createResource({type: 'blah'}),
       createResource({}, 'amp-foo'),
     ];
-    sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
-    return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
-      expect(Object.keys(result).length).to.equal(1);
-      expect(result['foo']).to.be.ok;
-      expect(result['foo'].length).to.equal(1);
-      return result['foo'][0].then(baseElement =>
-        expect(baseElement.element.getAttribute('type')).to.equal('doubleclick')
-      );
-    });
+    env.sandbox
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
+    return groupAmpAdsByType(ampdoc, 'doubleclick', () => 'foo').then(
+      result => {
+        expect(Object.keys(result).length).to.equal(1);
+        expect(result['foo']).to.be.ok;
+        expect(result['foo'].length).to.equal(1);
+        return result['foo'][0].then(baseElement =>
+          expect(baseElement.element.getAttribute('type')).to.equal(
+            'doubleclick'
+          )
+        );
+      }
+    );
   });
 
   it('should find amp-ad within sticky container', () => {
@@ -1071,9 +1027,9 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       stickyResource.element
     );
     ampAdResource.element.createdCallback = true;
-    sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    env.sandbox
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', () => 'foo').then(result => {
       expect(Object.keys(result).length).to.equal(1);
       expect(result['foo']).to.be.ok;
@@ -1102,9 +1058,9 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       stickyResource.element
     );
     ampAdResource.element.createdCallback = true;
-    sandbox
-      .stub(Services.resourcesForDoc(doc), 'getMeasuredResources')
-      .callsFake((doc, fn) => Promise.resolve(resources.filter(fn)));
+    env.sandbox
+      .stub(IniLoad, 'getMeasuredResources')
+      .callsFake((doc, win, fn) => Promise.resolve(resources.filter(fn)));
     return groupAmpAdsByType(win, 'doubleclick', element =>
       element.getAttribute('foo')
     ).then(result => {
@@ -1113,151 +1069,15 @@ describes.realWin('#groupAmpAdsByType', {amp: true}, env => {
       expect(result['bar'].length).to.equal(2);
       expect(result['hello']).to.be.ok;
       expect(result['hello'].length).to.equal(1);
-      return Promise.all(result['bar'].concat(result['hello'])).then(
-        baseElements =>
-          baseElements.forEach(baseElement =>
-            expect(baseElement.element.getAttribute('type')).to.equal(
-              'doubleclick'
-            )
+      return Promise.all(
+        result['bar'].concat(result['hello'])
+      ).then(baseElements =>
+        baseElements.forEach(baseElement =>
+          expect(baseElement.element.getAttribute('type')).to.equal(
+            'doubleclick'
           )
+        )
       );
-    });
-  });
-});
-
-describes.realWin('#getContainerWidth', {amp: true}, env => {
-  let doc, win;
-  beforeEach(() => {
-    win = env.win;
-    doc = win.document;
-  });
-
-  function createResource(
-    config,
-    layout,
-    tagName = 'amp-ad',
-    parent = doc.body
-  ) {
-    config['layout'] = layout;
-    const element = createElementWithAttributes(doc, tagName, config);
-    parent.appendChild(element);
-    return element;
-  }
-
-  it('should return the fixed width for FIXED layout', () => {
-    const element = createResource({width: 300, height: 250}, 'fixed');
-    expect(getContainerWidth(win, element)).to.equal(300);
-  });
-
-  it('should return 0 for FIXED layout and invalid width', () => {
-    allowConsoleError(() => {
-      const element = createResource({width: 'auto', height: 250}, 'fixed');
-      expect(getContainerWidth(win, element)).to.equal(0);
-    });
-  });
-
-  it('should return 0 for NODISPLAY layout', () => {
-    const element = createResource({width: 500}, 'nodisplay');
-    expect(getContainerWidth(win, element)).to.equal(0);
-  });
-
-  it('should return 0 for FLEX_ITEM layout', () => {
-    const element = createResource({width: 500}, 'flex-item');
-    expect(getContainerWidth(win, element)).to.equal(0);
-  });
-
-  it('should return 0 for invalid layout', () => {
-    allowConsoleError(() => {
-      const element = createResource({width: 500}, 'qwerty');
-      expect(getContainerWidth(win, element)).to.equal(0);
-    });
-  });
-
-  it('should return the max-width, if present, for FILL layout', () => {
-    const element = createResource({maxWidth: 300}, 'fill');
-    expect(getContainerWidth(win, element)).to.equal(300);
-  });
-
-  it("should return parent's fixed width for FILL layout", () => {
-    const parent = document.createElement('div');
-    parent.setAttribute('width', 300);
-    parent.setAttribute('layout', 'fixed');
-    doc.body.appendChild(parent);
-    const element = createResource({} /* config */, 'fill', 'amp-ad', parent);
-    expect(getContainerWidth(win, element)).to.equal(300);
-  });
-
-  it('should return the max-width, if present, for FIXED_HEIGHT layout', () => {
-    const element = createResource({height: 300}, 'fixed-height');
-    element.style.maxWidth = '250px';
-    expect(getContainerWidth(win, element)).to.equal(250);
-  });
-
-  it("should return parent's fixed width for FIXED_HEIGHT layout", () => {
-    const parent = document.createElement('div');
-    parent.setAttribute('width', 300);
-    parent.setAttribute('layout', 'fixed');
-    doc.body.appendChild(parent);
-    const element = createResource(
-      {height: 250},
-      'fixed-height',
-      'amp-ad',
-      parent
-    );
-    expect(getContainerWidth(win, element)).to.equal(300);
-  });
-
-  it('should return the max-width, if present, for FLUID layout', () => {
-    const element = createResource({height: 300}, 'fluid');
-    element.style.maxWidth = '250px';
-    expect(getContainerWidth(win, element)).to.equal(250);
-  });
-
-  it("should return parent's fixed width for FLUID layout", () => {
-    const parent = document.createElement('div');
-    parent.setAttribute('width', 300);
-    parent.setAttribute('layout', 'fixed');
-    doc.body.appendChild(parent);
-    const element = createResource({height: 250}, 'fluid', 'amp-ad', parent);
-    expect(getContainerWidth(win, element)).to.equal(300);
-  });
-
-  it('should return the max-width, if present, for RESPONSIVE layout', () => {
-    const element = createResource({height: 200, width: 200}, 'responsive');
-    element.style.maxWidth = '250px';
-    expect(getContainerWidth(win, element)).to.equal(250);
-  });
-
-  it("should return parent's fixed width for RESPONSIVE layout", () => {
-    const parent = document.createElement('div');
-    parent.setAttribute('width', 300);
-    parent.setAttribute('layout', 'fixed');
-    doc.body.appendChild(parent);
-    const element = createResource(
-      {height: 250, width: 250},
-      'responsive',
-      'amp-ad',
-      parent
-    );
-    expect(getContainerWidth(win, element)).to.equal(300);
-  });
-
-  it('should return the viewport width for CONTAINER layout', () => {
-    const element = createResource({} /* config */, 'container');
-    sandbox
-      .stub(Services.viewportForDoc(element), 'getSize')
-      .returns({width: 300});
-    expect(getContainerWidth(win, element)).to.equal(300);
-  });
-
-  it('should return -1 width for non-fixed layouts, maxDepth = 1', () => {
-    ['fill', 'fixed-height', 'fluid', 'responsive'].forEach(layout => {
-      const parent = document.createElement('div');
-      parent.setAttribute('width', 300);
-      parent.setAttribute('layout', 'fixed');
-      doc.body.appendChild(parent);
-      const element = createResource({height: 250}, layout, 'amp-ad', parent);
-      expect(getContainerWidth(win, element, 1)).to.equal(-1);
     });
   });
 });

@@ -29,7 +29,6 @@ tags: {  # <amp-autocomplete>
   tag_name: "AMP-AUTOCOMPLETE"
   spec_name: "amp-autocomplete"
   requires_extension: "amp-autocomplete"
-  mandatory_ancestor: "FORM"
   attrs: {
     name: "filter"
     value_casei: "custom"
@@ -58,14 +57,15 @@ tags: {  # <amp-autocomplete>
     }
   }
   attrs: { name: "submit-on-enter" }
-  attrs: { 
-    name: "suggest-first" 
+  attrs: {
+    name: "suggest-first"
     trigger: {
       also_requires_attr: "filter"
     }
   }
   attrs: { name: "highlight-user-entry" }
   attrs: { name: "template" }
+  attrs: { name: "items" }
   # amp-bind
   attrs: {
     name: "[src]"

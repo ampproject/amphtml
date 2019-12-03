@@ -16,25 +16,24 @@
 import {Services} from '../../src/services';
 import {fetchDocument} from '../../src/document-fetcher';
 
-describes.realWin('DocumentFetcher', {amp: true}, function() {
+describes.realWin('DocumentFetcher', {amp: true}, function(env) {
   let xhrCreated;
   let ampdocServiceForStub;
   let ampdocViewerStub;
   // Given XHR calls give tests more time.
   this.timeout(5000);
   function setupMockXhr() {
-    const mockXhr = sandbox.useFakeXMLHttpRequest();
+    const mockXhr = env.sandbox.useFakeXMLHttpRequest();
     xhrCreated = new Promise(resolve => (mockXhr.onCreate = resolve));
   }
   beforeEach(() => {
-    ampdocServiceForStub = sandbox.stub(Services, 'ampdocServiceFor');
-    ampdocViewerStub = sandbox.stub(Services, 'viewerForDoc');
-    ampdocViewerStub.returns({
-      whenFirstVisible: () => Promise.resolve(),
-    });
+    ampdocServiceForStub = env.sandbox.stub(Services, 'ampdocServiceFor');
+    ampdocViewerStub = env.sandbox.stub(Services, 'viewerForDoc');
+    ampdocViewerStub.returns({});
     ampdocServiceForStub.returns({
       isSingleDoc: () => false,
-      getAmpDoc: () => ampdocViewerStub,
+      getAmpDoc: () => null,
+      getSingleDoc: () => null,
     });
   });
 
@@ -42,9 +41,6 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
     const win = {location: {href: 'https://acme.com/path'}};
     beforeEach(() => {
       setupMockXhr();
-    });
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('should be able to fetch a document', () => {
@@ -139,9 +135,14 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
       setupMockXhr();
       optedInDoc = window.document.implementation.createHTMLDocument('');
       optedInDoc.documentElement.setAttribute('allow-xhr-interception', '');
+      const ampdoc = {
+        getRootNode: () => optedInDoc,
+        whenFirstVisible: () => Promise.resolve(),
+      };
       ampdocServiceForStub.returns({
         isSingleDoc: () => true,
-        getAmpDoc: () => ({getRootNode: () => optedInDoc}),
+        getAmpDoc: () => ampdoc,
+        getSingleDoc: () => ampdoc,
       });
       viewer = {
         hasCapability: () => true,
@@ -149,7 +150,7 @@ describes.realWin('DocumentFetcher', {amp: true}, function() {
         sendMessageAwaitResponse: getDefaultResponsePromise,
         whenFirstVisible: () => Promise.resolve(),
       };
-      sendMessageStub = sandbox.stub(viewer, 'sendMessageAwaitResponse');
+      sendMessageStub = window.sandbox.stub(viewer, 'sendMessageAwaitResponse');
       sendMessageStub.returns(getDefaultResponsePromise());
       ampdocViewerStub.returns(viewer);
       interceptionEnabledWin = {

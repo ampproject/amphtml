@@ -42,6 +42,7 @@ describes.sandboxed('FixedLayer', {}, () => {
   let timer;
 
   beforeEach(() => {
+    documentApi = {};
     allRules = {};
 
     docBody = createElement('docBody');
@@ -65,7 +66,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       element1,
       element3,
     ]);
-    documentApi = {
+    Object.assign(documentApi, {
       styleSheets: [
         // Will be ignored due to being a link.
         {
@@ -122,7 +123,7 @@ describes.sandboxed('FixedLayer', {}, () => {
                 ]),
               ],
             },
-            // Uknown rule.
+            // Unknown rule.
             {
               type: 3,
             },
@@ -164,10 +165,10 @@ describes.sandboxed('FixedLayer', {}, () => {
       },
       documentElement: docElem,
       body: docBody,
-    };
+    });
     documentApi.defaultView.document = documentApi;
     installDocService(documentApi.defaultView, /* isSingleDoc */ true);
-    ampdoc = Services.ampdocServiceFor(documentApi.defaultView).getAmpDoc();
+    ampdoc = Services.ampdocServiceFor(documentApi.defaultView).getSingleDoc();
     installHiddenObserverForDoc(ampdoc);
     installPlatformService(documentApi.defaultView);
     installTimerService(documentApi.defaultView);
@@ -324,6 +325,16 @@ describes.sandboxed('FixedLayer', {}, () => {
         }
         return Node.DOCUMENT_POSITION_PRECEDING;
       },
+      contains(elem) {
+        let el = elem;
+        while (el) {
+          if (el === this) {
+            return true;
+          }
+          el = el.parentElement;
+        }
+        return false;
+      },
       hasAttribute(name) {
         for (let i = 0; i < this.attributes.length; i++) {
           if (this.attributes[i].name === name) {
@@ -398,6 +409,10 @@ describes.sandboxed('FixedLayer', {}, () => {
         this.firstElementChild = createElement('i-amphtml-fpa');
         toggle(this.firstElementChild, false);
       },
+      getRootNode() {
+        return documentApi;
+      },
+      dispatchEvent() {},
     };
     return elem;
   }
@@ -529,7 +544,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should add and remove element directly', () => {
-        const updateStub = sandbox.stub(fixedLayer, 'update');
+        const updateStub = window.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         // Add.
@@ -875,7 +890,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         expect(state['F0'].top).to.equal('0px');
 
         // Update to transient padding.
-        sandbox.stub(fixedLayer, 'update').callsFake(() => {});
+        window.sandbox.stub(fixedLayer, 'update').callsFake(() => {});
         fixedLayer.updatePaddingTop(22, /* transient */ true);
         vsyncTasks[0].measure(state);
         expect(state['F0'].fixed).to.be.true;
@@ -1145,7 +1160,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         element1.setAttribute('style', 'bottom: 10px');
         element1.style.bottom = '10px';
 
-        const userError = sandbox.stub(user(), 'error');
+        const userError = window.sandbox.stub(user(), 'error');
         fixedLayer.setup();
         // Expect error regarding inline styles.
         expect(userError).calledWithMatch(
@@ -1182,7 +1197,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
           element1.computedStyle['display'] = '';
 
-          sandbox.stub(timer, 'delay').callsFake(callback => {
+          window.sandbox.stub(timer, 'delay').callsFake(callback => {
             callback();
           });
           return mutationObserver
@@ -1199,6 +1214,36 @@ describes.sandboxed('FixedLayer', {}, () => {
               expect(state['F0'].zIndex).to.equal('');
             });
         });
+      });
+
+      it('should ignore descendants of already-tracked elements', () => {
+        const updateStub = window.sandbox.stub(fixedLayer, 'update');
+        expect(fixedLayer.elements_).to.have.length(5);
+
+        element1.appendChild(element6);
+
+        // Add.
+        fixedLayer.addElement(element6);
+        expect(updateStub).not.to.have.been.called;
+        expect(fixedLayer.elements_).to.have.length(5);
+      });
+
+      it('should replace descendants of tracked elements', () => {
+        const updateStub = window.sandbox.stub(fixedLayer, 'update');
+        expect(fixedLayer.elements_).to.have.length(5);
+
+        element6.appendChild(element1);
+
+        // Add.
+        fixedLayer.addElement(element6);
+        expect(updateStub).to.be.calledOnce;
+        expect(fixedLayer.elements_).to.have.length(5);
+
+        const fe = fixedLayer.elements_[4];
+        expect(fe.id).to.equal('F5');
+        expect(fe.element).to.equal(element6);
+        expect(fe.selectors).to.deep.equal(['*']);
+        expect(fe.forceTransfer).to.be.undefined;
       });
     });
 
@@ -1519,7 +1564,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       element1.setAttribute('style', 'bottom: 10px');
       element1.style.bottom = '10px';
 
-      const userError = sandbox.stub(user(), 'error');
+      const userError = window.sandbox.stub(user(), 'error');
       fixedLayer.setup();
       // Expect error regarding inline styles.
       expect(userError).calledWithMatch(
@@ -1556,7 +1601,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
         element1.computedStyle['display'] = '';
 
-        sandbox.stub(timer, 'delay').callsFake(callback => {
+        window.sandbox.stub(timer, 'delay').callsFake(callback => {
           callback();
         });
         return mutationObserver

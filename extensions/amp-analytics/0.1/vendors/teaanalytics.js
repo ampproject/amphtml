@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const TEAANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const TEAANALYTICS_CONFIG = jsonLiteral({
   vars: {
     userUniqueId: '${clientId(__tea_sdk__user_unique_id)}',
     debug: 0,
@@ -45,3 +47,5 @@ export const TEAANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     event: '${base}',
   },
 });
+
+export {TEAANALYTICS_CONFIG};

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const UMENGANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const UMENGANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'siteid': '',
     'initial_view_time': '',
@@ -48,3 +50,5 @@ export const UMENGANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {UMENGANALYTICS_CONFIG};

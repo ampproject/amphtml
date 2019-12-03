@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const ATINTERNET_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const ATINTERNET_CONFIG = jsonLiteral({
   'transport': {'beacon': false, 'xhrpost': false, 'image': true},
   'vars': {
     'pixelPath': 'hit.xiti',
@@ -34,3 +36,5 @@ export const ATINTERNET_CONFIG = /** @type {!JsonObject} */ ({
       'type=click&click=${type}${suffix}',
   },
 });
+
+export {ATINTERNET_CONFIG};

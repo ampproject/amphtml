@@ -148,14 +148,18 @@ export class Transport {
    *
    * @param {!Window} win
    * @param {!Element} element
-   * @param {(!../../../src/preconnect.Preconnect)=} opt_preconnect
+   * @param {(!../../../src/preconnect.PreconnectService)=} opt_preconnect
    */
   maybeInitIframeTransport(win, element, opt_preconnect) {
     if (!this.options_['iframe'] || this.iframeTransport_) {
       return;
     }
     if (opt_preconnect) {
-      opt_preconnect.preload(getIframeTransportScriptUrl(win), 'script');
+      opt_preconnect.preload(
+        Services.ampdoc(element),
+        getIframeTransportScriptUrl(win),
+        'script'
+      );
     }
 
     const type = element.getAttribute('type');
@@ -209,7 +213,7 @@ export class Transport {
         parseUrlDeprecated(this.win_.location.href).origin,
       'Origin of iframe request must not be equal to the document origin.' +
         ' See https://github.com/ampproject/' +
-        ' amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.'
+        'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.'
     );
 
     /** @const {!Element} */

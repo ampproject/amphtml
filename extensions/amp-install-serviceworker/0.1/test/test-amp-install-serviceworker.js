@@ -25,7 +25,6 @@ import {
 } from '../../../../src/url';
 import {loadPromise} from '../../../../src/event-helper';
 import {
-  registerServiceBuilder,
   registerServiceBuilderForDoc,
   resetServiceForTesting,
 } from '../../../../src/service';
@@ -51,20 +50,17 @@ describes.realWin(
   },
   env => {
     let doc;
-    let sandbox;
     let container;
     let ampdoc;
     let maybeInstallUrlRewriteStub;
-    let whenVisible;
 
     beforeEach(() => {
       doc = env.win.document;
-      sandbox = env.sandbox;
-      ampdoc = Services.ampdocServiceFor(env.win).getAmpDoc();
+      ampdoc = Services.ampdocServiceFor(env.win).getSingleDoc();
       container = doc.createElement('div');
       env.win.document.body.appendChild(container);
-      stubUrlService(sandbox);
-      maybeInstallUrlRewriteStub = sandbox.stub(
+      stubUrlService(env.sandbox);
+      maybeInstallUrlRewriteStub = env.sandbox.stub(
         AmpInstallServiceWorker.prototype,
         'maybeInstallUrlRewrite_'
       );
@@ -94,13 +90,9 @@ describes.realWin(
           },
         },
       };
-      whenVisible = Promise.resolve();
-      registerServiceBuilder(implementation.win, 'viewer', function() {
-        return {
-          whenFirstVisible: () => whenVisible,
-          isVisible: () => true,
-        };
-      });
+      const whenVisible = Promise.resolve();
+      env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenVisible);
+      env.sandbox.stub(ampdoc, 'isVisible').returns(true);
       implementation.buildCallback();
       expect(calledSrc).to.be.undefined;
       return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
@@ -137,13 +129,9 @@ describes.realWin(
           },
         },
       };
-      whenVisible = Promise.resolve();
-      registerServiceBuilder(implementation.win, 'viewer', function() {
-        return {
-          whenFirstVisible: () => whenVisible,
-          isVisible: () => true,
-        };
-      });
+      const whenVisible = Promise.resolve();
+      env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenVisible);
+      env.sandbox.stub(ampdoc, 'isVisible').returns(true);
       implementation.buildCallback();
       expect(calledSrc).to.be.undefined;
       return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
@@ -172,10 +160,10 @@ describes.realWin(
           },
         });
       };
-      const postMessageStub = sandbox.stub();
+      const postMessageStub = env.sandbox.stub();
       const fakeRegistration = {
         installing: {
-          addEventListener: sandbox.spy(eventListener),
+          addEventListener: env.sandbox.spy(eventListener),
         },
         active: {
           postMessage: postMessageStub,
@@ -207,20 +195,16 @@ describes.realWin(
           },
         },
       };
-      whenVisible = Promise.resolve();
-      registerServiceBuilder(implementation.win, 'viewer', function() {
-        return {
-          whenFirstVisible: () => whenVisible,
-          isVisible: () => true,
-        };
-      });
+      const whenVisible = Promise.resolve();
+      env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenVisible);
+      env.sandbox.stub(ampdoc, 'isVisible').returns(true);
       implementation.buildCallback();
       return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
         () => {
           return p.then(fakeRegistration => {
             expect(
               fakeRegistration.installing.addEventListener
-            ).to.be.calledWith('statechange', sinon.match.func);
+            ).to.be.calledWith('statechange', env.sandbox.match.func);
             expect(postMessageStub).to.be.calledWith(
               JSON.stringify({
                 type: 'AMP__FIRST-VISIT-CACHING',
@@ -242,7 +226,7 @@ describes.realWin(
         install.getAmpDoc = () => ampdoc;
         install.setAttribute('src', 'https://example.com/sw.js');
         const implementation = new AmpInstallServiceWorker(install);
-        const postMessageStub = sandbox.stub();
+        const postMessageStub = env.sandbox.stub();
         const fakeRegistration = {
           active: {
             postMessage: postMessageStub,
@@ -279,13 +263,9 @@ describes.realWin(
             },
           },
         };
-        whenVisible = Promise.resolve();
-        registerServiceBuilder(implementation.win, 'viewer', function() {
-          return {
-            whenFirstVisible: () => whenVisible,
-            isVisible: () => true,
-          };
-        });
+        const whenVisible = Promise.resolve();
+        env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenVisible);
+        env.sandbox.stub(ampdoc, 'isVisible').returns(true);
         implementation.buildCallback();
         return Promise.all([whenVisible, loadPromise(implementation.win)]).then(
           () => {
@@ -418,12 +398,8 @@ describes.realWin(
           };
         });
         whenVisible = Promise.resolve();
-        registerServiceBuilder(win, 'viewer', function() {
-          return {
-            whenFirstVisible: () => whenVisible,
-            isVisible: () => true,
-          };
-        });
+        env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(whenVisible);
+        env.sandbox.stub(ampdoc, 'isVisible').returns(true);
       });
 
       function testIframe(callCount = 1) {
@@ -438,7 +414,7 @@ describes.realWin(
           iframe.src = 'about:blank';
           appendChild.call(install, iframe);
         };
-        const mutateElement = sandbox.stub(implementation, 'mutateElement');
+        const mutateElement = env.sandbox.stub(implementation, 'mutateElement');
         mutateElement.callsFake(fn => {
           expect(iframe).to.be.undefined;
           const returnedValue = fn();
@@ -521,8 +497,8 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       ampdoc = env.ampdoc;
-      viewer = win.services.viewer.obj;
-      stubUrlService(sandbox);
+      viewer = win.__AMP_SERVICES.viewer.obj;
+      stubUrlService(env.sandbox);
       element = win.document.createElement('amp-install-serviceworker');
       element.setAttribute('src', 'https://example.com/sw.js');
       // This is a RegExp string.
@@ -540,7 +516,7 @@ describes.fakeWin(
 
     describe('install conditions', () => {
       beforeEach(() => {
-        sandbox.stub(implementation, 'preloadShell_');
+        window.sandbox.stub(implementation, 'preloadShell_');
       });
 
       it('should install rewriter', () => {
@@ -631,15 +607,15 @@ describes.fakeWin(
       let preloadStub;
 
       beforeEach(() => {
-        mutateElementStub = sandbox
+        mutateElementStub = window.sandbox
           .stub(implementation, 'mutateElement')
           .callsFake(callback => callback());
-        preloadStub = sandbox.stub(implementation, 'preloadShell_');
+        preloadStub = env.sandbox.stub(implementation, 'preloadShell_');
         viewer.setVisibilityState_('visible');
       });
 
       it('should start preload wait', () => {
-        const stub = sandbox.stub(implementation, 'waitToPreloadShell_');
+        const stub = env.sandbox.stub(implementation, 'waitToPreloadShell_');
         implementation.maybeInstallUrlRewrite_();
         expect(stub).to.be.calledOnce;
       });
@@ -650,7 +626,7 @@ describes.fakeWin(
           'data-no-service-worker-fallback-shell-url',
           'http://example.com/shell'
         );
-        const stub = sandbox.stub(implementation, 'waitToPreloadShell_');
+        const stub = env.sandbox.stub(implementation, 'waitToPreloadShell_');
         implementation.maybeInstallUrlRewrite_();
         expect(stub).to.not.be.called;
       });
@@ -660,7 +636,7 @@ describes.fakeWin(
         expect(preloadStub).to.not.be.called;
         return loadPromise(win)
           .then(() => {
-            return viewer.whenFirstVisible();
+            return ampdoc.whenFirstVisible();
           })
           .then(() => {
             expect(preloadStub).to.be.calledOnce;
@@ -704,7 +680,7 @@ describes.fakeWin(
       let origHref;
 
       beforeEach(() => {
-        sandbox.stub(implementation, 'preloadShell_');
+        window.sandbox.stub(implementation, 'preloadShell_');
         implementation.maybeInstallUrlRewrite_();
         rewriter = implementation.urlRewriter_;
         anchor = win.document.createElement('a');
