@@ -17,7 +17,6 @@
 import {install} from '../../src/polyfills/document-contains';
 
 describe('HTMLDocument.contains', () => {
-  let sandbox;
   let fakeWinWithContains;
   let fakeWinWithoutContains;
   let nativeContains;
@@ -28,8 +27,6 @@ describe('HTMLDocument.contains', () => {
   let disconnectedChild;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     fakeWinWithContains = {
       HTMLDocument: class {
         contains() {}
@@ -59,7 +56,6 @@ describe('HTMLDocument.contains', () => {
     if (connectedElement.parentNode) {
       connectedElement.parentNode.removeChild(connectedElement);
     }
-    sandbox.restore();
   });
 
   it('should NOT override an existing method', () => {

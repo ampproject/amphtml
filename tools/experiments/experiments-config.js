@@ -68,6 +68,13 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
   },
   {
+    id: 'amp-consent-geo-override',
+    name: 'AMP consent modified to support CCPA',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/lannka-consent-design/extensions/amp-consent/amp-consent.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25623',
+  },
+  {
     id: 'amp-nested-menu',
     name: 'AMP extension for a nested drilldown menu',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25343',
@@ -247,14 +254,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
-    id: 'inabox-viewport-friendly',
-    name:
-      'Inabox viewport measures the host window directly if ' +
-      'within friendly iframe',
-    spec: 'https://github.com/ampproject/amphtml/issues/19869',
-    cleanupIssue: 'TODO',
-  },
-  {
     id: 'fie-css-cleanup',
     name:
       'Experiment to prevent regression after a major CSS clean up' +
@@ -277,13 +276,6 @@ export const EXPERIMENTS = [
       'For development use only',
     spec: 'N/A',
     cleanupIssue: 'N/A',
-  },
-  {
-    id: 'macro-after-long-task',
-    name:
-      'If applicable, convert remaining micro tasks to the next macro ' +
-      ' tasks if a previous micro task execution took too long',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
   },
   {
     id: 'pausable-iframe',

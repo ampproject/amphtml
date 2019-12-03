@@ -85,6 +85,7 @@ exports.rules = [
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
+      'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
@@ -254,6 +255,7 @@ exports.rules = [
 
       // Amp geo in group enum
       'extensions/amp-consent/0.1/amp-consent.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
+      'extensions/amp-consent/0.1/consent-config.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
 
       // AMP Story
