@@ -17,19 +17,12 @@
     .brand-logo {
       font-family: 'Open Sans';
     }
-    .ad-container {
-      display: flex;
-      justify-content: center;
-    }
     .content-container p {
       line-height: 24px;
     }
     header,
     .article-body {
       padding: 15px;
-    }
-    .full-bleed {
-      margin: 0 -15px;
     }
     figure {
       margin: 0;
@@ -195,7 +188,7 @@
       "consentInstanceId": "geotest",
       "promptUI": "ui1",
       "consentRequired": false,
-
+      "postPromptUI": "postPromptUI",
       "geoOverride": {
         "na": {
           "checkConsentHref": "/check-consent?consentRequired=false",
@@ -206,12 +199,20 @@
           "consentRequired": true
         },
         "row": {
-          "consentRequired": false
+          "promptUI": "ui2",
+          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true",
+          "consentRequired": true
         }
       }
     }</script>
     <div id="ui1">
-      Can I load the image??
+      CA: Can I load the image??
+      <button on="tap:ABC.accept" role="button">Accept</button>
+      <button on="tap:ABC.reject" role="button">Reject</button>
+      <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+    </div>
+    <div id="ui2">
+      EU: Can I load the image??
       <button on="tap:ABC.accept" role="button">Accept</button>
       <button on="tap:ABC.reject" role="button">Reject</button>
       <button on="tap:ABC.dismiss" role="button">Dismiss</button>
@@ -222,8 +223,6 @@
     </div>
   </amp-consent>
   <article>
-
-
     <div class="content-container">
       <header>
         <h1 itemprop="headline">Lorem Ipsum</h1>
