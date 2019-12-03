@@ -30,10 +30,10 @@ describes.realWin('media-pool', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    sandbox
+    env.sandbox
       .stub(Services, 'vsyncFor')
       .callsFake(() => ({mutate: task => task()}));
-    sandbox.stub(Services, 'timerFor').callsFake(() => ({delay: NOOP}));
+    env.sandbox.stub(Services, 'timerFor').callsFake(() => ({delay: NOOP}));
 
     mediaPool = new MediaPool(win, COUNTS, element => {
       return distanceFnStub(element);

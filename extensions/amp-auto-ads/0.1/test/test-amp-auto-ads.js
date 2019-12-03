@@ -50,7 +50,7 @@ describes.repeated(
   'responsive sizing experiment',
   {
     'control': {branch: RESPONSIVE_SIZING_EXP.control},
-    'experiment': {branch: RESPONSIVE_SIZING_EXP.experiment},
+    'holdback': {branch: RESPONSIVE_SIZING_EXP.holdback},
   },
   (name, variant) => {
     describes.realWin(
@@ -66,7 +66,6 @@ describes.repeated(
 
         let win;
         let doc;
-        let sandbox;
         let container;
         let anchor1;
         let anchor2;
@@ -79,7 +78,6 @@ describes.repeated(
         beforeEach(() => {
           win = env.win;
           doc = win.document;
-          sandbox = env.sandbox;
           const a4aRegistry = getA4ARegistry();
           a4aRegistry['_ping_'] = () => true;
 
@@ -101,11 +99,11 @@ describes.repeated(
           }
 
           const extensions = Services.extensionsFor(win);
-          sandbox
+          env.sandbox
             .stub(extensions, 'loadElementClass')
             .returns(Promise.resolve(el => new FakeA4A(el)));
 
-          const viewportMock = sandbox.mock(Services.viewportForDoc(doc));
+          const viewportMock = env.sandbox.mock(Services.viewportForDoc(doc));
           viewportMock
             .expects('getSize')
             .returns({width: 320, height: 500})
@@ -184,9 +182,9 @@ describes.repeated(
               },
             });
           };
-          sandbox.spy(xhr, 'fetchJson');
+          env.sandbox.spy(xhr, 'fetchJson');
 
-          whenVisible = sandbox.stub(env.ampdoc, 'whenFirstVisible');
+          whenVisible = env.sandbox.stub(env.ampdoc, 'whenFirstVisible');
           whenVisible.returns(Promise.resolve());
         });
 
@@ -444,16 +442,35 @@ describes.repeated(
             });
           });
 
-          it('should insert anchor anchor ad with provided anchor ad attributes.', () => {
-            configObj = {
-              optInStatus: [2],
-            };
+          it('should insert three ads with base attribute and anchor anchor ad with provided anchor ad attributes.', () => {
+            configObj['optInStatus'].push(OPT_IN_STATUS_ANCHOR_ADS);
             configObj.stickyAdAttributes = {
               'data-no-fill': 'true',
             };
 
             return getAmpAutoAds().then(() => {
-              return new Promise(resolve => {
+              const bannerAdsPromise = new Promise(resolve => {
+                waitForChild(
+                  anchor4,
+                  parent => {
+                    return parent.childNodes.length > 0;
+                  },
+                  () => {
+                    expect(anchor1.childNodes).to.have.lengthOf(1);
+                    expect(anchor2.childNodes).to.have.lengthOf(1);
+                    expect(anchor3.childNodes).to.have.lengthOf(0);
+                    expect(anchor4.childNodes).to.have.lengthOf(1);
+                    verifyAdElement(anchor1.childNodes[0]);
+                    verifyAdElement(anchor2.childNodes[0]);
+                    verifyAdElement(anchor4.childNodes[0]);
+                    expect(anchor4.childNodes[0].hasAttribute('data-no-fill'))
+                      .to.be.false;
+                    resolve();
+                  }
+                );
+              });
+
+              const anchorAdPromise = new Promise(resolve => {
                 waitForChild(
                   env.win.document.body,
                   parent => {
@@ -467,6 +484,7 @@ describes.repeated(
                   }
                 );
               });
+              return Promise.all([bannerAdsPromise, anchorAdPromise]);
             });
           });
         });

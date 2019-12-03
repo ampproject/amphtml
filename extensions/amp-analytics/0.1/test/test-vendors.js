@@ -141,7 +141,7 @@ describes.realWin(
                 const analytics = getAnalyticsTag(
                   clearVendorOnlyConfig(config)
                 );
-                sandbox
+                window.sandbox
                   .stub(urlReplacements.getVariableSource(), 'get')
                   .callsFake(function(name) {
                     expect(this.replacements_).to.have.property(name);
@@ -151,7 +151,7 @@ describes.realWin(
                     };
                   });
 
-                sandbox
+                window.sandbox
                   .stub(ExpansionOptions.prototype, 'getVar')
                   .callsFake(function(name) {
                     let val = this.vars[name];

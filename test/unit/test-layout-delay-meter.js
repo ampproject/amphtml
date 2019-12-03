@@ -28,22 +28,20 @@ describes.realWin(
   },
   env => {
     let win;
-    let sandbox;
     let meter;
     let tickSpy;
     let clock;
 
     beforeEach(() => {
-      sandbox = env.sandbox;
       win = env.win;
       installPerformanceService(win);
       const perf = Services.performanceFor(win);
-      sandbox.stub(perf, 'isPerformanceTrackingOn').callsFake(() => true);
+      env.sandbox.stub(perf, 'isPerformanceTrackingOn').callsFake(() => true);
       clock = lolex.install({
         target: win,
         toFake: ['Date', 'setTimeout', 'clearTimeout'],
       });
-      tickSpy = sandbox.spy(perf, 'tickDelta');
+      tickSpy = env.sandbox.spy(perf, 'tickDelta');
 
       meter = new LayoutDelayMeter(win, 2);
     });

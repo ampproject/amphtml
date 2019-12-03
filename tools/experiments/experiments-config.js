@@ -68,6 +68,18 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
   },
   {
+    id: 'amp-consent-geo-override',
+    name: 'AMP consent modified to support CCPA',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/lannka-consent-design/extensions/amp-consent/amp-consent.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25623',
+  },
+  {
+    id: 'amp-nested-menu',
+    name: 'AMP extension for a nested drilldown menu',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25343',
+  },
+  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
@@ -124,12 +136,6 @@ export const EXPERIMENTS = [
     name: 'Remove fixed transfer from iOS 12.2 and up',
     spec: 'https://github.com/ampproject/amphtml/issues/22220',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
-  },
-  {
-    id: 'ios-scrollable-iframe',
-    name: 'iOS 13 enables iframe scrolling per spec',
-    spec: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23379',
   },
   {
     id: 'chunked-amp',
@@ -242,23 +248,10 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/17161',
   },
   {
-    id: 'amp-list-load-more',
-    name: 'Enables load-more related functionality in amp-list',
-    spec: 'https://github.com/ampproject/amphtml/issues/13575',
-  },
-  {
     id: 'hidden-mutation-observer',
     name: "Enables FixedLayer's hidden-attribute mutation observer",
     spec: 'https://github.com/ampproject/amphtml/issues/17475',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
-  },
-  {
-    id: 'inabox-viewport-friendly',
-    name:
-      'Inabox viewport measures the host window directly if ' +
-      'within friendly iframe',
-    spec: 'https://github.com/ampproject/amphtml/issues/19869',
-    cleanupIssue: 'TODO',
   },
   {
     id: 'fie-css-cleanup',
@@ -283,13 +276,6 @@ export const EXPERIMENTS = [
       'For development use only',
     spec: 'N/A',
     cleanupIssue: 'N/A',
-  },
-  {
-    id: 'macro-after-long-task',
-    name:
-      'If applicable, convert remaining micro tasks to the next macro ' +
-      ' tasks if a previous micro task execution took too long',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
   },
   {
     id: 'pausable-iframe',

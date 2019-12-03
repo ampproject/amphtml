@@ -35,18 +35,19 @@ Documents served via a cache URL, e.g. cdn.ampproject.org/v/, will include the V
 `cap`<br/>
 A comma delimited list of capabilities supported by the Viewer. Other boolean parameters should be deprecated and replaced with an entry in cap.
 
-| Parameter              | Supported messages                    | Description                                                             |
-| ---------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
-| `a2a`                  | `a2aNavigate`                         | AMP-to-AMP (A2A) document linking support.                              |
-| `cid`                  | `cid`                                 | Client ID service.                                                      |
-| `errorReporter`        | `error`                               | Error reporter.                                                         |
-| `fragment`             | `fragment`                            | URL fragment support for the history API.                               |
-| `handshakepoll`        | `handshake-poll`                      | Mobile web handshake.                                                   |
-| `navigateTo`           | `navigateTo`                          | Support for navigating to external URLs.                                |
-| `replaceUrl`           | `getReplaceUrl`                       | Support for replacing the document URL with one provided by the Viewer. |
-| `swipe`                | `touchstart`, `touchmove`, `touchend` | Forwards touch events from the document to the Viewer.                  |
-| `viewerRenderTemplate` | `viewerRenderTemplate`                | Proxies all mustache template rendering to the Viewer.                  |
-| `xhrInterceptor`       | `xhr`                                 | Proxies all XHRs through the Viewer.                                    |
+| Parameter              | Supported messages                    | Description                                                                     |
+| ---------------------- | ------------------------------------- | ------------------------------------------------------------------------------- |
+| `a2a`                  | `a2aNavigate`                         | AMP-to-AMP (A2A) document linking support.                                      |
+| `cid`                  | `cid`                                 | Client ID service.                                                              |
+| `errorReporter`        | `error`                               | Error reporter.                                                                 |
+| `fragment`             | `fragment`                            | URL fragment support for the history API.                                       |
+| `handshakepoll`        | `handshake-poll`                      | Mobile web handshake.                                                           |
+| `iframeScroll`         |                                       | Viewer platform supports and configures scrolling on the AMP document's iframe. |
+| `navigateTo`           | `navigateTo`                          | Support for navigating to external URLs.                                        |
+| `replaceUrl`           | `getReplaceUrl`                       | Support for replacing the document URL with one provided by the Viewer.         |
+| `swipe`                | `touchstart`, `touchmove`, `touchend` | Forwards touch events from the document to the Viewer.                          |
+| `viewerRenderTemplate` | `viewerRenderTemplate`                | Proxies all mustache template rendering to the Viewer.                          |
+| `xhrInterceptor`       | `xhr`                                 | Proxies all XHRs through the Viewer.                                            |
 
 `origin`<br/>
 The origin of the Viewer. The Viewer Integration will verify this is an allowed domain and this will be the target of all messages sent from the AMP document to the Viewer.
@@ -69,7 +70,6 @@ The origin of the Viewer. The Viewer Integration will verify this is an allowed 
 | `viewerUrl`       | `string`                                                                        | The url of the Viewer. This is the shareable Viewer URL and may be used as a fallback as part of AMP Access.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `webview`         | `boolean`                                                                       | Whether the document is being loaded in a WebView instead of an iframe. This will enable "embedded" mode for the document, which is needed for dialog to work.                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `highlight`       | `string`                                                                        | The information to highlight text. JSON-encoded string.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `viewportType`    | natural, natural-ios-embed                                                      | The viewport type. Natural means that the AMP document can read the window dimensions and they will be correct. natural-ios-embed Viewport mode is for use when the AMP document is displayed in an iframe on Mobile Safari. It works around quirks of Mobile Safari's iframe implementation by making the body scrollable rather than the document.                                                                                                                                                                                                              |
 | `visibilityState` | `inactive`,`paused`,`visible`,`prerender`,`hidden` (deprecated, use `inactive`) | The initial visibility state of the AMP document.<ul><li>prerender- AMP document is being pre-rendered before being shown. It may be prerendered according to prerenderSize</li><li>inactive or hidden -The document is not visible to the user.</li><li>paused - this document should stop loading new resources and pause any resources such as video. The document may still be visible to the user, but the Viewer may be performing a performance sensitive operation such as a swipe.</li><li>visible- The document is active and visible to the user.</li> |
 
 ### Messaging

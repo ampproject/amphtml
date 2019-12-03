@@ -53,7 +53,7 @@ describes.fakeWin(
         win.navigator.userAgent = userAgent;
       }
       if (referrer !== undefined) {
-        sandbox
+        env.sandbox
           .stub(viewer, 'getUnconfirmedReferrerUrl')
           .callsFake(() => referrer);
       }
