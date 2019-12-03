@@ -138,7 +138,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       const entitlement = new Entitlement({
         source: '',
         raw: '',
-        granted: true
+        granted: true,
       });
       const verifyAuthTokenStub = env.sandbox
         .stub(viewerPlatform, 'verifyAuthToken_')

@@ -565,7 +565,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     elem.textContent = 'some html';
     expect(() => {
       allowConsoleError(() => {
-        platform.decorateUI(elem, 'subscribe-smartbutton');encryptedDocumentKey
+        platform.decorateUI(elem, 'subscribe-smartbutton');
       });
     }).to.throw(/language/);
   });
