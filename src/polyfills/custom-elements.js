@@ -678,8 +678,7 @@ function installPatches(win, registry) {
   if (!innerHTMLDesc) {
     // Sigh... IE11 puts innerHTML desciptor on HTMLElement. But, we've
     // replaced HTMLElement with a polyfill wrapper, so have to get its proto.
-    innerHTMLProto =
-      /** @type {!Object} */ (win.HTMLElement.prototype.__proto__);
+    innerHTMLProto = Object.getPrototypeOf(win.HTMLElement.prototype);
     innerHTMLDesc = Object.getOwnPropertyDescriptor(
       innerHTMLProto,
       'innerHTML'
@@ -690,7 +689,11 @@ function installPatches(win, registry) {
     innerHTMLSetter.call(this, html);
     registry.upgrade(this);
   };
-  Object.defineProperty(innerHTMLProto, 'innerHTML', innerHTMLDesc);
+  Object.defineProperty(
+    /** @type {!Object} */ (innerHTMLProto),
+    'innerHTML',
+    innerHTMLDesc
+  );
 }
 
 /**
@@ -786,7 +789,7 @@ function polyfill(win) {
     // prototype to the custom element prototype. And if it wasn't already
     // constructed, we created a new node via native createElement, and we need
     // to reset its prototype. Basically always reset the prototype.
-    el.__proto__ = constructor.prototype;
+    setPrototypeOf(Object, el, constructor.prototype);
     return el;
   }
   subClass(Object, HTMLElement, HTMLElementPolyfill);
@@ -852,7 +855,68 @@ function subClass(Object, superClass, subClass) {
       value: subClass,
     },
   });
-  subClass.__proto__ = superClass;
+  setPrototypeOf(Object, subClass, superClass);
+}
+
+/**
+ * Tests whether setting '__proto__' will change the prototype chain of an
+ * object. Only needed for old IE.
+ * @return {boolean}
+ */
+function supportsUnderProto() {
+  const proto = {'test': true};
+  const obj = {};
+  obj.__proto__ = proto;
+  return !!obj['test'];
+}
+
+/**
+ * Sets the prototype chain of an object, with various fallbacks to support
+ * old IE.
+ * @param {!Object} Object
+ * @param {!Object} obj
+ * @param {!Object} prototype
+ */
+function setPrototypeOf(Object, obj, prototype) {
+  if (Object.setPrototypeOf) {
+    // Every decent browser.
+    Object.setPrototypeOf(obj, prototype);
+  } else if (supportsUnderProto()) {
+    // IE11
+    obj.__proto__ = prototype;
+  } else {
+    // IE10 man. :sigh:
+    copyProperties(Object, obj, prototype);
+  }
+}
+
+/**
+ * Copies the property descriptors from prototype to obj. This is only
+ * necessary for old IE, which can't properly set the prototype of an already
+ * created object.
+ * @param {!Object} Object
+ * @param {!Object} obj
+ * @param {!Object} prototype
+ */
+function copyProperties(Object, obj, prototype) {
+  while (prototype) {
+    if (Object.isPrototypeOf.call(prototype, obj)) {
+      break;
+    }
+
+    const props = Object.getOwnPropertyNames(prototype);
+    for (let i = 0; i < props.length; i++) {
+      const prop = props[i];
+      if (Object.hasOwnProperty.call(obj, prop)) {
+        continue;
+      }
+
+      const desc = Object.getOwnPropertyDescriptor(prototype);
+      Object.defineProperty(obj, prop, desc);
+    }
+
+    prototype = Object.getPrototypeOf(prototype);
+  }
 }
 
 /**
