@@ -54,7 +54,7 @@ describes.fakeWin('validator-integration', {}, env => {
 
     it('should propagate pre-existing nonces', () => {
       const scriptEl = win.document.createElement('script');
-      scriptEl.nonce = '123';
+      scriptEl.setAttribute('nonce', '123');
       win.document.head.append(scriptEl);
       loadScriptStub.returns(Promise.resolve());
 
