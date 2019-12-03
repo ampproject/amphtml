@@ -780,10 +780,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.SIDEBAR_STATE, sidebarState => {
       this.onSidebarStateUpdate_(sidebarState);
-      this.analyticsService_.triggerEvent(
-        sidebarState ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
-        this.sidebar_
-      );
     });
 
     this.storeService_.subscribe(
@@ -1964,6 +1960,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onSidebarStateUpdate_(sidebarState) {
+    this.analyticsService_.triggerEvent(
+      sidebarState ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.sidebar_
+    );
+
     const actions = Services.actionServiceForDoc(this.element);
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
