@@ -51,12 +51,16 @@ describes.fakeWin('validator-integration', {}, env => {
       maybeValidate(win);
       expect(loadScriptStub).to.have.been.called;
     });
+  });
 
+  describe('loadScript', () => {
     it('should propagate pre-existing nonces', () => {
-      const scriptEl = win.document.createElement('script');
+      const scriptEl = env.win.document.createElement('script');
       scriptEl.setAttribute('nonce', '123');
       win.document.head.append(scriptEl);
-      loadScriptStub.returns(Promise.resolve());
+      loadScriptStub = env.sandbox
+        .stub(eventHelper, 'loadPromise')
+        .returns(Promise.resolve());
 
       loadScript(win.document, 'http://example.com');
 

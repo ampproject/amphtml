@@ -65,7 +65,7 @@ export function loadScript(doc, url) {
   // Propagate nonce to all generated script tags.
   const currentScript = doc.querySelector('script[nonce]');
   if (currentScript) {
-    script.nonce = currentScript.nonce;
+    script.setAttribute('nonce', currentScript.getAttribute('nonce'));
   }
 
   const promise = loadPromise(script).then(
