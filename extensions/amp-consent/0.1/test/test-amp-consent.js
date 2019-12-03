@@ -370,11 +370,11 @@ describes.realWin(
         beforeEach(() => {
           jsonMockResponses = {
             'https://server-test-1/':
-              '{"consentRequired": false, "consentStateValue": 2, "consentString": "hello"}',
+              '{"consentRequired": false, "consentStateValue": "unknown", "consentString": "hello"}',
             'https://server-test-2/':
-              '{"consentRequired": true, "consentStateValue": 0, "consentString": "mystring"}',
+              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring"}',
             'https://server-test-3/':
-              '{"consentRequired": true, "consentStateValue": 2}',
+              '{"consentRequired": true, "consentStateValue": "unknown"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
           };
         });
@@ -484,7 +484,7 @@ describes.realWin(
         beforeEach(() => {
           jsonMockResponses = {
             'https://server-test-4/':
-              '{"consentRequired": true, "consentStateValue": 1, "consentString": "newstring"}',
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
           };
         });
@@ -558,7 +558,7 @@ describes.realWin(
             'https://expire-cache/':
               '{"expireCache": true,"consentRequired": true, "consentStateValue": null, "consentString": null}',
             'https://expire-cache-2/':
-              '{"expireCache": true,"consentRequired": true, "consentStateValue": 1, "consentString": "myconsentstring"}',
+              '{"expireCache": true,"consentRequired": true, "consentStateValue": "accepted", "consentString": "myconsentstring"}',
             'https://expire-cache-3/':
               '{"expireCache": true,"consentRequired": false, "consentStateValue": null, "consentString": null}',
           };
