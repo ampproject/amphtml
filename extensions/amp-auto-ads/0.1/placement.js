@@ -21,14 +21,12 @@ import {
 } from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
 import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
-import {clamp} from '../../../src/utils/math';
 import {
   closestAncestorElementBySelector,
   createElementWithAttributes,
   scopedQuerySelectorAll,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
-import {computedStyle} from '../../../src/style';
 import {dev, user} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementLayoutBox} from './utils';
@@ -45,9 +43,6 @@ export const NO_OP_EXP = {
   experiment: '44710303',
 };
 
-/** @const */
-export const RESPONSIVE_SIZING_HOLDBACK_BRANCH = '368226533';
-
 /**
  * @typedef {{
  *   width: (number|undefined),
@@ -62,11 +57,6 @@ let PlacementSizingDef;
  * @const
  */
 const TARGET_AD_HEIGHT_PX = 250;
-
-/**
- * @const
- */
-const MAXIMUM_RESPONSIVE_WIDTH = 1200;
 
 /**
  * @enum {number}
@@ -123,7 +113,6 @@ export class Placement {
    * @param {!Position} position
    * @param {function(!Element, !Element)} injector
    * @param {!JsonObject<string, string>} attributes
-   * @param {?string} responsiveSizingBranch
    * @param {!../../../src/layout-rect.LayoutMarginsChangeDef=} opt_margins
    */
   constructor(
@@ -132,7 +121,6 @@ export class Placement {
     position,
     injector,
     attributes,
-    responsiveSizingBranch,
     opt_margins
   ) {
     /** @const {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -140,9 +128,6 @@ export class Placement {
 
     /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(anchorElement);
-
-    /** @const @private {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
-    this.viewport_ = Services.viewportForDoc(anchorElement);
 
     /** @const @private {!Element} */
     this.anchorElement_ = anchorElement;
@@ -161,9 +146,6 @@ export class Placement {
      * @private {!../../../src/layout-rect.LayoutMarginsChangeDef|undefined}
      */
     this.margins_ = opt_margins;
-
-    /** @const @private {?string} */
-    this.responsiveSizingBranch_ = responsiveSizingBranch;
 
     /** @private {?Element} */
     this.adElement_ = null;
@@ -227,18 +209,9 @@ export class Placement {
           this.state_ = PlacementState.TOO_NEAR_EXISTING_AD;
           return this.state_;
         }
-        const useResponsiveAdElement =
-          isResponsiveEnabled &&
-          this.responsiveSizingBranch_ != RESPONSIVE_SIZING_HOLDBACK_BRANCH;
-        this.adElement_ = useResponsiveAdElement
+        this.adElement_ = isResponsiveEnabled
           ? this.createResponsiveAdElement_(baseAttributes)
           : this.createAdElement_(baseAttributes, sizing.width);
-        if (this.responsiveSizingBranch_) {
-          addExperimentIdToElement(
-            this.responsiveSizingBranch_,
-            this.adElement_
-          );
-        }
         const noOpExpBranch = getExperimentBranch(
           this.ampdoc.win,
           NO_OP_EXP.branch
@@ -248,7 +221,7 @@ export class Placement {
         }
         this.injector_(this.anchorElement_, this.getAdElement());
 
-        if (useResponsiveAdElement) {
+        if (isResponsiveEnabled) {
           return (
             whenUpgradedToCustomElement(this.getAdElement())
               // Responsive ads set their own size when built.
@@ -265,85 +238,49 @@ export class Placement {
           );
         }
 
-        return this.getPlacementSizing_(sizing, isResponsiveEnabled).then(
-          placement => {
-            // CustomElement polyfill does not call connectedCallback
-            // synchronously. So we explicitly wait for CustomElement to be
-            // ready.
-            return whenUpgradedToCustomElement(this.getAdElement())
-              .then(() => this.getAdElement().whenBuilt())
-              .then(() => {
-                return this.resources_.attemptChangeSize(
-                  this.getAdElement(),
-                  placement.height,
-                  placement.width,
-                  placement.margins
-                );
-              })
-              .then(
-                () => {
-                  this.state_ = PlacementState.PLACED;
-                  return this.state_;
-                },
-                () => {
-                  this.state_ = PlacementState.RESIZE_FAILED;
-                  return this.state_;
-                }
+        return this.getPlacementSizing_(sizing).then(placement => {
+          // CustomElement polyfill does not call connectedCallback
+          // synchronously. So we explicitly wait for CustomElement to be
+          // ready.
+          return whenUpgradedToCustomElement(this.getAdElement())
+            .then(() => this.getAdElement().whenBuilt())
+            .then(() => {
+              return this.resources_.attemptChangeSize(
+                this.getAdElement(),
+                placement.height,
+                placement.width,
+                placement.margins
               );
-          }
-        );
+            })
+            .then(
+              () => {
+                this.state_ = PlacementState.PLACED;
+                return this.state_;
+              },
+              () => {
+                this.state_ = PlacementState.RESIZE_FAILED;
+                return this.state_;
+              }
+            );
+        });
       });
     });
   }
 
   /**
    * Gets instructions for the placement in terms of height, width and margins.
-   * If responsive is on, ad should be placed at full viewport width and a
-   * proportionate height, and the margins are adjusted so that the ad edges
-   * stick to both ends of the viewport.
+   * This is intended to be used for non-responsive auto ads only.
    * @param {!./ad-network-config.SizeInfoDef} sizing
-   * @param {boolean} isResponsiveEnabled
    * @return {!Promise<!PlacementSizingDef>}
    * @private
    */
-  getPlacementSizing_(sizing, isResponsiveEnabled) {
-    const viewportWidth = this.viewport_.getWidth();
-    if (isResponsiveEnabled && viewportWidth <= MAXIMUM_RESPONSIVE_WIDTH) {
-      const viewportHeight = this.viewport_.getHeight();
-      const responsiveHeight = getResponsiveHeightForContext_(
-        viewportWidth,
-        viewportHeight
-      );
-      let margins = cloneLayoutMarginsChangeDef(this.margins_);
-      return getElementLayoutBox(this.anchorElement_)
-        .then(layoutBox => {
-          const direction = computedStyle(this.ampdoc.win, this.anchorElement_)[
-            'direction'
-          ];
-          if (layoutBox.left !== 0) {
-            margins = margins || {};
-            if (direction == 'rtl') {
-              margins.right = layoutBox.left;
-            } else {
-              margins.left = -layoutBox.left;
-            }
-          }
-        })
-        .then(() => {
-          return Promise.resolve({
-            width: viewportWidth,
-            height: responsiveHeight,
-            margins,
-          });
-        });
-    } else {
-      return Promise.resolve(
-        /** @type {!PlacementSizingDef} */ ({
-          height: sizing.height || TARGET_AD_HEIGHT_PX,
-          margins: this.margins_,
-        })
-      );
-    }
+  getPlacementSizing_(sizing) {
+    return Promise.resolve(
+      /** @type {!PlacementSizingDef} */ ({
+        height: sizing.height || TARGET_AD_HEIGHT_PX,
+        margins: this.margins_,
+      })
+    );
   }
 
   /**
@@ -399,14 +336,9 @@ export class Placement {
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} configObj
- * @param {?string} responsiveSizingBranch id of selected branch in responsive sizing experiment, if any.
  * @return {!Array<!Placement>}
  */
-export function getPlacementsFromConfigObj(
-  ampdoc,
-  configObj,
-  responsiveSizingBranch
-) {
+export function getPlacementsFromConfigObj(ampdoc, configObj) {
   const placementObjs = configObj['placements'];
   if (!placementObjs) {
     user().info(TAG, 'No placements in config');
@@ -414,12 +346,7 @@ export function getPlacementsFromConfigObj(
   }
   const placements = [];
   placementObjs.forEach(placementObj => {
-    getPlacementsFromObject(
-      ampdoc,
-      placementObj,
-      placements,
-      responsiveSizingBranch
-    );
+    getPlacementsFromObject(ampdoc, placementObj, placements);
   });
   return placements;
 }
@@ -430,14 +357,8 @@ export function getPlacementsFromConfigObj(
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {!JsonObject} placementObj
  * @param {!Array<!Placement>} placements
- * @param {?string} responsiveSizingBranch
  */
-function getPlacementsFromObject(
-  ampdoc,
-  placementObj,
-  placements,
-  responsiveSizingBranch
-) {
+function getPlacementsFromObject(ampdoc, placementObj, placements) {
   const injector = INJECTORS[placementObj['pos']];
   if (!injector) {
     user().warn(TAG, 'No injector for position');
@@ -479,7 +400,6 @@ function getPlacementsFromObject(
         placementObj['pos'],
         injector,
         attributes,
-        responsiveSizingBranch,
         margins
       )
     );
@@ -551,19 +471,4 @@ function isPositionValid(anchorElement, position) {
     }
     return false;
   });
-}
-
-/**
- * Calculates the appropriate height for a full-width responsive ad.
- * @param {number} viewportWidth
- * @param {number} viewportHeight
- * @return {number}
- * @private
- */
-function getResponsiveHeightForContext_(viewportWidth, viewportHeight) {
-  const minHeight = 100;
-  const maxHeight = Math.min(300, viewportHeight);
-  // We aim for a 6:5 aspect ratio.
-  const idealHeight = Math.round(viewportWidth / 1.2);
-  return clamp(idealHeight, minHeight, maxHeight);
 }
