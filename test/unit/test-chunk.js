@@ -23,7 +23,6 @@ import {
   startupChunk,
 } from '../../src/chunk';
 import {installDocService} from '../../src/service/ampdoc-impl';
-import {toggleExperiment} from '../../src/experiments';
 
 describe('chunk2', () => {
   beforeEach(() => {
@@ -394,7 +393,6 @@ describe('long tasks', () => {
         subscriptions = {};
         clock = env.sandbox.useFakeTimers();
         installDocService(env.win, /* isSingleDoc */ true);
-        toggleExperiment(env.win, 'macro-after-long-task', true);
 
         env.win.addEventListener = function(type, handler) {
           if (subscriptions[type] && !subscriptions[type].includes(handler)) {
