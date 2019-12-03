@@ -85,11 +85,11 @@ export class ViewerSubscriptionPlatform {
       'productId': this.currentProductId_,
       'origin': this.origin_,
     });
-    // TODO(chenshay): Viewer Matching: We don't know which viewer it actually
-    // is. Need to check the viewerUrl to know, or more specificlly iterate via
-    // configured platforms and check whether any of these support the viewer.
+    const viewerUrl = this.viewer_.getResolvedViewerUrl().includes('google.com')
+      ? 'google.com'
+      : 'local';
     const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-      'google.com'
+      viewerUrl
     );
     if (encryptedDocumentKey) {
       messageData['encryptedDocumentKey'] = encryptedDocumentKey;
