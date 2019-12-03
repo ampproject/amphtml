@@ -20,7 +20,6 @@ import {dict} from './utils/object';
 import {getContextMetadata} from '../src/iframe-attributes';
 import {getMode} from './mode';
 import {internalRuntimeVersion} from './internal-version';
-import {isExperimentOn} from './experiments';
 import {setStyle} from './style';
 import {startsWith} from './string';
 import {tryParseJson} from './json';
@@ -141,17 +140,12 @@ export function getIframe(
     // Chrome does not reflect the iframe readystate.
     this.readyState = 'complete';
   };
-  if (isExperimentOn(parentWindow, 'no-sync-xhr-in-ads')) {
-    // Block synchronous XHR in ad. These are very rare, but super bad for UX
-    // as they block the UI thread for the arbitrary amount of time until the
-    // request completes.
-    iframe.setAttribute('allow', "sync-xhr 'none';");
-  }
+  // Block synchronous XHR in ad. These are very rare, but super bad for UX
+  // as they block the UI thread for the arbitrary amount of time until the
+  // request completes.
+  iframe.setAttribute('allow', "sync-xhr 'none';");
   const excludeFromSandbox = ['facebook'];
-  if (
-    isExperimentOn(parentWindow, 'sandbox-ads') &&
-    !excludeFromSandbox.includes(opt_type)
-  ) {
+  if (!excludeFromSandbox.includes(opt_type)) {
     applySandbox(iframe);
   }
   iframe.setAttribute(
@@ -197,19 +191,20 @@ export function addDataAndJsonAttributes_(element, attributes) {
 /**
  * Preloads URLs related to the bootstrap iframe.
  * @param {!Window} win
- * @param {!./preconnect.Preconnect} preconnect
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+ * @param {!./preconnect.PreconnectService} preconnect
  * @param {boolean=} opt_disallowCustom whether 3p url should not use meta tag.
  */
-export function preloadBootstrap(win, preconnect, opt_disallowCustom) {
+export function preloadBootstrap(win, ampdoc, preconnect, opt_disallowCustom) {
   const url = getBootstrapBaseUrl(win, undefined, opt_disallowCustom);
-  preconnect.preload(url, 'document');
+  preconnect.preload(ampdoc, url, 'document');
 
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
   const scriptUrl = getMode().localDev
     ? getAdsLocalhost(win) + '/dist.3p/current/integration.js'
     : `${urls.thirdParty}/${internalRuntimeVersion()}/f.js`;
-  preconnect.preload(scriptUrl, 'script');
+  preconnect.preload(ampdoc, scriptUrl, 'script');
 }
 
 /**
@@ -242,7 +237,7 @@ export function setDefaultBootstrapBaseUrlForTesting(url) {
  * @param {*} win
  */
 export function resetBootstrapBaseUrlForTesting(win) {
-  win.defaultBootstrapSubDomain = undefined;
+  win.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN = undefined;
 }
 
 /**
@@ -257,11 +252,12 @@ export function getDefaultBootstrapBaseUrl(parentWindow, opt_srcFileBasename) {
     return getDevelopmentBootstrapBaseUrl(parentWindow, srcFileBasename);
   }
   // Ensure same sub-domain is used despite potentially different file.
-  parentWindow.defaultBootstrapSubDomain =
-    parentWindow.defaultBootstrapSubDomain || getSubDomain(parentWindow);
+  parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN =
+    parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN ||
+    getSubDomain(parentWindow);
   return (
     'https://' +
-    parentWindow.defaultBootstrapSubDomain +
+    parentWindow.__AMP_DEFAULT_BOOTSTRAP_SUBDOMAIN +
     `.${urls.thirdPartyFrameHost}/${internalRuntimeVersion()}/` +
     `${srcFileBasename}.html`
   );

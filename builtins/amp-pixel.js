@@ -65,12 +65,14 @@ export class AmpPixel extends BaseElement {
       return;
     }
     // Trigger, but only when visible.
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    viewer.whenFirstVisible().then(this.trigger_.bind(this));
+    this.getAmpDoc()
+      .whenFirstVisible()
+      .then(this.trigger_.bind(this));
   }
 
   /**
    * Triggers the signal.
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   trigger_() {

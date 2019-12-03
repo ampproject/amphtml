@@ -219,6 +219,7 @@ export class LinkRewriter {
    * Filter the list of anchors to returns only the ones
    * that were not in the page at the time of the last page scan.
    * @param {!Array<!HTMLElement>} anchorList
+   * @return {!Array<HTMLElement>}
    * @private
    */
   getUnknownAnchors_(anchorList) {

@@ -41,18 +41,19 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     },
   };
 
+  let doc;
   let containerElement;
   let context;
   let renderer;
   let validator;
   let validatorPromise;
-  let sandbox;
 
   beforeEach(() => {
+    doc = env.win.document;
     renderer = new TemplateRenderer();
     validator = new TemplateValidator();
 
-    containerElement = document.createElement('div');
+    containerElement = doc.createElement('div');
     containerElement.setAttribute('height', 50);
     containerElement.setAttribute('width', 320);
     containerElement.signals = () => ({
@@ -74,7 +75,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
     containerElement.getIntersectionChangeEntry = () => ({});
     containerElement.isInViewport = () => true;
     containerElement.getAmpDoc = () => env.ampdoc;
-    document.body.appendChild(containerElement);
+    doc.body.appendChild(containerElement);
 
     context = {
       win: env.win,
@@ -83,11 +84,12 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       sentinel: 's-1234',
     };
 
-    sandbox = sinon.sandbox;
-    sandbox.stub(getAmpAdTemplateHelper(env.win), 'fetch').callsFake(url => {
-      expect(url).to.equal(templateUrl);
-      return Promise.resolve(data.adTemplate);
-    });
+    env.sandbox
+      .stub(getAmpAdTemplateHelper(env.win), 'fetch')
+      .callsFake(url => {
+        expect(url).to.equal(templateUrl);
+        return Promise.resolve(data.adTemplate);
+      });
 
     validatorPromise = validator.validate(
       context,
@@ -103,8 +105,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
   });
 
   afterEach(() => {
-    sandbox.restore();
-    document.body.removeChild(containerElement);
+    doc.body.removeChild(containerElement);
   });
 
   it('should append iframe child with correct template values', () => {
@@ -178,7 +179,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
 
   it('should insert analytics', () => {
     env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
-    const insertAnalyticsSpy = sandbox.spy(
+    const insertAnalyticsSpy = env.sandbox.spy(
       getAmpAdTemplateHelper(env.win),
       'insertAnalytics'
     );

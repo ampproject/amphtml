@@ -57,35 +57,36 @@ describes.sandboxed('Navigation', {}, () => {
       let anchor;
       let elementWithId;
       let anchorWithName;
+      let customAnchor;
 
       beforeEach(() => {
         win = env.win;
         doc = win.document;
         const {documentElement} = doc;
 
-        handler = Services.navigationForDoc(doc);
+        handler = Services.navigationForDoc(documentElement);
         handler.isIframed_ = true;
 
-        decorationSpy = sandbox.spy(Impression, 'getExtraParamsUrl');
+        decorationSpy = env.sandbox.spy(Impression, 'getExtraParamsUrl');
 
-        handleNavSpy = sandbox.spy(handler, 'handleNavClick_');
+        handleNavSpy = env.sandbox.spy(handler, 'handleNavigation_');
 
-        handleCustomProtocolSpy = sandbox.spy(
+        handleCustomProtocolSpy = env.sandbox.spy(
           handler,
           'handleCustomProtocolClick_'
         );
 
         win.open = function() {};
-        winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
+        winOpenStub = env.sandbox.stub(win, 'open').callsFake(() => {
           return {};
         });
 
         const viewport = Services.viewportForDoc(doc);
-        scrollIntoViewStub = sandbox.stub(viewport, 'scrollIntoView');
+        scrollIntoViewStub = env.sandbox.stub(viewport, 'scrollIntoView');
 
         const history = Services.historyForDoc(doc);
         replaceStateForTargetPromise = Promise.resolve();
-        replaceStateForTargetStub = sandbox
+        replaceStateForTargetStub = env.sandbox
           .stub(history, 'replaceStateForTarget')
           .callsFake(() => replaceStateForTargetPromise);
 
@@ -94,11 +95,17 @@ describes.sandboxed('Navigation', {}, () => {
         doc.body.appendChild(anchor);
         event.target = anchor;
 
+        customAnchor = doc.createElement('a');
+        customAnchor.href = 'https://www.google.com/custom';
+        doc.body.appendChild(customAnchor);
+
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
-        sandbox
-          .stub(Services, 'urlReplacementsForDoc')
-          .withArgs(anchor)
-          .returns(urlReplacements);
+        const urlReplacementStub = env.sandbox.stub(
+          Services,
+          'urlReplacementsForDoc'
+        );
+        urlReplacementStub.withArgs(anchor).returns(urlReplacements);
+        urlReplacementStub.withArgs(customAnchor).returns(urlReplacements);
 
         elementWithId = doc.createElement('div');
         elementWithId.id = 'test';
@@ -111,11 +118,22 @@ describes.sandboxed('Navigation', {}, () => {
 
       describe('discovery', () => {
         it('should select a direct link', () => {
+          // TODO(alabiaga): throughout the file -- invoke the handler via the
+          // document used to get the navigation service. e.g document.click().
           handler.handle_(event);
           expect(handleNavSpy).to.be.calledOnce;
           expect(handleNavSpy).to.be.calledWith(event, anchor);
           expect(handleCustomProtocolSpy).to.be.calledOnce;
           expect(handleCustomProtocolSpy).to.be.calledWith(event, anchor);
+        });
+
+        it('should select a custom linker target', () => {
+          event.target = null;
+          event['__AMP_CUSTOM_LINKER_TARGET__'] = customAnchor;
+          handler.handle_(event);
+
+          expect(handleNavSpy).to.be.calledOnce;
+          expect(handleNavSpy).to.be.calledWith(event, customAnchor);
         });
 
         it('should NOT handle custom protocol when not iframed', () => {
@@ -203,19 +221,19 @@ describes.sandboxed('Navigation', {}, () => {
         });
 
         it('verify order of operations', () => {
-          const expandVars = sandbox.spy(handler, 'expandVarsForAnchor_');
-          const parseUrl = sandbox.spy(handler, 'parseUrl_');
+          const expandVars = env.sandbox.spy(handler, 'expandVarsForAnchor_');
+          const parseUrl = env.sandbox.spy(handler, 'parseUrl_');
           const obj = {
             callback: () => {},
           };
-          const linkRuleSpy = sandbox.spy(obj, 'callback');
+          const linkRuleSpy = env.sandbox.spy(obj, 'callback');
           handler.registerAnchorMutator(linkRuleSpy, 1);
           handler.handle_(event);
           // Verify that the expansion of variables occurs first
           // followed by the anchor transformation and then the parsing
           // of the possibly mutated anchor href into the location object
           // for navigation.handleNavClick.
-          sinon.assert.callOrder(expandVars, linkRuleSpy, parseUrl);
+          env.sandbox.assert.callOrder(expandVars, linkRuleSpy, parseUrl);
           expect(expandVars).to.be.calledOnce;
           // Verify that parseUrl is called once when the variables are
           // expanded, then after the anchor mutators and then once more
@@ -563,7 +581,9 @@ describes.sandboxed('Navigation', {}, () => {
         });
 
         it('should delegate navigation if viewer supports A2A', () => {
-          const stub = sandbox.stub(handler, 'navigateToAmpUrl').returns(true);
+          const stub = env.sandbox
+            .stub(handler, 'navigateToAmpUrl')
+            .returns(true);
 
           handler.handle_(event);
 
@@ -580,7 +600,9 @@ describes.sandboxed('Navigation', {}, () => {
         });
 
         it('should behave normally if viewer does not support A2A', () => {
-          const stub = sandbox.stub(handler, 'navigateToAmpUrl').returns(false);
+          const stub = env.sandbox
+            .stub(handler, 'navigateToAmpUrl')
+            .returns(false);
 
           handler.handle_(event);
 
@@ -616,14 +638,36 @@ describes.sandboxed('Navigation', {}, () => {
           expect(win.location.href).to.equal('https://www.pub.com/');
         });
 
+        it('should navigate relative to source url', () => {
+          win.location.href =
+            'https://cdn.ampproject.org/c/s/www.pub.com/dir/page.html';
+          const urlService = Services.urlForDoc(doc.documentElement);
+
+          env.sandbox.stub(urlService, 'getSourceUrl').callsFake(url => {
+            expect(url).to.equal('abc.html');
+            return 'https://www.pub.com/dir/abc.html';
+          });
+
+          allowConsoleError(() => {
+            handler.navigateTo(win, 'abc.html');
+          });
+
+          expect(win.location.href).to.equal(
+            'https://www.pub.com/dir/abc.html'
+          );
+        });
+
         it('should delegate navigation to viewer if necessary', () => {
           const meta = doc.createElement('meta');
           meta.setAttribute('name', 'amp-to-amp-navigation');
           meta.setAttribute('content', 'feature-foo, action-bar');
           ampdoc.getRootNode().head.appendChild(meta);
 
-          const send = sandbox.stub(handler.viewer_, 'sendMessage');
-          const hasCapability = sandbox.stub(handler.viewer_, 'hasCapability');
+          const send = env.sandbox.stub(handler.viewer_, 'sendMessage');
+          const hasCapability = env.sandbox.stub(
+            handler.viewer_,
+            'hasCapability'
+          );
           hasCapability.returns(true);
           expect(win.location.href).to.equal('https://www.pub.com/');
 
@@ -692,19 +736,24 @@ describes.sandboxed('Navigation', {}, () => {
           beforeEach(() => {
             win = env.win;
             doc = win.document;
-            ampdoc = env.ampdoc;
+            // TODO(#22733): cleanup `env.ampdoc` part.
+            ampdoc = doc.__AMPDOC || env.ampdoc;
             parentWin = env.parentWin;
             embed = env.embed;
 
-            handler = win.services.navigation.obj;
-            winOpenStub = sandbox.stub(win, 'open').callsFake(() => {
+            // TODO(#22733): cleanup `win.__AMP_SERVICES.navigation` part.
+            handler = (
+              (ampdoc.__AMP_SERVICES && ampdoc.__AMP_SERVICES.navigation) ||
+              win.__AMP_SERVICES.navigation
+            ).obj;
+            winOpenStub = env.sandbox.stub(win, 'open').callsFake(() => {
               return {};
             });
-            const viewport = parentWin.services.viewport.obj;
-            scrollIntoViewStub = sandbox.stub(viewport, 'scrollIntoView');
-            const history = parentWin.services.history.obj;
+            const viewport = parentWin.__AMP_SERVICES.viewport.obj;
+            scrollIntoViewStub = env.sandbox.stub(viewport, 'scrollIntoView');
+            const history = parentWin.__AMP_SERVICES.history.obj;
             replaceStateForTargetPromise = Promise.resolve();
-            replaceStateForTargetStub = sandbox
+            replaceStateForTargetStub = env.sandbox
               .stub(history, 'replaceStateForTarget')
               .callsFake(() => replaceStateForTargetPromise);
 
@@ -719,7 +768,7 @@ describes.sandboxed('Navigation', {}, () => {
             const urlReplacements = Services.urlReplacementsForDoc(
               documentElement
             );
-            sandbox
+            env.sandbox
               .stub(Services, 'urlReplacementsForDoc')
               .withArgs(anchor)
               .returns(urlReplacements);

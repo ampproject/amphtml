@@ -18,6 +18,7 @@ describes.endtoend(
   'amp-bind',
   {
     testUrl: 'http://localhost:8000/test/fixtures/e2e/amp-bind/bind-basic.html',
+    environments: 'ampdoc-amp4ads-preset',
   },
   async env => {
     let controller;

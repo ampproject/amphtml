@@ -97,8 +97,7 @@ export class ConsentStateManager {
       dev().error(TAG, 'instance not registered');
       return;
     }
-
-    this.instance_.update(state, consentStr);
+    this.instance_.update(state, consentStr, false);
 
     if (this.consentChangeHandler_) {
       this.consentChangeHandler_(constructConsentInfo(state, consentStr));
@@ -181,6 +180,7 @@ export class ConsentStateManager {
 
   /**
    * Returns a promise that's resolved when consent instance is ready.
+   * @return {*} TODO(#23582): Specify return type
    */
   whenConsentReady() {
     if (this.instance_) {
@@ -192,6 +192,15 @@ export class ConsentStateManager {
       this.consentReadyResolver_ = deferred.resolve;
     }
     return this.consentReadyPromise_;
+  }
+
+  /**
+   * Get last consent instance stored.
+   * @visibleForTesting
+   * @return {?ConsentInfoDef}
+   */
+  getSavedInstanceForTesting() {
+    return this.instance_.savedConsentInfo_;
   }
 }
 
@@ -246,6 +255,7 @@ export class ConsentInstance {
   /**
    * Set dirtyBit to current consent info. Refresh stored consent value with
    * dirtyBit
+   * @return {*} TODO(#23582): Specify return type
    */
   setDirtyBit() {
     // Note: this.hasDirtyBitNext_ is only set to true when 'forcePromptNext'
@@ -454,14 +464,12 @@ export class ConsentInstance {
         body: request,
         ampCors: false,
       };
-      Services.viewerForDoc(this.ampdoc_)
-        .whenFirstVisible()
-        .then(() => {
-          Services.xhrFor(this.ampdoc_.win).fetchJson(
-            /** @type {string} */ (this.onUpdateHref_),
-            init
-          );
-        });
+      this.ampdoc_.whenFirstVisible().then(() => {
+        Services.xhrFor(this.ampdoc_.win).fetchJson(
+          /** @type {string} */ (this.onUpdateHref_),
+          init
+        );
+      });
     });
   }
 }

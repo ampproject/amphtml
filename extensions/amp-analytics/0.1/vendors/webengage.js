@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-export const WEBENGAGE_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const WEBENGAGE_CONFIG = jsonLiteral({
   'requests': {
     'base':
-      'https://c.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId(we_luid)}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application',
+      'https://c.${region}.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId(we_luid)}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application',
     'wePageview': {
       'baseUrl': '${base}&eventName=Page Viewed',
     },
@@ -32,3 +34,5 @@ export const WEBENGAGE_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {WEBENGAGE_CONFIG};

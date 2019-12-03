@@ -44,6 +44,7 @@ describes.realWin(
       pin.setAttribute('data-media', pinMedia);
       pin.setAttribute('data-description', pinDescription);
       div.appendChild(pin);
+      pin.implementation_.buildCallback();
       return pin.implementation_.layoutCallback().then(() => {
         return pin;
       });
@@ -63,6 +64,7 @@ describes.realWin(
         pin.setAttribute('alt', pinAlt);
       }
       div.appendChild(pin);
+      pin.implementation_.buildCallback();
       return pin.implementation_.layoutCallback().then(() => {
         return pin;
       });

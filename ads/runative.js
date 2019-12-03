@@ -15,6 +15,7 @@
  */
 
 import {loadScript, validateData} from '../3p/3p';
+import {parseJson} from '../src/json';
 
 const requiredParams = ['spot'];
 const optionsParams = [
@@ -54,6 +55,7 @@ export function runative(global, data) {
 
 /**
  * @param {!Object} data
+ * @return {JsonObject}
  */
 function getInitData(data) {
   const initKeys = requiredParams.concat(optionsParams);
@@ -69,11 +71,12 @@ function getInitData(data) {
 
   initParams['element_id'] = adContainerId;
 
-  return initParams;
+  return parseJson(initParams);
 }
 
 /**
  * @param {!Window} global
+ * @return {?Node}
  */
 function getAdContainer(global) {
   const container = global.document.createElement('div');
@@ -86,6 +89,7 @@ function getAdContainer(global) {
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @return {?Node}
  */
 function getInitAdScript(global, data) {
   const scriptElement = global.document.createElement('script');

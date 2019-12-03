@@ -21,11 +21,16 @@ import {
   getExistingAds,
 } from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
+import {Attributes, getAttributesFromConfigObj} from './attributes';
+import {
+  NO_OP_EXP,
+  RESPONSIVE_SIZING_HOLDBACK_BRANCH,
+  getPlacementsFromConfigObj,
+} from './placement';
 import {Services} from '../../../src/services';
+import {dict} from '../../../src/utils/object';
 import {getAdNetworkConfig} from './ad-network-config';
-import {getAttributesFromConfigObj} from './attributes';
-import {getPlacementsFromConfigObj} from './placement';
-import {isExperimentOn} from '../../../src/experiments';
+import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 /** @const */
@@ -34,11 +39,17 @@ const TAG = 'amp-auto-ads';
 /** @const */
 const AD_TAG = 'amp-ad';
 
+/** @const {!{branch: string, control: string, holdback: string}}
+ */
+export const RESPONSIVE_SIZING_EXP = {
+  branch: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
+  control: '368226532',
+  holdback: RESPONSIVE_SIZING_HOLDBACK_BRANCH,
+};
+
 export class AmpAutoAds extends AMP.BaseElement {
   /** @override */
   buildCallback() {
-    userAssert(isExperimentOn(this.win, 'amp-auto-ads'), 'Experiment is off');
-
     const type = this.element.getAttribute('type');
     userAssert(type, 'Missing type attribute');
 
@@ -55,8 +66,10 @@ export class AmpAutoAds extends AMP.BaseElement {
       AD_TAG
     );
 
-    const viewer = Services.viewerForDoc(this.getAmpDoc());
-    const whenVisible = viewer.whenFirstVisible();
+    const whenVisible = this.getAmpDoc().whenFirstVisible();
+    const responsiveSizingBranch = this.getUseResponsiveForResponsiveExperimentBranch(
+      adNetwork.isResponsiveEnabled()
+    );
 
     whenVisible
       .then(() => {
@@ -72,10 +85,15 @@ export class AmpAutoAds extends AMP.BaseElement {
           return;
         }
 
-        const placements = getPlacementsFromConfigObj(ampdoc, configObj);
+        const placements = getPlacementsFromConfigObj(
+          ampdoc,
+          configObj,
+          responsiveSizingBranch
+        );
         const attributes = /** @type {!JsonObject} */ (Object.assign(
+          dict({}),
           adNetwork.getAttributes(),
-          getAttributesFromConfigObj(configObj)
+          getAttributesFromConfigObj(configObj, Attributes.BASE_ATTRIBUTES)
         ));
         const sizing = adNetwork.getSizing();
         const adConstraints =
@@ -89,8 +107,38 @@ export class AmpAutoAds extends AMP.BaseElement {
           adTracker,
           adNetwork.isResponsiveEnabled()
         ).run();
-        new AnchorAdStrategy(ampdoc, attributes, configObj).run();
+        const stickyAdAttributes = /** @type {!JsonObject} */ (Object.assign(
+          dict({}),
+          attributes,
+          getAttributesFromConfigObj(configObj, Attributes.STICKY_AD_ATTRIBUTES)
+        ));
+        new AnchorAdStrategy(ampdoc, stickyAdAttributes, configObj).run();
       });
+  }
+
+  /**
+   * Selects into the use responsive ads for sizing in auto ads experiment branch.
+   * @param {boolean} isResponsiveEnabled
+   * @return {?string} id of selected branch, if any.
+   */
+  getUseResponsiveForResponsiveExperimentBranch(isResponsiveEnabled) {
+    const experimentInfoMap = /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({
+      [[RESPONSIVE_SIZING_EXP.branch]]: {
+        isTrafficEligible: () => isResponsiveEnabled,
+        branches: [
+          [RESPONSIVE_SIZING_EXP.control],
+          [RESPONSIVE_SIZING_EXP.holdback],
+        ],
+      },
+      [[NO_OP_EXP.branch]]: {
+        isTrafficEligible: () => isResponsiveEnabled,
+        branches: [[NO_OP_EXP.control], [NO_OP_EXP.experiment]],
+      },
+    });
+    return randomlySelectUnsetExperiments(this.win, experimentInfoMap)[
+      RESPONSIVE_SIZING_EXP.branch
+    ];
   }
 
   /** @override */

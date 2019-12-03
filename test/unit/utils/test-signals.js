@@ -16,12 +16,12 @@
 
 import {Signals} from '../../../src/utils/signals';
 
-describes.sandboxed('Signals', {}, () => {
+describes.sandboxed('Signals', {}, env => {
   let clock;
   let signals;
 
   beforeEach(() => {
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     clock.tick(1);
     signals = new Signals();
   });
@@ -174,5 +174,20 @@ describes.sandboxed('Signals', {}, () => {
     signals.reset('sig');
     // Promise has been reset completely.
     expect(signals.promiseMap_['sig']).to.be.undefined;
+  });
+});
+
+describes.sandboxed('Signals with zero for tests', {}, env => {
+  let signals;
+
+  beforeEach(() => {
+    env.sandbox.useFakeTimers();
+    signals = new Signals();
+  });
+
+  it('should register signal without promise', () => {
+    // The signal value is often 0 in tests due to the fake timer.
+    signals.signal('sig');
+    expect(signals.get('sig')).to.equal(0);
   });
 });

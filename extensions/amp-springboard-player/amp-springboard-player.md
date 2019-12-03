@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Springboard Platform video player.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -31,12 +32,12 @@ Displays the Springboard Player used in the <a href="http://publishers.springboa
     <td><code>&lt;script async custom-element="amp-springboard-player" src="https://cdn.ampproject.org/v0/amp-springboard-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, flex-item, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-springboard-player/">Annotated code example for amp-springboard-player</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-springboard-player/">Annotated code example for amp-springboard-player</a></td>
   </tr>
   </tr>
 </table>
@@ -49,17 +50,21 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 
 ```html
 <amp-springboard-player
-	data-site-id="261"
-	data-mode="video"
-	data-content-id="1578473"
-	data-player-id="test401"
-	data-domain="test.com"
-	data-items="10"
-	layout="responsive" width="480" height="270">
+  data-site-id="261"
+  data-mode="video"
+  data-content-id="1578473"
+  data-player-id="test401"
+  data-domain="test.com"
+  data-items="10"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-springboard-player>
 ```
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-site-id (required)</strong></td>
@@ -87,7 +92,7 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
 

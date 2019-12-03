@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AFFILIATE_LINK_SELECTOR} from './amp-story-affiliate-link';
 import {
   Action,
   EmbeddedComponentState,
@@ -139,6 +140,14 @@ export class AdvancementConfig {
   }
 
   /**
+   * Returns whether the advancement configuration will automatically advance
+   * @return {boolean}
+   */
+  isAutoAdvance() {
+    return false;
+  }
+
+  /**
    * @return {boolean}
    * @protected
    */
@@ -186,91 +195,41 @@ export class AdvancementConfig {
   }
 
   /**
-   * Provides an AdvancementConfig object for the specified amp-story-page.
-   * @param {!./amp-story-page.AmpStoryPage|!./amp-story.AmpStory} element
-   * @return {!AdvancementConfig | !ManualAdvancement | !MultipleAdvancementConfig}
+   * Provides an AdvancementConfig object for the specified amp-story or
+   * amp-story-page.
+   * @param {!Window} win
+   * @param {!Element} element
+   * @return {!AdvancementConfig|!ManualAdvancement|!TimeBasedAdvancement|!MediaBasedAdvancement}
    */
-  static forElement(element) {
-    const rootEl = element.element;
-    const win = /** @type {!Window} */ (rootEl.ownerDocument.defaultView);
-    const autoAdvanceStr = rootEl.getAttribute('auto-advance-after');
-    const supportedAdvancementModes = [
-      ManualAdvancement.fromElement(win, rootEl),
-      TimeBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
-      MediaBasedAdvancement.fromAutoAdvanceString(autoAdvanceStr, win, rootEl),
-    ].filter(x => x !== null);
-
-    if (supportedAdvancementModes.length === 0) {
-      return new AdvancementConfig();
+  static forElement(win, element) {
+    const manualAdvancement = ManualAdvancement.fromElement(win, element);
+    if (manualAdvancement) {
+      return manualAdvancement;
     }
 
-    if (supportedAdvancementModes.length === 1) {
-      return supportedAdvancementModes[0];
+    const autoAdvanceStr = element.getAttribute('auto-advance-after');
+
+    if (autoAdvanceStr) {
+      const timeBasedAdvancement = TimeBasedAdvancement.fromAutoAdvanceString(
+        autoAdvanceStr,
+        win,
+        element
+      );
+      if (timeBasedAdvancement) {
+        return timeBasedAdvancement;
+      }
+
+      const mediaBasedAdvancement = MediaBasedAdvancement.fromAutoAdvanceString(
+        autoAdvanceStr,
+        win,
+        element
+      );
+      if (mediaBasedAdvancement) {
+        return mediaBasedAdvancement;
+      }
     }
 
-    return new MultipleAdvancementConfig(supportedAdvancementModes);
-  }
-}
-
-/**
- * An AdvancementConfig implementation that composes multiple other
- * AdvancementConfig implementations by simply delegating all of its calls to
- * an array of underlying advancement modes.
- */
-class MultipleAdvancementConfig extends AdvancementConfig {
-  /**
-   * @param {!Array<!AdvancementConfig>} advancementModes A list of
-   *     AdvancementConfigs to which all calls should be delegated.
-   */
-  constructor(advancementModes) {
-    super();
-
-    /** @private @const {!Array<!AdvancementConfig>} */
-    this.advancementModes_ = advancementModes;
-  }
-
-  /** @override */
-  addProgressListener(progressListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addProgressListener(progressListener);
-    });
-  }
-
-  /** @override */
-  addOnTapNavigationListener(onTapNavigationListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addOnTapNavigationListener(onTapNavigationListener);
-    });
-  }
-
-  /** @override */
-  addAdvanceListener(advanceListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addAdvanceListener(advanceListener);
-    });
-  }
-
-  /** @override */
-  addPreviousListener(previousListener) {
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.addPreviousListener(previousListener);
-    });
-  }
-
-  /** @override */
-  start() {
-    super.start();
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.start();
-    });
-  }
-
-  /** @override */
-  stop(canResume = false) {
-    super.stop();
-    this.advancementModes_.forEach(advancementMode => {
-      advancementMode.stop(canResume);
-    });
+    return new AdvancementConfig();
   }
 }
 
@@ -354,6 +313,13 @@ class ManualAdvancement extends AdvancementConfig {
       this.maybePerformNavigation_.bind(this),
       true
     );
+  }
+
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return false;
   }
 
   /**
@@ -464,7 +430,10 @@ class ManualAdvancement extends AdvancementConfig {
       dev().assertElement(event.target),
       el => {
         tagName = el.tagName.toLowerCase();
-        if (tagName === 'amp-story-page-attachment') {
+        if (
+          tagName === 'amp-story-page-attachment' ||
+          tagName === 'amp-story-quiz'
+        ) {
           shouldHandleEvent = false;
           return true;
         }
@@ -493,13 +462,14 @@ class ManualAdvancement extends AdvancementConfig {
   canShowTooltip_(event, pageRect) {
     let valid = true;
     let tagName;
+    const target = dev().assertElement(event.target);
 
     if (this.isInScreenSideEdge_(event, pageRect)) {
       return false;
     }
 
     return !!closest(
-      dev().assertElement(event.target),
+      target,
       el => {
         tagName = el.tagName.toLowerCase();
 
@@ -541,15 +511,37 @@ class ManualAdvancement extends AdvancementConfig {
    */
   isHandledByEmbeddedComponent_(event, pageRect) {
     const target = dev().assertElement(event.target);
-    const inExpandedMode =
-      this.storeService_.get(StateProperty.INTERACTIVE_COMPONENT_STATE)
-        .state === EmbeddedComponentState.EXPANDED;
+    const stored = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
+      StateProperty.INTERACTIVE_COMPONENT_STATE
+    ));
+    const inExpandedMode = stored.state === EmbeddedComponentState.EXPANDED;
 
     return (
       inExpandedMode ||
       (matches(target, INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS) &&
         this.canShowTooltip_(event, pageRect))
     );
+  }
+
+  /**
+   * Check if click should be handled by the affiliate link logic.
+   * @param {!Element} target
+   * @private
+   * @return {boolean}
+   */
+  isHandledByAffiliateLink_(target) {
+    const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
+
+    // do not handle if clicking on expanded affiliate link
+    if (clickedOnLink && target.hasAttribute('expanded')) {
+      return false;
+    }
+
+    const expandedElement = this.storeService_.get(
+      StateProperty.AFFILIATE_LINK_STATE
+    );
+
+    return expandedElement != null || clickedOnLink;
   }
 
   /**
@@ -563,6 +555,7 @@ class ManualAdvancement extends AdvancementConfig {
     const pageRect = this.element_.getLayoutBox();
 
     if (this.isHandledByEmbeddedComponent_(event, pageRect)) {
+      event.stopPropagation();
       event.preventDefault();
       const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
         StateProperty.INTERACTIVE_COMPONENT_STATE
@@ -573,6 +566,18 @@ class ManualAdvancement extends AdvancementConfig {
         clientX: event.clientX,
         clientY: event.clientY,
       });
+      return;
+    }
+
+    if (this.isHandledByAffiliateLink_(target)) {
+      event.preventDefault();
+      event.stopPropagation();
+      const clickedOnLink = matches(target, AFFILIATE_LINK_SELECTOR);
+      if (clickedOnLink) {
+        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, target);
+      } else {
+        this.storeService_.dispatch(Action.TOGGLE_AFFILIATE_LINK, null);
+      }
       return;
     }
 
@@ -614,6 +619,7 @@ class ManualAdvancement extends AdvancementConfig {
    * individual section has been previously defined depending on the language
    * settings.
    * @param {!Object} page
+   * @return {number}
    * @private
    */
   getTapDirection_(page) {
@@ -629,15 +635,15 @@ class ManualAdvancement extends AdvancementConfig {
   /**
    * Gets an instance of ManualAdvancement based on the HTML tag of the element.
    * @param {!Window} win
-   * @param {!Element} rootEl
-   * @return {?AdvancementConfig} An AdvancementConfig, only if the rootEl is
+   * @param {!Element} element
+   * @return {?AdvancementConfig} An AdvancementConfig, only if the element is
    *                              an amp-story tag.
    */
-  static fromElement(win, rootEl) {
-    if (rootEl.tagName.toLowerCase() !== 'amp-story') {
+  static fromElement(win, element) {
+    if (element.tagName.toLowerCase() !== 'amp-story') {
       return null;
     }
-    return new ManualAdvancement(win, rootEl);
+    return new ManualAdvancement(win, element);
   }
 }
 
@@ -728,6 +734,13 @@ class TimeBasedAdvancement extends AdvancementConfig {
       : null;
   }
 
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return true;
+  }
+
   /** @override */
   getProgress() {
     if (this.startTimeMs_ === null) {
@@ -746,12 +759,12 @@ class TimeBasedAdvancement extends AdvancementConfig {
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @param {!Window} win
-   * @param {!Element} rootEl
+   * @param {!Element} element
    * @return {?AdvancementConfig} An AdvancementConfig, if time-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, element) {
     if (!autoAdvanceStr) {
       return null;
     }
@@ -761,7 +774,7 @@ class TimeBasedAdvancement extends AdvancementConfig {
       return null;
     }
 
-    return new TimeBasedAdvancement(win, Number(delayMs), rootEl);
+    return new TimeBasedAdvancement(win, Number(delayMs), element);
   }
 }
 
@@ -787,7 +800,7 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(win);
 
-    /** @private @const {!../../../src/service/resources-impl.Resources} */
+    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(win.document));
 
     /** @private @const {!Array<!Element>} */
@@ -802,10 +815,10 @@ class MediaBasedAdvancement extends AdvancementConfig {
     /** @private {!Array<!UnlistenDef>} */
     this.unlistenFns_ = [];
 
-    /** @private {?UnlistenDef} */
+    /** @protected {?UnlistenDef} */
     this.unlistenEndedFn_ = null;
 
-    /** @private {?UnlistenDef} */
+    /** @protected {?UnlistenDef} */
     this.unlistenTimeupdateFn_ = null;
 
     /** @private {?../../../src/video-interface.VideoInterface} */
@@ -982,6 +995,13 @@ class MediaBasedAdvancement extends AdvancementConfig {
     this.unlistenFns_.forEach(fn => fn());
   }
 
+  /**
+   * @override
+   */
+  isAutoAdvance() {
+    return true;
+  }
+
   /** @override */
   getProgress() {
     if (this.isVideoInterfaceVideo_()) {
@@ -1005,18 +1025,25 @@ class MediaBasedAdvancement extends AdvancementConfig {
    * @param {string} autoAdvanceStr The value of the auto-advance-after
    *     attribute.
    * @param {!Window} win
-   * @param {!Element} rootEl
+   * @param {!Element} element
    * @return {?AdvancementConfig} An AdvancementConfig, if media-element-based
    *     auto-advance is supported for the specified auto-advance string; null
    *     otherwise.
    */
-  static fromAutoAdvanceString(autoAdvanceStr, win, rootEl) {
+  static fromAutoAdvanceString(autoAdvanceStr, win, element) {
     try {
-      const elements = rootEl.querySelectorAll(
+      const elements = element.querySelectorAll(
         `[data-id=${escapeCssSelectorIdent(autoAdvanceStr)}],
           #${escapeCssSelectorIdent(autoAdvanceStr)}`
       );
       if (!elements.length) {
+        if (autoAdvanceStr) {
+          user().warn(
+            'AMP-STORY-PAGE',
+            `Element with ID ${element.id} has no media element ` +
+              'supported for automatic advancement.'
+          );
+        }
         return null;
       }
 
