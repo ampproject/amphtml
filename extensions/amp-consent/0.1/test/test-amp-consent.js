@@ -53,7 +53,6 @@ describes.realWin(
       ampdoc = env.ampdoc;
       win = env.win;
       toggleExperiment(win, 'amp-consent-v2', true);
-      toggleExperiment(win, 'amp-consent-geo-override', true);
 
       storageValue = {};
       jsonMockResponses = {
@@ -214,6 +213,13 @@ describes.realWin(
 
     describe('geo-override server communication', () => {
       let ampConsent;
+      beforeEach(() => {
+        toggleExperiment(win, 'amp-consent-geo-override', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'amp-consent-geo-override', false);
+      });
 
       it('checks local storage before making sever request', async () => {
         const config = {
@@ -354,11 +360,11 @@ describes.realWin(
         beforeEach(() => {
           jsonMockResponses = {
             'https://server-test-1/':
-              '{"consentRequired": false, "consentStateValue": 2, "consentString": "hello"}',
+              '{"consentRequired": false, "consentStateValue": "unknown", "consentString": "hello"}',
             'https://server-test-2/':
-              '{"consentRequired": true, "consentStateValue": 0, "consentString": "mystring"}',
+              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring"}',
             'https://server-test-3/':
-              '{"consentRequired": true, "consentStateValue": 2}',
+              '{"consentRequired": true, "consentStateValue": "unknown"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
           };
         });
@@ -468,7 +474,7 @@ describes.realWin(
         beforeEach(() => {
           jsonMockResponses = {
             'https://server-test-4/':
-              '{"consentRequired": true, "consentStateValue": 1, "consentString": "newstring"}',
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
             'https://geo-override-check2/': '{"consentRequired": true}',
           };
         });
@@ -542,7 +548,7 @@ describes.realWin(
             'https://expire-cache/':
               '{"expireCache": true,"consentRequired": true, "consentStateValue": null, "consentString": null}',
             'https://expire-cache-2/':
-              '{"expireCache": true,"consentRequired": true, "consentStateValue": 1, "consentString": "myconsentstring"}',
+              '{"expireCache": true,"consentRequired": true, "consentStateValue": "accepted", "consentString": "myconsentstring"}',
             'https://expire-cache-3/':
               '{"expireCache": true,"consentRequired": false, "consentStateValue": null, "consentString": null}',
           };
@@ -739,7 +745,7 @@ describes.realWin(
         defaultConfig = dict({
           'consents': {
             'ABC': {
-              'checkConsentHref': 'https://geo-override-check2/',
+              'checkConsentHref': 'https://response1',
               'promptUI': '123',
             },
           },
@@ -762,7 +768,12 @@ describes.realWin(
         });
       });
 
+      afterEach(() => {
+        toggleExperiment(win, 'amp-consent-geo-override', false);
+      });
+
       it('should not show promptUI if local storage has decision', async () => {
+        toggleExperiment(win, 'amp-consent-geo-override', true);
         const config = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
@@ -877,6 +888,7 @@ describes.realWin(
 
         describe('hide/show postPromptUI with local storage', () => {
           beforeEach(() => {
+            toggleExperiment(win, 'amp-consent-geo-override', true);
             defaultConfig = dict({
               'consentInstanceId': 'ABC',
               'consentRequired': true,
@@ -888,6 +900,10 @@ describes.realWin(
             consentElement.appendChild(postPromptUI);
             doc.body.appendChild(consentElement);
             ampConsent = new AmpConsent(consentElement);
+          });
+
+          afterEach(() => {
+            toggleExperiment(win, 'amp-consent-geo-override', false);
           });
 
           it('hides postPromptUI with no local storage decision', async () => {
