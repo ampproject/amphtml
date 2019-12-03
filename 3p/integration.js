@@ -266,7 +266,6 @@ import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
 import {widespace} from '../ads/widespace';
 import {wisteria} from '../ads/wisteria';
-import {whopainfeed} from '../ads/whopainfeed';
 import {wpmedia} from '../ads/wpmedia';
 import {xlift} from '../ads/xlift';
 import {yahoo} from '../ads/yahoo';
@@ -321,7 +320,6 @@ const AMP_EMBED_ALLOWED = {
   strossle: true,
   svknative: true,
   taboola: true,
-  whopainfeed: true,
   yahoonativeads: true,
   zen: true,
   zergnet: true,
@@ -552,7 +550,6 @@ register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
 register('widespace', widespace);
 register('wisteria', wisteria);
-register('whopainfeed', whopainfeed);
 register('wpmedia', wpmedia);
 register('xlift', xlift);
 register('yahoo', yahoo);

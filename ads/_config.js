@@ -1112,11 +1112,6 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
-  'whopainfeed': {
-    prefetch: 'https://widget.infeed.com.ar/widget/widget-amp.js',
-    renderStartImplemented: true,
-  },
-
   'wpmedia': {
     prefetch: 'https://std.wpcdn.pl/wpjslib/wpjslib-amp.js',
     preconnect: ['https://www.wp.pl', 'https://v.wpimg.pl'],
