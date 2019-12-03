@@ -226,7 +226,8 @@ function getIntersectionRect(element) {
  * @param {!../../../src/layout-rect.LayoutRectDef} rect
  * @return {boolean}
  */
-function isSizedLayoutRect({width, height}) {
+function isSizedLayoutRect(rect) {
+  const {width, height} = rect;
   return width > 0 && height > 0;
 }
 

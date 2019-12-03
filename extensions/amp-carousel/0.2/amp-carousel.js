@@ -45,7 +45,8 @@ class AmpCarousel extends AMP.BaseElement {
   setupActions_() {
     this.registerAction(
       'goToSlide',
-      ({args, trust}) => {
+      actionInvocation => {
+        const {args, trust} = actionInvocation;
         this.carousel_.goToSlide(args['index'] || 0, {
           actionSource: this.getActionSource_(trust),
         });
@@ -54,7 +55,8 @@ class AmpCarousel extends AMP.BaseElement {
     );
     this.registerAction(
       'toggleAutoplay',
-      ({args}) => {
+      actionInvocation => {
+        const {args} = actionInvocation;
         // args will be `null` if not present, so we cannot use a default value above
         const toggle = args ? args['toggleOn'] : undefined;
         this.toggleAutoplay_(toggle);
@@ -212,12 +214,12 @@ class AmpCarousel extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.carousel_.pauseAutoAdvance();
+    this.carousel_.pauseLayout();
   }
 
   /** @override */
   resumeCallback() {
-    this.carousel_.resumeAutoAdvance();
+    this.carousel_.resumeLayout();
   }
 
   /** @override */
@@ -310,7 +312,7 @@ class AmpCarousel extends AMP.BaseElement {
    * @return {!ActionSource}
    */
   getActionSource_(trust) {
-    return trust == ActionTrust.HIGH
+    return trust >= ActionTrust.DEFAULT
       ? ActionSource.GENERIC_HIGH_TRUST
       : ActionSource.GENERIC_LOW_TRUST;
   }

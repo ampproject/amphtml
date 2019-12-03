@@ -257,6 +257,7 @@ requirement: {
   whitelist: 'ads/mads.js'
   whitelist: 'ads/google/imaVideo.js'
   whitelist: 'ads/zen.js'
+  whitelist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
   whitelist: 'src/json.js' # Where parseJson itself is implemented.
 }
 
@@ -277,6 +278,7 @@ requirement: {
   whitelist: 'extensions/amp-access/0.1/amp-access-iframe.js' # False-positive
   whitelist: 'extensions/amp-access/0.1/iframe-api/messenger.js' # 3p-intent
   whitelist: 'src/service/history-impl.js' # False-positive
+  whitelist: 'extensions/amp-viewer-integration/0.1/messaging/messaging.js' # published as standalone library
 }
 
 requirement: {

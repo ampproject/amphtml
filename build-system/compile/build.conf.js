@@ -27,7 +27,6 @@ const defaultPlugins = [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
-  getJsonConfigurationPlugin(),
   getReplacePlugin(),
 ];
 
@@ -76,26 +75,8 @@ function getReplacePlugin() {
     replacements.push(createReplacement(defineFlag, true));
   }
 
-  const currentTimestampMs = Date.now();
-
   // default each experiment flag constant to false
   Object.keys(experimentsConfig).forEach(experiment => {
-    const expirationStr = experimentsConfig[experiment]['expirationDateUTC'];
-    const expirationDate = new Date(expirationStr);
-    const expirationTimestampMs = expirationDate.getTime();
-
-    // check experiment expiration times
-    if (experimentsConfig[experiment]['name'] && !expirationTimestampMs) {
-      if (defineFlag) {
-        throw new Error(`Invalid expiration date for ${experiment}`);
-      }
-    } else if (expirationTimestampMs < currentTimestampMs) {
-      if (defineFlag) {
-        throw new Error(
-          `${experiment} has expired on ${expirationDate.toUTCString()}. Please remove from experiments-config.json and cleanup relevant code.`
-        );
-      }
-    }
     const experimentDefine =
       experimentsConfig[experiment]['defineExperimentConstant'];
 
@@ -137,7 +118,7 @@ function getJsonConfigurationPlugin() {
  * @param {!Object<string, boolean>} buildFlags
  * @return {!Array<string|!Array<string|!Object>>}
  */
-function plugins({isEsmBuild, isForTesting, isSinglePass}) {
+function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
   const applied = [...defaultPlugins];
   // TODO(erwinm): This is temporary until we remove the assert/log removals
   // from the java transformation to the babel transformation.
@@ -152,7 +133,14 @@ function plugins({isEsmBuild, isForTesting, isSinglePass}) {
   if (isEsmBuild) {
     applied.push(['filter-imports', {imports: esmRemovedImports}]);
   }
-  if (!isForTesting) {
+  if (isChecktypes) {
+    applied.push(localPlugin('transform-simple-object-destructure'));
+  } else {
+    // This triggers some conformance errors such as `use tryParseJson` during
+    // type check phase so we omit it from the default plugins.
+    applied.push(getJsonConfigurationPlugin());
+  }
+  if (!(isForTesting || isChecktypes)) {
     applied.push(
       localPlugin('amp-mode-transformer'),
       localPlugin('is_dev-constant-transformer')

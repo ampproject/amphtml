@@ -85,10 +85,6 @@ const forbiddenTerms = {
       'https://medium.com/gulpjs/gulp-util-ca3b1f9f9ac5 ' +
       'for a list of alternatives.',
   },
-  'document-register-element.node': {
-    message: 'Use `document-register-element.patched` instead',
-    whitelist: ['build-system/tasks/update-packages.js'],
-  },
   'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls',
   },
@@ -128,10 +124,12 @@ const forbiddenTerms = {
       'build-system/server/amp4test.js',
       'build-system/tasks/build.js',
       'build-system/tasks/check-exact-versions.js',
+      'build-system/tasks/check-owners.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
       'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
+      'build-system/tasks/prettify.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -437,6 +435,7 @@ const forbiddenTerms = {
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
       'src/impression.js',
+      'src/ssr-template-helper.js',
       'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },

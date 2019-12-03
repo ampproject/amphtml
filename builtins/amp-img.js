@@ -16,12 +16,14 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
+import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
+import {removeElement} from '../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -113,7 +115,7 @@ export class AmpImg extends BaseElement {
     // `src` url if it exists or the first srcset url.
     const src = this.element.getAttribute('src');
     if (src) {
-      this.preconnect.url(src, onLayout);
+      Services.preconnectFor(this.win).url(this.getAmpDoc(), src, onLayout);
     } else {
       const srcset = this.element.getAttribute('srcset');
       if (!srcset) {
@@ -123,7 +125,11 @@ export class AmpImg extends BaseElement {
       const srcseturl = /\S+/.exec(srcset);
       // Connect to the first url if it exists
       if (srcseturl) {
-        this.preconnect.url(srcseturl[0], onLayout);
+        Services.preconnectFor(this.win).url(
+          this.getAmpDoc(),
+          srcseturl[0],
+          onLayout
+        );
       }
     }
   }
@@ -279,6 +285,18 @@ export class AmpImg extends BaseElement {
       this.unlistenLoad_();
       this.unlistenLoad_ = null;
     }
+
+    // Interrupt retrieval of incomplete images to free network resources when
+    // navigating pages in a PWA. Opt for tiny dataURI image instead of empty
+    // src to prevent the viewer from detecting a load error.
+    const img = this.img_;
+    if (img && !img.complete) {
+      img.src =
+        'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
+      removeElement(img);
+      this.img_ = null;
+    }
+
     return true;
   }
 

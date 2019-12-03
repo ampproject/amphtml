@@ -21,7 +21,6 @@ import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {preconnectForElement} from './preconnect';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -157,9 +156,6 @@ export class BaseElement {
 
     /** @private {?string} */
     this.defaultActionAlias_ = null;
-
-    /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectForElement(this.element);
   }
 
   /**
@@ -587,7 +583,7 @@ export class BaseElement {
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ActionTrust.HIGH) {
+  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.initActionMap_();
     this.actionMap_[alias] = {handler, minTrust};
   }
@@ -602,7 +598,7 @@ export class BaseElement {
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ActionTrust.HIGH
+    minTrust = ActionTrust.DEFAULT
   ) {
     devAssert(
       !this.defaultActionAlias_,

@@ -20,7 +20,7 @@ tags: {  # amp-list
     name: "amp-list"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -88,9 +88,10 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "fetch"
   }
   attrs: { name: "single-item" }
+  attrs: { name: "strip-prefix" }
   attrs: {
     name: "src"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
     value_url: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
@@ -107,7 +108,7 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   }
   attrs: {
     name: "[src]"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
   }
   attrs: {
     name: "[state]"
@@ -281,7 +282,7 @@ tags: {  # <amp-list>
   attrs: { name: "single-item" }
   attrs: {
     name: "src"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
     value_url: {
       protocol: "https"
       allow_relative: true
@@ -292,7 +293,7 @@ tags: {  # <amp-list>
   # <amp-bind>
   attrs: {
     name: "[src]"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
   }
   attrs: {
     name: "[state]"

@@ -4,7 +4,7 @@
 {
   rules: [
     {
-      owners: [{ name: 'muxin' }]
-    }
-  ]
+      owners: [{name: 'muxin'}],
+    },
+  ],
 }

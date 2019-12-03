@@ -73,12 +73,17 @@
   "comscore": {
     "host": "https://sb.scorecardresearch.com",
     "base": "https://sb.scorecardresearch.com/b?",
-    "pageview": "https://sb.scorecardresearch.com/b?c1=2&c2=1000001&cs_amp_consent=&cs_pv=_page_view_id_&c12=_client_id_&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
+    "pageview": "https://sb.scorecardresearch.com/b?c1=2&c2=1000001&cs_ucfr=&cs_amp_consent=&cs_pv=_page_view_id_&c12=_client_id_&rn=_random_&c8=_title_&c7=_canonical_url_&c9=_document_referrer_&cs_c7amp=_ampdoc_url_"
   },
   "cxense": {
     "host": "https://scomcluster.cxense.com",
     "base": "https://scomcluster.cxense.com/Repo/rep.gif",
     "pageview": "https://scomcluster.cxense.com/Repo/rep.gif?ver=1&typ=pgv&sid=!siteId&ckp=_client_id_&loc=_source_url_&rnd=_random_&ref=_document_referrer_&ltm=_timestamp_&wsz=_screen_width_x_screen_height_&bln=_browser_language_&chs=_document_charset_&col=_screen_color_depth_&tzo=_timezone_&cp_cx_channel=amp"
+  },
+  "deepbi": {
+    "base": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true",
+    "pageview": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true&event_type=page-open",
+    "event": "https://api.deep.bi/v1/pixel/!datasetKey/p.gif?accessKey=!accessKey&gdpr=true&page_href=_source_url_&referrer_href=_document_referrer_&page_title=_title_&amp=true&event_type=event"
   },
   "dynatrace": {
     "endpoint": "https://!tenant.live.dynatrace.com:443/ampbf/!tenantpath",
