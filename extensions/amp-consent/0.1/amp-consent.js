@@ -548,8 +548,10 @@ export class AmpConsent extends AMP.BaseElement {
       const expireCache = response['expireCache'];
       if (expireCache) {
         this.consentStateManager_.setDirtyBit();
-        // Decision from promptUI takes precedence over consent decision from response
-      } else if (
+      }
+
+      // Decision from promptUI takes precedence over consent decision from response
+      if (
         !!response['consentRequired'] &&
         !this.consentStateChangedViaPromptUI_
       ) {
