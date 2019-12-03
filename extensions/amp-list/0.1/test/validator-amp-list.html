@@ -39,6 +39,11 @@
             [src]="foo.bar">
     <div></div>
   </amp-list>
+  <!-- Valid: amp-list with only data-amp-bind-src attribute -->
+  <amp-list width=10 height=10
+            data-amp-bind-src="foo.bar">
+    <div></div>
+  </amp-list>
   <!-- Valid: amp-list with both src and [src] attributes -->
   <amp-list width=10 height=10
             src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -142,7 +147,7 @@
             wdith=10 height=10>
     <div></div>
   </amp-list>
-  <!-- Invalid: missing at least src or [src]. -->
+  <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
   <amp-list width=10 height=10>
     <div></div>
   </amp-list>
