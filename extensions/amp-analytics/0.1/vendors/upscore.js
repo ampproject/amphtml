@@ -36,12 +36,21 @@ const UPSCORE_CONFIG = jsonLiteral({
       'pubdate=${pubdate}&' +
       'ref=${documentReferrer}&' +
       'section=${section}&' +
-      'url=${ampdocUrl}&' +
+      'url=${canonicalUrl}&' +
       'agent=${userAgent}&' +
-      'location=${ampGeo(ISOCountry)}',
+      'location=${ampGeo(ISOCountry)}&' +
+      'c_keys=${customKeys}&' +
+      'c_values=${customValues}',
     'finalbeat': '${host}${basePrefix}&type=final',
     'heartbeat': '${host}${basePrefix}&type=pulse',
     'pageview': '${host}${basePrefix}&${initialHit}&type=init',
+    'videoBase': '${host}url=${canonicalUrl}&video_id=${video_id}',
+    'videoTime': 'ct=${currentTime}&d=${duration}',
+    'video-play':
+      '${videoBase}&e=video_start&${videoTime}&video_name=${video_name}&video_thumb=${video_thumbnail}',
+    'video-pause': '${videoBase}&e=video_pause&${videoTime}',
+    'video-stop': '${videoBase}&e=video_stop&${videoTime}',
+    'video-info': '${videoBase}&e=video_position&${videoTime}',
   },
   'triggers': {
     'initHit': {
