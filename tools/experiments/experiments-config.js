@@ -278,13 +278,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'macro-after-long-task',
-    name:
-      'If applicable, convert remaining micro tasks to the next macro ' +
-      ' tasks if a previous micro task execution took too long',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
-  },
-  {
     id: 'pausable-iframe',
     name: 'Use iframe freezing instead of recreating iframes.',
     spec: 'https://github.com/ampproject/amphtml/issues/24110',
