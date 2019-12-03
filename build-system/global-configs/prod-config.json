@@ -1,5 +1,8 @@
 {
-  "allow-doc-opt-in": ["amp-next-page"],
+  "allow-doc-opt-in": [
+    "amp-consent-geo-override",
+    "amp-next-page"
+  ],
   "allow-url-opt-in": [
     "pump-early-frame",
     "twitter-default-placeholder",
@@ -38,5 +41,6 @@
   "swg-gpay-api": 0.1,
   "swg-gpay-native": 1,
   "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
-  "version-locking": 1
+  "version-locking": 1,
+  "amp-consent-geo-override": 1
 }

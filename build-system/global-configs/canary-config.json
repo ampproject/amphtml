@@ -1,5 +1,8 @@
 {
-  "allow-doc-opt-in": ["amp-next-page"],
+  "allow-doc-opt-in": [
+    "amp-consent-geo-override",
+    "amp-next-page"
+  ],
   "allow-url-opt-in": [
     "pump-early-frame",
     "twitter-default-placeholder",
