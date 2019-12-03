@@ -1202,7 +1202,7 @@ export class ResourcesImpl {
     this.relayoutAll_ = false;
     const relayoutTop = this.relayoutTop_;
     this.relayoutTop_ = -1;
-    const elementsThatScrolled = this.elementsThatScrolled_.splice(0, Infinity);
+    const elementsThatScrolled = this.elementsThatScrolled_;
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
     let relayoutCount = 0;
@@ -1273,6 +1273,7 @@ export class ResourcesImpl {
         }
       }
     }
+    elementsThatScrolled.length = 0;
 
     // Unload all in one cycle.
     if (toUnload) {
