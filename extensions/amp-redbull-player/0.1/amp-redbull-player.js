@@ -129,7 +129,7 @@ class AmpRedBullPlayer extends AMP.BaseElement {
     Services.videoManagerForDoc(this.element).register(this);
     const message = {
       'msg': 'amp-loaded',
-      'id': `${TAG}-${this.tagId_}`,
+      'id': `${TAG}-${this.tagId_}`
     };
     this.iframe_.contentWindow./*OK*/ postMessage(JSON.stringify(message), '*');
   }
