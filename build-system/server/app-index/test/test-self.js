@@ -15,7 +15,7 @@
  */
 
 const amphtmlValidator = require('amphtml-validator');
-const promisifyAll = require('util-promisifyall');
+const fs = require('fs');
 const path = require('path');
 const {expect} = require('chai');
 const {
@@ -24,7 +24,6 @@ const {
   parseHtmlChunk,
 } = require('./helpers');
 
-const fs = promisifyAll(require('fs'));
 
 describe('devdash', () => {
 
@@ -112,7 +111,7 @@ describe('devdash', () => {
         const validDocPath = path.join(__dirname,
             '../../../../validator/testdata/feature_tests/minimum_valid_amp.html');
 
-        const validDoc = (await fs.readFileAsync(validDocPath)).toString();
+        const validDoc = (await fs.promises.readFile(validDocPath)).toString();
 
         expectValidAmphtml(await amphtmlValidator.getInstance(), validDoc);
       });

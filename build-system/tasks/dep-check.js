@@ -18,11 +18,11 @@
 const babelify = require('babelify');
 const browserify = require('browserify');
 const depCheckConfig = require('../test-configs/dep-check-config');
+const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
-const promisifyAll = require('util-promisifyall');
 const source = require('vinyl-source-stream');
 const through = require('through2');
 const {
@@ -37,7 +37,6 @@ const {isTravisBuild} = require('../common/travis');
 
 const root = process.cwd();
 const absPathRegExp = new RegExp(`^${root}/`);
-const fs = promisifyAll(require('fs-extra'));
 
 /**
  * @typedef {{
@@ -164,7 +163,7 @@ const rules = depCheckConfig.rules.map(config => new Rule(config));
  */
 function getSrcs() {
   return fs
-    .readdirAsync('extensions')
+    .readdir('extensions')
     .then(dirItems => {
       // Look for extension entry points
       return flatten(

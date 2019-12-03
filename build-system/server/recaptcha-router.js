@@ -17,11 +17,10 @@
 const argv = require('minimist')(process.argv.slice(2));
 const cors = require('./amp-cors');
 const pc = process;
+const fs = require('fs');
 const multer = require('multer');
-const promisifyAll = require('util-promisifyall');
 const recaptchaRouter = require('express').Router();
 
-const fs = promisifyAll(require('fs'));
 const upload = multer();
 
 const recaptchaMock = `
@@ -33,7 +32,7 @@ window.grecaptcha = {
 
 const recaptchaFrameRequestHandler = (req, res, next) => {
   if (argv._.includes('unit') || argv._.includes('integration')) {
-    fs.readFileAsync(pc.cwd() + req.path, 'utf8').then(file => {
+    fs.promises.readFile(pc.cwd() + req.path, 'utf8').then(file => {
       file = file.replace(
         /initRecaptcha\(.*\)/g,
         'initRecaptcha("/recaptcha/mock.js?sitekey=")'

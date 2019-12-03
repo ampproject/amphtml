@@ -15,10 +15,8 @@
  */
 'use strict';
 
-const promisifyAll = require('util-promisifyall');
+const fs = require('fs');
 const {join, normalize, sep} = require('path');
-
-const fs = promisifyAll(require('fs'));
 
 function isMaliciousPath(path, rootPath) {
   return (path + sep).substr(0, rootPath.length) !== rootPath;
@@ -36,8 +34,8 @@ async function getListing(rootPath, basepath) {
   }
 
   try {
-    if ((await fs.statAsync(path)).isDirectory()) {
-      return fs.readdirAsync(path);
+    if ((await fs.promises.stat(path)).isDirectory()) {
+      return fs.promises.readdir(path);
     }
   } catch (unusedE) {
     /* empty catch for fallbacks */

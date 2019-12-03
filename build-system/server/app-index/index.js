@@ -17,8 +17,8 @@
 
 const api = require('./api/api');
 const basepathMappings = require('./basepath-mappings');
+const fs = require('fs');
 const path = require('path');
-const promisifyAll = require('util-promisifyall');
 const {
   getListing,
   isMainPageFromUrl,
@@ -27,8 +27,6 @@ const {
 const {getServeMode} = require('../app-utils');
 const {join} = require('path');
 const {renderTemplate} = require('./template');
-
-const fs = promisifyAll(require('fs'));
 
 // Sitting on /build-system/server/app-index, so we go back thrice for the repo root.
 const root = path.join(__dirname, '../../../');
@@ -44,7 +42,7 @@ async function serveIndex({url}, res, next) {
     return next();
   }
 
-  const css = (await fs.readFileAsync(mainCssFile)).toString();
+  const css = (await fs.promises.readFile(mainCssFile)).toString();
 
   const renderedHtml = renderTemplate({
     fileSet,

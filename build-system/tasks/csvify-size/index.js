@@ -17,11 +17,10 @@
 
 const childProcess = require('child_process');
 const colors = require('ansi-colors');
+const fs = require('fs');
 const log = require('fancy-log');
-const promisifyAll = require('util-promisifyall');
 const util = require('util');
 
-const fs = promisifyAll(require('fs'));
 const exec = util.promisify(childProcess.exec);
 
 const prettyBytesUnits = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
@@ -234,7 +233,7 @@ function serializeCheckout(logs) {
       // all the tables.
       return exec(`git checkout ${sha} ${filePath}`)
         .then(() => {
-          return fs.readFileAsync(`${filePath}`);
+          return fs.promises.readFile(`${filePath}`);
         })
         .then(file => {
           const quotedDateTime = `"${dateTime}"`;
@@ -268,7 +267,7 @@ async function csvifySize() {
     return serializeCheckout(logs.reverse()).then(rows => {
       rows.unshift.apply(rows, tableHeaders);
       const tbl = rows.map(row => row.join(',')).join('\n');
-      return fs.writeFileAsync('test/size.csv', `${tbl}\n`);
+      return fs.promises.writeFile('test/size.csv', `${tbl}\n`);
     });
   });
 }

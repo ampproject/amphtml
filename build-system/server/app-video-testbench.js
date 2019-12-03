@@ -16,12 +16,11 @@
 /* eslint-disable */
 'use strict';
 
-const promisifyAll = require('util-promisifyall');
+const fs = require('fs');
 const {JSDOM} = require('jsdom');
 const {replaceUrls} = require('./app-utils');
 const {getServeMode} = require('./app-utils');
 
-const fs = promisifyAll(require('fs'));
 
 const sourceFile = 'test/manual/amp-video.amp.html';
 
@@ -368,7 +367,7 @@ function isValidExtension(extension) {
 
 
 function runVideoTestBench(req, res, next) {
-  fs.readFileAsync(sourceFile).then(contents => {
+  fs.promises.readFile(sourceFile).then(contents => {
     const dom = new JSDOM(contents);
     const {window} = dom;
     const doc = window.document;
