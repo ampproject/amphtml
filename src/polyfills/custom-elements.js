@@ -897,23 +897,27 @@ function setPrototypeOf(obj, prototype) {
  * @visibleForTesting
  */
 export function copyProperties(obj, prototype) {
-  while (prototype) {
-    if (Object.isPrototypeOf.call(prototype, obj)) {
+  let current = prototype;
+  while (current !== null) {
+    if (Object.isPrototypeOf.call(current, obj)) {
       break;
     }
 
-    const props = Object.getOwnPropertyNames(prototype);
+    const props = Object.getOwnPropertyNames(current);
     for (let i = 0; i < props.length; i++) {
       const prop = props[i];
       if (Object.hasOwnProperty.call(obj, prop)) {
         continue;
       }
 
-      const desc = Object.getOwnPropertyDescriptor(prototype, prop);
+      const desc = /** @type {!ObjectPropertyDescriptor<Object>} */ (Object.getOwnPropertyDescriptor(
+        current,
+        prop
+      ));
       Object.defineProperty(obj, prop, desc);
     }
 
-    prototype = Object.getPrototypeOf(prototype);
+    current = Object.getPrototypeOf(current);
   }
 }
 
