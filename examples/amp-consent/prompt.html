@@ -1,8 +1,14 @@
 <html>
-<head>
-  <title>Tracking consent</title>
-</head>
-<body>
-  <h1>This dialog should disappear soon...</h1>
-</body>
+  <body>
+    <script type="text/javascript">
+      const urlParams = new URLSearchParams(window.location.search);
+      const delay = urlParams.get('delay');
+      setTimeout(() => {
+        parent.postMessage({
+          type: 'consent-response',
+          action: 'accept'
+        }, '*');
+      }, parseInt(delay));
+    </script>
+  </body>
 </html>
