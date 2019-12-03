@@ -88,13 +88,12 @@ export class ViewerSubscriptionPlatform {
     // TODO(chenshay): Viewer Matching: We don't know which viewer it actually
     // is. Need to check the viewerUrl to know, or more specificlly iterate via
     // configured platforms and check whether any of these support the viewer.
-    const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-      'google.com'
-    );
+    const encryptedDocumentKey = this.serviceAdapter_
+      .getEncryptedDocumentKey('google.com')
     if (encryptedDocumentKey) {
       messageData['encryptedDocumentKey'] = encryptedDocumentKey;
     }
-    const entitlementPromise = this.viewer_
+    return this.viewer_
       .sendMessageAwaitResponse('auth', messageData)
       .then(entitlementData => {
         const authData = (entitlementData || {})['authorization'];
@@ -104,13 +103,25 @@ export class ViewerSubscriptionPlatform {
         if (!authData) {
           return Entitlement.empty('local');
         }
-        return this.verifyAuthToken_(authData, decryptedDocumentKey);
+        return this.verifyAuthToken_(
+          authData,
+          decryptedDocumentKey
+        ).then(resolvedEntitlements => {
+          if (
+            resolvedEntitlements.granted &&
+            encryptedDocumentKey &&
+            !decryptedDocumentKey
+          ) {
+            // Return null to avoid showing encrypted subscription content.
+            return null;
+          }
+          return resolvedEntitlements;
+        });
       })
       .catch(reason => {
         this.sendAuthTokenErrorToViewer_(reason.message);
         throw reason;
       });
-    return /** @type {!Promise<Entitlement>} */ (entitlementPromise);
   }
 
   /**

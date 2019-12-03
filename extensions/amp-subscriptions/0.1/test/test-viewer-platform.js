@@ -120,6 +120,34 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         expect(sendAuthTokenStub).to.be.calledWith(reason);
       }
     });
+
+    it('should return null on missing decryptedDocumentKey.', async () => {
+      serviceAdapter.getEncryptedDocumentKey.restore();
+      env.sandbox
+        .stub(serviceAdapter, 'getEncryptedDocumentKey')
+        .callsFake(() => Promise.resolve('encryptedDocumentKey'));
+      viewerPlatform.viewer_.sendMessageAwaitResponse.restore();
+      env.sandbox
+        .stub(viewerPlatform.viewer_, 'sendMessageAwaitResponse')
+        .callsFake(() =>
+          Promise.resolve({
+            'authorization': 'faketoken',
+            'decryptedDocumentKey': null,
+          })
+        );
+      const entitlement = new Entitlement({
+        source: '',
+        raw: '',
+        granted: true
+      });
+      const verifyAuthTokenStub = env.sandbox
+        .stub(viewerPlatform, 'verifyAuthToken_')
+        .callsFake(() => Promise.resolve(entitlement));
+
+      const ent = await viewerPlatform.getEntitlements();
+      expect(verifyAuthTokenStub).to.be.calledWith('faketoken', null);
+      expect(ent).to.be.null;
+    });
   });
 
   describe('subscriptionchange message', () => {

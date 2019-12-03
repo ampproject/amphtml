@@ -565,7 +565,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     elem.textContent = 'some html';
     expect(() => {
       allowConsoleError(() => {
-        platform.decorateUI(elem, 'subscribe-smartbutton');
+        platform.decorateUI(elem, 'subscribe-smartbutton');encryptedDocumentKey
       });
     }).to.throw(/language/);
   });
@@ -629,6 +629,20 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         expect(entitlement.source).to.be.equal('google');
         expect(entitlement.granted).to.be.equal(false);
         expect(entitlement.grantReason).to.be.null;
+      });
+    });
+
+    it('should return null on granted and empty decryptedDocumentKey', () => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
+        return Promise.resolve({
+          json: () => {
+            return Promise.resolve({entitlements: entitlementResponse});
+          },
+        });
+      });
+      getEncryptedDocumentKeyStub.callsFake(() => 'encryptedDocumentKey');
+      return platform.getEntitlements().then(entitlement => {
+        expect(entitlement).to.be.null;
       });
     });
   });

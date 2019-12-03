@@ -390,6 +390,14 @@ export class GoogleSubscriptionsPlatform {
         } else {
           return null;
         }
+        if (
+          granted &&
+          encryptedDocumentKey &&
+          !swgEntitlements.decryptedDocumentKey
+        ) {
+          // Return null to avoid showing encrypted subscription content.
+          return null;
+        }
         swgEntitlements.ack();
         return new Entitlement({
           source: swgEntitlement.source,

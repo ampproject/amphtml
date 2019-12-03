@@ -177,6 +177,18 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     );
   });
 
+  it('should return null on missing decryptedDocumentKey.', async () => {
+    env.sandbox
+      .stub(localSubscriptionPlatform.xhr_, 'fetchJson')
+      .callsFake(() => Promise.resolve({json: () => Promise.resolve(json)}));
+    getEncryptedDocumentKeyStub.callsFake(() => 'encryptedDocumentKey');
+
+    const ent = await localSubscriptionPlatform.getEntitlements();
+
+    // ent should be null since no decryptedDocumentKey was returned.
+    expect(ent).to.be.null;
+  });
+
   it('should not add encryptedDocumentKey parameter to url', async () => {
     const fetchStub = env.sandbox
       .stub(localSubscriptionPlatform.xhr_, 'fetchJson')

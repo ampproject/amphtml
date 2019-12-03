@@ -71,7 +71,16 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
           .fetchJson(fetchUrl, {credentials: 'include'})
           .then(res => res.json())
           .then(resJson => {
-            return Entitlement.parseFromJson(resJson);
+            const ent = Entitlement.parseFromJson(resJson);
+            if (
+              ent.granted &&
+              encryptedDocumentKey &&
+              !ent.decryptedDocumentKey
+            ) {
+              // Return null to avoid showing encrypted subscription content.
+              return null;
+            }
+            return ent;
           });
       });
   }
