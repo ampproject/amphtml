@@ -1,5 +1,8 @@
 {
-  "allow-doc-opt-in": ["amp-next-page"],
+  "allow-doc-opt-in": [
+    "amp-consent-geo-override",
+    "amp-next-page"
+  ],
   "allow-url-opt-in": [
     "pump-early-frame",
     "twitter-default-placeholder",
@@ -14,7 +17,6 @@
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-auto-ads-no-op-experiment": 0.05,
-  "amp-consent-geo-override": 1,
   "amp-consent-v2": 1,
   "amp-mega-menu": 1,
   "amp-nested-menu": 1,
