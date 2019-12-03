@@ -26,7 +26,7 @@ export function nativery(global, data) {
 
   // push the two object into the '_nativery' global
   global._nativery =
-  global._nativery ||
+    global._nativery ||
     Object.assign(
       {},
       {
