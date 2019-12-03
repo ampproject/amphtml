@@ -467,7 +467,10 @@ export class AmpConsent extends AMP.BaseElement {
           return Promise.resolve(consentRequired);
         }
         return this.getConsentRemote_().then(consentResponse => {
-          return !!consentResponse['consentRequired'];
+          // `promptIfUnknown` is a legacy field
+          return consentResponse['consentRequired'] !== undefined
+            ? !!consentResponse['consentRequired']
+            : !!consentResponse['promptIfUnknown'];
         });
       });
   }
