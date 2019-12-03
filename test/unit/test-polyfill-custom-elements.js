@@ -16,7 +16,7 @@
 
 import {copyProperties} from '../../src/polyfills/custom-elements';
 
-describe('copyProperties', () => {
+describes.fakeWin('copyProperties', {}, () => {
   it('copies own properties from proto object', () => {
     const obj = {};
     const proto = {test: 1};
