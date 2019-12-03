@@ -136,7 +136,7 @@ class CustomElementRegistry {
      * @private
      * @const
      */
-    this.pendingDefines_ = win.Object.create(null);
+    this.pendingDefines_ = Object.create(null);
   }
 
   /**
@@ -233,7 +233,7 @@ class Registry {
      * @private
      * @const
      */
-    this.definitions_ = win.Object.create(null);
+    this.definitions_ = Object.create(null);
 
     /**
      * A up-to-date DOM selector for all custom elements.
@@ -583,7 +583,7 @@ class Registry {
  * @param {!Registry} registry
  */
 function installPatches(win, registry) {
-  const {Document, Element, Node, Object, document} = win;
+  const {Document, Element, Node, document} = win;
   const docProto = Document.prototype;
   const elProto = Element.prototype;
   const nodeProto = Node.prototype;
@@ -701,7 +701,7 @@ function installPatches(win, registry) {
  * @param {!Window} win
  */
 function polyfill(win) {
-  const {Element, HTMLElement, Object, document} = win;
+  const {Element, HTMLElement, document} = win;
   const {createElement} = document;
 
   const registry = new Registry(win);
@@ -789,10 +789,10 @@ function polyfill(win) {
     // prototype to the custom element prototype. And if it wasn't already
     // constructed, we created a new node via native createElement, and we need
     // to reset its prototype. Basically always reset the prototype.
-    setPrototypeOf(Object, el, constructor.prototype);
+    setPrototypeOf(el, constructor.prototype);
     return el;
   }
-  subClass(Object, HTMLElement, HTMLElementPolyfill);
+  subClass(HTMLElement, HTMLElementPolyfill);
 
   // Expose the polyfilled HTMLElement constructor for everyone to extend from.
   win.HTMLElement = HTMLElementPolyfill;
@@ -819,7 +819,7 @@ function polyfill(win) {
  * @suppress {globalThis}
  */
 function wrapHTMLElement(win) {
-  const {HTMLElement, Reflect, Object} = win;
+  const {HTMLElement, Reflect} = win;
   /**
    * @return {!Element}
    */
@@ -831,7 +831,7 @@ function wrapHTMLElement(win) {
     // constructor).
     return Reflect.construct(HTMLElement, [], ctor);
   }
-  subClass(Object, HTMLElement, HTMLElementWrapper);
+  subClass(HTMLElement, HTMLElementWrapper);
 
   // Expose the wrapped HTMLElement constructor for everyone to extend from.
   win.HTMLElement = HTMLElementWrapper;
@@ -840,11 +840,10 @@ function wrapHTMLElement(win) {
 /**
  * Setups up prototype inheritance
  *
- * @param {!Object} Object
  * @param {!Function} superClass
  * @param {!Function} subClass
  */
-function subClass(Object, superClass, subClass) {
+function subClass(superClass, subClass) {
   // Object.getOwnPropertyDescriptor(superClass.prototype, 'constructor')
   // {value: ƒ, writable: true, enumerable: false, configurable: true}
   subClass.prototype = Object.create(superClass.prototype, {
@@ -855,7 +854,7 @@ function subClass(Object, superClass, subClass) {
       value: subClass,
     },
   });
-  setPrototypeOf(Object, subClass, superClass);
+  setPrototypeOf(subClass, superClass);
 }
 
 /**
@@ -873,11 +872,10 @@ function supportsUnderProto() {
 /**
  * Sets the prototype chain of an object, with various fallbacks to support
  * old IE.
- * @param {!Object} Object
  * @param {!Object} obj
  * @param {!Object} prototype
  */
-function setPrototypeOf(Object, obj, prototype) {
+function setPrototypeOf(obj, prototype) {
   if (Object.setPrototypeOf) {
     // Every decent browser.
     Object.setPrototypeOf(obj, prototype);
@@ -886,7 +884,7 @@ function setPrototypeOf(Object, obj, prototype) {
     obj.__proto__ = prototype;
   } else {
     // IE10 man. :sigh:
-    copyProperties(Object, obj, prototype);
+    copyProperties(obj, prototype);
   }
 }
 
@@ -894,28 +892,32 @@ function setPrototypeOf(Object, obj, prototype) {
  * Copies the property descriptors from prototype to obj. This is only
  * necessary for old IE, which can't properly set the prototype of an already
  * created object.
- * @param {!Object} Object
  * @param {!Object} obj
  * @param {!Object} prototype
+ * @visibleForTesting
  */
-function copyProperties(Object, obj, prototype) {
-  while (prototype) {
-    if (Object.isPrototypeOf.call(prototype, obj)) {
+export function copyProperties(obj, prototype) {
+  let current = prototype;
+  while (current !== null) {
+    if (Object.isPrototypeOf.call(current, obj)) {
       break;
     }
 
-    const props = Object.getOwnPropertyNames(prototype);
+    const props = Object.getOwnPropertyNames(current);
     for (let i = 0; i < props.length; i++) {
       const prop = props[i];
       if (Object.hasOwnProperty.call(obj, prop)) {
         continue;
       }
 
-      const desc = Object.getOwnPropertyDescriptor(prototype);
+      const desc = /** @type {!ObjectPropertyDescriptor<Object>} */ (Object.getOwnPropertyDescriptor(
+        current,
+        prop
+      ));
       Object.defineProperty(obj, prop, desc);
     }
 
-    prototype = Object.getPrototypeOf(prototype);
+    current = Object.getPrototypeOf(current);
   }
 }
 
@@ -951,7 +953,7 @@ export function install(win, opt_ctor) {
     // compiled down, and we need to do the minimal polyfill because all you
     // cannot extend HTMLElement without native classes.
     try {
-      const {Object, Reflect, Function} = win;
+      const {Reflect} = win;
 
       // "Construct" ctor using ES5 idioms
       const instance = Object.create(opt_ctor.prototype);
