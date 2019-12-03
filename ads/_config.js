@@ -1106,14 +1106,14 @@ const adConfig = jsonConfiguration({
     ],
   },
 
-  'widespace': {},
-
-  'wisteria': {
+  'whopainfeed': {
+    prefetch: 'https://widget.infeed.com.ar/widget/widget-amp.js',
     renderStartImplemented: true,
   },
 
-  'whopainfeed': {
-    prefetch: 'https://widget.infeed.com.ar/widget/widget-amp.js',
+  'widespace': {},
+
+  'wisteria': {
     renderStartImplemented: true,
   },
 
