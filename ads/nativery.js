@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {getDetail} from '../src/event-helper';
 import {validateData, writeScript} from '../3p/3p';
 
 /**
@@ -41,8 +40,8 @@ export function nativery(global, data) {
 
   // must add listener for resize
   global.addEventListener('amp-widgetCreated', function(e) {
-    if (e && getDetail(e)) {
-      global.context.requestResize(undefined, getDetail(e).height);
+    if (e && e.detail) {
+      global.context.requestResize(undefined, e.detail.height);
     }
   });
 
