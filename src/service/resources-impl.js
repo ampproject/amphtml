@@ -1116,7 +1116,7 @@ export class ResourcesImpl {
       return false;
     }
     const parentWidth =
-      (parent.getImpl && parent.getImpl().getLayoutWidth()) || -1;
+      (parent.getLayoutWidth && parent.getLayoutWidth()) || -1;
     // Reflow will not happen if the parent element is at least as wide as the
     // new width.
     return parentWidth >= width;

@@ -2458,7 +2458,7 @@ describe('Resources changeSize', () => {
         'reflow is impossible',
       () => {
         const parent = document.createElement('div');
-        parent.getImpl = () => ({getLayoutWidth: () => 222});
+        parent.getLayoutWidth = () => 222;
         const element = document.createElement('div');
         element.overflowCallback = () => {};
         parent.appendChild(element);
