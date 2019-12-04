@@ -21,7 +21,6 @@ import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
-import {includes} from '../../../src/string';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
 /**
@@ -86,12 +85,24 @@ export class ViewerSubscriptionPlatform {
       'productId': this.currentProductId_,
       'origin': this.origin_,
     });
-    const viewerUrl = includes(this.viewer_.getResolvedViewerUrl(), 'google.com')
-      ? 'google.com'
-      : 'local';
-    const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-      viewerUrl
+    // Defaulting to google.com for now.
+    // TODO(@elijahsoria): Remove this line and only rely on what is returned
+    // in the cryptokeys param.
+    let encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
+      'google.com'
     );
+    const cryptokeysNames = this.viewer_.getParam('cryptokeys');
+    if (cryptokeysNames) {
+      const keyNames = cryptokeysNames.split(',');
+      for (let i = 0; i != keyNames.length; i++) {
+        const encKeyOrNull = this.serviceAdapter_.getEncryptedDocumentKey(
+          keyNames[i]
+        );
+        encryptedDocumentKey = encKeyOrNull
+          ? encKeyOrNull
+          : encryptedDocumentKey;
+      }
+    }
     if (encryptedDocumentKey) {
       messageData['encryptedDocumentKey'] = encryptedDocumentKey;
     }
