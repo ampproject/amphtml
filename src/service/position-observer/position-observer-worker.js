@@ -40,7 +40,7 @@ const LOW_FIDELITY_FRAME_COUNT = 4;
  * @typedef {{
  *  positionRect: ?../../layout-rect.LayoutRectDef,
  *  viewportRect: !../../layout-rect.LayoutRectDef,
- *  relativePos: string,
+ *  relativePos: ?../../layout-rect.RelativePositions,
  * }}
  */
 export let PositionInViewportEntryDef;
@@ -146,7 +146,7 @@ export class PositionObserverWorker {
         /** @type {./position-observer-worker.PositionInViewportEntryDef}*/ ({
           positionRect: elementBox,
           viewportRect: viewportBox,
-          relativePos: '',
+          relativePos: null,
         })
       );
     });
