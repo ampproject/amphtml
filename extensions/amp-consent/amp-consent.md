@@ -285,7 +285,7 @@ AMP will check client cache and server in parallel to find the previous consent 
 
 #### stripPrefix
 
-`stripPrefix`: Causes `<amp-consent>` to strip a prefix from the endpoint's return value. This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
+`stripPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's return value. This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
 ## Consent Management
 
