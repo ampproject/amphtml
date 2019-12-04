@@ -45,7 +45,8 @@ export class AutoAdvance {
    *   advanceable: !AdvanceDef
    * }} config
    */
-  constructor({win, scrollContainer, advanceable}) {
+  constructor(config) {
+    const {win, scrollContainer, advanceable} = config;
     /** @private @const */
     this.win_ = win;
 

@@ -20,6 +20,7 @@
   },
   "rules": {
     "local/no-array-destructuring": 0,
+    "local/no-destructure-assignment-params": 0,
     "local/no-export-side-effect": 0,
     "local/no-for-of-statement": 0,
     "local/no-has-own-property-method": 0,
