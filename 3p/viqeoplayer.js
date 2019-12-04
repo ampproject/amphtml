@@ -53,10 +53,8 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
   subscribe('ended', 'end');
   subscribe('advStarted', 'startAdvert');
   subscribe('advEnded', 'endAdvert');
-  subscribeTracking({
-    Mute: 'mute',
-    Unmute: 'unmute',
-  });
+  subscribe('muted', 'mute');
+  subscribe('unmuted', 'unmute');
 
   /**
    * Subscribe on viqeo's events
@@ -68,22 +66,6 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
     VIQEO['subscribeTracking'](() => {
       sendMessage(targetEventName);
     }, `Player:${playerEventName}`);
-  }
-
-  /**
-   * Subscribe viqeo's tracking
-   * @param {Object.<string, string>} eventsDescription
-   * @private
-   */
-  function subscribeTracking(eventsDescription) {
-    VIQEO['subscribeTracking'](params => {
-      const name =
-        params && params['trackingParams'] && params['trackingParams'].name;
-      const targetEventName = eventsDescription[name];
-      if (targetEventName) {
-        sendMessage(targetEventName);
-      }
-    }, 'Player:userAction');
   }
 
   const sendMessage = (eventName, value = null) => {

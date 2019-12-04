@@ -147,6 +147,16 @@ describes.realWin(
             return p;
           })
           .then(() => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.MUTED);
+            fakePostMessage(viqeoElement, {action: 'mute'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.UNMUTED);
+            fakePostMessage(viqeoElement, {action: 'unmute'});
+            return p;
+          })
+          .then(() => {
             const p = listenOncePromise(viqeoElement, VideoEvents.ENDED);
             fakePostMessage(viqeoElement, {action: 'end'});
             return p;
