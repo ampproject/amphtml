@@ -118,6 +118,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   attachContent_() {
+    // Adjust grid-layer to fill screen
+    this.element.parentElement.classList.add('i-amphtml-has-interactive-child');
+
     // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
     const promptInput = this.element.children[0];
     // First child must be heading h1-h3

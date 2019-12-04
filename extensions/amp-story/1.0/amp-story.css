@@ -985,9 +985,16 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
   white-space: nowrap !important;
 }
 
+
+amp-story-page .i-amphtml-has-interactive-child {
+  align-content: normal;
+  padding-top: 32px !important;
+}
+
 amp-story-quiz {
   width: 100% !important;
   height: auto !important;
   max-width: 400px !important;
   justify-self: center;
+  align-self: center;
 }
