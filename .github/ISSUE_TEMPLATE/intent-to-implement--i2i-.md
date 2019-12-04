@@ -57,7 +57,7 @@ You should add a link to the launch tracker for this work here if applicable. On
 -->
 
 ## Consideration checklist
-### Design
+### Software Design
 - [ ] Design shows understanding of problem statement/priority
 - [ ] Acceptance/success criteria for problem being solved is clear
 - [ ] Brought to design review
