@@ -481,6 +481,11 @@ class AmpCarousel extends AMP.BaseElement {
     const isSlides = type == CarouselType.SLIDES;
 
     this.type_ = isSlides ? CarouselType.SLIDES : CarouselType.CAROUSEL;
+    // Use center alignment for slides to make sure fractional widths
+    // do not cause the wrong slide to be considered as active. For example,
+    // a slide is positioned at 100.5px, but the updated scroll position is
+    // truncated to 100px.
+    this.carousel_.updateAlignment(isSlides ? 'center' : 'start');
     this.carousel_.updateHideScrollbar(isSlides);
     this.carousel_.updateMixedLength(!isSlides);
     this.carousel_.updateSnap(isSlides);
