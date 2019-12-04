@@ -577,7 +577,8 @@ export class AmpConsent extends AMP.BaseElement {
         const consentString = responseConsentString || storedInfo.consentString;
         this.consentStateManager_.updateConsentInstanceState(
           consentStateValue,
-          consentString
+          consentString,
+          true
         );
       });
     }
