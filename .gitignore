@@ -1,6 +1,6 @@
 .DS_Store
 .g4ignore
-build
+build/
 .amp-build
 c
 /dist
