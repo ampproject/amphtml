@@ -17,6 +17,7 @@
 import {RequestBank} from '../../testing/test-helper';
 import {maybeSwitchToCompiledJs} from '../../testing/iframe';
 import {parseQueryString} from '../../src/url';
+import {toggleExperiment} from '../../src/experiments';
 import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
 describe('AMPHTML ad on AMP Page', () => {
@@ -350,6 +351,7 @@ describe('A more real AMPHTML image ad', () => {
       });
 
       it('should properly render ad in a friendly iframe with viewability pings', () => {
+        toggleExperiment(env.win, 'inabox-viewport-friendly', true);
         writeFriendlyFrame(doc, iframe, adBody);
         return testVisibilityPings(0, 1000);
       });

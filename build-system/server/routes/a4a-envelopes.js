@@ -44,10 +44,12 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
   fs.promises
     .readFile(process.cwd() + templatePath, 'utf8')
     .then(template => {
-      const url = getInaboxUrl(req);
+      let url;
       if (req.baseUrl == '/inabox-friendly') {
+        url = getInaboxUrl(req, 'inabox-viewport-friendly');
         template = template.replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"');
       } else {
+        url = getInaboxUrl(req);
         template = template
           .replace(
             /NAME/g,
