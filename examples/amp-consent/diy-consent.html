@@ -130,7 +130,8 @@ var consentState;
 if (window && window.name) {
   try {
     clientInfo = JSON.parse(window.name);
-    cmpId = clientInfo['clientConfig']['CMP_id'];
+    cmpId =
+        clientInfo['clientConfig'] && clientInfo['clientConfig']['CMP_id'];
     consentStr = clientInfo['consentString'];
     consentState = clientInfo['consentState'];
     // TODO: convert consentState to readable value

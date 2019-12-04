@@ -119,8 +119,8 @@
   </div>
 </header>
 <main role="main">
+  <p>This example tests amp-consent with amp-geo using 'geoOverride' to prompt different UIs</p>
   <h3>Image that is blocked by '_till_responded' consent</h3>
-
   <amp-analytics type="_ping_">
     <script type="application/json">
       {
@@ -178,7 +178,8 @@
         "ISOCountryGroups": {
           "na": ["ca", "mx", "us"],
           "eea": ["preset-eea"],
-          "row": ["unknown"]
+          "row": ["unknown"],
+          "useIframe": ["fake"]
         }
       }
     </script>
@@ -187,28 +188,54 @@
   <amp-consent id='ABC' layout='nodisplay'>
     <script type="application/json">{
       "consentInstanceId": "geotest",
-      "promptUISrc": "/examples/amp-consent/prompt.html",
       "consentRequired": false,
+      "promptUI": "ui1",
       "postPromptUI": "postPromptUI",
-
+      "clientConfig": {
+        "geoGroup": "default",
+        "CMP_id": "1234"
+      },
       "geoOverride": {
         "na": {
           "checkConsentHref": "/check-consent?consentRequired=false",
           "consentRequired": "remote"
         },
         "eea": {
-          "promptUISrc": "/examples/amp-consent/prompt.html?delay=1000",
+          "promptUI": null,
+          "promptUISrc": "http://ads.localhost:8000/examples/amp-consent/diy-consent.html",
+          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true",
+          "consentRequired": true,
+          "clientConfig": {
+            "geoGroup": "eea",
+            "eea_config": "test"
+          }
+        },
+        "row": {
           "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true",
           "consentRequired": true
         },
-        "row": {
-          "promptUISrc": "/examples/amp-consent/prompt.html?delay=0",
-          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true",
-          "consentRequired": true
+        "useIframe": {
+          "consentRequired": true,
+          "promptUI": "ui2"
         }
       }
     }</script>
-
+    <div id="ui1">
+      Can I load the image??
+      <button on="tap:ABC.accept" role="button">Accept</button>
+      <button on="tap:ABC.reject" role="button">Reject</button>
+      <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+    </div>
+    <div id="ui2">
+      Can I load the image??
+      <amp-iframe id='5678' width=300 height=50
+        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+        layout="responsive"
+        frameborder="0"
+        src="http://ads.localhost:8000/examples/amp-consent/diy-consent.html">
+        <placeholder></placeholder>
+      </amp-iframe>
+    </div>
     <div id="postPromptUI">
       Post Prompt UI
       <button on="tap:ABC.prompt" role="button">Manage</button>
