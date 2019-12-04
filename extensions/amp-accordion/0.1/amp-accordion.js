@@ -140,14 +140,15 @@ class AmpAccordion extends AMP.BaseElement {
         // for details.
       });
 
+      const isExpanded = section.hasAttribute('expanded');
       const header = sectionComponents[0];
       header.classList.add('i-amphtml-accordion-header');
       header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
-      header.setAttribute(
-        'aria-expanded',
-        section.hasAttribute('expanded').toString()
-      );
+      header.setAttribute('aria-expanded', isExpanded.toString());
+      content.renderSubtree = isExpanded
+        ? ''
+        : 'invisible skip-viewport-activation';
       if (!header.hasAttribute('tabindex')) {
         header.setAttribute('tabindex', 0);
       }
@@ -160,6 +161,12 @@ class AmpAccordion extends AMP.BaseElement {
 
       header.addEventListener('click', this.clickHandler_.bind(this));
       header.addEventListener('keydown', this.keyDownHandler_.bind(this));
+      content.addEventListener('rendersubtreeactivation', event => {
+        const section = event.target.closest('amp-accordion > section');
+        if (section) {
+          this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
+        }
+      });
     });
   }
 
@@ -303,17 +310,21 @@ class AmpAccordion extends AMP.BaseElement {
     if (this.element.hasAttribute('animate')) {
       if (toExpand) {
         header.setAttribute('aria-expanded', 'true');
+        content.renderSubtree = '';
         this.animateExpand_(section, trust);
         if (this.element.hasAttribute('expand-single-section')) {
           this.sections_.forEach(sectionIter => {
             if (sectionIter != section) {
               this.animateCollapse_(sectionIter, trust);
               sectionIter.children[0].setAttribute('aria-expanded', 'false');
+              sectionIter.children[1].renderSubtree =
+                'invisible skip-viewport-activation';
             }
           });
         }
       } else {
         header.setAttribute('aria-expanded', 'false');
+        content.renderSubtree = 'invisible skip-viewport-activation';
         this.animateCollapse_(section, trust);
       }
     } else {
@@ -322,6 +333,7 @@ class AmpAccordion extends AMP.BaseElement {
         if (toExpand) {
           this.triggerEvent_('expand', section, trust);
           section.setAttribute('expanded', '');
+          content.renderSubtree = '';
           header.setAttribute('aria-expanded', 'true');
           // if expand-single-section is set, only allow one <section> to be
           // expanded at a time
@@ -333,6 +345,8 @@ class AmpAccordion extends AMP.BaseElement {
                   sectionIter.removeAttribute('expanded');
                 }
                 sectionIter.children[0].setAttribute('aria-expanded', 'false');
+                sectionIter.children[1].renderSubtree =
+                  'invisible skip-viewport-activation';
               }
             });
           }
@@ -340,6 +354,7 @@ class AmpAccordion extends AMP.BaseElement {
           this.triggerEvent_('collapse', section, trust);
           section.removeAttribute('expanded');
           header.setAttribute('aria-expanded', 'false');
+          content.renderSubtree = 'invisible skip-viewport-activation';
         }
       }, section);
     }
