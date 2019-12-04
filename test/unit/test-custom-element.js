@@ -329,12 +329,10 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('Element - updateLayoutBox', () => {
         const element = new ElementClass();
         container.appendChild(element);
-        expect(element.layoutWidth_).to.equal(-1);
-        expect(element.implementation_.layoutWidth_).to.equal(-1);
+        expect(element.getLayoutWidth()).to.equal(-1);
 
         element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-        expect(element.layoutWidth_).to.equal(111);
-        expect(element.implementation_.layoutWidth_).to.equal(111);
+        expect(element.getLayoutWidth()).to.equal(111);
       });
 
       it('should tolerate errors in onLayoutMeasure', () => {
@@ -352,8 +350,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         return element.buildingPromise_.then(() => {
           allowConsoleError(() => {
             element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-            expect(element.layoutWidth_).to.equal(111);
-            expect(element.implementation_.layoutWidth_).to.equal(111);
+            expect(element.getLayoutWidth()).to.equal(111);
             expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
           });
         });
@@ -374,8 +371,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
               {top: 0, left: 0, width: 111, height: 51},
               /* opt_hasMeasurementsChanged */ false
             );
-            expect(element.layoutWidth_).to.equal(111);
-            expect(element.implementation_.layoutWidth_).to.equal(111);
+            expect(element.getLayoutWidth()).to.equal(111);
             expect(onMeasureChangeStub).to.have.not.been.called;
           });
         }
@@ -396,8 +392,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
               {top: 0, left: 0, width: 111, height: 51},
               /* opt_hasMeasurementsChanged */ true
             );
-            expect(element.layoutWidth_).to.equal(111);
-            expect(element.implementation_.layoutWidth_).to.equal(111);
+            expect(element.getLayoutWidth()).to.equal(111);
             expect(onMeasureChangeStub).to.have.been.called;
           });
         }
@@ -421,7 +416,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(element.isUpgraded()).to.equal(true);
         expect(element.implementation_).to.be.instanceOf(TestElement);
         expect(element.implementation_.layout_).to.equal(Layout.FILL);
-        expect(element.implementation_.layoutWidth_).to.equal(111);
         expect(testElementCreatedCallback).to.be.calledOnce;
         expect(testElementFirstAttachedCallback).to.be.calledOnce;
         expect(element.isBuilt()).to.equal(false);

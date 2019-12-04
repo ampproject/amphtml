@@ -214,7 +214,7 @@ export class AmpImg extends BaseElement {
       return;
     }
 
-    const width = this.getLayoutWidth();
+    const width = this.element.getLayoutWidth();
     if (!this.shouldSetSizes_(width)) {
       return;
     }
@@ -269,7 +269,7 @@ export class AmpImg extends BaseElement {
     const img = dev().assertElement(this.img_);
     this.unlistenLoad_ = listen(img, 'load', () => this.hideFallbackImg_());
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
-    if (this.getLayoutWidth() <= 0) {
+    if (this.element.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
     return this.loadPromise(img);

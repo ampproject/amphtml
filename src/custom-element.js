@@ -413,8 +413,8 @@ function createBaseCustomElementClass(win) {
       this.classList.remove('i-amphtml-unresolved');
       this.implementation_.createdCallback();
       this.assertLayout_();
+      // TODO(wg-runtime): Don't set BaseElement ivars externally.
       this.implementation_.layout_ = this.layout_;
-      this.implementation_.layoutWidth_ = this.layoutWidth_;
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
@@ -464,6 +464,15 @@ function createBaseCustomElementClass(win) {
     getLayoutPriority() {
       devAssert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
       return this.implementation_.getLayoutPriority();
+    }
+
+    /**
+     * TODO(wg-runtime, #25824): Make Resource.getLayoutBox() the source of truth.
+     * @return {number}
+     * @deprecated
+     */
+    getLayoutWidth() {
+      return this.layoutWidth_;
     }
 
     /**
@@ -588,16 +597,12 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Updates the layout box of the element.
-     * See {@link BaseElement.getLayoutWidth} for details.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
      * @param {boolean=} opt_measurementsChanged
      */
     updateLayoutBox(layoutBox, opt_measurementsChanged) {
       this.layoutWidth_ = layoutBox.width;
       this.layoutHeight_ = layoutBox.height;
-      if (this.isUpgraded()) {
-        this.implementation_.layoutWidth_ = this.layoutWidth_;
-      }
       if (this.isBuilt()) {
         try {
           this.implementation_.onLayoutMeasure();

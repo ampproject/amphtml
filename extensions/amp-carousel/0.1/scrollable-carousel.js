@@ -298,7 +298,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   withinWindow_(pos, callback) {
-    const containerWidth = this.getLayoutWidth();
+    const containerWidth = this.element.getLayoutWidth();
     for (let i = 0; i < this.cells_.length; i++) {
       const cell = this.cells_[i];
       if (
@@ -367,8 +367,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   hasNext() {
-    // TODO(jridgewell): this could be using cached values from Layers.
-    const containerWidth = this.getLayoutWidth();
+    const containerWidth = this.element.getLayoutWidth();
     const scrollWidth = this.container_./*OK*/ scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;

@@ -639,8 +639,11 @@ describes.realWin(
 
     it('should handle layout measures (orientation changes)', async () => {
       const ampSlideScroll = await getAmpSlideScroll();
+      const getLayoutWidthStub = env.sandbox.stub(
+        ampSlideScroll,
+        'getLayoutWidth'
+      );
       const impl = ampSlideScroll.implementation_;
-      const getLayoutWidthStub = env.sandbox.stub(impl, 'getLayoutWidth');
 
       getLayoutWidthStub.returns(200);
       impl.onLayoutMeasure();
