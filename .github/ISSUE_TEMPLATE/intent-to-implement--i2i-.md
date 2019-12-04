@@ -60,7 +60,7 @@ You should add a link to the launch tracker for this work here if applicable. On
 ### Design
 - [ ] Design shows understanding of problem statement/priority
 - [ ] Acceptance/success criteria for problem being solved is clear
-- [ ] Design socialized
+- [ ] Brought to design review
 <!--
 Mark as done once this design has been presented at a [Design Review](https://github.com/ampproject/amphtml/blob/master/contributing/design-reviews.md).
 -->
