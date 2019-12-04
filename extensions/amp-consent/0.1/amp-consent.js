@@ -427,6 +427,8 @@ export class AmpConsent extends AMP.BaseElement {
     this.passSharedData_();
     if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
       this.syncRemoteConsentState_();
+    } else {
+      this.maybeSetDirtyBit_();
     }
 
     this.getConsentRequiredPromise_()
@@ -522,6 +524,18 @@ export class AmpConsent extends AMP.BaseElement {
     });
 
     this.consentStateManager_.setConsentInstanceSharedData(sharedDataPromise);
+  }
+
+  /**
+   * Set dirtyBit of the local consent value based on server response
+   */
+  maybeSetDirtyBit_() {
+    const responsePromise = this.getConsentRemote_();
+    responsePromise.then(response => {
+      if (response && !!response['forcePromptOnNext']) {
+        this.consentStateManager_.setDirtyBit();
+      }
+    });
   }
 
   /**
