@@ -15,6 +15,7 @@
  */
 
 import {validateData, writeScript} from '../3p/3p';
+import {getDetail} from '../src/event-helper';
 
 /**
  * @param {!Window} global
@@ -40,8 +41,8 @@ export function nativery(global, data) {
 
   // must add listener for resize
   global.addEventListener('amp-widgetCreated', function(e) {
-    if (e && e.detail) {
-      global.context.requestResize(undefined, e.detail.height);
+    if (e && getDetail(e)) {
+      global.context.requestResize(undefined, getDetail(e).height);
     }
   });
 
