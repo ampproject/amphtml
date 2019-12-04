@@ -557,7 +557,7 @@ export class AmpConsent extends AMP.BaseElement {
       ) {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
-          response['consentString']
+          response['consentString'] || undefined
         );
       }
     });
@@ -569,18 +569,12 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string=} responseConsentString
    */
   updateCacheIfNotNull_(responseStateValue, responseConsentString) {
-    if (responseStateValue !== null || responseConsentString !== null) {
-      this.consentStateManager_.getConsentInstanceInfo().then(storedInfo => {
-        const consentStateValue =
-          convertEnumValueToState(responseStateValue) ||
-          storedInfo.consentState;
-        const consentString = responseConsentString || storedInfo.consentString;
-        this.consentStateManager_.updateConsentInstanceState(
-          consentStateValue,
-          consentString,
-          true
-        );
-      });
+    const consentStateValue = convertEnumValueToState(responseStateValue);
+    if (consentStateValue !== null) {
+      this.consentStateManager_.updateConsentInstanceState(
+        consentStateValue,
+        responseConsentString
+      );
     }
   }
 

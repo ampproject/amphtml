@@ -91,14 +91,13 @@ export class ConsentStateManager {
    * Update consent instance state
    * @param {CONSENT_ITEM_STATE} state
    * @param {string=} consentStr
-   * @param {boolean=} opt_systemUpdate
    */
-  updateConsentInstanceState(state, consentStr, opt_systemUpdate = false) {
+  updateConsentInstanceState(state, consentStr) {
     if (!this.instance_) {
       dev().error(TAG, 'instance not registered');
       return;
     }
-    this.instance_.update(state, consentStr, opt_systemUpdate);
+    this.instance_.update(state, consentStr, false);
 
     if (this.consentChangeHandler_) {
       this.consentChangeHandler_(constructConsentInfo(state, consentStr));
