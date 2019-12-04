@@ -15,13 +15,14 @@
  */
 'use strict';
 
-const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const gulp = require('gulp');
 const log = require('fancy-log');
-const request = BBPromise.promisify(require('request'));
 const srcGlobs = require('../test-configs/config').presubmitGlobs;
 const through2 = require('through2');
+const util = require('util');
+
+const request = util.promisify(require('request'));
 
 const {GITHUB_ACCESS_TOKEN} = process.env;
 
