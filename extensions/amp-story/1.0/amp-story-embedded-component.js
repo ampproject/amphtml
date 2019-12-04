@@ -29,6 +29,7 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
+import {Keys} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, closest, matches} from '../../../src/dom';
@@ -500,6 +501,11 @@ export class AmpStoryEmbeddedComponent {
       }
     );
 
+    /** @type {!../../../src/service/history-impl.History} */
+    this.historyService_ = Services.historyForDoc(
+      getAmpdoc(this.win_.document)
+    );
+
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
 
@@ -508,6 +514,9 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {?Element} */
     this.buttonRight_ = null;
+
+    /** @private {number} */
+    this.historyId_ = -1;
   }
 
   /**
@@ -577,6 +586,11 @@ export class AmpStoryEmbeddedComponent {
         this.onFocusedStateUpdate_(null);
         this.scheduleEmbedToPause_(component.element);
         this.toggleExpandedView_(component.element);
+        this.historyService_
+          .push(() => this.close_())
+          .then(historyId => {
+            this.historyId_ = historyId;
+          });
         break;
       default:
         dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
@@ -658,14 +672,12 @@ export class AmpStoryEmbeddedComponent {
       (target && matches(target, '.i-amphtml-expanded-view-close-button')) ||
       forceClose
     ) {
-      // Target is expanded and going into hidden mode.
-      this.close_();
-      this.toggleExpandedView_(null);
-      this.tooltip_.removeEventListener(
-        'click',
-        this.expandComponentHandler_,
-        true /** capture */
-      );
+      if (this.historyId_ !== -1) {
+        this.historyService_.goBack();
+      } else {
+        // Used for visual diff testing viewer.
+        this.close_();
+      }
     }
   }
 
@@ -715,6 +727,13 @@ export class AmpStoryEmbeddedComponent {
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       state: EmbeddedComponentState.HIDDEN,
     });
+
+    this.toggleExpandedView_(null);
+    this.tooltip_.removeEventListener(
+      'click',
+      this.expandComponentHandler_,
+      true /** capture */
+    );
   }
 
   /**
@@ -802,6 +821,19 @@ export class AmpStoryEmbeddedComponent {
       while (this.embedsToBePaused_.length > 0) {
         const embedEl = this.embedsToBePaused_.pop();
         this.owners_.schedulePause(this.storyEl_, embedEl);
+      }
+    });
+
+    this.win_.addEventListener('keyup', event => {
+      if (
+        event.key === Keys.ESCAPE &&
+        this.state_ === EmbeddedComponentState.EXPANDED
+      ) {
+        event.preventDefault();
+        this.maybeCloseExpandedView_(
+          null /** target */,
+          true /** forceClose */
+        );
       }
     });
   }
