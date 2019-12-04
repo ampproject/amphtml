@@ -570,6 +570,7 @@ export class AmpConsent extends AMP.BaseElement {
    */
   updateCacheIfNotNull_(responseStateValue, responseConsentString) {
     const consentStateValue = convertEnumValueToState(responseStateValue);
+    // consentStateValue and consentString are treated as a pair that will update together
     if (consentStateValue !== null) {
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
