@@ -109,7 +109,7 @@ Example:
 AMP sends the consent instance ID in the `consentInstanceId` field with the POST request.
 
 ```html
-{ 
+{
   "consentInstanceId": {string},
   "consentStateValue": {enum}, // the stored consent state in client cache
                                // takes value of ["accepted", "rejected", "unknown"]
@@ -123,29 +123,33 @@ AMP sends the consent instance ID in the `consentInstanceId` field with the POST
 AMP expects the response to be a JSON object like the following:
 
 ```html
-{ 
-  "consentRequired": {boolean}                  // Whether consent is required from the user. 
+{
+  "consentRequired": {boolean}                  // Required value.
+                                                // Whether consent is required from the user.
   "consentStateValue": {?enum} [default: null], // (new) The latest consent state known by the server
                                                 // Takes value of ["accepted", "rejected", "unknown"].
                                                 // The value will be ignored if "consentRequired: false".
                                                 // If the value is non-null, it will be cached at client.
   "consentString": {?string} [default: null],   // (new) The latest consent string known by the server.
                                                 // If the value is non-null, it will be cached at client.
-  "expireCache": {boolean} [default: false]     // (new) Indicate that the cache needs to be cleared.  
-                                                // Set to `true` in conjunction with consentStateValue='accepted'/'rejected' 
-                                                // to enforce server side consent state 
+  "expireCache": {boolean} [default: false]     // (new) Indicate that the cache needs to be cleared.
+                                                // Set to `true` in conjunction with consentStateValue='accepted'/'rejected'
+                                                // to enforce server side consent state
 }
 ```
+
+**Note: The legacy `promptIfUnknown` is migrating to `consentRequired` as prompt is no longer strictly required to manage consents.**
 
 Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
 
 ```html
-{ 
+{
+  "consentRequire": true,
   "sharedData": {
     "a-key": "some-string-value",
-    "key-with-bool-value": true, 
+    "key-with-bool-value": true,
     "key-with-numeric-value": 123
-  } 
+  }
 }
 ```
 
@@ -157,25 +161,13 @@ current user to the 3rd party vendor extensions.
 
 Unlike consent state, this `shareData` is not persisted in client side storage.
 
-##### Client caching
-As mentioned in the response section, the consent state returned in the response will be stored in `localStorage` as a client
-side cache. The cached value will be used to avoid an extra server roundtrip on user's next visit. Note that this cached value, i.e user's previous consent decision ("accepted" or "rejected"), will always be respected in prior to all other things. 
-A couple of implications with this behavior:
-
-- If a user can make consent decisions elsewhere, any decision changes will be one-time off due to the client cache.
-- When the user is travelling away from a consent enforced region, the user's very first visit in the new region will still take user's previous consent decision in cache. It's the `checkConsentHref` endpoint's job to decide if the same decision should still be respected for all future visits by echoing back user's consent, or consent is no longer required for the user  by responding `consentRequire: false, expireCache: true`.
-
-If the above behavior is unwanted, publishers can return `expireCache: true` all the time to completely disable client cache, with a tradeoff on increased latency.
-
-Note that any locally collected consent decisions via AMP's prompt UI are also stored in the same client cache overriding any previous consent state.
-
 #### consentRequired
-`consentRequired`: It accepts a boolean value indicating if a consent is required. `<amp-consent>` releases the lock immediately if `consentRequired: false`. It makes sense mostly with a combination of [geoOverride](#geooverride) config so that only a certain regions require consent. 
+`consentRequired`: It accepts a boolean value indicating if a consent is required. `<amp-consent>` will unblock components with an `UNKNOWN_NOT_REQUIRED` state if `consentRequired: false` and there's no previous consent decision stored in client cache. It makes sense mostly with a combination of [geoOverride](#geooverride) config so that only a certain regions require consent.
 
 It can also be set to `consentRequired: "remote"` to fetch the value remotely from the `checkConsentHref` endpoint. This is
-useful when publishers want to use their own server to decide if consent is required. For example, they want to have their own geo detection, or use the existing consent state for a known user.
+useful when publishers want to use their own server to decide if consent is required. For example, they want to have their own geo detection, or use the existing consent state for a known user. When used without `geoOverride`(#geooverride), the `consentRequired` value is set to `remote` by default if not specified.
 
-Note that this value will be ignored if there is previous consent state stored in client cache (see [Client caching](#client-caching) section for examples). 
+Note that this value will be ignored if there is previous consent state stored in client cache (see [Client caching](#client-caching) section for examples).
 
 
 #### onUpdateHref
@@ -185,12 +177,14 @@ Note that this value will be ignored if there is previous consent state stored i
 AMP sends the consent instance ID, a generated user id only for this usage and the consent state along with the POST request.
 
 ```html
-{ 
+{
   "consentInstanceId": "my-consent",
-  "ampUserId": "xxx", 
+  "ampUserId": "xxx",
   "consentStateValue": "accepted"/"rejected"/"unknown"
 }
 ```
+
+TODO(zhouyx@): Need discussion. "unknown" can now override "accept/reject" with server response. We need to add support to that.
 
 #### promptUI
 
@@ -201,9 +195,9 @@ The consent decisions collected from user via this prompt UI will be stored in `
 
 #### geoOverride
 
-`geoOverride` provides a way to utilize the `<amp-geo>` component to detect user's geo location to assist client side decisions. 
+`geoOverride` provides a way to utilize the `<amp-geo>` component to detect user's geo location to assist client side decisions.
 
-`geoOverride` is a JSON object keyed by geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). Each geo override should be a valid `<amp-consent>` config object. AMP will take all the values in the corresponding `geoOverride` to override the existing config. 
+`geoOverride` is a JSON object keyed by geo group codes which are defined in `<amp-geo>` (details [here](https://github.com/ampproject/amphtml/blob/master/extensions/amp-geo/amp-geo.md)). Each geo override should be a valid `<amp-consent>` config object. AMP will take all the values in the corresponding `geoOverride` to override the existing config.
 
 Two important tips when configuring `amp-geo`:
 
@@ -221,7 +215,7 @@ Take the following config as an example:
   "geoOverride": {
     "geoGroup1": {
       "consentRequired": true,
-    }, 
+    },
     "geoGroup2": {
       "checkConsentHref": "https://example.com/check-consent",
       "consentRequired": "remote",
@@ -416,9 +410,20 @@ The post-prompt UI provides one user action type that can be used to allow the u
 
 The `<amp-consent>` element can be used to block any other AMP components on the page from loading (except `<amp-consent>` itself).
 
+### Client caching
+The consent information (from the response or from user action on client side) will be cached on client side in localStorage. The cached value will be used by <amp-consent> to unblock content for performance optimization unless specifically erased by the expireCache : true flag.
+A couple of implications with this behavior:
+
+- When a user change the consent decision elsewhere, the change will be synced through `checkConsentHref` response. But the change will be applied one-time off due to the client cache.
+- When a user travels, <amp-consent> will use the stored consent. It's up to the `checkConsentHref` response to erase stored value using `expireCache: false` and `consentRequired: false`.
+
+TODO(zhouyx@): Need discussion
+When consent is collected and managed purely on client side via the defined prompt UI. The user decision from interacting with prompt UI will be stored in the same client cache.
+Consent decisions from user interaction with the prompt will override any previous consent state, and is not subject to the `expireCache` value from the current response.
+
 ### Basic blocking behaviors
 
-To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required from the user. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
+To block components, add the `data-block-on-consent` attribute to the AMP component. This ensures that `buildCallback` of the component isn't called until consent has been accepted, or if consent is not required for the user based on the `consentRequired` value. In effect, this means that all behaviors of the element (e.g. sending analytics pings for `<amp-analytics>` or the loading of an `<amp-ad>`) are delayed until the relevant consent instance is accepted.
 
 Individual components may override this behavior to provide more specialized handling. Please refer to each component's documentation for details.
 
@@ -551,8 +556,6 @@ Example:
 
 Use the `<amp-consent>` component which allows configuring a custom UI with `Accept`, `Reject` and `Dismiss` states. It is up to each amp-component vendor how they interpret these states, so please read your vendor's documentation carefully.
 
-To collect consent from all users, you put `consentRequired: true` in the config of `<amp-consent>`.
-
 ##### How can I stop showing all of my content to users from the EEA?
 
 You could consider hiding all your content for EEA users by implementing [`<amp-geo>`](https://amp.dev/documentation/components/amp-geo). See [this blog post](https://www.ampproject.org/latest/blog/dynamic-geo-personalization/) for more details.
@@ -575,11 +578,11 @@ You may also choose to suppress the consent if you detect that the user doesn't 
 
 ##### What is `consentRequired`?
 
-`consentRequired` is used to determine if consent is required for the user. It can be specified in the config of `<amp-consent>` for different geo regions, it can also be retrieved from the `checkConsentHref` endpoint.
+[`consentRequired`](#consentRequired) is used to determine if consent is required for the user. It can be specified in the config of `<amp-consent>` for different geo regions, it can also be retrieved from the `checkConsentHref` endpoint.
 
 ##### I also manage consent on non-AMP pages, how can I reconcile the two?
 
-You can configure `checkConsentHref` to call your own server-side endpoint to detect consent state for the user and reconcile how you want AMP to behave with a response on `consentRequired`.
+You can configure `checkConsentHref` to call your own server-side endpoint to detect consent state for the user and reconcile how you want AMP to behave with using a response from the [`checkConsentHref`](#checkConsentHref).
 
 ##### How can I send additional information to an ad network/analytics provider?
 
