@@ -28,7 +28,6 @@ const log = require('fancy-log');
 const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
-const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');

@@ -231,8 +231,11 @@ class SeleniumWebDriverController {
     this.isXpathInstalled_ = true;
 
     const scripts = await Promise.all([
-      fs.readFileAsync('third_party/wgxpath/wgxpath.js', 'utf8'),
-      fs.readFileAsync('build-system/tasks/e2e/driver/query-xpath.js', 'utf8'),
+      fs.promises.readFile('third_party/wgxpath/wgxpath.js', 'utf8'),
+      fs.promises.readFile(
+        'build-system/tasks/e2e/driver/query-xpath.js',
+        'utf8'
+      ),
     ]);
     await this.driver.executeScript(scripts.join('\n\n'));
   }

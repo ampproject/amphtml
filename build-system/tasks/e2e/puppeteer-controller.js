@@ -301,8 +301,11 @@ class PuppeteerController {
     this.isXpathInstalled_ = true;
 
     const scripts = await Promise.all([
-      fs.readFileAsync('third_party/wgxpath/wgxpath.js', 'utf8'),
-      fs.readFileAsync('build-system/tasks/e2e/driver/query-xpath.js', 'utf8'),
+      fs.promises.readFile('third_party/wgxpath/wgxpath.js', 'utf8'),
+      fs.promises.readFile(
+        'build-system/tasks/e2e/driver/query-xpath.js',
+        'utf8'
+      ),
     ]);
     const frame = await this.getCurrentFrame_();
     await frame.evaluate(scripts.join('\n\n'));
