@@ -224,7 +224,7 @@ class AmpCarousel extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (mutations['slide']) {
+    if (mutations['slide'] !== undefined) {
       this.carousel_.goToSlide(Number(mutations['slide']));
     }
   }
