@@ -310,12 +310,12 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    return this.meta_['currentTime'] || 0;
+    return /** @type {number} */ (this.meta_['currentTime'] || 0);
   }
 
   /** @override */
   getDuration() {
-    return this.meta_['duration'] || 1;
+    return /** @type {number} */ (this.meta_['duration'] || 1);
   }
 
   /** @override */
