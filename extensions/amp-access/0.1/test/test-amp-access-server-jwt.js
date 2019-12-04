@@ -50,7 +50,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       buildUrl: () => {},
       collectUrlVars: () => {},
     };
-    contextMock = sandbox.mock(context);
+    contextMock = env.sandbox.mock(context);
   });
 
   afterEach(() => {
@@ -129,9 +129,9 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
 
     beforeEach(() => {
       adapter = new AccessServerJwtAdapter(ampdoc, validConfig, context);
-      xhrMock = sandbox.mock(adapter.xhr_);
-      jwtMock = sandbox.mock(adapter.jwtHelper_);
-      docFetcherMock = sandbox.mock(DocumentFetcher);
+      xhrMock = env.sandbox.mock(adapter.xhr_);
+      jwtMock = env.sandbox.mock(adapter.jwtHelper_);
+      docFetcherMock = env.sandbox.mock(DocumentFetcher);
 
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
@@ -140,7 +140,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         authorize: () => Promise.resolve({}),
         pingback: () => Promise.resolve(),
       };
-      clientAdapterMock = sandbox.mock(clientAdapter);
+      clientAdapterMock = env.sandbox.mock(clientAdapter);
       adapter.clientAdapter_ = clientAdapter;
 
       adapter.isProxyOrigin_ = true;
@@ -172,7 +172,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       it('should fallback to client auth when not on proxy', () => {
         adapter.isProxyOrigin_ = false;
         const p = Promise.resolve();
-        const stub = sandbox
+        const stub = env.sandbox
           .stub(adapter, 'authorizeOnClient_')
           .callsFake(() => p);
         docFetcherMock.expects('fetchDocument').never();
@@ -184,7 +184,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       it('should fallback to client auth w/o server state', () => {
         adapter.serverState_ = null;
         const p = Promise.resolve();
-        const stub = sandbox
+        const stub = env.sandbox
           .stub(adapter, 'authorizeOnClient_')
           .callsFake(() => p);
         docFetcherMock.expects('fetchDocument').never();
@@ -195,7 +195,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
 
       it('should execute via server on proxy and w/server state', () => {
         const p = Promise.resolve();
-        const stub = sandbox
+        const stub = env.sandbox
           .stub(adapter, 'authorizeOnServer_')
           .callsFake(() => p);
         docFetcherMock.expects('fetchDocument').never();
@@ -207,7 +207,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
       it('should fetch JWT directly via client', () => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
-        sandbox
+        env.sandbox
           .stub(adapter, 'fetchJwt_')
           .callsFake(() => Promise.resolve({jwt}));
         docFetcherMock.expects('fetchDocument').never();
@@ -221,7 +221,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        sandbox
+        env.sandbox
           .stub(adapter, 'fetchJwt_')
           .callsFake(() => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
@@ -231,7 +231,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         });
         docFetcherMock
           .expects('fetchDocument')
-          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+          .withExactArgs(env.sandbox.match.any, 'http://localhost:8000/af', {
             method: 'POST',
             body: request,
             headers: {
@@ -240,7 +240,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           })
           .returns(Promise.resolve(responseDoc))
           .once();
-        const replaceSectionsStub = sandbox
+        const replaceSectionsStub = env.sandbox
           .stub(adapter, 'replaceSections_')
           .callsFake(() => {
             return Promise.resolve();
@@ -256,7 +256,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        sandbox
+        env.sandbox
           .stub(adapter, 'fetchJwt_')
           .callsFake(() => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
@@ -266,7 +266,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         });
         docFetcherMock
           .expects('fetchDocument')
-          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+          .withExactArgs(env.sandbox.match.any, 'http://localhost:8000/af', {
             method: 'POST',
             body: request,
             headers: {
@@ -275,7 +275,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           })
           .returns(Promise.reject('intentional'))
           .once();
-        const replaceSectionsStub = sandbox
+        const replaceSectionsStub = env.sandbox
           .stub(adapter, 'replaceSections_')
           .callsFake(() => {
             return Promise.resolve();
@@ -296,7 +296,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         const authdata = {};
         const jwt = {'amp_authdata': authdata};
         const encoded = 'rAnDoM';
-        sandbox
+        env.sandbox
           .stub(adapter, 'fetchJwt_')
           .callsFake(() => Promise.resolve({jwt, encoded}));
         const request = serializeQueryString({
@@ -306,7 +306,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
         });
         docFetcherMock
           .expects('fetchDocument')
-          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+          .withExactArgs(env.sandbox.match.any, 'http://localhost:8000/af', {
             method: 'POST',
             body: request,
             headers: {
@@ -315,7 +315,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           })
           .returns(new Promise(() => {})) // Never resolved.
           .once();
-        const replaceSectionsStub = sandbox
+        const replaceSectionsStub = env.sandbox
           .stub(adapter, 'replaceSections_')
           .callsFake(() => {
             return Promise.resolve();
@@ -408,7 +408,7 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           .withExactArgs(encoded)
           .returns(jwt)
           .once();
-        sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => false);
+        env.sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => false);
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);
@@ -528,8 +528,8 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           .withExactArgs(encoded, pemPromise)
           .returns(Promise.resolve(jwt))
           .once();
-        sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
-        const validateStub = sandbox.stub(adapter, 'validateJwt_');
+        env.sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
+        const validateStub = env.sandbox.stub(adapter, 'validateJwt_');
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);
@@ -582,15 +582,15 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           .expects('decodeAndVerify')
           .withExactArgs(
             encoded,
-            sinon.match(arg => {
+            env.sandbox.match(arg => {
               pemPromise = arg;
               return true;
             })
           )
           .returns(Promise.resolve(jwt))
           .once();
-        sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
-        const validateStub = sandbox.stub(adapter, 'validateJwt_');
+        env.sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
+        const validateStub = env.sandbox.stub(adapter, 'validateJwt_');
         return adapter
           .fetchJwt_()
           .then(resp => {
@@ -639,8 +639,8 @@ describes.realWin('AccessServerJwtAdapter', {amp: true}, env => {
           .returns(false)
           .once();
         jwtMock.expects('decodeAndVerify').never();
-        sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
-        const validateStub = sandbox.stub(adapter, 'validateJwt_');
+        env.sandbox.stub(adapter, 'shouldBeValidated_').callsFake(() => true);
+        const validateStub = env.sandbox.stub(adapter, 'validateJwt_');
         return adapter.fetchJwt_().then(resp => {
           expect(resp.encoded).to.equal(encoded);
           expect(resp.jwt).to.equal(jwt);

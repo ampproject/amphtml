@@ -63,8 +63,8 @@ describes.sandboxed('AmpAnimation', {}, () => {
         viewer = win.__AMP_SERVICES.viewer.obj;
         viewer.setVisibilityState_('hidden');
         runner = new NativeWebAnimationRunner([]);
-        runnerMock = sandbox.mock(runner);
-        createRunnerStub = sandbox
+        runnerMock = env.sandbox.mock(runner);
+        createRunnerStub = env.sandbox
           .stub(AmpAnimation.prototype, 'createRunner_')
           .callsFake(() => Promise.resolve(runner));
       });
@@ -165,7 +165,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
       it('should not activate w/o visibility trigger', function*() {
         const anim = yield createAnim({}, {duration: 1001});
-        const activateStub = sandbox.stub(anim, 'startAction_');
+        const activateStub = env.sandbox.stub(anim, 'startAction_');
         viewer.setVisibilityState_('visible');
         yield anim.layoutCallback();
         expect(activateStub).to.not.be.called;
@@ -176,7 +176,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const activateStub = sandbox.stub(anim, 'startAction_');
+        const activateStub = env.sandbox.stub(anim, 'startAction_');
         viewer.setVisibilityState_('visible');
         yield anim.layoutCallback();
         expect(activateStub).to.be.calledOnce;
@@ -187,7 +187,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const startStub = sandbox.stub(anim, 'startOrResume_');
+        const startStub = env.sandbox.stub(anim, 'startOrResume_');
         anim.startAction_();
         expect(anim.triggered_).to.be.true;
         expect(startStub).to.not.be.called;
@@ -198,7 +198,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const startStub = sandbox.stub(anim, 'startOrResume_');
+        const startStub = env.sandbox.stub(anim, 'startOrResume_');
         viewer.setVisibilityState_('visible');
         anim.startAction_();
         expect(anim.triggered_).to.be.true;
@@ -210,8 +210,8 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const startStub = sandbox.stub(anim, 'startOrResume_');
-        const pauseStub = sandbox.stub(anim, 'pause_');
+        const startStub = env.sandbox.stub(anim, 'startOrResume_');
+        const pauseStub = env.sandbox.stub(anim, 'pause_');
         anim.startAction_();
         expect(anim.triggered_).to.be.true;
 
@@ -231,8 +231,8 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const startStub = sandbox.stub(anim, 'startOrResume_');
-        const pauseStub = sandbox.stub(anim, 'pause_');
+        const startStub = env.sandbox.stub(anim, 'startOrResume_');
+        const pauseStub = env.sandbox.stub(anim, 'pause_');
         expect(anim.triggered_).to.be.false;
 
         // Go to visible state.
@@ -251,8 +251,8 @@ describes.sandboxed('AmpAnimation', {}, () => {
           {trigger: 'visibility'},
           {duration: 1001}
         );
-        const startStub = sandbox.stub(anim, 'startOrResume_');
-        const pauseStub = sandbox.stub(anim, 'pause_');
+        const startStub = env.sandbox.stub(anim, 'startOrResume_');
+        const pauseStub = env.sandbox.stub(anim, 'pause_');
         anim.startAction_();
         anim.pausedByAction_ = true;
         expect(anim.triggered_).to.be.true;
@@ -328,7 +328,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
       it('should resize from ampdoc viewport', function*() {
         const anim = yield createAnim({}, {duration: 1001});
-        const stub = sandbox.stub(anim, 'onResize_');
+        const stub = env.sandbox.stub(anim, 'onResize_');
         const viewport = win.__AMP_SERVICES.viewport.obj;
 
         // No size changes.
@@ -488,7 +488,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
         });
 
         it('should trigger restart', () => {
-          const cancelStub = sandbox.stub(anim, 'cancel_');
+          const cancelStub = env.sandbox.stub(anim, 'cancel_');
           const args = {};
           const invocation = {
             method: 'restart',
@@ -866,7 +866,7 @@ describes.sandboxed('AmpAnimation', {}, () => {
 
       it("should take resize from embed's window", function*() {
         const anim = yield createAnim({}, {duration: 1001});
-        const stub = sandbox.stub(anim, 'onResize_');
+        const stub = env.sandbox.stub(anim, 'onResize_');
         embed.win.eventListeners.fire({type: 'resize'});
         expect(stub).to.be.calledOnce;
       });

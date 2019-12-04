@@ -32,7 +32,6 @@ import {
   serializeMessage,
 } from '../../../src/3p-frame-messaging';
 import {dev} from '../../../src/log';
-import {preconnectForElement} from '../../../src/preconnect';
 import {toggleExperiment} from '../../../src/experiments';
 
 describe
@@ -40,21 +39,18 @@ describe
   .ifChrome()
   .run('3p-frame', () => {
     let clock;
-    let sandbox;
     let container;
     let preconnect;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      clock = sandbox.useFakeTimers();
+      clock = window.sandbox.useFakeTimers();
       container = document.createElement('div');
       document.body.appendChild(container);
-      preconnect = preconnectForElement(container);
+      preconnect = Services.preconnectFor(window);
     });
 
     afterEach(() => {
       resetBootstrapBaseUrlForTesting(window);
-      sandbox.restore();
       resetCountForTesting();
       const m = document.querySelector('[name="amp-3p-iframe-src"]');
       if (m) {
@@ -162,7 +158,7 @@ describe
       setupElementFunctions(div);
 
       const viewer = Services.viewerForDoc(window.document);
-      const viewerMock = sandbox.mock(viewer);
+      const viewerMock = window.sandbox.mock(viewer);
       viewerMock
         .expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/')
@@ -170,7 +166,7 @@ describe
 
       container.appendChild(div);
 
-      sandbox
+      window.sandbox
         .stub(DomFingerprint, 'generate')
         .callsFake(() => 'MY-MOCK-FINGERPRINT');
 
@@ -413,39 +409,37 @@ describe
 
     it('should prefetch bootstrap frame and JS', () => {
       window.__AMP_MODE = {localDev: true};
-      preloadBootstrap(window, preconnect);
+      const ampdoc = Services.ampdoc(window.document);
+      preloadBootstrap(window, ampdoc, preconnect);
       // Wait for visible promise.
-      return Services.ampdoc(window.document)
-        .whenFirstVisible()
-        .then(() => {
-          const fetches = document.querySelectorAll('link[rel=preload]');
-          expect(fetches).to.have.length(2);
-          expect(fetches[0]).to.have.property(
-            'href',
-            'http://ads.localhost:9876/dist.3p/current/frame.max.html'
-          );
-          expect(fetches[1]).to.have.property(
-            'href',
-            'http://ads.localhost:9876/dist.3p/current/integration.js'
-          );
-        });
+      return ampdoc.whenFirstVisible().then(() => {
+        const fetches = document.querySelectorAll('link[rel=preload]');
+        expect(fetches).to.have.length(2);
+        expect(fetches[0]).to.have.property(
+          'href',
+          'http://ads.localhost:9876/dist.3p/current/frame.max.html'
+        );
+        expect(fetches[1]).to.have.property(
+          'href',
+          'http://ads.localhost:9876/dist.3p/current/integration.js'
+        );
+      });
     });
 
     it('should prefetch default bootstrap frame if custom disabled', () => {
       window.__AMP_MODE = {localDev: true};
       addCustomBootstrap('http://localhost:9876/boot/remote.html');
-      preloadBootstrap(window, preconnect, true);
+      const ampdoc = Services.ampdoc(window.document);
+      preloadBootstrap(window, ampdoc, preconnect, true);
       // Wait for visible promise.
-      return Services.ampdoc(window.document)
-        .whenFirstVisible()
-        .then(() => {
-          expect(
-            document.querySelectorAll(
-              'link[rel=preload]' +
-                '[href="http://ads.localhost:9876/dist.3p/current/frame.max.html"]'
-            )
-          ).to.be.ok;
-        });
+      return ampdoc.whenFirstVisible().then(() => {
+        expect(
+          document.querySelectorAll(
+            'link[rel=preload]' +
+              '[href="http://ads.localhost:9876/dist.3p/current/frame.max.html"]'
+          )
+        ).to.be.ok;
+      });
     });
 
     it('should make sub domains (unique)', () => {
@@ -484,7 +478,9 @@ describe
     });
 
     it('uses a unique name based on domain', () => {
-      const viewerMock = sandbox.mock(Services.viewerForDoc(window.document));
+      const viewerMock = window.sandbox.mock(
+        Services.viewerForDoc(window.document)
+      );
       viewerMock
         .expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/')
@@ -620,13 +616,13 @@ describe
       });
 
       it('should return null if the input is not a json', () => {
-        const errorStub = sandbox.stub(dev(), 'error');
+        const errorStub = window.sandbox.stub(dev(), 'error');
         expect(deserializeMessage('amp-other')).to.be.null;
         expect(errorStub).to.not.be.called;
       });
 
       it('should return null if failed to parse the input', () => {
-        const errorStub = sandbox.stub(dev(), 'error');
+        const errorStub = window.sandbox.stub(dev(), 'error');
         expect(deserializeMessage('amp-{"type","sentinel":"msgsentinel"}')).to
           .be.null;
         expect(errorStub).to.be.calledOnce;
