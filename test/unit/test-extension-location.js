@@ -193,5 +193,13 @@ describes.sandboxed('Extension Location', {}, () => {
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('latest');
     });
+
+    it('extensions with .max suffix', () => {
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/v0/amp-ad-latest.max.js'
+      );
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('latest');
+    });
   });
 });
