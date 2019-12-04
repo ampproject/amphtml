@@ -75,23 +75,27 @@ Have you tested across mobile and desktop devices?
 
 This section describes different cross cutting considerations that the implementor should keep in mind while building this technical solution.
 
-- [ ] Accessibility Considerations
+<!--
+Retain all the considerations below that are applicable to your issue. If a consideration doesn't apply to you please remove that section.
+-->
+
+- #### Accessibility Considerations
 <!--
 Reach out to the UI and Accessibility WG for assistance. https://github.com/ampproject/wg-ui-and-a11y
 -->
-- [ ] Performance Considerations
+- #### Performance Considerations
 <!--
 Reach out to the Performance WG for assistance. https://github.com/ampproject/wg-performance
 -->
-- [ ] Privacy Considerations
+- #### Privacy Considerations
 <!--
 Reach out to the Security and Privacy WG for assistance. https://github.com/ampproject/wg-security-privacy
 -->
-- [ ] Security Considerations
+- #### Security Considerations
 <!--
 Reach out to the Security and Privacy WG for assistance. https://github.com/ampproject/wg-security-privacy
 -->
-- [ ] Analytics Considerations
+- #### Analytics Considerations
 <!--
 Reach out to the Analytics WG for assistance. https://github.com/ampproject/wg-analytics
 -->
