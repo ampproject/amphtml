@@ -187,8 +187,9 @@
   <amp-consent id='ABC' layout='nodisplay'>
     <script type="application/json">{
       "consentInstanceId": "geotest",
-      "promptUI": "ui1",
+      "promptUISrc": "/examples/amp-consent/prompt.html",
       "consentRequired": false,
+      "postPromptUI": "postPromptUI",
 
       "geoOverride": {
         "na": {
@@ -196,21 +197,17 @@
           "consentRequired": "remote"
         },
         "eea": {
+          "promptUISrc": "/examples/amp-consent/prompt.html?delay=1000",
           "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true",
           "consentRequired": true
         },
         "row": {
-          "consentRequired": false
+          "promptUISrc": "/examples/amp-consent/prompt.html?delay=0",
+          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true",
+          "consentRequired": true
         }
       }
     }</script>
-    <amp-iframe id="ui1"
-                width=300 height=300
-                sandbox="allow-scripts allow-same-origin"
-                layout="responsive"
-                frameborder="0"
-                src="prompt.html">
-    </amp-iframe>
 
     <div id="postPromptUI">
       Post Prompt UI
