@@ -636,7 +636,7 @@ export class AmpConsent extends AMP.BaseElement {
             .then(res =>
               xhrService.xssiJson(
                 res,
-                this.element.getAttribute('strip-prefix')
+                this.consentConfig_['stripPrefix']
               )
             );
         });
