@@ -1,5 +1,5 @@
 {
-  "allow-doc-opt-in": ["amp-next-page"],
+  "allow-doc-opt-in": ["amp-next-page", "inabox-viewport-friendly"],
   "allow-url-opt-in": [
     "pump-early-frame",
     "twitter-default-placeholder",
