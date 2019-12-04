@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../3p/3p';
 import {getDetail} from '../src/event-helper';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
