@@ -307,7 +307,7 @@ For example, lets say we had an API that returned this response:
 We could instruct `amp-list` to remove the security prefix like so:
 
 ```html
-<amp-list strip-prefix=")]}" src="/some-api.json"></amp-list>
+<amp-list strip-prefix=")]}" src="https://foo.com/list.json"></amp-list>
 ```
 
 ##### reset-on-refresh (optional)
