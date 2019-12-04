@@ -21,6 +21,7 @@ import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
+import {includes} from '../../../src/string';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
 /**
@@ -85,7 +86,7 @@ export class ViewerSubscriptionPlatform {
       'productId': this.currentProductId_,
       'origin': this.origin_,
     });
-    const viewerUrl = this.viewer_.getResolvedViewerUrl().includes('google.com')
+    const viewerUrl = includes(this.viewer_.getResolvedViewerUrl(), 'google.com')
       ? 'google.com'
       : 'local';
     const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
