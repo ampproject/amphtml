@@ -546,6 +546,7 @@ export class AmpConsent extends AMP.BaseElement {
       if (!response) {
         return;
       }
+      // Ideally we should fallback to true if either are true.
       const expireCache =
         response['expireCache'] || response['forcePromptOnNext'];
       if (expireCache) {
