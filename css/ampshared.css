@@ -449,13 +449,8 @@ amp-accordion > section {
 }
 
 /* Collapse content by default. */
-amp-accordion > section:not([expanded]) > :last-child {
-  position: absolute;
-  width: 100%;
-  height: 0px !important;
-  margin: 0px;
-  border: 0px hidden;
-  padding: 0;
+amp-accordion > section > :last-child {
+  display: none !important;
 }
 
 /* Expand content when needed. */
