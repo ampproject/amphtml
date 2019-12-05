@@ -47,8 +47,17 @@ tags: {  # <amp-autocomplete>
     requires_extension: "amp-bind"
   }
   attrs: { name: "filter-value" }
+  attrs: { name: "highlight-user-entry" }
+  attrs: { name: "inline" }
+  attrs: { name: "items" }
   attrs: { name: "max-entries" }
   attrs: { name: "min-characters" }
+  attrs: { 
+    name: "query" 
+    trigger: {
+      also_requires_attr: "src"
+    }
+  }
   attrs: {
     name: "src"
     value_url: {
@@ -63,9 +72,7 @@ tags: {  # <amp-autocomplete>
       also_requires_attr: "filter"
     }
   }
-  attrs: { name: "highlight-user-entry" }
   attrs: { name: "template" }
-  attrs: { name: "items" }
   # amp-bind
   attrs: {
     name: "[src]"
