@@ -19,7 +19,6 @@ limitations under the License.
 ## Example
 
 ### Regular ad
-
 ```html
 <amp-ad
   width="300"
@@ -32,7 +31,6 @@ limitations under the License.
 ```
 
 ### Sticky ad
-
 ```html
 <amp-sticky-ad>
   <amp-ad
