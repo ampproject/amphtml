@@ -23,7 +23,7 @@ import {
 import {ViewerForTesting} from '../../viewer-for-testing';
 import {getSourceUrl} from '../../../../../src/url';
 
-describes.sandboxed('AmpViewerIntegration', {}, () => {
+describes.sandboxed('AmpViewerIntegration', {}, env => {
   const ampDocSrc = '/test/fixtures/served/ampdoc-with-messaging.html';
   // TODO(aghassemi): Investigate failure in beforeEach. #10974.
   describe.skip('Handshake', function() {
@@ -55,7 +55,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
     it('should handle unload correctly', () => {
       viewer.confirmHandshake();
       viewer.waitForDocumentLoaded().then(() => {
-        const stub = sandbox.stub(viewer, 'handleUnload_');
+        const stub = env.sandbox.stub(viewer, 'handleUnload_');
         window.eventListeners.fire({type: 'unload'});
         expect(stub).to.be.calledOnce;
       });
@@ -95,7 +95,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           });
 
           it('should start with the correct message', () => {
-            const sendRequestSpy = sandbox
+            const sendRequestSpy = env.sandbox
               .stub(messaging, 'sendRequest')
               .callsFake(() => {
                 return Promise.resolve();
@@ -119,10 +119,10 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           });
 
           it('should not initiate touch handler without capability', () => {
-            sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            env.sandbox.stub(messaging, 'sendRequest').callsFake(() => {
               return Promise.resolve();
             });
-            const initTouchHandlerStub = sandbox.stub(
+            const initTouchHandlerStub = env.sandbox.stub(
               ampViewerIntegration,
               'initTouchHandler_'
             );
@@ -137,14 +137,14 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           });
 
           it('should initiate touch handler with capability', () => {
-            sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            env.sandbox.stub(messaging, 'sendRequest').callsFake(() => {
               return Promise.resolve();
             });
-            sandbox
+            env.sandbox
               .stub(viewer, 'hasCapability')
               .withArgs('swipe')
               .returns(true);
-            const initTouchHandlerStub = sandbox.stub(
+            const initTouchHandlerStub = env.sandbox.stub(
               ampViewerIntegration,
               'initTouchHandler_'
             );
@@ -157,10 +157,10 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           });
 
           it('should not initiate keyboard handler without capability', () => {
-            sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            env.sandbox.stub(messaging, 'sendRequest').callsFake(() => {
               return Promise.resolve();
             });
-            const initKeyboardHandlerStub = sandbox.stub(
+            const initKeyboardHandlerStub = env.sandbox.stub(
               ampViewerIntegration,
               'initKeyboardHandler_'
             );
@@ -175,14 +175,14 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           });
 
           it('should initiate keyboard handler with capability', () => {
-            sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            env.sandbox.stub(messaging, 'sendRequest').callsFake(() => {
               return Promise.resolve();
             });
-            sandbox
+            env.sandbox
               .stub(viewer, 'hasCapability')
               .withArgs('keyboard')
               .returns(true);
-            const initKeyboardHandlerStub = sandbox.stub(
+            const initKeyboardHandlerStub = env.sandbox.stub(
               ampViewerIntegration,
               'initKeyboardHandler_'
             );
@@ -195,14 +195,14 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           });
 
           it('should initiate focus handler with capability', () => {
-            sandbox.stub(messaging, 'sendRequest').callsFake(() => {
+            env.sandbox.stub(messaging, 'sendRequest').callsFake(() => {
               return Promise.resolve();
             });
-            sandbox
+            env.sandbox
               .stub(viewer, 'hasCapability')
               .withArgs('focus-rect')
               .returns(true);
-            const initFocusHandlerStub = sandbox.stub(
+            const initFocusHandlerStub = env.sandbox.stub(
               ampViewerIntegration,
               'initFocusHandler_'
             );
@@ -241,7 +241,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         port.addEventListener = function() {};
         port.postMessage = function() {};
 
-        postMessageSpy = sandbox.stub(port, 'postMessage').callsFake(() => {
+        postMessageSpy = env.sandbox.stub(port, 'postMessage').callsFake(() => {
           postMessageResolve();
         });
 
@@ -302,8 +302,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           },
         };
 
-        const resolveSpy = sandbox.stub();
-        const rejectSpy = sandbox.stub();
+        const resolveSpy = env.sandbox.stub();
+        const rejectSpy = env.sandbox.stub();
         const waitingForResponse = {
           '1': {
             resolve: resolveSpy,
@@ -311,7 +311,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           },
         };
 
-        sandbox
+        env.sandbox
           .stub(messaging, 'waitingForResponse_')
           .callsFake(waitingForResponse);
         messaging.handleMessage_(event);
@@ -337,8 +337,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           },
         };
 
-        const resolveSpy = sandbox.stub();
-        const rejectSpy = sandbox.stub();
+        const resolveSpy = env.sandbox.stub();
+        const rejectSpy = env.sandbox.stub();
         const waitingForResponse = {
           '1': {
             resolve: resolveSpy,
@@ -346,7 +346,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           },
         };
 
-        sandbox
+        env.sandbox
           .stub(messaging, 'waitingForResponse_')
           .callsFake(waitingForResponse);
         messaging.handleMessage_(event);
@@ -370,8 +370,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           },
         };
 
-        const resolveSpy = sandbox.stub();
-        const rejectSpy = sandbox.stub();
+        const resolveSpy = env.sandbox.stub();
+        const rejectSpy = env.sandbox.stub();
         const waitingForResponse = {
           '1': {
             resolve: resolveSpy,
@@ -379,8 +379,8 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
           },
         };
 
-        const logErrorSpy = sandbox.stub(messaging, 'logError_');
-        sandbox
+        const logErrorSpy = env.sandbox.stub(messaging, 'logError_');
+        env.sandbox
           .stub(messaging, 'waitingForResponse_')
           .callsFake(waitingForResponse);
         messaging.handleMessage_(event);
@@ -439,7 +439,7 @@ describes.sandboxed('AmpViewerIntegration', {}, () => {
         const err = new Error('reason');
         const errString = messaging.errorToString_(err);
         const requestId = 1;
-        const logErrorSpy = sandbox.stub(messaging, 'logError_');
+        const logErrorSpy = env.sandbox.stub(messaging, 'logError_');
         messaging.sendResponseError_(requestId, mName, err);
 
         return postMessagePromise.then(function() {

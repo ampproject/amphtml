@@ -417,7 +417,7 @@ describes.realWin(
         const clickEvent = {
           target: headerElements[0],
           currentTarget: headerElements[0],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
           .false;
@@ -443,7 +443,7 @@ describes.realWin(
         const clickEvent = {
           target: child,
           currentTarget: header,
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         expect(header.parentNode.hasAttribute('expanded')).to.be.false;
         expect(header.getAttribute('aria-expanded')).to.equal('false');
@@ -460,7 +460,7 @@ describes.realWin(
         const clickEvent = {
           target: headerElements[1],
           currentTarget: headerElements[1],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
           .true;
@@ -485,7 +485,7 @@ describes.realWin(
         const aClickEvent = {
           target: a,
           currentTarget: headerElements[0],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         ampAccordion.implementation_.clickHandler_(aClickEvent);
         expect(aClickEvent.preventDefault).to.not.have.been.called;
@@ -504,7 +504,7 @@ describes.realWin(
             key: Keys.SPACE,
             target: headerElements[0],
             currentTarget: headerElements[0],
-            preventDefault: sandbox.spy(),
+            preventDefault: env.sandbox.spy(),
           };
           expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
             .false;
@@ -536,7 +536,7 @@ describes.realWin(
             key: Keys.ENTER,
             target: child,
             currentTarget: headerElements[0],
-            preventDefault: sandbox.spy(),
+            preventDefault: env.sandbox.spy(),
           };
           expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
             .false;
@@ -566,7 +566,7 @@ describes.realWin(
             key: Keys.ENTER,
             target: headerElements[1],
             currentTarget: headerElements[1],
-            preventDefault: sandbox.spy(),
+            preventDefault: env.sandbox.spy(),
           };
           expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
             .true;
@@ -599,7 +599,7 @@ describes.realWin(
             key: Keys.UP_ARROW,
             target: headerElements[0],
             currentTarget: headerElements[0],
-            preventDefault: sandbox.spy(),
+            preventDefault: env.sandbox.spy(),
           };
           ampAccordion.implementation_.keyDownHandler_(upArrowEvent);
           expect(doc.activeElement).to.equal(
@@ -609,7 +609,7 @@ describes.realWin(
             key: Keys.DOWN_ARROW,
             target: headerElements[headerElements.length - 1],
             currentTarget: headerElements[headerElements.length - 1],
-            preventDefault: sandbox.spy(),
+            preventDefault: env.sandbox.spy(),
           };
           ampAccordion.implementation_.keyDownHandler_(downArrowEvent);
           expect(doc.activeElement).to.equal(headerElements[0]);
@@ -635,12 +635,12 @@ describes.realWin(
         const clickEventExpandElement = {
           target: headerElements[0],
           currentTarget: headerElements[0],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         const clickEventCollapseElement = {
           target: headerElements[1],
           currentTarget: headerElements[1],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         expect(Object.keys(impl.currentState_)).to.have.length(0);
         impl.onHeaderPicked_(clickEventExpandElement);
@@ -705,8 +705,8 @@ describes.realWin(
     it('should disable sessionStorage when opt-out', () => {
       return getAmpAccordion().then(ampAccordion => {
         const impl = ampAccordion.implementation_;
-        const setSessionStateSpy = sandbox.spy();
-        const getSessionStateSpy = sandbox.spy();
+        const setSessionStateSpy = env.sandbox.spy();
+        const getSessionStateSpy = env.sandbox.spy();
         impl.win.sessionStorage.setItem = function() {
           setSessionStateSpy();
         };
@@ -721,7 +721,7 @@ describes.realWin(
         const clickEventExpandElement = {
           target: headerElements[0],
           currentTarget: headerElements[0],
-          preventDefault: sandbox.spy(),
+          preventDefault: env.sandbox.spy(),
         };
         impl.onHeaderPicked_(clickEventExpandElement);
         expect(getSessionStateSpy).to.not.have.been.called;
@@ -758,7 +758,7 @@ describes.realWin(
             const clickEventElement = {
               target: headerElements1[0],
               currentTarget: headerElements1[0],
-              preventDefault: sandbox.spy(),
+              preventDefault: env.sandbox.spy(),
             };
             ampAccordion1.implementation_.onHeaderPicked_(clickEventElement);
             const headerElements2 = ampAccordion2.querySelectorAll(
@@ -777,15 +777,15 @@ describes.realWin(
         const impl = ampAccordion.implementation_;
 
         const actions = impl.getActionServiceForTesting();
-        sandbox.stub(actions, 'trigger');
+        env.sandbox.stub(actions, 'trigger');
 
         execute(impl, 'collapse', 123, `acc${counter}sec1`);
 
         expect(actions.trigger).to.be.calledOnce;
         expect(actions.trigger.getCall(0)).to.be.calledWith(
-          /* element */ sinon.match.has('tagName'),
+          /* element */ env.sandbox.match.has('tagName'),
           'collapse',
-          /* event */ sinon.match.has('detail'),
+          /* event */ env.sandbox.match.has('detail'),
           /* trust */ 123
         );
 
@@ -793,9 +793,9 @@ describes.realWin(
 
         expect(actions.trigger).to.be.calledTwice;
         expect(actions.trigger.getCall(1)).to.be.calledWith(
-          /* element */ sinon.match.has('tagName'),
+          /* element */ env.sandbox.match.has('tagName'),
           'expand',
-          /* event */ sinon.match.has('detail'),
+          /* event */ env.sandbox.match.has('detail'),
           /* trust */ 456
         );
       });

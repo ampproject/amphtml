@@ -435,6 +435,7 @@ const forbiddenTerms = {
       'src/inabox/inabox-viewer.js',
       'src/service/cid-impl.js',
       'src/impression.js',
+      'src/ssr-template-helper.js',
       'extensions/amp-viewer-assistance/0.1/amp-viewer-assistance.js',
     ],
   },

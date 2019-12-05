@@ -21,7 +21,6 @@ import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {preconnectForElement} from './preconnect';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -137,9 +136,6 @@ export class BaseElement {
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
 
-    /** @package {number} */
-    this.layoutWidth_ = -1;
-
     /** @package {boolean} */
     this.inViewport_ = false;
 
@@ -157,9 +153,6 @@ export class BaseElement {
 
     /** @private {?string} */
     this.defaultActionAlias_ = null;
-
-    /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectForElement(this.element);
   }
 
   /**
@@ -257,17 +250,6 @@ export class BaseElement {
    */
   getVsync() {
     return Services.vsyncFor(this.win);
-  }
-
-  /**
-   * Returns the layout width for this element. A `-1` value indicates that the
-   * layout is not yet known. A `0` value indicates that the element is not
-   * visible.
-   * @return {number}
-   * @public
-   */
-  getLayoutWidth() {
-    return this.layoutWidth_;
   }
 
   /**
@@ -659,6 +641,27 @@ export class BaseElement {
         element.setAttribute(attr, val);
       } else if (opt_removeMissingAttrs) {
         element.removeAttribute(attr);
+      }
+    }
+  }
+
+  /**
+   * Utility method to propagate all data attributes from this element
+   * to the target element. (For use with arbitrary data attributes.)
+   * Removes any data attributes that are missing on this element from
+   * the target element.
+   * @param {!Element} targetElement
+   */
+  propagateDataset(targetElement) {
+    for (const key in targetElement.dataset) {
+      if (!(key in this.element.dataset)) {
+        delete targetElement.dataset[key];
+      }
+    }
+
+    for (const key in this.element.dataset) {
+      if (targetElement.dataset[key] !== this.element.dataset[key]) {
+        targetElement.dataset[key] = this.element.dataset[key];
       }
     }
   }

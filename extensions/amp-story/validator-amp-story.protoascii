@@ -124,6 +124,7 @@ tags: {  # <amp-story-page>
       protocol: "https"
     }
   }
+  attrs: { name: "next-page-no-ad" }
   attr_lists: "mandatory-id-attr"
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
@@ -637,7 +638,6 @@ descendant_tag_list: {
   tag: "AMP-EXPERIMENT"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
-  tag: "AMP-GFYCAT"
   tag: "AMP-GIST"
   tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-IMG"
@@ -810,11 +810,8 @@ descendant_tag_list {
   tag: "AMP-FX-COLLECTION"
   tag: "AMP-FX-FLYING-CARPET"
   tag: "AMP-GFYCAT"
-  tag: "AMP-GFYCAT"
-  tag: "AMP-GIST"
   tag: "AMP-GIST"
   tag: "AMP-GOOGLE-DOCUMENT-EMBED"
-  tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-HULU"
   tag: "AMP-IMA-VIDEO"
@@ -826,8 +823,6 @@ descendant_tag_list {
   tag: "AMP-JWPLAYER"
   tag: "AMP-KALTURA-PLAYER"
   tag: "AMP-LIST"
-  tag: "AMP-LIST"
-  tag: "AMP-LIVE-LIST"
   tag: "AMP-LIVE-LIST"
   tag: "AMP-MATHML"
   tag: "AMP-MEGAPHONE"
