@@ -551,14 +551,16 @@ export class AmpConsent extends AMP.BaseElement {
         response['expireCache'] || response['forcePromptOnNext'];
       if (expireCache) {
         this.consentStateManager_.setDirtyBit();
-        // Decision from promptUI takes precedence over consent decision from response
-      } else if (
+      }
+
+      // Decision from promptUI takes precedence over consent decision from response
+      if (
         !!response['consentRequired'] &&
         !this.consentStateChangedViaPromptUI_
       ) {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
-          response['consentString']
+          response['consentString'] || undefined
         );
       }
     });
@@ -570,17 +572,13 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string=} responseConsentString
    */
   updateCacheIfNotNull_(responseStateValue, responseConsentString) {
-    if (responseStateValue !== null || responseConsentString !== null) {
-      this.consentStateManager_.getConsentInstanceInfo().then(storedInfo => {
-        const consentStateValue =
-          convertEnumValueToState(responseStateValue) ||
-          storedInfo.consentState;
-        const consentString = responseConsentString || storedInfo.consentString;
-        this.consentStateManager_.updateConsentInstanceState(
-          consentStateValue,
-          consentString
-        );
-      });
+    const consentStateValue = convertEnumValueToState(responseStateValue);
+    // consentStateValue and consentString are treated as a pair that will update together
+    if (consentStateValue !== null) {
+      this.consentStateManager_.updateConsentInstanceState(
+        consentStateValue,
+        responseConsentString
+      );
     }
   }
 
