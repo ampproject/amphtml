@@ -43,10 +43,10 @@ module.exports = {
   },
 
   'type into inputInline to not display results': async (page, name) => {
-    await page.tap('input#inputInline');
+    await page.tap('#inputInline');
     await page.keyboard.type('hello ');
     await verifySelectorsInvisible(page, name, [
-      'amp-autocomplete#autocompleteInline > .i-amphtml-autocomplete-results',
+      '#autocompleteInline > .i-amphtml-autocomplete-results',
     ]);
   },
 };
