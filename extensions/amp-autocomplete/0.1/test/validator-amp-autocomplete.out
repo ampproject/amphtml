@@ -370,5 +370,12 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:345:2 The attribute 'f
 amp-autocomplete/0.1/test/validator-amp-autocomplete.html:351:2 The attribute 'filter' in tag 'amp-autocomplete' is set to the invalid value 'random'. (see https://amp.dev/documentation/components/amp-autocomplete)
 |      <input>
 |    </amp-autocomplete>
+|
+|    <!-- Invalid: amp-autocomplete with query attr missing src attr -->
+|    <amp-autocomplete filter="prefix" query="q">
+>>   ^~~~~~~~~
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:356:2 The attribute 'src' in tag 'amp-autocomplete' is missing or incorrect, but required by attribute 'query'. (see https://amp.dev/documentation/components/amp-autocomplete)
+|      <input>
+|    </amp-autocomplete>
 |  </body>
 |  </html>

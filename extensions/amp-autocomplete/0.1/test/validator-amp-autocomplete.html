@@ -351,5 +351,10 @@
   <amp-autocomplete filter="random" src="https://data.com/articles.json?ref=CANONICAL_URL">
     <input>
   </amp-autocomplete>
+
+  <!-- Invalid: amp-autocomplete with query attr missing src attr -->
+  <amp-autocomplete filter="prefix" query="q">
+    <input>
+  </amp-autocomplete>
 </body>
 </html>

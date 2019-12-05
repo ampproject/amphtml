@@ -56,7 +56,12 @@ tags: {  # <amp-autocomplete>
       allow_relative: true
     }
   }
-  attrs: { name: "query" }
+  attrs: { 
+    name: "query" 
+    trigger: {
+      also_requires_attr: "src"
+    }
+  }
   attrs: { name: "inline" }
   attrs: { name: "submit-on-enter" }
   attrs: {
