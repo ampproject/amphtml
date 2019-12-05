@@ -852,12 +852,16 @@ export class ResourcesImpl {
                 const parentWidth =
                   (parent.getLayoutWidth && parent.getLayoutWidth()) ||
                   parent.getBoundingClientRect().width;
-                let cumulativeWidth = request.newWidth;
+                let cumulativeWidth = widthDiff;
                 for (let i = 0; i < parent.childElementCount; i++) {
                   cumulativeWidth += parent.children[i].getBoundingClientRect()
                     .width;
+                  if (cumulativeWidth > parentWidth) {
+                    state.resize = false;
+                    return;
+                  }
                 }
-                state.resize = cumulativeWidth <= parentWidth;
+                state.resize = true;
               },
               mutate: state => {
                 if (state.resize) {
