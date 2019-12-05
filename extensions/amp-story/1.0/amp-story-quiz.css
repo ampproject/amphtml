@@ -82,6 +82,7 @@ h3.i-amphtml-story-quiz-prompt {
     border: solid 1px #DADCE0 !important;
     font-size: 16px !important;
     line-height: 20px !important;
+    position: relative;
 }
 
 /* Truncate option text and add an ellipsis after 2 lines. */
@@ -158,4 +159,30 @@ h3.i-amphtml-story-quiz-prompt {
     background-repeat: no-repeat !important;
     background-position: center !important;
     font-size: 0 !important;
+}
+
+.i-amphtml-story-quiz-option-animation {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 32px;
+    border: solid 1px transparent;
+    /*
+    padding: 8px 16px 8px 8px;
+    margin-bottom: 8px; */
+}
+
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected .i-amphtml-story-quiz-option-animation {
+    animation: scales forwards 1s ease;
+}
+
+@keyframes scales {
+    0% {
+      background: rgba(255, 0, 0, 1);
+      transform: scale(0.1);
+    }
+    100% {
+      background: rgba(255, 0, 0, 1);
+      transform: scale(1);
+    }
 }
