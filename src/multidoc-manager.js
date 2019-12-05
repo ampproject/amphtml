@@ -65,7 +65,7 @@ export class MultidocManager {
    * @param {!Object<string, string>|undefined} params
    * @param {function(!Object, !ShadowRoot,
    * !./service/ampdoc-impl.AmpDocShadow):!Promise} builder
-   * @return {!ShadowDoc}
+   * @return {!./runtime.ShadowDoc}
    * @private
    */
   attachShadowDoc_(hostElement, url, params, builder) {
@@ -224,7 +224,7 @@ export class MultidocManager {
    * @param {!Document} doc
    * @param {string} url
    * @param {!Object<string, string>=} opt_initParams
-   * @return {!ShadowDoc}
+   * @return {!./runtime.ShadowDoc}
    */
   attachShadowDoc(hostElement, doc, url, opt_initParams) {
     dev().fine(TAG, 'Attach shadow doc:', doc);
