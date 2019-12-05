@@ -4853,12 +4853,46 @@ tags: {
 # Note that the type TEXT/PLAIN description is define in
 # validator-amp-mustache.protoascii.
 tags: {
-  html_format: AMP
   html_format: AMP4EMAIL
   html_format: ACTIONS
   tag_name: "SCRIPT"
-  spec_name: "amphtml engine v0.js script"
-  mandatory: true
+  spec_name: "amphtml engine v0.js script [AMP4EMAIL,ACTIONS]"
+  mandatory_alternatives: "amphtml engine v0.js script"
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "crossorigin"
+    value: "anonymous"
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/v0.js"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    value_casei: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+}
+tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amphtml engine v0.js script [AMP]"
+  mandatory_alternatives: "amphtml engine v0.js script"
   unique: true
   mandatory_parent: "HEAD"
   attr_lists: "nonce-attr"
