@@ -180,6 +180,9 @@ function createBaseCustomElementClass(win) {
        */
       this.resources_ = null;
 
+      /** @private {?./service/mutator-interface.MutatorInterface} */
+      this.mutator_ = null;
+
       /** @private {!Layout} */
       this.layout_ = Layout.NODISPLAY;
 
@@ -346,6 +349,19 @@ function createBaseCustomElementClass(win) {
       );
       return /** @typedef {!./service/resources-interface.ResourcesInterface} */ this
         .resources_;
+    }
+
+    /**
+     * Returns mutator manager. Only available after attachment. It throws
+     * exception before the element is attached.
+     * @return {!./service/mutator-interface.MutatorInterface}
+     * @final
+     * @package
+     */
+    getMutator() {
+      devAssert(this.mutator_, 'no mutator yet, since element is not attached');
+      return /** @typedef {!./service/mutator-interface.MutatorInterface} */ this
+        .mutator_;
     }
 
     /**
@@ -839,6 +855,10 @@ function createBaseCustomElementClass(win) {
         this.resources_ = Services.resourcesForDoc(this.ampdoc_);
       }
       this.getResources().add(this);
+
+      if (!this.mutator_) {
+        this.mutator_ = Services.mutatorForDoc(this.ampdoc_);
+      }
 
       if (this.everAttached) {
         const reconstruct = this.reconstructWhenReparented();
@@ -1835,9 +1855,9 @@ function createBaseCustomElementClass(win) {
 
         if (overflown) {
           this.overflowElement_.onclick = () => {
-            const resources = this.getResources();
-            resources./*OK*/ changeSize(this, requestedHeight, requestedWidth);
-            resources.mutateElement(this, () => {
+            const mutator = this.getMutator();
+            mutator./*OK*/ changeSize(this, requestedHeight, requestedWidth);
+            mutator./*OK*/ mutateElement(this, () => {
               this.overflowCallback(
                 /* overflown */ false,
                 requestedHeight,
@@ -1858,8 +1878,8 @@ function createBaseCustomElementClass(win) {
      * @param {?Element=} opt_element
      */
     mutateOrInvoke_(mutator, opt_element) {
-      if (this.resources_) {
-        this.getResources().mutateElement(opt_element || this, mutator);
+      if (this.mutator_) {
+        this.getMutator().mutateElement(opt_element || this, mutator);
       } else {
         mutator();
       }

@@ -167,6 +167,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(element.getAmpDoc()).to.be.ok;
         expect(element.resources_).to.be.ok;
         expect(element.getResources()).to.be.ok;
+        expect(element.mutator_).to.be.ok;
+        expect(element.getMutator()).to.be.ok;
       });
 
       it('Element - createdCallback', () => {
@@ -2183,8 +2185,8 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   let element;
   let overflowElement;
   let vsync;
-  let resources;
-  let resourcesMock;
+  let mutator;
+  let mutatorMock;
 
   class TestElement extends BaseElement {
     isLayoutSupported(unusedLayout) {
@@ -2201,12 +2203,12 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       TestElement
     );
     win.customElements.define('amp-test-overflow', ElementClass);
-    resources = Services.resourcesForDoc(doc);
-    resourcesMock = env.sandbox.mock(resources);
+    mutator = Services.mutatorForDoc(doc);
+    mutatorMock = env.sandbox.mock(mutator);
     element = new ElementClass();
     element.layoutWidth_ = 300;
     element.layout_ = Layout.FIXED;
-    element.resources_ = resources;
+    element.mutator_ = mutator;
     overflowElement = doc.createElement('div');
     overflowElement.setAttribute('overflow', '');
     element.appendChild(overflowElement);
@@ -2222,7 +2224,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   });
 
   afterEach(() => {
-    resourcesMock.verify();
+    mutatorMock.verify();
   });
 
   it('should NOT be initialized by default', () => {
@@ -2278,7 +2280,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   it('should force change size when clicked', () => {
     element.overflowCallback(true, 117, 113);
     expect(overflowElement).to.have.class('amp-visible');
-    resourcesMock
+    mutatorMock
       .expects('changeSize')
       .withExactArgs(element, 117, 113)
       .once();

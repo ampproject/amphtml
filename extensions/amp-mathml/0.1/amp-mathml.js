@@ -78,7 +78,7 @@ export class AmpMathml extends AMP.BaseElement {
           data['width'] = undefined;
         }
         this.element
-          .getResources()
+          .getMutator()
           ./*OK*/ changeSize(this.element, data['height'], data['width']);
       },
       /* opt_is3P */ true

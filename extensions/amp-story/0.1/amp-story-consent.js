@@ -293,7 +293,7 @@ export class AmpStoryConsent extends AMP.BaseElement {
     };
 
     this.element
-      .getResources()
+      .getMutator()
       .measureMutateElement(this.storyConsentEl_, measurer, mutator);
   }
 
