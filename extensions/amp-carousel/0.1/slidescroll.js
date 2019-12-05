@@ -163,7 +163,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     this.slidesContainer_ = this.win.document.createElement('div');
     // Focusable container makes it possible to fully consume Arrow key events.
-    this.slidesContainer_.setAttribute('tabindex', '0');
+    this.slidesContainer_.setAttribute('tabindex', '-1');
     this.slidesContainer_.classList.add('i-amphtml-slides-container');
     // Let screen reader know that this is a live area and changes
     // to it (such after pressing next) should be announced to the
