@@ -124,16 +124,25 @@ AMP expects the response to be a JSON object like the following:
 
 ```html
 {
-  "consentRequired": {boolean}                  // Required value.
-                                                // Whether consent is required from the user.
-  "consentStateValue": {?enum} [default: null], // (new) The latest consent state known by the server
-                                                // Takes value of ["accepted", "rejected", "unknown"].
-                                                // The value will be ignored if "consentRequired: false".
+  "consentRequired": {boolean}                  // Whether consent is required from the user.
+                                                // The value is required it is used to
+                                                // determine if consent is required. If not
+                                                // found, AMP will unblock content as consent // is not required. */
+  "consentStateValue": {?enum} [default: null], // (new)
+                                                // The latest consent state known
+                                                // by the server
+                                                // Takes value of ["accepted", "rejected",
+                                                // "unknown"].
+                                                // The value will be ignored if
+                                                // "consentRequired: false".
+                                                // If the value is non-null, it will be cached // at client.
+  "consentString": {?string} [default: null],   // (new)
+                                                // The latest consent string known by the server.
                                                 // If the value is non-null, it will be cached at client.
-  "consentString": {?string} [default: null],   // (new) The latest consent string known by the server.
-                                                // If the value is non-null, it will be cached at client.
-  "expireCache": {boolean} [default: false]     // (new) Indicate that the cache needs to be cleared.
-                                                // Set to `true` in conjunction with consentStateValue='accepted'/'rejected'
+  "expireCache": {boolean} [default: false]     // (new)
+                                                // Indicate that the cache needs to be cleared
+                                                // Set to `true` in conjunction with
+                                                // consentStateValue='accepted'/'rejected'
                                                 // to enforce server side consent state
 }
 ```
@@ -183,8 +192,6 @@ AMP sends the consent instance ID, a generated user id only for this usage and t
   "consentStateValue": "accepted"/"rejected"/"unknown"
 }
 ```
-
-TODO(zhouyx@): Need discussion. "unknown" can now override "accept/reject" with server response. We need to add support to that.
 
 #### promptUI
 
@@ -411,15 +418,13 @@ The post-prompt UI provides one user action type that can be used to allow the u
 The `<amp-consent>` element can be used to block any other AMP components on the page from loading (except `<amp-consent>` itself).
 
 ### Client caching
-The consent information (from the response or from user action on client side) will be cached on client side in localStorage. The cached value will be used by <amp-consent> to unblock content for performance optimization unless specifically erased by the expireCache : true flag.
+The consent information (from the response or from user action on client side) will be cached on client side in localStorage. The cached value if exist will always be used by `<amp-consent>` to unblock content for performance optimization. Server endpoint can instruct `<amp-consent>` to erase the stored value so that it won't be used to unblock content the next visit using the `expireCache: true`.
+
 A couple of implications with this behavior:
 
-- When a user change the consent decision elsewhere, the change will be synced through `checkConsentHref` response. But the change will be applied one-time off due to the client cache.
-- When a user travels, <amp-consent> will use the stored consent. It's up to the `checkConsentHref` response to erase stored value using `expireCache: false` and `consentRequired: false`.
-
-TODO(zhouyx@): Need discussion
-When consent is collected and managed purely on client side via the defined prompt UI. The user decision from interacting with prompt UI will be stored in the same client cache.
-Consent decisions from user interaction with the prompt will override any previous consent state, and is not subject to the `expireCache` value from the current response.
+- When stored user consent no longer applies, the change will be synced through `checkConsentHref` response. But the change will be applied one-time off due to the client cache.
+- When a user travels, `<amp-consent>` will use the stored consent. It's up to the `checkConsentHref` response to erase stored value using `expireCache: false` and `consentRequired: false`.
+- If a promptUI is used to collect user consent. Using `expireCache: true` will prompt consent dialog and block users from content on their following visits.
 
 ### Basic blocking behaviors
 
