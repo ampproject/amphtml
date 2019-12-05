@@ -13,16 +13,7 @@
     [placeholder],
     [fallback] {
       font-size: 4em;
-      text-align: center;
-    }
-    .center-vertically {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 50%;
-      transform: translate(0, -50%);
-      height: 1em;
-      line-height: 1em;
+      padding: 1em;
     }
   </style>
 </head>
@@ -35,12 +26,8 @@
     layout="responsive"
     dock
   >
-    <div placeholder>
-      <div class="center-vertically">🖼</div>
-    </div>
-    <div fallback>
-      <div class="center-vertically">😵</div>
-    </div>
+    <div placeholder>🖼</div>
+    <div fallback>😵</div>
   </amp-video-iframe>
   <button on="tap: video.play" id="play-button">play</button>
   <button
