@@ -147,6 +147,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     });
 
     this.historyService_.push(() => this.closeInternal_(), historyState);
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
     );
@@ -183,6 +184,10 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
 
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.CLOSE,
+      this.element
+    );
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT
     );

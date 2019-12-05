@@ -15,6 +15,11 @@
  */
 
 import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
+import {
   Action,
   StateProperty,
   getStoreService,
@@ -63,6 +68,9 @@ export class InfoDialog {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
+
+    /** @private {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win_, parentEl);
 
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
@@ -155,6 +163,12 @@ export class InfoDialog {
     this.resources_.mutateElement(dev().assertElement(this.element_), () => {
       this.element_.classList.toggle(DIALOG_VISIBLE_CLASS, isOpen);
     });
+
+    this.element_[ANALYTICS_TAG_NAME] = 'amp-story-info-dialog';
+    this.analyticsService_.triggerEvent(
+      isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.element_
+    );
   }
 
   /**
