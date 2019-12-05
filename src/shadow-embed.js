@@ -621,8 +621,7 @@ export class ShadowDomWriterBulk {
   close() {
     devAssert(this.onBody_ && this.onBodyChunk_ && this.onEnd_);
     this.eof_ = true;
-    this.vsync_.mutate(() => this.complete_());
-    return this.success_;
+    return this.vsync_.mutatePromise(() => this.complete_());
   }
 
   /** @override */
