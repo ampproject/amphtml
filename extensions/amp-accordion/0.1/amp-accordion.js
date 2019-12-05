@@ -27,6 +27,7 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
+import {isExperimentOn} from '../../../src/experiments';
 import {
   numeric,
   px,
@@ -40,6 +41,10 @@ const MAX_TRANSITION_DURATION = 500; // ms
 const MIN_TRANSITION_DURATION = 200; // ms
 const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
 const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
+
+const isDisplayLockingEnabledForAccordion = function(win) {
+  return isExperimentOn(win, 'amp-accordion');
+};
 
 class AmpAccordion extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -146,9 +151,10 @@ class AmpAccordion extends AMP.BaseElement {
       header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded', isExpanded.toString());
-      content.renderSubtree = isExpanded
-        ? ''
-        : 'invisible skip-viewport-activation';
+      this.setRenderSubtreeIfEnabled(
+        content,
+        isExpanded ? '' : 'invisible skip-viewport-activation'
+      );
       if (!header.hasAttribute('tabindex')) {
         header.setAttribute('tabindex', 0);
       }
@@ -308,21 +314,26 @@ class AmpAccordion extends AMP.BaseElement {
     if (this.element.hasAttribute('animate')) {
       if (toExpand) {
         header.setAttribute('aria-expanded', 'true');
-        content.renderSubtree = '';
+        this.setRenderSubtreeIfEnabled(content, '');
         this.animateExpand_(section, trust);
         if (this.element.hasAttribute('expand-single-section')) {
           this.sections_.forEach(sectionIter => {
             if (sectionIter != section) {
               this.animateCollapse_(sectionIter, trust);
               sectionIter.children[0].setAttribute('aria-expanded', 'false');
-              sectionIter.children[1].renderSubtree =
-                'invisible skip-viewport-activation';
+              this.setRenderSubtreeIfEnabled(
+                sectionIter.children[1],
+                'invisible skip-viewport-activation'
+              );
             }
           });
         }
       } else {
         header.setAttribute('aria-expanded', 'false');
-        content.renderSubtree = 'invisible skip-viewport-activation';
+        this.setRenderSubtreeIfEnabled(
+          content,
+          'invisible skip-viewport-activation'
+        );
         this.animateCollapse_(section, trust);
       }
     } else {
@@ -331,7 +342,7 @@ class AmpAccordion extends AMP.BaseElement {
         if (toExpand) {
           this.triggerEvent_('expand', section, trust);
           section.setAttribute('expanded', '');
-          content.renderSubtree = '';
+          this.setRenderSubtreeIfEnabled(content, '');
           header.setAttribute('aria-expanded', 'true');
           // if expand-single-section is set, only allow one <section> to be
           // expanded at a time
@@ -343,8 +354,10 @@ class AmpAccordion extends AMP.BaseElement {
                   sectionIter.removeAttribute('expanded');
                 }
                 sectionIter.children[0].setAttribute('aria-expanded', 'false');
-                sectionIter.children[1].renderSubtree =
-                  'invisible skip-viewport-activation';
+                this.setRenderSubtreeIfEnabled(
+                  sectionIter.children[1],
+                  'invisible skip-viewport-activation'
+                );
               }
             });
           }
@@ -352,12 +365,28 @@ class AmpAccordion extends AMP.BaseElement {
           this.triggerEvent_('collapse', section, trust);
           section.removeAttribute('expanded');
           header.setAttribute('aria-expanded', 'false');
-          content.renderSubtree = 'invisible skip-viewport-activation';
+          this.setRenderSubtreeIfEnabled(
+            content,
+            'invisible skip-viewport-activation'
+          );
         }
       }, section);
     }
     this.currentState_[contentId] = !isSectionClosedAfterClick;
     this.setSessionState_();
+  }
+
+  /**
+   * If Display Locking API is enabled, set the renderSubtree attribute
+   * on the given element with the given value.
+   * @param {HTMLElement} element
+   * @param {string} value
+   */
+  setRenderSubtreeIfEnabled(element, value) {
+    if (!isDisplayLockingEnabledForAccordion(this.win)) {
+      return;
+    }
+    element.renderSubtree = value;
   }
 
   /**
