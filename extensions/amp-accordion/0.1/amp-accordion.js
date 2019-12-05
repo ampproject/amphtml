@@ -33,6 +33,7 @@ import {
   px,
   setStyles as setStylesTransition,
 } from '../../../src/transition';
+import {once} from '../../../src/utils/function';
 import {parseJson} from '../../../src/json';
 import {removeFragment} from '../../../src/url';
 
@@ -42,9 +43,11 @@ const MIN_TRANSITION_DURATION = 200; // ms
 const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
 const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
 
-const isDisplayLockingEnabledForAccordion = function(win) {
-  return isExperimentOn(win, 'amp-accordion');
-};
+const isDisplayLockingEnabledForAccordion = once(win => {
+  return (
+    isExperimentOn(win, 'amp-accordion') && 'renderSubtree' in Element.prototype
+  );
+});
 
 class AmpAccordion extends AMP.BaseElement {
   /** @param {!AmpElement} element */
