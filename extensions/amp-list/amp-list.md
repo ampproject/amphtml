@@ -296,7 +296,7 @@ Causes `<amp-list>` to treat the returned result as if it were a single element 
 
 ##### strip-prefix (optional)
 
-Causes `<amp-list>` to strip a prefix from a given endpoint's JSON before parsing. This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
+Causes `<amp-list>` to strip a prefix from the fetched JSON before parsing. This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
 For example, lets say we had an API that returned this response:
 
