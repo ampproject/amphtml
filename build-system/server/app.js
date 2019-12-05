@@ -816,7 +816,7 @@ app.get('/a4a_template/*', (req, res) => {
       res.setHeader('AMP-template-amp-creative', 'amp-mustache');
       res.end(file);
     })
-    .error(() => {
+    .catch(() => {
       res.status(404);
       res.end('Not found: ' + filePath);
     });
@@ -1099,7 +1099,7 @@ app.get('/adzerk/*', (req, res) => {
       res.setHeader('AMP-Ad-Response-Type', 'template');
       res.end(file);
     })
-    .error(() => {
+    .catch(() => {
       res.status(404);
       res.end('Not found: ' + filePath);
     });
@@ -1414,7 +1414,7 @@ app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
       res.setHeader('Content-Type', 'application/json');
       res.end(file);
     })
-    .error(() => {
+    .catch(() => {
       res.status(404);
       res.end('Not found: ' + localVendorConfigPath);
     });
