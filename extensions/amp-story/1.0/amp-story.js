@@ -981,7 +981,10 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeSidebar_();
     this.setThemeColor_();
 
-    const storyLayoutPromise = this.initializePages_()
+    const storyLayoutPromise = Promise.all([
+      this.getAmpDoc().whenFirstVisible(), // Pauses execution during prerender.
+      this.initializePages_(),
+    ])
       .then(() => {
         this.handleConsentExtension_();
         this.initializeStoryAccess_();
