@@ -18,6 +18,11 @@
   <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
   <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
+  <script>
+    (self.AMP = self.AMP || []).push(function(AMP) {
+      AMP.toggleExperiment('amp-autocomplete', true);
+    });
+  </script>
 </head>
 <body>
   <h2>Plain text, inline data</h2>
@@ -61,6 +66,27 @@
           </div>
         </div>
       </template>
+    </amp-autocomplete>
+    <input type="submit" value="Submit">
+    <div submit-success>
+      <template type="amp-mustache">
+        Success!
+      </template>
+    </div>
+  </form>
+
+  <h2>Inline autocomplete</h2>
+  <form
+    id="form2"
+    method="get"
+    action="/form/search-html/get"
+    action-xhr="/form/search-json/get"
+    target="_blank">
+    <amp-autocomplete id="autocompleteInline" inline="@" filter="prefix" min-characters="0">
+      <input type="search" id="inputInline">
+      <script type="application/json">
+        { "items" : ["apple", "banana", "orange"] }
+      </script>
     </amp-autocomplete>
     <input type="submit" value="Submit">
     <div submit-success>
