@@ -61,7 +61,7 @@ describes.endtoend(
         right: pageWidth - arrowMargin,
       });
       await expect(controller.getElementRect(nextArrow)).to.include({
-        left: 0,
+        left: arrowMargin,
       });
     });
   }
