@@ -160,6 +160,10 @@ An explicit size of the image, which is used by the AMP runtime to determine the
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
+**data attributes**
+
+Data attributes are copied from the `amp-img` element to the internal `img` element created by the component.
+
 ## Styling
 
 `amp-img` can be styled directly via CSS properties. Setting a grey background

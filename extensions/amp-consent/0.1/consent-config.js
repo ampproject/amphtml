@@ -19,7 +19,7 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
 import {deepMerge, map} from '../../../src/utils/object';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
@@ -90,7 +90,7 @@ export class ConsentConfig {
       return config;
     }
 
-    dev().warn(
+    user().warn(
       TAG,
       'Using `consents` is an outdated format. Newer features may not be supported.'
     );
@@ -206,17 +206,18 @@ export class ConsentConfig {
    * @return {!JsonObject}
    */
   validateMergedGeoOverride_(mergedConfig) {
+    const consentRequired = mergedConfig['consentRequired'];
     userAssert(
       mergedConfig['consentInstanceId'],
       '%s: consentInstanceId to store consent info is required',
       TAG
     );
     userAssert(
-      mergedConfig['consentRequired'] !== undefined,
+      typeof consentRequired === 'boolean' || consentRequired === 'remote',
       '`consentRequired` is required',
       TAG
     );
-    if (mergedConfig['consentRequired'] === 'remote') {
+    if (consentRequired === 'remote') {
       userAssert(
         mergedConfig['checkConsentHref'],
         '%s: `checkConsentHref` must be specified if `consentRequired` is remote',

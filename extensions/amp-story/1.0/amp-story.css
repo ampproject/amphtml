@@ -364,16 +364,6 @@ amp-story-grid-layer {
   left: 0 !important;
 }
 
-/**
- * Adds a width limit to make sure amp-twitter element only takes required
- * space, otherwise it takes whole width and causes a tooltip trigger in blank
- * space.
- * See #22334
- */
-amp-story-grid-layer amp-twitter {
-  max-width: 500px !important;
-}
-
 amp-story-grid-layer > * {
   pointer-events: auto !important;
 }

@@ -16,6 +16,7 @@
 
 import {
   CONSENT_ITEM_STATE,
+  convertEnumValueToState,
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
@@ -87,7 +88,11 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?function()} */
     this.dialogResolver_ = null;
 
+    /** @private {boolean} */
     this.isPromptUIOn_ = false;
+
+    /** @private {boolean} */
+    this.consentStateChangedViaPromptUI_ = false;
 
     /** @private {boolean} */
     this.consentUIPending_ = false;
@@ -391,6 +396,8 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
 
+    this.consentStateChangedViaPromptUI_ = true;
+
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
@@ -419,6 +426,9 @@ export class AmpConsent extends AMP.BaseElement {
   init_() {
     this.passSharedData_();
     this.maybeSetDirtyBit_();
+    if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
+      this.syncRemoteConsentState_();
+    }
 
     this.getConsentRequiredPromise_()
       .then(isConsentRequired => {
@@ -446,13 +456,23 @@ export class AmpConsent extends AMP.BaseElement {
     if (!isExperimentOn(this.win, 'amp-consent-geo-override')) {
       return this.getConsentRequiredPromiseLegacy_();
     }
-    if (typeof this.consentConfig_['consentRequired'] === 'boolean') {
-      return Promise.resolve(this.consentConfig_['consentRequired']);
-    }
-    return this.getConsentRemote_().then(consentInfo => {
-      const remoteResponse = consentInfo['consentRequired'];
-      return typeof remoteResponse === 'boolean' ? remoteResponse : true;
-    });
+    return this.consentStateManager_
+      .getConsentInstanceInfo()
+      .then(storedInfo => {
+        if (hasStoredValue(storedInfo)) {
+          return Promise.resolve(true);
+        }
+        const consentRequired = this.consentConfig_['consentRequired'];
+        if (typeof consentRequired === 'boolean') {
+          return Promise.resolve(consentRequired);
+        }
+        return this.getConsentRemote_().then(consentResponse => {
+          // `promptIfUnknown` is a legacy field
+          return consentResponse['consentRequired'] !== undefined
+            ? !!consentResponse['consentRequired']
+            : !!consentResponse['promptIfUnknown'];
+        });
+      });
   }
 
   /**
@@ -515,6 +535,48 @@ export class AmpConsent extends AMP.BaseElement {
         this.consentStateManager_.setDirtyBit();
       }
     });
+  }
+
+  /**
+   * Clear cache for server side decision and then sync.
+   */
+  syncRemoteConsentState_() {
+    this.getConsentRemote_().then(response => {
+      if (!response) {
+        return;
+      }
+      const expireCache = response['expireCache'];
+      if (expireCache) {
+        this.consentStateManager_.setDirtyBit();
+      }
+
+      // Decision from promptUI takes precedence over consent decision from response
+      if (
+        !!response['consentRequired'] &&
+        !this.consentStateChangedViaPromptUI_
+      ) {
+        this.updateCacheIfNotNull_(
+          response['consentStateValue'],
+          response['consentString'] || undefined
+        );
+      }
+    });
+  }
+
+  /**
+   * Sync with local storage if consentRequired is true.
+   * @param {string=} responseStateValue
+   * @param {string=} responseConsentString
+   */
+  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
+    const consentStateValue = convertEnumValueToState(responseStateValue);
+    // consentStateValue and consentString are treated as a pair that will update together
+    if (consentStateValue !== null) {
+      this.consentStateManager_.updateConsentInstanceState(
+        consentStateValue,
+        responseConsentString
+      );
+    }
   }
 
   /**
@@ -632,6 +694,30 @@ export class AmpConsent extends AMP.BaseElement {
         this.postPromptUI_.hide();
       });
     });
+  }
+
+  /**
+   * @return {?ConsentStateManager}
+   * @visibleForTesting
+   */
+  getConsentStateManagerForTesting() {
+    return this.consentStateManager_;
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   * @visibleForTesting
+   */
+  getConsentRequiredPromiseForTesting() {
+    return this.getConsentRequiredPromise_();
+  }
+
+  /**
+   * @return {boolean}
+   * @visibleForTesting
+   */
+  getIsPromptUiOnForTesting() {
+    return this.isPromptUIOn_;
   }
 }
 

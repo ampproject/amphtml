@@ -15,7 +15,11 @@
  */
 
 import {ACTION_TYPE, AmpConsent} from '../amp-consent';
-import {CONSENT_ITEM_STATE} from '../consent-info';
+import {
+  CONSENT_ITEM_STATE,
+  STORAGE_KEY,
+  getConsentStateValue,
+} from '../consent-info';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {dict} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
@@ -42,6 +46,7 @@ describes.realWin(
     let requestBody;
     let ISOCountryGroups;
     let xhrServiceMock;
+    let storageMock;
 
     beforeEach(() => {
       doc = env.win.document;
@@ -73,6 +78,17 @@ describes.realWin(
         },
       };
 
+      storageMock = {
+        setNonBoolean: () => {},
+        get: name => {
+          return Promise.resolve(storageValue[name]);
+        },
+        set: (name, value) => {
+          storageValue[name] = value;
+          return Promise.resolve();
+        },
+      };
+
       resetServiceForTesting(win, 'xhr');
       registerServiceBuilder(win, 'xhr', function() {
         return xhrServiceMock;
@@ -90,15 +106,7 @@ describes.realWin(
 
       resetServiceForTesting(win, 'storage');
       registerServiceBuilder(win, 'storage', function() {
-        return Promise.resolve({
-          get: name => {
-            return Promise.resolve(storageValue[name]);
-          },
-          set: (name, value) => {
-            storageValue[name] = value;
-            return Promise.resolve();
-          },
-        });
+        return Promise.resolve(storageMock);
       });
     });
 
@@ -205,16 +213,64 @@ describes.realWin(
       it('read promptIfUnknown from server response', async () => {
         await ampConsent.buildCallback();
         await macroTask();
-        return ampConsent.getConsentRequiredPromise_().then(isRequired => {
-          expect(isRequired).to.be.true;
-        });
+        return ampConsent
+          .getConsentRequiredPromiseForTesting()
+          .then(isRequired => {
+            expect(isRequired).to.be.true;
+          });
       });
     });
 
     describe('geo-override server communication', () => {
       let ampConsent;
       beforeEach(() => {
-        toggleExperiment(win, 'amp-consent-geo-override');
+        toggleExperiment(win, 'amp-consent-geo-override', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'amp-consent-geo-override', false);
+      });
+
+      it('checks local storage before making sever request', async () => {
+        const config = {
+          'consentInstanceId': 'abc',
+          'consentRequired': 'remote',
+          'checkConsentHref': 'https://geo-override-check2/',
+        };
+        const localStorageSpy = env.sandbox.spy(storageMock, 'get');
+        const fetchSpy = env.sandbox.spy(xhrServiceMock, 'fetchJson');
+
+        ampConsent = getAmpConsent(doc, config);
+        await ampConsent.buildCallback();
+        await macroTask();
+        expect(localStorageSpy).to.be.calledBefore(fetchSpy);
+        expect(fetchSpy).to.be.calledOnce;
+        const instanceInfo = await ampConsent
+          .getConsentStateManagerForTesting()
+          .getConsentInstanceInfo();
+
+        expect(instanceInfo.consentState).to.equal(CONSENT_ITEM_STATE.UNKNOWN);
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .true;
+      });
+
+      it('respects exisitng local storage decision', async () => {
+        const config = {
+          'consentInstanceId': 'abc',
+          'consentRequired': 'remote',
+          'checkConsentHref': 'https://geo-override-false/',
+        };
+        storageValue = {
+          'amp-consent:abc': false,
+        };
+        ampConsent = getAmpConsent(doc, config);
+
+        await ampConsent.buildCallback();
+        await macroTask();
+        const instanceInfo = await ampConsent
+          .getConsentStateManagerForTesting()
+          .getConsentInstanceInfo();
+        expect(instanceInfo.consentState).to.equal(CONSENT_ITEM_STATE.REJECTED);
       });
 
       it('sends post request to server when consentRequired is remote', async () => {
@@ -226,7 +282,8 @@ describes.realWin(
         ampConsent = getAmpConsent(doc, remoteConfig);
         await ampConsent.buildCallback();
         await macroTask();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .false;
       });
 
       it('resolves consentRequired to remote response with old format', async () => {
@@ -240,7 +297,8 @@ describes.realWin(
         ampConsent = getAmpConsent(doc, remoteConfig);
         await ampConsent.buildCallback();
         await macroTask();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .true;
       });
 
       it('send post request to server with matched group', async () => {
@@ -283,7 +341,8 @@ describes.realWin(
         ampConsent = getAmpConsent(doc, remoteConfig);
         await ampConsent.buildCallback();
         await macroTask();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .true;
         expect(ampConsent.matchedGeoGroup_).to.equal('na');
         expect(requestBody).to.deep.equal({
           'consentInstanceId': 'abc',
@@ -303,7 +362,267 @@ describes.realWin(
         ampConsent = getAmpConsent(doc, remoteConfig);
         await ampConsent.buildCallback();
         await macroTask();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .true;
+      });
+
+      describe('remote server response', () => {
+        beforeEach(() => {
+          jsonMockResponses = {
+            'https://server-test-1/':
+              '{"consentRequired": false, "consentStateValue": "unknown", "consentString": "hello"}',
+            'https://server-test-2/':
+              '{"consentRequired": true, "consentStateValue": "rejected", "consentString": "mystring"}',
+            'https://server-test-3/':
+              '{"consentRequired": true, "consentStateValue": "unknown"}',
+            'https://geo-override-check2/': '{"consentRequired": true}',
+          };
+        });
+
+        it('should not update local storage when response is false', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://server-test-1/',
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('unknown');
+          // 3 is dismissed, 4 is not requried, and 5 is unknown.
+          // All 3 turn into 'unknown'.
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 4,
+            'consentString': undefined,
+            'isDirty': undefined,
+          });
+        });
+
+        it('should not update local storage when response is null', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://geo-override-check2/',
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('unknown');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 5,
+            'consentString': undefined,
+            'isDirty': undefined,
+          });
+          expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+            .true;
+        });
+
+        it('updates local storage and uses those values', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://server-test-2/',
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('rejected');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 2,
+            'consentString': 'mystring',
+            'isDirty': undefined,
+          });
+        });
+
+        it('accepts unknown as a response', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://server-test-3/',
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('unknown');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 5,
+            'consentString': undefined,
+            'isDirty': undefined,
+          });
+        });
+      });
+
+      describe('syncing while local storage exists', () => {
+        beforeEach(() => {
+          jsonMockResponses = {
+            'https://server-test-4/':
+              '{"consentRequired": true, "consentStateValue": "accepted", "consentString": "newstring"}',
+            'https://geo-override-check2/': '{"consentRequired": true}',
+          };
+        });
+
+        it('syncs data from server with existing local storage', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': true,
+            'checkConsentHref': 'https://server-test-4/',
+          };
+          // 0 represents 'rejected' in storage
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 0,
+              [STORAGE_KEY.STRING]: 'oldstring',
+            },
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('accepted');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 1,
+            'consentString': 'newstring',
+            'isDirty': undefined,
+          });
+        });
+
+        it('should not sync data if response is null', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': true,
+            'checkConsentHref': 'https://geo-override-check2/',
+          };
+          // 0 represents 'rejected' in storage
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 0,
+              [STORAGE_KEY.STRING]: 'mystring',
+            },
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getConsentInstanceInfo();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('rejected');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 2,
+            'consentString': 'mystring',
+            'isDirty': undefined,
+          });
+        });
+      });
+
+      describe('expire cache', () => {
+        beforeEach(() => {
+          jsonMockResponses = {
+            'https://expire-cache/':
+              '{"expireCache": true,"consentRequired": true, "consentStateValue": null, "consentString": null}',
+            'https://expire-cache-2/':
+              '{"expireCache": true,"consentRequired": true, "consentStateValue": "invalidState"}',
+          };
+        });
+
+        it('should set dirty bit', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://expire-cache/',
+          };
+          // 0 represents 'rejected' in storage
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 0,
+              [STORAGE_KEY.STRING]: 'mystring',
+            },
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getSavedInstanceForTesting();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('rejected');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 2,
+            'consentString': 'mystring',
+            'isDirty': true,
+          });
+        });
+
+        it('should not update cache with invalid consent info', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://expire-cache-2/',
+          };
+          // 0 represents 'rejected' in storage
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 0,
+              [STORAGE_KEY.STRING]: 'mystring',
+            },
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getSavedInstanceForTesting();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('rejected');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 2,
+            'consentString': 'mystring',
+            'isDirty': true,
+          });
+        });
       });
     });
 
@@ -327,7 +646,8 @@ describes.realWin(
         ampConsent = new AmpConsent(consentElement);
         ISOCountryGroups = ['unknown', 'testGroup'];
         await ampConsent.buildCallback();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.true;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .true;
       });
 
       it('not in geo group', async () => {
@@ -335,7 +655,8 @@ describes.realWin(
         ampConsent = new AmpConsent(consentElement);
         ISOCountryGroups = ['unknown'];
         await ampConsent.buildCallback();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .false;
       });
 
       it('geo override promptIfUnknown', async () => {
@@ -354,7 +675,8 @@ describes.realWin(
         doc.body.appendChild(consentElement);
         ampConsent = new AmpConsent(consentElement);
         await ampConsent.buildCallback();
-        expect(await ampConsent.getConsentRequiredPromise_()).to.be.false;
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .false;
       });
     });
 
@@ -485,6 +807,33 @@ describes.realWin(
         });
       });
 
+      afterEach(() => {
+        toggleExperiment(win, 'amp-consent-geo-override', false);
+      });
+
+      it('should not show promptUI if local storage has decision', async () => {
+        toggleExperiment(win, 'amp-consent-geo-override', true);
+        const config = {
+          'consentInstanceId': 'abc',
+          'consentRequired': 'remote',
+          'checkConsentHref': 'https://geo-override-check2/',
+          'promptUI': '123',
+        };
+        storageValue = {
+          'amp-consent:abc': true,
+        };
+
+        ampConsent = getAmpConsent(doc, config);
+        await ampConsent.buildCallback();
+        await macroTask();
+        const instanceInfo = await ampConsent
+          .getConsentStateManagerForTesting()
+          .getConsentInstanceInfo();
+
+        expect(instanceInfo.consentState).to.equal(CONSENT_ITEM_STATE.ACCEPTED);
+        expect(ampConsent.isPromptUIOn_).to.be.false;
+      });
+
       it('update current displaying status', async () => {
         await ampConsent.buildCallback();
         await macroTask();
@@ -576,6 +925,56 @@ describes.realWin(
           expect(postPromptUI).to.have.display('none');
         });
 
+        describe('hide/show postPromptUI with local storage', () => {
+          beforeEach(() => {
+            toggleExperiment(win, 'amp-consent-geo-override', true);
+            defaultConfig = dict({
+              'consentInstanceId': 'ABC',
+              'consentRequired': true,
+              'postPromptUI': 'test2',
+            });
+            consentElement = createConsentElement(doc, defaultConfig);
+            postPromptUI = doc.createElement('div');
+            postPromptUI.setAttribute('id', 'test2');
+            consentElement.appendChild(postPromptUI);
+            doc.body.appendChild(consentElement);
+            ampConsent = new AmpConsent(consentElement);
+          });
+
+          afterEach(() => {
+            toggleExperiment(win, 'amp-consent-geo-override', false);
+          });
+
+          it('hides postPromptUI with no local storage decision', async () => {
+            await ampConsent.buildCallback();
+            expect(postPromptUI).to.have.display('none');
+          });
+
+          it('shows postPromptUI with local storage decision', async () => {
+            const scheduleDisplaySpy = env.sandbox.spy(
+              ampConsent,
+              'scheduleDisplay_'
+            );
+
+            storageValue = {
+              'amp-consent:ABC': true,
+            };
+            await ampConsent.buildCallback();
+            ampConsent.element.classList.remove('i-amphtml-notbuilt');
+            await macroTask();
+            const instanceInfo = await ampConsent
+              .getConsentStateManagerForTesting()
+              .getConsentInstanceInfo();
+
+            expect(instanceInfo.consentState).to.equal(
+              CONSENT_ITEM_STATE.ACCEPTED
+            );
+            expect(scheduleDisplaySpy).to.not.be.called;
+            expect(postPromptUI).to.not.be.null;
+            expect(postPromptUI).to.not.have.display('none');
+          });
+        });
+
         describe('hide/show postPromptUI', () => {
           beforeEach(() => {
             defaultConfig = dict({
@@ -596,7 +995,7 @@ describes.realWin(
             ampConsent = new AmpConsent(consentElement);
           });
 
-          it('hide postPromptUI', async () => {
+          it('hide postPromptUI with no local storage', async () => {
             await ampConsent.buildCallback();
             ampConsent.element.classList.remove('i-amphtml-notbuilt');
             await macroTask();

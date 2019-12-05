@@ -61,6 +61,16 @@
                   "eventId": "clickOnBookend"
                 }
               },
+              "trackPageAttachmentOpen": {
+                "on": "story-open",
+                "tagName": "amp-story-page-attachment",
+                "request": "base"
+              },
+              "trackPageAttachmentClose": {
+                "on": "story-close",
+                "tagName": "amp-story-page-attachment",
+                "request": "base"
+              },
               "trackFocusedState": {
                 "on": "story-focus",
                 "tagName": "a",
@@ -79,11 +89,13 @@
                 }
               },
               "trackBookendEnter": {
-                "on": "story-bookend-enter",
+                "on": "story-open",
+                "tagName": "amp-story-bookend",
                 "request": "pageView"
               },
               "trackBookendExit": {
-                "on": "story-bookend-exit",
+                "on": "story-close",
+                "tagName": "amp-story-bookend",
                 "request": "pageView"
               },
               "trackAudioEnable": {
@@ -103,6 +115,14 @@
         <amp-story-grid-layer template="vertical">
           <h1>Page One</h1>
         </amp-story-grid-layer>
+        <amp-story-page-attachment layout="nodisplay">
+          <div>
+            <h1>Some really cool video</h1>
+              <p style="color: black">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+              </p>
+          </div>
+        </amp-story-page-attachment>
       </amp-story-page>
 
       <amp-story-page id="p2">

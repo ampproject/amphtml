@@ -18,7 +18,6 @@ import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
-import {isExperimentOn} from './experiments';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
@@ -300,11 +299,7 @@ class Chunks {
     this.boundExecute_ = this.execute_.bind(this);
     /** @private {number} */
     this.durationOfLastExecution_ = 0;
-    /** @private {boolean} */
-    this.macroAfterLongTask_ = isExperimentOn(
-      this.win_,
-      'macro-after-long-task'
-    );
+
     /**
      * Set to true if we scheduled a macro or micro task to execute the next
      * task. If true, we don't schedule another one.
@@ -448,11 +443,7 @@ class Chunks {
     // If we've spent over 5 millseconds executing the
     // last instruction yeild back to the main thread.
     // 5 milliseconds is a magic number.
-    if (
-      this.macroAfterLongTask_ &&
-      this.bodyIsVisible_ &&
-      this.durationOfLastExecution_ > 5
-    ) {
+    if (this.bodyIsVisible_ && this.durationOfLastExecution_ > 5) {
       this.durationOfLastExecution_ = 0;
       this.requestMacroTask_();
       return;
