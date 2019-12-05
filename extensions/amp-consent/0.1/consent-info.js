@@ -110,8 +110,7 @@ export function recalculateConsentStateValue(newState, previousState) {
     newState = CONSENT_ITEM_STATE.UNKNOWN;
   }
   if (
-    newState == CONSENT_ITEM_STATE.DISMISSED ||
-    newState == CONSENT_ITEM_STATE.UNKNOWN
+    newState == CONSENT_ITEM_STATE.DISMISSED
   ) {
     return previousState || CONSENT_ITEM_STATE.UNKNOWN;
   }
