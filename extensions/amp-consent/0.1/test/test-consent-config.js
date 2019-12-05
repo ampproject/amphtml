@@ -418,11 +418,9 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       // Check consent config exists
       scriptElement.setAttribute('type', 'application/json');
       scriptElement.textContent = JSON.stringify({});
-      allowConsoleError(() => {
-        expect(() =>
-          new ConsentConfig(element).getConsentConfigPromise()
-        ).to.throw(consentExistError);
-      });
+      await expect(
+        new ConsentConfig(element).getConsentConfigPromise()
+      ).to.be.rejectedWith(consentExistError);
 
       scriptElement.textContent = JSON.stringify({
         'consents': {
