@@ -110,9 +110,8 @@ export class LocalSubscriptionBasePlatform {
    */
   initializeListeners_() {
     // Listen for click events bubbling up to the root node.
-    // To fix an iOS shadow DOM bug (https://github.com/ampproject/amphtml/issues/25754),
-    // listen to the root node's `body` property, if it's defined.
-    // It won't be defined for Chrome, but that's OK.
+    // If the root node has a `body` property, listen to events on that instead,
+    // to fix an iOS shadow DOM bug (https://github.com/ampproject/amphtml/issues/25754).
     const el = this.rootNode_.body || this.rootNode_;
     el.addEventListener('click', e => {
       const element = closestAncestorElementBySelector(
