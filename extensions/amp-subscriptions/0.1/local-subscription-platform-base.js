@@ -109,7 +109,12 @@ export class LocalSubscriptionBasePlatform {
    * @protected
    */
   initializeListeners_() {
-    this.rootNode_.body.addEventListener('click', e => {
+    // Listen for click events bubbling up to the root node.
+    // To fix an iOS shadow DOM bug (https://github.com/ampproject/amphtml/issues/25754),
+    // listen to the root node's `body` property, if it's defined.
+    // It won't be defined for Chrome, but that's OK.
+    const el = this.rootNode_.body || this.rootNode_;
+    el.addEventListener('click', e => {
       const element = closestAncestorElementBySelector(
         dev().assertElement(e.target),
         '[subscriptions-action]'
