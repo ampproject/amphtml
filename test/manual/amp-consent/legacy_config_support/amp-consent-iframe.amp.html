@@ -153,6 +153,18 @@
       PublisherLogo
     </div>
   </header>
+  <p>
+    This is an example to show that one can use "amp-iframe" as the UI,
+    and "amp-consent" handles the layout of the iframe correctly.
+    You should be able to see an interact with an iframe prompt that looks like the one below
+  </p>
+  <amp-iframe id='1234' width=300 height=50
+    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+    layout="responsive"
+    frameborder="0"
+    src="http://ads.localhost:8000/examples/amp-consent/diy-consent.html">
+    <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
+  </amp-iframe>
   <main role="main">
      <h3>Image that is blocked by '_till_responded' consent</h3>
     <amp-img
@@ -322,15 +334,6 @@
         </div>
       </div>
 
-      <amp-iframe id='1234' width=300 height=50
-          on:"message:myConsentId.accept"
-          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-          layout="responsive"
-          frameborder="0"
-          src="http://ads.localhost:8000/test/manual/diy-consent.html">
-          <placeholder></placeholder>
-      </amp-iframe>
-
       <amp-consent id='ABC' layout='nodisplay'>
       <script type="application/json">{
         "consents": {
@@ -344,11 +347,10 @@
       <div id="ui1">
         Can I load the image??
         <amp-iframe id='5678' width=300 height=50
-          on:"message:myConsentId.accept"
           sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
           layout="responsive"
           frameborder="0"
-          src="http://ads.localhost:8000/test/manual/diy-consent.html">
+          src="http://ads.localhost:8000/examples/amp-consent/diy-consent.html">
           <placeholder></placeholder>
         </amp-iframe>
       </div>
