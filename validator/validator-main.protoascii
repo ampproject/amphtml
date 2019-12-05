@@ -6937,62 +6937,64 @@ error_specificity {
   code: BASE_TAG_MUST_PRECEED_ALL_URLS
   specificity: 83
 }
-error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 100 }
-error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 101 }
-error_specificity { code: DEPRECATED_ATTR specificity: 102 }
-error_specificity { code: DEPRECATED_TAG specificity: 103 }
-error_specificity { code: DISALLOWED_MANUFACTURED_BODY specificity: 104 }
-error_specificity { code: DOCUMENT_TOO_COMPLEX specificity: 105 }
-error_specificity { code: INCORRECT_MIN_NUM_CHILD_TAGS specificity: 106 }
-error_specificity { code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS specificity: 107 }
-error_specificity { code: MANDATORY_LAST_CHILD_TAG specificity: 108 }
+error_specificity { code: LTS_EXTENSION_ONLY specificity: 100 }
+error_specificity { code: LTS_RUNTIME_ONLY specificity: 101 }
+error_specificity { code: DISALLOWED_SCRIPT_TAG specificity: 102 }
+error_specificity { code: GENERAL_DISALLOWED_TAG specificity: 103 }
+error_specificity { code: DEPRECATED_ATTR specificity: 104 }
+error_specificity { code: DEPRECATED_TAG specificity: 105 }
+error_specificity { code: DISALLOWED_MANUFACTURED_BODY specificity: 106 }
+error_specificity { code: DOCUMENT_TOO_COMPLEX specificity: 107 }
+error_specificity { code: INCORRECT_MIN_NUM_CHILD_TAGS specificity: 108 }
+error_specificity { code: TAG_NOT_ALLOWED_TO_HAVE_SIBLINGS specificity: 109 }
+error_specificity { code: MANDATORY_LAST_CHILD_TAG specificity: 110 }
 error_specificity {
   code: CSS_SYNTAX_INVALID_PROPERTY
-  specificity: 109
-}
-error_specificity {
-  code: CSS_SYNTAX_INVALID_PROPERTY_NOLIST
-  specificity: 110
-}
-error_specificity {
-  code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
   specificity: 111
 }
 error_specificity {
-  code: CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME
+  code: CSS_SYNTAX_INVALID_PROPERTY_NOLIST
   specificity: 112
 }
 error_specificity {
-  code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
+  code: CSS_SYNTAX_QUALIFIED_RULE_HAS_NO_DECLARATIONS
   specificity: 113
 }
 error_specificity {
-  code: CSS_SYNTAX_MALFORMED_MEDIA_QUERY
+  code: CSS_SYNTAX_DISALLOWED_QUALIFIED_RULE_MUST_BE_INSIDE_KEYFRAME
+  specificity: 114
+}
+error_specificity {
+  code: CSS_SYNTAX_DISALLOWED_KEYFRAME_INSIDE_KEYFRAME
   specificity: 115
 }
 error_specificity {
-  code: CSS_SYNTAX_DISALLOWED_MEDIA_TYPE
-  specificity: 116
-}
-error_specificity {
-  code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
+  code: CSS_SYNTAX_MALFORMED_MEDIA_QUERY
   specificity: 117
 }
 error_specificity {
-  code: INVALID_UTF8
+  code: CSS_SYNTAX_DISALLOWED_MEDIA_TYPE
   specificity: 118
 }
 error_specificity {
-  code: CSS_EXCESSIVELY_NESTED
+  code: CSS_SYNTAX_DISALLOWED_MEDIA_FEATURE
   specificity: 119
 }
 error_specificity {
-  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  code: INVALID_UTF8
   specificity: 120
 }
 error_specificity {
-  code: VALUE_SET_MISMATCH
+  code: CSS_EXCESSIVELY_NESTED
   specificity: 121
+}
+error_specificity {
+  code: DOCUMENT_SIZE_LIMIT_EXCEEDED
+  specificity: 122
+}
+error_specificity {
+  code: VALUE_SET_MISMATCH
+  specificity: 123
 }
 error_specificity {
   code: DEV_MODE_ONLY
@@ -7053,6 +7055,14 @@ error_formats {
 error_formats {
   code: GENERAL_DISALLOWED_TAG
   format: "The tag '%1' is disallowed except in specific forms."
+}
+error_formats {
+  code: LTS_RUNTIME_ONLY
+  format: "Extension '%1' must use LTS to match LTS runtime."
+}
+error_formats {
+  code: LTS_EXTENSION_ONLY
+  format: "Extension '%1' may not use LTS with non-LTS runtime."
 }
 error_formats {
   code: DISALLOWED_SCRIPT_TAG
