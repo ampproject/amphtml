@@ -12,12 +12,24 @@
     (window.AmpVideoIframe = window.AmpVideoIframe || []).push(function(amp) {
       amp.postEvent('canplay');
 
-      amp.method('play', () => {
+      amp.method('play', function() {
         amp.postEvent('playing');
 
         setTimeout(function() {
           amp.postEvent('ad_start');
         }, 1500);
+      });
+
+      amp.method('pause', function() {
+        amp.postEvent('pause');
+      });
+
+      amp.method('mute', function() {
+        amp.postEvent('muted');
+      });
+
+      amp.method('unmute', function() {
+        amp.postEvent('unmuted');
       });
     });
   </script>

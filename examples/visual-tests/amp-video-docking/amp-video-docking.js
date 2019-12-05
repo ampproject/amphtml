@@ -48,6 +48,32 @@ module.exports = {
     await hoverDockArea(page);
   },
 
+  'toggles controls button into paused': async (page, name) => {
+    await dock(page, name);
+    await hoverDockArea(page);
+    await page.tap('.amp-video-docked-pause');
+  },
+
+  'toggles controls button into playing': async (page, name) => {
+    await dock(page, name);
+    await hoverDockArea(page);
+    await page.tap('.amp-video-docked-pause');
+    await page.tap('.amp-video-docked-play');
+  },
+
+  'toggles controls button into muted': async (page, name) => {
+    await dock(page, name);
+    await hoverDockArea(page);
+    await page.tap('.amp-video-docked-mute');
+  },
+
+  'toggles controls button into unmuted': async (page, name) => {
+    await dock(page, name);
+    await hoverDockArea(page);
+    await page.tap('.amp-video-docked-mute');
+    await page.tap('.amp-video-docked-unmute');
+  },
+
   'displays scrollback button while ad plays': async (page, name) => {
     await dock(page, name);
     await hoverDockArea(page);
