@@ -127,20 +127,17 @@ AMP expects the response to be a JSON object like the following:
   "consentRequired": {boolean}                  // Whether consent is required from the user.
                                                 // The value is required it is used to
                                                 // determine if consent is required. If not
-                                                // found, AMP will unblock content as consent // is not required. */
-  "consentStateValue": {?enum} [default: null], // (new)
-                                                // The latest consent state known
+                                                // found, AMP will unblock content as consent is not required.
+  "consentStateValue": {?enum} [default: null], // The latest consent state known
                                                 // by the server
                                                 // Takes value of ["accepted", "rejected",
                                                 // "unknown"].
                                                 // The value will be ignored if
                                                 // "consentRequired: false".
-                                                // If the value is non-null, it will be cached // at client.
-  "consentString": {?string} [default: null],   // (new)
-                                                // The latest consent string known by the server.
                                                 // If the value is non-null, it will be cached at client.
-  "expireCache": {boolean} [default: false]     // (new)
-                                                // Indicate that the cache needs to be cleared
+  "consentString": {?string} [default: null],   // The latest consent string known by the server.
+                                                // If the value is non-null, it will be cached at client.
+  "expireCache": {boolean} [default: false]     // Indicate that the cache needs to be cleared
                                                 // Set to `true` in conjunction with
                                                 // consentStateValue='accepted'/'rejected'
                                                 // to enforce server side consent state
