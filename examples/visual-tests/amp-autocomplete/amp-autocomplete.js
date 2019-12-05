@@ -49,12 +49,4 @@ module.exports = {
       'amp-autocomplete#autocompleteInline > .i-amphtml-autocomplete-results',
     ]);
   },
-
-  'type trigger into inputInline to display results': async (page, name) => {
-    await page.tap('input#inputInline');
-    await page.keyboard.type('@');
-    await verifySelectorsVisible(page, name, [
-      'amp-autocomplete#autocompleteInline > .i-amphtml-autocomplete-results',
-    ]);
-  },
 };
