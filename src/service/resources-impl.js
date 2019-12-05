@@ -851,11 +851,12 @@ export class ResourcesImpl {
                 // cause some of them to be pushed down.
                 const parentWidth =
                   (parent.getLayoutWidth && parent.getLayoutWidth()) ||
-                  parent.getBoundingClientRect().width;
+                  parent./*OK*/ getBoundingClientRect().width;
                 let cumulativeWidth = widthDiff;
                 for (let i = 0; i < parent.childElementCount; i++) {
-                  cumulativeWidth += parent.children[i].getBoundingClientRect()
-                    .width;
+                  cumulativeWidth += parent.children[
+                    i
+                  ]./*OK*/ getBoundingClientRect().width;
                   if (cumulativeWidth > parentWidth) {
                     state.resize = false;
                     return;
