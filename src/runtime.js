@@ -175,19 +175,6 @@ function adoptShared(global, callback) {
    */
   global.AMP.setTickFunction = (unusedFn, opt_flush) => {};
 
-  /**
-   * Installs services for the given AMP document (used for
-   * shadow documents and amp-next-page)
-   * @export
-   */
-  global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
-
-  /**
-   * Exports the combined (shared and doc) styles
-   * @export
-   */
-  global.AMP.combinedCss = ampDocCss + ampSharedCss;
-
   // Run specific setup for a single-doc or shadow-doc mode.
   const iniPromise = callback(global, extensions);
 
@@ -340,31 +327,70 @@ function startRegisterOrChunk(global, fnOrStruct, register) {
  */
 export function adopt(global) {
   return adoptShared(global, global => {
-    const {documentElement} = global.document;
-
-    const ampdocService = Services.ampdocServiceFor(global);
-    const ampdoc = ampdocService.getSingleDoc();
-    global.AMP.ampdoc = ampdoc;
-
-    const viewer = Services.viewerForDoc(documentElement);
-    global.AMP.viewer = viewer;
-
-    if (getMode().development) {
-      global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
-      global.AMP.resources = Services.resourcesForDoc(documentElement);
-    }
-
-    const viewport = Services.viewportForDoc(documentElement);
-    global.AMP.viewport = {};
-    global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
-    global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
-    global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
+    // Shared runtimes variables between both multi-doc and single-doc pages
+    adoptServicesAndResources(global);
 
     return waitForBodyOpenPromise(global.document).then(() => {
       // Ensure that all declared extensions are marked and stubbed.
-      stubElementsForDoc(ampdoc);
+      stubElementsForDoc(global.AMP.ampdoc);
     });
   });
+}
+
+/**
+ * Applies the runtime to a given global scope for a single-doc mode.
+ * Multi frame support is currently incomplete.
+ * @param {!Window} global Global scope to adopt.
+ * @return {!Promise}
+ */
+export function adoptWithMultidocDeps(global) {
+  return adoptShared(global, global => {
+    // Shared runtimes variables between both multi-doc and single-doc pages
+    adoptServicesAndResources(global);
+
+    // Dependencies to the MultiDocManager
+    adoptMultiDocDeps(global);
+
+    return waitForBodyOpenPromise(global.document).then(() => {
+      // Ensure that all declared extensions are marked and stubbed.
+      stubElementsForDoc(global.AMP.ampdoc);
+    });
+  });
+}
+
+/**
+ * Adopt shared runtimes variables between both multi-doc and single-doc pages
+ * @param {!Window} global Global scope to adopt.
+ */
+function adoptServicesAndResources(global) {
+  const {documentElement} = global.document;
+
+  const ampdocService = Services.ampdocServiceFor(global);
+  const ampdoc = ampdocService.getSingleDoc();
+  global.AMP.ampdoc = ampdoc;
+
+  const viewer = Services.viewerForDoc(documentElement);
+  global.AMP.viewer = viewer;
+
+  if (getMode().development) {
+    global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
+    global.AMP.resources = Services.resourcesForDoc(documentElement);
+  }
+
+  const viewport = Services.viewportForDoc(documentElement);
+  global.AMP.viewport = {};
+  global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
+  global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
+  global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
+}
+
+/**
+ * Adopt MultiDocManager dependencies
+ * @param {!Window} global Global scope to adopt.
+ */
+function adoptMultiDocDeps(global) {
+  global.AMP.installAmpdocServices = installAmpdocServices.bind(null);
+  global.AMP.combinedCss = ampDocCss + ampSharedCss;
 }
 
 /**
@@ -378,6 +404,9 @@ export function adoptShadowMode(global) {
     if (global.AMP.attachShadowDoc) {
       return Promise.resolve();
     }
+
+    // Dependencies to the MultiDocManager
+    adoptMultiDocDeps(global);
 
     const manager = new MultidocManager(
       global,
