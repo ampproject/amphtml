@@ -2487,6 +2487,13 @@ class Context {
      * @private
      */
     this.extensions_ = new ExtensionsContext();
+
+    /**
+     * Whether the document uses the LTS runtime engine.
+     * @type {boolean}
+     * @private
+     */
+    this.ltsEngineUsed_ = false;
   }
 
   /** @return {!ParsedValidatorRules} */
@@ -2581,6 +2588,7 @@ class Context {
     this.satisfyConditionsFromTagSpec_(parsedTagSpec);
     this.satisfyMandatoryAlternativesFromTagSpec_(parsedTagSpec);
     this.recordValidatedFromTagSpec_(isPassing, parsedTagSpec);
+    this.recordLtsEngineUsedFromTagSpec_(parsedTagSpec);
 
     const {validationResult} = result;
     for (const provision of validationResult.valueSetProvisions)
@@ -2866,6 +2874,22 @@ class Context {
   /** @return {!LineCol} */
   getEncounteredBodyLineCol() {
     return /** @type {!LineCol} */ (this.encounteredBodyLineCol_);
+  }
+
+  /**
+   * Record if this document contains a tag requesting the LTS runtime engine.
+   * @param {!ParsedTagSpec}
+   * @private
+   */
+  recordLtsEngineUsedFromTagSpec_(parsedTagSpec) {
+    if (parsedTagSpec.getSpec().specName === 'amphtml engine v0.js script [AMP LTS]') {
+      this.ltsEngineUsed_ = true;
+    }
+  }
+
+  /** @return {boolean} */
+  getLtsEngineUsed() {
+    return this.ltsEngineUsed_;
   }
 }
 
@@ -4224,13 +4248,25 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
     }
     return true;
   } else if (attr.name === 'src') {
-    const srcUrlRe =
-        /^https:\/\/cdn\.ampproject\.org\/v0\/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.js$/;
+    const srcUrlRe = /^https:\/\/cdn\.ampproject\.org(\/lts)?\/v0\/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.js$/
     const reResult = srcUrlRe.exec(attr.value);
     // If the src URL matches this regex and the base name of the file matches
     // the extension, look to see if the version matches.
-    if (reResult !== null && reResult[1] === extensionSpec.name) {
-      const encounteredVersion = reResult[2];
+    if (reResult !== null && reResult[2] === extensionSpec.name) {
+      // Make sure that the extension uses the LTS path if and only if the 
+      // runtime engine also uses LTS.
+      const extensionUsesLts = !!reResult[1];
+      if (extensionUsesLts !== context.getLtsEngineUsed()) {
+        context.addError(
+          extensionUsesLts
+            ? amp.validator.ValidationError.Code.LTS_EXTENSION_ONLY
+            : amp.validator.ValidationError.Code.LTS_RUNTIME_ONLY,
+          context.getLineCol(),
+          /* params */[extensionSpec.name],
+          'https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup', result);
+      }
+
+      const encounteredVersion = reResult[3];
       if (extensionSpec.deprecatedVersion.indexOf(encounteredVersion) !== -1) {
         context.addWarning(
             amp.validator.ValidationError.Code
