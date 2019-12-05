@@ -69,7 +69,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         dict({
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/get-consent-v1',
-          'promptUISrc': '/test/manual/diy-consent.html',
+          'promptUISrc': '/examples/amp-consent/diy-consent.html',
           'consentRequired': 'remote',
         })
       );
@@ -207,7 +207,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/override',
           'consentRequired': false,
-          'promptUISrc': '/test/manual/diy-consent.html',
+          'promptUISrc': '/examples/amp-consent/diy-consent.html',
           'promptIfUnknownForGeoGroup': 'eea',
           'postPromptUI': 'test',
           'clientConfig': {
