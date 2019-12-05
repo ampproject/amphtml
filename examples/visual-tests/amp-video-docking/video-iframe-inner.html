@@ -7,7 +7,8 @@
 </head>
 <body style="background: lightcoral">
   <script>
-    // Mock video playback.
+    // Mock video playback without actual video.
+    // https://go.amp.dev/c/amp-video-iframe#integration-inside-the-frame
     (window.AmpVideoIframe = window.AmpVideoIframe || []).push(function(amp) {
       amp.postEvent('canplay');
 
