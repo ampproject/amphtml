@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <script async src="https://cdn.ampproject.org/video-iframe-integration-v0.js"></script>
+</head>
+<body style="background: lightcoral">
+  <script>
+    (window.AmpVideoIframe = window.AmpVideoIframe || []).push(function(amp) {
+      amp.postEvent('canplay');
+
+      amp.method('play', () => {
+        amp.postEvent('playing');
+
+        setTimeout(function() {
+          amp.postEvent('ad_start');
+        }, 1500);
+      });
+    });
+  </script>
+</body>
+</html>
