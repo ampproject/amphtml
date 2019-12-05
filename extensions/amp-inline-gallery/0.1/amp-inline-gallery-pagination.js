@@ -18,6 +18,7 @@ import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dict} from '../../../src/utils/object';
+import {exponentialFalloff} from '../../../src/utils/math';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {setImportantStyles} from '../../../src/style.js';
@@ -27,17 +28,6 @@ import {toArray} from '../../../src/types';
  * The maximum number of dots to show before converting to a count.
  */
 const MAX_DOT_COUNT = 8;
-
-/**
- * Returns a number falling off from one to zero, based on a distance
- * progress percentage and a power to decay at.
- * @param {number} percentage
- * @param {number} power
- * @return {number}
- */
-function exponentialFalloff(percentage, power) {
-  return Math.max(0, 1 - 1 / Math.pow(percentage, power));
-}
 
 export class AmpInlineGalleryPagination extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -215,7 +205,7 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
     this.getDots_().forEach((dot, i) => {
       const distance = i - (index + offset);
       const percentage = Math.max(1 - Math.abs(distance), 0);
-      const percentageFalloff = exponentialFalloff(percentage, -0.5);
+      const percentageFalloff = exponentialFalloff(percentage, 2);
 
       setImportantStyles(dot, {
         '--percentage-falloff': percentageFalloff,

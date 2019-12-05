@@ -164,3 +164,17 @@ export function sum(values) {
     return a + b;
   });
 }
+
+/**
+ * Returns a number falling off from one to zero, based on a progress
+ * percentage and a power to decay at.
+ * @param {number} percentage A number between one and zero.
+ * @param {number} power A number greater than or equal to one.
+ * @return {number} A number between one and zero.
+ */
+export function exponentialFalloff(percentage, power) {
+  devAssert(percentage >= 0);
+  devAssert(percentage <= 1);
+  devAssert(power >= 1);
+  return Math.max(0, 1 - 1 / Math.pow(percentage, -1 / power));
+}

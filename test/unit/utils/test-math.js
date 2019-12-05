@@ -18,6 +18,7 @@ import {
   boundValue,
   clamp,
   distance,
+  exponentialFalloff,
   magnitude,
   mapRange,
   mod,
@@ -247,6 +248,31 @@ describes.sandboxed('utils/math', {}, () => {
     it('should sum up an array of numbers', () => {
       expect(sum([2, 10, 100])).to.equal(112);
       expect(sum([-3, 2, 44])).to.equal(43);
+    });
+  });
+
+  describe('exponentialFalloff', () => {
+    it('should return one with no progress', () => {
+      expect(exponentialFalloff(0, 2)).to.equal(1);
+      expect(exponentialFalloff(0, 4)).to.equal(1);
+    });
+
+    it('should return zero with full progress', () => {
+      expect(exponentialFalloff(1, 2)).to.equal(0);
+      expect(exponentialFalloff(1, 4)).to.equal(0);
+    });
+
+    it('should be linear with a power of one', () => {
+      expect(exponentialFalloff(0.25, 1)).to.equal(0.75);
+      expect(exponentialFalloff(0.5, 1)).to.equal(0.5);
+      expect(exponentialFalloff(0.75, 1)).to.equal(0.25);
+    });
+
+    it('should fall off according to the power', () => {
+      expect(exponentialFalloff(0.5, 2)).to.be.closeTo(0.293, 0.001);
+      expect(exponentialFalloff(0.5, 4)).to.be.closeTo(0.159, 0.001);
+      expect(exponentialFalloff(0.9, 2)).to.be.closeTo(0.051, 0.001);
+      expect(exponentialFalloff(0.9, 4)).to.be.closeTo(0.026, 0.001);
     });
   });
 });
