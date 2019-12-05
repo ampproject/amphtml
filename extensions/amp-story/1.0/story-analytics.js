@@ -21,6 +21,9 @@ import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
+/** @private @const {string} */
+export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
+
 /** @enum {string} */
 export const StoryAnalyticsEvent = {
   BOOKEND_CLICK: 'story-bookend-click',
@@ -29,6 +32,8 @@ export const StoryAnalyticsEvent = {
   CLICK_THROUGH: 'story-click-through',
   FOCUS: 'story-focus',
   LAST_PAGE_VISIBLE: 'story-last-page-visible',
+  OPEN: 'story-open',
+  CLOSE: 'story-close',
   PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
   PAGE_VISIBLE: 'story-page-visible',
@@ -159,7 +164,8 @@ export class StoryAnalyticsService {
     }
 
     if (element) {
-      details.tagName = element.tagName.toLowerCase();
+      details.tagName =
+        element[ANALYTICS_TAG_NAME] || element.tagName.toLowerCase();
       Object.assign(
         vars,
         getDataParamsFromAttributes(

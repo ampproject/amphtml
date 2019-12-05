@@ -1964,6 +1964,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onSidebarStateUpdate_(sidebarState) {
+    this.analyticsService_.triggerEvent(
+      sidebarState ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.sidebar_
+    );
+
     const actions = Services.actionServiceForDoc(this.element);
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
