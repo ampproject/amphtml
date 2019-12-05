@@ -433,6 +433,10 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
                        "lower-third" !important;
 }
 
+amp-story-grid-layer.i-amphtml-has-quiz {
+  align-content: normal;
+}
+
 /**
  * Development mode
  */
@@ -983,12 +987,6 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
   text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
-}
-
-
-amp-story-page .i-amphtml-has-interactive-child {
-  align-content: normal;
-  padding-top: 32px !important;
 }
 
 amp-story-quiz {

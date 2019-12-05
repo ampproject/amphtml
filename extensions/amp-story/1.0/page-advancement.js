@@ -430,10 +430,6 @@ class ManualAdvancement extends AdvancementConfig {
   isWithinInteractiveArea_(event, pageEl) {
     const pageRect = this.element_.getLayoutBox();
 
-    if (this.isInScreenSideEdge_(event, pageRect)) {
-      return false;
-    }
-
     if (pageEl.querySelector('amp-story-page-attachment')) {
       return event.clientY <= pageRect.height - PAGE_ATTACHMENT_SAFETY_AREA_PX;
     }
@@ -458,6 +454,10 @@ class ManualAdvancement extends AdvancementConfig {
     let shouldHandleEvent = false;
     let interactiveElementDetected = false;
     let tagName;
+
+    if (this.isInScreenSideEdge_(event, this.element_.getLayoutBox())) {
+      return true;
+    }
 
     closest(
       dev().assertElement(event.target),

@@ -100,8 +100,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    // TODO(jackbsteinberg): This selection is temporary and may need to be revisited later
-    return layout === 'flex-item' || layout === 'container';
+    return layout === 'container';
   }
 
   /**
@@ -119,7 +118,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   attachContent_() {
     // Adjust grid-layer to fill screen
-    this.element.parentElement.classList.add('i-amphtml-has-interactive-child');
+    this.element.parentElement.classList.add('i-amphtml-has-quiz');
 
     // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
     const promptInput = this.element.children[0];
