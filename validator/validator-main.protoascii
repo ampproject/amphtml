@@ -4924,6 +4924,41 @@ tags: {
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
 }
 tags: {
+  html_format: AMP
+  tag_name: "SCRIPT"
+  spec_name: "amphtml engine v0.js script [AMP LTS]"
+  mandatory_alternatives: "amphtml engine v0.js script"
+  unique: true
+  mandatory_parent: "HEAD"
+  attr_lists: "nonce-attr"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "crossorigin"
+    value: "anonymous"
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value: "https://cdn.ampproject.org/lts/v0.js"
+    dispatch_key: NAME_VALUE_DISPATCH
+  }
+  attrs: {
+    name: "type"
+    value_casei: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup"
+}
+tags: {
   html_format: AMP4ADS
   tag_name: "SCRIPT"
   spec_name: "amp4ads engine amp4ads-v0.js script"
