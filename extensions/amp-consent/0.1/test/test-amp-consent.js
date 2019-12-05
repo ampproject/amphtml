@@ -63,6 +63,7 @@ describes.realWin(
         'https://geo-override-check2/': '{"consentRequired": true}',
         'http://www.origin.com/r/1': '{}',
         'https://invalid.response.com/': '{"consentRequired": 3}',
+        'https://strip-prefix/': 'while(1){"consentRequired": false}',
       };
 
       xhrServiceMock = {
@@ -74,8 +75,11 @@ describes.realWin(
             json() {
               return Promise.resolve(JSON.parse(jsonMockResponses[url]));
             },
+            // text() {
+              // return Promise.resolve(jsonMockResponses[url]);
+            // }
           });
-        },
+        }
       };
 
       storageMock = {
@@ -254,7 +258,7 @@ describes.realWin(
           .true;
       });
 
-      it('respects exisitng local storage decision', async () => {
+      it('respects existing local storage decision', async () => {
         const config = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
@@ -300,6 +304,22 @@ describes.realWin(
         expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
           .true;
       });
+      
+      // it('respects the stripPrefix option', async () => {
+      //   const remoteConfig = {
+      //     'consents': {
+      //       'example': {
+      //         'checkConsentHref': 'https://strip-prefix/',
+      //         //'stripPrefix': 'while(1)',
+      //       },
+      //     },
+      //   };
+      //   ampConsent = getAmpConsent(doc, remoteConfig);
+      //   await ampConsent.buildCallback();
+      //   await macroTask();
+      //   expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be.false;
+      // });
+
 
       it('send post request to server with matched group', async () => {
         const remoteConfig = {

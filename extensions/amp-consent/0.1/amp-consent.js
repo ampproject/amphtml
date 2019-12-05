@@ -32,6 +32,7 @@ import {
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
+import {xssiJson} from '../../../src/service/xhr-impl';
 import {
   assertHttpsUrl,
   getSourceUrl,
@@ -633,12 +634,7 @@ export class AmpConsent extends AMP.BaseElement {
         return ampdoc.whenFirstVisible().then(() => {
           return xhrService
             .fetchJson(resolvedHref, init)
-            .then(res =>
-              xhrService.xssiJson(
-                res,
-                this.consentConfig_['stripPrefix']
-              )
-            );
+            .then(res => xssiJson(res, this.consentConfig_['stripPrefix']));
         });
       });
     }
