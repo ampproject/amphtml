@@ -218,7 +218,6 @@ export function xssiJson(res, prefix) {
   if (!prefix) {
     return res.json();
   }
-  console.error(prefix);
 
   return res.text().then(txt => {
     if (!startsWith(txt, dev().assertString(prefix))) {

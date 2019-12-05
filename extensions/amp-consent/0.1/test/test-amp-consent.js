@@ -75,11 +75,11 @@ describes.realWin(
             json() {
               return Promise.resolve(JSON.parse(jsonMockResponses[url]));
             },
-            // text() {
-              // return Promise.resolve(jsonMockResponses[url]);
-            // }
+            text() {
+              return Promise.resolve(jsonMockResponses[url]);
+            },
           });
-        }
+        },
       };
 
       storageMock = {
@@ -223,6 +223,18 @@ describes.realWin(
             expect(isRequired).to.be.true;
           });
       });
+
+      it('respects the stripPrefix option', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'checkConsentHref': 'https://strip-prefix/',
+          'stripPrefix': 'while(1)',
+        };
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .false;
+      });
     });
 
     describe('geo-override server communication', () => {
@@ -304,22 +316,6 @@ describes.realWin(
         expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
           .true;
       });
-      
-      // it('respects the stripPrefix option', async () => {
-      //   const remoteConfig = {
-      //     'consents': {
-      //       'example': {
-      //         'checkConsentHref': 'https://strip-prefix/',
-      //         //'stripPrefix': 'while(1)',
-      //       },
-      //     },
-      //   };
-      //   ampConsent = getAmpConsent(doc, remoteConfig);
-      //   await ampConsent.buildCallback();
-      //   await macroTask();
-      //   expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be.false;
-      // });
-
 
       it('send post request to server with matched group', async () => {
         const remoteConfig = {

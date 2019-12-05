@@ -32,7 +32,6 @@ import {
   NotificationUiManager,
 } from '../../../src/service/notification-ui-manager';
 import {Services} from '../../../src/services';
-import {xssiJson} from '../../../src/service/xhr-impl';
 import {
   assertHttpsUrl,
   getSourceUrl,
@@ -45,6 +44,7 @@ import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
+import {xssiJson} from '../../../src/service/xhr-impl';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const CONSENT_POLICY_MANAGER = 'consentPolicyManager';
