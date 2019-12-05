@@ -94,7 +94,7 @@
     "gulp-eslint": "6.0.0",
     "gulp-eslint-if-fixed": "1.0.0",
     "gulp-file": "0.4.0",
-    "gulp-git": "2.9.0",
+    "gulp-git": "2.10.0",
     "gulp-help": "chmontgomery/gulp-help#gulp4",
     "gulp-if": "3.0.0",
     "gulp-jest": "4.0.3",

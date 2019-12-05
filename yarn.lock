@@ -6940,10 +6940,10 @@ gulp-file@0.4.0:
     through2 "^0.4.1"
     vinyl "^2.1.0"
 
-gulp-git@2.9.0:
-  version "2.9.0"
-  resolved "https://registry.yarnpkg.com/gulp-git/-/gulp-git-2.9.0.tgz#f1ea6528d855f5e9cd4d712913131214f5088b58"
-  integrity sha512-66ZCwlCCf0YXEUedDbx76p0ii6aQ6aUHC4oSytn3UM8J6VWJKYF4PBARMIgR/POGWyYeN7hjd81Elpjn/o4+Tg==
+gulp-git@2.10.0:
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/gulp-git/-/gulp-git-2.10.0.tgz#ba96e596c79c3f864392285b5f5b3d951f5ea371"
+  integrity sha512-AYh0xXpKdDYS+ftCuyF9+LFXoltjtFlpfKITTCKDI0LunztpwVuHFtp31SvRSFVZikvRHTHUGMZ9Z0TnXjDIxQ==
   dependencies:
     any-shell-escape "^0.1.1"
     fancy-log "^1.3.2"
