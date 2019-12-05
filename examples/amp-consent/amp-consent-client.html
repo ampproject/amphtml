@@ -2,7 +2,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>AMP Consent GEO in Iframe Test</title>
+  <title>AMP Consent GEO Test</title>
   <link rel="canonical" href="amp-consent.amp.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <meta name="amp-consent-blocking" content="amp-ad">
@@ -104,11 +104,10 @@
       margin: 0;
     }
   </style>
-  <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
   <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
@@ -119,6 +118,7 @@
   </div>
 </header>
 <main role="main">
+  <p>This is a basic example of amp-consent where consent decision is collected and managed client side</p>
   <h3>Image that is blocked by '_till_responded' consent</h3>
 
   <amp-analytics type="_ping_">
@@ -172,50 +172,28 @@
   <amp-img
     src="/examples/img/bigbuckbunny.jpg" width=300 height=200></amp-img>
 
-  <amp-geo layout=nodisplay>
-    <script type="application/json">
-      {
-        "ISOCountryGroups": {
-          "na": ["ca", "mx", "us"],
-          "eea": ["preset-eea"],
-          "row": ["unknown"]
-        }
-      }
-    </script>
-  </amp-geo>
-
   <amp-consent id='ABC' layout='nodisplay'>
     <script type="application/json">{
-      "consentInstanceId": "geotest",
-      "promptUISrc": "/examples/amp-consent/prompt.html",
-      "consentRequired": false,
+      "consentInstanceId": "consent-clinet",
+      "promptUI": "ui1",
       "postPromptUI": "postPromptUI",
-
-      "geoOverride": {
-        "na": {
-          "checkConsentHref": "/check-consent?consentRequired=false",
-          "consentRequired": "remote"
-        },
-        "eea": {
-          "promptUISrc": "/examples/amp-consent/prompt.html?delay=1000",
-          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true",
-          "consentRequired": true
-        },
-        "row": {
-          "promptUISrc": "/examples/amp-consent/prompt.html?delay=0",
-          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true",
-          "consentRequired": true
-        }
-      }
+      "consentRequired": "remote",
+      "checkConsentHref": "/check-consent?consentRequired=true&expireCache=false",
+      "onUpdateHref": "https://fake.com/update-consent-endpoint"
     }</script>
-
-    <div id="postPromptUI">
-      Post Prompt UI
-      <button on="tap:ABC.prompt" role="button">Manage</button>
-    </div>
+    <div id="ui1">
+        CA: Can I load the image??
+        <button on="tap:ABC.accept" role="button">Accept</button>
+        <button on="tap:ABC.reject" role="button">Reject</button>
+        <button on="tap:ABC.dismiss" role="button">Dismiss</button>
+      </div>
+      <div id="postPromptUI">
+        Post Prompt UI
+        <button on="tap:ABC.prompt" role="button">Manage</button>
+      </div>
   </amp-consent>
-  <article>
 
+  <article>
     <div class="content-container">
       <header>
         <h1 itemprop="headline">Lorem Ipsum</h1>
@@ -256,7 +234,7 @@
         <h1>_ping_ Ad Blocked by metaTags</h1>
         <amp-ad width=300 height=250
                 type="_ping_"
-                data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+                data-url='/examples/img/bigbuckbunny.jpg'
                 data-valid='true'>
         </amp-ad>
 
@@ -277,6 +255,7 @@
         </p>
       </div>
     </div>
+    <button on="tap:ABC.prompt" role="button">Manage Consent</button>
   </article>
 </main>
 
