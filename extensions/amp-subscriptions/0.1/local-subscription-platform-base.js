@@ -109,7 +109,7 @@ export class LocalSubscriptionBasePlatform {
    * @protected
    */
   initializeListeners_() {
-    this.rootNode_.addEventListener('click', e => {
+    this.rootNode_.body.addEventListener('click', e => {
       const element = closestAncestorElementBySelector(
         dev().assertElement(e.target),
         '[subscriptions-action]'
