@@ -83,7 +83,7 @@ Example:
       "consentRequired": "remote",
       "checkConsentHref": "https://example.com/api/check-consent",
       "promptUI": "consent-ui",
-      "onUpdateHref": "https://example.com/update-consent",
+      "onUpdateHref": "https://example.com/update-consent"
     }
   </script>
   <div id="consent-ui">
@@ -108,7 +108,7 @@ Example:
 
 AMP sends the consent instance ID in the `consentInstanceId` field with the POST request.
 
-```html
+```
 {
   "consentInstanceId": {string},
   "consentStateValue": {enum}, // the stored consent state in client cache
@@ -122,7 +122,7 @@ AMP sends the consent instance ID in the `consentInstanceId` field with the POST
 
 AMP expects the response to be a JSON object like the following:
 
-```html
+```
 {
   "consentRequired": {boolean}                  // Whether consent is required from the user.
                                                 // The value is required it is used to
@@ -150,7 +150,7 @@ AMP expects the response to be a JSON object like the following:
 
 Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
 
-```html
+```json
 {
   "consentRequire": true,
   "sharedData": {
@@ -184,7 +184,7 @@ Note that this value will be ignored if there is previous consent state stored i
 
 AMP sends the consent instance ID, a generated user id only for this usage and the consent state along with the POST request.
 
-```html
+```
 {
   "consentInstanceId": "my-consent",
   "ampUserId": "xxx",
@@ -220,56 +220,63 @@ Take the following config as an example:
 
   "geoOverride": {
     "geoGroup1": {
-      "consentRequired": true,
+      "consentRequired": true
     },
     "geoGroup2": {
       "checkConsentHref": "https://example.com/check-consent",
-      "consentRequired": "remote",
+      "consentRequired": "remote"
     },
     "geoGroupUnknown": {
       "checkConsentHref": "https://example.com/check-consent",
-      "consentRequired": true,
+      "consentRequired": true
    }
   }
 }
 ```
 
 For users outside `geoGroup1`, `geoGroup2` & `geoGroupUknown`, the merged config is
-```
+
+```json
 {
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
-  "consentRequired": "false",
+  "consentRequired": false
 }
 ```
+
 `<amp-consent>` does nothing because `"consentRequired": false`.
 
 
 For users in `geoGroup1`, the merged config is
-```
+
+```json
 {
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
-  "consentRequired": true,
+  "consentRequired": true
 }
 ```
+
 Because `checkConsentHref` is not specified, both consent collection and storage are completely handled at client side. AMP will prompt the consent UI if and only if the client cache is empty.
 
 
 For users in `geoGroup2`, the merged config is
-```
+
+```json
 {
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
   "checkConsentHref": "https://example.com/check-consent",
-  "consentRequired": "remote",
+  "consentRequired": "remote"
 }
 ```
+
 If client cache is empty, AMP will wait for `checkConsentHref` response to decide whether a consent is required from the user. If the response contains `consentRequired: true` and `consentStateValue: unknown`, then AMP will collect consent via the specified prompt UI. If `consentStateValue` is 'accepted' or 'rejected', then it will use this value and also sync to cache.
 
 
 For users in `geoGroupUnknown`, the merged config is
-```
+
+```json
 {
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
@@ -277,6 +284,7 @@ For users in `geoGroupUnknown`, the merged config is
   "consentRequired": true,
 }
 ```
+
 AMP will check client cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent via the specified prompt UI if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
 
 
