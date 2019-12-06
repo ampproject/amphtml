@@ -382,11 +382,11 @@ class AmpAccordion extends AMP.BaseElement {
   /**
    * If Display Locking API is enabled, set the renderSubtree attribute
    * on the given element with the given value.
-   * @param {HTMLElement} element
+   * @param {Element} element
    * @param {string} value
    */
   setRenderSubtreeIfEnabled(element, value) {
-    if (!isDisplayLockingEnabledForAccordion(this.win)) {
+    if (!isDisplayLockingEnabledForAccordion(this.win) || !element) {
       return;
     }
     element.renderSubtree = value;
