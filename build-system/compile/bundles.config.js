@@ -783,6 +783,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-redbull-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-reddit',
     version: '0.1',
     latestVersion: '0.1',

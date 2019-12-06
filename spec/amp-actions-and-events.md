@@ -471,6 +471,19 @@ event.response</pre></td>
   </tr>
 </table>
 
+### amp-lightbox-gallery <a name="amp-lightbox-gallery"></a>
+
+<table>
+  <tr>
+    <th>Action</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td><code>open</code></td>
+    <td>Opens the lightbox-gallery. Can be triggered by tapping another element, if you specify the image id: `on="tap:amp-lightbox-gallery.open(id='image-id')"`.</td>
+  </tr>
+</table>
+
 ### amp-list
 
 <table>
