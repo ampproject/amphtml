@@ -27,8 +27,8 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 import {toggleExperiment} from '../../../../src/experiments';
+import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
 describes.realWin(
   'amp-consent',
@@ -81,7 +81,7 @@ describes.realWin(
             },
           });
         },
-        xssiJson: xhrServiceForTesting(win).xssiJson
+        xssiJson: xhrServiceForTesting(win).xssiJson,
       };
 
       storageMock = {
