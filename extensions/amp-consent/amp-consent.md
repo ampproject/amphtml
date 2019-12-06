@@ -170,13 +170,13 @@ current user to the 3rd party vendor extensions.
 Unlike consent state, this `shareData` is not persisted in client side storage.
 
 #### consentRequired
+
 `consentRequired`: It accepts a boolean value indicating if a consent is required. `<amp-consent>` will unblock components with an `UNKNOWN_NOT_REQUIRED` state if `consentRequired: false` and there's no previous consent decision stored in client cache. It makes sense mostly with a combination of [geoOverride](#geooverride) config so that only a certain regions require consent.
 
 It can also be set to `consentRequired: "remote"` to fetch the value remotely from the `checkConsentHref` endpoint. This is
 useful when publishers want to use their own server to decide if consent is required. For example, they want to have their own geo detection, or use the existing consent state for a known user. When used without `geoOverride`(#geooverride), the `consentRequired` value is set to `remote` by default if not specified.
 
 Note that this value will be ignored if there is previous consent state stored in client cache (see [Client caching](#client-caching) section for examples).
-
 
 #### onUpdateHref
 
@@ -197,7 +197,6 @@ AMP sends the consent instance ID, a generated user id only for this usage and t
 `promptUI`: Specifies the prompt element that is shown to collect the user's consent. The prompt element should be child element of `<amp-consent>` with an `id` that is referenced by the `promptUI`. See the [Prompt UI](#prompt-ui) section for details on how a user interacts with the prompt UI.
 
 The consent decisions collected from user via this prompt UI will be stored in `localStorage` as client cache. See the [Client caching](#client-caching) section for how the cache is used.
-
 
 #### geoOverride
 
@@ -246,7 +245,6 @@ For users outside `geoGroup1`, `geoGroup2` & `geoGroupUknown`, the merged config
 
 `<amp-consent>` does nothing because `"consentRequired": false`.
 
-
 For users in `geoGroup1`, the merged config is
 
 ```json
@@ -258,7 +256,6 @@ For users in `geoGroup1`, the merged config is
 ```
 
 Because `checkConsentHref` is not specified, both consent collection and storage are completely handled at client side. AMP will prompt the consent UI if and only if the client cache is empty.
-
 
 For users in `geoGroup2`, the merged config is
 
@@ -273,7 +270,6 @@ For users in `geoGroup2`, the merged config is
 
 If client cache is empty, AMP will wait for `checkConsentHref` response to decide whether a consent is required from the user. If the response contains `consentRequired: true` and `consentStateValue: unknown`, then AMP will collect consent via the specified prompt UI. If `consentStateValue` is 'accepted' or 'rejected', then it will use this value and also sync to cache.
 
-
 For users in `geoGroupUnknown`, the merged config is
 
 ```json
@@ -286,7 +282,6 @@ For users in `geoGroupUnknown`, the merged config is
 ```
 
 AMP will check client cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent via the specified prompt UI if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
-
 
 ## Consent Management
 
@@ -425,6 +420,7 @@ The post-prompt UI provides one user action type that can be used to allow the u
 The `<amp-consent>` element can be used to block any other AMP components on the page from loading (except `<amp-consent>` itself).
 
 ### Client caching
+
 The consent information (from the response or from user action on client side) will be cached on client side in localStorage. The cached value if exist will always be used by `<amp-consent>` to unblock content for performance optimization. Server endpoint can instruct `<amp-consent>` to erase the stored value so that it won't be used to unblock content the next visit using the `expireCache: true`.
 
 A couple of implications with this behavior:
