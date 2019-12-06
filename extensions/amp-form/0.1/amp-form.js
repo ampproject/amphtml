@@ -950,8 +950,8 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmitSuccess_(response, incomingTrust) {
-    return response
-      .json()
+    return this.xhr_
+      .xssiJson(response, this.form_.getAttribute('strip-prefix'))
       .then(
         json =>
           this.handleSubmitSuccess_(
@@ -1000,7 +1000,9 @@ export class AmpForm {
     let promise;
     if (e && e.response) {
       const error = /** @type {!Error} */ (e);
-      promise = error.response.json().catch(() => null);
+      promise = this.xhr_
+        .xssiJson(error.response, this.element.getAttribute('strip-prefix'))
+        .catch(() => null);
     } else {
       promise = Promise.resolve(null);
     }
