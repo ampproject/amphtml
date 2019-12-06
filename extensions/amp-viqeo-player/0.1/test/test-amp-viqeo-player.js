@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {PlayingStates} from '../../../../src/video-interface';
+import {PlayingStates, VideoEvents} from '../../../../src/video-interface';
 import {Services} from '../../../../src/services';
+import {listenOncePromise} from '../../../../src/event-helper';
 import AmpViqeoPlayer from '../amp-viqeo-player';
 
 describes.realWin(
@@ -34,6 +35,13 @@ describes.realWin(
       win = env.win;
       doc = win.document;
     });
+
+    function fakePostMessage(viqeoElement, info) {
+      viqeoElement.implementation_.handleViqeoMessages_({
+        source: viqeoElement.querySelector('iframe').contentWindow,
+        data: {source: 'ViqeoPlayer', ...info},
+      });
+    }
 
     it.skip('test-get-data', () => {
       return getViqeo().then(p => {
@@ -120,6 +128,52 @@ describes.realWin(
       });
     });
 
+    it('should forward events', () => {
+      return getViqeo().then(({viqeoElement}) => {
+        return Promise.resolve()
+          .then(() => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.LOAD);
+            fakePostMessage(viqeoElement, {action: 'ready'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.PLAYING);
+            fakePostMessage(viqeoElement, {action: 'play'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.PAUSE);
+            fakePostMessage(viqeoElement, {action: 'pause'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.MUTED);
+            fakePostMessage(viqeoElement, {action: 'mute'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.UNMUTED);
+            fakePostMessage(viqeoElement, {action: 'unmute'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.ENDED);
+            fakePostMessage(viqeoElement, {action: 'end'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.AD_START);
+            fakePostMessage(viqeoElement, {action: 'startAdvert'});
+            return p;
+          })
+          .then(() => {
+            const p = listenOncePromise(viqeoElement, VideoEvents.AD_END);
+            fakePostMessage(viqeoElement, {action: 'endAdvert'});
+            return p;
+          });
+      });
+    });
+
     function getViqeo(params) {
       const {
         id,
@@ -159,9 +213,7 @@ describes.realWin(
       doc.body.appendChild(viqeoElement);
       return viqeoElement
         .build()
-        .then(() => {
-          viqeoElement.layoutCallback.bind(viqeoElement);
-        })
+        .then(() => viqeoElement.layoutCallback())
         .then(() => {
           const videoManager = Services.videoManagerForDoc(doc);
           const entry = videoManager.getEntryForElement_(viqeoElement);
