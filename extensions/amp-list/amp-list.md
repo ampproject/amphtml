@@ -294,6 +294,22 @@ The `items` array will be truncated to `max-items` entries if the returned value
 Causes `<amp-list>` to treat the returned result as if it were a single element array. An object response will be wrapped in an array so
 `{items: {...}}` will behave as if it were `{items: [{...}]}`.
 
+##### strip-prefix (optional)
+
+Causes `<amp-list>` to strip a prefix from the fetched JSON before parsing. This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
+
+For example, lets say we had an API that returned this response:
+
+```
+)]}{ "items": ["value"] }
+```
+
+We could instruct `amp-list` to remove the security prefix like so:
+
+```html
+<amp-list strip-prefix=")]}" src="https://foo.com/list.json"></amp-list>
+```
+
 ##### reset-on-refresh (optional)
 
 Displays a loading indicator and placeholder again when the list's source is refreshed via `amp-bind` or the `refresh()` action.
@@ -312,7 +328,10 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
-##### [is-layout-container](optional)
+<!-- prettier-ignore-start -->
+<!-- See: https://github.com/remarkjs/remark/issues/456 -->
+##### [is-layout-container] (optional)
+<!-- prettier-ignore-end-->
 
 This is a bindable attribute that should always be `false` by default. When set to `true` via `amp-bind`, it changes the layout of the `<amp-list>` to `container`. This attribute is useful for handling dynamic resizing for amp-list.
 
