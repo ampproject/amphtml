@@ -59,6 +59,8 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
+    // Focusable container makes it possible to fully consume Arrow key events.
+    this.container_.setAttribute('tabindex', '-1');
     this.element.appendChild(this.container_);
 
     this.cells_.forEach(cell => {
