@@ -27,12 +27,12 @@ const CAPTAINMETRICS_CONFIG = jsonLiteral({
     'hostDomain': 'photon.captainmetrics.com',
     'deviceId': 'CLIENT_ID(_cm_cid)',
     'sessionId': '$HASH(PAGE_VIEW_ID CLIENT_ID(_cm_cid))',
-    'projectId': ''
+    'projectId': '',
   },
   'requests': {
     'hit': {
-      'baseUrl': 'https://${hostDomain}/amp/'
-    }
+      'baseUrl': 'https://${hostDomain}/amp/',
+    },
   },
   'extraUrlParams': {
     'cId': '${deviceId}',
@@ -51,22 +51,22 @@ const CAPTAINMETRICS_CONFIG = jsonLiteral({
     'lp': '${page}',
     'ref': '${externalReferrer}',
     'ampRef': '${ampdocUrl}',
-    'pageId': '${pageViewId}'
+    'pageId': '${pageViewId}',
   },
   'linkers': {
     '_cm_amp': {
       'ids': {
         'cId': '${deviceId}',
-        'sId': '${sessionId}'
+        'sId': '${sessionId}',
       },
       'enabled': true,
-      'proxyOnly': false
-    }
+      'proxyOnly': false,
+    },
   },
   'cookies': {
     '_cm_cid': {
-      'value': 'LINKER_PARAM(_cm_amp, cId)'
-    }
+      'value': 'LINKER_PARAM(_cm_amp, cId)',
+    },
   },
 });
 
