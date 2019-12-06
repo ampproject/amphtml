@@ -390,12 +390,8 @@ describes.realWin(
 
         const ampAnalyticsEl = null;
 
-        const preconnectSpy = env.sandbox.spy();
-        transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
-          preload: preconnectSpy,
-        });
+        transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.null;
-        expect(preconnectSpy).to.not.be.called;
       });
 
       it('initialize iframe transport when used', () => {
@@ -416,12 +412,8 @@ describes.realWin(
           'amp-analytics'
         );
 
-        const preconnectSpy = env.sandbox.spy();
-        transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
-          preload: preconnectSpy,
-        });
+        transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
-        expect(preconnectSpy).to.be.called;
 
         transport.deleteIframeTransport();
         expect(transport.iframeTransport_).to.be.null;
@@ -446,12 +438,8 @@ describes.realWin(
           'amp-analytics'
         );
 
-        const preconnectSpy = env.sandbox.spy();
-        transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
-          preload: preconnectSpy,
-        });
+        transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
-        expect(preconnectSpy).to.be.called;
 
         transport.deleteIframeTransport();
         expect(transport.iframeTransport_).to.be.null;
