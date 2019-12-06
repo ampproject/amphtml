@@ -21,7 +21,7 @@ import {
   TransportSerializers,
   defaultSerializer,
 } from './transport-serializer';
-import {IframeTransport, getIframeTransportScriptUrl} from './iframe-transport';
+import {IframeTransport} from './iframe-transport';
 import {Services} from '../../../src/services';
 import {WindowInterface} from '../../../src/window-interface';
 import {
@@ -146,34 +146,27 @@ export class Transport {
    * user navigates/swipes away from the page, and is recreated if the user
    * navigates back to the page.
    *
-   * @param {!Window} win
    * @param {!Element} element
-   * @param {(!../../../src/preconnect.PreconnectService)=} opt_preconnect
    */
-  maybeInitIframeTransport(win, element, opt_preconnect) {
+  maybeInitIframeTransport(element) {
     if (!this.options_['iframe'] || this.iframeTransport_) {
       return;
     }
-    if (opt_preconnect) {
-      opt_preconnect.preload(
-        Services.ampdoc(element),
-        getIframeTransportScriptUrl(win),
-        'script'
-      );
-    }
 
+    // In the case of FIE rendering, we should be using the parent doc win.
+    const topWin = getTopWindow(element.ownerDocument.defaultView);
     const type = element.getAttribute('type');
     // In inabox there is no amp-ad element.
     const ampAdResourceId = this.isInabox_
       ? '1'
       : user().assertString(
-          getAmpAdResourceId(element, getTopWindow(win)),
+          getAmpAdResourceId(element, topWin),
           'No friendly amp-ad ancestor element was found ' +
             'for amp-analytics tag with iframe transport.'
         );
 
     this.iframeTransport_ = new IframeTransport(
-      win,
+      topWin,
       type,
       this.options_,
       ampAdResourceId
