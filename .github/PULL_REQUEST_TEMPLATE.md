@@ -9,6 +9,8 @@
   - Mention the GitHub issue that is being addressed by the pull request.
   - The keywords `Fixes`, `Closes`, or `Resolves` followed the issue number will automatically close the issue.
 
+> NOTE: All non-trivial changes (like introducing new features or components) should have an associated issue or reference an I2I (intent-to-implement: go.amp.dev/i2i). Please read through the contribution process (go.amp.dev/contributing/code) for more information.
+
 # Example of a good description:
 
 - Implement aspect X
