@@ -301,7 +301,7 @@ Causes `<amp-list>` to strip a prefix from the fetched JSON before parsing. This
 For example, lets say we had an API that returned this response:
 
 ```
-)]}{ 'a': 'value' }
+)]}{ "items": ["value"] }
 ```
 
 We could instruct `amp-list` to remove the security prefix like so:
