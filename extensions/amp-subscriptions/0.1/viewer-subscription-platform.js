@@ -86,21 +86,19 @@ export class ViewerSubscriptionPlatform {
       'origin': this.origin_,
     });
     // Defaulting to google.com for now.
-    // TODO(@elijahsoria): Remove this line and only rely on what is returned
+    // TODO(@elijahsoria): Remove google.com and only rely on what is returned
     // in the cryptokeys param.
-    let encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-      'google.com'
-    );
-    const cryptokeysNames = this.viewer_.getParam('cryptokeys');
+    let encryptedDocumentKey;
+    const cryptokeysNames = this.viewer_.getParam('cryptokeys') || 'google.com';
     if (cryptokeysNames) {
       const keyNames = cryptokeysNames.split(',');
       for (let i = 0; i != keyNames.length; i++) {
-        const encKeyOrNull = this.serviceAdapter_.getEncryptedDocumentKey(
+        encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
           keyNames[i]
         );
-        encryptedDocumentKey = encKeyOrNull
-          ? encKeyOrNull
-          : encryptedDocumentKey;
+        if (encryptedDocumentKey) {
+          break;
+        }
       }
     }
     if (encryptedDocumentKey) {
