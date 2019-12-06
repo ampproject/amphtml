@@ -150,6 +150,30 @@ export class Xhr {
   }
 
   /**
+   * A subsitute for the standard response.json(), which may optionally strip a prefix before calling JSON.parse().
+   *
+   * @param {!Response} res fetch response to convert to json.
+   * @param {string|undefined} prefix to strip away.
+   * @return {Promise<*>}
+   */
+  xssiJson(res, prefix) {
+    if (!prefix) {
+      return res.json();
+    }
+
+    return res.text().then(txt => {
+      if (!startsWith(txt, dev().assertString(prefix))) {
+        user().warn(
+          'XHR',
+          `Failed to strip missing prefix "${prefix}" in fetch response.`
+        );
+        return parseJson(txt);
+      }
+      return parseJson(txt.slice(prefix.length));
+    });
+  }
+
+  /**
    * @param {string} input URL
    * @param {?FetchInitDef=} opt_init Fetch options object.
    * @return {!Promise<!Response>}
@@ -205,28 +229,4 @@ export function xhrServiceForTesting(window) {
  */
 export function installXhrService(window) {
   registerServiceBuilder(window, 'xhr', Xhr);
-}
-
-/**
- * A subsitute for the standard response.json(), which may optionally strip a prefix before calling JSON.parse().
- *
- * @param {!Response} res fetch response to convert to json.
- * @param {string|undefined} prefix to strip away.
- * @return {Promise<*>}
- */
-export function xssiJson(res, prefix) {
-  if (!prefix) {
-    return res.json();
-  }
-
-  return res.text().then(txt => {
-    if (!startsWith(txt, dev().assertString(prefix))) {
-      user().warn(
-        'XHR',
-        `Failed to strip missing prefix "${prefix}" in fetch response.`
-      );
-      return parseJson(txt);
-    }
-    return parseJson(txt.slice(prefix.length));
-  });
 }

@@ -27,6 +27,7 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
+import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -80,6 +81,7 @@ describes.realWin(
             },
           });
         },
+        xssiJson: xhrServiceForTesting(win).xssiJson
       };
 
       storageMock = {

@@ -18,7 +18,6 @@ import {Services} from './services';
 import {assertHttpsUrl} from './url';
 import {getValueForExpr} from './json';
 import {user} from './log';
-import {xssiJson} from './service/xhr-impl';
 
 /**
  * @enum {number}

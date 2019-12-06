@@ -23,7 +23,7 @@ import {getCookie} from '../../src/cookies';
 import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 import {utf8FromArrayBuffer} from '../../extensions/amp-a4a/0.1/amp-a4a';
-import {xhrServiceForTesting, xssiJson} from '../../src/service/xhr-impl';
+import {xhrServiceForTesting} from '../../src/service/xhr-impl';
 
 // TODO(jridgewell, #11827): Make this test work on Safari.
 describe
@@ -1157,14 +1157,17 @@ describe
           text: () => Promise.reject(new Error('should not be called')),
         };
 
-        return Promise.all([xssiJson(response), xssiJson(response, '')]);
+        return Promise.all([
+          xhr.xssiJson(response),
+          xhr.xssiJson(response, ''),
+        ]);
       });
 
       it('should not strip characters if the prefix is not present', () => {
         xhrCreated.then(mock => mock.respond(200, [], '{"a": 1}'));
         return xhr
           .fetchJson('/abc')
-          .then(res => xssiJson(res, 'while(1)'))
+          .then(res => xhr.xssiJson(res, 'while(1)'))
           .then(json => {
             expect(json).to.be.deep.equal({a: 1});
           });
@@ -1174,7 +1177,7 @@ describe
         xhrCreated.then(mock => mock.respond(200, [], 'while(1){"a": 1}'));
         return xhr
           .fetchJson('/abc')
-          .then(res => xssiJson(res, 'while(1)'))
+          .then(res => xhr.xssiJson(res, 'while(1)'))
           .then(json => {
             expect(json).to.be.deep.equal({a: 1});
           });
