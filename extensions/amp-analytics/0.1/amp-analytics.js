@@ -295,7 +295,9 @@ export class AmpAnalytics extends AMP.BaseElement {
     );
 
     this.transport_.maybeInitIframeTransport(
-      this.win,
+      // In the case of FIE rendering, we should be using the parent doc win.
+      // TODO: this will be a blocker to launch ampdoc-fie
+      this.getAmpDoc().win,
       this.element,
       Services.preconnectFor(this.win)
     );
