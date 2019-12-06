@@ -192,7 +192,7 @@ describes.realWin(
   'amp-analytics.iframe-transport',
   {amp: true, allowExternalResources: true},
   env => {
-    it.only('logs poor performance of vendor iframe', () => {
+    it('logs poor performance of vendor iframe', () => {
       const body =
         '<html><head><script>' +
         'function busyWait(count, duration, cb) {\n' +
