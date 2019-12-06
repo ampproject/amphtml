@@ -87,10 +87,10 @@ function createContainer(global, data) {
  */
 function getBeOpinionAsyncInit(global, accountId) {
   const {context} = global;
-  context.onResizeDenied(function(requestedHeight, requestedWidth) {
-    context.requestResize(requestedWidth, requestedHeight);
-  });
   return function() {
+    context.onResizeDenied(function(requestedHeight, requestedWidth) {
+      context.requestResize(requestedWidth, requestedHeight);
+    });
     global.BeOpinionSDK.init({
       account: accountId,
       onContentReceive: function(hasContent) {
