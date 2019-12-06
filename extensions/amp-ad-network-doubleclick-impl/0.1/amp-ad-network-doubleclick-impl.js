@@ -932,6 +932,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (multiSizeDataStr) {
       const multiSizeValidation =
         this.element.getAttribute('data-multi-size-validation') || 'true';
+      const allowExpansion =
+        this.element.getAttribute('data-multi-size-allow-expansion') == 'true';
       // The following call will check all specified multi-size dimensions,
       // verify that they meet all requirements, and then return all the valid
       // dimensions in an array.
@@ -940,6 +942,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         this.initialSize_.width,
         this.initialSize_.height,
         multiSizeValidation == 'true',
+        allowExpansion,
         this.isFluidPrimaryRequest_
       );
       if (dimensions.length) {

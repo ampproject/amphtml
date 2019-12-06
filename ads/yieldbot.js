@@ -40,7 +40,8 @@ export function yieldbot(global, data) {
             multiSizeDataStr,
             primaryWidth,
             primaryHeight,
-            false
+            false /* multiSizeValidation */,
+            false /* allowExpansion */
           );
           dimensions.unshift([primaryWidth, primaryHeight]);
         } else {

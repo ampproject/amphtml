@@ -1345,6 +1345,43 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
       });
     });
 
+    it('should default to not allowing expansion', () => {
+      stubForAmpCreative();
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .callsFake(() => mockSendXhrRequest(undefined, true));
+      impl.element.setAttribute('data-multi-size', '300x50');
+      // Stub ini load otherwise FIE could delay test
+      env.sandbox
+        ./*OK*/ stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+        .returns(Promise.resolve());
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        expect(impl.adUrl_).to.be.ok;
+        expect(impl.adUrl_).to.not.match(/300x50/);
+      });
+    });
+
+    it('should allow expansion if attribute set', () => {
+      stubForAmpCreative();
+      env.sandbox
+        .stub(impl, 'sendXhrRequest')
+        .callsFake(() => mockSendXhrRequest(undefined, true));
+      impl.element.setAttribute('data-multi-size', '300x50');
+      impl.element.setAttribute('data-multi-size-allow-expansion', 'true');
+      // Stub ini load otherwise FIE could delay test
+      env.sandbox
+        ./*OK*/ stub(FriendlyIframeEmbed.prototype, 'whenIniLoaded')
+        .returns(Promise.resolve());
+      impl.buildCallback();
+      impl.onLayoutMeasure();
+      return impl.layoutCallback().then(() => {
+        expect(impl.adUrl_).to.be.ok;
+        expect(impl.adUrl_).to.match(/300x50/);
+      });
+    });
+
     it('should attempt resize for fluid request + fixed response case', () => {
       impl.isFluidRequest_ = true;
       impl.handleResize_(150, 50);

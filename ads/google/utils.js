@@ -58,6 +58,7 @@ export function getMultiSizeDimensions(
   primaryWidth,
   primaryHeight,
   multiSizeValidation,
+  allowExpansion,
   isFluidPrimary = false
 ) {
   const dimensions = [];
@@ -104,6 +105,7 @@ export function getMultiSizeDimensions(
     // Check that secondary size is not larger than primary size.
     if (
       !isFluidPrimary &&
+      !allowExpansion &&
       !validateDimensions(
         width,
         height,
