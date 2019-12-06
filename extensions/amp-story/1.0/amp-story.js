@@ -981,7 +981,10 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeSidebar_();
     this.setThemeColor_();
 
-    const storyLayoutPromise = this.initializePages_()
+    const storyLayoutPromise = Promise.all([
+      this.getAmpDoc().whenFirstVisible(), // Pauses execution during prerender.
+      this.initializePages_(),
+    ])
       .then(() => {
         this.handleConsentExtension_();
         this.initializeStoryAccess_();
@@ -1625,7 +1628,8 @@ export class AmpStory extends AMP.BaseElement {
           el.removeAttribute(Attributes.DESKTOP_POSITION);
         });
 
-        list.forEach(({page, position}) => {
+        list.forEach(entry => {
+          const {page, position} = entry;
           page.element.setAttribute(Attributes.DESKTOP_POSITION, position);
         });
       }
@@ -1960,6 +1964,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onSidebarStateUpdate_(sidebarState) {
+    this.analyticsService_.triggerEvent(
+      sidebarState ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.sidebar_
+    );
+
     const actions = Services.actionServiceForDoc(this.element);
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {

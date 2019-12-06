@@ -193,6 +193,18 @@ describes.sandboxed('amp-img', {}, env => {
     });
   });
 
+  it('should propagate data attributes', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      width: 320,
+      height: 240,
+      'data-foo': 'abc',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('data-foo')).to.equal('abc');
+    });
+  });
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;
@@ -208,9 +220,9 @@ describes.sandboxed('amp-img', {}, env => {
       el.setAttribute('height', 100);
       el.getResources = () => Services.resourcesForDoc(document);
       el.getPlaceholder = sandbox.stub();
+      el.getLayoutWidth = () => 100;
       impl = new AmpImg(el);
       impl.createdCallback();
-      sandbox.stub(impl, 'getLayoutWidth').returns(100);
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
       toggleFallbackSpy = sandbox.spy(el, 'toggleFallback');
@@ -364,6 +376,7 @@ describes.sandboxed('amp-img', {}, env => {
     el.setAttribute('aria-label', 'Hello');
     el.setAttribute('aria-labelledby', 'id2');
     el.setAttribute('aria-describedby', 'id3');
+    el.getLayoutWidth = () => -1;
 
     el.getPlaceholder = sandbox.stub();
     const impl = new AmpImg(el);
@@ -464,10 +477,10 @@ describes.sandboxed('amp-img', {}, env => {
       if (addBlurClass) {
         img.classList.add('i-amphtml-blurry-placeholder');
       }
+      el.getLayoutWidth = () => 200;
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
       const impl = new AmpImg(el);
-      sandbox.stub(impl, 'getLayoutWidth').returns(200);
       impl.togglePlaceholder = sandbox.stub();
       return impl;
     }
@@ -518,9 +531,9 @@ describes.sandboxed('amp-img', {}, env => {
       }
       el.getResources = () => Services.resourcesForDoc(document);
       el.getPlaceholder = sandbox.stub();
+      el.getLayoutWidth = () => layoutWidth;
       const impl = new AmpImg(el);
       impl.createdCallback();
-      sandbox.stub(impl, 'getLayoutWidth').returns(layoutWidth);
       sandbox.stub(impl, 'getLayout').returns(attributes['layout']);
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
