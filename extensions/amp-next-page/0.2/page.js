@@ -89,7 +89,7 @@ export class Page {
     return this.title_;
   }
 
-  /** @return {string} */
+  /** @return {!PageRelativePos} */
   get relativePos() {
     return this.relativePos_;
   }
@@ -196,7 +196,6 @@ export class Page {
    * @param {?PositionInViewportEntryDef} position
    */
   footerPositionChanged(position) {
-    console.log('footer position changed', position.relativePos);
     const prevFooterPosition = this.headerPosition_;
     if (position.relativePos === prevFooterPosition) {
       return;
