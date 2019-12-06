@@ -16,7 +16,7 @@
 
 import {
   IframeTransport,
-  getIframeTransportScriptUrl,
+  getIframeTransportScriptUrlForTesting,
 } from '../iframe-transport';
 import {addParamsToUrl} from '../../../../src/url';
 import {expectPostMessage} from '../../../../testing/iframe.js';
@@ -172,13 +172,13 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   });
 
   it('gets correct client lib URL in local/test mode', () => {
-    const url = getIframeTransportScriptUrl(env.ampdoc.win);
+    const url = getIframeTransportScriptUrlForTesting(env.ampdoc.win);
     expect(url).to.contain(env.win.location.host);
     expect(url).to.contain('/dist/iframe-transport-client-lib.js');
   });
 
   it('gets correct client lib URL in prod mode', () => {
-    const url = getIframeTransportScriptUrl(env.ampdoc.win, true);
+    const url = getIframeTransportScriptUrlForTesting(env.ampdoc.win, true);
     expect(url).to.contain(urls.thirdParty);
     expect(url).to.contain('/iframe-transport-client-v0.js');
     expect(url).to.equal(
