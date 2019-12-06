@@ -17,23 +17,23 @@
 import {PositionInViewportEntryDef} from '../../../src/service/position-observer/position-observer-worker';
 import {RelativePositions} from '../../../src/layout-rect';
 import {VisibilityState} from '../../../src/visibility-state';
-import {dev} from '../../../src/log';
+import {devAssert} from '../../../src/log';
 
-/** @enum {string} */
+/** @enum {number} */
 export const PageState = {
-  QUEUED: 'queued',
-  FETCHING: 'fetching',
-  LOADED: 'loaded',
-  FAILED: 'failed',
-  INSERTED: 'inserted',
+  QUEUED: 0,
+  FETCHING: 1,
+  LOADED: 2,
+  FAILED: 3,
+  INSERTED: 4,
 };
 
-/** @enum {string} */
+/** @enum {number} */
 export const PageRelativePos = {
-  INSIDE_VIEWPORT: 'inside',
-  OUTSIDE_VIEWPORT: 'outside',
-  LEAVING_VIEWPORT: 'leaving',
-  CONTAINS_VIEWPORT: 'contains',
+  INSIDE_VIEWPORT: 0,
+  OUTSIDE_VIEWPORT: 1,
+  LEAVING_VIEWPORT: 2,
+  CONTAINS_VIEWPORT: 3,
 };
 
 export class Page {
@@ -75,7 +75,7 @@ export class Page {
   /**
    * @param {string} url
    */
-  updateUrl(url) {
+  set url(url) {
     this.url_ = url;
   }
 
@@ -182,11 +182,11 @@ export class Page {
    * @param {?PositionInViewportEntryDef} position
    */
   headerPositionChanged(position) {
-    const prevFooterPosition = this.footerPosition_;
-    if (position.relativePos === prevFooterPosition) {
+    const prevHeaderPosition = this.headerPosition_;
+    if (position.relativePos === prevHeaderPosition) {
       return;
     }
-    this.footerPosition_ = position.relativePos;
+    this.headerPosition_ = position.relativePos;
     this.updateRelativePos_();
   }
 
@@ -196,11 +196,12 @@ export class Page {
    * @param {?PositionInViewportEntryDef} position
    */
   footerPositionChanged(position) {
-    const prevHeaderPosition = this.headerPosition_;
-    if (position.relativePos === prevHeaderPosition) {
+    console.log('footer position changed', position.relativePos);
+    const prevFooterPosition = this.headerPosition_;
+    if (position.relativePos === prevFooterPosition) {
       return;
     }
-    this.headerPosition_ = position.relativePos;
+    this.footerPosition_ = position.relativePos;
     this.updateRelativePos_();
   }
 
@@ -213,7 +214,7 @@ export class Page {
     const {headerPosition_: header, footerPosition_: footer} = this;
     const {INSIDE, TOP, BOTTOM} = RelativePositions;
 
-    dev().assert(
+    devAssert(
       header || footer,
       'next-page scroll triggered without a header or footer position'
     );

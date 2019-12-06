@@ -15,6 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.2.css';
+import {MultidocManager} from '../../../src/runtime';
 import {Page, PageRelativePos} from './page';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
@@ -70,6 +71,9 @@ export class NextPageService {
     /** @private @const {?PositionObserver} */
     this.injectedPositionObserver_ = opt_injectedPositionObserver || null;
 
+    /** @private {?MultidocManager} */
+    this.multidocManager_ = null;
+
     /** @private {?Array<!Page>} */
     this.pages_;
 
@@ -96,6 +100,13 @@ export class NextPageService {
    * @param {!AmpElement} element
    */
   build(element) {
+    this.multidocManager_ = new MultidocManager(
+      this.win_,
+      Services.ampdocServiceFor(this.win_),
+      Services.extensionsFor(this.win_),
+      Services.timerFor(this.win_)
+    );
+
     this.element_ = element;
     this.separator_ = this.getSeparatorElement_();
     this.moreBox_ = this.getMoreBoxElement_();
@@ -226,20 +237,28 @@ export class NextPageService {
     this.getPositionObserver_().observe(
       header,
       PositionObserverFidelity.LOW,
-      () => page.headerPositionChanged(page)
+      position => page.headerPositionChanged(position)
     );
     this.getPositionObserver_().observe(
       footer,
       PositionObserverFidelity.LOW,
-      () => page.footerPositionChanged(page)
+      position => page.footerPositionChanged(position)
     );
 
     // Handles extension deny-lists and sticky items
     sanitizeDoc(doc);
 
+    // Insert the separator
+    this.element_.insertBefore(this.separator_.cloneNode(true), this.moreBox_);
+
+    // Insert the shadow doc and two observer elements
+    this.element_.insertBefore(header, this.moreBox_);
+    this.element_.insertBefore(shadowRoot, this.moreBox_);
+    this.element_.insertBefore(footer, this.moreBox_);
+
     // Try inserting the shadow document
     try {
-      const amp = this.win_.AMP.attachShadowDoc(shadowRoot, doc, '', {
+      const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {
         visibilityState: VisibilityState.PRERENDER,
       });
 
@@ -248,17 +267,6 @@ export class NextPageService {
 
       const body = ampdoc.getBody();
       body.classList.add('i-amphtml-next-page-document');
-
-      // Insert the separator
-      this.element_.insertBefore(
-        this.separator_.cloneNode(true),
-        this.moreBox_
-      );
-
-      // Insert the shadow doc and two observer elements
-      this.element_.insertBefore(header, this.moreBox_);
-      this.element_.insertBefore(shadowRoot, this.moreBox_);
-      this.element_.insertBefore(footer, this.moreBox_);
 
       return amp;
     } catch (e) {
@@ -310,7 +318,7 @@ export class NextPageService {
         // Make sure the response is coming from the same origin as the
         // page and update the page's url in case of a redirection
         validateUrl(response.url, this.ampdoc_.getUrl());
-        page.updateUrl(response.url);
+        page.url = response.url;
 
         return response.text();
       })
