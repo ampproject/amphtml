@@ -16,7 +16,11 @@
 
 amp-inline-gallery-pagination {
   font-size: 12px;
-  font-family: Arial, Helvetica, sans-serif;
+  /*
+   * TODO(https://github.com/ampproject/amphtml/issues/25888)
+   * Use a better, common set of fonts for sans-serif.
+   */
+  font-family: sans-serif;
   line-height: 1;
 }
 
