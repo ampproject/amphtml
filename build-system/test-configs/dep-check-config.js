@@ -326,6 +326,8 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-minute-media-player/0.1/amp-minute-media-player.js->' +
         'src/service/video-manager-impl.js',
+      'extensions/amp-redbull-player/0.1/amp-redbull-player.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
@@ -397,8 +399,6 @@ exports.rules = [
       'extensions/amp-experiment/1.0/amp-experiment.js->' +
         'src/service/origin-experiments-impl.js',
       'extensions/amp-script/0.1/amp-script.js->' +
-        'src/service/origin-experiments-impl.js',
-      'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
