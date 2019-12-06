@@ -87,7 +87,13 @@ class ActivityHistory {
       this.prevActivityEvent_ = activityEvent;
     }
 
-    if (this.prevActivityEvent_.time < activityEvent.time) {
+    if (
+      this.prevActivityEvent_.time < activityEvent.time ||
+      // when pushed event with "inactive" type from (mouseleave)
+      // prevActivityEvent has event with same time but "active" type from (mousemove)
+      (this.prevActivityEvent_.time === activityEvent.time &&
+        this.prevActivityEvent_.type !== activityEvent.type)
+    ) {
       this.totalEngagedTime_ += findEngagedTimeBetween(
         this.prevActivityEvent_,
         activityEvent.time
@@ -126,6 +132,13 @@ const ACTIVE_EVENT_TYPES = [
   'keydown',
   'keyup',
 ];
+/**
+ * Array of event types which will be listened for on the document to indicate
+ * leave from document. Other activities are also observed on the AmpDoc and Viewport
+ * objects. See {@link setUpActivityListeners_} for listener implementation.
+ * @private @const {Array<string>}
+ */
+const INACTIVE_EVENT_TYPES = ['mouseleave'];
 
 /**
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampDoc
@@ -163,6 +176,9 @@ export class Activity {
 
     /** @private @const {function()} */
     this.boundHandleActivity_ = this.handleActivity_.bind(this);
+
+    /** @private @const {function()} */
+    this.boundHandleInactive_ = this.handleInactive_.bind(this);
 
     /** @private @const {function()} */
     this.boundHandleVisibilityChange_ = this.handleVisibilityChange_.bind(this);
@@ -228,15 +244,17 @@ export class Activity {
 
   /** @private */
   setUpActivityListeners_() {
-    for (let i = 0; i < ACTIVE_EVENT_TYPES.length; i++) {
-      this.unlistenFuncs_.push(
-        listen(
-          this.ampdoc.getRootNode(),
-          ACTIVE_EVENT_TYPES[i],
-          this.boundHandleActivity_
-        )
-      );
-    }
+    this.setUpListenersFromArray_(
+      this.ampdoc.getRootNode(),
+      ACTIVE_EVENT_TYPES,
+      this.boundHandleActivity_
+    );
+
+    this.setUpListenersFromArray_(
+      this.ampdoc.getRootNode(),
+      INACTIVE_EVENT_TYPES,
+      this.boundHandleInactive_
+    );
 
     this.unlistenFuncs_.push(
       this.ampdoc.onVisibilityChanged(this.boundHandleVisibilityChange_)
@@ -246,6 +264,18 @@ export class Activity {
     // TODO(britice): If Viewport is updated to return an unlisten function,
     // update this to capture the unlisten function.
     this.viewport_.onScroll(this.boundHandleActivity_);
+  }
+
+  /**
+   *  @private
+   *  @param {!EventTarget} target
+   *  @param {Array<string>} events
+   *  @param {function()} listener
+   */
+  setUpListenersFromArray_(target, events, listener) {
+    for (let i = 0; i < events.length; i++) {
+      this.unlistenFuncs_.push(listen(target, events[i], listener));
+    }
   }
 
   /** @private */
