@@ -30,6 +30,13 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
   VIQEO['subscribeTracking'](params => {
     viqeoPlayerInstance = params['player'];
   }, 'Player:added');
+  VIQEO['subscribeTracking'](() => {
+    sendMessage('updatePlayedRanges', viqeoPlayerInstance['getPlayedRanges']());
+    sendMessage('updateCurrentTime', viqeoPlayerInstance['getCurrentTime']());
+  }, 'Player:currentTimeUpdated');
+  VIQEO['subscribeTracking'](() => {
+    sendMessage('updateDuration', viqeoPlayerInstance['getDuration']());
+  }, 'Player:durationUpdated');
   VIQEO['createPlayer']({
     videoId: data['videoid'],
     profileId: data['profileid'],
@@ -38,16 +45,16 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
 
   global.addEventListener('message', parseMessage, false);
 
-  subscribe('videoLoaded', 'ready');
-  subscribe('previewLoaded', 'ready');
-  subscribe('started', 'started');
+  subscribe('ready', 'ready');
   subscribe('paused', 'pause');
+  subscribe('started', 'play');
   subscribe('played', 'play');
   subscribe('replayed', 'play');
-  subscribeTracking({
-    Mute: 'mute',
-    Unmute: 'unmute',
-  });
+  subscribe('ended', 'end');
+  subscribe('advStarted', 'startAdvert');
+  subscribe('advEnded', 'endAdvert');
+  subscribe('muted', 'mute');
+  subscribe('unmuted', 'unmute');
 
   /**
    * Subscribe on viqeo's events
@@ -59,22 +66,6 @@ function viqeoPlayerInitLoaded(global, VIQEO) {
     VIQEO['subscribeTracking'](() => {
       sendMessage(targetEventName);
     }, `Player:${playerEventName}`);
-  }
-
-  /**
-   * Subscribe viqeo's tracking
-   * @param {Object.<string, string>} eventsDescription
-   * @private
-   */
-  function subscribeTracking(eventsDescription) {
-    VIQEO['subscribeTracking'](params => {
-      const name =
-        params && params['trackingParams'] && params['trackingParams'].name;
-      const targetEventName = eventsDescription[name];
-      if (targetEventName) {
-        sendMessage(targetEventName);
-      }
-    }, 'Player:userAction');
   }
 
   const sendMessage = (eventName, value = null) => {
