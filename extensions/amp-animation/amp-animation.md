@@ -654,7 +654,7 @@ The animation can be triggered via a `trigger` attribute or an `on` action.
 
 ### `trigger` attribute
 
-The only available value for the `trigger` attribute is `visibility`. The animation runs when the underlying document or embed are visible (in viewport). 
+The only available value for the `trigger` attribute is `visibility`. The animation runs when the underlying document or embed are visible (in viewport).
 
 For instance:
 ```html
@@ -664,7 +664,7 @@ For instance:
 </amp-animation>
 ```
 
-Important: If the `amp-animation` component is a direct child of the document `body`, and not imported through an embedded element, it will start as soon as the `body` is loaded, regardless if it, or the animated element, is placed below the initial viewport. 
+Important: If the `amp-animation` component is a direct child of the document `body`, and not imported through an embedded element, it will start as soon as the `body` is loaded, regardless if it, or the animated element, is placed below the initial viewport.
 
 ### Triggering via `on` action
 
