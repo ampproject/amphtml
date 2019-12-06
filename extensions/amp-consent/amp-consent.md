@@ -281,7 +281,7 @@ For users in `geoGroupUnknown`, the merged config is
   "onUpdateHref": "https://example.com/update-consent",
   "promptUI": "consent-ui",
   "checkConsentHref": "https://example.com/check-consent",
-  "consentRequired": true,
+  "consentRequired": true
 }
 ```
 
