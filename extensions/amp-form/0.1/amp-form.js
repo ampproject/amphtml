@@ -1001,7 +1001,7 @@ export class AmpForm {
     if (e && e.response) {
       const error = /** @type {!Error} */ (e);
       promise = this.xhr_
-        .xssiJson(error.response, this.element.getAttribute('strip-prefix'))
+        .xssiJson(error.response, this.form_.getAttribute('strip-prefix'))
         .catch(() => null);
     } else {
       promise = Promise.resolve(null);
