@@ -52,9 +52,9 @@ export const VIDEO_TAGS = {
 };
 
 const GALLERY_TAG = 'amp-lightbox-gallery';
-const CAROUSEL_TAG = 'AMP-CAROUSEL';
+const CAROUSEL_TAGS = ['AMP-CAROUSEL', 'AMP-BASE-CAROUSEL'];
 const FIGURE_TAG = 'FIGURE';
-const SLIDE_SELECTOR = '.amp-carousel-slide';
+const SLIDE_SELECTOR = '.amp-carousel-slide, .i-amphtml-carousel-slotted';
 
 /**
  * @param {!Element} slide
@@ -150,7 +150,8 @@ export class LightboxManager {
     });
 
     // Process elements where the `lightbox` attr is dynamically set.
-    root.addEventListener(AutoLightboxEvents.NEWLY_SET, ({target}) => {
+    root.addEventListener(AutoLightboxEvents.NEWLY_SET, e => {
+      const {target} = e;
       this.processLightboxElement_(dev().assertElement(target));
     });
 
@@ -221,7 +222,7 @@ export class LightboxManager {
       return;
     }
     this.seen_.push(element);
-    if (element.tagName == CAROUSEL_TAG) {
+    if (CAROUSEL_TAGS.includes(element.tagName)) {
       this.processLightboxCarousel_(element);
     } else {
       const lightboxGroupId = element.getAttribute('lightbox') || 'default';

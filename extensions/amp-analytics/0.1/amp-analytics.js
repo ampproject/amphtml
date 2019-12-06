@@ -295,9 +295,14 @@ export class AmpAnalytics extends AMP.BaseElement {
     );
 
     this.transport_.maybeInitIframeTransport(
+      // In the case of FIE rendering, we should be using the parent doc win.
+      // Currently, getAmpDoc returns the parent doc for FIE elements.
+      // This behavior will be changed by ampdoc-fie launch.
+      // TODO: this will be a blocker to launch ampdoc-fie.
+      // We should find a different way to get the parent win in case of FIE.
       this.getAmpDoc().win,
       this.element,
-      this.preconnect
+      Services.preconnectFor(this.win)
     );
 
     const promises = [];
@@ -392,7 +397,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @visibleForTesting
    */
   preload(url, opt_preloadAs) {
-    this.preconnect.preload(url, opt_preloadAs);
+    Services.preconnectFor(this.win).preload(
+      this.getAmpDoc(),
+      url,
+      opt_preloadAs
+    );
   }
 
   /**
@@ -540,7 +549,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           requests[k] = new RequestHandler(
             this.element,
             request,
-            this.preconnect,
+            Services.preconnectFor(this.win),
             this.transport_,
             this.isSandbox_
           );

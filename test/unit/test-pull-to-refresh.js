@@ -17,14 +17,11 @@
 import {PullToRefreshBlocker} from '../../src/pull-to-refresh';
 
 describe('PullToRefreshBlocker', () => {
-  let sandbox;
   let eventListeners;
   let viewportMock;
   let blocker;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     eventListeners = {};
     const documentApi = {
       addEventListener: (eventType, handler) => {
@@ -40,7 +37,7 @@ describe('PullToRefreshBlocker', () => {
     const viewportApi = {
       getScrollTop: () => 0,
     };
-    viewportMock = sandbox.mock(viewportApi);
+    viewportMock = window.sandbox.mock(viewportApi);
 
     blocker = new PullToRefreshBlocker(documentApi, viewportApi);
   });
@@ -48,7 +45,6 @@ describe('PullToRefreshBlocker', () => {
   afterEach(() => {
     viewportMock.verify();
     blocker.cleanup();
-    sandbox.restore();
   });
 
   function sendEvent(event, opt_prevetDefault) {
@@ -127,7 +123,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    const preventDefault = sandbox.spy();
+    const preventDefault = window.sandbox.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 112}]}, preventDefault);
     expect(blocker.tracking_).to.equal(false);
     expect(preventDefault).to.be.calledOnce;
@@ -142,7 +138,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    const preventDefault = sandbox.spy();
+    const preventDefault = window.sandbox.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 100}]}, preventDefault);
     expect(blocker.tracking_).to.equal(false);
     expect(preventDefault).to.have.not.been.called;
@@ -157,7 +153,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    const preventDefault = sandbox.spy();
+    const preventDefault = window.sandbox.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 111}]}, preventDefault);
     expect(blocker.tracking_).to.equal(true);
     expect(preventDefault).to.have.not.been.called;
