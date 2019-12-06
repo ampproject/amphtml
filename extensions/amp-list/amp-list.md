@@ -328,7 +328,10 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
+<!-- prettier-ignore-start -->
+<!-- See: https://github.com/remarkjs/remark/issues/456 -->
 ##### [is-layout-container] (optional)
+<!-- prettier-ignore-end-->
 
 This is a bindable attribute that should always be `false` by default. When set to `true` via `amp-bind`, it changes the layout of the `<amp-list>` to `container`. This attribute is useful for handling dynamic resizing for amp-list.
 
