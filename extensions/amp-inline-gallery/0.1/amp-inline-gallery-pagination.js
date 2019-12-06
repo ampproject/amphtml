@@ -19,7 +19,6 @@ import {Layout} from '../../../src/layout';
 import {createCustomEvent} from '../../../src/event-helper';
 import {devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {exponentialFalloff} from '../../../src/utils/math';
 import {htmlFor} from '../../../src/static-template';
 import {scopedQuerySelectorAll} from '../../../src/dom';
 import {setImportantStyles} from '../../../src/style.js';
@@ -29,6 +28,21 @@ import {toArray} from '../../../src/types';
  * The maximum number of dots to show before converting to a count.
  */
 const MAX_DOT_COUNT = 8;
+
+/**
+ * Returns a number falling off from one to zero, based on a progress
+ * percentage and a power to decay at.
+ * TODO(sparhami) Move to math.js.
+ * @param {number} percentage A number between one and zero.
+ * @param {number} power A number greater than or equal to one.
+ * @return {number} A number between one and zero.
+ */
+export function exponentialFalloff(percentage, power) {
+  devAssert(percentage >= 0);
+  devAssert(percentage <= 1);
+  devAssert(power >= 1);
+  return Math.max(0, 1 - 1 / Math.pow(percentage, -1 / power));
+}
 
 export class AmpInlineGalleryPagination extends AMP.BaseElement {
   /** @param {!AmpElement} element */
