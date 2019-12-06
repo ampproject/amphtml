@@ -229,7 +229,7 @@ Take the following config as an example:
     "geoGroupUnknown": {
       "checkConsentHref": "https://example.com/check-consent",
       "consentRequired": true
-   }
+    }
   }
 }
 ```
