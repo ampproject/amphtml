@@ -196,6 +196,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'bg': includeJsonLiteral(BG_CONFIG),
       'burt': includeJsonLiteral(BURT_CONFIG),
       'byside': includeJsonLiteral(BYSIDE_CONFIG),
+      'captainmetrics': includeJsonLiteral(CAPTAINMETRICS_CONFIG),
       'chartbeat': includeJsonLiteral(CHARTBEAT_CONFIG),
       'clicky': includeJsonLiteral(CLICKY_CONFIG),
       'colanalytics': includeJsonLiteral(COLANALYTICS_CONFIG),
