@@ -395,7 +395,7 @@ function runVideoTestBench(req, res, next) {
     appendClientScript(doc);
 
     return res.end(replaceUrls(getServeMode(), dom.serialize()));
-  }).error(() => {
+  }).catch(() => {
     next();
   });
 }
