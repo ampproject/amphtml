@@ -38,6 +38,7 @@ import {BAIDUANALYTICS_CONFIG} from './vendors/baiduanalytics';
 import {BG_CONFIG} from './vendors/bg';
 import {BURT_CONFIG} from './vendors/burt';
 import {BYSIDE_CONFIG} from './vendors/byside';
+import {CAPTAINMETRICS_CONFIG} from './vendors/captainmetrics';
 import {CHARTBEAT_CONFIG} from './vendors/chartbeat';
 import {CLICKY_CONFIG} from './vendors/clicky';
 import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
