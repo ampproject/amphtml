@@ -344,6 +344,14 @@ export class ConsentInstance {
         return;
       }
 
+      if (consentInfo['consentState'] === CONSENT_ITEM_STATE.UNKNOWN) {
+        // Remove stored value if the consentState is unknown
+        // Do not consilidate with the value == null check below,
+        // because UNKNOWN and DISMISS are different
+        storage.remove(this.storageKey_);
+        return;
+      }
+
       const consentStr = consentInfo['consentString'];
       if (consentStr && consentStr.length > 150) {
         // Verify the length of consentString.
