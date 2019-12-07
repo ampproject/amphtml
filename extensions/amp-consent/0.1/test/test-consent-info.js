@@ -171,11 +171,13 @@ describes.fakeWin('ConsentInfo', {}, () => {
       newState
     );
 
-    // UNKNOWN/DISMISS/NOT_REQUIRED cannot override reject/accept
+    // UNKNOWN will clear stored REJECTED/ACCEPTED
     newState = CONSENT_ITEM_STATE.UNKNOWN;
     expect(recalculateConsentStateValue(newState, previousState)).to.equal(
-      previousState
+      CONSENT_ITEM_STATE.UNKNOWN
     );
+
+    //DISMISS/NOT_REQUIRED cannot override reject/accept
     newState = CONSENT_ITEM_STATE.DISMISSED;
     expect(recalculateConsentStateValue(newState, previousState)).to.equal(
       previousState
@@ -185,12 +187,8 @@ describes.fakeWin('ConsentInfo', {}, () => {
       previousState
     );
 
-    // UNKNOWN/DISMISS cannot override NOT_REQUIRED
+    // DISMISS cannot override NOT_REQUIRED
     previousState = CONSENT_ITEM_STATE.NOT_REQUIRED;
-    newState = CONSENT_ITEM_STATE.UNKNOWN;
-    expect(recalculateConsentStateValue(newState, previousState)).to.equal(
-      previousState
-    );
     newState = CONSENT_ITEM_STATE.DISMISSED;
     expect(recalculateConsentStateValue(newState, previousState)).to.equal(
       previousState
