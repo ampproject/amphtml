@@ -281,6 +281,18 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
             'amp-consent:test',
             composeStoreValue(consentInfo)
           );
+
+          instance.update(CONSENT_ITEM_STATE.DISMISS);
+          yield macroTask();
+          storageSetSpy.resetHistory();
+          storageRemoveSpy.resetHistory();
+          expect(storageSetSpy).to.not.be.called;
+          expect(storageRemoveSpy).to.not.be.called;
+
+          instance.update(CONSENT_ITEM_STATE.UNKNOWN, 'test');
+          yield macroTask();
+          expect(storageSetSpy).to.not.be.called;
+          expect(storageRemoveSpy).to.be.calledOnce;
         });
 
         it('remove consentInfo when consentStr length exceeds', function*() {
