@@ -166,7 +166,7 @@ describes.fakeWin(
 
           dispatchLoadedMetadata(element);
 
-          expect(mockTimer.delay).to.have.been.calledWith(
+          expect(mockTimer.delay).to.always.have.been.calledWith(
             env.sandbox.match.func,
             PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS
           );
