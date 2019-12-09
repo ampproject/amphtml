@@ -117,8 +117,19 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   attachContent_() {
-    // Adjust grid-layer to fill screen
-    this.element.parentElement.classList.add('i-amphtml-has-quiz');
+    const gridLayer = this.element.parentElement;
+
+    // Adjust grid-layer to identify quiz layers
+    gridLayer.classList.add('i-amphtml-has-quiz');
+
+    // Adjust grid-layer to identify CTAs and Page Attachments
+    if (gridLayer.parentElement.querySelector('amp-story-cta-layer')) {
+      gridLayer.classList.add('i-amphtml-has-CTA-layer');
+    }
+
+    if (gridLayer.parentElement.querySelector('amp-story-page-attachment')) {
+      gridLayer.classList.add('i-amphtml-has-page-attachment');
+    }
 
     // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
     const promptInput = this.element.children[0];

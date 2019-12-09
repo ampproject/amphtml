@@ -433,8 +433,12 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
                        "lower-third" !important;
 }
 
-amp-story-grid-layer.i-amphtml-has-quiz {
-  align-content: normal;
+amp-story-grid-layer.i-amphtml-has-page-attachment.i-amphtml-has-quiz {
+  padding-bottom: 104px !important;
+}
+
+amp-story-grid-layer.i-amphtml-has-CTA-layer.i-amphtml-has-quiz {
+  padding-bottom: 20% !important;
 }
 
 /**
@@ -990,9 +994,8 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
 }
 
 amp-story-quiz {
-  width: 100% !important;
+  width: auto !important;
   height: auto !important;
+  min-width: 224px !important;
   max-width: 400px !important;
-  justify-self: center;
-  align-self: center;
 }
