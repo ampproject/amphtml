@@ -426,10 +426,6 @@ class ManualAdvancement extends AdvancementConfig {
     let shouldHandleEvent = false;
     let tagName;
 
-    if (this.isInScreenSideEdge_(event, this.element_.getLayoutBox())) {
-      return true;
-    }
-
     closest(
       dev().assertElement(event.target),
       el => {
