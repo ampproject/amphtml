@@ -16,22 +16,27 @@
 'use strict';
 
 const {
-  verifySelectorsVisible
+  verifySelectorsVisible,
 } = require('../../../build-system/tasks/visual-diff/helpers');
 
 async function scroll(page, _, target = 'bottom') {
   await page.tap(`#scroll-${target}-button`);
-  await page.waitFor(500); // transition
+
+  // Scrolling takes 500ms as defined by the runtime, and leeway.
+  await page.waitFor(700);
 }
 
 async function dock(page, name) {
   await page.tap('#play-button');
-  await page.waitFor(200) // active playback
+  await page.waitFor(200); // active playback
   await scroll(page);
   await verifySelectorsVisible(page, name, ['.amp-video-docked-shadow']);
 }
 
-const hoverDockArea = page => page.hover('.i-amphtml-video-docked-overlay');
+async function hoverDockArea(page, name) {
+  await page.hover('.i-amphtml-video-docked-overlay');
+  await verifySelectorsVisible(page, name, ['.amp-video-docked-controls']);
+}
 
 module.exports = {
   "doesn't dock when not playing": scroll,
@@ -45,38 +50,40 @@ module.exports = {
 
   'displays dock controls on hover': async (page, name) => {
     await dock(page, name);
-    await hoverDockArea(page);
+    await hoverDockArea(page, name);
   },
 
   'toggles controls button into paused': async (page, name) => {
     await dock(page, name);
-    await hoverDockArea(page);
+    await hoverDockArea(page, name);
     await page.tap('.amp-video-docked-pause');
   },
 
   'toggles controls button into playing': async (page, name) => {
     await dock(page, name);
-    await hoverDockArea(page);
+    await hoverDockArea(page, name);
     await page.tap('.amp-video-docked-pause');
     await page.tap('.amp-video-docked-play');
   },
 
   'toggles controls button into muted': async (page, name) => {
     await dock(page, name);
-    await hoverDockArea(page);
+    await hoverDockArea(page, name);
     await page.tap('.amp-video-docked-mute');
   },
 
   'toggles controls button into unmuted': async (page, name) => {
     await dock(page, name);
-    await hoverDockArea(page);
+    await hoverDockArea(page, name);
     await page.tap('.amp-video-docked-mute');
     await page.tap('.amp-video-docked-unmute');
   },
 
   'displays scrollback button while ad plays': async (page, name) => {
     await dock(page, name);
-    await hoverDockArea(page);
-    await page.waitFor(1500); // time until midroll ad
-  }
+    await hoverDockArea(page, name);
+    await verifySelectorsVisible(page, name, [
+      '.amp-video-docked-control-set-scroll-back',
+    ]);
+  },
 };
