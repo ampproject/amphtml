@@ -425,9 +425,10 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     this.passSharedData_();
-    this.maybeSetDirtyBit_();
     if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
       this.syncRemoteConsentState_();
+    } else {
+      this.maybeSetDirtyBit_();
     }
 
     this.getConsentRequiredPromise_()
@@ -545,7 +546,9 @@ export class AmpConsent extends AMP.BaseElement {
       if (!response) {
         return;
       }
-      const expireCache = response['expireCache'];
+      // Ideally we should fallback to true if either are true.
+      const expireCache =
+        response['expireCache'] || response['forcePromptOnNext'];
       if (expireCache) {
         this.consentStateManager_.setDirtyBit();
       }
