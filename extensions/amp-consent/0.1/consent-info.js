@@ -109,10 +109,7 @@ export function recalculateConsentStateValue(newState, previousState) {
   if (!isEnumValue(CONSENT_ITEM_STATE, newState)) {
     newState = CONSENT_ITEM_STATE.UNKNOWN;
   }
-  if (
-    newState == CONSENT_ITEM_STATE.DISMISSED ||
-    newState == CONSENT_ITEM_STATE.UNKNOWN
-  ) {
+  if (newState == CONSENT_ITEM_STATE.DISMISSED) {
     return previousState || CONSENT_ITEM_STATE.UNKNOWN;
   }
   if (newState == CONSENT_ITEM_STATE.NOT_REQUIRED) {
@@ -249,6 +246,22 @@ export function convertValueToState(value) {
     return CONSENT_ITEM_STATE.REJECTED;
   }
   return CONSENT_ITEM_STATE.UNKNOWN;
+}
+
+/**
+ * Helper function to convert response enum value to CONSENT_ITEM_STATE value
+ * @param {*} value
+ * @return {?CONSENT_ITEM_STATE}
+ */
+export function convertEnumValueToState(value) {
+  if (value === 'accepted') {
+    return CONSENT_ITEM_STATE.ACCEPTED;
+  } else if (value === 'rejected') {
+    return CONSENT_ITEM_STATE.REJECTED;
+  } else if (value === 'unknown') {
+    return CONSENT_ITEM_STATE.UNKNOWN;
+  }
+  return null;
 }
 
 /**

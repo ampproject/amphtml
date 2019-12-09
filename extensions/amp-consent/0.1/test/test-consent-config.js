@@ -69,7 +69,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         dict({
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/get-consent-v1',
-          'promptUISrc': '/test/manual/diy-consent.html',
+          'promptUISrc': '/examples/amp-consent/diy-consent.html',
           'consentRequired': 'remote',
         })
       );
@@ -207,7 +207,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'consentInstanceId': '_ping_',
           'checkConsentHref': '/override',
           'consentRequired': false,
-          'promptUISrc': '/test/manual/diy-consent.html',
+          'promptUISrc': '/examples/amp-consent/diy-consent.html',
           'promptIfUnknownForGeoGroup': 'eea',
           'postPromptUI': 'test',
           'clientConfig': {
@@ -243,6 +243,10 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
             'geoGroupUnknown': {
               'checkConsentHref': 'https://example.com/check-consent',
               'consentRequired': true,
+            },
+            'invalid': {
+              'consentInstanceId': 'error',
+              'checkConsentHref': 'https://example.com/check-consent',
             },
           },
         };
@@ -375,6 +379,27 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'consentInstanceId': 'abc',
           'consentRequired': true,
           'promptIfUnknownForGeoGroup': 'na',
+        });
+      });
+
+      it('should not override consentInstanceId', async () => {
+        expectAsyncConsoleError(/consentInstanceId/, 1);
+        appendConfigScriptElement(doc, element, geoConfig);
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
+          Promise.resolve({
+            isInCountryGroup(geoGroup) {
+              if (geoGroup === 'invalid') {
+                return GEO_IN_GROUP.IN;
+              }
+              return GEO_IN_GROUP.NOT_IN;
+            },
+          })
+        );
+        const consentConfig = new ConsentConfig(element);
+        expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
+          'consentInstanceId': 'abc',
+          'consentRequired': false,
+          'checkConsentHref': 'https://example.com/check-consent',
         });
       });
     });
