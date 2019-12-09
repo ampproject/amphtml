@@ -58,9 +58,16 @@ export function maybeValidate(win) {
  * @param {string} url
  * @return {!Promise}
  */
-function loadScript(doc, url) {
+export function loadScript(doc, url) {
   const script = doc.createElement('script');
   script.src = url;
+
+  // Propagate nonce to all generated script tags.
+  const currentScript = doc.querySelector('script[nonce]');
+  if (currentScript) {
+    script.setAttribute('nonce', currentScript.getAttribute('nonce'));
+  }
+
   const promise = loadPromise(script).then(
     () => {
       doc.head.removeChild(script);

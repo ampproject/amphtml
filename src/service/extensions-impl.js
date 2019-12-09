@@ -572,6 +572,12 @@ export class Extensions {
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
 
+    // Propagate nonce to all generated script tags.
+    const currentScript = this.win.document.querySelector('script[nonce]');
+    if (currentScript) {
+      scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
+    }
+
     // Allow error information to be collected
     // https://github.com/ampproject/amphtml/issues/7353
     scriptElement.setAttribute('crossorigin', 'anonymous');
