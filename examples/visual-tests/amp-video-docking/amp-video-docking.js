@@ -34,7 +34,11 @@ async function dock(page, name) {
 }
 
 async function activateControlsBy(page, name, tapOrHover) {
-  await page[tapOrHover].call(page, '.i-amphtml-video-docked-overlay');
+  if (tapOrHover == 'hover') {
+    await page.hover('.i-amphtml-video-docked-overlay');
+  } else {
+    await page.tap('.i-amphtml-video-docked-overlay');
+  }
   await verifySelectorsVisible(page, name, ['.amp-video-docked-controls']);
 }
 
