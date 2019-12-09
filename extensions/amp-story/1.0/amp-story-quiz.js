@@ -117,18 +117,24 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   attachContent_() {
-    const gridLayer = this.element.parentElement;
+    const gridLayer = closest(dev().assertElement(this.element), el => {
+      const tagName = el.tagName.toLowerCase();
+
+      if (tagName === 'amp-story-grid-layer') {
+        return true;
+      }
+    });
 
     // Adjust grid-layer to identify quiz layers
-    gridLayer.classList.add('i-amphtml-has-quiz');
+    gridLayer.classList.add('i-amphtml-story-has-quiz');
 
     // Adjust grid-layer to identify CTAs and Page Attachments
     if (gridLayer.parentElement.querySelector('amp-story-cta-layer')) {
-      gridLayer.classList.add('i-amphtml-has-CTA-layer');
+      gridLayer.classList.add('i-amphtml-story-has-CTA-layer');
     }
 
     if (gridLayer.parentElement.querySelector('amp-story-page-attachment')) {
-      gridLayer.classList.add('i-amphtml-has-page-attachment');
+      gridLayer.classList.add('i-amphtml-story-has-page-attachment');
     }
 
     // TODO(jackbsteinberg): Optional prompt behavior must be implemented here

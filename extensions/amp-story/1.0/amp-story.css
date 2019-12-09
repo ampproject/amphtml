@@ -433,14 +433,6 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
                        "lower-third" !important;
 }
 
-amp-story-grid-layer.i-amphtml-has-page-attachment.i-amphtml-has-quiz {
-  padding-bottom: 104px !important;
-}
-
-amp-story-grid-layer.i-amphtml-has-CTA-layer.i-amphtml-has-quiz {
-  padding-bottom: 20% !important;
-}
-
 /**
  * Development mode
  */
@@ -994,8 +986,10 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
 }
 
 amp-story-quiz {
+  align-self: flex-start;
   width: auto !important;
   height: auto !important;
+  /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
   min-width: 224px !important;
   max-width: 400px !important;
 }

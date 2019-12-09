@@ -51,12 +51,6 @@ const PREVIOUS_SCREEN_AREA_RATIO = 0.25;
  */
 const PROTECTED_SCREEN_EDGE_PX = 48;
 
-/** @private @const {number} */
-const PAGE_ATTACHMENT_SAFETY_AREA_PX = 104;
-
-/** @private @const {number} */
-const CTA_SAFETY_AREA_PERCENTAGE = 0.2;
-
 const INTERACTIVE_EMBEDDED_COMPONENTS_SELECTORS = Object.values(
   interactiveElementsSelectors()
 ).join(',');
@@ -446,7 +440,10 @@ class ManualAdvancement extends AdvancementConfig {
           return true;
         }
 
-        if (tagName == 'amp-story-quiz') {
+        if (
+          tagName == 'amp-story-quiz' &&
+          !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
+        ) {
           shouldHandleEvent = false;
           return true;
         }
