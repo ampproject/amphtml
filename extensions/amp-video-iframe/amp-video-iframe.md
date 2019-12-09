@@ -131,7 +131,7 @@ Include an `amp-video-iframe` on your AMP document:
 <amp-video-iframe
   layout="responsive"
   width="16"
-  height="16"
+  height="9"
   src="/my-video-player.html"
   poster="/my-video-poster.jpg"
 >
@@ -150,7 +150,7 @@ By hosting a generic [integration document](#integration) that can reference vid
 <amp-video-iframe
   layout="responsive"
   width="16"
-  height="16"
+  height="9"
   src="https://video-provider.example/amp-video-iframe.html?videoid=PROVIDED_VIDEO_ID"
   poster="https://video-provider.example/amp-video-iframe-poster.jpg?videoid=PROVIDED_VIDEO_ID"
 >
