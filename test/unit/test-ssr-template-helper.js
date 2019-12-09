@@ -53,7 +53,7 @@ describes.fakeWin(
       );
     });
 
-    describe('isSupported', () => {
+    describe('isEnabled', () => {
       it('should return true if doc level opt-in', () => {
         win.document.documentElement.setAttribute(
           'allow-viewer-render-template',
