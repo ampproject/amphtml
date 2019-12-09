@@ -47,10 +47,12 @@ supported by the AMP component library.
 
 1. If you'd like to **include a video directly on the AMP document**, you should use [`amp-video`](https://amp.dev/documentation/components/amp-video).
 
-2. If you're using a **common 3rd party** like Youtube, Vimeo or [others supported in AMP](../../spec/amp-video-interface.md), you should use their supported component (e.g. [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube), [`amp-vimeo`](https://amp.dev/documentation/components/amp-vimeo)). (If you're a 3rd party video vendor, you can [use `amp-video-iframe` to provide a simple way for authors to embed video.](#vendors))
+2. If you're using a **common 3rd party** like Youtube, Vimeo or [others supported in AMP](../../spec/amp-video-interface.md), you should use their supported component (e.g. [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube), [`amp-vimeo`](https://amp.dev/documentation/components/amp-vimeo)).
 
 3. If you've built a **custom player** or are using one provided by an **unsupported 3rd party**, **you should use `amp-video-iframe`**. This is different from using [`amp-iframe`](https://amp.dev/documentation/components/amp-iframe) in that it enables
    [Video Features on AMP](../../spec/amp-video-interface.md). See [behavior](#behavior) below for more details.
+   
+4. If you're a **3rd party video vendor**, **you can use `amp-video-iframe`** to [provide a simple way for authors to embed video.](#vendors)
 
 ## Behavior
 
