@@ -163,7 +163,7 @@ describe.configure().run('amp-ad 3P', () => {
         expect(iframe.offsetHeight).to.equal(250);
         expect(iframe.offsetWidth).to.equal(300);
         expect(iframe.contentWindow.ping.resizeSuccess).to.be.undefined;
-        iframe.contentWindow.context.requestResize(200, 50);
+        iframe.contentWindow.context.requestResize(50, 200);
         return poll('wait for embed-size to be received', () => {
           return !!fixture.messages.getFirstMessageEventOfType('embed-size');
         });

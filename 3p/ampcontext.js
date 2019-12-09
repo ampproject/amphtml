@@ -207,11 +207,11 @@ export class AbstractAmpContext {
   /**
    *  Send message to runtime requesting to resize ad to height and width.
    *    This is not guaranteed to succeed. All this does is make the request.
-   *  @param {number} width The new width for the ad we are requesting.
    *  @param {number} height The new height for the ad we are requesting.
+   *  @param {number} width The new width for the ad we are requesting.
    *  @param {boolean=} hasOverflow Whether the ad handles its own overflow ele
    */
-  requestResize(width, height, hasOverflow) {
+  requestResize(height, width, hasOverflow) {
     this.client_.sendMessage(
       MessageType.EMBED_SIZE,
       dict({

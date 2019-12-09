@@ -73,8 +73,8 @@ export function mathml(global, data) {
         }
         display[0].setAttribute('style', 'margin-top:0;margin-bottom:0');
         context.requestResize(
-          rendered./*OK*/ offsetWidth,
-          rendered./*OK*/ offsetHeight
+          rendered./*OK*/ offsetHeight,
+          rendered./*OK*/ offsetWidth
         );
         setStyle(div, 'visibility', 'visible');
       });

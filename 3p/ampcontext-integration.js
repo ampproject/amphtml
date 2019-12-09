@@ -101,7 +101,7 @@ export class IntegrationAmpContext extends AbstractAmpContext {
    */
   updateDimensions(width, height) {
     userAssert(this.updateDimensionsEnabled_(), 'Not available.');
-    this.requestResize(width, height);
+    this.requestResize(height, width);
   }
 
   /**

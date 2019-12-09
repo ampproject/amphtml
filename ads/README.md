@@ -156,7 +156,7 @@ Additionally, one can observe the `amp:visibilitychange` on the `window` object 
 ### Ad resizing
 
 Ads can call the special API
-`window.context.requestResize(width, height, opt_hasOverflow)` to send a resize request.
+`window.context.requestResize(height, width, opt_hasOverflow)` to send a resize request.
 
 Once the request is processed the AMP runtime will try to accommodate this request as soon as
 possible, but it will take into account where the reader is currently reading, whether the scrolling
@@ -223,7 +223,7 @@ _Example:_
 window.context.renderStart({width: 200, height: 100});
 ```
 
-Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(width, height, opt_hasOverflow)` API. Details in [Ad Resizing](#ad-resizing).
+Note that if the creative needs to resize on user interaction, the creative can continue to do that by calling the `window.context.requestResize(height, width, opt_hasOverflow)` API. Details in [Ad Resizing](#ad-resizing).
 
 ### amp-consent integration
 

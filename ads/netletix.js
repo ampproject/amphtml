@@ -82,7 +82,7 @@ export function netletix(global, data) {
             event.data.height &&
             (event.data.width != nxw || event.data.height != nxh)
           ) {
-            global.context.requestResize(event.data.width, event.data.height);
+            global.context.requestResize(event.data.height, event.data.width);
           }
           break;
         case 'nx-empty':

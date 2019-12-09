@@ -174,7 +174,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, env => {
 
       const overflow = win.document.getElementById('overflow');
       const container = win.document.getElementById('csacontainer');
-      const requestedHeight = requestResizeSpy.args[0][1];
+      const requestedHeight = requestResizeSpy.args[0][0];
 
       // Resize requests above the fold will be denied
       resizeDeniedHandler(win, container, requestedHeight);
@@ -200,7 +200,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, env => {
 
       const overflow = win.document.getElementById('overflow');
       const container = win.document.getElementById('csacontainer');
-      const requestedHeight = requestResizeSpy.args[0][1];
+      const requestedHeight = requestResizeSpy.args[0][0];
 
       // Resize requests above the fold will be denied
       resizeDeniedHandler(win, container, requestedHeight);
@@ -223,7 +223,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, env => {
       // Try to resize when ads are loaded
       resizeIframe(win, 'csacontainer');
       // Resize requests below the fold succeeed
-      const requestedHeight = requestResizeSpy.args[0][1];
+      const requestedHeight = requestResizeSpy.args[0][0];
 
       const overflow = win.document.getElementById('overflow');
       const container = win.document.getElementById('csacontainer');
@@ -248,7 +248,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, env => {
       // Try to resize when ads are loaded
       resizeIframe(win, 'csacontainer');
       // Resize requests below the fold succeed
-      const requestedHeight = requestResizeSpy.args[0][1];
+      const requestedHeight = requestResizeSpy.args[0][0];
       resizeSuccessHandler(win, container, requestedHeight);
 
       const overflow = win.document.getElementById('overflow');

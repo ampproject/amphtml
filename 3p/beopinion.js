@@ -89,7 +89,7 @@ function getBeOpinionAsyncInit(global, accountId) {
   const {context} = global;
   return function() {
     context.onResizeDenied(function(requestedHeight, requestedWidth) {
-      context.requestResize(requestedWidth, requestedHeight);
+      context.requestResize(requestedHeight, requestedWidth);
     });
     global.BeOpinionSDK.init({
       account: accountId,
@@ -103,7 +103,7 @@ function getBeOpinionAsyncInit(global, accountId) {
       onHeightChange: function(newHeight) {
         const c = global.document.getElementById('c');
         const boundingClientRect = c./*REVIEW*/ getBoundingClientRect();
-        context.requestResize(boundingClientRect.width, newHeight);
+        context.requestResize(newHeight, boundingClientRect.width);
       },
     });
     global.BeOpinionSDK['watch'](); // global.BeOpinionSDK.watch() fails 'gulp check-types' validation

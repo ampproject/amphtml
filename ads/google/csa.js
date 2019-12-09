@@ -141,10 +141,10 @@ function orientationChangeHandler(global, containerDiv) {
       const overflow = global.document.getElementById('overflow');
       if (overflow) {
         overflow.onclick = () =>
-          global.context.requestResize(undefined, newHeight);
+          global.context.requestResize(newHeight, undefined);
       }
       // Resize the container to the correct height.
-      global.context.requestResize(undefined, newHeight);
+      global.context.requestResize(newHeight, undefined);
     }
   }, 250); /* 250 is time in ms to wait before executing orientation */
 }
@@ -296,7 +296,7 @@ export function resizeIframe(global, containerName) {
     createOverflow(global, container, height);
   }
   // Attempt to resize to actual CSA container height
-  global.context.requestResize(undefined, height);
+  global.context.requestResize(height, undefined);
 }
 
 /**
@@ -309,7 +309,7 @@ export function resizeIframe(global, containerName) {
 function createOverflow(global, container, height) {
   const overflow = getOverflowElement(global);
   // When overflow is clicked, resize to full height
-  overflow.onclick = () => global.context.requestResize(undefined, height);
+  overflow.onclick = () => global.context.requestResize(height, undefined);
   global.document.getElementById('c').appendChild(overflow);
   // Resize the CSA container to not conflict with overflow
   resizeCsa(container, currentAmpHeight - overflowHeight);

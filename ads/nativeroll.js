@@ -46,7 +46,7 @@ function initPlayer(global, data) {
     onLoad: () => {
       const height = global.document.getElementsByClassName('nr-player')[0]
         ./* OK */ offsetHeight;
-      global.context.requestResize(undefined, height);
+      global.context.requestResize(height, undefined);
     },
     onDestroy: () => {
       global.context.noContentAvailable();

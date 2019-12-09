@@ -272,7 +272,7 @@ describe('3p ampcontext.js', () => {
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
       'amp-$internalRuntimeVersion$' +
-        '{"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
+        '{"width":200,"height":100,"type":"embed-size","sentinel":"1-291921"}',
       '*'
     );
 
@@ -319,7 +319,7 @@ describe('3p ampcontext.js', () => {
     expect(windowPostMessageSpy).to.be.calledOnce;
     expect(windowPostMessageSpy).to.be.calledWith(
       'amp-$internalRuntimeVersion$' +
-        '{"width":100,"height":200,"type":"embed-size","sentinel":"1-291921"}',
+        '{"width":200,"height":100,"type":"embed-size","sentinel":"1-291921"}',
       '*'
     );
 

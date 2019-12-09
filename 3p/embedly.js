@@ -108,8 +108,8 @@ export function embedly(global, data) {
     // Use embedly SDK to listen to resize event from loaded card
     global.window['embedly']('on', RESIZE_EVENT_NAME, function(iframe) {
       context.requestResize(
-        iframe./*OK*/ width,
-        parseInt(iframe./*OK*/ height, 10) + /* margin */ 5
+        parseInt(iframe./*OK*/ height, 10) + /* margin */ 5,
+        iframe./*OK*/ width
       );
     });
   });
