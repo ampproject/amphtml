@@ -140,7 +140,7 @@ h3.i-amphtml-story-quiz-prompt {
 }
 
 .i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected > .i-amphtml-story-quiz-answer-choice {
-    animation: answer-choice-bounce forwards 350ms cubic-bezier(0.0, 0.0, 0.2, 1);
+    animation: answer-choice-bounce forwards 300ms cubic-bezier(0.0, 0.0, 0.2, 1);
 }
 
 /** TODO(jackbsteinberg): Use a more a11y-friendly approach than font-size: 0px; */
@@ -178,10 +178,10 @@ h3.i-amphtml-story-quiz-prompt {
         color: white !important;
         visibility: hidden;
     }
-    80% {
+    50% {
         visibility: hidden;
     }
-    90% {
+    60% {
         visibility: visible;
     }
 }
@@ -191,10 +191,10 @@ h3.i-amphtml-story-quiz-prompt {
         visibility: hidden;
         border: solid 2px transparent !important;
     }
-    40% {
+    45% {
         visibility: hidden;
     }
-    41% {
+    46% {
         transform: scale(0.1);
         visibility: visible;
     }
@@ -211,7 +211,11 @@ h3.i-amphtml-story-quiz-prompt {
     0% {
         border-color: var(--correct-color);
         background: var(--correct-color);
+        opacity: 0.2;
         transform: scale(0.1);
+    }
+    50% {
+        opacity: 1;
     }
     100% {
         border-color: var(--correct-color);
@@ -224,7 +228,11 @@ h3.i-amphtml-story-quiz-prompt {
     0% {
         border-color: var(--incorrect-color);
         background: var(--incorrect-color);
+        opacity: 0.2;
         transform: scale(0.1);
+    }
+    50% {
+        opacity: 1;
     }
     100% {
         border-color: var(--incorrect-color);
