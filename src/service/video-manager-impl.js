@@ -1321,8 +1321,8 @@ function isLandscape(win) {
 /** @visibleForTesting */
 export const PERCENTAGE_INTERVAL = 5;
 
-/** @private */
-const PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS = 500;
+/** @visibleForTesting */
+export const PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS = 500;
 
 /** @private */
 const PERCENTAGE_FREQUENCY_MIN_MS = 250;

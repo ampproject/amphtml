@@ -16,6 +16,7 @@
 
 import {
   AnalyticsPercentageTracker,
+  PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS,
   PERCENTAGE_INTERVAL,
 } from '../../src/service/video-manager-impl';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
@@ -165,9 +166,9 @@ describes.fakeWin(
 
           dispatchLoadedMetadata(element);
 
-          expect(mockTimer.delay).to.not.have.been.calledWith(
+          expect(mockTimer.delay).to.have.been.calledWith(
             env.sandbox.match.func,
-            invalidDuration
+            PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS
           );
         });
       });
