@@ -64,7 +64,7 @@ describes.realWin(
         'https://geo-override-check2/': '{"consentRequired": true}',
         'http://www.origin.com/r/1': '{}',
         'https://invalid.response.com/': '{"consentRequired": 3}',
-        'https://strip-prefix/': 'while(1){"consentRequired": false}',
+        'https://xssi-prefix/': 'while(1){"consentRequired": false}',
       };
 
       xhrServiceMock = {
@@ -229,7 +229,7 @@ describes.realWin(
       it('respects the xssiPrefix option', async () => {
         const remoteConfig = {
           'consentInstanceId': 'abc',
-          'checkConsentHref': 'https://strip-prefix/',
+          'checkConsentHref': 'https://xssi-prefix/',
           'xssiPrefix': 'while(1)',
         };
         ampConsent = getAmpConsent(doc, remoteConfig);
