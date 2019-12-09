@@ -226,11 +226,11 @@ describes.realWin(
           });
       });
 
-      it('respects the stripPrefix option', async () => {
+      it('respects the xssiPrefix option', async () => {
         const remoteConfig = {
           'consentInstanceId': 'abc',
           'checkConsentHref': 'https://strip-prefix/',
-          'stripPrefix': 'while(1)',
+          'xssiPrefix': 'while(1)',
         };
         ampConsent = getAmpConsent(doc, remoteConfig);
         await ampConsent.buildCallback();

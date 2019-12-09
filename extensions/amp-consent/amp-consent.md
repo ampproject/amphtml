@@ -283,9 +283,9 @@ For users in `geoGroupUnknown`, the merged config is
 
 AMP will check client cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent via the specified prompt UI if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
 
-#### stripPrefix
+#### xssiPrefix
 
-`stripPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's return value. If the prefix is not present in the response, then this option will have no effect. `stripPrefix` can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
+`xssiPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's return value. If the prefix is not present in the response, then this option will have no effect. `xssiPrefix` can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
 ## Consent Management
 

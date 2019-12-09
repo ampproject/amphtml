@@ -634,7 +634,7 @@ export class AmpConsent extends AMP.BaseElement {
           return xhrService
             .fetchJson(resolvedHref, init)
             .then(res =>
-              xhrService.xssiJson(res, this.consentConfig_['stripPrefix'])
+              xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
             );
         });
       });
