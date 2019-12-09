@@ -761,8 +761,22 @@
       "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
     },
     {
-      "url": "examples/visual-tests/amp-video-docking/amp-video-docking.html",
-      "name": "amp-video-docking",
+      "url": "examples/visual-tests/amp-video-docking/ltr.html",
+      "name": "amp-video-docking (left-to-right)",
+      "viewport": {"width": 800, "height": 600},
+      "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
+      "loading_complete_selectors": [".i-amphtml-video-component"],
+    },
+    {
+      "url": "examples/visual-tests/amp-video-docking/rtl.html",
+      "name": "amp-video-docking (right-to-left)",
+      "viewport": {"width": 800, "height": 600},
+      "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
+      "loading_complete_selectors": [".i-amphtml-video-component"],
+    },
+    {
+      "url": "examples/visual-tests/amp-video-docking/slot.html",
+      "name": "amp-video-docking (slot)",
       "viewport": {"width": 800, "height": 600},
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
       "loading_complete_selectors": [".i-amphtml-video-component"],
