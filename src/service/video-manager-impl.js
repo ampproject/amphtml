@@ -1487,6 +1487,14 @@ export class AnalyticsPercentageTracker {
     }
 
     const duration = video.getDuration();
+    // Handle cases such as livestreams or videos with no duration information is
+    // available, where 1 second is the default duration for some video players
+    // TODO(#25954): Further investigate root cause and remove this protection
+    // if appropriate.
+    if (!duration || isNaN(duration) || duration <= 1) {
+      timer.delay(calculateAgain, PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS);
+      return;
+    }
 
     const frequencyMs = calculateActualPercentageFrequencyMs(duration);
 
