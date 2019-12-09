@@ -422,28 +422,6 @@ class ManualAdvancement extends AdvancementConfig {
   }
 
   /**
-   * @param {Event} event
-   * @param {Element} pageEl
-   * @return {boolean}
-   * @private
-   */
-  isWithinInteractiveArea_(event, pageEl) {
-    const pageRect = this.element_.getLayoutBox();
-
-    if (pageEl.querySelector('amp-story-page-attachment')) {
-      return event.clientY <= pageRect.height - PAGE_ATTACHMENT_SAFETY_AREA_PX;
-    }
-
-    if (pageEl.querySelector('amp-story-cta-layer')) {
-      return (
-        event.clientY <= pageRect.height * (1 - CTA_SAFETY_AREA_PERCENTAGE)
-      );
-    }
-
-    return true;
-  }
-
-  /**
    * Checks if the event should be handled by ManualAdvancement, or should
    * follow its capture phase.
    * @param {!Event} event
@@ -452,7 +430,6 @@ class ManualAdvancement extends AdvancementConfig {
    */
   shouldHandleEvent_(event) {
     let shouldHandleEvent = false;
-    let interactiveElementDetected = false;
     let tagName;
 
     if (this.isInScreenSideEdge_(event, this.element_.getLayoutBox())) {
@@ -471,18 +448,7 @@ class ManualAdvancement extends AdvancementConfig {
 
         if (tagName == 'amp-story-quiz') {
           shouldHandleEvent = false;
-          interactiveElementDetected = true;
-        }
-
-        // If the click came from an interactive element,
-        // check whether it's inside the interactive area
-        if (interactiveElementDetected && tagName === 'amp-story-page') {
-          const withinInteractiveArea = this.isWithinInteractiveArea_(
-            event,
-            el
-          );
-          shouldHandleEvent = !withinInteractiveArea;
-          return withinInteractiveArea;
+          return true;
         }
 
         if (tagName === 'amp-story-page') {
