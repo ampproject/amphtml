@@ -36,6 +36,7 @@ import {AMPLITUDE_CONFIG} from './vendors/amplitude';
 import {ATINTERNET_CONFIG} from './vendors/atinternet';
 import {BAIDUANALYTICS_CONFIG} from './vendors/baiduanalytics';
 import {BG_CONFIG} from './vendors/bg';
+import {BROWSI_CONFIG} from './vendors/browsi';
 import {BURT_CONFIG} from './vendors/burt';
 import {BYSIDE_CONFIG} from './vendors/byside';
 import {CHARTBEAT_CONFIG} from './vendors/chartbeat';
@@ -196,6 +197,7 @@ export const ANALYTICS_CONFIG =
         'atinternet': includeJsonLiteral(ATINTERNET_CONFIG),
         'baiduanalytics': includeJsonLiteral(BAIDUANALYTICS_CONFIG),
         'bg': includeJsonLiteral(BG_CONFIG),
+        'browsi': includeJsonLiteral(BROWSI_CONFIG),
         'burt': includeJsonLiteral(BURT_CONFIG),
         'byside': includeJsonLiteral(BYSIDE_CONFIG),
         'chartbeat': includeJsonLiteral(CHARTBEAT_CONFIG),

@@ -21,23 +21,11 @@
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
   <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
-  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-  <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 </head>
 <body>
 <p>Scroll down to see content</p>
-<amp-ad width="320" height="50"
-        type="doubleclick"
-        data-slot="/4119129/mobile_ad_banner"
-        rtc-config='{"vendors":
-            {"browsi":
-              {"site-key": "demo_site"},
-              {"pub-key": "demo_publisher"}
-            },
-          "timeoutMillis": 500
-        }'>
-</amp-ad>
+
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
 
@@ -70,23 +58,6 @@ Nam posuere velit euismod risus pulvinar, in sollicitudin sapien consectetur. Ve
 <p>
 Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor mollis finibus, tortor elit elementum dolor, vel vulputate lorem dui id ante. Vivamus in velit at lectus blandit gravida vitae quis arcu. Nam et magna magna. Fusce condimentum diam lacus, ac ullamcorper purus malesuada eu. Mauris ullamcorper elit et venenatis faucibus. Nullam lobortis molestie purus quis pellentesque. Sed at libero id nisi rhoncus tincidunt. Praesent vestibulum vehicula tristique. Etiam rutrum, nunc id porta interdum, nulla nisi molestie leo, at fermentum justo dolor at lorem. Duis in egestas sapien.
 </p>
-<amp-video
-    id="myVideo"
-    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
-    width="358"
-    height="204"
-    layout="responsive"
-    controls
-    autoplay
-  >
-  <div placeholder>
-    This is a placeholder
-  </div>
-  <div fallback>
-    This is a fallback
-  </div>
-</amp-video>
-<button on="tap:myVideo.pause">Pause</button>
 <p>
 Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctus tincidunt lacus, vitae lobortis nisi malesuada ac. Aliquam mattis leo vel elit rutrum, nec consequat massa vestibulum. Maecenas bibendum metus nec ante feugiat, eu faucibus orci mattis. Cras tristique sem non elit congue malesuada. Proin ornare, lacus et porttitor consequat, sapien urna rutrum diam, ac pellentesque ligula est eget nisi. Interdum et malesuada fames ac ante ipsum primis in faucibus. Donec ultrices sollicitudin eros a placerat. Proin eget pulvinar est. Donec posuere ultrices odio at ultrices. Suspendisse potenti. Phasellus id orci id purus porttitor consectetur a at erat. Nullam volutpat ultricies nisl id maximus. Morbi porta ex ante, et egestas odio ultricies consequat.
 </p>
@@ -130,18 +101,13 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
   <amp-ad id="myAd1" width="300" height="250"
           type="doubleclick"
           data-slot="/57778053/Browsi_Demo_high"
-          rtc-config='{"vendors": {"browsi": {"PUB_KEY": "pub-k"}, {"SITE_KEY": "site-k"}}, "timeoutMillis": 500}'>
-    <!--          rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1&consent_state=CONSENT_STATE&consent_string=CONSENT_STRING"], "timeoutMillis": 500}'>-->
+          rtc-config='{
+            "vendors": {
+              "browsi": {"PUB_KEY": "pub-k", "SITE_KEY": "site-k"}
+            },
+            "timeoutMillis": 500
+          }'>
   </amp-ad>
-<amp-anim src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464-hp.gif" id="anim-id" width="665" height="220" layout="responsive">
-  <amp-img placeholder src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
-
-  <amp-ad width="414" height="457"
-          type="doubleclick"
-          layout="fixed"
-          data-slot="/57778053/Browsi_Demo_high">
-  </amp-ad>
-</amp-anim>
 </div>
 </body>
 </html>
