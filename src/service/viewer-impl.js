@@ -644,7 +644,10 @@ export class ViewerImpl {
   isTrustedViewerOrigin_(urlString) {
     /** @const {!Location} */
     const url = parseUrlDeprecated(urlString);
-    const {protocol} = url;
+    const {protocol, hostname} = url;
+    if (hostname == 'localhost') {
+      return true;
+    }
     // Mobile WebView x-thread is allowed.
     if (protocol == 'x-thread:') {
       return true;
@@ -653,7 +656,7 @@ export class ViewerImpl {
       // Non-https origins are never trusted.
       return false;
     }
-    return urls.trustedViewerHosts.some(th => th.test(url.hostname));
+    return urls.trustedViewerHosts.some(th => th.test(hostname));
   }
 
   /** @override */
