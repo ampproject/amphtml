@@ -33,10 +33,73 @@ async function dock(page, name) {
   await verifySelectorsVisible(page, name, ['.amp-video-docked-shadow']);
 }
 
-async function hoverDockArea(page, name) {
-  await page.hover('.i-amphtml-video-docked-overlay');
+async function activateControlsBy(page, name, tapOrHover) {
+  if (tapOrHover == 'hover') {
+    await page.hover('.i-amphtml-video-docked-overlay');
+  } else {
+    await page.tap('.i-amphtml-video-docked-overlay');
+  }
   await verifySelectorsVisible(page, name, ['.amp-video-docked-controls']);
 }
+
+const testControlsActivatedBy = tapOrHover => ({
+  [`displays dock controls (controls on ${tapOrHover})`]: async (
+    page,
+    name
+  ) => {
+    await dock(page);
+    await activateControlsBy(page, name, tapOrHover);
+  },
+
+  [`toggles controls button into paused (controls on ${tapOrHover})`]: async (
+    page,
+    name
+  ) => {
+    await dock(page, name);
+    await activateControlsBy(page, name, tapOrHover);
+    await page.tap('.amp-video-docked-pause');
+  },
+
+  [`toggles controls button into playing (controls on ${tapOrHover})`]: async (
+    page,
+    name
+  ) => {
+    await dock(page, name);
+    await activateControlsBy(page, name, tapOrHover);
+    await page.tap('.amp-video-docked-pause');
+    await page.tap('.amp-video-docked-play');
+  },
+
+  [`toggles controls button into muted (controls on ${tapOrHover})`]: async (
+    page,
+    name
+  ) => {
+    await dock(page, name);
+    await activateControlsBy(page, name, tapOrHover);
+    await page.tap('.amp-video-docked-mute');
+  },
+
+  [`toggles controls button into unmuted (controls on ${tapOrHover})`]: async (
+    page,
+    name
+  ) => {
+    await dock(page, name);
+    await activateControlsBy(page, name, tapOrHover);
+    await page.tap('.amp-video-docked-mute');
+    await page.tap('.amp-video-docked-unmute');
+  },
+
+  [`displays scrollback button on ad (controls on ${tapOrHover})`]: async (
+    page,
+    name
+  ) => {
+    await dock(page, name);
+    await activateControlsBy(page, name, tapOrHover);
+    await verifySelectorsVisible(page, name, [
+      '.amp-video-docked-control-set-scroll-back',
+    ]);
+  },
+});
 
 module.exports = {
   "doesn't dock when not playing": scroll,
@@ -48,42 +111,6 @@ module.exports = {
     await scroll(page, name, 'video');
   },
 
-  'displays dock controls on hover': async (page, name) => {
-    await dock(page, name);
-    await hoverDockArea(page, name);
-  },
-
-  'toggles controls button into paused': async (page, name) => {
-    await dock(page, name);
-    await hoverDockArea(page, name);
-    await page.tap('.amp-video-docked-pause');
-  },
-
-  'toggles controls button into playing': async (page, name) => {
-    await dock(page, name);
-    await hoverDockArea(page, name);
-    await page.tap('.amp-video-docked-pause');
-    await page.tap('.amp-video-docked-play');
-  },
-
-  'toggles controls button into muted': async (page, name) => {
-    await dock(page, name);
-    await hoverDockArea(page, name);
-    await page.tap('.amp-video-docked-mute');
-  },
-
-  'toggles controls button into unmuted': async (page, name) => {
-    await dock(page, name);
-    await hoverDockArea(page, name);
-    await page.tap('.amp-video-docked-mute');
-    await page.tap('.amp-video-docked-unmute');
-  },
-
-  'displays scrollback button while ad plays': async (page, name) => {
-    await dock(page, name);
-    await hoverDockArea(page, name);
-    await verifySelectorsVisible(page, name, [
-      '.amp-video-docked-control-set-scroll-back',
-    ]);
-  },
+  ...testControlsActivatedBy('hover'),
+  ...testControlsActivatedBy('tap'),
 };
