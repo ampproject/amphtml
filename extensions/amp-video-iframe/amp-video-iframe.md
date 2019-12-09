@@ -142,7 +142,7 @@ Include an `amp-video-iframe` on your AMP document:
 
 ### <a id="vendors"></a> For third-party video vendors
 
-If you're a vendor that does *not* provide a [custom video player component](../spec/amp-video-interface.md), you can use `amp-video-iframe` to allow AMP document authors to embed video provided through your service.
+If you're a vendor that does _not_ provide a [custom video player component](../spec/amp-video-interface.md), you can use `amp-video-iframe` to allow AMP document authors to embed video provided through your service.
 
 By hosting a generic [integration document](#integration) that can reference videos with URL parameters, authors don't need to provide the inner player document themselves, but only include an `<amp-video-iframe>` tag in the AMP document:
 
