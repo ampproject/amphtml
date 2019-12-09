@@ -830,7 +830,7 @@ export function getBinaryTypeNumericalCode(type) {
     {
       'production': '0',
       'control': '1',
-      'canary': '2',
+      'experimental': '2',
       'rc': '3',
       'experimentA': '10',
       'experimentB': '11',
