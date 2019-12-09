@@ -94,7 +94,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
       serviceAdapter
     );
     const domStub = env.sandbox.stub(
-      localSubscriptionPlatform.rootNode_,
+      localSubscriptionPlatform.rootNode_.body,
       'addEventListener'
     );
 
