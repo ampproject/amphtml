@@ -64,7 +64,7 @@ The process for deprecations is similar to the [process for significant changes]
 - Give developers at least 6 weeks after your deprecation warning is in production to apply changes before removing the feature.
 - If you did not include removal in your I2D, file a separate Intent-to-Remove (I2R) when you are ready to remove the deprecated feature.
 
-The given component or integration may be neutered immediately in such a way that usage in a document no longer has side effects, but validation does not break.
+The given component or integration may be neutered immediately in such a way that usage in a document no longer has side effects (e.g. the underlying backend has been turned down), but validation does not break.
 
 ### Version deprecations
 
