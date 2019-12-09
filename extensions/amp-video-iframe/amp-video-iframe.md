@@ -47,7 +47,7 @@ supported by the AMP component library.
 
 1. If you'd like to **include a video directly on the AMP document**, you should use [`amp-video`](https://amp.dev/documentation/components/amp-video).
 
-2. If you're using a **common 3rd party** like Youtube, Vimeo or [others supported in AMP](../../spec/amp-video-interface.md), you should use their supported component (e.g. [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube), [`amp-vimeo`](https://amp.dev/documentation/components/amp-vimeo)).
+2. If you're using a **common 3rd party** like Youtube, Vimeo or [others supported in AMP](../../spec/amp-video-interface.md), you should use their supported component (e.g. [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube), [`amp-vimeo`](https://amp.dev/documentation/components/amp-vimeo)). (If you're a 3rd party video vendor, you can [use `amp-video-iframe` to provide a simple way for authors to embed video.](#vendors))
 
 3. If you've built a **custom player** or are using one provided by an **unsupported 3rd party**, **you should use `amp-video-iframe`**. This is different from using [`amp-iframe`](https://amp.dev/documentation/components/amp-iframe) in that it enables
    [Video Features on AMP](../../spec/amp-video-interface.md). See [behavior](#behavior) below for more details.
@@ -136,7 +136,28 @@ Include an `amp-video-iframe` on your AMP document:
 </amp-video-iframe>
 ```
 
-## Integration inside the frame
+### <a id="vendors"></a> For third-party video vendors
+
+If you're a vendor that does *not* provide a [custom video player component](../spec/amp-video-interface.md), you can use `amp-video-iframe` to allow AMP document authors to easily embed video provided through your service.
+
+By hosting a generic [integration document](#integration) that can reference videos with URL parameters, authors don't need to provide the inner player document themselves, but simply include an `<amp-video-iframe>` tag:
+
+```html
+<amp-video-iframe
+  layout="responsive"
+  width="16"
+  height="16"
+  src="https://video-provider.example/amp-video-iframe.html?videoid=PROVIDED_VIDEO_ID"
+  poster="https://video-provider.example/amp-video-iframe-poster.jpg?videoid=PROVIDED_VIDEO_ID"
+>
+</amp-video-iframe>
+```
+
+The dynamic server-side document `amp-video-iframe.html` includes the video as necessary per the configurable `PROVIDED_VIDEO_ID` parameter. This document bootstraps the [iframe integration script](#integration) so that the AMP document can coordinate with the player.
+
+Note: For most video providers, `amp-video-iframe` provides enough tools for common playback actions (see possible [methods](#method) and [events](#postEvent)). Refer to the [vendor-specific video player spec](../../spec/amp-3p-video.md) for more details on whether you can use `amp-video-iframe` or you should build a third-party player component instead.
+
+## <a id="integration"></a> Integration inside the frame
 
 In order for the video integration to work, the embedded document (e.g. `my-video-player.html`) must include a small library:
 
