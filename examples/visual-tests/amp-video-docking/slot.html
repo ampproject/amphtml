@@ -10,13 +10,29 @@
   <script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js"></script>
   <script async custom-element="amp-video-docking" src="https://cdn.ampproject.org/v0/amp-video-docking-0.1.js"></script>
   <style amp-custom>
+    body {
+      padding-top: 40px;
+    }
     [placeholder],
     [fallback] {
       font-size: 4em;
       padding: 1em;
     }
+    .fixed {
+      position: fixed;
+      width: 200px;
+      height: 150px;
+      right: 22px;
+      top: 22px;
+      border: 4px dotted tomato;
+      padding: 4px;
+    }
   </style>
 </head>
+<!--
+  This contains an amp-layout#slot element that the video docks into (see at end
+  of document.)
+-->
 <body>
   <amp-video-iframe
     id="video"
@@ -24,7 +40,7 @@
     width="400"
     height="300"
     layout="responsive"
-    dock
+    dock="#slot"
   >
     <div placeholder>🖼</div>
     <div fallback>😵</div>
@@ -43,5 +59,13 @@
     scroll to video
   </button>
   <div id="bottom" style="height: 200vh"></div>
+  <div class="fixed">
+    <amp-layout
+      layout="responsive"
+      width="400"
+      height="300"
+      id="slot"
+    ></amp-layout>
+  </div>
 </body>
 </html>
