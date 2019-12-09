@@ -19,6 +19,7 @@ const {verifySelectorsVisible} = require('../../../build-system/tasks/visual-dif
 
 module.exports = {
   'click menu item one': async (page, name) => {
+    await page.waitFor('amp-mega-menu .i-amphtml-mega-menu-item:first-child .i-amphtml-mega-menu-heading');
     await page.tap('amp-mega-menu .i-amphtml-mega-menu-item:first-child .i-amphtml-mega-menu-heading');
     await page.waitFor(400);
     await verifySelectorsVisible(page, name, [
