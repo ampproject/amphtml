@@ -285,7 +285,7 @@ AMP will check client cache and server in parallel to find the previous consent 
 
 #### xssiPrefix
 
-`xssiPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's return value. If the prefix is not present in the response, then this option will have no effect. `xssiPrefix` can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
+`xssiPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's response. If the prefix is not present in the response, then this option will have no effect. `xssiPrefix` can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
 ## Consent Management
 
