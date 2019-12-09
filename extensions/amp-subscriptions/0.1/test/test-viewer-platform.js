@@ -21,6 +21,7 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '../../../../src/services';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
+import {dict} from '../../../../src/utils/object';
 import {getWinOrigin} from '../../../../src/url';
 
 describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
@@ -119,6 +120,36 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       } catch (e) {
         expect(sendAuthTokenStub).to.be.calledWith(reason);
       }
+    });
+
+    it('should use domain in cryptokeys param to get encrypted doc key', async () => {
+      env.sandbox
+        .stub(viewerPlatform.viewer_, 'getParam')
+        .withArgs('cryptokeys')
+        .returns('test.com,hello.com');
+      serviceAdapter.getEncryptedDocumentKey.restore();
+      env.sandbox
+        .stub(serviceAdapter, 'getEncryptedDocumentKey')
+        .withArgs('hello.com')
+        .returns('encryptedDocKey');
+      viewerPlatform.viewer_.sendMessageAwaitResponse.restore();
+      const sendMessageStub = env.sandbox
+        .stub(viewerPlatform.viewer_, 'sendMessageAwaitResponse')
+        .callsFake(() => Promise.resolve(fakeAuthToken));
+      env.sandbox
+        .stub(viewerPlatform, 'verifyAuthToken_')
+        .callsFake(() => Promise.resolve({}));
+
+      await viewerPlatform.getEntitlements();
+      expect(sendMessageStub).to.be.calledWith(
+        'auth',
+        dict({
+          'publicationId': 'example.org',
+          'productId': 'example.org:basic',
+          'origin': 'origin',
+          'encryptedDocumentKey': 'encryptedDocKey',
+        })
+      );
     });
   });
 
