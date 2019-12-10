@@ -549,7 +549,7 @@ export class AmpList extends AMP.BaseElement {
       return Promise.resolve();
     }
     let fetch;
-    if (this.ssrTemplateHelper_.isSupported()) {
+    if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
       fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
@@ -740,7 +740,7 @@ export class AmpList extends AMP.BaseElement {
       scheduleNextPass();
       current.rejecter();
     };
-    const isSSR = this.ssrTemplateHelper_.isSupported();
+    const isSSR = this.ssrTemplateHelper_.isEnabled();
     let renderPromise = this.ssrTemplateHelper_
       .applySsrOrCsrTemplate(this.element, current.data)
       .then(result => this.updateBindings_(result, current.append))
