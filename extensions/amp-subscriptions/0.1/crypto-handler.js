@@ -54,7 +54,7 @@ export class CryptoHandler {
 
   /**
    * Checks if the document is encrypted by looking at the parsed keys.
-   * @return {!bool}
+   * @return {boolean}
    */
   isDocumentEncrypted() {
     return this.encryptedKeys_ && Object.keys(this.encryptedKeys_).length > 0;

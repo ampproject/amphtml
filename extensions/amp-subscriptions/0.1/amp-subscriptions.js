@@ -290,23 +290,19 @@ export class SubscriptionService {
       return this.timer_
         .timeoutPromise(timeout, subscriptionPlatform.getEntitlements())
         .then(entitlement => {
-          if (
-            entitlement.granted &&
-            this.cryptoHandler_.isDocumentEncrypted() &&
-            !entitlement.decryptedDocumentKey
-          ) {
-            const x =
+          entitlement =
+            entitlement ||
+            Entitlement.empty(subscriptionPlatform.getServiceId());
+          if (this.checkEntitlementsAndEncryption_(entitlement)) {
+            const userOrDevLog =
               subscriptionPlatform.getServiceId() == 'local' ? user() : dev();
-            x.error(
+            userOrDevLog.error(
               TAG,
-              'Subscription granted and encryption enabled, ' +
+              '${serviceId}: Subscription granted and encryption enabled, ' +
                 'but no decrypted document key returned.'
             );
             return null;
           }
-          entitlement =
-            entitlement ||
-            Entitlement.empty(subscriptionPlatform.getServiceId());
           this.resolveEntitlementsToStore_(
             subscriptionPlatform.getServiceId(),
             entitlement
@@ -411,15 +407,11 @@ export class SubscriptionService {
           .getEntitlements()
           .then(entitlement => {
             devAssert(entitlement, 'Entitlement is null');
-            if (
-              entitlement.granted &&
-              this.cryptoHandler_.isDocumentEncrypted() &&
-              !entitlement.decryptedDocumentKey
-            ) {
+            if (this.checkEntitlementsAndEncryption_(entitlement)) {
               user().error(
                 TAG,
-                'Subscription granted and encryption enabled, ' +
-                  'but no decrypted document key returned.'
+                `${service['serviceId']}: Subscription granted and encryption enabled, ` +
+                  `but no decrypted document key returned.`
               );
               return null;
             }
@@ -463,6 +455,18 @@ export class SubscriptionService {
    */
   getEncryptedDocumentKey(serviceId) {
     return this.cryptoHandler_.getEncryptedDocumentKey(serviceId);
+  }
+
+  /**
+   * @param {?./entitlement.Entitlement} entitlement
+   * @return {boolean}
+   */
+  checkEntitlementsAndEncryption_(entitlement) {
+    return (
+      entitlement.granted &&
+      this.cryptoHandler_.isDocumentEncrypted() &&
+      !entitlement.decryptedDocumentKey
+    );
   }
 
   /**
