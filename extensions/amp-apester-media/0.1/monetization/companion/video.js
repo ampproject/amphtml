@@ -162,14 +162,14 @@ function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
   });
 
   if (consentObj['gdpr']) {
-    macros['gdpr'] = consentObj['gdpr'];
-    macros['user_consent'] = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
-    macros['param4'] = consentObj['gdprString'];
+    macros.gdpr = consentObj['gdpr'];
+    macros.user_consent = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
+    macros.param4 = consentObj['gdprString'];
   }
-
+  
   if (publisher && publisher.groupId) {
-    macros['param7'] = `apester.com:${publisher.groupId}`;
-    macros['schain'] = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
+    macros.param7 = `apester.com:${publisher.groupId}`;
+    macros.schain = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
   }
   return macros;
 }
