@@ -167,8 +167,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(element.getAmpDoc()).to.be.ok;
         expect(element.resources_).to.be.ok;
         expect(element.getResources()).to.be.ok;
-        expect(element.mutator_).to.be.ok;
-        expect(element.getMutator()).to.be.ok;
       });
 
       it('Element - createdCallback', () => {
@@ -2206,6 +2204,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     mutator = Services.mutatorForDoc(doc);
     mutatorMock = env.sandbox.mock(mutator);
     element = new ElementClass();
+    element.ampdoc_ = doc;
     element.layoutWidth_ = 300;
     element.layout_ = Layout.FIXED;
     element.mutator_ = mutator;
