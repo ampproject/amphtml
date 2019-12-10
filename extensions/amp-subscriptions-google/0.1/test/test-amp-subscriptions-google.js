@@ -631,20 +631,6 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
         expect(entitlement.grantReason).to.be.null;
       });
     });
-
-    it('should return null on granted and empty decryptedDocumentKey', () => {
-      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-        return Promise.resolve({
-          json: () => {
-            return Promise.resolve({entitlements: entitlementResponse});
-          },
-        });
-      });
-      getEncryptedDocumentKeyStub.callsFake(() => 'encryptedDocumentKey');
-      return platform.getEntitlements().then(entitlement => {
-        expect(entitlement).to.be.null;
-      });
-    });
   });
 
   describe('isReadyToPay', () => {

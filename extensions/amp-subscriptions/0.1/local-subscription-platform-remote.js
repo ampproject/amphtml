@@ -18,11 +18,9 @@ import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
 import {Services} from '../../../src/services';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
-import {devAssert, user, userAssert} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isArray} from '../../../src/types';
-
-const TAG = 'amp-subscriptions';
 
 /**
  * Implments the remotel local subscriptions platform which uses
@@ -73,21 +71,7 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
           .fetchJson(fetchUrl, {credentials: 'include'})
           .then(res => res.json())
           .then(resJson => {
-            const ent = Entitlement.parseFromJson(resJson);
-            if (
-              ent.granted &&
-              encryptedDocumentKey &&
-              !ent.decryptedDocumentKey
-            ) {
-              // Return null to avoid showing encrypted subscription content.
-              user().error(
-                TAG,
-                'Subscription granted and encryption enabled, ' +
-                  'but no decrypted document key returned.'
-              );
-              return null;
-            }
-            return ent;
+            return Entitlement.parseFromJson(resJson);
           });
       });
   }

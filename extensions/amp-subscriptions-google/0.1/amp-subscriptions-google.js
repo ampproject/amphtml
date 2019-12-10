@@ -40,7 +40,7 @@ import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
 import {startsWith} from '../../../src/string';
-import {user, userAssert} from '../../../src/log';
+import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
@@ -377,15 +377,6 @@ export class GoogleSubscriptionsPlatform {
         let granted = false;
         if (swgEntitlement && swgEntitlement.source) {
           granted = true;
-          if (encryptedDocumentKey && !swgEntitlements.decryptedDocumentKey) {
-            // Return null to avoid showing encrypted subscription content.
-            user().error(
-              TAG,
-              'Subscription granted and encryption enabled, ' +
-                'but no decrypted document key returned.'
-            );
-            return null;
-          }
         } else if (
           swgEntitlements.entitlements.length &&
           swgEntitlements.entitlements[0].products.length

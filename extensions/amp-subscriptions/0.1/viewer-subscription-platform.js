@@ -104,7 +104,7 @@ export class ViewerSubscriptionPlatform {
     if (encryptedDocumentKey) {
       messageData['encryptedDocumentKey'] = encryptedDocumentKey;
     }
-    return this.viewer_
+    const entitlementPromise = this.viewer_
       .sendMessageAwaitResponse('auth', messageData)
       .then(entitlementData => {
         const authData = (entitlementData || {})['authorization'];
@@ -114,24 +114,13 @@ export class ViewerSubscriptionPlatform {
         if (!authData) {
           return Entitlement.empty('local');
         }
-        return this.verifyAuthToken_(authData, decryptedDocumentKey).then(
-          resolvedEntitlements => {
-            if (
-              resolvedEntitlements.granted &&
-              encryptedDocumentKey &&
-              !decryptedDocumentKey
-            ) {
-              // Return null to avoid showing encrypted subscription content.
-              return null;
-            }
-            return resolvedEntitlements;
-          }
-        );
+        return this.verifyAuthToken_(authData, decryptedDocumentKey);
       })
       .catch(reason => {
         this.sendAuthTokenErrorToViewer_(reason.message);
         throw reason;
       });
+    return /** @type {!Promise<Entitlement>} */ (entitlementPromise);
   }
 
   /**

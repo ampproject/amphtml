@@ -122,34 +122,6 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       }
     });
 
-    it('should return null on missing decryptedDocumentKey.', async () => {
-      serviceAdapter.getEncryptedDocumentKey.restore();
-      env.sandbox
-        .stub(serviceAdapter, 'getEncryptedDocumentKey')
-        .callsFake(() => Promise.resolve('encryptedDocumentKey'));
-      viewerPlatform.viewer_.sendMessageAwaitResponse.restore();
-      env.sandbox
-        .stub(viewerPlatform.viewer_, 'sendMessageAwaitResponse')
-        .callsFake(() =>
-          Promise.resolve({
-            'authorization': 'faketoken',
-            'decryptedDocumentKey': null,
-          })
-        );
-      const entitlement = new Entitlement({
-        source: '',
-        raw: '',
-        granted: true,
-      });
-      const verifyAuthTokenStub = env.sandbox
-        .stub(viewerPlatform, 'verifyAuthToken_')
-        .callsFake(() => Promise.resolve(entitlement));
-
-      const ent = await viewerPlatform.getEntitlements();
-      expect(verifyAuthTokenStub).to.be.calledWith('faketoken', null);
-      expect(ent).to.be.null;
-    });
-
     it('should use domain in cryptokeys param to get encrypted doc key', async () => {
       env.sandbox
         .stub(viewerPlatform.viewer_, 'getParam')
