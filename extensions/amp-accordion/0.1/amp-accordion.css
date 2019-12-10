@@ -38,4 +38,5 @@ amp-accordion > section:not([expanded]) > :last-child {
   margin: 0px;
   border: 0px hidden;
   padding: 0;
+  opacity: 0;
 }
