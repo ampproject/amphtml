@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import {useEffect} from 'preact/hooks';
+import {getAmpContext} from './context';
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'preact/hooks';
 
 /**
  * @param {function} callback
@@ -23,4 +30,47 @@ export function useMountEffect(callback) {
   useEffect(callback, [
     /* mount-only effect*/
   ]);
+}
+
+/**
+ * @param {function} callback
+ */
+export function useMountLayoutEffect(callback) {
+  useLayoutEffect(callback, [
+    /* mount-only effect*/
+  ]);
+}
+
+/**
+ * Notifies Resources (if present) of a rerender in the component.
+ * Every functional component **must** use this helper.
+ */
+export function useResourcesNotify() {
+  const ctx = useContext(getAmpContext());
+  const notify = ctx && ctx.notify;
+  useLayoutEffect(() => {
+    if (notify) {
+      notify();
+    }
+  });
+}
+
+/**
+ * @param {number} current
+ * @return {number}
+ */
+function increment(current) {
+  return current + 1;
+}
+
+/**
+ * @return {function()}
+ */
+export function useRerenderer() {
+  const state = useState(0);
+  // We only care about the setter, which is the second item of the tuple.
+  const set = state[1];
+  // useRef ensures the callback's instance identity is consistent.
+  const ref = useRef(() => set(increment));
+  return ref.current;
 }

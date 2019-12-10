@@ -47,13 +47,14 @@ export function getAmpContext() {
  */
 export function withAmpContext(props) {
   const parent = useContext(getAmpContext());
-  const current = {
+  const current = Object.assign({}, props, {
     renderable: parent.renderable && props.renderable,
     playable: parent.playable && props.playable,
-  };
+    children: undefined,
+  });
 
-  return createElement(
-    getAmpContext().Provider,
-    Object.assign({}, props, {value: current})
-  );
+  return createElement(getAmpContext().Provider, {
+    children: props.children,
+    value: current,
+  });
 }

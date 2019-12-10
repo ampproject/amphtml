@@ -65,6 +65,7 @@ export function PreactBaseElement(Component, opts = {}) {
       this.context_ = {
         renderable: false,
         playable: false,
+        notify: () => this.mutateElement(() => {}),
       };
 
       this.boundRerender_ = () => {
@@ -302,7 +303,7 @@ function getContextFromDom(node, context) {
   while (n) {
     const nodeContext = n['i-amphtml-context'];
     if (nodeContext) {
-      Object.assign({}, context, nodeContext);
+      return Object.assign({}, nodeContext, context);
       break;
     }
     n = n.assignedSlot || n.parentNode || n.host;

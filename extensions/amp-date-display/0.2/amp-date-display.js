@@ -17,12 +17,17 @@
 import {AmpEvents} from '../../../src/amp-events';
 import {PreactBaseElement} from '../../../src/preact-base-element';
 import {Services} from '../../../src/services';
-import {cloneElement, createElement} from 'preact';
 import {createCustomEvent} from '../../../src/event-helper';
+import {createElement} from 'preact';
 import {dev, userAssert} from '../../../src/log';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren, rootNodeFor} from '../../../src/dom';
-import {useLayoutEffect, useRef} from 'preact/hooks';
+import {
+  useMountLayoutEffect,
+  useRerenderer,
+  useResourcesNotify,
+} from '../../../src/preact/utils';
+import {useRef} from 'preact/hooks';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -222,11 +227,13 @@ function getVariablesInUTC(date, locale) {
  * @return {*} TODO
  */
 function AmpDateDisplayComponent(props) {
+  useResourcesNotify();
   const ref = useRef();
   const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
   const {templates} = props.services;
+  const rerender = useRerenderer();
 
-  useLayoutEffect(() => {
+  useMountLayoutEffect(() => {
     const {host} = rootNodeFor(ref.current);
     templates.findAndRenderTemplate(host, data).then(rendered => {
       const win = host.ownerDocument.defaultView;
@@ -242,8 +249,9 @@ function AmpDateDisplayComponent(props) {
         {bubbles: true}
       );
       host.dispatchEvent(event);
+      rerender();
     });
-  }, []);
+  });
   return createElement('div', {ref}, props['children']);
 }
 
