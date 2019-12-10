@@ -318,12 +318,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
   {
-    id: 'remove-viewer-query-params-on-navigate',
-    name: 'Removes query params from viewer iframe on navigation.',
-    spec: 'https://github.com/ampproject/amphtml/issues/25179',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
-  },
-  {
     id: 'layoutbox-invalidate-on-scroll',
     name:
       'Invalidate the cached layoutboxes of elements nested in a scroller ' +

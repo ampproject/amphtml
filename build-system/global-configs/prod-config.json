@@ -35,7 +35,6 @@
   "ios-fixed-no-transfer": 0,
   "layoutbox-invalidate-on-scroll": 0.05,
   "pump-early-frame": 1,
-  "remove-viewer-query-params-on-navigate": 1,
   "swg-gpay-api": 0.1,
   "swg-gpay-native": 1,
   "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
