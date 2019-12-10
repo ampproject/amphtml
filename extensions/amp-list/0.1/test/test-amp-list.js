@@ -895,7 +895,7 @@ describes.repeated(
             expect(element.getAttribute('src')).to.equal('');
           });
 
-          it.only('should not render if [src] has changed since the fetch was initiated', async () => {
+          it('should not render if [src] has changed since the fetch was initiated', async () => {
             const foo = doc.createElement('div');
             const bar = doc.createElement('div');
 
