@@ -57,7 +57,7 @@ export class CryptoHandler {
    * @return {!bool}
    */
   isDocumentEncrypted() {
-    return !!this.encryptedKeys_;
+    return this.encryptedKeys_ && Object.keys(this.encryptedKeys_).length > 0;
   }
 
   /**
