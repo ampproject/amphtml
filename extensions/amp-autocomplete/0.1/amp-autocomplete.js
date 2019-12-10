@@ -269,7 +269,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     }
 
     // When SSR is supported, it is required.
-    this.isSsr_ = this.getSsrTemplateHelper().isSupported();
+    this.isSsr_ = this.getSsrTemplateHelper().isEnabled();
     this.hasTemplate_ = this.templates_.hasTemplate(
       this.element,
       'template, script[template]'

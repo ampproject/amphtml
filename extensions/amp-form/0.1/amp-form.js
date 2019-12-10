@@ -392,7 +392,7 @@ export class AmpForm {
     );
 
     //  Form verification is not supported when SSRing templates is enabled.
-    if (!this.ssrTemplateHelper_.isSupported()) {
+    if (!this.ssrTemplateHelper_.isEnabled()) {
       this.form_.addEventListener('change', e => {
         this.verifier_.onCommit().then(updatedErrors => {
           const {updatedElements, errors} = updatedErrors;
@@ -688,7 +688,7 @@ export class AmpForm {
    */
   handleXhrSubmit_(trust) {
     let p;
-    if (this.ssrTemplateHelper_.isSupported()) {
+    if (this.ssrTemplateHelper_.isEnabled()) {
       p = this.handleSsrTemplate_(trust);
     } else {
       this.submittingWithTrust_(trust);
@@ -1070,7 +1070,7 @@ export class AmpForm {
    * @private
    */
   assertSsrTemplate_(value, msg) {
-    const supported = this.ssrTemplateHelper_.isSupported();
+    const supported = this.ssrTemplateHelper_.isEnabled();
     userAssert(
       supported === value,
       '[amp-form]: viewerRenderTemplate | %s',
