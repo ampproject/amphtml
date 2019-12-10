@@ -293,7 +293,7 @@ export class SubscriptionService {
           entitlement =
             entitlement ||
             Entitlement.empty(subscriptionPlatform.getServiceId());
-          if (this.checkEntitlementsAndEncryption_(entitlement)) {
+          if (this.checkEntitlementsAndEncryptionInvalid_(entitlement)) {
             const userOrDevLog =
               subscriptionPlatform.getServiceId() == 'local' ? user() : dev();
             userOrDevLog.error(
@@ -407,7 +407,7 @@ export class SubscriptionService {
           .getEntitlements()
           .then(entitlement => {
             devAssert(entitlement, 'Entitlement is null');
-            if (this.checkEntitlementsAndEncryption_(entitlement)) {
+            if (this.checkEntitlementsAndEncryptionInvalid_(entitlement)) {
               user().error(
                 TAG,
                 `${service['serviceId']}: Subscription granted and encryption enabled, ` +
@@ -458,10 +458,12 @@ export class SubscriptionService {
   }
 
   /**
+   * Returns true if entitlement is granting, encryption is enabled, and
+   * the decrypted document key is null.
    * @param {?./entitlement.Entitlement} entitlement
    * @return {boolean}
    */
-  checkEntitlementsAndEncryption_(entitlement) {
+  checkEntitlementsAndEncryptionInvalid_(entitlement) {
     return (
       entitlement.granted &&
       this.cryptoHandler_.isDocumentEncrypted() &&
