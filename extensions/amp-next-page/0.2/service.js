@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.2.css';
-import {MultidocManager} from '../../../src/runtime';
+import {MultidocManager} from '../../../src/multidoc-manager';
 import {Page, PageRelativePos} from './page';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
