@@ -209,6 +209,12 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
+    id: 'amp-next-page-v2',
+    name: 'Document-level (true) infinite scroll experience',
+    spec: 'https://github.com/ampproject/amphtml/issues/25500',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25634',
+  },
+  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
