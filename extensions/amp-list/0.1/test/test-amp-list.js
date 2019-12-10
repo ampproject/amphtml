@@ -895,12 +895,12 @@ describes.repeated(
             expect(element.getAttribute('src')).to.equal('');
           });
 
-          it('should not render if [src] has changed since the fetch was initiated', async () => {
-            const foo = {items: [doc.createElement('div')]};
-            const bar = {items: [doc.createElement('div')]};
+          it.only('should not render if [src] has changed since the fetch was initiated', async () => {
+            const foo = doc.createElement('div');
+            const bar = doc.createElement('div');
 
-            const firstPromise = Promise.resolve(foo);
-            const secondPromise = firstPromise.then(() => bar);
+            const firstPromise = Promise.resolve({items: [foo]});
+            const secondPromise = firstPromise.then(() => ({items: [bar]}));
 
             listMock
               .expects('fetch_')
@@ -909,8 +909,10 @@ describes.repeated(
               .twice();
             listMock
               .expects('scheduleRender_')
+              .withArgs([bar])
               .returns(Promise.resolve())
               .once();
+            listMock.expects('showFallback_').never();
 
             element.setAttribute('src', 'https://foo.com/list.json');
             list.layoutCallback();
