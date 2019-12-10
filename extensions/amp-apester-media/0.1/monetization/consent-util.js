@@ -42,20 +42,18 @@ const awaitPromiseTimeout = () => {
  * @return {Promise<!JsonObject>}
  * */
 export function getConsentData(apesterElement) {
-  const consentStatePromise = getConsentPolicyState(
-    apesterElement,
-    'default'
-  ).catch(err => {
-    dev().error(TAG, 'Error determining consent state', err);
-    return CONSENT_POLICY_STATE.UNKNOWN;
-  });
-  const consentStringPromise = getConsentPolicyInfo(
-    apesterElement,
-    'default'
-  ).catch(err => {
-    dev().error(TAG, 'Error determining consent string', err);
-    return null;
-  });
+  const consentStatePromise = getConsentPolicyState(apesterElement).catch(
+    err => {
+      dev().error(TAG, 'Error determining consent state', err);
+      return CONSENT_POLICY_STATE.UNKNOWN;
+    }
+  );
+  const consentStringPromise = getConsentPolicyInfo(apesterElement).catch(
+    err => {
+      dev().error(TAG, 'Error determining consent string', err);
+      return undefined;
+    }
+  );
   const consentDataPromise = Promise.all([
     consentStatePromise,
     consentStringPromise,

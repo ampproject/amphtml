@@ -67,16 +67,17 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
  * @return {?string}
  */
 function getCompanionPosition(video) {
-  if (video) {
-    if (video['companion']['enabled']) {
-      return 'above';
-    }
-    if (video['companion_below']['enabled']) {
-      return 'below';
-    }
-    if (video['floating']['enabled']) {
-      return 'floating';
-    }
+  if (!video) {
+    return null;
+  }
+  if (video['companion']['enabled']) {
+    return 'above';
+  }
+  if (video['companion_below']['enabled']) {
+    return 'below';
+  }
+  if (video['floating']['enabled']) {
+    return 'floating';
   }
 }
 
@@ -100,7 +101,7 @@ function constructCompanionSrElement(
       'width': size.width,
       'height': '0',
       'type': 'blade',
-      'layout': 'responsive',
+      'layout': 'fixed',
       'data-blade_player_type': 'bladex',
       'servingDomain': 'ssr.streamrail.net',
       'data-blade_macros': JSON.stringify(macros),
@@ -152,22 +153,23 @@ function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
   const publisher = interactionModel['publisher'];
 
   const pageUrl = Services.documentInfoForDoc(apesterElement).canonicalUrl;
-  const macros = {
-    param1: interactionId,
-    param2: publisherId,
-    param6: campaignId,
-    page_url: pageUrl, // eslint-disable-line google-camelcase/google-camelcase
-  };
+
+  const macros = dict({
+    'param1': interactionId,
+    'param2': publisherId,
+    'param6': campaignId,
+    'page_url': pageUrl, // eslint-disable-line google-camelcase/google-camelcase
+  });
 
   if (consentObj['gdpr']) {
-    macros.gdpr = consentObj['gdpr'];
-    macros.user_consent = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
-    macros.param4 = consentObj['gdprString'];
+    macros['gdpr'] = consentObj['gdpr'];
+    macros['user_consent'] = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
+    macros['param4'] = consentObj['gdprString'];
   }
 
   if (publisher && publisher.groupId) {
-    macros.param7 = `apester.com:${publisher.groupId}`;
-    macros.schain = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
+    macros['param7'] = `apester.com:${publisher.groupId}`;
+    macros['schain'] = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
   }
   return macros;
 }
