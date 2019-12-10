@@ -152,7 +152,7 @@ Optionally, additional key-value pairs can be returned in the response as the `s
 
 ```json
 {
-  "consentRequire": true,
+  "consentRequired": true,
   "sharedData": {
     "a-key": "some-string-value",
     "key-with-bool-value": true,
