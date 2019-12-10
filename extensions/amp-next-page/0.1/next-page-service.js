@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
-import {MultidocManager} from '../../../src/runtime';
+import {MultidocManager} from '../../../src/multidoc-manager';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
