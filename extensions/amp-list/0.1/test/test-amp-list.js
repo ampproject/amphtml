@@ -895,6 +895,10 @@ describes.repeated(
             expect(element.getAttribute('src')).to.equal('');
           });
 
+          it('should not render if [src] has changed since the fetch was initiated', () => {
+            // TODO(samouri)
+          });
+
           it('should render if [src] mutates with data', () => {
             const foo = doc.createElement('div');
             expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo]);
