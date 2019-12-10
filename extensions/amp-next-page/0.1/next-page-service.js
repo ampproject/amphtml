@@ -247,7 +247,7 @@ export class NextPageService {
    */
   createMeasurer_() {
     const measurer = this.win_.document.createElement('div');
-    measurer.classList.add('i-amp-next-page-measurer');
+    measurer.classList.add('i-amphtml-next-page-measurer');
     return measurer;
   }
 
