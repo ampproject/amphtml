@@ -92,7 +92,7 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "fetch"
   }
   attrs: { name: "single-item" }
-  attrs: { name: "strip-prefix" }
+  attrs: { name: "xssi-prefix" }
   attrs: {
     name: "src"
     mandatory_anyof: "['src','[src]','data-amp-bind-src']"
