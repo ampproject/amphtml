@@ -62,7 +62,6 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
       .then(fetchUrl => {
         // WARNING: If this key is really long, you might run into issues by hitting
         // the maximum URL length in some browsers when sending the GET fetch URL.
-        // If you run into this issue, it would be best to use POST.
         const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
           'local'
         );
