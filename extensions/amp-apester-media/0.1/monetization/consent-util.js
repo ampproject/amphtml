@@ -48,12 +48,13 @@ export function getConsentData(apesterElement) {
       return CONSENT_POLICY_STATE.UNKNOWN;
     }
   );
-  const consentStringPromise = getConsentPolicyInfo(apesterElement).catch(
-    err => {
-      dev().error(TAG, 'Error determining consent string', err);
-      return undefined;
-    }
-  );
+  const consentStringPromise = getConsentPolicyInfo(
+    apesterElement,
+    'default'
+  ).catch(err => {
+    dev().error(TAG, 'Error determining consent string', err);
+    return undefined;
+  });
   const consentDataPromise = Promise.all([
     consentStatePromise,
     consentStringPromise,

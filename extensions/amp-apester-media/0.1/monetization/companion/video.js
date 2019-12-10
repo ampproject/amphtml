@@ -79,6 +79,7 @@ function getCompanionPosition(video) {
   if (video['floating']['enabled']) {
     return 'floating';
   }
+  return null;
 }
 
 /**
@@ -135,17 +136,7 @@ export function getCompanionVideoAdSize(apesterElement) {
  * @param {?string} campaignId
  * @param {AmpElement} apesterElement
  * @param {!JsonObject} consentObj
- * @return {{
- * gdpr: ?number,
- * page_url: string,
- * param1: string,
- * param2: ?string,
- * param4: ?string,
- * param6: ?string,
- * param7: ?string,
- * schain: ?string,
- * user_consent: ?string
- * }}
+ * @return {!JsonObject}
  */
 function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
   const interactionId = interactionModel['interactionId'];
@@ -162,14 +153,14 @@ function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
   });
 
   if (consentObj['gdpr']) {
-    macros.gdpr = consentObj['gdpr'];
-    macros.user_consent = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
-    macros.param4 = consentObj['gdprString'];
+    macros['gdpr'] = consentObj['gdpr'];
+    macros['user_consent'] = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
+    macros['param4'] = consentObj['gdprString'];
   }
 
   if (publisher && publisher.groupId) {
-    macros.param7 = `apester.com:${publisher.groupId}`;
-    macros.schain = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
+    macros['param7'] = `apester.com:${publisher.groupId}`;
+    macros['schain'] = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
   }
   return macros;
 }
