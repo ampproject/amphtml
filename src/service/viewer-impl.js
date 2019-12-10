@@ -17,14 +17,14 @@
 import {Deferred, tryResolve} from '../utils/promise';
 import {Observable} from '../observable';
 import {Services} from '../services';
+import {ViewerInterface} from './viewer-interface';
+import {VisibilityState} from '../visibility-state';
 import {
-  USER_ERROR_SENTINEL,
   dev,
   devAssert,
   duplicateErrorIfNecessary,
+  stripUserError,
 } from '../log';
-import {ViewerInterface} from './viewer-interface';
-import {VisibilityState} from '../visibility-state';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -875,7 +875,7 @@ function getChannelError(opt_reason) {
     channelError = new Error('No messaging channel: ' + opt_reason);
   }
   // Force convert user error to dev error
-  channelError.message = channelError.message.replace(USER_ERROR_SENTINEL, '');
+  channelError.message = stripUserError(channelError.message);
   return channelError;
 }
 
