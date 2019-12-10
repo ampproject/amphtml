@@ -22,7 +22,7 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {Services} from './services';
-import {adopt} from './runtime';
+import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
@@ -115,7 +115,7 @@ if (shouldMainBootstrapRun) {
           maybeTrackImpression(self);
         });
         startupChunk(self.document, function adoptWindow() {
-          adopt(self);
+          adoptWithMultidocDeps(self);
         });
         startupChunk(self.document, function builtins() {
           // Builtins.
