@@ -1361,7 +1361,7 @@ function calculateActualPercentageFrequencyMs(durationSeconds) {
  * @return {boolean}
  */
 const isDurationFiniteNonZero = duration =>
-  duration && !isNaN(duration) && duration > 1;
+  !!duration && !isNaN(duration) && duration > 1;
 
 /** @visibleForTesting */
 export class AnalyticsPercentageTracker {
