@@ -895,8 +895,28 @@ describes.repeated(
             expect(element.getAttribute('src')).to.equal('');
           });
 
-          it('should not render if [src] has changed since the fetch was initiated', () => {
-            // TODO(samouri)
+          it('should not render if [src] has changed since the fetch was initiated', async () => {
+            const foo = {items: [doc.createElement('div')]};
+            const bar = {items: [doc.createElement('div')]};
+
+            const firstPromise = Promise.resolve(foo);
+            const secondPromise = firstPromise.then(() => bar);
+
+            listMock
+              .expects('fetch_')
+              .returns(firstPromise)
+              .returns(secondPromise)
+              .twice();
+            listMock
+              .expects('scheduleRender_')
+              .returns(Promise.resolve())
+              .once();
+
+            element.setAttribute('src', 'https://foo.com/list.json');
+            list.layoutCallback();
+
+            element.setAttribute('src', 'https://bar.com/list.json');
+            await list.layoutCallback();
           });
 
           it('should render if [src] mutates with data', () => {
