@@ -89,7 +89,7 @@ describes.repeated(
           setBindService = resolve;
 
           ssrTemplateHelper = {
-            isSupported: () => false,
+            isEnabled: () => false,
             ssr: () => Promise.resolve(),
             applySsrOrCsrTemplate: env.sandbox.stub(),
           };
@@ -692,7 +692,7 @@ describes.repeated(
 
           describe('SSR templates', () => {
             beforeEach(() => {
-              env.sandbox.stub(ssrTemplateHelper, 'isSupported').returns(true);
+              env.sandbox.stub(ssrTemplateHelper, 'isEnabled').returns(true);
             });
 
             it('should error if proxied fetch fails', () => {

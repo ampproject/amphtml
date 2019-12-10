@@ -66,7 +66,7 @@ describes.realWin(
 
       const ampAutocomplete = new AmpAutocomplete(element);
       const ssrTemplateHelper = ampAutocomplete.getSsrTemplateHelper();
-      env.sandbox.stub(ssrTemplateHelper, 'isSupported').returns(wantSsr);
+      env.sandbox.stub(ssrTemplateHelper, 'isEnabled').returns(wantSsr);
 
       return ampAutocomplete.buildCallback().then(() => {
         return ampAutocomplete;
