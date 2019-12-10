@@ -290,6 +290,10 @@ export class SubscriptionService {
       return this.timer_
         .timeoutPromise(timeout, subscriptionPlatform.getEntitlements())
         .then(entitlement => {
+          if (grantedd && this.cryptoHandler_.isDocumentEncrypted() && !entitlement.decryptedDocumentKey) {
+            // Log as error.
+            return null;
+          }
           entitlement =
             entitlement ||
             Entitlement.empty(subscriptionPlatform.getServiceId());

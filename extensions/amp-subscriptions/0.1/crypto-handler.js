@@ -53,6 +53,14 @@ export class CryptoHandler {
   }
 
   /**
+   * Checks if the document is encrypted by looking at the parsed keys.
+   * @return {!bool}
+   */
+  isDocumentEncrypted() {
+    return !!this.encryptedKeys_;
+  }
+
+  /**
    * This method is used for testing.
    * @return {?JsonObject}
    */

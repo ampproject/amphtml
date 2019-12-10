@@ -23,6 +23,8 @@ import {dict} from '../../../src/utils/object';
 import {getSourceOrigin, getWinOrigin} from '../../../src/url';
 import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
+const TAG = 'amp-subscriptions';
+
 /**
  * This implements the methods to interact with viewer subscription platform.
  * @implements {./subscription-platform.SubscriptionPlatform}
