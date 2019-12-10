@@ -14,22 +14,31 @@
  * limitations under the License.
  */
 
+import '../../../amp-mustache/0.2/amp-mustache';
 import '../amp-date-display';
 import * as lolex from 'lolex';
-import {toggleExperiment} from '../../../../src/experiments';
+import {waitForChildPromise} from '../../../../src/dom';
 
 describes.realWin(
   'amp-date-display',
   {
     amp: {
-      extensions: ['amp-date-display'],
+      extensions: ['amp-mustache:0.2', 'amp-date-display:0.2'],
     },
   },
   env => {
     let win;
     let element;
-    let impl;
     let clock;
+
+    async function getRenderedData() {
+      await waitForChildPromise(element, () => {
+        // The rendered container inserts a div element.
+        return element.querySelector('div');
+      });
+
+      return JSON.parse(element.textContent);
+    }
 
     beforeEach(() => {
       win = env.win;
@@ -38,12 +47,34 @@ describes.realWin(
         now: new Date('2018-01-01T08:00:00Z'),
       });
 
-      toggleExperiment(win, 'amp-date-display', true);
       element = win.document.createElement('amp-date-display');
+      const template = document.createElement('template');
+      template.setAttribute('type', 'amp-mustache');
+      template.content.textContent = JSON.stringify({
+        year: '{{year}}',
+        yearTwoDigit: '{{yearTwoDigit}}',
+        month: '{{month}}',
+        monthTwoDigit: '{{monthTwoDigit}}',
+        monthName: '{{monthName}}',
+        monthNameShort: '{{monthNameShort}}',
+        day: '{{day}}',
+        dayTwoDigit: '{{dayTwoDigit}}',
+        dayName: '{{dayName}}',
+        dayNameShort: '{{dayNameShort}}',
+        hour: '{{hour}}',
+        hourTwoDigit: '{{hourTwoDigit}}',
+        hour12: '{{hour12}}',
+        hour12TwoDigit: '{{hour12TwoDigit}}',
+        minute: '{{minute}}',
+        minuteTwoDigit: '{{minuteTwoDigit}}',
+        second: '{{second}}',
+        secondTwoDigit: '{{secondTwoDigit}}',
+        dayPeriod: '{{dayPeriod}}',
+        iso: '{{iso}}',
+      });
+      element.appendChild(template);
+      element.setAttribute('layout', 'nodisplay');
       win.document.body.appendChild(element);
-      impl = element.implementation_;
-      env.sandbox.stub(impl.templates_, 'findAndRenderTemplate').resolves();
-      env.sandbox.stub(impl, 'boundRendered_');
     });
 
     afterEach(() => {
@@ -53,94 +84,96 @@ describes.realWin(
     // Unfortunately, we cannot test the most interesting case of UTC datetime
     // displayed in local, because the test would work in only one time zone.
 
-    it('provides all variables in UTC and English (default)', () => {
+    it('provides all variables in UTC and English (default)', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('display-in', 'UTC');
       element.build();
 
-      const data = impl.getDataForTemplate_();
+      const data = await getRenderedData();
 
-      expect(data.year).to.equal(2001);
+      expect(data.year).to.equal('2001');
       expect(data.yearTwoDigit).to.equal('01');
-      expect(data.month).to.equal(2);
+      expect(data.month).to.equal('2');
       expect(data.monthTwoDigit).to.equal('02');
       expect(data.monthName).to.equal('February');
       expect(data.monthNameShort).to.equal('Feb');
-      expect(data.day).to.equal(3);
+      expect(data.day).to.equal('3');
       expect(data.dayTwoDigit).to.equal('03');
       expect(data.dayName).to.equal('Saturday');
       expect(data.dayNameShort).to.equal('Sat');
-      expect(data.hour).to.equal(4);
+      expect(data.hour).to.equal('4');
       expect(data.hourTwoDigit).to.equal('04');
-      expect(data.hour12).to.equal(4);
+      expect(data.hour12).to.equal('4');
       expect(data.hour12TwoDigit).to.equal('04');
-      expect(data.minute).to.equal(5);
+      expect(data.minute).to.equal('5');
       expect(data.minuteTwoDigit).to.equal('05');
-      expect(data.second).to.equal(6);
+      expect(data.second).to.equal('6');
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
     });
 
-    it('provides all variables in local and English (default)', () => {
+    it('provides all variables in local and English (default)', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007');
       element.build();
 
-      const data = impl.getDataForTemplate_();
+      const data = await getRenderedData();
 
-      expect(data.year).to.equal(2001);
+      expect(data.year).to.equal('2001');
       expect(data.yearTwoDigit).to.equal('01');
-      expect(data.month).to.equal(2);
+      expect(data.month).to.equal('2');
       expect(data.monthTwoDigit).to.equal('02');
       expect(data.monthName).to.equal('February');
       expect(data.monthNameShort).to.equal('Feb');
-      expect(data.day).to.equal(3);
+      expect(data.day).to.equal('3');
       expect(data.dayTwoDigit).to.equal('03');
       expect(data.dayName).to.equal('Saturday');
       expect(data.dayNameShort).to.equal('Sat');
-      expect(data.hour).to.equal(4);
+      expect(data.hour).to.equal('4');
       expect(data.hourTwoDigit).to.equal('04');
-      expect(data.hour12).to.equal(4);
+      expect(data.hour12).to.equal('4');
       expect(data.hour12TwoDigit).to.equal('04');
-      expect(data.minute).to.equal(5);
+      expect(data.minute).to.equal('5');
       expect(data.minuteTwoDigit).to.equal('05');
-      expect(data.second).to.equal(6);
+      expect(data.second).to.equal('6');
       expect(data.secondTwoDigit).to.equal('06');
       expect(data.dayPeriod).to.equal('am');
     });
 
     describe('correctly parses', () => {
-      it('now keyword', () => {
+      it('now keyword', async () => {
         element.setAttribute('datetime', 'now');
         element.build();
 
-        const {iso} = impl.getDataForTemplate_();
+        const {iso} = await getRenderedData();
         const dateFromParsed = new win.Date(iso);
 
         // Because of the runtime there could be a several ms difference.
         expect(dateFromParsed.getTime()).to.equal(win.Date.now());
       });
 
-      it('day only ISO 8601 date', () => {
+      it('day only ISO 8601 date', async () => {
         element.setAttribute('datetime', '2001-02-03');
         element.build();
-        expect(impl.getDataForTemplate_().iso).to.equal(
-          '2001-02-03T00:00:00.000Z'
-        );
+
+        const data = await getRenderedData();
+
+        expect(data.iso).to.equal('2001-02-03T00:00:00.000Z');
       });
 
-      it('full ISO 8601 date in UTC time zone', () => {
+      it('full ISO 8601 date in UTC time zone', async () => {
         element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
         element.build();
-        expect(impl.getDataForTemplate_().iso).to.equal(
-          '2001-02-03T04:05:06.007Z'
-        );
+
+        const data = await getRenderedData();
+
+        expect(data.iso).to.equal('2001-02-03T04:05:06.007Z');
       });
 
-      it('full ISO 8601 date without time zone (interpreted as local)', () => {
+      it('full ISO 8601 date without time zone (interpreted as local)', async () => {
         element.setAttribute('datetime', '2001-02-03T04:05:06.007');
         element.build();
 
-        const data = impl.getDataForTemplate_();
+        const data = await getRenderedData();
         const result =
           `${data.year}-${data.monthTwoDigit}-${data.dayTwoDigit}` +
           `T${data.hourTwoDigit}:${data.minuteTwoDigit}:${data.secondTwoDigit}`;
@@ -148,56 +181,61 @@ describes.realWin(
         expect(result).to.equal('2001-02-03T04:05:06');
       });
 
-      it('full ISO 8601 date in a custom time zone', () => {
+      it('full ISO 8601 date in a custom time zone', async () => {
         element.setAttribute('datetime', '2001-02-03T04:05:06.007+08:00');
         element.build();
-        expect(impl.getDataForTemplate_().iso).to.equal(
-          '2001-02-02T20:05:06.007Z'
-        );
+
+        const data = await getRenderedData();
+
+        expect(data.iso).to.equal('2001-02-02T20:05:06.007Z');
       });
 
-      it('seconds since the UNIX epoch', () => {
+      it('seconds since the UNIX epoch', async () => {
         element.setAttribute('timestamp-seconds', '981173106');
         element.build();
-        expect(impl.getDataForTemplate_().iso).to.equal(
-          '2001-02-03T04:05:06.000Z'
-        );
+
+        const data = await getRenderedData();
+
+        expect(data.iso).to.equal('2001-02-03T04:05:06.000Z');
       });
 
-      it('miliseconds since the UNIX epoch', () => {
+      it('miliseconds since the UNIX epoch', async () => {
         element.setAttribute('timestamp-ms', '981173106007');
         element.build();
-        expect(impl.getDataForTemplate_().iso).to.equal(
-          '2001-02-03T04:05:06.007Z'
-        );
+
+        const data = await getRenderedData();
+
+        expect(data.iso).to.equal('2001-02-03T04:05:06.007Z');
       });
     });
 
-    it('adds offset seconds', () => {
+    it('adds offset seconds', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('offset-seconds', '1234567');
       element.build();
-      expect(impl.getDataForTemplate_().iso).to.equal(
-        '2001-02-17T11:01:13.007Z'
-      );
+
+      const data = await getRenderedData();
+
+      expect(data.iso).to.equal('2001-02-17T11:01:13.007Z');
     });
 
-    it('subtracts offset seconds', () => {
+    it('subtracts offset seconds', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('offset-seconds', '-1234567');
       element.build();
-      expect(impl.getDataForTemplate_().iso).to.equal(
-        '2001-01-19T21:08:59.007Z'
-      );
+
+      const data = await getRenderedData();
+
+      expect(data.iso).to.equal('2001-01-19T21:08:59.007Z');
     });
 
-    it('provides variables in Czech when "cs" locale is passed', () => {
+    it('provides variables in Czech when "cs" locale is passed', async () => {
       element.setAttribute('datetime', '2001-02-03T04:05:06.007Z');
       element.setAttribute('display-in', 'UTC');
       element.setAttribute('locale', 'cs');
       element.build();
 
-      const data = impl.getDataForTemplate_();
+      const data = await getRenderedData();
 
       expect(data.monthName).to.equal('únor');
       expect(data.monthNameShort).to.equal('úno');

@@ -79,18 +79,19 @@ let EnhancedVariablesDef;
 
 /**
  * @param {!JsonObject} props
+ * @param {!Window} win
  * @return {!EnhancedVariablesDef}
  */
-function getDataForTemplate(props) {
+function getDataForTemplate(props, win) {
   const {
     'displayIn': displayIn = '',
     'locale': locale = DEFAULT_LOCALE,
     'offsetSeconds': offsetSeconds = DEFAULT_OFFSET_SECONDS,
   } = props;
 
-  const epoch = getEpoch(props);
+  const epoch = getEpoch(props, win);
   const offset = offsetSeconds * 1000;
-  const date = new Date(epoch + offset);
+  const date = new win.Date(epoch + offset);
 
   const basicData =
     displayIn.toLowerCase() === 'utc'
@@ -102,9 +103,10 @@ function getDataForTemplate(props) {
 
 /**
  * @param {!JsonObject} props
+ * @param {!Window} win
  * @return {number|undefined}
  */
-function getEpoch(props) {
+function getEpoch(props, win) {
   const {
     'datetime': datetime = '',
     'timestampMilliseconds': timestampMilliseconds = 0,
@@ -113,9 +115,9 @@ function getEpoch(props) {
 
   let epoch;
   if (datetime.toLowerCase() === 'now') {
-    epoch = Date.now();
+    epoch = win.Date.now();
   } else if (datetime) {
-    epoch = Date.parse(datetime);
+    epoch = win.Date.parse(datetime);
     userAssert(!isNaN(epoch), 'Invalid date: %s', datetime);
   } else if (timestampMilliseconds) {
     epoch = timestampMilliseconds;
@@ -229,14 +231,15 @@ function getVariablesInUTC(date, locale) {
 function AmpDateDisplayComponent(props) {
   useResourcesNotify();
   const ref = useRef();
-  const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
   const {templates} = props.services;
   const rerender = useRerenderer();
 
   useMountLayoutEffect(() => {
     const {host} = rootNodeFor(ref.current);
+    const win = host.ownerDocument.defaultView;
+    const data = /** @type {!JsonObject} */ (getDataForTemplate(props, win));
+
     templates.findAndRenderTemplate(host, data).then(rendered => {
-      const win = host.ownerDocument.defaultView;
       removeChildren(dev().assertElement(host));
       const container = document.createElement('div');
       container.appendChild(rendered);
