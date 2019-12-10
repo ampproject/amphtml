@@ -242,6 +242,16 @@ export class NextPageService {
   }
 
   /**
+   * Creates an invisible element used to measure the position of the documents
+   * @return {!Element}
+   */
+  createMeasurer_() {
+    const measurer = this.win_.document.createElement('div');
+    measurer.classList.add('i-amphtml-next-page-measurer');
+    return measurer;
+  }
+
+  /**
    * Creates a default hairline separator element to go between two documents.
    * @return {!Element}
    */
@@ -262,6 +272,9 @@ export class NextPageService {
 
       const container = this.win_.document.createElement('div');
 
+      const measurer = this.createMeasurer_();
+      container.appendChild(measurer);
+
       const separator = this.separator_.cloneNode(true);
       separator.removeAttribute('separator');
       container.appendChild(separator);
@@ -276,7 +289,7 @@ export class NextPageService {
       const page = this.nextArticle_;
       this.appendPageHandler_(container).then(() => {
         this.positionObserver_.observe(
-          separator,
+          measurer,
           PositionObserverFidelity.LOW,
           position => this.positionUpdate_(page, position)
         );
