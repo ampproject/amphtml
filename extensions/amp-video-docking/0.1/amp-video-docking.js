@@ -633,7 +633,9 @@ export class VideoDocking {
    * @private
    */
   getFixedSlotLayoutBox_() {
-    return this.getFixedLayoutBox_(dev().assertElement(this.getSlot_()));
+    return dev()
+      .assertElement(this.getSlot_())
+      .getPageLayoutBox();
   }
 
   /**
