@@ -951,7 +951,7 @@ export class AmpForm {
    */
   handleXhrSubmitSuccess_(response, incomingTrust) {
     return this.xhr_
-      .xssiJson(response, this.form_.getAttribute('strip-prefix'))
+      .xssiJson(response, this.form_.getAttribute('xssi-prefix'))
       .then(
         json =>
           this.handleSubmitSuccess_(
@@ -1001,7 +1001,7 @@ export class AmpForm {
     if (e && e.response) {
       const error = /** @type {!Error} */ (e);
       promise = this.xhr_
-        .xssiJson(error.response, this.form_.getAttribute('strip-prefix'))
+        .xssiJson(error.response, this.form_.getAttribute('xssi-prefix'))
         .catch(() => null);
     } else {
       promise = Promise.resolve(null);

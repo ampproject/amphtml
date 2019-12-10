@@ -1249,11 +1249,11 @@ describes.repeated(
           });
         });
 
-        it('should respect the strip-prefix option when parsing json', async () => {
+        it('should respect the xssi-prefix option when parsing json', async () => {
           const form = createElement('form');
           form.setAttribute('method', 'GET');
           form.setAttribute('action-xhr', 'https://example.com/xssi-json');
-          form.setAttribute('strip-prefix', 'while(1)');
+          form.setAttribute('xssi-prefix', 'while(1)');
 
           const ampForm = await getAmpForm(form);
           env.sandbox.stub(ampForm.xhr_, 'fetch').resolves('{}');
