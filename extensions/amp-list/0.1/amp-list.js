@@ -545,7 +545,8 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetchList_(opt_refresh = false) {
-    if (!this.element.getAttribute('src')) {
+    const elementSrc = this.element.getAttribute('src');
+    if (!elementSrc) {
       return Promise.resolve();
     }
     let fetch;
@@ -553,6 +554,11 @@ export class AmpList extends AMP.BaseElement {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
       fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
+        // Bail if the src has changed while resolving the xhr request.
+        if (elementSrc !== this.element.getAttribute('src')) {
+          return Promise.resolve();
+        }
+
         const items = this.computeListItems_(data);
         if (this.loadMoreEnabled_) {
           this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
@@ -620,6 +626,7 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_(refresh) {
+    const elementSrc = this.element.getAttribute('src');
     let request;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
@@ -678,7 +685,13 @@ export class AmpList extends AMP.BaseElement {
           throw user().createError('Error proxying amp-list templates', error);
         }
       )
-      .then(data => this.scheduleRender_(data, /* append */ false));
+      .then(data => {
+        // Bail if the src has changed while resolving the xhr request.
+        if (elementSrc !== this.element.getAttribute('src')) {
+          return Promise.resolve();
+        }
+        this.scheduleRender_(data, /* append */ false);
+      });
   }
 
   /**
