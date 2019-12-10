@@ -31,8 +31,6 @@
 }
 
 amp-accordion > section:not([expanded]) > :last-child {
-  display: block !important;
-  position: absolute;
   width: 100%;
   height: 0px !important;
   margin: 0px;
