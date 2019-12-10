@@ -166,7 +166,7 @@ function getSrMacros(interactionModel, campaignId, apesterElement, consentObj) {
     macros.user_consent = consentObj['user_consent']; // eslint-disable-line google-camelcase/google-camelcase
     macros.param4 = consentObj['gdprString'];
   }
-  
+
   if (publisher && publisher.groupId) {
     macros.param7 = `apester.com:${publisher.groupId}`;
     macros.schain = `1.0,1!apester.com,${publisher.groupId},1,,,,`;
