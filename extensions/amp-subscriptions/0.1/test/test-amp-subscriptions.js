@@ -699,6 +699,24 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         origPlatforms
       );
     });
+
+    it('should return null Entitlement on granted and empty decryptedDocumentKey', async () => {
+      const entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+      });
+      env.sandbox
+        .stub(platform, 'getEntitlements')
+        .callsFake(() => Promise.resolve(entitlement));
+      env.sandbox
+        .stub(subscriptionService.cryptoHandler_, 'isDocumentEncrypted')
+        .callsFake(() => true);
+
+      const ent = await subscriptionService.fetchEntitlements_(platform);
+      expect(ent).to.be.null;
+    });
   });
 
   describe('viewer authorization', () => {

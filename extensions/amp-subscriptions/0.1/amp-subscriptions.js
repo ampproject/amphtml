@@ -290,8 +290,18 @@ export class SubscriptionService {
       return this.timer_
         .timeoutPromise(timeout, subscriptionPlatform.getEntitlements())
         .then(entitlement => {
-          if (grantedd && this.cryptoHandler_.isDocumentEncrypted() && !entitlement.decryptedDocumentKey) {
-            // Log as error.
+          if (
+            entitlement.granted &&
+            this.cryptoHandler_.isDocumentEncrypted() &&
+            !entitlement.decryptedDocumentKey
+          ) {
+            const x =
+              subscriptionPlatform.getServiceId() == 'local' ? user() : dev();
+            x.error(
+              TAG,
+              'Subscription granted and encryption enabled, ' +
+                'but no decrypted document key returned.'
+            );
             return null;
           }
           entitlement =
@@ -401,6 +411,18 @@ export class SubscriptionService {
           .getEntitlements()
           .then(entitlement => {
             devAssert(entitlement, 'Entitlement is null');
+            if (
+              entitlement.granted &&
+              this.cryptoHandler_.isDocumentEncrypted() &&
+              !entitlement.decryptedDocumentKey
+            ) {
+              user().error(
+                TAG,
+                'Subscription granted and encryption enabled, ' +
+                  'but no decrypted document key returned.'
+              );
+              return null;
+            }
             // Viewer authorization is redirected to use local platform instead.
             this.resolveEntitlementsToStore_(
               'local',

@@ -18,7 +18,7 @@ import {Entitlement} from './entitlement';
 import {LocalSubscriptionBasePlatform} from './local-subscription-platform-base';
 import {Services} from '../../../src/services';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
-import {devAssert, userAssert, user} from '../../../src/log';
+import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {isArray} from '../../../src/types';
 
@@ -80,9 +80,11 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
               !ent.decryptedDocumentKey
             ) {
               // Return null to avoid showing encrypted subscription content.
-              user().error(TAG,
+              user().error(
+                TAG,
                 'Subscription granted and encryption enabled, ' +
-                  'but no decrypted document key returned.');
+                  'but no decrypted document key returned.'
+              );
               return null;
             }
             return ent;
