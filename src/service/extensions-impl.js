@@ -573,7 +573,7 @@ export class Extensions {
     scriptElement.setAttribute('i-amphtml-inserted', '');
 
     // Propagate nonce to all generated script tags.
-    const currentScript = this.win.document.querySelector('script[nonce]');
+    const currentScript = this.win.document.querySelector('head script[nonce]');
     if (currentScript) {
       scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
     }
