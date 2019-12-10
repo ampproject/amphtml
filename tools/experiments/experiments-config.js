@@ -209,6 +209,12 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
+    id: 'amp-next-page-v2',
+    name: 'Document-level (true) infinite scroll experience',
+    spec: 'https://github.com/ampproject/amphtml/issues/25500',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25634',
+  },
+  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
@@ -254,6 +260,14 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
+    id: 'inabox-viewport-friendly',
+    name:
+      'Inabox viewport measures the host window directly if ' +
+      'within friendly iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/19869',
+    cleanupIssue: 'TODO',
+  },
+  {
     id: 'fie-css-cleanup',
     name:
       'Experiment to prevent regression after a major CSS clean up' +
@@ -276,13 +290,6 @@ export const EXPERIMENTS = [
       'For development use only',
     spec: 'N/A',
     cleanupIssue: 'N/A',
-  },
-  {
-    id: 'macro-after-long-task',
-    name:
-      'If applicable, convert remaining micro tasks to the next macro ' +
-      ' tasks if a previous micro task execution took too long',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
   },
   {
     id: 'pausable-iframe',

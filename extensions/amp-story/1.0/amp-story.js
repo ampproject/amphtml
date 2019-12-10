@@ -52,6 +52,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
+import {AmpStoryQuiz} from './amp-story-quiz';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
@@ -980,7 +981,10 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeSidebar_();
     this.setThemeColor_();
 
-    const storyLayoutPromise = this.initializePages_()
+    const storyLayoutPromise = Promise.all([
+      this.getAmpDoc().whenFirstVisible(), // Pauses execution during prerender.
+      this.initializePages_(),
+    ])
       .then(() => {
         this.handleConsentExtension_();
         this.initializeStoryAccess_();
@@ -1624,7 +1628,8 @@ export class AmpStory extends AMP.BaseElement {
           el.removeAttribute(Attributes.DESKTOP_POSITION);
         });
 
-        list.forEach(({page, position}) => {
+        list.forEach(entry => {
+          const {page, position} = entry;
           page.element.setAttribute(Attributes.DESKTOP_POSITION, position);
         });
       }
@@ -1959,6 +1964,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onSidebarStateUpdate_(sidebarState) {
+    this.analyticsService_.triggerEvent(
+      sidebarState ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.sidebar_
+    );
+
     const actions = Services.actionServiceForDoc(this.element);
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
@@ -2726,5 +2736,6 @@ AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
+  AMP.registerElement('amp-story-quiz', AmpStoryQuiz);
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

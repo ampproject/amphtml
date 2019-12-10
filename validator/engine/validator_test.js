@@ -1290,6 +1290,7 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-mustache': ['0.1', '0.2', 'latest'],
         'amp-pixel': ['0.1', 'latest'],
         'amp-position-observer': ['0.1', 'latest'],
+        'amp-selector': ['0.1', 'latest'],
         'amp-social-share': ['0.1', 'latest'],
         'amp-video': ['0.1', 'latest'],
       };

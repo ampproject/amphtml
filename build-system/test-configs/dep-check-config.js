@@ -85,6 +85,7 @@ exports.rules = [
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
+      'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
@@ -325,6 +326,8 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-minute-media-player/0.1/amp-minute-media-player.js->' +
         'src/service/video-manager-impl.js',
+      'extensions/amp-redbull-player/0.1/amp-redbull-player.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
@@ -358,6 +361,14 @@ exports.rules = [
       'extensions/amp-next-page/0.1/next-page-service.js->' +
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
+        'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-next-page/0.2/service.js->' +
+        'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-next-page/0.2/service.js->' +
+        'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-next-page/0.2/page.js->' +
+        'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-next-page/0.2/page.js->' +
         'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
         'src/service/notification-ui-manager.js',
@@ -396,8 +407,6 @@ exports.rules = [
       'extensions/amp-experiment/1.0/amp-experiment.js->' +
         'src/service/origin-experiments-impl.js',
       'extensions/amp-script/0.1/amp-script.js->' +
-        'src/service/origin-experiments-impl.js',
-      'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
