@@ -93,7 +93,9 @@ describes.realWin('video docking', {amp: true}, env => {
 
   function stubLayoutBox(impl, rect, ratio = 0) {
     impl.getLayoutBox = () => rect;
+    impl.getPageLayoutBox = impl.getLayoutBox;
     impl.element.getLayoutBox = impl.getLayoutBox;
+    impl.element.getPageLayoutBox = impl.getLayoutBox;
     impl.element.getIntersectionChangeEntry = () => ({
       intersectionRatio: ratio,
       intersectionRect: rect,
