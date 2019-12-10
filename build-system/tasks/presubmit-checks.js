@@ -590,7 +590,7 @@ const forbiddenTerms = {
   'overrideVisibilityState': {
     message: 'overrideVisibilityState is a restricted API.',
     whitelist: [
-      'src/runtime.js',
+      'src/multidoc-manager.js',
       'src/service/ampdoc-impl.js',
       'src/service/viewer-impl.js',
     ],
