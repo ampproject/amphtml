@@ -59,7 +59,7 @@ This section describes considerations the implementor should keep in mind while 
 <!--
 Have unit tests been written? Integration tests? Validator tests?
 Details on unit and integration tests:https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#testing-your-changes
-Details on validator tests: https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.mdo
+Details on validator tests: https://github.com/ampproject/amphtml/blob/master/contributing/component-validator-rules.md
 -->
 - [ ] Documentation present
 <!--
