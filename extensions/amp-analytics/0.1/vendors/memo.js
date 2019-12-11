@@ -21,8 +21,6 @@ const MEMO_CONFIG = jsonLiteral({
     'pid': '',
     'published_at': '',
     'authors': [],
-    'channels': [],
-    'tags': [],
   },
   'requests': {
     'host': 'https://elsa.memoinsights.com',
@@ -33,14 +31,11 @@ const MEMO_CONFIG = jsonLiteral({
       '&url=${canonicalUrl}' +
       '&date=${published_at}' +
       '&authors=${authors}' +
-      '&channels=${categories}' +
-      '&tags=${tags}' +
       '&referrer=${documentReferrer}' +
       '&page_url=${sourceUrl}' +
-      '&user_id=${clientId(sr_amp_id)}' +
+      '&user_id=${clientId(memo_amp_id)}' +
       '&domain=${canonicalHost}' +
-      '&article_id=${article_id}' +
-      '&ignore_metadata=${ignore_metadata}',
+      '&v=amp',
     'visible': '${host}/n?${baseParams}',
     'timer': '${host}/t?${baseParams}&t=5000&e=5000',
   },
