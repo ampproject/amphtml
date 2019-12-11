@@ -58,10 +58,15 @@ export function handleCompanionDisplay(media, apesterElement) {
  * @return {Element}
  */
 function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
-  // eslint-disable-next-line local/no-spread
-  const maxWidth = Math.max(...bannerSizes.map(s => s[0]));
-  // eslint-disable-next-line local/no-spread
-  const maxHeight = Math.max(...bannerSizes.map(s => s[1]));
+  const maxWidth = Math.max.apply(
+    null,
+    bannerSizes.map(s => s[0])
+  );
+  const maxHeight = Math.max.apply(
+    null,
+    bannerSizes.map(s => s[1])
+  );
+
   const multiSizeData = bannerSizes.map(size => size.join('x')).join();
   const ampAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
