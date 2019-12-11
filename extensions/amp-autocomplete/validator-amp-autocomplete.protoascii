@@ -52,8 +52,8 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "items" }
   attrs: { name: "max-entries" }
   attrs: { name: "min-characters" }
-  attrs: { 
-    name: "query" 
+  attrs: {
+    name: "query"
     trigger: {
       also_requires_attr: "src"
     }
