@@ -127,10 +127,12 @@ export class Xhr {
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
-   * @return {!Promise<!Response>}
+   * @return {!Promise<!JsonObject>}
    */
   fetchJson(input, opt_init) {
-    return this.fetch(input, setupJsonFetchInit(opt_init));
+    return this.fetch(input, setupJsonFetchInit(opt_init)).then(res =>
+      res.json()
+    );
   }
 
   /**

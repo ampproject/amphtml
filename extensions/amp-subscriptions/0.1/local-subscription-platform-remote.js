@@ -69,7 +69,6 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
         }
         return this.xhr_
           .fetchJson(fetchUrl, {credentials: 'include'})
-          .then(res => res.json())
           .then(resJson => {
             return Entitlement.parseFromJson(resJson);
           });

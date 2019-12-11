@@ -894,13 +894,15 @@ function executeIdentityTokenFetch(
 ) {
   const url = getIdentityTokenRequestUrl(win, ampDoc, domain);
   return Services.xhrFor(win)
-    .fetchJson(url, {
-      mode: 'cors',
-      method: 'GET',
-      ampCors: false,
-      credentials: 'include',
-    })
-    .then(res => res.json())
+    .fetch(
+      url,
+      Services.xhrFor(win).setupJsonFetchInit({
+        mode: 'cors',
+        method: 'GET',
+        ampCors: false,
+        credentials: 'include',
+      })
+    )
     .then(obj => {
       const token = obj['newToken'];
       const jar = obj['1p_jar'] || '';

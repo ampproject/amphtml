@@ -73,6 +73,7 @@ export function batchFetchJsonFor(
       }
       return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
     })
+    // TODO(samour): convert to fetch() for now until xssiJson is combined with fetchJson.
     .then(res => Services.xhrFor(ampdoc.win).xssiJson(res, xssiPrefix))
     .then(data => {
       if (data == null) {

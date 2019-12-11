@@ -105,7 +105,7 @@ export class AffiliateLinkResolver {
       credentials: 'include',
     };
 
-    return this.xhr_.fetchJson(beaconUrl, fetchOptions).then(res => res.json());
+    return this.xhr_.fetchJson(beaconUrl, fetchOptions);
   }
 
   /**

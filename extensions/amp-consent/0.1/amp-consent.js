@@ -630,9 +630,7 @@ export class AmpConsent extends AMP.BaseElement {
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
         return ampdoc.whenFirstVisible().then(() => {
-          return Services.xhrFor(this.win)
-            .fetchJson(resolvedHref, init)
-            .then(res => res.json());
+          return Services.xhrFor(this.win).fetchJson(resolvedHref, init);
         });
       });
     }

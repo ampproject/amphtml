@@ -149,7 +149,6 @@ export class AmpShareTracking extends AMP.BaseElement {
     };
     return Services.xhrFor(this.win)
       .fetchJson(vendorUrl, postReq)
-      .then(res => res.json())
       .then(
         json => {
           if (json.fragment) {

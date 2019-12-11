@@ -310,14 +310,17 @@ export class SignatureVerifier {
     }
     // TODO(@taymonbeal, #11088): consider a timeout on this fetch
     return Services.xhrFor(this.win_)
-      .fetchJson(url, {
-        mode: 'cors',
-        method: 'GET',
-        // This should be cached across publisher domains, so don't append
-        // __amp_source_origin to the URL.
-        ampCors: false,
-        credentials: 'omit',
-      })
+      .fetch(
+        url,
+        Services.xhrFor(this.win_).setupJsonFetchInit({
+          mode: 'cors',
+          method: 'GET',
+          // This should be cached across publisher domains, so don't append
+          // __amp_source_origin to the URL.
+          ampCors: false,
+          credentials: 'omit',
+        })
+      )
       .then(
         response => {
           // These are assertions on signing service behavior required by

@@ -115,20 +115,18 @@ export class CacheCidApi {
         }),
         timeoutMessage
       )
-      .then(res => {
-        return res.json().then(response => {
-          if (response['optOut']) {
-            return null;
-          }
-          const cid = response['publisherClientId'];
-          if (!cid && useAlternate && response['alternateUrl']) {
-            // If an alternate url is provided, try again with the alternate url
-            // The client is still responsible for appending API keys to the URL.
-            const alt = `${response['alternateUrl']}?key=${SERVICE_KEY_}`;
-            return this.fetchCid_(dev().assertString(alt), false);
-          }
-          return cid;
-        });
+      .then(response => {
+        if (response['optOut']) {
+          return null;
+        }
+        const cid = response['publisherClientId'];
+        if (!cid && useAlternate && response['alternateUrl']) {
+          // If an alternate url is provided, try again with the alternate url
+          // The client is still responsible for appending API keys to the URL.
+          const alt = `${response['alternateUrl']}?key=${SERVICE_KEY_}`;
+          return this.fetchCid_(dev().assertString(alt), false);
+        }
+        return cid;
       })
       .catch(e => {
         if (e && e.response) {

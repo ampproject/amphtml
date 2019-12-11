@@ -133,7 +133,6 @@ export class AmpSmartlinks extends AMP.BaseElement {
           method: 'GET',
           ampCors: false,
         })
-        .then(res => res.json())
         .then(res => {
           return getData(res)[0]['amp_config'];
         });

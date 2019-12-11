@@ -150,15 +150,13 @@ export class GoogleCidApi {
     }
     return this.timer_.timeoutPromise(
       TIMEOUT,
-      Services.xhrFor(this.win_)
-        .fetchJson(url, {
-          method: 'POST',
-          ampCors: false,
-          credentials: 'include',
-          mode: 'cors',
-          body: payload,
-        })
-        .then(res => res.json())
+      Services.xhrFor(this.win_).fetchJson(url, {
+        method: 'POST',
+        ampCors: false,
+        credentials: 'include',
+        mode: 'cors',
+        body: payload,
+      })
     );
   }
 

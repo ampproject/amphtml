@@ -197,7 +197,6 @@ export const callPixelEndpoint = event => {
       ampCors: false,
       credentials: 'include',
     })
-    .then(res => res.json())
     .then(
       json => {
         const {pixels = []} = json;

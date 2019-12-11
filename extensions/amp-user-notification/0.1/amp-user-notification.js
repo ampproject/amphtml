@@ -260,7 +260,6 @@ export class AmpUserNotification extends AMP.BaseElement {
       };
       return Services.xhrFor(this.win)
         .fetchJson(href, getReq)
-        .then(res => res.json());
     });
   }
 

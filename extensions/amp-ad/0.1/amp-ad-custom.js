@@ -96,9 +96,7 @@ export class AmpAdCustom extends AMP.BaseElement {
     // if we have cached the response, find it, otherwise fetch
     const responsePromise =
       ampCustomadXhrPromises[fullUrl] ||
-      Services.xhrFor(this.win)
-        .fetchJson(fullUrl)
-        .then(res => res.json());
+      Services.xhrFor(this.win).fetchJson(fullUrl);
     if (this.slot_ !== null) {
       // Cache this response if using `data-slot` feature so only one request
       // is made per url

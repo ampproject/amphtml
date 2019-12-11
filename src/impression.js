@@ -235,17 +235,22 @@ function invoke(win, clickUrl) {
   if (getMode().localDev && !getMode().test) {
     clickUrl = 'http://localhost:8000/impression-proxy?url=' + clickUrl;
   }
-  return Services.xhrFor(win)
-    .fetchJson(clickUrl, {
-      credentials: 'include',
-    })
-    .then(res => {
-      // Treat 204 no content response specially
-      if (res.status == 204) {
-        return null;
-      }
-      return res.json();
-    });
+  return (
+    Services.xhrFor(win)
+      .fetch(
+        clickUrl,
+        Services.xhrFor(win).setupJsonFetchInit({
+          credentials: 'include',
+        })
+      )
+      .then(res => {
+        // Treat 204 no content response specially
+        if (res.status == 204) {
+          return null;
+        }
+        return res.json();
+      })
+  );
 }
 
 /**

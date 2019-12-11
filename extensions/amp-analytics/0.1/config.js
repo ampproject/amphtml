@@ -114,7 +114,6 @@ export class AnalyticsConfig {
 
     return Services.xhrFor(toWin(this.win_))
       .fetchJson(vendorUrl)
-      .then(res => res.json())
       .then(
         jsonValue => {
           this.predefinedConfig_[type] = jsonValue;
@@ -182,7 +181,6 @@ export class AnalyticsConfig {
           fetchConfig
         );
       })
-      .then(res => res.json())
       .then(
         jsonValue => {
           this.remoteConfig_ = jsonValue;
@@ -252,7 +250,6 @@ export class AnalyticsConfig {
             fetchConfig
           );
         })
-        .then(res => res.json())
         .then(
           jsonValue => {
             this.config_ = this.mergeConfigs_(jsonValue);

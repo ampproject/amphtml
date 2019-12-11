@@ -469,12 +469,14 @@ export class RealTimeConfigManager {
       .timeoutPromise(
         timeoutMillis,
         Services.xhrFor(this.win_)
-          .fetchJson(
+          .fetch(
             // NOTE(bradfrizzell): we could include ampCors:false allowing
             // the request to be cached across sites but for now assume that
             // is not a required feature.
             url,
-            {credentials: 'include'}
+            Services.xhrFor(this.win).setupJsonFetchInit({
+              credentials: 'include',
+            })
           )
           .then(res => {
             checkStillCurrent();

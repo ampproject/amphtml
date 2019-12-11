@@ -169,7 +169,6 @@ export class AmpVizVega extends AMP.BaseElement {
 
       return Services.xhrFor(this.win)
         .fetchJson(dev().assertString(this.src_), {})
-        .then(res => res.json())
         .then(data => {
           this.data_ = data;
         });

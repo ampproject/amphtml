@@ -253,7 +253,6 @@ export class LaterpayVendor {
               credentials: 'include',
             })
           )
-          .then(res => res.json());
       });
   }
 

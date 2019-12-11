@@ -115,7 +115,7 @@ export class Linkmate {
       body: payload,
     };
 
-    return this.xhr_.fetchJson(fetchUrl, postOptions).then(res => res.json());
+    return this.xhr_.fetchJson(fetchUrl, postOptions);
   }
 
   /**

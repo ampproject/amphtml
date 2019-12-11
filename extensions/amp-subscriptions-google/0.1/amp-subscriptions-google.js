@@ -568,12 +568,10 @@ class AmpFetcher {
 
   /** @override */
   fetchCredentialedJson(url) {
-    return this.xhr_
-      .fetchJson(url, {
-        credentials: 'include',
-        prerenderSafe: true,
-      })
-      .then(response => response.json());
+    return this.xhr_.fetchJson(url, {
+      credentials: 'include',
+      prerenderSafe: true,
+    });
   }
 
   /** @override */

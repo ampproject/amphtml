@@ -134,7 +134,6 @@ export class AccessClientAdapter {
             credentials: 'include',
           })
         )
-        .then(res => res.json());
     });
   }
 

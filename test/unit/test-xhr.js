@@ -372,7 +372,6 @@ describe
           window.sandbox.stub(user(), 'assert');
           return xhr
             .fetchJson(`${baseUrl}/get?k=v1`)
-            .then(res => res.json())
             .then(res => {
               expect(res).to.exist;
               expect(res['args']['k']).to.equal('v1');
@@ -385,7 +384,6 @@ describe
             encodeURIComponent(`${baseUrl}/get?k=v2`);
           return xhr
             .fetchJson(url, {ampCors: false})
-            .then(res => res.json())
             .then(res => {
               expect(res).to.exist;
               expect(res['args']['k']).to.equal('v2');
@@ -584,7 +582,6 @@ describe
                 'Content-Type': 'application/json;charset=utf-8',
               },
             })
-            .then(res => res.json())
             .then(res => {
               expect(res.json).to.jsonEqual({
                 hello: 'world',
@@ -1166,7 +1163,7 @@ describe
       it('should not strip characters if the prefix is not present', () => {
         xhrCreated.then(mock => mock.respond(200, [], '{"a": 1}'));
         return xhr
-          .fetchJson('/abc')
+          .fetch('/abc')
           .then(res => xhr.xssiJson(res, 'while(1)'))
           .then(json => {
             expect(json).to.be.deep.equal({a: 1});
@@ -1176,7 +1173,7 @@ describe
       it('should strip prefix from the response text if prefix is present', () => {
         xhrCreated.then(mock => mock.respond(200, [], 'while(1){"a": 1}'));
         return xhr
-          .fetchJson('/abc')
+          .fetch('/abc')
           .then(res => xhr.xssiJson(res, 'while(1)'))
           .then(json => {
             expect(json).to.be.deep.equal({a: 1});

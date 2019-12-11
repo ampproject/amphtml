@@ -168,9 +168,10 @@ export class PooolVendor {
       })
       .then(url => {
         dev().info(TAG, 'Authorization URL: ', url);
-        return this.timer_
-          .timeoutPromise(AUTHORIZATION_TIMEOUT, this.xhr_.fetchJson(url))
-          .then(res => res.json());
+        return this.timer_.timeoutPromise(
+          AUTHORIZATION_TIMEOUT,
+          this.xhr_.fetchJson(url)
+        );
       });
   }
 
