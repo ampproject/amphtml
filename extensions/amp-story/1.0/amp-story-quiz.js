@@ -210,7 +210,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     const optionText = document.createElement('span');
     optionText.classList.add('i-amphtml-story-quiz-option-text');
     optionText.textContent = option.textContent;
-
     convertedOption.appendChild(optionText);
 
     if (option.hasAttribute('correct')) {
