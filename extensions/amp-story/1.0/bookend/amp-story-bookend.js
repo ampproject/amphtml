@@ -41,7 +41,6 @@ import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
-import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
@@ -667,10 +666,10 @@ export class AmpStoryBookend extends DraggableDrawer {
    * @private
    */
   getStoryMetadata_() {
-    const jsonLd = getJsonLd(this.getAmpDoc().getRootNode());
-
     const urlService = Services.urlForDoc(this.element);
-    const {canonicalUrl} = Services.documentInfoForDoc(this.getAmpDoc());
+    const {canonicalUrl, jsonLd} = Services.documentInfoForDoc(
+      this.getAmpDoc()
+    );
     const {hostname: domainName} = urlService.parse(canonicalUrl);
 
     const title =

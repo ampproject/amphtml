@@ -75,14 +75,9 @@ export function setMediaSession(
  * @return {string|undefined}
  */
 export function parseSchemaImage(doc) {
-  const schema = doc.querySelector('script[type="application/ld+json"]');
-  if (!schema) {
-    // No schema element found
-    return;
-  }
-  const schemaJson = tryParseJson(schema.textContent);
+  const {jsonLd: schemaJson} = Services.documentInfoForDoc(doc);
   if (!schemaJson || !schemaJson['image']) {
-    // No image found in the schema
+    // No schema or image found
     return;
   }
 
@@ -113,9 +108,9 @@ export function parseSchemaImage(doc) {
  * @return {string|undefined}
  */
 export function parseOgImage(doc) {
-  const metaTag = doc.querySelector('meta[property="og:image"]');
-  if (metaTag) {
-    return metaTag.getAttribute('content');
+  const {metaTags} = Services.documentInfoForDoc(doc);
+  if (metaTags && metaTags['og:image']) {
+    return metaTags['og:image'];
   } else {
     return;
   }
@@ -127,11 +122,9 @@ export function parseOgImage(doc) {
  * @return {string|undefined}
  */
 export function parseFavicon(doc) {
-  const linkTag =
-    doc.querySelector('link[rel="shortcut icon"]') ||
-    doc.querySelector('link[rel="icon"]');
-  if (linkTag) {
-    return linkTag.getAttribute('href');
+  const {linkRels} = Services.documentInfoForDoc(doc);
+  if (linkRels && linkRels['icon']) {
+    return linkRels['icon'];
   } else {
     return;
   }

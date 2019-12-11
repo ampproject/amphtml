@@ -30,7 +30,6 @@ import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
-import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {
@@ -681,7 +680,7 @@ export class Bookend {
    */
   getStoryMetadata_() {
     const ampdoc = getAmpdoc(this.parentEl_);
-    const jsonLd = getJsonLd(ampdoc.getRootNode());
+    const {jsonLd} = Services.documentInfoForDoc(ampdoc);
 
     const metadata = {
       title:

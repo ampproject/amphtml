@@ -23,7 +23,9 @@ import {
 
 import {getRandomString64} from './cid-impl';
 import {isArray} from '../types';
+import {isJsonLdScriptTag} from '../dom';
 import {map} from '../utils/object';
+import {parseJson, tryParseJson} from '../json';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */
@@ -96,6 +98,7 @@ export class DocInfo {
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
+    const jsonLd = getJsonLd(ampdoc.win.document);
     const replaceParams = getReplaceParams(ampdoc);
 
     return (this.info_ = {
@@ -116,6 +119,7 @@ export class DocInfo {
       },
       linkRels,
       metaTags,
+      jsonLd,
       replaceParams,
     });
   }
@@ -180,11 +184,11 @@ function getLinkRels(doc) {
 function getMetaTags(doc) {
   const metaTags = map();
   if (doc.head) {
-    const metas = doc.head.querySelectorAll('meta[name]');
+    const metas = doc.head.querySelectorAll('meta[name], meta[property]');
     for (let i = 0; i < metas.length; i++) {
       const meta = metas[i];
       const content = meta.getAttribute('content');
-      const name = meta.getAttribute('name');
+      const name = meta.getAttribute('name') || meta.getAttribute('property');
       if (!name || !content) {
         continue;
       }
@@ -202,6 +206,31 @@ function getMetaTags(doc) {
     }
   }
   return metaTags;
+}
+
+/**
+ * Returns a map object of meta tags in document head.
+ * Key is the meta name, value is a list of corresponding content values.
+ * @param {!Document} doc
+ * @return {!JsonObject<string, string|!Array<string>>}
+ */
+function getJsonLd(doc) {
+  const jsonLd = map();
+  if (doc.head) {
+    const scriptTag = doc.head.querySelector(
+      'script[type="application/ld+json"]'
+    );
+
+    if (!scriptTag || !isJsonLdScriptTag(scriptTag)) {
+      return null;
+    }
+
+    const parsedJsonLd = parseJson(scriptTag.textContent);
+    if (parsedJsonLd) {
+      jsonLd = parsedJsonLd;
+    }
+  }
+  return jsonLd;
 }
 
 /**
