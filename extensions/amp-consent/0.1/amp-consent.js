@@ -629,10 +629,13 @@ export class AmpConsent extends AMP.BaseElement {
         const ampdoc = this.getAmpDoc();
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
+        const xhrService = Services.xhrFor(this.win);
         return ampdoc.whenFirstVisible().then(() => {
-          return Services.xhrFor(this.win)
+          return xhrService
             .fetchJson(resolvedHref, init)
-            .then(res => res.json());
+            .then(res =>
+              xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
+            );
         });
       });
     }
