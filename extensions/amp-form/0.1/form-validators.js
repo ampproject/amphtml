@@ -85,8 +85,8 @@ export class FormValidator {
     /** @protected @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc = Services.ampdoc(form);
 
-    /** @const @protected {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources = Services.resourcesForDoc(form);
+    /** @const @protected {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator = Services.mutatorForDoc(form);
 
     /** @protected @const {!Document|!ShadowRoot} */
     this.root = this.ampdoc.getRootNode();
@@ -379,7 +379,7 @@ export class AbstractCustomValidator extends FormValidator {
     input.setAttribute('aria-invalid', 'true');
     input.setAttribute('aria-describedby', validationId);
 
-    this.resources.mutateElement(validation, () =>
+    this.mutator.mutateElement(validation, () =>
       validation.classList.add('visible')
     );
   }
@@ -397,7 +397,7 @@ export class AbstractCustomValidator extends FormValidator {
     input.removeAttribute('aria-invalid');
     input.removeAttribute('aria-describedby');
 
-    this.resources.mutateElement(visibleValidation, () =>
+    this.mutator.mutateElement(visibleValidation, () =>
       visibleValidation.classList.remove('visible')
     );
   }

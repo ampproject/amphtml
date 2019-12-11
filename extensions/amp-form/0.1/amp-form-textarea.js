@@ -176,8 +176,8 @@ export function handleInitialOverflowElements(textareas) {
  * @visibleForTesting
  */
 export function getHasOverflow(element) {
-  const resources = Services.resourcesForDoc(element);
-  return resources.measureElement(() => {
+  const mutator = Services.mutatorForDoc(element);
+  return mutator.measureElement(() => {
     return element./*OK*/ scrollHeight > element./*OK*/ clientHeight;
   });
 }
@@ -206,16 +206,16 @@ function resizeTextareaElements(elements) {
  * @param {!Element} element
  */
 function handleTextareaDrag(element) {
-  const resources = Services.resourcesForDoc(element);
+  const mutator = Services.mutatorForDoc(element);
 
   Promise.all([
-    resources.measureElement(() => element./*OK*/ scrollHeight),
+    mutator.measureElement(() => element./*OK*/ scrollHeight),
     listenOncePromise(element, 'mouseup'),
   ]).then(results => {
     const heightMouseDown = results[0];
     let heightMouseUp = 0;
 
-    return resources.measureMutateElement(
+    return mutator.measureMutateElement(
       element,
       () => {
         heightMouseUp = element./*OK*/ scrollHeight;
@@ -248,7 +248,7 @@ function maybeRemoveResizeBehavior(element, startHeight, endHeight) {
  * @visibleForTesting
  */
 export function maybeResizeTextarea(element) {
-  const resources = Services.resourcesForDoc(element);
+  const mutator = Services.mutatorForDoc(element);
   const win = /** @type {!Window} */ (devAssert(
     element.ownerDocument.defaultView
   ));
@@ -263,7 +263,7 @@ export function maybeResizeTextarea(element) {
   // element's content, or 2. the element itself.
   const minScrollHeightPromise = getShrinkHeight(element);
 
-  return resources.measureMutateElement(
+  return mutator.measureMutateElement(
     element,
     () => {
       const computed = computedStyle(win, element);
@@ -319,7 +319,7 @@ function getShrinkHeight(textarea) {
   const doc = /** @type {!Document} */ (devAssert(textarea.ownerDocument));
   const win = /** @type {!Window} */ (devAssert(doc.defaultView));
   const body = /** @type {!HTMLBodyElement} */ (devAssert(doc.body));
-  const resources = Services.resourcesForDoc(textarea);
+  const mutator = Services.mutatorForDoc(textarea);
 
   const clone = textarea.cloneNode(/*deep*/ false);
   clone.classList.add(AMP_FORM_TEXTAREA_CLONE_CSS);
@@ -328,7 +328,7 @@ function getShrinkHeight(textarea) {
   let resultingHeight = 0;
   let shouldKeepTop = false;
 
-  return resources
+  return mutator
     .measureMutateElement(
       body,
       () => {
@@ -354,7 +354,7 @@ function getShrinkHeight(textarea) {
       }
     )
     .then(() => {
-      return resources.measureMutateElement(
+      return mutator.measureMutateElement(
         body,
         () => {
           resultingHeight = clone./*OK*/ scrollHeight;

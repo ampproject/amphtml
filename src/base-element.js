@@ -824,9 +824,11 @@ export class BaseElement {
    * @public
    */
   changeHeight(newHeight) {
-    this.element
-      .getResources()
-      ./*OK*/ changeSize(this.element, newHeight, /* newWidth */ undefined);
+    Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
@@ -835,7 +837,7 @@ export class BaseElement {
    * is no longer visible.
    */
   collapse() {
-    this.element.getResources().collapseElement(this.element);
+    Services.mutatorForDoc(this.getAmpDoc()).collapseElement(this.element);
   }
 
   /**
@@ -843,7 +845,9 @@ export class BaseElement {
    * @return {!Promise}
    */
   attemptCollapse() {
-    return this.element.getResources().attemptCollapse(this.element);
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptCollapse(
+      this.element
+    );
   }
 
   /**
@@ -861,9 +865,11 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return this.element
-      .getResources()
-      .attemptChangeSize(this.element, newHeight, /* newWidth */ undefined);
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
@@ -883,15 +889,13 @@ export class BaseElement {
    * @public
    */
   attemptChangeSize(newHeight, newWidth, opt_event) {
-    return this.element
-      .getResources()
-      .attemptChangeSize(
-        this.element,
-        newHeight,
-        newWidth,
-        /* newMargin */ undefined,
-        opt_event
-      );
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+      this.element,
+      newHeight,
+      newWidth,
+      /* newMargin */ undefined,
+      opt_event
+    );
   }
 
   /**
@@ -902,7 +906,7 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureElement(measurer) {
-    return this.element.getResources().measureElement(measurer);
+    return Services.mutatorForDoc(this.getAmpDoc()).measureElement(measurer);
   }
 
   /**
@@ -940,9 +944,11 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureMutateElement(measurer, mutator, opt_element) {
-    return this.element
-      .getResources()
-      .measureMutateElement(opt_element || this.element, measurer, mutator);
+    return Services.mutatorForDoc(this.getAmpDoc()).measureMutateElement(
+      opt_element || this.element,
+      measurer,
+      mutator
+    );
   }
 
   /**
@@ -960,7 +966,7 @@ export class BaseElement {
    * is no longer visible.
    */
   expand() {
-    this.element.getResources().expandElement(this.element);
+    Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
   }
 
   /**

@@ -92,8 +92,8 @@ export class AccessService {
     /** @private @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(ampdoc.win);
 
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /** @private @const {?../../../src/service/performance-impl.Performance} */
     this.performance_ = Services.performanceForOrNull(ampdoc.win);
@@ -476,7 +476,7 @@ export class AccessService {
     if (on == wasOn) {
       return Promise.resolve();
     }
-    return this.resources_.mutateElement(element, () => {
+    return this.mutator_.mutateElement(element, () => {
       if (on) {
         element.removeAttribute('amp-access-hide');
       } else {

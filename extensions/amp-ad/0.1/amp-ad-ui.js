@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
 
@@ -95,9 +96,9 @@ export class AmpAdUIHandler {
     let attemptCollapsePromise;
     if (this.containerElement_) {
       // Collapse the container element if there's one
-      attemptCollapsePromise = this.element_
-        .getResources()
-        .attemptCollapse(this.containerElement_);
+      attemptCollapsePromise = Services.mutatorForDoc(
+        this.element_.getAmpDoc()
+      ).attemptCollapse(this.containerElement_);
       attemptCollapsePromise.then(() => {});
     } else {
       attemptCollapsePromise = this.baseInstance_.attemptCollapse();

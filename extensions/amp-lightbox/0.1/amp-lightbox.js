@@ -713,7 +713,7 @@ function setTransparentBody(win, body) {
   const state = {};
   const ampdoc = Services.ampdocServiceFor(win).getAmpDoc(body);
 
-  Services.resourcesForDoc(ampdoc).measureMutateElement(
+  Services.mutatorForDoc(ampdoc).measureMutateElement(
     body,
     function measure() {
       state.alreadyTransparent =

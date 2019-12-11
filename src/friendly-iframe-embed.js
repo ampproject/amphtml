@@ -561,6 +561,14 @@ export class FriendlyIframeEmbed {
   }
 
   /**
+   * @return {!./service/mutator-interface.MutatorInterface}
+   * @private
+   */
+  getMutator_() {
+    return Services.mutatorForDoc(this.iframe);
+  }
+
+  /**
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
    * @param {{measure: (function()|undefined), mutate: function()}} task
@@ -568,7 +576,7 @@ export class FriendlyIframeEmbed {
    * @private
    */
   measureMutate_(task) {
-    return this.getResources_().measureMutateElement(
+    return this.getMutator_().measureMutateElement(
       this.iframe,
       task.measure || null,
       task.mutate

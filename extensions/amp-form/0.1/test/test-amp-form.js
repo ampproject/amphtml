@@ -74,9 +74,9 @@ describes.repeated(
           createTextNode = ownerDoc.createTextNode.bind(ownerDoc);
 
           // Force sync mutateElement to make testing easier.
-          const resources = Services.resourcesForDoc(env.ampdoc);
+          const mutator = Services.mutatorForDoc(env.ampdoc);
           mutateElementStub = env.sandbox
-            .stub(resources, 'mutateElement')
+            .stub(mutator, 'mutateElement')
             .callsArg(1);
 
           // This needs to be stubbed to stop the function from,

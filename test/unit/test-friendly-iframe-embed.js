@@ -902,7 +902,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const winW = 600;
     const winH = 800;
 
-    const resourcesMock = {
+    const mutatorMock = {
       measureMutateElement: (unusedEl, measure, mutate) => {
         if (measure) {
           measure();
@@ -935,7 +935,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
         Promise.resolve()
       );
 
-      env.sandbox.stub(fie, 'getResources_').returns(resourcesMock);
+      env.sandbox.stub(fie, 'getMutator_').returns(mutatorMock);
       env.sandbox.stub(fie, 'getBodyElement').returns(bodyElementMock);
 
       fie.win = win;

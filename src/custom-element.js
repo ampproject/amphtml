@@ -1835,9 +1835,9 @@ function createBaseCustomElementClass(win) {
 
         if (overflown) {
           this.overflowElement_.onclick = () => {
-            const resources = this.getResources();
-            resources./*OK*/ changeSize(this, requestedHeight, requestedWidth);
-            resources.mutateElement(this, () => {
+            const mutator = Services.mutatorForDoc(this.getAmpDoc());
+            mutator./*OK*/ changeSize(this, requestedHeight, requestedWidth);
+            mutator./*OK*/ mutateElement(this, () => {
               this.overflowCallback(
                 /* overflown */ false,
                 requestedHeight,
@@ -1858,8 +1858,11 @@ function createBaseCustomElementClass(win) {
      * @param {?Element=} opt_element
      */
     mutateOrInvoke_(mutator, opt_element) {
-      if (this.resources_) {
-        this.getResources().mutateElement(opt_element || this, mutator);
+      if (this.ampdoc_) {
+        Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
+          opt_element || this,
+          mutator
+        );
       } else {
         mutator();
       }

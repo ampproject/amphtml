@@ -87,13 +87,13 @@ describes.realWin(
         textarea.innerHTML = 'small text';
         doc.body.appendChild(textarea);
 
-        const fakeResources = {
+        const fakeMutator = {
           measureMutateElement(unusedElement, measurer, mutator) {
             measurer();
             return mutator() || Promise.resolve();
           },
         };
-        env.sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
 
         const initialHeight = textarea.clientHeight;
         return maybeResizeTextarea(textarea).then(() => {
@@ -109,13 +109,13 @@ describes.realWin(
         textarea.innerHTML = 'big text'.repeat(100);
         doc.body.appendChild(textarea);
 
-        const fakeResources = {
+        const fakeMutator = {
           measureMutateElement(unusedElement, measurer, mutator) {
             measurer();
             return mutator() || Promise.resolve();
           },
         };
-        env.sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
 
         const initialHeight = textarea.clientHeight;
         return maybeResizeTextarea(textarea).then(() => {
@@ -131,13 +131,13 @@ describes.realWin(
         textarea.innerHTML = 'big text'.repeat(100);
         doc.body.appendChild(textarea);
 
-        const fakeResources = {
+        const fakeMutator = {
           measureMutateElement(unusedElement, measurer, mutator) {
             measurer();
             return mutator() || Promise.resolve();
           },
         };
-        env.sandbox.stub(Services, 'resourcesForDoc').returns(fakeResources);
+        env.sandbox.stub(Services, 'mutatorForDoc').returns(fakeMutator);
 
         const initialHeight = textarea.clientHeight;
         let increasedHeight;
