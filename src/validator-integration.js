@@ -63,7 +63,7 @@ export function loadScript(doc, url) {
   script.src = url;
 
   // Propagate nonce to all generated script tags.
-  const currentScript = doc.querySelector('script[nonce]');
+  const currentScript = doc.head.querySelector('script[nonce]');
   if (currentScript) {
     script.setAttribute('nonce', currentScript.getAttribute('nonce'));
   }
