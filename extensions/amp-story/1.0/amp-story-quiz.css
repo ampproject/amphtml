@@ -169,23 +169,6 @@ h3.i-amphtml-story-quiz-prompt {
     animation: option-select-incorrect forwards 150ms cubic-bezier(0.0, 0.0, 0.2, 1);
 }
 
-.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected .i-amphtml-story-quiz-option-text {
-    animation: keep-text-stable forwards 150ms cubic-bezier(0.0, 0.0, 0.2, 1);
-}
-
-@keyframes keep-text-stable {
-    0% {
-        color: white !important;
-        visibility: hidden;
-    }
-    50% {
-        visibility: hidden;
-    }
-    60% {
-        visibility: visible;
-    }
-}
-
 @keyframes answer-choice-bounce {
     0% {
         visibility: hidden;
@@ -213,14 +196,22 @@ h3.i-amphtml-story-quiz-prompt {
         background: var(--correct-color);
         opacity: 0.2;
         transform: scale(0.1);
+        color: var(--incorrect-color);
     }
     50% {
         opacity: 1;
+    }
+    70% {
+        color: var(--correct-color);
+    }
+    71% {
+        color: white;
     }
     100% {
         border-color: var(--correct-color);
         background: var(--correct-color);
         transform: scale(1);
+        color: white;
     }
 }
 
@@ -230,13 +221,21 @@ h3.i-amphtml-story-quiz-prompt {
         background: var(--incorrect-color);
         opacity: 0.2;
         transform: scale(0.1);
+        color: var(--incorrect-color);
     }
     50% {
         opacity: 1;
+    }
+    70% {
+        color: var(--incorrect-color);
+    }
+    71% {
+        color: white;
     }
     100% {
         border-color: var(--incorrect-color);
         background: var(--incorrect-color);
         transform: scale(1);
+        color: white;
     }
 }

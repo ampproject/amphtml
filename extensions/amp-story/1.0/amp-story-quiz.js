@@ -211,11 +211,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     optionText.classList.add('i-amphtml-story-quiz-option-text');
     optionText.textContent = option.textContent;
 
-    // Add the animation container
-    const animationContainer = document.createElement('div');
-    animationContainer.classList.add('i-amphtml-story-quiz-option-animation');
-    convertedOption.appendChild(animationContainer);
-
     convertedOption.appendChild(optionText);
 
     if (option.hasAttribute('correct')) {
