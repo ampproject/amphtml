@@ -17,7 +17,6 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
 
 .i-amphtml-story-quiz-container {
-    align-self: start;
     --correct-color: #5BBA74 !important;
     --correct-color-shaded: #2D8E42 !important;
     --incorrect-color: #F34E4E !important;
@@ -67,7 +66,7 @@ h3.i-amphtml-story-quiz-prompt {
     display: flex !important;
     flex-direction: column;
     background-color: white !important;
-    border-radius: 32px !important;
+    border-radius: 30px !important;
     padding: 8px 8px 0px 8px !important;
 }
 
@@ -75,7 +74,7 @@ h3.i-amphtml-story-quiz-prompt {
     display: flex !important;
     justify-items: start !important;
     align-items: center !important;
-    border-radius: 32px !important;
+    border-radius: 30px !important;
     padding: 8px 16px 8px 8px !important;
     background-color: inherit !important;
     margin-bottom: 8px !important;
