@@ -712,9 +712,10 @@ message ValidationError {
     // DO NOT REASSIGN the previously used values 2, 3.
   }
   optional Severity severity = 6 [default = ERROR];
-  // NEXT AVAILABLE TAG: 111
+  // NEXT AVAILABLE TAG: 112
   enum Code {
     UNKNOWN_CODE = 0;
+    INVALID_DOCTYPE_HTML = 111;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
     WARNING_TAG_REQUIRED_BY_MISSING = 76;

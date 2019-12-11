@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 978
+spec_file_revision: 985
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -6931,6 +6931,10 @@ error_specificity {
   specificity: 121
 }
 error_specificity {
+  code: INVALID_DOCTYPE_HTML
+  specificity: 122
+}
+error_specificity {
   code: DEV_MODE_ONLY
   # This should always trump any other error. It is asserting
   # that the developer intends for this tag to be an error but
@@ -6942,6 +6946,11 @@ error_specificity {
 error_formats {
   code: UNKNOWN_CODE
   format: "Unknown error."
+}
+error_formats {
+  code: INVALID_DOCTYPE_HTML
+  format: "Invalid or missing doctype declaration. Should be <!doctype html>. "
+          "See https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/"
 }
 error_formats {
   code: MANDATORY_TAG_MISSING
