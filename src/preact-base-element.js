@@ -304,7 +304,6 @@ function getContextFromDom(node, context) {
     const nodeContext = n['i-amphtml-context'];
     if (nodeContext) {
       return Object.assign({}, nodeContext, context);
-      break;
     }
     n = n.assignedSlot || n.parentNode || n.host;
   }
