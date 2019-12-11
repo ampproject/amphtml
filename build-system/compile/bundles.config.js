@@ -638,6 +638,16 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-inline-gallery',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {
+      hasCss: true,
+      cssBinaries: ['amp-inline-gallery', 'amp-inline-gallery-pagination'],
+    },
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-inputmask',
     version: '0.1',
     latestVersion: '0.1',
