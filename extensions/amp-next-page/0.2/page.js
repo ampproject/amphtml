@@ -42,8 +42,17 @@ export class Page {
    * @param {string} url
    * @param {string} title
    * @param {string} image
+   * @param {!PageState=} optInitState
+   * @param {!VisibilityState=} optInitVisibility
    */
-  constructor(manager, url, title, image) {
+  constructor(
+    manager,
+    url,
+    title,
+    image,
+    optInitState = PageState.QUEUED,
+    optInitVisibility = VisibilityState.PRERENDER
+  ) {
     /** @private @const {!./service.NextPageService} */
     this.manager_ = manager;
     /** @private @const {string} */
@@ -56,13 +65,13 @@ export class Page {
     /** @private {?../../../src/runtime.ShadowDoc} */
     this.shadowDoc_ = null;
     /** @private {!PageState} */
-    this.state_ = PageState.QUEUED;
+    this.state_ = optInitState;
     /** @private {?RelativePositions} */
     this.headerPosition_ = null;
     /** @private {?RelativePositions} */
     this.footerPosition_ = null;
     /** @private {!VisibilityState} */
-    this.visibilityState_ = VisibilityState.PRERENDER;
+    this.visibilityState_ = optInitVisibility;
     /** @private {!PageRelativePos} */
     this.relativePos_ = PageRelativePos.OUTSIDE_VIEWPORT;
   }
@@ -117,9 +126,12 @@ export class Page {
     // TODO(wassgha): Handle manual visibility management
 
     // Update visibility internally and at the shadow doc level
-    if (this.shadowDoc_ && visibilityState != this.visibilityState_) {
-      this.shadowDoc_.setVisibilityState(visibilityState);
+    if (visibilityState != this.visibilityState_) {
+      this.shadowDoc_ && this.shadowDoc_.setVisibilityState(visibilityState);
       this.visibilityState_ = visibilityState;
+      if (visibilityState === VisibilityState.VISIBLE) {
+        this.manager_.setTitlePage(this);
+      }
     }
   }
 
