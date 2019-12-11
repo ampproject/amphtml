@@ -83,19 +83,19 @@ export function parseSchemaImage(doc) {
   // Image definition in schema could be one of :
   if (typeof schemaJson['image'] === 'string') {
     // 1. "image": "http://..",
-    return schemaJson['image'];
+    return /** @type {string} */ (schemaJson['image']);
   } else if (
     schemaJson['image']['@list'] &&
     typeof schemaJson['image']['@list'][0] === 'string'
   ) {
     // 2. "image": {.., "@list": ["http://.."], ..}
-    return schemaJson['image']['@list'][0];
+    return /** @type {string} */ (schemaJson['image']['@list'][0]);
   } else if (typeof schemaJson['image']['url'] === 'string') {
     // 3. "image": {.., "url": "http://..", ..}
     return schemaJson['image']['url'];
   } else if (typeof schemaJson['image'][0] === 'string') {
     // 4. "image": ["http://.. "]
-    return schemaJson['image'][0];
+    return /** @type {string} */ (schemaJson['image'][0]);
   } else {
     return;
   }
@@ -108,8 +108,12 @@ export function parseSchemaImage(doc) {
  */
 export function parseOgImage(doc) {
   const {metaTags} = Services.documentInfoForDoc(doc.documentElement);
-  if (metaTags && metaTags['og:image']) {
-    return metaTags['og:image'];
+  if (
+    metaTags &&
+    metaTags['og:image'] &&
+    typeof metaTags['og:image'] === 'string'
+  ) {
+    return /** @type {string} */ (metaTags['og:image']);
   } else {
     return;
   }
@@ -122,8 +126,8 @@ export function parseOgImage(doc) {
  */
 export function parseFavicon(doc) {
   const {linkRels} = Services.documentInfoForDoc(doc.documentElement);
-  if (linkRels && linkRels['icon']) {
-    return linkRels['icon'];
+  if (linkRels && linkRels['icon'] && typeof linkRels['icon'] === 'string') {
+    return /** @type {string} */ (linkRels['icon']);
   } else {
     return;
   }

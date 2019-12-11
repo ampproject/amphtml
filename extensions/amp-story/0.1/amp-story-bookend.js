@@ -684,8 +684,8 @@ export class Bookend {
 
     const metadata = {
       title:
-        jsonLd && jsonLd['headline']
-          ? jsonLd['headline']
+        jsonLd && jsonLd['headline'] && typeof jsonLd['headline'] === 'string'
+          ? /** @type {string} */ (jsonLd['headline'])
           : user().assertElement(
               title,
               'Please set <title> or structured data (JSON-LD).'
@@ -698,8 +698,8 @@ export class Bookend {
 
     if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
       userAssert(
-        isProtocolValid(jsonLd['image']),
-        `Unsupported protocol for story image URL ${jsonLd['image']}`
+        isProtocolValid(jsonLd['image'][0]),
+        `Unsupported protocol for story image URL ${jsonLd['image'][0]}`
       );
       metadata.imageUrl = jsonLd['image'][0];
     }

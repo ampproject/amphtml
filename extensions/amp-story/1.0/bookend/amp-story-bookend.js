@@ -675,8 +675,8 @@ export class AmpStoryBookend extends DraggableDrawer {
     const {hostname: domainName} = urlService.parse(canonicalUrl);
 
     const title =
-      jsonLd && jsonLd['headline']
-        ? jsonLd['headline']
+      jsonLd && jsonLd['headline'] && typeof jsonLd['headline'] === 'string'
+        ? /** @type {string} */ (jsonLd['headline'])
         : user().assertElement(
             titleFromTag,
             'Please set <title> or structured data (JSON-LD).'

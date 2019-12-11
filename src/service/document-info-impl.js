@@ -33,6 +33,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
 
 /**
  * Properties:
+ *     - title: the title of the document extrated from the <title> tag
  *     - sourceUrl: the source url of an amp document.
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
@@ -42,6 +43,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
  *     - metaTags: A map object of meta tag's name (key) and corresponding
  *       contents (value).
+ *     - jsonLd: Contents of the json-ld script tag
  *     - replaceParams: A map object of extra query string parameter names (key)
  *       to corresponding values, used for custom analytics.
  *       Null if not applicable.
