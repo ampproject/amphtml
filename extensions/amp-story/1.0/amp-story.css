@@ -984,3 +984,12 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
 }
+
+amp-story-quiz {
+  align-self: center;
+  width: auto !important;
+  height: auto !important;
+  /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
+  min-width: 224px !important;
+  max-width: 400px !important;
+}

@@ -79,6 +79,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.quizEl_ = buildQuizTemplate(this.element);
+    this.adjustGridLayer_();
     this.attachContent_();
     this.initializeListeners_();
     createShadowRootWithStyle(this.element, this.quizEl_, CSS);
@@ -100,8 +101,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    // TODO(jackbsteinberg): This selection is temporary and may need to be revisited later
-    return layout === 'flex-item';
+    return layout === 'container';
   }
 
   /**
@@ -109,6 +109,32 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   getQuizElement() {
     return this.quizEl_;
+  }
+
+  /**
+   * Add classes to adjust the bottom padding on the grid-layer
+   * to prevent overlap with the quiz
+   *
+   * @private
+   */
+  adjustGridLayer_() {
+    const gridLayer = closest(dev().assertElement(this.element), el => {
+      const tagName = el.tagName.toLowerCase();
+
+      if (tagName === 'amp-story-grid-layer') {
+        return true;
+      }
+    });
+
+    gridLayer.classList.add('i-amphtml-story-has-quiz');
+
+    if (gridLayer.parentElement.querySelector('amp-story-cta-layer')) {
+      gridLayer.classList.add('i-amphtml-story-has-CTA-layer');
+    }
+
+    if (gridLayer.parentElement.querySelector('amp-story-page-attachment')) {
+      gridLayer.classList.add('i-amphtml-story-has-page-attachment');
+    }
   }
 
   /**
