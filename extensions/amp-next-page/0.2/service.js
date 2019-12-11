@@ -32,6 +32,11 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {
+  parseFavicon,
+  parseOgImage,
+  parseSchemaImage,
+} from '../../../src/mediasession-helper';
 import {sanitizeDoc, validatePage, validateUrl} from './utils';
 import {tryParseJson} from '../../../src/json';
 
@@ -107,16 +112,7 @@ export class NextPageService {
    */
   build(element) {
     // Create a reference to the host page
-    const {title, location} = this.win_.document;
-    const {href: url} = location;
-    this.initialPage_ = new Page(
-      this,
-      url,
-      title,
-      null /** image */,
-      PageState.INSERTED /** optInitState */,
-      VisibilityState.VISIBLE /** optInitVisibility */
-    );
+    this.initialPage_ = this.createInitialPage();
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
@@ -253,18 +249,46 @@ export class NextPageService {
   }
 
   /**
-   * @param {!Page=} page
+   * Sets the title and url of the document to those of
+   * the provided page
+   * @param {?Page=} optPage
    */
-  setTitlePage(page = this.initialPage_) {
-    const {title, url} = page;
+  setTitlePage(optPage = this.initialPage_) {
+    if (!optPage) {
+      return;
+    }
+    const {title, url} = optPage;
     this.win_.document.title = title;
     this.history_.replace({title, url});
   }
 
-  /** */
+  /**
+   * Adds an initial entry in history that sub-pages can
+   * replace when they become visible
+   */
   initializeHistory() {
     const {title, url} = this.initialPage_;
-    this.history_.push(null, {title, url});
+    this.history_.push(undefined /** opt_onPop */, {title, url});
+  }
+
+  /**
+   *
+   * @return {!Page}
+   */
+  createInitialPage() {
+    const doc = this.win_.document;
+    const {title, location} = doc;
+    const {href: url} = location;
+    const image =
+      parseSchemaImage(doc) || parseOgImage(doc) || parseFavicon(doc) || '';
+    return new Page(
+      this,
+      url,
+      title,
+      image,
+      PageState.INSERTED /** optInitState */,
+      VisibilityState.VISIBLE /** optInitVisibility */
+    );
   }
 
   /**
