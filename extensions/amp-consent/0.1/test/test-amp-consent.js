@@ -28,6 +28,7 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
+import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
 describes.realWin(
   'amp-consent',
@@ -63,6 +64,7 @@ describes.realWin(
         'https://geo-override-check2/': '{"consentRequired": true}',
         'http://www.origin.com/r/1': '{}',
         'https://invalid.response.com/': '{"consentRequired": 3}',
+        'https://xssi-prefix/': 'while(1){"consentRequired": false}',
       };
 
       xhrServiceMock = {
@@ -74,8 +76,12 @@ describes.realWin(
             json() {
               return Promise.resolve(JSON.parse(jsonMockResponses[url]));
             },
+            text() {
+              return Promise.resolve(jsonMockResponses[url]);
+            },
           });
         },
+        xssiJson: xhrServiceForTesting(win).xssiJson,
       };
 
       storageMock = {
@@ -219,6 +225,18 @@ describes.realWin(
             expect(isRequired).to.be.true;
           });
       });
+
+      it('respects the xssiPrefix option', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'checkConsentHref': 'https://xssi-prefix/',
+          'xssiPrefix': 'while(1)',
+        };
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .false;
+      });
     });
 
     describe('geo-override server communication', () => {
@@ -254,7 +272,7 @@ describes.realWin(
           .true;
       });
 
-      it('respects exisitng local storage decision', async () => {
+      it('respects existing local storage decision', async () => {
         const config = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
