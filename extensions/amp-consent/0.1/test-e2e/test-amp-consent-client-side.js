@@ -20,35 +20,41 @@
 describes.endtoend(
   'amp-consent',
   {
-    // can we change the url?
     testUrl:
       'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html',
     experiments: ['amp-consent-geo-override'],
   },
   env => {
     let controller;
+    let ui1;
+    let ui2;
+    let postPromptUi;
+    let tillResponded;
+    let accepted;
+    let autoReject;
     // let requestBank;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       controller = env.controller;
-      // requestBank = env.requestBank;
-      // Maybe need this
-      // env.win.localStorage = {};
     });
 
-    it('should listen to client side decision', async () => {
-      const ui1 = await controller.findElement('#ui1');
-      const ui2 = await controller.findElement('#ui2');
-      const postPromptUi = await controller.findElement('#postPromptUI');
-      const tillResponded = await controller.findElement(
+    async function findElements() {
+      ui1 = await controller.findElement('#ui1');
+      ui2 = await controller.findElement('#ui2');
+      postPromptUi = await controller.findElement('#postPromptUI');
+      tillResponded = await controller.findElement(
         '[data-block-on-consent="_till_responded"]'
       );
-      const accepted = await controller.findElement(
+      accepted = await controller.findElement(
         '[data-block-on-consent="_till_accepted"]'
       );
-      const autoReject = await controller.findElement(
+      autoReject = await controller.findElement(
         '[data-block-on-consent="_auto_reject"]'
       );
+    }
+
+    it('should listen to client side decision', async () => {
+      await findElements();
 
       // Images are either loaded or not loaded
       await expect(
@@ -86,13 +92,32 @@ describes.endtoend(
         controller.getElementAttribute(autoReject, 'class')
       ).to.does.not.match(/amp-notbuilt/);
 
-      console.log(env);
-
       // Refresh
-      // await controller.type(tillResponded, '\uE035');
-    });
+      await controller.navigateTo(
+        'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html'
+      );
 
-    // it('should resepect server-side decision', async () => {
-    // });
+      // Find elements again
+      await controller.findElement('#postPromptUI');
+
+      // // Correct prompt is showing
+      // await expect(controller.getElementProperty(ui1, 'hidden')).to.be.true;
+      // await expect(controller.getElementProperty(ui2, 'hidden')).to.be.true;
+
+      // // PostPrompUI appears
+      // await expect(controller.getElementProperty(postPromptUi, 'hidden')).to.be
+      //   .false;
+
+      // // Images load
+      // await expect(
+      //   controller.getElementAttribute(tillResponded, 'class')
+      // ).to.does.not.match(/amp-notbuilt/);
+      // await expect(
+      //   controller.getElementAttribute(accepted, 'class')
+      // ).to.does.not.match(/amp-notbuilt/);
+      // await expect(
+      //   controller.getElementAttribute(autoReject, 'class')
+      // ).to.does.not.match(/amp-notbuilt/);
+    });
   }
 );
