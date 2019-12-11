@@ -66,7 +66,7 @@ describes.realWin(
 
       fetchDocumentMock = env.sandbox.mock(DocFetcher);
       env.sandbox
-        .stub(Services.resourcesForDoc(ampdoc), 'mutateElement')
+        .stub(Services.mutatorForDoc(ampdoc), 'mutateElement')
         .callsFake((unused, mutator) => {
           mutator();
           return Promise.resolve();

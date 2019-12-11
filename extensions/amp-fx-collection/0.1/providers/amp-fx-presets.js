@@ -55,7 +55,7 @@ function flyIn(fxElement, axis, coeff) {
 
   // only do this on the first element
   if (!fxElement.initialTrigger) {
-    Services.resourcesForDoc(element).mutateElement(element, () => {
+    Services.mutatorForDoc(element).mutateElement(element, () => {
       const style = computedStyle(fxElement.win, element);
       const prop = axisIsX ? 'left' : 'top';
       const propAsLength = style[prop] === 'auto' ? '0px' : style[prop];

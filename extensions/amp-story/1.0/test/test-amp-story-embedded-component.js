@@ -42,8 +42,8 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
 
-    // Making sure resource tasks run synchronously.
-    env.sandbox.stub(Services, 'resourcesForDoc').returns({
+    // Making sure mutator tasks run synchronously.
+    env.sandbox.stub(Services, 'mutatorForDoc').returns({
       mutateElement: (element, callback) => {
         callback();
         return Promise.resolve();

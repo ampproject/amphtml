@@ -77,9 +77,11 @@ export class AmpMathml extends AMP.BaseElement {
           // Don't change the width if not inlined.
           data['width'] = undefined;
         }
-        this.element
-          .getResources()
-          ./*OK*/ changeSize(this.element, data['height'], data['width']);
+        Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
+          this.element,
+          data['height'],
+          data['width']
+        );
       },
       /* opt_is3P */ true
     );
