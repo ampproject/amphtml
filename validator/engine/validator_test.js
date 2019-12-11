@@ -1214,7 +1214,6 @@ describe('ValidatorRulesMakeSense', () => {
   const tagWithoutSpecNameIsUnique = {};
   const tagNameRegex =
       new RegExp('(!DOCTYPE|O:P|[A-Z0-9-]+|\\$REFERENCE_POINT)');
-  const mandatoryParentRegex = new RegExp('(!DOCTYPE|\\$ROOT|[A-Z0-9-]+)');
   const disallowedAncestorRegex = new RegExp('[A-Z0-9-]+');
   for (const tagSpec of rules.tags) {
     // Helper for message output, set a tagspec_name in this order:
@@ -1367,12 +1366,6 @@ describe('ValidatorRulesMakeSense', () => {
           });
         }
       }
-    }
-    // mandatory_parent
-    if (tagSpec.mandatoryParent !== null) {
-      it('mandatory parent tag name defined', () => {
-        expect(mandatoryParentRegex.test(tagSpec.mandatoryParent)).toBe(true);
-      });
     }
     // disallowed_ancestor must be a upper case alphabetic name.
     it('disallowed_ancestor defined and not equal to mandatory parent', () => {
