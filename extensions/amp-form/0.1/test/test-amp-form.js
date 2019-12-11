@@ -74,9 +74,9 @@ describes.repeated(
           createTextNode = ownerDoc.createTextNode.bind(ownerDoc);
 
           // Force sync mutateElement to make testing easier.
-          const resources = Services.resourcesForDoc(env.ampdoc);
+          const mutator = Services.mutatorForDoc(env.ampdoc);
           mutateElementStub = env.sandbox
-            .stub(resources, 'mutateElement')
+            .stub(mutator, 'mutateElement')
             .callsArg(1);
 
           // This needs to be stubbed to stop the function from,
@@ -96,7 +96,7 @@ describes.repeated(
           env.ampdoc.getBody().appendChild(form);
           const ampForm = new AmpForm(form, 'amp-form-test-id');
           env.sandbox
-            .stub(ampForm.ssrTemplateHelper_, 'isSupported')
+            .stub(ampForm.ssrTemplateHelper_, 'isEnabled')
             .returns(false);
           return Promise.resolve(ampForm);
         }
@@ -243,9 +243,9 @@ describes.repeated(
               env.sandbox.stub(form, 'submit');
               env.sandbox.stub(form, 'checkValidity').returns(true);
               env.sandbox.stub(ampForm, 'analyticsEvent_');
-              ampForm.ssrTemplateHelper_.isSupported.restore();
+              ampForm.ssrTemplateHelper_.isEnabled.restore();
               env.sandbox
-                .stub(ampForm.ssrTemplateHelper_, 'isSupported')
+                .stub(ampForm.ssrTemplateHelper_, 'isEnabled')
                 .returns(true);
               env.sandbox
                 .stub(ampForm.viewer_, 'isTrustedViewer')
@@ -2396,7 +2396,7 @@ describes.repeated(
                 .stub(Services, 'navigationForDoc')
                 .returns({navigateTo});
               env.sandbox
-                .stub(ampForm.ssrTemplateHelper_, 'isSupported')
+                .stub(ampForm.ssrTemplateHelper_, 'isEnabled')
                 .returns(false);
             });
 
