@@ -64,6 +64,7 @@ import {MARINSOFTWARE_CONFIG} from './vendors/marinsoftware';
 import {MEDIAMETRIE_CONFIG} from './vendors/mediametrie';
 import {MEDIARITHMICS_CONFIG} from './vendors/mediarithmics';
 import {MEDIATOR_CONFIG} from './vendors/mediator';
+import {MEMO_CONFIG} from './vendors/memo';
 import {METRIKA_CONFIG} from './vendors/metrika';
 import {MOAT_CONFIG} from './vendors/moat';
 import {MOBIFY_CONFIG} from './vendors/mobify';
@@ -221,6 +222,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'mediametrie': includeJsonLiteral(MEDIAMETRIE_CONFIG),
       'mediarithmics': includeJsonLiteral(MEDIARITHMICS_CONFIG),
       'mediator': includeJsonLiteral(MEDIATOR_CONFIG),
+      'memo': includeJsonLiteral(MEMO_CONFIG),
       'metrika': includeJsonLiteral(METRIKA_CONFIG),
       'moat': includeJsonLiteral(MOAT_CONFIG),
       'mobify': includeJsonLiteral(MOBIFY_CONFIG),
