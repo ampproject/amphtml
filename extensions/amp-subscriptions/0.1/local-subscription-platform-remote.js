@@ -60,6 +60,8 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
     return this.urlBuilder_
       .buildUrl(this.authorizationUrl_, /* useAuthData */ false)
       .then(fetchUrl => {
+        // WARNING: If this key is really long, you might run into issues by hitting
+        // the maximum URL length in some browsers when sending the GET fetch URL.
         const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
           'local'
         );
