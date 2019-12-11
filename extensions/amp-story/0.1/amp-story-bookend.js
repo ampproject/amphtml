@@ -680,14 +680,14 @@ export class Bookend {
    */
   getStoryMetadata_() {
     const ampdoc = getAmpdoc(this.parentEl_);
-    const {jsonLd} = Services.documentInfoForDoc(ampdoc);
+    const {jsonLd, title} = Services.documentInfoForDoc(ampdoc);
 
     const metadata = {
       title:
         jsonLd && jsonLd['headline']
           ? jsonLd['headline']
           : user().assertElement(
-              this.win_.document.head.querySelector('title'),
+              title,
               'Please set <title> or structured data (JSON-LD).'
             ).textContent,
 

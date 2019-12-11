@@ -667,18 +667,20 @@ export class AmpStoryBookend extends DraggableDrawer {
    */
   getStoryMetadata_() {
     const urlService = Services.urlForDoc(this.element);
-    const {canonicalUrl, jsonLd} = Services.documentInfoForDoc(
-      this.getAmpDoc()
-    );
+    const {
+      canonicalUrl,
+      title: titleFromTag,
+      jsonLd,
+    } = Services.documentInfoForDoc(this.getAmpDoc());
     const {hostname: domainName} = urlService.parse(canonicalUrl);
 
     const title =
       jsonLd && jsonLd['headline']
         ? jsonLd['headline']
         : user().assertElement(
-            this.win.document.head.querySelector('title'),
+            titleFromTag,
             'Please set <title> or structured data (JSON-LD).'
-          ).textContent;
+          );
 
     const metadata = {domainName, title};
     const image = jsonLd && isArray(jsonLd['image']) ? jsonLd['image'] : null;

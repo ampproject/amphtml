@@ -25,7 +25,7 @@ import {getRandomString64} from './cid-impl';
 import {isArray} from '../types';
 import {isJsonLdScriptTag} from '../dom';
 import {map} from '../utils/object';
-import {parseJson, tryParseJson} from '../json';
+import {parseJson} from '../json';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */
@@ -47,12 +47,14 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *       Null if not applicable.
  *
  * @typedef {{
+ *   title: string,
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
  *   pageViewId64: !Promise<string>,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
+ *   jsonLd: !Object<string, string|!Array<string>>,
  *   replaceParams: ?Object<string, string|!Array<string>>
  * }}
  */
@@ -100,8 +102,10 @@ export class DocInfo {
     const metaTags = getMetaTags(ampdoc.win.document);
     const jsonLd = getJsonLd(ampdoc.win.document);
     const replaceParams = getReplaceParams(ampdoc);
+    const title = getTitle(ampdoc.win.document);
 
     return (this.info_ = {
+      title,
       /** @return {string} */
       get sourceUrl() {
         return getSourceUrl(ampdoc.getUrl());
@@ -209,8 +213,8 @@ function getMetaTags(doc) {
 }
 
 /**
- * Returns a map object of meta tags in document head.
- * Key is the meta name, value is a list of corresponding content values.
+ * Returns a json object that corresponds to the jsonld script in document head
+ * if it exists.
  * @param {!Document} doc
  * @return {!JsonObject<string, string|!Array<string>>}
  */
@@ -231,6 +235,15 @@ function getJsonLd(doc) {
     }
   }
   return jsonLd;
+}
+
+/**
+ * Gets the document title from the head node
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getTitle(doc) {
+  return (doc.head.querySelector('title') || {}).textContent;
 }
 
 /**
