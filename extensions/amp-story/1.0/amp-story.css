@@ -986,7 +986,7 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
 }
 
 amp-story-quiz {
-  align-self: flex-start;
+  align-self: center;
   width: auto !important;
   height: auto !important;
   /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */

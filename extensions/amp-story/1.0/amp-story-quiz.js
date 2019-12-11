@@ -79,6 +79,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.quizEl_ = buildQuizTemplate(this.element);
+    this.adjustGridLayer_();
     this.attachContent_();
     this.initializeListeners_();
     createShadowRootWithStyle(this.element, this.quizEl_, CSS);
@@ -111,12 +112,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * Finds the prompt and options content
-   * and adds it to the quiz element.
+   * Add classes to adjust the bottom padding on the grid-layer
+   * to prevent overlap with the quiz
    *
    * @private
    */
-  attachContent_() {
+  adjustGridLayer_() {
     const gridLayer = closest(dev().assertElement(this.element), el => {
       const tagName = el.tagName.toLowerCase();
 
@@ -125,10 +126,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       }
     });
 
-    // Adjust grid-layer to identify quiz layers
     gridLayer.classList.add('i-amphtml-story-has-quiz');
 
-    // Adjust grid-layer to identify CTAs and Page Attachments
     if (gridLayer.parentElement.querySelector('amp-story-cta-layer')) {
       gridLayer.classList.add('i-amphtml-story-has-CTA-layer');
     }
@@ -136,7 +135,15 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     if (gridLayer.parentElement.querySelector('amp-story-page-attachment')) {
       gridLayer.classList.add('i-amphtml-story-has-page-attachment');
     }
+  }
 
+  /**
+   * Finds the prompt and options content
+   * and adds it to the quiz element.
+   *
+   * @private
+   */
+  attachContent_() {
     // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
     const promptInput = this.element.children[0];
     // First child must be heading h1-h3

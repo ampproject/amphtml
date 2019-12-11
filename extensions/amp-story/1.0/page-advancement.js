@@ -437,7 +437,7 @@ class ManualAdvancement extends AdvancementConfig {
         }
 
         if (
-          tagName == 'amp-story-quiz' &&
+          tagName === 'amp-story-quiz' &&
           !this.isInScreenSideEdge_(event, this.element_.getLayoutBox())
         ) {
           shouldHandleEvent = false;
