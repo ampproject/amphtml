@@ -74,6 +74,9 @@ export class NextPageService {
     /** @private {?MultidocManager} */
     this.multidocManager_ = null;
 
+    /** @private {?../../../src/service/history-impl.History} */
+    this.history_ = null;
+
     /** @private {?Array<!Page>} */
     this.pages_;
 
@@ -85,6 +88,9 @@ export class NextPageService {
 
     /** @private {number} */
     this.lastScrollTop_ = 0;
+
+    /** @private {Page} */
+    this.initialPage_ = null;
   }
 
   /**
@@ -100,6 +106,7 @@ export class NextPageService {
    * @param {!AmpElement} element
    */
   build(element) {
+    this.history_ = Services.historyForDoc(this.ampdoc_);
     this.multidocManager_ = new MultidocManager(
       this.win_,
       Services.ampdocServiceFor(this.win_),
@@ -113,6 +120,11 @@ export class NextPageService {
 
     // Have the suggestion box be always visible
     this.element_.appendChild(this.moreBox_);
+
+    // Create a reference to the host page
+    const {title, location} = this.win_.document;
+    const {href: url} = location;
+    this.initialPage_ = new Page(this, url, title);
 
     if (!this.pages_) {
       this.pages_ = [];
@@ -170,29 +182,41 @@ export class NextPageService {
    * to their relative position to the viewport
    */
   updateVisibility() {
+    let initialPageVisible = true;
     this.pages_.forEach((page, index) => {
       if (
         page.relativePos === PageRelativePos.INSIDE_VIEWPORT ||
         page.relativePos === PageRelativePos.CONTAINS_VIEWPORT
       ) {
+        initialPageVisible = false;
         if (!page.isVisible()) {
-          page.setVisible(VisibilityState.VISIBLE);
+          page.setVisibility(VisibilityState.VISIBLE);
+          this.setTitlePage(page);
         }
-        // Hide the previous page
-        const prevPage = this.pages_[index + this.scrollDirection_];
-        if (
-          prevPage &&
-          prevPage.relativePos === PageRelativePos.LEAVING_VIEWPORT &&
-          prevPage.isVisible()
-        ) {
-          prevPage.setVisible(VisibilityState.HIDDEN);
+        // Hide the previous pages
+        let prevPageIndex = index + this.scrollDirection_;
+        while (prevPageIndex >= 0 && prevPageIndex < this.pages_.length) {
+          const prevPage = this.pages_[prevPageIndex];
+          if (
+            prevPage &&
+            (prevPage.relativePos === PageRelativePos.LEAVING_VIEWPORT ||
+              prevPage.relativePos === PageRelativePos.OUTSIDE_VIEWPORT) &&
+            prevPage.isVisible()
+          ) {
+            prevPage.setVisibility(VisibilityState.HIDDEN);
+          }
+          prevPageIndex += this.scrollDirection_;
         }
       } else if (page.relativePos === PageRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
-          page.setVisible(VisibilityState.VISIBLE);
+          page.setVisibility(VisibilityState.HIDDEN);
         }
       }
     });
+
+    if (initialPageVisible) {
+      this.setTitlePage();
+    }
   }
 
   /**
@@ -214,6 +238,15 @@ export class NextPageService {
    */
   setLastFetchedPage(page) {
     this.lastFetchedPage_ = page;
+  }
+
+  /**
+   * @param {!Page=} page
+   */
+  setTitlePage(page = this.initialPage_) {
+    const {title, url} = page;
+    this.win_.document.title = title;
+    this.history_.replace({title, url});
   }
 
   /**

@@ -112,7 +112,7 @@ export class Page {
   /**
    * @param {VisibilityState} visibilityState
    */
-  setVisible(visibilityState) {
+  setVisibility(visibilityState) {
     // TODO(wassgha): Handle history manipulation
     // TODO(wassgha): Handle manual visibility management
 
@@ -229,8 +229,8 @@ export class Page {
       // is looking at a section of the document
       this.relativePos_ = PageRelativePos.CONTAINS_VIEWPORT;
     } else if (
-      (header === TOP && footer === TOP) ||
-      (header === BOTTOM && footer === BOTTOM)
+      ((!header || header === TOP) && footer === TOP) ||
+      (header === BOTTOM && (!footer || footer === BOTTOM))
     ) {
       // Both the header and the footer of the document are either
       // above or below the document meaning that the viewport hasn't
