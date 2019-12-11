@@ -219,14 +219,14 @@ function getMetaTags(doc) {
  * @return {!JsonObject<string, string|!Array<string>>}
  */
 function getJsonLd(doc) {
-  const jsonLd = map();
+  let jsonLd = map();
   if (doc.head) {
     const scriptTag = doc.head.querySelector(
       'script[type="application/ld+json"]'
     );
 
     if (!scriptTag || !isJsonLdScriptTag(scriptTag)) {
-      return null;
+      return jsonLd;
     }
 
     const parsedJsonLd = parseJson(scriptTag.textContent);
@@ -243,7 +243,7 @@ function getJsonLd(doc) {
  * @return {string}
  */
 function getTitle(doc) {
-  return (doc.head.querySelector('title') || {}).textContent;
+  return ((doc.head && doc.head.querySelector('title')) || {}).textContent;
 }
 
 /**

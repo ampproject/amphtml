@@ -74,7 +74,7 @@ export function setMediaSession(
  * @return {string|undefined}
  */
 export function parseSchemaImage(doc) {
-  const {jsonLd: schemaJson} = Services.documentInfoForDoc(doc);
+  const {jsonLd: schemaJson} = Services.documentInfoForDoc(doc.documentElement);
   if (!schemaJson || !schemaJson['image']) {
     // No schema or image found
     return;
@@ -107,7 +107,7 @@ export function parseSchemaImage(doc) {
  * @return {string|undefined}
  */
 export function parseOgImage(doc) {
-  const {metaTags} = Services.documentInfoForDoc(doc);
+  const {metaTags} = Services.documentInfoForDoc(doc.documentElement);
   if (metaTags && metaTags['og:image']) {
     return metaTags['og:image'];
   } else {
@@ -121,7 +121,7 @@ export function parseOgImage(doc) {
  * @return {string|undefined}
  */
 export function parseFavicon(doc) {
-  const {linkRels} = Services.documentInfoForDoc(doc);
+  const {linkRels} = Services.documentInfoForDoc(doc.documentElement);
   if (linkRels && linkRels['icon']) {
     return linkRels['icon'];
   } else {
