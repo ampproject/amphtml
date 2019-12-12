@@ -163,6 +163,7 @@
             {
                 "ISOCountryGroups": {
                     "na": ["ca", "mx", "us"],
+                    "eu": ["preset-eea"],
                     "unknown": ["unknown"]
                 }
             }
@@ -172,26 +173,30 @@
   <amp-consent id='ABC' layout='nodisplay'>
     <script type="application/json">{
       "consentInstanceId": "consent-clinet",
-      "promptUI": "ui2",
-      "postPromptUI": "postPromptUI",
       "onUpdateHref": "https://fake.com/update-consent-endpoint",
-      "consentRequired": true,
+      "consentRequired": false,
+      "postPromptUI": "postPromptUI",
       "geoOverride": {
-          "na": {
-              "consentRequired": "remote",
-              "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true&consentStateValue=rejected",
-              "promptUI": "ui1"
-          }
+        "eu": {
+          "consentRequired": true,
+          "promptUI": "ui2"
+        },
+        "na": {
+            "consentRequired": "remote",
+            "checkConsentHref": "${RequestBank.getUrl()}",
+            "promptUI": "ui1"
+        }
       }
     }</script>
+    <!-- "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true&consentStateValue=rejected", -->
     <div id="ui1">
-        CA: Can I load the image??
+        NA: Can I load the image??
         <button on="tap:ABC.accept" role="button">Accept</button>
         <button on="tap:ABC.reject" role="button">Reject</button>
         <button on="tap:ABC.dismiss" role="button">Dismiss</button>
       </div>
     <div id="ui2">
-        UNKNOWN: Can I load the image??
+        EU: Can I load the image??
         <button id="accept" on="tap:ABC.accept" role="button">Accept</button>
         <button id="reject" on="tap:ABC.reject" role="button">Reject</button>
         <button id="dismiss" on="tap:ABC.dismiss" role="button">Dismiss</button>
