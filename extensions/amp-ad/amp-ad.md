@@ -415,6 +415,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Speakol](../../ads/speakol.md)
 - [SpotX](../../ads/spotx.md)
 - [SpringAds](../../ads/springAds.md)
+- [Sulvo](../../ads/sulvo.md)
 - [SunMedia](../../ads/sunmedia.md)
 - [Swoop](../../ads/swoop.md)
 - [TcsEmotion](../../ads/tcsemotion.md)

@@ -152,8 +152,8 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(this.form_);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(this.form_);
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface}  */
     this.viewer_ = Services.viewerForDoc(this.form_);
@@ -392,7 +392,7 @@ export class AmpForm {
     );
 
     //  Form verification is not supported when SSRing templates is enabled.
-    if (!this.ssrTemplateHelper_.isSupported()) {
+    if (!this.ssrTemplateHelper_.isEnabled()) {
       this.form_.addEventListener('change', e => {
         this.verifier_.onCommit().then(updatedErrors => {
           const {updatedElements, errors} = updatedErrors;
@@ -688,7 +688,7 @@ export class AmpForm {
    */
   handleXhrSubmit_(trust) {
     let p;
-    if (this.ssrTemplateHelper_.isSupported()) {
+    if (this.ssrTemplateHelper_.isEnabled()) {
       p = this.handleSsrTemplate_(trust);
     } else {
       this.submittingWithTrust_(trust);
@@ -1070,7 +1070,7 @@ export class AmpForm {
    * @private
    */
   assertSsrTemplate_(value, msg) {
-    const supported = this.ssrTemplateHelper_.isSupported();
+    const supported = this.ssrTemplateHelper_.isEnabled();
     userAssert(
       supported === value,
       '[amp-form]: viewerRenderTemplate | %s',
@@ -1232,7 +1232,7 @@ export class AmpForm {
           .then(rendered => {
             rendered.id = messageId;
             rendered.setAttribute('i-amphtml-rendered', '');
-            return this.resources_.mutateElement(
+            return this.mutator_.mutateElement(
               dev().assertElement(container),
               () => {
                 container.appendChild(rendered);
@@ -1251,7 +1251,7 @@ export class AmpForm {
         // this container are now visible so they get scheduled for layout.
         // This will be unnecessary when the AMP Layers implementation is
         // complete.
-        this.resources_.mutateElement(container, () => {});
+        this.mutator_.mutateElement(container, () => {});
       }
     }
 

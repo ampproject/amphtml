@@ -638,6 +638,16 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-inline-gallery',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {
+      hasCss: true,
+      cssBinaries: ['amp-inline-gallery', 'amp-inline-gallery-pagination'],
+    },
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-inputmask',
     version: '0.1',
     latestVersion: '0.1',
@@ -739,7 +749,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-next-page',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,

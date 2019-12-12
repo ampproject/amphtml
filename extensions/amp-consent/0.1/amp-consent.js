@@ -425,9 +425,10 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     this.passSharedData_();
-    this.maybeSetDirtyBit_();
     if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
       this.syncRemoteConsentState_();
+    } else {
+      this.maybeSetDirtyBit_();
     }
 
     this.getConsentRequiredPromise_()
@@ -545,7 +546,9 @@ export class AmpConsent extends AMP.BaseElement {
       if (!response) {
         return;
       }
-      const expireCache = response['expireCache'];
+      // Ideally we should fallback to true if either are true.
+      const expireCache =
+        response['expireCache'] || response['forcePromptOnNext'];
       if (expireCache) {
         this.consentStateManager_.setDirtyBit();
       }
@@ -626,10 +629,13 @@ export class AmpConsent extends AMP.BaseElement {
         const ampdoc = this.getAmpDoc();
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
+        const xhrService = Services.xhrFor(this.win);
         return ampdoc.whenFirstVisible().then(() => {
-          return Services.xhrFor(this.win)
+          return xhrService
             .fetchJson(resolvedHref, init)
-            .then(res => res.json());
+            .then(res =>
+              xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
+            );
         });
       });
     }

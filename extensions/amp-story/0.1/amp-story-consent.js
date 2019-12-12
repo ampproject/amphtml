@@ -32,7 +32,7 @@ import {
   getRGBFromCssColorValue,
   getTextColorForRGB,
 } from './utils';
-import {dev, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {isArray} from '../../../src/types';
 import {parseJson} from '../../../src/json';
@@ -292,9 +292,11 @@ export class AmpStoryConsent extends AMP.BaseElement {
       );
     };
 
-    this.element
-      .getResources()
-      .measureMutateElement(this.storyConsentEl_, measurer, mutator);
+    Services.mutatorForDoc(this.getAmpDoc())./*OK*/ measureMutateElement(
+      devAssert(this.storyConsentEl_),
+      measurer,
+      mutator
+    );
   }
 
   /**
