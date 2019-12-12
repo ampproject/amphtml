@@ -24,7 +24,7 @@ import {useMountEffect} from './utils';
  * @param {!Element} element
  * @param {string} name
  * @param {!Object|undefined} props
- * @return {!ReactElement}
+ * @return {*}
  */
 export function createSlot(element, name, props) {
   element.setAttribute('slot', name);
@@ -195,7 +195,7 @@ function getAmpElements(root) {
 /**
  * @param {!Object} props
  * @param {!Node} slotElement
- * @return {!Array<!Node>}
+ * @return {!Array<!Element>}
  */
 function getAssignedElements(props, slotElement) {
   return props.assignedElements || toArray(slotElement.assignedElements());

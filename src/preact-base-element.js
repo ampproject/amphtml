@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+import {Deferred} from './utils/promise';
 import {Fragment, createElement, render} from 'preact';
-import {Slot, createSlot} from './preact/slot.js';
+import {Slot, createSlot} from './preact/slot';
+import {devAssert} from './log';
 import {dict} from './utils/object';
 import {matches} from './dom';
-import {withAmpContext} from './preact/context.js';
+import {withAmpContext} from './preact/context';
 
 /**
  * @typedef {{
  *   prop: string,
  *   default: *,
- *   type: ("number"|"Element"|undefined)
+ *   type: (string|undefined)
  * }}
  */
 export let AmpElementAttr;
@@ -45,9 +47,9 @@ export let AmpElementOptions;
  * be very few exceptions, which is why we allow options to configure the
  * class.
  *
- * @param {function} Component
+ * @param {function(!JsonObject):*} Component
  * @param {!AmpElementOptions} opts
- * @return {function}
+ * @return {function(new:./base-element.BaseElement, !Element)}
  */
 export function PreactBaseElement(Component, opts = {}) {
   return class extends AMP.BaseElement {
@@ -61,7 +63,7 @@ export function PreactBaseElement(Component, opts = {}) {
       /** @private {number} */
       this.scheduledRender_ = 0;
 
-      /** @private {!Context} */
+      /** @private {!Object} */
       this.context_ = {
         renderable: false,
         playable: false,
@@ -72,6 +74,9 @@ export function PreactBaseElement(Component, opts = {}) {
         this.scheduledRender_ = 0;
         this.rerender_();
       };
+
+      /** @private {!Deferred|null} */
+      this.scheduledRenderDeferred_ = null;
     }
 
     /** @override */
@@ -109,9 +114,13 @@ export function PreactBaseElement(Component, opts = {}) {
 
     /** @override */
     layoutCallback() {
+      const deferred =
+        this.scheduledRenderDeferred_ ||
+        (this.scheduledRenderDeferred_ = new Deferred());
       this.context_.renderable = true;
       this.context_.playable = true;
       this.scheduleRender_();
+      return deferred.promise;
     }
 
     /** @override */
@@ -155,7 +164,7 @@ export function PreactBaseElement(Component, opts = {}) {
 
       const props = collectProps(
         this.element,
-        opts,
+        devAssert(opts),
         this.win,
         this.getAmpDoc()
       );
@@ -169,6 +178,12 @@ export function PreactBaseElement(Component, opts = {}) {
       const v = createElement(withAmpContext, context, cv);
 
       render(v, this.container_);
+
+      const deferred = this.scheduledRenderDeferred_;
+      if (deferred) {
+        deferred.resolve();
+        this.scheduledRenderDeferred_ = null;
+      }
     }
   };
 }
@@ -177,7 +192,7 @@ export function PreactBaseElement(Component, opts = {}) {
  * @param {!AmpElement} element
  * @param {!AmpElementOptions} opts
  * @param {!Window} win
- * @param {!Ampdoc} ampdoc
+ * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  * @return {!Object}
  */
 function collectProps(element, opts, win, ampdoc) {
@@ -216,7 +231,7 @@ function collectProps(element, opts, win, ampdoc) {
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
   if (opts.passthrough) {
-    props.children = [createElement(Slot)];
+    props['children'] = [createElement(Slot)];
   } else if (opts.children) {
     const children = [];
     const nodes = element.getRealChildNodes();
@@ -249,7 +264,7 @@ function collectProps(element, opts, win, ampdoc) {
         );
       }
     }
-    props.children = children;
+    props['children'] = children;
   }
 
   const services = {};
@@ -258,7 +273,7 @@ function collectProps(element, opts, win, ampdoc) {
     const getter = requestedServices[service];
     services[service] = getter(win, ampdoc);
   }
-  props.services = services;
+  props['services'] = services;
 
   return props;
 }

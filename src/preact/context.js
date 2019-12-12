@@ -18,6 +18,14 @@ import {createContext, createElement} from 'preact';
 import {useContext} from 'preact/hooks';
 
 /**
+ * @typedef {{
+ *   Provider: *,
+ *   Consumer: *,
+ * }}
+ */
+let ContextDef;
+
+/**
  * The external context given to React components to control whether they can
  * render/play/etc.
  *
@@ -26,7 +34,7 @@ import {useContext} from 'preact/hooks';
  * - playable: whether the playback is allowed in this vDOM area. If playback
  *   is not allow, the component must immediately stop the playback.
  *
- * @return {*}
+ * @return {!ContextDef}
  */
 export function getAmpContext() {
   if (self.__AMP_CONTEXT) {

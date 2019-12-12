@@ -231,7 +231,7 @@ function getVariablesInUTC(date, locale) {
 function AmpDateDisplayComponent(props) {
   useResourcesNotify();
   const ref = useRef();
-  const {templates} = props.services;
+  const {templates} = props['services'];
   const rerender = useRerenderer();
 
   useMountLayoutEffect(() => {

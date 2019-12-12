@@ -24,7 +24,7 @@ import {
 } from 'preact/hooks';
 
 /**
- * @param {function} callback
+ * @param {function()} callback
  */
 export function useMountEffect(callback) {
   useEffect(callback, [
@@ -33,7 +33,7 @@ export function useMountEffect(callback) {
 }
 
 /**
- * @param {function} callback
+ * @param {function()} callback
  */
 export function useMountLayoutEffect(callback) {
   useLayoutEffect(callback, [
