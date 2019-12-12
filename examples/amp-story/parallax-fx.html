@@ -145,7 +145,7 @@
 
   <body>
     <amp-story standalone parallax-fx>
-      <amp-story-page id="cover">
+      <amp-story-page id="cover" parallax-fx-origin-layer="6">
         <amp-story-grid-layer template="fill">
           <amp-img src="./img/background.jpg" layout="fill"></amp-img>
         </amp-story-grid-layer>
@@ -195,7 +195,7 @@
             ></amp-img>
           </div>
         </amp-story-grid-layer>
-        <amp-story-grid-layer template="vertical" parallax-fx-origin-layer>
+        <amp-story-grid-layer template="vertical">
           <div class="layout-container">
             <amp-img
               id="space"
@@ -208,8 +208,8 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-1">
-        <amp-story-grid-layer template="fill" parallax-fx-origin-layer>
+      <amp-story-page id="page-1" parallax-fx-origin-layer="-1">
+        <amp-story-grid-layer template="fill">
           <amp-img src="./img/background.jpg" layout="fill"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="fill">
@@ -268,7 +268,7 @@
         </amp-story-grid-layer>
       </amp-story-page>
 
-      <amp-story-page id="page-2">
+      <amp-story-page id="page-2" parallax-fx-origin-layer="3">
         <amp-story-grid-layer template="fill">
           <amp-img src="./img/background.jpg" layout="fill"></amp-img>
         </amp-story-grid-layer>
@@ -282,7 +282,7 @@
             </div>
           </div>
         </amp-story-grid-layer>
-        <amp-story-grid-layer template="vertical" parallax-fx-origin-layer>
+        <amp-story-grid-layer template="vertical">
           <div class="layout-container">
             <amp-img
               id="moon"
@@ -330,11 +330,10 @@
 
       <amp-story-page
         parallax-fx-layer-spacing="4"
-        parallax-fx-farthest-scale="1.3"
-        parallax-fx-nearest-scale="0.7"
+        parallax-fx-origin-layer="-1"
         id="page-3"
       >
-        <amp-story-grid-layer template="fill" parallax-fx-origin-layer>
+        <amp-story-grid-layer template="fill">
           <amp-img src="./img/background.jpg" layout="fill"></amp-img>
         </amp-story-grid-layer>
         <amp-story-grid-layer template="fill">

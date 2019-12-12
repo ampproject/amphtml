@@ -46,15 +46,7 @@ tags: {  # <amp-story>
     value: ""
   }
   attrs: {
-    name: "parallax-fx-farthest-scale",
-    value_regex: "[0-9]+([.][0-9]+)?"
-  }
-  attrs: {
     name: "parallax-fx-layer-spacing",
-    value_regex: "[0-9]+([.][0-9]+)?"
-  }
-  attrs: {
-    name: "parallax-fx-nearest-scale",
     value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
@@ -141,16 +133,12 @@ tags: {  # <amp-story-page>
     }
   }
   attrs: {
-    name: "parallax-fx-farthest-scale",
-    value_regex: "[0-9]+([.][0-9]+)?"
-  }
-  attrs: {
     name: "parallax-fx-layer-spacing",
     value_regex: "[0-9]+([.][0-9]+)?"
   }
   attrs: {
-    name: "parallax-fx-nearest-scale",
-    value_regex: "[0-9]+([.][0-9]+)?"
+    name: "parallax-fx-origin-layer"
+    value: "[0-9]+"
   }
   attrs: {
     name: "no-parallax-fx",
@@ -186,10 +174,6 @@ tags: {  # <amp-story-grid-layer>
   }
   attrs: {
     name: "no-parallax-fx"
-    value: ""
-  }
-  attrs: {
-    name: "parallax-fx-origin-layer"
     value: ""
   }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"

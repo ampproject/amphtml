@@ -32,8 +32,6 @@
   <amp-story 
       standalone 
       parallax-fx 
-      parallax-fx-farthest-scale="1"
-      parallax-fx-nearest-scale="1.3"
       parallax-fx-layer-spacing="3"
       title="My Story"
       publisher="Me"
@@ -43,7 +41,7 @@
       poster-landscape-src="http://me.com/landscape.jpg"
       background-audio="http://me.com/path/to/my.mp3">
     <!-- Story page that inherits the parallax fx parameters from its parent story -->
-    <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value">
+    <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value" parallax-fx-origin-layer="1">
       <amp-story-grid-layer template="horizontal">
         <h5 animate-in="drop">
           <h1>
@@ -58,7 +56,7 @@
         <h3 align-items="stretch"></h3>
         <h3 align-self="start"></h3>
       </amp-story-grid-layer>
-      <amp-story-grid-layer template="horizontal" parallax-fx-origin-layer>
+      <amp-story-grid-layer template="horizontal">
         <h1></h1>
       </amp-story-grid-layer>
     </amp-story-page>
@@ -85,10 +83,9 @@
     <!-- Story page that overrides the parallax-fx parameters -->
     <amp-story-page 
         id="2" 
-        parallax-fx-farthest-scale="0.8"
-        parallax-fx-nearest-scale="1.1"
-        parallax-fx-layer-spacing="2">
-      <amp-story-grid-layer template="horizontal" parallax-fx-origin-layer>
+        parallax-fx-layer-spacing="2"
+        parallax-fx-origin-layer="0">
+      <amp-story-grid-layer template="horizontal">
         <h5 animate-in="drop">
           <h1>
             <h4 animate-in-delay="anything"></h4>

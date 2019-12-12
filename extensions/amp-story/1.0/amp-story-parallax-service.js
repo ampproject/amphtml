@@ -17,7 +17,6 @@
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex} from '../../../src/utils/array';
 import {isExperimentOn} from '../../../src/experiments';
 import {listen} from '../../../src/event-helper';
 import {mapRange, sum} from '../../../src/utils/math';
@@ -28,16 +27,14 @@ import {toArray} from '../../../src/types';
 const SMOOTHING_PTS = 4;
 const PERSPECTIVE = 1000;
 const DEFAULT_LAYER_SPACING = 1;
-const DEFAULT_FARTHEST_SCALE = 1.3;
-const DEFAULT_NEAREST_SCALE = 0.8;
+const DEFAULT_BG_SCALE = 1.3;
 const AMPLIFICATION_FACTOR = 40;
+const DEFAULT_ORIGIN_LAYER = -1;
 
 const LAYER_SPACING_ATTR = 'parallax-fx-layer-spacing';
-const NEAREST_SCALE_ATTR = 'parallax-fx-nearest-scale';
-const FARTHEST_SCALE_ATTR = 'parallax-fx-farthest-scale';
+const ORIGIN_LAYER_ATTR = 'parallax-fx-origin-layer';
 const PARALLAX_FX_ATTR = 'parallax-fx';
 const NO_PARALLAX_FX_ATTR = 'no-parallax-fx';
-const ORIGIN_LAYER_ATTR = 'parallax-fx-origin-layer';
 
 /**
  * Util function to retrieve the parallax service. Ensures we can retrieve the
@@ -91,14 +88,11 @@ export class AmpStoryParallaxService {
     /** @private {Array} */
     this.smoothingPointsY_ = [];
 
-    /** @private {string} */
-    this.storyLayerSpacing_ = this.story_.getAttribute(LAYER_SPACING_ATTR);
+    /** @const {string} */
+    this.storyLayerSpacing = this.story_.getAttribute(LAYER_SPACING_ATTR);
 
-    /** @private {string} */
-    this.storyFarthestScale_ = this.story_.getAttribute(FARTHEST_SCALE_ATTR);
-
-    /** @private {string} */
-    this.storyNearestScale_ = this.story_.getAttribute(NEAREST_SCALE_ATTR);
+    /** @const {string} */
+    this.storyOriginLayer = this.story_.getAttribute(ORIGIN_LAYER_ATTR);
 
     /** @private {boolean} */
     this.enabled_ =
@@ -122,24 +116,6 @@ export class AmpStoryParallaxService {
       listen(this.win_, 'mousemove', event => {
         this.parallaxMouseMutate_(event);
       });
-    }
-  }
-
-  /**
-   * Gets the computed value for each parameter (either specified on the story element or a default one)
-   * @param {string} attribute
-   * @return {*} the story's attribute value or the default one
-   */
-  getDefaultAttr(attribute) {
-    switch (attribute) {
-      case LAYER_SPACING_ATTR:
-        return this.storyLayerSpacing_ || DEFAULT_LAYER_SPACING;
-      case FARTHEST_SCALE_ATTR:
-        return this.storyFarthestScale_ || DEFAULT_FARTHEST_SCALE;
-      case NEAREST_SCALE_ATTR:
-        return this.storyNearestScale_ || DEFAULT_NEAREST_SCALE;
-      default:
-        return '';
     }
   }
 
@@ -248,11 +224,11 @@ export class AmpStoryParallaxService {
 
     const box = page.element.getLayoutBox();
 
-    const percentageX = (event.pageX - (box.left - box.width / 2)) / box.width;
+    const percentageX = (event.pageX - box.left) / box.width;
     const percentageY = (event.pageY - box.top) / box.height;
 
-    const mappedX = mapRange(percentageX * 100, 0, 100, -25, 25);
-    const mappedY = mapRange(percentageY * 100, 0, 100, -25, 25);
+    const mappedX = mapRange(percentageX * 100, 100, 0, -25, 25);
+    const mappedY = mapRange(percentageY * 100, 100, 0, -25, 25);
 
     this.parallaxPages_.forEach(page => {
       if (page.shouldUpdate()) {
@@ -289,19 +265,15 @@ export class ParallaxPage {
     /** @private @const {number} */
     this.layerSpacing_ = Number(
       this.element.getAttribute(LAYER_SPACING_ATTR) ||
-        this.manager_.getDefaultAttr(LAYER_SPACING_ATTR)
+        this.manager_.storyLayerSpacing ||
+        DEFAULT_LAYER_SPACING
     );
 
     /** @private @const {number} */
-    this.farthestScale_ = Number(
-      this.element.getAttribute(FARTHEST_SCALE_ATTR) ||
-        this.manager_.getDefaultAttr(FARTHEST_SCALE_ATTR)
-    );
-
-    /** @private @const {number} */
-    this.nearestScale_ = Number(
-      this.element.getAttribute(NEAREST_SCALE_ATTR) ||
-        this.manager_.getDefaultAttr(NEAREST_SCALE_ATTR)
+    this.originLayer_ = Number(
+      this.element.getAttribute(ORIGIN_LAYER_ATTR) ||
+        this.manager_.storyOriginLayer ||
+        DEFAULT_ORIGIN_LAYER
     );
   }
 
@@ -371,28 +343,14 @@ export class ParallaxPage {
         transition: 'opacity 350ms cubic-bezier(0.0,0.0,0.2,1)',
       });
 
-      const originLayerIndex = findIndex(layers, layer =>
-        layer.hasAttribute(ORIGIN_LAYER_ATTR)
-      );
-
-      const layerZIndexOffset =
-        originLayerIndex == -1
-          ? Math.round(layers.length / 2)
-          : originLayerIndex;
-
       // Loop through the layers in the page and assign a z-index following
       // DOM order (manual override will be added in the future)
       layers.forEach((layer, order) => {
-        const translation = `translateZ(${(order - layerZIndexOffset) *
+        const isFillLayer = layer.getAttribute('template') === 'fill';
+        const translation = `translateZ(${(order - this.originLayer_) *
           this.layerSpacing_ *
           (PERSPECTIVE / AMPLIFICATION_FACTOR)}px)`;
-        const scale = `scale(${mapRange(
-          order,
-          0,
-          layers.length - 1,
-          this.farthestScale_,
-          this.nearestScale_
-        )})`;
+        const scale = isFillLayer ? `scale(${DEFAULT_BG_SCALE})` : '';
         setImportantStyles(layer, {
           contain: 'none',
           overflow: 'visible',

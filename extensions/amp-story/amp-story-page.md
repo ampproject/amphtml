@@ -123,17 +123,13 @@ For example:
 
 Used with the [`parallax-fx`](amp-story.md#parallax-fx) attribute on the story component. Disables the tilt-controlled [3D Parallax Effect](amp-story.md#parallax-fx) for the current page.
 
-##### parallax-fx-mode [optional]
+##### parallax-fx-origin-layer [optional]
 
-Used with the [`parallax-fx`](amp-story.md#parallax-fx [optional]) attribute on the story component. Overrides the effect's mode for the current page.
+Used with the [`parallax-fx`](amp-story.md#parallax-fx [optional]) attribute on the story component. Overrides the effect's origin layer for the current page (the layer that appears to be at the surface of the device's screen). The default value is -1.
 
 ##### parallax-fx-layer-spacing [optional]
 
 Used with the [`parallax-fx`](amp-story.md#parallax-fx [optional]) attribute on the story component. Overrides the layer spacing for the parallax effect on the current page.
-
-##### parallax-fx-nearest-scale / parallax-fx-farthest-scale [optional]
-
-Used with the [`parallax-fx`](amp-story.md#parallax-fx [optional]) attribute on the story component. Overrides the scaling compensation factors for the parallax effect on the current page.
 
 ## Children (of amp-story-page)
 

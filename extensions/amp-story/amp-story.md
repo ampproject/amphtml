@@ -302,13 +302,13 @@ The `amp-story` component represents an entire story. The component itself imple
 
 Enables a [3D Parallax Effect](#parallax-fx) which uses the device's accelerometer (on mobile) or the mouse's relative position to the story page (on desktop) to give the illusion of a 3D space to a story's layers. The effect is tilt-controlled on mobile devices and mouse-controlled on desktop.
 
+##### parallax-fx-origin-layer [optional]
+
+Used with the `parallax-fx` attribute. Configures the depth of the parallax effect by setting which layer appears to be at the surface of the device thus enabling either a "depth" effect where layers appear to be behind the device (by setting it to a high value) or a "pop-out" effect where the layers appear to be popping out of the screen (by setting it to a low value). The default value is -1.
+
 ##### parallax-fx-layer-spacing [optional]
 
 Used with the `parallax-fx` attribute. Configures the apparent spacing between the page's layers within the 3D space. Values are numbers without a unit.
-
-##### parallax-fx-nearest-scale / parallax-fx-farthest-scale [optional]
-
-Used with the `parallax-fx` attribute. Configures the scaling effect on the farther and nearer layers of the page to compensate for the changes in size of the layer caused by the 3D effect. The default values are `1` for the farthest layer and `1.2` for the nearest layer with the layers in between getting values between `1` and `1.2` based on their order.
 
 ### Metadata guidelines
 
@@ -805,7 +805,7 @@ A 3D Parallax effect controlled by the device's tilt sensor (accelerometer) can 
 
 Specific pages can opt-out of the effect by setting the `no-parallax-fx` attribute on the `amp-story-page` component.
 
-The effect can be further customized by setting the desired spacing between the layers (`parallax-fx-layer-spacing`), parallax mode (whether to `pop-out`, have a `depth` or be in the `center` through setting `parallax-fx-mode`) or the scaling of the layers using `parallax-fx-farthest-scale` and `parallax-fx-nearest-scale`.
+The effect can be further customized by setting the desired spacing between the layers (`parallax-fx-layer-spacing`) and the origin layer that appears to be at the surface of the device (to achieve a pop-out or a depth effect by setting `parallax-fx-origin-layer`).
 
 ## Branching
 

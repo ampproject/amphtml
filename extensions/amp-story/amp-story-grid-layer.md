@@ -77,9 +77,6 @@ Example:
 </amp-story-grid-layer>
 ```
 
-##### parallax-fx-origin-layer [optional]
-To be used with the [`parallax-fx`](amp-story.md#parallax-fx) attribute on `amp-story`, sets the layer as the origin layer (in other words, the layer that appears to be at the surface of the photo for the 3D effect). The origin layer will be fixed (does not move when the phone is titled) while other layers will appear to be moving relative to it.
-
 ##### no-parallax-fx [optional]
 To be used with the [`parallax-fx`](amp-story.md#parallax-fx) attribute on `amp-story`, disables the 3D parallax effect on the layer.
 
