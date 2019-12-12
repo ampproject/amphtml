@@ -257,7 +257,7 @@ export class AmpForm {
   }
 
   /**
-   * Returns the value of the form's xssi-prefix attribute.
+   * @return {string|undefined} the value of the form's xssi-prefix attribute.
    */
   getXssiPrefix() {
     return this.form_.getAttribute('xssi-prefix');
