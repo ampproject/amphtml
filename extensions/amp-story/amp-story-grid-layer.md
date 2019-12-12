@@ -78,6 +78,7 @@ Example:
 ```
 
 ##### no-parallax-fx [optional]
+
 To be used with the [`parallax-fx`](amp-story.md#parallax-fx) attribute on `amp-story`, disables the 3D parallax effect on the layer.
 
 ## Templates

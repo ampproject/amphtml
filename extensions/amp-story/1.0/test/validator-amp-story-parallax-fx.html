@@ -1,5 +1,5 @@
 <!--
-  Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+  Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 -->
 <!--
   Test Description:
-  Tests for the amp-story tag.
+  Tests the parallax effect on amp-story
 -->
 <!doctype html>
 <html ⚡>
@@ -40,7 +40,7 @@
       poster-square-src="http://me.com/square.jpg"
       poster-landscape-src="http://me.com/landscape.jpg"
       background-audio="http://me.com/path/to/my.mp3">
-    <!-- Story page that inherits the parallax fx parameters from its parent story -->
+    <!-- Valid: Story page that inherits the parallax fx parameters from its parent story -->
     <amp-story-page id="1" background-audio="path/to/my.mp3" auto-advance-after="any-value" parallax-fx-origin-layer="1">
       <amp-story-grid-layer template="horizontal">
         <h5 animate-in="drop">
@@ -60,7 +60,7 @@
         <h1></h1>
       </amp-story-grid-layer>
     </amp-story-page>
-    <!-- Story page that opted out of the 3d parallax fx -->
+    <!-- Valid: Story page that opted out of the 3d parallax fx -->
     <amp-story-page id="2" no-parallax-fx>
       <amp-story-grid-layer template="horizontal">
         <h5 animate-in="drop">
@@ -80,7 +80,7 @@
         <h1></h1>
       </amp-story-grid-layer>
     </amp-story-page>
-    <!-- Story page that overrides the parallax-fx parameters -->
+    <!-- Valid: Story page that overrides the parallax-fx parameters -->
     <amp-story-page 
         id="2" 
         parallax-fx-layer-spacing="2"

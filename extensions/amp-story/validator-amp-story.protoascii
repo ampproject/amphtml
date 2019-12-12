@@ -133,6 +133,11 @@ tags: {  # <amp-story-page>
     }
   }
   attrs: {
+    name: "no-parallax-fx",
+    value: ""
+  }
+  attrs: { name: "next-page-no-ad" }
+  attrs: {
     name: "parallax-fx-layer-spacing",
     value_regex: "[0-9]+([.][0-9]+)?"
   }
@@ -140,11 +145,6 @@ tags: {  # <amp-story-page>
     name: "parallax-fx-origin-layer"
     value: "[0-9]+"
   }
-  attrs: {
-    name: "no-parallax-fx",
-    value: ""
-  }
-  attrs: { name: "next-page-no-ad" }
   attr_lists: "mandatory-id-attr"
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
