@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-/**
- * Test client side and server side
- */
 describes.endtoend(
   'amp-consent',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=us',
     experiments: ['amp-consent-geo-override'],
+    // TODO (micajuineho): Add shadow-demo after #25985 is fixed.
+    environments: ['single', 'viewer-demo'],
   },
   env => {
     let controller;
@@ -32,7 +31,6 @@ describes.endtoend(
     let tillResponded;
     let accepted;
     let autoReject;
-    // let requestBank;
 
     beforeEach(() => {
       controller = env.controller;
@@ -53,13 +51,13 @@ describes.endtoend(
       );
     }
 
-    it('should listen to server side decision', async () => {
+    async function verifyAcceptedPageElements() {
       await findElements();
 
       // Images are either loaded or not loaded
       await expect(
         controller.getElementAttribute(tillResponded, 'class')
-      ).to.match(/amp-notbuilt/);
+      ).to.not.match(/amp-notbuilt/);
       await expect(controller.getElementAttribute(accepted, 'class')).to.match(
         /amp-notbuilt/
       );
@@ -67,38 +65,23 @@ describes.endtoend(
         controller.getElementAttribute(autoReject, 'class')
       ).to.does.not.match(/amp-notbuilt/);
 
-      // Correct prompt is showing
-      await expect(controller.getElementProperty(ui1, 'hidden')).to.be.false;
-      await expect(controller.getElementProperty(ui2, 'hidden')).to.be.true;
-
-      const rejectButton = await controller.findElement('#reject');
-      await controller.click(rejectButton);
-
-      // Prompt UI disappears
+      // Correct prompts are showing
       await expect(controller.getElementProperty(ui1, 'hidden')).to.be.true;
-
-      // PostPrompUI appears
+      await expect(controller.getElementProperty(ui2, 'hidden')).to.be.true;
       await expect(controller.getElementProperty(postPromptUi, 'hidden')).to.be
         .false;
+    }
 
-      // Images load
-      await expect(
-        controller.getElementAttribute(tillResponded, 'class')
-      ).to.does.not.match(/amp-notbuilt/);
-      await expect(controller.getElementAttribute(accepted, 'class')).to.match(
-        /amp-notbuilt/
-      );
-      await expect(
-        controller.getElementAttribute(autoReject, 'class')
-      ).to.does.not.match(/amp-notbuilt/);
+    it('should listen to server side decision and persist it', async () => {
+      await verifyAcceptedPageElements();
 
       // Refresh
       await controller.navigateTo(
         'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=us'
       );
 
-      // Find elements again
-      //   await controller.findElement('#postPromptUI');
+      // Verify same behavior after refresh
+      await verifyAcceptedPageElements();
     });
   }
 );

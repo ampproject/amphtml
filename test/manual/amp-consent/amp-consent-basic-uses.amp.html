@@ -5,7 +5,7 @@
   <title>AMP Consent GEO Test</title>
   <link rel="canonical" href="amp-consent.amp.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <meta name="amp-consent-blocking" content="amp-ad">
+  <meta name="amp-consent-blocking" content="amp-twitter">
 
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
 
@@ -112,7 +112,7 @@
       margin: 0;
     }
   </style>
-  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+  <script async custom-element="amp-sidebar" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
   <script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js"></script>
   <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
@@ -149,14 +149,9 @@
     data-block-on-consent='default'
     src="/examples/img/bigbuckbunny.jpg" width=300 height=200></amp-img>
 
-  <h3>Image that is blocked by default (not specified) consent</h3>
-  <amp-img
-    data-block-on-consent
-    src="/examples/img/bigbuckbunny.jpg" width=300 height=200></amp-img>
-
   <h3>Image that is NOT blocked by consent</h3>
   <amp-img
-    src="/examples/img/bigbuckbunny.jpg" width=300 height=200></amp-img>
+    src="/examples/img/ima-poster.png" width=300 height=200></amp-img>
   
     <amp-geo layout=nodisplay>
         <script type="application/json">
@@ -183,12 +178,12 @@
         },
         "na": {
             "consentRequired": "remote",
-            "checkConsentHref": "${RequestBank.getUrl()}",
+            "checkConsentHref": "/check-consent?consentRequired=true&consentStateValue=rejected",
             "promptUI": "ui1"
         }
       }
     }</script>
-    <!-- "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true&consentStateValue=rejected", -->
+    
     <div id="ui1">
         NA: Can I load the image??
         <button on="tap:ABC.accept" role="button">Accept</button>
@@ -206,7 +201,7 @@
         <button on="tap:ABC.prompt" role="button">Manage</button>
       </div>
   </amp-consent>
-
+  
   <article>
     <div class="content-container">
       <header>
@@ -245,32 +240,28 @@
           Maecenas sollicitudin felis aliquam tortor vulputate,
           ac posuere velit semper.
         </p>
-        <h1>_ping_ Ad Blocked by metaTags</h1>
-        <amp-ad width=300 height=250
-                type="_ping_"
-                data-url='/examples/img/bigbuckbunny.jpg'
-                data-valid='true'>
-        </amp-ad>
-
-        <p>
-          Curabitur convallis, urna quis pulvinar feugiat, purus diam
-          posuere turpis, sit amet tincidunt purus justo et mi. Donec
-          sapien urna, aliquam ut lacinia quis, varius vitae ex.
-          Maecenas efficitur iaculis lorem, at imperdiet orci viverra
-          in. Nullam eu erat eu metus ultrices viverra a sit amet leo.
-          Pellentesque est felis, pulvinar mollis sollicitudin et,
-          suscipit eget massa. Nunc bibendum non nunc et consequat.
-          Quisque auctor est vel leo faucibus, non faucibus magna ultricies.
-          Vestibulum ante ipsum primis in faucibus orci luctus et ultrices
-          posuere cubilia Curae; Vestibulum tortor lacus, bibendum et
-          enim eu, vehicula placerat erat. Nullam gravida rhoncus accumsan.
-          Integer suscipit iaculis elit nec mollis. Vestibulum eget arcu
-          nec lectus finibus rutrum vel sed orci.
-        </p>
       </div>
     </div>
     <button on="tap:ABC.prompt" role="button">Manage Consent</button>
   </article>
+
+  <amp-twitter
+    width="375"
+    height="472"
+    layout="responsive"
+    data-tweetid="885634330868850689"
+  >
+  <blockquote placeholder>
+    <p>
+      I only needed to change some CSS.
+      <a href="http://t.co/LvjLbjgY9F">pic.twitter.com/LvjLbjgY9F</a>
+    </p>
+    &mdash; Malte Ubl (@cramforce)
+    <a href="https://twitter.com/cramforce/status/638793490521001985"
+      >September 1, 2015</a
+    >
+  </blockquote>
+  </amp-twitter>
 </main>
 
 <footer>

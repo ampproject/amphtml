@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-/**
- * Test client side and server side
- */
 describes.endtoend(
   'amp-consent',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=de',
     experiments: ['amp-consent-geo-override'],
+    // TODO (micajuineho): Add shadow-demo after #25985 is fixed.
     environments: ['single', 'viewer-demo'],
   },
   env => {
@@ -33,6 +31,9 @@ describes.endtoend(
     let tillResponded;
     let accepted;
     let autoReject;
+    let defaultBlock;
+    let notBlocked;
+    let twitter;
 
     beforeEach(() => {
       controller = env.controller;
@@ -51,73 +52,84 @@ describes.endtoend(
       autoReject = await controller.findElement(
         '[data-block-on-consent="_auto_reject"]'
       );
+      defaultBlock = await controller.findElement(
+        '[data-block-on-consent="default"]'
+      );
+      notBlocked = await controller.findElement(
+        '[src="/examples/img/ima-poster.png"]'
+      );
+      twitter = await controller.findElement(
+        '[data-tweetid="885634330868850689"]'
+      );
     }
 
-    it('should listen to client side decision', async () => {
+    async function verifyElementsBuilt(builtArray) {
+      const elements = [
+        tillResponded,
+        accepted,
+        autoReject,
+        defaultBlock,
+        notBlocked,
+        twitter,
+      ];
+
+      await expect(builtArray.length).to.equal(elements.length);
+
+      for (let i = 0; i < elements.length; i++) {
+        if (builtArray[i]) {
+          // Should be visible
+          await expect(
+            controller.getElementAttribute(elements[i], 'class')
+          ).to.not.match(/amp-notbuilt/);
+        } else {
+          // Should not be visible
+          await expect(
+            controller.getElementAttribute(elements[i], 'class')
+          ).to.match(/amp-notbuilt/);
+        }
+      }
+    }
+
+    async function verifyPromptsHidden(hiddenArray) {
+      const elements = [ui1, ui2, postPromptUi];
+
+      await expect(hiddenArray.length).to.equal(elements.length);
+
+      for (let i = 0; i < elements.length; i++) {
+        if (hiddenArray[i]) {
+          // Should be hidden
+          await expect(controller.getElementProperty(elements[i], 'hidden')).to
+            .be.true;
+        } else {
+          // Should not be hidden
+          await expect(controller.getElementProperty(elements[i], 'hidden')).to
+            .be.false;
+        }
+      }
+    }
+
+    it('should work with client side decision', async () => {
+      // Verify no local storage decision
       await findElements();
+      await verifyElementsBuilt([false, false, true, false, true, false]);
+      await verifyPromptsHidden([true, false, true]);
 
-      // Images are either loaded or not loaded
-      await expect(
-        controller.getElementAttribute(tillResponded, 'class')
-      ).to.match(/amp-notbuilt/);
-      await expect(controller.getElementAttribute(accepted, 'class')).to.match(
-        /amp-notbuilt/
-      );
-      await expect(
-        controller.getElementAttribute(autoReject, 'class')
-      ).to.does.not.match(/amp-notbuilt/);
-
-      // Correct prompt is showing
-      await expect(controller.getElementProperty(ui1, 'hidden')).to.be.true;
-      await expect(controller.getElementProperty(ui2, 'hidden')).to.be.false;
-
+      // Client-side decision
       const acceptButton = await controller.findElement('#accept');
       await controller.click(acceptButton);
 
-      // Prompt UI disappears
-      await expect(controller.getElementProperty(ui2, 'hidden')).to.be.true;
-
-      // PostPrompUI appears
-      await expect(controller.getElementProperty(postPromptUi, 'hidden')).to.be
-        .false;
-
-      // Images load
-      await expect(
-        controller.getElementAttribute(tillResponded, 'class')
-      ).to.does.not.match(/amp-notbuilt/);
-      await expect(
-        controller.getElementAttribute(accepted, 'class')
-      ).to.does.not.match(/amp-notbuilt/);
-      await expect(
-        controller.getElementAttribute(autoReject, 'class')
-      ).to.does.not.match(/amp-notbuilt/);
+      await verifyElementsBuilt([true, true, true, true, true, true]);
+      await verifyPromptsHidden([true, true, false]);
 
       // Refresh
       await controller.navigateTo(
         'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=de'
       );
 
-      // Find elements again
+      // Verify all elements are still built
       await findElements();
-
-      // Correct prompt is showing
-      await expect(controller.getElementProperty(ui1, 'hidden')).to.be.true;
-      await expect(controller.getElementProperty(ui2, 'hidden')).to.be.true;
-
-      // PostPrompUI appears
-      await expect(controller.getElementProperty(postPromptUi, 'hidden')).to.be
-        .false;
-
-      // Images load
-      await expect(
-        controller.getElementAttribute(tillResponded, 'class')
-      ).to.does.not.match(/amp-notbuilt/);
-      await expect(
-        controller.getElementAttribute(accepted, 'class')
-      ).to.does.not.match(/amp-notbuilt/);
-      await expect(
-        controller.getElementAttribute(autoReject, 'class')
-      ).to.does.not.match(/amp-notbuilt/);
+      await verifyElementsBuilt([true, true, true, true, true, true]);
+      await verifyPromptsHidden([true, true, false]);
     });
   }
 );
