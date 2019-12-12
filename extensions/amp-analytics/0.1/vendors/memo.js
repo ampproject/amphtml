@@ -58,6 +58,11 @@ const MEMO_CONFIG = jsonLiteral({
       'request': 'timer',
     },
   },
+  'transport': {
+    'beacon': false,
+    'xhrpost': false,
+    'image': true
+  }
 });
 
 export {MEMO_CONFIG};
