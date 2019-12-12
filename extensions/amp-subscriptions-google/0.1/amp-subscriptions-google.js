@@ -37,6 +37,7 @@ import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
+import {getData} from '../../../src/event-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
 import {startsWith} from '../../../src/string';
@@ -163,17 +164,18 @@ export class GoogleSubscriptionsPlatform {
     });
     this.runtime_.setOnFlowStarted(e => {
       // This information is used by Propensity.
-      const params = {};
-      const data = e.data || {};
+      const params = /** @type {!JsonObject} */ ({});
+      const data = /** @type {!JsonObject} */ (getData(e) || {});
       switch (e.flow) {
         case Action.SUBSCRIBE:
-          params.product = data.skuId || data.product || 'unknown';
-          params.active = true;
+          params['product'] =
+            data['skuId'] || data['product'] || 'unknown productId';
+          params['active'] = true;
           break;
         case Action.SHOW_OFFERS:
-          params.skus = data.skus || '*';
-          params.source = data.source || 'unknown';
-          params.active = data.active || null;
+          params['skus'] = data['skus'] || '*';
+          params['source'] = data['source'] || 'unknown triggering source';
+          params['active'] = data['active'] || null;
           break;
       }
       if (
@@ -355,11 +357,11 @@ export class GoogleSubscriptionsPlatform {
       this.serviceAdapter_.resetPlatforms();
     });
     const ent = response.entitlements.getEntitlementForThis();
-    const params = {
+    const params = /** @type {!JsonObject} */ ({
       'active': true,
-      //TODO: use ent.getSku()
-      'product': (ent && ent.subscriptionToken) || 'unknown',
-    };
+      //TODO: use ent.getSku() after next SwG release
+      'product': (ent && ent.subscriptionToken) || 'unknown subscriptionToken',
+    });
 
     this.subscriptionAnalytics_.actionEvent(
       this.getServiceId(),
