@@ -56,8 +56,8 @@ const MEMO_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
-    'image': true
-  }
+    'image': true,
+  },
 });
 
 export {MEMO_CONFIG};
