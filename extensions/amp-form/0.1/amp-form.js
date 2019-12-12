@@ -257,6 +257,13 @@ export class AmpForm {
   }
 
   /**
+   * Returns the value of the form's xssi-prefix attribute.
+   */
+  getXssiPrefix() {
+    return this.form_.getAttribute('xssi-prefix');
+  }
+
+  /**
    * Builds fetch request data for amp-form elements.
    * @param {string} url
    * @param {string} method
@@ -951,7 +958,7 @@ export class AmpForm {
    */
   handleXhrSubmitSuccess_(response, incomingTrust) {
     return this.xhr_
-      .xssiJson(response, this.form_.getAttribute('xssi-prefix'))
+      .xssiJson(response, this.getXssiPrefix())
       .then(
         json =>
           this.handleSubmitSuccess_(
@@ -1001,7 +1008,7 @@ export class AmpForm {
     if (e && e.response) {
       const error = /** @type {!Error} */ (e);
       promise = this.xhr_
-        .xssiJson(error.response, this.form_.getAttribute('xssi-prefix'))
+        .xssiJson(error.response, this.getXssiPrefix())
         .catch(() => null);
     } else {
       promise = Promise.resolve(null);
