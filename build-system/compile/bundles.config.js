@@ -131,6 +131,7 @@ exports.jsBundles = {
       incudePolyfills: true,
       extraGlobs: ['extensions/amp-viewer-integration/**/*.js'],
       compilationLevel: 'WHITESPACE_ONLY',
+      skipUnknownDepsCheck: true,
     },
   },
   'video-iframe-integration.js': {
@@ -305,6 +306,12 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-ad-network-gmossp-impl',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.AD,
+  },
+  {
+    name: 'amp-ad-network-mytarget-impl',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.AD,
@@ -574,12 +581,6 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-user-location',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
     name: 'amp-gfycat',
     version: '0.1',
     latestVersion: '0.1',
@@ -635,6 +636,16 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-inline-gallery',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {
+      hasCss: true,
+      cssBinaries: ['amp-inline-gallery', 'amp-inline-gallery-pagination'],
+    },
+    type: TYPES.MISC,
   },
   {
     name: 'amp-inputmask',
@@ -711,6 +722,13 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-mega-menu',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-megaphone',
     version: '0.1',
     latestVersion: '0.1',
@@ -723,7 +741,7 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-drilldown',
+    name: 'amp-nested-menu',
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
@@ -731,7 +749,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-next-page',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -775,6 +793,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-redbull-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-reddit',
     version: '0.1',
     latestVersion: '0.1',
@@ -801,7 +825,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-sidebar',
-    version: ['0.1', '1.0'],
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -871,16 +895,17 @@ exports.extensionBundles = [
       hasCss: true,
       cssBinaries: [
         'amp-story-bookend',
-        'amp-story-tooltip',
         'amp-story-consent',
         'amp-story-draggable-drawer-header',
         'amp-story-hint',
-        'amp-story-unsupported-browser-layer',
-        'amp-story-viewport-warning-layer',
         'amp-story-info-dialog',
+        'amp-story-quiz',
         'amp-story-share',
         'amp-story-share-menu',
         'amp-story-system-layer',
+        'amp-story-tooltip',
+        'amp-story-unsupported-browser-layer',
+        'amp-story-viewport-warning-layer',
       ],
     },
     type: TYPES.MISC,

@@ -39,7 +39,7 @@ import {ActionTrust} from '../../../src/action-constants';
 import {AdvancementConfig, TapNavigationDirection} from './page-advancement';
 import {
   AdvancementMode,
-  AnalyticsEvent,
+  StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
 import {AmpEvents} from '../../../src/amp-events';
@@ -52,6 +52,7 @@ import {AmpStoryGridLayer} from './amp-story-grid-layer';
 import {AmpStoryHint} from './amp-story-hint';
 import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
+import {AmpStoryQuiz} from './amp-story-quiz';
 import {AmpStoryRenderService} from './amp-story-render-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
@@ -64,6 +65,7 @@ import {
   removeAttributeInMutate,
   setAttributeInMutate,
   setHistoryState,
+  shouldShowStoryUrlInfo,
 } from './utils';
 import {InfoDialog} from './amp-story-info-dialog';
 import {Keys} from '../../../src/utils/key-codes';
@@ -103,6 +105,7 @@ import {createPseudoLocale} from '../../../src/localized-strings';
 import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
+import {endsWith} from '../../../src/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
@@ -110,6 +113,7 @@ import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
 import {getParallaxService} from './amp-story-parallax-service';
+import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
@@ -441,27 +445,42 @@ export class AmpStory extends AMP.BaseElement {
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
-        if (args) {
-          this.storeService_.dispatch(
-            Action.SET_ADVANCEMENT_MODE,
-            AdvancementMode.GO_TO_PAGE
-          );
-          this.switchTo_(args['id'], NavigationDirection.NEXT);
+        if (!args) {
+          return;
         }
+        this.storeService_.dispatch(
+          Action.SET_ADVANCEMENT_MODE,
+          AdvancementMode.GO_TO_PAGE
+        );
+        // If open, closes the sidebar before navigating.
+        const promise = this.storeService_.get(StateProperty.SIDEBAR_STATE)
+          ? Services.historyForDoc(this.getAmpDoc()).goBack()
+          : Promise.resolve();
+        promise.then(() =>
+          this.switchTo_(args['id'], NavigationDirection.NEXT)
+        );
       });
     }
   }
 
-  /** @override */
-  pauseCallback() {
+  /**
+   * Pauses the whole story on viewer visibilityState updates, or tab visibility
+   * updates.
+   * @private
+   */
+  pause_() {
     this.pausedStateToRestore_ = !!this.storeService_.get(
       StateProperty.PAUSED_STATE
     );
     this.storeService_.dispatch(Action.TOGGLE_PAUSED, true);
   }
 
-  /** @override */
-  resumeCallback() {
+  /**
+   * Resumes the whole story on viewer visibilityState updates, or tab
+   * visibility updates.
+   * @private
+   */
+  resume_() {
     this.storeService_.dispatch(
       Action.TOGGLE_PAUSED,
       this.pausedStateToRestore_
@@ -663,7 +682,9 @@ export class AmpStory extends AMP.BaseElement {
         // We do not want to trigger an analytics event for the initialization of
         // the muted state.
         this.analyticsService_.triggerEvent(
-          isMuted ? AnalyticsEvent.STORY_MUTED : AnalyticsEvent.STORY_UNMUTED
+          isMuted
+            ? StoryAnalyticsEvent.STORY_MUTED
+            : StoryAnalyticsEvent.STORY_UNMUTED
         );
       },
       false /** callToInitialize */
@@ -790,6 +811,27 @@ export class AmpStory extends AMP.BaseElement {
     });
 
     this.getAmpDoc().onVisibilityChanged(() => this.onVisibilityChanged_());
+
+    this.win.addEventListener('hashchange', () => {
+      const maybePageId = parseQueryString(this.win.location.hash)['page'];
+      if (!maybePageId || !this.isActualPage_(maybePageId)) {
+        return;
+      }
+      this.switchTo_(maybePageId, NavigationDirection.NEXT);
+      // Removes the page 'hash' parameter from the URL.
+      let href = this.win.location.href.replace(
+        new RegExp(`page=${maybePageId}&?`),
+        ''
+      );
+      if (endsWith(href, '#')) {
+        href = href.slice(0, -1);
+      }
+      this.win.history.replaceState(
+        (this.win.history && getState(this.win.history)) || {} /** data */,
+        this.win.document.title /** title */,
+        href /** URL */
+      );
+    });
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
@@ -943,7 +985,10 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeSidebar_();
     this.setThemeColor_();
 
-    const storyLayoutPromise = this.initializePages_()
+    const storyLayoutPromise = Promise.all([
+      this.getAmpDoc().whenFirstVisible(), // Pauses execution during prerender.
+      this.initializePages_(),
+    ])
       .then(() => {
         this.handleConsentExtension_();
         this.initializeStoryAccess_();
@@ -983,7 +1028,7 @@ export class AmpStory extends AMP.BaseElement {
         // Preloads and prerenders the share menu.
         this.shareMenu_.build();
 
-        const infoDialog = this.viewer_.isEmbedded()
+        const infoDialog = shouldShowStoryUrlInfo(this.viewer_)
           ? new InfoDialog(this.win, this.element)
           : null;
         if (infoDialog) {
@@ -1054,25 +1099,34 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
-    const isActualPage = pageId =>
-      !!this.element.querySelector(`#${escapeCssSelectorIdent(pageId)}`);
     const historyPage = /** @type {string} */ (getHistoryState(
       this.win,
       HistoryState.PAGE_ID
     ));
 
-    if (isExperimentOn(this.win, 'amp-story-branching')) {
-      const maybePageId = parseQueryString(this.win.location.hash)['page'];
-      if (maybePageId && isActualPage(maybePageId)) {
-        return maybePageId;
-      }
+    const maybePageId = parseQueryString(this.win.location.hash)['page'];
+    if (maybePageId && this.isActualPage_(maybePageId)) {
+      return maybePageId;
     }
 
-    if (historyPage && isActualPage(historyPage)) {
+    if (historyPage && this.isActualPage_(historyPage)) {
       return historyPage;
     }
 
     return firstPageEl.id;
+  }
+
+  /**
+   * Checks if the amp-story-page for a given ID exists.
+   * Note: the `this.pages_` array might not be defined yet.
+   * @param {string} pageId
+   * @return {boolean}
+   * @private
+   */
+  isActualPage_(pageId) {
+    // TODO(gmajoulet): check from the cached pages array if available, and use
+    // the querySelector as a fallback.
+    return !!this.element.querySelector(`#${escapeCssSelectorIdent(pageId)}`);
   }
 
   /**
@@ -1443,10 +1497,7 @@ export class AmpStory extends AMP.BaseElement {
 
           // Start progress bar update for pages that are not ads or auto-
           // advance.
-          const isAutoAdvance = targetPage.element.hasAttribute(
-            Attributes.AUTO_ADVANCE_AFTER
-          );
-          if (!isAutoAdvance) {
+          if (!targetPage.isAutoAdvance()) {
             this.systemLayer_.updateProgress(
               targetPageId,
               this.advancement_.getProgress()
@@ -1582,7 +1633,8 @@ export class AmpStory extends AMP.BaseElement {
           el.removeAttribute(Attributes.DESKTOP_POSITION);
         });
 
-        list.forEach(({page, position}) => {
+        list.forEach(entry => {
+          const {page, position} = entry;
           page.element.setAttribute(Attributes.DESKTOP_POSITION, position);
         });
       }
@@ -1755,7 +1807,7 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onVisibilityChanged_() {
-    this.getAmpDoc().isVisible() ? this.resumeCallback() : this.pauseCallback();
+    this.getAmpDoc().isVisible() ? this.resume_() : this.pause_();
   }
 
   /**
@@ -1917,6 +1969,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onSidebarStateUpdate_(sidebarState) {
+    this.analyticsService_.triggerEvent(
+      sidebarState ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.sidebar_
+    );
+
     const actions = Services.actionServiceForDoc(this.element);
     if (this.win.MutationObserver) {
       if (!this.sidebarObserver_) {
@@ -2684,5 +2741,6 @@ AMP.extension('amp-story', '1.0', AMP => {
   AMP.registerElement('amp-story-grid-layer', AmpStoryGridLayer);
   AMP.registerElement('amp-story-page', AmpStoryPage);
   AMP.registerElement('amp-story-page-attachment', AmpStoryPageAttachment);
+  AMP.registerElement('amp-story-quiz', AmpStoryQuiz);
   AMP.registerServiceForDoc('amp-story-render', AmpStoryRenderService);
 });

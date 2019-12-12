@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays GL Transmission Format (gITF) 3D models.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -56,11 +57,13 @@ by a CORS endpoint.
   <a href="tel:123456789">+1 (23) 456-789</a>
 </amp-call-tracking>
 ```
+
 {% call callout('Note', type='note') %}
 Each unique CORS endpoint is called only once per page.
 {% endcall %}
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>config (required)</strong></td>

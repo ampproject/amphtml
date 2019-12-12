@@ -32,10 +32,8 @@ describes.realWin(
   },
   env => {
     let webPush;
-    let sandbox;
 
     beforeEach(() => {
-      sandbox = env.sandbox;
       webPush = new WebPushService(env.ampdoc);
     });
 
@@ -44,7 +42,7 @@ describes.realWin(
     });
 
     it('should not support environment missing Notification API', () => {
-      sandbox.defineProperty(env.win, 'Notification', {
+      env.sandbox.defineProperty(env.win, 'Notification', {
         enumerable: false,
         writable: false,
         value: undefined,
@@ -53,7 +51,7 @@ describes.realWin(
     });
 
     it('should not support environment missing Service Worker API', () => {
-      sandbox.defineProperty(env.win.navigator, 'serviceWorker', {
+      env.sandbox.defineProperty(env.win.navigator, 'serviceWorker', {
         enumerable: false,
         writable: false,
         value: undefined,
@@ -62,7 +60,7 @@ describes.realWin(
     });
 
     it('should not support environment missing PushManager API', () => {
-      sandbox.defineProperty(env.win, 'PushManager', {
+      env.sandbox.defineProperty(env.win, 'PushManager', {
         enumerable: false,
         writable: false,
         value: undefined,
@@ -72,7 +70,7 @@ describes.realWin(
 
     it('an unsupported environment should prevent initializing', () => {
       // Cause push to not be supported on this environment
-      sandbox.defineProperty(env.win, 'PushManager', {
+      env.sandbox.defineProperty(env.win, 'PushManager', {
         enumerable: false,
         writable: false,
         value: undefined,
@@ -93,12 +91,12 @@ describes.fakeWin(
   env => {
     it('should not support HTTP location', () => {
       env.ampdoc.win.location.resetHref('http://site.com/');
-      sandbox.stub(mode, 'getMode').callsFake(() => {
+      env.sandbox.stub(mode, 'getMode').callsFake(() => {
         return {development: false, test: false};
       });
       expect(env.ampdoc.win.location.href).to.be.equal('http://site.com/');
       const webPush = new WebPushService(env.ampdoc);
-      sandbox
+      env.sandbox
         ./*OK*/ stub(webPush, 'arePushRelatedApisSupported_')
         .callsFake(() => true);
       expect(webPush.environmentSupportsWebPush()).to.eq(false);
@@ -116,7 +114,7 @@ describes.fakeWin(
       env.ampdoc.win.location.resetHref('http://localhost/');
       expect(env.ampdoc.win.location.href).to.be.equal('http://localhost/');
       const webPush = new WebPushService(env.ampdoc);
-      sandbox
+      env.sandbox
         ./*OK*/ stub(webPush, 'arePushRelatedApisSupported_')
         .callsFake(() => true);
       expect(webPush.environmentSupportsWebPush()).to.eq(true);
@@ -133,7 +131,7 @@ describes.fakeWin(
     it('should support localhost HTTP location with port', () => {
       env.ampdoc.win.location.resetHref('http://localhost:8000/');
       const webPush = new WebPushService(env.ampdoc);
-      sandbox
+      env.sandbox
         ./*OK*/ stub(webPush, 'arePushRelatedApisSupported_')
         .callsFake(() => true);
       expect(env.ampdoc.win.location.href).to.be.equal(
@@ -153,7 +151,7 @@ describes.fakeWin(
     it('should support 127.0.0.1 HTTP location', () => {
       env.ampdoc.win.location.resetHref('http://127.0.0.1/');
       const webPush = new WebPushService(env.ampdoc);
-      sandbox
+      env.sandbox
         ./*OK*/ stub(webPush, 'arePushRelatedApisSupported_')
         .callsFake(() => true);
       expect(env.ampdoc.win.location.href).to.be.equal('http://127.0.0.1/');
@@ -171,7 +169,7 @@ describes.fakeWin(
     it('should support 127.0.0.1 HTTP location with port', () => {
       env.ampdoc.win.location.resetHref('http://localhost:9000/');
       const webPush = new WebPushService(env.ampdoc);
-      sandbox
+      env.sandbox
         ./*OK*/ stub(webPush, 'arePushRelatedApisSupported_')
         .callsFake(() => true);
       expect(env.ampdoc.win.location.href).to.be.equal(
@@ -320,17 +318,17 @@ describes.realWin(
       let spy = null;
       return setupHelperIframe()
         .then(() => {
-          spy = sandbox./*OK*/ spy(webPush, 'setWidgetVisibilities');
+          spy = env.sandbox./*OK*/ spy(webPush, 'setWidgetVisibilities');
 
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'isQuerySupported_')
             .callsFake(() => Promise.resolve(true));
 
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'getCanonicalFrameStorageValue_')
             .callsFake(() => Promise.resolve(NotificationPermission.DENIED));
 
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'doesWidgetCategoryMarkupExist_')
             .callsFake(() => true);
           // We've mocked default notification permissions
@@ -355,15 +353,15 @@ describes.realWin(
 
       return setupHelperIframe()
         .then(() => {
-          spy = sandbox./*OK*/ spy(webPush, 'setWidgetVisibilities');
+          spy = env.sandbox./*OK*/ spy(webPush, 'setWidgetVisibilities');
 
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'querySubscriptionStateRemotely')
             .callsFake(() => Promise.resolve(true));
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'isServiceWorkerActivated')
             .callsFake(() => Promise.resolve(true));
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'queryNotificationPermission')
             .callsFake(() => Promise.resolve(NotificationPermission.DEFAULT));
 
@@ -389,12 +387,12 @@ describes.realWin(
 
       return setupHelperIframe()
         .then(() => {
-          spy = sandbox./*OK*/ spy(webPush, 'setWidgetVisibilities');
+          spy = env.sandbox./*OK*/ spy(webPush, 'setWidgetVisibilities');
 
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'isServiceWorkerActivated')
             .callsFake(() => Promise.resolve(false));
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'queryNotificationPermission')
             .callsFake(() => Promise.resolve(NotificationPermission.DEFAULT));
 
@@ -420,15 +418,15 @@ describes.realWin(
 
       return setupHelperIframe()
         .then(() => {
-          spy = sandbox./*OK*/ spy(webPush, 'setWidgetVisibilities');
+          spy = env.sandbox./*OK*/ spy(webPush, 'setWidgetVisibilities');
 
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'querySubscriptionStateRemotely')
             .callsFake(() => Promise.resolve(false));
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'isServiceWorkerActivated')
             .callsFake(() => Promise.resolve(true));
-          sandbox
+          env.sandbox
             ./*OK*/ stub(webPush, 'queryNotificationPermission')
             .callsFake(() => Promise.resolve(NotificationPermission.DEFAULT));
 
@@ -521,20 +519,20 @@ describes.realWin(
       let iframeWindowControllerMock = null;
 
       return setupHelperIframe().then(() => {
-        sandbox
+        env.sandbox
           ./*OK*/ stub(webPush, 'isServiceWorkerActivated')
           .callsFake(() => Promise.resolve(true));
-        sandbox./*OK*/ stub(webPush, 'queryNotificationPermission', () =>
+        env.sandbox./*OK*/ stub(webPush, 'queryNotificationPermission', () =>
           Promise.resolve(NotificationPermission.GRANTED)
         );
 
-        iframeWindowControllerMock = sandbox./*OK*/ mock(
+        iframeWindowControllerMock = env.sandbox./*OK*/ mock(
           iframeWindow._ampWebPushHelperFrame
         );
         iframeWindowControllerMock
           .expects('waitUntilWorkerControlsPage')
           .returns(Promise.resolve(true));
-        sandbox
+        env.sandbox
           ./*OK*/ stub(
             iframeWindow._ampWebPushHelperFrame,
             'messageServiceWorker'
@@ -615,7 +613,7 @@ describes.realWin(
 
       return setupHelperIframe()
         .then(() => {
-          helperFrameSwMessageMock = sandbox./*OK*/ mock(
+          helperFrameSwMessageMock = env.sandbox./*OK*/ mock(
             iframeWindow.navigator.serviceWorker
           );
           helperFrameSwMessageMock
@@ -634,13 +632,13 @@ describes.realWin(
       let iframeWindowControllerMock = null;
 
       return setupHelperIframe().then(() => {
-        iframeWindowControllerMock = sandbox./*OK*/ mock(
+        iframeWindowControllerMock = env.sandbox./*OK*/ mock(
           iframeWindow._ampWebPushHelperFrame
         );
         iframeWindowControllerMock
           .expects('waitUntilWorkerControlsPage')
           .returns(Promise.resolve(true));
-        sandbox
+        env.sandbox
           ./*OK*/ stub(
             iframeWindow._ampWebPushHelperFrame,
             'messageServiceWorker'
@@ -658,7 +656,7 @@ describes.realWin(
       let openWindowMock = null;
 
       return setupHelperIframe().then(() => {
-        openWindowMock = sandbox./*OK*/ mock(env.win);
+        openWindowMock = env.sandbox./*OK*/ mock(env.win);
         const returningPopupUrl =
           env.win.location.href +
           '?' +
@@ -776,13 +774,13 @@ describes.realWin(
       let iframeWindowControllerMock = null;
 
       return setupHelperIframe().then(() => {
-        iframeWindowControllerMock = sandbox./*OK*/ mock(
+        iframeWindowControllerMock = env.sandbox./*OK*/ mock(
           iframeWindow._ampWebPushHelperFrame
         );
         iframeWindowControllerMock
           .expects('waitUntilWorkerControlsPage')
           .returns(Promise.resolve(true));
-        sandbox
+        env.sandbox
           ./*OK*/ stub(
             iframeWindow._ampWebPushHelperFrame,
             'messageServiceWorker'
@@ -802,10 +800,10 @@ describes.realWin(
 
       return setupHelperIframe()
         .then(() => {
-          unsubscribeStub = sandbox
+          unsubscribeStub = env.sandbox
             ./*OK*/ stub(webPush, 'unsubscribeFromPushRemotely')
             .callsFake(() => Promise.resolve());
-          updateWidgetStub = sandbox
+          updateWidgetStub = env.sandbox
             ./*OK*/ stub(webPush, 'updateWidgetVisibilities')
             .callsFake(() => Promise.resolve());
 

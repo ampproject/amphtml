@@ -6,6 +6,7 @@ teaser:
   text: Allows running custom JavaScript to render UI.
 experimental: true
 ---
+
 # amp-script
 
 Allows running custom JavaScript to render UI.
@@ -63,6 +64,7 @@ The `amp-script` component allows you run custom JavaScript to render UI element
 ### A simple example
 
 An `amp-script` element can load JavaScript in two ways:
+
 - Remotely, from a URL to a JavaScript file.
 - Locally, from a `script[type=text/plain][target=amp-script]` element on the page.
 
@@ -87,12 +89,13 @@ Use the `script` attribute to reference a local `script` element by `id`.
 <head>
   <meta
     name="amp-script-src"
-    content="sha384-YCFs8k-ouELcBTgzKzNAujZFxygwiqimSqKK7JqeKaGNflwDxaC3g2toj7s_kxWG">
+    content="sha384-YCFs8k-ouELcBTgzKzNAujZFxygwiqimSqKK7JqeKaGNflwDxaC3g2toj7s_kxWG"
+  />
 </head>
 
 ...
 
-<amp-script width=200 height=50 script="hello-world">
+<amp-script width="200" height="50" script="hello-world">
   <button>Hello amp-script!</button>
 </amp-script>
 
@@ -127,7 +130,7 @@ document.body.appendChild(p);
 Will be reflected on the page as a new child of the `amp-script` element:
 
 ```html
-<amp-script src="http://example.com/my-script.js" width=300 height=100>
+<amp-script src="http://example.com/my-script.js" width="300" height="100">
   <p>I am added to the body!</p>
 </amp-script>
 ```
@@ -138,7 +141,7 @@ Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/am
 
 `amp-script` supports getting and setting [`amp-state`](https://amp.dev/documentation/components/amp-bind/#initializing-state-with-amp-state) JSON via JavaScript.
 
-This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings). These elements can be inside (descendants) or outside (non-descendants) of the `amp-script` element.
+This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings). Currently, invoking `AMP.setState()` from `amp-script` will only implicitly update state without mutating the DOM (similar to [`amp-state` initialization](https://amp.dev/documentation/examples/components/amp-bind/?referrer=ampbyexample.com#initializing-state)) &mdash; work is planned to allow mutations from `AMP.setState()` triggered by user gesture ([#24862](https://github.com/ampproject/amphtml/issues/24862)).
 
 [tip type="default"]
 `AMP.setState()` requires the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension script to be included in the document head.
@@ -162,8 +165,7 @@ AMP.getState(expr) {}
 ##### Example with WebSocket and AMP.setState()
 
 ```html
-<amp-script width=1 height=1 script="webSocketDemo">
-</amp-script>
+<amp-script width="1" height="1" script="webSocketDemo"> </amp-script>
 
 <!--
   <amp-state> doesn't support WebSocket URLs in its "src" attribute,
@@ -171,7 +173,7 @@ AMP.getState(expr) {}
 -->
 <script type="text/plain" target="amp-script" id="webSocketDemo">
   const socket = new WebSocket('wss://websocket.example');
-  socket.onmessage = e => {
+  socket.onmessage = event => {
     AMP.setState({socketData: event.data});
   };
 </script>
@@ -200,7 +202,11 @@ The rules for mutations are as follows:
 
 1. Mutations are always accepted for five seconds after a user gesture.
 2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
-3. Mutations are always accepted for `amp-script` elements with [`[layout!="container"]`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute) and `height < 300px`.
+3. Mutations are always accepted for `amp-script` elements with [`[layout!="container"]`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute) and `height ≤ 300px`.
+
+#### Creating AMP elements
+
+With regard to dynamic creation of AMP elements (e.g. via `document.createElement()`), only `amp-img` and `amp-layout` are currently allowed. Please upvote or comment on [#25344](https://github.com/ampproject/amphtml/issues/25344) with your use case.
 
 #### Security features
 
@@ -249,7 +255,7 @@ Example of script hashes:
 ```
 
 [tip type="default"]
-The JavaScript size and script hash requirements can be disabled during development by adding a `development` attribute to an `amp-script` element.
+The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to both the top-level `html` element and the `amp-script` element (or any of its parent nodes).
 [/tip]
 
 ## Attributes
@@ -285,12 +291,6 @@ The value of `max-age` should be chosen carefully:
 - A shorter `max-age` may prevent inclusion in AMP Caches that have a [minimum SXG lifetime](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache).
 
 If you don't publish signed exchanges, `max-age` does nothing.
-
-**development (optional, invalid)**
-
-A boolean attribute that disables the JS size and security constraints for a more convenient development experience.
-
-This attribute is not allowed by the AMP Validator and should not be used on pages in production.
 
 **common attributes**
 

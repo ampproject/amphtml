@@ -36,16 +36,15 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
-import {getExperimentBranch, isExperimentOn} from './experiments';
-import {getMode} from './mode';
+import {getExperimentBranch} from './experiments';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
-import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
+import {isInAmpdocFieExperiment} from './ampdoc-fie';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -144,7 +143,7 @@ export function installFriendlyIframeEmbed(
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
-  const ampdocFieExperimentOn = isExperimentOn(win, 'ampdoc-fie');
+  const ampdocFieExperimentOn = isInAmpdocFieExperiment(win);
   /** @const {?./service/ampdoc-impl.AmpDocService} */
   const ampdocService = ampdocFieExperimentOn
     ? Services.ampdocServiceFor(win)
@@ -562,6 +561,14 @@ export class FriendlyIframeEmbed {
   }
 
   /**
+   * @return {!./service/mutator-interface.MutatorInterface}
+   * @private
+   */
+  getMutator_() {
+    return Services.mutatorForDoc(this.iframe);
+  }
+
+  /**
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
    * @param {{measure: (function()|undefined), mutate: function()}} task
@@ -569,7 +576,7 @@ export class FriendlyIframeEmbed {
    * @private
    */
   measureMutate_(task) {
-    return this.getResources_().measureMutateElement(
+    return this.getMutator_().measureMutateElement(
       this.iframe,
       task.measure || null,
       task.mutate
@@ -857,15 +864,12 @@ export class FriendlyIframeEmbed {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenList(childWin);
-  if (
-    // eslint-disable-next-line no-undef
-    CUSTOM_ELEMENTS_V1 ||
-    getMode().test
-  ) {
-    installCustomElements(childWin);
-  } else {
-    installRegisterElement(childWin, 'auto');
-  }
+  // The anonymous class parameter allows us to detect native classes vs
+  // transpiled classes.
+  installCustomElements(
+    childWin,
+    NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined
+  );
 }
 
 /**

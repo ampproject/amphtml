@@ -21,6 +21,7 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../amp-a4a/0.1/real-time-config-manager';
+import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
   AmpA4A,
   DEFAULT_SAFEFRAME_VERSION,
@@ -71,6 +72,11 @@ import {
 } from './sra-utils';
 import {WindowInterface} from '../../../src/window-interface';
 import {
+  assertDoesNotContainDisplay,
+  setImportantStyles,
+  setStyles,
+} from '../../../src/style';
+import {
   createElementWithAttributes,
   isRTL,
   removeElement,
@@ -101,7 +107,6 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {setImportantStyles, setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -379,33 +384,36 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
     const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ ({
-      // Only select into SRA experiments if SRA not already explicitly
-      // enabled and refresh is not being used by any slot.
-      [DOUBLECLICK_SRA_EXP]: {
-        isTrafficEligible: () =>
-          !forcedExperimentId &&
-          !this.win.document./*OK*/ querySelector(
-            'meta[name=amp-ad-enable-refresh], ' +
-              'amp-ad[type=doubleclick][data-enable-refresh], ' +
-              'meta[name=amp-ad-doubleclick-sra]'
+        !../../../src/experiments.ExperimentInfo>} */ (Object.assign(
+      {
+        // Only select into SRA experiments if SRA not already explicitly
+        // enabled and refresh is not being used by any slot.
+        [DOUBLECLICK_SRA_EXP]: {
+          isTrafficEligible: () =>
+            !forcedExperimentId &&
+            !this.win.document./*OK*/ querySelector(
+              'meta[name=amp-ad-enable-refresh], ' +
+                'amp-ad[type=doubleclick][data-enable-refresh], ' +
+                'meta[name=amp-ad-doubleclick-sra]'
+            ),
+          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
+            key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
           ),
-        branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-          key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
-        ),
+        },
+        [FLEXIBLE_AD_SLOTS_EXP]: {
+          isTrafficEligible: () => true,
+          branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
+        },
+        [[FIE_CSS_CLEANUP_EXP.branch]]: {
+          isTrafficEligible: () => true,
+          branches: [
+            [FIE_CSS_CLEANUP_EXP.control],
+            [FIE_CSS_CLEANUP_EXP.experiment],
+          ],
+        },
       },
-      [FLEXIBLE_AD_SLOTS_EXP]: {
-        isTrafficEligible: () => true,
-        branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
-      },
-      [[FIE_CSS_CLEANUP_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_CSS_CLEANUP_EXP.control],
-          [FIE_CSS_CLEANUP_EXP.experiment],
-        ],
-      },
-    });
+      AMPDOC_FIE_EXPERIMENT_INFO_MAP
+    ));
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(
       expName => setExps[expName] && this.experimentIds.push(setExps[expName])
@@ -1190,6 +1198,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               'Attempt to change size failed on fluid ' +
                 'creative. Will re-attempt when slot is out of the viewport.'
             );
+            const {width, height} = this.getSlotSize();
+            if (width && height) {
+              // This call is idempotent, so it's okay to make it multiple
+              // times.
+              this.fireFluidDelayedImpression();
+            }
             this.reattemptToExpandFluidCreative_ = true;
             this.setCssPosition_('absolute');
           });
@@ -1245,7 +1259,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       (returnedSizeDifferent && heightNotIncreased)
     ) {
       this.attemptChangeSize(newHeight, newWidth).catch(() => {});
-      if (newWidth > width) {
+      if (
+        newWidth > width &&
+        // If 'fluid' were the primary requested size, ensure we do not trigger
+        // slot adjustment if the returned size is one of the requested multi-
+        // sizes. Slot adjustment should only be triggered when the creative
+        // size is not one of the requested sizes.
+        (!this.isFluidPrimaryRequest_ ||
+          (this.parameterSize &&
+            this.parameterSize.indexOf(`${newWidth}x${newHeight}`) == -1))
+      ) {
         this.adjustSlotPostExpansion_(newWidth);
       }
     }
@@ -1265,41 +1288,41 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     ) {
       return;
     }
+    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
     const isRtl = isRTL(this.win.document);
     const dirStr = isRtl ? 'Right' : 'Left';
-    // Guaranteed to be set after exiting if/else.
-    let /** ?number */ newMargin = null;
-    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
-    if (newWidth <= parentWidth) {
-      // Must center creative within its parent container
-      const parentPadding = parseInt(parentStyle[`padding${dirStr}`], 10) || 0;
-      const parentBorder =
-        parseInt(parentStyle[`border${dirStr}Width`], 10) || 0;
-      const whitespace = (this.flexibleAdSlotData_.parentWidth - newWidth) / 2;
-      newMargin = whitespace - parentPadding - parentBorder;
-    } else {
-      // Must center creative within the viewport
-      const viewportWidth = this.getViewport().getRect().width;
-      const pageLayoutBox = this.element.getPageLayoutBox();
-      const whitespace = (viewportWidth - newWidth) / 2;
-      if (isRtl) {
-        newMargin = pageLayoutBox.right + whitespace - viewportWidth;
+    const /** !Object<string, string> */ style = {'z-index': '11'};
+    // Compute offset margins if the slot is not centered by default.
+    if (parentStyle.textAlign != 'center') {
+      const getMarginStr = marginNum => `${Math.round(marginNum)}px`;
+      if (newWidth <= parentWidth) {
+        // Must center creative within its parent container
+        const parentPadding =
+          parseInt(parentStyle[`padding${dirStr}`], 10) || 0;
+        const parentBorder =
+          parseInt(parentStyle[`border${dirStr}Width`], 10) || 0;
+        const whitespace =
+          (this.flexibleAdSlotData_.parentWidth - newWidth) / 2;
+        style[isRtl ? 'margin-right' : 'margin-left'] = getMarginStr(
+          whitespace - parentPadding - parentBorder
+        );
       } else {
-        newMargin = -(pageLayoutBox.left - whitespace);
+        // Must center creative within the viewport
+        const viewportWidth = this.getViewport().getRect().width;
+        const pageLayoutBox = this.element.getPageLayoutBox();
+        const whitespace = (viewportWidth - newWidth) / 2;
+        if (isRtl) {
+          style['margin-right'] = getMarginStr(
+            pageLayoutBox.right + whitespace - viewportWidth
+          );
+        } else {
+          style['margin-left'] = getMarginStr(
+            -(pageLayoutBox.left - whitespace)
+          );
+        }
       }
     }
-    // setStyles cannot have computed style names, so we must do this by cases.
-    if (isRtl) {
-      setStyles(this.element, {
-        'z-index': '11',
-        'margin-right': `${Math.round(newMargin)}px`,
-      });
-    } else {
-      setStyles(this.element, {
-        'z-index': '11',
-        'margin-left': `${Math.round(newMargin)}px`,
-      });
-    }
+    setStyles(this.element, assertDoesNotContainDisplay(style));
   }
 
   /** @override */
@@ -1390,7 +1413,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   groupSlotsForSra() {
     return groupAmpAdsByType(
-      this.win,
+      this.getAmpDoc(),
       this.element.getAttribute('type'),
       getNetworkId
     );
