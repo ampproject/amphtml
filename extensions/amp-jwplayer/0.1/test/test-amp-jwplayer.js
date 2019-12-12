@@ -15,6 +15,8 @@
  */
 
 import '../amp-jwplayer';
+import {DocInfo} from '../../../../src/service/document-info-impl';
+import {Services} from '../../../../src/services';
 import {htmlFor} from '../../../../src/static-template';
 
 describes.realWin(
@@ -40,15 +42,16 @@ describes.realWin(
       jw.setAttribute('width', '320');
       jw.setAttribute('height', '180');
       jw.setAttribute('layout', 'responsive');
-      const html = htmlFor(env.win.document);
+
+      const ogTitle = env.win.document.createElement('meta');
+      ogTitle.setAttribute('property', 'og:title');
+      ogTitle.setAttribute('content', 'title_tag');
+      env.win.document.head.appendChild(ogTitle);
+
       env.sandbox
-        .stub(env.ampdoc.getHeadNode(), 'querySelector')
-        .withArgs('meta[property="og:title"]')
-        .returns(
-          html`
-            <meta property="og:title" content="title_tag" />
-          `
-        );
+        .stub(Services, 'documentInfoForDoc')
+        .returns(new DocInfo(env.ampdoc).get());
+
       doc.body.appendChild(jw);
       return jw.build().then(() => {
         jw.layoutCallback();

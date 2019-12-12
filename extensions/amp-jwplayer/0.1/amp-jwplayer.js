@@ -175,7 +175,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     if (this.contentSearch_ === '__CONTEXTUAL__') {
       const docInfo = Services.documentInfoForDoc(this.getAmpDoc());
       const {title, metaTags} = docInfo;
-      const ogTitle = metaTags && metaTags['title'];
+      const ogTitle = metaTags && metaTags['og:title'];
       return ogTitle || title || '';
     }
     return this.contentSearch_;

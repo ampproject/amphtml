@@ -15,6 +15,10 @@
  */
 
 import {Services} from '../../src/services';
+import {createIframePromise} from '../../testing/iframe';
+import {installDocService} from '../../src/service/ampdoc-impl';
+import {installDocumentInfoServiceForDoc} from '../../src/service/document-info-impl';
+
 import {isProtocolValid} from '../../src/url';
 import {
   parseFavicon,
@@ -23,7 +27,7 @@ import {
   setMediaSession,
 } from '../../src/mediasession-helper';
 
-const schemaTemplate = `
+const SCHEMA_TEMPLATE = `
 {
   "@context": "http://schema.org",
   "@type": "NewsArticle",
@@ -55,143 +59,139 @@ const schemaTemplate = `
 }
 `;
 
-describes.sandboxed('MediaSessionAPI Helper Functions', {}, env => {
-  let element;
-  let ampdoc;
-  let favicon;
-  let schema;
-  let ogImage;
-  let head;
+describe
+  .configure()
+  .skipFirefox()
+  .run('MediaSessionAPI Helper Functions', () => {
+    let element;
+    let favicon;
+    let schema;
+    let ogImage;
+    let head;
 
-  beforeEach(() => {
-    element = {};
-    env.sandbox
-      .stub(Services, 'urlForDoc')
-      .withArgs(element)
-      .returns({isProtocolValid});
+    function getWin() {
+      return createIframePromise().then(iframe => {
+        window.sandbox
+          .stub(Services, 'urlForDoc')
+          .withArgs(element)
+          .returns({isProtocolValid});
 
-    head = document.querySelector('head');
-    // Favicon
-    favicon = document.createElement('link');
-    favicon.setAttribute('rel', 'icon');
-    favicon.setAttribute('href', 'http://example.com/favicon.ico');
-    head.appendChild(favicon);
-    // Schema
-    schema = document.createElement('script');
-    schema.setAttribute('type', 'application/ld+json');
-    schema.innerHTML = schemaTemplate;
-    head.appendChild(schema);
-    // og-image
-    ogImage = document.createElement('meta');
-    ogImage.setAttribute('property', 'og:image');
-    ogImage.setAttribute('content', 'http://example.com/og-image.png');
-    head.appendChild(ogImage);
-    ampdoc = {
-      win: {
-        'document': document,
-        'navigator': {
-          'mediaSession': {
-            'metadata': {
-              'artist': '',
-              'album': '',
-              'artwork': [],
-              'title': '',
-            },
-            'setActionHandler': () => {},
-          },
-        },
-        'MediaMetadata': Object,
-      },
-    };
-  });
+        head = iframe.doc.head;
+        // Favicon
+        favicon = iframe.doc.createElement('link');
+        favicon.setAttribute('rel', 'icon');
+        favicon.setAttribute('href', 'http://example.com/favicon.ico');
+        head.appendChild(favicon);
+        // Schema
+        schema = iframe.doc.createElement('script');
+        schema.setAttribute('type', 'application/ld+json');
+        schema.innerHTML = SCHEMA_TEMPLATE;
+        head.appendChild(schema);
+        // og-image
+        ogImage = iframe.doc.createElement('meta');
+        ogImage.setAttribute('property', 'og:image');
+        ogImage.setAttribute('content', 'http://example.com/og-image.png');
+        head.appendChild(ogImage);
 
-  afterEach(() => {
-    head.removeChild(favicon);
-    head.removeChild(schema);
-    head.removeChild(ogImage);
-  });
+        const {win} = iframe;
+        installDocService(win, /* isSingleDoc */ true);
+        win.__AMP_SERVICES.documentInfo = null;
+        win.MediaMetadata = window.MediaMetadata;
+        installDocumentInfoServiceForDoc(win.document);
+        return iframe.win;
+      });
+    }
 
-  it('should parse the schema and find the image', () => {
-    expect(parseSchemaImage(ampdoc.win.document)).to.equal(
-      'http://example.com/image.png'
-    );
-  });
-
-  it('should parse the og-image', () => {
-    expect(parseOgImage(ampdoc.win.document)).to.equal(
-      'http://example.com/og-image.png'
-    );
-  });
-
-  it('should parse the favicon', () => {
-    expect(parseFavicon(ampdoc.win.document)).to.equal(
-      'http://example.com/favicon.ico'
-    );
-  });
-
-  it('should set the media session', () => {
-    expect(ampdoc.win.navigator.mediaSession.metadata).to.deep.equal({
-      'artist': '',
-      'album': '',
-      'artwork': [],
-      'title': '',
+    it('should parse the schema and find the image', () => {
+      return getWin().then(win => {
+        expect(parseSchemaImage(win.document)).to.equal(
+          'http://example.com/image.png'
+        );
+      });
     });
-    const fakeMetaData = {
-      'artist': 'Some artist',
-      'album': 'Some album',
-      'artwork': ['http://example.com/image.png'],
-      'title': 'Some title',
-    };
-    setMediaSession(element, ampdoc.win, fakeMetaData);
-    const newMetaData = ampdoc.win.navigator.mediaSession.metadata;
-    expect(newMetaData).to.deep.equal(fakeMetaData);
-  });
 
-  it('should throw if artwork src is invalid - object', () => {
-    const fakeMetaData = {
-      'artist': '',
-      'album': '',
-      'artwork': [
-        /*eslint no-script-url: 0*/
-        {'src': 'javascript://alert(1)'},
-      ],
-      'title': '',
-    };
-    return allowConsoleError(() => {
-      expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
-      }).to.throw();
+    it('should parse the og-image', () => {
+      return getWin().then(win => {
+        expect(parseOgImage(win.document)).to.equal(
+          'http://example.com/og-image.png'
+        );
+      });
     });
-  });
 
-  it('should throw if artwork src is invalid - string', () => {
-    const fakeMetaData = {
-      'artist': '',
-      'album': '',
-      'artwork': [
-        /*eslint no-script-url: 0*/
-        'javascript://alert(1)',
-      ],
-      'title': '',
-    };
-    return allowConsoleError(() => {
-      expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
-      }).to.throw();
+    it('should parse the favicon', () => {
+      return getWin().then(win => {
+        expect(parseFavicon(win.document)).to.equal(
+          'http://example.com/favicon.ico'
+        );
+      });
     });
-  });
 
-  it('should throw if artwork is not array', () => {
-    const fakeMetaData = {
-      'artist': '',
-      'album': '',
-      'artwork': 'https://NotArray',
-      'title': '',
-    };
-    return allowConsoleError(() => {
-      expect(() => {
-        setMediaSession(element, ampdoc.win, fakeMetaData);
-      }).to.throw();
+    it('should set the media session', () => {
+      return getWin().then(win => {
+        expect(win.navigator.mediaSession.metadata).to.equal(null);
+        const fakeMetaData = {
+          'artist': 'Some artist',
+          'album': 'Some album',
+          'artwork': [{'src': 'http://example.com/image.png'}],
+          'title': 'Some title',
+        };
+        setMediaSession(element, win, fakeMetaData);
+        const newMetaData = win.navigator.mediaSession.metadata;
+        expect(newMetaData).to.deep.equal(new win.MediaMetadata(fakeMetaData));
+      });
+    });
+
+    it('should throw if artwork src is invalid - object', () => {
+      const fakeMetaData = {
+        'artist': '',
+        'album': '',
+        'artwork': [
+          /*eslint no-script-url: 0*/
+          {'src': 'javascript://alert(1)'},
+        ],
+        'title': '',
+      };
+      return getWin().then(win => {
+        return allowConsoleError(() => {
+          expect(() => {
+            setMediaSession(element, win, fakeMetaData);
+          }).to.throw();
+        });
+      });
+    });
+
+    it('should throw if artwork src is invalid - string', () => {
+      const fakeMetaData = {
+        'artist': '',
+        'album': '',
+        'artwork': [
+          /*eslint no-script-url: 0*/
+          'javascript://alert(1)',
+        ],
+        'title': '',
+      };
+      return getWin().then(win => {
+        return allowConsoleError(() => {
+          expect(() => {
+            setMediaSession(element, win, fakeMetaData);
+          }).to.throw();
+        });
+      });
+    });
+
+    it('should throw if artwork is not array', () => {
+      const fakeMetaData = {
+        'artist': '',
+        'album': '',
+        'artwork': 'https://NotArray',
+        'title': '',
+      };
+      return getWin().then(win => {
+        return allowConsoleError(() => {
+          expect(() => {
+            setMediaSession(element, win, fakeMetaData);
+          }).to.throw();
+        });
+      });
     });
   });
-});
