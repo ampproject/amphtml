@@ -175,10 +175,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   resumeCallback() {
     if (this.iniPromise_) {
       this.iniPromise_.then(() => {
-        this.transport_.maybeInitIframeTransport(
-          this.getAmpDoc().win,
-          this.element
-        );
+        this.transport_.maybeInitIframeTransport(this.element);
       });
     }
   }
@@ -294,11 +291,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.element
     );
 
-    this.transport_.maybeInitIframeTransport(
-      this.win,
-      this.element,
-      Services.preconnectFor(this.win)
-    );
+    this.transport_.maybeInitIframeTransport(this.element);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.

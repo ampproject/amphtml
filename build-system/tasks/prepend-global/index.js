@@ -16,13 +16,14 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const BBPromise = require('bluebird');
 const childProcess = require('child_process');
-const exec = BBPromise.promisify(childProcess.exec);
 const colors = require('ansi-colors');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
 const log = require('fancy-log');
 const path = require('path');
+const util = require('util');
+
+const exec = util.promisify(childProcess.exec);
 
 const {red, cyan} = colors;
 
@@ -98,7 +99,7 @@ function writeTarget(filename, fileString, opt_dryrun) {
     log(fileString);
     return Promise.resolve();
   }
-  return fs.writeFileAsync(filename, fileString);
+  return fs.promises.writeFile(filename, fileString);
 }
 
 /**
@@ -135,8 +136,8 @@ function applyConfig(
   return checkoutBranchConfigs(filename, opt_localBranch, opt_branch)
     .then(() => {
       return Promise.all([
-        fs.readFileAsync(filename),
-        fs.readFileAsync(target),
+        fs.promises.readFile(filename),
+        fs.promises.readFile(target),
       ]);
     })
     .then(files => {
@@ -209,7 +210,7 @@ function enableLocalDev(config, target, configJson) {
  * @return {!Promise}
  */
 function removeConfig(target) {
-  return fs.readFileAsync(target).then(file => {
+  return fs.promises.readFile(target).then(file => {
     let contents = file.toString();
     if (numConfigs(contents) == 0) {
       return Promise.resolve();

@@ -30,15 +30,17 @@ import {
   installServiceInEmbedScope,
   registerServiceBuilderForDoc,
 } from '../service';
-import {isExperimentOn} from '../experiments';
 import {toWin} from '../types';
 import PriorityQueue from '../utils/priority-queue';
 
 const TAG = 'navigation';
+
 /** @private @const {string} */
 const EVENT_TYPE_CLICK = 'click';
+
 /** @private @const {string} */
 const EVENT_TYPE_CONTEXT_MENU = 'contextmenu';
+
 const VALID_TARGETS = ['_top', '_blank'];
 
 /** @private @const {string} */
@@ -361,7 +363,6 @@ export class Navigation {
     if (!target || !target.href) {
       return;
     }
-
     if (e.type == EVENT_TYPE_CLICK) {
       this.handleClick_(target, e);
     } else if (e.type == EVENT_TYPE_CONTEXT_MENU) {
@@ -410,7 +411,7 @@ export class Navigation {
    * @private
    */
   handleContextMenuClick_(element, e) {
-    // TODO(wg-runtime): Handle A2A and custom link protocols.
+    // TODO(wg-runtime): Handle A2A, custom link protocols, and ITP 2.3 mitigation.
     this.expandVarsForAnchor_(element);
     this.applyAnchorMutators_(element, e);
   }
@@ -553,61 +554,62 @@ export class Navigation {
         }
       }
 
-      // Safari 13: Temporarily remove viewer query params from iframe
-      // (e.g. amp_js_v, usqp) to prevent document.referrer from being reduced
-      // to eTLD+1 (e.g. ampproject.org).
+      // ITP 2.3 mitigation. See https://github.com/ampproject/amphtml/issues/25179.
       const {win} = this.ampdoc;
       const platform = Services.platformFor(win);
       const viewer = Services.viewerForDoc(element);
       if (
-        isExperimentOn(
-          this.ampdoc.win,
-          'remove-viewer-query-params-on-navigate'
-        ) &&
         fromLocation.search &&
         platform.isSafari() &&
         platform.getMajorVersion() >= 13 &&
         viewer.isProxyOrigin() &&
         viewer.isEmbedded()
       ) {
-        dev().info(
-          TAG,
-          'Removing iframe query string before navigation:',
-          fromLocation.search
-        );
-        const original = fromLocation.href;
-        const noQuery = `${fromLocation.origin}${fromLocation.pathname}${fromLocation.hash}`;
-        win.history.replaceState(null, '', noQuery);
-
-        const restoreQuery = () => {
-          const currentHref = win.location.href;
-          if (currentHref == noQuery) {
-            dev().info(TAG, 'Restored iframe URL with query string:', original);
-            win.history.replaceState(null, '', original);
-          } else {
-            dev().error(
-              TAG,
-              'Unexpected iframe URL change:',
-              currentHref,
-              noQuery
-            );
-          }
-        };
-
-        // For blank_, restore query params after the new page opens.
-        if (target === '_blank') {
-          win.setTimeout(restoreQuery, 0);
-        } else {
-          // For _top etc., wait until page is restored from page cache (bfcache).
-          // https://webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
-          win.addEventListener('pageshow', function onPageShow(e) {
-            if (e.persisted) {
-              restoreQuery();
-              win.removeEventListener('pageshow', onPageShow);
-            }
-          });
-        }
+        this.removeViewerQueryBeforeNavigation_(win, fromLocation, target);
       }
+    }
+  }
+
+  /**
+   * Temporarily remove viewer query params from iframe (e.g. amp_js_v, usqp)
+   * to prevent document.referrer from being reduced to eTLD+1 (e.g. ampproject.org).
+   * @param {!Window} win
+   * @param {!Location} fromLocation
+   * @param {string} target
+   * @private
+   */
+  removeViewerQueryBeforeNavigation_(win, fromLocation, target) {
+    dev().info(
+      TAG,
+      'Removing iframe query string before navigation:',
+      fromLocation.search
+    );
+    const original = fromLocation.href;
+    const noQuery = `${fromLocation.origin}${fromLocation.pathname}${fromLocation.hash}`;
+    win.history.replaceState(null, '', noQuery);
+
+    const restoreQuery = () => {
+      const currentHref = win.location.href;
+      if (currentHref == noQuery) {
+        dev().info(TAG, 'Restored iframe URL with query string:', original);
+        win.history.replaceState(null, '', original);
+      } else {
+        dev().error(TAG, 'Unexpected iframe URL change:', currentHref, noQuery);
+      }
+    };
+
+    // For blank_, restore query params after the new page opens.
+    if (target === '_blank') {
+      win.setTimeout(restoreQuery, 0);
+    } else {
+      // For _top etc., wait until page is restored from page cache (bfcache).
+      // https://webkit.org/blog/516/webkit-page-cache-ii-the-unload-event/
+      win.addEventListener('pageshow', function onPageShow(e) {
+        if (e.persisted) {
+          restoreQuery();
+          win.removeEventListener('pageshow', onPageShow);
+        }
+      });
     }
   }
 

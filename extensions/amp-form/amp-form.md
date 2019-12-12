@@ -129,7 +129,7 @@ The value for `action-xhr` can be the same or a different endpoint than `action`
 
 To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
 
-##### data-initialize-from-url
+##### data-initialize-from-url (optional)
 
 Initializes form fields from the window URL's search string, where the query parameter name matches the field's name. When this attribute is present, `<input>`, `<select>`, and `<textarea>` fields can optionally be initialized.
 
@@ -152,6 +152,11 @@ Limitations:
 - Supported `<input>` types include `checkbox`, `color`, `date`, `datetime-local`, `email`, `hidden`, `month`, `number`, `radio`, `range`, `search`, `tel`, `text`, `time`, `url`, and `week`.
 - Fields that take advantage of [variable substitutions](#variable-substitutions) (fields with attribute `data-amp-replace`) are not supported.
 - This feature is not supported on AMP pages delivered by an [AMP cache](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/how_amp_pages_are_cached/). The `data-initialize-from-url` and `data-allow-initialization` attributes will not cause AMP validation failures, but the form fields will not be initialized from the URL.
+
+##### xssi-prefix (optional)
+
+Specifies that a prefix should be stripped prior to parsing the fetched json from the `action-xhr` endpoint. If the prefix is not present in the response, then this attribute will have no effect.
+This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
 ##### Other form attributes
 

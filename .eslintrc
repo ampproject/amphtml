@@ -81,6 +81,7 @@
     "local/json-configuration": 2,
     "local/no-array-destructuring": 2,
     "local/no-deep-destructuring": 2,
+    "local/no-destructure-assignment-params": 2,
     "local/no-duplicate-import": 2,
     "local/no-duplicate-name-typedef": 2,
     "local/no-es2015-number-props": 2,
@@ -191,6 +192,7 @@
       ],
       "rules": {
         "require-jsdoc": 0,
+        "local/no-destructure-assignment-params": 0,
         "jsdoc/check-param-names": 0,
         "jsdoc/check-tag-names": 0,
         "jsdoc/check-types": 0,

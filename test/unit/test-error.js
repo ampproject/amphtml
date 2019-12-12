@@ -460,7 +460,7 @@ describe('getErrorReportData', () => {
 
   it('reportError marks binary type', () => {
     window.AMP_CONFIG = {
-      type: 'canary',
+      type: 'experimental',
     };
     const e = new Error('XYZ');
     const data = getErrorReportData(
@@ -471,7 +471,7 @@ describe('getErrorReportData', () => {
       e
     );
     expect(data.m).to.equal('XYZ');
-    expect(data['bt']).to.equal('canary');
+    expect(data['bt']).to.equal('experimental');
 
     window.AMP_CONFIG = {
       type: 'control',

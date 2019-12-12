@@ -29,6 +29,7 @@ import {
 } from './story-analytics';
 import {CSS} from '../../../build/amp-story-tooltip-1.0.css';
 import {EventType, dispatch} from './events';
+import {Keys} from '../../../src/utils/key-codes';
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {addAttributesToElement, closest, matches} from '../../../src/dom';
@@ -459,8 +460,8 @@ export class AmpStoryEmbeddedComponent {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
 
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
@@ -500,6 +501,11 @@ export class AmpStoryEmbeddedComponent {
       }
     );
 
+    /** @type {!../../../src/service/history-impl.History} */
+    this.historyService_ = Services.historyForDoc(
+      getAmpdoc(this.win_.document)
+    );
+
     /** @private {EmbeddedComponentState} */
     this.state_ = EmbeddedComponentState.HIDDEN;
 
@@ -508,6 +514,9 @@ export class AmpStoryEmbeddedComponent {
 
     /** @private {?Element} */
     this.buttonRight_ = null;
+
+    /** @private {number} */
+    this.historyId_ = -1;
   }
 
   /**
@@ -577,6 +586,11 @@ export class AmpStoryEmbeddedComponent {
         this.onFocusedStateUpdate_(null);
         this.scheduleEmbedToPause_(component.element);
         this.toggleExpandedView_(component.element);
+        this.historyService_
+          .push(() => this.close_())
+          .then(historyId => {
+            this.historyId_ = historyId;
+          });
         break;
       default:
         dev().warn(TAG, `EmbeddedComponentState ${this.state_} does not exist`);
@@ -607,7 +621,7 @@ export class AmpStoryEmbeddedComponent {
   toggleExpandedView_(targetToExpand) {
     if (!targetToExpand) {
       this.expandedViewOverlay_ &&
-        this.resources_.mutateElement(this.expandedViewOverlay_, () => {
+        this.mutator_.mutateElement(this.expandedViewOverlay_, () => {
           this.componentPage_.classList.toggle(
             'i-amphtml-expanded-mode',
             false
@@ -626,7 +640,7 @@ export class AmpStoryEmbeddedComponent {
     if (!this.expandedViewOverlay_) {
       this.buildAndAppendExpandedViewOverlay_();
     }
-    this.resources_.mutateElement(
+    this.mutator_.mutateElement(
       dev().assertElement(this.expandedViewOverlay_),
       () => {
         toggle(dev().assertElement(this.expandedViewOverlay_), true);
@@ -641,9 +655,8 @@ export class AmpStoryEmbeddedComponent {
    */
   buildAndAppendExpandedViewOverlay_() {
     this.expandedViewOverlay_ = buildExpandedViewOverlay(this.storyEl_);
-    this.resources_.mutateElement(
-      dev().assertElement(this.componentPage_),
-      () => this.componentPage_.appendChild(this.expandedViewOverlay_)
+    this.mutator_.mutateElement(dev().assertElement(this.componentPage_), () =>
+      this.componentPage_.appendChild(this.expandedViewOverlay_)
     );
   }
 
@@ -658,14 +671,12 @@ export class AmpStoryEmbeddedComponent {
       (target && matches(target, '.i-amphtml-expanded-view-close-button')) ||
       forceClose
     ) {
-      // Target is expanded and going into hidden mode.
-      this.close_();
-      this.toggleExpandedView_(null);
-      this.tooltip_.removeEventListener(
-        'click',
-        this.expandComponentHandler_,
-        true /** capture */
-      );
+      if (this.historyId_ !== -1) {
+        this.historyService_.goBack();
+      } else {
+        // Used for visual diff testing viewer.
+        this.close_();
+      }
     }
   }
 
@@ -715,6 +726,13 @@ export class AmpStoryEmbeddedComponent {
     this.storeService_.dispatch(Action.TOGGLE_INTERACTIVE_COMPONENT, {
       state: EmbeddedComponentState.HIDDEN,
     });
+
+    this.toggleExpandedView_(null);
+    this.tooltip_.removeEventListener(
+      'click',
+      this.expandComponentHandler_,
+      true /** capture */
+    );
   }
 
   /**
@@ -725,7 +743,7 @@ export class AmpStoryEmbeddedComponent {
    */
   onFocusedStateUpdate_(component) {
     if (!component) {
-      this.resources_.mutateElement(
+      this.mutator_.mutateElement(
         dev().assertElement(this.focusedStateOverlay_),
         () => {
           this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', true);
@@ -761,7 +779,7 @@ export class AmpStoryEmbeddedComponent {
       this.storyEl_.querySelector('amp-story-page[active]')
     );
 
-    this.resources_.mutateElement(
+    this.mutator_.mutateElement(
       dev().assertElement(this.focusedStateOverlay_),
       () => {
         this.focusedStateOverlay_.classList.toggle('i-amphtml-hidden', false);
@@ -804,6 +822,19 @@ export class AmpStoryEmbeddedComponent {
         this.owners_.schedulePause(this.storyEl_, embedEl);
       }
     });
+
+    this.win_.addEventListener('keyup', event => {
+      if (
+        event.key === Keys.ESCAPE &&
+        this.state_ === EmbeddedComponentState.EXPANDED
+      ) {
+        event.preventDefault();
+        this.maybeCloseExpandedView_(
+          null /** target */,
+          true /** forceClose */
+        );
+      }
+    });
   }
 
   /**
@@ -813,7 +844,7 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   onUIStateUpdate_(uiState) {
-    this.resources_.mutateElement(
+    this.mutator_.mutateElement(
       dev().assertElement(this.focusedStateOverlay_),
       () => {
         [UIType.DESKTOP_FULLBLEED, UIType.DESKTOP_PANELS].includes(uiState)
@@ -954,7 +985,7 @@ export class AmpStoryEmbeddedComponent {
       `Failed to look up embed style element with ID ${embedId}`
     );
     const embedData = embedStyleEl[AMP_EMBED_DATA];
-    this.resources_.measureMutateElement(
+    this.mutator_.measureMutateElement(
       target,
       /** measure */
       () => {
@@ -1007,9 +1038,9 @@ export class AmpStoryEmbeddedComponent {
    * that content around stays put.
    * @param {!Element} pageEl
    * @param {!Element} element
-   * @param {!../../../src/service/resources-interface.ResourcesInterface} resources
+   * @param {!../../../src/service/mutator-interface.MutatorInterface} mutator
    */
-  static prepareForAnimation(pageEl, element, resources) {
+  static prepareForAnimation(pageEl, element, mutator) {
     let elId = null;
 
     // When a window resize happens, we must reset the styles and prepare the
@@ -1025,7 +1056,7 @@ export class AmpStoryEmbeddedComponent {
     }
 
     let state = {};
-    resources.measureMutateElement(
+    mutator.measureMutateElement(
       element,
       /** measure */
       () => {
@@ -1092,7 +1123,7 @@ export class AmpStoryEmbeddedComponent {
       '.i-amphtml-tooltip-action-icon'
     );
 
-    this.resources_.mutateElement(dev().assertElement(actionIcon), () => {
+    this.mutator_.mutateElement(dev().assertElement(actionIcon), () => {
       actionIcon.classList.toggle(embedConfig.actionIcon, true);
     });
   }
@@ -1123,7 +1154,7 @@ export class AmpStoryEmbeddedComponent {
 
     // Publisher specified a valid icon url.
     if (iconUrl) {
-      this.resources_.mutateElement(
+      this.mutator_.mutateElement(
         dev().assertElement(tooltipCustomIcon),
         () => {
           setImportantStyles(dev().assertElement(tooltipCustomIcon), {
@@ -1135,12 +1166,9 @@ export class AmpStoryEmbeddedComponent {
     }
 
     // No icon src specified by publisher. Use default icon found in the config.
-    this.resources_.mutateElement(
-      dev().assertElement(tooltipCustomIcon),
-      () => {
-        tooltipCustomIcon.classList.add(embedConfig.customIconClassName);
-      }
-    );
+    this.mutator_.mutateElement(dev().assertElement(tooltipCustomIcon), () => {
+      tooltipCustomIcon.classList.add(embedConfig.customIconClassName);
+    });
   }
 
   /**
@@ -1178,7 +1206,7 @@ export class AmpStoryEmbeddedComponent {
   positionTooltip_(component) {
     const state = {arrowOnTop: false};
 
-    this.resources_.measureMutateElement(
+    this.mutator_.measureMutateElement(
       this.storyEl_,
       /** measure */
       () => {
@@ -1278,7 +1306,7 @@ export class AmpStoryEmbeddedComponent {
    * @private
    */
   clearTooltip_() {
-    this.resources_.mutateElement(dev().assertElement(this.tooltip_), () => {
+    this.mutator_.mutateElement(dev().assertElement(this.tooltip_), () => {
       const actionIcon = this.tooltip_.querySelector(
         '.i-amphtml-tooltip-action-icon'
       );

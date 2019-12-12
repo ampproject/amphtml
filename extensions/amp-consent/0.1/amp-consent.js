@@ -16,6 +16,7 @@
 
 import {
   CONSENT_ITEM_STATE,
+  convertEnumValueToState,
   getConsentStateValue,
   hasStoredValue,
 } from './consent-info';
@@ -87,7 +88,11 @@ export class AmpConsent extends AMP.BaseElement {
     /** @private {?function()} */
     this.dialogResolver_ = null;
 
+    /** @private {boolean} */
     this.isPromptUIOn_ = false;
+
+    /** @private {boolean} */
+    this.consentStateChangedViaPromptUI_ = false;
 
     /** @private {boolean} */
     this.consentUIPending_ = false;
@@ -391,6 +396,8 @@ export class AmpConsent extends AMP.BaseElement {
       return;
     }
 
+    this.consentStateChangedViaPromptUI_ = true;
+
     if (action == ACTION_TYPE.ACCEPT) {
       //accept
       this.consentStateManager_.updateConsentInstanceState(
@@ -418,7 +425,11 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     this.passSharedData_();
-    this.maybeSetDirtyBit_();
+    if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
+      this.syncRemoteConsentState_();
+    } else {
+      this.maybeSetDirtyBit_();
+    }
 
     this.getConsentRequiredPromise_()
       .then(isConsentRequired => {
@@ -447,7 +458,7 @@ export class AmpConsent extends AMP.BaseElement {
       return this.getConsentRequiredPromiseLegacy_();
     }
     return this.consentStateManager_
-      .getLastConsentInstanceInfo()
+      .getConsentInstanceInfo()
       .then(storedInfo => {
         if (hasStoredValue(storedInfo)) {
           return Promise.resolve(true);
@@ -456,8 +467,11 @@ export class AmpConsent extends AMP.BaseElement {
         if (typeof consentRequired === 'boolean') {
           return Promise.resolve(consentRequired);
         }
-        return this.getConsentRemote_().then(consentInfo => {
-          return !!consentInfo['consentRequired'];
+        return this.getConsentRemote_().then(consentResponse => {
+          // `promptIfUnknown` is a legacy field
+          return consentResponse['consentRequired'] !== undefined
+            ? !!consentResponse['consentRequired']
+            : !!consentResponse['promptIfUnknown'];
         });
       });
   }
@@ -525,6 +539,50 @@ export class AmpConsent extends AMP.BaseElement {
   }
 
   /**
+   * Clear cache for server side decision and then sync.
+   */
+  syncRemoteConsentState_() {
+    this.getConsentRemote_().then(response => {
+      if (!response) {
+        return;
+      }
+      // Ideally we should fallback to true if either are true.
+      const expireCache =
+        response['expireCache'] || response['forcePromptOnNext'];
+      if (expireCache) {
+        this.consentStateManager_.setDirtyBit();
+      }
+
+      // Decision from promptUI takes precedence over consent decision from response
+      if (
+        !!response['consentRequired'] &&
+        !this.consentStateChangedViaPromptUI_
+      ) {
+        this.updateCacheIfNotNull_(
+          response['consentStateValue'],
+          response['consentString'] || undefined
+        );
+      }
+    });
+  }
+
+  /**
+   * Sync with local storage if consentRequired is true.
+   * @param {string=} responseStateValue
+   * @param {string=} responseConsentString
+   */
+  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
+    const consentStateValue = convertEnumValueToState(responseStateValue);
+    // consentStateValue and consentString are treated as a pair that will update together
+    if (consentStateValue !== null) {
+      this.consentStateManager_.updateConsentInstanceState(
+        consentStateValue,
+        responseConsentString
+      );
+    }
+  }
+
+  /**
    * Returns a promise that if user is in the given geoGroup
    * @param {string} geoGroup
    * @return {Promise<boolean>}
@@ -571,10 +629,13 @@ export class AmpConsent extends AMP.BaseElement {
         const ampdoc = this.getAmpDoc();
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
+        const xhrService = Services.xhrFor(this.win);
         return ampdoc.whenFirstVisible().then(() => {
-          return Services.xhrFor(this.win)
+          return xhrService
             .fetchJson(resolvedHref, init)
-            .then(res => res.json());
+            .then(res =>
+              xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
+            );
         });
       });
     }
@@ -639,6 +700,14 @@ export class AmpConsent extends AMP.BaseElement {
         this.postPromptUI_.hide();
       });
     });
+  }
+
+  /**
+   * @return {?ConsentStateManager}
+   * @visibleForTesting
+   */
+  getConsentStateManagerForTesting() {
+    return this.consentStateManager_;
   }
 
   /**
