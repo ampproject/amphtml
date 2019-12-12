@@ -356,11 +356,18 @@ export class GoogleSubscriptionsPlatform {
     response.complete().then(() => {
       this.serviceAdapter_.resetPlatforms();
     });
-    const ent = response.entitlements.getEntitlementForThis();
+    let product;
+    try {
+      const entitlement =
+        response.entitlements && response.entitlements.getEntitlementForThis();
+      if (entitlement) {
+        //TODO: use entitlement.getSku() after next SwG release
+        product = entitlement.subscriptionToken;
+      }
+    } catch (ex) {}
     const params = /** @type {!JsonObject} */ ({
       'active': true,
-      //TODO: use ent.getSku() after next SwG release
-      'product': (ent && ent.subscriptionToken) || 'unknown subscriptionToken',
+      'product': product || 'unknown subscriptionToken',
     });
 
     this.subscriptionAnalytics_.actionEvent(
