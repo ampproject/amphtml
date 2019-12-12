@@ -82,6 +82,7 @@ import {PIANO_CONFIG} from './vendors/piano';
 import {PINPOLL_CONFIG} from './vendors/pinpoll';
 import {PISTATS_CONFIG} from './vendors/piStats';
 import {PRESSBOARD_CONFIG} from './vendors/pressboard';
+import {PROPENSITY_CONFIG} from './vendors/propensity';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
 import {RAKAM_CONFIG} from './vendors/rakam';
 import {REPPUBLIKA_CONFIG} from './vendors/reppublika';
@@ -243,6 +244,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'piano': includeJsonLiteral(PIANO_CONFIG),
       'pinpoll': includeJsonLiteral(PINPOLL_CONFIG),
       'pressboard': includeJsonLiteral(PRESSBOARD_CONFIG),
+      'propensity': includeJsonLiteral(PROPENSITY_CONFIG),
       'quantcast': includeJsonLiteral(QUANTCAST_CONFIG),
       'retargetly': includeJsonLiteral(RETARGETLY_CONFIG),
       'rakam': includeJsonLiteral(RAKAM_CONFIG),
