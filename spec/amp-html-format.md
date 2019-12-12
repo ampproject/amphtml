@@ -237,11 +237,11 @@ All other authored class names are allowed in AMP HTML markup.
 
 ### IDs
 
-Certian ID names are disallowed in AMP HTML, such as IDs prefixed with `-amp-` and `i-amp-` that may conflict with internal AMP IDs.
+Certain ID names are disallowed in AMP HTML, such as IDs prefixed with `-amp-` and `i-amp-` that may conflict with internal AMP IDs.
 
 Consult the AMP documentation for specific extensions before using `amp-` and `AMP` IDs to avoid conflict with the features provided by these extensions, such as `amp-access`.
 
-View the full list of disallowed ID names [here](../validator/validator-main.protoascii#L5392).
+View the full list of disallowed ID names by searching for `mandatory-id-attr` [here](../validator/validator-main.protoascii).
 
 ### Links
 
