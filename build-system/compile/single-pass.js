@@ -28,7 +28,6 @@ const log = require('fancy-log');
 const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
-const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
@@ -719,7 +718,12 @@ function compile(flagsArray) {
       .pipe(gulpIf(!argv.pseudo_names, checkForUnknownDeps()))
       .on('error', reject)
       .pipe(sourcemaps.write('.'))
-      .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
+      .pipe(
+        gulpIf(
+          /(\/amp-|\/_base)/,
+          rename(path => (path.dirname += '/v0'))
+        )
+      )
       .pipe(gulp.dest('.'))
       .on('end', resolve);
   });

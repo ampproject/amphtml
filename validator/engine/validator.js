@@ -1573,6 +1573,20 @@ class TagStack {
   }
 
   /**
+   * The spec_name of the parent of the current tag if one exists, otherwise the
+   * tag_name.
+   * @return {string}
+   */
+  parentTagSpecName() {
+    if ((this.parentStackEntry_().tagSpec !== null) &&
+        (this.parentStackEntry_().tagSpec.getSpec().specName !== null)) {
+      return /** @type {string} */ (
+          this.parentStackEntry_().tagSpec.getSpec().specName);
+    }
+    return this.parentStackEntry_().tagName;
+  }
+
+  /**
    * The number of children that have been discovered up to now by traversing
    * the stack.
    * @return {number}
@@ -2231,7 +2245,7 @@ class ExtensionsContext {
      */
     this.extensionsLoaded_ = Object.create(null);
 
-    // AMP-AD is grandfathered in to not require the respective extension
+    // AMP-AD is exempted to not require the respective extension
     // javascript file for historical reasons. We still need to mark that
     // the extension is used if we see the tags.
     this.extensionsLoaded_['amp-ad'] = true;
@@ -2355,7 +2369,7 @@ class ExtensionsContext {
       this.extensionsLoaded_[extensionName] = true;
       switch (extensionSpec.requiresUsage) {
         case amp.validator.ExtensionSpec.ExtensionUsageRequirement
-            .GRANDFATHERED: // Fallthrough intended:
+            .EXEMPTED: // Fallthrough intended:
         case amp.validator.ExtensionSpec.ExtensionUsageRequirement.NONE:
           // This extension does not have usage demonstrated by a tag, for
           // example: amp-dynamic-css-classes
@@ -3524,8 +3538,9 @@ function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
   } else if (height.isSet && (!width.isSet || width.isAuto)) {
     return amp.validator.AmpLayout.Layout.FIXED_HEIGHT;
   } else if (
-    height.isSet && width.isSet &&
-    (sizesAttr !== undefined || heightsAttr !== undefined)) {
+      height.isSet && width.isSet &&
+      ((sizesAttr !== undefined && sizesAttr !== '') ||
+       (heightsAttr !== undefined && heightsAttr !== ''))) {
     return amp.validator.AmpLayout.Layout.RESPONSIVE;
   } else {
     return amp.validator.AmpLayout.Layout.FIXED;
@@ -3616,7 +3631,8 @@ function attrValueHasPartialsTemplateSyntax(value) {
 function validateParentTag(parsedTagSpec, context, validationResult) {
   const spec = parsedTagSpec.getSpec();
   if (spec.mandatoryParent !== null &&
-      spec.mandatoryParent !== context.getTagStack().parentTagName()) {
+      (spec.mandatoryParent !== context.getTagStack().parentTagName()) &&
+      (spec.mandatoryParent !== context.getTagStack().parentTagSpecName())) {
     // Output a parent/child error using CSS Child Selector syntax which is
     // both succinct and should be well understood by web developers.
     context.addError(
@@ -4095,7 +4111,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
         getTagSpecUrl(spec), result);
     return;
   }
-  // RESPONSIVE only allows heights attribute.
+  // heights attribute is only allowed for RESPONSIVE layout.
   if (heightsAttr !== undefined &&
       layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
     const code = layoutAttr === undefined ?

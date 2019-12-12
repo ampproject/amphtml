@@ -35,7 +35,6 @@ describes.realWin(
     let win;
     let doc;
     let ampdoc;
-    let sandbox;
     let element, list;
     let templates;
 
@@ -43,25 +42,24 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
-      sandbox = env.sandbox;
 
       templates = {
-        findAndSetHtmlForTemplate: sandbox.stub(),
-        findAndRenderTemplate: sandbox.stub(),
-        findAndRenderTemplateArray: sandbox.stub(),
+        findAndSetHtmlForTemplate: env.sandbox.stub(),
+        findAndRenderTemplate: env.sandbox.stub(),
+        findAndRenderTemplateArray: env.sandbox.stub(),
       };
-      sandbox.stub(Services, 'templatesFor').returns(templates);
-      sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
+      env.sandbox.stub(Services, 'templatesFor').returns(templates);
+      env.sandbox.stub(AmpDocService.prototype, 'getAmpDoc').returns(ampdoc);
 
       element = doc.createElement('amp-list');
       list = new AmpList(element);
 
-      sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
-      sandbox.stub(list, 'getFallback').returns(null);
+      env.sandbox.stub(list, 'getAmpDoc').returns(ampdoc);
+      env.sandbox.stub(list, 'getFallback').returns(null);
 
-      sandbox.stub(list, 'mutateElement').callsFake(mutateElementStub);
-      sandbox.stub(list, 'measureElement').callsFake(measureElementStub);
-      sandbox
+      env.sandbox.stub(list, 'mutateElement').callsFake(mutateElementStub);
+      env.sandbox.stub(list, 'measureElement').callsFake(measureElementStub);
+      env.sandbox
         .stub(list, 'measureMutateElement')
         .callsFake(measureMutateElementStub);
       element.setAttribute('src', '/list');
@@ -70,8 +68,8 @@ describes.realWin(
       element.setAttribute('height', '10');
       doc.body.appendChild(element);
 
-      sandbox.stub(list, 'getOverflowElement').returns(null);
-      sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
+      env.sandbox.stub(list, 'getOverflowElement').returns(null);
+      env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
       list.element.changeSize = () => {};
       list.buildCallback();
     });
@@ -90,7 +88,7 @@ describes.realWin(
     });
 
     it('should trigger on bind', async () => {
-      const changeSpy = sandbox.spy(list, 'changeToLayoutContainer_');
+      const changeSpy = env.sandbox.spy(list, 'changeToLayoutContainer_');
       await list.layoutCallback();
       await list.mutatedAttributesCallback({'is-layout-container': true});
       expect(changeSpy).to.be.calledOnce;
