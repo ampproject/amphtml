@@ -51,7 +51,7 @@ const DEFAULT_OFFSET_SECONDS = 0;
   second: number,
   iso: string,
 }} */
-let VariablesDef;
+let VariablesV2Def;
 
 /** @typedef {{
   year: number,
@@ -75,12 +75,12 @@ let VariablesDef;
   secondTwoDigit: string,
   dayPeriod: string,
  }} */
-let EnhancedVariablesDef;
+let EnhancedVariablesV2Def;
 
 /**
  * @param {!JsonObject} props
  * @param {!Window} win
- * @return {!EnhancedVariablesDef}
+ * @return {!EnhancedVariablesV2Def}
  */
 function getDataForTemplate(props, win) {
   const {
@@ -146,14 +146,14 @@ function padStart(input) {
 }
 
 /**
- * @param {!VariablesDef} data
- * @return {!EnhancedVariablesDef}
+ * @param {!VariablesV2Def} data
+ * @return {!EnhancedVariablesV2Def}
  */
 function enhanceBasicVariables(data) {
   const hour12 = data.hour % 12 || 12;
 
   // Override type since Object.assign is not understood
-  return /** @type {!EnhancedVariablesDef} */ (Object.assign({}, data, {
+  return /** @type {!EnhancedVariablesV2Def} */ (Object.assign({}, data, {
     yearTwoDigit: padStart(data.year % 100),
     monthTwoDigit: padStart(data.month),
     dayTwoDigit: padStart(data.day),
@@ -169,7 +169,7 @@ function enhanceBasicVariables(data) {
 /**
  * @param {!Date} date
  * @param {string} locale
- * @return {!VariablesDef}
+ * @return {!VariablesV2Def}
  */
 function getVariablesInLocal(date, locale) {
   return {
@@ -194,7 +194,7 @@ function getVariablesInLocal(date, locale) {
 /**
  * @param {!Date} date
  * @param {string} locale
- * @return {!VariablesDef}
+ * @return {!VariablesV2Def}
  */
 function getVariablesInUTC(date, locale) {
   return {
