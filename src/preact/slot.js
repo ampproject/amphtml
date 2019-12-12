@@ -16,6 +16,7 @@
 
 import {createElement} from 'preact';
 import {getAmpContext} from './context';
+import {matches} from '../dom';
 import {toArray} from '../types';
 import {useContext, useEffect, useRef} from 'preact/hooks';
 import {useMountEffect} from './utils';
@@ -186,7 +187,7 @@ function objectsEqualShallow(o1, o2) {
  */
 function getAmpElements(root) {
   const elements = toArray(root.querySelectorAll('.i-amphtml-element'));
-  if (root.matches('.i-amphtml-element')) {
+  if (matches(root, '.i-amphtml-element')) {
     elements.unshift(root);
   }
   return elements;
