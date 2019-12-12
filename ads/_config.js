@@ -177,6 +177,9 @@ const adConfig = jsonConfiguration({
     clientIdScope: 'amp_ecid_adensor',
     renderStartImplemented: true,
   },
+
+  'adservsolutions': {},
+
   'adsloom': {
     clientIdScope: 'AMP_ECID_ADSLOOM',
   },

@@ -266,6 +266,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [AdReactor](../../ads/adreactor.md)
 - [AdSense](../../ads/google/adsense.md)
 - [AdSensor](../../ads/adsensor.md)
+- [AdServSolutions](../../ads/adservsolutions.md)
 - [AdsLoom](../../ads/adsloom.md)
 - [AdsNative](../../ads/adsnative.md)
 - [AdSpeed](../../ads/adspeed.md)
