@@ -65,47 +65,61 @@ describes.endtoend(
       );
     }
 
-    async function verifyElementsBuilt(builtArray) {
-      const elements = [
-        tillResponded,
-        accepted,
-        autoReject,
-        defaultBlock,
-        notBlocked,
-        twitter,
-      ];
+    async function verifyElementsBuilt(builtMap) {
+      const elementsMap = {
+        'tillResponded': tillResponded,
+        'accepted': accepted,
+        'autoReject': autoReject,
+        'defaultBlock': defaultBlock,
+        'notBlocked': notBlocked,
+        'twitter': twitter,
+      };
 
-      await expect(builtArray.length).to.equal(elements.length);
+      await expect(builtMap.length).to.equal(elementsMap.length);
+      const elementIds = Object.keys(elementsMap);
 
-      for (let i = 0; i < elements.length; i++) {
-        if (builtArray[i]) {
+      for (let i = 0; i < elementIds.length; i++) {
+        const elementId = elementIds[i];
+        const element = elementsMap[elementId];
+        const shouldBeBuilt = builtMap[elementId];
+
+        if (shouldBeBuilt) {
           // Should be visible
           await expect(
-            controller.getElementAttribute(elements[i], 'class')
+            controller.getElementAttribute(element, 'class')
           ).to.not.match(/amp-notbuilt/);
         } else {
           // Should not be visible
           await expect(
-            controller.getElementAttribute(elements[i], 'class')
+            controller.getElementAttribute(element, 'class')
           ).to.match(/amp-notbuilt/);
         }
       }
     }
 
-    async function verifyPromptsHidden(hiddenArray) {
-      const elements = [ui1, ui2, postPromptUi];
+    async function verifyPromptsHidden(hiddenMap) {
+      const elementsMap = {
+        'ui1': ui1,
+        'ui2': ui2,
+        'postPromptUi': postPromptUi,
+      };
 
-      await expect(hiddenArray.length).to.equal(elements.length);
+      await expect(hiddenMap.length).to.equal(elementsMap.length);
+      const elementIds = Object.keys(elementsMap);
 
-      for (let i = 0; i < elements.length; i++) {
-        if (hiddenArray[i]) {
+      for (let i = 0; i < elementIds.length; i++) {
+        const elementId = elementIds[i];
+        const element = elementsMap[elementId];
+        const shouldBeHidden = hiddenMap[elementId];
+
+        if (shouldBeHidden) {
           // Should be hidden
-          await expect(controller.getElementProperty(elements[i], 'hidden')).to
-            .be.true;
+          await expect(controller.getElementProperty(element, 'hidden')).to.be
+            .true;
         } else {
           // Should not be hidden
-          await expect(controller.getElementProperty(elements[i], 'hidden')).to
-            .be.false;
+          await expect(controller.getElementProperty(element, 'hidden')).to.be
+            .false;
         }
       }
     }
@@ -115,15 +129,37 @@ describes.endtoend(
 
       // Verify no local storage decision
       await findElements();
-      await verifyElementsBuilt([false, false, true, false, true, false]);
-      await verifyPromptsHidden([true, false, true]);
+      await verifyElementsBuilt({
+        'tillResponded': false,
+        'accepted': false,
+        'autoReject': true,
+        'defaultBlock': false,
+        'notBlocked': true,
+        'twitter': false,
+      });
+      await verifyPromptsHidden({
+        'ui1': true,
+        'ui2': false,
+        'postPromptUi': true,
+      });
 
       // Client-side decision
       const acceptButton = await controller.findElement('#accept');
       await controller.click(acceptButton);
 
-      await verifyElementsBuilt([true, true, true, true, true, true]);
-      await verifyPromptsHidden([true, true, false]);
+      await verifyElementsBuilt({
+        'tillResponded': true,
+        'accepted': true,
+        'autoReject': true,
+        'defaultBlock': true,
+        'notBlocked': true,
+        'twitter': true,
+      });
+      await verifyPromptsHidden({
+        'ui1': true,
+        'ui2': true,
+        'postPromptUi': false,
+      });
 
       // Navigate away to random page
       await controller.navigateTo('http://localhost:8000/');
@@ -132,8 +168,19 @@ describes.endtoend(
 
       // Verify all elements are still built
       await findElements();
-      await verifyElementsBuilt([true, true, true, true, true, true]);
-      await verifyPromptsHidden([true, true, false]);
+      await verifyElementsBuilt({
+        'tillResponded': true,
+        'accepted': true,
+        'autoReject': true,
+        'defaultBlock': true,
+        'notBlocked': true,
+        'twitter': true,
+      });
+      await verifyPromptsHidden({
+        'ui1': true,
+        'ui2': true,
+        'postPromptUi': false,
+      });
 
       // Check the analytics request consentState
       const req = await requestBank.withdraw('tracking');

@@ -65,47 +65,61 @@ describes.endtoend(
       );
     }
 
-    async function verifyElementsBuilt(builtArray) {
-      const elements = [
-        tillResponded,
-        accepted,
-        autoReject,
-        defaultBlock,
-        notBlocked,
-        twitter,
-      ];
+    async function verifyElementsBuilt(builtMap) {
+      const elementsMap = {
+        'tillResponded': tillResponded,
+        'accepted': accepted,
+        'autoReject': autoReject,
+        'defaultBlock': defaultBlock,
+        'notBlocked': notBlocked,
+        'twitter': twitter,
+      };
 
-      await expect(builtArray.length).to.equal(elements.length);
+      await expect(builtMap.length).to.equal(elementsMap.length);
+      const elementIds = Object.keys(elementsMap);
 
-      for (let i = 0; i < elements.length; i++) {
-        if (builtArray[i]) {
+      for (let i = 0; i < elementIds.length; i++) {
+        const elementId = elementIds[i];
+        const element = elementsMap[elementId];
+        const shouldBeBuilt = builtMap[elementId];
+
+        if (shouldBeBuilt) {
           // Should be visible
           await expect(
-            controller.getElementAttribute(elements[i], 'class')
+            controller.getElementAttribute(element, 'class')
           ).to.not.match(/amp-notbuilt/);
         } else {
           // Should not be visible
           await expect(
-            controller.getElementAttribute(elements[i], 'class')
+            controller.getElementAttribute(element, 'class')
           ).to.match(/amp-notbuilt/);
         }
       }
     }
 
-    async function verifyPromptsHidden(hiddenArray) {
-      const elements = [ui1, ui2, postPromptUi];
+    async function verifyPromptsHidden(hiddenMap) {
+      const elementsMap = {
+        'ui1': ui1,
+        'ui2': ui2,
+        'postPromptUi': postPromptUi,
+      };
 
-      await expect(hiddenArray.length).to.equal(elements.length);
+      await expect(hiddenMap.length).to.equal(elementsMap.length);
+      const elementIds = Object.keys(elementsMap);
 
-      for (let i = 0; i < elements.length; i++) {
-        if (hiddenArray[i]) {
+      for (let i = 0; i < elementIds.length; i++) {
+        const elementId = elementIds[i];
+        const element = elementsMap[elementId];
+        const shouldBeHidden = hiddenMap[elementId];
+
+        if (shouldBeHidden) {
           // Should be hidden
-          await expect(controller.getElementProperty(elements[i], 'hidden')).to
-            .be.true;
+          await expect(controller.getElementProperty(element, 'hidden')).to.be
+            .true;
         } else {
           // Should not be hidden
-          await expect(controller.getElementProperty(elements[i], 'hidden')).to
-            .be.false;
+          await expect(controller.getElementProperty(element, 'hidden')).to.be
+            .false;
         }
       }
     }
@@ -116,9 +130,20 @@ describes.endtoend(
 
       // Block/unblock elements based off of 'reject' from response
       await findElements();
-      await verifyElementsBuilt([true, false, true, false, true, false]);
+      await verifyElementsBuilt({
+        'tillResponded': true,
+        'accepted': false,
+        'autoReject': true,
+        'defaultBlock': false,
+        'notBlocked': true,
+        'twitter': false,
+      });
       // TODO (micajuineho) this should change once #26006 is fixed.
-      await verifyPromptsHidden([false, true, true]);
+      await verifyPromptsHidden({
+        'ui1': false,
+        'ui2': true,
+        'postPromptUi': true,
+      });
 
       // Navigate away to random page
       await controller.navigateTo('http://localhost:8000/');
@@ -127,13 +152,24 @@ describes.endtoend(
 
       // Verify it listened to new response
       await findElements();
-      await verifyElementsBuilt([true, true, true, true, true, true]);
+      await verifyElementsBuilt({
+        'tillResponded': true,
+        'accepted': true,
+        'autoReject': true,
+        'defaultBlock': true,
+        'notBlocked': true,
+        'twitter': true,
+      });
       // TODO (micajuineho) this should change once #26006 is fixed.
-      await verifyPromptsHidden([false, true, true]);
+      await verifyPromptsHidden({
+        'ui1': false,
+        'ui2': true,
+        'postPromptUi': true,
+      });
 
       // Check the analytics request consentState
       const req = await requestBank.withdraw('tracking');
-      await expect(req.url).to.match(/consentState=insufficient/);
+      await expect(req.url).to.match(/consentState=sufficient/);
     });
   }
 );
