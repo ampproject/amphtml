@@ -52,7 +52,7 @@ The process for bringing a design to the design review is:
 
 ## Explainers
 
-For larger design topics (e.g. new features, or a significant change), the use of an explainer merged into the appropriate working group repository on GitHub is preferred. 
+For larger design topics (e.g. new features, or a significant change), the use of an explainer merged into the appropriate working group repository on GitHub is preferred.
 
 - An explainer is simply a document in the markdown format (md) that describes your proposed design.
   - You create an explainer as a Pull Request, and comments/updates can be made using the normal PR review process.
