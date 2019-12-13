@@ -17,7 +17,6 @@
 import '../amp-mega-menu';
 import {Keys} from '../../../../src/utils/key-codes';
 import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
 import {tryFocus} from '../../../../src/dom';
 
 describes.realWin(
@@ -36,9 +35,6 @@ describes.realWin(
 
       element = getAmpMegaMenu();
       doc.body.appendChild(element);
-
-      // TODO(#24898): remove this toggle when cleaning up experiment post launch.
-      toggleExperiment(win, 'amp-mega-menu', true);
     });
 
     function getAmpMegaMenu() {

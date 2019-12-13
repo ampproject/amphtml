@@ -62,12 +62,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-mega-menu',
-    name: 'AMP extension for a mega menu with expandable items',
-    spec: 'https://github.com/ampproject/amphtml/issues/24814',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
-  },
-  {
     id: 'amp-consent-geo-override',
     name: 'AMP consent modified to support CCPA',
     spec:
