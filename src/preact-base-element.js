@@ -60,8 +60,8 @@ export function PreactBaseElement(Component, opts = {}) {
       /** @private {?Node} */
       this.container_ = null;
 
-      /** @private {number} */
-      this.scheduledRender_ = 0;
+      /** @private {boolean} */
+      this.scheduledRender_ = false;
 
       /** @private {!Object} */
       this.context_ = {
@@ -71,7 +71,7 @@ export function PreactBaseElement(Component, opts = {}) {
       };
 
       this.boundRerender_ = () => {
-        this.scheduledRender_ = 0;
+        this.scheduledRender_ = false;
         this.rerender_();
       };
 
@@ -132,16 +132,16 @@ export function PreactBaseElement(Component, opts = {}) {
 
     /** @private */
     scheduleRender_() {
-      if (this.scheduledRender_ === 0) {
-        this.scheduledRender_ = requestAnimationFrame(this.boundRerender_);
+      if (!this.scheduledRender_) {
+        this.scheduledRender_ = true;
+        this.mutateElement(this.boundRerender_);
       }
     }
 
     /** @private */
     unmount_() {
-      if (this.scheduledRender_ !== 0) {
-        cancelAnimationFrame(this.scheduledRender_);
-        this.scheduledRender_ = 0;
+      if (this.scheduledRender_) {
+        this.scheduledRender_ = false;
       }
 
       if (this.container_) {
@@ -151,6 +151,12 @@ export function PreactBaseElement(Component, opts = {}) {
 
     /** @private */
     rerender_() {
+      // If the component unmounted before the scheduled render runs, exit
+      // early.
+      if (!this.scheduledRender_) {
+        return;
+      }
+
       if (!this.container_) {
         if (opts.children || opts.passthrough) {
           this.container_ = this.element.attachShadow({mode: 'open'});
