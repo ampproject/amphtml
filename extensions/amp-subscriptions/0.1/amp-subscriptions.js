@@ -276,6 +276,7 @@ export class SubscriptionService {
    * Internal function to wrap SwG decryption handling
    * @param {!SubscriptionPlatform} platform
    * @return {!Promise<?./entitlement.Entitlement>}
+   * @private
    */
   getEntitlements_(platform) {
     return platform.getEntitlements().then(entitlements => {
