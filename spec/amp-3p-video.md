@@ -64,7 +64,7 @@ This manager performs standard responsibilities for all videos, regardless of ty
 
 - accessible, managed autoplay
 - analytics tracking for playback
-- coordination with [`amp-story`](https://go.amp.dev/c/amp-youtube)
+- coordination with [`amp-story`](https://go.amp.dev/c/amp-story)
 - [docked video](https://amp.dev/documentation/components/amp-video-docking/)
 - rotate-to-fullscreen
 
