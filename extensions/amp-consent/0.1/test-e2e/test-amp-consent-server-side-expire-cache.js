@@ -18,9 +18,9 @@ describes.endtoend(
   'amp-consent',
   {
     testUrl:
-      'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=de',
+      'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=mx',
     experiments: ['amp-consent-geo-override'],
-    // TODO (micajuineho): Add shadow-demo after #25985 is fixed and viewer-demo when...
+    // TODO (micajuineho): Add shadow-demo after #25985 is fixed, and viewer-demo when...
     environments: ['single'],
   },
   env => {
@@ -108,30 +108,26 @@ describes.endtoend(
       }
     }
 
-    it('should work with client side decision', async () => {
+    it('should respect server side decision and clear on next visit', async () => {
       const currentUrl = await controller.getCurrentUrl();
+      const nextGeoUrl = currentUrl.replace('mx', 'ca');
 
-      // Verify no local storage decision
+      // Block/unblock elements based off of 'reject' from response
       await findElements();
-      await verifyElementsBuilt([false, false, true, false, true, false]);
-      await verifyPromptsHidden([true, false, true]);
-
-      // Client-side decision
-      const acceptButton = await controller.findElement('#accept');
-      await controller.click(acceptButton);
-
-      await verifyElementsBuilt([true, true, true, true, true, true]);
-      await verifyPromptsHidden([true, true, false]);
+      await verifyElementsBuilt([true, false, true, false, true, false]);
+      // TODO (micajuineho) this should change once #26006 is fixed.
+      await verifyPromptsHidden([false, true, true]);
 
       // Navigate away to random page
       await controller.navigateTo('http://localhost:8000/');
-      // Visit website again
-      await controller.navigateTo(currentUrl);
+      // Refresh to differnt geolocation
+      await controller.navigateTo(nextGeoUrl);
 
-      // Verify all elements are still built
+      // Verify it listened to new response
       await findElements();
       await verifyElementsBuilt([true, true, true, true, true, true]);
-      await verifyPromptsHidden([true, true, false]);
+      // TODO (micajuineho) this should change once #26006 is fixed.
+      await verifyPromptsHidden([false, true, true]);
     });
   }
 );

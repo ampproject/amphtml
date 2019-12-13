@@ -126,8 +126,8 @@
   </div>
 </header>
 <main role="main">
-<div>IMPORTANT GEO INFORMATION: <span class="unknown"></span></div>
-  <p>Example for both client and server side</p>
+
+
   <h3>Image that is blocked by '_till_responded' consent</h3>
 
   <amp-img
@@ -157,8 +157,10 @@
         <script type="application/json">
             {
                 "ISOCountryGroups": {
-                    "na": ["ca", "mx", "us"],
+                    "na": ["us"],
                     "eu": ["preset-eea"],
+                    "expireCache1": ["mx"],
+                    "expireCache2": ["ca"],
                     "unknown": ["unknown"]
                 }
             }
@@ -168,7 +170,6 @@
   <amp-consent id='ABC' layout='nodisplay'>
     <script type="application/json">{
       "consentInstanceId": "consent-clinet",
-      "onUpdateHref": "https://fake.com/update-consent-endpoint",
       "consentRequired": false,
       "postPromptUI": "postPromptUI",
       "geoOverride": {
@@ -177,9 +178,19 @@
           "promptUI": "ui2"
         },
         "na": {
-            "consentRequired": "remote",
-            "checkConsentHref": "/check-consent?consentRequired=true&consentStateValue=rejected",
-            "promptUI": "ui1"
+          "consentRequired": "remote",
+          "checkConsentHref": "/check-consent?consentRequired=true&consentStateValue=rejected",
+          "promptUI": "ui1"
+        },
+        "expireCache1": {
+          "consentRequired": "remote",
+          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true&consentStateValue=rejected",
+          "promptUI": "ui1"
+        },
+        "expireCache2": {
+          "consentRequired": "remote",
+          "checkConsentHref": "/check-consent?consentRequired=true&expireCache=true&consentStateValue=accepted",
+          "promptUI": "ui1"
         }
       }
     }</script>

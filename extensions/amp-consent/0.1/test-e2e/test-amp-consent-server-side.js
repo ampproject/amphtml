@@ -20,8 +20,8 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=us',
     experiments: ['amp-consent-geo-override'],
-    // TODO (micajuineho): Add shadow-demo after #25985 is fixed.
-    environments: ['single', 'viewer-demo'],
+    // TODO (micajuineho): Add shadow-demo after #25985 is fixed and viewer-demo when...
+    environments: ['single'],
   },
   env => {
     let controller;
@@ -31,6 +31,9 @@ describes.endtoend(
     let tillResponded;
     let accepted;
     let autoReject;
+    let defaultBlock;
+    let notBlocked;
+    let twitter;
 
     beforeEach(() => {
       controller = env.controller;
@@ -49,39 +52,79 @@ describes.endtoend(
       autoReject = await controller.findElement(
         '[data-block-on-consent="_auto_reject"]'
       );
+      defaultBlock = await controller.findElement(
+        '[data-block-on-consent="default"]'
+      );
+      notBlocked = await controller.findElement(
+        '[src="/examples/img/ima-poster.png"]'
+      );
+      twitter = await controller.findElement(
+        '[data-tweetid="885634330868850689"]'
+      );
     }
 
-    async function verifyAcceptedPageElements() {
+    async function verifyElementsBuilt(builtArray) {
+      const elements = [
+        tillResponded,
+        accepted,
+        autoReject,
+        defaultBlock,
+        notBlocked,
+        twitter,
+      ];
+
+      await expect(builtArray.length).to.equal(elements.length);
+
+      for (let i = 0; i < elements.length; i++) {
+        if (builtArray[i]) {
+          // Should be visible
+          await expect(
+            controller.getElementAttribute(elements[i], 'class')
+          ).to.not.match(/amp-notbuilt/);
+        } else {
+          // Should not be visible
+          await expect(
+            controller.getElementAttribute(elements[i], 'class')
+          ).to.match(/amp-notbuilt/);
+        }
+      }
+    }
+
+    async function verifyPromptsHidden(hiddenArray) {
+      const elements = [ui1, ui2, postPromptUi];
+
+      await expect(hiddenArray.length).to.equal(elements.length);
+
+      for (let i = 0; i < elements.length; i++) {
+        if (hiddenArray[i]) {
+          // Should be hidden
+          await expect(controller.getElementProperty(elements[i], 'hidden')).to
+            .be.true;
+        } else {
+          // Should not be hidden
+          await expect(controller.getElementProperty(elements[i], 'hidden')).to
+            .be.false;
+        }
+      }
+    }
+
+    it('should respect server side decision and persist it', async () => {
+      const currentUrl = await controller.getCurrentUrl();
+
+      // Block/unblock elements based off of 'reject' from response
       await findElements();
+      await verifyElementsBuilt([true, false, true, false, true, false]);
+      await verifyPromptsHidden([true, true, false]);
 
-      // Images are either loaded or not loaded
-      await expect(
-        controller.getElementAttribute(tillResponded, 'class')
-      ).to.not.match(/amp-notbuilt/);
-      await expect(controller.getElementAttribute(accepted, 'class')).to.match(
-        /amp-notbuilt/
-      );
-      await expect(
-        controller.getElementAttribute(autoReject, 'class')
-      ).to.does.not.match(/amp-notbuilt/);
-
-      // Correct prompts are showing
-      await expect(controller.getElementProperty(ui1, 'hidden')).to.be.true;
-      await expect(controller.getElementProperty(ui2, 'hidden')).to.be.true;
-      await expect(controller.getElementProperty(postPromptUi, 'hidden')).to.be
-        .false;
-    }
-
-    it('should listen to server side decision and persist it', async () => {
-      await verifyAcceptedPageElements();
-
-      // Refresh
-      await controller.navigateTo(
-        'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=us'
-      );
+      // Navigate away to random page
+      await controller.navigateTo('http://localhost:8000/');
+      // Visit website again
+      await controller.navigateTo(currentUrl);
 
       // Verify same behavior after refresh
-      await verifyAcceptedPageElements();
+      await findElements();
+      await verifyElementsBuilt([true, false, true, false, true, false]);
+      await verifyPromptsHidden([true, true, false]);
     });
   }
 );
