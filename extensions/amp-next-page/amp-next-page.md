@@ -89,35 +89,35 @@ component will render a maximum of three documents (total) on screen at one sing
 
 [tip type="important"]
 **Important** [`<amp-analytics>`](../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`.
-Measuring pageviews is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md) or `<amp-analytics>` on the host page.
+Tracking page views is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md) or `<amp-analytics>` on the host page.
 [/tip]
 
 ### Analytics triggers
 
-Partial support for analytics is included through the initial host page through two events that `<amp-next-page>` triggers and that you can track in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
+Partial support for analytics is included through the initial host page via two separate events. These are triggered by `<amp-next-page>` triggers and you can track them in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
 
 | Event                  | Fired when                                               |
 | ---------------------- | -------------------------------------------------------- |
 | `amp-next-page-scroll` | The user scrolls to a new page                           |
 | `amp-next-page-click`  | The user click on an article from the recommendation box |
 
-Both of the `triggers` come with two variables `fromUrl` and `toUrl` that refer to the previous and the current page that the user is viewing, which can be used as follows:
+Both of the `triggers` provide the variables `fromUrl` and `toUrl` referring to the previous and current pages. They can be used as follows:
 
 ```html
 <amp-analytics>
   <script type="application/json">
     {
       "requests": {
-        "documentrecommendations": "https://foo.com/pixel?RANDOM&toURL=${toURL}"
+        "nextpage": "https://foo.com/pixel?RANDOM&toURL=${toURL}"
       },
       "triggers": {
         "trackScrollThrough": {
           "on": "amp-next-page-scroll",
-          "request": "documentrecommendations"
+          "request": "nextpage"
         },
         "trackClickThrough": {
           "on": "amp-next-page-click",
-          "request": "documentrecommendations"
+          "request": "nextpage"
         }
       }
     }
