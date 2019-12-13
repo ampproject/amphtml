@@ -283,6 +283,10 @@ For users in `geoGroupUnknown`, the merged config is
 
 AMP will check client cache and server in parallel to find the previous consent state. Because `"consentRequired": true` it will collect consent via the specified prompt UI if cache is empty w/o waiting for the server response. The server response is mainly for cache refresh or fetching `shareData`.
 
+#### xssiPrefix
+
+`xssiPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's response. If the prefix is not present in the response, then this option will have no effect. `xssiPrefix` can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
+
 ## Consent Management
 
 The `<amp-consent>` element supports customizing the consent prompt UI and post-prompt UI, which can be used to manage consent.
@@ -637,5 +641,5 @@ Join in on the discussion where we are discussing [upcoming potential features](
 ## Supported Consent Management Platforms
 
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
-- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](cmps/sourcepoint.md)
+- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/cmps/sourcepoint.md)
 - Your Integrated platform here!

@@ -62,12 +62,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-mega-menu',
-    name: 'AMP extension for a mega menu with expandable items',
-    spec: 'https://github.com/ampproject/amphtml/issues/24814',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
-  },
-  {
     id: 'amp-consent-geo-override',
     name: 'AMP consent modified to support CCPA',
     spec:
@@ -315,12 +309,6 @@ export const EXPERIMENTS = [
     id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
     name: 'Use amp-ad responsive to make amp auto ads responsive.',
     spec: 'https://github.com/ampproject/amphtml/issues/24168',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
-  },
-  {
-    id: 'remove-viewer-query-params-on-navigate',
-    name: 'Removes query params from viewer iframe on navigation.',
-    spec: 'https://github.com/ampproject/amphtml/issues/25179',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
   {

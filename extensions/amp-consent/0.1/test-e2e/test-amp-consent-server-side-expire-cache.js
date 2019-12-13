@@ -133,7 +133,7 @@ describes.endtoend(
 
       // Check the analytics request consentState
       const req = await requestBank.withdraw('tracking');
-      await expect(req.url).to.match(/consentState=sufficient/);
+      await expect(req.url).to.match(/consentState=insufficient/);
     });
   }
 );

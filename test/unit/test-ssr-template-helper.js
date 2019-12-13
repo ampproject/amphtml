@@ -53,19 +53,19 @@ describes.fakeWin(
       );
     });
 
-    describe('isSupported', () => {
+    describe('isEnabled', () => {
       it('should return true if doc level opt-in', () => {
         win.document.documentElement.setAttribute(
           'allow-viewer-render-template',
           true
         );
         hasCapabilityStub.withArgs('viewerRenderTemplate').returns(true);
-        expect(ssrTemplateHelper.isSupported()).to.be.true;
+        expect(ssrTemplateHelper.isEnabled()).to.be.true;
       });
 
       it('should return false if not doc level opt-in', () => {
         hasCapabilityStub.withArgs('viewerRenderTemplate').returns(true);
-        expect(ssrTemplateHelper.isSupported()).to.be.false;
+        expect(ssrTemplateHelper.isEnabled()).to.be.false;
       });
 
       it(
@@ -77,7 +77,7 @@ describes.fakeWin(
             true
           );
           hasCapabilityStub.withArgs('viewerRenderTemplate').returns(false);
-          expect(ssrTemplateHelper.isSupported()).to.be.false;
+          expect(ssrTemplateHelper.isEnabled()).to.be.false;
         }
       );
     });
