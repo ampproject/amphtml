@@ -76,6 +76,13 @@ const RTC_VENDORS = jsonConfiguration({
     macros: ['SITE_ID'],
     disableKeyAppend: true,
   },
+  lockerdome: {
+    url:
+      'https://local.lockerdome.com:3000/ladbid/amprtc/?adunit_id=ADUNIT_ID&w=ATTR(width)&h=ATTR(height)&dow=ATTR(data-override-width)&doh=ATTR(data-override-height)&dms=ATTR(data-multi-size)&dmsv=ATTR(data-multi-size-validation)&ds=ATTR(data-slot)&tgt=TGT&adcid=ADCID&pvid=PAGEVIEWID&to=TIMEOUT&purl=HREF',
+      macros: ['ADUNIT_ID'],
+      errorReportingUrl: 'https://local.lockerdome.com:3000/ladbid/amprtcerror?error_type=ERROR_TYPE&href=HREF',
+      disableKeyAppend: true,
+  },
   lotame: {
     url: 'https://ad.crwdcntrl.net/5/pe=y/c=CLIENT_ID/an=AD_NETWORK',
     macros: ['CLIENT_ID', 'AD_NETWORK'],
