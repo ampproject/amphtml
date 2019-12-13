@@ -94,7 +94,7 @@ Tracking page views is supported through [`<amp-pixel>`](../../builtins/amp-pixe
 
 ### Analytics triggers
 
-Partial support for analytics is included through the initial host page via two separate events. These are triggered by `<amp-next-page>` triggers and you can track them in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
+Partial support for analytics is included through the initial host page via two separate events. These are triggered by `<amp-next-page>` and you can track them in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
 
 | Event                  | Fired when                                               |
 | ---------------------- | -------------------------------------------------------- |
