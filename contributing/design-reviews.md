@@ -34,8 +34,7 @@ The process for bringing a design to the design review is:
 - Perform a design pre-review with your reviewer if you have one; they may include other people that know the areas your design affects in this pre-review as well. If you don't have a reviewer you can request a pre-review in the [#contributing Slack channel](https://amphtml.slack.com/messages/contributing) ([sign up](https://bit.ly/amp-slack-signup)). It is fine to request a pre-review before your design is complete.
 - When your design is ready to be discussed at a design review add a comment on the [Design Review GitHub issue](https://github.com/ampproject/amphtml/labels/Type%3A%20Design%20Review) for the date/time that works best for you.
   - You must add your design review topic to the design review issue at least 24 hours in advance of the design review.
-  - Your comment should point to the explainer, I2I or other GitHub issue describing the design that you want to discuss.  Your design review comment **must** link to an explainer or GitHub issue.  Topics that do not provide this link will not be discussed at the design review.  You may highlight in this comment which parts of the design you'd like feedback on.
-  - No topics whose designs are not public will be discussed at a design review.
+  - Your comment should point to the explainer, I2I or other GitHub issue describing the design that you want to discuss. Your design review comment **must** link to an explainer or GitHub issue. Topics that do not provide this link will not be discussed at the design review. You may highlight in this comment which parts of the design you'd like feedback on.
 - During the design review you'll lead the community in a conversation about your design. The design reviews are fairly informal and don't have a fixed structure.
   - You don't need to have any slides or material other than your explainer/GitHub issue prepared for the design review.
   - Present your explainer/issue during the meeting using the video conference "present" functionality. (If you have technical trouble doing this, someone else at the meeting can handle it.)
@@ -53,15 +52,15 @@ The process for bringing a design to the design review is:
 
 ## Explainers
 
-For larger design topics (e.g. new features, or a significant change), the use of an explainer merged into the appropriate working group repository on GitHub is preferred.  
+For larger design topics (e.g. new features, or a significant change), the use of an explainer merged into the appropriate working group repository on GitHub is preferred. 
 
 - An explainer is simply a document in the markdown format (md) that describes your proposed design.
   - You create an explainer as a Pull Request, and comments/updates can be made using the normal PR review process.
-  - Explainers should be added to the appropriate Working Group repository.  Explainers for work that span multiple working groups may be placed in any of the appropriate WG repos.  Explainers for work that does not align with a WG may use the [ampproject design-doc](https://github.com/ampproject/design-docs) repository.
-  - You _may_ use a public Google document (with public comments enabled) instead of an md file for your explainer, but this has significant disadvantages.  If you use a Google document, you *must* submit a PDF version in the same repository you would have used for an explainer md file.
-- The [W3C TAG Explainer document](https://w3ctag.github.io/explainers) describes what an explainer should contain and a recommended template.  [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) also has tips on documenting a design.
-- An explainer does not need to be "final" before being merged in.  You may merge in a draft copy and handle updates through issues/PRs as needed.
-- Explainers (whether as an md file or in a Google document) should be visible to the public, and any member of the community should be able to comment on it.  The explainer should not link to non-public information except in extraordinary circumstances, and the non-public nature of the link and the reason for it not being public should be detailed.
+  - Explainers should be added to the appropriate Working Group repository. Explainers for work that span multiple working groups may be placed in any of the appropriate WG repos. Explainers for work that does not align with a WG may use the [ampproject design-doc](https://github.com/ampproject/design-docs) repository.
+  - You _may_ use a public Google document (with public comments enabled) instead of an md file for your explainer, but this has significant disadvantages. If you use a Google document, you _must_ submit a PDF version in the same repository you would have used for an explainer md file.
+  - The [W3C TAG Explainer document](https://w3ctag.github.io/explainers) describes what an explainer should contain and a recommended template. [Design docs - A design doc](https://medium.com/@cramforce/design-docs-a-design-doc-a152f4484c6b) also has tips on documenting a design.
+  - An explainer does not need to be "final" before being merged in. You may merge in a draft copy and handle updates through issues/PRs as needed.
+  - Explainers (whether as an md file or in a Google document) should be visible to the public, and any member of the community should be able to comment on it. The explainer should not link to non-public information except in extraordinary circumstances, and the non-public nature of the link and the reason for it not being public should be detailed.
 - See the ["Using React/Preact to implement AMP elements" explainer](https://github.com/ampproject/wg-bento/blob/master/react/explainer.md) for an example.
 - Add this license text to the top of your design doc before sharing it with anyone else in the community (updating the year if necessary):
 
