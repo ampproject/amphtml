@@ -649,7 +649,14 @@ export class SanitizerImpl {
             dev().error(TAG, 'Invalid AMP.setState() argument: %s', value);
           });
           if (state) {
+            // Only evaluate updates in case of recent user interaction.
             const skipEval = !this.userActivationTracker_.isActive();
+            if (skipEval) {
+              user().warn(
+                TAG,
+                'AMP.setState only updated page state and did not reevaluate bindings due to lack of recent user interaction.'
+              );
+            }
             bind.setState(state, skipEval, /* skipAmpState */ false);
           }
         }
