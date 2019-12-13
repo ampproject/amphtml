@@ -152,7 +152,25 @@
   <h3>Image that is NOT blocked by consent</h3>
   <amp-img
     src="/examples/img/ima-poster.png" width=300 height=200></amp-img>
-  
+    
+    <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "endpoint": "http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking"
+        },
+        "triggers": {
+          "pageview": {
+            "on": "visible",
+            "request": "endpoint",
+            "extraUrlParams": {
+              "consentState": "CONSENT_STATE"
+            }
+          }
+        }
+      }
+      </script>
+    </amp-analytics>
     <amp-geo layout=nodisplay>
         <script type="application/json">
             {

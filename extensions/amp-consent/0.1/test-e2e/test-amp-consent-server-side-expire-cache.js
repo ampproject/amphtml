@@ -34,9 +34,11 @@ describes.endtoend(
     let defaultBlock;
     let notBlocked;
     let twitter;
+    let requestBank;
 
     beforeEach(() => {
       controller = env.controller;
+      requestBank = env.requestBank;
     });
 
     async function findElements() {
@@ -128,6 +130,10 @@ describes.endtoend(
       await verifyElementsBuilt([true, true, true, true, true, true]);
       // TODO (micajuineho) this should change once #26006 is fixed.
       await verifyPromptsHidden([false, true, true]);
+
+      // Check the analytics request consentState
+      const req = await requestBank.withdraw('tracking');
+      await expect(req.url).to.match(/consentState=sufficient/);
     });
   }
 );
