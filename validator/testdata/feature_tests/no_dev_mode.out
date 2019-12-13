@@ -60,7 +60,7 @@ feature_tests/no_dev_mode.html:48:2 The tag 'faketag' is disallowed.
 feature_tests/no_dev_mode.html:49:4 The tag 'anotherfaketag' is disallowed.
 |    </faketag>
 |
-|    <amp-autocomplete data-ampdevmode></amp-autocomplete>
+|    <amp-autocomplete filter="prefix" data-ampdevmode></amp-autocomplete>
 |
 |  </body>
 |  </html>

@@ -41,6 +41,7 @@ tags: {  # <amp-autocomplete>
       if_value_regex: "custom"
       also_requires_attr: "filter-expr"
     }
+    mandatory: true
   }
   attrs: {
     name: "filter-expr"
@@ -68,9 +69,6 @@ tags: {  # <amp-autocomplete>
   attrs: { name: "submit-on-enter" }
   attrs: {
     name: "suggest-first"
-    trigger: {
-      also_requires_attr: "filter"
-    }
   }
   attrs: { name: "template" }
   # amp-bind
