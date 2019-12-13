@@ -46,8 +46,7 @@ export function useMountLayoutEffect(callback) {
  * Every functional component **must** use this helper.
  */
 export function useResourcesNotify() {
-  const ctx = useContext(getAmpContext());
-  const notify = ctx && ctx.notify;
+  const {notify} = useContext(getAmpContext());
   useLayoutEffect(() => {
     if (notify) {
       notify();
