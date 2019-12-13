@@ -32,10 +32,7 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
     this.carousel_ = null;
 
     /** @private {number} */
-    this.thumbArWidth_ = 0;
-
-    /** @private {number} */
-    this.thumbArHeight_ = 0;
+    this.thumbAspectRatio_ = 0;
   }
 
   /** @override */
@@ -45,10 +42,14 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.thumbArWidth_ =
+    const aspectRatioWidth =
       Number(this.element.getAttribute('aspect-ratio-width')) || 0;
-    this.thumbArHeight_ =
+    const aspectRatioHeight =
       Number(this.element.getAttribute('aspect-ratio-height')) || 0;
+    if (aspectRatioWidth && aspectRatioHeight) {
+      this.thumbAspectRatio_ = aspectRatioWidth / aspectRatioHeight;
+    }
+
     // Stop events from the internal carousel from bubbling up to the
     // gallery, which would cause the pagination indicator to update.
     this.element.addEventListener(CarouselEvents.OFFSET_CHANGE, event => {
@@ -90,11 +91,11 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
       </div>
     `;
 
-    // If an thumb width/height aspect ratio specified, used those, otherwise
-    // use the aspect ratio of the element we are creating a thumb for and
+    // If an thumb width/height aspect ratio specified, used that. Otherwise
+    // use the aspect ratio of the element we are creating a thumb and
     // fall back to a square if anything goes wrong.
-    const arWidth = this.thumbArWidth_ || srcElement.offsetWidth || 1;
-    const arHeight = this.thumbArHeight_ || srcElement.offsetHeight || 1;
+    const srcAspectRatio = srcElement.offsetWidth / srcElement.offsetHeight;
+    const aspectRatio = this.thumbAspectRatio_ || srcAspectRatio || 1;
     // Use a padding-right (along with `writing-mode: vertical-lr` in the CSS)
     // to make the width match the aspect ratio for the available height. Note
     // that we do not use an `svg` with a `viewBox` as that has problems in
@@ -102,7 +103,7 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
     setStyle(
       content.querySelector('.i-amphtml-inline-gallery-thumbnails-resizer'),
       'padding-right',
-      100 * (arWidth / arHeight),
+      100 * aspectRatio,
       '%'
     );
 
@@ -216,11 +217,11 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
       >
       </amp-base-carousel>
     `;
-    // We create with loop defaulting to true above, and allow it to be
+    thumbnails.forEach(t => this.carousel_.appendChild(t));
+
+    // We create with loop defaulting to false above, and allow it to be
     // overwriten.
     this.propagateAttributes(['loop'], this.carousel_);
-
-    thumbnails.forEach(t => this.carousel_.appendChild(t));
     this.element.appendChild(this.carousel_);
   }
 }
