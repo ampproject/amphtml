@@ -20,7 +20,7 @@ import {
   onDocumentFormSubmit_,
 } from '../../src/document-submit';
 
-describes.sandboxed('test-document-submit', {}, () => {
+describes.sandboxed('test-document-submit', {}, env => {
   describe('installGlobalSubmitListenerForDoc', () => {
     let ampdoc;
     let headNode;
@@ -50,7 +50,7 @@ describes.sandboxed('test-document-submit', {}, () => {
 
     it('should not register submit listener if amp-form is not registered.', () => {
       ampdoc.getHeadNode().appendChild(createScript('amp-list'));
-      sandbox.spy(rootNode, 'addEventListener');
+      env.sandbox.spy(rootNode, 'addEventListener');
       return installGlobalSubmitListenerForDoc(ampdoc).then(() => {
         expect(rootNode.addEventListener).not.to.have.been.called;
       });
@@ -58,7 +58,7 @@ describes.sandboxed('test-document-submit', {}, () => {
 
     it('should register submit listener if amp-form extension is registered.', () => {
       ampdoc.getHeadNode().appendChild(createScript('amp-form'));
-      sandbox.spy(rootNode, 'addEventListener');
+      env.sandbox.spy(rootNode, 'addEventListener');
       return installGlobalSubmitListenerForDoc(ampdoc).then(() => {
         expect(rootNode.addEventListener).called;
       });
@@ -75,12 +75,12 @@ describes.sandboxed('test-document-submit', {}, () => {
     beforeEach(() => {
       window = env.win;
       document = window.document;
-      preventDefaultSpy = sandbox.spy();
-      stopImmediatePropagationSpy = sandbox.spy();
+      preventDefaultSpy = env.sandbox.spy();
+      stopImmediatePropagationSpy = env.sandbox.spy();
       tgt = document.createElement('form');
       tgt.action = 'https://www.google.com';
       tgt.target = '_blank';
-      tgt.checkValidity = sandbox.stub().returns(true);
+      tgt.checkValidity = env.sandbox.stub().returns(true);
       evt = {
         target: tgt,
         preventDefault: preventDefaultSpy,
@@ -199,15 +199,14 @@ describes.sandboxed('test-document-submit', {}, () => {
     });
 
     it('should prevent submit', () => {
-      tgt.checkValidity = sandbox.stub().returns(false);
+      tgt.checkValidity = env.sandbox.stub().returns(false);
       onDocumentFormSubmit_(evt);
       expect(preventDefaultSpy).to.be.calledOnce;
       expect(tgt.checkValidity).to.be.calledOnce;
-      sandbox.restore();
       preventDefaultSpy.resetHistory();
       tgt.checkValidity.reset();
 
-      tgt.checkValidity = sandbox.stub().returns(false);
+      tgt.checkValidity = env.sandbox.stub().returns(false);
       onDocumentFormSubmit_(evt);
       expect(preventDefaultSpy).to.be.calledOnce;
       expect(tgt.checkValidity).to.be.calledOnce;
@@ -215,14 +214,14 @@ describes.sandboxed('test-document-submit', {}, () => {
 
     it('should not check validity if novalidate provided', () => {
       tgt.setAttribute('novalidate', '');
-      tgt.checkValidity = sandbox.stub().returns(false);
+      tgt.checkValidity = env.sandbox.stub().returns(false);
       onDocumentFormSubmit_(evt);
       expect(preventDefaultSpy).to.have.not.been.called;
       expect(tgt.checkValidity).to.have.not.been.called;
     });
 
     it('should not prevent default', () => {
-      tgt.checkValidity = sandbox.stub().returns(true);
+      tgt.checkValidity = env.sandbox.stub().returns(true);
       onDocumentFormSubmit_(evt);
       expect(preventDefaultSpy).to.have.not.been.called;
       expect(tgt.checkValidity).to.be.calledOnce;
@@ -231,7 +230,7 @@ describes.sandboxed('test-document-submit', {}, () => {
     it('should delegate xhr submit through action service', () => {
       evt.target.setAttribute('action-xhr', 'https://example.com');
       const actionService = Services.actionServiceForDoc(tgt);
-      sandbox.stub(actionService, 'execute');
+      env.sandbox.stub(actionService, 'execute');
       onDocumentFormSubmit_(evt);
       expect(actionService.execute).to.have.been.calledOnce;
       expect(actionService.execute).to.have.been.calledWith(
@@ -248,7 +247,7 @@ describes.sandboxed('test-document-submit', {}, () => {
 
     it('should not delegate non-XHR submit through action service', () => {
       const actionService = Services.actionServiceForDoc(tgt);
-      sandbox.stub(actionService, 'execute');
+      env.sandbox.stub(actionService, 'execute');
       onDocumentFormSubmit_(evt);
       expect(actionService.execute).to.have.not.been.called;
     });

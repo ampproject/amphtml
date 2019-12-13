@@ -56,7 +56,8 @@ export class TextBoxComponent {
    * @return {!TextBoxComponentDef}
    * @override
    * */
-  build({type, text}) {
+  build(textboxJson) {
+    const {type, text} = textboxJson;
     return {type, text};
   }
 

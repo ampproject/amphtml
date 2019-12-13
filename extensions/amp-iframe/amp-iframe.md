@@ -113,7 +113,7 @@ If <code>frameborder</code> is not specified, by default, it will be set to <cod
 <br><br>
 If you are iframing a document that was not specifically created with sandboxing in mind, you will most likely need to add <code>allow-scripts allow-same-origin</code> to the <code>sandbox</code> attribute and you might need to allow additional capabilities.
 <br><br>
-Note also, that the sandbox applies to all windows opened from a sandboxed iframe. This includes new windows created by a link with <code>target=_blank</code> (add <code>allow-popups</code> to allow this to happen). Adding <code>allow-popups-to-escape-sandbox</code> to the <code>sandbox</code> attribute, makes those new windows behave like non-sandboxed new windows. This is likely most of the time what you want and expect. Unfortunately, as of this writing, <code>allow-popups-to-escape-sandbox</code> is only supported by Chrome.
+Note also, that the sandbox applies to all windows opened from a sandboxed iframe. This includes new windows created by a link with <code>target=_blank</code> (add <code>allow-popups</code> to allow this to happen). Adding <code>allow-popups-to-escape-sandbox</code> to the <code>sandbox</code> attribute, makes those new windows behave like non-sandboxed new windows. This is likely most of the time what you want and expect. Unfortunately, as of this writing, <code>allow-popups-to-escape-sandbox</code> is supported by Chrome, Firefox, Safari and Opera but not Edge.
 <br><br>
 See the <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox">docs on MDN</a> for further details on the sandbox attribute.</td>
   </tr>

@@ -40,10 +40,10 @@ describe('Styles', () => {
       installPlatformService(win);
       installPerformanceService(win);
       const perf = Services.performanceFor(win);
-      tickSpy = sandbox.spy(perf, 'tick');
+      tickSpy = env.sandbox.spy(perf, 'tick');
       resources = Services.resourcesForDoc(ampdoc);
-      schedulePassSpy = sandbox.spy(resources, 'schedulePass');
-      waitForServicesStub = sandbox.stub(rds, 'waitForServices');
+      schedulePassSpy = env.sandbox.spy(resources, 'schedulePass');
+      waitForServicesStub = env.sandbox.stub(rds, 'waitForServices');
       styles.setBodyMadeVisibleForTesting(false);
     });
 
@@ -90,7 +90,10 @@ describe('Styles', () => {
         setTimeout(resolve, 0);
       }).then(() => {
         expect(tickSpy.withArgs('mbv')).to.be.calledOnce;
-        expect(schedulePassSpy).to.not.be.calledWith(sinon.match.number, true);
+        expect(schedulePassSpy).to.not.be.calledWith(
+          env.sandbox.match.number,
+          true
+        );
         expect(ampdoc.signals().get('render-start')).to.be.ok;
       });
     });

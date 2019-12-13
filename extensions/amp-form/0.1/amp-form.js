@@ -31,7 +31,12 @@ import {
 import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
-import {SOURCE_ORIGIN_PARAM, addParamsToUrl} from '../../../src/url';
+import {
+  SOURCE_ORIGIN_PARAM,
+  addParamsToUrl,
+  isProxyOrigin,
+  parseQueryString,
+} from '../../../src/url';
 import {Services} from '../../../src/services';
 import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
@@ -147,8 +152,8 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(this.form_);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(this.form_);
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface}  */
     this.viewer_ = Services.viewerForDoc(this.form_);
@@ -215,6 +220,7 @@ export class AmpForm {
     );
     this.installEventHandlers_();
     this.installInputMasking_();
+    this.maybeInitializeFromUrl_();
 
     /** @private {?Promise} */
     this.xhrSubmitPromise_ = null;
@@ -248,6 +254,13 @@ export class AmpForm {
       );
     }
     return url;
+  }
+
+  /**
+   * @return {string|undefined} the value of the form's xssi-prefix attribute.
+   */
+  getXssiPrefix() {
+    return this.form_.getAttribute('xssi-prefix');
   }
 
   /**
@@ -386,9 +399,10 @@ export class AmpForm {
     );
 
     //  Form verification is not supported when SSRing templates is enabled.
-    if (!this.ssrTemplateHelper_.isSupported()) {
+    if (!this.ssrTemplateHelper_.isEnabled()) {
       this.form_.addEventListener('change', e => {
-        this.verifier_.onCommit().then(({updatedElements, errors}) => {
+        this.verifier_.onCommit().then(updatedErrors => {
+          const {updatedElements, errors} = updatedErrors;
           updatedElements.forEach(checkUserValidityAfterInteraction_);
           // Tell the validation to reveal any input.validationMessage added
           // by the form verifier.
@@ -681,7 +695,7 @@ export class AmpForm {
    */
   handleXhrSubmit_(trust) {
     let p;
-    if (this.ssrTemplateHelper_.isSupported()) {
+    if (this.ssrTemplateHelper_.isEnabled()) {
       p = this.handleSsrTemplate_(trust);
     } else {
       this.submittingWithTrust_(trust);
@@ -943,8 +957,8 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmitSuccess_(response, incomingTrust) {
-    return response
-      .json()
+    return this.xhr_
+      .xssiJson(response, this.getXssiPrefix())
       .then(
         json =>
           this.handleSubmitSuccess_(
@@ -993,7 +1007,9 @@ export class AmpForm {
     let promise;
     if (e && e.response) {
       const error = /** @type {!Error} */ (e);
-      promise = error.response.json().catch(() => null);
+      promise = this.xhr_
+        .xssiJson(error.response, this.getXssiPrefix())
+        .catch(() => null);
     } else {
       promise = Promise.resolve(null);
     }
@@ -1063,7 +1079,7 @@ export class AmpForm {
    * @private
    */
   assertSsrTemplate_(value, msg) {
-    const supported = this.ssrTemplateHelper_.isSupported();
+    const supported = this.ssrTemplateHelper_.isEnabled();
     userAssert(
       supported === value,
       '[amp-form]: viewerRenderTemplate | %s',
@@ -1225,7 +1241,7 @@ export class AmpForm {
           .then(rendered => {
             rendered.id = messageId;
             rendered.setAttribute('i-amphtml-rendered', '');
-            return this.resources_.mutateElement(
+            return this.mutator_.mutateElement(
               dev().assertElement(container),
               () => {
                 container.appendChild(rendered);
@@ -1244,7 +1260,7 @@ export class AmpForm {
         // this container are now visible so they get scheduled for layout.
         // This will be unnecessary when the AMP Layers implementation is
         // complete.
-        this.resources_.mutateElement(container, () => {});
+        this.mutator_.mutateElement(container, () => {});
       }
     }
 
@@ -1269,6 +1285,91 @@ export class AmpForm {
     if (previousRender) {
       removeElement(previousRender);
     }
+  }
+
+  /**
+   * Initialize form fields from query parameter values if attribute
+   * 'data-initialize-from-url' is present on the form and attribute
+   * 'data-allow-initialization' is present on the field.
+   * @private
+   */
+  maybeInitializeFromUrl_() {
+    if (
+      isProxyOrigin(this.win_.location) ||
+      !this.form_.hasAttribute('data-initialize-from-url')
+    ) {
+      return;
+    }
+
+    const valueTags = ['SELECT', 'TEXTAREA'];
+    const valueInputTypes = [
+      'color',
+      'date',
+      'datetime-local',
+      'email',
+      'hidden',
+      'month',
+      'number',
+      'range',
+      'search',
+      'tel',
+      'text',
+      'time',
+      'url',
+      'week',
+    ];
+    const checkedInputTypes = ['checkbox', 'radio'];
+
+    const maybeFillField = (field, name) => {
+      // Do not interfere with form fields that utilize variable substitutions.
+      // These fields are populated at time of form submission.
+      if (field.hasAttribute('data-amp-replace')) {
+        return;
+      }
+      // Form fields must be whitelisted
+      if (!field.hasAttribute('data-allow-initialization')) {
+        return;
+      }
+
+      const value = queryParams[name] || '';
+      const type = field.getAttribute('type') || 'text';
+      const tag = field.tagName;
+
+      if (tag === 'INPUT') {
+        if (valueInputTypes.includes(type.toLocaleLowerCase())) {
+          if (field.value !== value) {
+            field.value = value;
+          }
+        } else if (checkedInputTypes.includes(type)) {
+          const checked = field.value === value;
+          if (field.checked !== checked) {
+            field.checked = checked;
+          }
+        }
+      } else if (valueTags.includes(tag)) {
+        if (field.value !== value) {
+          field.value = value;
+        }
+      }
+    };
+
+    const queryParams = parseQueryString(this.win_.location.search);
+    Object.keys(queryParams).forEach(key => {
+      // Typecast since Closure is missing NodeList union type in HTMLFormElement.elements.
+      const formControls = /** @type {(!Element|!NodeList)} */ (this.form_
+        .elements[key]);
+      if (!formControls) {
+        return;
+      }
+
+      if (formControls.nodeType === Node.ELEMENT_NODE) {
+        const field = dev().assertElement(formControls);
+        maybeFillField(field, key);
+      } else if (formControls.length) {
+        const fields = /** @type {!NodeList} */ (formControls);
+        iterateCursor(fields, field => maybeFillField(field, key));
+      }
+    });
   }
 
   /**

@@ -157,7 +157,7 @@ describes.fakeWin(
         onReauthorizeFn,
         element
       );
-      sandbox.stub(source.adapter_, 'getConfig');
+      env.sandbox.stub(source.adapter_, 'getConfig');
       source.getAdapterConfig();
       expect(source.adapter_.getConfig.called).to.be.true;
     });
@@ -234,7 +234,7 @@ describes.fakeWin(
         onReauthorizeFn,
         element
       );
-      const sourceMock = sandbox.mock(source);
+      const sourceMock = env.sandbox.mock(source);
       sourceMock
         .expects('login_')
         .withExactArgs('https://url', '')
@@ -264,7 +264,7 @@ describes.fakeWin(
       win = env.win;
       ampdoc = env.ampdoc;
       document = win.document;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
@@ -359,7 +359,7 @@ describes.fakeWin(
     });
 
     it('should return adapter config', () => {
-      sandbox.stub(source.adapter_, 'getConfig');
+      env.sandbox.stub(source.adapter_, 'getConfig');
       source.getAdapterConfig();
       expect(source.adapter_.getConfig.called).to.be.true;
     });
@@ -384,7 +384,7 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       ampdoc = env.ampdoc;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
@@ -413,7 +413,7 @@ describes.fakeWin(
         authorize: () => {},
       };
       source.adapter_ = adapter;
-      adapterMock = sandbox.mock(adapter);
+      adapterMock = env.sandbox.mock(adapter);
     });
 
     afterEach(() => {
