@@ -79,6 +79,63 @@ let EnhancedVariablesV2Def;
 
 /**
  * @param {!JsonObject} props
+ * @return {*} TODO
+ */
+function AmpDateDisplayComponent(props) {
+  useResourcesNotify();
+  const ref = useRef();
+  const {templates} = props['services'];
+  const rerender = useRerenderer();
+
+  useMountLayoutEffect(() => {
+    const {host} = rootNodeFor(ref.current);
+    const win = host.ownerDocument.defaultView;
+    const data = /** @type {!JsonObject} */ (getDataForTemplate(props, win));
+
+    templates.findAndRenderTemplate(host, data).then(rendered => {
+      removeChildren(dev().assertElement(host));
+      const container = document.createElement('div');
+      container.appendChild(rendered);
+      host.appendChild(container);
+
+      const event = createCustomEvent(
+        win,
+        AmpEvents.DOM_UPDATE,
+        /* detail */ null,
+        {bubbles: true}
+      );
+      host.dispatchEvent(event);
+      rerender();
+    });
+  });
+  return createElement('div', {ref}, props['children']);
+}
+
+const AmpDateDisplay = PreactBaseElement(AmpDateDisplayComponent, {
+  passthrough: true,
+
+  services: {
+    'templates': win => Services.templatesFor(win),
+  },
+
+  attrs: {
+    'display-in': {prop: 'displayIn'},
+    'offset-seconds': {prop: 'offsetSeconds', type: 'number'},
+    'locale': {prop: 'locale'},
+    'datetime': {prop: 'datetime'},
+    'timestamp-ms': {prop: 'timestampMilliseconds', type: 'number'},
+    'timestamp-seconds': {prop: 'timestampSeconds', type: 'number'},
+    'template': {prop: 'displayIn'},
+  },
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  },
+});
+
+/**
+ * @param {!JsonObject} props
  * @param {!Window} win
  * @return {!EnhancedVariablesV2Def}
  */
@@ -223,63 +280,6 @@ function getVariablesInUTC(date, locale) {
     iso: date.toISOString(),
   };
 }
-
-/**
- * @param {!JsonObject} props
- * @return {*} TODO
- */
-function AmpDateDisplayComponent(props) {
-  useResourcesNotify();
-  const ref = useRef();
-  const {templates} = props['services'];
-  const rerender = useRerenderer();
-
-  useMountLayoutEffect(() => {
-    const {host} = rootNodeFor(ref.current);
-    const win = host.ownerDocument.defaultView;
-    const data = /** @type {!JsonObject} */ (getDataForTemplate(props, win));
-
-    templates.findAndRenderTemplate(host, data).then(rendered => {
-      removeChildren(dev().assertElement(host));
-      const container = document.createElement('div');
-      container.appendChild(rendered);
-      host.appendChild(container);
-
-      const event = createCustomEvent(
-        win,
-        AmpEvents.DOM_UPDATE,
-        /* detail */ null,
-        {bubbles: true}
-      );
-      host.dispatchEvent(event);
-      rerender();
-    });
-  });
-  return createElement('div', {ref}, props['children']);
-}
-
-const AmpDateDisplay = PreactBaseElement(AmpDateDisplayComponent, {
-  passthrough: true,
-
-  services: {
-    'templates': win => Services.templatesFor(win),
-  },
-
-  attrs: {
-    'display-in': {prop: 'displayIn'},
-    'offset-seconds': {prop: 'offsetSeconds', type: 'number'},
-    'locale': {prop: 'locale'},
-    'datetime': {prop: 'datetime'},
-    'timestamp-ms': {prop: 'timestampMilliseconds', type: 'number'},
-    'timestamp-seconds': {prop: 'timestampSeconds', type: 'number'},
-    'template': {prop: 'displayIn'},
-  },
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  },
-});
 
 AMP.extension(TAG, '0.2', AMP => {
   AMP.registerElement(TAG, AmpDateDisplay);
