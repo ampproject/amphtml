@@ -227,6 +227,12 @@
     "s2": "//collector.mediator.media/script/!mediator_id/amp/register/?url=_canonical_url_&ref=_document_referrer_&e=s2",
     "s3": "//collector.mediator.media/script/!mediator_id/amp/register/?url=_canonical_url_&ref=_document_referrer_&e=s3"
   },
+  "memo": {
+    "host": "https://elsa.memoinsights.com",
+    "baseParams": "amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&v=amp",
+    "visible": "https://elsa.memoinsights.com/n?amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&v=amp",
+    "timer": "https://elsa.memoinsights.com/t?amp=true&pid=!pid&title=_title_&url=_canonical_url_&date=!published_at&authors=!authors&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&v=amp&t=5000&e=5000"
+  },
   "metrika": {
     "pageview": "https://mc.yandex.ru/watch/!counterId?browser-info=amp%3A1%3Az%3A_timezone_%3Ai%3A_timestamp_%3Arn%3A_random_%3Ala%3A_browser_language_%3Aen%3A_document_charset_%3Arqn%3A1%3As%3A_screen_width_x_screen_height_x_screen_color_depth_%3Aw%3A_available_screen_width_x_available_screen_height_%3Ads%3A_domain_lookup_time_%2C_tcp_connect_time_%2C_server_response_time_%2C_page_download_time_%2C_redirect_time_%2C_nav_timing_%2C_nav_redirect_count_%2C_nav_timing_%2C_nav_timing_%2C_nav_timing_%2C_page_load_time_%2C_nav_timing_%2C_content_load_time_%3Auid%3A_client_id_%3Apvid%3A_page_view_id_%3At%3A_title_&site-info=!yaParams&page-url=_source_url_&page-ref=_document_referrer_",
     "notBounce": "https://mc.yandex.ru/watch/!counterId?browser-info=ar%3A1%3Anb%3A1%3Aamp%3A1%3Az%3A_timezone_%3Ai%3A_timestamp_%3Arn%3A_random_%3Ala%3A_browser_language_%3Aen%3A_document_charset_%3Arqn%3A1%3As%3A_screen_width_x_screen_height_x_screen_color_depth_%3Aw%3A_available_screen_width_x_available_screen_height_%3Ads%3A_domain_lookup_time_%2C_tcp_connect_time_%2C_server_response_time_%2C_page_download_time_%2C_redirect_time_%2C_nav_timing_%2C_nav_redirect_count_%2C_nav_timing_%2C_nav_timing_%2C_nav_timing_%2C_page_load_time_%2C_nav_timing_%2C_content_load_time_%3Auid%3A_client_id_%3Apvid%3A_page_view_id_%3At%3A_title_&page-url=_source_url_&page-ref=_document_referrer_",
