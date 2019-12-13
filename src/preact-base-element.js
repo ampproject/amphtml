@@ -174,8 +174,7 @@ export function PreactBaseElement(Component, opts = {}) {
       // this element will be reused.
       const cv = createElement(Component, props);
 
-      const context = getContextFromDom(this.element, this.context_);
-      const v = createElement(withAmpContext, context, cv);
+      const v = createElement(withAmpContext, this.context_, cv);
 
       render(v, this.container_);
 
@@ -302,26 +301,4 @@ function matchChild(element, defs) {
     }
   }
   return null;
-}
-
-/**
- * @param {!Node} node
- * @param {!Object} context
- * @return {!Object}
- */
-function getContextFromDom(node, context) {
-  // TBD: This can be made a lot faster using effects and dedicated context
-  // tree in AMP. See Revamp.
-
-  // Go up the DOM hierarchy. Traverse Shadow DOM.
-  let n = node;
-  while (n) {
-    const nodeContext = n['i-amphtml-context'];
-    if (nodeContext) {
-      return Object.assign({}, nodeContext, context);
-    }
-    n = n.assignedSlot || n.parentNode || n.host;
-  }
-
-  return context;
 }
