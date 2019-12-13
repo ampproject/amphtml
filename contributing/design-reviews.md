@@ -75,5 +75,3 @@ For larger design topics (e.g. new features, or a significant change), the use o
 
   See the License for the specific language governing permissions and limitations under the License.
   ```
-  
-
