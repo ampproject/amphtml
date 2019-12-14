@@ -23,6 +23,19 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {matches, scopedQuerySelector} from '../../../src/dom';
 import {setStyle} from '../../../src/style';
 
+/**
+ * Renders a carousel of thumbnails for an inline gallery.
+ *
+ * TODO(sparhami) Look into syncing the state between the main carousel and
+ * the thumbnails. One potential solution is to only change the position when
+ * the new slide would be outside of the currently visibile thumbnails. More
+ * investigation / UX work is needed here.
+ * TODO(sparhami) Change amp-base-carousel to move one viewport of items at
+ * a time when using `mixed-length="true"`.
+ * TODO(sparhami) Look into styling for the active thumbnail.
+ * TODO(sparhami) Make non-looping thumbnails the default; need to make sure
+ * the next arrow works properly for that case.
+ */
 export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -94,7 +107,8 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
     // If an thumb width/height aspect ratio specified, used that. Otherwise
     // use the aspect ratio of the element we are creating a thumb and
     // fall back to a square if anything goes wrong.
-    const srcAspectRatio = srcElement.offsetWidth / srcElement.offsetHeight;
+    const srcAspectRatio =
+      srcElement./*OK*/ offsetWidth / srcElement./*OK*/ offsetHeight;
     const aspectRatio = this.thumbAspectRatio_ || srcAspectRatio || 1;
     // Use a padding-right (along with `writing-mode: vertical-lr` in the CSS)
     // to make the width match the aspect ratio for the available height. Note
