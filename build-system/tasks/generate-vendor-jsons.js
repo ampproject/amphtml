@@ -91,7 +91,6 @@ function generateVendorJsons() {
 }
 
 function generateCanaryBgJson_(analyticsConfig, destPath) {
-  return;
   // generate separate canary JSON file for Bolt Guard (BG)
   const bgCanaryConfig = Object.assign({}, analyticsConfig['bg'], {
     'transport': {
