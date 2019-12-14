@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from '../vendors';
+//import {ANALYTICS_CONFIG} from '../vendors';
 import {AnalyticsConfig, expandConfigRequest, mergeObjects} from '../config';
 import {Services} from '../../../../src/services';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
@@ -25,24 +25,45 @@ import {user} from '../../../../src/log';
 describes.realWin('AnalyticsConfig', {amp: false}, env => {
   let win;
   let doc;
+  let vendorName = 'test-vendor';
+  let fakeVendorJson;
+  let fakeRemoteJson;
+  let fakeRewriterJson;
+  let xhrStub;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-  });
+    xhrStub = stubXhr();
+      xhrStub.callsFake(url => {
 
-  afterEach(() => {
-    delete ANALYTICS_CONFIG['-test-venfor'];
+        if (url.indexOf(`${vendorName}.json`) >= 0) {
+          return Promise.resolve({
+            json: () => fakeVendorJson,
+          });
+        }
+        if (url.indexOf('/remote') >= 0) {
+          return Promise.resolve({
+            json: () => fakeRemoteJson,
+          });
+        }
+        if (url.indexOf('/rewriter') >= 0) {
+          return Promise.resolve({
+            json: () => fakeRewriterJson
+          });
+        }
+      });
   });
 
   describe('handles top level fields correctly', () => {
+
     it('propogates requestOrigin into each request object', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requestOrigin': 'https://example.com',
         'requests': {'test1': '/test1', 'test2': '/test1/test2'},
       };
 
-      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const element = getAnalyticsTag({}, {'type': vendorName});
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']).to.deep.equal({
@@ -59,7 +80,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('does not overwrite existing origin in request object', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requestOrigin': 'https://toplevel.com',
         'requests': {
           'test1': {
@@ -69,7 +90,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         },
       };
 
-      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const element = getAnalyticsTag({}, {'type': vendorName});
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']).to.deep.equal({
@@ -82,7 +103,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('handles empty string request origin', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requestOrigin': '',
         'requests': {
           'test1': {
@@ -91,7 +112,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         },
       };
 
-      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const element = getAnalyticsTag({}, {'type': vendorName});
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']).to.deep.equal({
@@ -104,7 +125,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('handles undefined request origin', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requestOrigin': undefined,
         'requests': {
           'test1': {
@@ -113,7 +134,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         },
       };
 
-      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const element = getAnalyticsTag({}, {'type': vendorName});
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['requests']).to.deep.equal({
@@ -128,7 +149,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
   describe('merges requests correctly', () => {
     it('inline and vendor both string', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {'foo': '/bar', 'bar': 'foobar'},
       };
 
@@ -137,7 +158,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'requests': {'foo': 'https://example.com/${bar}'},
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
-        {'type': '-test-venfor'}
+        {'type': vendorName}
       );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
@@ -159,7 +180,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('inline and vendor string and object', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {
           'foo': 'foo',
           'bar': {
@@ -179,7 +200,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
-        {'type': '-test-venfor'}
+        {'type': vendorName}
       );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
@@ -203,7 +224,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('inline and vendor both object', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {
           'foo': {
             'baseUrl': 'foo',
@@ -227,7 +248,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
-        {'type': '-test-venfor'}
+        {'type': vendorName}
       );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
@@ -251,6 +272,12 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('inline and remote both string', () => {
+      fakeRemoteJson = {
+        requests: {
+          foo: 'https://example.com/remote',
+        },
+      };
+
       const element = getAnalyticsTag(
         {
           'vars': {'title': 'local'},
@@ -258,20 +285,8 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
         {
-          'config': '//config-rv2',
+          'config': '/remote',
         }
-      );
-
-      stubXhr().returns(
-        Promise.resolve({
-          json() {
-            return Promise.resolve({
-              requests: {
-                foo: 'https://example.com/remote',
-              },
-            });
-          },
-        })
       );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
@@ -331,7 +346,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
   describe('vendor only configs', () => {
     it('succeeds for vendor optout config', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {
           'pageview': '//fake-url',
         },
@@ -343,7 +358,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         },
         optout: true,
       };
-      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const element = getAnalyticsTag({}, {'type': vendorName});
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['optout']).to.be.true;
       });
@@ -363,7 +378,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('succeeds for vendor iframePing config', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {
           'pageview': '//fake-url',
         },
@@ -375,7 +390,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
         },
       };
-      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const element = getAnalyticsTag({}, {'type': vendorName});
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['triggers']).to.deep.equal({
           'pageview': {
@@ -400,7 +415,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('succeeds for vendor iframe transport config', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {
           'pageview': '//fake-url',
         },
@@ -417,7 +432,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           iframe: '//fake-url',
         },
       };
-      const element = getAnalyticsTag({}, {'type': '-test-venfor'});
+      const element = getAnalyticsTag({}, {'type': vendorName});
       return new AnalyticsConfig(element).loadConfig().then(config => {
         expect(config['transport']).to.deep.equal({
           image: false,
@@ -436,7 +451,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         '[AmpAnalytics <unknown id>] Inline or remote config ' +
           'should not overwrite vendor transport settings'
       );
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {
           'pageview': '//fake-url',
         },
@@ -464,7 +479,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             iframe: '//fake-url2',
           },
         },
-        {'type': '-test-venfor'}
+        {'type': vendorName}
       );
       return new AnalyticsConfig(element).loadConfig();
     });
@@ -476,6 +491,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
         /Remote configs are not allowed to specify transport iframe/
       );
 
+      fakeRemoteJson = {
+        vars: {'title': 'remote'},
+        transport: {
+          iframe: '//fake-url',
+        },
+      };
+
       const element = getAnalyticsTag(
         {
           'vars': {'title': 'local'},
@@ -483,26 +505,11 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
         {
-          'config': '//config1',
+          'config': '/remote',
         }
       );
 
-      const xhrStub = stubXhr();
-      xhrStub.returns(
-        Promise.resolve({
-          json: () => {
-            return {
-              vars: {'title': 'remote'},
-              transport: {
-                iframe: '//fake-url',
-              },
-            };
-          },
-        })
-      );
-
       return new AnalyticsConfig(element).loadConfig().then(config => {
-        expect(xhrStub).to.be.calledWith('//config1', {});
         expect(config['vars']['title']).to.equal('remote');
         // iframe transport from remote config is ignored
         expect(config['transport']['iframe']).to.be.undefined;
@@ -510,6 +517,9 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should not fetch remote config if sandboxed', () => {
+      fakeRemoteJson = {
+        vars: {'title': 'remote'},
+      };
       const element = getAnalyticsTag(
         {
           'vars': {'title': 'local'},
@@ -517,7 +527,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
         {
-          'config': '//config1',
+          'config': '/remote',
           'sandbox': 'true',
         }
       );
@@ -528,6 +538,10 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('fetches and merges remote config with credentials', () => {
+      fakeRemoteJson = {
+        vars: {'title': 'remote'},
+      };
+
       const element = getAnalyticsTag(
         {
           'vars': {'title': 'local'},
@@ -535,23 +549,13 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
         {
-          'config': '//config1',
+          'config': '/remote',
           'data-credentials': 'include',
         }
       );
 
-      const xhrStub = stubXhr();
-      xhrStub.returns(
-        Promise.resolve({
-          json: () => {
-            return {
-              vars: {'title': 'remote'},
-            };
-          },
-        })
-      );
       return new AnalyticsConfig(element).loadConfig().then(config => {
-        expect(xhrStub).to.be.calledWith('//config1', {
+        expect(xhrStub).to.be.calledWith('/remote', {
           credentials: 'include',
         });
         expect(config['vars']['title']).to.equal('remote');
@@ -561,53 +565,38 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
   describe('should re-write configuration if configured', () => {
     it('should fully rewrite a configuration', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'configRewriter': {
-          'url': '//rewriter',
+          'url': '/rewriter',
         },
+      };
+      fakeRewriterJson = {
+        'requests': {'foo': '/rewriter'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
       };
       const element = getAnalyticsTag(
         {
           'requests': {'foo': '//inlined'},
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
-        {'type': '-test-venfor'}
+        {'type': vendorName}
       );
 
-      const xhrStub = stubXhr();
-      xhrStub.callsFake(url => {
-        const result = {
-          'requests': {'foo': url},
-          'triggers': [{'on': 'visible', 'request': 'foo'}],
-        };
-        return Promise.resolve({
-          json: () => result,
-        });
-      });
-
       return new AnalyticsConfig(element).loadConfig().then(config => {
-        expect(xhrStub).to.be.calledWith('//rewriter', {
-          body: {
-            requests: {foo: '//inlined'},
-            triggers: [{on: 'visible', request: 'foo'}],
-          },
-          method: 'POST',
-        });
-
         expect(config['requests']['foo']).to.deep.equal({
-          baseUrl: '//rewriter',
+          baseUrl: '/rewriter',
         });
       });
     });
 
     it('should resolve and send publisher enabled varGroups', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'configRewriter': {
-          'url': '//rewriter',
+          'url': '/rewriter',
           'varGroups': {
             'feature1': {
               'key': 'cats',
@@ -619,6 +608,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           },
         },
       };
+
       const element = getAnalyticsTag(
         {
           'requests': {'foo': '//inlined'},
@@ -629,13 +619,11 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             },
           },
         },
-        {'type': '-test-venfor'}
+        {'type': vendorName}
       );
 
-      const xhrStub = stubXhr();
-
       return new AnalyticsConfig(element).loadConfig().then(() => {
-        expect(xhrStub).to.be.calledWith('//rewriter', {
+        expect(xhrStub).to.be.calledWith('/rewriter', {
           body: {
             requests: {foo: '//inlined'},
             triggers: [{on: 'visible', request: 'foo'}],
@@ -652,11 +640,11 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should resolve and send vendor enabled varGroups', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'configRewriter': {
-          'url': '//rewriter',
+          'url': '/rewriter',
           'varGroups': {
             'feature1': {
               'key': 'cats',
@@ -671,13 +659,11 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'requests': {'foo': '//inlined'},
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
-        {'type': '-test-venfor'}
+        {'type': vendorName}
       );
 
-      const xhrStub = stubXhr();
-
       return new AnalyticsConfig(element).loadConfig().then(() => {
-        expect(xhrStub).to.be.calledWith('//rewriter', {
+        expect(xhrStub).to.be.calledWith('/rewriter', {
           body: {
             requests: {foo: '//inlined'},
             triggers: [{on: 'visible', request: 'foo'}],
@@ -694,11 +680,11 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should not send configRewriter object if no vars are enabled', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'configRewriter': {
-          'url': '//rewriter',
+          'url': '/rewriter',
           'varGroups': {
             'feature1': {
               'key': 'cats',
@@ -712,13 +698,11 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'requests': {'foo': '//inlined'},
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
-        {'type': '-test-venfor'}
+        {'type': vendorName}
       );
 
-      const xhrStub = stubXhr();
-
       return new AnalyticsConfig(element).loadConfig().then(() => {
-        expect(xhrStub).to.be.calledWith('//rewriter', {
+        expect(xhrStub).to.be.calledWith('/rewriter', {
           body: {
             requests: {foo: '//inlined'},
             triggers: [{on: 'visible', request: 'foo'}],
@@ -729,11 +713,11 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should support amp-analytics-variables macros in varGroups', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'configRewriter': {
-          'url': '//rewriter',
+          'url': '/rewriter',
           'varGroups': {
             'feature1': {
               'hasValue': '$NOT(foo)',
@@ -747,13 +731,11 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'requests': {'foo': '//inlined'},
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
-        {'type': '-test-venfor'}
+        {'type': vendorName}
       );
 
-      const xhrStub = stubXhr();
-
       return new AnalyticsConfig(element).loadConfig().then(() => {
-        expect(xhrStub).to.be.calledWith('//rewriter', {
+        expect(xhrStub).to.be.calledWith('/rewriter', {
           body: {
             requests: {foo: '//inlined'},
             triggers: [{on: 'visible', request: 'foo'}],
@@ -769,34 +751,31 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should merge rewritten configuration and use vendor', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'configRewriter': {
-          'url': '//rewriter',
+          'url': '/rewriter',
         },
+      };
+      fakeRemoteJson = {
+        'requests': {'foo': '//remote'},
+      };
+
+      fakeRewriterJson = {
+        'requests': {'foo': '//rewriter'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
       };
       const element = getAnalyticsTag(
         {
           'requests': {'foo': '//inlined'},
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
-        {'type': '-test-venfor', 'config': '//remote'}
+        {'type': vendorName, 'config': '//remote'}
       );
 
-      const xhrStub = stubXhr();
-      xhrStub.callsFake(url => {
-        const result = {
-          'requests': {'foo': url},
-          'triggers': [{'on': 'visible', 'request': 'foo'}],
-        };
-        return Promise.resolve({
-          json: () => result,
-        });
-      });
-
       return new AnalyticsConfig(element).loadConfig().then(config => {
-        expect(xhrStub).to.be.calledWith('//rewriter', {
+        expect(xhrStub).to.be.calledWith('/rewriter', {
           body: {
             requests: {foo: '//remote'},
             triggers: [{on: 'visible', request: 'foo'}],
@@ -811,7 +790,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should ignore config rewriter if no url provided', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
+      fakeVendorJson = {
         'requests': {'foo': '//vendor'},
         'triggers': [{'on': 'visible', 'request': 'foo'}],
         'configRewriter': {},
@@ -821,7 +800,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
           'requests': {'foo': '//inlined'},
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         },
-        {'type': '-test-venfor'}
+        {'type': vendorName}
       );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
@@ -832,9 +811,8 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('should ignore inlined config rewriter', () => {
-      ANALYTICS_CONFIG['-test-venfor'] = {
-        'requests': {'foo': '//vendor'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}],
+      fakeRewriterJson = {
+        'requests': {'foo': '//rewriter'},
       };
       const element = getAnalyticsTag(
         {
@@ -844,7 +822,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
             'url': '//rewriter',
           },
         },
-        {'type': '-test-venfor'}
       );
 
       return new AnalyticsConfig(element).loadConfig().then(config => {
@@ -883,14 +860,14 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
   describe('warning message', () => {
     it('shows the warning', () => {
-      ANALYTICS_CONFIG['test-vendor'] = {
+      fakeVendorJson = {
         'requests': {'test1': '/test1', 'test2': '/test1/test2'},
         'warningMessage': 'I am a warning',
       };
 
       const element = getAnalyticsTag(
         {},
-        {'type': 'test-vendor', 'id': 'analyticsId'}
+        {'type': vendorName, 'id': 'analyticsId'}
       );
       const usrObj = user();
       const spy = env.sandbox.spy(usrObj, 'warn');
@@ -909,7 +886,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
     });
 
     it('handles incorrect inputs', () => {
-      ANALYTICS_CONFIG['test-vendor'] = {
+      fakeVendorJson = {
         'requests': {'test1': '/test1', 'test2': '/test2'},
         'warningMessage': {
           'message': 'I am deprecated',
@@ -919,7 +896,7 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
       const element = getAnalyticsTag(
         {},
-        {'type': 'test-vendor', 'id': 'analyticsId'}
+        {'type': vendorName, 'id': 'analyticsId'}
       );
       const usrObj = user();
       const spy = env.sandbox.spy(usrObj, 'warn');
@@ -945,7 +922,6 @@ describes.realWin('AnalyticsConfig', {amp: false}, env => {
 
       const usrObj = user();
       const spy = env.sandbox.spy(usrObj, 'warn');
-      const xhrStub = stubXhr();
       xhrStub.returns(
         Promise.resolve({
           json: () => {

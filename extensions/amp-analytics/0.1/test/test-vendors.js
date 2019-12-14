@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {ExpansionOptions} from '../variables';
 import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
@@ -25,26 +24,10 @@ import {
 import {Services} from '../../../../src/services';
 import {hasOwn} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
+import {AnalyticsConfig} from '../config';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
-const AnalyticsConfig = Object.assign({}, ANALYTICS_CONFIG);
-
-describe('iframe transport', () => {
-  it('Should not contain iframe transport if not whitelisted', () => {
-    for (const vendor in AnalyticsConfig) {
-      const vendorEntry = AnalyticsConfig[vendor];
-      if (
-        hasOwn(vendorEntry, 'transport') &&
-        hasOwn(vendorEntry.transport, 'iframe')
-      ) {
-        expect(vendorEntry['transport']['iframe']).to.equal(
-          IFRAME_TRANSPORTS[vendor]
-        );
-      }
-    }
-  });
-});
 
 describes.realWin(
   'amp-analytics',
@@ -52,6 +35,7 @@ describes.realWin(
     amp: {
       extensions: ['amp-analytics'],
     },
+    mockFetch: false,
   },
   function(env) {
     let win, doc;
@@ -65,169 +49,162 @@ describes.realWin(
       requestVerifier = new ImagePixelVerifier(wi);
     });
 
-    function getAnalyticsTag(config, attrs) {
-      config['transport'] = {
-        xhrpost: false,
-        beacon: false,
-      };
-      config = JSON.stringify(config);
-      const el = doc.createElement('amp-analytics');
-      const script = doc.createElement('script');
-      script.textContent = config;
-      script.setAttribute('type', 'application/json');
-      el.appendChild(script);
-      for (const k in attrs) {
-        el.setAttribute(k, attrs[k]);
-      }
-
-      doc.body.appendChild(el);
-
-      el.connectedCallback();
-      const analytics = new AmpAnalytics(el);
-      analytics.createdCallback();
-      analytics.buildCallback();
-      return analytics;
-    }
-
-    /**
-     * Clears the properties in the config that should only be used in vendor
-     * configs. This is needed because we pass in all the vendor requests as
-     * inline config and iframePings/optout are not allowed to be used without
-     * AMP team's approval.
-     *
-     * @param {!JsonObject} config The inline config to update.
-     * @return {!JsonObject}
-     */
-    function clearVendorOnlyConfig(config) {
-      for (const t in config.triggers) {
-        if (config.triggers[t].iframePing) {
-          config.triggers[t].iframePing = undefined;
-        }
-      }
-      if (config.optout) {
-        config.optout = undefined;
-      }
-      return config;
-    }
-
-    describe('vendor request tests', () => {
-      for (const vendor in AnalyticsConfig) {
-        if (vendor === 'default') {
-          continue;
-        }
-        const config = AnalyticsConfig[vendor];
-        if (!config.requests) {
-          delete AnalyticsConfig[vendor];
-          continue;
-        }
-        describe('analytics vendor: ' + vendor, function() {
-          beforeEach(() => {
-            // Remove all the triggers to prevent unwanted requests, for instance
-            // one from a "visible" trigger. Those unwanted requests are a source
-            // of test flakiness. Especially they will alternate value of var
-            // $requestCount.
-            config.triggers = {};
-          });
-
-          for (const name in config.requests) {
-            it(
-              'should produce request: ' +
-                name +
-                '. If this test fails update vendor-requests.json',
-              function*() {
-                const urlReplacements = Services.urlReplacementsForDoc(
-                  doc.documentElement
-                );
-                const analytics = getAnalyticsTag(
-                  clearVendorOnlyConfig(config)
-                );
-                window.sandbox
-                  .stub(urlReplacements.getVariableSource(), 'get')
-                  .callsFake(function(name) {
-                    expect(this.replacements_).to.have.property(name);
-                    const defaultValue = `_${name.toLowerCase()}_`;
-                    return {
-                      sync: () => defaultValue,
-                    };
-                  });
-
-                window.sandbox
-                  .stub(ExpansionOptions.prototype, 'getVar')
-                  .callsFake(function(name) {
-                    let val = this.vars[name];
-                    if (val == null || val == '') {
-                      val = '!' + name;
-                    }
-                    return val;
-                  });
-                analytics.createdCallback();
-                analytics.buildCallback();
-                yield analytics.layoutCallback();
-
-                // Wait for event queue to clear.
-                yield macroTask();
-
-                analytics.handleEvent_(
-                  {
-                    request: name,
-                  },
-                  {
-                    vars: Object.create(null),
-                  }
-                );
-                yield macroTask();
-                expect(requestVerifier.hasRequestSent()).to.be.true;
-                let url = requestVerifier.getLastRequestUrl();
-
-                const vendorData = VENDOR_REQUESTS[vendor];
-                if (!vendorData) {
-                  throw new Error(
-                    'Add vendor ' + vendor + ' to vendor-requests.json'
-                  );
-                }
-                const val = vendorData[name];
-                if (val == '<ignore for test>') {
-                  url = '<ignore for test>';
-                }
-                if (val == null) {
-                  throw new Error(
-                    'Define ' +
-                      vendor +
-                      '.' +
-                      name +
-                      ' in vendor-requests.json. Expected value: ' +
-                      url
-                  );
-                }
-
-                // Write this out for easy copy pasting.
-                writeOutput(vendor, name, url);
-
-                expect(url).to.equal(val);
-              }
+    describe('Should not contain iframe transport if not whitelisted', () => {
+      for (const vendor in VENDOR_REQUESTS) {
+        it('test vendor: '+ vendor, () => {
+          const el = doc.createElement('amp-analytics');
+          el.setAttribute('type', vendor);
+          doc.body.appendChild(el);
+          const analyticsConfig = new AnalyticsConfig(el);
+          return analyticsConfig.loadConfig().then(config => {
+            if(hasOwn(config, 'transport') &&
+            hasOwn(config.transport, 'iframe')) {
+            expect(config['transport']['iframe']).to.equal(
+              IFRAME_TRANSPORTS[vendor]
             );
           }
+          });
+        });
+      }
+    });
+
+    describe('vendor request tests', () => {
+      for (const vendor in VENDOR_REQUESTS) {
+        if (vendor != '1googleanalytics') {
+         // continue;
+        }
+        describe('analytics vendor: ' + vendor, function() {
+          let config;
+          let analytics;
+          beforeEach(done => {
+            const urlReplacements = Services.urlReplacementsForDoc(
+              doc.documentElement
+            );
+            window.sandbox
+                .stub(urlReplacements.getVariableSource(), 'get')
+                .callsFake(function(name) {
+                  expect(this.replacements_).to.have.property(name);
+                  const defaultValue = `_${name.toLowerCase()}_`;
+                  return {
+                    sync: () => defaultValue,
+                  };
+                });
+
+            window.sandbox
+              .stub(ExpansionOptions.prototype, 'getVar')
+              .callsFake(function(name) {
+                let val = this.vars[name];
+                if (val == null || val == '') {
+                  val = '!' + name;
+                }
+                return val;
+              });
+
+            analytics = getAnalyticsTag(doc, vendor);
+            analytics.layoutCallback().then(() => {
+              config = analytics.config_;
+              done();
+            });
+          });
+
+          it('test requests', function* () {
+            const requestCount = Object.keys(config.requests).length;
+            const outputConfig = {};
+            for (const name in config.requests) {
+              // Wait for event queue to clear.
+              // To prevent default triggers
+              yield macroTask();
+              analytics.handleEvent_(
+                {
+                  request: name,
+                },
+                {
+                  vars: Object.create(null),
+                }
+              );
+
+              // Reset $requestCount value after each
+              analytics.config_['vars']['requestCount'] = 0;
+
+              yield macroTask();
+              expect(requestVerifier.hasRequestSent()).to.be.true;
+              let url = requestVerifier.getLastRequestUrl();
+
+              const vendorData = VENDOR_REQUESTS[vendor];
+              if (!vendorData) {
+                throw new Error(
+                  'Add vendor ' + vendor + ' to vendor-requests.json'
+                );
+              }
+              const val = vendorData[name];
+              if (val == '<ignore for test>') {
+                url = '<ignore for test>';
+              }
+              if (val == null) {
+                throw new Error(
+                  'Define ' +
+                    vendor +
+                    '.' +
+                    name +
+                    ' in vendor-requests.json. Expected value: ' +
+                    url
+                );
+              }
+              outputConfig[name] = url;
+              // Write this out for easy copy pasting.
+              if (url !== val) {
+                throw new Error(
+                  `Vendor ${vendor}, request ${name} doesn't match` +
+                  `Expected value ${val}, get value ${url}`
+                );
+              }
+              expect(url).to.equal(val);
+            }
+            writeOutput(vendor, outputConfig);
+          });
         });
       }
     });
   }
 );
 
-const actualResults = {};
+/**
+ * Get the AmpAnalytics instance
+ * @param {string} vendor
+ */
+function getAnalyticsTag(doc, vendor) {
+  const el = doc.createElement('amp-analytics');
+  el.setAttribute('type', vendor);
 
-function writeOutput(vendor, name, url) {
-  if (!actualResults[vendor]) {
-    actualResults[vendor] = {};
-  }
-  actualResults[vendor][name] = url;
-  const cnt = Object.keys(AnalyticsConfig[vendor]['requests']).length;
-  AnalyticsConfig[vendor].testCnt = (AnalyticsConfig[vendor].testCnt || 0) + 1;
-  if (cnt == AnalyticsConfig[vendor].testCnt) {
-    delete AnalyticsConfig[vendor];
-    if (Object.keys(AnalyticsConfig).length == 1) {
-      const out = top.document.createElement('div');
-      out.textContent = JSON.stringify(actualResults, null, '  ');
-      top.document.body.insertBefore(out, top.document.body.firstChild);
-    }
-  }
+  // Overwrite transport method to use image
+  expectAsyncConsoleError(/should not overwrite vendor transport/);
+  const script = doc.createElement('script');
+  script.setAttribute('type', 'application/json');
+  script.textContent = JSON.stringify({
+    "transport": {
+      "iframe": false,
+      "image": true,
+    },
+  });;
+  el.appendChild(script);
+
+  doc.body.appendChild(el);
+  el.connectedCallback();
+  const analytics = new AmpAnalytics(el);
+  analytics.createdCallback();
+  analytics.buildCallback();
+  return analytics;
+}
+
+// Cache firstChild before append div to doc
+const firstChild = top.document.body.firstChild;
+
+function writeOutput(vendor, output) {
+  const vendorDiv = top.document.createElement('h3');
+  vendorDiv.textContent = vendor;
+  top.document.body.insertBefore(vendorDiv, firstChild);
+
+  const out = top.document.createElement('div');
+  out.textContent = JSON.stringify(output, null, '  ');
+  top.document.body.insertBefore(out, firstChild);
 }

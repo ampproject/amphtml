@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {ANALYTICS_CONFIG} from './vendors';
+import {defaultConfig} from './default-config';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {calculateScriptBaseUrl} from '../../../src/service/extension-location';
@@ -24,6 +24,7 @@ import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
+
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';
@@ -40,10 +41,9 @@ export class AnalyticsConfig {
     this.win_ = null;
 
     /**
-     * @const {!JsonObject} Copied here for tests.
-     * @private
+     * @private {!JsonObject}
      */
-    this.predefinedConfig_ = ANALYTICS_CONFIG;
+    this.vendorConfig_ = dict({});
 
     /**
      * @private {JsonObject}
@@ -65,11 +65,9 @@ export class AnalyticsConfig {
   loadConfig() {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
-
     return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
       .then(this.processConfigs_.bind(this))
       .then(this.checkWarningMessage_.bind(this))
-      .then(this.addExperimentParams_.bind(this))
       .then(() => this.config_);
   }
 
@@ -98,61 +96,26 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   fetchVendorConfig_() {
-    if (!ANALYTICS_VENDOR_SPLIT) {
-      return Promise.resolve();
-    }
-
     const type = this.element_.getAttribute('type');
     if (!type) {
       return Promise.resolve();
     }
 
     const vendorUrl = this.getVendorUrl_(type);
-
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching vendor config', vendorUrl);
-
     return Services.xhrFor(toWin(this.win_))
       .fetchJson(vendorUrl)
       .then(res => res.json())
       .then(
         jsonValue => {
-          this.predefinedConfig_[type] = jsonValue;
+          this.vendorConfig_ = jsonValue;
           dev().fine(TAG, 'Vendor config loaded for ' + type, jsonValue);
         },
         err => {
           user().error(TAG, 'Error loading vendor config: ', vendorUrl, err);
         }
       );
-  }
-
-  /**
-   * TODO: cleanup #22757 @jonathantyng
-   * Append special param to pageview request for RC and experiment builds
-   * for the googleanalytics component. This is to track pageview changes
-   * in AB experiment
-   */
-  addExperimentParams_() {
-    const type = this.element_.getAttribute('type');
-    const rtv = getMode().rtvVersion;
-    const isRc = rtv ? rtv.substring(0, 2) === '03' : false;
-
-    if (
-      type === 'googleanalytics' &&
-      (isRc || ANALYTICS_VENDOR_SPLIT) &&
-      this.config_['requests']
-    ) {
-      if (this.config_['requests']['pageview']) {
-        this.config_['requests']['pageview'][
-          'baseUrl'
-        ] += `&aae=${ANALYTICS_VENDOR_SPLIT}`;
-      }
-      if (this.config_['requests']['timing']) {
-        this.config_['requests']['timing'][
-          'baseUrl'
-        ] += `&aae=${ANALYTICS_VENDOR_SPLIT}`;
-      }
-    }
   }
 
   /**
@@ -375,10 +338,9 @@ export class AnalyticsConfig {
         'requestCount': 0,
       },
     });
-    const defaultConfig = this.predefinedConfig_['default'] || {};
     mergeObjects(expandConfigRequest(defaultConfig), config);
     mergeObjects(
-      expandConfigRequest(this.getTypeConfig_()),
+      expandConfigRequest(this.vendorConfig_),
       config,
       /* predefined */ true
     );
@@ -395,16 +357,7 @@ export class AnalyticsConfig {
    * @return {!JsonObject}
    */
   getConfigRewriter_() {
-    return this.getTypeConfig_()['configRewriter'] || {};
-  }
-
-  /**
-   * Reads a vendor configuration.
-   * @return {!JsonObject}
-   */
-  getTypeConfig_() {
-    const type = this.element_.getAttribute('type');
-    return this.predefinedConfig_[type] || {};
+    return this.vendorConfig_['configRewriter'] || {};
   }
 
   /**
@@ -437,8 +390,7 @@ export class AnalyticsConfig {
    * @param {!JsonObject} inlineConfig
    */
   validateTransport_(inlineConfig) {
-    const type = this.element_.getAttribute('type');
-    if (this.predefinedConfig_[type]) {
+    if (this.vendorConfig_) {
       // TODO(zhouyx, #7096) Track overwrite percentage. Prevent transport
       // overwriting
       if (inlineConfig['transport'] || this.remoteConfig_['transport']) {
