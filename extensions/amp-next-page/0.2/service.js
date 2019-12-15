@@ -16,12 +16,10 @@
 
 import {CSS} from '../../../build/amp-next-page-0.2.css';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {Page, PageRelativePos} from './page';
+import {Page} from './page';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
-  installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
@@ -34,6 +32,7 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {sanitizeDoc, validatePage, validateUrl} from './utils';
 import {tryParseJson} from '../../../src/json';
+import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;
@@ -68,8 +67,11 @@ export class NextPageService {
     /** @private {?AmpElement} element */
     this.element_ = null;
 
-    /** @private @const {?PositionObserver} */
-    this.injectedPositionObserver_ = opt_injectedPositionObserver || null;
+    /** @private @const {!PositionObserver|undefined} */
+    this.injectedPositionObserver_ = opt_injectedPositionObserver;
+
+    /** @private {?VisibilityObserver} */
+    this.visibilityObserver_ = null;
 
     /** @private {?MultidocManager} */
     this.multidocManager_ = null;
@@ -105,6 +107,11 @@ export class NextPageService {
       Services.ampdocServiceFor(this.win_),
       Services.extensionsFor(this.win_),
       Services.timerFor(this.win_)
+    );
+
+    this.visibilityObserver_ = new VisibilityObserver(
+      this.ampdoc_,
+      this.injectedPositionObserver_
     );
 
     this.element_ = element;
@@ -172,41 +179,32 @@ export class NextPageService {
   updateVisibility() {
     this.pages_.forEach((page, index) => {
       if (
-        page.relativePos === PageRelativePos.INSIDE_VIEWPORT ||
-        page.relativePos === PageRelativePos.CONTAINS_VIEWPORT
+        page.relativePos === ViewportRelativePos.INSIDE_VIEWPORT ||
+        page.relativePos === ViewportRelativePos.CONTAINS_VIEWPORT
       ) {
         if (!page.isVisible()) {
-          page.setVisible(VisibilityState.VISIBLE);
+          page.setVisibility(VisibilityState.VISIBLE);
         }
-        // Hide the previous page
-        const prevPage = this.pages_[index + this.scrollDirection_];
-        if (
-          prevPage &&
-          prevPage.relativePos === PageRelativePos.LEAVING_VIEWPORT &&
-          prevPage.isVisible()
-        ) {
-          prevPage.setVisible(VisibilityState.HIDDEN);
+        // Hide the previous pages
+        let prevPageIndex = index + this.scrollDirection_;
+        while (prevPageIndex >= 0 && prevPageIndex < this.pages_.length) {
+          const prevPage = this.pages_[prevPageIndex];
+          if (
+            prevPage &&
+            (prevPage.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
+              prevPage.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) &&
+            prevPage.isVisible()
+          ) {
+            prevPage.setVisibility(VisibilityState.HIDDEN);
+          }
+          prevPageIndex += this.scrollDirection_;
         }
-      } else if (page.relativePos === PageRelativePos.OUTSIDE_VIEWPORT) {
+      } else if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
-          page.setVisible(VisibilityState.VISIBLE);
+          page.setVisibility(VisibilityState.HIDDEN);
         }
       }
     });
-  }
-
-  /**
-   * @return {!PositionObserver}
-   * @private
-   */
-  getPositionObserver_() {
-    // For testing
-    if (this.injectedPositionObserver_) {
-      return this.injectedPositionObserver_;
-    }
-
-    installPositionObserverServiceForDoc(this.ampdoc_);
-    return Services.positionObserverForDoc(this.ampdoc_.getHeadNode());
   }
 
   /**
@@ -229,21 +227,7 @@ export class NextPageService {
       return null;
     }
 
-    const header = this.win_.document.createElement('div');
     const shadowRoot = this.win_.document.createElement('div');
-    const footer = this.win_.document.createElement('div');
-
-    // TODO(wassgha): Unobserve
-    this.getPositionObserver_().observe(
-      header,
-      PositionObserverFidelity.LOW,
-      position => page.headerPositionChanged(position)
-    );
-    this.getPositionObserver_().observe(
-      footer,
-      PositionObserverFidelity.LOW,
-      position => page.footerPositionChanged(position)
-    );
 
     // Handles extension deny-lists and sticky items
     sanitizeDoc(doc);
@@ -251,10 +235,12 @@ export class NextPageService {
     // Insert the separator
     this.element_.insertBefore(this.separator_.cloneNode(true), this.moreBox_);
 
-    // Insert the shadow doc and two observer elements
-    this.element_.insertBefore(header, this.moreBox_);
+    // Insert the shadow doc and observe its position
     this.element_.insertBefore(shadowRoot, this.moreBox_);
-    this.element_.insertBefore(footer, this.moreBox_);
+    this.visibilityObserver_.observe(shadowRoot, this.element_, position => {
+      page.relativePos = position;
+      this.updateVisibility();
+    });
 
     // Try inserting the shadow document
     try {
