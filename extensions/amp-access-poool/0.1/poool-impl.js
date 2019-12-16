@@ -24,7 +24,7 @@ import {resetStyles, setStyle, setStyles} from '../../../src/style';
 const TAG = 'amp-access-poool';
 
 const ACCESS_CONFIG = {
-  'authorization': 'https://api.poool.fr/api/v2/amp/access?rid=READER_ID',
+  'authorization': 'https://api.poool.fr/api/v3/amp/access?rid=READER_ID',
   'iframe':
     'https://assets.poool.fr/amp.html' +
     '?rid=READER_ID' +
