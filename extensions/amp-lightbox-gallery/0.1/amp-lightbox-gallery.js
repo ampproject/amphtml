@@ -626,7 +626,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   setupGestures_() {
     const gestures = Gestures.get(dev().assertElement(this.carousel_));
-    gestures.onGesture(SwipeYRecognizer, ({data}) => {
+    gestures.onGesture(SwipeYRecognizer, e => {
+      const {data} = e;
       this.swipeGesture_(data);
     });
   }

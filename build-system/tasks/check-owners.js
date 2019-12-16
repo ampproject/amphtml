@@ -26,12 +26,12 @@ const fs = require('fs-extra');
 const JSON5 = require('json5');
 const log = require('fancy-log');
 const request = require('request');
-const utils = require('bluebird');
+const util = require('util');
 const {cyan, red, green} = require('ansi-colors');
 const {getFilesToCheck, usesFilesOrLocalChanges} = require('../common/utils');
 const {isTravisBuild} = require('../common/travis');
 
-const requestPost = utils.promisify(request.post);
+const requestPost = util.promisify(request.post);
 
 const OWNERS_SYNTAX_CHECK_URI =
   'http://ampproject-owners-bot.appspot.com/v0/syntax';

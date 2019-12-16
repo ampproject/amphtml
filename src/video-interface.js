@@ -51,25 +51,32 @@ export class VideoInterface {
   isInteractive() {}
 
   /**
-   * Current playback time in seconds at time of trigger
+   * Current playback time in seconds at time of trigger.
+   *
+   * This is used for analytics metadata.
+   *
    * @return {number}
    */
   getCurrentTime() {}
 
   /**
    * Total duration of the video in seconds
+   *
+   * This is used for analytics metadata.
+   *
    * @return {number}
    */
   getDuration() {}
 
   /**
    * Get a 2d array of start and stop times that the user has watched.
+   * This is used for analytics metadata.
    * @return {!Array<Array<number>>}
    */
   getPlayedRanges() {}
 
   /**
-   * Plays the video..
+   * Plays the video.
    *
    * @param {boolean} unusedIsAutoplay Whether the call to the `play` method is
    * triggered by the autoplay functionality. Video players can use this hint
@@ -84,11 +91,15 @@ export class VideoInterface {
 
   /**
    * Mutes the video.
+   * Implementation is required for autoplay and mute/unmute controls on docked
+   * video.
    */
   mute() {}
 
   /**
    * Unmutes the video.
+   * Implementation is required for autoplay and mute/unmute controls on docked
+   * video.
    */
   unmute() {}
 
@@ -96,6 +107,8 @@ export class VideoInterface {
    * Makes the video UI controls visible.
    *
    * AMP will not call this method if `controls` attribute is not set.
+   *
+   * Implementation is required for docked video.
    */
   showControls() {}
 
@@ -103,36 +116,41 @@ export class VideoInterface {
    * Hides the video UI controls.
    *
    * AMP will not call this method if `controls` attribute is not set.
+   *
+   * Implementation is required for docked video.
    */
   hideControls() {}
 
   /**
    * Returns video's meta data (artwork, title, artist, album, etc.) for use
    * with the Media Session API
-   * artwork (Array): URL to the poster image (preferably a 512x512 PNG)
-   * title (string): Name of the video
-   * artist (string): Name of the video's author/artist
-   * album (string): Name of the video's album if it exists
    * @return {!./mediasession-helper.MetadataDef|undefined} metadata
+   *   - artwork (Array): URL to the poster image (preferably a 512x512 PNG)
+   *   - title (string): Name of the video
+   *   - artist (string): Name of the video's author/artist
+   *   - album (string): Name of the video's album if it exists
    */
   getMetadata() {}
 
   /**
-   * If this returns true then it will be assumed that the player implements
-   * a feature to enter fullscreen on device rotation internally, so that the
-   * video manager does not override it. If not, the video manager will
-   * implement this feature automatically for videos with the attribute
-   * `rotate-to-fullscreen`.
+   * If returning true, it's assumed that the embedded video document internally
+   * implements a feature to enter fullscreen on device rotation, so that the
+   * VideoManager does not override it.
+   *
+   * Otherwise, the feature is implemented automatically when using the
+   * `rotate-to-fullscreen` attribute.
    *
    * @return {boolean}
    */
   preimplementsAutoFullscreen() {}
 
   /**
-   * If this returns true then it will be assumed that the player implements
-   * the MediaSession API internally so that the video manager does not override
-   * it. If not, the video manager will use the metadata variable as well as
-   * inferred meta-data to update the video's Media Session notification.
+   * If returning true, it's assumed that the embedded video document internally
+   * implements the MediaSession API internally so that the VideoManager won't
+   * replace it.
+   *
+   * Otherwise provided and inferred metadata are used to update the video's
+   * Media Session.
    *
    * @return {boolean}
    */
@@ -155,7 +173,7 @@ export class VideoInterface {
   fullscreenExit() {}
 
   /**
-   * Returns whether the video is currently in fullscreen mode or not
+   * Returns whether the video is currently in fullscreen mode or not.
    * @return {boolean}
    */
   isFullscreen() {}

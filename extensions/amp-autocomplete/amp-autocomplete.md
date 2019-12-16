@@ -59,7 +59,7 @@ Example:
 <amp-autocomplete filter="substring" id="myAutocomplete">
   <input />
   <script type="application/json">
-    { "items": ["a", "b", "c"] }
+    {"items": ["a", "b", "c"]}
   </script>
 </amp-autocomplete>
 ```
@@ -82,6 +82,11 @@ Example:
   <tr>
     <td width="40%"><strong>src (optional)</strong></td>
     <td>The URL of the remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This must be a CORS HTTP service and the URL's protocol must be HTTPS. The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests?referrer=ampproject.org">CORS Requests in AMP</a> spec. If fetching the data at the src URL fails, the <code>amp-autocomplete</code> triggers a fallback. The src attribute may be omitted if the <code>[src]</code> attribute exists.
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>query (optional)</strong></td>
+    <td>The query parameter to generate a static remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This requires the presence of the <code>src</code> attribute. For example, if <code>src="http://www.example.com"</code> and <code>query="q"</code>, then when a user types in <code>abc</code>, the component will retrieve data from <code>http://www.example.com?q=abc</code>. This feature is currently only usable under <a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a> and can be activated by the <code>amp-autocomplete</code> experiment.
     </td>
   </tr>
   <tr>
@@ -146,6 +151,11 @@ Example:
 
   </pre>
       In the first example, the JSON payload is queued by the "items" key, and thus no component attribute is needed because the default value corresponds. In the second example, the JSON payload is queued by the "fruit" key, so the <code>items</code> attribute is given the value <code>"fruit"</code> so as to accurately etrieve the intended datasource. In both examples, the end user interaction is the same.
+    </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>inline (optional)</strong></td>
+    <td>Whether the <code>amp-autocomplete</code> should autosuggest on the full user input or only a triggered substring of the user input. By default when the attribute is absent, suggestions will be based on the full user input. The attribute cannot have an empty value but must take a single character token, i.e. <code>@</code> which activates the autocomplete behavior. For example, if <code>inline="@"</code> then user input of <code>hello</code> will not retrieve suggestions but a user input of <code>hello @abc</code> might trigger options filtered on the substring <code>abc</code>. Currently triggered substrings are delimited on whitespace characters, however this is subject to change in the future. This feature is currently only usable under <a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a> and can be activated by the <code>amp-autocomplete</code> experiment.
     </td>
   </tr>
 </table>

@@ -1573,6 +1573,20 @@ class TagStack {
   }
 
   /**
+   * The spec_name of the parent of the current tag if one exists, otherwise the
+   * tag_name.
+   * @return {string}
+   */
+  parentTagSpecName() {
+    if ((this.parentStackEntry_().tagSpec !== null) &&
+        (this.parentStackEntry_().tagSpec.getSpec().specName !== null)) {
+      return /** @type {string} */ (
+          this.parentStackEntry_().tagSpec.getSpec().specName);
+    }
+    return this.parentStackEntry_().tagName;
+  }
+
+  /**
    * The number of children that have been discovered up to now by traversing
    * the stack.
    * @return {number}
@@ -3617,7 +3631,8 @@ function attrValueHasPartialsTemplateSyntax(value) {
 function validateParentTag(parsedTagSpec, context, validationResult) {
   const spec = parsedTagSpec.getSpec();
   if (spec.mandatoryParent !== null &&
-      spec.mandatoryParent !== context.getTagStack().parentTagName()) {
+      (spec.mandatoryParent !== context.getTagStack().parentTagName()) &&
+      (spec.mandatoryParent !== context.getTagStack().parentTagSpecName())) {
     // Output a parent/child error using CSS Child Selector syntax which is
     // both succinct and should be well understood by web developers.
     context.addError(
@@ -4096,7 +4111,7 @@ function validateLayout(parsedTagSpec, context, encounteredTag, result) {
         getTagSpecUrl(spec), result);
     return;
   }
-  // RESPONSIVE only allows heights attribute.
+  // heights attribute is only allowed for RESPONSIVE layout.
   if (heightsAttr !== undefined &&
       layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
     const code = layoutAttr === undefined ?

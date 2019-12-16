@@ -402,7 +402,7 @@ As an example, if you wanted to load /some/font.ttf in `https://example.com/amp.
   </noscript>
 </amp-img>
 
-[tip type="note]
+[tip type="note"]
 If your font file is okay to be accessible from any origin, you can respond with a wild card `Access-Control-Allow-Origin`, AMP cache will also echo that value meaning it will be responding with `Access-Control-Allow-Origin: *`. If you already have this setting, there is no need in changing anything.
 [/tip]
 

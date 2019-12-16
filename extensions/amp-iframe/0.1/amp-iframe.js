@@ -276,7 +276,11 @@ export class AmpIframe extends AMP.BaseElement {
    */
   preconnectCallback(onLayout) {
     if (this.iframeSrc) {
-      this.preconnect.url(this.iframeSrc, onLayout);
+      Services.preconnectFor(this.win).url(
+        this.getAmpDoc(),
+        this.iframeSrc,
+        onLayout
+      );
     }
   }
 
