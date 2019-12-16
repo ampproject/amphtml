@@ -33,7 +33,7 @@
 
     .filterBar form * {
       margin-left: 10px;
-      margin-right 10px;
+      margin-right: 10px;
     }
 
     .filterBar .clearLocalStorage {
@@ -163,6 +163,27 @@
           </div>
         </amp-consent>
         <!-- End didomi example -->
+
+      <!-- sirdata example -->
+      <amp-consent id="consent" layout="nodisplay" type="sirdata">
+        <script type="application/json">
+          {
+            "postPromptUI": "promptConsentUI",
+            "clientConfig": {
+              "cmp": {
+                "theme": {
+                  "noConsentButton": "refuse"
+                }
+              }
+            }
+          }
+        </script>
+        <div id="promptConsentUI">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=sirdata)" role="button">Privacy settings</button>
+        </div>
+      </amp-consent>
+      <!-- End sirdata example -->
 
       <!-- SourcePoint example -->
       <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>
