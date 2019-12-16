@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,20 @@
 'use strict';
 
 module.exports = function(context) {
-  // Allow ObjectSpread, but disallow ArraySpread
+  // Allow RestParams, but disallow ArrayRest and ObjectRest
   return {
-    'ArrayExpression > SpreadElement': function(node) {
-      context.report({node, message: 'Iterator spreading is not allowed.'});
+    'ArrayPattern > RestElement': function(node) {
+      context.report({
+        node,
+        message: 'Collecting elements using a rest element is not allowed.',
+      });
+    },
+
+    'ObjectPattern > RestElement, ExperimentalRestProperty': function(node) {
+      context.report({
+        node,
+        message: 'Collecting props using a rest property is not allowed.',
+      });
     },
   };
 };
