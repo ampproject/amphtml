@@ -406,6 +406,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Sharethrough](../../ads/sharethrough.md)
 - [SHE Media](../../ads/shemedia.md)
 - [Sklik](../../ads/sklik.md)
+- [SSP](../../ads/ssp.md)
 - [SlimCut Media](../../ads/slimcutmedia.md)
 - [Smart AdServer](../../ads/smartadserver.md)
 - [smartclip](../../ads/smartclip.md)
