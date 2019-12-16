@@ -865,13 +865,15 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
 
     const unresolvedPromise = new Promise(() => {});
     const viewportSize = {width: 0, height: 0};
-    sandbox.stub(Services, 'viewerForDoc').returns({
-      isEmbedded: () => {},
+    env.sandbox.stub(Services, 'ampdoc').returns({
       hasBeenVisible: () => {},
       onVisibilityChanged: () => {},
       whenFirstVisible: () => unresolvedPromise,
-      whenMessagingReady: () => {},
       getVisibilityState: () => viewerVisibilityState,
+    });
+    sandbox.stub(Services, 'viewerForDoc').returns({
+      isEmbedded: () => {},
+      whenMessagingReady: () => {},
     });
     sandbox.stub(Services, 'resourcesForDoc').returns({
       getResourcesInRect: () => unresolvedPromise,
