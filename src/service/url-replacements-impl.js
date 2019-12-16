@@ -268,6 +268,11 @@ export class GlobalVariableSource extends VariableSource {
       this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN')
     );
 
+    // Returns the URI encoded version of a string
+    // While this looks like a "do-nothing" method, .set implicitly URI encodes
+    // output by default.
+    this.set('URI_ENCODE', str => str);
+
     /**
      * Stores client ids that were generated during this page view
      * indexed by scope.
@@ -1139,6 +1144,7 @@ export class UrlReplacements {
       'PAGE_VIEW_ID': true,
       'PAGE_VIEW_ID_64': true,
       'NAV_TIMING': true,
+      'URI_ENCODE': true,
     };
     const additionalUrlParameters =
       element.getAttribute('data-amp-addparams') || '';

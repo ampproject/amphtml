@@ -74,7 +74,7 @@ The following table lists the features that enable variable substitutions, as we
       </ul>
     </td>
     <td width="25%">Yes, via space-delimited attribute <code>data-amp-replace</code>. Read more about <a href="#per-use-opt-in">per-use opt-in</a></td>
-    <td width="25%">Only these variables are supported: <code>CLIENT_ID</code> and <code>QUERY_PARAM</code>.<br>See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes</td>
+    <td width="25%">Only these variables are supported: <code>CLIENT_ID</code>, <code>QUERY_PARAM</code>, and <code>URI_ENCODE</code>.<br>See the section on <a href="#substitution-timing">"substitution timing"</a> for further notes</td>
   </tr>
   <tr>
     <td width="25%">Form inputs<br><a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md#variable-substitutions">Detailed documentation</a></td>
@@ -105,6 +105,7 @@ Only these variables are supported:
 
 - `CLIENT_ID`
 - `QUERY_PARAM(argument)`
+- `URI_ENCODE(argument)`
 
 ### Per-use opt-in
 
@@ -1240,6 +1241,16 @@ Provides the start time of the triggered timer in milliseconds from epoch. Reset
 
 - **platform variable**: N/A
 - **amp-analytics variable**: `${timerStart}`
+
+#### URI Encode
+
+Provides a URI encoded version of a string.
+
+- **platform variable**: `URI_ENCODE`
+  - Example: <br>
+  ```html
+  <a href="https://foo.com/pixel?val1=URI_ENCODE(a&b)&val2=c">Link</a>
+  ```
 
 #### User Agent
 
