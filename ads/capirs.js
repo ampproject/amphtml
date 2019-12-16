@@ -67,7 +67,6 @@ export function capirs(global, data) {
     },
   };
 
-  loadScript(global, '//ssp.rambler.ru/lpdid.js');
   loadScript(global, '//ssp.rambler.ru/capirs_async.js');
 }
 
