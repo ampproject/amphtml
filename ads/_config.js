@@ -995,6 +995,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'ssp': {
+    prefetch: 'https://ssp.imedia.cz/static/js/ssp.js',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
