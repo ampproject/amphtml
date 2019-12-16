@@ -139,7 +139,9 @@ export class NextPageService {
     this.getPagesPromise_().then(pages => {
       pages.forEach(page => {
         validatePage(page, this.ampdoc_.getUrl());
-        this.pages_.push(new Page(this, page.url, page.title, page.image));
+        this.pages_.push(
+          new Page(this, {url: page.url, title: page.title, image: page.image})
+        );
       });
     });
 
@@ -281,9 +283,11 @@ export class NextPageService {
       parseSchemaImage(doc) || parseOgImage(doc) || parseFavicon(doc) || '';
     return new Page(
       this,
-      url,
-      title,
-      image,
+      {
+        url,
+        title,
+        image,
+      },
       PageState.INSERTED /** initState */,
       VisibilityState.VISIBLE /** initVisibility */
     );

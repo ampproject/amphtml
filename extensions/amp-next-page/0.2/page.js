@@ -39,28 +39,24 @@ export const PageRelativePos = {
 export class Page {
   /**
    * @param {!./service.NextPageService} manager
-   * @param {string} url
-   * @param {string} title
-   * @param {string} image
+   * @param {{ url: string, title: string, image: string }} meta
    * @param {!PageState=} initState
    * @param {!VisibilityState=} initVisibility
    */
   constructor(
     manager,
-    url,
-    title,
-    image,
+    meta,
     initState = PageState.QUEUED,
     initVisibility = VisibilityState.PRERENDER
   ) {
     /** @private @const {!./service.NextPageService} */
     this.manager_ = manager;
     /** @private @const {string} */
-    this.title_ = title;
+    this.title_ = meta.title;
     /** @private {string} */
-    this.url_ = url;
+    this.url_ = meta.url;
     /** @private @const {string} */
-    this.image_ = image;
+    this.image_ = meta.image;
 
     /** @private {?../../../src/runtime.ShadowDoc} */
     this.shadowDoc_ = null;
