@@ -37,7 +37,11 @@ module.exports = function(babel) {
     const properties = path.get('properties');
     for (const prop of properties) {
       const {key, value, computed} = prop.node;
-      const member = t.memberExpression(t.cloneWithoutLoc(from), key, computed);
+      const member = t.memberExpression(
+        t.cloneWithoutLoc(from),
+        key,
+        computed || !t.isIdentifier(key)
+      );
       let expression = member;
       let newValue = value;
       if (t.isAssignmentPattern(value)) {
