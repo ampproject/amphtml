@@ -49,9 +49,9 @@ export const Direction = {UP: 1, DOWN: -1};
 export class NextPageService {
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!PositionObserver=} opt_injectedPositionObserver
+   * @param {!PositionObserver=} injectedPositionObserver
    */
-  constructor(ampdoc, opt_injectedPositionObserver) {
+  constructor(ampdoc, injectedPositionObserver) {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -74,7 +74,7 @@ export class NextPageService {
     this.element_ = null;
 
     /** @private @const {?PositionObserver} */
-    this.injectedPositionObserver_ = opt_injectedPositionObserver || null;
+    this.injectedPositionObserver_ = injectedPositionObserver || null;
 
     /** @private {?MultidocManager} */
     this.multidocManager_ = null;
@@ -94,7 +94,7 @@ export class NextPageService {
     /** @private {number} */
     this.lastScrollTop_ = 0;
 
-    /** @private {Page} */
+    /** @private {?Page} */
     this.initialPage_ = null;
   }
 
@@ -219,10 +219,7 @@ export class NextPageService {
     });
 
     // If no page is visible then the host page should be
-    if (
-      !this.pages_.some(page => page.isVisible()) &&
-      !this.initialPage_.isVisible()
-    ) {
+    if (!this.pages_.some(page => page.isVisible())) {
       this.initialPage_.setVisibility(VisibilityState.VISIBLE);
     }
   }
@@ -251,13 +248,14 @@ export class NextPageService {
   /**
    * Sets the title and url of the document to those of
    * the provided page
-   * @param {?Page=} optPage
+   * @param {?Page=} page
    */
-  setTitlePage(optPage = this.initialPage_) {
-    if (!optPage) {
+  setTitlePage(page = this.initialPage_) {
+    if (!page) {
+      dev().warn(TAG, 'setTitlePage called before next-page-service is built');
       return;
     }
-    const {title, url} = optPage;
+    const {title, url} = page;
     this.win_.document.title = title;
     this.history_.replace({title, url});
   }
@@ -286,8 +284,8 @@ export class NextPageService {
       url,
       title,
       image,
-      PageState.INSERTED /** optInitState */,
-      VisibilityState.VISIBLE /** optInitVisibility */
+      PageState.INSERTED /** initState */,
+      VisibilityState.VISIBLE /** initVisibility */
     );
   }
 

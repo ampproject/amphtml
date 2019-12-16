@@ -42,16 +42,16 @@ export class Page {
    * @param {string} url
    * @param {string} title
    * @param {string} image
-   * @param {!PageState=} optInitState
-   * @param {!VisibilityState=} optInitVisibility
+   * @param {!PageState=} initState
+   * @param {!VisibilityState=} initVisibility
    */
   constructor(
     manager,
     url,
     title,
     image,
-    optInitState = PageState.QUEUED,
-    optInitVisibility = VisibilityState.PRERENDER
+    initState = PageState.QUEUED,
+    initVisibility = VisibilityState.PRERENDER
   ) {
     /** @private @const {!./service.NextPageService} */
     this.manager_ = manager;
@@ -65,13 +65,13 @@ export class Page {
     /** @private {?../../../src/runtime.ShadowDoc} */
     this.shadowDoc_ = null;
     /** @private {!PageState} */
-    this.state_ = optInitState;
+    this.state_ = initState;
     /** @private {?RelativePositions} */
     this.headerPosition_ = null;
     /** @private {?RelativePositions} */
     this.footerPosition_ = null;
     /** @private {!VisibilityState} */
-    this.visibilityState_ = optInitVisibility;
+    this.visibilityState_ = initVisibility;
     /** @private {!PageRelativePos} */
     this.relativePos_ = PageRelativePos.OUTSIDE_VIEWPORT;
   }
@@ -122,16 +122,18 @@ export class Page {
    * @param {VisibilityState} visibilityState
    */
   setVisibility(visibilityState) {
-    // TODO(wassgha): Handle history manipulation
-    // TODO(wassgha): Handle manual visibility management
-
+    if (visibilityState == this.visibilityState_) {
+      return;
+    }
     // Update visibility internally and at the shadow doc level
-    if (visibilityState != this.visibilityState_) {
-      this.shadowDoc_ && this.shadowDoc_.setVisibilityState(visibilityState);
-      this.visibilityState_ = visibilityState;
-      if (visibilityState === VisibilityState.VISIBLE) {
-        this.manager_.setTitlePage(this);
-      }
+    this.visibilityState_ = visibilityState;
+    if (this.shadowDoc_) {
+      this.shadowDoc_.setVisibilityState(visibilityState);
+    }
+
+    // Switch the title and url of the page to reflect this page
+    if (visibilityState === VisibilityState.VISIBLE) {
+      this.manager_.setTitlePage(this);
     }
   }
 
