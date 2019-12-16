@@ -20,6 +20,7 @@ import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
 import {createElement} from 'preact';
 import {dev, userAssert} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeChildren, rootNodeFor} from '../../../src/dom';
 import {
@@ -130,6 +131,7 @@ const AmpDateDisplay = PreactBaseElement(AmpDateDisplayComponent, {
 
   /** @override */
   isLayoutSupported(layout) {
+    userAssert(isExperimentOn(this.win, 'amp-date-display-v2'));
     return isLayoutSizeDefined(layout);
   },
 });
