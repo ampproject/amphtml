@@ -188,6 +188,7 @@ import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativeroll} from '../ads/nativeroll';
+import {nativery} from '../ads/nativery';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
 import {nend} from '../ads/nend';
@@ -308,6 +309,7 @@ const AMP_EMBED_ALLOWED = {
   mgid: true,
   miximedia: true,
   mywidget: true,
+  nativery: true,
   lentainform: true,
   opinary: true,
   outbrain: true,
@@ -472,6 +474,7 @@ register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativeroll', nativeroll);
+register('nativery', nativery);
 register('nativo', nativo);
 register('navegg', navegg);
 register('nend', nend);
