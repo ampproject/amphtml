@@ -253,7 +253,7 @@ describe('SanitizerImpl', () => {
 
   beforeEach(() => {
     win = new FakeWindow();
-    s = new SanitizerImpl(win, /* element */ null, []);
+    s = new SanitizerImpl(win, /* element */ null, [], {});
     el = win.document.createElement('div');
   });
 
@@ -436,8 +436,9 @@ describe('SanitizerImpl', () => {
       window.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
-    it('AMP.setState(json)', async () => {
+    it('AMP.setState(json), without user interaction', async () => {
       window.sandbox.spy(bind, 'setState');
+      s.userActivationTracker_.isActive = () => false;
 
       await s.setStorage(
         StorageLocation.AMP_STATE,
@@ -447,6 +448,20 @@ describe('SanitizerImpl', () => {
 
       expect(bind.setState).to.be.calledOnce;
       expect(bind.setState).to.be.calledWithExactly({foo: 'bar'}, true, false);
+    });
+
+    it('AMP.setState(json), with user interaction', async () => {
+      window.sandbox.spy(bind, 'setState');
+      s.userActivationTracker_.isActive = () => true;
+
+      await s.setStorage(
+        StorageLocation.AMP_STATE,
+        /* key */ null,
+        '{"foo":"bar"}'
+      );
+
+      expect(bind.setState).to.be.calledOnce;
+      expect(bind.setState).to.be.calledWithExactly({foo: 'bar'}, false, false);
     });
 
     it('AMP.setState(not_json)', async () => {

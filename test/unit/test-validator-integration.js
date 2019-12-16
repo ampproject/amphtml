@@ -65,7 +65,7 @@ describes.fakeWin('validator-integration', {}, env => {
       loadScript(win.document, 'http://example.com');
 
       expect(loadScriptStub).calledWith(
-        env.sandbox.match(el => el.nonce === '123')
+        env.sandbox.match(el => el.getAttribute('nonce') === '123')
       );
     });
   });
