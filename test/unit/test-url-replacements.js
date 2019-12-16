@@ -237,7 +237,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(70);
+          expect(variables.length).to.equal(71);
         });
       });
 
@@ -1970,21 +1970,22 @@ describes.sandboxed('UrlReplacements', {}, env => {
           a.href =
             'https://canonical.com/link?' +
             'out=QUERY_PARAM(foo)' +
-            '&c=PAGE_VIEW_IDCLIENT_ID(abc)NAV_TIMING(navigationStart)';
+            '&c=PAGE_VIEW_IDCLIENT_ID(abc)NAV_TIMING(navigationStart)' +
+            '&d=URI_ENCODE(a &?b)';
           a.setAttribute(
             'data-amp-replace',
-            'QUERY_PARAM CLIENT_ID PAGE_VIEW_ID NAV_TIMING'
+            'QUERY_PARAM CLIENT_ID PAGE_VIEW_ID NAV_TIMING URI_ENCODE'
           );
           // No replacement without previous async replacement
           urlReplacements.maybeExpandLink(a, null);
           expect(a.href).to.equal(
-            'https://canonical.com/link?out=bar&c=1234100'
+            'https://canonical.com/link?out=bar&c=1234100&d=a%20%26%3Fb'
           );
           // Get a cid, then proceed.
           return urlReplacements.expandUrlAsync('CLIENT_ID(abc)').then(() => {
             urlReplacements.maybeExpandLink(a, null);
             expect(a.href).to.equal(
-              'https://canonical.com/link?out=bar&c=1234test-cid(abc)100'
+              'https://canonical.com/link?out=bar&c=1234test-cid(abc)100&d=a%20%26%3Fb'
             );
           });
         });
