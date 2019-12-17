@@ -25,6 +25,9 @@ import {useContext} from 'preact/hooks';
  */
 let ContextDef;
 
+/** @type {ContextDef} */
+let context;
+
 /**
  * The external context given to React components to control whether they can
  * render/play/etc.
@@ -37,14 +40,13 @@ let ContextDef;
  * @return {!ContextDef}
  */
 export function getAmpContext() {
-  if (self.__AMP_CONTEXT) {
-    return self.__AMP_CONTEXT;
-  }
-
-  return (self.__AMP_CONTEXT = createContext({
-    renderable: true,
-    playable: true,
-  }));
+  return (
+    context ||
+    (context = createContext({
+      renderable: true,
+      playable: true,
+    }))
+  );
 }
 
 /**

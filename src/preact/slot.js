@@ -182,7 +182,7 @@ function objectsEqualShallow(o1, o2) {
 }
 
 /**
- * @param {!Node} root
+ * @param {!Element} root
  * @return {!Array<!Node>}
  */
 function getAmpElements(root) {
