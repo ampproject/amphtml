@@ -20,6 +20,7 @@ import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getMode} from '../../src/mode';
 import {installPerformanceService} from '../../src/service/performance-impl';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {installRuntimeServices} from '../../src/service/core-services';
 
 describes.realWin('performance', {amp: true}, env => {
@@ -35,6 +36,7 @@ describes.realWin('performance', {amp: true}, env => {
       target: win,
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
     });
+    installPlatformService(env.win);
     installPerformanceService(env.win);
     perf = Services.performanceFor(env.win);
   });
@@ -748,6 +750,7 @@ describes.realWin('performance with experiment', {amp: true}, env => {
       .withArgs('csi')
       .returns('1');
     env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+    installPlatformService(win);
     installPerformanceService(win);
     perf = Services.performanceFor(win);
   });

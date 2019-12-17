@@ -91,6 +91,7 @@ if (shouldMainBootstrapRun) {
   startupChunk(self.document, function initial() {
     /** @const {!./service/ampdoc-impl.AmpDoc} */
     const ampdoc = ampdocService.getAmpDoc(self.document);
+    installPlatformService(self);
     installPerformanceService(self);
     /** @const {!./service/performance-impl.Performance} */
     const perf = Services.performanceFor(self);
@@ -99,7 +100,6 @@ if (shouldMainBootstrapRun) {
     ) {
       perf.addEnabledExperiment('no-boilerplate');
     }
-    installPlatformService(self);
     fontStylesheetTimeout(self);
     perf.tick('is');
     installStylesForDoc(

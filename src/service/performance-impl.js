@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
@@ -104,12 +105,19 @@ export class Performance {
     /** @private {string} */
     this.ampexp_ = '';
 
-    /** @private {number|null} */
-    this.makeBodyVisible_ = null;
-    /** @private {number|null} */
-    this.firstContentfulPaint_ = null;
-    /** @private {number|null} */
-    this.firstViewportReady_ = null;
+    this.fcpDeferred_ = new Deferred();
+    this.fvrDeferred_ = new Deferred();
+    this.mbvDeferred_ = new Deferred();
+
+    // Platform service must be installed before performance serivce is
+    this.platform_ = Services.platformFor(this.win);
+
+    // TODO (micajuineho) change this once all platforms
+    // support PerformancePaintTiming
+    // https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming
+    if (!this.platform_.isChrome() && !this.platform_.isOpera()) {
+      this.fcpDeferred_.resolve(null);
+    }
 
     /**
      * How many times a layout jank metric has been ticked.
@@ -684,13 +692,13 @@ export class Performance {
     );
     switch (label) {
       case 'fcp':
-        this.firstContentfulPaint_ = storedVal;
+        this.fcpDeferred_.resolve(storedVal);
         break;
       case 'pc':
-        this.firstViewportReady_ = storedVal;
+        this.fvrDeferred_.resolve(storedVal);
         break;
       case 'mbv':
-        this.makeBodyVisible_ = storedVal;
+        this.mbvDeferred_.resolve(storedVal);
         break;
     }
   }
@@ -828,24 +836,24 @@ export class Performance {
   }
 
   /**
-   * @return {number|null}
+   * @return {!Promise<number>}
    */
   getFirstContentfulPaint() {
-    return this.firstContentfulPaint_;
+    return this.fcpDeferred_.promise;
   }
 
   /**
-   * @return {number|null}
+   * @return {!Promise<number>}
    */
   getMakeBodyVisible() {
-    return this.makeBodyVisible_;
+    return this.mbvDeferred_.promise;
   }
 
   /**
-   * @return {number|null}
+   * @return {!Promise<number>}
    */
   getFirstViewportReady() {
-    return this.firstViewportReady_;
+    return this.fvrDeferred_.promise;
   }
 }
 

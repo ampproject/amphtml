@@ -18,6 +18,7 @@ import * as lolex from 'lolex';
 import {LayoutDelayMeter} from '../../src/layout-delay-meter';
 import {Services} from '../../src/services';
 import {installPerformanceService} from '../../src/service/performance-impl';
+import {installPlatformService} from '../../src/service/platform-impl';
 
 describes.realWin(
   'layout-delay-meter',
@@ -34,6 +35,7 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+      installPlatformService(win);
       installPerformanceService(win);
       const perf = Services.performanceFor(win);
       env.sandbox.stub(perf, 'isPerformanceTrackingOn').callsFake(() => true);
