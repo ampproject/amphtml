@@ -116,7 +116,7 @@ const BROWSI_CONFIG = jsonLiteral({
     "visibility100": {
       "on": "visible",
       "request": "visibility",
-      "selector": '#myAd1',
+      "selector": 'amp-ad',
       "visibilitySpec": {
         "visiblePercentageMin": 100,
         "totalTimeMin": 1000,
