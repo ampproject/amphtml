@@ -2569,9 +2569,18 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onSelectPage_(data) {
-    if (data && data['next']) {
+    if (!data) {
+      return;
+    }
+
+    this.storeService_.dispatch(
+      Action.SET_ADVANCEMENT_MODE,
+      AdvancementMode.VIEWER_SELECT_PAGE
+    );
+
+    if (data['next']) {
       this.next_();
-    } else if (data && data['previous']) {
+    } else if (data['previous']) {
       this.previous_();
     }
   }
