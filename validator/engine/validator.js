@@ -4404,8 +4404,8 @@ function validateAttributes(
   const attrsByName = parsedTagSpec.getAttrsByName();
   for (const attr of encounteredTag.attrs()) {
     // For transformed AMP, attributes `class` and `i-amphtml-layout` are
-    // handled within validateSsrLayout.
-    if (context.isTransformed() &&
+    // handled within validateSsrLayout for non-sizer elements.
+    if (context.isTransformed() && encounteredTag.lowerName() !== 'i-amphtml-sizer' &&
         (attr.name === 'class' || attr.name === 'i-amphtml-layout')) {
       continue;
     }
