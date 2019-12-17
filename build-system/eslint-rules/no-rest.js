@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,26 +15,33 @@
  */
 'use strict';
 
-// Forbids use of Spread elements when they require an iterator polyfill
+// Forbids use of Rest elements when they require an iterator polyfill, or
+// there's no clear benefit.
 //
 // Good:
 // ```
-// const obj = {foo: 1, ...obj};
+// function foo(...args) {}
 // ```
 //
 // Bad:
 // ```
-// const args = [1, 2, 3, ...array];
-// bar(...args);
+// const [...rest] = [1, 2, 3];
+// const {...rest} = {foo: 1};
 // ```
 module.exports = function(context) {
   return {
-    'ArrayExpression > SpreadElement': function(node) {
-      context.report({node, message: 'Iterator spreading is not allowed.'});
+    'ArrayPattern > RestElement': function(node) {
+      context.report({
+        node,
+        message: 'Collecting elements using a rest element is not allowed.',
+      });
     },
 
-    'CallExpression > SpreadElement': function(node) {
-      context.report({node, message: 'Iterator spreading is not allowed.'});
+    'ObjectPattern > RestElement, ExperimentalRestProperty': function(node) {
+      context.report({
+        node,
+        message: 'Collecting props using a rest property is not allowed.',
+      });
     },
   };
 };
