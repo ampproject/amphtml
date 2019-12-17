@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-next-page-0.2.css';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {Page, PageRelativePos} from './page';
+import {Page, PageRelativePos, PageState} from './page';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
   installPositionObserverServiceForDoc,
@@ -32,6 +32,11 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {
+  parseFavicon,
+  parseOgImage,
+  parseSchemaImage,
+} from '../../../src/mediasession-helper';
 import {sanitizeDoc, validatePage, validateUrl} from './utils';
 import {tryParseJson} from '../../../src/json';
 
@@ -44,9 +49,9 @@ export const Direction = {UP: 1, DOWN: -1};
 export class NextPageService {
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!PositionObserver=} opt_injectedPositionObserver
+   * @param {!PositionObserver=} injectedPositionObserver
    */
-  constructor(ampdoc, opt_injectedPositionObserver) {
+  constructor(ampdoc, injectedPositionObserver) {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -69,10 +74,13 @@ export class NextPageService {
     this.element_ = null;
 
     /** @private @const {?PositionObserver} */
-    this.injectedPositionObserver_ = opt_injectedPositionObserver || null;
+    this.injectedPositionObserver_ = injectedPositionObserver || null;
 
     /** @private {?MultidocManager} */
     this.multidocManager_ = null;
+
+    /** @private {?../../../src/service/history-impl.History} */
+    this.history_ = null;
 
     /** @private {?Array<!Page>} */
     this.pages_;
@@ -85,6 +93,9 @@ export class NextPageService {
 
     /** @private {number} */
     this.lastScrollTop_ = 0;
+
+    /** @private {?Page} */
+    this.initialPage_ = null;
   }
 
   /**
@@ -100,6 +111,12 @@ export class NextPageService {
    * @param {!AmpElement} element
    */
   build(element) {
+    // Create a reference to the host page
+    this.initialPage_ = this.createInitialPage();
+
+    this.history_ = Services.historyForDoc(this.ampdoc_);
+    this.initializeHistory();
+
     this.multidocManager_ = new MultidocManager(
       this.win_,
       Services.ampdocServiceFor(this.win_),
@@ -115,13 +132,16 @@ export class NextPageService {
     this.element_.appendChild(this.moreBox_);
 
     if (!this.pages_) {
-      this.pages_ = [];
+      this.pages_ = [this.initialPage_];
+      this.setLastFetchedPage(this.initialPage_);
     }
 
     this.getPagesPromise_().then(pages => {
       pages.forEach(page => {
         validatePage(page, this.ampdoc_.getUrl());
-        this.pages_.push(new Page(this, page.url, page.title, page.image));
+        this.pages_.push(
+          new Page(this, {url: page.url, title: page.title, image: page.image})
+        );
       });
     });
 
@@ -176,23 +196,34 @@ export class NextPageService {
         page.relativePos === PageRelativePos.CONTAINS_VIEWPORT
       ) {
         if (!page.isVisible()) {
-          page.setVisible(VisibilityState.VISIBLE);
+          page.setVisibility(VisibilityState.VISIBLE);
         }
-        // Hide the previous page
-        const prevPage = this.pages_[index + this.scrollDirection_];
-        if (
-          prevPage &&
-          prevPage.relativePos === PageRelativePos.LEAVING_VIEWPORT &&
-          prevPage.isVisible()
-        ) {
-          prevPage.setVisible(VisibilityState.HIDDEN);
+        // Hide the previous pages
+        let prevPageIndex = index + this.scrollDirection_;
+        while (prevPageIndex >= 0 && prevPageIndex < this.pages_.length) {
+          const prevPage = this.pages_[prevPageIndex];
+          if (
+            prevPage &&
+            (prevPage.relativePos === PageRelativePos.LEAVING_VIEWPORT ||
+              prevPage.relativePos === PageRelativePos.OUTSIDE_VIEWPORT ||
+              prevPage === this.initialPage_) &&
+            prevPage.isVisible()
+          ) {
+            prevPage.setVisibility(VisibilityState.HIDDEN);
+          }
+          prevPageIndex += this.scrollDirection_;
         }
       } else if (page.relativePos === PageRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
-          page.setVisible(VisibilityState.VISIBLE);
+          page.setVisibility(VisibilityState.HIDDEN);
         }
       }
     });
+
+    // If no page is visible then the host page should be
+    if (!this.pages_.some(page => page.isVisible())) {
+      this.initialPage_.setVisibility(VisibilityState.VISIBLE);
+    }
   }
 
   /**
@@ -214,6 +245,52 @@ export class NextPageService {
    */
   setLastFetchedPage(page) {
     this.lastFetchedPage_ = page;
+  }
+
+  /**
+   * Sets the title and url of the document to those of
+   * the provided page
+   * @param {?Page=} page
+   */
+  setTitlePage(page = this.initialPage_) {
+    if (!page) {
+      dev().warn(TAG, 'setTitlePage called before next-page-service is built');
+      return;
+    }
+    const {title, url} = page;
+    this.win_.document.title = title;
+    this.history_.replace({title, url});
+  }
+
+  /**
+   * Adds an initial entry in history that sub-pages can
+   * replace when they become visible
+   */
+  initializeHistory() {
+    const {title, url} = this.initialPage_;
+    this.history_.push(undefined /** opt_onPop */, {title, url});
+  }
+
+  /**
+   *
+   * @return {!Page}
+   */
+  createInitialPage() {
+    const doc = this.win_.document;
+    const {title, location} = doc;
+    const {href: url} = location;
+    const image =
+      parseSchemaImage(doc) || parseOgImage(doc) || parseFavicon(doc) || '';
+    return new Page(
+      this,
+      {
+        url,
+        title,
+        image,
+      },
+      PageState.INSERTED /** initState */,
+      VisibilityState.VISIBLE /** initVisibility */
+    );
   }
 
   /**
