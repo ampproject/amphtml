@@ -34,7 +34,7 @@ export function blade(global, data) {
   const marcosObj = tryParseJson(data['blade_macros']) || {};
   marcosObj['rand'] = Math.random().toString();
   marcosObj['page_url'] = marcosObj['page_url'] || global.context.canonicalUrl;
-  const macros = Object.assign({}, marcosObj);
+  const macros = {...marcosObj};
   macros.width = data.width;
   macros.height = data.height;
 
