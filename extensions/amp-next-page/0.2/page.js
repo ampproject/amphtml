@@ -39,30 +39,35 @@ export const PageRelativePos = {
 export class Page {
   /**
    * @param {!./service.NextPageService} manager
-   * @param {string} url
-   * @param {string} title
-   * @param {string} image
+   * @param {{ url: string, title: string, image: string }} meta
+   * @param {!PageState=} initState
+   * @param {!VisibilityState=} initVisibility
    */
-  constructor(manager, url, title, image) {
+  constructor(
+    manager,
+    meta,
+    initState = PageState.QUEUED,
+    initVisibility = VisibilityState.PRERENDER
+  ) {
     /** @private @const {!./service.NextPageService} */
     this.manager_ = manager;
     /** @private @const {string} */
-    this.title_ = title;
+    this.title_ = meta.title;
     /** @private {string} */
-    this.url_ = url;
+    this.url_ = meta.url;
     /** @private @const {string} */
-    this.image_ = image;
+    this.image_ = meta.image;
 
     /** @private {?../../../src/runtime.ShadowDoc} */
     this.shadowDoc_ = null;
     /** @private {!PageState} */
-    this.state_ = PageState.QUEUED;
+    this.state_ = initState;
     /** @private {?RelativePositions} */
     this.headerPosition_ = null;
     /** @private {?RelativePositions} */
     this.footerPosition_ = null;
     /** @private {!VisibilityState} */
-    this.visibilityState_ = VisibilityState.PRERENDER;
+    this.visibilityState_ = initVisibility;
     /** @private {!PageRelativePos} */
     this.relativePos_ = PageRelativePos.OUTSIDE_VIEWPORT;
   }
@@ -112,14 +117,19 @@ export class Page {
   /**
    * @param {VisibilityState} visibilityState
    */
-  setVisible(visibilityState) {
-    // TODO(wassgha): Handle history manipulation
-    // TODO(wassgha): Handle manual visibility management
-
+  setVisibility(visibilityState) {
+    if (visibilityState == this.visibilityState_) {
+      return;
+    }
     // Update visibility internally and at the shadow doc level
-    if (this.shadowDoc_ && visibilityState != this.visibilityState_) {
+    this.visibilityState_ = visibilityState;
+    if (this.shadowDoc_) {
       this.shadowDoc_.setVisibilityState(visibilityState);
-      this.visibilityState_ = visibilityState;
+    }
+
+    // Switch the title and url of the page to reflect this page
+    if (visibilityState === VisibilityState.VISIBLE) {
+      this.manager_.setTitlePage(this);
     }
   }
 
@@ -229,8 +239,8 @@ export class Page {
       // is looking at a section of the document
       this.relativePos_ = PageRelativePos.CONTAINS_VIEWPORT;
     } else if (
-      (header === TOP && footer === TOP) ||
-      (header === BOTTOM && footer === BOTTOM)
+      ((!header || header === TOP) && footer === TOP) ||
+      (header === BOTTOM && (!footer || footer === BOTTOM))
     ) {
       // Both the header and the footer of the document are either
       // above or below the document meaning that the viewport hasn't
