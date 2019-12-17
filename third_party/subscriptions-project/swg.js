@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.85 */
+/** Version: 0.1.22.87 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -730,6 +730,71 @@ class EventParams {
 /**
  * @implements {Message}
  */
+class FinishedLoggingResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.complete_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.error_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getComplete() {
+    return this.complete_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setComplete(value) {
+    this.complete_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getError() {
+    return this.error_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setError(value) {
+    this.error_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.complete_,  // field 1 - complete
+      this.error_,  // field 2 - error
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'FinishedLoggingResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class LinkSaveTokenRequest {
  /**
   * @param {!Array=} data
@@ -1107,6 +1172,7 @@ const PROTO_MAP = {
   'AnalyticsRequest': AnalyticsRequest,
   'EntitlementsResponse': EntitlementsResponse,
   'EventParams': EventParams,
+  'FinishedLoggingResponse': FinishedLoggingResponse,
   'LinkSaveTokenRequest': LinkSaveTokenRequest,
   'LinkingInfoResponse': LinkingInfoResponse,
   'SkuSelectedResponse': SkuSelectedResponse,
@@ -4251,6 +4317,18 @@ function tryParseJson(json, onFailed) {
 }
 
 /**
+ * Converts the passed string into a JSON object (if possible) and returns the
+ * value of the propertyName on that object.
+ * @param {string} jsonString
+ * @param {string} propertyName
+ * @return {*}
+ */
+function getPropertyFromJsonString(jsonString, propertyName) {
+  const json = tryParseJson(jsonString);
+  return (json && json[propertyName]) || null;
+}
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4577,6 +4655,19 @@ class Entitlement {
       ? /** @type {!Array<Object>} */ (json)
       : [json];
     return jsonList.map(json => Entitlement.parseFromJson(json));
+  }
+
+  /**
+   * Returns the SKU associated with this entitlement.
+   * @return {?string}
+   */
+  getSku() {
+    return (
+      /** @type {?string} */ (getPropertyFromJsonString(
+        this.subscriptionToken,
+        'productId'
+      ) || null)
+    );
   }
 }
 
@@ -5398,7 +5489,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.85',
+    '_client': 'SwG 0.1.22.87',
   });
 }
 
@@ -5442,6 +5533,7 @@ function cacheParam(cacheKey) {
  *
  * In other words, Flow = Payments + Account Creation.
  */
+
 /**
  * String values input by the publisher are mapped to the number values.
  * @type {!Object<string, number>}
@@ -5522,6 +5614,7 @@ class PayStartFlow {
     this.recurrenceEnum = 0;
     if (this.subscriptionRequest_.oneTime) {
       this.recurrenceEnum = RecurrenceMapping['ONE_TIME'];
+      delete this.subscriptionRequest_.oneTime;
     }
   }
 
@@ -5541,7 +5634,7 @@ class PayStartFlow {
     }
 
     if (this.recurrenceEnum) {
-      swgPaymentRequest.oneTime = this.recurrenceEnum;
+      swgPaymentRequest.paymentRecurrence = this.recurrenceEnum;
     }
 
     // Start/cancel events.
@@ -5812,8 +5905,9 @@ function validatePayResponse(deps, payPromise, completeHandler) {
 function parseSubscriptionResponse(deps, data, completeHandler) {
   let swgData = null;
   let raw = null;
-  let productType = null;
+  let productType = ProductType.SUBSCRIPTION;
   let oldSku = null;
+
   if (data) {
     if (typeof data == 'string') {
       raw = /** @type {string} */ (data);
@@ -5821,21 +5915,18 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
       // Assume it's a json object in the format:
       // `{integratorClientCallbackData: "..."}` or `{swgCallbackData: "..."}`.
       const json = /** @type {!Object} */ (data);
-      if ('productType' in data) {
-        productType = data['productType'];
-      }
       if ('swgCallbackData' in json) {
         swgData = /** @type {!Object} */ (json['swgCallbackData']);
       } else if ('integratorClientCallbackData' in json) {
         raw = json['integratorClientCallbackData'];
       }
-      if ('swgRequest' in data) {
-        oldSku = data['swgRequest']['oldSku'] || null;
+      if ('paymentRequest' in data) {
+        oldSku = (data['paymentRequest']['swg'] || {})['oldSku'];
+        productType =
+          (data['paymentRequest']['i'] || {})['productType'] ||
+          ProductType.SUBSCRIPTION;
       }
     }
-  }
-  if (!productType) {
-    productType = ProductType.SUBSCRIPTION;
   }
   if (raw && !swgData) {
     raw = atob(raw);
@@ -5901,8 +5992,12 @@ function parseEntitlements(deps, swgData) {
  * @return {?string}
  */
 function parseSkuFromPurchaseDataSafe(purchaseData) {
-  const json = tryParseJson(purchaseData.raw);
-  return (json && json['productId']) || null;
+  return (
+    /** @type {?string} */ (getPropertyFromJsonString(
+      purchaseData.raw,
+      'productId'
+    ) || null)
+  );
 }
 
 /**
@@ -6019,8 +6114,8 @@ class OffersFlow {
       }
     }
 
-    /** @private @const {!string} */
-    this.skus_ = (feArgsObj['skus'] || []).join(',') || ALL_SKUS;
+    /** @private  @const {!Array<!string>} */
+    this.skus_ = feArgsObj['skus'] || [ALL_SKUS];
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
@@ -6094,7 +6189,11 @@ class OffersFlow {
     if (this.activityIframeView_) {
       // So no error if skipped to payment screen.
       // Start/cancel events.
-      this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SHOW_OFFERS);
+      // The second parameter is required by Propensity in AMP.
+      this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SHOW_OFFERS, {
+        skus: this.skus_,
+        source: 'SwG',
+      });
       this.activityIframeView_.onCancel(() => {
         this.deps_
           .callbacks()
@@ -6116,7 +6215,7 @@ class OffersFlow {
       this.eventManager_.logSwgEvent(
         AnalyticsEvent.IMPRESSION_OFFERS,
         null,
-        getEventParams$1(this.skus_)
+        getEventParams$1(this.skus_.join(','))
       );
 
       return this.dialogManager_.openView(this.activityIframeView_);
@@ -6510,7 +6609,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.85',
+        '_client': 'SwG 0.1.22.87',
       },
       args || {}
     );
@@ -7243,7 +7342,7 @@ class AnalyticsService {
     if (source) {
       this.context_.setUtmSource(source);
     }
-    this.context_.setClientVersion('SwG 0.1.22.85');
+    this.context_.setClientVersion('SwG 0.1.22.87');
     this.addLabels(getOnExperiments(this.doc_.getWin()));
   }
 
@@ -10116,12 +10215,6 @@ const ExperimentFlags = {
    * Cleanup issue: #406.
    */
   GPAY_API: 'gpay-api',
-
-  /**
-   * Enables GPay native support.
-   * Cleanup issue: #441.
-   */
-  GPAY_NATIVE: 'gpay-native',
 
   /**
    * Enables the feature that allows you to replace one subscription
@@ -14490,7 +14583,7 @@ function isNativeDisabledInRequest(request) {
 
 const PAY_REQUEST_ID = 'swg-pay';
 const GPAY_ACTIVITY_REQUEST$1 = 'GPAY';
-
+const REDIRECT_DELAY = 250;
 const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
 /**
@@ -14611,6 +14704,25 @@ class PayClientBindingSwg {
 
   /** @override */
   start(paymentRequest, options) {
+    if (options.forceRedirect) {
+      // This resolves an issue with logging where the page redirects before
+      // logs get sent to the server.  Ultimately we need a logging promise to
+      // resolve prior to redirecting but that is not possible right now.
+      const start = this.start_.bind(this);
+      this.win_.setTimeout(
+        () => start(paymentRequest, options),
+        REDIRECT_DELAY
+      );
+    } else {
+      this.start_(paymentRequest, options);
+    }
+  }
+
+  /**
+   * @param {!Object} paymentRequest
+   * @param {!PayOptionsDef} options
+   */
+  start_(paymentRequest, options) {
     const opener = this.activityPorts_.open(
       GPAY_ACTIVITY_REQUEST$1,
       payUrl(),
@@ -14692,6 +14804,9 @@ class PayClientBindingPayjs {
     /** @private {?function(!Promise<!Object>)} */
     this.responseCallback_ = null;
 
+    /** @private {?Object} */
+    this.request_ = null;
+
     /** @private {?Promise<!Object>} */
     this.response_ = null;
 
@@ -14740,6 +14855,8 @@ class PayClientBindingPayjs {
 
   /** @override */
   start(paymentRequest, options) {
+    this.request_ = paymentRequest;
+
     if (options.forceRedirect) {
       paymentRequest = Object.assign(paymentRequest, {
         'forceRedirect': options.forceRedirect || false,
@@ -14750,16 +14867,22 @@ class PayClientBindingPayjs {
       'disableNative',
       // The page cannot be iframed at this time. May be relaxed later
       // for AMP and similar contexts.
-      this.win_ != this.top_() ||
-        // Experiment must be enabled.
-        !isExperimentOn(this.win_, ExperimentFlags.GPAY_NATIVE)
+      this.win_ != this.top_()
     );
     // Notice that the callback for verifier may execute asynchronously.
     this.redirectVerifierHelper_.useVerifier(verifier => {
       if (verifier) {
         setInternalParam(paymentRequest, 'redirectVerifier', verifier);
       }
-      this.client_.loadPaymentData(paymentRequest);
+      if (options.forceRedirect) {
+        const client = this.client_;
+        this.win_.setTimeout(
+          () => client.loadPaymentData(paymentRequest),
+          REDIRECT_DELAY
+        );
+      } else {
+        this.client_.loadPaymentData(paymentRequest);
+      }
     });
   }
 
@@ -14770,7 +14893,7 @@ class PayClientBindingPayjs {
     if (response) {
       Promise.resolve().then(() => {
         if (response) {
-          callback(this.convertResponse_(response));
+          callback(this.convertResponse_(response, this.request_));
         }
       });
     }
@@ -14783,22 +14906,37 @@ class PayClientBindingPayjs {
   handleResponse_(responsePromise) {
     this.response_ = responsePromise;
     if (this.responseCallback_) {
-      this.responseCallback_(this.convertResponse_(this.response_));
+      this.responseCallback_(
+        this.convertResponse_(this.response_, this.request_)
+      );
     }
   }
 
   /**
    * @param {!Promise<!Object>} response
+   * @param {?Object} request
    * @return {!Promise<!Object>}
    * @private
    */
-  convertResponse_(response) {
-    return response.catch(reason => {
-      if (typeof reason == 'object' && reason['statusCode'] == 'CANCELED') {
-        return Promise.reject(createCancelError(this.win_));
-      }
-      return Promise.reject(reason);
-    });
+  convertResponse_(response, request) {
+    return response
+      .then(
+        // Temporary client side solution to remember the
+        // input params. TODO: Remove this once server-side
+        // input preservation is done and is part of the response.
+        res => {
+          if (request) {
+            res['paymentRequest'] = request;
+          }
+          return res;
+        }
+      )
+      .catch(reason => {
+        if (typeof reason == 'object' && reason['statusCode'] == 'CANCELED') {
+          return Promise.reject(createCancelError(this.win_));
+        }
+        return Promise.reject(reason);
+      });
   }
 
   /**
@@ -15873,7 +16011,20 @@ class ConfiguredRuntime {
   getEntitlements(encryptedDocumentKey) {
     return this.entitlementsManager_
       .getEntitlements(encryptedDocumentKey)
-      .then(entitlements => entitlements.clone());
+      .then(entitlements => {
+        // Auto update internal things tracking the user's current SKU.
+        if (entitlements) {
+          try {
+            const skus = entitlements.entitlements.map(
+              entitlement => entitlement.getSku() || 'unknown subscriptionToken'
+            );
+            if (skus.length > 0) {
+              this.analyticsService_.setSku(skus.join(','));
+            }
+          } catch (ex) {}
+        }
+        return entitlements.clone();
+      });
   }
 
   /** @override */
