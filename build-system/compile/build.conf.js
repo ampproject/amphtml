@@ -90,7 +90,7 @@ function getReplacePlugin() {
     }
   });
 
-  // default each backup experiment constant to false as well
+  // default each backup experiment constant to the customized value
   Object.keys(experimentsConstantBackup).forEach(experimentDefine => {
     function flagExists(element) {
       return element['identifierName'] === experimentDefine;
@@ -98,7 +98,8 @@ function getReplacePlugin() {
 
     // only add default replacement if it already doesn't exist in array
     if (experimentDefine && !replacements.some(flagExists)) {
-      replacements.push(createReplacement(experimentDefine, false));
+      const value = !!experimentsConstantBackup[experimentDefine];
+      replacements.push(createReplacement(experimentDefine, value));
     }
   });
 
