@@ -5324,14 +5324,14 @@ tags: {
   explicit_attrs_only: true
   attrs: {
     name: "style"
+    dispatch_key: NAME_DISPATCH
+    mandatory: true
     blacklisted_value_regex: "!\\s*important"
     css_declaration: {
       name: "display"
       value_casei: "block"
     }
     css_declaration: { name: "padding-top" }
-    dispatch_key: NAME_DISPATCH
-    mandatory: true
   }
 }
 
