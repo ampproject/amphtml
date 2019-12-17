@@ -47,7 +47,6 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
   let renderer;
   let validator;
   let validatorPromise;
-  let sandbox;
 
   beforeEach(() => {
     doc = env.win.document;
@@ -85,11 +84,12 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
       sentinel: 's-1234',
     };
 
-    sandbox = sinon.sandbox;
-    sandbox.stub(getAmpAdTemplateHelper(env.win), 'fetch').callsFake(url => {
-      expect(url).to.equal(templateUrl);
-      return Promise.resolve(data.adTemplate);
-    });
+    env.sandbox
+      .stub(getAmpAdTemplateHelper(env.win), 'fetch')
+      .callsFake(url => {
+        expect(url).to.equal(templateUrl);
+        return Promise.resolve(data.adTemplate);
+      });
 
     validatorPromise = validator.validate(
       context,
@@ -105,7 +105,6 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
   });
 
   afterEach(() => {
-    sandbox.restore();
     doc.body.removeChild(containerElement);
   });
 
@@ -180,7 +179,7 @@ describes.realWin('TemplateRenderer', realWinConfig, env => {
 
   it('should insert analytics', () => {
     env.win.AMP.registerTemplate('amp-mustache', AmpMustache);
-    const insertAnalyticsSpy = sandbox.spy(
+    const insertAnalyticsSpy = env.sandbox.spy(
       getAmpAdTemplateHelper(env.win),
       'insertAnalytics'
     );
