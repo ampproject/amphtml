@@ -16,6 +16,8 @@
   </style>
   <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+        <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -31,13 +33,17 @@
           "requests": {
             "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
             "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
-            "quizRespond": "${base}?&index=${storyPageIndex}&id=${storyPageId}&quizId=${quizId}&optionId=${optionId}}"
+            "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&storyQuizId=${storyQuizId}&storyQuizOptionId=${storyQuizOptionId}"
           },
           "triggers": {
             "trackQuizResponse": {
               "on": "story-quiz-respond",
-              "request": "quizRespond"
+              "request": "click"
             },
+            "checkLastPage": {
+              "on": "story-last-page-visible",
+              "request": "click"
+            }
           }
         }
       </script>

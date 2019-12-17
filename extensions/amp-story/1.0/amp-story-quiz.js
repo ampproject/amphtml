@@ -84,6 +84,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private {?Element} */
     this.quizEl_ = null;
 
+    /** @private {?string} */
+    this.quizId_ = null;
+
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
   }
@@ -156,6 +159,18 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   attachContent_() {
+    // Set quiz ID
+    if (!this.element.hasAttribute('id')) {
+      // If the quiz has no ID, randomly set one
+      this.element.setAttribute(
+        'id',
+        Math.random()
+          .toString(36)
+          .substring(7)
+      );
+    }
+    this.quizId_ = this.element.getAttribute('id');
+
     // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
     const promptInput = this.element.children[0];
     // First child must be heading h1-h3
@@ -271,12 +286,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   handleOptionSelection_(optionEl) {
-    // TODO(jackbsteinberg): FIND A BETTER METHOD OF SETTING IDS
-    // TODO(jackbsteinberg): CHECK THE IDS HERE
+    // TODO(jackbsteinberg): FIND A BETTER METHOD OF SETTING AND GETTING IDS, THIS IS REALLY FLIMSY LOL
     // update the store service
     this.storeService_.dispatch(Action.SET_QUIZ_INFO, {
-      [StateProperty.CURRENT_QUIZ_ID]: '',
-      [StateProperty.CURRENT_QUIZ_OPTION_ID]: '',
+      [StateProperty.CURRENT_QUIZ_ID]: this.quizId_,
+      [StateProperty.CURRENT_QUIZ_OPTION_ID]: optionEl.querySelector(
+        '.i-amphtml-story-quiz-answer-choice'
+      ).textContent,
     });
 
     // trigger analytics
