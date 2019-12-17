@@ -91,10 +91,11 @@ export function sanitizeHtml(html, doc) {
   };
 
   // No Caja support for <script> or <svg>.
-  const cajaBlacklistedTags = Object.assign(
-    {'script': true, 'svg': true},
-    BLACKLISTED_TAGS
-  );
+  const cajaBlacklistedTags = {
+    'script': true,
+    'svg': true,
+    ...BLACKLISTED_TAGS,
+  };
 
   const parser = htmlSanitizer.makeSaxParser({
     'startTag': function(tagName, attribs) {

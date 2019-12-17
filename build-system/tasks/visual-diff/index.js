@@ -564,7 +564,7 @@ async function snapshotWebpages(browser, webpages) {
 
           // Create a default set of snapshot options for Percy and modify
           // them based on the test's configuration.
-          const snapshotOptions = Object.assign({}, DEFAULT_SNAPSHOT_OPTIONS);
+          const snapshotOptions = {...DEFAULT_SNAPSHOT_OPTIONS};
           if (webpage.enable_percy_javascript) {
             snapshotOptions.enableJavaScript = true;
           }

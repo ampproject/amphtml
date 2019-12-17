@@ -50,7 +50,7 @@ describes.realWin(
     };
 
     function createDatePicker(opt_attrs, opt_parent = document.body) {
-      const attrs = Object.assign({}, DEFAULT_ATTRS, opt_attrs);
+      const attrs = {...DEFAULT_ATTRS, ...opt_attrs};
       const element = createElementWithAttributes(
         document,
         'amp-date-picker',
@@ -96,7 +96,7 @@ describes.realWin(
      */
     function createDateTemplate(body, opt_attrs) {
       const template = createTemplate(body);
-      const attrs = Object.assign({}, DEFAULT_TEMPLATE_ATTRS, opt_attrs);
+      const attrs = {...DEFAULT_TEMPLATE_ATTRS, ...opt_attrs};
       for (const key in attrs) {
         template.setAttribute(key, attrs[key]);
       }

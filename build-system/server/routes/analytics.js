@@ -45,7 +45,7 @@ router.post('/rewriter', (req, res) => {
       reqBody: body,
     },
   };
-  const payload = Object.assign({}, body, extraUrlParams);
+  const payload = {...body, ...extraUrlParams};
   res.json(payload);
 });
 

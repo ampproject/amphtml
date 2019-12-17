@@ -207,7 +207,7 @@ export function getTargetingAndExclusions(impls) {
     } else {
       // Need to create a copy otherwise later delete operations will modify
       // first slot's targeting.
-      commonKVs = Object.assign({}, impl.jsonTargeting['targeting']);
+      commonKVs = {...impl.jsonTargeting['targeting']};
     }
   }
   let hasScp = false;

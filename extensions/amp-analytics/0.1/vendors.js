@@ -295,11 +295,10 @@ function mergeIframeTransportConfig(config, iframeTransportConfig) {
   for (const vendor in iframeTransportConfig) {
     if (hasOwn(iframeTransportConfig, vendor)) {
       const url = iframeTransportConfig[vendor];
-      config[vendor]['transport'] = Object.assign(
-        {},
-        config[vendor]['transport'],
-        {'iframe': url}
-      );
+      config[vendor]['transport'] = {
+        ...config[vendor]['transport'],
+        'iframe': url,
+      };
     }
   }
 }

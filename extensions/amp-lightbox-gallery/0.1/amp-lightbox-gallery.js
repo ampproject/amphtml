@@ -1337,7 +1337,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   updateVideoThumbnails_() {
     const thumbnails = this.manager_
       .getThumbnails(this.currentLightboxGroupId_)
-      .map((thumbnail, index) => Object.assign({index}, thumbnail))
+      .map((thumbnail, index) => ({index, ...thumbnail}))
       .filter(thumbnail => VIDEO_TAGS[thumbnail.element.tagName]);
 
     this.mutateElement(() => {

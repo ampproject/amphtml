@@ -140,11 +140,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const currentHistoryState = /** @type {!Object} */ (getState(
       this.win.history
     ));
-    const historyState = Object.assign({}, currentHistoryState, {
+    const historyState = {
+      ...currentHistoryState,
       [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService_.get(
         StateProperty.CURRENT_PAGE_ID
       ),
-    });
+    };
 
     this.historyService_.push(() => this.closeInternal_(), historyState);
     this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);

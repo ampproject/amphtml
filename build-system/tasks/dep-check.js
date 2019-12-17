@@ -210,10 +210,7 @@ function getGraph(entryModule) {
   const bundler = browserify(entryModule, {
     debug: true,
     fast: true,
-  }).transform(
-    babelify,
-    Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {compact: false})
-  );
+  }).transform(babelify, {...BABELIFY_GLOBAL_TRANSFORM, compact: false});
 
   bundler.pipeline.get('deps').push(
     through.obj(function(row, enc, next) {

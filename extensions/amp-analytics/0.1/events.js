@@ -1395,7 +1395,7 @@ function removeInternalVars(details) {
   if (!details) {
     return details;
   }
-  const clean = Object.assign({}, details);
+  const clean = {...details};
   delete clean[videoAnalyticsCustomEventTypeKey];
   return /** @type {!JsonObject} */ (clean);
 }

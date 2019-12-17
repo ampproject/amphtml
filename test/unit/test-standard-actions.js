@@ -103,7 +103,7 @@ describes.sandboxed('StandardActions', {}, env => {
   }
 
   function trustedInvocation(obj) {
-    return Object.assign({satisfiesTrust: () => true}, obj);
+    return {satisfiesTrust: () => true, ...obj};
   }
 
   function stubPlatformIsIos(isIos = true) {

@@ -87,19 +87,17 @@ async function startServer(
     started = resolve;
   });
   setServeMode(modeOptions);
-  const options = Object.assign(
-    {
-      name: 'AMP Dev Server',
-      root: process.cwd(),
-      host: argv.host || 'localhost',
-      port: argv.port || 8000,
-      https: argv.https,
-      preferHttp1: true,
-      silent: true,
-      middleware: getMiddleware,
-    },
-    connectOptions
-  );
+  const options = {
+    name: 'AMP Dev Server',
+    root: process.cwd(),
+    host: argv.host || 'localhost',
+    port: argv.port || 8000,
+    https: argv.https,
+    preferHttp1: true,
+    silent: true,
+    middleware: getMiddleware,
+    ...connectOptions,
+  };
   connect.server(options, started);
   await startedPromise;
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;

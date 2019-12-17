@@ -109,11 +109,13 @@ function declareExtension(
   const defaultOptions = {hasCss: false};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach(v => {
-    extensionsObject[`${name}-${v}`] = Object.assign(
-      {name, version: v, latestVersion},
-      defaultOptions,
-      options
-    );
+    extensionsObject[`${name}-${v}`] = {
+      name,
+      version: v,
+      latestVersion,
+      ...defaultOptions,
+      ...options,
+    };
     if (includeLatest && v == latestVersion) {
       extensionsObject[`${name}-latest`] = extensionsObject[`${name}-${v}`];
     }
@@ -334,7 +336,7 @@ async function buildExtensions(options) {
  */
 async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
-  let o = Object.assign({}, options);
+  let o = {...options};
   o = Object.assign(o, e);
   await buildExtension(
     e.name,
@@ -392,7 +394,7 @@ async function buildExtension(
         version,
         latestVersion,
         hasCss,
-        Object.assign({}, options, {continueOnError: true})
+        {...options, continueOnError: true}
       );
       if (options.onWatchBuild) {
         options.onWatchBuild(bundleComplete);

@@ -786,8 +786,8 @@ describes.realWin(
       });
 
       it('should queue up multiple amp-user-notification elements', function*() {
-        const tag1 = Object.assign({}, tag);
-        const tag2 = Object.assign({}, tag);
+        const tag1 = {...tag};
+        const tag2 = {...tag};
         let resolve1;
         let resolve2;
 

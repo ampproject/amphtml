@@ -397,7 +397,7 @@ async function runTestInBatchesWithBrowsers_(
     green('browser(s)...')
   );
   while (startIndex < endIndex) {
-    const configBatch = Object.assign({}, config);
+    const configBatch = {...config};
     configBatch.browsers = browsers.slice(startIndex, endIndex);
     log(
       green('Batch'),

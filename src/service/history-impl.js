@@ -829,17 +829,15 @@ export class HistoryBindingNatural_ {
    * @return {!HistoryStateDef}
    */
   mergeStateUpdate_(state, update) {
-    const mergedData = /** @type {!JsonObject} */ (Object.assign(
-      {},
-      (state && state.data) || {},
-      update.data || {}
-    ));
-    return /** @type {!HistoryStateDef} */ (Object.assign(
-      {},
-      state || {},
-      update,
-      {data: mergedData}
-    ));
+    const mergedData = /** @type {!JsonObject} */ ({
+      ...((state && state.data) || {}),
+      ...(update.data || {}),
+    });
+    return /** @type {!HistoryStateDef} */ ({
+      ...(state || {}),
+      ...update,
+      data: mergedData,
+    });
   }
 }
 
@@ -934,10 +932,10 @@ export class HistoryBindingVirtual_ {
    * @override
    */
   push(opt_stateUpdate) {
-    const message = /** @type {!JsonObject} */ (Object.assign(
-      {'stackIndex': this.stackIndex_ + 1},
-      opt_stateUpdate || {}
-    ));
+    const message = /** @type {!JsonObject} */ ({
+      'stackIndex': this.stackIndex_ + 1,
+      ...(opt_stateUpdate || {}),
+    });
     const push = 'pushHistory';
     return this.viewer_
       .sendMessageAwaitResponse(push, message)
@@ -999,10 +997,10 @@ export class HistoryBindingVirtual_ {
       opt_stateUpdate.url = url;
     }
 
-    const message = /** @type {!JsonObject} */ (Object.assign(
-      {'stackIndex': this.stackIndex_},
-      opt_stateUpdate || {}
-    ));
+    const message = /** @type {!JsonObject} */ ({
+      'stackIndex': this.stackIndex_,
+      ...(opt_stateUpdate || {}),
+    });
     const replace = 'replaceHistory';
     return this.viewer_
       .sendMessageAwaitResponse(replace, message, /* cancelUnsent */ true)
