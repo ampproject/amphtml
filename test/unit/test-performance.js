@@ -871,15 +871,15 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       whenFirstVisible: () => unresolvedPromise,
       getVisibilityState: () => viewerVisibilityState,
     });
-    sandbox.stub(Services, 'viewerForDoc').returns({
+    env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => {},
       whenMessagingReady: () => {},
     });
-    sandbox.stub(Services, 'resourcesForDoc').returns({
+    env.sandbox.stub(Services, 'resourcesForDoc').returns({
       getResourcesInRect: () => unresolvedPromise,
       whenFirstPass: () => Promise.resolve(),
     });
-    sandbox.stub(Services, 'viewportForDoc').returns({
+    env.sandbox.stub(Services, 'viewportForDoc').returns({
       getSize: () => viewportSize,
     });
   }
