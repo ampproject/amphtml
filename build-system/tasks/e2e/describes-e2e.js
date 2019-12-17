@@ -95,7 +95,7 @@ function configure(config) {
     throw new Error('describes.configure should only be called once');
   }
 
-  describesConfig = Object.assign({}, config);
+  describesConfig = {...config};
 }
 
 /**
