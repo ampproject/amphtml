@@ -19,7 +19,12 @@ import {Observable} from '../observable';
 import {Services} from '../services';
 import {ViewerInterface} from './viewer-interface';
 import {VisibilityState} from '../visibility-state';
-import {dev, devAssert, duplicateErrorIfNecessary} from '../log';
+import {
+  dev,
+  devAssert,
+  duplicateErrorIfNecessary,
+  stripUserError,
+} from '../log';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -856,17 +861,22 @@ export class ViewerImpl {
 }
 
 /**
- * Creates an error for the case where a channel cannot be established.
+ * Creates a dev error for the case where a channel cannot be established.
  * @param {*=} opt_reason
  * @return {!Error}
  */
 function getChannelError(opt_reason) {
+  let channelError;
   if (opt_reason instanceof Error) {
     opt_reason = duplicateErrorIfNecessary(opt_reason);
     opt_reason.message = 'No messaging channel: ' + opt_reason.message;
-    return opt_reason;
+    channelError = opt_reason;
+  } else {
+    channelError = new Error('No messaging channel: ' + opt_reason);
   }
-  return new Error('No messaging channel: ' + opt_reason);
+  // Force convert user error to dev error
+  channelError.message = stripUserError(channelError.message);
+  return channelError;
 }
 
 /**
