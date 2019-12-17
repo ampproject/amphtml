@@ -5355,7 +5355,7 @@ tags: {
   enabled_by: "transformed"
   tag_name: "IMG"
   spec_name: "IMG-I-AMPHTML-INTRINSIC-SIZER"
-  mandatory_parent: "I-AMPHTML-SIZER"
+  mandatory_parent: "I-AMPHTML-SIZER-INTRINSIC"
   attrs: {
     name: "alt"
     value: ""

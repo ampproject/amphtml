@@ -43,6 +43,12 @@
   <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
     <i-amphtml-sizer class="i-amphtml-sizer"><img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="image.png"></i-amphtml-sizer>
   </amp-img>
+  <!-- Invalid intrinsic i-amphtml-sizer inside responsive sizer  -->
+  <amp-img src="image.png" height="100" width="300" layout="intrinsic" class="i-amphtml-layout-intrinsic i-amphtml-layout-size-defined" i-amphtml-layout="intrinsic">
+    <i-amphtml-sizer style=display:block;padding-top:171.4370%;>
+      <img alt="" aria-hidden="true" class="i-amphtml-intrinsic-sizer" role="presentation" src="data:image/svg+xml;charset=utf-8,<svg height=&quot;100&quot; width=&quot;300&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; version=&quot;1.1&quot;/>">
+    </i-amphtml-sizer>
+  </amp-img>
   <!-- Valid -->
   <amp-social-share class="i-amphtml-layout-fixed i-amphtml-layout-size-defined" i-amphtml-layout=fixed style=width:60px;height:44px; type=test></amp-social-share>
   <!-- Invalid i-amphtml-layout attribute value does not match layout value -->
