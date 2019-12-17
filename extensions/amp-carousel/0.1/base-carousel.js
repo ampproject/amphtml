@@ -186,11 +186,11 @@ export class BaseCarousel extends AMP.BaseElement {
         this.mutateElement(() => {
           this.element.classList.remove(className);
           this.prevButton_.classList.toggle(
-            'i-amphtml-screen-reader',
+            'i-amphtml-carousel-hide-buttons',
             !this.showControls_
           );
           this.nextButton_.classList.toggle(
-            'i-amphtml-screen-reader',
+            'i-amphtml-carousel-hide-buttons',
             !this.showControls_
           );
         });
