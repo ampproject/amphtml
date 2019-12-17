@@ -23,7 +23,7 @@ function poll(description, condition, opt_onError) {
   return classicPoll(description, condition, opt_onError, TIMEOUT);
 }
 
-describe.configure().run('amp-script', function() {
+describes.sandboxed('amp-script', {}, function() {
   this.timeout(TIMEOUT);
 
   let browser, doc, element;
