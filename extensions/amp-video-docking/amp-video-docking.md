@@ -58,6 +58,8 @@ component's visual area. If the user scrolls back, the video reverts to its orig
 - The video can be flicked to be dismissed from its docked position.
 - Multiple videos on the same page can be docked, but only one at a time will be docked and fixed.
 
+Important: This feature is not supported on `iOS` when served from the [AMP Viewer](https://developers.google.com/search/docs/guides/about-amp#about-google-amp-viewer) due to [Safari restrictions](https://medium.com/@dvoytenko/amp-ios-scrolling-and-position-fixed-b854a5a0d451).
+
 ### <a id="support"></a> Support
 
 This extension is used in conjunction with a [supported video player](../../spec/amp-video-interface.md).
