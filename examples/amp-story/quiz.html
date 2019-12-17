@@ -24,6 +24,25 @@
     publisher="The AMP Team"
     publisher-logo-src="./img/AMP-Brand-White-Icon.svg"
     poster-portrait-src="./img/overview.jpg">
+
+    <amp-analytics id="analytics1">
+      <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
+            "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+            "quizRespond": "${base}?&index=${storyPageIndex}&id=${storyPageId}&quizId=${quizId}&optionId=${optionId}}"
+          },
+          "triggers": {
+            "trackQuizResponse": {
+              "on": "story-quiz-respond",
+              "request": "quizRespond"
+            },
+          }
+        }
+      </script>
+    </amp-analytics>
+
     <amp-story-page id="cover">
       <amp-story-grid-layer template="fill">
           <amp-img src="https://i.pinimg.com/originals/60/3d/be/603dbeae12bb77121f912d48aee8ee4e.jpg"

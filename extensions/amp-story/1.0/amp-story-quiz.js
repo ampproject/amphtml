@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
+import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
+import {
+  Action,
+  StateProperty,
+  getStoreService,
+} from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-quiz-1.0.css';
-import {StateProperty, getStoreService} from './amp-story-store-service';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
@@ -65,6 +74,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   constructor(element) {
     super(element);
+
+    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
+    this.analyticsService_ = getAnalyticsService(this.win);
 
     /** @private {boolean} */
     this.hasReceivedResponse_ = false;
@@ -259,6 +271,21 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   handleOptionSelection_(optionEl) {
+    // TODO(jackbsteinberg): FIND A BETTER METHOD OF SETTING IDS
+    // TODO(jackbsteinberg): CHECK THE IDS HERE
+    // update the store service
+    this.storeService_.dispatch(Action.SET_QUIZ_INFO, {
+      [StateProperty.CURRENT_QUIZ_ID]: '',
+      [StateProperty.CURRENT_QUIZ_OPTION_ID]: '',
+    });
+
+    // trigger analytics
+    this.quizEl_[ANALYTICS_TAG_NAME] = 'story-quiz-respond';
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.QUIZ_RESPOND,
+      this.quizEl_
+    );
+
     this.mutateElement(() => {
       optionEl.classList.add('i-amphtml-story-quiz-option-selected');
       this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
