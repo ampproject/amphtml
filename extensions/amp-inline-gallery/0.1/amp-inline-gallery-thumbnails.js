@@ -32,7 +32,8 @@ import {setStyle} from '../../../src/style';
  * investigation / UX work is needed here.
  * TODO(sparhami) Change amp-base-carousel to move one viewport of items at
  * a time when using `mixed-length="true"`.
- * TODO(sparhami) Look into styling for the active thumbnail.
+ * TODO(sparhami) Look into styling for the active thumbnail and other
+ * customizations.
  * TODO(sparhami) Make non-looping thumbnails the default; need to make sure
  * the next arrow works properly for that case.
  */
@@ -44,8 +45,8 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
     /** @private {?Element} */
     this.carousel_ = null;
 
-    /** @private {number} */
-    this.thumbAspectRatio_ = 0;
+    /** @private {?number} */
+    this.thumbAspectRatio_ = null;
   }
 
   /** @override */
@@ -63,8 +64,10 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
       this.thumbAspectRatio_ = aspectRatioWidth / aspectRatioHeight;
     }
 
-    // Stop events from the internal carousel from bubbling up to the
-    // gallery, which would cause the pagination indicator to update.
+    // The pagination indicator should be controlled by the gallery's main
+    // carousel and not the carousel from the thumbnail strip. We stop
+    // propagation since the gallery is not interested in slide changes from
+    // our carousel.
     this.element.addEventListener(CarouselEvents.OFFSET_CHANGE, event => {
       event.stopPropagation();
     });
@@ -170,6 +173,9 @@ export class AmpInlineGalleryThumbnails extends AMP.BaseElement {
       return this.createDefaultThumbnail_();
     }
 
+    // Create a new thumbnail image, we do not want to clone since the
+    // elemnet may have inline styles, classes or attributes that affect
+    // rendering that we do not want.
     const thumbImg = document.createElement('amp-img');
     thumbImg.className = 'i-amphtml-inline-gallery-thumbnails-image';
     thumbImg.setAttribute('layout', 'fill');
