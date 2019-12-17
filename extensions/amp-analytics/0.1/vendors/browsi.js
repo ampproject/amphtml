@@ -25,17 +25,17 @@ const BROWSI_CONFIG = jsonLiteral({
   'requests': {
     'base':
       'https://www.browsi.com/ampData?' +
-      'pub-key=${pubKey}' +
-      '&site-key=${siteKey}' +
+      'pk=${pubKey}' +
+      '&sk=${siteKey}' +
       '&et=${type}' +
       '&pvid=PAGE_VIEW_ID_64'
     ,
-    'capture':
+    'engagement':
       '${base}' +
       '&path=${canonicalPath}' +
       '&now=${timestamp}' +
       '&st=${scrollTop}' +
-      '&sh=${scrollHeight}'
+      '&ph=${scrollHeight}'
     ,
     'pageview':
       '${base}' +
@@ -89,12 +89,12 @@ const BROWSI_CONFIG = jsonLiteral({
     "timer": {
       "on": "timer",
       "timerSpec": {
-        "interval": 5,
-        "maxTimerLength": 60
+        "interval": 3,
+        "maxTimerLength": 180
       },
-      "request": "capture",
+      "request": "engagement",
       "vars": {
-        "type": "timing"
+        "type": "engagement"
       }
     },
     "visibility50": {
@@ -104,14 +104,13 @@ const BROWSI_CONFIG = jsonLiteral({
       "important": 'true',
       "visibilitySpec": {
         "visiblePercentageMin": 50,
-        // "totalTimeMin": 1000,
-        // "totalTimeMax": 10000,
+        "totalTimeMin": 1000,
         "continuousTimeMin": 200,
         "continuousTimeMax": 20000,
-        "repeat": true
+        "repeat": false
       },
       "vars": {
-        "type": "visibility501"
+        "type": "visibility50"
       }
     },
     "visibility100": {
@@ -123,7 +122,7 @@ const BROWSI_CONFIG = jsonLiteral({
         "totalTimeMin": 1000,
         "continuousTimeMin": 1000,
         "continuousTimeMax": 10000,
-        "repeat": true
+        "repeat": false
       },
       "vars": {
         "type": "visibility100"
