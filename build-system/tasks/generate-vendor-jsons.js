@@ -63,7 +63,7 @@ function generateVendorJsons() {
         ANALYTICS_CONFIG[vendorName],
         null,
         2
-      );
+      ) + '\n';
       const fileName = vendorName + '.json';
 
       promises.push(
