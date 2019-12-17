@@ -24,17 +24,17 @@ import {withAmpContext} from './preact/context';
 
 /**
  * @typedef {{
- *   prop: string,
+ *   attr: string,
+ *   type: (string|undefined),
  *   default: *,
- *   type: (string|undefined)
  * }}
  */
-export let AmpElementAttr;
+export let AmpElementProp;
 
 /**
  * @typedef {{
  *   className: (string|undefined),
- *   attrs: (!Object<string, !AmpElementAttr>|undefined),
+ *   props: (!Object<string, !AmpElementProp>|undefined),
  * }}
  */
 export let AmpElementOptions;
@@ -208,15 +208,13 @@ function collectProps(element, opts, win, ampdoc) {
     props['className'] = opts.className;
   }
 
-  // Attributes.
-  const defs = opts.attrs || {};
+  // Props.
+  const defs = opts.props || {};
   for (const name in defs) {
     const def = defs[name];
-    const value = element.getAttribute(name);
+    const value = element.getAttribute(def.attr);
     if (value == null) {
-      if (def.default != null) {
-        props[def.prop] = def.default;
-      }
+      props[name] = def.default;
     } else {
       const v =
         def.type == 'number'
@@ -226,7 +224,7 @@ function collectProps(element, opts, win, ampdoc) {
             // React and AMP? Currently modeled as a Ref.
             {current: element.getRootNode().getElementById(value)}
           : value;
-      props[def.prop] = v;
+      props[name] = v;
     }
   }
 

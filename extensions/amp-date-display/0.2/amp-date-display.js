@@ -119,14 +119,13 @@ const AmpDateDisplay = PreactBaseElement(AmpDateDisplayComponent, {
     'templates': win => Services.templatesFor(win),
   },
 
-  attrs: {
-    'display-in': {prop: 'displayIn'},
-    'offset-seconds': {prop: 'offsetSeconds', type: 'number'},
-    'locale': {prop: 'locale'},
-    'datetime': {prop: 'datetime'},
-    'timestamp-ms': {prop: 'timestampMilliseconds', type: 'number'},
-    'timestamp-seconds': {prop: 'timestampSeconds', type: 'number'},
-    'template': {prop: 'displayIn'},
+  props: {
+    'displayIn': {attr: 'display-in'},
+    'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
+    'locale': {attr: 'locale'},
+    'datetime': {attr: 'datetime'},
+    'timestampMs': {attr: 'timestamp-milliseconds', type: 'number'},
+    'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
   },
 
   /** @override */
