@@ -205,21 +205,7 @@ export class NextPageService {
         if (!page.isVisible()) {
           page.setVisibility(VisibilityState.VISIBLE);
         }
-        // Hide the previous pages
-        let prevPageIndex = index + this.scrollDirection_;
-        while (prevPageIndex >= 0 && prevPageIndex < this.pages_.length) {
-          const prevPage = this.pages_[prevPageIndex];
-          if (
-            prevPage &&
-            (prevPage.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
-              prevPage.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT ||
-              prevPage === this.initialPage_) &&
-            prevPage.isVisible()
-          ) {
-            prevPage.setVisibility(VisibilityState.HIDDEN);
-          }
-          prevPageIndex += this.scrollDirection_;
-        }
+        this.hidePreviousPages(index);
       } else if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
           page.setVisibility(VisibilityState.HIDDEN);
@@ -230,6 +216,27 @@ export class NextPageService {
     // If no page is visible then the host page should be
     if (!this.pages_.some(page => page.isVisible())) {
       this.initialPage_.setVisibility(VisibilityState.VISIBLE);
+    }
+  }
+
+  /**
+   * Makes sure that all pages preceding the current page are
+   * marked hidden if they are out of the viewport
+   * @param {number} index index of the page to start at
+   */
+  hidePreviousPages(index) {
+    let i = index + this.scrollDirection_;
+    while (i >= 0 && i < this.pages_.length) {
+      const page = this.pages_[i];
+      const shouldBeHidden =
+        page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
+        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT ||
+        page === this.initialPage_;
+      if (shouldBeHidden && page.isVisible()) {
+        page.setVisibility(VisibilityState.HIDDEN);
+      }
+      // Go back one more page in the opposite direction of the scroll
+      i += this.scrollDirection_;
     }
   }
 
