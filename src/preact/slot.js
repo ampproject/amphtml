@@ -29,7 +29,7 @@ import {useMountEffect} from './utils';
  */
 export function createSlot(element, name, props) {
   element.setAttribute('slot', name);
-  const slotProps = Object.assign({name}, props || {});
+  const slotProps = {name, ...(props || {})};
   return createElement(Slot, slotProps);
 }
 
@@ -42,7 +42,7 @@ export function createSlot(element, name, props) {
 export function Slot(props) {
   const context = useContext(getAmpContext());
   const ref = useRef();
-  const slotProps = Object.assign({}, props, {ref});
+  const slotProps = {...props, ref};
   useEffect(() => {
     const slot = ref.current;
     const assignedElements = getAssignedElements(props, slot);

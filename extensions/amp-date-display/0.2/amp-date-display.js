@@ -212,7 +212,8 @@ function enhanceBasicVariables(data) {
   const hour12 = data.hour % 12 || 12;
 
   // Override type since Object.assign is not understood
-  return /** @type {!EnhancedVariablesV2Def} */ (Object.assign({}, data, {
+  return /** @type {!EnhancedVariablesV2Def} */ ({
+    ...data,
     yearTwoDigit: padStart(data.year % 100),
     monthTwoDigit: padStart(data.month),
     dayTwoDigit: padStart(data.day),
@@ -222,7 +223,7 @@ function enhanceBasicVariables(data) {
     minuteTwoDigit: padStart(data.minute),
     secondTwoDigit: padStart(data.second),
     dayPeriod: data.hour < 12 ? 'am' : 'pm',
-  }));
+  });
 }
 
 /**

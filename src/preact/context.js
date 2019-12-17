@@ -57,11 +57,12 @@ export function getAmpContext() {
  */
 export function withAmpContext(props) {
   const parent = useContext(getAmpContext());
-  const current = Object.assign({}, props, {
+  const current = {
+    ...props,
     renderable: parent.renderable && props.renderable,
     playable: parent.playable && props.playable,
     children: undefined,
-  });
+  };
 
   return createElement(getAmpContext().Provider, {
     children: props.children,
