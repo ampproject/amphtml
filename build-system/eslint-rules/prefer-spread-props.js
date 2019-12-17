@@ -15,6 +15,22 @@
  */
 'use strict';
 
+// This warns when using Object.assign where an object spread is better. Note
+// that using Object.assign to mutate an already existing object is still
+// allowed.
+//
+// Good:
+// ```
+// const foo = {...obj};
+// const bar = {foo: 1, ...obj};
+// const baz = Object.assign(someObject, obj);
+// ```
+//
+// Bad:
+// ```
+// const foo = Object.assign({}, obj);
+// const bar = Object.assign({foo: 1}, obj);
+// ```
 module.exports = {
   meta: {
     fixable: 'code',

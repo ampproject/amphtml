@@ -15,8 +15,20 @@
  */
 'use strict';
 
+// Forbids use of Rest elements when they require an iterator polyfill, or
+// there's no clear benefit.
+//
+// Good:
+// ```
+// function foo(...args) {}
+// ```
+//
+// Bad:
+// ```
+// const [...rest] = [1, 2, 3];
+// const {...rest} = {foo: 1};
+// ```
 module.exports = function(context) {
-  // Allow RestParams, but disallow ArrayRest and ObjectRest
   return {
     'ArrayPattern > RestElement': function(node) {
       context.report({

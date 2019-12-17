@@ -15,6 +15,31 @@
  */
 'use strict';
 
+// Disallows using an object spread on an inline object expression. Instead,
+// the object expression's properties should be hoisted out inline with the
+// rest of the outer object.
+//
+// Good:
+// ```
+// const foo = {
+//   foo: 1,
+//   ...bar,
+//   baz: 2
+// };
+// ```
+//
+// Bad:
+// ```
+// const foo = {
+//   ...{
+//     foo: 1,
+//   },
+//   ...bar,
+//   ...{
+//     baz: 2
+//   },
+// };
+// ```
 module.exports = {
   meta: {
     fixable: 'code',
