@@ -175,24 +175,15 @@ describes.realWin(
     });
 
     function getViqeo(params) {
-      const {
-        id,
-        viqeoProfileId,
-        viqeoId,
-        width,
-        height,
-        opt_params,
-      } = Object.assign(
-        {
-          id: 'myVideo',
-          viqeoProfileId: 184,
-          viqeoId: '922d04f30b66f1a32eb2',
-          width: 320,
-          height: 180,
-          opt_params: {},
-        },
-        params
-      );
+      const {id, viqeoProfileId, viqeoId, width, height, opt_params} = {
+        id: 'myVideo',
+        viqeoProfileId: 184,
+        viqeoId: '922d04f30b66f1a32eb2',
+        width: 320,
+        height: 180,
+        opt_params: {},
+        ...params,
+      };
 
       const viqeoElement = doc.createElement('amp-viqeo-player');
 

@@ -28,7 +28,7 @@ import {macroTask} from '../../../../testing/yield';
 
 /* global require: false */
 const VENDOR_REQUESTS = require('./vendor-requests.json');
-const AnalyticsConfig = Object.assign({}, ANALYTICS_CONFIG);
+const AnalyticsConfig = {...ANALYTICS_CONFIG};
 
 describe('iframe transport', () => {
   it('Should not contain iframe transport if not whitelisted', () => {

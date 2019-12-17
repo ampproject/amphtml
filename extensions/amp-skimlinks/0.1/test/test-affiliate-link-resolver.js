@@ -277,9 +277,10 @@ describes.fakeWin(
           const stubXhr = helpers.createStubXhr({
             'merchant_domains': ['merchant1.com', 'merchant2.com'],
           });
-          const skimOptions = Object.assign({}, DEFAULT_SKIM_OPTIONS, {
+          const skimOptions = {
+            ...DEFAULT_SKIM_OPTIONS,
             excludedDomains: ['excluded-merchant.com'],
-          });
+          };
 
           resolver = new AffiliateLinkResolver(stubXhr, skimOptions, waypoint);
         });

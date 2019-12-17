@@ -31,7 +31,7 @@ const shellCmd = process.platform == 'win32' ? 'cmd' : '/bin/bash';
  * @return {!Object}
  */
 function spawnProcess(cmd, options) {
-  return childProcess.spawnSync(cmd, Object.assign({shell: shellCmd}, options));
+  return childProcess.spawnSync(cmd, {shell: shellCmd, ...options});
 }
 
 /**
@@ -55,7 +55,7 @@ function exec(cmd, options) {
  * @return {!Object}
  */
 function execScriptAsync(script, options) {
-  return childProcess.spawn(script, Object.assign({shell: shellCmd}, options));
+  return childProcess.spawn(script, {shell: shellCmd, ...options});
 }
 
 /**

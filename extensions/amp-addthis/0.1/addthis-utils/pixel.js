@@ -40,9 +40,10 @@ const groupPixelsByTime = pixelList => {
   // Clean delay value; if it's empty/doesn't exist, default to [0]
   const cleanedPixels = pixelList.map(pixel => {
     const {delay} = pixel;
-    return Object.assign({}, pixel, {
+    return {
+      ...pixel,
       delay: Array.isArray(delay) && delay.length ? delay : [0],
-    });
+    };
   });
 
   const delayMap = cleanedPixels

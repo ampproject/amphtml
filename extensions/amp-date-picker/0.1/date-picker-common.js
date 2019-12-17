@@ -216,19 +216,15 @@ export function withDatePickerCommon(WrappedComponent) {
       initialVisibleMonth || date || startDate || endDate || undefined;
     props['initialVisibleMonth'] = () => Moment(initialDate);
 
-    return react.createElement(
-      WrappedComponent,
-      Object.assign(
-        {},
-        props,
-        dict({
-          'daySize': Number(daySize),
-          'isDayBlocked': this.isDayBlocked,
-          'isDayHighlighted': this.isDayHighlighted,
-          'isOutsideRange': this.isOutsideRange,
-        })
-      )
-    );
+    return react.createElement(WrappedComponent, {
+      ...props,
+      ...dict({
+        'daySize': Number(daySize),
+        'isDayBlocked': this.isDayBlocked,
+        'isDayHighlighted': this.isDayHighlighted,
+        'isOutsideRange': this.isOutsideRange,
+      }),
+    });
   };
 
   /** @dict */

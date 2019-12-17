@@ -567,21 +567,19 @@ function createKeyboardEventInitWithKeyCode(key, keyCode) {
  * @return {!JsonObject}
  */
 function createKeyboardEventInit(overrideKeyboardEventInit) {
-  return Object.assign(
-    {
-      key: '',
-      code: '',
-      location: 0,
-      ctrlKey: false,
-      shiftKey: false,
-      altKey: false,
-      metaKey: false,
-      repeat: false,
-      isComposing: false,
-      charCode: 0,
-      keyCode: 0,
-      which: 0,
-    },
-    overrideKeyboardEventInit
-  );
+  return {
+    key: '',
+    code: '',
+    location: 0,
+    ctrlKey: false,
+    shiftKey: false,
+    altKey: false,
+    metaKey: false,
+    repeat: false,
+    isComposing: false,
+    charCode: 0,
+    keyCode: 0,
+    which: 0,
+    ...overrideKeyboardEventInit,
+  };
 }

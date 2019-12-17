@@ -121,7 +121,7 @@ export class AmpMustache extends BaseTemplate {
   render(data) {
     let mustacheData = data;
     if (typeof data === 'object') {
-      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+      mustacheData = {...data, ...this.nestedTemplates_};
     }
     const html = mustache.render(
       this.template_,

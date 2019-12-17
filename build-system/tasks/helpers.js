@@ -138,7 +138,7 @@ function doBuildJs(jsBundles, name, extraOptions) {
       target.srcDir,
       target.srcFilename,
       extraOptions.minify ? target.minifiedDestDir : target.destDir,
-      Object.assign({}, target.options, extraOptions)
+      {...target.options, ...extraOptions}
     );
   } else {
     return Promise.reject(red('Error:'), 'Could not find', cyan(name));
@@ -366,21 +366,14 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
   // TODO: @jonathantyng remove browserifyOptions #22757
-  const browserifyOptions = Object.assign(
-    {},
-    {
-      entries: entryPoint,
-      debug: true,
-      fast: true,
-    },
-    options.browserifyOptions
-  );
+  const browserifyOptions = {
+    entries: entryPoint,
+    debug: true,
+    fast: true,
+    ...options.browserifyOptions,
+  };
 
-  const babelifyOptions = Object.assign(
-    {},
-    BABELIFY_GLOBAL_TRANSFORM,
-    BABELIFY_PLUGINS
-  );
+  const babelifyOptions = {...BABELIFY_GLOBAL_TRANSFORM, ...BABELIFY_PLUGINS};
 
   let bundler = browserify(browserifyOptions).transform(
     babelify,

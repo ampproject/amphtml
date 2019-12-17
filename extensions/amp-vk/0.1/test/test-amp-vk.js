@@ -70,7 +70,7 @@ describes.realWin(
     }
 
     it('requires data-embedtype', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['embedtype'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -93,7 +93,7 @@ describes.realWin(
     // Post tests
 
     it('post::requires data-hash', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['hash'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -103,7 +103,7 @@ describes.realWin(
     });
 
     it('post::requires data-owner-id', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['owner-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -113,7 +113,7 @@ describes.realWin(
     });
 
     it('post::requires data-post-id', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['post-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -155,7 +155,7 @@ describes.realWin(
     // Poll tests
 
     it('poll::requires data-api-id', () => {
-      const params = Object.assign({}, POLL_PARAMS);
+      const params = {...POLL_PARAMS};
       delete params['api-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -165,7 +165,7 @@ describes.realWin(
     });
 
     it('poll::requires data-poll-id', () => {
-      const params = Object.assign({}, POLL_PARAMS);
+      const params = {...POLL_PARAMS};
       delete params['poll-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(

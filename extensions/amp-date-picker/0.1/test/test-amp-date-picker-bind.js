@@ -46,7 +46,7 @@ describes.realWin(
      * }}
      */
     function createDatePicker(opt_attrs = {}, opt_parent = document.body) {
-      const attrs = Object.assign({}, DEFAULT_ATTRS, opt_attrs);
+      const attrs = {...DEFAULT_ATTRS, ...opt_attrs};
       let input = null;
       let endInput = null;
       if (attrs['mode'] === 'overlay') {

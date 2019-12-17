@@ -396,14 +396,12 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
   describe('selectAndActivatePlatform_', () => {
     function resolveRequiredPromises(entitlementSpec, grantEntitlementSpec) {
-      entitlementSpec = Object.assign(
-        {
-          service: 'local',
-          source: 'local',
-          raw: 'raw',
-        },
-        entitlementSpec
-      );
+      entitlementSpec = {
+        service: 'local',
+        source: 'local',
+        raw: 'raw',
+        ...entitlementSpec,
+      };
       if (!grantEntitlementSpec && entitlementSpec.granted) {
         grantEntitlementSpec = entitlementSpec;
       }

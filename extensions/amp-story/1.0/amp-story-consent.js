@@ -326,11 +326,10 @@ export class AmpStoryConsent extends AMP.BaseElement {
         'type="application/json"'
     );
 
-    this.storyConsentConfig_ = Object.assign(
-      {},
-      DEFAULT_OPTIONAL_PARAMETERS,
-      /** @type {Object} */ (parseJson(storyConsentScript.textContent))
-    );
+    this.storyConsentConfig_ = {
+      ...DEFAULT_OPTIONAL_PARAMETERS,
+      ...parseJson(storyConsentScript.textContent),
+    };
 
     user().assertString(
       this.storyConsentConfig_.title,

@@ -270,9 +270,9 @@ function compile(
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      // Transpile from ES6 to ES5 if not running with `--esm`
-      // otherwise transpilation is done by Babel
-      language_in: argv.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
+      language_in: 'ECMASCRIPT_2018',
+      // Do not transpile down to ES5 if running with `--esm`, since we do
+      // limited transpilation in Babel.
       language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the

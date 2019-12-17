@@ -156,12 +156,13 @@ describes.fakeWin(
           expect(sendStub).to.be.calledOnce;
           expect(sendStub).to.be.calledWithExactly('start', {
             'protocol': 'amp-access',
-            'config': Object.assign({}, validConfig, {
+            'config': {
+              ...validConfig,
               'iframeVars': {
                 'VAR1': 'A',
                 'VAR2': 'B',
               },
-            }),
+            },
           });
         });
       });

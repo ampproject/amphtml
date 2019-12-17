@@ -115,9 +115,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   });
 
   it('pingbackReturnsAllEntitlements should "pingbackAllEntitlements" config value', () => {
-    const testConfig = Object.assign({}, serviceConfig.services[0], {
+    const testConfig = {
+      ...serviceConfig.services[0],
       'pingbackAllEntitlements': true,
-    });
+    };
     const testLocalPlatform = localSubscriptionPlatformFactory(
       ampdoc,
       testConfig,
