@@ -104,6 +104,8 @@
     "local/no-unload-listener": 2,
     "local/prefer-deferred-promise": 0,
     "local/prefer-destructuring": 2,
+    "local/prefer-spread-props": 2,
+    "local/prefer-unnested-spread-objects": 2,
     "local/private-prop-names": 2,
     "local/query-selector": 2,
     "local/split-single-pass-comment": 2,
