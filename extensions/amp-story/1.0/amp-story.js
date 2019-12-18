@@ -831,6 +831,8 @@ export class AmpStory extends AMP.BaseElement {
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
+
+    this.viewer_.onMessage('selectPage', data => this.onSelectPage_(data));
   }
 
   /** @private */
@@ -2559,6 +2561,28 @@ export class AmpStory extends AMP.BaseElement {
       Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO,
       storyHasBackgroundAudio
     );
+  }
+
+  /**
+   * Handles the selectPage viewer event.
+   * @param {!JsonObject} data
+   * @private
+   */
+  onSelectPage_(data) {
+    if (!data) {
+      return;
+    }
+
+    this.storeService_.dispatch(
+      Action.SET_ADVANCEMENT_MODE,
+      AdvancementMode.VIEWER_SELECT_PAGE
+    );
+
+    if (data['next']) {
+      this.next_();
+    } else if (data['previous']) {
+      this.previous_();
+    }
   }
 
   /**
