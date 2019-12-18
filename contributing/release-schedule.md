@@ -46,6 +46,8 @@ See the [release cadence section](#release-cadence) for a more detailed breakdow
 
 The **lts** release channel provides a previous **stable** build for four-month intervals. Every four weeks, the current **stable** release is promoted to **lts**. This is not recommended for all AMP partners, but is provided so partners performing a QA cycle may do so less often. The **lts** release must be explicitly opted into by adding `/lts` to the path of the runtime and extension scripts requested in the page:
 
+> Note: The LTS release channel is available only to AMP HTML pages; it is not available to AMP Actions, AMP for Email, AMP Stories, or AMP for Ads.
+
 ```html
 <!-- Standard AMP HTML runtime and extension scripts -->
 <script async src="https://cdn.ampproject.org/v0.js"></script>
