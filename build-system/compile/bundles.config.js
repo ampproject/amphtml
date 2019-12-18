@@ -643,7 +643,11 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     options: {
       hasCss: true,
-      cssBinaries: ['amp-inline-gallery', 'amp-inline-gallery-pagination'],
+      cssBinaries: [
+        'amp-inline-gallery',
+        'amp-inline-gallery-pagination',
+        'amp-inline-gallery-thumbnails',
+      ],
     },
     type: TYPES.MISC,
   },
