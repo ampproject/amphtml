@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../utils/promise';
 import {Services} from '../services';
 import {VisibilityState} from '../visibility-state';
 import {dev} from '../log';
@@ -24,6 +25,7 @@ import {isCanary} from '../experiments';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
 import {throttle} from '../utils/rate-limit';
+import {whenContentIniLoad} from '../ini-load';
 import {whenDocumentComplete, whenDocumentReady} from '../document-ready';
 
 /**
@@ -83,10 +85,13 @@ export class Performance {
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
 
+    /** @private {?./ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = null;
+
     /** @private {?./viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
-    /** @private {?./resources-impl.ResourcesDef} */
+    /** @private {?./resources-interface.ResourcesInterface} */
     this.resources_ = null;
 
     /** @private {boolean} */
@@ -100,12 +105,19 @@ export class Performance {
     /** @private {string} */
     this.ampexp_ = '';
 
-    /** @private {number|null} */
-    this.makeBodyVisible_ = null;
-    /** @private {number|null} */
-    this.firstContentfulPaint_ = null;
-    /** @private {number|null} */
-    this.firstViewportReady_ = null;
+    this.fcpDeferred_ = new Deferred();
+    this.fvrDeferred_ = new Deferred();
+    this.mbvDeferred_ = new Deferred();
+
+    // Platform service must be installed before performance serivce is
+    this.platform_ = Services.platformFor(this.win);
+
+    // TODO (micajuineho) change this once all platforms
+    // support PerformancePaintTiming
+    // https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming
+    if (!this.platform_.isChrome() && !this.platform_.isOpera()) {
+      this.fcpDeferred_.resolve(null);
+    }
 
     /**
      * How many times a layout jank metric has been ticked.
@@ -143,10 +155,7 @@ export class Performance {
      *
      * @private {boolean}
      */
-    this.supportsLayoutInstabilityAPIv76_ =
-      this.win.PerformanceObserver &&
-      this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('layoutShift');
+    this.supportsLayoutInstabilityAPIv76_ = false;
 
     /**
      * Whether the user agent supports the Layout Instability API that shipped
@@ -154,13 +163,71 @@ export class Performance {
      *
      * @private {boolean}
      */
-    this.supportsLayoutInstabilityAPIv77_ =
-      this.win.PerformanceObserver &&
-      this.win.PerformanceObserver.supportedEntryTypes &&
-      this.win.PerformanceObserver.supportedEntryTypes.includes('layout-shift');
+    this.supportsLayoutInstabilityAPIv77_ = false;
+
+    /**
+     * Whether the user agent supports the Event Timing API that shipped
+     * with Chrome 76.
+     *
+     * @private {boolean}
+     */
+    this.supportsEventTimingAPIv76_ = false;
+
+    /**
+     * Whether the user agent supports the Event Timing API that shipped
+     * with Chrome 77.
+     *
+     * @private {boolean}
+     */
+    this.supportsEventTimingAPIv77_ = false;
+
+    /**
+     * Whether the user agent supports the Largest Contentful Paint metric.
+     *
+     * @private {boolean}
+     */
+    this.supportsLargestContentfulPaint_ = false;
+
+    const {PerformanceObserver} = this.win;
+    if (PerformanceObserver) {
+      const {supportedEntryTypes} = PerformanceObserver;
+      if (supportedEntryTypes) {
+        this.supportsLayoutInstabilityAPIv76_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'layoutShift'
+        );
+        this.supportsLayoutInstabilityAPIv77_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'layout-shift'
+        );
+        this.supportsEventTimingAPIv76_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'firstInput'
+        );
+        this.supportsEventTimingAPIv77_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'first-input'
+        );
+        this.supportsLargestContentfulPaint_ = this.win.PerformanceObserver.supportedEntryTypes.includes(
+          'largest-contentful-paint'
+        );
+      }
+    }
+
+    /**
+     * The latest reported largest contentful paint time, where the loadTime
+     * is specified.
+     *
+     * @private {number|null}
+     */
+    this.largestContentfulPaintLoadTime_ = null;
+
+    /**
+     * The latest reported largest contentful paint time, where the renderTime
+     * is specified.
+     *
+     * @private {number|null}
+     */
+    this.largestContentfulPaintRenderTime_ = null;
 
     this.boundOnVisibilityChange_ = this.onVisibilityChange_.bind(this);
-    this.onViewerVisibilityChange_ = this.onViewerVisibilityChange_.bind(this);
+    this.onAmpDocVisibilityChange_ = this.onAmpDocVisibilityChange_.bind(this);
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
@@ -185,6 +252,7 @@ export class Performance {
    */
   coreServicesAvailable() {
     const {documentElement} = this.win.document;
+    this.ampdoc_ = Services.ampdoc(documentElement);
     this.viewer_ = Services.viewerForDoc(documentElement);
     this.resources_ = Services.resourcesForDoc(documentElement);
 
@@ -192,7 +260,7 @@ export class Performance {
       this.viewer_.isEmbedded() && this.viewer_.getParam('csi') === '1';
 
     // This is for redundancy. Call flush on any visibility change.
-    this.viewer_.onVisibilityChanged(this.flush.bind(this));
+    this.ampdoc_.onVisibilityChanged(this.flush.bind(this));
 
     // Does not need to wait for messaging ready since it will be queued
     // if it isn't ready.
@@ -202,36 +270,26 @@ export class Performance {
     // and has no messaging channel.
     const channelPromise = this.viewer_.whenMessagingReady();
 
-    this.viewer_.whenFirstVisible().then(() => {
+    this.ampdoc_.whenFirstVisible().then(() => {
       this.tick('ofv');
       this.flush();
     });
 
-    if (this.win.PerformanceLayoutJank) {
-      // Register a handler to record the layout jank metric when the page
-      // enters the hidden lifecycle state.
-      this.win.addEventListener(
-        VISIBILITY_CHANGE_EVENT,
-        this.boundOnVisibilityChange_,
-        {capture: true}
-      );
-
-      this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
-    }
-
-    if (
+    const registerVisibilityChangeListener =
+      this.win.PerformanceLayoutJank ||
+      this.supportsLargestContentfulPaint_ ||
       this.supportsLayoutInstabilityAPIv76_ ||
-      this.supportsLayoutInstabilityAPIv77_
-    ) {
-      // Register a handler to record the layout shift metric when the page
-      // enters the hidden lifecycle state.
+      this.supportsLayoutInstabilityAPIv77_;
+    // Register a handler to record metrics when the page enters the hidden
+    // lifecycle state.
+    if (registerVisibilityChangeListener) {
       this.win.addEventListener(
         VISIBILITY_CHANGE_EVENT,
         this.boundOnVisibilityChange_,
         {capture: true}
       );
 
-      this.viewer_.onVisibilityChanged(this.onViewerVisibilityChange_);
+      this.ampdoc_.onVisibilityChanged(this.onAmpDocVisibilityChange_);
     }
 
     // We don't check `isPerformanceTrackingOn` here since there are some
@@ -308,7 +366,11 @@ export class Performance {
       ) {
         this.tickDelta('fcp', entry.startTime + entry.duration);
         recordedFirstContentfulPaint = true;
-      } else if (entry.entryType === 'firstInput' && !recordedFirstInputDelay) {
+      } else if (
+        (entry.entryType === 'firstInput' ||
+          entry.entryType === 'first-input') &&
+        !recordedFirstInputDelay
+      ) {
         this.tickDelta('fid', entry.processingStart - entry.startTime);
         recordedFirstInputDelay = true;
       } else if (entry.entryType === 'layoutJank') {
@@ -320,6 +382,13 @@ export class Performance {
         // likely in response to the user's action.
         if (!entry.hadRecentInput) {
           this.aggregateShiftScore_ += entry.value;
+        }
+      } else if (entry.entryType === 'largest-contentful-paint') {
+        if (entry.loadTime) {
+          this.largestContentfulPaintLoadTime_ = entry.loadTime;
+        }
+        if (entry.renderTime) {
+          this.largestContentfulPaintRenderTime_ = entry.renderTime;
         }
       }
     };
@@ -333,12 +402,17 @@ export class Performance {
       entryTypesToObserve.push('paint');
     }
 
-    if (this.win.PerformanceEventTiming) {
+    if (this.supportsEventTimingAPIv76_) {
       // Programmatically read once as currently PerformanceObserver does not
       // report past entries as of Chrome 61.
       // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
       this.win.performance.getEntriesByType('firstInput').forEach(processEntry);
       entryTypesToObserve.push('firstInput');
+    }
+
+    if (this.supportsEventTimingAPIv77_) {
+      const firstInputObserver = this.createPerformanceObserver_(processEntry);
+      firstInputObserver.observe({type: 'first-input', buffered: true});
     }
 
     if (this.win.PerformanceLayoutJank) {
@@ -360,26 +434,22 @@ export class Performance {
     }
 
     if (this.supportsLayoutInstabilityAPIv77_) {
-      // Layout shift entries are not available from the Performance Timeline
-      // through `getEntriesByType`, so a separate PerformanceObserver is
-      // required for this metric.
-      const layoutInstabilityObserver = new this.win.PerformanceObserver(
-        list => {
-          list.getEntries().forEach(processEntry);
-          this.flush();
-        }
+      const layoutInstabilityObserver = this.createPerformanceObserver_(
+        processEntry
       );
       layoutInstabilityObserver.observe({type: 'layout-shift', buffered: true});
+    }
+
+    if (this.supportsLargestContentfulPaint_) {
+      const lcpObserver = this.createPerformanceObserver_(processEntry);
+      lcpObserver.observe({type: 'largest-contentful-paint', buffered: true});
     }
 
     if (entryTypesToObserve.length === 0) {
       return;
     }
 
-    const observer = new this.win.PerformanceObserver(list => {
-      list.getEntries().forEach(processEntry);
-      this.flush();
-    });
+    const observer = this.createPerformanceObserver_(processEntry);
 
     // Wrap observer.observe() in a try statement for testing, because
     // Webkit throws an error if the entry types to observe are not natively
@@ -390,6 +460,18 @@ export class Performance {
       dev() /*OK*/
         .warn(err);
     }
+  }
+
+  /**
+   * @param {function(!PerformanceEntry)} processEntry
+   * @return {!PerformanceObserver}
+   * @private
+   */
+  createPerformanceObserver_(processEntry) {
+    return new this.win.PerformanceObserver(list => {
+      list.getEntries().forEach(processEntry);
+      this.flush();
+    });
   }
 
   /**
@@ -409,6 +491,7 @@ export class Performance {
   /**
    * When the visibility state of the document changes to hidden,
    * send the layout jank score.
+   * @private
    */
   onVisibilityChange_() {
     if (this.win.document.visibilityState === 'hidden') {
@@ -421,15 +504,19 @@ export class Performance {
       ) {
         this.tickLayoutShiftScore_();
       }
+      if (this.supportsLargestContentfulPaint_) {
+        this.tickLargestContentfulPaint_();
+      }
     }
   }
 
   /**
    * When the viewer visibility state of the document changes to inactive,
    * send the layout jank score.
+   * @private
    */
-  onViewerVisibilityChange_() {
-    if (this.viewer_.getVisibilityState() === VisibilityState.INACTIVE) {
+  onAmpDocVisibilityChange_() {
+    if (this.ampdoc_.getVisibilityState() === VisibilityState.INACTIVE) {
       if (this.win.PerformanceLayoutJank) {
         this.tickLayoutJankScore_();
       }
@@ -438,6 +525,9 @@ export class Performance {
         this.supportsLayoutInstabilityAPIv77_
       ) {
         this.tickLayoutShiftScore_();
+      }
+      if (this.supportsLargestContentfulPaint_) {
+        this.tickLargestContentfulPaint_();
       }
     }
   }
@@ -532,17 +622,30 @@ export class Performance {
   }
 
   /**
+   * Tick the largest contentful paint metrics.
+   */
+  tickLargestContentfulPaint_() {
+    if (this.largestContentfulPaintLoadTime_ !== null) {
+      this.tickDelta('lcpl', this.largestContentfulPaintLoadTime_);
+    }
+    if (this.largestContentfulPaintRenderTime_ !== null) {
+      this.tickDelta('lcpr', this.largestContentfulPaintRenderTime_);
+    }
+    this.flush();
+  }
+
+  /**
    * Measure the delay the user perceives of how long it takes
    * to load the initial viewport.
    * @private
    */
   measureUserPerceivedVisualCompletenessTime_() {
-    const didStartInPrerender = !this.viewer_.hasBeenVisible();
+    const didStartInPrerender = !this.ampdoc_.hasBeenVisible();
     let docVisibleTime = didStartInPrerender ? -1 : this.initTime_;
 
-    // This will only be relevant if the viewer is in prerender mode.
+    // This will only be relevant if the ampdoc is in prerender mode.
     // (hasn't been visible yet, ever at this point)
-    this.viewer_.whenFirstVisible().then(() => {
+    this.ampdoc_.whenFirstVisible().then(() => {
       docVisibleTime = this.win.Date.now();
       // Mark this first visible instance in the browser timeline.
       this.mark('visible');
@@ -555,7 +658,7 @@ export class Performance {
             ? this.win.Date.now() - docVisibleTime
             : //  Prerender was complete before visibility.
               0;
-        this.viewer_.whenFirstVisible().then(() => {
+        this.ampdoc_.whenFirstVisible().then(() => {
           // We only tick this if the page eventually becomes visible,
           // since otherwise we heavily skew the metric towards the
           // 0 case, since pre-renders that are never used are highly
@@ -589,9 +692,12 @@ export class Performance {
     const size = Services.viewportForDoc(documentElement).getSize();
     const rect = layoutRectLtwh(0, 0, size.width, size.height);
     return this.resources_.whenFirstPass().then(() => {
-      return this.resources_
-        .getResourcesInRect(this.win, rect, /* isInPrerender */ true)
-        .then(resources => Promise.all(resources.map(r => r.loadedOnce())));
+      return whenContentIniLoad(
+        documentElement,
+        this.win,
+        rect,
+        /* isInPrerender */ true
+      );
     });
   }
 
@@ -631,13 +737,13 @@ export class Performance {
     );
     switch (label) {
       case 'fcp':
-        this.firstContentfulPaint_ = storedVal;
+        this.fcpDeferred_.resolve(storedVal);
         break;
       case 'pc':
-        this.firstViewportReady_ = storedVal;
+        this.fvrDeferred_.resolve(storedVal);
         break;
       case 'mbv':
-        this.makeBodyVisible_ = storedVal;
+        this.mbvDeferred_.resolve(storedVal);
         break;
     }
   }
@@ -674,7 +780,7 @@ export class Performance {
    */
   tickSinceVisible(label) {
     const now = this.win.Date.now();
-    const visibleTime = this.viewer_ ? this.viewer_.getFirstVisibleTime() : 0;
+    const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);
   }
@@ -775,24 +881,24 @@ export class Performance {
   }
 
   /**
-   * @return {number|null}
+   * @return {!Promise<number>}
    */
   getFirstContentfulPaint() {
-    return this.firstContentfulPaint_;
+    return this.fcpDeferred_.promise;
   }
 
   /**
-   * @return {number|null}
+   * @return {!Promise<number>}
    */
   getMakeBodyVisible() {
-    return this.makeBodyVisible_;
+    return this.mbvDeferred_.promise;
   }
 
   /**
-   * @return {number|null}
+   * @return {!Promise<number>}
    */
   getFirstViewportReady() {
-    return this.firstViewportReady_;
+    return this.fvrDeferred_.promise;
   }
 }
 

@@ -16,12 +16,14 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
+import {Services} from '../src/services';
 import {dev} from '../src/log';
 import {guaranteeSrcForSrcsetUnsupportedBrowsers} from '../src/utils/img';
 import {isExperimentOn} from '../src/experiments';
 import {listen} from '../src/event-helper';
 import {propagateObjectFitStyles, setImportantStyles} from '../src/style';
 import {registerElement} from '../src/service/custom-element-registry';
+import {removeElement} from '../src/dom';
 
 /** @const {string} */
 const TAG = 'amp-img';
@@ -97,6 +99,7 @@ export class AmpImg extends BaseElement {
         this.img_,
         /* opt_removeMissingAttrs */ true
       );
+      this.propagateDataset(this.img_);
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
   }
@@ -113,7 +116,7 @@ export class AmpImg extends BaseElement {
     // `src` url if it exists or the first srcset url.
     const src = this.element.getAttribute('src');
     if (src) {
-      this.preconnect.url(src, onLayout);
+      Services.preconnectFor(this.win).url(this.getAmpDoc(), src, onLayout);
     } else {
       const srcset = this.element.getAttribute('srcset');
       if (!srcset) {
@@ -123,7 +126,11 @@ export class AmpImg extends BaseElement {
       const srcseturl = /\S+/.exec(srcset);
       // Connect to the first url if it exists
       if (srcseturl) {
-        this.preconnect.url(srcseturl[0], onLayout);
+        Services.preconnectFor(this.win).url(
+          this.getAmpDoc(),
+          srcseturl[0],
+          onLayout
+        );
       }
     }
   }
@@ -178,6 +185,7 @@ export class AmpImg extends BaseElement {
     // It is important to call this before setting `srcset` attribute.
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+    this.propagateDataset(this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
@@ -201,12 +209,6 @@ export class AmpImg extends BaseElement {
     if (sizes) {
       return;
     }
-    // Auto-sizes are not compatible with intrinsic layout.
-    // See https://github.com/ampproject/amphtml/issues/23453 for context.
-    const layout = this.getLayout();
-    if (layout === Layout.INTRINSIC) {
-      return;
-    }
     // Sizes is useless without the srcset attribute or if the srcset
     // attribute uses the x descriptor.
     const srcset = this.element.getAttribute('srcset');
@@ -214,7 +216,7 @@ export class AmpImg extends BaseElement {
       return;
     }
 
-    const width = this.getLayoutWidth();
+    const width = this.element.getLayoutWidth();
     if (!this.shouldSetSizes_(width)) {
       return;
     }
@@ -224,7 +226,7 @@ export class AmpImg extends BaseElement {
     const entry = `(max-width: ${viewportWidth}px) ${width}px, `;
     let defaultSize = width + 'px';
 
-    if (layout !== Layout.FIXED) {
+    if (this.getLayout() !== Layout.FIXED) {
       const ratio = Math.round((width * 100) / viewportWidth);
       defaultSize = Math.max(ratio, 100) + 'vw';
     }
@@ -269,7 +271,7 @@ export class AmpImg extends BaseElement {
     const img = dev().assertElement(this.img_);
     this.unlistenLoad_ = listen(img, 'load', () => this.hideFallbackImg_());
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
-    if (this.getLayoutWidth() <= 0) {
+    if (this.element.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
     return this.loadPromise(img);
@@ -285,6 +287,18 @@ export class AmpImg extends BaseElement {
       this.unlistenLoad_();
       this.unlistenLoad_ = null;
     }
+
+    // Interrupt retrieval of incomplete images to free network resources when
+    // navigating pages in a PWA. Opt for tiny dataURI image instead of empty
+    // src to prevent the viewer from detecting a load error.
+    const img = this.img_;
+    if (img && !img.complete) {
+      img.src =
+        'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
+      removeElement(img);
+      this.img_ = null;
+    }
+
     return true;
   }
 

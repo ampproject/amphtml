@@ -1,0 +1,65 @@
+<html>
+  <head>
+    <title>AMP Story Embed Example</title>
+    <script async src="../../dist/amp-story-embed.js"></script>
+    <style page>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
+    <style injected>
+      .amp-story-embed {
+        width: 405px;
+        height: 720px;
+      }
+
+      .story {
+        background-size: cover;
+        display: block;
+        position: relative;
+        height: 100%;
+        width: 100%;
+        flex: 0 0 100%;
+      }
+
+      .title {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+        display: block;
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        color: #fff;
+        font-size: 40px;
+        padding: 88px 32px 32px 32px;
+        line-height: 1.25;
+        text-shadow: 3px 3px #000;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>This is a NON-AMP page that embeds a story below:</h1>
+    <amp-story-embed>
+      <a href="https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/"
+          data-poster-portrait-src="https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/img/promo3x4.jpg"
+          class="story">
+        <span class="title">A local’s guide to what to eat and do in New York City</span>
+      </a>
+      <a href="https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-miami/"
+          data-poster-portrait-src="https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-miami/img/promo3x4.jpg"
+          class="story">
+        <span class="title">A local’s guide to what to eat and do in Miami</span>
+      </a>
+      <a href="https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/"
+          data-poster-portrait-src="https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/img/promo3x4.jpg"
+          class="story">
+        <span class="title">A local’s guide to what to eat and do in Mexico City</span>
+      </a>
+      <a href="https://www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-rome/"
+          data-poster-portrait-src="https://washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-do-and-eat-in-rome/img/promo3x4.jpg"
+          class="story">
+        <span class="title">A local’s guide to what to eat and do in Rome</span>
+      </a>
+    </amp-story-embed>
+  </body>
+</html>

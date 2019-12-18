@@ -87,23 +87,6 @@ let BoundPropertyDef;
 let BoundElementDef;
 
 /**
- * @enum {number}
- */
-const HistoryOp = {
-  REPLACE: 0,
-  PUSH: 1,
-};
-
-/**
- * @typedef {{
- *   op: !HistoryOp,
- *   data: (!JsonObject|undefined),
- *   onPop: (!Function|undefined)
- * }}
- */
-let HistoryTaskDef;
-
-/**
  * A map of tag names to arrays of attributes that do not have non-bind
  * counterparts. For instance, amp-carousel allows a `[slide]` attribute,
  * but does not support a `slide` attribute.
@@ -157,7 +140,7 @@ export class Bind {
      */
     this.actionSequenceIds_ = [];
 
-    /** @const @private {function()} */
+    /** @const @private {!Function} */
     this.eventuallyClearActionSequenceIds_ = debounce(
       this.win_,
       () => {
@@ -194,8 +177,8 @@ export class Bind {
      */
     this.maxNumberOfBindings_ = 1000;
 
-    /** @const @private {!../../../src/service/resources-impl.ResourcesDef} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /**
      * The current values of all bound expressions on the page.
@@ -217,7 +200,7 @@ export class Bind {
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ = this.viewer_
+    this.initializePromise_ = ampdoc
       .whenFirstVisible()
       .then(() => {
         if (opt_win) {
@@ -236,24 +219,11 @@ export class Bind {
     /** @const @private {!Deferred} */
     this.addMacrosDeferred_ = new Deferred();
 
-    /** @private {?Promise} */
+    /** @private {Promise} */
     this.setStatePromise_ = null;
 
     /** @private @const {!../../../src/utils/signals.Signals} */
     this.signals_ = new Signals();
-
-    /**
-     * A queue of history replace/push to adhere to browser rate-limits.
-     * @private @const {!Array<!HistoryTaskDef>}
-     */
-    this.historyQueue_ = [];
-
-    /** @private @const {!Function} */
-    this.debouncedFlushHistoryQueue_ = debounce(
-      this.win_,
-      () => this.flushHistoryQueue_(),
-      1000
-    );
 
     // Install debug tools.
     const g = self.AMP;
@@ -373,15 +343,41 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    dev().info(TAG, 'setState:', expression);
-    this.setStatePromise_ = this.evaluateExpression_(expression, scope)
-      .then(result => this.setState(result))
-      .then(() => {
-        return this.getDataForHistory_().then(data => {
-          if (data) {
-            this.pushToHistoryQueue_({op: HistoryOp.REPLACE, data});
-          }
-        });
+    return this.evaluateExpression_(expression, scope).then(result =>
+      this.setStateAndUpdateHistory_(result)
+    );
+  }
+
+  /**
+   * Sanitizes a state object and merges the resulting object into the current
+   * state.
+   * @param {!JsonObject} state
+   * @return {!Promise}
+   */
+  setStateWithObject(state) {
+    // Sanitize and copy state
+    const result = this.copyJsonObject_(state);
+    if (!result) {
+      return Promise.reject('Invalid state');
+    }
+    return this.setStateAndUpdateHistory_(result);
+  }
+
+  /**
+   * Merges a state object into the current global state.
+   * @param {!JsonObject} state
+   * @return {!Promise}
+   * @private
+   */
+  setStateAndUpdateHistory_(state) {
+    dev().info(TAG, 'setState:', state);
+    this.setStatePromise_ = this.setState(state)
+      .then(() => this.getDataForHistory_())
+      .then(data => {
+        // Don't bother calling History.replace with empty data.
+        if (data) {
+          this.history_.replace(data);
+        }
       });
     return this.setStatePromise_;
   }
@@ -408,76 +404,32 @@ export class Bind {
       });
 
       const onPop = () => this.setState(oldState);
-      return this.setState(result).then(() => {
-        return this.getDataForHistory_().then(data => {
-          this.pushToHistoryQueue_({op: HistoryOp.PUSH, data, onPop});
+      return this.setState(result)
+        .then(() => this.getDataForHistory_())
+        .then(data => {
+          this.history_.push(onPop, data);
         });
-      });
     });
-  }
-
-  /**
-   * @param {!HistoryTaskDef} task
-   * @private
-   */
-  pushToHistoryQueue_(task) {
-    let enqueue = true;
-
-    // Collapse if consecutive "replace" operations.
-    if (task.op === HistoryOp.REPLACE && this.historyQueue_.length > 0) {
-      const lastTask = this.historyQueue_[this.historyQueue_.length - 1];
-      if (lastTask.op === HistoryOp.REPLACE) {
-        lastTask.data = task.data;
-        enqueue = false;
-      }
-    }
-
-    if (enqueue) {
-      this.historyQueue_.push(task);
-    }
-
-    if (task.op === HistoryOp.PUSH) {
-      // Immediately flush queue on "push" to avoid adding latency to
-      // the browser "back" functionality.
-      this.flushHistoryQueue_();
-    } else {
-      // Debounce flush queue on "replace" to rate limit History.replace.
-      this.debouncedFlushHistoryQueue_();
-    }
-  }
-
-  /**
-   * @private
-   */
-  flushHistoryQueue_() {
-    this.historyQueue_.forEach(({op, data, onPop}) => {
-      if (op === HistoryOp.REPLACE) {
-        this.history_.replace(data);
-      } else if (op === HistoryOp.PUSH) {
-        this.history_.push(onPop, data);
-      }
-    });
-    this.historyQueue_.length = 0;
   }
 
   /**
    * Returns data that should be saved in browser history on AMP.setState() or
    * AMP.pushState(). This enables features like restoring browser tabs.
-   * @return {!Promise<(!JsonObject|undefined)>}
+   * @return {!Promise<?JsonObject>}
    */
   getDataForHistory_() {
-    // Copy so subsequent changes don't modify the stored object reference.
     const data = dict({
-      'data': dict({'amp-bind': this.copyJsonObject_(this.state_)}),
+      'data': dict({'amp-bind': this.state_}),
       'title': this.localWin_.document.title,
     });
     if (!this.viewer_.isEmbedded()) {
-      return Promise.resolve(data);
+      // CC doesn't recognize !JsonObject as a subtype of (JsonObject|null).
+      return /** @type {!Promise<?JsonObject>} */ (Promise.resolve(data));
     }
     // Only pass state for history updates to trusted viewers, since they
     // may contain user data e.g. form input.
     return this.viewer_.isTrustedViewer().then(trusted => {
-      return trusted ? data : undefined;
+      return trusted ? data : null;
     });
   }
 
@@ -584,6 +536,20 @@ export class Bind {
   }
 
   /**
+   * Returns a copy of the global state for a given field-based expression,
+   * e.g. "foo.bar".
+   * @param {string} expr
+   * @return {*}
+   */
+  getState(expr) {
+    const value = expr ? getValueForExpr(this.state_, expr) : undefined;
+    if (isObject(value) || isArray(value)) {
+      return this.copyJsonObject_(/** @type {JsonObject} */ (value));
+    }
+    return value;
+  }
+
+  /**
    * Returns the stringified value of the global state for a given field-based
    * expression, e.g. "foo.bar.baz".
    * @param {string} expr
@@ -635,14 +601,15 @@ export class Bind {
         return Promise.all(whenParsed);
       })
       .then(() => {
-        // In dev mode, check default values against initial expression results.
-        if (getMode().development) {
-          return this.evaluate_().then(results => this.verify_(results));
-        }
         // Bind is "ready" when its initialization completes _and_ all <amp-state>
         // elements' local data is parsed and processed (not remote data).
         this.viewer_.sendMessage('bindReady', undefined);
         this.dispatchEventForTesting_(BindEvents.INITIALIZE);
+
+        // In dev mode, check default values against initial expression results.
+        if (getMode().development) {
+          return this.evaluate_().then(results => this.verify_(results));
+        }
       });
   }
 
@@ -1208,7 +1175,7 @@ export class Bind {
       // Useful for rendering amp-list with amp-bind state via [src].
       if (
         newValue === undefined ||
-        deepEquals(newValue, previousResult, /* depth */ 10)
+        deepEquals(newValue, previousResult, /* depth */ 20)
       ) {
       } else {
         boundProperty.previousResult = newValue;
@@ -1267,7 +1234,7 @@ export class Bind {
     if (updates.length === 0) {
       return Promise.resolve();
     }
-    return this.resources_.mutateElement(element, () => {
+    return this.mutator_.mutateElement(element, () => {
       const mutations = map();
       let width, height;
 
@@ -1289,10 +1256,9 @@ export class Bind {
       });
 
       if (width !== undefined || height !== undefined) {
-        // TODO(choumx): Add new Resources method for adding change-size
         // request without scheduling vsync pass since `mutateElement()`
         // will schedule a pass after a short delay anyways.
-        this.resources_./*OK*/ changeSize(element, height, width);
+        this.mutator_./*OK*/ changeSize(element, height, width);
       }
 
       if (typeof element.mutatedAttributesCallback === 'function') {

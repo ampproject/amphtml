@@ -20,10 +20,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="adpicker"
-    data-ph="kbj2l87p3j">
-</amp-ad>
+<amp-ad width="300" height="250" type="adpicker" data-ph="kbj2l87p3j"> </amp-ad>
 ```
 
 ## Configuration

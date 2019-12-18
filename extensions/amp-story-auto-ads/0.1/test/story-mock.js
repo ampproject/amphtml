@@ -119,32 +119,11 @@ export function addStoryPages(doc, storyImpl, numPages = 3) {
  * @param {Array<string>=} additonalSelectors
  */
 export function fireBuildSignals(doc, additonalSelectors = []) {
-  const defaultSelectors = ['amp-ad', '#i-amphtml-ad-page-1'];
+  const defaultSelectors = ['amp-ad', 'amp-story', 'amp-story-page'];
   const selectors = defaultSelectors.concat(additonalSelectors).join(',');
-  doc
-    .querySelectorAll(selectors)
-    .forEach(element => element.signals().signal(CommonSignals.BUILT));
-}
-
-/**
- * Add specified CTA values to most recently created ad.
- * @param {!../amp-story-auto-autoAds.AmpStoryAutoAds} autoAdsImpl
- * @param {string} ctaType
- * @param {string} ctaUrl
- */
-export function addCtaValues(autoAdsImpl, ctaType, ctaUrl) {
-  autoAdsImpl.lastCreatedAdElement_.setAttribute('data-vars-ctatype', ctaType);
-  autoAdsImpl.lastCreatedAdElement_.setAttribute('data-vars-ctaurl', ctaUrl);
-}
-
-/**
- * Mock creation of iframe that is normally handled by amp-ad.
- * @param {!../amp-story-auto-autoAds.AmpStoryAutoAds} autoAdsImpl
- * @param {string} content
- */
-export function insertAdContent(autoAdsImpl, content) {
-  const iframe = autoAdsImpl.doc_.createElement('iframe');
-  iframe.srcdoc = content;
-  autoAdsImpl.lastCreatedAdElement_.appendChild(iframe);
-  return autoAdsImpl.loadPromise(iframe);
+  doc.querySelectorAll(selectors).forEach(element => {
+    const signals = element.signals();
+    signals.signal(CommonSignals.BUILT);
+    signals.signal(CommonSignals.INI_LOAD);
+  });
 }

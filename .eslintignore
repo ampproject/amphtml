@@ -12,7 +12,7 @@ test/coverage/**
 **/*.extern.js
 build-system/tasks/visual-diff/snippets/*.js
 build-system/babel-plugins/**/fixtures/**/*.js
-build-system/app-index/test/**/*.js
+build-system/server/app-index/test/*.js
 examples/**
 extensions/amp-a4a/0.1/test/testdata/**
 testing/local-amp-chrome-extension/**

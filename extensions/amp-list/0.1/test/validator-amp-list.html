@@ -39,6 +39,11 @@
             [src]="foo.bar">
     <div></div>
   </amp-list>
+  <!-- Valid: amp-list with only data-amp-bind-src attribute -->
+  <amp-list width=10 height=10
+            data-amp-bind-src="foo.bar">
+    <div></div>
+  </amp-list>
   <!-- Valid: amp-list with both src and [src] attributes -->
   <amp-list width=10 height=10
             src="https://data.com/articles.json?ref=CANONICAL_URL"
@@ -121,10 +126,15 @@
       <button load-more-clickable>Click me to reload!</button>
     </amp-list-load-more>
   </amp-list>
-  <!-- Valid amp-list with [is-layout-container] attribute -->
+  <!-- Valid amp-list with is-layout-container attribute -->
   <amp-list width=10 height=10
     src="https://data.com/articles.json?ref=CANONICAL_URL"
     [is-layout-container]="containerState"></amp-list>
+  </amp-list>
+  <!-- Valid amp-list with diffable attribute -->
+  <amp-list width=10 height=10
+    src="https://data.com/articles.json?ref=CANONICAL_URL"
+    diffable></amp-list>
   </amp-list>
   <!-- Invalid: unsupported "binding" attribute value -->
   <amp-list width=10 height=10
@@ -137,7 +147,7 @@
             wdith=10 height=10>
     <div></div>
   </amp-list>
-  <!-- Invalid: missing at least src or [src]. -->
+  <!-- Invalid: missing at least src, [src] or data-amp-bind-src. -->
   <amp-list width=10 height=10>
     <div></div>
   </amp-list>
@@ -187,5 +197,11 @@
     <div></div>
   </amp-list>
   <template id="found"></template>
+  <!-- Valid: amp-list with src and xssi-prefix attribute -->
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL"
+            xssi-prefix="while(1)">
+    <div></div>
+  </amp-list>
 </body>
 </html>

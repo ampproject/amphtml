@@ -16,10 +16,7 @@
 
 import '../amp-video-iframe';
 import {Services} from '../../../../src/services';
-import {
-  VideoAnalyticsEvents,
-  VideoEvents,
-} from '../../../../src/video-interface';
+import {VideoEvents} from '../../../../src/video-interface';
 import {
   addAttributesToElement,
   whenUpgradedToCustomElement,
@@ -40,16 +37,17 @@ describes.realWin(
     },
   },
   env => {
-    const {any} = sinon.match;
     const defaultFixture = 'video-iframe.html';
 
     let win;
     let doc;
     let videoManagerStub;
+    let any;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      any = env.sandbox.match.any;
 
       videoManagerStub = {
         register: env.sandbox.spy(),
@@ -271,8 +269,8 @@ describes.realWin(
 
         videoIframe.implementation_.onMessage_(message);
 
-        expect(postMessage.withArgs(sinon.match(expectedResponseMessage))).to
-          .have.been.calledOnce;
+        expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
+          .to.have.been.calledOnce;
       });
 
       it('should return 0 if not in autoplay range', async () => {
@@ -303,8 +301,8 @@ describes.realWin(
 
         videoIframe.implementation_.onMessage_(message);
 
-        expect(postMessage.withArgs(sinon.match(expectedResponseMessage))).to
-          .have.been.calledOnce;
+        expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
+          .to.have.been.calledOnce;
       });
 
       [
@@ -353,7 +351,7 @@ describes.realWin(
           if (accept) {
             const expectedEventVars = {eventType, vars: vars || {}};
             const expectedDispatch = dispatch.withArgs(
-              VideoAnalyticsEvents.CUSTOM,
+              VideoEvents.CUSTOM_TICK,
               expectedEventVars
             );
             implementation_.onMessage_({data});
@@ -362,8 +360,8 @@ describes.realWin(
             allowConsoleError(() => {
               expect(() => implementation_.onMessage_({data})).to.throw();
             });
-            expect(dispatch.withArgs(VideoAnalyticsEvents.CUSTOM, any)).to.not
-              .have.been.called;
+            expect(dispatch.withArgs(VideoEvents.CUSTOM_TICK, any)).to.not.have
+              .been.called;
           }
         });
       });
@@ -417,7 +415,7 @@ describes.realWin(
 
           expect(
             postMessage.withArgs(
-              sinon.match({
+              env.sandbox.match({
                 event: 'method',
                 method: lowercaseMethod,
               })

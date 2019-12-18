@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
@@ -36,12 +37,21 @@ class AmpBeOpinion extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    preloadBootstrap(this.win, this.preconnect);
+    const preconnect = Services.preconnectFor(this.win);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
     // Hosts the script that renders widgets.
-    this.preconnect.preload('https://widget.beopinion.com/sdk.js', 'script');
-    this.preconnect.url('https://s.beopinion.com', opt_onLayout);
-    this.preconnect.url('https://t.beopinion.com', opt_onLayout);
-    this.preconnect.url('https://data.beopinion.com', opt_onLayout);
+    preconnect.preload(
+      this.getAmpDoc(),
+      'https://widget.beopinion.com/sdk.js',
+      'script'
+    );
+    preconnect.url(this.getAmpDoc(), 'https://s.beopinion.com', opt_onLayout);
+    preconnect.url(this.getAmpDoc(), 'https://t.beopinion.com', opt_onLayout);
+    preconnect.url(
+      this.getAmpDoc(),
+      'https://data.beopinion.com',
+      opt_onLayout
+    );
   }
 
   /** @override */

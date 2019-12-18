@@ -30,11 +30,9 @@ describes.sandboxed('Extensions', {}, () => {
     let win;
     let extensions;
     let timeoutCallback;
-    let sandbox;
 
     beforeEach(() => {
       win = env.win;
-      sandbox = env.sandbox;
       win.setTimeout = cb => {
         timeoutCallback = cb;
       };
@@ -329,7 +327,7 @@ describes.sandboxed('Extensions', {}, () => {
     });
 
     it('should install elements in shadow doc', () => {
-      sandbox
+      env.sandbox
         .stub(Services.ampdocServiceFor(win), 'isSingleDoc')
         .callsFake(() => false);
       expect(
@@ -403,14 +401,14 @@ describes.sandboxed('Extensions', {}, () => {
 
     // TODO(#16916): Make this test work with synchronous throws.
     it.skip('should install all doc factories to shadow doc', () => {
-      sandbox
+      env.sandbox
         .stub(Services.ampdocServiceFor(win), 'isSingleDoc')
         .callsFake(() => false);
-      const factory1 = sandbox.spy();
+      const factory1 = env.sandbox.spy();
       const factory2 = function() {
         throw new Error('intentional');
       };
-      const factory3 = sandbox.spy();
+      const factory3 = env.sandbox.spy();
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -467,8 +465,8 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should install auto undeclared services for single-doc', () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      const factory1Spy = sandbox.spy();
-      const factory2Spy = sandbox.spy();
+      const factory1Spy = env.sandbox.spy();
+      const factory2Spy = env.sandbox.spy();
       const factory1 = function() {
         factory1Spy();
         return {a: 1};
@@ -496,8 +494,8 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should skip non-auto undeclared services for single-doc', () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
-      const factory1 = sandbox.spy();
-      const factory2 = sandbox.spy();
+      const factory1 = env.sandbox.spy();
+      const factory2 = env.sandbox.spy();
 
       // Manually preload extension, which would make it non-auto.
       extensions.preloadExtension('amp-test');
@@ -528,8 +526,8 @@ describes.sandboxed('Extensions', {}, () => {
       const ampdoc = Services.ampdocServiceFor(win).getSingleDoc();
       ampdoc.declareExtension('amp-test');
 
-      const factory1Spy = sandbox.spy();
-      const factory2Spy = sandbox.spy();
+      const factory1Spy = env.sandbox.spy();
+      const factory2Spy = env.sandbox.spy();
       const factory1 = function() {
         factory1Spy();
         return {a: 1};
@@ -556,16 +554,16 @@ describes.sandboxed('Extensions', {}, () => {
 
     // TODO(#16916): Make this test work with synchronous throws.
     it.skip('should install all services to doc', () => {
-      sandbox
+      env.sandbox
         .stub(Services.ampdocServiceFor(win), 'isSingleDoc')
         .callsFake(() => false);
-      const factory1 = sandbox.spy();
-      const factory2Spy = sandbox.spy();
+      const factory1 = env.sandbox.spy();
+      const factory2Spy = env.sandbox.spy();
       const factory2 = function() {
         factory2Spy();
         throw new Error('intentional');
       };
-      const factory3 = sandbox.spy();
+      const factory3 = env.sandbox.spy();
       extensions.registerExtension(
         'amp-ext',
         () => {
@@ -602,6 +600,145 @@ describes.sandboxed('Extensions', {}, () => {
       return extensions.loadElementClass('amp-ext').then(elementClass => {
         expect(elementClass).to.equal(ctor);
       });
+    });
+
+    it('should keep awaiting promise through reload', () => {
+      const script = document.createElement('script');
+      script.setAttribute('custom-element', 'amp-ext');
+      script.setAttribute(
+        'src',
+        'https://cdn.ampproject.org/v0/amp-ext-0.1.js'
+      );
+      win.document.head.appendChild(script);
+
+      // Start waiting immediately.
+      const initialPromise = extensions.preloadExtension('amp-ext');
+
+      // Reload the extension. E.g. due to the version mismatch.
+      const reloadPromise = extensions.reloadExtension('amp-ext');
+
+      // Register extension.
+      extensions.registerExtension('amp-ext', () => {}, {});
+
+      return reloadPromise.then(reloadedExtension => {
+        expect(reloadedExtension).to.exist;
+        return initialPromise.then(initialExtension => {
+          expect(initialExtension).to.equal(reloadedExtension);
+          const newScript = win.document.head.querySelector(
+            'script[custom-element="amp-ext"]:not([i-amphtml-loaded-new-version])'
+          );
+          expect(newScript).to.exist;
+        });
+      });
+    });
+  });
+
+  describes.fakeWin('reloadExtension', {}, env => {
+    let win;
+    let extensions;
+
+    beforeEach(() => {
+      win = env.win;
+
+      env.sandbox.stub(Services, 'ampdocServiceFor').returns(null);
+      extensions = new Extensions(win);
+      env.sandbox.stub(extensions, 'preloadExtension');
+    });
+
+    it('should devAssert if script cannot be found', () => {
+      expect(() => {
+        extensions.reloadExtension('amp-list');
+      }).to.throw('Cannot find script for extension: amp-list');
+
+      expect(extensions.preloadExtension).to.not.be.called;
+    });
+
+    it('should ignore inserted scripts', () => {
+      const list = document.createElement('script');
+      list.setAttribute('custom-element', 'amp-list');
+      list.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-list-0.1.js');
+      list.setAttribute('i-amphtml-inserted', '');
+      win.document.head.appendChild(list);
+
+      expect(() => {
+        extensions.reloadExtension('amp-list');
+      }).to.throw('Cannot find script for extension: amp-list');
+
+      expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
+      expect(extensions.preloadExtension).to.not.be.called;
+    });
+
+    it('should support [custom-element] scripts', () => {
+      const list = document.createElement('script');
+      list.setAttribute('custom-element', 'amp-list');
+      list.setAttribute('src', 'https://cdn.ampproject.org/v0/amp-list-0.1.js');
+      win.document.head.appendChild(list);
+
+      extensions.reloadExtension('amp-list');
+
+      expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+        'amp-list'
+      );
+      expect(extensions.preloadExtension).to.be.calledWith('amp-list', '0.1');
+    });
+
+    it('should support "latest" version scripts', () => {
+      const list = document.createElement('script');
+      list.setAttribute('custom-element', 'amp-list');
+      list.setAttribute(
+        'src',
+        'https://cdn.ampproject.org/v0/amp-list-latest.js'
+      );
+      win.document.head.appendChild(list);
+
+      extensions.reloadExtension('amp-list');
+
+      expect(list.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+        'amp-list'
+      );
+      expect(extensions.preloadExtension).to.be.calledWith(
+        'amp-list',
+        'latest'
+      );
+    });
+
+    it('should support [custom-template] scripts', () => {
+      const mustache = document.createElement('script');
+      mustache.setAttribute('custom-template', 'amp-mustache');
+      mustache.setAttribute(
+        'src',
+        'https://cdn.ampproject.org/v0/amp-mustache-0.2.js'
+      );
+      win.document.head.appendChild(mustache);
+
+      extensions.reloadExtension('amp-mustache');
+
+      expect(mustache.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+        'amp-mustache'
+      );
+      expect(extensions.preloadExtension).to.be.calledWith(
+        'amp-mustache',
+        '0.2'
+      );
+    });
+
+    it('should support no-attribute scripts', () => {
+      const viewer = document.createElement('script');
+      viewer.setAttribute(
+        'src',
+        'https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js'
+      );
+      win.document.head.appendChild(viewer);
+
+      extensions.reloadExtension('amp-viewer-integration');
+
+      expect(viewer.getAttribute('i-amphtml-loaded-new-version')).to.equal(
+        'amp-viewer-integration'
+      );
+      expect(extensions.preloadExtension).to.be.calledWith(
+        'amp-viewer-integration',
+        '0.1'
+      );
     });
   });
 
@@ -644,6 +781,20 @@ describes.sandboxed('Extensions', {}, () => {
         ).to.have.length(1);
         expect(extensions.extensions_['amp-mustache'].scriptPresent).to.be.true;
         expect(win.customElements.elements['amp-mustache']).to.be.undefined;
+      });
+
+      it('should insert extension script and not collide with prefixes', () => {
+        // First add an extension with the same suffix.
+        extensions.preloadExtension('amp-test-suffix');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test-suffix"]')
+        ).to.have.length(1);
+
+        // Then try to add the prefix-based extension.
+        extensions.preloadExtension('amp-test');
+        expect(
+          doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(1);
       });
 
       it('should insert extension version correctly', () => {
@@ -697,6 +848,7 @@ describes.sandboxed('Extensions', {}, () => {
       it('should not insert when script exists in head', () => {
         const ampTestScript = doc.createElement('script');
         ampTestScript.setAttribute('custom-element', 'amp-test');
+        ampTestScript.setAttribute('i-amphtml-loaded-new-version', 'amp-test');
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
@@ -709,6 +861,13 @@ describes.sandboxed('Extensions', {}, () => {
         extensions.preloadExtension('amp-test');
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
+        ).to.have.length(2);
+        expect(
+          doc.head.querySelectorAll(
+            '[custom-element="amp-test"]' +
+              ':not([i-amphtml-loaded-new-version])' +
+              '[i-amphtml-inserted]'
+          )
         ).to.have.length(1);
         expect(extensions.extensions_['amp-test'].scriptPresent).to.be.true;
         expect(win.customElements.elements['amp-test']).to.not.exist;
@@ -727,6 +886,7 @@ describes.sandboxed('Extensions', {}, () => {
         const script = doc.head.querySelector('[custom-element="amp-test"]');
         expect(script.getAttribute('data-script')).to.equal('amp-test');
         expect(script.getAttribute('async')).to.equal('');
+        expect(script.getAttribute('crossorigin')).to.equal('anonymous');
       });
 
       it('should insert special-case for amp-embed script', () => {
@@ -766,7 +926,7 @@ describes.sandboxed('Extensions', {}, () => {
       });
 
       it('should insert extension script correctly', () => {
-        const loadSpy = sandbox.spy(extensions, 'preloadExtension');
+        const loadSpy = env.sandbox.spy(extensions, 'preloadExtension');
         expect(
           doc.head.querySelectorAll('[custom-element="amp-test"]')
         ).to.have.length(0);
@@ -816,7 +976,7 @@ describes.sandboxed('Extensions', {}, () => {
       });
 
       it('should reuse the load if already started', () => {
-        const loadSpy = sandbox.spy(extensions, 'preloadExtension');
+        const loadSpy = env.sandbox.spy(extensions, 'preloadExtension');
         const extHolder = extensions.getExtensionHolder_('amp-test');
         extHolder.scriptPresent = true;
         const promise1 = extensions.installExtensionForDoc(ampdoc, 'amp-test');
@@ -838,8 +998,8 @@ describes.sandboxed('Extensions', {}, () => {
       });
 
       it('should install doc services', () => {
-        const factory1Spy = sandbox.spy();
-        const factory2Spy = sandbox.spy();
+        const factory1Spy = env.sandbox.spy();
+        const factory2Spy = env.sandbox.spy();
         const factory1 = function() {
           factory1Spy();
           return {a: 1};
@@ -889,9 +1049,9 @@ describes.sandboxed('Extensions', {}, () => {
 
       // TODO(#16916): Make this test work with synchronous throws.
       it.skip('should survive factory failures', () => {
-        const factory1Spy = sandbox.spy();
-        const factory2Spy = sandbox.spy();
-        const factory3Spy = sandbox.spy();
+        const factory1Spy = env.sandbox.spy();
+        const factory2Spy = env.sandbox.spy();
+        const factory3Spy = env.sandbox.spy();
         const factory1 = function() {
           factory1Spy();
           return {a: 1};

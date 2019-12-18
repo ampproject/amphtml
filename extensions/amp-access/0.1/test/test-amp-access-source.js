@@ -23,6 +23,7 @@ import {AccessSource} from '../amp-access-source';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
 import {installPerformanceService} from '../../../../src/service/performance-impl';
+import {installPlatformService} from '../../../../src/service/platform-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin(
@@ -45,6 +46,7 @@ describes.fakeWin(
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       element = document.createElement('script');
@@ -155,7 +157,7 @@ describes.fakeWin(
         onReauthorizeFn,
         element
       );
-      sandbox.stub(source.adapter_, 'getConfig');
+      env.sandbox.stub(source.adapter_, 'getConfig');
       source.getAdapterConfig();
       expect(source.adapter_.getConfig.called).to.be.true;
     });
@@ -232,7 +234,7 @@ describes.fakeWin(
         onReauthorizeFn,
         element
       );
-      const sourceMock = sandbox.mock(source);
+      const sourceMock = env.sandbox.mock(source);
       sourceMock
         .expects('login_')
         .withExactArgs('https://url', '')
@@ -262,10 +264,11 @@ describes.fakeWin(
       win = env.win;
       ampdoc = env.ampdoc;
       document = win.document;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       const config = {
@@ -356,7 +359,7 @@ describes.fakeWin(
     });
 
     it('should return adapter config', () => {
-      sandbox.stub(source.adapter_, 'getConfig');
+      env.sandbox.stub(source.adapter_, 'getConfig');
       source.getAdapterConfig();
       expect(source.adapter_.getConfig.called).to.be.true;
     });
@@ -381,10 +384,11 @@ describes.fakeWin(
     beforeEach(() => {
       win = env.win;
       ampdoc = env.ampdoc;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       const config = {
@@ -409,7 +413,7 @@ describes.fakeWin(
         authorize: () => {},
       };
       source.adapter_ = adapter;
-      adapterMock = sandbox.mock(adapter);
+      adapterMock = env.sandbox.mock(adapter);
     });
 
     afterEach(() => {

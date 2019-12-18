@@ -30,11 +30,7 @@ import {ResourceState} from './service/resource';
 import {Services} from './services';
 import {Signals} from './utils/signals';
 import {blockedByConsentError, isBlockedByConsent, reportError} from './error';
-import {
-  createLegacyLoaderElement,
-  createNewLoaderElement,
-  isNewLoaderExperimentEnabled,
-} from '../src/loader.js';
+import {createLoaderElement} from '../src/loader.js';
 import {dev, devAssert, rethrowAsync, user, userAssert} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer-polyfill';
 import {getMode} from './mode';
@@ -47,15 +43,6 @@ import {toWin} from './types';
 import {tryResolve} from '../src/utils/promise';
 
 const TAG = 'CustomElement';
-
-/**
- * This is the minimum width of the element needed to trigger `loading`
- * animation. This value is justified as about 1/3 of a smallish mobile
- * device viewport. Trying to put a loading indicator into a small element
- * is meaningless.
- * @private @const {number}
- */
-const MIN_WIDTH_FOR_LOADING = 100;
 
 /**
  * The elements positioned ahead of this threshold may have their loading
@@ -189,7 +176,7 @@ function createBaseCustomElementClass(win) {
 
       /**
        * Resources can only be looked up when an element is attached.
-       * @private {?./service/resources-impl.ResourcesDef}
+       * @private {?./service/resources-interface.ResourcesInterface}
        */
       this.resources_ = null;
 
@@ -247,6 +234,16 @@ function createBaseCustomElementClass(win) {
 
       /** @private {?Element|undefined} */
       this.overflowElement_ = undefined;
+
+      /**
+       * The time at which this element was scheduled for layout relative to
+       * the epoch. This value will be set to 0 until the this element has been
+       * scheduled.
+       * Note that this value may change over time if the element is enqueued,
+       * then dequeued and re-enqueued by the scheduler.
+       * @type {number|undefined}
+       */
+      this.layoutScheduleTime = undefined;
 
       // Closure compiler appears to mark HTMLElement as @struct which
       // disables bracket access. Force this with a type coercion.
@@ -338,7 +335,7 @@ function createBaseCustomElementClass(win) {
     /**
      * Returns Resources manager. Only available after attachment. It throws
      * exception before the element is attached.
-     * @return {!./service/resources-impl.ResourcesDef}
+     * @return {!./service/resources-interface.ResourcesInterface}
      * @final
      * @package
      */
@@ -347,7 +344,7 @@ function createBaseCustomElementClass(win) {
         this.resources_,
         'no resources yet, since element is not attached'
       );
-      return /** @typedef {!./service/resources-impl.ResourcesDef} */ this
+      return /** @typedef {!./service/resources-interface.ResourcesInterface} */ this
         .resources_;
     }
 
@@ -416,8 +413,8 @@ function createBaseCustomElementClass(win) {
       this.classList.remove('i-amphtml-unresolved');
       this.implementation_.createdCallback();
       this.assertLayout_();
+      // TODO(wg-runtime): Don't set BaseElement ivars externally.
       this.implementation_.layout_ = this.layout_;
-      this.implementation_.layoutWidth_ = this.layoutWidth_;
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
@@ -467,6 +464,15 @@ function createBaseCustomElementClass(win) {
     getLayoutPriority() {
       devAssert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
       return this.implementation_.getLayoutPriority();
+    }
+
+    /**
+     * TODO(wg-runtime, #25824): Make Resource.getLayoutBox() the source of truth.
+     * @return {number}
+     * @deprecated
+     */
+    getLayoutWidth() {
+      return this.layoutWidth_;
     }
 
     /**
@@ -567,7 +573,7 @@ function createBaseCustomElementClass(win) {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        startupChunk(self.document, () => {
+        startupChunk(this.getAmpDoc(), () => {
           const TAG = this.tagName;
           if (!this.ownerDocument) {
             dev().error(TAG, 'preconnect without ownerDocument');
@@ -591,16 +597,12 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Updates the layout box of the element.
-     * See {@link BaseElement.getLayoutWidth} for details.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
      * @param {boolean=} opt_measurementsChanged
      */
     updateLayoutBox(layoutBox, opt_measurementsChanged) {
       this.layoutWidth_ = layoutBox.width;
       this.layoutHeight_ = layoutBox.height;
-      if (this.isUpgraded()) {
-        this.implementation_.layoutWidth_ = this.layoutWidth_;
-      }
       if (this.isBuilt()) {
         try {
           this.implementation_.onLayoutMeasure();
@@ -618,7 +620,8 @@ function createBaseCustomElementClass(win) {
           this.toggleLoading(true);
         } else if (
           layoutBox.top < PREPARE_LOADING_THRESHOLD &&
-          layoutBox.top >= 0
+          layoutBox.top >= 0 &&
+          !this.loadingContainer_
         ) {
           // Few top elements will also be pre-initialized with a loading
           // element.
@@ -1014,6 +1017,15 @@ function createBaseCustomElementClass(win) {
      */
     prerenderAllowed() {
       return this.implementation_.prerenderAllowed();
+    }
+
+    /**
+     * Whether the element has render-blocking service.
+     * @return {boolean}
+     * @final
+     */
+    isBuildRenderBlocking() {
+      return this.implementation_.isBuildRenderBlocking();
     }
 
     /**
@@ -1653,7 +1665,6 @@ function createBaseCustomElementClass(win) {
         this.layoutWidth_ <= 0 || // Layout is not ready or invisible
         this.loadingDisabled_ ||
         !isLoadingAllowed(this) ||
-        isTooSmallForLoader(this) ||
         isInternalOrServiceNode(this) ||
         !isLayoutSizeDefined(this.layout_)
       ) {
@@ -1692,21 +1703,12 @@ function createBaseCustomElementClass(win) {
         const container = htmlFor(/** @type {!Document} */ (doc))`
             <div class="i-amphtml-loading-container i-amphtml-fill-content
               amp-hidden"></div>`;
-
-        let loadingElement;
-        if (isNewLoaderExperimentEnabled(this)) {
-          loadingElement = createNewLoaderElement(
-            devAssert(this.ampdoc_),
-            this,
-            this.layoutWidth_,
-            this.layoutHeight_
-          );
-        } else {
-          loadingElement = createLegacyLoaderElement(
-            /** @type {!Document} */ (doc),
-            this.elementName()
-          );
-        }
+        const loadingElement = createLoaderElement(
+          this.getAmpDoc(),
+          this,
+          this.layoutWidth_,
+          this.layoutHeight_
+        );
 
         container.appendChild(loadingElement);
 
@@ -1833,9 +1835,9 @@ function createBaseCustomElementClass(win) {
 
         if (overflown) {
           this.overflowElement_.onclick = () => {
-            const resources = this.getResources();
-            resources./*OK*/ changeSize(this, requestedHeight, requestedWidth);
-            resources.mutateElement(this, () => {
+            const mutator = Services.mutatorForDoc(this.getAmpDoc());
+            mutator./*OK*/ changeSize(this, requestedHeight, requestedWidth);
+            mutator./*OK*/ mutateElement(this, () => {
               this.overflowCallback(
                 /* overflown */ false,
                 requestedHeight,
@@ -1856,8 +1858,11 @@ function createBaseCustomElementClass(win) {
      * @param {?Element=} opt_element
      */
     mutateOrInvoke_(mutator, opt_element) {
-      if (this.resources_) {
-        this.getResources().mutateElement(opt_element || this, mutator);
+      if (this.ampdoc_) {
+        Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
+          opt_element || this,
+          mutator
+        );
       } else {
         mutator();
       }
@@ -1907,20 +1912,6 @@ function isInternalOrServiceNode(node) {
     return true;
   }
   return false;
-}
-
-/**
- * Whether element size is too small to show loader.
- * @param {!Element} element
- * @return {boolean}
- */
-function isTooSmallForLoader(element) {
-  // New loaders experiments has its own sizing heuristics
-  if (isNewLoaderExperimentEnabled(element)) {
-    return false;
-  }
-
-  return element.layoutWidth_ < MIN_WIDTH_FOR_LOADING;
 }
 
 /**

@@ -61,6 +61,7 @@
       <option>colanalytics</option>
       <option>comscore</option>
       <option>cxense</option>
+      <option>deepbi</option>
       <option>dynatrace</option>
       <option>epica</option>
       <option>euleriananalytics</option>
@@ -79,6 +80,7 @@
       <option>mediametrie</option>
       <option>mediarithmics</option>
       <option>mediator</option>
+      <option>memo</option>
       <option>mobify</option>
       <option>mparticle</option>
       <option>mpulse</option>
@@ -443,6 +445,24 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Cxense example -->
 
+<!-- Deep.BI tracking -->
+<amp-analytics type="deepbi" id="deepbi">
+<script type="application/json">
+{
+  "vars": {
+    "datasetKey": "aBcDeFgHiJkL",
+    "accessKey": "aBcDeFgHiJkLMn0123456789",
+    "gdpr":"true"
+  },
+  "extraUrlParams": {
+    "dimension1": "value1"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Deep.BI example -->
+
+
 <!-- dynatrace tracking -->
 <amp-analytics type="dynatrace" id="dynatrace">
 <script type="application/json">
@@ -620,7 +640,6 @@ For complete documentation and additional examples please see: https://marketing
 
 <!--
   INFOnline example
-
   Important: url needs to point to a copy of
   amp-analytics-infonline.html on a different subdomain
   than your AMP files.
@@ -854,6 +873,21 @@ For complete documentation and additional examples please see: https://marketing
 </script>
 </amp-analytics>
 <!-- End Mediator.media example -->
+
+<!-- Memo Tracking -->
+<amp-analytics type="memo" id="memo">
+<script type="application/json">
+  {
+    "vars": {
+      "pid": "000000000000000000000000",
+      "title": "Article Title",
+      "authors": ["Joe Author 1", "Jane Author 2"],
+      "published_at": "2019-01-01 00:00:00"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Memo Example -->
 
 <!-- Mobify tracking -->
 <amp-analytics type="mobify" id="mobify">
@@ -1535,13 +1569,39 @@ For complete documentation and additional examples please see: https://marketing
       "author":"john suran",
       "creator":"john suran",
       "domain":"clientDomain",
-      "pubdate":"2015-01-01 00:00:00"
+      "pubdate":"2015-01-01 00:00:00",
+      "customKeys": ["source","user_status"],
+      "customValues": ["digital team","0"]
     },
     "triggers": {
-      "event": {
-        "on": "click",
-        "selector": "#test1",
-        "request": "finalbeat"
+      "videoPlays": {
+        "on": "video-play",
+        "selector": "#myVideo",
+        "request": "video-play",
+        "vars" : {
+          "video_id" : "myVideo",
+          "video_name" : "test test test",
+          "video_thumbnail" : "poster_test"
+        }
+      },
+      "videoPauses": {
+        "on": "video-pause",
+        "selector": "#myVideo",
+        "request": "video-pause"
+      },
+      "videoSecondsPlayed": {
+        "on": "video-seconds-played",
+        "selector": "#myVideo",
+        "videoSpec": {
+          "exclude-autoplay": false,
+          "interval": 10
+        },
+        "request": "video-info"
+      },
+      "videoEnded": {
+        "on": "video-ended",
+        "selector": "#myVideo",
+        "request": "video-stop"
       }
     }
   }
