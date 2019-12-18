@@ -18,7 +18,7 @@ A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a 
 
 ## Release Channels
 
-The AMP Runtime and extensions are provided through a variety of different *release channels*. Each channel serves a purpose for developers and for the AMP HTML Project itself. See the [release cadence section](#release-cadence) for a more detailed breakdown.
+The AMP runtime and extensions are provided through a variety of different *release channels*. Each channel serves a purpose for developers and for the AMP HTML Project itself. See the [release cadence section](#release-cadence) for a more detailed breakdown of how and when code from the [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository makes it into release builds.
 
 ### Nightly
 
@@ -60,7 +60,7 @@ The **lts** release channel provides a previous **stable** build for four-month 
 
 As long as all runtime and extension scripts in a page must use the same release version, requesting the LTS scripts is considered valid AMP and gets the same cache benefits as the **stable** release channel.
 
-One trade-off to be aware of is that, because the **lts** release is updated every four weeks, the release binaries may be as much as six weeks behind the `HEAD` of `ampproject/amphtml`. For this reason, partners using the **lts** release channel should not use very newly introduced features. See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release).
+One trade-off to be aware of is that, because the **lts** release is updated every four weeks, the release binaries may be as much as six weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). For this reason, partners using the **lts** release channel should not use very newly introduced features. See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release).
 
 ## Determining if your change is in a release
 
