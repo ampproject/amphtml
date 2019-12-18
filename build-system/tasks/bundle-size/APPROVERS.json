@@ -7,6 +7,10 @@
     "approvers": ["ampproject/wg-ads"],
     "threshold": 0.1
   },
+  "dist/v0/amp-analytics-0.1.js": {
+    "approvers": ["ampproject/wg-analytics"],
+    "threshold": 0.1
+  },
   "dist/v0/amp-story-0.1.js": {
     "approvers": ["ampproject/wg-stories"],
     "threshold": 0.5
