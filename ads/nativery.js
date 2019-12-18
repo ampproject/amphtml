@@ -22,21 +22,16 @@ import {validateData, writeScript} from '../3p/3p';
  */
 export function nativery(global, data) {
   validateData(data, ['wid']);
-  const params = Object.assign({}, data);
+  const params = {...data};
 
   // push the two object into the '_nativery' global
-  global._nativery =
-    global._nativery ||
-    Object.assign(
-      {},
-      {
-        wid: data.wid,
-        referrer: data.referrer || global.context.referrer,
-        url: data.url || global.context.canonicalUrl,
-        viewId: global.context.pageViewId,
-        params,
-      }
-    );
+  global._nativery = global._nativery || {
+    wid: data.wid,
+    referrer: data.referrer || global.context.referrer,
+    url: data.url || global.context.canonicalUrl,
+    viewId: global.context.pageViewId,
+    params,
+  };
 
   // must add listener for resize
   global.addEventListener('amp-widgetCreated', function(e) {

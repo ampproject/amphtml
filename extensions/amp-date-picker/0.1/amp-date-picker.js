@@ -1936,11 +1936,10 @@ export class AmpDatePicker extends AMP.BaseElement {
    * @return {!Promise}
    */
   render(opt_additionalProps) {
-    const props = /** @type {!JsonObject} */ (Object.assign(
-      {},
-      this.props_,
-      opt_additionalProps
-    ));
+    const props = /** @type {!JsonObject} */ ({
+      ...this.props_,
+      ...opt_additionalProps,
+    });
     const shouldBeOpen = props['isOpen'] || this.mode_ == DatePickerMode.STATIC;
     const Picker = shouldBeOpen ? this.pickerClass_ : null;
 
@@ -1952,34 +1951,30 @@ export class AmpDatePicker extends AMP.BaseElement {
         // the picker expands 1 behind where it should for the number of weeks
         // in the month.
         this.reactRender_(
-          this.react_.createElement(
-            Picker,
-            Object.assign(
-              {},
-              dict({
-                'allowBlockedEndDate': this.allowBlockedEndDate_,
-                'min': props['min'],
-                'max': props['max'],
-                'date': props['date'],
-                'startDate': props['startDate'],
-                'endDate': props['endDate'],
-                'isRTL': this.isRTL_,
-                'onDateChange': this.onDateChange,
-                'onDatesChange': this.onDatesChange,
-                'onFocusChange': this.onFocusChange,
-                'onMount': this.onMount,
-                'renderDay': this.renderDay,
-                'blocked': this.blocked_,
-                'highlighted': this.highlighted_,
-                'firstDayOfWeek': this.firstDayOfWeek_,
-                'daySize': this.daySize_,
-                'weekDayFormat': this.weekDayFormat_,
-                'isFocused': props['isFocused'], // should automatically focus
-                'focused': props['focused'],
-              }),
-              props
-            )
-          ),
+          this.react_.createElement(Picker, {
+            ...dict({
+              'allowBlockedEndDate': this.allowBlockedEndDate_,
+              'min': props['min'],
+              'max': props['max'],
+              'date': props['date'],
+              'startDate': props['startDate'],
+              'endDate': props['endDate'],
+              'isRTL': this.isRTL_,
+              'onDateChange': this.onDateChange,
+              'onDatesChange': this.onDatesChange,
+              'onFocusChange': this.onFocusChange,
+              'onMount': this.onMount,
+              'renderDay': this.renderDay,
+              'blocked': this.blocked_,
+              'highlighted': this.highlighted_,
+              'firstDayOfWeek': this.firstDayOfWeek_,
+              'daySize': this.daySize_,
+              'weekDayFormat': this.weekDayFormat_,
+              'isFocused': props['isFocused'], // should automatically focus
+              'focused': props['focused'],
+            }),
+            ...props,
+          }),
           this.container_
         );
       } else {
