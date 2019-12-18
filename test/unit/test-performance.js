@@ -841,6 +841,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
         visibilityState: 'visible',
       },
       location: env.win.location,
+      navigator: env.win.navigator,
       performance: {
         getEntriesByType: env.sandbox.stub(),
       },
