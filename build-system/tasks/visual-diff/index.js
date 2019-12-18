@@ -161,7 +161,7 @@ async function launchBrowser() {
   const browserOptions = {
     args: ['--no-sandbox', '--disable-extensions', '--disable-gpu'],
     dumpio: argv.chrome_debug,
-    headless: true,
+    headless: !argv.headless_disabled,
   };
 
   try {
@@ -820,6 +820,7 @@ visualDiff.flags = {
   'percy_branch': '  Override the PERCY_BRANCH environment variable',
   'percy_disabled':
     '  Disables Percy integration (for testing local changes only)',
+  'headless_disabled': '  Disables headless mode on the browser for debugging',
   'nobuild': '  Skip build',
   'noyarn': '  Skip calling yarn to install dependencies',
 };

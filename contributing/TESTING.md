@@ -274,7 +274,9 @@ You can also run the visual tests locally during development. You must first cre
 export PERCY_TOKEN="<unique-percy-token>"
 ```
 
-Once the environment variable is set up, you can run the AMP visual diff tests.
+alternatively, you can override the environment variable using `--percy_token`.
+
+Once the percy token is set up, you can run the AMP visual diff tests.
 
 First, build the AMP runtime:
 
@@ -310,9 +312,21 @@ The debug flags `--chrome_debug` and `--webserver_debug` can be used independent
  gulp visual-diff --debug
 ```
 
+To disable headless mode and see what the browser is executing locally, use `--headless_disabled` :
+
+```sh
+ gulp visual-diff --headless_disabled
+```
+
 To execute only a subset of the tests (i.e., when creating or debugging an existing test) use the `--grep` regular expression flag. e.g., `gulp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
 
 After each run, a new set of results will be available at `https://percy.io/<org>/<project>`.
+
+For local debugging, you might find it useful to use the following command:
+
+```sh
+gulp visual-diff --grep="amp-..." --nobuild --debug --headless_disabled --percy_disabled --percy_token=YOUR_TOKEN_HERE --percy_branch=local
+```
 
 ## Testing on devices
 
