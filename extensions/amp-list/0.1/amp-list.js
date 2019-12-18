@@ -169,6 +169,9 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
     this.ssrTemplateHelper_ = null;
+
+    /** @private {Worker} */
+    this.dataTransformer_ = null;
   }
 
   /** @override */
@@ -191,6 +194,16 @@ export class AmpList extends AMP.BaseElement {
     // Store this in buildCallback() because `this.element` sometimes
     // is missing attributes in the constructor.
     this.initialSrc_ = this.element.getAttribute('src');
+
+    // Remember, this is a proof of concept. No validation or error
+    // handling is performed.
+    if (this.element.hasAttribute('transform')) {
+      try {
+        this.dataTransformer_ = new Worker(
+          this.element.getAttribute('transform')
+        );
+      } catch (ex) {}
+    }
 
     if (this.element.hasAttribute('diffable')) {
       // Set container to the initial content, if it exists. This allows
@@ -552,17 +565,30 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
-        const items = this.computeListItems_(data);
-        if (this.loadMoreEnabled_) {
-          this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
-        }
-        return this.scheduleRender_(
-          items,
-          /*opt_append*/ false,
-          data
-        ).then(() => this.maybeSetLoadMore_());
-      });
+      fetch = this.prepareAndSendFetch_(opt_refresh)
+        .then(data => {
+          // Remember, this is a proof of concept. No validation or error
+          // handling is performed.
+          if (this.dataTransformer_) {
+            this.dataTransformer_.postMessage(data);
+            return new Promise(resolve => {
+              this.dataTransformer_.onmessage = e => resolve(e.data);
+            });
+          } else {
+            return Promise.resolve(data);
+          }
+        })
+        .then(data => {
+          const items = this.computeListItems_(data);
+          if (this.loadMoreEnabled_) {
+            this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
+          }
+          return this.scheduleRender_(
+            items,
+            /*opt_append*/ false,
+            data
+          ).then(() => this.maybeSetLoadMore_());
+        });
     }
 
     return fetch.catch(error => {
