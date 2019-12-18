@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ const SNOWPLOW_V2_CONFIG = jsonLiteral({
   },
   'cookies': {
     'enabled': true,
-    'cookieMaxAge': 1800,
     '_sp_duid': {
       'value':
         '$IF($IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)), $IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)), $SUBSTR(QUERY_PARAM(_sp),0,36))',
