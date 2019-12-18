@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Adds several dynamic CSS class names onto the HTML element.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -43,7 +44,7 @@ limitations under the License.
 The AMP Dynamic CSS Classes extension adds the following CSS classes
 onto the `<body>` element:
 
-**amp-referrer-***
+**amp-referrer-\***
 
 One or more referrer classes will be set, one for each level of
 subdomain specificity. For example, `www.google.com` will add three

@@ -15,7 +15,6 @@
  */
 
 import '../amp-instagram';
-import {Services} from '../../../../src/services';
 
 describes.realWin(
   'amp-instagram',
@@ -51,7 +50,7 @@ describes.realWin(
         ins.setAttribute('data-captioned', '');
       }
       const visibilityPromise = env.sandbox.stub(
-        Services.viewerForDoc(doc),
+        env.ampdoc,
         'whenFirstVisible'
       );
       visibilityPromise.returns(
@@ -197,7 +196,7 @@ describes.realWin(
       const ins = await getIns('fBwFP', true);
       const impl = ins.implementation_;
       const iframe = ins.querySelector('iframe');
-      const changeHeight = sandbox.spy(impl, 'changeHeight');
+      const changeHeight = env.sandbox.spy(impl, 'changeHeight');
       const newHeight = 977;
       expect(iframe).to.not.be.null;
       sendFakeMessage(ins, iframe, 'MEASURE', {

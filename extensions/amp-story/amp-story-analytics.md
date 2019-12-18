@@ -22,7 +22,7 @@ This document details triggers associated with AMP Stories. If you're looking fo
 
 `amp-story` issues events for changes of state. These events can be reported through the analytics configuration by using triggers.
 
-See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
+See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on _amp-analytics_ configuration.
 
 ### Visible trigger (`"on": "story-page-visible"`)
 
@@ -64,6 +64,10 @@ The `story-bookend-enter` trigger is fired when the bookend is shown to the user
 
 The `story-bookend-exit` trigger is fired when the bookend is dismissed by the user.
 
+### Bookend click trigger (`"on": "story-bookend-click"`)
+
+The `story-bookend-click` trigger is fired when a user clicks a link inside the bookend. This trigger can be tracked with the accompanying variables: [`storyBookendComponentPosition`](#storyBookendComponentPosition), [`storyBookendComponentType`](#storyBookendComponentType), and [`storyBookendTargetHref`](#storyBookendTargetHref) listed below.
+
 ### Mute trigger (`"on": "story-audio-muted"`)
 
 The `story-audio-muted` trigger is fired when the user initiates an interaction to mute the audio for the current story.
@@ -98,11 +102,23 @@ The total number of pages available to the user in the story.
 
 ### `storyProgress`
 
-The user's progress through the story, as a decimal in the range [0...1].  This represents how many pages the user has passed; for example, if the user is currently looking at the second page of ten, the progress will be reported as 0.1 (as the user has not yet finished the second page).
+The user's progress through the story, as a decimal in the range [0...1]. This represents how many pages the user has passed; for example, if the user is currently looking at the second page of ten, the progress will be reported as 0.1 (as the user has not yet finished the second page).
 
 ### `storyIsMuted`
 
 A boolean representing whether the story was muted when the accompanying trigger was fired.
+
+### `storyBookendComponentPosition`
+
+A number representing the index of the bookend component that the user clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
+
+### `storyBookendComponentType`
+
+The type of component in the bookend that was clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
+
+### `storyBookendTargetHref`
+
+The url of the bookend component that was clicked when the accompanying trigger, [`story-bookend-click`](#bookend-click-trigger-"on":-"story-bookend-click") was fired.
 
 ### Additional Vars
 

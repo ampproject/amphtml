@@ -16,6 +16,7 @@
 
 import '../amp-carousel';
 import {ActionTrust} from '../../../../src/action-constants';
+import {CarouselEvents} from '../../../amp-base-carousel/0.1/carousel-events';
 import {getDetail, listenOncePromise} from '../../../../src/event-helper';
 
 /**
@@ -30,7 +31,7 @@ import {getDetail, listenOncePromise} from '../../../../src/event-helper';
  * @return {!Promise<undefined>}
  */
 async function afterIndexUpdate(el, index) {
-  const event = await listenOncePromise(el, 'indexchange');
+  const event = await listenOncePromise(el, CarouselEvents.INDEX_CHANGE);
   await el.implementation_.mutateElement(() => {});
   await el.implementation_.mutateElement(() => {});
 
@@ -200,11 +201,32 @@ describes.realWin(
       });
     });
 
+    describe('slideChange event', () => {
+      it('should not dispatch on initial render', async () => {
+        const eventSpy = env.sandbox.spy();
+        container.addEventListener('slideChange', eventSpy);
+        await getCarousel({loop: false});
+
+        expect(eventSpy).to.have.not.been.called;
+      });
+
+      it('should dispatch when changing slides', async () => {
+        const eventSpy = env.sandbox.spy();
+        container.addEventListener('slideChange', eventSpy);
+        const carousel = await getCarousel({loop: false});
+
+        carousel.implementation_.interactionNext();
+        await afterIndexUpdate(carousel);
+
+        expect(eventSpy).to.have.been.calledOnce;
+      });
+    });
+
     describe('goToSlide action', () => {
       it('should propagate high trust', async () => {
         const carousel = await getCarousel({loop: false});
         const impl = carousel.implementation_;
-        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         impl.executeAction({
           method: 'goToSlide',
@@ -217,7 +239,7 @@ describes.realWin(
         expect(triggerSpy).to.have.been.calledWith(
           carousel,
           'slideChange',
-          /* CustomEvent */ sinon.match.has('detail', {index: 1}),
+          /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
           ActionTrust.HIGH
         );
       });
@@ -225,7 +247,7 @@ describes.realWin(
       it('should propagate low trust', async () => {
         const carousel = await getCarousel({loop: false});
         const impl = carousel.implementation_;
-        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         impl.executeAction({
           method: 'goToSlide',
@@ -238,7 +260,7 @@ describes.realWin(
         expect(triggerSpy).to.have.been.calledWith(
           carousel,
           'slideChange',
-          /* CustomEvent */ sinon.match.has('detail', {index: 1}),
+          /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
           ActionTrust.LOW
         );
       });

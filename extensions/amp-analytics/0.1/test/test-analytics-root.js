@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as IniLoad from '../../../../src/ini-load';
 import {AmpDocShadow} from '../../../../src/service/ampdoc-impl';
 import {AmpdocAnalyticsRoot, EmbedAnalyticsRoot} from '../analytics-root';
 import {AnalyticsEventType, CustomEventTracker} from '../events';
@@ -28,7 +29,7 @@ import {VisibilityManagerForMApp} from '../visibility-manager-for-mapp';
 describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   let win;
   let ampdoc;
-  let resources, viewport;
+  let viewport;
   let root;
   let body, target, child, other;
   let mockVisibilityInterface;
@@ -36,7 +37,6 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    resources = win.__AMP_SERVICES.resources.obj;
     viewport = win.__AMP_SERVICES.viewport.obj;
     root = new AmpdocAnalyticsRoot(ampdoc);
     body = win.document.body;
@@ -88,7 +88,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
     );
 
     // Dispose.
-    const stub = sandbox.stub(tracker, 'dispose');
+    const stub = env.sandbox.stub(tracker, 'dispose');
     root.dispose();
     expect(stub).to.be.calledOnce;
     expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.be.null;
@@ -104,39 +104,40 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should provide the correct rect for ini-load for main doc', () => {
-    const stub = sandbox
-      .stub(resources, 'getResourcesInRect')
-      .callsFake(() => Promise.resolve([]));
+    const spy = env.sandbox.spy(IniLoad, 'whenContentIniLoad');
     root.whenIniLoaded();
-    expect(stub).to.be.calledOnce;
-    expect(stub.args[0][0]).to.equal(win);
-    expect(stub.args[0][1]).to.contain({
-      top: 0,
-      left: 0,
-      width: win.innerWidth,
-      height: win.innerHeight,
-    });
+    expect(spy).to.be.calledWith(
+      ampdoc,
+      win,
+      env.sandbox.match({
+        top: 0,
+        left: 0,
+        width: win.innerWidth,
+        height: win.innerHeight,
+      })
+    );
   });
 
   it('should provide the correct rect for ini-load for inabox', () => {
     win.__AMP_MODE = {runtime: 'inabox'};
-    sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
+    env.sandbox.stub(viewport, 'getLayoutRect').callsFake(element => {
       if (element == win.document.documentElement) {
         return {left: 10, top: 11, width: 100, height: 200};
       }
     });
-    const stub = sandbox
-      .stub(resources, 'getResourcesInRect')
-      .callsFake(() => Promise.resolve([]));
+    const spy = env.sandbox.spy(IniLoad, 'whenContentIniLoad');
+
     root.whenIniLoaded();
-    expect(stub).to.be.calledOnce;
-    expect(stub.args[0][0]).to.equal(win);
-    expect(stub.args[0][1]).to.contain({
-      left: 10,
-      top: 11,
-      width: 100,
-      height: 200,
-    });
+    expect(spy).to.be.calledWith(
+      ampdoc,
+      win,
+      env.sandbox.match({
+        left: 10,
+        top: 11,
+        width: 100,
+        height: 200,
+      })
+    );
   });
 
   it('should create visibility root', () => {
@@ -149,8 +150,8 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should create correct visiblityManager', () => {
-    sandbox.stub(HostServices, 'isAvailable').callsFake(() => true);
-    sandbox.stub(HostServices, 'visibilityForDoc').callsFake(() => {
+    env.sandbox.stub(HostServices, 'isAvailable').callsFake(() => true);
+    env.sandbox.stub(HostServices, 'visibilityForDoc').callsFake(() => {
       return Promise.resolve(mockVisibilityInterface);
     });
     return root.isUsingHostAPI().then(() => {
@@ -160,8 +161,8 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
   });
 
   it('should fallback to correct visibilityManager', () => {
-    sandbox.stub(HostServices, 'isAvailable').callsFake(() => true);
-    sandbox.stub(HostServices, 'visibilityForDoc').callsFake(() => {
+    env.sandbox.stub(HostServices, 'isAvailable').callsFake(() => true);
+    env.sandbox.stub(HostServices, 'visibilityForDoc').callsFake(() => {
       return Promise.reject({
         fallback: true,
       });
@@ -297,7 +298,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
       // Root on `target` element.
       const ampdoc1 = new AmpDocShadow(win, 'https://amce.org/', target);
-      sandbox.stub(ampdoc1, 'whenReady').callsFake(() => {
+      env.sandbox.stub(ampdoc1, 'whenReady').callsFake(() => {
         return Promise.resolve();
       });
       const root1 = new AmpdocAnalyticsRoot(ampdoc1);
@@ -310,7 +311,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
       // // Root on `child` element.
       const ampdoc2 = new AmpDocShadow(win, 'https://amce.org/', child);
-      sandbox.stub(ampdoc2, 'whenReady').callsFake(() => {
+      env.sandbox.stub(ampdoc2, 'whenReady').callsFake(() => {
         return Promise.resolve();
       });
       const root2 = new AmpdocAnalyticsRoot(ampdoc2);
@@ -323,7 +324,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
       // // Root on `other` element.
       const ampdoc3 = new AmpDocShadow(win, 'https://amce.org/', other);
-      sandbox.stub(ampdoc3, 'whenReady').callsFake(() => {
+      env.sandbox.stub(ampdoc3, 'whenReady').callsFake(() => {
         return Promise.resolve();
       });
       const root3 = new AmpdocAnalyticsRoot(ampdoc3);
@@ -355,7 +356,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
   describe('createSelectiveListener', () => {
     function matches(context, target, selector, selectionMethod) {
-      const listener = sandbox.spy();
+      const listener = env.sandbox.spy();
       const selective = root.createSelectiveListener(
         listener,
         context,
@@ -449,7 +450,7 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
 
     it('should NOT match nodes not in root', () => {
       expect(matches(body, target, '*')).to.equal(target);
-      sandbox.stub(root, 'contains').callsFake(() => false);
+      env.sandbox.stub(root, 'contains').callsFake(() => false);
       expect(matches(body, target, '*')).to.be.null;
     });
   });
@@ -520,7 +521,7 @@ describes.realWin(
       );
 
       // Dispose.
-      const stub = sandbox.stub(tracker, 'dispose');
+      const stub = env.sandbox.stub(tracker, 'dispose');
       root.dispose();
       expect(stub).to.be.calledOnce;
       expect(root.getTrackerOptional(AnalyticsEventType.CUSTOM)).to.be.null;
@@ -553,7 +554,7 @@ describes.realWin(
     });
 
     it('should resolve ini-load signal', () => {
-      const stub = sandbox
+      const stub = env.sandbox
         .stub(embed, 'whenIniLoaded')
         .callsFake(() => Promise.resolve());
       return root.whenIniLoaded().then(() => {
@@ -642,7 +643,7 @@ describes.realWin(
 
     describe('createSelectiveListener', () => {
       function matches(context, target, selector, selectionMethod) {
-        const listener = sandbox.spy();
+        const listener = env.sandbox.spy();
         const selective = root.createSelectiveListener(
           listener,
           context,
@@ -693,7 +694,7 @@ describes.realWin(
 
       it('should NOT match nodes not in root', () => {
         expect(matches(body, target, '*')).to.equal(target);
-        sandbox.stub(root, 'contains').callsFake(() => false);
+        env.sandbox.stub(root, 'contains').callsFake(() => false);
         expect(matches(body, target, '*')).to.be.null;
       });
     });

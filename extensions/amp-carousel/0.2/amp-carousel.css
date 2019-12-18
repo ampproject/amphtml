@@ -123,7 +123,7 @@ amp-carousel:not([type="slides"]) .i-amphtml-carousel-content {
   overflow: hidden !important;
 }
 
-.i-amphtml-carousel-slide > .i-amphtml-replaced-content {
+.amp-carousel-slide > .i-amphtml-replaced-content {
   /*
    * Apply contain object-fit to all replaced content to avoid distorted ratios.
    */

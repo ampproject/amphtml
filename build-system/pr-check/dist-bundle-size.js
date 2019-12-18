@@ -34,7 +34,7 @@ const {
   uploadDistOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../common/travis');
 const {runYarnChecks} = require('./yarn-checks');
 const {signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 

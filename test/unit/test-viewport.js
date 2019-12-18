@@ -32,7 +32,6 @@ import {
 import {ViewportBindingNatural_} from '../../src/service/viewport/viewport-binding-natural';
 import {dev} from '../../src/log';
 import {getMode} from '../../src/mode';
-import {installGlobalDocumentStateService} from '../../src/service/document-state';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
 import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
@@ -40,12 +39,10 @@ import {installVsyncService} from '../../src/service/vsync-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {setParentWindow} from '../../src/service';
-import {toggleExperiment} from '../../src/experiments';
 
 const NOOP = () => {};
 
 describes.fakeWin('Viewport', {}, env => {
-  let sandbox;
   let clock;
   let viewport;
   let binding;
@@ -60,10 +57,10 @@ describes.fakeWin('Viewport', {}, env => {
   let updatedPaddingTop;
   let viewportSize;
   let vsyncTasks;
+  let onVisibilityHandlers;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
 
     windowApi = env.win;
     windowApi.requestAnimationFrame = fn => window.setTimeout(fn, 16);
@@ -90,19 +87,32 @@ describes.fakeWin('Viewport', {}, env => {
           viewerDisableScrollHandler = handler;
         }
       },
-      sendMessage: sandbox.spy(),
-      getVisibilityState: () => visibilityState,
-      isVisible: () => visibilityState == 'visible',
-      onVisibilityChanged: () => {},
+      sendMessage: env.sandbox.spy(),
     };
-    viewerMock = sandbox.mock(viewer);
+    viewerMock = env.sandbox.mock(viewer);
     installTimerService(windowApi);
     installVsyncService(windowApi);
     installPlatformService(windowApi);
     installDocService(windowApi, /* isSingleDoc */ true);
-    installGlobalDocumentStateService(windowApi);
+
     ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
     installViewerServiceForDoc(ampdoc);
+    env.sandbox
+      .stub(ampdoc, 'getVisibilityState')
+      .callsFake(() => visibilityState);
+    env.sandbox
+      .stub(ampdoc, 'isVisible')
+      .callsFake(() => visibilityState == 'visible');
+    onVisibilityHandlers = [];
+    env.sandbox.stub(ampdoc, 'onVisibilityChanged').callsFake(handler => {
+      onVisibilityHandlers.push(handler);
+      return function() {
+        const index = onVisibilityHandlers.indexOf(handler);
+        if (index != -1) {
+          onVisibilityHandlers.splice(index, 1);
+        }
+      };
+    });
 
     binding = new ViewportBindingDef();
     viewportSize = {width: 111, height: 222};
@@ -111,8 +121,8 @@ describes.fakeWin('Viewport', {}, env => {
     };
     binding.getScrollTop = () => 17;
     binding.getScrollLeft = () => 0;
-    binding.connect = sandbox.spy();
-    binding.disconnect = sandbox.spy();
+    binding.connect = env.sandbox.spy();
+    binding.disconnect = env.sandbox.spy();
     updatedPaddingTop = undefined;
     binding.updatePaddingTop = paddingTop => (updatedPaddingTop = paddingTop);
     viewport = new ViewportImpl(ampdoc, binding, viewer);
@@ -129,8 +139,8 @@ describes.fakeWin('Viewport', {}, env => {
     // Use window since Animation by default will use window.
     const vsync = Services.vsyncFor(window);
     vsyncTasks = [];
-    sandbox.stub(vsync, 'canAnimate').returns(true);
-    sandbox
+    env.sandbox.stub(vsync, 'canAnimate').returns(true);
+    env.sandbox
       .stub(vsync, 'createAnimTask')
       .callsFake((unusedContextNode, task) => {
         return () => {
@@ -143,6 +153,11 @@ describes.fakeWin('Viewport', {}, env => {
     expect(vsyncTasks.length).to.equal(0);
     viewerMock.verify();
   });
+
+  function changeVisibilityState(value) {
+    visibilityState = value;
+    onVisibilityHandlers.forEach(handler => handler());
+  }
 
   function runVsync() {
     const tasks = vsyncTasks.slice(0);
@@ -157,7 +172,7 @@ describes.fakeWin('Viewport', {}, env => {
   }
 
   function stubVsyncMeasure() {
-    sandbox
+    env.sandbox
       .stub(viewport.vsync_, 'measurePromise')
       .callsFake(cb => Promise.resolve(cb()));
   }
@@ -176,7 +191,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should not set singledoc class', () => {
-      sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
+      env.sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
       new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.not.have.class('i-amphtml-singledoc');
     });
@@ -188,7 +203,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should set embedded class', () => {
-      sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+      env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
       new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.have.class('i-amphtml-embedded');
       expect(root).to.not.have.class('i-amphtml-standalone');
@@ -211,7 +226,7 @@ describes.fakeWin('Viewport', {}, env => {
 
       beforeEach(() => {
         webviewParam = '1';
-        sandbox.stub(viewer, 'getParam').callsFake(param => {
+        env.sandbox.stub(viewer, 'getParam').callsFake(param => {
           if (param == 'webview') {
             return webviewParam;
           }
@@ -219,7 +234,7 @@ describes.fakeWin('Viewport', {}, env => {
         });
         const platform = Services.platformFor(ampdoc.win);
         isIos = true;
-        sandbox.stub(platform, 'isIos').callsFake(() => isIos);
+        env.sandbox.stub(platform, 'isIos').callsFake(() => isIos);
       });
 
       it('should set ios-webview class', () => {
@@ -247,9 +262,9 @@ describes.fakeWin('Viewport', {}, env => {
 
     beforeEach(() => {
       viewport.size_ = null;
-      errorStub = sandbox.stub(dev(), 'error');
+      errorStub = env.sandbox.stub(dev(), 'error');
       randomValue = 0.009;
-      sandbox.stub(Math, 'random').callsFake(() => randomValue);
+      env.sandbox.stub(Math, 'random').callsFake(() => randomValue);
     });
 
     it('should be ok with non-zero dimensions', () => {
@@ -353,11 +368,10 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should connect binding later when visibility changes', () => {
-    binding.connect = sandbox.spy();
-    binding.disconnect = sandbox.spy();
-    viewer.isVisible = () => false;
-    let onVisibilityHandler;
-    viewer.onVisibilityChanged = handler => (onVisibilityHandler = handler);
+    onVisibilityHandlers.length = 0;
+    changeVisibilityState('hidden');
+    binding.connect = env.sandbox.spy();
+    binding.disconnect = env.sandbox.spy();
     viewport = new ViewportImpl(ampdoc, binding, viewer);
 
     // Hasn't been called at first.
@@ -366,29 +380,26 @@ describes.fakeWin('Viewport', {}, env => {
     expect(viewport.size_).to.be.null;
 
     // When becomes visible - it gets called.
-    viewer.isVisible = () => true;
-    onVisibilityHandler();
+    changeVisibilityState('visible');
     expect(binding.connect).to.be.calledOnce;
     expect(binding.disconnect).to.not.be.called;
 
     // Repeat visibility calls do not affect anything.
-    onVisibilityHandler();
+    changeVisibilityState('visible');
     expect(binding.connect).to.be.calledOnce;
     expect(binding.disconnect).to.not.be.called;
 
     // When becomes invisible - it gets disconnected.
-    viewer.isVisible = () => false;
-    onVisibilityHandler();
+    changeVisibilityState('hidden');
     expect(binding.connect).to.be.calledOnce;
     expect(binding.disconnect).to.be.calledOnce;
   });
 
   it('should resize only after size has been initialed', () => {
-    binding.connect = sandbox.spy();
-    binding.disconnect = sandbox.spy();
-    viewer.isVisible = () => true;
-    let onVisibilityHandler;
-    viewer.onVisibilityChanged = handler => (onVisibilityHandler = handler);
+    onVisibilityHandlers.length = 0;
+    changeVisibilityState('visible');
+    binding.connect = env.sandbox.spy();
+    binding.disconnect = env.sandbox.spy();
     viewport = new ViewportImpl(ampdoc, binding, viewer);
 
     // Size has not be initialized yet.
@@ -397,16 +408,14 @@ describes.fakeWin('Viewport', {}, env => {
     expect(viewport.size_).to.be.null;
 
     // Disconnect: ignore resizing.
-    viewer.isVisible = () => false;
-    onVisibilityHandler();
+    changeVisibilityState('hidden');
     expect(binding.connect).to.be.calledOnce;
     expect(binding.disconnect).to.be.calledOnce;
     expect(viewport.size_).to.be.null;
 
     // Size has been initialized.
     viewport.size_ = {width: 0, height: 0};
-    viewer.isVisible = () => true;
-    onVisibilityHandler();
+    changeVisibilityState('visible');
     expect(binding.connect).to.be.calledTwice;
     expect(binding.disconnect).to.be.calledOnce;
     expect(viewport.size_).to.deep.equal(viewportSize);
@@ -530,14 +539,14 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should not do anything if padding is not changed', () => {
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     viewerViewportHandler({paddingTop: 19});
     bindingMock.verify();
   });
 
   it('should update non-transient padding', () => {
-    const bindingMock = sandbox.mock(binding);
-    const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
+    const bindingMock = env.sandbox.mock(binding);
+    const fixedLayerMock = env.sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock
       .expects('updatePaddingTop')
       .withExactArgs(/* paddingTop */ 0, /* transient */ undefined)
@@ -548,8 +557,8 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should update padding when viewer wants to hide header', () => {
-    const bindingMock = sandbox.mock(binding);
-    const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
+    const bindingMock = env.sandbox.mock(binding);
+    const fixedLayerMock = env.sandbox.mock(viewport.fixedLayer_);
     fixedLayerMock
       .expects('updatePaddingTop')
       .withExactArgs(/* paddingTop */ 0, /* transient */ true)
@@ -573,7 +582,7 @@ describes.fakeWin('Viewport', {}, env => {
       'hide header',
     () => {
       viewport.fixedLayer_ = {updatePaddingTop: () => {}};
-      const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
+      const fixedLayerMock = env.sandbox.mock(viewport.fixedLayer_);
       fixedLayerMock
         .expects('updatePaddingTop')
         .withArgs(0)
@@ -592,10 +601,10 @@ describes.fakeWin('Viewport', {}, env => {
     const requestingEl = document.createElement('div');
 
     viewport.vsync_ = {mutate: callback => callback()};
-    sandbox.stub(viewport, 'enterOverlayMode');
-    sandbox.stub(viewport, 'maybeEnterFieLightboxMode').callsFake(NOOP);
-    sandbox.stub(viewport.fixedLayer_, 'enterLightbox');
-    const bindingMock = sandbox.mock(binding);
+    env.sandbox.stub(viewport, 'enterOverlayMode');
+    env.sandbox.stub(viewport, 'maybeEnterFieLightboxMode').callsFake(NOOP);
+    env.sandbox.stub(viewport.fixedLayer_, 'enterLightbox');
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('updateLightboxMode')
       .withArgs(true)
@@ -620,10 +629,10 @@ describes.fakeWin('Viewport', {}, env => {
     const requestingEl = document.createElement('div');
 
     viewport.vsync_ = {mutate: callback => callback()};
-    sandbox.stub(viewport, 'leaveOverlayMode');
-    sandbox.stub(viewport, 'maybeLeaveFieLightboxMode').callsFake(NOOP);
-    sandbox.stub(viewport.fixedLayer_, 'leaveLightbox');
-    const bindingMock = sandbox.mock(binding);
+    env.sandbox.stub(viewport, 'leaveOverlayMode');
+    env.sandbox.stub(viewport, 'maybeLeaveFieLightboxMode').callsFake(NOOP);
+    env.sandbox.stub(viewport.fixedLayer_, 'leaveLightbox');
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('updateLightboxMode')
       .withArgs(false)
@@ -647,12 +656,12 @@ describes.fakeWin('Viewport', {}, env => {
   it('should enter full overlay on FIE when entering lightbox mode', () => {
     const requestingElement = {};
     const fieMock = {
-      enterFullOverlayMode: sandbox.spy(),
+      enterFullOverlayMode: env.sandbox.spy(),
     };
 
-    sandbox.stub(viewport, 'isLightboxExperimentOn').callsFake(() => true);
+    env.sandbox.stub(viewport, 'isLightboxExperimentOn').callsFake(() => true);
 
-    sandbox.stub(viewport, 'getFriendlyIframeEmbed_').callsFake(el => {
+    env.sandbox.stub(viewport, 'getFriendlyIframeEmbed_').callsFake(el => {
       expect(el).to.equal(requestingElement);
       return fieMock;
     });
@@ -665,10 +674,10 @@ describes.fakeWin('Viewport', {}, env => {
   it('should leave full overlay on FIE when leaving lightbox mode', () => {
     const requestingElement = {};
     const fieMock = {
-      leaveFullOverlayMode: sandbox.spy(),
+      leaveFullOverlayMode: env.sandbox.spy(),
     };
 
-    sandbox.stub(viewport, 'getFriendlyIframeEmbed_').callsFake(el => {
+    env.sandbox.stub(viewport, 'getFriendlyIframeEmbed_').callsFake(el => {
       expect(el).to.equal(requestingElement);
       return fieMock;
     });
@@ -679,8 +688,8 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should update viewport when entering overlay mode', () => {
-    const disableTouchZoomStub = sandbox.stub(viewport, 'disableTouchZoom');
-    const disableScrollStub = sandbox.stub(viewport, 'disableScroll');
+    const disableTouchZoomStub = env.sandbox.stub(viewport, 'disableTouchZoom');
+    const disableScrollStub = env.sandbox.stub(viewport, 'disableScroll');
 
     viewport.enterOverlayMode();
 
@@ -689,11 +698,11 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should update viewport when leaving overlay mode', () => {
-    const restoreOriginalTouchZoomStub = sandbox.stub(
+    const restoreOriginalTouchZoomStub = env.sandbox.stub(
       viewport,
       'restoreOriginalTouchZoom'
     );
-    const resetScrollStub = sandbox.stub(viewport, 'resetScroll');
+    const resetScrollStub = env.sandbox.stub(viewport, 'resetScroll');
 
     viewport.leaveOverlayMode();
 
@@ -702,7 +711,7 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should disable scrolling based on requests', () => {
-    const disableScrollStub = sandbox.stub(viewport, 'disableScroll');
+    const disableScrollStub = env.sandbox.stub(viewport, 'disableScroll');
 
     viewerDisableScrollHandler(true);
 
@@ -710,7 +719,7 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should reset scrolling based on requests', () => {
-    const resetScrollStub = sandbox.stub(viewport, 'resetScroll');
+    const resetScrollStub = env.sandbox.stub(viewport, 'resetScroll');
 
     viewerDisableScrollHandler(false);
 
@@ -837,7 +846,7 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should update scroll pos and reset cache', () => {
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('setScrollTop')
       .withArgs(117)
@@ -853,7 +862,7 @@ describes.fakeWin('Viewport', {}, env => {
     // be attached.
     document.body.appendChild(element);
 
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
 
     bindingMock
       .expects('getScrollingElement')
@@ -887,7 +896,7 @@ describes.fakeWin('Viewport', {}, env => {
     // be attached.
     document.body.appendChild(element);
 
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
 
     bindingMock
       .expects('getScrollingElement')
@@ -902,7 +911,7 @@ describes.fakeWin('Viewport', {}, env => {
       .returns({top})
       .once();
 
-    const interpolateScrollIntoView = sandbox.stub(
+    const interpolateScrollIntoView = env.sandbox.stub(
       viewport,
       'interpolateScrollIntoView_'
     );
@@ -923,25 +932,25 @@ describes.fakeWin('Viewport', {}, env => {
 
     expect(
       interpolateScrollIntoView.withArgs(
-        /* parent       */ sinon.match.any,
-        /* curScrollTop */ sinon.match.any,
+        /* parent       */ env.sandbox.match.any,
+        /* curScrollTop */ env.sandbox.match.any,
         /* newScrollTop */ top - /* padding */ 19,
-        /* duration     */ sinon.match.any,
-        /* curve        */ sinon.match.any
+        /* duration     */ env.sandbox.match.any,
+        /* curve        */ env.sandbox.match.any
       )
     ).to.be.calledOnce;
   });
 
   it('should not change scrollTop for animateScrollIntoView', () => {
     const element = document.createElement('div');
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('getLayoutRect')
       .withArgs(element)
       .returns({top: 111})
       .once();
     viewport.paddingTop_ = 0;
-    sandbox.stub(viewport, 'getScrollTop').returns(111);
+    env.sandbox.stub(viewport, 'getScrollTop').returns(111);
     bindingMock
       .expects('setScrollTop')
       .withArgs(111)
@@ -959,7 +968,7 @@ describes.fakeWin('Viewport', {}, env => {
 
   it('should send cached scroll pos to getLayoutRect', () => {
     const element = document.createElement('div');
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     viewport.scrollTop_ = 111;
     viewport.scrollLeft_ = 222;
     bindingMock
@@ -971,7 +980,7 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should calculate client rect w/o global client rect', () => {
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('getRootClientRectAsync')
       .returns(Promise.resolve(null));
@@ -984,7 +993,7 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should calculate client rect w/ global client rect when ', () => {
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('getRootClientRectAsync')
       .returns(Promise.resolve(layoutRectLtwh(5, 5, 5, 5)))
@@ -998,7 +1007,7 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should deletegate scrollWidth', () => {
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('getScrollWidth')
       .withArgs()
@@ -1008,7 +1017,7 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should deletegate scrollHeight', () => {
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('getScrollHeight')
       .withArgs()
@@ -1018,7 +1027,7 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should delegate contentHeight', () => {
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('getContentHeight')
       .withArgs()
@@ -1029,14 +1038,14 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should delegate contentHeightChanged', () => {
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock.expects('contentHeightChanged').once();
     viewport.contentHeightChanged();
     bindingMock.verify();
   });
 
   it('should scroll to target position when the viewer sets scrollTop', () => {
-    const bindingMock = sandbox.mock(binding);
+    const bindingMock = env.sandbox.mock(binding);
     bindingMock
       .expects('setScrollTop')
       .withArgs(117)
@@ -1085,7 +1094,7 @@ describes.fakeWin('Viewport', {}, env => {
     beforeEach(() => {
       ampdoc = new AmpDocSingle(window);
       viewport = new ViewportImpl(ampdoc, binding, viewer);
-      bindingMock = sandbox.mock(binding);
+      bindingMock = env.sandbox.mock(binding);
       iframe = document.createElement('iframe');
       const html = '<div id="one"></div>';
       let promise;
@@ -1173,18 +1182,20 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should override scrollTo when requested', () => {
-      sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
+      env.sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       viewport = new ViewportImpl(ampdoc, binding, viewer);
-      const setScrollTopStub = sandbox.stub(viewport, 'setScrollTop');
+      const setScrollTopStub = env.sandbox.stub(viewport, 'setScrollTop');
       expect(windowApi.scrollTo).to.not.equal(originalScrollTo);
       windowApi.scrollTo(0, 11);
       expect(setScrollTopStub).to.be.calledOnce.calledWith(11);
     });
 
     it('should override scrollY/pageYOffset when requested', () => {
-      sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
+      env.sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       viewport = new ViewportImpl(ampdoc, binding, viewer);
-      const stub = sandbox.stub(viewport, 'getScrollTop').callsFake(() => 19);
+      const stub = env.sandbox
+        .stub(viewport, 'getScrollTop')
+        .callsFake(() => 19);
       expect(windowApi.scrollY).to.equal(19);
       expect(windowApi.pageYOffset).to.equal(19);
       expect(stub).to.be.calledTwice;
@@ -1196,7 +1207,7 @@ describes.fakeWin('Viewport', {}, env => {
         writable: false,
         configurable: false, // make it non-configurable to let it will throw
       });
-      sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
+      env.sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       new ViewportImpl(ampdoc, binding, viewer);
       expect(windowApi.scrollTo).to.equal(originalScrollTo);
     });
@@ -1207,7 +1218,7 @@ describes.fakeWin('Viewport', {}, env => {
         writable: false,
         configurable: false, // make it non-configurable to let it will throw
       });
-      sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
+      env.sandbox.stub(binding, 'overrideGlobalScrollTo').callsFake(() => true);
       new ViewportImpl(ampdoc, binding, viewer);
       expect(windowApi.scrollY).to.equal(21);
     });
@@ -1377,7 +1388,6 @@ describe('Viewport META', () => {
   });
 
   describe('TouchZoom', () => {
-    let sandbox;
     let clock;
     let viewport;
     let binding;
@@ -1389,8 +1399,7 @@ describe('Viewport META', () => {
     let viewportMetaSetter;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      clock = sandbox.useFakeTimers();
+      clock = window.sandbox.useFakeTimers();
       viewer = {
         isEmbedded: () => false,
         getParam: param => {
@@ -1407,7 +1416,7 @@ describe('Viewport META', () => {
       originalViewportMetaString = 'width=device-width,minimum-scale=1';
       viewportMetaString = originalViewportMetaString;
       viewportMeta = Object.create(null);
-      viewportMetaSetter = sandbox.spy();
+      viewportMetaSetter = window.sandbox.spy();
       Object.defineProperty(viewportMeta, 'content', {
         get: () => viewportMetaString,
         set: value => {
@@ -1440,15 +1449,10 @@ describe('Viewport META', () => {
       installVsyncService(windowApi);
       installPlatformService(windowApi);
       installDocService(windowApi, /* isSingleDoc */ true);
-      installGlobalDocumentStateService(windowApi);
       ampdoc = Services.ampdocServiceFor(windowApi).getSingleDoc();
       installViewerServiceForDoc(ampdoc);
       binding = new ViewportBindingDef();
       viewport = new ViewportImpl(ampdoc, binding, viewer);
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('should initialize original viewport meta', () => {
@@ -1541,7 +1545,6 @@ describe('createViewport', () => {
       it('should bind to "natural" when not iframed', () => {
         win.parent = win;
         installDocService(win, /* isSingleDoc */ true);
-        installGlobalDocumentStateService(win);
         const ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         installViewportServiceForDoc(ampDoc);
@@ -1552,7 +1555,6 @@ describe('createViewport', () => {
       it('should bind to "naturual" when iframed', () => {
         win.parent = {};
         installDocService(win, /* isSingleDoc */ true);
-        installGlobalDocumentStateService(win);
         const ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         installViewportServiceForDoc(ampDoc);
@@ -1571,16 +1573,13 @@ describe('createViewport', () => {
       let win;
       let ampDoc;
       let viewer;
-      let sandbox;
 
       beforeEach(() => {
         win = env.win;
-        sandbox = env.sandbox;
         installPlatformService(win);
         installTimerService(win);
         installVsyncService(win);
         installDocService(win, /* isSingleDoc */ true);
-        installGlobalDocumentStateService(win);
         ampDoc = Services.ampdocServiceFor(win).getSingleDoc();
         installViewerServiceForDoc(ampDoc);
         viewer = Services.viewerForDoc(ampDoc);
@@ -1596,7 +1595,7 @@ describe('createViewport', () => {
 
       it('should bind to "iOS embed" when iframed', () => {
         win.parent = {};
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+        env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
         expect(viewport.binding_).to.be.instanceof(
@@ -1606,26 +1605,16 @@ describe('createViewport', () => {
 
       it('should NOT bind to "iOS embed" when iframed but not embedded', () => {
         win.parent = {};
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
+        env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
         expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
-      });
-
-      it('should bind to "iOS embed" when not iframed but in dev mode', () => {
-        getMode(win).development = true;
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(
-          ViewportBindingIosEmbedWrapper_
-        );
       });
 
       it('should bind to "iOS embed" when iframed but in test mode', () => {
         win.parent = {};
         getMode(win).test = true;
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
+        env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
         expect(viewport.binding_).to.be.instanceof(
@@ -1633,28 +1622,13 @@ describe('createViewport', () => {
         );
       });
 
-      it('should NOT bind to "iOS embed" when in dev mode, but iframed', () => {
-        win.parent = {};
-        getMode(win).development = true;
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
-      });
-
       it('should bind to "natural" when iframed, but iOS supports scrollable iframes', () => {
-        toggleExperiment(win, 'ios-scrollable-iframe', true);
         win.parent = {};
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
-        installViewportServiceForDoc(ampDoc);
-        const viewport = Services.viewportForDoc(ampDoc);
-        expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);
-      });
-
-      it('should bind to "natural" when in dev mode, but iOS supports scrollable iframes', () => {
-        toggleExperiment(win, 'ios-scrollable-iframe', true);
-        getMode(win).development = true;
-        sandbox.stub(viewer, 'isEmbedded').callsFake(() => false);
+        env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+        env.sandbox
+          .stub(viewer, 'hasCapability')
+          .withArgs('iframeScroll')
+          .returns(true);
         installViewportServiceForDoc(ampDoc);
         const viewport = Services.viewportForDoc(ampDoc);
         expect(viewport.binding_).to.be.instanceof(ViewportBindingNatural_);

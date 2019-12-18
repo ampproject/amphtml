@@ -51,7 +51,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   ) {
     const methodName = opt_once ? 'requestOnce' : 'makeRequest';
 
-    return sandbox
+    return env.sandbox
       ./*OK*/ stub(binding.iframeClient_, methodName)
       .callsFake((req, res, cb) => {
         expect(req).to.equal(requestType);
@@ -96,28 +96,24 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     installIframeMessagingClient(win);
     installPlatformService(win);
     binding = new ViewportBindingInabox(win);
-    sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
+    env.sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
     toggleExperiment(win, 'inabox-viewport-friendly', true);
     bindingFriendly = new ViewportBindingInabox(win);
-    measureSpy = sandbox.spy();
+    measureSpy = env.sandbox.spy();
     element = {
       getBoundingClientRect() {
         return layoutRectLtwh(0, 0, 100, 100);
       },
       measure: measureSpy,
     };
-    sandbox
+    env.sandbox
       .stub(Services.resourcesForDoc(win.document), 'get')
       .returns([element]);
-    sandbox.stub(Services, 'resourcesPromiseForDoc').returns(
+    env.sandbox.stub(Services, 'resourcesPromiseForDoc').returns(
       new Promise(resolve => {
         resolve();
       })
     );
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('should work for size, layoutRect and position observer', () => {
@@ -140,7 +136,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     it('same domain', () => {
       binding = bindingFriendly;
-      sandbox
+      env.sandbox
         .stub(PositionObserver.prototype, 'observe')
         .callsFake((e, callback) => {
           topWindowObservable.add(() => callback({viewportRect, targetRect}));
@@ -158,8 +154,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     });
 
     function testPositionCallback() {
-      onScrollCallback = sandbox.spy();
-      onResizeCallback = sandbox.spy();
+      onScrollCallback = env.sandbox.spy();
+      onResizeCallback = env.sandbox.spy();
       binding.onScroll(onScrollCallback);
       binding.onResize(onResizeCallback);
 
@@ -181,7 +177,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(binding.getLayoutRect(element)).to.deep.equal(
         layoutRectLtwh(10, 20, 100, 100)
       );
-      sandbox.reset();
+      env.sandbox.reset();
 
       // Scroll, viewport position changed
       positionCallback({
@@ -195,7 +191,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(binding.getLayoutRect(element)).to.deep.equal(
         layoutRectLtwh(10, 20, 100, 100)
       );
-      sandbox.reset();
+      env.sandbox.reset();
 
       // Resize, viewport size changed
       positionCallback({
@@ -209,11 +205,11 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(binding.getLayoutRect(element)).to.deep.equal(
         layoutRectLtwh(10, 20, 100, 100)
       );
-      sandbox.reset();
+      env.sandbox.reset();
 
       // DOM change, target position changed
-      sandbox.restore();
-      sandbox
+      env.sandbox.restore();
+      env.sandbox
         .stub(Services.resourcesForDoc(win.document), 'get')
         .returns([element]);
       positionCallback({
@@ -234,14 +230,14 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     const allResourcesMock = Array(5)
       .fill(undefined)
       .map(() => ({
-        measure: sandbox.spy(),
+        measure: env.sandbox.spy(),
       }));
 
-    sandbox
+    env.sandbox
       .stub(binding, 'getChildResources')
       .callsFake(() => allResourcesMock);
 
-    const prepareContainer = sandbox
+    const prepareContainer = env.sandbox
       .stub(binding, 'prepareBodyForOverlay_')
       .returns(Promise.resolve());
 
@@ -275,7 +271,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should reset content and request resize on leave overlay mode', () => {
-    const resetContainer = sandbox
+    const resetContainer = env.sandbox
       .stub(binding, 'resetBodyForOverlay_')
       .returns(Promise.resolve());
 
@@ -303,7 +299,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       height: 300,
     };
 
-    const updateBoxRectStub = sandbox
+    const updateBoxRectStub = env.sandbox
       .stub(binding, 'updateBoxRect_')
       .callsFake(NOOP);
 
@@ -315,7 +311,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       /* opt_once */ true
     );
 
-    sandbox.stub(binding, 'prepareBodyForOverlay_').returns(Promise.resolve());
+    env.sandbox
+      .stub(binding, 'prepareBodyForOverlay_')
+      .returns(Promise.resolve());
 
     yield binding.updateLightboxMode(true);
 
@@ -332,7 +330,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       height: 300,
     };
 
-    const updateBoxRectStub = sandbox
+    const updateBoxRectStub = env.sandbox
       .stub(binding, 'updateBoxRect_')
       .callsFake(NOOP);
 
@@ -344,7 +342,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       /* opt_once */ true
     );
 
-    sandbox.stub(binding, 'resetBodyForOverlay_').returns(Promise.resolve());
+    env.sandbox
+      .stub(binding, 'resetBodyForOverlay_')
+      .returns(Promise.resolve());
 
     yield binding.updateLightboxMode(false);
 
@@ -368,24 +368,24 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       width: 40,
       height: 30,
     };
-    sandbox
+    env.sandbox
       .stub(FrameOverlayManager.prototype, 'expandFrame')
       .callsFake((i, callback) => {
         callback(boxRect);
       });
-    sandbox
+    env.sandbox
       .stub(FrameOverlayManager.prototype, 'collapseFrame')
       .callsFake((i, callback) => {
         callback(boxRect2);
       });
 
-    const updateBoxRectStub = sandbox
+    const updateBoxRectStub = env.sandbox
       .stub(bindingFriendly, 'updateBoxRect_')
       .callsFake(NOOP);
-    sandbox
+    env.sandbox
       .stub(bindingFriendly, 'prepareBodyForOverlay_')
       .returns(Promise.resolve());
-    sandbox
+    env.sandbox
       .stub(bindingFriendly, 'resetBodyForOverlay_')
       .returns(Promise.resolve());
 
@@ -405,8 +405,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     const el = document.createElement('div');
 
-    sandbox.stub(win, 'innerWidth').callsFake(w);
-    sandbox.stub(win, 'innerHeight').callsFake(h);
+    env.sandbox.stub(win, 'innerWidth').callsFake(w);
+    env.sandbox.stub(win, 'innerHeight').callsFake(h);
 
     yield prepareBodyForOverlay(win, el);
 
@@ -456,7 +456,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should request the position directly from host if friendly', () => {
-    sandbox
+    env.sandbox
       .stub(PositionObserver.prototype, 'getTargetRect')
       .returns(layoutRectLtwh(10, 20, 100, 100));
     return bindingFriendly.getRootClientRectAsync().then(rect => {
@@ -465,8 +465,11 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should disconnect friendly listener and reconnect again properly', () => {
-    const unobserveFunction = sandbox.spy();
-    const observeFunction = sandbox.stub(PositionObserver.prototype, 'observe');
+    const unobserveFunction = env.sandbox.spy();
+    const observeFunction = env.sandbox.stub(
+      PositionObserver.prototype,
+      'observe'
+    );
     observeFunction.returns(unobserveFunction);
     return bindingFriendly
       .connect()

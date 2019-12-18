@@ -21,6 +21,7 @@ import {
   magnitude,
   mapRange,
   mod,
+  sum,
 } from '../../../src/utils/math';
 
 describes.sandboxed('utils/math', {}, () => {
@@ -239,6 +240,13 @@ describes.sandboxed('utils/math', {}, () => {
       expect(distance(-1.5, -3, 1.5, 1)).to.equal(5);
       expect(distance(4, 6, -1, -6)).to.equal(13);
       expect(distance(-0.5, -0.5, 1, 2)).be.closeTo(2.915, 0.001);
+    });
+  });
+
+  describe('sum', () => {
+    it('should sum up an array of numbers', () => {
+      expect(sum([2, 10, 100])).to.equal(112);
+      expect(sum([-3, 2, 44])).to.equal(43);
     });
   });
 });
