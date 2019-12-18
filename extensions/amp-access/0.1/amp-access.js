@@ -92,8 +92,8 @@ export class AccessService {
     /** @private @const {!../../../src/service/template-impl.Templates} */
     this.templates_ = Services.templatesFor(ampdoc.win);
 
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /** @private @const {?../../../src/service/performance-impl.Performance} */
     this.performance_ = Services.performanceForOrNull(ampdoc.win);
@@ -383,7 +383,7 @@ export class AccessService {
   runAuthorization_(opt_disableFallback) {
     this.toggleTopClass_('amp-access-loading', true);
 
-    const authorizations = this.viewer_.whenFirstVisible().then(() => {
+    const authorizations = this.ampdoc.whenFirstVisible().then(() => {
       return Promise.all(
         this.sources_.map(source => this.runOneAuthorization_(source))
       );
@@ -476,7 +476,7 @@ export class AccessService {
     if (on == wasOn) {
       return Promise.resolve();
     }
-    return this.resources_.mutateElement(element, () => {
+    return this.mutator_.mutateElement(element, () => {
       if (on) {
         element.removeAttribute('amp-access-hide');
       } else {
@@ -559,11 +559,11 @@ export class AccessService {
     }
     this.reportViewPromise_ = null;
     this.ampdoc.whenReady().then(() => {
-      if (this.viewer_.isVisible()) {
+      if (this.ampdoc.isVisible()) {
         this.reportWhenViewed_(timeToView);
       }
-      this.viewer_.onVisibilityChanged(() => {
-        if (this.viewer_.isVisible()) {
+      this.ampdoc.onVisibilityChanged(() => {
+        if (this.ampdoc.isVisible()) {
           this.reportWhenViewed_(timeToView);
         }
       });
@@ -624,8 +624,8 @@ export class AccessService {
     return new Promise((resolve, reject) => {
       // 1. Document becomes invisible again: cancel.
       unlistenSet.push(
-        this.viewer_.onVisibilityChanged(() => {
-          if (!this.viewer_.isVisible()) {
+        this.ampdoc.onVisibilityChanged(() => {
+          if (!this.ampdoc.isVisible()) {
             reject(cancellation());
           }
         })
@@ -682,7 +682,7 @@ export class AccessService {
    * @private
    */
   handleAction_(invocation) {
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
     if (invocation.method == 'login') {

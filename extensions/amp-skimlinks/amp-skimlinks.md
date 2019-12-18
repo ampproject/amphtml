@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Run skimlinks inside your AMP page.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -50,42 +51,47 @@ A skimlinks account is required in order to use [amp-skimlinks](https://skimlink
 Inside the `<head>...</head>` section of your AMP page, insert this code before the line `<script async src="https://cdn.ampproject.org/v0.js"></script>`
 
 Code:
+
 ```html
-    <script async custom-element="amp-skimlinks" src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js"></script>
+<script
+  async
+  custom-element="amp-skimlinks"
+  src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js"
+></script>
 ```
 
 **Add the amp-skimlinks extension**
 Inside the `<body>...</body>` section of your AMP page, insert this code:
 
 Code:
-```html
-    <amp-skimlinks
-        layout="nodisplay"
-        publisher-code="123X456"
-    >
-    </amp-skimlinks>
-```
 
+```html
+<amp-skimlinks layout="nodisplay" publisher-code="123X456"> </amp-skimlinks>
+```
 
 The final code should like:
 
 ```html
-<!doctype html>
+<!DOCTYPE html>
 <html ⚡>
-<head>
-  ...
-  <script async custom-element="amp-skimlinks" src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js"></script>
-  ...
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-</head>
-<body>
+  <head>
+    ...
+    <script
+      async
+      custom-element="amp-skimlinks"
+      src="https://cdn.ampproject.org/v0/amp-skimlinks-0.1.js"
+    ></script>
+    ...
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
     ...
     <amp-skimlinks
-        layout="nodisplay"
-        publisher-code="YOUR_SKIMLINKS_CODE"
+      layout="nodisplay"
+      publisher-code="YOUR_SKIMLINKS_CODE"
     ></amp-skimlinks>
     ....
-</body>
+  </body>
 </html>
 ```
 

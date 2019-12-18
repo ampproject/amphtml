@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {RequestBankE2E} from './request-bank';
 
 // import to install chromedriver and geckodriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
@@ -28,13 +29,14 @@ const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {installRepl, uninstallRepl} = require('./repl');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../../common/travis');
 const {PuppeteerController} = require('./puppeteer-controller');
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
 const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
+const SETUP_RETRIES = 1;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
@@ -43,6 +45,7 @@ const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
  * {@link https://github.com/GoogleChrome/puppeteer/blob/master/experimental/puppeteer-firefox/README.md}
  */
 const PUPPETEER_BROWSERS = new Set(['chrome']);
+const REQUESTBANK_URL_PREFIX = 'http://localhost:8000';
 
 /**
  * @typedef {{
@@ -92,7 +95,7 @@ function configure(config) {
     throw new Error('describes.configure should only be called once');
   }
 
-  describesConfig = Object.assign({}, config);
+  describesConfig = {...config};
 }
 
 /**
@@ -410,7 +413,7 @@ function describeEnv(factory) {
       this.timeout(TEST_TIMEOUT);
       beforeEach(async function() {
         this.timeout(SETUP_TIMEOUT);
-        await fixture.setup(env, browserName);
+        await fixture.setup(env, browserName, SETUP_RETRIES);
 
         // don't install for CI
         if (!isTravisBuild()) {
@@ -479,42 +482,54 @@ class EndToEndFixture {
   /**
    * @param {!Object} env
    * @param {string} browserName
+   * @param {number} retries
    */
-  async setup(env, browserName) {
-    const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
-    const config = getConfig();
-    const controller = await getController(config, browserName, deviceName);
-    const ampDriver = new AmpDriver(controller);
-    env.controller = controller;
-    env.ampDriver = ampDriver;
+  async setup(env, browserName, retries = 0) {
+    try {
+      const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
+      const config = getConfig();
+      const controller = await getController(config, browserName, deviceName);
+      const ampDriver = new AmpDriver(controller);
+      const requestBank = new RequestBankE2E(REQUESTBANK_URL_PREFIX, 'e2e');
+      env.controller = controller;
+      env.ampDriver = ampDriver;
+      env.requestBank = requestBank;
 
-    const {environment} = env;
+      const {environment} = env;
 
-    const url = new URL(testUrl);
-    if (experiments.length > 0) {
-      if (environment.includes('inabox')) {
-        // inabox experiments are toggled at server side using <meta> tag
-        url.searchParams.set('exp', experiments.join(','));
+      const url = new URL(testUrl);
+      if (experiments.length > 0) {
+        if (environment.includes('inabox')) {
+          // inabox experiments are toggled at server side using <meta> tag
+          url.searchParams.set('exp', experiments.join(','));
+        } else {
+          // AMP doc experiments are toggled via cookies
+          await toggleExperiments(ampDriver, url.href, experiments);
+        }
+      }
+
+      if (initialRect) {
+        const {width, height} = initialRect;
+        await controller.setWindowRect({width, height});
+      }
+
+      await ampDriver.navigateToEnvironment(environment, url.href);
+    } catch (ex) {
+      if (retries > 0) {
+        await this.setup(env, browserName, --retries);
       } else {
-        // AMP doc experiments are toggled via cookies
-        await toggleExperiments(ampDriver, url.href, experiments);
+        throw ex;
       }
     }
-
-    if (initialRect) {
-      const {width, height} = initialRect;
-      await controller.setWindowRect({width, height});
-    }
-
-    await ampDriver.navigateToEnvironment(environment, url.href);
   }
 
   async teardown(env) {
-    const {controller} = env;
+    const {controller, requestBank} = env;
     if (controller) {
       await controller.switchToParent();
       await controller.dispose();
     }
+    await requestBank.tearDown();
   }
 }
 

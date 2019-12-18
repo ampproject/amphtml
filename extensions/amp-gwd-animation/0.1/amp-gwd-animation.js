@@ -241,6 +241,7 @@ export class GwdAnimation extends AMP.BaseElement {
     const eventName = getDetail(event)['eventName'];
     const timelineEventName = `${this.timelineEventPrefix_}${eventName}`;
 
+    // TODO(wg-ui-and-a11y): Should animation timeline events be low trust?
     actionService.trigger(
       this.element,
       timelineEventName,

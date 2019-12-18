@@ -20,7 +20,7 @@ limitations under the License.
 
 `<amp-carousel type="slides">` issues events for major states . These events can be reported through the analytics configuration by using triggers.
 
-See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on *amp-analytics* configuration.
+See [amp-analytics.md](../amp-analytics/amp-analytics.md) for details on _amp-analytics_ configuration.
 
 ### Change trigger (`"on": "amp-carousel-change"`)
 

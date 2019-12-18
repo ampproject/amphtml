@@ -15,7 +15,6 @@
  */
 
 const colors = require('ansi-colors');
-const conf = require('../build.conf');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -30,7 +29,12 @@ const {
   printConfigHelp,
   printNobuildHelp,
   toPromise,
+  transferSrcsToTempDir,
 } = require('./helpers');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
 const {
   createModuleCompatibleES5Bundle,
 } = require('./create-module-compatible-es5-bundle');
@@ -39,21 +43,16 @@ const {
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
-const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../sources');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {formatExtractedMessages} = require('../compile/log-messages');
 const {maybeUpdatePackages} = require('./update-packages');
-const {VERSION} = require('../internal-version');
+const {VERSION} = require('../compile/internal-version');
 
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
-
-const babel = require('@babel/core');
-const deglob = require('globs-to-files');
 
 const WEB_PUSH_PUBLISHER_FILES = [
   'amp-web-push-helper-frame',
@@ -62,48 +61,10 @@ const WEB_PUSH_PUBLISHER_FILES = [
 
 const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
 
-function transferSrcsToTempDir() {
-  log(
-    'Performing multi-pass',
-    colors.cyan('babel'),
-    'transforms in',
-    colors.cyan(SRC_TEMP_DIR)
-  );
-  const files = deglob.sync(BABEL_SRC_GLOBS);
-  files.forEach(file => {
-    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
-      fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
-      return;
-    }
-
-    const {code} = babel.transformFileSync(file, {
-      plugins: conf.plugins({
-        isEsmBuild: argv.esm,
-        isForTesting: argv.fortesting,
-      }),
-      retainLines: true,
-      compact: false,
-    });
-    const name = `${SRC_TEMP_DIR}${file.replace(process.cwd(), '')}`;
-    fs.outputFileSync(name, code);
-    process.stdout.write('.');
-  });
-  console.log('\n');
-}
-
 /**
- * Dist Build
- * @return {!Promise}
+ * Prints a useful help message prior to the gulp dist task
  */
-async function dist() {
-  maybeUpdatePackages();
-  const handlerProcess = createCtrlcHandler('dist');
-  process.env.NODE_ENV = 'production';
-  printNobuildHelp();
-  cleanupBuildDir();
-
-  await prebuild();
-
+function printDistHelp() {
   if (argv.fortesting) {
     let cmd = 'gulp dist --fortesting';
     if (argv.single_pass) {
@@ -120,33 +81,43 @@ async function dist() {
   } else {
     parseExtensionFlags();
   }
+}
+
+/**
+ * Dist Build
+ * @return {!Promise}
+ */
+async function dist() {
+  maybeUpdatePackages();
+  const handlerProcess = createCtrlcHandler('dist');
+  process.env.NODE_ENV = 'production';
+  printNobuildHelp();
+  printDistHelp();
+
+  cleanupBuildDir();
+  await prebuild();
   await compileCss();
   await compileJison();
-  await startNailgunServer(distNailgunPort, /* detached */ false);
 
-  // Single pass has its own tmp directory processing. Only do this for
-  // multipass.
-  // We need to execute this after `compileCss` and `compileJison` so that we can copy that
-  // over to the tmp directory.
+  // This is the temp directory processing for multi-pass (single-pass does its
+  // own processing). Executed after `compileCss` and `compileJison` so their
+  // results can be copied too.
   if (!argv.single_pass) {
-    transferSrcsToTempDir();
+    transferSrcsToTempDir({isForTesting: argv.fortesting});
   }
 
-  await Promise.all([
-    compileAllMinifiedJs(),
-    bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true),
-    buildExtensions({minify: true, watch: false}),
-    buildExperiments({minify: true, watch: false}),
-    buildLoginDone('0.1', {minify: true, watch: false}),
-    buildWebPushPublisherFiles({minify: true, watch: false}).then(
-      postBuildWebPushPublisherFilesVersion
-    ),
-    copyCss(),
-    copyParsers(),
-  ]);
+  await copyCss();
+  await copyParsers();
+  await bootstrapThirdPartyFrames(/* watch */ false, /* minify */ true);
 
+  // Steps that use closure compiler. Small ones before large (parallel) ones.
+  await startNailgunServer(distNailgunPort, /* detached */ false);
+  await buildExperiments({minify: true, watch: false});
+  await buildLoginDone('0.1', {minify: true, watch: false});
+  await buildWebPushPublisherFiles({minify: true, watch: false});
+  await compileAllMinifiedJs();
+  await buildExtensions({minify: true, watch: false});
   await stopNailgunServer(distNailgunPort);
-  await formatExtractedMessages();
 
   if (argv.esm) {
     await Promise.all([
@@ -156,6 +127,7 @@ async function dist() {
     ]);
   }
 
+  await formatExtractedMessages();
   await generateFileListing();
 
   return exitCtrlcHandler(handlerProcess);
@@ -210,9 +182,8 @@ function buildLoginDone(version, options) {
  * Build amp-web-push publisher files HTML page.
  *
  * @param {!Object} options
- * @return {!Promise}
  */
-function buildWebPushPublisherFiles(options) {
+async function buildWebPushPublisherFiles(options) {
   const distDir = 'dist/v0';
   const promises = [];
   WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
@@ -230,7 +201,8 @@ function buildWebPushPublisherFiles(options) {
       promises.push(p);
     });
   });
-  return Promise.all(promises);
+  await Promise.all(promises);
+  await postBuildWebPushPublisherFilesVersion();
 }
 
 async function prebuild() {

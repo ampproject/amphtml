@@ -201,11 +201,32 @@ describes.realWin(
       });
     });
 
+    describe('slideChange event', () => {
+      it('should not dispatch on initial render', async () => {
+        const eventSpy = env.sandbox.spy();
+        container.addEventListener('slideChange', eventSpy);
+        await getCarousel({loop: false});
+
+        expect(eventSpy).to.have.not.been.called;
+      });
+
+      it('should dispatch when changing slides', async () => {
+        const eventSpy = env.sandbox.spy();
+        container.addEventListener('slideChange', eventSpy);
+        const carousel = await getCarousel({loop: false});
+
+        carousel.implementation_.interactionNext();
+        await afterIndexUpdate(carousel);
+
+        expect(eventSpy).to.have.been.calledOnce;
+      });
+    });
+
     describe('goToSlide action', () => {
       it('should propagate high trust', async () => {
         const carousel = await getCarousel({loop: false});
         const impl = carousel.implementation_;
-        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         impl.executeAction({
           method: 'goToSlide',
@@ -218,7 +239,7 @@ describes.realWin(
         expect(triggerSpy).to.have.been.calledWith(
           carousel,
           'slideChange',
-          /* CustomEvent */ sinon.match.has('detail', {index: 1}),
+          /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
           ActionTrust.HIGH
         );
       });
@@ -226,7 +247,7 @@ describes.realWin(
       it('should propagate low trust', async () => {
         const carousel = await getCarousel({loop: false});
         const impl = carousel.implementation_;
-        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
         impl.executeAction({
           method: 'goToSlide',
@@ -239,7 +260,7 @@ describes.realWin(
         expect(triggerSpy).to.have.been.calledWith(
           carousel,
           'slideChange',
-          /* CustomEvent */ sinon.match.has('detail', {index: 1}),
+          /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
           ActionTrust.LOW
         );
       });

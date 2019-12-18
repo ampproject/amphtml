@@ -15,10 +15,11 @@
  */
 
 const app = require('express').Router();
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
+const log = require('fancy-log');
 const request = require('request');
 const {getServeMode, replaceUrls} = require('../app-utils');
+const {red} = require('ansi-colors');
 
 // In-a-box envelope.
 // Examples:
@@ -27,7 +28,7 @@ const {getServeMode, replaceUrls} = require('../app-utils');
 app.use(['/inabox', '/inabox-mraid'], (req, res) => {
   const templatePath =
     process.cwd() + '/build-system/server/server-inabox-template.html';
-  fs.readFileAsync(templatePath, 'utf8').then(template => {
+  fs.promises.readFile(templatePath, 'utf8').then(template => {
     template = template.replace(/SOURCE/g, 'AD_URL');
     if (req.baseUrl == '/inabox-mraid') {
       // MRAID does not load amp4ads-host-v0.js
@@ -44,7 +45,8 @@ app.use(['/inabox', '/inabox-mraid'], (req, res) => {
 // http://localhost:8000/inabox-friendly/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
 app.use('/inabox-(friendly|safeframe)', (req, res) => {
   const templatePath = '/build-system/server/server-inabox-template.html';
-  fs.readFileAsync(process.cwd() + templatePath, 'utf8')
+  fs.promises
+    .readFile(process.cwd() + templatePath, 'utf8')
     .then(template => {
       let url;
       if (req.baseUrl == '/inabox-friendly') {
@@ -68,6 +70,11 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
     })
     .then(result => {
       res.end(result);
+    })
+    .catch(err => {
+      log(red('Error:'), err);
+      res.status(500);
+      res.end();
     });
 });
 
@@ -79,7 +86,7 @@ app.use('/a4a(|-3p)/', (req, res) => {
   const force3p = req.baseUrl.startsWith('/a4a-3p');
   const templatePath = '/build-system/server/server-a4a-template.html';
   const url = getInaboxUrl(req);
-  fs.readFileAsync(process.cwd() + templatePath, 'utf8').then(template => {
+  fs.promises.readFile(process.cwd() + templatePath, 'utf8').then(template => {
     const content = fillTemplate(template, url.href, req.query)
       .replace(/CHECKSIG/g, force3p || '')
       .replace(/DISABLE3PFALLBACK/g, !force3p);
@@ -135,6 +142,7 @@ function requestFromUrl(template, url, query) {
     request(url, (error, response, body) => {
       if (error) {
         reject(error);
+        return;
       }
       if (
         !response.headers['content-type'] ||

@@ -18,27 +18,27 @@ import {Deferred} from '../utils/promise';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
+import {READY_SCAN_SIGNAL, ResourcesInterface} from './resources-interface';
 import {Resource, ResourceState} from './resource';
-import {ResourcesInterface} from './resources-interface';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
-import {dev, devAssert, user} from '../log';
+import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
-import {getSourceUrl, isProxyOrigin} from '../url';
+import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
-import {loadPromise} from '../event-helper';
+import {listen, loadPromise} from '../event-helper';
 import {registerServiceBuilderForDoc} from '../service';
 import {remove} from '../utils/array';
 import {startupChunk} from '../chunk';
+import {throttle} from '../utils/rate-limit';
 
 const TAG_ = 'Resources';
-const READY_SCAN_SIGNAL_ = 'ready-scan';
 const LAYOUT_TASK_ID_ = 'L';
 const LAYOUT_TASK_OFFSET_ = 0;
 const PRELOAD_TASK_ID_ = 'P';
@@ -112,7 +112,7 @@ export class ResourcesImpl {
     this.buildAttemptsCount_ = 0;
 
     /** @private {boolean} */
-    this.visible_ = this.viewer_.isVisible();
+    this.visible_ = this.ampdoc.isVisible();
 
     /** @private {number} */
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
@@ -143,8 +143,6 @@ export class ResourcesImpl {
     this.relayoutAll_ = true;
 
     /**
-     * TODO(jridgewell): relayoutTop should be replaced with parent layer
-     * dirtying.
      * @private {number}
      */
     this.relayoutTop_ = -1;
@@ -205,12 +203,15 @@ export class ResourcesImpl {
     /** @const @private {!Array<function()>} */
     this.passCallbacks_ = [];
 
+    /** @const @private {!Array<!Element>} */
+    this.elementsThatScrolled_ = [];
+
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
     /** @private @const {!FiniteStateMachine<!VisibilityState>} */
     this.visibilityStateMachine_ = new FiniteStateMachine(
-      this.viewer_.getVisibilityState()
+      this.ampdoc.getVisibilityState()
     );
 
     // When viewport is resized, we have to re-measure all elements.
@@ -229,8 +230,8 @@ export class ResourcesImpl {
 
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
-    this.viewer_.onVisibilityChanged(() => {
-      if (this.firstVisibleTime_ == -1 && this.viewer_.isVisible()) {
+    this.ampdoc.onVisibilityChanged(() => {
+      if (this.firstVisibleTime_ == -1 && this.ampdoc.isVisible()) {
         this.firstVisibleTime_ = Date.now();
       }
       this.schedulePass();
@@ -254,6 +255,16 @@ export class ResourcesImpl {
     });
 
     this.rebuildDomWhenReady_();
+
+    if (isExperimentOn(this.win, 'layoutbox-invalidate-on-scroll')) {
+      /** @private @const */
+      this.throttledScroll_ = throttle(this.win, e => this.scrolled_(e), 250);
+
+      listen(this.win.document, 'scroll', this.throttledScroll_, {
+        capture: true,
+        passive: true,
+      });
+    }
   }
 
   /** @private */
@@ -271,7 +282,8 @@ export class ResourcesImpl {
         // No promise means that there's no problem.
         remeasure();
       }
-      this.monitorInput_();
+      const input = Services.inputFor(this.win);
+      input.setupInputModeClasses(this.ampdoc);
 
       // Safari 10 and under incorrectly estimates font spacing for
       // `@font-face` fonts. This leads to wild measurement errors. The best
@@ -304,33 +316,6 @@ export class ResourcesImpl {
   /** @override */
   getAmpdoc() {
     return this.ampdoc;
-  }
-
-  /** @private */
-  monitorInput_() {
-    const input = Services.inputFor(this.win);
-    input.onTouchDetected(detected => {
-      this.toggleInputClass_('amp-mode-touch', detected);
-    }, true);
-    input.onMouseDetected(detected => {
-      this.toggleInputClass_('amp-mode-mouse', detected);
-    }, true);
-    input.onKeyboardStateChanged(active => {
-      this.toggleInputClass_('amp-mode-keyboard-active', active);
-    }, true);
-  }
-
-  /**
-   * @param {string} clazz
-   * @param {boolean} on
-   * @private
-   */
-  toggleInputClass_(clazz, on) {
-    this.ampdoc.waitForBodyOpen().then(body => {
-      this.vsync_.mutate(() => {
-        body.classList.toggle(clazz, on);
-      });
-    });
   }
 
   /** @override */
@@ -389,7 +374,7 @@ export class ResourcesImpl {
     // Most documents have 10 or less AMP tags. By building 20 we should not
     // change the behavior for the vast majority of docs, and almost always
     // catch everything in the first viewport.
-    return this.buildAttemptsCount_ < 20 || this.viewer_.hasBeenVisible();
+    return this.buildAttemptsCount_ < 20 || this.ampdoc.hasBeenVisible();
   }
 
   /**
@@ -413,7 +398,7 @@ export class ResourcesImpl {
     // prerendered. This avoids wasting our prerender build quota.
     // See isUnderBuildQuota_() for more details.
     const shouldBuildResource =
-      this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
+      this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
       resource.prerenderAllowed();
 
     if (buildingEnabled && shouldBuildResource) {
@@ -479,7 +464,11 @@ export class ResourcesImpl {
    * @private
    */
   buildResourceUnsafe_(resource, schedulePass, force = false) {
-    if (!this.isUnderBuildQuota_() && !force) {
+    if (
+      !this.isUnderBuildQuota_() &&
+      !force &&
+      !resource.isBuildRenderBlocking()
+    ) {
       return null;
     }
     const promise = resource.build();
@@ -773,7 +762,7 @@ export class ResourcesImpl {
       return;
     }
 
-    this.visible_ = this.viewer_.isVisible();
+    this.visible_ = this.ampdoc.isVisible();
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
     const firstPassAfterDocumentReady =
@@ -821,18 +810,16 @@ export class ResourcesImpl {
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
 
-    this.visibilityStateMachine_.setState(this.viewer_.getVisibilityState());
+    this.visibilityStateMachine_.setState(this.ampdoc.getVisibilityState());
     if (
       this.documentReady_ &&
       this.ampInitialized_ &&
-      !this.ampdoc.signals().get(READY_SCAN_SIGNAL_)
+      !this.ampdoc.signals().get(READY_SCAN_SIGNAL)
     ) {
       // This signal mainly signifies that most of elements have been measured
       // by now. This is mostly used to avoid measuring too many elements
-      // individually. This will be superceeded by layers API, e.g.
-      // "layer measured".
-      // May not be called in shadow mode.
-      this.ampdoc.signals().signal(READY_SCAN_SIGNAL_);
+      // individually. May not be called in shadow mode.
+      this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
     }
 
     if (this.maybeChangeHeight_) {
@@ -894,7 +881,6 @@ export class ResourcesImpl {
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_) ||
       now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2;
 
-    // TODO(jridgewell, #12780): Update resize rules to account for layers.
     if (this.requestsChangeSize_.length > 0) {
       dev().fine(
         TAG_,
@@ -966,23 +952,13 @@ export class ResourcesImpl {
         } else if (request.force || !this.visible_) {
           // 2. An immediate execution requested or the document is hidden.
           resize = true;
-        } else if (this.activeHistory_.hasDescendantsOf(resource.element)) {
+        } else if (
+          this.activeHistory_.hasDescendantsOf(resource.element) ||
+          (event && event.userActivation && event.userActivation.hasBeenActive)
+        ) {
           // 3. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
-          if (
-            isProxyOrigin(this.win.location) &&
-            event &&
-            event.userActivation
-          ) {
-            // Report false positives.
-            // TODO(#23926): cleanup once user activation for resize is
-            // implemented.
-            user().expectedError(TAG_, 'RESIZE_APPROVE');
-            if (!event.userActivation.hasBeenActive) {
-              user().expectedError(TAG_, 'RESIZE_APPROVE_NOT_ACTIVE');
-            }
-          }
         } else if (
           topUnchangedBoundary >= viewportRect.bottom - bottomOffset ||
           (topMarginDiff == 0 &&
@@ -1140,7 +1116,7 @@ export class ResourcesImpl {
       return false;
     }
     const parentWidth =
-      (parent.getImpl && parent.getImpl().getLayoutWidth()) || -1;
+      (parent.getLayoutWidth && parent.getLayoutWidth()) || -1;
     // Reflow will not happen if the parent element is at least as wide as the
     // new width.
     return parentWidth >= width;
@@ -1226,6 +1202,7 @@ export class ResourcesImpl {
     this.relayoutAll_ = false;
     const relayoutTop = this.relayoutTop_;
     this.relayoutTop_ = -1;
+    const elementsThatScrolled = this.elementsThatScrolled_;
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
     let relayoutCount = 0;
@@ -1255,7 +1232,8 @@ export class ResourcesImpl {
       relayoutCount > 0 ||
       remeasureCount > 0 ||
       relayoutAll ||
-      relayoutTop != -1
+      relayoutTop != -1 ||
+      elementsThatScrolled.length > 0
     ) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
@@ -1263,13 +1241,27 @@ export class ResourcesImpl {
           // If element has owner, and measure is not requested, do nothing.
           continue;
         }
-        if (
+        let needsMeasure =
           relayoutAll ||
           r.getState() == ResourceState.NOT_LAID_OUT ||
           !r.hasBeenMeasured() ||
           r.isMeasureRequested() ||
-          (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop)
-        ) {
+          (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop);
+
+        if (!needsMeasure) {
+          for (let i = 0; i < elementsThatScrolled.length; i++) {
+            // TODO(jridgewell): Need to figure out how ShadowRoots and FIEs
+            // should behave in this model. If the ShadowRoot's host scrolls,
+            // do we need to invalidate inside the shadow or light tree? Or if
+            // the FIE's iframe parent scrolls, do we?
+            if (elementsThatScrolled[i].contains(r.element)) {
+              needsMeasure = true;
+              break;
+            }
+          }
+        }
+
+        if (needsMeasure) {
           const wasDisplayed = r.isDisplayed();
           r.measure();
           if (wasDisplayed && !r.isDisplayed()) {
@@ -1281,6 +1273,7 @@ export class ResourcesImpl {
         }
       }
     }
+    elementsThatScrolled.length = 0;
 
     // Unload all in one cycle.
     if (toUnload) {
@@ -1783,7 +1776,7 @@ export class ResourcesImpl {
     // (and they can't prerender).
     if (!this.visible_) {
       if (
-        this.viewer_.getVisibilityState() != VisibilityState.PRERENDER ||
+        this.ampdoc.getVisibilityState() != VisibilityState.PRERENDER ||
         !resource.prerenderAllowed()
       ) {
         return false;
@@ -1907,7 +1900,7 @@ export class ResourcesImpl {
       PAUSED: paused,
       INACTIVE: inactive,
     } = VisibilityState;
-    const doPass = () => {
+    const doWork = () => {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
       if (viewportSize.height > 0 && viewportSize.width > 0) {
@@ -1945,32 +1938,32 @@ export class ResourcesImpl {
     };
     const resume = () => {
       this.resources_.forEach(r => r.resume());
-      doPass();
+      doWork();
     };
 
-    vsm.addTransition(prerender, prerender, doPass);
-    vsm.addTransition(prerender, visible, doPass);
-    vsm.addTransition(prerender, hidden, doPass);
-    vsm.addTransition(prerender, inactive, doPass);
-    vsm.addTransition(prerender, paused, doPass);
+    vsm.addTransition(prerender, prerender, doWork);
+    vsm.addTransition(prerender, visible, doWork);
+    vsm.addTransition(prerender, hidden, doWork);
+    vsm.addTransition(prerender, inactive, doWork);
+    vsm.addTransition(prerender, paused, doWork);
 
-    vsm.addTransition(visible, visible, doPass);
-    vsm.addTransition(visible, hidden, doPass);
+    vsm.addTransition(visible, visible, doWork);
+    vsm.addTransition(visible, hidden, doWork);
     vsm.addTransition(visible, inactive, unload);
     vsm.addTransition(visible, paused, pause);
 
-    vsm.addTransition(hidden, visible, doPass);
-    vsm.addTransition(hidden, hidden, doPass);
+    vsm.addTransition(hidden, visible, doWork);
+    vsm.addTransition(hidden, hidden, doWork);
     vsm.addTransition(hidden, inactive, unload);
     vsm.addTransition(hidden, paused, pause);
 
     vsm.addTransition(inactive, visible, resume);
     vsm.addTransition(inactive, hidden, resume);
     vsm.addTransition(inactive, inactive, noop);
-    vsm.addTransition(inactive, paused, doPass);
+    vsm.addTransition(inactive, paused, doWork);
 
     vsm.addTransition(paused, visible, resume);
-    vsm.addTransition(paused, hidden, doPass);
+    vsm.addTransition(paused, hidden, doWork);
     vsm.addTransition(paused, inactive, unload);
     vsm.addTransition(paused, paused, noop);
   }
@@ -2021,6 +2014,35 @@ export class ResourcesImpl {
       if (pendingIndex != -1) {
         this.pendingBuildResources_.splice(pendingIndex, 1);
       }
+    }
+  }
+
+  /**
+   * Listens for scroll events on elements (not the root scroller), and marks
+   * them for invalidating all child layout boxes. This is to support native
+   * scrolling elements outside amp-components.
+   *
+   * @param {!Event} event
+   */
+  scrolled_(event) {
+    const {target} = event;
+    // If the target of the scroll event is an element, that means that element
+    // is an overflow scroller.
+    // If the target is the document itself, that means the native root
+    // scroller (`document.scrollingElement`) did the scrolling.
+    if (target.nodeType !== Node.ELEMENT_NODE) {
+      return;
+    }
+    // In iOS <= 12, the scroll hacks cause the scrolling element to be
+    // reported as the target, instead of the document.
+    if (target === this.viewport_.getScrollingElement()) {
+      return;
+    }
+
+    const scrolled = dev().assertElement(target);
+    if (!this.elementsThatScrolled_.includes(scrolled)) {
+      this.elementsThatScrolled_.push(scrolled);
+      this.schedulePass(FOUR_FRAME_DELAY_);
     }
   }
 }

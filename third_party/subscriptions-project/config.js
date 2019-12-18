@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.68 */
+/** Version: 0.1.22.87 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -359,6 +359,86 @@ function log(var_args) {
 }
 
 /**
+ * @param  {...*} var_args [description]
+ */
+function warn(var_args) {
+  console.warn.apply(console, arguments);
+}
+
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} message The assertion message
+ * @param {...*} var_args Arguments substituted into %s in the message.
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ */
+function assert(shouldBeTrueish, message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    message = message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
+
+function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
+
+var log_1 = {
+  assert,
+  debugLog,
+  warn,
+  log
+};
+var log_3 = log_1.debugLog;
+
+/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -380,10 +460,10 @@ function log(var_args) {
  *  a. The element itself has a nextSibling.
  *  b. Any of the element ancestors has a nextSibling.
  * @param {!Element} element
- * @param {?Node=} opt_stopNode
+ * @param {?Node=} stopNode
  * @return {boolean}
  */
-function hasNextNodeInDocumentOrder(element, opt_stopNode) {
+function hasNextNodeInDocumentOrder(element, stopNode) {
   let currentElement = element;
   do {
     if (currentElement.nextSibling) {
@@ -391,7 +471,7 @@ function hasNextNodeInDocumentOrder(element, opt_stopNode) {
     }
   } while (
     (currentElement = currentElement.parentNode) &&
-    currentElement != opt_stopNode
+    currentElement != stopNode
   );
   return false;
 }
@@ -453,16 +533,16 @@ function parseJson(json) {
  * Returns `undefined` if parsing fails.
  * Returns the `Object` corresponding to the JSON string when parsing succeeds.
  * @param {*} json JSON string to parse
- * @param {function(!Error)=} opt_onFailed Optional function that will be called
+ * @param {function(!Error)=} onFailed Optional function that will be called
  *     with the error if parsing fails.
  * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
-function tryParseJson(json, opt_onFailed) {
+function tryParseJson(json, onFailed) {
   try {
     return parseJson(json);
   } catch (e) {
-    if (opt_onFailed) {
-      opt_onFailed(e);
+    if (onFailed) {
+      onFailed(e);
     }
     return undefined;
   }
@@ -563,7 +643,7 @@ class PageConfigResolver {
       );
       this.configResolver_ = null;
     }
-    debugLog(config);
+    log_3(config);
     return config;
   }
 }
