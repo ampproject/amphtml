@@ -83,23 +83,16 @@ class ActivityHistory {
    * @param {ActivityEventDef} activityEvent
    */
   push(activityEvent) {
-    if (!this.prevActivityEvent_) {
-      this.prevActivityEvent_ = activityEvent;
-    }
-
     if (
-      this.prevActivityEvent_.time < activityEvent.time ||
-      // when pushed event with "inactive" type from (mouseleave)
-      // prevActivityEvent has event with same time but "active" type from (mousemove)
-      (this.prevActivityEvent_.time === activityEvent.time &&
-        this.prevActivityEvent_.type !== activityEvent.type)
+      this.prevActivityEvent_ &&
+      this.prevActivityEvent_.time < activityEvent.time
     ) {
       this.totalEngagedTime_ += findEngagedTimeBetween(
         this.prevActivityEvent_,
         activityEvent.time
       );
-      this.prevActivityEvent_ = activityEvent;
     }
+    this.prevActivityEvent_ = activityEvent;
   }
 
   /**
