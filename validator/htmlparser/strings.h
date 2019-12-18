@@ -88,7 +88,7 @@ class Strings {
   // 0b11110xxx - 4 byte sequence.
   //
   // Returns number of byte sequence needed to encode the codepoint.
-  static bool IsInitialCodePointByte(uint8_t c);
+  static int CodePointByteSequenceCount(uint8_t c);
 
   // Decodes byte sequence to utf-8 codepoint.
   // The s points to the first byte in the sequence. Moves the cursor past
