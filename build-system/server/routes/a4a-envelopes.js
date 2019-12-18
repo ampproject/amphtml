@@ -25,11 +25,15 @@ const {red} = require('ansi-colors');
 // Examples:
 // http://localhost:8000/inabox/examples/animations.amp.html
 // http://localhost:8000/inabox/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
-app.use('/inabox/', (req, res) => {
+app.use(['/inabox', '/inabox-mraid'], (req, res) => {
   const templatePath =
     process.cwd() + '/build-system/server/server-inabox-template.html';
   fs.promises.readFile(templatePath, 'utf8').then(template => {
     template = template.replace(/SOURCE/g, 'AD_URL');
+    if (req.baseUrl == '/inabox-mraid') {
+      // MRAID does not load amp4ads-host-v0.js
+      template = template.replace('INABOX_ADS_TAG_INTEGRATION', '');
+    }
     const url = getInaboxUrl(req);
     res.end(fillTemplate(template, url.href, req.query));
   });
@@ -47,7 +51,9 @@ app.use('/inabox-(friendly|safeframe)', (req, res) => {
       let url;
       if (req.baseUrl == '/inabox-friendly') {
         url = getInaboxUrl(req, 'inabox-viewport-friendly');
-        template = template.replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"');
+        template = template
+          .replace('SRCDOC_ATTRIBUTE', 'srcdoc="BODY"')
+          .replace('INABOX_ADS_TAG_INTEGRATION', '');
       } else {
         url = getInaboxUrl(req);
         template = template
@@ -102,6 +108,9 @@ function getInaboxUrl(req, extraExperiment) {
   }
   // this tells local server to convert the AMP document to AMP4ADS spec
   url.searchParams.set('inabox', '1');
+  if (req.baseUrl == '/inabox-mraid') {
+    url.searchParams.set('mraid', '1');
+  }
   // turn on more logs if requested
   const logLevel = url.searchParams.get('log');
   if (logLevel) {
@@ -175,6 +184,10 @@ function fillTemplate(template, url, query, body) {
       .replace(/OFFSET/g, query.offset || '0px')
       .replace(/AD_WIDTH/g, query.width || '300')
       .replace(/AD_HEIGHT/g, query.height || '250')
+      .replace(
+        'INABOX_ADS_TAG_INTEGRATION',
+        '<script src="/examples/amphtml-ads/ads-tag-integration.js"></script>'
+      )
       // Clear out variables that are not already replaced beforehand.
       .replace(/NAME/g, 'inabox')
       .replace(/SOURCE/g, '')
