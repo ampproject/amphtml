@@ -109,7 +109,8 @@ import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {maybeTrackImpression} from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-import fetchMock from 'fetch-mock';
+import fetchMock from 'fetch-mock/es5/client-bundle';
+import sinon from 'sinon'; // eslint-disable-line local/no-import
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -645,7 +646,12 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win);
+          // The anonymous class parameter allows us to detect native classes
+          // vs transpiled classes.
+          installCustomElements(
+            win,
+            NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined
+          );
         }
 
         // Intercept event listeners

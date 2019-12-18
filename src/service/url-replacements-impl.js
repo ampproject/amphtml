@@ -393,36 +393,6 @@ export class GlobalVariableSource extends VariableSource {
       })
     );
 
-    // Attempt to returns user location data if available, otherwise null.
-    this.setAsync(
-      'AMP_USER_LOCATION',
-      /** @type {AsyncResolverDef} */ (type => {
-        // Type may be "","lat","lon", and undefined
-        return this.getUserLocation_(userLocationService => {
-          return userLocationService.getReplacementLocation(
-            'AMP_USER_LOCATION',
-            type
-          );
-        }, 'AMP_USER_LOCATION');
-      })
-    );
-
-    // Returns user location data only if available,
-    // and waits for the user to approve.
-    this.setAsync(
-      'AMP_USER_LOCATION_POLL',
-      /** @type {AsyncResolverDef} */ (type => {
-        // Type may be "","lat","lon", and undefined
-        return this.getUserLocation_(userLocationService => {
-          return userLocationService.getReplacementLocation(
-            'AMP_USER_LOCATION_POLL',
-            type,
-            /*opt_poll*/ true
-          );
-        }, 'AMP_USER_LOCATION_POLL');
-      })
-    );
-
     // Returns incoming share tracking fragment.
     this.setAsync(
       'SHARE_TRACKING_INCOMING',
@@ -682,6 +652,18 @@ export class GlobalVariableSource extends VariableSource {
       this.getStoryValue_('pageId', 'STORY_PAGE_ID')
     );
 
+    this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
+      return Services.performanceFor(win).getFirstContentfulPaint();
+    });
+
+    this.setAsync('FIRST_VIEWPORT_READY', () => {
+      return Services.performanceFor(win).getFirstViewportReady();
+    });
+
+    this.setAsync('MAKE_BODY_VISIBLE', () => {
+      return Services.performanceFor(win).getMakeBodyVisible();
+    });
+
     this.setAsync('AMP_STATE', key => {
       // This is safe since AMP_STATE is not an A4A whitelisted variable.
       const root = this.ampdoc.getRootNode();
@@ -831,28 +813,6 @@ export class GlobalVariableSource extends VariableSource {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
       return getter(geo);
     });
-  }
-
-  /**
-   * Resolves the value via the user location service.
-   * @param {function(Object<string, string>)} getter
-   * @param {string} expr
-   * @return {!Promise<Object<string,(string|Array<string>)>>}
-   * @template T
-   * @private
-   */
-  getUserLocation_(getter, expr) {
-    const element = this.ampdoc.getHeadNode();
-    return Services.userLocationForDocOrNull(element).then(
-      userLocationService => {
-        userAssert(
-          userLocationService,
-          'To use variable %s, amp-user-location should be configured',
-          expr
-        );
-        return getter(userLocationService);
-      }
-    );
   }
 
   /**

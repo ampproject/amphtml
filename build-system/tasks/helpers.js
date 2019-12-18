@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
@@ -22,6 +23,7 @@ const conf = require('../compile/build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
+const globby = require('globby');
 const gulp = require('gulp');
 const gulpWatch = require('gulp-watch');
 const log = require('fancy-log');
@@ -37,7 +39,9 @@ const {
 } = require('../compile/internal-version');
 const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
+const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {closureCompile} = require('../compile/compile');
+const {isTravisBuild} = require('../common/travis');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
 
@@ -134,7 +138,7 @@ function doBuildJs(jsBundles, name, extraOptions) {
       target.srcDir,
       target.srcFilename,
       extraOptions.minify ? target.minifiedDestDir : target.destDir,
-      Object.assign({}, target.options, extraOptions)
+      {...target.options, ...extraOptions}
     );
   } else {
     return Promise.reject(red('Error:'), 'Could not find', cyan(name));
@@ -362,21 +366,14 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
   // TODO: @jonathantyng remove browserifyOptions #22757
-  const browserifyOptions = Object.assign(
-    {},
-    {
-      entries: entryPoint,
-      debug: true,
-      fast: true,
-    },
-    options.browserifyOptions
-  );
+  const browserifyOptions = {
+    entries: entryPoint,
+    debug: true,
+    fast: true,
+    ...options.browserifyOptions,
+  };
 
-  const babelifyOptions = Object.assign(
-    {},
-    BABELIFY_GLOBAL_TRANSFORM,
-    BABELIFY_PLUGINS
-  );
+  const babelifyOptions = {...BABELIFY_GLOBAL_TRANSFORM, ...BABELIFY_PLUGINS};
 
   let bundler = browserify(browserifyOptions).transform(
     babelify,
@@ -513,13 +510,15 @@ function printConfigHelp(command) {
     cyan(argv.config === 'canary' ? 'canary' : 'prod'),
     green('AMP config.')
   );
-  log(
-    green('⤷ Use'),
-    cyan('--config={canary|prod}'),
-    green('with your'),
-    cyan(command),
-    green('command to specify which config to apply.')
-  );
+  if (!isTravisBuild()) {
+    log(
+      green('⤷ Use'),
+      cyan('--config={canary|prod}'),
+      green('with your'),
+      cyan(command),
+      green('command to specify which config to apply.')
+    );
+  }
 }
 
 /**
@@ -650,6 +649,40 @@ function toPromise(readable) {
   });
 }
 
+/**
+ * @param {{isEsmBuild: boolean|undefined, isCheckTypes: boolean|undefined, isFortesting: boolean|undefined, isSinglePass: boolean|undefined}=} options
+ */
+function transferSrcsToTempDir(options = {}) {
+  log(
+    'Performing pre-closure',
+    colors.cyan('babel'),
+    'transforms in',
+    colors.cyan(SRC_TEMP_DIR)
+  );
+  const files = globby.sync(BABEL_SRC_GLOBS);
+  files.forEach(file => {
+    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
+      fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
+      return;
+    }
+
+    const {code} = babel.transformFileSync(file, {
+      plugins: conf.plugins({
+        isEsmBuild: options.isEsmBuild,
+        isSinglePass: options.isSinglePass,
+        isForTesting: options.isForTesting,
+        isChecktypes: options.isChecktypes,
+      }),
+      retainLines: true,
+      compact: false,
+    });
+    const name = `${SRC_TEMP_DIR}/${file}`;
+    fs.outputFileSync(name, code);
+    process.stdout.write('.');
+  });
+  console.log('\n');
+}
+
 module.exports = {
   BABELIFY_GLOBAL_TRANSFORM,
   BABELIFY_PLUGINS,
@@ -667,4 +700,5 @@ module.exports = {
   printConfigHelp,
   printNobuildHelp,
   toPromise,
+  transferSrcsToTempDir,
 };

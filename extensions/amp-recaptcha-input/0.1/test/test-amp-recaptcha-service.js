@@ -94,7 +94,7 @@ describes.realWin(
           expect(recaptchaService.unlisteners_.length).to.be.equal(3);
 
           // Stub out the unlisten function
-          const unlistener = sandbox.stub();
+          const unlistener = env.sandbox.stub();
           recaptchaService.unlisteners_[0] = unlistener;
 
           recaptchaService.unregister();
@@ -154,7 +154,7 @@ describes.realWin(
       () => {
         expect(recaptchaService.registeredElementCount_).to.be.equal(0);
 
-        const postMessageStub = sandbox.stub(
+        const postMessageStub = env.sandbox.stub(
           recaptchaService,
           'postMessageToIframe_'
         );

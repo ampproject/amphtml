@@ -18,12 +18,12 @@ import {Response, fetchPolyfill} from '../../src/polyfills/fetch';
 import {Services} from '../../src/services';
 import {createFormDataWrapper} from '../../src/form-data-wrapper';
 
-describes.sandboxed('fetch', {}, () => {
+describes.sandboxed('fetch', {}, env => {
   describe('fetch method', () => {
     let xhrCreated;
 
     function setupMockXhr() {
-      const mockXhr = sandbox.useFakeXMLHttpRequest();
+      const mockXhr = env.sandbox.useFakeXMLHttpRequest();
       xhrCreated = new Promise(resolve => (mockXhr.onCreate = resolve));
     }
 
@@ -40,12 +40,7 @@ describes.sandboxed('fetch', {}, () => {
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       setupMockXhr();
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     it('should allow GET method', () => {
@@ -105,14 +100,14 @@ describes.sandboxed('fetch', {}, () => {
 
     it('should allow FormData as body', () => {
       const fakeWin = null;
-      sandbox.stub(Services, 'platformFor').returns({
+      env.sandbox.stub(Services, 'platformFor').returns({
         isIos() {
           return false;
         },
       });
 
       const formData = createFormDataWrapper(fakeWin);
-      sandbox.stub(JSON, 'stringify');
+      env.sandbox.stub(JSON, 'stringify');
       formData.append('name', 'John Miller');
       formData.append('age', 56);
       const post = fetchPolyfill.bind(this, '/post', {

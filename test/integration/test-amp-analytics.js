@@ -15,7 +15,6 @@
  */
 
 import {BrowserController, RequestBank} from '../../testing/test-helper';
-
 import {parseQueryString} from '../../src/url';
 
 describe('amp-analytics', function() {
@@ -28,7 +27,9 @@ describe('amp-analytics', function() {
         document.cookie='_cid=amp-12345';
       </script>
       <!-- put amp-analytics > 3 viewports away from viewport -->
-      <div style="height: 400vh"></div>
+      <div style="height: 400vh">
+        viewport
+      </div>
       <amp-analytics>
         <script type="application/json">
         {
@@ -50,10 +51,10 @@ describe('amp-analytics', function() {
             "cid": "\${clientId(_cid)}",
             "loadend": "\${navTiming(loadEventEnd)}",
             "default": "\$DEFAULT( , test)",
-            "cookie": "\${cookie(test-cookie)}",
-            "firstContentfulPaint": "FIRST_CONTENTFUL_PAINT",
-            "firstViewportReady": "FIRST_VIEWPORT_READY",
-            "makeBodyVisible": "MAKE_BODY_VISIBLE"
+            "fcp": "FIRST_CONTENTFUL_PAINT",
+            "fvr": "FIRST_VIEWPORT_READY",
+            "mbv": "MAKE_BODY_VISIBLE",
+            "cookie": "\${cookie(test-cookie)}"
           }
         }
         </script>
@@ -74,14 +75,19 @@ describe('amp-analytics', function() {
           expect(q['cid']).to.equal('amp-12345');
           expect(q['loadend']).to.not.equal('0');
           expect(q['default']).to.equal('test');
-          console.log(q['firstViewportReady']);
-          console.log(q['makeBodyVisible']);
-          console.log(q['firstContentfulPaint']);
+          console.log(q['fvr']);
+          console.log(q['mbv']);
+          console.log(q['fcp']);
           console.log(JSON.stringify(q));
           console.log(req.url);
           // cookie set via http response header when requesting
           // localhost:9876/amp4test/compose-doc
           expect(q['cookie']).to.equal('test');
+
+          // FCP only resolves for Chrome and Opera
+          expect(q['fcp']).to.not.be.null;
+          expect(q['fvr']).to.not.be.null;
+          expect(q['mbv']).to.not.be.null;
           expect(
             req.headers.referer,
             'should keep referrer if no referrerpolicy specified'
