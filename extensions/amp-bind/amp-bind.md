@@ -356,25 +356,25 @@ encodeURIComponent('Hello world')</pre>
 
 [example preview="inline" playground="true" imports="amp-bind"]
 ```html
-  <amp-bind-macro
-    id="circleArea"
-    arguments="radius"
-    expression="3.14 * radius * radius"
-  ></amp-bind-macro>
-  <p>
-    Input a radius value
-  </p>
-  <input
-    type="number"
-    min="0"
-    max="100"
-    value="0"
-    on="input-throttled:AMP.setState({myCircle:{radius: event.value}})"
-  />
-  <p>
-    The circle has an area of
-    <span [text]="circleArea(myCircle.radius)">0</span>.
-  </p>
+<amp-bind-macro
+  id="circleArea"
+  arguments="radius"
+  expression="3.14 * radius * radius"
+></amp-bind-macro>
+<p>
+  Input a radius value
+</p>
+<input
+  type="number"
+  min="0"
+  max="100"
+  value="0"
+  on="input-throttled:AMP.setState({myCircle:{radius: event.value}})"
+/>
+<p>
+  The circle has an area of
+  <span [text]="circleArea(myCircle.radius)">0</span>.
+</p>
 ```
 [/example]
 
