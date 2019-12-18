@@ -29,8 +29,7 @@ export function zucks(global, data) {
 
       const d = global.document.createElement('ins');
       d.id = elementId;
-      const container = document.getElementById('c');
-      container.appendChild(d);
+      global.document.getElementById('c').appendChild(d);
 
       if (data['zoeMultiAd'] !== 'true') {
         (global.gZgokZoeQueue = global.gZgokZoeQueue || []).push({frameId});
@@ -42,7 +41,9 @@ export function zucks(global, data) {
       });
     });
   } else if (data['adtype'] === 'native') {
-    loadScript(global, `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`);
+    const s = global.document.createElement('script');
+    s.src = `https://j.zucks.net.zimg.jp/n?f=${data['frameId']}`;
+    global.document.getElementById('c').appendChild(s);
   } else {
     writeScript(global, `https://j.zucks.net.zimg.jp/j?f=${data['frameId']}`);
   }
