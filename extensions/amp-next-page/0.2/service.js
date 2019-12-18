@@ -225,19 +225,22 @@ export class NextPageService {
    * @param {number} index index of the page to start at
    */
   hidePreviousPages(index) {
-    let i = index + this.scrollDirection_;
-    while (i >= 0 && i < this.pages_.length) {
-      const page = this.pages_[i];
-      const shouldBeHidden =
-        page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
-        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT ||
-        page === this.initialPage_;
-      if (shouldBeHidden && page.isVisible()) {
-        page.setVisibility(VisibilityState.HIDDEN);
-      }
-      // Go back one more page in the opposite direction of the scroll
-      i += this.scrollDirection_;
-    }
+    // Get all the pages that the user scrolled past (or didn't see yet)
+    const previousPages =
+      this.scrollDirection_ === Direction.UP
+        ? this.pages_.slice(index + 1)
+        : this.pages_.slice(0, index);
+
+    // Find the ones that should be hidden (no longer inside the viewport)
+    previousPages
+      .filter(page => {
+        const shouldHide =
+          page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
+          page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT ||
+          page === this.initialPage_;
+        return shouldHide && page.isVisible();
+      })
+      .forEach(page => page.setVisibility(VisibilityState.HIDDEN));
   }
 
   /**
