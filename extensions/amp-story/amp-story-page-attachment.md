@@ -5,6 +5,7 @@ formats:
 teaser:
   text: An additional pane of content that can be associated with a single page of an AMP story.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -61,7 +62,9 @@ Customizes the call to action text displayed on the UI prompt to open the attach
 Default: "Swipe up"
 
 ```html
-<amp-story-page-attachment layout="nodisplay" data-cta-text="Read more">...</amp-story-page-attachment>
+<amp-story-page-attachment layout="nodisplay" data-cta-text="Read more"
+  >...</amp-story-page-attachment
+>
 ```
 
 ### `data-title`
@@ -70,7 +73,9 @@ Displays the provided title in the page attachment header.
 Default: `null`
 
 ```html
-<amp-story-page-attachment layout="nodisplay" data-title="My title">...</amp-story-page-attachment>
+<amp-story-page-attachment layout="nodisplay" data-title="My title"
+  >...</amp-story-page-attachment
+>
 ```
 
 ### `theme`
@@ -79,7 +84,9 @@ Enables light or dark mode for the page attachment header and content background
 Values: "light" (default), "dark"
 
 ```html
-<amp-story-page-attachment layout="nodisplay" theme="dark">...</amp-story-page-attachment>
+<amp-story-page-attachment layout="nodisplay" theme="dark"
+  >...</amp-story-page-attachment
+>
 ```
 
 ## Allowed content and components

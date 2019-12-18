@@ -36,16 +36,15 @@ import {
   setParentWindow,
 } from './service';
 import {escapeHtml} from './dom';
-import {getExperimentBranch, isExperimentOn} from './experiments';
-import {getMode} from './mode';
+import {getExperimentBranch} from './experiments';
 import {installAmpdocServices} from './service/core-services';
 import {install as installCustomElements} from './polyfills/custom-elements';
 import {install as installDOMTokenList} from './polyfills/domtokenlist';
 import {install as installDocContains} from './polyfills/document-contains';
-import {installCustomElements as installRegisterElement} from 'document-register-element/build/document-register-element.patched';
 import {installStylesForDoc, installStylesLegacy} from './style-installer';
 import {installTimerInEmbedWindow} from './service/timer-impl';
 import {isDocumentReady} from './document-ready';
+import {isInAmpdocFieExperiment} from './ampdoc-fie';
 import {layoutRectLtwh, moveLayoutRect} from './layout-rect';
 import {loadPromise} from './event-helper';
 import {
@@ -56,14 +55,7 @@ import {
   setStyles,
 } from './style';
 import {toWin} from './types';
-
-/** @const {!Array<string>} */
-const EXCLUDE_INI_LOAD = [
-  'AMP-AD',
-  'AMP-ANALYTICS',
-  'AMP-PIXEL',
-  'AMP-AD-EXIT',
-];
+import {whenContentIniLoad} from './ini-load';
 
 /**
  * @const {{experiment: string, control: string, branch: string}}
@@ -151,7 +143,7 @@ export function installFriendlyIframeEmbed(
   const win = getTopWindow(toWin(iframe.ownerDocument.defaultView));
   /** @const {!./service/extensions-impl.Extensions} */
   const extensions = Services.extensionsFor(win);
-  const ampdocFieExperimentOn = isExperimentOn(win, 'ampdoc-fie');
+  const ampdocFieExperimentOn = isInAmpdocFieExperiment(win);
   /** @const {?./service/ampdoc-impl.AmpDocService} */
   const ampdocService = ampdocFieExperimentOn
     ? Services.ampdocServiceFor(win)
@@ -569,6 +561,14 @@ export class FriendlyIframeEmbed {
   }
 
   /**
+   * @return {!./service/mutator-interface.MutatorInterface}
+   * @private
+   */
+  getMutator_() {
+    return Services.mutatorForDoc(this.iframe);
+  }
+
+  /**
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
    * @param {{measure: (function()|undefined), mutate: function()}} task
@@ -576,7 +576,7 @@ export class FriendlyIframeEmbed {
    * @private
    */
   measureMutate_(task) {
-    return this.getResources_().measureMutateElement(
+    return this.getMutator_().measureMutateElement(
       this.iframe,
       task.measure || null,
       task.mutate
@@ -857,31 +857,6 @@ export class FriendlyIframeEmbed {
 }
 
 /**
- * Returns the promise that will be resolved when all content elements
- * have been loaded in the initially visible set.
- * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
- * @param {!Window} hostWin
- * @param {!./layout-rect.LayoutRectDef} rect
- * @return {!Promise}
- */
-export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
-  // TODO(lannka): should avoid this type casting by moving the `getResourcesInRect`
-  // logic here.
-  const resources = /** @type {!./service/resources-impl.ResourcesImpl} */ (Services.resourcesForDoc(
-    elementOrAmpDoc
-  ));
-  return resources.getResourcesInRect(hostWin, rect).then(resources => {
-    const promises = [];
-    resources.forEach(r => {
-      if (!EXCLUDE_INI_LOAD.includes(r.element.tagName)) {
-        promises.push(r.loadedOnce());
-      }
-    });
-    return Promise.all(promises);
-  });
-}
-
-/**
  * Install polyfills in the child window (friendly iframe).
  * @param {!Window} parentWin
  * @param {!Window} childWin
@@ -889,11 +864,12 @@ export function whenContentIniLoad(elementOrAmpDoc, hostWin, rect) {
 function installPolyfillsInChildWindow(parentWin, childWin) {
   installDocContains(childWin);
   installDOMTokenList(childWin);
-  if (isExperimentOn(parentWin, 'custom-elements-v1') || getMode().test) {
-    installCustomElements(childWin);
-  } else {
-    installRegisterElement(childWin, 'auto');
-  }
+  // The anonymous class parameter allows us to detect native classes vs
+  // transpiled classes.
+  installCustomElements(
+    childWin,
+    NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined
+  );
 }
 
 /**

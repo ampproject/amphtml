@@ -162,9 +162,7 @@ export class Dialog {
           },
           mutate: () => {
             this.viewport_.updatePaddingBottom(offsetHeight);
-            // TODO(dvoytenko, #20608): add to fixed layer, once the SwG/FL
-            // conflict is resolved.
-            // this.viewport_.addToFixedLayer(this.wrapper_, true);
+            this.viewport_.addToFixedLayer(this.wrapper_, true);
           },
         });
       });

@@ -67,7 +67,7 @@ describes.realWin(
     it('resizes with JSON String message', () => {
       return getImgur('2CnX7').then(imgur => {
         const impl = imgur.implementation_;
-        const changeHeightSpy = sandbox.spy(impl, 'attemptChangeHeight');
+        const changeHeightSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
         expect(changeHeightSpy).not.to.have.been.called;
         const event = {
           origin: 'https://imgur.com',
@@ -83,7 +83,7 @@ describes.realWin(
     it('resizes with JSON Object message', () => {
       return getImgur('2CnX7').then(imgur => {
         const impl = imgur.implementation_;
-        const changeHeightSpy = sandbox.spy(impl, 'attemptChangeHeight');
+        const changeHeightSpy = env.sandbox.spy(impl, 'attemptChangeHeight');
         expect(changeHeightSpy).not.to.have.been.called;
         const event = {
           origin: 'https://imgur.com',

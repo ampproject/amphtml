@@ -177,8 +177,8 @@ export class Bind {
      */
     this.maxNumberOfBindings_ = 1000;
 
-    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /**
      * The current values of all bound expressions on the page.
@@ -200,7 +200,7 @@ export class Bind {
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ = this.viewer_
+    this.initializePromise_ = ampdoc
       .whenFirstVisible()
       .then(() => {
         if (opt_win) {
@@ -343,9 +343,35 @@ export class Bind {
    * @return {!Promise}
    */
   setStateWithExpression(expression, scope) {
-    dev().info(TAG, 'setState:', expression);
-    this.setStatePromise_ = this.evaluateExpression_(expression, scope)
-      .then(result => this.setState(result))
+    return this.evaluateExpression_(expression, scope).then(result =>
+      this.setStateAndUpdateHistory_(result)
+    );
+  }
+
+  /**
+   * Sanitizes a state object and merges the resulting object into the current
+   * state.
+   * @param {!JsonObject} state
+   * @return {!Promise}
+   */
+  setStateWithObject(state) {
+    // Sanitize and copy state
+    const result = this.copyJsonObject_(state);
+    if (!result) {
+      return Promise.reject('Invalid state');
+    }
+    return this.setStateAndUpdateHistory_(result);
+  }
+
+  /**
+   * Merges a state object into the current global state.
+   * @param {!JsonObject} state
+   * @return {!Promise}
+   * @private
+   */
+  setStateAndUpdateHistory_(state) {
+    dev().info(TAG, 'setState:', state);
+    this.setStatePromise_ = this.setState(state)
       .then(() => this.getDataForHistory_())
       .then(data => {
         // Don't bother calling History.replace with empty data.
@@ -510,6 +536,20 @@ export class Bind {
   }
 
   /**
+   * Returns a copy of the global state for a given field-based expression,
+   * e.g. "foo.bar".
+   * @param {string} expr
+   * @return {*}
+   */
+  getState(expr) {
+    const value = expr ? getValueForExpr(this.state_, expr) : undefined;
+    if (isObject(value) || isArray(value)) {
+      return this.copyJsonObject_(/** @type {JsonObject} */ (value));
+    }
+    return value;
+  }
+
+  /**
    * Returns the stringified value of the global state for a given field-based
    * expression, e.g. "foo.bar.baz".
    * @param {string} expr
@@ -561,14 +601,15 @@ export class Bind {
         return Promise.all(whenParsed);
       })
       .then(() => {
-        // In dev mode, check default values against initial expression results.
-        if (getMode().development) {
-          return this.evaluate_().then(results => this.verify_(results));
-        }
         // Bind is "ready" when its initialization completes _and_ all <amp-state>
         // elements' local data is parsed and processed (not remote data).
         this.viewer_.sendMessage('bindReady', undefined);
         this.dispatchEventForTesting_(BindEvents.INITIALIZE);
+
+        // In dev mode, check default values against initial expression results.
+        if (getMode().development) {
+          return this.evaluate_().then(results => this.verify_(results));
+        }
       });
   }
 
@@ -1134,7 +1175,7 @@ export class Bind {
       // Useful for rendering amp-list with amp-bind state via [src].
       if (
         newValue === undefined ||
-        deepEquals(newValue, previousResult, /* depth */ 10)
+        deepEquals(newValue, previousResult, /* depth */ 20)
       ) {
       } else {
         boundProperty.previousResult = newValue;
@@ -1193,7 +1234,7 @@ export class Bind {
     if (updates.length === 0) {
       return Promise.resolve();
     }
-    return this.resources_.mutateElement(element, () => {
+    return this.mutator_.mutateElement(element, () => {
       const mutations = map();
       let width, height;
 
@@ -1215,10 +1256,9 @@ export class Bind {
       });
 
       if (width !== undefined || height !== undefined) {
-        // TODO(choumx): Add new Resources method for adding change-size
         // request without scheduling vsync pass since `mutateElement()`
         // will schedule a pass after a short delay anyways.
-        this.resources_./*OK*/ changeSize(element, height, width);
+        this.mutator_./*OK*/ changeSize(element, height, width);
       }
 
       if (typeof element.mutatedAttributesCallback === 'function') {

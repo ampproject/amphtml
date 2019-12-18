@@ -18,7 +18,6 @@ import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
-import {isExperimentOn} from './experiments';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
@@ -249,9 +248,6 @@ class StartupTask extends Task {
     super(fn);
 
     /** @private @const */
-    this.win_ = win;
-
-    /** @private @const */
     this.chunks_ = chunks;
   }
 
@@ -270,11 +266,10 @@ class StartupTask extends Task {
 
   /** @override */
   useRequestIdleCallback_() {
-    // We only start using requestIdleCallback when the viewer has
+    // We only start using requestIdleCallback when the core runtime has
     // been initialized. Otherwise we risk starving ourselves
-    // before we get into a state where the viewer can tell us
-    // that we are visible.
-    return !!this.chunks_.viewer;
+    // before the render-critical work is done.
+    return this.chunks_.coreReady_;
   }
 
   /**
@@ -282,16 +277,7 @@ class StartupTask extends Task {
    * @private
    */
   isVisible_() {
-    // Ask the viewer first.
-    if (this.chunks_.viewer) {
-      return this.chunks_.viewer.isVisible();
-    }
-    // There is no viewer yet. Lets try to guess whether we are visible.
-    if (this.win_.document.hidden) {
-      return false;
-    }
-    // Viewers send a URL param if we are not visible.
-    return !/visibilityState=(hidden|prerender)/.test(this.win_.location.hash);
+    return this.chunks_.ampdoc.isVisible();
   }
 }
 
@@ -303,6 +289,8 @@ class Chunks {
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
   constructor(ampDoc) {
+    /** @protected @const {!./service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampDoc;
     /** @private @const {!Window} */
     this.win_ = ampDoc.win;
     /** @private @const {!PriorityQueue<Task>} */
@@ -311,11 +299,7 @@ class Chunks {
     this.boundExecute_ = this.execute_.bind(this);
     /** @private {number} */
     this.durationOfLastExecution_ = 0;
-    /** @private {boolean} */
-    this.macroAfterLongTask_ = isExperimentOn(
-      this.win_,
-      'macro-after-long-task'
-    );
+
     /**
      * Set to true if we scheduled a macro or micro task to execute the next
      * task. If true, we don't schedule another one.
@@ -335,17 +319,18 @@ class Chunks {
       }
     });
 
-    /** @private @const {!Promise<!./service/viewer-interface.ViewerInterface>} */
-    this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
-    /**  @protected {?./service/viewer-interface.ViewerInterface} */
-    this.viewer = null;
-    this.viewerPromise_.then(viewer => {
-      this.viewer = viewer;
-      viewer.onVisibilityChanged(() => {
-        if (viewer.isVisible()) {
-          this.schedule_();
-        }
-      });
+    /** @protected {boolean} */
+    this.coreReady_ = false;
+    Services.viewerPromiseForDoc(ampDoc).then(() => {
+      // Once the viewer has been resolved, most of core runtime has been
+      // initialized as well.
+      this.coreReady_ = true;
+    });
+
+    ampDoc.onVisibilityChanged(() => {
+      if (ampDoc.isVisible()) {
+        this.schedule_();
+      }
     });
   }
 
@@ -458,11 +443,7 @@ class Chunks {
     // If we've spent over 5 millseconds executing the
     // last instruction yeild back to the main thread.
     // 5 milliseconds is a magic number.
-    if (
-      this.macroAfterLongTask_ &&
-      this.bodyIsVisible_ &&
-      this.durationOfLastExecution_ > 5
-    ) {
+    if (this.bodyIsVisible_ && this.durationOfLastExecution_ > 5) {
       this.durationOfLastExecution_ = 0;
       this.requestMacroTask_();
       return;

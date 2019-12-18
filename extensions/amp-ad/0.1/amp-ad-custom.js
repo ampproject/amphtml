@@ -116,7 +116,9 @@ export class AmpAdCustom extends AMP.BaseElement {
         return;
       }
 
-      templateData = this.handleTemplateData_(templateData);
+      templateData = this.handleTemplateData_(
+        /** @type {!JsonObject} */ (templateData)
+      );
 
       this.renderStarted();
 
@@ -197,11 +199,6 @@ export class AmpAdCustom extends AMP.BaseElement {
   unlayoutCallback() {
     this.uiHandler.applyUnlayoutUI();
     return true;
-  }
-
-  /** @override */
-  createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholder();
   }
 
   /**

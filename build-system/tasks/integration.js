@@ -24,7 +24,7 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {execOrDie} = require('../exec');
+const {execOrDie} = require('../common/exec');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -37,7 +37,11 @@ class Runner extends RuntimeTestRunner {
       return;
     }
     execOrDie('gulp clean');
-    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+    if (argv.compiled) {
+      execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+    } else {
+      execOrDie(`gulp build --config ${argv.config}`);
+    }
   }
 }
 

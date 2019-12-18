@@ -22,17 +22,17 @@
 const app = require('express')();
 const argv = require('minimist')(process.argv.slice(2));
 const bacon = require('baconipsum');
-const BBPromise = require('bluebird');
 const bodyParser = require('body-parser');
 const cors = require('./amp-cors');
 const devDashboard = require('./app-index/index');
 const formidable = require('formidable');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
 const jsdom = require('jsdom');
 const path = require('path');
 const request = require('request');
 const upload = require('multer')();
 const pc = process;
+const autocompleteEmailData = require('./autocomplete-test-data');
 const runVideoTestBench = require('./app-video-testbench');
 const {
   recaptchaFrameRequestHandler,
@@ -50,7 +50,6 @@ app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
 app.use('/list/', require('./routes/list'));
-app.use('/user-location/', require('./routes/user-location'));
 app.use('/test', require('./routes/test'));
 
 // Append ?csp=1 to the URL to turn on the CSP header.
@@ -229,7 +228,7 @@ app.use('/pwa', (req, res) => {
   }
   res.statusCode = 200;
   res.setHeader('Content-Type', contentType);
-  fs.readFileAsync(pc.cwd() + file).then(file => {
+  fs.promises.readFile(pc.cwd() + file).then(file => {
     res.end(file);
   });
 });
@@ -409,6 +408,19 @@ app.use('/form/autocomplete/query', (req, res) => {
 
 app.use('/form/autocomplete/error', (req, res) => {
   res(500);
+});
+
+app.use('/form/mention/query', (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+    res.json({items: autocompleteEmailData});
+    return;
+  }
+  const lowerCaseQuery = query.toLowerCase().trim();
+  const filtered = autocompleteEmailData.filter(l =>
+    l.toLowerCase().startsWith(lowerCaseQuery)
+  );
+  res.json({items: filtered});
 });
 
 app.use('/form/verify-search-json/post', (req, res) => {
@@ -754,6 +766,15 @@ app.post('/get-consent-no-prompt/', (req, res) => {
   res.json(body);
 });
 
+app.post('/check-consent', (req, res) => {
+  cors.assertCors(req, res, ['POST']);
+  res.json({
+    'consentRequired': req.query.consentRequired === 'true',
+    'consentStateValue': req.query.consentStateValue,
+    'expireCache': req.query.expireCache === 'true',
+  });
+});
+
 // Proxy with local JS.
 // Example:
 // http://localhost:8000/proxy/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
@@ -778,7 +799,7 @@ app.get('/iframe/*', (req, res) => {
 });
 
 app.get('/a4a_template/*', (req, res) => {
-  cors.assertCors(req, res, ['GET'], undefined, true);
+  cors.assertCors(req, res, ['GET']);
   const match = /^\/a4a_template\/([a-z-]+)\/(\d+)$/.exec(req.path);
   if (!match) {
     res.status(404);
@@ -788,13 +809,14 @@ app.get('/a4a_template/*', (req, res) => {
   const filePath =
     `${pc.cwd()}/extensions/amp-ad-network-${match[1]}-impl/` +
     `0.1/data/${match[2]}.template`;
-  fs.readFileAsync(filePath)
+  fs.promises
+    .readFile(filePath)
     .then(file => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('AMP-template-amp-creative', 'amp-mustache');
       res.end(file);
     })
-    .error(() => {
+    .catch(() => {
       res.status(404);
       res.end('Not found: ' + filePath);
     });
@@ -863,14 +885,15 @@ app.get(
     const mode = SERVE_MODE;
     const inabox = req.query['inabox'];
     const stream = Number(req.query['stream']);
-    fs.readFileAsync(pc.cwd() + filePath, 'utf8')
+    fs.promises
+      .readFile(pc.cwd() + filePath, 'utf8')
       .then(file => {
         if (req.query['amp_js_v']) {
           file = addViewerIntegrationScript(req.query['amp_js_v'], file);
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
 
-        if (inabox && req.headers.origin && req.query.__amp_source_origin) {
+        if (inabox && req.headers.origin) {
           // Allow CORS requests for A4A.
           cors.enableCors(req, res, req.headers.origin);
         } else {
@@ -1068,14 +1091,15 @@ app.get('/adzerk/*', (req, res) => {
   }
   const filePath =
     pc.cwd() + '/extensions/amp-ad-network-adzerk-impl/0.1/data/' + match[1];
-  fs.readFileAsync(filePath)
+  fs.promises
+    .readFile(filePath)
     .then(file => {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('AMP-Ad-Template-Extension', 'amp-mustache');
       res.setHeader('AMP-Ad-Response-Type', 'template');
       res.end(file);
     })
-    .error(() => {
+    .catch(() => {
       res.status(404);
       res.end('Not found: ' + filePath);
     });
@@ -1161,7 +1185,8 @@ app.get('/dist/amp-inabox-host.js', (req, res, next) => {
  */
 app.get('/dist/sw(.max)?.js', (req, res, next) => {
   const filePath = req.path;
-  fs.readFileAsync(pc.cwd() + filePath, 'utf8')
+  fs.promises
+    .readFile(pc.cwd() + filePath, 'utf8')
     .then(file => {
       let n = new Date();
       // Round down to the nearest 5 minutes.
@@ -1192,8 +1217,8 @@ app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
     // Cause a delay, to show the "stale-while-revalidate"
     if (req.path.includes('v0.js')) {
       const path = req.path.replace(/rtv\/\d+/, '');
-      return fs
-        .readFileAsync(pc.cwd() + path, 'utf8')
+      return fs.promises
+        .readFile(pc.cwd() + path, 'utf8')
         .then(file => {
           res.end(file);
         })
@@ -1210,7 +1235,8 @@ app.get('/dist/rtv/9[89]*/*.js', (req, res, next) => {
 
 app.get(['/dist/cache-sw.html'], (req, res, next) => {
   const filePath = '/test/manual/cache-sw.html';
-  fs.readFileAsync(pc.cwd() + filePath, 'utf8')
+  fs.promises
+    .readFile(pc.cwd() + filePath, 'utf8')
     .then(file => {
       let n = new Date();
       // Round down to the nearest 5 minutes.
@@ -1255,7 +1281,7 @@ app.get('/dist/diversions', (req, res) => {
  * Web worker binary.
  */
 app.get('/dist/ww(.max)?.js', (req, res) => {
-  fs.readFileAsync(pc.cwd() + req.path).then(file => {
+  fs.promises.readFile(pc.cwd() + req.path).then(file => {
     res.setHeader('Content-Type', 'text/javascript');
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(file);
@@ -1319,7 +1345,7 @@ function addViewerIntegrationScript(ampJsVersion, file) {
 }
 
 function getUrlPrefix(req) {
-  return '//' + req.headers.host;
+  return req.protocol + '://' + req.headers.host;
 }
 
 function generateInfo(filePath) {
@@ -1382,12 +1408,13 @@ app.use('(/dist)?/rtv/*/v0/analytics-vendors/:vendor.json', (req, res) => {
   const max = serveMode === 'default' ? '.max' : '';
   const localVendorConfigPath = `${pc.cwd()}/dist/v0/analytics-vendors/${vendor}${max}.json`;
 
-  fs.readFileAsync(localVendorConfigPath)
+  fs.promises
+    .readFile(localVendorConfigPath)
     .then(file => {
       res.setHeader('Content-Type', 'application/json');
       res.end(file);
     })
-    .error(() => {
+    .catch(() => {
       res.status(404);
       res.end('Not found: ' + localVendorConfigPath);
     });

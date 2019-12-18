@@ -150,7 +150,6 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: false,
       });
 
       clm.updateChildren(el.children);
@@ -165,7 +164,6 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: false,
       });
 
       clm.updateChildren(el.children);
@@ -183,7 +181,6 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: false,
       });
 
       clm.updateChildren(el.children);
@@ -205,7 +202,6 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: false,
       });
 
       clm.updateChildren(el.children);
@@ -228,7 +224,6 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: false,
       });
 
       clm.updateChildren(el.children);
@@ -250,7 +245,6 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: false,
         viewportIntersectionCallback,
       });
 
@@ -272,7 +266,6 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: false,
       });
 
       clm.updateChildren(el.children);
@@ -292,7 +285,6 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: false,
       });
 
       clm.updateChildren(el.children);
@@ -316,7 +308,6 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: false,
       });
 
       clm.updateChildren(el.children);
@@ -341,7 +332,6 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: false,
       });
 
       clm.updateChildren(el.children);
@@ -365,9 +355,9 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: true,
       });
 
+      clm.setQueueChanges(true);
       clm.updateChildren(el.children);
       await afterRenderPromise();
 
@@ -375,79 +365,19 @@ describes.realWin('child layout manager', {}, env => {
       expect(ownersMock.scheduleLayout).to.have.not.been.called;
     });
 
-    it('should schedule layout for one extra viewport on layout', async () => {
-      const el = createHorizontalScroller(5);
-      const clm = new ChildLayoutManager({
-        ampElement: ampElementMock,
-        intersectionElement: el,
-        queueChanges: true,
-      });
-
-      clm.updateChildren(el.children);
-      clm.wasLaidOut();
-      await afterRenderPromise();
-
-      expect(ownersMock.scheduleLayout)
-        .to.have.callCount(2)
-        .to.have.been.calledWith(domElementMock, el.children[0])
-        .to.have.been.calledWith(domElementMock, el.children[1]);
-    });
-
-    it('should schedule layout when wasLaidOut is called', async () => {
-      const el = createHorizontalScroller(5);
-      const clm = new ChildLayoutManager({
-        ampElement: ampElementMock,
-        intersectionElement: el,
-        queueChanges: true,
-      });
-
-      clm.updateChildren(el.children);
-      await afterRenderPromise();
-
-      expect(ownersMock.scheduleLayout).to.have.not.been.called;
-
-      clm.wasLaidOut();
-      await afterRenderPromise();
-
-      expect(ownersMock.scheduleLayout)
-        .to.have.callCount(2)
-        .to.have.been.calledWith(domElementMock, el.children[0])
-        .to.have.been.calledWith(domElementMock, el.children[1]);
-    });
-
-    it('should update viewport visibility', async () => {
-      const el = createHorizontalScroller(5);
-      const clm = new ChildLayoutManager({
-        ampElement: ampElementMock,
-        intersectionElement: el,
-        queueChanges: true,
-      });
-
-      clm.updateChildren(el.children);
-      clm.wasLaidOut();
-      await afterRenderPromise();
-
-      expect(ownersMock.updateInViewport)
-        .to.have.callCount(5)
-        .to.have.been.calledWith(domElementMock, el.children[0], true)
-        .to.have.been.calledWith(domElementMock, el.children[1], false)
-        .to.have.been.calledWith(domElementMock, el.children[2], false)
-        .to.have.been.calledWith(domElementMock, el.children[3], false)
-        .to.have.been.calledWith(domElementMock, el.children[4], false);
-    });
-
     it('should queue layout on scroll', async () => {
       const el = createHorizontalScroller(5);
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: true,
       });
 
+      clm.setQueueChanges(true);
       clm.updateChildren(el.children);
       clm.wasLaidOut();
       await afterRenderPromise();
 
+      clm.flushChanges();
       ownersMock.scheduleLayout.resetHistory();
       await afterScrollAndIntersectingPromise(el.children[1], el);
 
@@ -466,13 +396,14 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: true,
       });
 
+      clm.setQueueChanges(true);
       clm.updateChildren(el.children);
       clm.wasLaidOut();
       await afterRenderPromise();
 
+      clm.flushChanges();
       ownersMock.scheduleUnlayout.resetHistory();
       await afterScrollAndIntersectingPromise(el.children[3], el);
       await afterRenderPromise();
@@ -495,13 +426,14 @@ describes.realWin('child layout manager', {}, env => {
       const clm = new ChildLayoutManager({
         ampElement: ampElementMock,
         intersectionElement: el,
-        queueChanges: true,
       });
 
+      clm.setQueueChanges(true);
       clm.updateChildren(el.children);
       clm.wasLaidOut();
       await afterRenderPromise();
 
+      clm.flushChanges();
       ownersMock.updateInViewport.resetHistory();
       await afterScrollAndIntersectingPromise(el.children[1], el);
       await afterRenderPromise();

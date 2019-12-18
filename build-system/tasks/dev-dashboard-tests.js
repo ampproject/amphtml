@@ -15,10 +15,10 @@
  */
 'use strict';
 
-const config = require('../config');
-const deglob = require('globs-to-files');
+const config = require('../test-configs/config');
+const globby = require('globby');
 const Mocha = require('mocha');
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild} = require('../common/travis');
 
 /**
  * Run all the dev dashboard tests
@@ -30,7 +30,7 @@ async function devDashboardTests() {
   });
 
   // Add our files
-  const allDevDashboardTests = deglob.sync(config.devDashboardTestPaths);
+  const allDevDashboardTests = globby.sync(config.devDashboardTestPaths);
   allDevDashboardTests.forEach(file => {
     mocha.addFile(file);
   });

@@ -17,7 +17,6 @@
 import {Action} from '../amp-story-store-service';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryRequestService} from '../amp-story-request-service';
-import {AnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {ArticleComponent} from '../bookend/components/article';
 import {CtaLinkComponent} from '../bookend/components/cta-link';
@@ -25,6 +24,7 @@ import {LandscapeComponent} from '../bookend/components/landscape';
 import {LocalizationService} from '../../../../src/service/localization';
 import {PortraitComponent} from '../bookend/components/portrait';
 import {Services} from '../../../../src/services';
+import {StoryAnalyticsEvent, getAnalyticsService} from '../story-analytics';
 import {TextBoxComponent} from '../bookend/components/text-box';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -32,6 +32,7 @@ import {user} from '../../../../src/log';
 
 describes.realWin('amp-story-bookend', {amp: true}, env => {
   let win;
+  let doc;
   let storyElem;
   let bookend;
   let bookendElem;
@@ -123,18 +124,17 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    storyElem = win.document.createElement('amp-story');
-    storyElem.appendChild(win.document.createElement('amp-story-page'));
-    win.document.body.appendChild(storyElem);
-    bookendElem = createElementWithAttributes(
-      win.document,
-      'amp-story-bookend',
-      {'layout': 'nodisplay'}
-    );
+    doc = win.document;
+    storyElem = doc.createElement('amp-story');
+    storyElem.appendChild(doc.createElement('amp-story-page'));
+    doc.body.appendChild(storyElem);
+    bookendElem = createElementWithAttributes(doc, 'amp-story-bookend', {
+      'layout': 'nodisplay',
+    });
     storyElem.appendChild(bookendElem);
 
     requestService = new AmpStoryRequestService(win, storyElem);
-    sandbox.stub(Services, 'storyRequestService').returns(requestService);
+    env.sandbox.stub(Services, 'storyRequestService').returns(requestService);
 
     const localizationService = new LocalizationService(win);
     registerServiceBuilder(win, 'localization', () => localizationService);
@@ -146,8 +146,8 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     analyticsVariables = getVariableService(win);
 
     // Force sync mutateElement.
-    sandbox.stub(bookend, 'mutateElement').callsArg(0);
-    sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
+    env.sandbox.stub(bookend, 'mutateElement').callsArg(0);
+    env.sandbox.stub(bookend, 'getStoryMetadata_').returns(metadata);
   });
 
   it('should build the users json', async () => {
@@ -212,7 +212,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();
@@ -284,7 +284,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();
@@ -318,7 +318,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -330,7 +330,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     }
   );
 
-  it('should forward the correct target when clicking on an element', () => {
+  it('should forward the correct target when clicking on an element', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -352,27 +352,26 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
-    const clickSpy = sandbox.spy();
-    win.document.addEventListener('click', clickSpy);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    const clickSpy = env.sandbox.spy();
+    doc.addEventListener('click', clickSpy);
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const ctaLinks = bookend.bookendEl_.querySelector(
-        '.i-amphtml-story-bookend-cta-link-wrapper'
-      );
-      ctaLinks.children[0].onclick = function(e) {
-        e.preventDefault(); // Make the test not actually navigate.
-      };
-      ctaLinks.children[0].click();
+    await bookend.loadConfigAndMaybeRenderBookend();
+    const ctaLinks = bookend.bookendEl_.querySelector(
+      '.i-amphtml-story-bookend-cta-link-wrapper'
+    );
+    ctaLinks.children[0].onclick = function(e) {
+      e.preventDefault(); // Make the test not actually navigate.
+    };
+    ctaLinks.children[0].click();
 
-      expect(clickSpy.getCall(0).args[0]).to.contain({
-        '__AMP_CUSTOM_LINKER_TARGET__': ctaLinks.children[0],
-      });
+    expect(clickSpy.getCall(0).args[0]).to.contain({
+      '__AMP_CUSTOM_LINKER_TARGET__': ctaLinks.children[0],
     });
   });
 
-  it('should fire analytics event when clicking on a link', () => {
+  it('should fire analytics event when clicking on a link', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -394,35 +393,34 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
-    const analyticsSpy = sandbox.spy(analytics, 'triggerEvent');
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    const analyticsSpy = env.sandbox.spy(analytics, 'triggerEvent');
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const ctaLinks = bookend.bookendEl_.querySelector(
-        '.i-amphtml-story-bookend-cta-link-wrapper'
-      );
-      ctaLinks.children[0].onclick = function(e) {
-        e.preventDefault(); // Make the test not actually navigate.
-      };
-      ctaLinks.children[0].click();
+    await bookend.loadConfigAndMaybeRenderBookend();
+    const ctaLinks = bookend.bookendEl_.querySelector(
+      '.i-amphtml-story-bookend-cta-link-wrapper'
+    );
+    ctaLinks.children[0].onclick = function(e) {
+      e.preventDefault(); // Make the test not actually navigate.
+    };
+    ctaLinks.children[0].click();
 
-      expect(analyticsSpy).to.have.been.calledWith(
-        AnalyticsEvent.BOOKEND_CLICK
-      );
-      expect(
-        analyticsVariables.get()[AnalyticsVariable.BOOKEND_TARGET_HREF]
-      ).to.equal('http://localhost:9876/google.com');
-      expect(
-        analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_TYPE]
-      ).to.equal('cta-link');
-      expect(
-        analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_POSITION]
-      ).to.equal(1);
-    });
+    expect(analyticsSpy).to.have.been.calledWith(
+      StoryAnalyticsEvent.BOOKEND_CLICK
+    );
+    expect(
+      analyticsVariables.get()[AnalyticsVariable.BOOKEND_TARGET_HREF]
+    ).to.equal('http://localhost:9876/google.com');
+    expect(
+      analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_TYPE]
+    ).to.equal('cta-link');
+    expect(
+      analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_POSITION]
+    ).to.equal(1);
   });
 
-  it('should not fire analytics event when clicking non-clickable components', () => {
+  it('should not fire analytics event when clicking non-clickable components', async () => {
     const userJson = {
       'bookendVersion': 'v1.0',
       'shareProviders': [
@@ -443,19 +441,18 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
-    const analyticsSpy = sandbox.spy(analytics, 'triggerEvent');
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    const analyticsSpy = env.sandbox.spy(analytics, 'triggerEvent');
 
     bookend.build();
-    return bookend.loadConfigAndMaybeRenderBookend().then(() => {
-      const textEl = bookend.bookendEl_.querySelector(
-        '.i-amphtml-story-bookend-text'
-      );
+    await bookend.loadConfigAndMaybeRenderBookend();
+    const textEl = bookend.bookendEl_.querySelector(
+      '.i-amphtml-story-bookend-text'
+    );
 
-      textEl.click();
+    textEl.click();
 
-      expect(analyticsSpy).to.not.have.been.called;
-    });
+    expect(analyticsSpy).to.not.have.been.called;
   });
 
   it(
@@ -488,7 +485,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -522,7 +519,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -562,7 +559,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -597,7 +594,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -639,7 +636,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -674,7 +671,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -716,7 +713,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
         ],
       };
 
-      sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+      env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
       bookend.build();
       await bookend.loadConfigAndMaybeRenderBookend();
@@ -768,7 +765,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       'whatsapp',
     ];
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();
@@ -795,7 +792,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();
@@ -820,9 +817,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    const userWarnStub = sandbox.stub(user(), 'warn');
+    const userWarnStub = env.sandbox.stub(user(), 'warn');
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     await bookend.loadConfigAndMaybeRenderBookend();
@@ -1043,7 +1040,7 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       ],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     expectAsyncConsoleError(
@@ -1069,10 +1066,128 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
       'components': [],
     };
 
-    sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
+    env.sandbox.stub(requestService, 'loadBookendConfig').resolves(userJson);
 
     bookend.build();
     const config = await bookend.loadConfigAndMaybeRenderBookend();
     expect(config.components.length).to.equal(0);
+  });
+
+  it('should rewrite article thumbnail image url for cached version', async () => {
+    const component = {
+      url: 'http://example.com/article.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example article',
+      image: '../../assets/01-iconic-american-destinations.jpg',
+    };
+
+    const fakeDoc = {
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
+      location: {
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const article = new ArticleComponent();
+    const el = article.buildElement(component, fakeDoc, {position: 0});
+    expect(el.querySelector('img').src).to.equal(
+      'https://www-nationalgeographic-com.cdn.ampproject.org/i/s/www.nationalgeographic.com/amp-stories/assets/01-iconic-american-destinations.jpg'
+    );
+  });
+
+  it('should rewrite landscape thumbnail image url for cached version', async () => {
+    const component = {
+      url: 'http://example.com/landscape.html',
+      domainName: 'example.com',
+      type: 'landscape',
+      title: 'This is an example landscape',
+      image: './assets/01-iconic-american-destinations.jpg',
+    };
+
+    const fakeDoc = {
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
+      location: {
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const landscape = new LandscapeComponent();
+    const el = landscape.buildElement(component, fakeDoc, {position: 0});
+    expect(el.querySelector('img').src).to.equal(
+      'https://www-nationalgeographic-com.cdn.ampproject.org/i/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/assets/01-iconic-american-destinations.jpg'
+    );
+  });
+
+  it('should rewrite portrait thumbnail image url for cached version', async () => {
+    const component = {
+      url: 'http://example.com/portrait.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example portrait',
+      image: 'assets/01-iconic-american-destinations.jpg',
+    };
+
+    const fakeDoc = {
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
+      location: {
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const portrait = new PortraitComponent();
+    const el = portrait.buildElement(component, fakeDoc, {position: 0});
+    expect(el.querySelector('img').src).to.equal(
+      'https://www-nationalgeographic-com.cdn.ampproject.org/i/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/assets/01-iconic-american-destinations.jpg'
+    );
+  });
+
+  it('should not rewrite thumbnail image url when using absolute url', async () => {
+    const component = {
+      url: 'http://example.com/portrait.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example portrait',
+      image: 'http://placehold.it/256x128',
+    };
+
+    const fakeDoc = {
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
+      location: {
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const portrait = new PortraitComponent();
+    const el = portrait.buildElement(component, fakeDoc, {position: 0});
+    expect(el.querySelector('img').src).to.equal('http://placehold.it/256x128');
+  });
+
+  it('should not rewrite thumbnail image for origin documents', async () => {
+    const component = {
+      url: 'http://example.com/portrait.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example portrait',
+      image: '../../assets/01-iconic-american-destinations.jpg',
+    };
+
+    const fakeDoc = {
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
+      location: {
+        href:
+          'https://www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const portrait = new PortraitComponent();
+    const el = portrait.buildElement(component, fakeDoc, {position: 0});
+    expect(el.querySelector('img').src).to.equal(
+      'https://www.nationalgeographic.com/amp-stories/assets/01-iconic-american-destinations.jpg'
+    );
   });
 });

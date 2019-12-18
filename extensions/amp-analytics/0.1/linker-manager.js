@@ -173,7 +173,7 @@ export class LinkerManager {
     const location = WindowInterface.getLocation(this.ampdoc_.win);
     const isProxyOrigin = this.urlService_.isProxyOrigin(location);
     linkerNames.forEach(name => {
-      const mergedConfig = Object.assign({}, defaultConfig, config[name]);
+      const mergedConfig = {...defaultConfig, ...config[name]};
 
       if (mergedConfig['enabled'] !== true) {
         user().info(

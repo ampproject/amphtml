@@ -74,9 +74,7 @@ function createContainer(global, data) {
 
   setStyles(container, {
     width: '100%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: 'block',
   });
 
   return container;
@@ -90,6 +88,9 @@ function createContainer(global, data) {
 function getBeOpinionAsyncInit(global, accountId) {
   const {context} = global;
   return function() {
+    context.onResizeDenied(function(requestedHeight, requestedWidth) {
+      context.requestResize(requestedWidth, requestedHeight);
+    });
     global.BeOpinionSDK.init({
       account: accountId,
       onContentReceive: function(hasContent) {
@@ -102,7 +103,6 @@ function getBeOpinionAsyncInit(global, accountId) {
       onHeightChange: function(newHeight) {
         const c = global.document.getElementById('c');
         const boundingClientRect = c./*REVIEW*/ getBoundingClientRect();
-        context.onResizeDenied(context.requestResize.bind(context));
         context.requestResize(boundingClientRect.width, newHeight);
       },
     });

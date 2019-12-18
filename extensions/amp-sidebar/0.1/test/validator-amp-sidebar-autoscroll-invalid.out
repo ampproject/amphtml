@@ -32,15 +32,15 @@ FAIL
 |    <!-- Invalid: Use of autoscroll outside amp-sidebar with autoscroll-->
 |    <div autoscroll></div>
 >>   ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar-autoscroll-invalid.html:32:2 The attribute 'autoscroll' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-sidebar/0.1/test/validator-amp-sidebar-autoscroll-invalid.html:32:2 The attribute 'autoscroll' may not appear in tag 'div'.
 |
 |      <!-- testing with a parent that does not have a matching tag. -->
 |    <does-not-exist>
 >>   ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar-autoscroll-invalid.html:35:2 The tag 'does-not-exist' is disallowed. [DISALLOWED_HTML]
+amp-sidebar/0.1/test/validator-amp-sidebar-autoscroll-invalid.html:35:2 The tag 'does-not-exist' is disallowed.
 |      <div autoscroll></div>
 >>     ^~~~~~~~~
-amp-sidebar/0.1/test/validator-amp-sidebar-autoscroll-invalid.html:36:4 The attribute 'autoscroll' may not appear in tag 'div'. [DISALLOWED_HTML]
+amp-sidebar/0.1/test/validator-amp-sidebar-autoscroll-invalid.html:36:4 The attribute 'autoscroll' may not appear in tag 'div'.
 |    </does-not-exist>
 |  </body>
 |  </html>
