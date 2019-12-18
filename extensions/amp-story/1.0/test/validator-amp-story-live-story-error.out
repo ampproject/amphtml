@@ -41,7 +41,7 @@ FAIL
 |    <body>
 |      <amp-story standalone publisher="AMP Team" title="Visual Diff Test"
 >>     ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-live-story-error.html:41:4 The attribute 'live-story' in tag 'amp-story' is set to the invalid value 'somevalue'. (see https://amp.dev/documentation/components/amp-story) [DISALLOWED_HTML]
+amp-story/1.0/test/validator-amp-story-live-story-error.html:41:4 The attribute 'live-story' in tag 'amp-story' is set to the invalid value 'somevalue'. (see https://amp.dev/documentation/components/amp-story)
 |          publisher-logo-src="/examples/visual-tests/photos/120.png"
 |          poster-portrait-src="/examples/visual-tests/picsum.photos/image981_900x1600.jpg"
 |          poster-landscape-src="/examples/visual-tests/picsum.photos/image981_1600x900.jpg"

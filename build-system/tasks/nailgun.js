@@ -19,9 +19,8 @@ const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
 const log = require('fancy-log');
 const sleep = require('sleep-promise');
-const {exec, execScriptAsync, getStdout} = require('../exec');
+const {exec, execScriptAsync, getStdout} = require('../common/exec');
 const {green, red, cyan, yellow} = colors;
-const {isTravisBuild} = require('../travis');
 const {maybeGenerateRunner} = require('./generate-runner');
 
 // Used to start and stop the Closure nailgun server
@@ -36,6 +35,7 @@ const DEFAULT_NAILGUN_PORT = '2113';
 const CHECK_TYPES_NAILGUN_PORT = '2114';
 const DIST_NAILGUN_PORT = '2115';
 const NAILGUN_STARTUP_TIMEOUT_MS = 5 * 1000;
+const NAILGUN_STOP_TIMEOUT_MS = 5 * 1000;
 
 /**
  * Replaces the default compiler binary with nailgun on linux and macos
@@ -111,9 +111,7 @@ async function startNailgunServer(port, detached) {
     try {
       const version = getStdout(getVersionCmd).trim();
       if (/Version/.test(version)) {
-        if (!isTravisBuild()) {
-          log('Started', cyan('nailgun-server.jar'), 'on port', cyan(port));
-        }
+        log('Started', cyan('nailgun-server.jar'), 'on port', cyan(port));
         return;
       }
     } catch (e) {
@@ -145,18 +143,21 @@ async function stopNailgunServer(port) {
   }
   if (process.platform == 'darwin' || process.platform == 'linux') {
     const stopNailgunServerCmd = `${nailgunRunner} --nailgun-port ${port} ng-stop`;
-    if (exec(stopNailgunServerCmd, {stdio: 'pipe'}).status == 0) {
-      if (!isTravisBuild()) {
-        log('Stopped', cyan('nailgun-server.jar'), 'on port', cyan(port));
-      }
+    const stopped = exec(stopNailgunServerCmd, {
+      stdio: 'pipe',
+      timeout: NAILGUN_STOP_TIMEOUT_MS,
+    });
+    if (stopped.status == 0) {
+      log('Stopped', cyan('nailgun-server.jar'), 'on port', cyan(port));
     } else {
       log(
         yellow('WARNING:'),
-        'Could not find a running instance of',
+        'Could not stop',
         cyan('nailgun-server.jar'),
         'on port',
         cyan(port)
       );
+      log(red(stopped.stderr));
     }
   }
 }

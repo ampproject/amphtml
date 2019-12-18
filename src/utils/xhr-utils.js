@@ -80,7 +80,7 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  * @private
  */
 export function toStructuredCloneable(input, init) {
-  const newInit = Object.assign({}, init);
+  const newInit = {...init};
   if (isFormDataWrapper(init.body)) {
     const wrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
@@ -200,10 +200,10 @@ export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
     return Promise.resolve();
   }
 
-  const viewer = Services.viewerForDoc(ampdocSingle);
   const whenUnblocked = init.prerenderSafe
     ? Promise.resolve()
-    : viewer.whenFirstVisible();
+    : ampdocSingle.whenFirstVisible();
+  const viewer = Services.viewerForDoc(ampdocSingle);
   const urlIsProxy = isProxyOrigin(input);
   const viewerCanIntercept = viewer.hasCapability('xhrInterceptor');
   const interceptorDisabledForLocalDev =

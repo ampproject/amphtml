@@ -29,8 +29,6 @@ describes.sandboxed('allocateVariant', {}, env => {
   let getNotificationStub;
 
   beforeEach(() => {
-    const {sandbox} = env;
-
     fakeWin = {
       Math: {
         random: () => {
@@ -47,8 +45,8 @@ describes.sandboxed('allocateVariant', {}, env => {
 
     fakeHead = {};
 
-    getCidStub = sandbox.stub();
-    sandbox
+    getCidStub = env.sandbox.stub();
+    env.sandbox
       .stub(Services, 'cidForDoc')
       .withArgs(ampdoc)
       .returns(
@@ -57,16 +55,16 @@ describes.sandboxed('allocateVariant', {}, env => {
         })
       );
 
-    uniformStub = sandbox.stub();
-    sandbox
+    uniformStub = env.sandbox.stub();
+    env.sandbox
       .stub(Services, 'cryptoFor')
       .withArgs(fakeWin)
       .returns({
         uniform: uniformStub,
       });
 
-    getNotificationStub = sandbox.stub();
-    sandbox
+    getNotificationStub = env.sandbox.stub();
+    env.sandbox
       .stub(Services, 'userNotificationManagerForDoc')
       .withArgs(fakeHead)
       .returns(
@@ -75,12 +73,10 @@ describes.sandboxed('allocateVariant', {}, env => {
         })
       );
 
-    fakeViewer = {
-      getParam: () => 'true',
-    };
-    getParamStub = sandbox.stub(fakeViewer, 'getParam').returns('true');
+    fakeViewer = {};
 
-    sandbox.stub(ampdoc, 'getHeadNode').returns(fakeHead);
+    env.sandbox.stub(ampdoc, 'getHeadNode').returns(fakeHead);
+    getParamStub = env.sandbox.stub(ampdoc, 'getParam').returns('true');
   });
 
   it('should throw for invalid config', () => {

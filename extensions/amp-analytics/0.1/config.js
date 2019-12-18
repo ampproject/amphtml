@@ -68,6 +68,7 @@ export class AnalyticsConfig {
 
     return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
       .then(this.processConfigs_.bind(this))
+      .then(this.checkWarningMessage_.bind(this))
       .then(this.addExperimentParams_.bind(this))
       .then(() => this.config_);
   }
@@ -97,7 +98,6 @@ export class AnalyticsConfig {
    * @return {!Promise<undefined>}
    */
   fetchVendorConfig_() {
-    // eslint-disable-next-line no-undef
     if (!ANALYTICS_VENDOR_SPLIT) {
       return Promise.resolve();
     }
@@ -136,21 +136,21 @@ export class AnalyticsConfig {
     const type = this.element_.getAttribute('type');
     const rtv = getMode().rtvVersion;
     const isRc = rtv ? rtv.substring(0, 2) === '03' : false;
-    // eslint-disable-next-line no-undef
-    const isExperiment = ANALYTICS_VENDOR_SPLIT;
 
     if (
       type === 'googleanalytics' &&
-      (isRc || isExperiment) &&
+      (isRc || ANALYTICS_VENDOR_SPLIT) &&
       this.config_['requests']
     ) {
       if (this.config_['requests']['pageview']) {
         this.config_['requests']['pageview'][
           'baseUrl'
-        ] += `&aae=${isExperiment}`;
+        ] += `&aae=${ANALYTICS_VENDOR_SPLIT}`;
       }
       if (this.config_['requests']['timing']) {
-        this.config_['requests']['timing']['baseUrl'] += `&aae=${isExperiment}`;
+        this.config_['requests']['timing'][
+          'baseUrl'
+        ] += `&aae=${ANALYTICS_VENDOR_SPLIT}`;
       }
     }
   }
@@ -268,6 +268,28 @@ export class AnalyticsConfig {
           }
         );
     });
+  }
+
+  /**
+   * Check if config has warning, display on console and
+   * remove the property.
+   * @private
+   */
+  checkWarningMessage_() {
+    if (this.config_['warningMessage']) {
+      const TAG = this.getName_();
+      const type = this.element_.getAttribute('type');
+      const remoteConfigUrl = this.element_.getAttribute('config');
+
+      user().warn(
+        TAG,
+        'Warning from analytics vendor%s%s: %s',
+        type ? ' ' + type : '',
+        remoteConfigUrl ? ' with remote config url ' + remoteConfigUrl : '',
+        String(this.config_['warningMessage'])
+      );
+      delete this.config_['warningMessage'];
+    }
   }
 
   /**

@@ -135,10 +135,14 @@ function getSpinnerPath() {
  * @return {!Element}
  */
 export function createSpinnerDom(html) {
+  // Extra wrapping div here is to workaround:
+  // https://bugs.chromium.org/p/chromium/issues/detail?id=1002748
   const content = html`
-    <svg class="i-amphtml-new-loader-spinner" viewbox="0 0 48 48">
-      <path class="i-amphtml-new-loader-spinner-path" fill="none"></path>
-    </svg>
+    <div class="i-amphtml-new-loader-spinner-wrapper">
+      <svg class="i-amphtml-new-loader-spinner" viewbox="0 0 48 48">
+        <path class="i-amphtml-new-loader-spinner-path" fill="none"></path>
+      </svg>
+    </div>
   `;
 
   // We create the path with code, rather than inline it above, as it is

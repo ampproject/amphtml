@@ -34,7 +34,7 @@ describes.fakeWin('amp-story-store-service', {}, env => {
   });
 
   it('should subscribe to property mutations and receive the new value', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
     storeService.dispatch(Action.TOGGLE_BOOKEND, true);
     expect(listenerSpy).to.have.been.calledOnce;
@@ -42,20 +42,20 @@ describes.fakeWin('amp-story-store-service', {}, env => {
   });
 
   it('should not trigger a listener if another property changed', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.CAN_INSERT_AUTOMATIC_AD, listenerSpy);
     storeService.dispatch(Action.TOGGLE_BOOKEND, true);
     expect(listenerSpy).to.have.callCount(0);
   });
 
   it('should not trigger a listener on subscribe by default', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
     expect(listenerSpy).to.have.callCount(0);
   });
 
   it('should trigger a listener on subscribe if option is set to true', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy, true);
     expect(listenerSpy).to.have.been.calledOnce;
     expect(listenerSpy).to.have.been.calledWith(false);
@@ -85,7 +85,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   });
 
   it('should toggle the bookend', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
     storeService.dispatch(Action.TOGGLE_BOOKEND, true);
     expect(listenerSpy).to.have.been.calledOnce;
@@ -93,7 +93,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   });
 
   it('should not toggle the bookend if embed mode disables it', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.state_[StateProperty.CAN_SHOW_BOOKEND] = false;
     storeService.subscribe(StateProperty.BOOKEND_STATE, listenerSpy);
     storeService.dispatch(Action.TOGGLE_BOOKEND, true);
@@ -101,7 +101,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   });
 
   it('should toggle the muted state', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.MUTED_STATE, listenerSpy);
     storeService.dispatch(Action.TOGGLE_MUTED, false);
     expect(listenerSpy).to.have.been.calledOnce;
@@ -109,7 +109,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   });
 
   it('should toggle the desktop state', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.DESKTOP_STATE, listenerSpy);
     storeService.dispatch(Action.TOGGLE_DESKTOP, true);
     expect(listenerSpy).to.have.been.calledOnce;
@@ -117,7 +117,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   });
 
   it('should update the current page id', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.CURRENT_PAGE_ID, listenerSpy);
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
@@ -128,7 +128,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   });
 
   it('should update the current page index', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.CURRENT_PAGE_INDEX, listenerSpy);
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
@@ -139,7 +139,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   });
 
   it('should toggle the has audio state', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.HAS_AUDIO_STATE, listenerSpy);
     storeService.dispatch(Action.TOGGLE_HAS_AUDIO, true);
     expect(listenerSpy).to.have.been.calledOnce;
@@ -147,7 +147,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   });
 
   it('should toggle the landscape state', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.LANDSCAPE_STATE, listenerSpy);
     storeService.dispatch(Action.TOGGLE_LANDSCAPE, true);
     expect(listenerSpy).to.have.been.calledOnce;
@@ -155,7 +155,7 @@ describes.fakeWin('amp-story-store-service actions', {}, env => {
   });
 
   it('should toggle the supported browser state', () => {
-    const listenerSpy = sandbox.spy();
+    const listenerSpy = env.sandbox.spy();
     storeService.subscribe(StateProperty.SUPPORTED_BROWSER_STATE, listenerSpy);
     storeService.dispatch(Action.TOGGLE_SUPPORTED_BROWSER, false);
     expect(listenerSpy).to.have.been.calledOnce;

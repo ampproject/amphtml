@@ -23,7 +23,6 @@ import {getAdCid} from '../../src/ad-cid';
 describes.realWin('ad-cid', {amp: true}, env => {
   const cidScope = 'cid-in-ads-test';
   const config = adConfig['_ping_'];
-  let sandbox;
 
   let cidService;
   let clock;
@@ -33,7 +32,6 @@ describes.realWin('ad-cid', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    sandbox = env.sandbox;
     clock = lolex.install({
       target: win,
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
@@ -57,7 +55,7 @@ describes.realWin('ad-cid', {amp: true}, env => {
     config.clientIdScope = cidScope;
 
     let getCidStruct;
-    sandbox.stub(cidService, 'get').callsFake(struct => {
+    env.sandbox.stub(cidService, 'get').callsFake(struct => {
       getCidStruct = struct;
       return Promise.resolve('test123');
     });
@@ -76,7 +74,7 @@ describes.realWin('ad-cid', {amp: true}, env => {
     config.clientIdCookieName = 'different-cookie-name';
 
     let getCidStruct;
-    sandbox.stub(cidService, 'get').callsFake(struct => {
+    env.sandbox.stub(cidService, 'get').callsFake(struct => {
       getCidStruct = struct;
       return Promise.resolve('test123');
     });
@@ -92,7 +90,7 @@ describes.realWin('ad-cid', {amp: true}, env => {
 
   it('should return on timeout', () => {
     config.clientIdScope = cidScope;
-    sandbox.stub(cidService, 'get').callsFake(() => {
+    env.sandbox.stub(cidService, 'get').callsFake(() => {
       return Services.timerFor(win).promise(2000);
     });
     const p = getAdCid(adElement).then(cid => {
@@ -109,7 +107,7 @@ describes.realWin('ad-cid', {amp: true}, env => {
 
   it('should return undefined on failed CID', () => {
     config.clientIdScope = cidScope;
-    sandbox.stub(cidService, 'get').callsFake(() => {
+    env.sandbox.stub(cidService, 'get').callsFake(() => {
       return Promise.reject(new Error('nope'));
     });
     return expect(getAdCid(adElement)).to.eventually.be.undefined;

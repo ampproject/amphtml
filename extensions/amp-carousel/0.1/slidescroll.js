@@ -17,6 +17,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseSlides} from './base-slides';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {bezierCurve} from '../../../src/curve';
 import {closestAncestorElementBySelector} from '../../../src/dom';
@@ -35,7 +36,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 const SHOWN_CSS_CLASS = 'i-amphtml-slide-item-show';
 
 /** @const {number} */
-const NATIVE_SNAP_TIMEOUT = 135;
+const NATIVE_SNAP_TIMEOUT = 200;
 
 /** @const {number} */
 const IOS_CUSTOM_SNAP_TIMEOUT = 45;
@@ -80,11 +81,8 @@ export class AmpSlideScroll extends BaseSlides {
     /** @private {?number} */
     this.scrollTimeout_ = null;
 
-    /** @private {?number} */
-    this.touchEndTimeout_ = null;
-
     /** @private {boolean} */
-    this.hasTouchMoved_ = false;
+    this.isTouching_ = false;
 
     /**
      * 0 - not in an elastic state.
@@ -164,6 +162,8 @@ export class AmpSlideScroll extends BaseSlides {
     this.noOfSlides_ = this.slides_.length;
 
     this.slidesContainer_ = this.win.document.createElement('div');
+    // Focusable container makes it possible to fully consume Arrow key events.
+    this.slidesContainer_.setAttribute('tabindex', '-1');
     this.slidesContainer_.classList.add('i-amphtml-slides-container');
     // Let screen reader know that this is a live area and changes
     // to it (such after pressing next) should be announced to the
@@ -207,6 +207,10 @@ export class AmpSlideScroll extends BaseSlides {
     this.slidesContainer_.addEventListener(
       'scroll',
       this.scrollHandler_.bind(this)
+    );
+    this.slidesContainer_.addEventListener(
+      'keydown',
+      this.keydownHandler_.bind(this)
     );
 
     listen(
@@ -254,13 +258,36 @@ export class AmpSlideScroll extends BaseSlides {
    */
   touchMoveHandler_() {
     this.clearAutoplay();
-    if (!this.hasNativeSnapPoints_) {
-      return;
+    this.isTouching_ = true;
+  }
+
+  /**
+   *
+   * @param {number} timeout The timeout to wait for before considering scroll
+   *    settled, unless this method is called again.
+   */
+  waitForScrollSettled_(timeout) {
+    if (this.scrollTimeout_) {
+      Services.timerFor(this.win).cancel(this.scrollTimeout_);
     }
-    this.hasTouchMoved_ = true;
-    if (this.touchEndTimeout_) {
-      Services.timerFor(this.win).cancel(this.touchEndTimeout_);
-    }
+
+    this.scrollTimeout_ = /** @type {number} */ (Services.timerFor(
+      this.win
+    ).delay(() => {
+      this.scrollTimeout_ = null;
+
+      if (this.snappingInProgress_ || this.isTouching_) {
+        return;
+      }
+
+      const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
+
+      if (this.hasNativeSnapPoints_) {
+        this.updateOnScroll_(currentScrollLeft);
+      } else {
+        this.customSnap_(currentScrollLeft);
+      }
+    }, timeout));
   }
 
   /**
@@ -268,32 +295,16 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   touchEndHandler_() {
-    if (this.hasTouchMoved_) {
-      if (this.scrollTimeout_) {
-        Services.timerFor(this.win).cancel(this.scrollTimeout_);
-      }
-      const timeout = this.shouldDisableCssSnap_
-        ? IOS_TOUCH_TIMEOUT
-        : NATIVE_TOUCH_TIMEOUT;
-      // Timer that detects scroll end and/or end of snap scroll.
-      this.touchEndTimeout_ = /** @type {number} */ (Services.timerFor(
-        this.win
-      ).delay(() => {
-        const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
-
-        if (this.snappingInProgress_) {
-          return;
-        }
-        this.updateOnScroll_(currentScrollLeft);
-        this.touchEndTimeout_ = null;
-      }, timeout));
-    }
-    this.hasTouchMoved_ = false;
+    const timeout = this.shouldDisableCssSnap_
+      ? IOS_TOUCH_TIMEOUT
+      : NATIVE_TOUCH_TIMEOUT;
+    this.isTouching_ = false;
+    this.waitForScrollSettled_(timeout);
   }
 
   /** @override */
   onLayoutMeasure() {
-    this.slideWidth_ = this.getLayoutWidth();
+    this.slideWidth_ = this.element.getLayoutWidth();
   }
 
   /** @override */
@@ -389,37 +400,35 @@ export class AmpSlideScroll extends BaseSlides {
    * @private
    */
   scrollHandler_(unusedEvent) {
-    if (this.scrollTimeout_) {
-      Services.timerFor(this.win).cancel(this.scrollTimeout_);
-    }
-
     const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
     if (!this.isIos_) {
       this.handleCustomElasticScroll_(currentScrollLeft);
     }
 
-    if (!this.touchEndTimeout_) {
-      const timeout = this.hasNativeSnapPoints_
-        ? NATIVE_SNAP_TIMEOUT
-        : this.isIos_
-        ? IOS_CUSTOM_SNAP_TIMEOUT
-        : CUSTOM_SNAP_TIMEOUT;
-      // Timer that detects scroll end and/or end of snap scroll.
-      this.scrollTimeout_ = /** @type {number} */ (Services.timerFor(
-        this.win
-      ).delay(() => {
-        if (this.snappingInProgress_) {
-          return;
-        }
-        if (this.hasNativeSnapPoints_) {
-          this.updateOnScroll_(currentScrollLeft);
-        } else {
-          this.customSnap_(currentScrollLeft);
-        }
-      }, timeout));
-    }
+    const timeout = this.hasNativeSnapPoints_
+      ? NATIVE_SNAP_TIMEOUT
+      : this.isIos_
+      ? IOS_CUSTOM_SNAP_TIMEOUT
+      : CUSTOM_SNAP_TIMEOUT;
+    // Timer that detects scroll end and/or end of snap scroll.
+    this.waitForScrollSettled_(timeout);
+
     this.previousScrollLeft_ = currentScrollLeft;
+  }
+
+  /**
+   * Escapes Left and Right arrow key events on the carousel container.
+   * This is to prevent them from doubly interacting with surrounding viewer
+   * contexts such as email clients when interacting with the amp-carousel.
+   * @param {!Event} event
+   * @private
+   */
+  keydownHandler_(event) {
+    const {key} = event;
+    if (key == Keys.LEFT_ARROW || key == Keys.RIGHT_ARROW) {
+      event.stopPropagation();
+    }
   }
 
   /**
@@ -590,19 +599,9 @@ export class AmpSlideScroll extends BaseSlides {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
-      // TODO(amphtml): Identify more platforms that require
-      // i-amphtml-no-scroll.
-      if (this.isIos_) {
-        // Make the container non scrollable to stop scroll events.
-        this.slidesContainer_.classList.add('i-amphtml-no-scroll');
-      }
       // Scroll to new slide and update scrollLeft to the correct slide.
       this.showSlideAndTriggerAction_(newIndex);
       this.vsync_.mutate(() => {
-        if (this.isIos_) {
-          // Make the container scrollable again to enable user swiping.
-          this.slidesContainer_.classList.remove('i-amphtml-no-scroll');
-        }
         this.snappingInProgress_ = false;
       });
     });
