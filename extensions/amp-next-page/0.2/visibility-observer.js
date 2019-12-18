@@ -52,11 +52,11 @@ export class VisibilityObserverEntry {
   /**
    * @param {!Element} element
    * @param {!Element} parent
-   * @param {!Function} callback
+   * @param {function(!ViewportRelativePos)} callback
    */
   observe(element, parent, callback) {
-    const top = this.observer_.ampdoc.win.document.createElement('div');
-    const bottom = this.observer_.ampdoc.win.document.createElement('div');
+    const top = element.ownerDocument.createElement('div');
+    const bottom = element.ownerDocument.createElement('div');
 
     parent.insertBefore(top, element);
     parent.insertBefore(bottom, element.nextSibling);
@@ -77,11 +77,11 @@ export class VisibilityObserverEntry {
    * Called when a position change is detected on the injected
    * top sentinel element
    * @param {?PositionInViewportEntryDef} position
-   * @param {!Function} callback
+   * @param {function(!ViewportRelativePos)} callback
    */
   topSentinelPositionChanged(position, callback) {
     const prevTopSentinelPosition = this.topSentinelPosition_;
-    if (position.relativePos === prevTopSentinelPosition) {
+    if (!position || position.relativePos === prevTopSentinelPosition) {
       return;
     }
     this.topSentinelPosition_ = position.relativePos;
@@ -92,11 +92,11 @@ export class VisibilityObserverEntry {
    * Called when a position change is detected on the injected
    * bottom sentinel element
    * @param {?PositionInViewportEntryDef} position
-   * @param {!Function} callback
+   * @param {function(!ViewportRelativePos)} callback
    */
   bottomSentinelPositionChanged(position, callback) {
     const prevBottomSentinelPosition = this.bottomSentinelPosition_;
-    if (position.relativePos === prevBottomSentinelPosition) {
+    if (!position || position.relativePos === prevBottomSentinelPosition) {
       return;
     }
     this.bottomSentinelPosition_ = position.relativePos;
@@ -106,7 +106,7 @@ export class VisibilityObserverEntry {
   /**
    * Calculates the position of the element relative to the viewport
    * based on the positions of the injected bottom and top sentinel elements
-   * @param {!Function} callback
+   * @param {function(!ViewportRelativePos)} callback
    * @private
    */
   updateRelativePos_(callback) {
@@ -144,30 +144,28 @@ export class VisibilityObserverEntry {
       return;
     }
 
-    if (callback) {
-      callback(this.relativePos_);
-    }
+    callback(this.relativePos_);
   }
 }
 
 export default class VisibilityObserver {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!PositionObserver=} opt_injectedPositionObserver
+   * @param {!PositionObserver=} injectedPositionObserver
    */
-  constructor(ampdoc, opt_injectedPositionObserver) {
-    /**  @const {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc = ampdoc;
+  constructor(ampdoc, injectedPositionObserver) {
+    /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
     /** @private @const {Array<!VisibilityObserverEntry>} */
     this.entries_ = [];
     /** @private @const {?PositionObserver} */
-    this.injectedPositionObserver_ = opt_injectedPositionObserver || null;
+    this.injectedPositionObserver_ = injectedPositionObserver || null;
   }
 
   /**
    * @param {!Element} element
    * @param {!Element} parent
-   * @param {!Function} callback
+   * @param {function(!ViewportRelativePos)} callback
    */
   observe(element, parent, callback) {
     const entry = new VisibilityObserverEntry(this);
@@ -184,7 +182,7 @@ export default class VisibilityObserver {
       return this.injectedPositionObserver_;
     }
 
-    installPositionObserverServiceForDoc(this.ampdoc);
-    return Services.positionObserverForDoc(this.ampdoc.getHeadNode());
+    installPositionObserverServiceForDoc(this.ampdoc_);
+    return Services.positionObserverForDoc(this.ampdoc_.getHeadNode());
   }
 }
