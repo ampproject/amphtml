@@ -491,6 +491,27 @@ function proxyToAmpProxy(req, res, mode) {
     // TODO(ccordry): Remove this when story v01 is depricated.
     const storyV1 = req.query['story_v'] === '1';
     const urlPrefix = getUrlPrefix(req);
+    if (req.query['mraid']) {
+      body = body
+        .replace(
+          '</head>',
+          '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
+            '</script>' +
+            '</head>'
+        )
+        // Change cdnUrl from the default so amp-mraid requests the (mock)
+        // mraid.js from the local server. In a real environment this doesn't
+        // matter as the local environment would intercept this request.
+        .replace(
+          '<head>',
+          ' <head>' +
+            ' <script>' +
+            ' window.AMP_CONFIG = {' +
+            `   cdnUrl: "${urlPrefix}",` +
+            ' };' +
+            ' </script>'
+        );
+    }
     body = replaceUrls(mode, body, urlPrefix, inabox, storyV1);
     if (inabox) {
       // Allow CORS requests for A4A.
@@ -885,11 +906,30 @@ app.get(
     const mode = SERVE_MODE;
     const inabox = req.query['inabox'];
     const stream = Number(req.query['stream']);
+    const urlPrefix = getUrlPrefix(req);
     fs.promises
       .readFile(pc.cwd() + filePath, 'utf8')
       .then(file => {
         if (req.query['amp_js_v']) {
           file = addViewerIntegrationScript(req.query['amp_js_v'], file);
+        }
+        if (req.query['mraid']) {
+          file = file
+            .replace(
+              '</head>',
+              '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
+                '</script>' +
+                '</head>'
+            )
+            .replace(
+              '<head>',
+              ' <head>' +
+                ' <script>' +
+                ' window.AMP_CONFIG = {' +
+                `   cdnUrl: "${urlPrefix}",` +
+                ' };' +
+                ' </script>'
+            );
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
 
@@ -1174,7 +1214,7 @@ app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
 
 app.get('/dist/amp-inabox-host.js', (req, res, next) => {
   const mode = SERVE_MODE;
-  if (mode == 'compiled') {
+  if (mode != 'default') {
     req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
   }
   next();
@@ -1288,6 +1328,11 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
   });
 });
 
+app.get('/mraid.js', (req, res, next) => {
+  req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
+  next();
+});
+
 /**
  * Shadow viewer. Fetches shadow runtime from cdn by default.
  * Setting the param useLocal=1 will load the runtime from the local build.
@@ -1310,6 +1355,10 @@ app.use('/shadow/', (req, res) => {
     return;
   }
   res.end(replaceUrls(SERVE_MODE, viewerHtml));
+});
+
+app.use('/mraid/', (req, res) => {
+  res.redirect(req.url + '?inabox=1&mraid=1');
 });
 
 /**
