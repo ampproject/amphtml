@@ -98,6 +98,7 @@ amp-carousel[i-amphtml-carousel-hide-buttons] .amp-carousel-button-next {
    * specified, even though we have `pointer-events: none`.
    */
   pointer-events: none;
+  visibility: visible !important;
 }
 
 /* Begin SlideScroll */
