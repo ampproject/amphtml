@@ -108,6 +108,14 @@ describes.realWin(
 
           it('test requests', function*() {
             const outputConfig = {};
+            if (!config.requests) {
+              throw new Error(
+                'Request for ' + vendor +
+                ' not found. Please make sure you run ' +
+                '"gulp vendor-configs" or build amp-analytics ' +
+                'before running the test'
+              );
+            }
             for (const name in config.requests) {
               // Wait for event queue to clear.
               // To prevent default triggers
