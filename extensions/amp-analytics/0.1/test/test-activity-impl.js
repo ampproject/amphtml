@@ -16,8 +16,7 @@
 
 import {Activity} from '../activity-impl';
 
-describes.fakeWin('Activity', {amp: true}, (env) => {
-  let ampdoc;
+describes.fakeWin('Activity', {amp: true}, env => {
   /** @type {Activity} */
   let activity;
   /** @type {function()} */
@@ -33,8 +32,7 @@ describes.fakeWin('Activity', {amp: true}, (env) => {
   /** @type {function()} */
   let pushInactiveEvent;
   beforeEach(() => {
-    ampdoc = env.ampdoc;
-    activity = new Activity(ampdoc);
+    activity = new Activity(env.ampdoc);
     getTotalEngagedTime = activity.getTotalEngagedTime.bind(activity);
     activity.getTimeSinceStart_ = () => timeSinceStart * 1000;
     setTimeSinceStart = timeSinceStart_ => (timeSinceStart = timeSinceStart_);
