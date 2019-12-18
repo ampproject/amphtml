@@ -15,6 +15,7 @@
  */
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 import {toggleAttribute} from '../../../src/dom';
 
 /**
@@ -187,8 +188,16 @@ export class BaseCarousel extends AMP.BaseElement {
       Services.timerFor(this.win).delay(() => {
         this.mutateElement(() => {
           this.element.classList.remove(className);
-          toggleAttribute(this.prevButton_, hideAttribute, !this.showControls_);
-          toggleAttribute(this.nextButton_, hideAttribute, !this.showControls_);
+          toggleAttribute(
+            dev().assertElement(this.prevButton_),
+            hideAttribute,
+            !this.showControls_
+          );
+          toggleAttribute(
+            dev().assertElement(this.nextButton_),
+            hideAttribute,
+            !this.showControls_
+          );
         });
       }, 4000);
     });
