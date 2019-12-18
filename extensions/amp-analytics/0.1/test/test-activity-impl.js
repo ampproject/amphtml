@@ -17,7 +17,7 @@
 import {Activity} from '../activity-impl';
 
 describes.fakeWin('Activity', {amp: true}, env => {
-  /** @type {Activity} */
+  /** @type {Activity} **/
   let activity;
   /** @type {function()} */
   let getTotalEngagedTime;
