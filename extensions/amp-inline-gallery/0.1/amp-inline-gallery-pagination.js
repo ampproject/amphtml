@@ -246,11 +246,12 @@ export class AmpInlineGalleryPagination extends AMP.BaseElement {
   }
 
   /**
+   * @param {!Array<!Element>} slides
    * @param {number} total
    * @param {number} index
    * @param {number} offset
    */
-  updateProgress(total, index, offset) {
+  updateProgress(slides, total, index, offset) {
     this.mutateElement(() => {
       this.updateTotal_(total);
       this.updateDots_(index, offset);

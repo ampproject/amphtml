@@ -645,7 +645,9 @@ exports.extensionBundles = [
       hasCss: true,
       cssBinaries: [
         'amp-inline-gallery',
+        'amp-inline-gallery-captions',
         'amp-inline-gallery-pagination',
+        'amp-inline-gallery-slide',
         'amp-inline-gallery-thumbnails',
       ],
     },
