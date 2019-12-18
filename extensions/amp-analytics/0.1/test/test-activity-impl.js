@@ -16,7 +16,7 @@
 
 import {Activity} from '../activity-impl';
 
-describes.fakeWin('Activity', {amp: true}, (env) => {
+describes.fakeWin('Activity', {amp: true}, env => {
   let ampdoc;
   /** @type {Activity} */
   let activity;
