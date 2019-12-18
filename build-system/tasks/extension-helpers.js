@@ -409,13 +409,13 @@ async function buildExtension(
       return;
     }
   }
+  if (name === 'amp-analytics') {
+    await vendorConfigs(options);
+  }
   if (argv.single_pass) {
     return;
   } else {
     await buildExtensionJs(path, name, version, latestVersion, options);
-  }
-  if (name === 'amp-analytics') {
-    await vendorConfigs(options);
   }
 }
 
