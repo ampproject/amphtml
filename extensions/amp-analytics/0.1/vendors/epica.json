@@ -1,0 +1,22 @@
+{
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  },
+  "vars": {
+    "anonymousId": "CLIENT_ID(epica_amp_id)"
+  },
+  "requests": {
+    "host": "https://cat.poder.io/api/v1/pixel",
+    "base": "?writeKey=${writeKey}&context.library.name=amp&anonymousId=${anonymousId}&context.locale=${browserLanguage}&context.page.path=${canonicalPath}&context.page.url=${canonicalUrl}&context.page.referrer=${documentReferrer}&context.page.title=${title}&context.screen.width=${screenWidth}&context.screen.height=${screenHeight}",
+    "page": "${host}/page${base}&name=${name}",
+    "track": "${host}/track${base}&event=${event}"
+  },
+  "triggers": {
+    "page": {
+      "on": "visible",
+      "request": "page"
+    }
+  }
+}

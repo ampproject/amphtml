@@ -1,0 +1,17 @@
+{
+  "requests": {
+    "base": "https://c.${region}.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId(we_luid)}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application",
+    "wePageview": {
+      "baseUrl": "${base}&eventName=Page Viewed"
+    }
+  },
+  "extraUrlParams": {
+    "isAmp": 1
+  },
+  "triggers": {
+    "wePageviewTrigger": {
+      "on": "visible",
+      "request": "wePageview"
+    }
+  }
+}
