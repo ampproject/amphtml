@@ -150,8 +150,6 @@ export const StateProperty = {
   CONSENT_ID: 'consentId',
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
-  CURRENT_QUIZ_ID: 'currentQuizId',
-  CURRENT_QUIZ_OPTION_ID: 'currentQuizOptionId',
   ADVANCEMENT_MODE: 'advancementMode',
   NAVIGATION_PATH: 'navigationPath',
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
@@ -166,7 +164,6 @@ export const Action = {
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
   SET_NAVIGATION_PATH: 'setNavigationPath',
   SET_PAGE_IDS: 'setPageIds',
-  SET_QUIZ_INFO: 'setQuizInfo',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
@@ -227,12 +224,6 @@ const actions = (state, action, data) => {
       );
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
-      }));
-    case Action.SET_QUIZ_INFO:
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.CURRENT_QUIZ_ID]: data[StateProperty.CURRENT_QUIZ_ID],
-        [StateProperty.CURRENT_QUIZ_OPTION_ID]:
-          data[StateProperty.CURRENT_QUIZ_OPTION_ID],
       }));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
@@ -504,8 +495,6 @@ export class AmpStoryStoreService {
       [StateProperty.CONSENT_ID]: null,
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
-      [StateProperty.CURRENT_QUIZ_OPTION_ID]: null,
-      [StateProperty.CURRENT_QUIZ_ID]: null,
       [StateProperty.ADVANCEMENT_MODE]: '',
       [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',
       [StateProperty.NAVIGATION_PATH]: [],

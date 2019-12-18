@@ -19,12 +19,9 @@ import {
   StoryAnalyticsEvent,
   getAnalyticsService,
 } from './story-analytics';
-import {
-  Action,
-  StateProperty,
-  getStoreService,
-} from './amp-story-store-service';
+import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-quiz-1.0.css';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
@@ -89,6 +86,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
+
+    /** @const @private {!./variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(this.win);
   }
 
   /** @override */
@@ -287,13 +287,15 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   handleOptionSelection_(optionEl) {
     // TODO(jackbsteinberg): FIND A BETTER METHOD OF SETTING AND GETTING IDS, THIS IS REALLY FLIMSY LOL
-    // update the store service
-    this.storeService_.dispatch(Action.SET_QUIZ_INFO, {
-      [StateProperty.CURRENT_QUIZ_ID]: this.quizId_,
-      [StateProperty.CURRENT_QUIZ_OPTION_ID]: optionEl.querySelector(
-        '.i-amphtml-story-quiz-answer-choice'
-      ).textContent,
-    });
+    // update the variable service
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.QUIZ_ID,
+      this.quizId_
+    );
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.QUIZ_OPTION_ID,
+      optionEl.querySelector('.i-amphtml-story-quiz-answer-choice').textContent
+    );
 
     // trigger analytics
     this.quizEl_[ANALYTICS_TAG_NAME] = 'story-quiz-respond';
