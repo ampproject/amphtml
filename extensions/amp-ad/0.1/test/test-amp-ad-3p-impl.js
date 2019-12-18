@@ -70,7 +70,7 @@ describes.realWin(
         registryBackup[k] = adConfig[k];
         delete adConfig[k];
       });
-      adConfig['_ping_'] = Object.assign({}, registryBackup['_ping_']);
+      adConfig['_ping_'] = {...registryBackup['_ping_']};
       win = env.win;
       ad3p = createAmpAd(win);
       win.document.body.appendChild(ad3p.element);

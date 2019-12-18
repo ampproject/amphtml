@@ -21,6 +21,7 @@ import {
 } from '../../../../testing/test-helper';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
 
@@ -44,6 +45,9 @@ describes.realWin(
       openXhrStub = env.sandbox.stub();
       sendXhrStub = env.sandbox.stub();
       sendBeaconStub = env.sandbox.stub();
+
+      // Needed for PreconnectService.
+      installDocService(win, true);
     });
 
     it('prefers beacon over xhrpost and image', () => {
@@ -386,12 +390,8 @@ describes.realWin(
 
         const ampAnalyticsEl = null;
 
-        const preconnectSpy = env.sandbox.spy();
-        transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
-          preload: preconnectSpy,
-        });
+        transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.null;
-        expect(preconnectSpy).to.not.be.called;
       });
 
       it('initialize iframe transport when used', () => {
@@ -412,12 +412,8 @@ describes.realWin(
           'amp-analytics'
         );
 
-        const preconnectSpy = env.sandbox.spy();
-        transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
-          preload: preconnectSpy,
-        });
+        transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
-        expect(preconnectSpy).to.be.called;
 
         transport.deleteIframeTransport();
         expect(transport.iframeTransport_).to.be.null;
@@ -442,12 +438,8 @@ describes.realWin(
           'amp-analytics'
         );
 
-        const preconnectSpy = env.sandbox.spy();
-        transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
-          preload: preconnectSpy,
-        });
+        transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
-        expect(preconnectSpy).to.be.called;
 
         transport.deleteIframeTransport();
         expect(transport.iframeTransport_).to.be.null;

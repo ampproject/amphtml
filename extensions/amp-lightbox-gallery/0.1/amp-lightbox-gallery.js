@@ -626,7 +626,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   setupGestures_() {
     const gestures = Gestures.get(dev().assertElement(this.carousel_));
-    gestures.onGesture(SwipeYRecognizer, ({data}) => {
+    gestures.onGesture(SwipeYRecognizer, e => {
+      const {data} = e;
       this.swipeGesture_(data);
     });
   }
@@ -1336,7 +1337,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   updateVideoThumbnails_() {
     const thumbnails = this.manager_
       .getThumbnails(this.currentLightboxGroupId_)
-      .map((thumbnail, index) => Object.assign({index}, thumbnail))
+      .map((thumbnail, index) => ({index, ...thumbnail}))
       .filter(thumbnail => VIDEO_TAGS[thumbnail.element.tagName]);
 
     this.mutateElement(() => {

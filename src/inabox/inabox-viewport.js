@@ -24,6 +24,7 @@ import {dev, devAssert} from '../log';
 import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+import {isExperimentOn} from '../experiments';
 import {isIframed} from '../dom';
 import {
   layoutRectFromDomRect,
@@ -449,7 +450,9 @@ export class ViewportBindingInabox {
     );
 
     /** @private @const {boolean} */
-    this.isFriendlyIframed_ = canInspectWindow(this.win.top);
+    this.isFriendlyIframed_ =
+      isExperimentOn(this.win, 'inabox-viewport-friendly') &&
+      canInspectWindow(this.win.top);
 
     /** @private {?../../ads/inabox/position-observer.PositionObserver} */
     this.topWindowPositionObserver_ = this.isFriendlyIframed_
