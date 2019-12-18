@@ -9,10 +9,6 @@
   },
   "cookies": {
     "enabled": true,
-<<<<<<< HEAD
-=======
-    "cookieMaxAge": 1800,
->>>>>>> new tests
     "_sp_duid": {
       "value": "$IF($IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)), $IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)), $SUBSTR(QUERY_PARAM(_sp),0,36))"
     }
@@ -54,8 +50,4 @@
     "xhrpost": false,
     "image": true
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> new tests
