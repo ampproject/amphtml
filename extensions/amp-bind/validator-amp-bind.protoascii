@@ -140,7 +140,7 @@ tags: {  # <amp-bind-macro>
   tag_name: "AMP-BIND-MACRO"
   requires_extension: "amp-bind"
   attrs: {
-    name: "args"
+    name: "arguments"
   }
   attrs: {
     name: "expression"

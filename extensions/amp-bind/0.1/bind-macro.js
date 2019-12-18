@@ -37,14 +37,14 @@ export class BindMacro {
 
   /**
    * @param {!JsonObject} scope
-   * @param {!Array} args
+   * @param {!Array} arguments
    * @throws {Error} On illegal function invocation.
    * @return {BindExpressionResultDef}
    */
-  evaluate(scope, args) {
+  evaluate(scope, arguments) {
     const copy = /** @type {!JsonObject} */ (Object.assign({}, scope));
     for (let i = 0; i < this.argumentNames_.length; i++) {
-      copy[this.argumentNames_[i]] = args[i];
+      copy[this.argumentNames_[i]] = arguments[i];
     }
     return this.expression_.evaluate(copy);
   }

@@ -355,7 +355,7 @@ encodeURIComponent('Hello world')</pre>
 `amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that takes zero or more arguments and references the current state. A macro can be invoked like a function by referencing its `id` attribute value from anywhere in your doc.
 
 ```html
-<amp-bind-macro id="circleArea" args="radius" expression="3.14 * radius * radius"></amp-bind-macro>
+<amp-bind-macro id="circleArea" arguments="radius" expression="3.14 * radius * radius"></amp-bind-macro>
 
 <div>
   The circle has an area of <span [text]="circleArea(myCircle.radius)">0</span>.
