@@ -17,13 +17,13 @@
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
 import {ExpansionOptions} from '../variables';
-import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
+//import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
 import {
   ImagePixelVerifier,
   mockWindowInterface,
 } from '../../../../testing/test-helper';
 import {Services} from '../../../../src/services';
-import {hasOwn} from '../../../../src/utils/object';
+//import {hasOwn} from '../../../../src/utils/object';
 import {macroTask} from '../../../../testing/yield';
 
 // TODO(zhouyx@): Remove after ANALYTICS_VENDOR_SPLIT clean up
