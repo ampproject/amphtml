@@ -1,0 +1,22 @@
+{
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  },
+  "vars": {
+    "pubId": "",
+    "siteId": ""
+  },
+  "requests": {
+    "host": "loadeu.exelator.com",
+    "pathPrefix": "load/",
+    "trackurl": "https://${host}/${pathPrefix}?p=${pubId}&g=${siteId}&j=0"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "trackurl"
+    }
+  }
+}

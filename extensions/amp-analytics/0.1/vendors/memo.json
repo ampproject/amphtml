@@ -1,0 +1,32 @@
+{
+  "vars": {
+    "pid": "",
+    "published_at": "",
+    "authors": []
+  },
+  "requests": {
+    "host": "https://elsa.memoinsights.com",
+    "baseParams": "amp=true&pid=${pid}&title=${title}&url=${canonicalUrl}&date=${published_at}&authors=${authors}&referrer=${documentReferrer}&page_url=${sourceUrl}&user_id=${clientId(memo_amp_id)}&domain=${canonicalHost}&v=amp",
+    "visible": "${host}/n?${baseParams}",
+    "timer": "${host}/t?${baseParams}&t=5000&e=5000"
+  },
+  "triggers": {
+    "visible": {
+      "on": "visible",
+      "request": "visible"
+    },
+    "timer": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 5,
+        "maxTimerLength": 1200
+      },
+      "request": "timer"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

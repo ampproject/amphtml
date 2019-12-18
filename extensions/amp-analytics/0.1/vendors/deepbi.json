@@ -1,0 +1,23 @@
+{
+  "requestOrigin": "https://${endpoint}",
+  "vars": {
+    "gdpr": true,
+    "endpoint": "api.deep.bi"
+  },
+  "requests": {
+    "base": "/v1/pixel/${datasetKey}/p.gif?accessKey=${accessKey}&gdpr=${gdpr}&page_href=${sourceUrl}&referrer_href=${documentReferrer}&page_title=${title}&amp=true",
+    "pageview": "${base}&event_type=page-open",
+    "event": "${base}&event_type=event"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

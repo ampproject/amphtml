@@ -1,0 +1,28 @@
+{
+  "requests": {
+    "host": "https://srv.pixel.parsely.com",
+    "basePrefix": "${host}/plogger/?rand=${timestamp}&idsite=${apikey}&url=${ampdocUrl}&urlref=${documentReferrer}&screen=${screenWidth}x${screenHeight}%7C${availableScreenWidth}x${availableScreenHeight}%7C${screenColorDepth}&title=${title}&date=${timestamp}&ampid=${clientId(_parsely_visitor)}",
+    "pageview": "${basePrefix}&action=pageview&metadata={\"canonical_url\":\"${canonicalUrl}\"}",
+    "heartbeat": "${basePrefix}&action=heartbeat&tt=${totalEngagedTime}&inc=${incrementalEngagedTime(parsely-js)}"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview"
+    },
+    "defaultHeartbeat": {
+      "on": "timer",
+      "enabled": "${incrementalEngagedTime(parsely-js,false)}",
+      "timerSpec": {
+        "interval": 10,
+        "maxTimerLength": 7200
+      },
+      "request": "heartbeat"
+    }
+  },
+  "transport": {
+    "beacon": false,
+    "xhrpost": false,
+    "image": true
+  }
+}

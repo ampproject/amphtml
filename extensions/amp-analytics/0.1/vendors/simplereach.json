@@ -1,0 +1,29 @@
+{
+  "vars": {
+    "pid": "",
+    "published_at": "",
+    "authors": [],
+    "channels": [],
+    "tags": []
+  },
+  "requests": {
+    "host": "https://edge.simplereach.com",
+    "baseParams": "amp=true&pid=${pid}&title=${title}&url=${canonicalUrl}&date=${published_at}&authors=${authors}&channels=${categories}&tags=${tags}&referrer=${documentReferrer}&page_url=${sourceUrl}&user_id=${clientId(sr_amp_id)}&domain=${canonicalHost}&article_id=${article_id}&ignore_metadata=${ignore_metadata}",
+    "visible": "${host}/n?${baseParams}",
+    "timer": "${host}/t?${baseParams}&t=5000&e=5000"
+  },
+  "triggers": {
+    "visible": {
+      "on": "visible",
+      "request": "visible"
+    },
+    "timer": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 5,
+        "maxTimerLength": 1200
+      },
+      "request": "timer"
+    }
+  }
+}
