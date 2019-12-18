@@ -151,15 +151,12 @@ export class VisibilityObserverEntry {
 export default class VisibilityObserver {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!PositionObserver=} injectedPositionObserver
    */
-  constructor(ampdoc, injectedPositionObserver) {
+  constructor(ampdoc) {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
     /** @private @const {Array<!VisibilityObserverEntry>} */
     this.entries_ = [];
-    /** @private @const {?PositionObserver} */
-    this.injectedPositionObserver_ = injectedPositionObserver || null;
   }
 
   /**
@@ -177,11 +174,6 @@ export default class VisibilityObserver {
    * @return {!PositionObserver}
    */
   getPositionObserver() {
-    // For testing
-    if (this.injectedPositionObserver_) {
-      return this.injectedPositionObserver_;
-    }
-
     installPositionObserverServiceForDoc(this.ampdoc_);
     return Services.positionObserverForDoc(this.ampdoc_.getHeadNode());
   }

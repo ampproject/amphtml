@@ -48,9 +48,8 @@ export const Direction = {UP: 1, DOWN: -1};
 export class NextPageService {
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!PositionObserver=} injectedPositionObserver
    */
-  constructor(ampdoc, injectedPositionObserver) {
+  constructor(ampdoc) {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -71,9 +70,6 @@ export class NextPageService {
 
     /** @private {?AmpElement} element */
     this.element_ = null;
-
-    /** @private @const {!PositionObserver|undefined} */
-    this.injectedPositionObserver_ = injectedPositionObserver;
 
     /** @private {?VisibilityObserver} */
     this.visibilityObserver_ = null;
@@ -126,10 +122,7 @@ export class NextPageService {
       Services.timerFor(this.win_)
     );
 
-    this.visibilityObserver_ = new VisibilityObserver(
-      this.ampdoc_,
-      this.injectedPositionObserver_
-    );
+    this.visibilityObserver_ = new VisibilityObserver(this.ampdoc_);
 
     this.element_ = element;
     this.separator_ = this.getSeparatorElement_();
