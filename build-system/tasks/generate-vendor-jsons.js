@@ -59,11 +59,8 @@ function generateVendorJsons() {
       }
 
       // convert object to JSON string with indentation of 2 spaces
-      const configString = JSON.stringify(
-        ANALYTICS_CONFIG[vendorName],
-        null,
-        2
-      );
+      const configString =
+        JSON.stringify(ANALYTICS_CONFIG[vendorName], null, 2) + '\n';
       const fileName = vendorName + '.json';
 
       promises.push(
