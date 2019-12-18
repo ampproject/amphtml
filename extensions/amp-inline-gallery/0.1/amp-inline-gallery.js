@@ -17,11 +17,18 @@
 import {CSS as AmpInlineGalleryCSS} from '../../../build/amp-inline-gallery-0.1.css';
 import {AmpInlineGalleryPagination} from './amp-inline-gallery-pagination';
 import {CSS as AmpInlineGalleryPaginationCSS} from '../../../build/amp-inline-gallery-pagination-0.1.css';
+import {AmpInlineGalleryThumbnails} from './amp-inline-gallery-thumbnails';
+import {CSS as AmpInlineGalleryThumbnailsCSS} from '../../../build/amp-inline-gallery-thumbnails-0.1.css';
 import {CarouselEvents} from '../../amp-base-carousel/0.1/carousel-events';
 import {InlineGalleryEvents} from './inline-gallery-events';
 import {Layout} from '../../../src/layout';
 import {getDetail} from '../../../src/event-helper';
-import {iterateCursor, scopedQuerySelectorAll} from '../../../src/dom';
+import {
+  iterateCursor,
+  scopedQuerySelector,
+  scopedQuerySelectorAll,
+} from '../../../src/dom';
+import {toArray} from '../../../src/types';
 
 /**
  * The selector of children to update the progress on as the gallery's carousel
@@ -29,7 +36,16 @@ import {iterateCursor, scopedQuerySelectorAll} from '../../../src/dom';
  */
 const CHILDREN_FOR_PROGRESS_SELECTOR = 'amp-inline-gallery-pagination';
 
-const CAROUSEL_SELECTOR = 'amp-base-carousel';
+/**
+ * The selector for the element to contain the thumbnails.
+ */
+const THUMBNAILS_SELECTORS = 'amp-inline-gallery-thumbnails';
+
+/**
+ * The selector for the main carousel (i.e. not the one for the thumbnails).
+ */
+const CAROUSEL_SELECTOR =
+  ':not(amp-inline-gallery-thumbnails) > amp-base-carousel';
 
 class AmpInlineGallery extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -47,6 +63,25 @@ class AmpInlineGallery extends AMP.BaseElement {
     });
     this.element.addEventListener(InlineGalleryEvents.GO_TO_SLIDE, event => {
       this.onGoToSlide_(event);
+    });
+
+    // Update the slides to all the `amp-inline-gallery-thumbnails` elements,
+    // if any.
+    // TODO(sparhami) This should respond to changes in slides on the
+    // `amp-base-carousel`.
+    Promise.all([
+      scopedQuerySelector(this.element, CAROUSEL_SELECTOR).getImpl(),
+      Promise.all(
+        toArray(
+          scopedQuerySelectorAll(this.element, THUMBNAILS_SELECTORS)
+        ).map(el => el.getImpl())
+      ),
+    ]).then(data => {
+      const carouselImpl = data[0];
+      const thumbnailsImpls = data[1];
+      const slides = carouselImpl.getSlides();
+
+      thumbnailsImpls.forEach(impl => impl.setSlides(slides));
     });
   }
 
@@ -122,7 +157,11 @@ AMP.extension('amp-inline-gallery', '0.1', AMP => {
     AmpInlineGalleryPagination,
     AmpInlineGalleryPaginationCSS
   );
-
+  AMP.registerElement(
+    'amp-inline-gallery-thumbnails',
+    AmpInlineGalleryThumbnails,
+    AmpInlineGalleryThumbnailsCSS
+  );
   AMP.registerElement(
     'amp-inline-gallery',
     AmpInlineGallery,

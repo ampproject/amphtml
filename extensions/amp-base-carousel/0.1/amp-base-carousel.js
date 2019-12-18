@@ -224,6 +224,13 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /**
+   * @return {!Array<!Element>} The slides in the carousel.
+   */
+  getSlides() {
+    return this.slides_;
+  }
+
+  /**
    * Moves the Carousel to a given index.
    * @param {number} index
    */

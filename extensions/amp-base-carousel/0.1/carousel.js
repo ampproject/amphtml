@@ -607,6 +607,7 @@ export class Carousel {
   updateSlides(slides) {
     this.slides_ = slides;
     this.carouselAccessibility_.updateSlides(slides);
+    // TODO(sparhami) Should need to call `this.updateUi()` here.
   }
 
   /**
