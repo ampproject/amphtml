@@ -197,11 +197,11 @@ describes.fakeWin(
       bindingMock
         .expects('push')
         .withExactArgs(state)
-        .returns(Promise.resolve(Object.assign({}, state, {stackIndex: 11})))
+        .returns(Promise.resolve({...state, stackIndex: 11}))
         .once();
       bindingMock
         .expects('get')
-        .returns(Promise.resolve(Object.assign({}, state, {stackIndex: 11})))
+        .returns(Promise.resolve({...state, stackIndex: 11}))
         .once();
       return history.push(onPop, state).then(historyId => {
         expect(historyId).to.equal(11);
@@ -245,7 +245,7 @@ describes.fakeWin(
       bindingMock
         .expects('pop')
         .withExactArgs(11)
-        .returns(Promise.resolve(Object.assign({}, popState, {stackIndex: 10})))
+        .returns(Promise.resolve({...popState, stackIndex: 10}))
         .once();
       return history.push(onPop).then(historyId => {
         expect(historyId).to.equal(11);
@@ -257,9 +257,7 @@ describes.fakeWin(
           expect(history.stackOnPop_.length).to.equal(11);
           clock.tick(1);
           expect(onPop).to.be.calledOnce;
-          expect(onPop).to.be.calledWith(
-            Object.assign({}, popState, {stackIndex: 10})
-          );
+          expect(onPop).to.be.calledWith({...popState, stackIndex: 10});
         });
       });
     });

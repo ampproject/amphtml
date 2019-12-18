@@ -1249,6 +1249,25 @@ describes.repeated(
           });
         });
 
+        it('should respect the xssi-prefix option when parsing json', async () => {
+          const form = createElement('form');
+          form.setAttribute('method', 'GET');
+          form.setAttribute('action-xhr', 'https://example.com/xssi-json');
+          form.setAttribute('xssi-prefix', 'while(1)');
+
+          const ampForm = await getAmpForm(form);
+          env.sandbox.stub(ampForm.xhr_, 'fetch').resolves('{}');
+          env.sandbox.stub(ampForm.xhr_, 'xssiJson').resolves({});
+
+          ampForm.handleSubmitEvent_({
+            target: ampForm.form_,
+            preventDefault: () => {},
+          });
+
+          await whenCalled(ampForm.xhr_.xssiJson);
+          expect(ampForm.xhr_.xssiJson).to.be.calledWith('{}', 'while(1)');
+        });
+
         it('should trigger amp-form-submit analytics event with form data', () => {
           return getAmpForm(getForm()).then(ampForm => {
             env.sandbox.stub(ampForm.xhr_, 'fetch').resolves({
@@ -1417,6 +1436,7 @@ describes.repeated(
 
           env.sandbox.stub(Services, 'xhrFor').returns({
             fetch: () => Promise.resolve({json: () => Promise.resolve()}),
+            xssiJson: () => Promise.resolve({}),
           });
 
           const ampForm = await getAmpForm(form);

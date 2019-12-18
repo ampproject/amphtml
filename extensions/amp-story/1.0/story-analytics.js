@@ -176,10 +176,7 @@ export class StoryAnalyticsService {
       );
     }
 
-    return /** @type {!JsonObject} */ (Object.assign(
-      {eventDetails: details},
-      vars
-    ));
+    return /** @type {!JsonObject} */ ({eventDetails: details, ...vars});
   }
 
   /**

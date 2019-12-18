@@ -29,7 +29,7 @@ import {
 import {createElementWithAttributes} from '../../src/dom';
 
 function fakeLocalStorage(initial = {}) {
-  const state = Object.assign({}, initial);
+  const state = {...initial};
   return {
     getItem: key => (key in state ? state[key] : null),
     setItem: (key, value) => (state[key] = value),
