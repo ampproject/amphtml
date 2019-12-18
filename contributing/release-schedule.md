@@ -30,7 +30,7 @@ The **nightly** release build is served to 0.05% of AMP traffic. It is possible 
 
 An additional **nightly-control** release channel exists, and is also served to 0.05% of AMP traffic. This release contains the same binaries as **stable**, and is used as a traffic-eqivalent baseline to compare **nightly** against for metrics and error reporting. It cannot be opted into.
 
-### [Weekly](#weekly)
+### Weekly
 
 The _weekly_ release channels are considered to be the primary "evergreen" release channels. The last **nightly** release from the previous week is promoted to the  **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel.
 
