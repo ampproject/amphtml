@@ -45,15 +45,12 @@ export class AmpNextPage extends AMP.BaseElement {
       'Experiment amp-next-page-v2 disabled'
     );
 
-    this.nextPageService_ = Services.nextPageServiceForDoc(this.getAmpDoc());
+    const ampDoc = this.getAmpDoc();
+    const hostDoc = ampDoc.shadowRoot
+      ? ampDoc.shadowRoot.ownerDocument
+      : ampDoc.win.document;
 
-    // Prevent multiple amp-next-page on the same document
-    if (this.nextPageService_.isBuilt()) {
-      return;
-    }
-
-    this.element.classList.add('i-amphtml-next-page');
-
+    this.nextPageService_ = Services.nextPageServiceForDoc(hostDoc);
     return this.nextPageService_.build(this.element);
   }
 }

@@ -111,6 +111,20 @@ export class NextPageService {
    * @param {!AmpElement} element
    */
   build(element) {
+    // Get the separator and more box (and remove the provided elements in the process)
+    const separator = this.getSeparatorElement_(element);
+    const moreBox = this.getMoreBoxElement_(element);
+
+    // Prevent multiple amp-next-page on the same document
+    if (this.isBuilt()) {
+      return;
+    }
+
+    // Set the parsed elements as the choice for all subsequent <amp-next-page> elements
+    this.element_ = element;
+    this.separator_ = separator;
+    this.moreBox_ = moreBox;
+
     // Create a reference to the host page
     this.initialPage_ = this.createInitialPage();
 
@@ -123,10 +137,6 @@ export class NextPageService {
       Services.extensionsFor(this.win_),
       Services.timerFor(this.win_)
     );
-
-    this.element_ = element;
-    this.separator_ = this.getSeparatorElement_();
-    this.moreBox_ = this.getMoreBoxElement_();
 
     // Have the suggestion box be always visible
     this.element_.appendChild(this.moreBox_);
@@ -145,6 +155,8 @@ export class NextPageService {
       });
     });
 
+    this.getHostNextPageElement_().classList.add('i-amphtml-next-page');
+
     this.viewport_.onScroll(() => this.updateScroll_());
     this.viewport_.onResize(() => this.updateScroll_());
     this.updateScroll_();
@@ -154,7 +166,7 @@ export class NextPageService {
    * @return {!AmpElement}
    * @private
    */
-  getNextPageElement_() {
+  getHostNextPageElement_() {
     return dev().assertElement(this.element_);
   }
 
@@ -414,7 +426,7 @@ export class NextPageService {
    * @private
    */
   getPagesPromise_() {
-    const inlinePages = this.getInlinePages_();
+    const inlinePages = this.getInlinePages_(this.getHostNextPageElement_());
     const src = this.element_.getAttribute('src');
     userAssert(
       inlinePages || src,
@@ -433,14 +445,12 @@ export class NextPageService {
 
   /**
    * Reads the inline next pages from the element.
+   * @param {!Element} element the container of the amp-next-page extension
    * @return {?Array} JSON object, or null if no inline pages specified.
    * @private
    */
-  getInlinePages_() {
-    const scriptElements = childElementsByTag(
-      this.getNextPageElement_(),
-      'SCRIPT'
-    );
+  getInlinePages_(element) {
+    const scriptElements = childElementsByTag(element, 'SCRIPT');
     if (!scriptElements.length) {
       return null;
     }
@@ -465,12 +475,13 @@ export class NextPageService {
   /**
    * Reads the developer-provided separator element or defaults
    * to the internal implementation of it
+   * @param {!Element} element the container of the amp-next-page extension
    * @return {!Element}
    * @private
    */
-  getSeparatorElement_() {
+  getSeparatorElement_(element) {
     const providedSeparator = childElementByAttr(
-      this.getNextPageElement_(),
+      element,
       'amp-next-page-separator'
     );
     // TODO(wassgha): Use templates (amp-mustache) to render the separator
@@ -491,12 +502,13 @@ export class NextPageService {
   }
 
   /**
+   * @param {!Element} element the container of the amp-next-page extension
    * @return {!Element}
    * @private
    */
-  getMoreBoxElement_() {
+  getMoreBoxElement_(element) {
     const providedMoreBox = childElementByAttr(
-      this.getNextPageElement_(),
+      element,
       'amp-next-page-more-box'
     );
     // TODO(wassgha): Use templates (amp-mustache) to render the more box
