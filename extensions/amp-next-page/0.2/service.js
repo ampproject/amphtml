@@ -37,8 +37,10 @@ import {
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
-import {sanitizeDoc, validatePage, validateUrl} from './utils';
+import {toArray} from '../../../src/types';
+import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
+import {validatePage, validateUrl} from './utils';
 
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;
@@ -96,6 +98,12 @@ export class NextPageService {
 
     /** @private {?Page} */
     this.initialPage_ = null;
+
+    /** @private {!Object<string, !Element>} */
+    this.replaceableElements_ = {};
+
+    /** @private {!Object<string, !Element>} */
+    this.persistentElements_ = {};
   }
 
   /**
@@ -113,6 +121,7 @@ export class NextPageService {
   build(element) {
     // Create a reference to the host page
     this.initialPage_ = this.createInitialPage();
+    this.handleElementHiding(this.win_.document, true /** isHost */);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
@@ -224,6 +233,25 @@ export class NextPageService {
     if (!this.pages_.some(page => page.isVisible())) {
       this.initialPage_.setVisibility(VisibilityState.VISIBLE);
     }
+
+    // Hide elements if necessary
+    this.pages_
+      .filter(page => page.isVisible())
+      .forEach(page => {
+        if (page == this.initialPage_) {
+          this.handleElementHiding(
+            this.win_.document,
+            true /** isHost */,
+            true /** isVisible */
+          );
+        } else if (page.document) {
+          this.handleElementHiding(
+            page.document,
+            false /** isHost */,
+            true /** isVisible */
+          );
+        }
+      });
   }
 
   /**
@@ -322,8 +350,8 @@ export class NextPageService {
       position => page.footerPositionChanged(position)
     );
 
-    // Handles extension deny-lists and sticky items
-    sanitizeDoc(doc);
+    // Handles extension deny-lists
+    this.sanitizeDoc(doc);
 
     // Insert the separator
     this.element_.insertBefore(this.separator_.cloneNode(true), this.moreBox_);
@@ -350,6 +378,85 @@ export class NextPageService {
       dev().error(TAG, 'failed to attach shadow document for page', e);
       return null;
     }
+  }
+
+  /**
+   * Removes redundancies and unauthorized extensions and elements
+   * @param {!Document} doc Document to attach.
+   */
+  sanitizeDoc(doc) {
+    // TODO(wassgha): Implement handling of sticky elements
+    // TODO(wassgha): Implement persistence of repeating elements (e.g amp-sidebar)
+
+    // TODO(wassgha): Parse for more pages to queue
+
+    // TODO(wassgha): Allow amp-analytics after bug bash
+    toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
+    this.handleElementHiding(doc, false /** isHost */, false /** isVisible */);
+  }
+
+  /**
+   * Hides or shows elements based on the `amp-next-page-hide`,
+   * `amp-next-page-keep` and `amp-next-page-replace` attributes
+   * @param {!Document} doc Document to attach.
+   * @param {boolean=} isHost Whether this is the initial page
+   * @param {boolean=} isVisible Whether this page is visible or not
+   */
+  handleElementHiding(doc, isHost = false, isVisible = true) {
+    if (!isHost) {
+      this.hideNextPageHiddenElements(doc);
+    }
+
+    toArray(doc.querySelectorAll('[amp-next-page-keep]')).forEach(element => {
+      if (!element.hasAttribute('amp-next-page-keep')) {
+        element.setAttribute(
+          'amp-next-page-keep',
+          String(Date.now() + Math.floor(Math.random() * 100))
+        );
+      }
+      const id = element.getAttribute('amp-next-page-keep');
+      if (
+        this.persistentElements_[id] &&
+        this.persistentElements_[id] !== element
+      ) {
+        toggle(element, false /** opt_display */);
+      } else if (isVisible) {
+        this.persistentElements_[id] = element;
+      }
+    });
+
+    if (isVisible) {
+      toArray(doc.querySelectorAll('[amp-next-page-replace]')).forEach(
+        element => {
+          if (!element.hasAttribute('amp-next-page-replace')) {
+            element.setAttribute(
+              'amp-next-page-replace',
+              String(Date.now() + Math.floor(Math.random() * 100))
+            );
+          }
+          const id = element.getAttribute('amp-next-page-replace');
+          if (
+            this.replaceableElements_[id] &&
+            this.replaceableElements_[id] !== element
+          ) {
+            toggle(this.replaceableElements_[id], false /** opt_display */);
+          }
+          this.replaceableElements_[id] = element;
+          toggle(element, true /** opt_display */);
+        }
+      );
+    }
+  }
+
+  /**
+   * Hides or shows elements based on the `amp-next-page-hide`,
+   * `amp-next-page-keep` and `amp-next-page-replace` attributes
+   * @param {!Document} doc Document to attach.
+   */
+  hideNextPageHiddenElements(doc) {
+    toArray(doc.querySelectorAll('[amp-next-page-hide]')).forEach(element =>
+      toggle(element, false /** opt_display */)
+    );
   }
 
   /**

@@ -99,6 +99,14 @@ export class Page {
     return this.relativePos_;
   }
 
+  /** @return {!Document|undefined} */
+  get document() {
+    if (!this.shadowDoc_) {
+      return;
+    }
+    return /** @type {!Document} */ (this.shadowDoc_.ampdoc.getRootNode());
+  }
+
   /**
    * @return {boolean}
    */
@@ -125,6 +133,15 @@ export class Page {
     this.visibilityState_ = visibilityState;
     if (this.shadowDoc_) {
       this.shadowDoc_.setVisibilityState(visibilityState);
+      if (visibilityState === VisibilityState.VISIBLE) {
+        this.shadowDoc_.ampdoc
+          .getBody()
+          .classList.add('amp-next-page-document-visible');
+      } else {
+        this.shadowDoc_.ampdoc
+          .getBody()
+          .classList.remove('amp-next-page-document-visible');
+      }
     }
 
     // Switch the title and url of the page to reflect this page
