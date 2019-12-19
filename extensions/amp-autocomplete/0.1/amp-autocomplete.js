@@ -34,7 +34,6 @@ import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isArray, isEnumValue, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
@@ -232,12 +231,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     this.queryKey_ = this.element.getAttribute('query');
     this.srcBase_ = this.element.getAttribute('src');
-    userAssert(
-      !this.queryKey_ || isExperimentOn(this.win, 'amp-autocomplete'),
-      'Experiment %s is not turned on for "query" attr. %s',
-      TAG,
-      this.element
-    );
 
     const jsonScript = this.element.querySelector(
       'script[type="application/json"]'

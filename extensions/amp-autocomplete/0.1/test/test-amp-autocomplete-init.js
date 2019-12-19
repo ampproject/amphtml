@@ -15,7 +15,6 @@
  */
 
 import '../amp-autocomplete';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-autocomplete init',
@@ -30,7 +29,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'amp-autocomplete', true); // for "query" case
     });
 
     function setupAutocomplete(
@@ -79,7 +77,7 @@ describes.realWin(
       return ampAutocomplete.build().then(() => ampAutocomplete);
     }
 
-    it('should build with "inline" and "query" when specified with experiment on', () => {
+    it('should build with "inline" and "query" when specified', () => {
       return getAutocomplete({
         'filter': 'substring',
         'query': 'q',
