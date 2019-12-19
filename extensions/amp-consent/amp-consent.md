@@ -369,6 +369,8 @@ following value scheme `on="event:idOfAmpConsentElement.accept/reject/dismiss"`
 
 - `dismiss`: instruct AMP to cancel `buildCallback` of components waiting for the consent, and hides the prompt UI.
 
+**_Note:_** The consent state value may be confusing in opt-in vs opt-out scenarios. The consent state value can be thought of as a signal to tell amp runtime to unblock components. It is up to you to interpret the `consentStateValue` along with the `consentString`. For example, in an opt-out scenario, the consent value might be `unknown`, which allows personalized ads to be served. However, in the opt-in scenario, `unknown` would trigger non-personalized ads to be served/ads to be blocked.
+
 ##### Prompt Actions from External Consent UI
 
 When using iframes as consent prompt UI. Iframes can send a `consent-response` message to the parent AMP page to inform [prompt actions](#prompt-actions) on the current consent. Note the message must come from the `<amp-iframe>` created iframe. Messages from nested iframes will be ignored.
