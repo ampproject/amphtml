@@ -364,13 +364,13 @@ exports.rules = [
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-next-page/0.2/service.js->' +
+      'extensions/amp-next-page/1.0/service.js->' +
         'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-next-page/0.2/service.js->' +
+      'extensions/amp-next-page/1.0/service.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-next-page/0.2/page.js->' +
+      'extensions/amp-next-page/1.0/page.js->' +
         'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-next-page/0.2/page.js->' +
+      'extensions/amp-next-page/1.0/page.js->' +
         'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
         'src/service/notification-ui-manager.js',
