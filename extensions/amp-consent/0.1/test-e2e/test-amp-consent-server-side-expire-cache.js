@@ -124,7 +124,8 @@ describes.endtoend(
       }
     }
 
-    it('should respect server side decision and clear on next visit', async () => {
+    // TODO (micajuineho) Remove skip once not flakey
+    it.skip('should respect server side decision and clear on next visit', async () => {
       const currentUrl = await controller.getCurrentUrl();
       const nextGeoUrl = currentUrl.replace('mx', 'ca');
 
