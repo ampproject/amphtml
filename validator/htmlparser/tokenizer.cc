@@ -734,15 +734,18 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
       case ' ':
       case '\n':
       case '\r':
+      case '\t':
       case '\f':
-      case '/':
+      case '/': {
         std::get<0>(pending_attribute_).end = raw_.end - 1;
         return;
+      }
       case '=':
-      case '>':
+      case '>': {
         UnreadByte();
         std::get<0>(pending_attribute_).end = raw_.end;
         return;
+      }
     }
   }
 }
