@@ -307,7 +307,7 @@ const forbiddenTerms = {
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
-      'extensions/amp-next-page/0.2/service.js',
+      'extensions/amp-next-page/0.2/visibility-observer.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'extensions/amp-video-docking/0.1/amp-video-docking.js',
       'src/service/position-observer/position-observer-impl.js',
