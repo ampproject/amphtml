@@ -1,6 +1,5 @@
 // AUTO GENERATED; DO NOT EDIT.
-// To regenerate this file, use the following command:
-// $ bazel-bin/htmlparser/bin/casetablegen
+// To regenerate this file, see comments in bin/casetable.cc
 
 #ifndef HTMLPARSER__CASETABLE_H_
 #define HTMLPARSER__CASETABLE_H_
