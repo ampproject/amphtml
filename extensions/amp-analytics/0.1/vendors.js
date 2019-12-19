@@ -91,6 +91,7 @@ import {SEGMENT_CONFIG} from './vendors/segment';
 import {SHINYSTAT_CONFIG} from './vendors/shinystat';
 import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SNOWPLOW_CONFIG} from './vendors/snowplow';
+import {SNOWPLOW_V2_CONFIG} from './vendors/snowplow_v2';
 import {TEAANALYTICS_CONFIG} from './vendors/teaanalytics';
 import {TEALIUMCOLLECT_CONFIG} from './vendors/tealiumcollect';
 import {TOP100_CONFIG} from './vendors/top100';
@@ -253,6 +254,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'shinystat': includeJsonLiteral(SHINYSTAT_CONFIG),
       'simplereach': includeJsonLiteral(SIMPLEREACH_CONFIG),
       'snowplow': includeJsonLiteral(SNOWPLOW_CONFIG),
+      'snowplow_v2': includeJsonLiteral(SNOWPLOW_V2_CONFIG),
       'teaanalytics': includeJsonLiteral(TEAANALYTICS_CONFIG),
       'tealiumcollect': includeJsonLiteral(TEALIUMCOLLECT_CONFIG),
       'top100': includeJsonLiteral(TOP100_CONFIG),
@@ -295,11 +297,10 @@ function mergeIframeTransportConfig(config, iframeTransportConfig) {
   for (const vendor in iframeTransportConfig) {
     if (hasOwn(iframeTransportConfig, vendor)) {
       const url = iframeTransportConfig[vendor];
-      config[vendor]['transport'] = Object.assign(
-        {},
-        config[vendor]['transport'],
-        {'iframe': url}
-      );
+      config[vendor]['transport'] = {
+        ...config[vendor]['transport'],
+        'iframe': url,
+      };
     }
   }
 }

@@ -21,6 +21,7 @@ import {Observable} from '../../../../src/observable';
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
 import {installPerformanceService} from '../../../../src/service/performance-impl';
+import {installPlatformService} from '../../../../src/service/platform-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin(
@@ -40,6 +41,7 @@ describes.fakeWin(
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       element = document.createElement('script');
@@ -275,6 +277,7 @@ describes.fakeWin(
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -564,6 +567,7 @@ describes.fakeWin(
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -724,6 +728,7 @@ describes.fakeWin(
       clock = env.sandbox.useFakeTimers();
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -1124,6 +1129,7 @@ describes.fakeWin(
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -1208,6 +1214,7 @@ describes.fakeWin(
       clock = env.sandbox.useFakeTimers();
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -1620,6 +1627,7 @@ describes.fakeWin(
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -1749,6 +1757,7 @@ describes.fakeWin(
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');

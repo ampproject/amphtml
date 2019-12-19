@@ -249,6 +249,7 @@ exports.rules = [
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
       'extensions/amp-inline-gallery/0.1/amp-inline-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
+      'extensions/amp-inline-gallery/0.1/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/0.1/carousel-events.js',
 
       // Facebook components
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
@@ -365,12 +366,10 @@ exports.rules = [
         'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-next-page/0.2/service.js->' +
         'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-next-page/0.2/service.js->' +
+      'extensions/amp-next-page/0.2/visibility-observer.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-next-page/0.2/page.js->' +
+      'extensions/amp-next-page/0.2/visibility-observer.js->' +
         'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-next-page/0.2/page.js->' +
-        'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
         'src/service/notification-ui-manager.js',
       'extensions/amp-consent/0.1/amp-consent.js->' +
