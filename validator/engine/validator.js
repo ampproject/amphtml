@@ -5217,11 +5217,14 @@ class ParsedValidatorRules {
      * @private
      */
     this.typeIdentifiers_ = Object.create(null);
-    this.typeIdentifiers_['⚡'] = 0;
+    this.typeIdentifiers_['\u26a1'] = 0;
+    this.typeIdentifiers_['\u26a1\ufe0f'] = 0;
     this.typeIdentifiers_['amp'] = 0;
-    this.typeIdentifiers_['⚡4ads'] = 0;
+    this.typeIdentifiers_['\u26a14ads'] = 0;
+    this.typeIdentifiers_['\u26a1\ufe0f4ads'] = 0;
     this.typeIdentifiers_['amp4ads'] = 0;
-    this.typeIdentifiers_['⚡4email'] = 0;
+    this.typeIdentifiers_['\u26a14email'] = 0;
+    this.typeIdentifiers_['\u26a1\ufe0f4email'] = 0;
     this.typeIdentifiers_['amp4email'] = 0;
     this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
@@ -5452,7 +5455,8 @@ class ParsedValidatorRules {
         if (formatIdentifiers.indexOf(attr.name) !== -1) {
           // Only add the type identifier once per representation. That is, both
           // "⚡" and "amp", which represent the same type identifier.
-          const typeIdentifier = attr.name.replace('⚡', 'amp');
+          const typeIdentifier = attr.name.replace('\u26a1\ufe0f', 'amp')
+                                          .replace('\u26a1', 'amp');
           if (validationResult.typeIdentifier.indexOf(typeIdentifier) === -1) {
             validationResult.typeIdentifier.push(typeIdentifier);
             context.recordTypeIdentifier(typeIdentifier);
@@ -5518,22 +5522,26 @@ class ParsedValidatorRules {
     switch (this.htmlFormat_) {
       case 'AMP':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡', 'amp', 'transformed', 'data-ampdevmode'],
+            htmlTag.attrs(), ['\u26a1', '\u26a1\ufe0f',
+                              'amp', 'transformed', 'data-ampdevmode'],
             context, validationResult);
         break;
       case 'AMP4ADS':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡4ads', 'amp4ads', 'data-ampdevmode'], context,
+            htmlTag.attrs(), ['\u26a14ads', '\u26a1\ufe0f4ads',
+                              'amp4ads', 'data-ampdevmode'], context,
             validationResult);
         break;
       case 'AMP4EMAIL':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡4email', 'amp4email', 'data-ampdevmode'],
+            htmlTag.attrs(), ['\u26a14email', '\u26a1\ufe0f4email',
+                              'amp4email', 'data-ampdevmode'],
             context, validationResult);
         break;
       case 'ACTIONS':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡', 'amp', 'actions', 'data-ampdevmode'],
+            htmlTag.attrs(), ['\u26a1', '\u26a1\ufe0f', 'amp',
+                              'actions', 'data-ampdevmode'],
             context,  validationResult);
         if (validationResult.typeIdentifier.indexOf('actions') === -1) {
           context.addError(
