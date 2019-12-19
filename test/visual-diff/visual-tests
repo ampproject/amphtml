@@ -742,6 +742,12 @@
       "no_base_test": true
     },
     {
+      "url": "examples/visual-tests/amphtml-ads/amp-fie-static.html",
+      "name": "amphtml-ads: friendly iframe static",
+      "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
+      "no_base_test": true
+    },
+    {
       "url": "examples/visual-tests/amphtml-ads/amp-inabox-adchoices.html",
       "name": "amphtml-ads: inabox adchoices",
       "interactive_tests": "examples/visual-tests/amphtml-ads/adchoices.js",
