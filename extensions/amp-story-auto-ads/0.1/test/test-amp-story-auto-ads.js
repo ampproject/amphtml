@@ -52,6 +52,8 @@ describes.realWin(
     let storyElement;
     let autoAds;
     let story;
+    let storeService;
+    let storeGetterStub;
 
     beforeEach(() => {
       win = env.win;
@@ -67,6 +69,37 @@ describes.realWin(
       storyElement.appendChild(adElement);
       story = new AmpStory(storyElement);
       autoAds = new AmpStoryAutoAds(adElement);
+      storeService = getStoreService(win);
+      storeGetterStub = env.sandbox.stub(storeService, 'get');
+      // Tests by default assume an 8 page parent story. Overide if needed.
+      storeGetterStub
+        .withArgs(StateProperty.PAGE_IDS)
+        .returns(['1', '2', '3', '4', '5', '6', '7', '8']);
+      storeGetterStub.callThrough();
+    });
+
+    describe('ad creation', () => {
+      beforeEach(() => {
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(adElement);
+      });
+
+      it('creates an ad when story pages > min interval', async () => {
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        const ampAd = doc.querySelector('amp-ad');
+        expect(ampAd).to.exist;
+      });
+
+      it('doesnt create ad when story pages < min interval', async () => {
+        storeGetterStub
+          .withArgs(StateProperty.PAGE_IDS)
+          .returns(['1', '2', '3', '4']);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+        const ampAd = doc.querySelector('amp-ad');
+        expect(ampAd).not.to.exist;
+      });
     });
 
     describe('service installation', () => {
@@ -166,13 +199,10 @@ describes.realWin(
     });
 
     describe('ad badge', () => {
-      let storeService;
-
       beforeEach(async () => {
         // Force sync mutateElement.
         env.sandbox.stub(autoAds, 'mutateElement').callsArg(0);
         addStoryAutoAdsConfig(adElement);
-        storeService = getStoreService(win);
         await story.buildCallback();
         // Fire these events so that story ads thinks the parent story is ready.
         story.signals().signal(CommonSignals.BUILT);
@@ -283,12 +313,9 @@ describes.realWin(
 
     describe('development mode', () => {
       it('should immediately insert and navigate to ad page', async () => {
-        const storeService = await Services.storyStoreServiceForOrNull(win);
-        const storeStub = env.sandbox.stub(storeService, 'get');
-        storeStub
+        storeGetterStub
           .withArgs(StateProperty.CURRENT_PAGE_ID)
           .returns('story-page-0');
-        storeStub.callThrough();
 
         const storyImpl = new MockStoryImpl(storyElement);
         storyElement.getImpl = () => Promise.resolve(storyImpl);
