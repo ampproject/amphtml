@@ -94,6 +94,7 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 ### A slightly more complex example
 
 [filter formats="websites, stories, ads"]
+
 ```html
 <!-- Store complex nested JSON data in <amp-state> elements. -->
 <amp-state id="myAnimals">
@@ -129,9 +130,11 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 
 <button on="tap:AMP.setState({currentAnimal: 'cat'})">Set to Cat</button>
 ```
+
 [/filter]
 
 [filter formats="email"]
+
 ```html
 <!-- Store complex nested JSON data in <amp-state> elements. -->
 <amp-state id="myAnimals">
@@ -156,6 +159,7 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
   Each animal has a different background color.
 </p>
 ```
+
 [/filter]
 
 When the button is pressed:
@@ -701,6 +705,7 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 
 <amp-state id="myRemoteState" src="https://data.com/articles.json"> </amp-state>
 ```
+
 [/filter]
 
 [filter formats="email"]
@@ -715,6 +720,7 @@ An `amp-state` element must contain a child `<script>` element.
   </script>
 </amp-state>
 ```
+
 [/filter]
 
 #### XHR batching
@@ -726,32 +732,35 @@ For example, if your `amp-state` element makes an XHR to an endpoint, while the 
 #### Attributes
 
 [filter formats="websites, stories, ads"]
+
 ##### src
+
 The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 [tip type="important]
-  The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
+The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
 [/tip]
 
 ##### credentials (optional)
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
 
-* Supported values: `omit`, `include`
-* Default: `omit`
+- Supported values: `omit`, `include`
+- Default: `omit`
 
 To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
 [/filter]
 
 [filter formats="email"]
+
 ##### Invalid AMP email attributes
 
 Security and privacy disallow the use of the following attributes on the AMP email format.
 
-* `[src]`
-* `src`
-* `credentials`
-* `overridable`
+- `[src]`
+- `src`
+- `credentials`
+- `overridable`
 
 [/filter]
 

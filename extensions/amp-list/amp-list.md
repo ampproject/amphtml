@@ -215,8 +215,7 @@ The `<amp-list>` element exposes a `refresh` action that other elements can refe
 
 [filter formats="websites, stories"]
 In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
-[/filter]
-[filter formats="email"]
+[/filter][filter formats="email"]
 In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
 [/filter]
 
@@ -253,6 +252,7 @@ The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supp
 [/filter]
 
 [filter formats="websites, stories"]
+
 ### credentials (optional)
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
@@ -274,6 +274,7 @@ Here's an example that specifies including credentials to display personalized c
   </template>
 </amp-list>
 ```
+
 [/filter]
 
 ### items (optional)
@@ -304,6 +305,7 @@ Causes `<amp-list>` to treat the returned result as if it were a single element 
 `{items: {...}}` will behave as if it were `{items: [{...}]}`.
 
 [filter formats="websites, stories"]
+
 ### xssi-prefix (optional)
 
 Causes `<amp-list>` to strip a prefix from the fetched JSON before parsing. This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
@@ -319,11 +321,12 @@ We could instruct `amp-list` to remove the security prefix like so:
 ```html
 <amp-list xssi-prefix=")]}" src="https://foo.com/list.json"></amp-list>
 ```
+
 [/filter]
 
 [filter formats="websites, stories"]
-### reset-on-refresh (optional)
 
+### reset-on-refresh (optional)
 
 Displays a loading indicator and placeholder again when the list's source is refreshed via `amp-bind` or the `refresh()` action.
 
@@ -358,24 +361,26 @@ Alternatively, one may also use the `changeToLayoutContainer` action.
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 [filter formats="email"]
+
 ##### Invalid AMP email attributes
 
 Security and privacy disallow the use of the following attributes on the AMP email format.
 
-* `[src]`
-* `[state]`
-* `[is-layout-container]`
-* `auto-resize`
-* `credentials`
-* `data-amp-bind-src`
-* `load-more`
-* `load-more-bookmark`
-* `reset-on-refresh`
-* `xssi-prefix`
+- `[src]`
+- `[state]`
+- `[is-layout-container]`
+- `auto-resize`
+- `credentials`
+- `data-amp-bind-src`
+- `load-more`
+- `load-more-bookmark`
+- `reset-on-refresh`
+- `xssi-prefix`
 
 [/filter]
 
 [filter formats="websites, stories"]
+
 ## Load more and infinite scroll
 
 We've introduced the `load-more` attributes with options `manual` and `auto` to allow pagination and infinite scroll.
@@ -530,6 +535,7 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
   </amp-list-load-more>
 </amp-list>
 ```
+
 [/filter]
 
 ## Substitutions

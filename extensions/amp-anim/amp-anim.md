@@ -83,15 +83,17 @@ A string that indicates the attribution of the image. For example, `attribution=
 An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image.
 
 ### Common attributes
+
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
 
 [filter formats="email"]
+
 ### Invalid AMP email attributes
 
 Security and privacy disallow the use of the following attributes on the AMP email format.
 
-* `object-fit`
-* `object-position`
+- `object-fit`
+- `object-position`
 
 [/filter]
 

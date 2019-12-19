@@ -165,21 +165,21 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 Data attributes are copied from the `amp-img` element to the internal `img` element created by the component.
 
 [filter formats="email"]
+
 ### Invalid AMP email attributes
 
 Security and privacy disallow the use of the following attributes on the AMP email format.
 
-* `[src]`
-* `[srcset]`
-* `lightbox`
-* `lightbox-thumbnail-id`
-* `object-fit`
-* `object-position`
+- `[src]`
+- `[srcset]`
+- `lightbox`
+- `lightbox-thumbnail-id`
+- `object-fit`
+- `object-position`
 
 [tip type="read-on"]
-  Enable a lightbox effect on `amp-img` in email by using the [`amp-image-lightbox`](../extensions/amp-image-lightbox/amp-image-lightbox.md) component with the `on` action.
-[/tip]
-[/filter]
+Enable a lightbox effect on `amp-img` in email by using the [`amp-image-lightbox`](../extensions/amp-image-lightbox/amp-image-lightbox.md) component with the `on` action.
+[/tip][/filter]
 
 ## Styling
 
@@ -254,6 +254,7 @@ See the guide on [creating responsive AMP pages](https://amp.dev/documentation/g
 [/filter]
 
 [filter formats="websites, stories, ads"]
+
 #### Maintaining the aspect ratio for images with unknown dimensions
 
 The AMP layout system requires the aspect ratio of an image in advance before fetching the image; however, in some cases you might not know the image's dimensions. To display images with unknown dimensions and maintain the aspect ratios, combine AMP's [`fill`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout) layout with the [`object-fit`](https://css-tricks.com/almanac/properties/o/object-fit/) CSS property. For more information, see the [How to support images with unknown dimensions](https://amp.dev/documentation/examples/style-layout/how_to_support_images_with_unknown_dimensions/) example.
