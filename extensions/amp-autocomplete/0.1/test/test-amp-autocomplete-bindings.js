@@ -18,7 +18,6 @@ import '../amp-autocomplete';
 import {AutocompleteBindingInline} from '../autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from '../autocomplete-binding-single';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-autocomplete bindings',
@@ -135,7 +134,6 @@ describes.realWin(
         new AutocompleteBindingInline(stubAmpAutocomplete(attributes));
 
       beforeEach(() => {
-        toggleExperiment(win, 'amp-autocomplete', true);
         pre = 'My friend is ';
         userInput = 'har';
         match = {0: '@' + userInput, index: pre.length};

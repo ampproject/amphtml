@@ -86,7 +86,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>query (optional)</strong></td>
-    <td>The query parameter to generate a static remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This requires the presence of the <code>src</code> attribute. For example, if <code>src="http://www.example.com"</code> and <code>query="q"</code>, then when a user types in <code>abc</code>, the component will retrieve data from <code>http://www.example.com?q=abc</code>. This feature is currently only usable under <a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a> and can be activated by the <code>amp-autocomplete</code> experiment.
+    <td>The query parameter to generate a static remote endpoint that returns the JSON that will be filtered and rendered within this <code>amp-autocomplete</code>. This requires the presence of the <code>src</code> attribute. For example, if <code>src="http://www.example.com"</code> and <code>query="q"</code>, then when a user types in <code>abc</code>, the component will retrieve data from <code>http://www.example.com?q=abc</code>.
     </td>
   </tr>
   <tr>
@@ -155,7 +155,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>inline (optional)</strong></td>
-    <td>Whether the <code>amp-autocomplete</code> should autosuggest on the full user input or only a triggered substring of the user input. By default when the attribute is absent, suggestions will be based on the full user input. The attribute cannot have an empty value but must take a single character token, i.e. <code>@</code> which activates the autocomplete behavior. For example, if <code>inline="@"</code> then user input of <code>hello</code> will not retrieve suggestions but a user input of <code>hello @abc</code> might trigger options filtered on the substring <code>abc</code>. Currently triggered substrings are delimited on whitespace characters, however this is subject to change in the future. This feature is currently only usable under <a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a> and can be activated by the <code>amp-autocomplete</code> experiment.
+    <td>Whether the <code>amp-autocomplete</code> should autosuggest on the full user input or only a triggered substring of the user input. By default when the attribute is absent, suggestions will be based on the full user input. The attribute cannot have an empty value but must take a single character token, i.e. <code>@</code> which activates the autocomplete behavior. For example, if <code>inline="@"</code> then user input of <code>hello</code> will not retrieve suggestions but a user input of <code>hello @abc</code> might trigger options filtered on the substring <code>abc</code>. Currently triggered substrings are delimited on whitespace characters, however this is subject to change in the future.
     </td>
   </tr>
 </table>
