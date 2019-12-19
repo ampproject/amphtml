@@ -18,7 +18,6 @@ import {Deferred} from './utils/promise';
 import {Fragment, createElement, render} from 'preact';
 import {Slot, createSlot} from './preact/slot';
 import {devAssert} from './log';
-import {dict} from './utils/object';
 import {matches} from './dom';
 import {withAmpContext} from './preact/context';
 
@@ -35,6 +34,17 @@ export let AmpElementProp;
  * @typedef {{
  *   className: (string|undefined),
  *   props: (!Object<string, !AmpElementProp>|undefined),
+ *   isLayoutSupported: (
+ *     function(
+ *       this:./base-element.BaseElement,
+ *       !./layout.Layout
+ *     ):boolean | undefined
+ *   ),
+ *   init: (
+ *     function(
+ *       this:./base-element.BaseElement
+ *     ):(!JsonObject|undefined) | undefined
+ *   ),
  * }}
  */
 export let AmpElementOptions;
@@ -77,6 +87,12 @@ export function PreactBaseElement(Component, opts = {}) {
 
       /** @private {!Deferred|null} */
       this.scheduledRenderDeferred_ = null;
+
+      /** @private {!JsonObject|null|undefined} */
+      this.defaultProps_ = null;
+
+      /** @private {boolean} */
+      this.mounted_ = true;
     }
 
     /** @override */
@@ -88,11 +104,14 @@ export function PreactBaseElement(Component, opts = {}) {
     /** @override */
     isLayoutSupported(layout) {
       const layoutSupported = opts.isLayoutSupported;
-      return layoutSupported ? layoutSupported(layout) : true;
+      return layoutSupported ? layoutSupported.call(this, layout) : true;
     }
 
     /** @override */
     buildCallback() {
+      const {init} = opts;
+      this.defaultProps_ = (init && init.call(this)) || null;
+
       this.scheduleRender_();
 
       // context-changed is fired on each child element to notify it that the
@@ -140,10 +159,7 @@ export function PreactBaseElement(Component, opts = {}) {
 
     /** @private */
     unmount_() {
-      if (this.scheduledRender_) {
-        this.scheduledRender_ = false;
-      }
-
+      this.mounted_ = false;
       if (this.container_) {
         render(Fragment, this.container_);
       }
@@ -153,7 +169,7 @@ export function PreactBaseElement(Component, opts = {}) {
     rerender_() {
       // If the component unmounted before the scheduled render runs, exit
       // early.
-      if (!this.scheduledRender_) {
+      if (!this.mounted_) {
         return;
       }
 
@@ -171,8 +187,7 @@ export function PreactBaseElement(Component, opts = {}) {
       const props = collectProps(
         this.element,
         devAssert(opts),
-        this.win,
-        this.getAmpDoc()
+        this.defaultProps_
       );
 
       // While this "creates" a new element, diffing will not create a second
@@ -196,12 +211,11 @@ export function PreactBaseElement(Component, opts = {}) {
 /**
  * @param {!AmpElement} element
  * @param {!AmpElementOptions} opts
- * @param {!Window} win
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @return {!Object}
+ * @param {!JsonObject|null|undefined} defaultProps
+ * @return {!JsonObject}
  */
-function collectProps(element, opts, win, ampdoc) {
-  const props = dict({});
+function collectProps(element, opts, defaultProps) {
+  const props = /** @type {!JsonObject} */ ({...defaultProps});
 
   // Class.
   if (opts.className) {
@@ -269,14 +283,6 @@ function collectProps(element, opts, win, ampdoc) {
     }
     props['children'] = children;
   }
-
-  const services = {};
-  const requestedServices = opts.services || {};
-  for (const service in requestedServices) {
-    const getter = requestedServices[service];
-    services[service] = getter(win, ampdoc);
-  }
-  props['services'] = services;
 
   return props;
 }

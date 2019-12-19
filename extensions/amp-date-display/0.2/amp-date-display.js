@@ -15,20 +15,16 @@
  */
 
 import {AmpEvents} from '../../../src/amp-events';
+import {Fragment, createElement} from 'preact';
 import {PreactBaseElement} from '../../../src/preact-base-element';
 import {Services} from '../../../src/services';
 import {createCustomEvent} from '../../../src/event-helper';
-import {createElement} from 'preact';
-import {dev, userAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {removeChildren, rootNodeFor} from '../../../src/dom';
-import {
-  useMountLayoutEffect,
-  useRerenderer,
-  useResourcesNotify,
-} from '../../../src/preact/utils';
-import {useRef} from 'preact/hooks';
+import {removeChildren} from '../../../src/dom';
+import {useResourcesNotify} from '../../../src/preact/utils';
+import {useState} from 'preact/hooks';
 
 /** @const {string} */
 const TAG = 'amp-date-display';
@@ -83,73 +79,131 @@ let EnhancedVariablesV2Def;
  * @return {*} TODO
  */
 function AmpDateDisplayComponent(props) {
+  const render = props['render'];
+  const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
   useResourcesNotify();
-  const ref = useRef();
-  const {templates} = props['services'];
-  const rerender = useRerenderer();
 
-  useMountLayoutEffect(() => {
-    const {host} = rootNodeFor(ref.current);
-    const win = host.ownerDocument.defaultView;
-    const data = /** @type {!JsonObject} */ (getDataForTemplate(props, win));
+  return render(data, props['children']);
+}
 
-    templates.findAndRenderTemplate(host, data).then(rendered => {
-      removeChildren(dev().assertElement(host));
-      const container = document.createElement('div');
-      container.appendChild(rendered);
-      host.appendChild(container);
+/**
+ * Renders the children prop, waiting for it to resolve if it is a promise.
+ *
+ * @param {!JsonObject} props
+ * @return {*} TODO
+ */
+function AsyncRender(props) {
+  const children = props['children'];
+  const {0: state, 1: set} = useState(children);
 
-      const event = createCustomEvent(
-        win,
-        AmpEvents.DOM_UPDATE,
-        /* detail */ null,
-        {bubbles: true}
-      );
-      host.dispatchEvent(event);
-      rerender();
-    });
-  });
-  return createElement('div', {ref}, props['children']);
+  if (state && state.then) {
+    Promise.resolve(children).then(set);
+    return null;
+  }
+
+  return state;
+}
+
+/**
+ * @param {!JsonObject} props
+ * @return {*} TODO
+ */
+function RenderDomTree(props) {
+  const {'dom': dom, 'host': host} = props;
+  useResourcesNotify();
+
+  removeChildren(dev().assertElement(host));
+  if (dom) {
+    host.appendChild(dom);
+  }
+
+  const event = createCustomEvent(
+    devAssert(host.ownerDocument.defaultView),
+    AmpEvents.DOM_UPDATE,
+    /* detail */ null,
+    {bubbles: true}
+  );
+  host.dispatchEvent(event);
+
+  return null;
 }
 
 const AmpDateDisplay = PreactBaseElement(AmpDateDisplayComponent, {
   passthrough: true,
-
-  services: {
-    'templates': win => Services.templatesFor(win),
-  },
 
   props: {
     'displayIn': {attr: 'display-in'},
     'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
     'locale': {attr: 'locale'},
     'datetime': {attr: 'datetime'},
-    'timestampMs': {attr: 'timestamp-milliseconds', type: 'number'},
+    'timestampMs': {attr: 'timestamp-ms', type: 'number'},
     'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
   },
 
   /** @override */
+  init() {
+    const templates = Services.templatesFor(this.win);
+    let rendered = false;
+
+    return {
+      /**
+       * @param {!JsonObject} data
+       * @param {*} children
+       * @return {*}
+       */
+      'render': (data, children) => {
+        // We only render once in AMP mode, but React mode may rerender
+        // serveral times.
+        if (rendered) {
+          return children;
+        }
+        rendered = true;
+
+        const host = this.element;
+        const domPromise = templates
+          .findAndRenderTemplate(host, data)
+          .then(rendered => {
+            const container = document.createElement('div');
+            container.appendChild(rendered);
+
+            return createElement(RenderDomTree, {
+              'dom': container,
+              'host': host,
+            });
+          });
+        const asyncRender = createElement(AsyncRender, null, domPromise);
+        return createElement(Fragment, null, children, asyncRender);
+      },
+    };
+  },
+
+  /** @override */
   isLayoutSupported(layout) {
-    userAssert(isExperimentOn(this.win, 'amp-date-display-v2'));
+    userAssert(
+      isExperimentOn(
+        this.win,
+        'amp-date-display-v2',
+        'expected amp-date-display-v2 experiment to be enabled'
+      )
+    );
     return isLayoutSizeDefined(layout);
   },
 });
 
 /**
  * @param {!JsonObject} props
- * @param {!Window} win
  * @return {!EnhancedVariablesV2Def}
  */
-function getDataForTemplate(props, win) {
+function getDataForTemplate(props) {
   const {
     'displayIn': displayIn = '',
     'locale': locale = DEFAULT_LOCALE,
     'offsetSeconds': offsetSeconds = DEFAULT_OFFSET_SECONDS,
   } = props;
 
-  const epoch = getEpoch(props, win);
+  const epoch = getEpoch(props);
   const offset = offsetSeconds * 1000;
-  const date = new win.Date(epoch + offset);
+  const date = new Date(epoch + offset);
 
   const basicData =
     displayIn.toLowerCase() === 'utc'
@@ -161,24 +215,23 @@ function getDataForTemplate(props, win) {
 
 /**
  * @param {!JsonObject} props
- * @param {!Window} win
  * @return {number|undefined}
  */
-function getEpoch(props, win) {
+function getEpoch(props) {
   const {
     'datetime': datetime = '',
-    'timestampMilliseconds': timestampMilliseconds = 0,
+    'timestampMs': timestampMs = 0,
     'timestampSeconds': timestampSeconds = 0,
   } = props;
 
   let epoch;
   if (datetime.toLowerCase() === 'now') {
-    epoch = win.Date.now();
+    epoch = Date.now();
   } else if (datetime) {
-    epoch = win.Date.parse(datetime);
+    epoch = Date.parse(datetime);
     userAssert(!isNaN(epoch), 'Invalid date: %s', datetime);
-  } else if (timestampMilliseconds) {
-    epoch = timestampMilliseconds;
+  } else if (timestampMs) {
+    epoch = timestampMs;
   } else if (timestampSeconds) {
     epoch = timestampSeconds * 1000;
   }
