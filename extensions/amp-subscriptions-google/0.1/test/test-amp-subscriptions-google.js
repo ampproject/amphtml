@@ -444,13 +444,13 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
 
     it('should work with Google formatted entitlements', () => {
       productId = 'myProduct';
-      //TODO: update this to '{productId: ' + productId + '}' after next SwG
-      //      release.
-      const token = productId;
+      const token = JSON.stringify({
+        productId,
+      });
       entitlements = new Entitlements(
         serviceId,
         null,
-        [new SwgEntitlement(null, [productId], token)],
+        [new SwgEntitlement('google', [productId], token)],
         productId
       );
     });

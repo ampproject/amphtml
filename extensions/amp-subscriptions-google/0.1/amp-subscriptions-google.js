@@ -361,8 +361,7 @@ export class GoogleSubscriptionsPlatform {
       const entitlement =
         response.entitlements && response.entitlements.getEntitlementForThis();
       if (entitlement) {
-        //TODO: use entitlement.getSku() after next SwG release
-        product = entitlement.subscriptionToken;
+        product = entitlement.getSku();
       }
     } catch (ex) {}
     const params = /** @type {!JsonObject} */ ({
