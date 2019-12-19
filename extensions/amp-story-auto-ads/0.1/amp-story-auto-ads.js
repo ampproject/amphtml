@@ -247,12 +247,30 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /**
    * Determines whether or not ad insertion is allowed based on how the story
-   * is served.
+   * is served, and the number of pages in the story.
    * @return {boolean}
    * @private
    */
   isAutomaticAdInsertionAllowed_() {
-    return !!this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
+    return (
+      !!this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD) &&
+      this.enoughPagesLeftInStory_(0) // Beginning of story.
+    );
+  }
+
+  /**
+   * Determine if enough pages in the story are left for ad placement to be
+   * possible.
+   * TODO(ccordry): also use this on subsequent ad requests.
+   * @param {number} pageIndex
+   * @return {boolean}
+   * @private
+   */
+  enoughPagesLeftInStory_(pageIndex) {
+    return (
+      this.storeService_.get(StateProperty.PAGE_IDS).length - pageIndex >
+      MIN_INTERVAL
+    );
   }
 
   /**
