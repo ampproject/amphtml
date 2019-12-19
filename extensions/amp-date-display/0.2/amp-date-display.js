@@ -180,11 +180,8 @@ const AmpDateDisplay = PreactBaseElement(AmpDateDisplayComponent, {
   /** @override */
   isLayoutSupported(layout) {
     userAssert(
-      isExperimentOn(
-        this.win,
-        'amp-date-display-v2',
-        'expected amp-date-display-v2 experiment to be enabled'
-      )
+      isExperimentOn(this.win, 'amp-date-display-v2'),
+      'expected amp-date-display-v2 experiment to be enabled'
     );
     return isLayoutSizeDefined(layout);
   },
