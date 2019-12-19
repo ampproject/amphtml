@@ -27,7 +27,7 @@ describe
   .configure()
   .skipSinglePass()
   .skipFirefox()
-  .run('amp-script', {}, function() {
+  .run('amp-script', function() {
     this.timeout(TIMEOUT);
 
     let browser, doc, element;
