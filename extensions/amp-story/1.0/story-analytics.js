@@ -37,7 +37,7 @@ export const StoryAnalyticsEvent = {
   PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
   PAGE_VISIBLE: 'story-page-visible',
-  QUIZ_RESPOND: 'story-quiz-respond',
+  INTERACTIVE_ELEMENT_RESPOND: 'interactive-element-respond',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };

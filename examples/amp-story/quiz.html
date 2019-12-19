@@ -33,11 +33,11 @@
           "requests": {
             "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
             "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
-            "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&storyQuizId=${storyQuizId}&storyQuizOptionId=${storyQuizOptionId}"
+            "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&interactiveElementType=${storyInteractiveElementType}&interactiveElementId=${storyInteractiveElementId}&interactiveElementResponseId=${storyInteractiveElementResponse}"
           },
           "triggers": {
             "trackQuizResponse": {
-              "on": "story-quiz-respond",
+              "on": "interactive-element-respond",
               "request": "click"
             },
             "checkLastPage": {
@@ -105,11 +105,13 @@
           }
         </style>
         <amp-story-grid-layer id="cat-question-cute">
-          <amp-story-quiz>
+          <amp-story-quiz
+            id="cats-cute-quiz">
             <h2>Are cats cute?</h2>
             <option correct>Yes</option>
             <option>No</option>
-          </amp-story-quiz>
+          </amp-story-quiz
+          >
         </amp-story-grid-layer>
         <amp-story-page-attachment layout="nodisplay" theme="dark">
           <h1>Amazing title</h1>

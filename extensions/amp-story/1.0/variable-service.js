@@ -28,8 +28,9 @@ export const AnalyticsVariable = {
   BOOKEND_COMPONENT_POSITION: 'storyBookendComponentPosition',
   BOOKEND_COMPONENT_TYPE: 'storyBookendComponentType',
   BOOKEND_TARGET_HREF: 'storyBookendTargetHref',
-  QUIZ_ID: 'storyQuizId',
-  QUIZ_OPTION_ID: 'storyQuizOptionId',
+  INTERACTIVE_ELEMENT_ID: 'storyInteractiveElementId',
+  INTERACTIVE_ELEMENT_RESPONSE: 'storyInteractiveElementResponse',
+  INTERACTIVE_ELEMENT_TYPE: 'storyInteractiveElementType',
   STORY_PAGE_ID: 'storyPageId',
   STORY_PAGE_INDEX: 'storyPageIndex',
   STORY_PAGE_COUNT: 'storyPageCount',
@@ -72,8 +73,9 @@ export class AmpStoryVariableService {
       [AnalyticsVariable.BOOKEND_COMPONENT_POSITION]: null,
       [AnalyticsVariable.BOOKEND_COMPONENT_TYPE]: null,
       [AnalyticsVariable.BOOKEND_TARGET_HREF]: null,
-      [AnalyticsVariable.QUIZ_ID]: null,
-      [AnalyticsVariable.QUIZ_OPTION_ID]: null,
+      [AnalyticsVariable.INTERACTIVE_ELEMENT_ID]: null,
+      [AnalyticsVariable.INTERACTIVE_ELEMENT_RESPONSE]: null,
+      [AnalyticsVariable.INTERACTIVE_ELEMENT_TYPE]: null,
       [AnalyticsVariable.STORY_PAGE_INDEX]: null,
       [AnalyticsVariable.STORY_PAGE_ID]: null,
       [AnalyticsVariable.STORY_PAGE_COUNT]: null,
@@ -122,17 +124,6 @@ export class AmpStoryVariableService {
       },
       true /* callToInitialize */
     );
-
-    this.storeService_.subscribe(StateProperty.CURRENT_QUIZ_ID, quizId => {
-      if (!quizId) {
-        return;
-      }
-
-      this.variables_[AnalyticsVariable.QUIZ_ID] = quizId;
-      this.variables_[
-        AnalyticsVariable.QUIZ_OPTION_ID
-      ] = this.storeService_.get(StateProperty.CURRENT_QUIZ_OPTION_ID);
-    });
   }
 
   /**

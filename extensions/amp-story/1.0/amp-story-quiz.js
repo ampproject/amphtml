@@ -34,6 +34,11 @@ const answerChoiceOptions = ['A', 'B', 'C', 'D'];
 /** @const {string} */
 const TAG = 'amp-story-quiz';
 
+// TODO(jackbsteinberg): Refactor quiz to extend a general interactive element class
+// and make this an enum on that class
+/** @const {number} */
+const INTERACTIVE_ELEMENT_TYPE_QUIZ = 0;
+
 /**
  * Generates the template for the quiz
  *
@@ -80,9 +85,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     /** @private {?Element} */
     this.quizEl_ = null;
-
-    /** @private {?string} */
-    this.quizId_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
@@ -159,18 +161,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   attachContent_() {
-    // Set quiz ID
-    if (!this.element.hasAttribute('id')) {
-      // If the quiz has no ID, randomly set one
-      this.element.setAttribute(
-        'id',
-        Math.random()
-          .toString(36)
-          .substring(7)
-      );
-    }
-    this.quizId_ = this.element.getAttribute('id');
-
     // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
     const promptInput = this.element.children[0];
     // First child must be heading h1-h3
@@ -218,6 +208,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     convertedOption.querySelector(
       '.i-amphtml-story-quiz-answer-choice'
     ).textContent = answerChoiceOptions[index];
+    convertedOption.optionId_ = index;
 
     // Transfer the option information into a span then remove the option
     const optionText = document.createElement('span');
@@ -279,6 +270,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
   }
 
+  // triggerAnalytics() {
+
+  // }
+
   /**
    * Triggers changes to quiz state on response interaction
    *
@@ -287,20 +282,22 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   handleOptionSelection_(optionEl) {
     // TODO(jackbsteinberg): FIND A BETTER METHOD OF SETTING AND GETTING IDS, THIS IS REALLY FLIMSY LOL
-    // update the variable service
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.QUIZ_ID,
-      this.quizId_
+      AnalyticsVariable.INTERACTIVE_ELEMENT_ID,
+      this.element.getAttribute('id')
     );
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.QUIZ_OPTION_ID,
-      optionEl.querySelector('.i-amphtml-story-quiz-answer-choice').textContent
+      AnalyticsVariable.INTERACTIVE_ELEMENT_RESPONSE,
+      optionEl.optionId_
+    );
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.INTERACTIVE_ELEMENT_TYPE,
+      INTERACTIVE_ELEMENT_TYPE_QUIZ
     );
 
-    // trigger analytics
-    this.quizEl_[ANALYTICS_TAG_NAME] = 'story-quiz-respond';
+    this.quizEl_[ANALYTICS_TAG_NAME] = 'interactive-element-respond';
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.QUIZ_RESPOND,
+      StoryAnalyticsEvent.INTERACTIVE_ELEMENT_RESPOND,
       this.quizEl_
     );
 
