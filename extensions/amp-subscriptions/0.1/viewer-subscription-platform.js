@@ -181,7 +181,9 @@ export class ViewerSubscriptionPlatform {
             decryptedDocumentKey,
           });
         }
-      } else if (decodedData['metering'] && !entitlement) {
+      }
+
+      if (decodedData['metering'] && !entitlement.granted) {
         // Special case where viewer gives metering but no entitlement
         entitlement = new Entitlement({
           source: decodedData['iss'] || '',
