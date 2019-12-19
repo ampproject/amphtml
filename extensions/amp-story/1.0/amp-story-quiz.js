@@ -119,11 +119,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   adjustGridLayer_() {
     const gridLayer = closest(dev().assertElement(this.element), el => {
-      const tagName = el.tagName.toLowerCase();
-
-      if (tagName === 'amp-story-grid-layer') {
-        return true;
-      }
+      return el.tagName.toLowerCase() === 'amp-story-grid-layer';
     });
 
     gridLayer.classList.add('i-amphtml-story-has-quiz');
