@@ -215,9 +215,11 @@ The `<amp-list>` element exposes a `refresh` action that other elements can refe
 
 [filter formats="websites, stories"]
 In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
-[/filter][filter formats="email"]
+[/filter]<!-- formats="websites, stories" -->
+
+[filter formats="email"]
 In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
-[/filter]
+[/filter]<!-- formats="email" -->
 
 ```html
 <button on="list.changeToLayoutContainer()">Show Grid</button>
@@ -249,7 +251,7 @@ If fetching the data at the `src` URL fails, the `<amp-list>` triggers a low-tru
 
 [filter formats="websites, stories"]
 The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supports URL and non-URL expression values; see `amp-list` in [`amp-bind` element specific attributes documentation](https://amp.dev/documentation/components/amp-bind/#element-specific-attributes) for details.
-[/filter]
+[/filter]<!-- formats="websites, stories" -->
 
 [filter formats="websites, stories"]
 
@@ -275,7 +277,7 @@ Here's an example that specifies including credentials to display personalized c
 </amp-list>
 ```
 
-[/filter]
+[/filter]<!-- formats="websites, stories" -->
 
 ### items (optional)
 
@@ -322,7 +324,7 @@ We could instruct `amp-list` to remove the security prefix like so:
 <amp-list xssi-prefix=")]}" src="https://foo.com/list.json"></amp-list>
 ```
 
-[/filter]
+[/filter]<!-- formats="websites, stories" -->
 
 [filter formats="websites, stories"]
 
@@ -331,7 +333,7 @@ We could instruct `amp-list` to remove the security prefix like so:
 Displays a loading indicator and placeholder again when the list's source is refreshed via `amp-bind` or the `refresh()` action.
 
 By default, this will only trigger on refreshes that cause a network fetch. To reset on all refreshes, use `reset-on-refresh="always"`.
-[/filter]
+[/filter]<!-- formats="websites, stories" -->
 
 ### binding (optional)
 
@@ -364,7 +366,7 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 ##### Invalid AMP email attributes
 
-Security and privacy disallow the use of the following attributes on the AMP email format.
+The AMP4EEMAIL spec disallows the use of the following attributes on the AMP email format.
 
 - `[src]`
 - `[state]`
@@ -377,7 +379,7 @@ Security and privacy disallow the use of the following attributes on the AMP ema
 - `reset-on-refresh`
 - `xssi-prefix`
 
-[/filter]
+[/filter] <!-- formats="email" -->
 
 [filter formats="websites, stories"]
 
@@ -536,7 +538,7 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
 </amp-list>
 ```
 
-[/filter]
+[/filter] <!-- formats="websites, stories" -->
 
 ## Substitutions
 

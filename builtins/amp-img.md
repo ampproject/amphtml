@@ -122,11 +122,11 @@ Learn more about using `amp-img` from these resources:
 
 [filter formats="websites, stories, ads"]
 This attribute is similar to the `src` attribute on the `img` tag. The value must be a URL that points to a publicly-cacheable image file. Cache providers may rewrite these URLs when ingesting AMP files to point to a cached version of the image.
-[/filter]
+[/filter] <!-- formats="websites, stories, ads" -->
 
 [filter formats="email"]
 This attribute is similar to the `src` attribute on the `img` tag. For emails, the URL must be `https`.
-[/filter]
+[/filter] <!-- formats="email" -->
 
 ### srcset
 
@@ -168,7 +168,7 @@ Data attributes are copied from the `amp-img` element to the internal `img` elem
 
 ### Invalid AMP email attributes
 
-Security and privacy disallow the use of the following attributes on the AMP email format.
+The AMP4EEMAIL spec disallows the use of the following attributes on the AMP email format.
 
 - `[src]`
 - `[srcset]`
@@ -179,7 +179,7 @@ Security and privacy disallow the use of the following attributes on the AMP ema
 
 [tip type="read-on"]
 Enable a lightbox effect on `amp-img` in email by using the [`amp-image-lightbox`](../extensions/amp-image-lightbox/amp-image-lightbox.md) component with the `on` action.
-[/tip][/filter]
+[/tip][/filter] <!-- formats="email" -->
 
 ## Styling
 
@@ -245,20 +245,20 @@ The [`srcset`](#attributes) attribute should be used to provide different resolu
 In contrast, the [`media`](https://www.ampproject.org/docs/reference/common_attributes#media) attribute shows or hides AMP components, and should be used when designing responsive layouts. The appropriate way to display images with differing aspect ratios is to use multiple `<amp-img>` components, each with a `media` attribute that matches the screen widths in which to show each instance.
 
 See the guide on [creating responsive AMP pages](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/responsive_design#displaying-responsive-images) for more details.
-[/filter]
+[/filter]<!-- formats="websites, stories, ads" -->
 
 [filter formats="email"]
 The [`media`](https://www.ampproject.org/docs/reference/common_attributes#media) attribute shows or hides AMP components, and should be used when designing responsive layouts. The appropriate way to display images with differing aspect ratios is to use multiple `<amp-img>` components, each with a `media` attribute that matches the screen widths in which to show each instance.
 
 See the guide on [creating responsive AMP pages](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/responsive_design#displaying-responsive-images) for more details.
-[/filter]
+[/filter]<!-- formats="email" -->
 
 [filter formats="websites, stories, ads"]
 
 #### Maintaining the aspect ratio for images with unknown dimensions
 
 The AMP layout system requires the aspect ratio of an image in advance before fetching the image; however, in some cases you might not know the image's dimensions. To display images with unknown dimensions and maintain the aspect ratios, combine AMP's [`fill`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout) layout with the [`object-fit`](https://css-tricks.com/almanac/properties/o/object-fit/) CSS property. For more information, see the [How to support images with unknown dimensions](https://amp.dev/documentation/examples/style-layout/how_to_support_images_with_unknown_dimensions/) example.
-[/filter]
+[/filter]<!-- formats="websites, stories, ads" -->
 
 ## Validation
 

@@ -115,7 +115,7 @@ Specifies a server endpoint to handle the form input. The value must be an `http
 
 [tip type="note"]
 The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fallback to using `action` and `target` in cases where the `amp-form` extension fails to load.
-[/tip][/filter]
+[/tip][/filter] <!-- formats="websites, stories, ads" -->
 
 ##### action-xhr
 
@@ -174,14 +174,14 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 ##### Invalid AMP email attributes
 
-Security and privacy disallow the use of the following attributes on the AMP email format.
+The AMP4EEMAIL spec disallows the use of the following attributes on the AMP email format.
 
 - `action`
 - `name`
 - `target`
 - `verify-xhr`
 
-[/filter]
+[/filter]<!-- formats="email" -->
 
 ## Inputs and fields
 

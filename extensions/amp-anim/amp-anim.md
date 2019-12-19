@@ -90,12 +90,12 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 ### Invalid AMP email attributes
 
-Security and privacy disallow the use of the following attributes on the AMP email format.
+The AMP4EEMAIL spec disallows the use of the following attributes on the AMP email format.
 
 - `object-fit`
 - `object-position`
 
-[/filter]
+[/filter] <!-- formats="email" -->
 
 ## Styling
 
