@@ -95,6 +95,7 @@ function AmpDateDisplayComponent(props) {
 function AsyncRender(props) {
   const children = props['children'];
   const {0: state, 1: set} = useState(children);
+  useResourcesNotify();
 
   if (state && state.then) {
     Promise.resolve(children).then(set);
