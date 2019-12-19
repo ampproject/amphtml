@@ -168,7 +168,7 @@ Data attributes are copied from the `amp-img` element to the internal `img` elem
 
 ### Invalid AMP email attributes
 
-The AMP4EEMAIL spec disallows the use of the following attributes on the AMP email format.
+The AMP4EMAIL spec disallows the use of the following attributes on the AMP email format.
 
 - `[src]`
 - `[srcset]`

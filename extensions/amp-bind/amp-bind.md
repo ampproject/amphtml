@@ -853,7 +853,7 @@ To send credentials, pass the value of `include`. If this value is set, the resp
 
 ##### Invalid AMP email attributes
 
-The AMP4EEMAIL spec disallows the use of the following attributes on the AMP email format.
+The AMP4EMAIL spec disallows the use of the following attributes on the AMP email format.
 
 - `[src]`
 - `src`

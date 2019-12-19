@@ -366,7 +366,7 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 ##### Invalid AMP email attributes
 
-The AMP4EEMAIL spec disallows the use of the following attributes on the AMP email format.
+The AMP4EMAIL spec disallows the use of the following attributes on the AMP email format.
 
 - `[src]`
 - `[state]`
