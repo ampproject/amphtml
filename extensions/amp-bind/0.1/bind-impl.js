@@ -253,9 +253,7 @@ export class Bind {
    * evaluation unless `skipEval` is false.
    * @param {!JsonObject} state
    *
-   * @param {Object} opts options bag
-   * @param {boolean=} opts.skipEval
-   * @param {boolean=} opts.skipAmpState
+   * @param {BindSetStateOptionsDef} opts options bag
    * @return {!Promise}
    */
   setState(state, opts = {}) {
