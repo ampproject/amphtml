@@ -278,12 +278,7 @@ h3.i-amphtml-story-quiz-prompt {
     }
     50% {
         opacity: 1;
-    }
-    70% {
         color: var(--correct-color);
-    }
-    71% {
-        color: white;
     }
     100% {
         border-color: var(--correct-color);
@@ -303,12 +298,7 @@ h3.i-amphtml-story-quiz-prompt {
     }
     50% {
         opacity: 1;
-    }
-    70% {
         color: var(--incorrect-color);
-    }
-    71% {
-        color: white;
     }
     100% {
         border-color: var(--incorrect-color);
