@@ -21,7 +21,6 @@ import {dev} from '../log';
 import {dict, map} from '../utils/object';
 import {getMode} from '../mode';
 import {getService, registerServiceBuilder} from '../service';
-import {isCanary} from '../experiments';
 import {isStoryDocument} from '../utils/story';
 import {layoutRectLtwh} from '../layout-rect';
 import {throttle} from '../utils/rate-limit';
@@ -231,9 +230,7 @@ export class Performance {
 
     // Add RTV version as experiment ID, so we can slice the data by version.
     this.addEnabledExperiment('rtv-' + getMode(this.win).rtvVersion);
-    if (isCanary(this.win)) {
-      this.addEnabledExperiment('canary');
-    }
+
     // Tick document ready event.
     whenDocumentReady(win.document).then(() => {
       this.tick('dr');
