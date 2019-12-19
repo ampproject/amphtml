@@ -164,7 +164,7 @@ function getLastGitTag(gitMetadata) {
   const command = 'git describe --tags --abbrev=0';
 
   return exec(command).then(lastTag => {
-    gitMetadata.baseTag = lastTag.trim();
+    gitMetadata.baseTag = lastTag.stdout.trim();
     return gitMetadata;
   });
 }
@@ -183,7 +183,7 @@ function getCurrentBranchName(gitMetadata) {
   const command = 'git rev-parse --abbrev-ref HEAD';
 
   return exec(command).then(branchName => {
-    gitMetadata.branch = branchName.trim();
+    gitMetadata.branch = branchName.stdout.trim();
     return gitMetadata;
   });
 }
