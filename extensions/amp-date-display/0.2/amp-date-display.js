@@ -106,6 +106,8 @@ function AsyncRender(props) {
 }
 
 /**
+ * Clears the host element and appends the DOM tree into it.
+ *
  * @param {!JsonObject} props
  * @return {*} TODO
  */

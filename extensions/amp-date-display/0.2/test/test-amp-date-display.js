@@ -43,7 +43,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       clock = lolex.install({
-        target: win,
+        target: window,
         now: new Date('2018-01-01T08:00:00Z'),
       });
 
@@ -145,10 +145,10 @@ describes.realWin(
         element.build();
 
         const {iso} = await getRenderedData();
-        const dateFromParsed = new win.Date(iso);
+        const dateFromParsed = new Date(iso);
 
         // Because of the runtime there could be a several ms difference.
-        expect(dateFromParsed.getTime()).to.equal(win.Date.now());
+        expect(dateFromParsed.getTime()).to.equal(Date.now());
       });
 
       it('day only ISO 8601 date', async () => {
