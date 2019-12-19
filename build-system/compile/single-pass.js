@@ -111,7 +111,7 @@ exports.getFlags = function(config) {
     // accessing the symbol, we remedy this by attaching all public exports
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
-    language_in: config.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
+    language_in: 'ECMASCRIPT_2018',
     language_out: config.esm
       ? 'NO_TRANSPILE'
       : config.language_out || 'ECMASCRIPT5',

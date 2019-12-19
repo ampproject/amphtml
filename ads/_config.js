@@ -721,6 +721,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
   },
 
+  'nativery': {
+    preconnect: 'https://cdn.nativery.com',
+  },
+
   'nativo': {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
@@ -993,6 +997,12 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
     preconnect: ['https://ib.adnxs.com'],
     renderStartImplemented: true,
+  },
+
+  'ssp': {
+    prefetch: 'https://ssp.imedia.cz/static/js/ssp.js',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
   },
 
   'strossle': {

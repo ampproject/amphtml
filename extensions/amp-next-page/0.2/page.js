@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {PositionInViewportEntryDef} from '../../../src/service/position-observer/position-observer-worker';
-import {RelativePositions} from '../../../src/layout-rect';
+import {
+  ViewportRelativePos, // eslint-disable-line no-unused-vars
+} from './visibility-observer';
 import {VisibilityState} from '../../../src/visibility-state';
-import {devAssert} from '../../../src/log';
 
 /** @enum {number} */
 export const PageState = {
@@ -28,43 +28,36 @@ export const PageState = {
   INSERTED: 4,
 };
 
-/** @enum {number} */
-export const PageRelativePos = {
-  INSIDE_VIEWPORT: 0,
-  OUTSIDE_VIEWPORT: 1,
-  LEAVING_VIEWPORT: 2,
-  CONTAINS_VIEWPORT: 3,
-};
-
 export class Page {
   /**
    * @param {!./service.NextPageService} manager
-   * @param {string} url
-   * @param {string} title
-   * @param {string} image
+   * @param {{ url: string, title: string, image: string }} meta
+   * @param {!PageState=} initState
+   * @param {!VisibilityState=} initVisibility
    */
-  constructor(manager, url, title, image) {
+  constructor(
+    manager,
+    meta,
+    initState = PageState.QUEUED,
+    initVisibility = VisibilityState.PRERENDER
+  ) {
     /** @private @const {!./service.NextPageService} */
     this.manager_ = manager;
     /** @private @const {string} */
-    this.title_ = title;
+    this.title_ = meta.title;
     /** @private {string} */
-    this.url_ = url;
+    this.url_ = meta.url;
     /** @private @const {string} */
-    this.image_ = image;
+    this.image_ = meta.image;
 
     /** @private {?../../../src/runtime.ShadowDoc} */
     this.shadowDoc_ = null;
     /** @private {!PageState} */
-    this.state_ = PageState.QUEUED;
-    /** @private {?RelativePositions} */
-    this.headerPosition_ = null;
-    /** @private {?RelativePositions} */
-    this.footerPosition_ = null;
+    this.state_ = initState;
     /** @private {!VisibilityState} */
-    this.visibilityState_ = VisibilityState.PRERENDER;
-    /** @private {!PageRelativePos} */
-    this.relativePos_ = PageRelativePos.OUTSIDE_VIEWPORT;
+    this.visibilityState_ = initVisibility;
+    /** @private {!ViewportRelativePos} */
+    this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
   }
 
   /** @return {string} */
@@ -89,9 +82,14 @@ export class Page {
     return this.title_;
   }
 
-  /** @return {!PageRelativePos} */
+  /** @return {!ViewportRelativePos} */
   get relativePos() {
     return this.relativePos_;
+  }
+
+  /** @param {!ViewportRelativePos} position */
+  set relativePos(position) {
+    this.relativePos_ = position;
   }
 
   /**
@@ -112,14 +110,19 @@ export class Page {
   /**
    * @param {VisibilityState} visibilityState
    */
-  setVisible(visibilityState) {
-    // TODO(wassgha): Handle history manipulation
-    // TODO(wassgha): Handle manual visibility management
-
+  setVisibility(visibilityState) {
+    if (visibilityState == this.visibilityState_) {
+      return;
+    }
     // Update visibility internally and at the shadow doc level
-    if (this.shadowDoc_ && visibilityState != this.visibilityState_) {
+    this.visibilityState_ = visibilityState;
+    if (this.shadowDoc_) {
       this.shadowDoc_.setVisibilityState(visibilityState);
-      this.visibilityState_ = visibilityState;
+    }
+
+    // Switch the title and url of the page to reflect this page
+    if (visibilityState === VisibilityState.VISIBLE) {
+      this.manager_.setTitlePage(this);
     }
   }
 
@@ -174,76 +177,5 @@ export class Page {
       .catch(() => {
         this.state_ = PageState.FAILED;
       });
-  }
-
-  /**
-   * Called when a position change is detected on the injected
-   * header element
-   * @param {?PositionInViewportEntryDef} position
-   */
-  headerPositionChanged(position) {
-    const prevHeaderPosition = this.headerPosition_;
-    if (position.relativePos === prevHeaderPosition) {
-      return;
-    }
-    this.headerPosition_ = position.relativePos;
-    this.updateRelativePos_();
-  }
-
-  /**
-   * Called when a position change is detected on the injected
-   * footer element
-   * @param {?PositionInViewportEntryDef} position
-   */
-  footerPositionChanged(position) {
-    const prevFooterPosition = this.headerPosition_;
-    if (position.relativePos === prevFooterPosition) {
-      return;
-    }
-    this.footerPosition_ = position.relativePos;
-    this.updateRelativePos_();
-  }
-
-  /**
-   * Calculates the position of the document relative to the viewport
-   * based on the positions of the injected footer and header elements
-   * @private
-   */
-  updateRelativePos_() {
-    const {headerPosition_: header, footerPosition_: footer} = this;
-    const {INSIDE, TOP, BOTTOM} = RelativePositions;
-
-    devAssert(
-      header || footer,
-      'next-page scroll triggered without a header or footer position'
-    );
-
-    if (header === INSIDE && footer === INSIDE) {
-      // Both the header and footer are within the viewport bounds
-      // meaning that the document is short enough to be
-      // contained inside the viewport
-      this.relativePos_ = PageRelativePos.INSIDE_VIEWPORT;
-    } else if ((!header || header === TOP) && (!footer || footer === BOTTOM)) {
-      // The head of the document is above the viewport and the
-      // footer of the document is below it, meaning that the viewport
-      // is looking at a section of the document
-      this.relativePos_ = PageRelativePos.CONTAINS_VIEWPORT;
-    } else if (
-      (header === TOP && footer === TOP) ||
-      (header === BOTTOM && footer === BOTTOM)
-    ) {
-      // Both the header and the footer of the document are either
-      // above or below the document meaning that the viewport hasn't
-      // reached the document yet or has passed it
-      this.relativePos_ = PageRelativePos.OUTSIDE_VIEWPORT;
-    } else {
-      // The remaining case is the case where the document is halfway
-      // through being scrolling into/out of the viewport in which case
-      // we don't need to update the visibility
-      this.relativePos_ = PageRelativePos.LEAVING_VIEWPORT;
-      return;
-    }
-
-    this.manager_.updateVisibility();
   }
 }

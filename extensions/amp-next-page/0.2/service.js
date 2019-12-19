@@ -16,12 +16,10 @@
 
 import {CSS} from '../../../build/amp-next-page-0.2.css';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {Page, PageRelativePos} from './page';
+import {Page, PageState} from './page';
 import {
   PositionObserver, // eslint-disable-line no-unused-vars
-  installPositionObserverServiceForDoc,
 } from '../../../src/service/position-observer/position-observer-impl';
-import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
@@ -32,8 +30,14 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {installStylesForDoc} from '../../../src/style-installer';
+import {
+  parseFavicon,
+  parseOgImage,
+  parseSchemaImage,
+} from '../../../src/mediasession-helper';
 import {sanitizeDoc, validatePage, validateUrl} from './utils';
 import {tryParseJson} from '../../../src/json';
+import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;
@@ -44,9 +48,8 @@ export const Direction = {UP: 1, DOWN: -1};
 export class NextPageService {
   /**
    * @param  {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!PositionObserver=} opt_injectedPositionObserver
    */
-  constructor(ampdoc, opt_injectedPositionObserver) {
+  constructor(ampdoc) {
     /** @private @const {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
@@ -68,11 +71,14 @@ export class NextPageService {
     /** @private {?AmpElement} element */
     this.element_ = null;
 
-    /** @private @const {?PositionObserver} */
-    this.injectedPositionObserver_ = opt_injectedPositionObserver || null;
+    /** @private {?VisibilityObserver} */
+    this.visibilityObserver_ = null;
 
     /** @private {?MultidocManager} */
     this.multidocManager_ = null;
+
+    /** @private {?../../../src/service/history-impl.History} */
+    this.history_ = null;
 
     /** @private {?Array<!Page>} */
     this.pages_;
@@ -85,6 +91,9 @@ export class NextPageService {
 
     /** @private {number} */
     this.lastScrollTop_ = 0;
+
+    /** @private {?Page} */
+    this.initialPage_ = null;
   }
 
   /**
@@ -100,12 +109,20 @@ export class NextPageService {
    * @param {!AmpElement} element
    */
   build(element) {
+    // Create a reference to the host page
+    this.initialPage_ = this.createInitialPage();
+
+    this.history_ = Services.historyForDoc(this.ampdoc_);
+    this.initializeHistory();
+
     this.multidocManager_ = new MultidocManager(
       this.win_,
       Services.ampdocServiceFor(this.win_),
       Services.extensionsFor(this.win_),
       Services.timerFor(this.win_)
     );
+
+    this.visibilityObserver_ = new VisibilityObserver(this.ampdoc_);
 
     this.element_ = element;
     this.separator_ = this.getSeparatorElement_();
@@ -115,13 +132,16 @@ export class NextPageService {
     this.element_.appendChild(this.moreBox_);
 
     if (!this.pages_) {
-      this.pages_ = [];
+      this.pages_ = [this.initialPage_];
+      this.setLastFetchedPage(this.initialPage_);
     }
 
     this.getPagesPromise_().then(pages => {
       pages.forEach(page => {
         validatePage(page, this.ampdoc_.getUrl());
-        this.pages_.push(new Page(this, page.url, page.title, page.image));
+        this.pages_.push(
+          new Page(this, {url: page.url, title: page.title, image: page.image})
+        );
       });
     });
 
@@ -172,41 +192,48 @@ export class NextPageService {
   updateVisibility() {
     this.pages_.forEach((page, index) => {
       if (
-        page.relativePos === PageRelativePos.INSIDE_VIEWPORT ||
-        page.relativePos === PageRelativePos.CONTAINS_VIEWPORT
+        page.relativePos === ViewportRelativePos.INSIDE_VIEWPORT ||
+        page.relativePos === ViewportRelativePos.CONTAINS_VIEWPORT
       ) {
         if (!page.isVisible()) {
-          page.setVisible(VisibilityState.VISIBLE);
+          page.setVisibility(VisibilityState.VISIBLE);
         }
-        // Hide the previous page
-        const prevPage = this.pages_[index + this.scrollDirection_];
-        if (
-          prevPage &&
-          prevPage.relativePos === PageRelativePos.LEAVING_VIEWPORT &&
-          prevPage.isVisible()
-        ) {
-          prevPage.setVisible(VisibilityState.HIDDEN);
-        }
-      } else if (page.relativePos === PageRelativePos.OUTSIDE_VIEWPORT) {
+        this.hidePreviousPages(index);
+      } else if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
-          page.setVisible(VisibilityState.VISIBLE);
+          page.setVisibility(VisibilityState.HIDDEN);
         }
       }
     });
+
+    // If no page is visible then the host page should be
+    if (!this.pages_.some(page => page.isVisible())) {
+      this.initialPage_.setVisibility(VisibilityState.VISIBLE);
+    }
   }
 
   /**
-   * @return {!PositionObserver}
-   * @private
+   * Makes sure that all pages preceding the current page are
+   * marked hidden if they are out of the viewport
+   * @param {number} index index of the page to start at
    */
-  getPositionObserver_() {
-    // For testing
-    if (this.injectedPositionObserver_) {
-      return this.injectedPositionObserver_;
-    }
+  hidePreviousPages(index) {
+    // Get all the pages that the user scrolled past (or didn't see yet)
+    const previousPages =
+      this.scrollDirection_ === Direction.UP
+        ? this.pages_.slice(index + 1)
+        : this.pages_.slice(0, index);
 
-    installPositionObserverServiceForDoc(this.ampdoc_);
-    return Services.positionObserverForDoc(this.ampdoc_.getHeadNode());
+    // Find the ones that should be hidden (no longer inside the viewport)
+    previousPages
+      .filter(page => {
+        const shouldHide =
+          page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
+          page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT ||
+          page === this.initialPage_;
+        return shouldHide && page.isVisible();
+      })
+      .forEach(page => page.setVisibility(VisibilityState.HIDDEN));
   }
 
   /**
@@ -214,6 +241,52 @@ export class NextPageService {
    */
   setLastFetchedPage(page) {
     this.lastFetchedPage_ = page;
+  }
+
+  /**
+   * Sets the title and url of the document to those of
+   * the provided page
+   * @param {?Page=} page
+   */
+  setTitlePage(page = this.initialPage_) {
+    if (!page) {
+      dev().warn(TAG, 'setTitlePage called before next-page-service is built');
+      return;
+    }
+    const {title, url} = page;
+    this.win_.document.title = title;
+    this.history_.replace({title, url});
+  }
+
+  /**
+   * Adds an initial entry in history that sub-pages can
+   * replace when they become visible
+   */
+  initializeHistory() {
+    const {title, url} = this.initialPage_;
+    this.history_.push(undefined /** opt_onPop */, {title, url});
+  }
+
+  /**
+   *
+   * @return {!Page}
+   */
+  createInitialPage() {
+    const doc = this.win_.document;
+    const {title, location} = doc;
+    const {href: url} = location;
+    const image =
+      parseSchemaImage(doc) || parseOgImage(doc) || parseFavicon(doc) || '';
+    return new Page(
+      this,
+      {
+        url,
+        title,
+        image,
+      },
+      PageState.INSERTED /** initState */,
+      VisibilityState.VISIBLE /** initVisibility */
+    );
   }
 
   /**
@@ -229,21 +302,7 @@ export class NextPageService {
       return null;
     }
 
-    const header = this.win_.document.createElement('div');
     const shadowRoot = this.win_.document.createElement('div');
-    const footer = this.win_.document.createElement('div');
-
-    // TODO(wassgha): Unobserve
-    this.getPositionObserver_().observe(
-      header,
-      PositionObserverFidelity.LOW,
-      position => page.headerPositionChanged(position)
-    );
-    this.getPositionObserver_().observe(
-      footer,
-      PositionObserverFidelity.LOW,
-      position => page.footerPositionChanged(position)
-    );
 
     // Handles extension deny-lists and sticky items
     sanitizeDoc(doc);
@@ -251,10 +310,12 @@ export class NextPageService {
     // Insert the separator
     this.element_.insertBefore(this.separator_.cloneNode(true), this.moreBox_);
 
-    // Insert the shadow doc and two observer elements
-    this.element_.insertBefore(header, this.moreBox_);
+    // Insert the shadow doc and observe its position
     this.element_.insertBefore(shadowRoot, this.moreBox_);
-    this.element_.insertBefore(footer, this.moreBox_);
+    this.visibilityObserver_.observe(shadowRoot, this.element_, position => {
+      page.relativePos = position;
+      this.updateVisibility();
+    });
 
     // Try inserting the shadow document
     try {
