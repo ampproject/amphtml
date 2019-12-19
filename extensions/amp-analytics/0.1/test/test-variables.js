@@ -398,7 +398,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('should replace FIRST_CONTENTFUL_PAINT', () => {
-      sandbox.stub(Services, 'performanceFor').returns({
+      env.sandbox.stub(Services, 'performanceFor').returns({
         getFirstContentfulPaint() {
           return 1;
         },
@@ -407,7 +407,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('should replace FIRST_VIEWPORT_READY', () => {
-      sandbox.stub(Services, 'performanceFor').returns({
+      env.sandbox.stub(Services, 'performanceFor').returns({
         getFirstViewportReady() {
           return 1;
         },
@@ -416,7 +416,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('should replace MAKE_BODY_VISIBLE', () => {
-      sandbox.stub(Services, 'performanceFor').returns({
+      env.sandbox.stub(Services, 'performanceFor').returns({
         getMakeBodyVisible() {
           return 1;
         },

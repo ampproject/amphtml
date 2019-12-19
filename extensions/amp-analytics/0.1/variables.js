@@ -214,23 +214,17 @@ export class VariableService {
 
     // Was set async before
     this.register_('FIRST_CONTENTFUL_PAINT', () => {
-      console.log('fcp macro called');
-      return tryResolve(() =>
-        Services.performanceFor(this.ampdoc_.win).getFirstContentfulPaint()
-      );
+      return Services.performanceFor(
+        this.ampdoc_.win
+      ).getFirstContentfulPaint();
     });
 
     this.register_('FIRST_VIEWPORT_READY', () => {
-      console.log('fvr macro called');
-      return tryResolve(() =>
-        Services.performanceFor(this.ampdoc_.win).getFirstViewportReady()
-      );
+      return Services.performanceFor(this.ampdoc_.win).getFirstViewportReady();
     });
 
     this.register_('MAKE_BODY_VISIBLE', () => {
-      return tryResolve(() =>
-        Services.performanceFor(this.ampdoc_.win).getMakeBodyVisible()
-      );
+      return Services.performanceFor(this.ampdoc_.win).getMakeBodyVisible();
     });
   }
 

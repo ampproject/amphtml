@@ -67,7 +67,7 @@ describe('amp-analytics', function() {
         document.cookie = '_cid=;expires=' + new Date(0).toUTCString();
       });
 
-      it.only('should send request', () => {
+      it('should send request', () => {
         return RequestBank.withdraw().then(req => {
           const q = parseQueryString(req.url.substr(1));
           expect(q['a']).to.equal('2');
@@ -75,11 +75,6 @@ describe('amp-analytics', function() {
           expect(q['cid']).to.equal('amp-12345');
           expect(q['loadend']).to.not.equal('0');
           expect(q['default']).to.equal('test');
-          console.log(q['fvr']);
-          console.log(q['mbv']);
-          console.log(q['fcp']);
-          console.log(JSON.stringify(q));
-          console.log(req.url);
           // cookie set via http response header when requesting
           // localhost:9876/amp4test/compose-doc
           expect(q['cookie']).to.equal('test');
