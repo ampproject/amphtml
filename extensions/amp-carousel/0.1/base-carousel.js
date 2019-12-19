@@ -15,6 +15,7 @@
  */
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {toggleAttribute} from '../../../src/dom';
 
 /**
  * @abstract
@@ -181,18 +182,12 @@ export class BaseCarousel extends AMP.BaseElement {
     }
     this.getVsync().mutate(() => {
       const className = 'i-amphtml-carousel-button-start-hint';
+      const hideAttribute = 'i-amphtml-carousel-hide-buttons';
       this.element.classList.add(className);
       Services.timerFor(this.win).delay(() => {
         this.mutateElement(() => {
           this.element.classList.remove(className);
-          this.prevButton_.classList.toggle(
-            'i-amphtml-screen-reader',
-            !this.showControls_
-          );
-          this.nextButton_.classList.toggle(
-            'i-amphtml-screen-reader',
-            !this.showControls_
-          );
+          toggleAttribute(this.element, hideAttribute, !this.showControls_);
         });
       }, 4000);
     });
