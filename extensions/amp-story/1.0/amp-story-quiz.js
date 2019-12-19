@@ -204,13 +204,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   configureOption_(option, index) {
     const convertedOption = buildOptionTemplate(dev().assertElement(option));
 
-    // Fill in the answer choice
+    // Fill in the answer choice and set the option ID
     convertedOption.querySelector(
       '.i-amphtml-story-quiz-answer-choice'
     ).textContent = answerChoiceOptions[index];
     convertedOption.optionId_ = index;
 
-    // Transfer the option information into a span then remove the option
+    // Extract and structure the option information
     const optionText = document.createElement('span');
     optionText.classList.add('i-amphtml-story-quiz-option-text');
     optionText.textContent = option.textContent;
@@ -221,7 +221,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
     this.element.removeChild(option);
 
-    // Add the option to the quiz element
     this.quizEl_
       .querySelector('.i-amphtml-story-quiz-option-container')
       .appendChild(convertedOption);
@@ -242,7 +241,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    // Add a click listener to the element to trigger the class change via tapping the prompt
+    // Add a click listener to the element to trigger the class change
     this.quizEl_.addEventListener('click', e => this.handleTap_(e));
   }
 
@@ -270,18 +269,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
   }
 
-  // triggerAnalytics() {
-
-  // }
-
   /**
-   * Triggers changes to quiz state on response interaction
+   * Triggers the analytics event for quiz response
    *
    * @param {!Element} optionEl
    * @private
    */
-  handleOptionSelection_(optionEl) {
-    // TODO(jackbsteinberg): FIND A BETTER METHOD OF SETTING AND GETTING IDS, THIS IS REALLY FLIMSY LOL
+  triggerAnalytics_(optionEl) {
     this.variableService_.onVariableUpdate(
       AnalyticsVariable.INTERACTIVE_ELEMENT_ID,
       this.element.getAttribute('id')
@@ -300,6 +294,16 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       StoryAnalyticsEvent.INTERACTIVE_ELEMENT_RESPOND,
       this.quizEl_
     );
+  }
+
+  /**
+   * Triggers changes to quiz state on response interaction
+   *
+   * @param {!Element} optionEl
+   * @private
+   */
+  handleOptionSelection_(optionEl) {
+    this.triggerAnalytics_(optionEl);
 
     this.mutateElement(() => {
       optionEl.classList.add('i-amphtml-story-quiz-option-selected');
