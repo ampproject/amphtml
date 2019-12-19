@@ -98,6 +98,7 @@ Here's an example of a basic form:
 
 ## Attributes
 
+[filter formats="websites, stories, ads"]
 ##### target
 
 Indicates where to display the form response after submitting the form. The value must be `_blank` or `_top`.
@@ -110,9 +111,10 @@ Specifies a server endpoint to handle the form input. The value must be an `http
 * For `method=POST`: use the [`action-xhr`](#action-xhr) attribute.
 
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fallback to using `action` and `target` in cases where the `amp-form` extension fails to load.
-{% endcall %}
+[/tip]
+[/filter]
 
 ##### action-xhr
 
@@ -139,6 +141,18 @@ All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/El
 This is an optional attribute that enables and selects a custom validation reporting strategy. Valid values are one of: `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
 See the [Custom Validation](#custom-validations) section for more details.
+
+[filter formats="email"]
+##### Invalid AMP email attributes
+
+Security and privacy disallow the use of the following attributes on the AMP email format.
+
+* `action`
+* `name`
+* `target`
+* `verify-xhr`
+
+[/filter]
 
 ## Inputs and fields
 
