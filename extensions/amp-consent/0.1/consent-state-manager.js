@@ -97,8 +97,7 @@ export class ConsentStateManager {
       dev().error(TAG, 'instance not registered');
       return;
     }
-
-    this.instance_.update(state, consentStr);
+    this.instance_.update(state, consentStr, false);
 
     if (this.consentChangeHandler_) {
       this.consentChangeHandler_(constructConsentInfo(state, consentStr));
@@ -193,6 +192,15 @@ export class ConsentStateManager {
       this.consentReadyResolver_ = deferred.resolve;
     }
     return this.consentReadyPromise_;
+  }
+
+  /**
+   * Get last consent instance stored.
+   * @visibleForTesting
+   * @return {?ConsentInfoDef}
+   */
+  getSavedInstanceForTesting() {
+    return this.instance_.savedConsentInfo_;
   }
 }
 
@@ -336,6 +344,14 @@ export class ConsentInstance {
         return;
       }
 
+      if (consentInfo['consentState'] === CONSENT_ITEM_STATE.UNKNOWN) {
+        // Remove stored value if the consentState is unknown
+        // Do not consilidate with the value == null check below,
+        // because UNKNOWN and DISMISS are different
+        storage.remove(this.storageKey_);
+        return;
+      }
+
       const consentStr = consentInfo['consentString'];
       if (consentStr && consentStr.length > 150) {
         // Verify the length of consentString.
@@ -456,14 +472,12 @@ export class ConsentInstance {
         body: request,
         ampCors: false,
       };
-      Services.viewerForDoc(this.ampdoc_)
-        .whenFirstVisible()
-        .then(() => {
-          Services.xhrFor(this.ampdoc_.win).fetchJson(
-            /** @type {string} */ (this.onUpdateHref_),
-            init
-          );
-        });
+      this.ampdoc_.whenFirstVisible().then(() => {
+        Services.xhrFor(this.ampdoc_.win).fetchJson(
+          /** @type {string} */ (this.onUpdateHref_),
+          init
+        );
+      });
     });
   }
 }

@@ -97,17 +97,17 @@ limitations under the License.
 </table>
 
 #### Examples
+
 Example - Google Ad Manager Ad
+
 ```html
-<amp-ad width=728 height=90
-    type="doubleclick"
-    data-slot="/6355419/Travel">
+<amp-ad width="728" height="90" type="doubleclick" data-slot="/6355419/Travel">
 </amp-ad>
 ```
+
 ### Configuration
 
 For semantics of configuration, please see [ad network documentation](https://developers.google.com/doubleclick-gpt/reference).
-
 
 #### Ad size
 
@@ -116,11 +116,14 @@ By default the ad size is based on the `width` and `height` attributes of the `a
 Example:
 
 ```html
-<amp-ad width=320 height=50
-    data-override-width=111
-    data-override-height=222
-    type="doubleclick"
-    data-slot="/4119129/mobile_ad_banner">
+<amp-ad
+  width="320"
+  height="50"
+  data-override-width="111"
+  data-override-height="222"
+  type="doubleclick"
+  data-slot="/4119129/mobile_ad_banner"
+>
 </amp-ad>
 ```
 
@@ -139,7 +142,7 @@ Supported via `json` attribute:
   - 0: Enables DFP cookies on ad requests on the page. This option is set by default.
   - 1: Ignores DFP cookies on subsequent ad requests and prevents cookies from being created on the page.
 - `tagForChildDirectedTreatment`: Configures whether the slot should be treated as child-directed.
-See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/3721907">Small Business</a> or <a href="https://support.google.com/dfp_premium/answer/3671211">Premium</a> for more details and allowed values.
+  See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/3721907">Small Business</a> or <a href="https://support.google.com/dfp_premium/answer/3671211">Premium</a> for more details and allowed values.
 - `targeting`: Sets a custom targeting parameter for this slot. Values must of the form:
   - `"<key_string>":"<value_string>"` or
   - `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
@@ -147,18 +150,23 @@ See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/37219
 Example with json attribute:
 
 ```html
-<amp-ad width=320 height=50
-    type="doubleclick"
-    data-slot="/4119129/mobile_ad_banner"
-    json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}'>
+<amp-ad
+  width="320"
+  height="50"
+  type="doubleclick"
+  data-slot="/4119129/mobile_ad_banner"
+  json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}'
+>
 </amp-ad>
 ```
 
 ### Supported DFP Formats
+
 - Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
 - Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
 
 ### Unsupported DFP Formats
+
 - Interstitials
 - Flash
 - Creatives served over HTTP.

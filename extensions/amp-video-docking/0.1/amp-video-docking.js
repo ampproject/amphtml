@@ -226,7 +226,8 @@ function getIntersectionRect(element) {
  * @param {!../../../src/layout-rect.LayoutRectDef} rect
  * @return {boolean}
  */
-function isSizedLayoutRect({width, height}) {
+function isSizedLayoutRect(rect) {
+  const {width, height} = rect;
   return width > 0 && height > 0;
 }
 
@@ -536,6 +537,10 @@ export class VideoDocking {
       this.dismissOnTap_();
     });
 
+    listen(container, VideoDockingEvents.SCROLL_BACK, () => {
+      this.scrollBack_();
+    });
+
     this.addDragListeners_(container);
     this.addDragListeners_(overlay);
 
@@ -628,7 +633,9 @@ export class VideoDocking {
    * @private
    */
   getFixedSlotLayoutBox_() {
-    return this.getFixedLayoutBox_(dev().assertElement(this.getSlot_()));
+    return dev()
+      .assertElement(this.getSlot_())
+      .getPageLayoutBox();
   }
 
   /**
@@ -1116,6 +1123,7 @@ export class VideoDocking {
       );
 
       placeholderIcon.classList.toggle('amp-rtl', isPlacementRtl);
+      this.getControls_().container.classList.toggle('amp-rtl', isPlacementRtl);
     }
 
     // Setting explicit dimensions is needed to match the video's aspect
@@ -1953,6 +1961,19 @@ export class VideoDocking {
       return;
     }
     removeElement(el);
+  }
+
+  /** @private */
+  scrollBack_() {
+    if (!this.currentlyDocked_) {
+      return;
+    }
+    // Don't set duration or curve.
+    // Rely on Viewport service to determine timing based on scroll Δ.
+    this.viewport_.animateScrollIntoView(
+      this.getDockedVideo_().element,
+      'center'
+    );
   }
 }
 

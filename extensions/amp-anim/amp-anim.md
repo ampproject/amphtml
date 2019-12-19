@@ -7,6 +7,7 @@ formats:
 teaser:
   text: Manages an animated image, typically a GIF.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -49,8 +50,8 @@ A runtime-managed animated image, typically a GIF.
 The `amp-anim` component is almost identical to the `amp-img` element, but allows the AMP runtime to reduce CPU usage when the animation is off-screen. Like [other elements](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders), it supports an optional `placeholder` child, to display while the `src` file is loading:
 
 ```html
-<amp-anim width=400 height=300 src="my-gif.gif">
-  <amp-img placeholder width=400 height=300 src="my-gif-screencap.jpg">
+<amp-anim width="400" height="300" src="my-gif.gif">
+  <amp-img placeholder width="400" height="300" src="my-gif-screencap.jpg">
   </amp-img>
 </amp-anim>
 ```
@@ -98,11 +99,13 @@ Security and privacy disallow the use of the following attributes on the AMP ema
 
 `amp-img` can be styled directly via CSS properties. Setting a grey background
 placeholder for example could be achieved via:
+
 ```css
 amp-anim {
   background-color: grey;
 }
 ```
+
 ## Validation
 
 See [amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/validator-amp-anim.protoascii) in the AMP validator specification.

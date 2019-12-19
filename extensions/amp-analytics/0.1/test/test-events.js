@@ -15,8 +15,8 @@
  */
 
 import * as lolex from 'lolex';
-import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {
+  AmpStoryEventTracker,
   AnalyticsEvent,
   AnalyticsEventType,
   ClickEventTracker,
@@ -28,6 +28,7 @@ import {
   VisibilityTracker,
   trackerTypeForTesting,
 } from '../events';
+import {AmpdocAnalyticsRoot} from '../analytics-root';
 import {Deferred} from '../../../../src/utils/promise';
 import {Signals} from '../../../../src/utils/signals';
 import {macroTask} from '../../../../testing/yield';
@@ -45,7 +46,7 @@ describes.realWin('Events', {amp: 1}, env => {
     win = env.win;
     ampdoc = env.ampdoc;
     root = new AmpdocAnalyticsRoot(ampdoc);
-    handler = sandbox.spy();
+    handler = env.sandbox.spy();
 
     analyticsElement = win.document.createElement('amp-analytics');
     win.document.body.appendChild(analyticsElement);
@@ -100,7 +101,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should add listener', () => {
       const selUnlisten = function() {};
-      const selListenerStub = sandbox
+      const selListenerStub = env.sandbox
         .stub(root, 'createSelectiveListener')
         .callsFake(() => selUnlisten);
       tracker.add(
@@ -120,7 +121,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('should add listener with default selection method', () => {
-      const selListenerStub = sandbox.stub(root, 'createSelectiveListener');
+      const selListenerStub = env.sandbox.stub(root, 'createSelectiveListener');
       tracker.add(analyticsElement, 'click', {selector: '*'}, handler);
       expect(selListenerStub.args[0][3]).to.be.null; // Default selection method.
     });
@@ -150,7 +151,7 @@ describes.realWin('Events', {amp: 1}, env => {
       target.click();
       expect(handler).to.be.calledOnce;
 
-      const handler2 = sandbox.spy();
+      const handler2 = env.sandbox.spy();
       tracker.add(analyticsElement, 'click', {selector: '.target'}, handler2);
       child.click();
       expect(handler).to.be.calledTwice;
@@ -159,7 +160,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should only stop on the first found target', () => {
       tracker.add(analyticsElement, 'click', {selector: '.target'}, handler);
-      const handler2 = sandbox.spy();
+      const handler2 = env.sandbox.spy();
       tracker.add(analyticsElement, 'click', {selector: '.child'}, handler2);
       target.click();
       child.click();
@@ -192,14 +193,14 @@ describes.realWin('Events', {amp: 1}, env => {
     beforeEach(() => {
       tracker = root.getTracker(AnalyticsEventType.SCROLL, ScrollEventTracker);
       fakeViewport = {
-        'getSize': sandbox
+        'getSize': env.sandbox
           .stub()
           .returns({top: 0, left: 0, height: 200, width: 200}),
-        'getScrollTop': sandbox.stub().returns(0),
-        'getScrollLeft': sandbox.stub().returns(0),
-        'getScrollHeight': sandbox.stub().returns(500),
-        'getScrollWidth': sandbox.stub().returns(500),
-        'onChanged': sandbox.stub(),
+        'getScrollTop': env.sandbox.stub().returns(0),
+        'getScrollLeft': env.sandbox.stub().returns(0),
+        'getScrollHeight': env.sandbox.stub().returns(500),
+        'getScrollWidth': env.sandbox.stub().returns(500),
+        'onChanged': env.sandbox.stub(),
       };
       scrollManager = tracker.root_.getScrollManager();
       scrollManager.viewport_ = fakeViewport;
@@ -225,7 +226,7 @@ describes.realWin('Events', {amp: 1}, env => {
         undefined,
         AnalyticsEventType.SCROLL,
         defaultScrollConfig,
-        sandbox.stub()
+        env.sandbox.stub()
       );
       expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(1);
 
@@ -234,8 +235,8 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('fires on scroll', () => {
-      const fn1 = sandbox.stub();
-      const fn2 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
+      const fn2 = env.sandbox.stub();
       tracker.add(
         undefined,
         AnalyticsEventType.SCROLL,
@@ -264,10 +265,10 @@ describes.realWin('Events', {amp: 1}, env => {
         };
       }
       expect(fn1).to.have.callCount(2);
-      expect(fn1.getCall(0).calledWithMatch(sinon.match(matcher(0)))).to.be
-        .true;
-      expect(fn1.getCall(1).calledWithMatch(sinon.match(matcher(0)))).to.be
-        .true;
+      expect(fn1.getCall(0).calledWithMatch(env.sandbox.match(matcher(0)))).to
+        .be.true;
+      expect(fn1.getCall(1).calledWithMatch(env.sandbox.match(matcher(0)))).to
+        .be.true;
       expect(fn2).to.have.not.been.called;
 
       // Scroll Down
@@ -276,19 +277,19 @@ describes.realWin('Events', {amp: 1}, env => {
       tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
 
       expect(fn1).to.have.callCount(4);
-      expect(fn1.getCall(2).calledWithMatch(sinon.match(matcher(100)))).to.be
-        .true;
-      expect(fn1.getCall(3).calledWithMatch(sinon.match(matcher(100)))).to.be
-        .true;
+      expect(fn1.getCall(2).calledWithMatch(env.sandbox.match(matcher(100)))).to
+        .be.true;
+      expect(fn1.getCall(3).calledWithMatch(env.sandbox.match(matcher(100)))).to
+        .be.true;
       expect(fn2).to.have.callCount(2);
-      expect(fn2.getCall(0).calledWithMatch(sinon.match(matcher(90)))).to.be
-        .true;
-      expect(fn2.getCall(1).calledWithMatch(sinon.match(matcher(90)))).to.be
-        .true;
+      expect(fn2.getCall(0).calledWithMatch(env.sandbox.match(matcher(90)))).to
+        .be.true;
+      expect(fn2.getCall(1).calledWithMatch(env.sandbox.match(matcher(90)))).to
+        .be.true;
     });
 
     it('does not fire duplicates on scroll', () => {
-      const fn1 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
       tracker.add(
         undefined,
         AnalyticsEventType.SCROLL,
@@ -305,7 +306,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('fails gracefully on bad scroll config', () => {
-      const fn1 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
 
       allowConsoleError(() => {
         tracker.add(
@@ -387,8 +388,8 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('fires events on normalized boundaries.', () => {
-      const fn1 = sandbox.stub();
-      const fn2 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
+      const fn2 = env.sandbox.stub();
       tracker.add(
         undefined,
         AnalyticsEventType.SCROLL,
@@ -422,9 +423,9 @@ describes.realWin('Events', {amp: 1}, env => {
     let getElementSpy;
 
     beforeEach(() => {
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       tracker = root.getTracker(AnalyticsEventType.CUSTOM, CustomEventTracker);
-      getElementSpy = sandbox.spy(root, 'getElement');
+      getElementSpy = env.sandbox.spy(root, 'getElement');
     });
 
     it('should initalize, add listeners and dispose', () => {
@@ -438,7 +439,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('should listen on custom events', () => {
-      const handler2 = sandbox.spy();
+      const handler2 = env.sandbox.spy();
       tracker.add(analyticsElement, 'custom-event-1', {}, handler);
       tracker.add(analyticsElement, 'custom-event-2', {}, handler2);
       tracker.trigger(new AnalyticsEvent(target, 'custom-event-1'));
@@ -492,7 +493,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const child2 = win.document.createElement('div');
       child2.classList.add('child2');
       target.appendChild(child2);
-      const handler2 = sandbox.spy();
+      const handler2 = env.sandbox.spy();
       tracker.add(
         analyticsElement,
         'custom-event',
@@ -529,8 +530,8 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(tracker.buffer_['custom-event-2']).to.have.length(2);
 
       // Listeners added: immediate events fired.
-      const handler2 = sandbox.spy();
-      const handler3 = sandbox.spy();
+      const handler2 = env.sandbox.spy();
+      const handler3 = env.sandbox.spy();
       tracker.add(analyticsElement, 'custom-event-1', {}, handler);
       tracker.add(analyticsElement, 'custom-event-2', {}, handler2);
       tracker.add(analyticsElement, 'custom-event-3', {}, handler3);
@@ -657,6 +658,217 @@ describes.realWin('Events', {amp: 1}, env => {
     });
   });
 
+  describe('AmpStoryEventTracker', () => {
+    let tracker;
+    let clock;
+    let getRootElementSpy;
+    let rootTarget;
+
+    beforeEach(() => {
+      clock = env.sandbox.useFakeTimers();
+      tracker = root.getTracker(AnalyticsEventType.STORY, AmpStoryEventTracker);
+      rootTarget = root.getRootElement();
+      getRootElementSpy = env.sandbox.spy(root, 'getRootElement');
+    });
+
+    it('should initalize, add listeners, and dispose', () => {
+      expect(tracker.root).to.equal(root);
+      expect(tracker.buffer_).to.exist;
+
+      tracker.dispose();
+      expect(tracker.buffer_).to.not.exist;
+    });
+
+    it('should listen on story events', () => {
+      const handler2 = env.sandbox.spy();
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+      tracker.add(analyticsElement, 'story-event-2', {}, handler2);
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      expect(getRootElementSpy).to.be.calledTwice;
+
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.have.not.been.called;
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.be.calledOnce;
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.be.calledOnce;
+    });
+
+    it('should buffer story events early on', () => {
+      // Events before listeners added.
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      expect(tracker.buffer_['story-event-1']).to.have.length(1);
+      expect(tracker.buffer_['story-event-2']).to.have.length(2);
+
+      // Listeners added: immediate events fired.
+      const handler2 = env.sandbox.spy();
+      const handler3 = env.sandbox.spy();
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+      tracker.add(analyticsElement, 'story-event-2', {}, handler2);
+      tracker.add(
+        analyticsElement,
+        'story-event-3',
+        {on: 'story-event-3'},
+        handler3
+      );
+
+      expect(handler).to.be.calledOnce;
+      expect(handler2).to.have.callCount(2);
+      expect(handler3).to.have.not.been.called;
+      expect(tracker.buffer_['story-event-1']).to.have.length(1);
+      expect(tracker.buffer_['story-event-2']).to.have.length(2);
+      expect(tracker.buffer_['story-event-3']).to.be.undefined;
+
+      // Second round of events.
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-3'));
+      expect(getRootElementSpy).to.have.callCount(3);
+
+      expect(handler).to.have.callCount(2);
+      expect(handler2).to.have.callCount(3);
+      expect(handler3).to.be.calledOnce;
+      expect(tracker.buffer_['story-event-1']).to.have.length(2);
+      expect(tracker.buffer_['story-event-2']).to.have.length(3);
+      expect(tracker.buffer_['story-event-3']).to.have.length(1);
+
+      // Buffering time expires.
+      clock.tick(10001);
+      expect(tracker.buffer_).to.be.undefined;
+
+      // Post-buffering round of events.
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-1'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-2'));
+      tracker.trigger(new AnalyticsEvent(target, 'story-event-3'));
+
+      expect(handler).to.have.callCount(3);
+      expect(handler2).to.have.callCount(4);
+      expect(handler3).to.have.callCount(2);
+      expect(tracker.buffer_).to.be.undefined;
+    });
+
+    it('should not fire twice from observable and buffer', () => {
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '1'})
+      );
+      tracker.add(target, 'story-event-1', {}, handler);
+
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '2'})
+      );
+
+      expect(handler).to.have.callCount(2);
+      expect(handler.firstCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '1'})
+      );
+      expect(handler.secondCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '2'})
+      );
+    });
+
+    it('should handle all events without duplicate trigger', () => {
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '1'})
+      );
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '2'})
+      );
+      tracker.add(analyticsElement, 'story-event-1', {}, handler);
+
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '3'})
+      );
+      tracker.trigger(
+        new AnalyticsEvent(target, 'story-event-1', {'order': '4'})
+      );
+
+      expect(handler).to.have.callCount(4);
+      expect(handler.firstCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '1'})
+      );
+      expect(handler.secondCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '2'})
+      );
+      expect(handler.thirdCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '3'})
+      );
+      expect(handler.lastCall).to.be.calledWith(
+        new AnalyticsEvent(rootTarget, 'story-event-1', {'order': '4'})
+      );
+    });
+
+    it(
+      'should fire event once when repeat option is false and event has ' +
+        'not been fired before',
+      () => {
+        const storyAnalyticsConfig = {
+          'on': 'story-page-visible',
+          'storySpec': {
+            'repeat': false,
+          },
+        };
+        const vars = {
+          'storyPageIndex': '0',
+          'storyPageId': 'p4',
+          'storyPageCount': '4',
+          'eventDetails': {'repeated': false},
+        };
+
+        tracker.add(
+          target,
+          'story-page-visible',
+          storyAnalyticsConfig,
+          handler
+        );
+        tracker.trigger(new AnalyticsEvent(target, 'story-page-visible', vars));
+        expect(handler).to.have.been.calledOnce;
+      }
+    );
+
+    it('should not fire event when repeat option is false', () => {
+      const storyAnalyticsConfig = {
+        'on': 'story-page-visible',
+        'storySpec': {
+          'repeat': false,
+        },
+      };
+      const vars = {
+        'storyPageIndex': '0',
+        'storyPageId': 'p4',
+        'storyPageCount': '4',
+        'eventDetails': {'repeated': true},
+      };
+
+      tracker.add(target, 'story-page-visible', storyAnalyticsConfig, handler);
+      tracker.trigger(new AnalyticsEvent(target, 'story-page-visible', vars));
+      expect(handler).to.not.have.been.called;
+    });
+
+    it('should fire event more than once when repeat option is absent', () => {
+      const storyAnalyticsConfig = {
+        'on': 'story-page-visible',
+        'storySpec': {},
+      };
+      const vars = {
+        'storyPageIndex': '0',
+        'storyPageId': 'p4',
+        'storyPageCount': '4',
+        'eventDetails': {'repeated': true},
+      };
+
+      tracker.add(target, 'story-page-visible', storyAnalyticsConfig, handler);
+      tracker.trigger(new AnalyticsEvent(target, 'story-page-visible', vars));
+      tracker.trigger(new AnalyticsEvent(target, 'story-page-visible', vars));
+      expect(handler).to.have.been.calledTwice;
+    });
+  });
+
   describe('SignalTracker', () => {
     let tracker;
     let targetSignals;
@@ -745,7 +957,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const iniLoadStub = sandbox
+      const iniLoadStub = env.sandbox
         .stub(root, 'whenIniLoaded')
         .callsFake(() => Promise.resolve());
       tracker.add(analyticsElement, 'ini-load', {}, resolver);
@@ -761,7 +973,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const iniLoadStub = sandbox
+      const iniLoadStub = env.sandbox
         .stub(root, 'whenIniLoaded')
         .callsFake(() => Promise.resolve());
       tracker.add(analyticsElement, 'ini-load', {selector: ':root'}, resolver);
@@ -777,7 +989,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const iniLoadStub = sandbox
+      const iniLoadStub = env.sandbox
         .stub(root, 'whenIniLoaded')
         .callsFake(() => Promise.resolve());
       tracker.add(analyticsElement, 'sig1', {selector: ':host'}, resolver);
@@ -793,7 +1005,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const spy = sandbox.spy(targetSignals, 'whenSignal');
+      const spy = env.sandbox.spy(targetSignals, 'whenSignal');
       tracker.add(
         analyticsElement,
         'ini-load',
@@ -813,7 +1025,7 @@ describes.realWin('Events', {amp: 1}, env => {
       const promise = new Promise(resolve => {
         resolver = resolve;
       });
-      const spy = sandbox.spy(targetSignals, 'whenSignal');
+      const spy = env.sandbox.spy(targetSignals, 'whenSignal');
       tracker.add(
         analyticsElement,
         'ini-load',
@@ -861,7 +1073,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('should validate timerSpec', () => {
-      const handler = sandbox.stub();
+      const handler = env.sandbox.stub();
       allowConsoleError(() => {
         expect(() => {
           tracker.add(analyticsElement, AnalyticsEventType.TIMER, {}, handler);
@@ -1002,7 +1214,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('timers start and stop by tracking different events', () => {
-      const fn1 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
       const clickTracker = root.getTracker('click', ClickEventTracker);
       tracker.add(
         analyticsElement,
@@ -1031,12 +1243,12 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(fn1.args[0][0].type).to.equal(AnalyticsEventType.TIMER);
       target.click(); // Stop timer.
 
-      const fn2 = sandbox.stub();
+      const fn2 = env.sandbox.stub();
       const customTracker = root.getTracker(
         AnalyticsEventType.CUSTOM,
         CustomEventTracker
       );
-      const getElementSpy = sandbox.spy(root, 'getElement');
+      const getElementSpy = env.sandbox.spy(root, 'getElement');
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1077,7 +1289,7 @@ describes.realWin('Events', {amp: 1}, env => {
       'timers started and stopped by the same event on the same target' +
         ' do not have race condition problems',
       () => {
-        const fn1 = sandbox.stub();
+        const fn1 = env.sandbox.stub();
         tracker.add(
           analyticsElement,
           AnalyticsEventType.TIMER,
@@ -1119,7 +1331,7 @@ describes.realWin('Events', {amp: 1}, env => {
     );
 
     it('only fires when the timer interval exceeds the minimum', () => {
-      const fn1 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
       allowConsoleError(() => {
         expect(() => {
           tracker.add(
@@ -1136,7 +1348,7 @@ describes.realWin('Events', {amp: 1}, env => {
       });
       expect(fn1).to.have.not.been.called;
 
-      const fn2 = sandbox.stub();
+      const fn2 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1154,7 +1366,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('fires on the appropriate interval', () => {
-      const fn1 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1167,7 +1379,7 @@ describes.realWin('Events', {amp: 1}, env => {
       );
       expect(fn1).to.be.calledOnce;
 
-      const fn2 = sandbox.stub();
+      const fn2 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1180,7 +1392,7 @@ describes.realWin('Events', {amp: 1}, env => {
       );
       expect(fn2).to.be.calledOnce;
 
-      const fn3 = sandbox.stub();
+      const fn3 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1194,7 +1406,7 @@ describes.realWin('Events', {amp: 1}, env => {
       );
       expect(fn3).to.have.not.been.called;
 
-      const fn4 = sandbox.stub();
+      const fn4 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1232,7 +1444,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('stops firing after the maxTimerLength is exceeded', () => {
-      const fn1 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1246,7 +1458,7 @@ describes.realWin('Events', {amp: 1}, env => {
       );
       expect(fn1).to.be.calledOnce;
 
-      const fn2 = sandbox.stub();
+      const fn2 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1260,7 +1472,7 @@ describes.realWin('Events', {amp: 1}, env => {
       );
       expect(fn2).to.be.calledOnce;
 
-      const fn3 = sandbox.stub();
+      const fn3 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1273,7 +1485,7 @@ describes.realWin('Events', {amp: 1}, env => {
       );
       expect(fn3).to.be.calledOnce;
 
-      const fn4 = sandbox.stub();
+      const fn4 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1287,7 +1499,7 @@ describes.realWin('Events', {amp: 1}, env => {
         fn4
       );
 
-      const fn5 = sandbox.stub();
+      const fn5 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1336,7 +1548,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('should unlisten tracker', () => {
-      const fn1 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
       const u1 = tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1350,7 +1562,7 @@ describes.realWin('Events', {amp: 1}, env => {
       );
       expect(fn1).to.be.calledOnce;
 
-      const fn2 = sandbox.stub();
+      const fn2 = env.sandbox.stub();
       const u2 = tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1377,7 +1589,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('should dispose all trackers', () => {
-      const fn1 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1391,7 +1603,7 @@ describes.realWin('Events', {amp: 1}, env => {
       );
       expect(fn1).to.be.calledOnce;
 
-      const fn2 = sandbox.stub();
+      const fn2 = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1412,7 +1624,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('should create events with timer vars', () => {
-      const handler = sandbox.stub();
+      const handler = env.sandbox.stub();
       tracker.add(
         analyticsElement,
         AnalyticsEventType.TIMER,
@@ -1430,7 +1642,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
       // Fake out the time since clock.tick will not actually advance the time.
       let fakeTime = 1000; // 1 second past epoch
-      sandbox.stub(Date, 'now').callsFake(() => {
+      env.sandbox.stub(Date, 'now').callsFake(() => {
         return fakeTime;
       });
       target.click();
@@ -1479,13 +1691,15 @@ describes.realWin('Events', {amp: 1}, env => {
 
     beforeEach(() => {
       tracker = root.getTracker('visible', VisibilityTracker);
-      visibilityManagerMock = sandbox.mock(root.getVisibilityManager());
-      getAmpElementSpy = sandbox.spy(root, 'getAmpElement');
+      visibilityManagerMock = env.sandbox.mock(root.getVisibilityManager());
+      getAmpElementSpy = env.sandbox.spy(root, 'getAmpElement');
       tracker.waitForTrackers_['ini-load'] = root.getTracker(
         'ini-load',
         IniLoadTracker
       );
-      iniLoadTrackerMock = sandbox.mock(tracker.waitForTrackers_['ini-load']);
+      iniLoadTrackerMock = env.sandbox.mock(
+        tracker.waitForTrackers_['ini-load']
+      );
 
       target.classList.add('i-amphtml-element');
       targetSignals = new Signals();
@@ -1495,10 +1709,10 @@ describes.realWin('Events', {amp: 1}, env => {
         eventResolver = resolve;
       });
 
-      matchEmptySpec = sinon.match(arg => {
+      matchEmptySpec = env.sandbox.match(arg => {
         return Object.keys(arg).length == 0;
       });
-      matchFunc = sinon.match(arg => {
+      matchFunc = env.sandbox.match(arg => {
         if (typeof arg == 'function') {
           const promise = arg();
           if (typeof promise.then == 'function') {
@@ -1507,7 +1721,7 @@ describes.realWin('Events', {amp: 1}, env => {
         }
         return false;
       });
-      saveCallback = sinon.match(arg => {
+      saveCallback = env.sandbox.match(arg => {
         if (typeof arg == 'function') {
           saveCallback.callback = arg;
           return true;
@@ -1525,7 +1739,7 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('should add doc listener', function*() {
-      const unlisten = sandbox.spy();
+      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').never();
       iniLoadTrackerMock.expects('getElementSignal').never();
       visibilityManagerMock
@@ -1552,7 +1766,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should add root listener', function*() {
       const config = {selector: ':root'};
-      const unlisten = sandbox.spy();
+      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getElementSignal').never();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
@@ -1578,7 +1792,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should add host listener and spec', function*() {
       const config = {visibilitySpec: {selector: ':host'}};
-      const unlisten = sandbox.spy();
+      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getElementSignal').never();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
@@ -1609,7 +1823,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     it('should add target listener', function*() {
       const config = {visibilitySpec: {selector: '.target'}};
-      const unlisten = sandbox.spy();
+      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').once();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
@@ -1654,7 +1868,7 @@ describes.realWin('Events', {amp: 1}, env => {
       target.setAttribute('data-vars-foo', 'bar');
 
       const config = {selector: '.target'};
-      const unlisten = sandbox.spy();
+      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').never();
       const readyPromise = Promise.resolve();
 
@@ -1788,7 +2002,7 @@ describes.realWin('Events', {amp: 1}, env => {
           'render-start',
           SignalTracker
         );
-        const signalTrackerMock = sandbox.mock(
+        const signalTrackerMock = env.sandbox.mock(
           tracker.waitForTrackers_['render-start']
         );
         signalTrackerMock
@@ -1826,13 +2040,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     describe('should create correct reportReadyPromise', () => {
       it('with viewer hidden', () => {
-        const stub = sandbox.stub(tracker.root, 'getViewer').callsFake(() => {
-          return {
-            isVisible: () => {
-              return false;
-            },
-          };
-        });
+        const stub = env.sandbox.stub(ampdoc, 'isVisible').returns(false);
         const promise = tracker.createReportReadyPromiseForDocumentHidden_();
         return promise.then(() => {
           expect(stub).to.be.calledOnce;
@@ -1843,12 +2051,12 @@ describes.realWin('Events', {amp: 1}, env => {
         const config = {visibilitySpec: {reportWhen: 'documentExit'}};
         const tracker = root.getTracker('visible', VisibilityTracker);
         const deferred = new Deferred();
-        const handlerSpy = sandbox.spy();
+        const handlerSpy = env.sandbox.spy();
         const handler = event => {
           deferred.resolve(event);
           handlerSpy();
         };
-        sandbox.stub(tracker, 'supportsPageHide_').returns(false);
+        env.sandbox.stub(tracker, 'supportsPageHide_').returns(false);
 
         tracker.add(tracker.root, 'visible', config, handler);
 
@@ -1867,7 +2075,7 @@ describes.realWin('Events', {amp: 1}, env => {
         const tracker = root.getTracker('visible', VisibilityTracker);
 
         const deferred = new Deferred();
-        const handlerSpy = sandbox.spy();
+        const handlerSpy = env.sandbox.spy();
         const handler = event => {
           deferred.resolve(event);
           handlerSpy();
@@ -1888,12 +2096,12 @@ describes.realWin('Events', {amp: 1}, env => {
         const config = {visibilitySpec: {reportWhen: 'documentExit'}};
         const tracker = root.getTracker('visible', VisibilityTracker);
         const deferred = new Deferred();
-        const handlerSpy = sandbox.spy();
+        const handlerSpy = env.sandbox.spy();
         const handler = event => {
           deferred.resolve(event);
           handlerSpy();
         };
-        sandbox.stub(tracker, 'supportsPageHide_').returns(true);
+        env.sandbox.stub(tracker, 'supportsPageHide_').returns(true);
 
         tracker.add(tracker.root, 'visible', config, handler);
 
@@ -1916,7 +2124,7 @@ describes.realWin('Events', {amp: 1}, env => {
 
     describe('Unmeasurable with HostAPI', () => {
       beforeEach(() => {
-        sandbox.stub(tracker.root, 'isUsingHostAPI').callsFake(() => {
+        env.sandbox.stub(tracker.root, 'isUsingHostAPI').callsFake(() => {
           return Promise.resolve(true);
         });
       });

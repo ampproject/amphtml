@@ -562,7 +562,7 @@ export class RealTimeConfigManager {
                   `using default timeout ${defaultTimeoutMillis}ms`
               );
               timeout = undefined;
-            } else if (timeout >= defaultTimeoutMillis || timeout < 0) {
+            } else if (timeout > defaultTimeoutMillis || timeout < 0) {
               user().warn(
                 TAG,
                 `Invalid RTC timeout: ${timeout}ms, ` +

@@ -115,20 +115,19 @@ export class ChildLayoutManager {
    *  intersectionElement: !Element,
    *  intersectionThreshold: (number|undefined),
    *  nearbyMarginInPercent: (number|undefined),
-   *  queueChanges: (boolean|undefined),
    *  viewportIntersectionThreshold: (number|undefined),
    *  viewportIntersectionCallback: (function(!Element, boolean)|undefined)
    * }} config
    */
-  constructor({
-    ampElement,
-    intersectionElement,
-    intersectionThreshold = DEFAULT_INTERSECTION_THRESHOLD,
-    nearbyMarginInPercent = DEFAULT_NEARBY_MARGIN,
-    queueChanges = false,
-    viewportIntersectionThreshold = intersectionThreshold,
-    viewportIntersectionCallback = () => {},
-  }) {
+  constructor(config) {
+    const {
+      ampElement,
+      intersectionElement,
+      intersectionThreshold = DEFAULT_INTERSECTION_THRESHOLD,
+      nearbyMarginInPercent = DEFAULT_NEARBY_MARGIN,
+      viewportIntersectionThreshold = intersectionThreshold,
+      viewportIntersectionCallback = () => {},
+    } = config;
     /** @private @const */
     this.ampElement_ = ampElement;
 
@@ -145,13 +144,13 @@ export class ChildLayoutManager {
     this.nearbyMarginInPercent_ = nearbyMarginInPercent;
 
     /** @private @const */
-    this.queueChanges_ = queueChanges;
-
-    /** @private @const */
     this.viewportIntersectionThreshold_ = viewportIntersectionThreshold;
 
     /** @private @const */
     this.viewportIntersectionCallback_ = viewportIntersectionCallback;
+
+    /** @private */
+    this.queueChanges_ = false;
 
     /** @private {!IArrayLike<!Element>} */
     this.children_ = [];
@@ -167,15 +166,16 @@ export class ChildLayoutManager {
 
     /** @private {boolean} */
     this.laidOut_ = false;
+  }
 
-    /** @private {boolean} */
-    this.flushNextNearingViewportChanges_ = false;
-
-    /** @private {boolean} */
-    this.flushNextBackingAwayViewportChanges_ = false;
-
-    /** @private {boolean} */
-    this.flushNextInViewportChanges_ = false;
+  /**
+   * Sets whether visibility changes should be applied immediately or queued
+   * for a later flush. This is useful on iOS, as doing layout during scrolling
+   * can cause flickering due to paint.
+   * @param {boolean} queueChanges
+   */
+  setQueueChanges(queueChanges) {
+    this.queueChanges_ = queueChanges;
   }
 
   /**
@@ -260,14 +260,17 @@ export class ChildLayoutManager {
    */
   processNearingChanges_(entries) {
     entries
-      .filter(({isIntersecting}) => isIntersecting)
-      .forEach(({target}) => {
+      .filter(entry => {
+        const {isIntersecting} = entry;
+        return isIntersecting;
+      })
+      .forEach(entry => {
+        const {target} = entry;
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.ENTER;
       });
 
-    if (!this.queueChanges_ || this.flushNextNearingViewportChanges_) {
+    if (!this.queueChanges_) {
       this.flushNearingViewportChanges_();
-      this.flushNextNearingViewportChanges_ = false;
     }
   }
 
@@ -278,14 +281,17 @@ export class ChildLayoutManager {
    */
   processBackingAwayChanges_(entries) {
     entries
-      .filter(({isIntersecting}) => !isIntersecting)
-      .forEach(({target}) => {
+      .filter(entry => {
+        const {isIntersecting} = entry;
+        return !isIntersecting;
+      })
+      .forEach(entry => {
+        const {target} = entry;
         target[NEAR_VIEWPORT_FLAG] = ViewportChangeState.LEAVE;
       });
 
-    if (!this.queueChanges_ || this.flushNextBackingAwayViewportChanges_) {
+    if (!this.queueChanges_) {
       this.flushBackingAwayViewportChanges_();
-      this.flushNextBackingAwayViewportChanges_ = false;
     }
   }
 
@@ -295,15 +301,15 @@ export class ChildLayoutManager {
    * @param {!Array<!IntersectionObserverEntry>} entries
    */
   processInViewportChanges_(entries) {
-    entries.forEach(({target, isIntersecting}) => {
+    entries.forEach(entry => {
+      const {target, isIntersecting} = entry;
       target[IN_VIEWPORT_FLAG] = isIntersecting
         ? ViewportChangeState.ENTER
         : ViewportChangeState.LEAVE;
     });
 
-    if (!this.queueChanges_ || this.flushNextInViewportChanges_) {
+    if (!this.queueChanges_) {
       this.flushInViewportChanges_();
-      this.flushNextInViewportChanges_ = false;
     }
   }
 
@@ -420,12 +426,6 @@ export class ChildLayoutManager {
   wasLaidOut() {
     this.laidOut_ = true;
     this.monitorChildren_(this.laidOut_);
-
-    // Make sure we flush the next changes from the IntersectionObservers,
-    // regardless if queuing was requested, since things were just laid out.
-    this.flushNextNearingViewportChanges_ = true;
-    this.flushNextBackingAwayViewportChanges_ = true;
-    this.flushNextInViewportChanges_ = true;
   }
 
   /**

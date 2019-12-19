@@ -18,14 +18,15 @@ const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const log = require('fancy-log');
 const watch = require('gulp-watch');
-const wrappers = require('../compile-wrappers');
+const wrappers = require('../compile/compile-wrappers');
 const {
   extensionAliasBundles,
   extensionBundles,
   verifyExtensionBundles,
-} = require('../../bundles.config');
+} = require('../compile/bundles.config');
 const {compileJs, mkdirSync} = require('./helpers');
-const {isTravisBuild} = require('../travis');
+const {endBuildStep} = require('./helpers');
+const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
 const {vendorConfigs} = require('./vendor-configs');
 
@@ -108,11 +109,13 @@ function declareExtension(
   const defaultOptions = {hasCss: false};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach(v => {
-    extensionsObject[`${name}-${v}`] = Object.assign(
-      {name, version: v, latestVersion},
-      defaultOptions,
-      options
-    );
+    extensionsObject[`${name}-${v}`] = {
+      name,
+      version: v,
+      latestVersion,
+      ...defaultOptions,
+      ...options,
+    };
     if (includeLatest && v == latestVersion) {
       extensionsObject[`${name}-latest`] = extensionsObject[`${name}-${v}`];
     }
@@ -126,8 +129,8 @@ function declareExtension(
 }
 
 /**
- * Initializes all extensions from bundles.config.js if not already done and
- * populates the given extensions object.
+ * Initializes all extensions from build-system/compile/bundles.config.js if not
+ * already done and populates the given extensions object.
  * @param {?Object} extensionsObject
  * @param {?boolean} includeLatest
  */
@@ -153,9 +156,11 @@ function maybeInitializeExtensions(
 /**
  * Process the command line arguments --noextensions, --extensions, and
  * --extensions_from and return a list of the referenced extensions.
+ *
+ * @param {boolean=} preBuild
  * @return {!Array<string>}
  */
-function getExtensionsToBuild() {
+function getExtensionsToBuild(preBuild = false) {
   if (extensionsToBuild) {
     return extensionsToBuild;
   }
@@ -174,7 +179,9 @@ function getExtensionsToBuild() {
     const extensionsFrom = getExtensionsFromArg(argv.extensions_from);
     extensionsToBuild = dedupe(extensionsToBuild.concat(extensionsFrom));
   }
-  if (!argv.noextensions && !argv.extensions && !argv.extensions_from) {
+  if (
+    !(preBuild || argv.noextensions || argv.extensions || argv.extensions_from)
+  ) {
     const allExtensions = [];
     for (const extension in extensions) {
       allExtensions.push(extensions[extension].name);
@@ -217,14 +224,10 @@ function parseExtensionFlags(preBuild = false) {
     green('.');
 
   if (preBuild) {
-    if (argv.extensions || argv.extensions_from) {
-      log(
-        green('Pre-building extension(s):'),
-        cyan(getExtensionsToBuild().join(', '))
-      );
-    } else {
-      log(green('Not pre-building any AMP extensions.'));
-    }
+    log(
+      green('Pre-building extension(s):'),
+      cyan(getExtensionsToBuild(preBuild).join(', '))
+    );
     log(extensionsMessage);
     log(inaboxSetMessage);
     log(extensionsFromMessage);
@@ -302,6 +305,7 @@ function dedupe(arr) {
  * @return {!Promise}
  */
 async function buildExtensions(options) {
+  const startTime = Date.now();
   maybeInitializeExtensions(extensions, /* includeLatest */ false);
   const extensionsToBuild = getExtensionsToBuild();
   const results = [];
@@ -314,6 +318,13 @@ async function buildExtensions(options) {
     }
   }
   await Promise.all(results);
+  if (!options.compileOnlyCss && !argv.single_pass) {
+    endBuildStep(
+      options.minify ? 'Minified all' : 'Compiled all',
+      'extensions',
+      startTime
+    );
+  }
 }
 
 /**
@@ -325,7 +336,7 @@ async function buildExtensions(options) {
  */
 async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
-  let o = Object.assign({}, options);
+  let o = {...options};
   o = Object.assign(o, e);
   await buildExtension(
     e.name,
@@ -383,7 +394,7 @@ async function buildExtension(
         version,
         latestVersion,
         hasCss,
-        Object.assign({}, options, {continueOnError: true})
+        {...options, continueOnError: true}
       );
       if (options.onWatchBuild) {
         options.onWatchBuild(bundleComplete);
@@ -398,13 +409,11 @@ async function buildExtension(
       return;
     }
   }
-  if (argv.single_pass) {
-    return;
-  } else {
-    await buildExtensionJs(path, name, version, latestVersion, options);
-  }
   if (name === 'amp-analytics') {
     await vendorConfigs(options);
+  }
+  if (!argv.single_pass) {
+    await buildExtensionJs(path, name, version, latestVersion, options);
   }
 }
 
