@@ -39,7 +39,7 @@ describes.endtoend(
       requestBank = env.requestBank;
     });
 
-    it('should respect server side decision and clear on next visit', async () => {
+    it.skip('should respect server side decision and clear on next visit', async () => {
       resetAllElements();
       const currentUrl = await controller.getCurrentUrl();
       const nextGeoUrl = currentUrl.replace('mx', 'ca');
