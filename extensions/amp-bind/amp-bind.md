@@ -93,6 +93,7 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 
 ### A slightly more complex example
 
+[filter formats="websites, stories, ads"]
 ```html
 <!-- Store complex nested JSON data in <amp-state> elements. -->
 <amp-state id="myAnimals">
@@ -128,6 +129,34 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 
 <button on="tap:AMP.setState({currentAnimal: 'cat'})">Set to Cat</button>
 ```
+[/filter]
+
+[filter formats="email"]
+```html
+<!-- Store complex nested JSON data in <amp-state> elements. -->
+<amp-state id="myAnimals">
+  <script type="application/json">
+    {
+      "dog": {
+        "imageUrl": "/img/dog.jpg",
+        "style": "greenBackground"
+      },
+      "cat": {
+        "imageUrl": "/img/cat.jpg",
+        "style": "redBackground"
+      }
+    }
+  </script>
+</amp-state>
+
+<p [text]="'This is a ' + currentAnimal + '.'">This is a dog.</p>
+
+<!-- CSS classes can also be added or removed with [class]. -->
+<p class="greenBackground" [class]="myAnimals[currentAnimal].style">
+  Each animal has a different background color.
+</p>
+```
+[/filter]
 
 When the button is pressed:
 
@@ -658,6 +687,7 @@ Use `AMP.printState()` to print the current state to the console.
 
 ### `<amp-state>` specification
 
+[filter formats="websites, stories, ads"]
 An `amp-state` element may contain either a child `<script>` element **OR** a `src` attribute containing a CORS URL to a remote JSON endpoint, but not both.
 
 ```html
@@ -671,6 +701,21 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 
 <amp-state id="myRemoteState" src="https://data.com/articles.json"> </amp-state>
 ```
+[/filter]
+
+[filter formats="email"]
+An `amp-state` element must contain a child `<script>` element.
+
+```html
+<amp-state id="myLocalState">
+  <script type="application/json">
+    {
+      "foo": "bar"
+    }
+  </script>
+</amp-state>
+```
+[/filter]
 
 #### XHR batching
 
