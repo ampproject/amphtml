@@ -1,12 +1,5 @@
 {
-  "experimentA": {
-    "name": "ANALYTICS_VENDOR_SPLIT",
-    "environment": "INABOX",
-    "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
-    "issue": "",
-    "expirationDateUTC": "2019-11-08",
-    "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
-  },
+  "experimentA": {},
   "experimentB": {},
   "experimentC": {
     "name": "Native Custom Elements V1",
