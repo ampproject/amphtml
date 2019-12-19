@@ -90,6 +90,17 @@ amp-carousel .amp-carousel-button.amp-disabled {
   visibility: hidden;
 }
 
+amp-carousel[i-amphtml-carousel-hide-buttons] .amp-carousel-button-prev,
+amp-carousel[i-amphtml-carousel-hide-buttons] .amp-carousel-button-next {
+  opacity: 0;
+  /** 
+   * Note, screen readers can still activate the buttons when hide buttons is
+   * specified, even though we have `pointer-events: none`.
+   */
+  pointer-events: none;
+  visibility: visible !important;
+}
+
 /* Begin SlideScroll */
 .i-amphtml-slidescroll {
 }
