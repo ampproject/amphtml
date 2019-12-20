@@ -102,7 +102,11 @@ const BABELIFY_GLOBAL_TRANSFORM = {
  * Plugins used by Babelify while compiling unminified code
  */
 const BABELIFY_PLUGINS = {
-  plugins: [conf.getReplacePlugin(), conf.getJsonConfigurationPlugin(), conf.getRewritePlugin()],
+  plugins: [
+    conf.getReplacePlugin(),
+    conf.getJsonConfigurationPlugin(),
+    conf.getRewritePlugin(),
+  ],
 };
 
 const hostname = argv.hostname || 'cdn.ampproject.org';
