@@ -64,6 +64,8 @@ The process for deprecations is similar to the [process for significant changes]
 - Give developers at least 6 weeks after your deprecation warning is in production to apply changes before removing the feature.
 - If you did not include removal in your I2D, file a separate Intent-to-Remove (I2R) when you are ready to remove the deprecated feature.
 
+If an underlying backend service has itself been turned down, then the given component or integration may be neutered immediately without breaking the validation.
+
 ### Version deprecations
 
 Old versions of the AMP JS library and extensions may eventually be declared invalid by the AMP Validator. Such changes are breaking and must follow the deprecations process above. Additional rules also constrain the timelines of version deprecations:
