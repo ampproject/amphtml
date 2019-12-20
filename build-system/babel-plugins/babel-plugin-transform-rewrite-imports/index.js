@@ -47,7 +47,7 @@ module.exports = function(babel) {
         }
       },
 
-      'ExportNamedDeclaration|ExportAllDeclaration': function(path) {
+      ExportDeclaration(path) {
         const source = path.get('source');
         if (!source.node) {
           return;
