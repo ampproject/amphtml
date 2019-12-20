@@ -130,6 +130,8 @@ The following AMP-specific analytic techniques are not supported:
 Requests for images inside [`<amp-carousel>`](https://amp.dev/documentation/components/amp-carousel) or [`<amp-accordion>`](https://amp.dev/documentation/components/amp-accordion)
 can indicate to the sender that the user is interacting with the message.
 
+Redirects in [`<amp-form>`](https://amp.dev/documentation/components/amp-form) are disallowed at runtime.
+
 ## Feedback & Support
 
 For support and feedback on AMP for Email, please use the following channel: [ongoing-participation](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#ongoing-participation)
