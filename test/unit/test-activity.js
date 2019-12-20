@@ -215,7 +215,7 @@ describe('Activity getTotalEngagedTime', () => {
 
   it(
     'should set event listeners on the document for' +
-    ' "mousedown", "mouseup", "mousemove", "keyup", "keydown", "mouseleave"',
+      ' "mousedown", "mouseup", "mousemove", "keyup", "keydown", "mouseleave"',
     () => {
       const addEventListenerSpy = window.sandbox.spy(
         fakeDoc,
@@ -368,7 +368,7 @@ describe('Activity getIncrementalEngagedTime', () => {
 
   it(
     'should have 5 seconds of incremental engaged time after doc ' +
-    'becomes visible',
+      'becomes visible',
     () => {
       whenFirstVisibleResolve();
       return ampdoc.whenFirstVisible().then(() => {
