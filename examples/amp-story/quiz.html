@@ -40,10 +40,9 @@
           width="720" height="1280"
           layout="responsive">
       </amp-story-grid-layer>
-      <amp-story-grid-layer template="vertical">
+      <amp-story-grid-layer>
         <amp-story-quiz
-          id='cat-question-appear'
-          layout="flex-item">
+          id='cat-question-appear'>
           <h1>When did the domestic cat first appear on the scene?</h1>
           <option>7,000 years ago</option>
           <option correct>500,000 years ago</option>
@@ -58,16 +57,51 @@
             width="720" height="1280"
             layout="responsive">
         </amp-story-grid-layer>
-        <amp-story-grid-layer template="vertical">
+        <amp-story-grid-layer>
           <amp-story-quiz
-            id='cat-question-handedness'
-            layout="flex-item">
+            id='cat-question-handedness'>
             <h2>True or False: Cats can be right-pawed or left-pawed.</h2>
             <option correct>True</option>
             <option>False</option>
             <option>The quick brown fox jumped over the lazy dog lorem ipsum dolor sit amet as d f ghjkl</option>
           </amp-story-quiz>
         </amp-story-grid-layer>
+      </amp-story-page>
+      <amp-story-page id="quiz-question-3">
+        <amp-story-grid-layer template="fill">
+            <amp-img src="https://i.pinimg.com/originals/8d/b1/e9/8db1e9b7cc3ee52b13cabe3a53c62f05.jpg"
+            width="720" height="1280"
+            layout="responsive">
+        </amp-story-grid-layer>
+        <style>
+          #cat-question-cute {
+            justify-content: flex-end;
+            align-content: flex-end;
+          }
+        </style>
+        <amp-story-grid-layer id="cat-question-cute">
+          <amp-story-quiz>
+            <h2>Are cats cute?</h2>
+            <option correct>Yes</option>
+            <option>No</option>
+          </amp-story-quiz>
+        </amp-story-grid-layer>
+        <amp-story-page-attachment layout="nodisplay" theme="dark">
+          <h1>Amazing title</h1>
+          <p>Bacon ipsum dolor cat cat cat.</p>
+          <amp-youtube
+              id="myLiveChannel"
+              data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
+              width="358"
+              height="204"
+              layout="responsive">
+            <amp-img
+                src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg"
+                placeholder
+                layout="fill">
+            </amp-img>
+          </amp-youtube>
+        </amp-story-page-attachment>
       </amp-story-page>
   </amp-story>
 </body>

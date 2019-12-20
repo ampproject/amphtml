@@ -29,7 +29,7 @@ import {
 import {createElementWithAttributes} from '../../src/dom';
 
 function fakeLocalStorage(initial = {}) {
-  const state = Object.assign({}, initial);
+  const state = {...initial};
   return {
     getItem: key => (key in state ? state[key] : null),
     setItem: (key, value) => (state[key] = value),
@@ -548,8 +548,8 @@ describe('getBinaryType', () => {
       },
     };
     expect(getBinaryType(win)).to.equal('production');
-    win.AMP_CONFIG.type = 'canary';
-    expect(getBinaryType(win)).to.equal('canary');
+    win.AMP_CONFIG.type = 'experimental';
+    expect(getBinaryType(win)).to.equal('experimental');
     win.AMP_CONFIG.type = 'control';
     expect(getBinaryType(win)).to.equal('control');
     win.AMP_CONFIG.type = 'rc';

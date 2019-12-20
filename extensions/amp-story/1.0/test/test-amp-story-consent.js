@@ -83,7 +83,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     setConfig(defaultConfig);
 
     storyConsentEl = win.document.createElement('amp-story-consent');
-    storyConsentEl.getResources = () => win.__AMP_SERVICES.resources.obj;
+    storyConsentEl.getAmpDoc = () => storyConsentEl;
     storyConsentEl.appendChild(storyConsentConfigEl);
 
     storyEl.appendChild(consentEl);

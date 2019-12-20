@@ -343,6 +343,28 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!../extensions/amp-next-page/0.2/service.NextPageService}
+   */
+  static nextPageServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!../extensions/amp-next-page/0.2/service.NextPageService} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'next-page'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/mutator-interface.MutatorInterface}
+   */
+  static mutatorForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/mutator-interface.MutatorInterface} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'resources'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/owners-interface.OwnersInterface}
    */
   static ownersForDoc(elementOrAmpDoc) {
