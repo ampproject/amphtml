@@ -177,8 +177,8 @@ export class Bind {
      */
     this.maxNumberOfBindings_ = 1000;
 
-    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /**
      * The current values of all bound expressions on the page.
@@ -1234,7 +1234,7 @@ export class Bind {
     if (updates.length === 0) {
       return Promise.resolve();
     }
-    return this.resources_.mutateElement(element, () => {
+    return this.mutator_.mutateElement(element, () => {
       const mutations = map();
       let width, height;
 
@@ -1256,10 +1256,9 @@ export class Bind {
       });
 
       if (width !== undefined || height !== undefined) {
-        // TODO(choumx): Add new Resources method for adding change-size
         // request without scheduling vsync pass since `mutateElement()`
         // will schedule a pass after a short delay anyways.
-        this.resources_./*OK*/ changeSize(element, height, width);
+        this.mutator_./*OK*/ changeSize(element, height, width);
       }
 
       if (typeof element.mutatedAttributesCallback === 'function') {

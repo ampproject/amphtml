@@ -18,6 +18,7 @@ import {
   ActionTrust,
   DEFAULT_ACTION,
   RAW_OBJECT_ARGS_KEY,
+  actionTrustToString,
 } from '../action-constants';
 import {Keys} from '../utils/key-codes';
 import {Services} from '../services';
@@ -213,10 +214,11 @@ export class ActionInvocation {
       return false;
     }
     if (this.trust < minimumTrust) {
+      const t = actionTrustToString(this.trust);
       user().error(
         TAG_,
-        `"${this.actionEventType}" is not allowed to invoke ` +
-          `"${this.tagOrTarget}.${this.method}".`
+        `"${this.actionEventType}" event with "${t}" trust is not allowed to ` +
+          `invoke "${this.tagOrTarget.toLowerCase()}.${this.method}".`
       );
       return false;
     }
@@ -407,7 +409,7 @@ export class ActionService {
    * @param {ActionHandlerDef} handler
    * @param {ActionTrust} minTrust
    */
-  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.HIGH) {
+  addGlobalMethodHandler(name, handler, minTrust = ActionTrust.DEFAULT) {
     this.globalMethodHandlers_[name] = {handler, minTrust};
   }
 
@@ -515,7 +517,10 @@ export class ActionService {
     if (!action) {
       return false;
     }
-    return action.actionInfos.some(({target}) => !!this.getActionNode_(target));
+    return action.actionInfos.some(action => {
+      const {target} = action;
+      return !!this.getActionNode_(target);
+    });
   }
 
   /**
@@ -537,7 +542,8 @@ export class ActionService {
     if (!action) {
       return false;
     }
-    return action.actionInfos.some(({target}) => {
+    return action.actionInfos.some(actionInfo => {
+      const {target} = actionInfo;
       return this.getActionNode_(target) == targetElement;
     });
   }
@@ -597,7 +603,8 @@ export class ActionService {
     // to complete. `currentPromise` is the i'th promise in the chain.
     /** @type {?Promise} */
     let currentPromise = null;
-    action.actionInfos.forEach(({target, args, method, str}) => {
+    action.actionInfos.forEach(actionInfo => {
+      const {target, args, method, str} = actionInfo;
       const dereferencedArgs = dereferenceArgsVariables(args, event, opt_args);
       const invokeAction = () => {
         const node = this.getActionNode_(target);

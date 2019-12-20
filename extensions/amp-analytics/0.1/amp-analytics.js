@@ -175,10 +175,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   resumeCallback() {
     if (this.iniPromise_) {
       this.iniPromise_.then(() => {
-        this.transport_.maybeInitIframeTransport(
-          this.getAmpDoc().win,
-          this.element
-        );
+        this.transport_.maybeInitIframeTransport(this.element);
       });
     }
   }
@@ -294,11 +291,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.element
     );
 
-    this.transport_.maybeInitIframeTransport(
-      this.getAmpDoc().win,
-      this.element,
-      this.preconnect
-    );
+    this.transport_.maybeInitIframeTransport(this.element);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -392,7 +385,11 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @visibleForTesting
    */
   preload(url, opt_preloadAs) {
-    this.preconnect.preload(url, opt_preloadAs);
+    Services.preconnectFor(this.win).preload(
+      this.getAmpDoc(),
+      url,
+      opt_preloadAs
+    );
   }
 
   /**
@@ -540,7 +537,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           requests[k] = new RequestHandler(
             this.element,
             request,
-            this.preconnect,
+            Services.preconnectFor(this.win),
             this.transport_,
             this.isSandbox_
           );
