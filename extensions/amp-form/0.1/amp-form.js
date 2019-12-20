@@ -69,8 +69,8 @@ import {installFormProxy} from './form-proxy';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
-import {parseJson} from '../../../src/json';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {tryParseJson} from '../../../src/json';
 
 /** @const {string} */
 const TAG = 'amp-form';
@@ -799,7 +799,7 @@ export class AmpForm {
   handleSsrTemplateResponse_(response, trust) {
     const init = response['init'];
     // response['body'] is serialized as a string in the response.
-    const body = response['body'] ? parseJson(response['body']) : null;
+    const body = tryParseJson(response['body']);
     if (init) {
       const status = init['status'];
       if (status >= 300) {
