@@ -1,0 +1,4 @@
+{
+  "plugins": ["../../../../../babel-plugin-transform-rewrite-imports"],
+  "sourceType": "module"
+}
