@@ -354,6 +354,53 @@ describes.realWin(
       });
     });
 
+    it('should still run ad strategies even when noConfigReason present.', () => {
+      configObj['optInStatus'].push(OPT_IN_STATUS_ANCHOR_ADS);
+      configObj.stickyAdAttributes = {
+        'data-no-fill': 'true',
+      };
+      configObj['noConfigReason'] = 'a reason';
+
+      return getAmpAutoAds().then(() => {
+        const bannerAdsPromise = new Promise(resolve => {
+          waitForChild(
+            anchor4,
+            parent => {
+              return parent.childNodes.length > 0;
+            },
+            () => {
+              expect(anchor1.childNodes).to.have.lengthOf(1);
+              expect(anchor2.childNodes).to.have.lengthOf(1);
+              expect(anchor3.childNodes).to.have.lengthOf(0);
+              expect(anchor4.childNodes).to.have.lengthOf(1);
+              verifyAdElement(anchor1.childNodes[0]);
+              verifyAdElement(anchor2.childNodes[0]);
+              verifyAdElement(anchor4.childNodes[0]);
+              expect(anchor4.childNodes[0].hasAttribute('data-no-fill')).to.to
+                .be.false;
+              resolve();
+            }
+          );
+        });
+
+        const anchorAdPromise = new Promise(resolve => {
+          waitForChild(
+            env.win.document.body,
+            parent => {
+              return parent.firstChild.tagName == 'AMP-STICKY-AD';
+            },
+            () => {
+              const stickyAd = env.win.document.body.firstChild;
+              const ampAd = stickyAd.firstChild;
+              expect(ampAd.getAttribute('data-no-fill')).to.equal('true');
+              resolve();
+            }
+          );
+        });
+        return Promise.all([bannerAdsPromise, anchorAdPromise]);
+      });
+    });
+
     describe('Anchor Ad', () => {
       it('should not insert anchor ad if not opted in', () => {
         return getAmpAutoAds().then(() => {
