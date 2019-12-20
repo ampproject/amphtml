@@ -102,6 +102,8 @@ The events below will be triggered on `section`s of `accordion`.
   </tr>
 </table>
 
+[filter formats="websites, stories"]
+
 ### Actions
 
 <table>
@@ -119,30 +121,33 @@ The events below will be triggered on `section`s of `accordion`.
   </tr>
 </table>
 
+[/filter]<!-- formats="websites, stories" -->
+
 #### Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong><code>animate</code></strong></td>
-    <td>Set this attribute on the <code>&lt;amp-accordion&gt;</code> to animate the expansion / collapse of all accordion sections.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong><code>disable-session-states</code></strong></td>
-    <td>Set this attribute on the <code>&lt;amp-accordion&gt;</code> to opt out of preserving the collapsed/expanded state of the accordion.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong><code>expanded</code></strong></td>
-    <td>Set this attribute on a <code>&lt;section&gt;</code> to display the section as expanded on page load.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong><code>expand-single-section</code></strong></td>
-    <td>Set this attribute on the <code>&lt;amp-accordion&gt;</code> to only allow one <code>&lt;section&gt;</code> to be expanded at a time. If the user focuses on one <code>&lt;section&gt;</code> any other previously expanded <code>&lt;section&gt;</code> will be collapsed.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong><code>[data-expand]</code></strong></td>
-    <td>Bind this attribute on a <code>&lt;section&gt;</code> to expand or collapse the section. An expression that evaluates to <code>false</code> will collapse the section if it is expanded, and anything else will expand the section if it is collapsed.</td>
-  </tr>
-</table>
+##### `animate`
+
+Set this attribute on the `<amp-accordion>` to animate the expansion / collapse of all accordion sections.
+
+[filter formats="websites, stories"]
+
+##### `disable-session-states`
+
+Set this attribute on the `<amp-accordion>` to opt out of preserving the collapsed/expanded state of the accordion.
+
+[/filter]<!-- formats="websites, stories" -->
+
+##### `expanded`
+
+Set this attribute on a `<section>` to display the section as expanded on page load.
+
+##### `expand-single-section`
+
+Set this attribute on the `<amp-accordion>` to only allow one `<section>` to be expanded at a time. If the user focuses on one `<section>` any other previously expanded `<section>` will be collapsed.
+
+##### `[data-expand]`
+
+Bind this attribute on a `<section>` to expand or collapse the section. An expression that evaluates to `false` will collapse the section if it is expanded, and anything else will expand the section if it is collapsed.
 
 ## Styling
 

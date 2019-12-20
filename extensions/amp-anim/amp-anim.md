@@ -63,12 +63,22 @@ In the future, additional functionality, such as animation playback control, cou
 ### src
 
 Similar to the `src` attribute on the `img` tag. The value must be a URL that
-points to a publicly-cacheable image file. Cache providers may rewrite these
+points to a publicly-cacheable image file. Cache providers and email clients may rewrite these
 URLs when ingesting AMP files to point to a cached version of the image.
+
+[filter formats="email"]
+
+In AMP email, this <strong>must</strong> be an absolute URL.
+
+[/filter] <!-- formats="email" -->
+
+[filter formats="websites, ads, stories"]
 
 ### srcset
 
 Same as `srcset` attribute on the `img` tag.
+
+[/filter] <!-- formats="websites, ads, stories" -->
 
 ### alt
 
@@ -90,7 +100,7 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 ### Invalid AMP email attributes
 
-The AMP4EMAIL spec disallows the use of the following attributes on the AMP email format.
+The AMP for Email spec disallows the use of the following attributes on the AMP email format.
 
 - `object-fit`
 - `object-position`

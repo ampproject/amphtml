@@ -174,7 +174,7 @@ See the [Custom Validation](#custom-validations) section for more details.
 
 ##### Invalid AMP email attributes
 
-The AMP4EMAIL spec disallows the use of the following attributes on the AMP email format.
+The AMP for Email spec disallows the use of the following attributes on the AMP email format.
 
 - `action`
 - `name`

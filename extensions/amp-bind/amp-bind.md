@@ -598,15 +598,24 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 
 - `[href]` Changes the link.
 
-[/filter] <!-- formats="websites, stories, ads" -->
-
 ##### `<button>`
 
 - `[disabled]`
 - `[type]`
 - `[value]`
 
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### `<button>`
+
+- `[disabled]`
+- `[value]`
+
 See corresponding [button attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes).
+
+[/filter] <!-- formats="email" -->
 
 ##### `<details>`
 
@@ -623,6 +632,8 @@ See corresponding [details attributes](https://developer.mozilla.org/en-US/docs/
 - `[xlink:href]`
 
 See corresponding [image attributes](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image).
+
+[filter formats="websites, stories, ads"]
 
 ##### `<input>`
 
@@ -650,6 +661,32 @@ See corresponding [image attributes](https://developer.mozilla.org/en-US/docs/We
 
 See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
 
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### `<input>`
+
+- `[autocomplete]`
+- `[disabled]`
+- `[height]`
+- `[max]`
+- `[maxlength]`
+- `[multiple]`
+- `[pattern]`
+- `[placeholder]`
+- `[readonly]`
+- `[required]`
+- `[size]`
+- `[spellcheck]`
+- `[step]`
+- `[value]`
+- `[width]`
+
+See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
+
+[/filter] <!-- formats="email" -->
+
 ##### `<option>`
 
 - `[disabled]`
@@ -670,6 +707,8 @@ See corresponding [optgroup attributes](https://developer.mozilla.org/en-US/docs
 
 - `[data-expand]` Changes the expansion of a `section` in an [`amp-accordion`](../amp-accordion/amp-accordion.md).
 
+[filter formats="websites, stories, ads"]
+
 ##### `<select>`
 
 - `[autofocus]`
@@ -679,6 +718,21 @@ See corresponding [optgroup attributes](https://developer.mozilla.org/en-US/docs
 - `[size]`
 
 See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
+
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### `<select>`
+
+- `[disabled]`
+- `[multiple]`
+- `[required]`
+- `[size]`
+
+See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
+
+[/filter] <!-- formats="email" -->
 
 ##### `<source>`
 
@@ -694,6 +748,8 @@ See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/W
 - [srclang]
 
 See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes).
+
+[filter formats="websites, stories, ads"]
 
 ##### `<textarea>`
 
@@ -715,6 +771,29 @@ See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/We
 - `[wrap]`
 
 Use `[defaultText]` to update initial text, and `[text]` to update current text. See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
+
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### `<textarea>`
+
+- `[autocomplete]`
+- `[cols]`
+- `[disabled]`
+- `[defaultText]`
+- `[maxlength]`
+- `[minlength]`
+- `[placeholder]`
+- `[readonly]`
+- `[required]`
+- `[rows]`
+- `[spellcheck]`
+- `[wrap]`
+
+Use `[defaultText]` to update initial text, and `[text]` to update current text. See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
+
+[/filter] <!-- formats="email" -->
 
 ## Debugging
 
@@ -853,7 +932,7 @@ To send credentials, pass the value of `include`. If this value is set, the resp
 
 ##### Invalid AMP email attributes
 
-The AMP4EMAIL spec disallows the use of the following attributes on the AMP email format.
+The AMP for Email spec disallows the use of the following attributes on the AMP email format.
 
 - `[src]`
 - `src`

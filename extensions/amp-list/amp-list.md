@@ -222,7 +222,7 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 [/filter]<!-- formats="email" -->
 
 ```html
-<button on="list.changeToLayoutContainer()">Show Grid</button>
+<button on="tap:list.changeToLayoutContainer()">Show Grid</button>
 <amp-list
   id="list"
   width="396"
@@ -347,6 +347,8 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
+[filter formats="websites, stories"]
+
 <!-- prettier-ignore-start -->
 <!-- See: https://github.com/remarkjs/remark/issues/456 -->
 ### [is-layout-container] (optional)
@@ -358,6 +360,8 @@ This attribute cannot be true by default for the same reason why `<amp-list>` do
 
 Alternatively, one may also use the `changeToLayoutContainer` action.
 
+[/filter]<!-- formats="websites, stories" -->
+
 ### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
@@ -366,7 +370,7 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 ##### Invalid AMP email attributes
 
-The AMP4EMAIL spec disallows the use of the following attributes on the AMP email format.
+The AMP for Email spec disallows the use of the following attributes on the AMP email format.
 
 - `[src]`
 - `[state]`
@@ -538,8 +542,6 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
 </amp-list>
 ```
 
-[/filter] <!-- formats="websites, stories" -->
-
 ## Substitutions
 
 The `<amp-list>` allows all standard URL variable substitutions.
@@ -552,6 +554,8 @@ For example:
 ```
 
 may make a request to something like `https://foo.com/list.json?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
+
+[/filter] <!-- formats="websites, stories" -->
 
 ## Validation
 
