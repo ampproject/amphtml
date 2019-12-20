@@ -1368,7 +1368,6 @@ describes.realWin(
         impl.renderStarted = () => {
           promiseResolver();
         };
-        let key, val;
         impl.iframe = {
           contentWindow: window,
           style: {'visibility': 'hidden'},
