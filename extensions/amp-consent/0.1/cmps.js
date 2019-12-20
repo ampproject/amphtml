@@ -46,3 +46,9 @@ CMP_CONFIG['SourcePoint'] = {
   'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
   'promptUISrc': 'https://amp.pm.sourcepoint.mgr.consensu.org/',
 };
+
+CMP_CONFIG['Marfeel'] = {
+  'consentInstanceId': 'Marfeel',
+  'checkConsentHref': 'https://live.mrf.io/cmp/consents/amp',
+  'promptUISrc': 'https://marfeel.mgr.consensu.org/amp/index.html',
+};
