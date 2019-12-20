@@ -37,11 +37,8 @@
           },
           "triggers": {
             "trackQuizResponse": {
-              "on": "interactive-element-respond",
-              "request": "click"
-            },
-            "checkLastPage": {
-              "on": "story-last-page-visible",
+              "on": "story-click-through",
+              "tagname": "amp-story-quiz",
               "request": "click"
             }
           }

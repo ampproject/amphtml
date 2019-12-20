@@ -35,12 +35,12 @@ const answerChoiceOptions = ['A', 'B', 'C', 'D'];
 const TAG = 'amp-story-quiz';
 
 // TODO(jackbsteinberg): Refactor quiz to extend a general interactive element class
-// and make this an enum on that class
+// and make this an enum on that class.
 /** @const {number} */
 const INTERACTIVE_ELEMENT_TYPE_QUIZ = 0;
 
 /**
- * Generates the template for the quiz
+ * Generates the template for the quiz.
  *
  * @param {!Element} element
  * @return {!Element}
@@ -56,7 +56,7 @@ const buildQuizTemplate = element => {
 };
 
 /**
- * Generates the template for each option
+ * Generates the template for each option.
  *
  * @param {!Element} option
  * @return {!Element}
@@ -130,7 +130,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /**
    * Add classes to adjust the bottom padding on the grid-layer
-   * to prevent overlap with the quiz
+   * to prevent overlap with the quiz.
    *
    * @private
    */
@@ -246,7 +246,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * Handles a tap event on the quiz element
+   * Handles a tap event on the quiz element.
    *
    * @param {Event} e
    * @private
@@ -270,7 +270,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * Triggers the analytics event for quiz response
+   * Triggers the analytics event for quiz response.
    *
    * @param {!Element} optionEl
    * @private
@@ -289,15 +289,15 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       INTERACTIVE_ELEMENT_TYPE_QUIZ
     );
 
-    this.quizEl_[ANALYTICS_TAG_NAME] = 'interactive-element-respond';
+    this.element[ANALYTICS_TAG_NAME] = 'amp-story-quiz';
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.INTERACTIVE_ELEMENT_RESPOND,
-      this.quizEl_
+      StoryAnalyticsEvent.CLICK_THROUGH,
+      this.element
     );
   }
 
   /**
-   * Triggers changes to quiz state on response interaction
+   * Triggers changes to quiz state on response interaction.
    *
    * @param {!Element} optionEl
    * @private
