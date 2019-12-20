@@ -71,12 +71,13 @@ h3.i-amphtml-story-quiz-prompt {
 }
 
 .i-amphtml-story-quiz-option {
+    position: relative !important;
     display: flex !important;
     justify-items: start !important;
     align-items: center !important;
     border-radius: 30px !important;
     padding: 8px 16px 8px 8px !important;
-    background-color: inherit !important;
+    background-color: transparent !important;
     margin-bottom: 8px !important;
     color: #5F6368 !important;
     border: solid 1px #DADCE0 !important;
@@ -130,14 +131,6 @@ h3.i-amphtml-story-quiz-prompt {
     color: var(--correct-color) !important;
 }
 
-.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected:not([correct]) {
-    background-color: var(--incorrect-color) !important;
-}
-
-.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected[correct] {
-    background-color: var(--correct-color) !important;
-}
-
 .i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected > .i-amphtml-story-quiz-answer-choice {
     border: solid 2px white !important;
     animation: answer-choice-bounce forwards 600ms linear;
@@ -161,12 +154,31 @@ h3.i-amphtml-story-quiz-prompt {
     font-size: 0 !important;
 }
 
-.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected[correct] {
-    animation: option-select-correct forwards 150ms cubic-bezier(0.0, 0.0, 0.2, 1);
+.i-amphtml-story-quiz-option > * {
+    z-index: 2 !important;
 }
 
-.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected:not([correct]) {
+.i-amphtml-story-quiz-option::before {
+    content: "";
+    position: absolute !important;
+    top: -1 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 32px !important;
+    font-size: 16px !important;
+    line-height: 20px !important;
+    z-index: 1 !important;
+}
+
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option::before {
+    animation: option-select-correct forwards 150ms cubic-bezier(0.0, 0.0, 0.2, 1);
+    border: solid 1px !important;
+}
+
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected:not([correct]).i-amphtml-story-quiz-option::before {
     animation: option-select-incorrect forwards 150ms cubic-bezier(0.0, 0.0, 0.2, 1);
+    border: solid 1px !important;
 }
 
 @keyframes answer-choice-bounce {
