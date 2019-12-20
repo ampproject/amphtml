@@ -75,7 +75,7 @@ const PROPENSITY_CONFIG = jsonLiteral({
       'vars': {
         'event': 'offer_selected',
         // ASSUME: active
-        'data': '{"product": ${product}, "active": true}',
+        'data': '{"product": "${product}", "active": true}',
       },
     },
     'onStartBuyflow': {
@@ -84,7 +84,7 @@ const PROPENSITY_CONFIG = jsonLiteral({
       'vars': {
         'event': 'payment_flow_start',
         // ASSUME: active
-        'data': '{"product": ${product}, "active": true}',
+        'data': '{"product": "${product}", "active": true}',
       },
     },
     'onPaymentComplete': {
@@ -93,7 +93,7 @@ const PROPENSITY_CONFIG = jsonLiteral({
       'vars': {
         'event': 'payment_complete',
         //ASSUME: active
-        'data': '{"product": ${product}, "active": true}',
+        'data': '{"product": "${product}", "active": true}',
       },
     },
   },
