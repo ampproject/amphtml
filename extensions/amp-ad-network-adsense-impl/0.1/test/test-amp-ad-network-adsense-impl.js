@@ -1371,15 +1371,11 @@ describes.realWin(
         let key, val;
         impl.iframe = {
           contentWindow: window,
-          setAttribute: (k, v) => {
-            key = k;
-            val = v;
-          },
+          style: {'visibility': 'hidden'},
         };
         win.postMessage('fill_sticky', '*');
         return renderPromise.then(() => {
-          expect(key).to.equal('visible');
-          expect(val).to.equal('');
+          expect(impl.iframe.style['visibility']).to.equal('');
         });
       });
 
