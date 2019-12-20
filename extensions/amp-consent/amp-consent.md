@@ -511,6 +511,6 @@ Join in on the discussion where we are discussing [upcoming potential features](
 ## Supported Consent Management Platforms
 
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
-- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](/extensions/amp-consent/cmps/sourcepoint.md)
 - Marfeel : [Website](https://www.marfeel.com/) - [Documentation](/extensions/amp-consent/cmps/marfeel.md)
+- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](/extensions/amp-consent/cmps/sourcepoint.md)
 - Your Integrated platform here!
