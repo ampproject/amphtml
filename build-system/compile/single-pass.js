@@ -478,9 +478,15 @@ function transformPathsToTempDir(graph, config) {
   );
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
-    // For now, just copy node_module files instead of transforming them.
     if (f.startsWith('node_modules/')) {
-      fs.copySync(f, `${graph.tmp}/${f}`);
+      // For now, only rewrite imports.
+      const {code, map} = babel.transformFileSync(f, {
+        plugins: [conf.getRewritePlugin()],
+        retainLines: true,
+        sourceMaps: true,
+      });
+      fs.outputFileSync(`${graph.tmp}/${f}`, code);
+      fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
     } else {
       const {code, map} = babel.transformFileSync(f, {
         plugins: conf.plugins({
