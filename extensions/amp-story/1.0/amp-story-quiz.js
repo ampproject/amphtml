@@ -77,8 +77,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
-    this.analyticsService_ = getAnalyticsService(this.win);
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win, element);
 
     /** @private {boolean} */
     this.hasReceivedResponse_ = false;
