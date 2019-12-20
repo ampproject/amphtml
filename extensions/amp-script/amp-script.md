@@ -141,7 +141,7 @@ Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/am
 
 `amp-script` supports getting and setting [`amp-state`](https://amp.dev/documentation/components/amp-bind/#initializing-state-with-amp-state) JSON via JavaScript.
 
-This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings). These elements can be inside (descendants) or outside (non-descendants) of the `amp-script` element.
+This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings). Invoking `AMP.setState()` from `amp-script` may cause mutations to the DOM as long as it was triggered by user gesture, otherwise it will only implicitly set state (similar to [`amp-state` initialization](https://amp.dev/documentation/examples/components/amp-bind/?referrer=ampbyexample.com#initializing-state)).
 
 [tip type="default"]
 `AMP.setState()` requires the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension script to be included in the document head.
@@ -202,7 +202,11 @@ The rules for mutations are as follows:
 
 1. Mutations are always accepted for five seconds after a user gesture.
 2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
-3. Mutations are always accepted for `amp-script` elements with [`[layout!="container"]`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute) and `height < 300px`.
+3. Mutations are always accepted for `amp-script` elements with [`[layout!="container"]`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute) and `height ≤ 300px`.
+
+#### Creating AMP elements
+
+With regard to dynamic creation of AMP elements (e.g. via `document.createElement()`), only `amp-img` and `amp-layout` are currently allowed. Please upvote or comment on [#25344](https://github.com/ampproject/amphtml/issues/25344) with your use case.
 
 #### Security features
 

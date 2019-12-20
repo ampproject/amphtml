@@ -20,7 +20,7 @@ tags: {  # amp-list
     name: "amp-list"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -65,6 +65,10 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
   }
   attrs: { name: "credentials" }
   attrs: {
+    name: "data-amp-bind-src"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
+  }
+  attrs: {
     name: "diffable"
     value: ""
   }
@@ -88,6 +92,7 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "fetch"
   }
   attrs: { name: "single-item" }
+  attrs: { name: "xssi-prefix" }
   attrs: {
     name: "src"
     mandatory_anyof: "['src','[src]','data-amp-bind-src']"

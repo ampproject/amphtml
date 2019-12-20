@@ -36,20 +36,17 @@ describe('Logging', () => {
   const RETURNS_ERROR = () => LogLevel.ERROR;
   const RETURNS_OFF = () => LogLevel.OFF;
 
-  let sandbox;
   let mode;
   let win;
   let logSpy;
   let timeoutSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     mode = {};
     window.__AMP_MODE = mode;
 
-    logSpy = sandbox.spy();
-    timeoutSpy = sandbox.spy();
+    logSpy = window.sandbox.spy();
+    timeoutSpy = window.sandbox.spy();
     win = {
       console: {
         log: logSpy,
@@ -58,12 +55,10 @@ describe('Logging', () => {
       setTimeout: timeoutSpy,
       __AMP_REPORT_ERROR: error => error,
     };
-    sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake(error => error);
+    window.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake(error => error);
   });
 
   afterEach(() => {
-    sandbox.restore();
-    sandbox = null;
     window.__AMP_MODE = undefined;
   });
 
@@ -628,7 +623,7 @@ describe('Logging', () => {
     let clock;
 
     beforeEach(() => {
-      clock = sandbox.useFakeTimers();
+      clock = window.sandbox.useFakeTimers();
       restoreAsyncErrorThrows();
     });
 
@@ -732,20 +727,17 @@ describe('Logging', () => {
   });
 
   describe('embed error', () => {
-    let sandbox;
     let iframe;
     let element;
     let element1;
     let element2;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       iframe = document.createElement('iframe');
       document.body.appendChild(iframe);
     });
 
     afterEach(() => {
-      sandbox.restore();
       document.body.removeChild(iframe);
     });
 
