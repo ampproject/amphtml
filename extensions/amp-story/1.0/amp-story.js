@@ -1431,15 +1431,6 @@ export class AmpStory extends AMP.BaseElement {
       // First step contains the minimum amount of code to display and play the
       // target page as fast as possible.
       () => {
-        oldPage && oldPage.element.removeAttribute('active');
-
-        if (
-          this.storeService_.get(StateProperty.UI_STATE) ===
-          UIType.DESKTOP_PANELS
-        ) {
-          this.setDesktopPositionAttributes_(targetPage);
-        }
-
         // Starts playing the page, if the story is not paused.
         // Note: navigation is prevented when the story is paused, this test
         // covers the case where the story is rendered paused (eg: consent).
@@ -1449,6 +1440,15 @@ export class AmpStory extends AMP.BaseElement {
           // Even if the page won't be playing, setting the active attribute
           // ensures it gets visible.
           targetPage.element.setAttribute('active', '');
+        }
+
+        oldPage && oldPage.element.removeAttribute('active');
+
+        if (
+          this.storeService_.get(StateProperty.UI_STATE) ===
+          UIType.DESKTOP_PANELS
+        ) {
+          this.setDesktopPositionAttributes_(targetPage);
         }
 
         this.forceRepaintForSafari_();
