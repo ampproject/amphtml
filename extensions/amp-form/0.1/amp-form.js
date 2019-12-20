@@ -797,19 +797,15 @@ export class AmpForm {
    */
   handleSsrTemplateResponse_(response, trust) {
     const init = response['init'];
+    const body = response['body'] ? JSON.parse(response['body']) : {};
     if (init) {
       const status = init['status'];
       if (status >= 300) {
         /** HTTP status codes of 300+ mean redirects and errors. */
-        return this.handleSubmitFailure_(
-          status,
-          response,
-          trust,
-          response['body']
-        );
+        return this.handleSubmitFailure_(status, response, trust, body);
       }
     }
-    return this.handleSubmitSuccess_(response, trust, response['body']);
+    return this.handleSubmitSuccess_(response, trust, body);
   }
 
   /**
