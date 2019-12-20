@@ -5608,10 +5608,10 @@ eslint-config-prettier@6.7.0:
   dependencies:
     get-stdin "^6.0.0"
 
-eslint-plugin-chai-expect@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-chai-expect/-/eslint-plugin-chai-expect-2.0.1.tgz#0f9267745feafa723b8ec1bb151c073df5558f60"
-  integrity sha512-HiFoh9F9grVdVQEIwADwPA7SlcGZcsm9gdzZGDoH2SeUoUmYrUuq1cQmfjyOfqRpFOL6qlhcz5nZW2ppTH9ZlQ==
+eslint-plugin-chai-expect@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-chai-expect/-/eslint-plugin-chai-expect-2.1.0.tgz#9dd1d8e5a80543fdec956f6aef7f83f2241ca92b"
+  integrity sha512-rd0/4mjMV6c3i0o4DKkWI4uaFN9DK707kW+/fDphaDI6HVgxXnhML9Xgt5vHnTXmSSnDhupuCFBgsEAEpchXmQ==
 
 eslint-plugin-eslint-plugin@2.1.0:
   version "2.1.0"
