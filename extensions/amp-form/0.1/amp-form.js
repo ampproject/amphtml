@@ -1127,18 +1127,18 @@ export class AmpForm {
    * @private
    */
   maybeHandleRedirect_(response) {
-    const doc = this.form_.ownerDocument;
-    userAssert(
-      !(doc && isAmp4Email(doc)),
-      'Redirects not supported in AMP4Email.',
-      this.form_
-    );
     this.assertSsrTemplate_(false, 'Redirects not supported.');
     if (!response || !response.headers) {
       return;
     }
     const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
     if (redirectTo) {
+      const doc = this.form_.ownerDocument;
+      userAssert(
+        !(doc && isAmp4Email(doc)),
+        'Redirects not supported in AMP4Email.',
+        this.form_
+      );
       userAssert(
         this.target_ != '_blank',
         'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
