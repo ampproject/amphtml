@@ -252,8 +252,7 @@ export class Bind {
    * Merges `state` into the current state and immediately triggers an
    * evaluation unless `skipEval` is false.
    * @param {!JsonObject} state
-   *
-   * @param {BindSetStateOptionsDef} opts options bag
+   * @param {!BindSetStateOptionsDef} opts options bag
    * @return {!Promise}
    */
   setState(state, opts = {}) {
