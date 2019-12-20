@@ -1128,10 +1128,11 @@ export class AmpForm {
    */
   maybeHandleRedirect_(response) {
     const doc = this.form_.ownerDocument;
-    if (doc && isAmp4Email(doc)) {
-      user().warn('Redirects not supported in AMP4Email.');
-      return;
-    }
+    userAssert(
+      !(doc && isAmp4Email(doc)),
+      'Redirects not supported in AMP4Email.',
+      this.form_
+    );
     this.assertSsrTemplate_(false, 'Redirects not supported.');
     if (!response || !response.headers) {
       return;
