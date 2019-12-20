@@ -797,6 +797,7 @@ export class AmpForm {
    */
   handleSsrTemplateResponse_(response, trust) {
     const init = response['init'];
+    // response['body'] is serialized as a string in the response.
     const body = response['body'] ? JSON.parse(response['body']) : {};
     if (init) {
       const status = init['status'];
