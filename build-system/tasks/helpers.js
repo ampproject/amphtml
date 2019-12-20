@@ -25,7 +25,9 @@ const file = require('gulp-file');
 const fs = require('fs-extra');
 const globby = require('globby');
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const gulpWatch = require('gulp-watch');
+const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
@@ -405,6 +407,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         )
         .pipe(source(srcFilename))
         .pipe(buffer())
+        .pipe(gulpIf(argv.coverage, istanbul()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(
           regexpSourcemaps(
