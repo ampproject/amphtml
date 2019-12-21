@@ -478,28 +478,20 @@ function transformPathsToTempDir(graph, config) {
   );
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
-    if (f.startsWith('node_modules/')) {
-      // For now, only rewrite imports.
-      const {code, map} = babel.transformFileSync(f, {
-        plugins: [conf.getRewritePlugin()],
-        retainLines: true,
-        sourceMaps: true,
-      });
-      fs.outputFileSync(`${graph.tmp}/${f}`, code);
-      fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
-    } else {
-      const {code, map} = babel.transformFileSync(f, {
-        plugins: conf.plugins({
+    const plugins = f.startsWith('node_modules/')
+      ? [conf.getRewritePlugin()]
+      : conf.plugins({
           isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
           isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
           isSinglePass: true,
-        }),
-        retainLines: true,
-        sourceMaps: true,
-      });
-      fs.outputFileSync(`${graph.tmp}/${f}`, code);
-      fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
-    }
+        });
+    const {code, map} = babel.transformFileSync(f, {
+      plugins,
+      retainLines: true,
+      sourceMaps: true,
+    });
+    fs.outputFileSync(`${graph.tmp}/${f}`, code);
+    fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
     process.stdout.write('.');
   });
   console.log('\n');
