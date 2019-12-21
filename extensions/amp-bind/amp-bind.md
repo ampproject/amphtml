@@ -900,11 +900,15 @@ An `amp-state` element must contain a child `<script>` element.
 
 [/filter] <!-- formats="email" -->
 
+[filter formats="websites, stories, ads"]
+
 #### XHR batching
 
 AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.
 
 For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
+
+[/filter] <!-- formats="websites, stories, ads" -->
 
 #### Attributes
 
