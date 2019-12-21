@@ -28,7 +28,7 @@ const log = require('fancy-log');
 const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
-const relativePath = require('path').relative;
+const pkgUp = require('pkg-up');
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
@@ -117,6 +117,7 @@ exports.getFlags = function(config) {
       : config.language_out || 'ECMASCRIPT5',
     chunk_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
+    package_json_entry_names: 'module,main',
     process_common_js_modules: true,
     externs: config.externs,
     define: config.define,
@@ -263,7 +264,6 @@ exports.getBundleFlags = function(g) {
       throw new Error('Expect to build more than one bundle.');
     }
   });
-  flagsArray.push('--js_module_root', `${g.tmp}/node_modules/`);
   flagsArray.push('--js_module_root', `${g.tmp}/`);
   return flagsArray;
 };
@@ -314,6 +314,7 @@ exports.getGraph = function(entryModules, config) {
     deps: true,
     detectGlobals: false,
     fast: true,
+    browserField: 'module',
   })
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
@@ -329,6 +330,7 @@ exports.getGraph = function(entryModules, config) {
     through.obj(function(row, enc, next) {
       row.source = null; // Release memory
       depEntries.push(row);
+      console.log(row);
       next();
     })
   );
@@ -342,15 +344,29 @@ exports.getGraph = function(entryModules, config) {
         })
         .forEach(function(row) {
           const id = unifyPath(
-            exports.maybeAddDotJs(relativePath(process.cwd(), row.id))
+            exports.maybeAddDotJs(path.relative(process.cwd(), row.id))
           );
           topo.addNode(id, id);
-          const deps = (edges[id] = Object.keys(row.deps)
-            .sort()
-            .map(function(dep) {
-              return unifyPath(relativePath(process.cwd(), row.deps[dep]));
-            }));
+          const deps = Object.keys(row.deps)
+            .reduce((deps, dep) => {
+              dep = unifyPath(path.relative(process.cwd(), row.deps[dep]));
+              deps.push(dep);
+              if (dep.startsWith('node_modules/')) {
+                const pkgJson = pkgUp.sync({cwd: path.dirname(dep)});
+                const jsonId = unifyPath(path.relative(process.cwd(), pkgJson));
+                topo.addNode(jsonId, jsonId);
+                edges[jsonId] = [];
+                graph.deps[jsonId] = [];
+                deps.push(jsonId);
+                graph.depOf[jsonId] = {};
+                graph.depOf[jsonId][jsonId] = true; // Self edge.
+              }
+              return deps;
+            }, [])
+            .sort();
+          edges[id] = deps;
           graph.deps[id] = deps;
+          console.log(id, deps);
           if (row.entry) {
             graph.depOf[id] = {};
             graph.depOf[id][id] = true; // Self edge.
@@ -447,6 +463,7 @@ function setupBundles(graph) {
       };
     }
     graph.bundles[dest].modules.push(id);
+    console.log(id);
   });
 }
 
@@ -466,20 +483,22 @@ function transformPathsToTempDir(graph, config) {
   );
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
-    const plugins = f.startsWith('node_modules/')
-      ? [conf.getRewritePlugin()]
-      : conf.plugins({
+    // For now, just copy node_module files instead of transforming them.
+    if (f.startsWith('node_modules/')) {
+      fs.copySync(f, `${graph.tmp}/${f}`);
+    } else {
+      const {code, map} = babel.transformFileSync(f, {
+        plugins: conf.plugins({
           isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
           isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
           isSinglePass: true,
-        });
-    const {code, map} = babel.transformFileSync(f, {
-      plugins,
-      retainLines: true,
-      sourceMaps: true,
-    });
-    fs.outputFileSync(`${graph.tmp}/${f}`, code);
-    fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
+        }),
+        retainLines: true,
+        sourceMaps: true,
+      });
+      fs.outputFileSync(`${graph.tmp}/${f}`, code);
+      fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
+    }
     process.stdout.write('.');
   });
   console.log('\n');
