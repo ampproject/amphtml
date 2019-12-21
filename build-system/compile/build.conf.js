@@ -27,7 +27,6 @@ const defaultPlugins = [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
-  getRewritePlugin(),
   getReplacePlugin(),
 ];
 
@@ -116,10 +115,6 @@ function getJsonConfigurationPlugin() {
   return localPlugin('transform-json-configuration');
 }
 
-function getRewritePlugin() {
-  return localPlugin('transform-rewrite-imports');
-}
-
 /**
  * Resolves babel plugin set to apply before compiling on singlepass.
  * @param {!Object<string, boolean>} buildFlags
@@ -161,5 +156,4 @@ module.exports = {
   eliminateIntermediateBundles,
   getReplacePlugin,
   getJsonConfigurationPlugin,
-  getRewritePlugin,
 };

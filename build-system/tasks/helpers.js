@@ -102,11 +102,7 @@ const BABELIFY_GLOBAL_TRANSFORM = {
  * Plugins used by Babelify while compiling unminified code
  */
 const BABELIFY_PLUGINS = {
-  plugins: [
-    conf.getReplacePlugin(),
-    conf.getJsonConfigurationPlugin(),
-    conf.getRewritePlugin(),
-  ],
+  plugins: [conf.getReplacePlugin(), conf.getJsonConfigurationPlugin()],
 };
 
 const hostname = argv.hostname || 'cdn.ampproject.org';
@@ -668,19 +664,8 @@ function transferSrcsToTempDir(options = {}) {
   );
   const files = globby.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
-    if (file.startsWith('third_party/')) {
+    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
       fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
-      return;
-    }
-
-    if (file.startsWith('node_modules/')) {
-      const {code} = babel.transformFileSync(file, {
-        plugins: [conf.getRewritePlugin()],
-        retainLines: true,
-        compact: false,
-      });
-      const name = `${SRC_TEMP_DIR}/${file}`;
-      fs.outputFileSync(name, code);
       return;
     }
 

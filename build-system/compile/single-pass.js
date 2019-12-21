@@ -334,6 +334,7 @@ exports.getGraph = function(entryModules, config) {
     through.obj(function(row, enc, next) {
       row.source = null; // Release memory
       depEntries.push(row);
+      console.log(row);
       next();
     })
   );
@@ -363,6 +364,7 @@ exports.getGraph = function(entryModules, config) {
             });
           edges[id] = deps;
           graph.deps[id] = deps;
+          console.log(id, deps);
           if (row.entry) {
             graph.depOf[id] = {};
             graph.depOf[id][id] = true; // Self edge.
@@ -459,6 +461,7 @@ function setupBundles(graph) {
       };
     }
     graph.bundles[dest].modules.push(id);
+    console.log(id);
   });
 }
 
@@ -478,20 +481,22 @@ function transformPathsToTempDir(graph, config) {
   );
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
-    const plugins = f.startsWith('node_modules/')
-      ? [conf.getRewritePlugin()]
-      : conf.plugins({
+    // For now, just copy node_module files instead of transforming them.
+    if (f.startsWith('node_modules/')) {
+      fs.copySync(f, `${graph.tmp}/${f}`);
+    } else {
+      const {code, map} = babel.transformFileSync(f, {
+        plugins: conf.plugins({
           isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
           isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
           isSinglePass: true,
-        });
-    const {code, map} = babel.transformFileSync(f, {
-      plugins,
-      retainLines: true,
-      sourceMaps: true,
-    });
-    fs.outputFileSync(`${graph.tmp}/${f}`, code);
-    fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
+        }),
+        retainLines: true,
+        sourceMaps: true,
+      });
+      fs.outputFileSync(`${graph.tmp}/${f}`, code);
+      fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
+    }
     process.stdout.write('.');
   });
   console.log('\n');
