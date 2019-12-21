@@ -215,21 +215,9 @@ Learn more about [Actions and Events in AMP](https://amp.dev/documentation/guide
 
 ## Events
 
-The `amp-form` exposes the following events:
+Use `amp-form` events with the [`on` attribute](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on)
 
-| Event            | Fired when                                                                                                           |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `submit`         | The form is submitted and before the submission is complete.                                                         |
-| `submit-success` | The form submission is done and the response is a success.                                                           |
-| `submit-error`   | The form submission is done and the response is an error.                                                            |
-| `verify`         | Asynchronous verification is initiated.                                                                              |
-| `verify-error`   | Asynchronous verification is done and the response is an error.                                                      |
-| `valid`          | The form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)). |
-| `invalid`        | The form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)).       |
-
-These events can be used via the [`on` attribute](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on).
-
-For example, the following listens to both the `submit-success` and `submit-error` events and shows different lightboxes depending on the event:
+The following example listens to both the `submit-success` and `submit-error` events and shows different lightboxes depending on the event:
 
 ```html
 <form
@@ -239,7 +227,38 @@ For example, the following listens to both the `submit-success` and `submit-erro
 ></form>
 ```
 
-See the [full example here](../../examples/forms.amp.html).
+### `amp-form` event list
+
+#### `submit`
+
+The form is submitted and before the submission is complete.
+
+#### `submit-success`
+
+The form submission is done and the response is a success.
+
+#### `submit-error`
+
+The form submission is done and the response is an error.
+
+[filter formats="websites, ads"]
+
+#### `verify`
+
+Asynchronous verification is initiated.
+
+#### `verify-error`
+
+Asynchronous verification is done and the response is an error.
+
+#### `valid`
+
+The form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)).
+
+#### `invalid`
+
+The form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)).
+[/filter]<!-- formats="websites, ads" -->
 
 #### Input events
 
@@ -655,6 +674,8 @@ to the input element.
 
 For more examples, see [examples/forms.amp.html](../../examples/forms.amp.html).
 
+[filter formats="websites, ads"]
+
 ## Variable substitutions
 
 The `amp-form` extension allows [platform variable substitutions](../../spec/amp-var-substitutions.md) for inputs that are hidden and that have the `data-amp-replace` attribute. On each form submission, `amp-form` finds all `input[type=hidden][data-amp-replace]` inside the form and applies variable substitutions to its `value` attribute and replaces it with the result of the substitution.
@@ -706,6 +727,8 @@ Once the user tries to submit the form, AMP will try to resolve the variables an
 Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in the whitelist through `data-amp-replace` attribute on the first field.
 
 Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../spec/amp-var-substitutions.md).
+
+[/filter]<!-- formats="websites, ads" -->
 
 ## Polyfills
 
