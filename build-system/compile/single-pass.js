@@ -165,7 +165,11 @@ exports.getBundleFlags = function(g) {
   Object.keys(g.packages)
     .sort()
     .forEach(function(pkg) {
-      srcs.push(pkg);
+      g.bundles[mainBundle].modules.push(pkg);
+      fs.outputFileSync(
+        `${g.tmp}/${pkg}`,
+        JSON.stringify(JSON.parse(readFile(pkg)), null, 4)
+      );
     });
 
   // Build up the weird flag structure that closure compiler calls
@@ -330,7 +334,6 @@ exports.getGraph = function(entryModules, config) {
     through.obj(function(row, enc, next) {
       row.source = null; // Release memory
       depEntries.push(row);
-      console.log(row);
       next();
     })
   );
@@ -348,25 +351,18 @@ exports.getGraph = function(entryModules, config) {
           );
           topo.addNode(id, id);
           const deps = Object.keys(row.deps)
-            .reduce((deps, dep) => {
+            .sort()
+            .map(dep => {
               dep = unifyPath(path.relative(process.cwd(), row.deps[dep]));
-              deps.push(dep);
               if (dep.startsWith('node_modules/')) {
                 const pkgJson = pkgUp.sync({cwd: path.dirname(dep)});
                 const jsonId = unifyPath(path.relative(process.cwd(), pkgJson));
-                topo.addNode(jsonId, jsonId);
-                edges[jsonId] = [];
-                graph.deps[jsonId] = [];
-                deps.push(jsonId);
-                graph.depOf[jsonId] = {};
-                graph.depOf[jsonId][jsonId] = true; // Self edge.
+                graph.packages[jsonId] = true;
               }
-              return deps;
-            }, [])
-            .sort();
+              return dep;
+            });
           edges[id] = deps;
           graph.deps[id] = deps;
-          console.log(id, deps);
           if (row.entry) {
             graph.depOf[id] = {};
             graph.depOf[id][id] = true; // Self edge.
@@ -463,7 +459,6 @@ function setupBundles(graph) {
       };
     }
     graph.bundles[dest].modules.push(id);
-    console.log(id);
   });
 }
 
