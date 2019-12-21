@@ -77,6 +77,18 @@ function patchWebAnimations() {
 }
 
 /**
+ * Patches WorkerDOM to have a module field in package.json.
+ */
+function patchWorkerDom() {
+  const pkgPath = 'node_modules/@ampproject/worker-dom/package.json';
+  const pkg = JSON.parse(fs.readFileSync(pkgPath).toString());
+  if (!pkg.module && pkg.syntax && pkg.syntax.esmodules) {
+    pkg.module = pkg.syntax.esmodules;
+    writeIfUpdated(pkgPath, JSON.stringify(pkg, null, 4));
+  }
+}
+
+/**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
  */
 function runYarnCheck() {
@@ -125,6 +137,7 @@ async function updatePackages() {
     runYarnCheck();
   }
   patchWebAnimations();
+  patchWorkerDom();
 }
 
 module.exports = {

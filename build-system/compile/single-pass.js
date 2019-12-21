@@ -334,7 +334,6 @@ exports.getGraph = function(entryModules, config) {
     through.obj(function(row, enc, next) {
       row.source = null; // Release memory
       depEntries.push(row);
-      console.log(row);
       next();
     })
   );
@@ -364,7 +363,6 @@ exports.getGraph = function(entryModules, config) {
             });
           edges[id] = deps;
           graph.deps[id] = deps;
-          console.log(id, deps);
           if (row.entry) {
             graph.depOf[id] = {};
             graph.depOf[id][id] = true; // Self edge.
@@ -461,7 +459,6 @@ function setupBundles(graph) {
       };
     }
     graph.bundles[dest].modules.push(id);
-    console.log(id);
   });
 }
 
