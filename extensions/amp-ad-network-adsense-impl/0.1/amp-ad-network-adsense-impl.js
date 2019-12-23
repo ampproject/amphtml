@@ -563,7 +563,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           event['source'] == this.iframe.contentWindow
         ) {
           this.renderStarted();
-          this.iframe.setAttribute('visible', '');
+          setStyles(this.iframe, {'visibility': ''});
           this.win.removeEventListener('message', stickyMsgListener);
         }
       };
