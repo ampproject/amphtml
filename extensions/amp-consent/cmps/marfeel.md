@@ -27,13 +27,15 @@ CMP used through Marfeel platform in order to handle and enforce user consent.
       "postPromptUI": "postPromptUI",
       "clientConfig": {
         "consentLanguage": "language-code",
-        "publisherLogo": "website-logo",
+        "publisherLogo": "website-logo"
       }
     }
   </script>
   <div id="postPromptUI">
     Post Prompt UI
-    <button on="tap:consent.prompt(consent=Marfeel)" role="button">Manage</button>
+    <button on="tap:consent.prompt(consent=Marfeel)" role="button">
+      Manage
+    </button>
   </div>
 </amp-consent>
 ```
