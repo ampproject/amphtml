@@ -29,7 +29,7 @@ bool HtmlIntegrationPoint(const Node& node) {
   }
 
   if (node.NameSpace() == "math") {
-    if (node.Data() == "annotation-xml") {
+    if (node.DataAtom() == Atom::ANNOTATION_XML) {
       for (const Attribute& attr : node.Attributes()) {
         if (attr.key == "encoding") {
           std::string value = attr.value;
@@ -41,8 +41,9 @@ bool HtmlIntegrationPoint(const Node& node) {
       }
     }
   } else if (node.NameSpace() == "svg") {
-    if (node.Data() == "desc" || node.Data() == "foreignObject" ||
-        node.Data() == "title") {
+    if (node.DataAtom() == Atom::DESC ||
+        node.DataAtom() == Atom::FOREIGN_OBJECT ||
+        node.DataAtom() == Atom::TITLE) {
       return true;
     }
   }
@@ -51,14 +52,13 @@ bool HtmlIntegrationPoint(const Node& node) {
 }
 
 bool MathMLTextIntegrationPoint(const Node& node) {
-  static constexpr std::array<std::string_view, 5> textNodes {
-    "mi", "mo", "mn", "ms", "mtext",
-  };
+  static constexpr std::array<Atom, 5> textNodes {
+    Atom::MI, Atom::MO, Atom::MN, Atom::MS, Atom::MTEXT};
 
   if (node.NameSpace() != "math") return false;
-  if (std::find(textNodes.begin(),
-                textNodes.end(),
-                node.Data().data()) != textNodes.end()) return true;
+  for (auto tn : textNodes) {
+    if (node.DataAtom() == tn) return true;
+  }
   return false;
 }
 

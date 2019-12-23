@@ -31,8 +31,7 @@ void CheckParseRenderOutput(std::string_view input,
   std::stringbuf buf;
   auto err = htmlparser::Renderer::Render(doc, &buf);
   EXPECT_EQ(err, htmlparser::RenderError::NO_ERROR);
-  std::string real_output = buf.str();
-  EXPECT_EQ(real_output, expected_output);
+  EXPECT_EQ(buf.str(), expected_output.data());
 }
 
 }  // namespace htmlparser
