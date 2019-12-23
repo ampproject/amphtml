@@ -42,10 +42,10 @@ CMP used through Marfeel platform in order to handle and enforce user consent.
 
 ## Configuration
 
-| Attribute        |  Type  | Mandatory | Description                                         |
-| ---------------- | :----: | :-------:                                                       |--------------------------------------------------------------------------------------------- |
-| consentLanguage  | String |    yes    | Language code (in ISO-639-1) to display the consent |
-| publisherLogo    | String |    yes    | URL of your website logo                            |
+| Attribute       |  Type  | Mandatory | Description                                         |
+| --------------- | :----: | :-------: | --------------------------------------------------- |
+| consentLanguage | String |    yes    | Language code (in ISO-639-1) to display the consent |
+| publisherLogo   | String |    yes    | URL of your website logo                            |
 
 
 Please contact [Marfeel](https://marfeel.com) for further details regarding the configuration of this CMP.
