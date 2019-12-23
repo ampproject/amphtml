@@ -52,6 +52,11 @@ export function markElementForDiffing(element, generateKey) {
   // Don't DOM diff nodes with bindings because amp-bind scans newly rendered
   // elements and discards _all_ old elements _before_ diffing, so preserving
   // old elements would cause loss of functionality.
+  //
+  // Alternatively, we could do diffing _before_ bindings are updated and
+  // more precisely add/remove bindings from nodes that set-dom diffs, but...
+  // 1. Would result in content flashing unless we clone the old DOM tree.
+  // 2. Need to change set-dom e.g. handle changed bind attribute values.
   const hasBinding = element.hasAttribute('i-amphtml-binding');
 
   if (!hasBinding && DIFFABLE_AMP_ELEMENTS[element.tagName]) {
