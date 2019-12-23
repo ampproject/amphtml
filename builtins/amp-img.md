@@ -128,9 +128,11 @@ This attribute is similar to the `src` attribute on the `img` tag. The value mus
 This attribute is similar to the `src` attribute on the `img` tag. For emails, the URL must be `https`.
 [/filter] <!-- formats="email" -->
 
+[filter formats="websites, stories, ads"]
 ### srcset
 
 Same as `srcset` attribute on the `img` tag. For browsers that do not support `srcset`, `<amp-img>` will default to using `src`. If only `srcset` and no `src` is provided, the first url in the `srcset` will be selected.
+[/filter] <!-- formats="websites, stories, ads" -->
 
 ### sizes
 
@@ -172,6 +174,7 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 
 - `[src]`
 - `[srcset]`
+- `srcset`
 - `lightbox`
 - `lightbox-thumbnail-id`
 - `object-fit`

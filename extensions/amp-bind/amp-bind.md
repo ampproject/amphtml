@@ -797,7 +797,13 @@ Use `[defaultText]` to update initial text, and `[text]` to update current text.
 
 ## Debugging
 
-Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development and to access special debugging functions.
+[filter formats="websites, stories, ads"]
+Test in development mode, byt adding the URL fragment `#development=1` to highlight warnings and errors during development and to access special debugging functions.
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+Test in development mode by saving the email as an HTML file. Test in the browser by adding the URL fragment `#development=1` to highlight warnings and errors during development and to access special debugging functions.
+[/filter] <!-- formats="email" -->
 
 ### Warnings
 

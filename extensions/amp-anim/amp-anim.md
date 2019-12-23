@@ -102,6 +102,7 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 The AMP for Email spec disallows the use of the following attributes on the AMP email format.
 
+- `srcset`
 - `object-fit`
 - `object-position`
 
