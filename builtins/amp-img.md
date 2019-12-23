@@ -129,6 +129,7 @@ This attribute is similar to the `src` attribute on the `img` tag. For emails, t
 [/filter] <!-- formats="email" -->
 
 [filter formats="websites, stories, ads"]
+
 ### srcset
 
 Same as `srcset` attribute on the `img` tag. For browsers that do not support `srcset`, `<amp-img>` will default to using `src`. If only `srcset` and no `src` is provided, the first url in the `srcset` will be selected.

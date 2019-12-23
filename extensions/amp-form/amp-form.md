@@ -503,6 +503,7 @@ Then `amp-bind` updates the `<p>` element's text to match the `subscibe` state:
 ```
 
 [filter formats="websites, ads"]
+
 ### Redirecting after a submission
 
 You can redirect users to a new page after a successful form submission by setting the `AMP-Redirect-To` response header and specifying a redirect URL. The redirect URL must be a HTTPS URL, otherwise AMP will throw an error and redirection won't occur. HTTP response headers are configured via your server.
