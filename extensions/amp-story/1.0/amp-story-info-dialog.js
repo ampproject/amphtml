@@ -15,6 +15,11 @@
  */
 
 import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
+import {
   Action,
   StateProperty,
   getStoreService,
@@ -64,11 +69,14 @@ export class InfoDialog {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
 
+    /** @private {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win_, parentEl);
+
     /** @private @const {!Element} */
     this.parentEl_ = parentEl;
 
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
 
     /** @private {?Element} */
     this.moreInfoLinkEl_ = null;
@@ -107,7 +115,7 @@ export class InfoDialog {
       '.i-amphtml-story-info-dialog-container'
     );
 
-    const appendPromise = this.resources_.mutateElement(this.parentEl_, () => {
+    const appendPromise = this.mutator_.mutateElement(this.parentEl_, () => {
       this.parentEl_.appendChild(root);
     });
 
@@ -152,9 +160,15 @@ export class InfoDialog {
    * @private
    */
   onInfoDialogStateUpdated_(isOpen) {
-    this.resources_.mutateElement(dev().assertElement(this.element_), () => {
+    this.mutator_.mutateElement(dev().assertElement(this.element_), () => {
       this.element_.classList.toggle(DIALOG_VISIBLE_CLASS, isOpen);
     });
+
+    this.element_[ANALYTICS_TAG_NAME] = 'amp-story-info-dialog';
+    this.analyticsService_.triggerEvent(
+      isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.element_
+    );
   }
 
   /**
@@ -208,7 +222,7 @@ export class InfoDialog {
       this.element_.querySelector('.i-amphtml-story-info-heading')
     );
 
-    return this.resources_.mutateElement(headingEl, () => {
+    return this.mutator_.mutateElement(headingEl, () => {
       headingEl.textContent = label;
     });
   }
@@ -223,7 +237,7 @@ export class InfoDialog {
       this.element_.querySelector('.i-amphtml-story-info-link')
     );
 
-    return this.resources_.mutateElement(linkEl, () => {
+    return this.mutator_.mutateElement(linkEl, () => {
       linkEl.setAttribute('href', pageUrl);
 
       // Add zero-width space character (\u200B) after "." and "/" characters
@@ -246,7 +260,7 @@ export class InfoDialog {
       this.element_.querySelector('.i-amphtml-story-info-moreinfo')
     );
 
-    return this.resources_.mutateElement(this.moreInfoLinkEl_, () => {
+    return this.mutator_.mutateElement(this.moreInfoLinkEl_, () => {
       const label = this.localizationService_.getLocalizedString(
         LocalizedStringId.AMP_STORY_DOMAIN_DIALOG_HEADING_LINK
       );

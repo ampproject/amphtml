@@ -1214,7 +1214,6 @@ describe('ValidatorRulesMakeSense', () => {
   const tagWithoutSpecNameIsUnique = {};
   const tagNameRegex =
       new RegExp('(!DOCTYPE|O:P|[A-Z0-9-]+|\\$REFERENCE_POINT)');
-  const mandatoryParentRegex = new RegExp('(!DOCTYPE|\\$ROOT|[A-Z0-9-]+)');
   const disallowedAncestorRegex = new RegExp('[A-Z0-9-]+');
   for (const tagSpec of rules.tags) {
     // Helper for message output, set a tagspec_name in this order:
@@ -1290,6 +1289,7 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-mustache': ['0.1', '0.2', 'latest'],
         'amp-pixel': ['0.1', 'latest'],
         'amp-position-observer': ['0.1', 'latest'],
+        'amp-selector': ['0.1', 'latest'],
         'amp-social-share': ['0.1', 'latest'],
         'amp-video': ['0.1', 'latest'],
       };
@@ -1366,12 +1366,6 @@ describe('ValidatorRulesMakeSense', () => {
           });
         }
       }
-    }
-    // mandatory_parent
-    if (tagSpec.mandatoryParent !== null) {
-      it('mandatory parent tag name defined', () => {
-        expect(mandatoryParentRegex.test(tagSpec.mandatoryParent)).toBe(true);
-      });
     }
     // disallowed_ancestor must be a upper case alphabetic name.
     it('disallowed_ancestor defined and not equal to mandatory parent', () => {
@@ -1492,7 +1486,7 @@ describe('ValidatorRulesMakeSense', () => {
         // getNameByAttrSpecId() looks like it would do what we want, but it's
         // sufficiently wrapped in private context inside the validator that I
         // don't see a way to call it.  For now just gold the current index.
-        expect(tagSpec.attrLists[0]).toEqual(19);
+        expect(tagSpec.attrLists[0]).toEqual(20);
       });
     }
 

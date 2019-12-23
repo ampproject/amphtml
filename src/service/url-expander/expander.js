@@ -170,10 +170,11 @@ export class Expander {
             };
           } else {
             // Macro is from the global source.
-            binding = Object.assign({}, this.variableSource_.get(match.name), {
+            binding = {
+              ...this.variableSource_.get(match.name),
               name: match.name,
               encode,
-            });
+            };
           }
 
           urlIndex = match.stop + 1;

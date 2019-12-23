@@ -43,8 +43,8 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     embedded = true;
     registerServiceBuilder(win, 'story-store', () => storeService);
 
-    // Making sure resource tasks run synchronously.
-    env.sandbox.stub(Services, 'resourcesForDoc').returns({
+    // Making sure mutator tasks run synchronously.
+    env.sandbox.stub(Services, 'mutatorForDoc').returns({
       mutateElement: (element, callback) => {
         callback();
         return Promise.resolve();

@@ -384,36 +384,32 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
     const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ (Object.assign(
-      {
-        // Only select into SRA experiments if SRA not already explicitly
-        // enabled and refresh is not being used by any slot.
-        [DOUBLECLICK_SRA_EXP]: {
-          isTrafficEligible: () =>
-            !forcedExperimentId &&
-            !this.win.document./*OK*/ querySelector(
-              'meta[name=amp-ad-enable-refresh], ' +
-                'amp-ad[type=doubleclick][data-enable-refresh], ' +
-                'meta[name=amp-ad-doubleclick-sra]'
-            ),
-          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-            key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
+        !../../../src/experiments.ExperimentInfo>} */ ({
+      [DOUBLECLICK_SRA_EXP]: {
+        isTrafficEligible: () =>
+          !forcedExperimentId &&
+          !this.win.document./*OK*/ querySelector(
+            'meta[name=amp-ad-enable-refresh], ' +
+              'amp-ad[type=doubleclick][data-enable-refresh], ' +
+              'meta[name=amp-ad-doubleclick-sra]'
           ),
-        },
-        [FLEXIBLE_AD_SLOTS_EXP]: {
-          isTrafficEligible: () => true,
-          branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
-        },
-        [[FIE_CSS_CLEANUP_EXP.branch]]: {
-          isTrafficEligible: () => true,
-          branches: [
-            [FIE_CSS_CLEANUP_EXP.control],
-            [FIE_CSS_CLEANUP_EXP.experiment],
-          ],
-        },
+        branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
+          key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
+        ),
       },
-      AMPDOC_FIE_EXPERIMENT_INFO_MAP
-    ));
+      [FLEXIBLE_AD_SLOTS_EXP]: {
+        isTrafficEligible: () => true,
+        branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
+      },
+      [[FIE_CSS_CLEANUP_EXP.branch]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_CSS_CLEANUP_EXP.control],
+          [FIE_CSS_CLEANUP_EXP.experiment],
+        ],
+      },
+      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
+    });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(
       expName => setExps[expName] && this.experimentIds.push(setExps[expName])
@@ -556,39 +552,35 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       psz = `${parentWidth}x-1`;
       fws = fwSignal ? fwSignal : '0';
     }
-    return Object.assign(
-      {
-        'iu': this.element.getAttribute('data-slot'),
-        'co':
-          this.jsonTargeting && this.jsonTargeting['cookieOptOut'] ? '1' : null,
-        'adk': this.adKey,
-        'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
-        'output': 'html',
-        'impl': 'ifr',
-        'tfcd': tfcd == undefined ? null : tfcd,
-        'adtest': isInManualExperiment(this.element) ? 'on' : null,
-        'ifi': this.ifi_,
-        'rc': this.refreshCount_ || null,
-        'frc': Number(this.fromResumeCallback) || null,
-        'fluid': this.isFluidRequest_ ? 'height' : null,
-        'fsf': this.forceSafeframe ? '1' : null,
-        // Both msz/psz send a height of -1 because height expansion is
-        // disallowed in AMP.
-        'msz': msz,
-        'psz': psz,
-        'fws': fws,
-        'scp': serializeTargeting(
-          (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
-          (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
-            null,
-          null
-        ),
-        'spsa': this.isSinglePageStoryAd
-          ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
-          : null,
-      },
-      googleBlockParameters(this)
-    );
+    return {
+      'iu': this.element.getAttribute('data-slot'),
+      'co':
+        this.jsonTargeting && this.jsonTargeting['cookieOptOut'] ? '1' : null,
+      'adk': this.adKey,
+      'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
+      'output': 'html',
+      'impl': 'ifr',
+      'tfcd': tfcd == undefined ? null : tfcd,
+      'adtest': isInManualExperiment(this.element) ? 'on' : null,
+      'ifi': this.ifi_,
+      'rc': this.refreshCount_ || null,
+      'frc': Number(this.fromResumeCallback) || null,
+      'fluid': this.isFluidRequest_ ? 'height' : null,
+      'fsf': this.forceSafeframe ? '1' : null,
+      'msz': msz,
+      'psz': psz,
+      'fws': fws,
+      'scp': serializeTargeting(
+        (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
+        (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
+          null,
+        null
+      ),
+      'spsa': this.isSinglePageStoryAd
+        ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
+        : null,
+      ...googleBlockParameters(this),
+    };
   }
 
   /**
