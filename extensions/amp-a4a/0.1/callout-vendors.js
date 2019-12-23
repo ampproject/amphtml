@@ -156,7 +156,7 @@ const RTC_VENDORS = jsonConfiguration({
     disableKeyAppend: true,
   },
   browsi: {
-    url: 'https://amp.browsiprod.com/predict?pv=PAGE_VIEW_ID_64&pk=PUB_KEY&sk=SITE_KEY&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&ai=ATTR(data-amp-slot-index)&aq=ATTR(data-google-query-id)&t=ATTR(type)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
+    url: 'https://amp.browsiprod.com/predict?pv=PAGEVIEWID_64&pk=PUB_KEY&sk=SITE_KEY&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&ai=ATTR(data-amp-slot-index)&aq=ATTR(data-google-query-id)&t=ATTR(type)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
     disableKeyAppend: true,
     macros: ['PUB_KEY', 'SITE_KEY'],
   },
