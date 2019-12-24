@@ -899,26 +899,37 @@ describes.repeated(
             const foo = doc.createElement('div');
             const bar = doc.createElement('div');
 
-            const firstPromise = Promise.resolve({items: [foo]});
-            const secondPromise = firstPromise.then(() => ({items: [bar]}));
+            // firstPromise won't resolve until the render triggered by secondPromise completes.
+            let resolveFirstPromise;
+            const firstPromise = new Promise(resolve => {
+              resolveFirstPromise = () => resolve({items: [foo]});
+            });
+            const secondPromise = Promise.resolve({items: [bar]});
 
             listMock
               .expects('fetch_')
+              .onFirstCall()
               .returns(firstPromise)
+              .onSecondCall()
               .returns(secondPromise)
               .twice();
+
+            // Even though there are two fetches, the render associated with
+            // the first one should be cancelled due to an outdated src.
             listMock
               .expects('scheduleRender_')
               .withArgs([bar])
               .returns(Promise.resolve())
               .once();
-            listMock.expects('showFallback_').never();
 
             element.setAttribute('src', 'https://foo.com/list.json');
-            list.layoutCallback();
+            const layout1Promise = list.layoutCallback();
 
             element.setAttribute('src', 'https://bar.com/list.json');
-            await list.layoutCallback();
+            const layout2Promise = list.layoutCallback();
+
+            layout2Promise.then(() => resolveFirstPromise());
+            await Promise.all([layout1Promise, layout2Promise]);
           });
 
           it('should render if [src] mutates with data', () => {
