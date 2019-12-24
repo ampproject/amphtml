@@ -547,7 +547,7 @@ export class AmpList extends AMP.BaseElement {
   fetchList_(opt_refresh = false) {
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
-      return Promise.resolve();
+      return;
     }
     let fetch;
     if (this.ssrTemplateHelper_.isSupported()) {
@@ -556,7 +556,7 @@ export class AmpList extends AMP.BaseElement {
       fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
         // Bail if the src has changed while resolving the xhr request.
         if (elementSrc !== this.element.getAttribute('src')) {
-          return Promise.resolve();
+          return;
         }
 
         const items = this.computeListItems_(data);
