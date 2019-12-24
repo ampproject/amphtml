@@ -926,9 +926,9 @@ describes.repeated(
             const layout1Promise = list.layoutCallback();
 
             element.setAttribute('src', 'https://bar.com/list.json');
-            const layout2Promise = list.layoutCallback();
-
+            const layout2Promise = list.layoutCallback(); 
             layout2Promise.then(() => resolveFirstPromise());
+
             await Promise.all([layout1Promise, layout2Promise]);
           });
 
