@@ -50,6 +50,11 @@ const RTC_VENDORS = jsonConfiguration({
   ////////////////////////////////////////////////////////////////////
 
   // Add vendors here
+  admicro: {
+    url: 'http://media1.admicro.vn/cms/arf-ZONE_ID.min.js',
+    macros: ['ZONE_ID'],
+    disableKeyAppend: true,
+  },
   medianet: {
     url:
       'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
