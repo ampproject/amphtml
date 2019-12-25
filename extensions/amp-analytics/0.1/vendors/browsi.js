@@ -28,15 +28,13 @@ const BROWSI_CONFIG = jsonLiteral({
       'pk=${pubKey}' +
       '&sk=${siteKey}' +
       '&et=${type}' +
-      '&pvid=PAGE_VIEW_ID_64'
-    ,
+      '&pvid=PAGE_VIEW_ID_64',
     'engagement':
       '${base}' +
       '&path=${canonicalPath}' +
       '&now=${timestamp}' +
       '&st=${scrollTop}' +
-      '&ph=${scrollHeight}'
-    ,
+      '&ph=${scrollHeight}',
     'pageview':
       '${base}' +
       '&client=${clientId(siteKey)}' +
@@ -50,84 +48,99 @@ const BROWSI_CONFIG = jsonLiteral({
       '&sw=${availableScreenWidth}' +
       '&vh=${viewportHeight}' +
       '&vw=${viewportWidth}' +
-      '&ua=${userAgent}'
-    ,
-    "visibility":
-      "${base}" +
-      "&isd=${initialScrollDepth}" +
-      "&ir=${intersectionRatio}" +
-      "&irct=${intersectionRect}" +
-      "&msd=${maxScrollDepth}" +
-      "&c=${counter(siteKey)}" +
-      "&mcvt=${maxContinuousVisibleTime}" +
-      "&tvt=${totalVisibleTime}" +
-      "&fst=${firstSeenTime}" +
-      "&lst=${lastSeenTime}" +
-      "&fvt=${firstVisibleTime}" +
-      "&lvt=${lastVisibleTime}" +
-      "&mvp=${minVisiblePercentage}" +
-      "&mxvp=${maxVisiblePercentage}" +
-      "&ex=${elementX}" +
-      "&ey=${elementY}" +
-      "&ew=${elementWidth}" +
-      "&eh=${elementHeight}" +
-      "&tt=${totalTime}" +
-      "&tet=${totalEngagedTime}" +
-      "&ltv=${loadTimeVisibility}" +
-      "&bas=${backgroundedAtStart}" +
-      "&b=${backgrounded}" +
-      "&subTitle=${subTitle}",
+      '&ua=${userAgent}',
+    'visibility':
+      '${base}' +
+      '&isd=${initialScrollDepth}' +
+      '&ir=${intersectionRatio}' +
+      '&irct=${intersectionRect}' +
+      '&msd=${maxScrollDepth}' +
+      '&c=${counter(siteKey)}' +
+      '&mcvt=${maxContinuousVisibleTime}' +
+      '&tvt=${totalVisibleTime}' +
+      '&fst=${firstSeenTime}' +
+      '&lst=${lastSeenTime}' +
+      '&fvt=${firstVisibleTime}' +
+      '&lvt=${lastVisibleTime}' +
+      '&mvp=${minVisiblePercentage}' +
+      '&mxvp=${maxVisiblePercentage}' +
+      '&ex=${elementX}' +
+      '&ey=${elementY}' +
+      '&ew=${elementWidth}' +
+      '&eh=${elementHeight}' +
+      '&tt=${totalTime}' +
+      '&tet=${totalEngagedTime}' +
+      '&ltv=${loadTimeVisibility}' +
+      '&bas=${backgroundedAtStart}' +
+      '&b=${backgrounded}' +
+      '&subTitle=${subTitle}',
   },
   'triggers': {
     'page-view': {
       'on': 'visible',
       'request': 'pageview',
       'vars': {
-        'type': 'pageview'
-      }
-    },
-    "timer": {
-      "on": "timer",
-      "timerSpec": {
-        "interval": 3,
-        "maxTimerLength": 180
+        'type': 'pageview',
       },
-      "request": "engagement",
-      "vars": {
-        "type": "engagement"
-      }
     },
-    "visibility50": {
-      "on": "visible",
-      "request": "visibility",
-      "selector": 'amp-ad',
-      "important": 'true',
-      "visibilitySpec": {
-        "visiblePercentageMin": 50,
-        "totalTimeMin": 1000,
-        "continuousTimeMin": 200,
-        "continuousTimeMax": 20000,
-        "repeat": false
+    'timer': {
+      'on': 'timer',
+      'timerSpec': {
+        'interval': 3,
+        'maxTimerLength': 180,
       },
-      "vars": {
-        "type": "visibility50"
-      }
+      'request': 'engagement',
+      'vars': {
+        'type': 'engagement',
+      },
     },
-    "visibility100": {
-      "on": "visible",
-      "request": "visibility",
-      "selector": 'amp-ad',
-      "important": 'true',
-      "visibilitySpec": {
-        "visiblePercentageMin": 100,
-        "totalTimeMin": 1000,
-        "continuousTimeMin": 1000,
-        "continuousTimeMax": 10000,
-        "repeat": false
+    'visibility50': {
+      'on': 'visible',
+      'request': 'visibility',
+      'selector': 'amp-ad',
+      'important': 'true',
+      'visibilitySpec': {
+        'visiblePercentageMin': 50,
+        'totalTimeMin': 1000,
+        'continuousTimeMin': 200,
+        'continuousTimeMax': 20000,
+        'repeat': false,
       },
-      "vars": {
-        "type": "visibility100"
-      }
+      'vars': {
+        'type': 'visibility50',
+      },
+    },
+    'visibility100-1': {
+      'on': 'visible',
+      'request': 'visibility',
+      'selector': 'amp-ad:nth-child(1)',
+      'important': 'true',
+      'visibilitySpec': {
+        'visiblePercentageMin': 100,
+        'totalTimeMin': 1000,
+        'continuousTimeMin': 1000,
+        'continuousTimeMax': 10000,
+        'repeat': false,
+      },
+      'vars': {
+        'type': 'visibility100',
+      },
+    },
+    'visibility100-2': {
+      'on': 'visible',
+      'request': 'visibility',
+      'selector': 'amp-ad:nth-child(2)',
+      'important': 'true',
+      'visibilitySpec': {
+        'visiblePercentageMin': 100,
+        'totalTimeMin': 1000,
+        'continuousTimeMin': 1000,
+        'continuousTimeMax': 10000,
+        'repeat': false,
+      },
+      'vars': {
+        'type': 'visibility100',
+      },
     },
   },
 });
