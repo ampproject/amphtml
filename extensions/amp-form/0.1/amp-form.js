@@ -43,6 +43,7 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
+  closestAncestorElementBySelector,
   createElementWithAttributes,
   iterateCursor,
   removeElement,
@@ -432,15 +433,6 @@ export class AmpForm {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
     });
-
-    // Ctrl/Cmd + Enter on textarea or contenteditable triggers form submission.
-    this.form_.querySelectorAll('textarea,[contenteditable]').forEach(el =>
-      el.addEventListener('keydown', e => {
-        if (e.key == Keys.ENTER && (e.ctrlKey || e.metaKey)) {
-          this.handleSubmitEvent_(e);
-        }
-      })
-    );
   }
 
   /** @private */
@@ -1598,6 +1590,7 @@ export class AmpFormService {
       this.installSubmissionHandlers_(root.querySelectorAll('form'));
       AmpFormTextarea.install(ampdoc);
       this.installGlobalEventListener_(root);
+      this.installFormSubmissionShortcutForTextarea_(root);
     });
   }
 
@@ -1628,6 +1621,32 @@ export class AmpFormService {
   installGlobalEventListener_(doc) {
     doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
+    });
+  }
+
+  /**
+   * Listen for Ctrl/Cmd + Enter in textarea elements
+   * to trigger form submission when relevant.
+   * @param {!Document} doc
+   */
+  installFormSubmissionShortcutForTextarea_(doc) {
+    doc.addEventListener('keydown', e => {
+      if (
+        e.key != Keys.ENTER ||
+        !(e.ctrlKey || e.metaKey) ||
+        e.target.tagName !== 'TEXTAREA'
+      ) {
+        return;
+      }
+      const formId = e.target.getAttribute('form');
+      const form = formId
+        ? doc.getElementById(formId)
+        : closestAncestorElementBySelector(e.target, 'form');
+      const ampForm = form ? formOrNullForElement(form) : null;
+      if (!ampForm) {
+        return;
+      }
+      ampForm.handleSubmitEvent_(e);
     });
   }
 }
