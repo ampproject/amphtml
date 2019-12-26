@@ -162,7 +162,7 @@ function normalizeRruleReturn(rruleDate) {
 /**
  * Tries to parse a string into an RRULE object.
  * @param {string} str A string which represents a repeating date RRULE spec.
- * @return {?JsonObject}
+ * @return {?RRule}
  */
 function tryParseRrulestr(str) {
   try {
