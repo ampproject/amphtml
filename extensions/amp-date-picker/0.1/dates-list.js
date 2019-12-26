@@ -80,7 +80,7 @@ export class DatesList {
       }
     }
     const rruleDates = this.rrulestrs_
-      .map((/** {RRule} */ rrule) => rrule.after(date))
+      .map(rrule => /** @type {RRule} */ (rrule).after(date))
       .filter(Boolean)
       .map(normalizeRruleReturn);
     firstDatesAfter.concat(rruleDates);
@@ -110,8 +110,8 @@ export class DatesList {
       .startOf('day')
       .add(1, 'day')
       .toDate();
-    return this.rrulestrs_.some((/** {RRule} */ rrule) => {
-      const rruleUTCDate = rrule.before(nextDate);
+    return this.rrulestrs_.some(rrule => {
+      const rruleUTCDate = /** @type {RRule} */ (rrule).before(nextDate);
       if (!rruleUTCDate) {
         return false;
       }
