@@ -1627,7 +1627,7 @@ export class AmpFormService {
   /**
    * Listen for Ctrl/Cmd + Enter in textarea elements
    * to trigger form submission when relevant.
-   * @param {!Document} doc
+   * @param {!Document|!ShadowRoot} doc
    */
   installFormSubmissionShortcutForTextarea_(doc) {
     doc.addEventListener('keydown', e => {
@@ -1641,7 +1641,10 @@ export class AmpFormService {
       const formId = e.target.getAttribute('form');
       const form = formId
         ? doc.getElementById(formId)
-        : closestAncestorElementBySelector(e.target, 'form');
+        : closestAncestorElementBySelector(
+            dev().assertElement(e.target),
+            'form'
+          );
       const ampForm = form ? formOrNullForElement(form) : null;
       if (!ampForm) {
         return;
