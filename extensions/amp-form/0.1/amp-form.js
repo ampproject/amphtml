@@ -31,6 +31,7 @@ import {
 import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
+import {Keys} from '../../../src/utils/key-codes';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
@@ -431,6 +432,15 @@ export class AmpForm {
       checkUserValidityAfterInteraction_(dev().assertElement(e.target));
       this.validator_.onInput(e);
     });
+
+    // Ctrl/Cmd + Enter on textarea or contenteditable triggers form submission.
+    this.form_.querySelectorAll('textarea,[contenteditable]').forEach(el =>
+      el.addEventListener('keydown', e => {
+        if (e.key == Keys.ENTER && (e.ctrlKey || e.metaKey)) {
+          this.handleSubmitEvent_(e);
+        }
+      })
+    );
   }
 
   /** @private */
