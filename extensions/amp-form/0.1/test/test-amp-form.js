@@ -306,17 +306,16 @@ describes.repeated(
                 .returns(template);
 
               const ssr = env.sandbox.stub(ampForm.ssrTemplateHelper_, 'ssr');
+              const response = {
+                init: {status: 200},
+                html: '<div>much success</div>',
+                body: '{"message": "hello"}',
+              };
               ssr
                 .onFirstCall()
-                .resolves({
-                  init: {status: 200},
-                  html: '<div>much success</div>',
-                })
+                .resolves(response)
                 .onSecondCall()
-                .resolves({
-                  init: {status: 200},
-                  html: '<div>much success</div>',
-                });
+                .resolves(response);
 
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
@@ -382,17 +381,16 @@ describes.repeated(
                 .returns(template);
 
               const ssr = env.sandbox.stub(ampForm.ssrTemplateHelper_, 'ssr');
+              const response = {
+                init: {status: 404},
+                html: '<div>much error</div>',
+                body: '{"message": "error"}',
+              };
               ssr
                 .onFirstCall()
-                .resolves({
-                  init: {status: 404},
-                  html: '<div>much error</div>',
-                })
+                .resolves(response)
                 .onSecondCall()
-                .resolves({
-                  init: {status: 404},
-                  html: '<div>much error</div>',
-                });
+                .resolves(response);
 
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
