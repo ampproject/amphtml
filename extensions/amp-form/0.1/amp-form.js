@@ -799,7 +799,9 @@ export class AmpForm {
   handleSsrTemplateResponse_(response, trust) {
     const init = response['init'];
     // response['body'] is serialized as a string in the response.
-    const body = tryParseJson(response['body']);
+    const body = tryParseJson(response['body'], error =>
+      user().error(TAG, 'Failed to parse response JSON: %s', error)
+    );
     if (init) {
       const status = init['status'];
       if (status >= 300) {
