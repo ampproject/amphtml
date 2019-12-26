@@ -83,9 +83,10 @@ export class DatesList {
       .map(rrule => /** @type {RRule} */ (rrule).after(date))
       .filter(Boolean)
       .map(normalizeRruleReturn);
-    firstDatesAfter.concat(rruleDates);
 
-    return firstDatesAfter.sort((a, b) => a.toDate() - b.toDate())[0];
+    return firstDatesAfter
+      .concat(rruleDates)
+      .sort((a, b) => a.toDate() - b.toDate())[0];
   }
 
   /**
