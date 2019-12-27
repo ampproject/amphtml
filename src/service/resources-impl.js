@@ -220,7 +220,7 @@ export class ResourcesImpl {
       // TODO(willchou): Support prerenderSize_.
       // {root: document.scrollingElement},
       // {rootMargin: '50% 12.5%'},
-      {root: document.scrollingElement, rootMargin: '50% 12.5%'},
+      {root: document.scrollingElement, rootMargin: '50% 12.5%'}
     );
 
     // When viewport is resized, we have to re-measure all elements.
@@ -282,39 +282,73 @@ export class ResourcesImpl {
    * @private
    */
   intersects_(entries, unusedObserver) {
+    const toUnload = [];
+
     entries.forEach(entry => this.intersect_(entry));
+
+    if (toUnload.length) {
+      this.vsync_.mutate(() => {
+        toUnload.forEach(r => {
+          r.unload();
+          this.cleanupTasks_(r);
+        });
+      });
+    }
   }
 
   /**
    * @param {!IntersectionObserverEntry} entry
+   * @param {!Array<!Resource>} toUnload Out param.
    * @private
    */
-  intersect_(entry) {
-    // QQQ
+  intersect_(entry, toUnload) {
     const {boundingClientRect, isIntersecting, target: element} = entry;
     const r = Resource.forElementOptional(element);
 
-    // TODO: Handle hasOwner().
+    // Phase 1: Build and relayout as needed. All mutations happen here.
+    //   1A: Apply sizes/media-queries to un-measured/un-laid-out resources.
+    // Phase 2: Remeasure if there were any relayouts. All reads happen here.
+    //   2A: Unload non-displayed resources.
+    // Phase 3: Trigger "viewport enter/exit" events.
+    // Phase 4: Schedule elements for layout within a reasonable distance from current viewport.
+    //   4A: Force build for all resources visible, measured, and in the viewport.
+    // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items with idleRenderOutsideViewport true.
+    // Phase 6: Idle layout: layout more if we are otherwise not doing much.
 
-    r.measure(/* premeasuredBox */ boundingClientRect);
+    // Build, then measure, then unload if necessary, then set inViewport, then layout.
 
-    // Must happen before layout scheduling to set isDisplayed etc.
-    element.viewportCallback(isIntersecting);
-
-    if (isIntersecting) {
-      // Build and lay out elements that enter the viewport.
-      if (!r.isBuilt()) {
-        this.buildOrScheduleBuildForResource_(
-          r,
-          /* checkForDupes */ true,
-          /* scheduleWhenBuilt */ undefined,
-          /* force */ true
-        );
-      }
-      if (r.getState() === ResourceState.READY_FOR_LAYOUT) {
-        this.scheduleLayoutOrPreload(r, /* layout */ true);
-      }
+    let whenBuilt = Promise.resolve();
+    if (!r.isBuilt() && !r.isBuilding()) {
+      this.buildOrScheduleBuildForResource_(
+        r,
+        /* checkForDupes */ true,
+        /* scheduleWhenBuilt */ false,
+        /* force */ true
+      );
+      whenBuilt = r.whenBuilt();
     }
+
+    whenBuilt.then(() => {
+      const wasDisplayed = r.isDisplayed();
+      r.measure(/* premeasuredBox */ boundingClientRect);
+      const isDisplayed = r.isDisplayed();
+
+      if (wasDisplayed && !isDisplayed) {
+        toUnload.push(r);
+        return;
+      }
+      if (r.hasOwner()) {
+        return;
+      }
+
+      r.setInViewport(isIntersecting);
+
+      if (isIntersecting && r.isDisplayed()) {
+        if (r.getState() === ResourceState.READY_FOR_LAYOUT) {
+          this.scheduleLayoutOrPreload(r, /* layout */ true);
+        }
+      }
+    });
   }
 
   /** @private */
@@ -718,12 +752,15 @@ export class ResourcesImpl {
    */
   dirtyElement(element) {
     let relayoutAll = false;
-    const isAmpElement = element.classList.contains('i-amphtml-element');
-    if (isAmpElement) {
-      // const r = Resource.forElement(element);
-      // this.setRelayoutTop_(r.getLayoutBox().top);
-    } else {
-      relayoutAll = true;
+    // [IO] No need to relayout (update media queries) due to a single element collapse.
+    if (this.intersectionObserver_) {
+      const isAmpElement = element.classList.contains('i-amphtml-element');
+      if (isAmpElement) {
+        // const r = Resource.forElement(element);
+        // this.setRelayoutTop_(r.getLayoutBox().top);
+      } else {
+        relayoutAll = true;
+      }
     }
     this.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
   }
@@ -1265,7 +1302,7 @@ export class ResourcesImpl {
     this.relayoutAll_ = false;
     // const relayoutTop = this.relayoutTop_;
     // this.relayoutTop_ = -1;
-    const elementsThatScrolled = this.elementsThatScrolled_.splice(0, Infinity);
+    // const elementsThatScrolled = this.elementsThatScrolled_.splice(0, Infinity);
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
     // let relayoutCount = 0;
@@ -1280,6 +1317,7 @@ export class ResourcesImpl {
         !r.hasBeenMeasured() ||
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
+        // TODO(willchou): In IO mode, decouple from relayout all. We only care about viewport size change.
         r.applySizesAndMediaQuery();
         // relayoutCount++;
       }
