@@ -245,7 +245,7 @@ describes.realWin(
       };
       return renderIframely(data).then(iframely => {
         const image = iframely.querySelector('amp-img');
-          expect(image).to.be.null;
+        expect(image).to.be.null;
         expect(iframely.querySelector('iframe')).to.not.be.null;
       });
     });

@@ -245,7 +245,7 @@ export class AmpIframely extends AMP.BaseElement {
   parseAttributes() {
     userAssert(
       this.element.getAttribute('data-id') ||
-      this.element.getAttribute('data-url'),
+        this.element.getAttribute('data-url'),
       'Iframely requires either "data-id" or a pair of "data-url" and "data-key" parameters for <%s> %s',
       TAG,
       this.element
