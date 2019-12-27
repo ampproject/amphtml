@@ -164,7 +164,7 @@
     "require-hijack": "1.2.1",
     "rocambole": "0.7.0",
     "sinon": "7.5.0",
-    "sinon-chai": "3.3.0",
+    "sinon-chai": "3.4.0",
     "sleep-promise": "8.0.1",
     "tempy": "0.3.0",
     "terser": "4.4.3",
