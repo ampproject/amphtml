@@ -49,29 +49,25 @@ Please get your API key at <a href="https://iframely.com">iframely.com</a>.
 #### Example: Embed third party via content ID
 
 
-[example preview="inline" playground="true" imports="amp-iframely"]
-[sourcecode:html]
+[example preview="inline" playground="true" imports="amp-iframely"][sourcecode:html]
 <amp-iframely width="400" height="225"
     data-id="I8NNa1s"
     layout="responsive"
     data-img>
 </amp-iframely>
-[/sourcecode]
-[/example]
+[/sourcecode][/example]
 
 
 #### Example: Summary card for any URL via API key
 
-[example preview="inline" playground="true" imports="amp-iframely"]
-[sourcecode:html]
+[example preview="inline" playground="true" imports="amp-iframely"][sourcecode:html]
 <amp-iframely height="140"
     data-url="https://iframely.com"
     data-key="30ef29b325c50219755786a371c281ad"
     layout="fixed-height"
     resizable>
 </amp-iframely>
-[/sourcecode]
-[/example]
+[/sourcecode][/example]
 
 Feel free to try any URL with the API key from the above example. However, it is restricted for use on amp.dev only.
 
