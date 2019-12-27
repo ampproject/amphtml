@@ -34,7 +34,7 @@ describes.realWin(
     };
     const url = 'https//some.url/';
     const key = 'some-StRiNg-of-more-then-16';
-    let paramsKU = {
+    const paramsKU = {
       'data-key': key,
       'data-url': url,
       'layout': 'responsive',
@@ -49,8 +49,8 @@ describes.realWin(
 
     function renderIframely(params) {
       const iframely = doc.createElement('amp-iframely');
-      for (var param in params) {
-        iframely.setAttribute(param, params[param])
+      for (const param in params) {
+        iframely.setAttribute(param, params[param]);
       }
       doc.body.appendChild(iframely);
       return iframely
@@ -61,9 +61,7 @@ describes.realWin(
 
     function testIframe(iframe, id) {
       expect(iframe).to.not.be.null;
-      expect(iframe.src).to.equal(
-        'https://cdn.iframe.ly/' + id + '?amp=1'
-      );
+      expect(iframe.src).to.equal('https://cdn.iframe.ly/' + id + '?amp=1');
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     }
 
@@ -77,9 +75,7 @@ describes.realWin(
       return allowConsoleError(() => {
         return renderIframely({
           'layout': 'fill',
-        }).should.eventually.be.rejectedWith(
-          /Iframely requires either/
-        );
+        }).should.eventually.be.rejectedWith(/Iframely requires either/);
       });
     });
 
@@ -97,9 +93,7 @@ describes.realWin(
       return allowConsoleError(() => {
         return renderIframely({
           'data-key': 'some-StRiNg/',
-        }).should.eventually.be.rejectedWith(
-          /Iframely requires either/,
-        );
+        }).should.eventually.be.rejectedWith(/Iframely requires either/);
       });
     });
 
@@ -122,7 +116,9 @@ describes.realWin(
         const iframe = iframely.querySelector('iframe');
         expect(iframe).to.not.be.null;
         expect(iframe.src).to.equal(
-          `https://cdn.iframe.ly/api/iframe?url=${encodeURIComponent(url)}&key=${key}&amp=1`
+          `https://cdn.iframe.ly/api/iframe?url=${encodeURIComponent(
+            url
+          )}&key=${key}&amp=1`
         );
         expect(iframe.className).to.match(/i-amphtml-fill-content/);
       });
@@ -137,7 +133,9 @@ describes.realWin(
         // Border render cleared
         expect(iframe.getAttribute('style')).to.equal('border: 0px;');
         // Allow string for iframe
-        expect(iframe.getAttribute('allow')).to.equal('encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *; autoplay *;');
+        expect(iframe.getAttribute('allow')).to.equal(
+          'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *; autoplay *;'
+        );
       });
     });
 
@@ -147,7 +145,7 @@ describes.realWin(
         expect(image).to.not.be.null;
         expect(image.tagName).to.equal('AMP-IMG');
         expect(image.className).to.match(/amp-hidden/);
-       });
+      });
     });
 
     it('renders image placeholder with proper URL for ID version', () => {
@@ -165,14 +163,16 @@ describes.realWin(
         const image = iframely.querySelector('amp-img');
         expect(image).to.not.be.null;
         expect(image.getAttribute('src')).to.equal(
-          `https://cdn.iframe.ly/api/thumbnail?url=${encodeURIComponent(url)}&key=${key}&amp=1`
+          `https://cdn.iframe.ly/api/thumbnail?url=${encodeURIComponent(
+            url
+          )}&key=${key}&amp=1`
         );
       });
     });
 
     it('renders iframe and image placeholder with proper domain', () => {
       const domain = 'mydomain.com';
-      let data = {
+      const data = {
         'data-id': TestID,
         'data-domain': domain,
         'width': '100',
@@ -186,16 +186,14 @@ describes.realWin(
           `https://${domain}/${TestID}/thumbnail?amp=1`
         );
         const iframe = iframely.querySelector('iframe');
-        expect(iframe.src).to.equal(
-          `https://${domain}/${TestID}?amp=1`
-        );
+        expect(iframe.src).to.equal(`https://${domain}/${TestID}?amp=1`);
       });
     });
 
     // TODO: url-key and domain
 
     it('renders placeholder with data-img key set', () => {
-      let data = {
+      const data = {
         'data-id': TestID,
         'data-img': '',
         'layout': 'fill',
@@ -208,7 +206,7 @@ describes.realWin(
     });
 
     it('does not render placeholder with resizable key set and responsive layout', () => {
-      let data = {
+      const data = {
         'data-id': TestID,
         'resizable': '',
         'height': '100',
@@ -223,7 +221,7 @@ describes.realWin(
     });
 
     it('render placeholder with data-img and resizeable', () => {
-      let data = {
+      const data = {
         'data-id': TestID,
         'resizable': '',
         'data-img': '',
@@ -239,7 +237,7 @@ describes.realWin(
     });
 
     it('does not render placeholder with fixed layout', () => {
-      let data = {
+      const data = {
         'data-id': TestID,
         'height': '100',
         'width': '100',
@@ -253,7 +251,7 @@ describes.realWin(
     });
 
     it('does not render placeholder with fixed layout and resizable', () => {
-      let data = {
+      const data = {
         'data-id': TestID,
         'height': '100',
         'width': '100',
@@ -268,7 +266,7 @@ describes.realWin(
     });
 
     it('render placeholder with data-img responsive layout and resizable params', () => {
-      let data = {
+      const data = {
         'data-id': TestID,
         'height': '100',
         'width': '100',
@@ -284,7 +282,7 @@ describes.realWin(
     });
 
     it('render placeholder with data-img fixed layout and resizable params', () => {
-      let data = {
+      const data = {
         'data-id': TestID,
         'height': '100',
         'width': '100',
@@ -299,7 +297,7 @@ describes.realWin(
     });
 
     it('does not render placeholder with fixed-height layout and resizable params', () => {
-      let data = {
+      const data = {
         'data-id': TestID,
         'height': '166',
         'layout': 'fixed-height',
@@ -313,7 +311,7 @@ describes.realWin(
     });
 
     it('does not render placeholder with resizable param set and layout===responsive', () => {
-      let data = {
+      const data = {
         'data-id': TestID,
         'height': '100',
         'width': '100',
@@ -328,7 +326,7 @@ describes.realWin(
     });
 
     it('does not render with invalid key length', () => {
-      let data = {
+      const data = {
         'data-url': 'https://some-url.com',
         'height': '100',
         'width': '100',
@@ -343,7 +341,7 @@ describes.realWin(
     });
 
     it('render iframe options properly', () => {
-      let data = {
+      const data = {
         'data-id': TestID,
         'height': '100',
         'width': '100',
@@ -357,9 +355,9 @@ describes.realWin(
         const iframe = iframely.querySelector('iframe');
         expect(image).to.not.be.null;
         expect(iframe).to.not.be.null;
-        expect(iframe.src.includes('&optionone=value&option-two=value')).to.be.true;
+        expect(iframe.src.includes('&optionone=value&option-two=value')).to.be
+          .true;
       });
     });
-
   }
 );

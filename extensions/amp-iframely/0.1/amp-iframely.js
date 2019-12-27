@@ -15,17 +15,22 @@
  */
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle} from '../../../src/style';
+import {setStyle, toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 export const TAG = 'amp-iframely';
 const DOMAIN = 'cdn.iframe.ly';
 
-/** Selects an iFrame by contentWindow. */
+/**
+ * Finds an iFrame that sent a message by its contentWindow.
+ * @param {array} iframes - narrowed set of iFrames to search in
+ * @param {document.window} contentWindow - source of a received message
+ * @return {iframe} the matched iFrame
+ * */
 function findIframeByContentWindow(iframes, contentWindow) {
   let selectedIframe = false;
-  for(let i = 0; i < iframes.length && !selectedIframe; i++) {
+  for (let i = 0; i < iframes.length && !selectedIframe; i++) {
     const iframe = iframes[i];
     if (iframe.contentWindow === contentWindow) {
       selectedIframe = iframe;
@@ -63,7 +68,8 @@ export class AmpIframely extends AMP.BaseElement {
     this.key = null;
 
     /** hardcoded allow attribute for iframe */
-    this.allow_ = 'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *; autoplay *;';
+    this.allow_ =
+      'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *; autoplay *;';
 
     /** other data- options that will be passed into iFrame src*/
     this.options_ = null;
@@ -136,7 +142,10 @@ export class AmpIframely extends AMP.BaseElement {
     this.applyFillContent(iframely);
     this.element.appendChild(iframely);
 
-    /** handling Iframely messages */
+    /**
+     * Handling Iframely messages
+     * @param {window.event.source} event - event to check iframely against
+     * */
     function receiveMessage(event) {
       const iframes = me.element.getElementsByTagName('iframe');
       if (findIframeByContentWindow(iframes, event.source)) {
@@ -148,7 +157,11 @@ export class AmpIframely extends AMP.BaseElement {
     return this.loadPromise(iframely);
   }
 
-  /** Reacts to events coming up from iframely */
+  /**
+   * Handles Iframely events: widget sizing, cancel, decorate cards
+   * @param {AmpIframely} me - instance of an active component
+   * @param {window.event} event - Iframely message with a method to apply
+   * */
   handleEvent(me, event) {
     let data = null;
     try {
@@ -166,22 +179,36 @@ export class AmpIframely extends AMP.BaseElement {
         const media = data.data.media || null;
         if (media && media.frame_style) {
           const styles = media.frame_style.split(';');
+          const styleSetter = {
+            'border': function(styleValue) {
+              setStyle(me.element, 'border', styleValue);
+            },
+            'border-radius': function(styleValue) {
+              setStyle(me.element, 'border-radius', styleValue);
+            },
+            'box-shadow': function(styleValue) {
+              setStyle(me.element, 'box-shadow', styleValue);
+            },
+          };
           styles.forEach(function(style) {
             const styleProp = style.split(':')[0];
             const styleValue = style.split(':')[1];
-            setStyle(me.element, styleProp, styleValue);
+            const whitelistedStyle = styleSetter[styleProp];
+            if (whitelistedStyle) {
+              whitelistedStyle(styleValue);
+            }
           });
         }
         if (media && media['aspect-ratio']) {
           let height;
           if (media['padding-bottom']) {
             // Apply height for media with updated "aspect-ratio" and "padding-bottom".
-            height = me.element.offsetWidth /
-              media['aspect-ratio'] +
+            height =
+              me.element.offsetWidth / media['aspect-ratio'] +
               media['padding-bottom'];
             me.changeHeight(height);
           } else {
-            height = me.element.offsetWidth / media["aspect-ratio"];
+            height = me.element.offsetWidth / media['aspect-ratio'];
             if (Math.abs(me.element.offsetHeight - height) > 1) {
               /** Apply new height for updated "aspect-ratio". */
               me.changeHeight(height);
@@ -190,12 +217,15 @@ export class AmpIframely extends AMP.BaseElement {
         }
       }
       if (data.method === 'cancelWidget') {
-        setStyle(me.element, 'display', 'none');
+        toggle(me.element, false);
       }
     }
   }
 
-  /** Determining placeholder SRC */
+  /**
+   * Constructing placeholder image SRC
+   * @return {string} url of the placeholder
+   * */
   constructPlaceholderSrc() {
     let src = null;
     if (this.id) {
@@ -208,7 +238,10 @@ export class AmpIframely extends AMP.BaseElement {
     return src;
   }
 
-  /** Test component call for required params */
+  /**
+   * Test component call for required params
+   * @return {null}
+   * */
   parseAttributes() {
     userAssert(
       this.element.getAttribute('data-id') ||
@@ -265,9 +298,12 @@ export class AmpIframely extends AMP.BaseElement {
     }
   }
 
-  /** Parse other data-* attributes and append them to API query url */
+  /**
+   * Parse other data-* attributes and append them to API query url
+   * @return {object} of iframely options
+   * */
   parseOptions() {
-    let options = {};
+    const options = {};
     const exclude = [
       'data-id',
       'data-domain',
@@ -275,20 +311,25 @@ export class AmpIframely extends AMP.BaseElement {
       'data-url',
       'data-img',
     ];
-    let data = this.element.getAttributeNames().filter(
-      name => name.startsWith('data-'));
+    let data = this.element
+      .getAttributeNames()
+      .filter(name => name.startsWith('data-'));
     data = data.filter(name => !exclude.includes(name));
-    data.forEach(item =>
-      options[item.split('data-').pop()] = this.element.getAttribute(item)
+    data.forEach(
+      item =>
+        (options[item.split('data-').pop()] = this.element.getAttribute(item))
     );
     return options;
   }
 
+  /**
+   * Pass other options into URL query string if present
+   * @return {string} string of encoded iframely options to append to query url
+   * */
   appendOptions() {
-    /** pass other options into URL querystring if present */
     let str = '';
     if (this.options_) {
-      for (let key in this.options_) {
+      for (const key in this.options_) {
         const value = encodeURIComponent(this.options_[key]);
         str += `&${key}=${value}`;
       }
