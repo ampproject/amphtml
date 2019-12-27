@@ -78,6 +78,15 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       expect(actual).to.equal('https://www.google.com/a?b=1&c=2');
     });
 
+    it('does not expand nested array vars correctly', () => {
+      check('${array}', '1,2%2C1', {
+        'foo': 1,
+        'bar': 2,
+        'array': ['${foo}', '${array2}'],
+        'array2': ['${bar}', '${foo}'],
+      });
+    });
+
     it('expands complicated string', () => {
       check('${foo}', 'HELLO%2FWORLD%2BWORLD%2BHELLO%2BHELLO', {
         'foo': '${a}+${b}+${c}+${hello}',
@@ -140,19 +149,16 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('expands array vars', () => {
-      check(
-        '${array}',
-        'xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,%24%7Bfoo%7D',
-        {
-          'foo': 'bar',
-          'array': [
-            'xy&x', // special chars should be encoded
-            'MACRO(abc,def)', // do not encode macro
-            'MACRO(abc,def)&123', // this is not a macro
-            '${foo}', // vars in array is not expanded
-          ],
-        }
-      );
+      check('${array}', 'xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,bar,', {
+        'foo': 'bar',
+        'array': [
+          'xy&x', // special chars should be encoded
+          'MACRO(abc,def)', // do not encode macro
+          'MACRO(abc,def)&123', // this is not a macro
+          '${foo}', // vars in array should be expanded
+          '${bar}', // undefined vars should be empty
+        ],
+      });
     });
 
     it('handles empty var name', () => {

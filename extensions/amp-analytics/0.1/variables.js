@@ -276,7 +276,6 @@ export class VariableService {
 
       let value = options.getVar(name);
 
-      // Recursively expand each variable
       if (typeof value == 'string') {
         value = this.expandTemplateSync(
           value,
@@ -287,20 +286,16 @@ export class VariableService {
           )
         );
       } else if (isArray(value)) {
-        // Perform variable substitution if the the item is in variable form ${}
         for (let i = 0; i < value.length; i++) {
-          value[i].replace(/\${([^}]*)}/g, (_, key) => {
-            if (key) {
-              value[i] = this.expandTemplateSync(
-                value[i],
-                new ExpansionOptions(
-                  options.vars,
-                  options.iterations - 1,
-                  true /* noEncode */
-                )
-              );
-            }
-          });
+          // Treat values as a template and expand
+          value[i] = this.expandTemplateSync(
+            value[i],
+            new ExpansionOptions(
+              options.vars,
+              options.iterations - 1,
+              true /* noEncode */
+            )
+          );
         }
       }
 
