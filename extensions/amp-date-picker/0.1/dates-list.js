@@ -15,7 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import {rrulestr} from 'rrule/dist/esm/src/index.js';
+import {rrulestr} from 'rrule/dist/esm/src/rrulestr.js';
 
 /** @enum {string} */
 const DateType = {
