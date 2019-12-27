@@ -142,10 +142,10 @@ export class ResourcesImpl {
     /** @private {boolean} */
     this.relayoutAll_ = true;
 
-    // /**
-    //  * @private {number}
-    //  */
-    // this.relayoutTop_ = -1;
+    /**
+     * @private {number}
+     */
+    this.relayoutTop_ = -1;
 
     /** @private {time} */
     this.lastScrollTime_ = 0;
@@ -156,11 +156,12 @@ export class ResourcesImpl {
     /** @const @private {!Pass} */
     this.pass_ = new Pass(this.win, () => this.doPass());
 
-    // /** @const @private {!Pass} */
-    // this.remeasurePass_ = new Pass(this.win, () => {
-    //   this.relayoutAll_ = true;
-    //   this.schedulePass();
-    // });
+    /** @const @private {!Pass} */
+    this.remeasurePass_ = new Pass(this.win, () => {
+      devAssert(!this.intersectionObserver_);
+      this.relayoutAll_ = true;
+      this.schedulePass();
+    });
 
     /** @const {!TaskQueue} */
     this.exec_ = new TaskQueue();
@@ -238,11 +239,15 @@ export class ResourcesImpl {
     this.viewport_.onChanged(event => {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
-      // if (event.relayoutAll) {
-      //   this.relayoutAll_ = true;
-      //   this.maybeChangeHeight_ = true;
-      // }
-      // this.schedulePass();
+
+      // No need to remeasure on viewport size change with IntersectionObserver.
+      if (!this.intersectionObserver_) {
+        if (event.relayoutAll) {
+          this.relayoutAll_ = true;
+          this.maybeChangeHeight_ = true;
+        }
+        this.schedulePass();
+      }
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
@@ -375,37 +380,42 @@ export class ResourcesImpl {
       this.documentReady_ = true;
       this.buildReadyResources_();
       this.pendingBuildResources_ = null;
-      // const fixPromise = ieMediaCheckAndFix(this.win);
-      // const remeasure = () => this.remeasurePass_.schedule();
-      // if (fixPromise) {
-      //   fixPromise.then(remeasure);
-      // } else {
-      //   // No promise means that there's no problem.
-      //   remeasure();
-      // }
+
       const input = Services.inputFor(this.win);
       input.setupInputModeClasses(this.ampdoc);
 
-      // Safari 10 and under incorrectly estimates font spacing for
-      // `@font-face` fonts. This leads to wild measurement errors. The best
-      // course of action is to remeasure everything on window.onload or font
-      // timeout (3s), whichever is earlier. This has to be done on the global
-      // window because this is where the fonts are always added.
-      // Unfortunately, `document.fonts.ready` cannot be used here due to
-      // https://bugs.webkit.org/show_bug.cgi?id=174030.
-      // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
-      // Promise.race([
-      //   loadPromise(this.win),
-      //   Services.timerFor(this.win).promise(3100),
-      // ]).then(remeasure);
+      // No need for remeasuring hacks with IntersectionObserver.
+      if (!this.intersectionObserver_) {
+        const fixPromise = ieMediaCheckAndFix(this.win);
+        const remeasure = () => this.remeasurePass_.schedule();
+        if (fixPromise) {
+          fixPromise.then(remeasure);
+        } else {
+          // No promise means that there's no problem.
+          remeasure();
+        }
 
-      // // Remeasure the document when all fonts loaded.
-      // if (
-      //   this.win.document.fonts &&
-      //   this.win.document.fonts.status != 'loaded'
-      // ) {
-      //   this.win.document.fonts.ready.then(remeasure);
-      // }
+        // Safari 10 and under incorrectly estimates font spacing for
+        // `@font-face` fonts. This leads to wild measurement errors. The best
+        // course of action is to remeasure everything on window.onload or font
+        // timeout (3s), whichever is earlier. This has to be done on the global
+        // window because this is where the fonts are always added.
+        // Unfortunately, `document.fonts.ready` cannot be used here due to
+        // https://bugs.webkit.org/show_bug.cgi?id=174030.
+        // See https://bugs.webkit.org/show_bug.cgi?id=174031 for more details.
+        Promise.race([
+          loadPromise(this.win),
+          Services.timerFor(this.win).promise(3100),
+        ]).then(remeasure);
+
+        // Remeasure the document when all fonts loaded.
+        if (
+          this.win.document.fonts &&
+          this.win.document.fonts.status != 'loaded'
+        ) {
+          this.win.document.fonts.ready.then(remeasure);
+        }
+      }
     });
   }
 
@@ -461,10 +471,9 @@ export class ResourcesImpl {
 
     if (this.intersectionObserver_) {
       this.intersectionObserver_.observe(resource.element);
+    } else {
+      this.remeasurePass_.schedule(1000);
     }
-    // else {
-    //   this.remeasurePass_.schedule(1000);
-    // }
   }
 
   /**
@@ -587,7 +596,11 @@ export class ResourcesImpl {
       return promise;
     }
     return promise.catch(
-      // () => this.schedulePass(),
+      () => {
+        if (!this.intersectionObserver_) {
+          this.schedulePass();
+        }
+      },
       error => {
         // Build failed: remove the resource. No other state changes are
         // needed.
@@ -708,47 +721,56 @@ export class ResourcesImpl {
    * @return {!Promise}
    */
   measureMutateElementResources_(element, measurer, mutator) {
-    // const calcRelayoutTop = () => {
-    //   const box = this.viewport_.getLayoutRect(element);
-    //   if (box.width != 0 && box.height != 0) {
-    //     return box.top;
-    //   }
-    //   return -1;
-    // };
-    // let relayoutTop = -1;
-    // TODO(jridgewell): support state
+    const calcRelayoutTop = () => {
+      devAssert(!this.intersectionObserver_);
+      const box = this.viewport_.getLayoutRect(element);
+      if (box.width != 0 && box.height != 0) {
+        return box.top;
+      }
+      return -1;
+    };
+    let relayoutTop = -1;
     return this.vsync_.runPromise({
       measure: () => {
         if (measurer) {
           measurer();
         }
-        // relayoutTop = calcRelayoutTop();
+        if (!this.intersectionObserver_) {
+          relayoutTop = calcRelayoutTop();
+        }
       },
       mutate: () => {
         mutator();
 
-        // if (element.classList.contains('i-amphtml-element')) {
-        //   const r = Resource.forElement(element);
-        //   r.requestMeasure();
-        // }
-        // const ampElements = element.getElementsByClassName('i-amphtml-element');
-        // for (let i = 0; i < ampElements.length; i++) {
-        //   const r = Resource.forElement(ampElements[i]);
-        //   r.requestMeasure();
-        // }
-        // if (relayoutTop != -1) {
-        //   this.setRelayoutTop_(relayoutTop);
-        // }
-        // this.schedulePass(FOUR_FRAME_DELAY_);
+        if (!this.intersectionObserver_) {
+          if (element.classList.contains('i-amphtml-element')) {
+            const r = Resource.forElement(element);
+            r.requestMeasure();
+          }
+          const ampElements = element.getElementsByClassName(
+            'i-amphtml-element'
+          );
+          for (let i = 0; i < ampElements.length; i++) {
+            const r = Resource.forElement(ampElements[i]);
+            r.requestMeasure();
+          }
+          if (relayoutTop != -1) {
+            this.setRelayoutTop_(relayoutTop);
+          }
+          this.schedulePass(FOUR_FRAME_DELAY_);
+        }
 
         // Need to measure again in case the element has become visible or
         // shifted.
         this.vsync_.measure(() => {
-          // const updatedRelayoutTop = calcRelayoutTop();
-          // if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
-          //   this.setRelayoutTop_(updatedRelayoutTop);
-          //   this.schedulePass(FOUR_FRAME_DELAY_);
-          // }
+          // TODO(willchou): This vsync measure is not necessary without calcRelayoutTop().
+          if (!this.intersectionObserver_) {
+            const updatedRelayoutTop = calcRelayoutTop();
+            if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
+              this.setRelayoutTop_(updatedRelayoutTop);
+              this.schedulePass(FOUR_FRAME_DELAY_);
+            }
+          }
           this.maybeChangeHeight_ = true;
         });
       },
@@ -768,16 +790,18 @@ export class ResourcesImpl {
    * @param {!Element} element
    */
   dirtyElement(element) {
-    let relayoutAll = false;
-    // [IO] No need to relayout (update media queries) due to a single element collapse.
+    // With IntersectionObserver, no need to relayout (e.g. update media queries)
+    // due to a single element collapse.
     if (this.intersectionObserver_) {
-      const isAmpElement = element.classList.contains('i-amphtml-element');
-      if (isAmpElement) {
-        // const r = Resource.forElement(element);
-        // this.setRelayoutTop_(r.getLayoutBox().top);
-      } else {
-        relayoutAll = true;
-      }
+      return;
+    }
+    let relayoutAll = false;
+    const isAmpElement = element.classList.contains('i-amphtml-element');
+    if (isAmpElement) {
+      const r = Resource.forElement(element);
+      this.setRelayoutTop_(r.getLayoutBox().top);
+    } else {
+      relayoutAll = true;
     }
     this.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
   }
@@ -807,17 +831,22 @@ export class ResourcesImpl {
 
   /** @override */
   collapseElement(element) {
+    // With IntersectionObserver, no need to relayout (e.g. update media queries)
+    // due to a single element collapse.
+    if (this.intersectionObserver_) {
+      return;
+    }
     const box = this.viewport_.getLayoutRect(element);
     const resource = Resource.forElement(element);
     if (box.width != 0 && box.height != 0) {
       if (isExperimentOn(this.win, 'dirty-collapse-element')) {
         this.dirtyElement(element);
       } else {
-        // this.setRelayoutTop_(box.top);
+        this.setRelayoutTop_(box.top);
       }
     }
     resource.completeCollapse();
-    // this.schedulePass(FOUR_FRAME_DELAY_);
+    this.schedulePass(FOUR_FRAME_DELAY_);
   }
 
   /** @override */
@@ -1257,17 +1286,17 @@ export class ResourcesImpl {
     return box.bottom >= threshold || initialBox.bottom >= threshold;
   }
 
-  // /**
-  //  * @param {number} relayoutTop
-  //  * @private
-  //  */
-  // setRelayoutTop_(relayoutTop) {
-  //   if (this.relayoutTop_ == -1) {
-  //     this.relayoutTop_ = relayoutTop;
-  //   } else {
-  //     this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
-  //   }
-  // }
+  /**
+   * @param {number} relayoutTop
+   * @private
+   */
+  setRelayoutTop_(relayoutTop) {
+    if (this.relayoutTop_ == -1) {
+      this.relayoutTop_ = relayoutTop;
+    } else {
+      this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
+    }
+  }
 
   /**
    * Reschedules change size request when an overflown element is activated.
