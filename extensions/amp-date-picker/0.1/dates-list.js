@@ -170,7 +170,7 @@ function normalizeRruleReturn(rruleDate) {
  */
 function tryParseRrulestr(str) {
   try {
-    return rrulestr(str);
+    return rrulestr(str, {});
   } catch (e) {
     return null;
   }
