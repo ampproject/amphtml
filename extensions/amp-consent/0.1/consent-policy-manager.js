@@ -19,7 +19,6 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
 import {Observable} from '../../../src/observable';
 import {getServicePromiseForDoc} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
 import {isFiniteNumber, isObject} from '../../../src/types';
 import {map} from '../../../src/utils/object';
 import {user, userAssert} from '../../../src/log';
@@ -77,16 +76,6 @@ export class ConsentPolicyManager {
 
     /** @private {?string} */
     this.consentString_ = null;
-  }
-
-  /**
-   * Is Multi-consent experiment enabled?
-   *
-   * @param {!Window} win
-   * @return {boolean}
-   */
-  static isMultiSupported(win) {
-    return isExperimentOn(win, 'multi-consent');
   }
 
   /**
