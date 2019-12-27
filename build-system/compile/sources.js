@@ -44,7 +44,7 @@ const COMMON_GLOBS = [
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
   'node_modules/web-animations-js/package.json',
-  'node_modules/rrule/dist/esm/src/index.js',
+  'node_modules/rrule/dist/esm/src/*.js',
   'node_modules/web-animations-js/web-animations.install.js',
   'node_modules/web-activities/package.json',
   'node_modules/web-activities/activity-ports.js',
