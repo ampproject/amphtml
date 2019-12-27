@@ -24,7 +24,6 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.realWin(
@@ -89,8 +88,6 @@ describes.realWin(
           },
         });
       });
-
-      toggleExperiment(win, 'amp-consent-v2', true);
     });
 
     afterEach(() => env.sandbox.restore());

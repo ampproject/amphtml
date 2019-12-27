@@ -267,10 +267,7 @@ export class AmpConsent extends AMP.BaseElement {
         user().error(TAG, 'consent-response message missing required info');
         return;
       }
-      if (
-        isExperimentOn(this.win, 'amp-consent-v2') &&
-        data['info'] !== undefined
-      ) {
+      if (data['info'] !== undefined) {
         if (typeof data['info'] != 'string') {
           user().error(
             TAG,

@@ -30,7 +30,6 @@ import {getConsentStateValue} from './consent-info';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {htmlFor} from '../../../src/static-template';
-import {isExperimentOn} from '../../../src/experiments';
 import {setImportantStyles, setStyles, toggle} from '../../../src/style';
 
 const TAG = 'amp-consent-ui';
@@ -80,9 +79,7 @@ export class ConsentUI {
 
     /** @private {boolean} */
     this.overlayEnabled_ =
-      isExperimentOn(baseInstance.win, 'amp-consent-v2') &&
-      config['uiConfig'] &&
-      config['uiConfig']['overlay'] === true;
+      config['uiConfig'] && config['uiConfig']['overlay'] === true;
 
     /** @private {boolean} */
     this.scrollEnabled_ = true;
@@ -163,7 +160,7 @@ export class ConsentUI {
         );
       }
       this.ui_ = dev().assertElement(promptElement);
-    } else if (promptUISrc && isExperimentOn(this.win_, 'amp-consent-v2')) {
+    } else if (promptUISrc) {
       // Create an iframe element with the provided src
       this.isCreatedIframe_ = true;
       this.ui_ = this.createPromptIframeFromSrc_(promptUISrc);

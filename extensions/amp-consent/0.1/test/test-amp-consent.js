@@ -53,7 +53,6 @@ describes.realWin(
       doc = env.win.document;
       ampdoc = env.ampdoc;
       win = env.win;
-      toggleExperiment(win, 'amp-consent-v2', true);
 
       storageValue = {};
       jsonMockResponses = {
