@@ -286,17 +286,7 @@ export class VariableService {
           )
         );
       } else if (isArray(value)) {
-        for (let i = 0; i < value.length; i++) {
-          // Treat values as a template and expand
-          value[i] = this.expandTemplateSync(
-            value[i],
-            new ExpansionOptions(
-              options.vars,
-              options.iterations - 1,
-              true /* noEncode */
-            )
-          );
-        }
+        value = this.expandArray_(value, options);
       }
 
       if (!options.noEncode) {
@@ -307,6 +297,26 @@ export class VariableService {
       }
       return value;
     });
+  }
+
+  /**
+   * @param {Array<string>} array
+   * @param {!ExpansionOptions} options
+   * @return {Array<string>}
+   */
+  expandArray_(array, options) {
+    for (let i = 0; i < array.length; i++) {
+      // Treat each value as a template and expand
+      array[i] = this.expandTemplateSync(
+        array[i],
+        new ExpansionOptions(
+          options.vars,
+          options.iterations - 1,
+          true /* noEncode */
+        )
+      );
+    }
+    return array;
   }
 
   /**

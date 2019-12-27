@@ -161,6 +161,12 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       });
     });
 
+    it('handles array with no vars', () => {
+      check('${array}', 'foo,bar', {
+        'array': ['foo', 'bar'],
+      });
+    });
+
     it('handles empty var name', () => {
       check('${}', '', {});
     });
