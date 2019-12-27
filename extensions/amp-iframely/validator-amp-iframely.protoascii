@@ -29,9 +29,14 @@ tags: {  # <amp-iframely>
   tag_name: "AMP-IFRAMELY"
   requires_extension: "amp-iframely"
   # either data-id
-  attrs: { name: "data-id" }  # iframely generated ID of a widget
-  # or data-url and data-key pair are mandatory attributes.
-  attrs: { name: "data-url" } # iframe url to build widget from
+  attrs: {  # iframely generated ID of a widget
+    name: "data-id"
+    mandatory_oneof: "['data-id', 'data-url']"
+  }
+  attrs: { # iframe url to build widget from
+    name: "data-url"
+    mandatory_oneof: "['data-id', 'data-url']"
+  }
   attrs: { name: "data-key" } # iframely key hash
 
   # optional attributes
