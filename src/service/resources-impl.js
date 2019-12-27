@@ -214,13 +214,24 @@ export class ResourcesImpl {
       this.ampdoc.getVisibilityState()
     );
 
+    // Need to use scrollingElement as root for viewport tracking in iframed pages.
+    const intersectionRoot = true //this.ampdoc.isSingleDoc() && this.viewer_.isEmbedded()
+      ? this.win.document.scrollingElement
+      : null;
+
+    if (this.prerenderSize_) {
+      const verticalMargin = (this.prerenderSize_ - 1) / 2;
+      this.prerenderObserver_ = new IntersectionObserver(
+        this.intersects_.bind(this),
+        {root: intersectionRoot, rootMargin: `${verticalMargin}% 0%`}
+      );
+      // TODO: Hook up prerenderObserver_ and hand-off to intersectionObserver_ during visibilityState change.
+    }
+
     /** @private @const {?IntersectionObserver} */
     this.intersectionObserver_ = new IntersectionObserver(
       this.intersects_.bind(this),
-      // TODO(willchou): Support prerenderSize_.
-      // {root: document.scrollingElement},
-      // {rootMargin: '50% 12.5%'},
-      {root: document.scrollingElement, rootMargin: '50% 12.5%'}
+      {root: intersectionRoot, rootMargin: '50% 12.5%'}
     );
 
     // When viewport is resized, we have to re-measure all elements.
@@ -329,6 +340,12 @@ export class ResourcesImpl {
     }
 
     whenBuilt.then(() => {
+      // NOT_LAID_OUT is the state after build() but before measure().
+      if (r.getState() == ResourceState.NOT_LAID_OUT) {
+        // TODO(willchou): Also need to do this on viewport size change.
+        r.applySizesAndMediaQuery();
+      }
+
       const wasDisplayed = r.isDisplayed();
       r.measure(/* premeasuredBox */ boundingClientRect);
       const isDisplayed = r.isDisplayed();
@@ -1292,21 +1309,23 @@ export class ResourcesImpl {
    * @private
    */
   discoverWork_() {
+    devAssert(!this.intersectionObserver_);
+
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
-    // const now = Date.now();
+    const now = Date.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
     const relayoutAll = this.relayoutAll_;
     this.relayoutAll_ = false;
-    // const relayoutTop = this.relayoutTop_;
-    // this.relayoutTop_ = -1;
-    // const elementsThatScrolled = this.elementsThatScrolled_.splice(0, Infinity);
+    const relayoutTop = this.relayoutTop_;
+    this.relayoutTop_ = -1;
+    const elementsThatScrolled = this.elementsThatScrolled_.splice(0, Infinity);
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
-    // let relayoutCount = 0;
-    // let remeasureCount = 0;
+    let relayoutCount = 0;
+    let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState.NOT_BUILT && !r.isBuilding()) {
@@ -1317,192 +1336,187 @@ export class ResourcesImpl {
         !r.hasBeenMeasured() ||
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
-        // TODO(willchou): In IO mode, decouple from relayout all. We only care about viewport size change.
         r.applySizesAndMediaQuery();
-        // relayoutCount++;
+        relayoutCount++;
       }
-      // if (r.isMeasureRequested()) {
-      //   remeasureCount++;
-      // }
+      if (r.isMeasureRequested()) {
+        remeasureCount++;
+      }
     }
 
-    // TODO(willchou): Unloading of non-displayed resources.
+    // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
+    // there's no way to optimize this. All reads happen here.
+    let toUnload;
+    if (
+      relayoutCount > 0 ||
+      remeasureCount > 0 ||
+      relayoutAll ||
+      relayoutTop != -1 ||
+      elementsThatScrolled.length > 0
+    ) {
+      for (let i = 0; i < this.resources_.length; i++) {
+        const r = this.resources_[i];
+        if (r.hasOwner() && !r.isMeasureRequested()) {
+          // If element has owner, and measure is not requested, do nothing.
+          continue;
+        }
+        let needsMeasure =
+          relayoutAll ||
+          r.getState() == ResourceState.NOT_LAID_OUT ||
+          !r.hasBeenMeasured() ||
+          r.isMeasureRequested() ||
+          (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop);
 
-    // // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
-    // // there's no way to optimize this. All reads happen here.
-    // let toUnload;
-    // if (
-    //   relayoutCount > 0 ||
-    //   remeasureCount > 0 ||
-    //   relayoutAll ||
-    //   relayoutTop != -1 ||
-    //   elementsThatScrolled.length > 0
-    // ) {
-    //   for (let i = 0; i < this.resources_.length; i++) {
-    //     const r = this.resources_[i];
-    //     if (r.hasOwner() && !r.isMeasureRequested()) {
-    //       // If element has owner, and measure is not requested, do nothing.
-    //       continue;
-    //     }
-    //     let needsMeasure =
-    //       relayoutAll ||
-    //       r.getState() == ResourceState.NOT_LAID_OUT ||
-    //       !r.hasBeenMeasured() ||
-    //       r.isMeasureRequested() ||
-    //       (relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop);
+        if (!needsMeasure) {
+          for (let i = 0; i < elementsThatScrolled.length; i++) {
+            // TODO(jridgewell): Need to figure out how ShadowRoots and FIEs
+            // should behave in this model. If the ShadowRoot's host scrolls,
+            // do we need to invalidate inside the shadow or light tree? Or if
+            // the FIE's iframe parent scrolls, do we?
+            if (elementsThatScrolled[i].contains(r.element)) {
+              needsMeasure = true;
+              break;
+            }
+          }
+        }
 
-    //     if (!needsMeasure) {
-    //       for (let i = 0; i < elementsThatScrolled.length; i++) {
-    //         // TODO(jridgewell): Need to figure out how ShadowRoots and FIEs
-    //         // should behave in this model. If the ShadowRoot's host scrolls,
-    //         // do we need to invalidate inside the shadow or light tree? Or if
-    //         // the FIE's iframe parent scrolls, do we?
-    //         if (elementsThatScrolled[i].contains(r.element)) {
-    //           needsMeasure = true;
-    //           break;
-    //         }
-    //       }
-    //     }
+        if (needsMeasure) {
+          const wasDisplayed = r.isDisplayed();
+          r.measure();
+          if (wasDisplayed && !r.isDisplayed()) {
+            if (!toUnload) {
+              toUnload = [];
+            }
+            toUnload.push(r);
+          }
+        }
+      }
+    }
 
-    //     if (needsMeasure) {
-    //       const wasDisplayed = r.isDisplayed();
-    //       r.measure();
-    //       if (wasDisplayed && !r.isDisplayed()) {
-    //         if (!toUnload) {
-    //           toUnload = [];
-    //         }
-    //         toUnload.push(r);
-    //       }
-    //     }
-    //   }
-    // }
+    // Unload all in one cycle.
+    if (toUnload) {
+      this.vsync_.mutate(() => {
+        toUnload.forEach(r => {
+          r.unload();
+          this.cleanupTasks_(r);
+        });
+      });
+    }
 
-    // // Unload all in one cycle.
-    // if (toUnload) {
-    //   this.vsync_.mutate(() => {
-    //     toUnload.forEach(r => {
-    //       r.unload();
-    //       this.cleanupTasks_(r);
-    //     });
-    //   });
-    // }
+    const viewportRect = this.viewport_.getRect();
+    // Load viewport = viewport + 3x up/down when document is visible or
+    // depending on prerenderSize in pre-render mode.
+    let loadRect;
+    if (this.visible_) {
+      loadRect = expandLayoutRect(viewportRect, 0.25, 2);
+    } else if (this.prerenderSize_ > 0) {
+      loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
+    } else {
+      loadRect = null;
+    }
 
-    // const viewportRect = this.viewport_.getRect();
-    // // Load viewport = viewport + 3x up/down when document is visible or
-    // // depending on prerenderSize in pre-render mode.
-    // let loadRect;
-    // if (this.visible_) {
-    //   loadRect = expandLayoutRect(viewportRect, 0.25, 2);
-    // } else if (this.prerenderSize_ > 0) {
-    //   loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
-    // } else {
-    //   loadRect = null;
-    // }
+    const visibleRect = this.visible_
+      ? // When the doc is visible, consider the viewport to be 25% larger,
+        // to minimize effect from small scrolling and notify things that
+        // they are in viewport just before they are actually visible.
+        expandLayoutRect(viewportRect, 0.25, 0.25)
+      : viewportRect;
 
-    // const visibleRect = this.visible_
-    //   ? // When the doc is visible, consider the viewport to be 25% larger,
-    //     // to minimize effect from small scrolling and notify things that
-    //     // they are in viewport just before they are actually visible.
-    //     expandLayoutRect(viewportRect, 0.25, 0.25)
-    //   : viewportRect;
+    // Phase 3: Trigger "viewport enter/exit" events.
+    for (let i = 0; i < this.resources_.length; i++) {
+      const r = this.resources_[i];
+      if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
+        continue;
+      }
+      // Note that when the document is not visible, neither are any of its
+      // elements to reduce CPU cycles.
+      // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
+      // layers. This is currently a short-term fix to the problem that
+      // the fixed elements get incorrect top coord.
+      const shouldBeInViewport =
+        this.visible_ && r.isDisplayed() && r.overlaps(visibleRect);
+      r.setInViewport(shouldBeInViewport);
+    }
 
-    // // Phase 3: Trigger "viewport enter/exit" events.
-    // for (let i = 0; i < this.resources_.length; i++) {
-    //   const r = this.resources_[i];
-    //   if (r.getState() == ResourceState.NOT_BUILT || r.hasOwner()) {
-    //     continue;
-    //   }
-    //   // Note that when the document is not visible, neither are any of its
-    //   // elements to reduce CPU cycles.
-    //   // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
-    //   // layers. This is currently a short-term fix to the problem that
-    //   // the fixed elements get incorrect top coord.
-    //   const shouldBeInViewport =
-    //     this.visible_ && r.isDisplayed() && r.overlaps(visibleRect);
-    //   r.setInViewport(shouldBeInViewport);
-    // }
+    // Phase 4: Schedule elements for layout within a reasonable distance from
+    // current viewport.
+    if (loadRect) {
+      for (let i = 0; i < this.resources_.length; i++) {
+        const r = this.resources_[i];
+        // TODO(dvoytenko): This extra build has to be merged with the
+        // scheduleLayoutOrPreload method below.
+        // Force build for all resources visible, measured, and in the viewport.
+        if (
+          !r.isBuilt() &&
+          !r.hasOwner() &&
+          r.hasBeenMeasured() &&
+          r.isDisplayed() &&
+          r.overlaps(loadRect)
+        ) {
+          this.buildOrScheduleBuildForResource_(
+            r,
+            /* checkForDupes */ true,
+            /* scheduleWhenBuilt */ undefined,
+            /* force */ true
+          );
+        }
+        if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
+          continue;
+        }
+        // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
+        // layers. This is currently a short-term fix to the problem that
+        // the fixed elements get incorrect top coord.
+        if (r.isDisplayed() && r.overlaps(loadRect)) {
+          this.scheduleLayoutOrPreload(r, /* layout */ true);
+        }
+      }
+    }
 
-    // // Phase 4: Schedule elements for layout within a reasonable distance from
-    // // current viewport.
-    // if (loadRect) {
-    //   for (let i = 0; i < this.resources_.length; i++) {
-    //     const r = this.resources_[i];
-    //     // TODO(dvoytenko): This extra build has to be merged with the
-    //     // scheduleLayoutOrPreload method below.
-    //     // Force build for all resources visible, measured, and in the viewport.
-    //     if (
-    //       !r.isBuilt() &&
-    //       !r.hasOwner() &&
-    //       r.hasBeenMeasured() &&
-    //       r.isDisplayed() &&
-    //       r.overlaps(loadRect)
-    //     ) {
-    //       this.buildOrScheduleBuildForResource_(
-    //         r,
-    //         /* checkForDupes */ true,
-    //         /* scheduleWhenBuilt */ undefined,
-    //         /* force */ true
-    //       );
-    //     }
-    //     if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
-    //       continue;
-    //     }
-    //     // TODO(dvoytenko, #3434): Reimplement the use of `isFixed` with
-    //     // layers. This is currently a short-term fix to the problem that
-    //     // the fixed elements get incorrect top coord.
-    //     if (r.isDisplayed() && r.overlaps(loadRect)) {
-    //       this.scheduleLayoutOrPreload(r, /* layout */ true);
-    //     }
-    //   }
-    // }
-
-    /* TODO(willchou): Idle layouts */
-
-    // if (
-    //   this.visible_ &&
-    //   this.exec_.getSize() == 0 &&
-    //   this.queue_.getSize() == 0 &&
-    //   now > this.exec_.getLastDequeueTime() + 5000
-    // ) {
-    //   // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
-    //   // with idleRenderOutsideViewport true
-    //   let idleScheduledCount = 0;
-    //   for (
-    //     let i = 0;
-    //     i < this.resources_.length && idleScheduledCount < 4;
-    //     i++
-    //   ) {
-    //     const r = this.resources_[i];
-    //     if (
-    //       r.getState() == ResourceState.READY_FOR_LAYOUT &&
-    //       !r.hasOwner() &&
-    //       r.isDisplayed() &&
-    //       r.idleRenderOutsideViewport()
-    //     ) {
-    //       dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
-    //       this.scheduleLayoutOrPreload(r, /* layout */ false);
-    //       idleScheduledCount++;
-    //     }
-    //   }
-    //   // Phase 6: Idle layout: layout more if we are otherwise not doing much.
-    //   // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
-    //   for (
-    //     let i = 0;
-    //     i < this.resources_.length && idleScheduledCount < 4;
-    //     i++
-    //   ) {
-    //     const r = this.resources_[i];
-    //     if (
-    //       r.getState() == ResourceState.READY_FOR_LAYOUT &&
-    //       !r.hasOwner() &&
-    //       r.isDisplayed()
-    //     ) {
-    //       dev().fine(TAG_, 'idle layout:', r.debugid);
-    //       this.scheduleLayoutOrPreload(r, /* layout */ false);
-    //       idleScheduledCount++;
-    //     }
-    //   }
-    // }
+    if (
+      this.visible_ &&
+      this.exec_.getSize() == 0 &&
+      this.queue_.getSize() == 0 &&
+      now > this.exec_.getLastDequeueTime() + 5000
+    ) {
+      // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items
+      // with idleRenderOutsideViewport true
+      let idleScheduledCount = 0;
+      for (
+        let i = 0;
+        i < this.resources_.length && idleScheduledCount < 4;
+        i++
+      ) {
+        const r = this.resources_[i];
+        if (
+          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          !r.hasOwner() &&
+          r.isDisplayed() &&
+          r.idleRenderOutsideViewport()
+        ) {
+          dev().fine(TAG_, 'idleRenderOutsideViewport layout:', r.debugid);
+          this.scheduleLayoutOrPreload(r, /* layout */ false);
+          idleScheduledCount++;
+        }
+      }
+      // Phase 6: Idle layout: layout more if we are otherwise not doing much.
+      // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
+      for (
+        let i = 0;
+        i < this.resources_.length && idleScheduledCount < 4;
+        i++
+      ) {
+        const r = this.resources_[i];
+        if (
+          r.getState() == ResourceState.READY_FOR_LAYOUT &&
+          !r.hasOwner() &&
+          r.isDisplayed()
+        ) {
+          dev().fine(TAG_, 'idle layout:', r.debugid);
+          this.scheduleLayoutOrPreload(r, /* layout */ false);
+          idleScheduledCount++;
+        }
+      }
+    }
   }
 
   /**
@@ -2016,7 +2030,9 @@ export class ResourcesImpl {
         if (this.hasMutateWork_()) {
           this.mutateWork_();
         }
-        this.discoverWork_();
+        if (!this.intersectionObserver_) {
+          this.discoverWork_();
+        }
         let delay = this.work_();
         if (this.hasMutateWork_()) {
           // Overflow mutate work.
