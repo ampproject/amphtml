@@ -348,7 +348,7 @@ export class GlobalVariableSource extends VariableSource {
           const variant = variants[/** @type {string} */ (experiment)];
           userAssert(
             variant !== undefined,
-            'The value passed to VARIANT() is not a valid experiment name:' +
+            'The value passed to VARIANT() is not a valid experiment in <amp-experiment>:' +
               experiment
           );
           // When no variant assigned, use reserved keyword 'none'.
