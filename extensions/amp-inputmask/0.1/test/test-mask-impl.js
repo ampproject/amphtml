@@ -17,7 +17,9 @@
 import {Mask} from '../mask-impl';
 
 describes.sandboxed('amp-inputmask mask-impl', {}, env => {
-  class FakeElement {}
+  class FakeElement {
+    addEventListener() {}
+  }
 
   describe('config', () => {
     let constructorStub;
