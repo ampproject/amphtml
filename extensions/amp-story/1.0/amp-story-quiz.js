@@ -37,7 +37,7 @@ const TAG = 'amp-story-quiz';
 // TODO(jackbsteinberg): Refactor quiz to extend a general interactive element class
 // and make this an enum on that class.
 /** @const {number} */
-const INTERACTIVE_ELEMENT_TYPE_QUIZ = 0;
+const STORY_REACTION_TYPE_QUIZ = 0;
 
 /**
  * Generates the template for the quiz.
@@ -208,7 +208,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     convertedOption.querySelector(
       '.i-amphtml-story-quiz-answer-choice'
     ).textContent = answerChoiceOptions[index];
-    convertedOption.optionId_ = index;
+    convertedOption.optionIndex_ = index;
 
     // Extract and structure the option information
     const optionText = document.createElement('span');
@@ -277,28 +277,28 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   triggerAnalytics_(optionEl) {
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.INTERACTIVE_ELEMENT_ID,
+      AnalyticsVariable.STORY_REACTION_ID,
       this.element.getAttribute('id')
     );
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.INTERACTIVE_ELEMENT_RESPONSE,
-      optionEl.optionId_
+      AnalyticsVariable.STORY_REACTION_RESPONSE,
+      optionEl.optionIndex_
     );
     this.variableService_.onVariableUpdate(
-      AnalyticsVariable.INTERACTIVE_ELEMENT_TYPE,
-      INTERACTIVE_ELEMENT_TYPE_QUIZ
+      AnalyticsVariable.STORY_REACTION_TYPE,
+      STORY_REACTION_TYPE_QUIZ
     );
 
     this.element[ANALYTICS_TAG_NAME] = 'amp-story-quiz';
     this.analyticsService_.triggerEvent(
-      StoryAnalyticsEvent.CLICK_THROUGH,
+      StoryAnalyticsEvent.REACTION,
       this.element
     );
 
     [
-      AnalyticsVariable.INTERACTIVE_ELEMENT_ID,
-      AnalyticsVariable.INTERACTIVE_ELEMENT_RESPONSE,
-      AnalyticsVariable.INTERACTIVE_ELEMENT_TYPE,
+      AnalyticsVariable.STORY_REACTION_ID,
+      AnalyticsVariable.STORY_REACTION_RESPONSE,
+      AnalyticsVariable.STORY_REACTION_TYPE,
     ].forEach(analyticsVar => {
       this.variableService_.onVariableUpdate(analyticsVar, null);
     });

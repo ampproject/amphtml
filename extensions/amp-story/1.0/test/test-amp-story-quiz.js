@@ -190,16 +190,14 @@ describes.realWin(
 
       option.click();
 
-      expect(trigger).to.have.been.calledWith('story-click-through');
+      expect(trigger).to.have.been.calledWith('story-reaction');
 
       const variables = analyticsVars.get();
-      expect(variables[AnalyticsVariable.INTERACTIVE_ELEMENT_ID]).to.equal(
+      expect(variables[AnalyticsVariable.STORY_REACTION_ID]).to.equal(
         'TEST_quizId'
       );
-      expect(
-        variables[AnalyticsVariable.INTERACTIVE_ELEMENT_RESPONSE]
-      ).to.equal(0);
-      expect(variables[AnalyticsVariable.INTERACTIVE_ELEMENT_TYPE]).to.equal(0);
+      expect(variables[AnalyticsVariable.STORY_REACTION_RESPONSE]).to.equal(0);
+      expect(variables[AnalyticsVariable.STORY_REACTION_TYPE]).to.equal(0);
     });
   }
 );
