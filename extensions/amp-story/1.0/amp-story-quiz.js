@@ -294,6 +294,14 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       StoryAnalyticsEvent.CLICK_THROUGH,
       this.element
     );
+
+    [
+      AnalyticsVariable.INTERACTIVE_ELEMENT_ID,
+      AnalyticsVariable.INTERACTIVE_ELEMENT_RESPONSE,
+      AnalyticsVariable.INTERACTIVE_ELEMENT_TYPE,
+    ].forEach(analyticsVar => {
+      this.variableService_.onVariableUpdate(analyticsVar, null);
+    });
   }
 
   /**
