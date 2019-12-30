@@ -119,4 +119,4 @@ Any other of Iframely's query-string <a href="https://iframely.com/docs/paramete
 
 As a mininum, either `data-id` attribute or a pair of `data-url` and `data-key` are required to identify the third party rich media content and authenticate with Iframely.
 
-See other [amp-iframely rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframely-card/validator-amp-iframely-card.protoascii) in the AMP validator specification.
+See other [amp-iframely rules](/extensions/amp-iframely-card/validator-amp-iframely-card.protoascii) in the AMP validator specification.
