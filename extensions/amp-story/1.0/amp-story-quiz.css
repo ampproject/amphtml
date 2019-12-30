@@ -180,6 +180,14 @@ h3.i-amphtml-story-quiz-prompt {
     border: solid 1px !important;
 }
 
+/**
+ * Proper bounce animation scale values calculated in a CodePen
+ * using methodology from Medium post "Spring Animation in CSS"
+ * by Thai Pangsakulyanont.
+ *
+ * https://codepen.io/jackbsteinberg/pen/ExaZpjZ
+ * https://medium.com/@dtinth/spring-animation-in-css-2039de6e1a03
+ */
 @keyframes answer-choice-bounce {
     0% {
         visibility: hidden;
