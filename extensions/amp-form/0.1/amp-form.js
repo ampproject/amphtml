@@ -43,7 +43,6 @@ import {SsrTemplateHelper} from '../../../src/ssr-template-helper';
 import {
   ancestorElementsByTag,
   childElementByAttr,
-  closestAncestorElementBySelector,
   createElementWithAttributes,
   iterateCursor,
   removeElement,
@@ -1638,13 +1637,7 @@ export class AmpFormService {
       ) {
         return;
       }
-      const formId = e.target.getAttribute('form');
-      const form = formId
-        ? doc.getElementById(formId)
-        : closestAncestorElementBySelector(
-            dev().assertElement(e.target),
-            'form'
-          );
+      const {form} = e.target;
       const ampForm = form ? formOrNullForElement(form) : null;
       if (!ampForm) {
         return;
