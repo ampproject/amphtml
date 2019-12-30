@@ -181,23 +181,18 @@ export class AmpIframely extends AMP.BaseElement {
         const media = data.data.media || null;
         if (media && media.frame_style) {
           const styles = media.frame_style.split(';');
-          const styleSetter = {
-            'border': function(styleValue) {
-              setStyle(me.element, 'border', styleValue);
-            },
-            'border-radius': function(styleValue) {
-              setStyle(me.element, 'border-radius', styleValue);
-            },
-            'box-shadow': function(styleValue) {
-              setStyle(me.element, 'box-shadow', styleValue);
-            },
-          };
           styles.forEach(function(style) {
-            const styleProp = style.split(':')[0];
             const styleValue = style.split(':')[1];
-            const whitelistedStyle = styleSetter[styleProp];
-            if (typeof whitelistedStyle === 'function') {
-              whitelistedStyle(styleValue);
+            switch (style.split(':')[0]) {
+              case 'border':
+                setStyle(me.element, 'border', styleValue);
+                break;
+              case 'border-radius':
+                setStyle(me.element, 'border-radius', styleValue);
+                break;
+              case 'box-shadow':
+                setStyle(me.element, 'box-shadow', styleValue);
+                break;
             }
           });
         }
