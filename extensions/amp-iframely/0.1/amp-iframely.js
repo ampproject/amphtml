@@ -172,7 +172,7 @@ export class AmpIframely extends AMP.BaseElement {
     if (data) {
       if (data.method === 'resize') {
         /** Set the size of the card according to the message from Iframely */
-        me.changeHeight(data['height']);
+        me./*OK*/ changeHeight(data['height']);
       }
       if (data.method === 'setIframelyEmbedData') {
         /** apply Iframely card styles if present */
@@ -201,17 +201,17 @@ export class AmpIframely extends AMP.BaseElement {
         }
         if (media && media['aspect-ratio']) {
           let height;
+          const box = me.element.getLayoutBox();
           if (media['padding-bottom']) {
-            // Apply height for media with updated "aspect-ratio" and "padding-bottom".
+            /** Apply height for media with updated "aspect-ratio" and "padding-bottom". */
             height =
-              me.element.offsetWidth / media['aspect-ratio'] +
-              media['padding-bottom'];
-            me.changeHeight(height);
+              box.width / media['aspect-ratio'] + media['padding-bottom'];
+            me./*OK*/ changeHeight(height);
           } else {
-            height = me.element.offsetWidth / media['aspect-ratio'];
-            if (Math.abs(me.element.offsetHeight - height) > 1) {
+            height = box.width / media['aspect-ratio'];
+            if (Math.abs(box.height - height) > 1) {
               /** Apply new height for updated "aspect-ratio". */
-              me.changeHeight(height);
+              me./*OK*/ changeHeight(height);
             }
           }
         }
