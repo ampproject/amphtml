@@ -99,7 +99,9 @@ export class AmpIframely extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(this.base, opt_onLayout);
+    if (this.preconnect && this.preconnect.url) {
+      this.preconnect.url(this.base, opt_onLayout);
+    }
   }
 
   /** @override */
