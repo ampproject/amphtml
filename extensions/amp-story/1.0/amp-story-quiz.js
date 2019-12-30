@@ -294,14 +294,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       StoryAnalyticsEvent.REACTION,
       this.element
     );
-
-    [
-      AnalyticsVariable.STORY_REACTION_ID,
-      AnalyticsVariable.STORY_REACTION_RESPONSE,
-      AnalyticsVariable.STORY_REACTION_TYPE,
-    ].forEach(analyticsVar => {
-      this.variableService_.onVariableUpdate(analyticsVar, null);
-    });
   }
 
   /**
