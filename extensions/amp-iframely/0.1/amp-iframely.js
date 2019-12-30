@@ -196,7 +196,7 @@ export class AmpIframely extends AMP.BaseElement {
             const styleProp = style.split(':')[0];
             const styleValue = style.split(':')[1];
             const whitelistedStyle = styleSetter[styleProp];
-            if (whitelistedStyle) {
+            if (typeof whitelistedStyle === 'function') {
               whitelistedStyle(styleValue);
             }
           });
