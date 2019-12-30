@@ -274,6 +274,8 @@ export class AmpNestedMenu extends AMP.BaseElement {
         break;
       case Keys.UP_ARROW: /* fallthrough */
       case Keys.DOWN_ARROW:
+      case Keys.HOME:
+      case Keys.END:
         this.handleVerticalArrowKeyDown_(e);
         break;
     }
@@ -314,14 +316,25 @@ export class AmpNestedMenu extends AMP.BaseElement {
     if (!item) {
       return;
     }
-    const nextItem =
-      e.key == Keys.UP_ARROW
+    let nextItem =
+      e.key == Keys.UP_ARROW || e.key == Keys.HOME
         ? item.previousElementSibling
         : item.nextElementSibling;
+
     // have reached the beginning or end of the list.
     if (!nextItem) {
       return;
     }
+
+    // Handle HOME key (selects first item in the list)
+    while (e.key == Keys.HOME && nextItem.previousElementSibling) {
+      nextItem = nextItem.previousElementSibling;
+    }
+    // Handle END key (selects last item in the list)
+    while (e.key == Keys.END && nextItem.nextElementSibling) {
+      nextItem = nextItem.nextElementSibling;
+    }
+
     const focusElement = nextItem.querySelector('button,a[href],[tabindex]');
     if (focusElement) {
       e.preventDefault();
