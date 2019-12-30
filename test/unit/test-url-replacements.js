@@ -2005,6 +2005,15 @@ describes.sandboxed('UrlReplacements', {}, env => {
           );
         });
 
+        it('should concatenate and respect QUERY_PARAM from addparams', () => {
+          a.href = 'http://whitelisted.com/link?first=QUERY_PARAM(foo,YYYY)';
+          a.setAttribute('data-amp-addparams', 'second=QUERY_PARAM(bar,XXXX)');
+          urlReplacements.maybeExpandLink(a, null);
+          expect(a.href).to.equal(
+            'http://whitelisted.com/link?first=QUERY_PARAM(foo,YYYY)&second=QUERY_PARAM(bar,XXXX)'
+          );
+        });
+
         it(
           'should add URL parameters and repalce whitelisted' +
             " values for http whitelisted URL's(non-secure)",
