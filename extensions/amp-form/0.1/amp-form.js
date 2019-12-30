@@ -1589,7 +1589,7 @@ export class AmpFormService {
 
       this.installSubmissionHandlers_(root.querySelectorAll('form'));
       AmpFormTextarea.install(ampdoc);
-      this.installGlobalEventListener_(root);
+      this.installDomUpdateEventListener_(root);
       this.installFormSubmissionShortcutForTextarea_(root);
     });
   }
@@ -1618,7 +1618,7 @@ export class AmpFormService {
    * @param {!Document|!ShadowRoot} doc
    * @private
    */
-  installGlobalEventListener_(doc) {
+  installDomUpdateEventListener_(doc) {
     doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
     });
