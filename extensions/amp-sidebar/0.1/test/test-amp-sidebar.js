@@ -242,7 +242,7 @@ describes.realWin(
         await impl.mutateElement(() => {});
         expect(sidebarElement.hasAttribute('open')).to.be.true;
         expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
-        expect(sidebarElement.getAttribute('role')).to.equal('menu');
+        expect(sidebarElement.getAttribute('role')).to.equal('dialog');
 
         expect(historyPushSpy).to.be.calledOnce;
         expect(historyPopSpy).to.have.not.been.called;
@@ -380,7 +380,7 @@ describes.realWin(
 
         expect(sidebarElement.hasAttribute('open')).to.be.false;
         expect(sidebarElement.hasAttribute('aria-hidden')).to.be.false;
-        expect(sidebarElement.getAttribute('role')).to.equal('menu');
+        expect(sidebarElement.getAttribute('role')).to.equal('dialog');
         expect(doc.activeElement).to.not.equal(screenReaderCloseButton);
 
         execute(impl, 'toggle');

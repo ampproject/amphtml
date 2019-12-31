@@ -183,8 +183,9 @@ export class AmpSidebar extends AMP.BaseElement {
     }
 
     if (!element.hasAttribute('role')) {
-      element.setAttribute('role', 'menu');
+      element.setAttribute('role', 'dialog');
     }
+    element.setAttribute('aria-modal', 'false');
     // Make sidebar programmatically focusable and focus on `open` for a11y.
     element.tabIndex = -1;
 
@@ -381,6 +382,7 @@ export class AmpSidebar extends AMP.BaseElement {
       // Wait for mutateElement, so that the element has been transfered to the
       // fixed layer. This is needed to hide the correct elements.
       setModalAsOpen(this.element);
+      this.element.setAttribute('aria-modal', 'true');
     });
 
     if (this.isIos_ && this.isSafari_) {
@@ -429,6 +431,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.getMaskElement_().removeAttribute('i-amphtml-sidebar-opened');
     this.mutateElement(() => {
       setModalAsClosed(this.element);
+      this.element.setAttribute('aria-modal', 'false');
     });
     this.element.removeAttribute('open');
     this.element.removeAttribute('i-amphtml-sidebar-opened');
