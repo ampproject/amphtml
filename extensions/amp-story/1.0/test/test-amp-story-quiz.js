@@ -16,6 +16,8 @@
 
 import {AmpStoryQuiz} from '../amp-story-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
+import {AnalyticsVariable, getVariableService} from '../variable-service';
+import {getAnalyticsService} from '../story-analytics';
 import {registerServiceBuilder} from '../../../../src/service';
 
 /**
@@ -39,7 +41,7 @@ const populateQuiz = (win, quizElement, numPrompts = 1, numOptions = 4) => {
     quizElement.appendChild(option.cloneNode());
   }
 
-  quizElement.setAttribute('id', 'quizId');
+  quizElement.setAttribute('id', 'TEST_quizId');
 };
 
 /**
@@ -61,11 +63,16 @@ describes.realWin(
     let win;
     let ampStoryQuiz;
     let storyEl;
+    let analytics;
+    let analyticsVars;
 
     beforeEach(() => {
       win = env.win;
       const ampStoryQuizEl = win.document.createElement('amp-story-quiz');
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
+
+      analyticsVars = getVariableService(win);
+      analytics = getAnalyticsService(win, win.document.body);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
@@ -169,6 +176,28 @@ describes.realWin(
       expect(quizOptions[1]).to.not.have.class(
         'i-amphtml-story-quiz-option-selected'
       );
+    });
+
+    it('should trigger an analytics event with the right variables on selection', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+      populateStandardQuizContent(win, ampStoryQuiz.element);
+      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const option = ampStoryQuiz
+        .getQuizElement()
+        .querySelector('.i-amphtml-story-quiz-option');
+
+      option.click();
+
+      expect(trigger).to.have.been.calledWith('story-reaction');
+
+      const variables = analyticsVars.get();
+      expect(variables[AnalyticsVariable.STORY_REACTION_ID]).to.equal(
+        'TEST_quizId'
+      );
+      expect(variables[AnalyticsVariable.STORY_REACTION_RESPONSE]).to.equal(0);
+      expect(variables[AnalyticsVariable.STORY_REACTION_TYPE]).to.equal(0);
     });
   }
 );
