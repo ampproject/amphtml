@@ -713,6 +713,12 @@ let BindEvaluateExpressionResultDef;
  */
 let BindRescanOptionsDef;
 
+/**
+ * Options bag used in Bind.setState().
+ * @typedef {{skipEval: (boolean|undefined), skipAmpState: (boolean|undefined)}}
+ */
+let BindSetStateOptionsDef;
+
 /////////////////////////////
 ////// Web Anmomation externs
 /////////////////////////////

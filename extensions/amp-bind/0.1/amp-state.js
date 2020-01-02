@@ -236,7 +236,7 @@ export class AmpState extends AMP.BaseElement {
       // As a rule, initialization should skip evaluation.
       // If we're not initializing then this must be a mutation, so we must
       // skip <amp-state> evaluation to prevent update cycles.
-      bind.setState(state, /* skipEval */ isInit, /* skipAmpState */ !isInit);
+      bind.setState(state, {skipEval: isInit, skipAmpState: !isInit});
     });
   }
 
