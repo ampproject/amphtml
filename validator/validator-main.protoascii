@@ -6712,7 +6712,6 @@ attr_lists: {
   # TODO(wassgha): Launch with amp-next-page 1.0
   # attrs: { name: "amp-next-page-hide" }
   # attrs: { name: "amp-next-page-replace" }
-  # attrs: { name: "amp-next-page-keep" }
   attrs: { name: "i-amp-access-id" }
   # amp-form specific attributes, see
   # https://github.com/ampproject/amphtml/issues/5268

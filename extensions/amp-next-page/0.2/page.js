@@ -28,6 +28,8 @@ export const PageState = {
   INSERTED: 4,
 };
 
+const VISIBLE_DOC_CLASS = 'amp-next-page-document-visible';
+
 export class Page {
   /**
    * @param {!./service.NextPageService} manager
@@ -126,19 +128,13 @@ export class Page {
     this.visibilityState_ = visibilityState;
     if (this.shadowDoc_) {
       this.shadowDoc_.setVisibilityState(visibilityState);
-      if (visibilityState === VisibilityState.VISIBLE) {
-        this.shadowDoc_.ampdoc
-          .getBody()
-          .classList.add('amp-next-page-document-visible');
-      } else {
-        this.shadowDoc_.ampdoc
-          .getBody()
-          .classList.remove('amp-next-page-document-visible');
-      }
+      this.shadowDoc_.ampdoc
+        .getBody()
+        .classList.toggle(VISIBLE_DOC_CLASS, this.isVisible());
     }
 
     // Switch the title and url of the page to reflect this page
-    if (visibilityState === VisibilityState.VISIBLE) {
+    if (this.isVisible()) {
       this.manager_.setTitlePage(this);
     }
   }

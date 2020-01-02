@@ -96,9 +96,6 @@ export class NextPageService {
 
     /** @private {!Object<string, !Element>} */
     this.replaceableElements_ = {};
-
-    /** @private {!Object<string, !Element>} */
-    this.persistentElements_ = {};
   }
 
   /**
@@ -220,21 +217,12 @@ export class NextPageService {
     // Hide elements if necessary
     this.pages_
       .filter(page => page.isVisible())
-      .forEach(page => {
-        if (page == this.initialPage_) {
-          this.handleElementHiding(
-            this.win_.document,
-            true /** isHost */,
-            true /** isVisible */
-          );
-        } else if (page.document) {
-          this.handleElementHiding(
-            page.document,
-            false /** isHost */,
-            true /** isVisible */
-          );
-        }
-      });
+      .forEach(page =>
+        this.handleElementHiding(
+          this.win_.document,
+          page === this.initialPage_ /** isHost */
+        )
+      );
   }
 
   /**
@@ -366,50 +354,34 @@ export class NextPageService {
    * @param {!Document} doc Document to attach.
    */
   sanitizeDoc(doc) {
-    // TODO(wassgha): Implement handling of sticky elements
-    // TODO(wassgha): Implement persistence of repeating elements (e.g amp-sidebar)
-
     // TODO(wassgha): Parse for more pages to queue
 
     // TODO(wassgha): Allow amp-analytics after bug bash
     toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
+    // Make sure all hidden elements are initially invisible
     this.handleElementHiding(doc, false /** isHost */, false /** isVisible */);
   }
 
   /**
-   * Hides or shows elements based on the `amp-next-page-hide`,
-   * `amp-next-page-keep` and `amp-next-page-replace` attributes
+   * Hides or shows elements based on the `amp-next-page-hide` and
+   * `amp-next-page-replace` attributes
    * @param {!Document} doc Document to attach.
    * @param {boolean=} isHost Whether this is the initial page
    * @param {boolean=} isVisible Whether this page is visible or not
    */
   handleElementHiding(doc, isHost = false, isVisible = true) {
+    // Hide elements that have [amp-next-page-hide] on child documents
     if (!isHost) {
-      this.hideNextPageHiddenElements(doc);
+      toArray(doc.querySelectorAll('[amp-next-page-hide]')).forEach(element =>
+        toggle(element, false /** opt_display */)
+      );
     }
 
-    toArray(doc.querySelectorAll('[amp-next-page-keep]')).forEach(element => {
-      if (!element.hasAttribute('amp-next-page-keep')) {
-        element.setAttribute(
-          'amp-next-page-keep',
-          String(Date.now() + Math.floor(Math.random() * 100))
-        );
-      }
-      const id = element.getAttribute('amp-next-page-keep');
-      if (
-        this.persistentElements_[id] &&
-        this.persistentElements_[id] !== element
-      ) {
-        toggle(element, false /** opt_display */);
-      } else if (isVisible) {
-        this.persistentElements_[id] = element;
-      }
-    });
-
+    // Replace elements that have [amp-next-page-replace]
     if (isVisible) {
       toArray(doc.querySelectorAll('[amp-next-page-replace]')).forEach(
         element => {
-          if (!element.hasAttribute('amp-next-page-replace')) {
+          if (!element.getAttribute('amp-next-page-replace')) {
             element.setAttribute(
               'amp-next-page-replace',
               String(Date.now() + Math.floor(Math.random() * 100))
@@ -427,17 +399,6 @@ export class NextPageService {
         }
       );
     }
-  }
-
-  /**
-   * Hides or shows elements based on the `amp-next-page-hide`,
-   * `amp-next-page-keep` and `amp-next-page-replace` attributes
-   * @param {!Document} doc Document to attach.
-   */
-  hideNextPageHiddenElements(doc) {
-    toArray(doc.querySelectorAll('[amp-next-page-hide]')).forEach(element =>
-      toggle(element, false /** opt_display */)
-    );
   }
 
   /**
