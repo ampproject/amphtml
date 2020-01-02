@@ -13,8 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {WebDriver} from '@types/selenium-webdriver'; // eslint-disable-line no-unused-vars
-import {logging} from 'selenium-webdriver';
+const logging = require('selenium-webdriver');
 
 /** @enum {string} */
 const NetworkMethods = {
