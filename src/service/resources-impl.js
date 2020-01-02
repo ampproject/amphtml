@@ -24,7 +24,7 @@ import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
-import {closest, hasNextNodeInDocumentOrder} from '../dom';
+import {closest, hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
@@ -216,9 +216,10 @@ export class ResourcesImpl {
     );
 
     // Need to use scrollingElement as root for viewport tracking in iframed pages.
-    const intersectionRoot = true //this.ampdoc.isSingleDoc() && this.viewer_.isEmbedded()
-      ? this.win.document.scrollingElement
-      : null;
+    const intersectionRoot =
+      this.ampdoc.isSingleDoc() && isIframed(this.win)
+        ? this.win.document.scrollingElement
+        : null;
 
     if (this.prerenderSize_) {
       const verticalMargin = (this.prerenderSize_ - 1) / 2;
@@ -226,7 +227,8 @@ export class ResourcesImpl {
         this.intersects_.bind(this),
         {root: intersectionRoot, rootMargin: `${verticalMargin}% 0%`}
       );
-      // TODO: Hook up prerenderObserver_ and hand-off to intersectionObserver_ during visibilityState change.
+      // TODO(willchou): Hook up prerenderObserver_ and hand-off
+      // to intersectionObserver_ during visibilityState change.
     }
 
     /** @private @const {?IntersectionObserver} */
@@ -740,9 +742,14 @@ export class ResourcesImpl {
         }
       },
       mutate: () => {
+        // TODO(willchou): Should we manually update the mutatee's layout box?
         mutator();
 
-        if (!this.intersectionObserver_) {
+        // No need to remeasure and set "relayout top" on element size changes
+        // with IntersectionObserver since enter/exit viewport will be detected.
+        if (this.intersectionObserver_) {
+          this.maybeChangeHeight_ = true;
+        } else {
           if (element.classList.contains('i-amphtml-element')) {
             const r = Resource.forElement(element);
             r.requestMeasure();
@@ -758,11 +765,7 @@ export class ResourcesImpl {
             this.setRelayoutTop_(relayoutTop);
           }
           this.schedulePass(FOUR_FRAME_DELAY_);
-        }
 
-        if (this.intersectionObserver_) {
-          this.maybeChangeHeight_ = true;
-        } else {
           // Need to measure again in case the element has become visible or shifted.
           this.vsync_.measure(() => {
             const updatedRelayoutTop = calcRelayoutTop();
