@@ -760,19 +760,19 @@ export class ResourcesImpl {
           this.schedulePass(FOUR_FRAME_DELAY_);
         }
 
-        // Need to measure again in case the element has become visible or
-        // shifted.
-        this.vsync_.measure(() => {
-          // TODO(willchou): This vsync measure is not necessary without calcRelayoutTop().
-          if (!this.intersectionObserver_) {
+        if (this.intersectionObserver_) {
+          this.maybeChangeHeight_ = true;
+        } else {
+          // Need to measure again in case the element has become visible or shifted.
+          this.vsync_.measure(() => {
             const updatedRelayoutTop = calcRelayoutTop();
             if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
               this.setRelayoutTop_(updatedRelayoutTop);
               this.schedulePass(FOUR_FRAME_DELAY_);
             }
-          }
-          this.maybeChangeHeight_ = true;
-        });
+            this.maybeChangeHeight_ = true;
+          });
+        }
       },
     });
   }
@@ -1037,7 +1037,7 @@ export class ResourcesImpl {
       this.requestsChangeSize_ = [];
 
       // Find minimum top position and run all mutates.
-      // let minTop = -1;
+      let minTop = -1;
       const scrollAdjSet = [];
       let aboveVpHeightChange = 0;
       for (let i = 0; i < requestsChangeSize.length; i++) {
@@ -1177,9 +1177,9 @@ export class ResourcesImpl {
         }
 
         if (resize) {
-          // if (box.top >= 0) {
-          //   minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
-          // }
+          if (box.top >= 0) {
+            minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+          }
           request.resource./*OK*/ changeSize(
             request.newHeight,
             request.newWidth,
@@ -1199,9 +1199,9 @@ export class ResourcesImpl {
         }
       }
 
-      // if (minTop != -1) {
-      //   this.setRelayoutTop_(minTop);
-      // }
+      if (minTop != -1) {
+        this.setRelayoutTop_(minTop);
+      }
 
       // Execute scroll-adjusting resize requests, if any.
       if (scrollAdjSet.length > 0) {
@@ -1214,8 +1214,8 @@ export class ResourcesImpl {
             mutate: state => {
               // let minTop = -1;
               scrollAdjSet.forEach(request => {
-                // const box = request.resource.getLayoutBox();
-                // minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+                const box = request.resource.getLayoutBox();
+                minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
                 request.resource./*OK*/ changeSize(
                   request.newHeight,
                   request.newWidth,
@@ -1227,9 +1227,9 @@ export class ResourcesImpl {
                   request.callback(/* hasSizeChanged */ true);
                 }
               });
-              // if (minTop != -1) {
-              //   this.setRelayoutTop_(minTop);
-              // }
+              if (minTop != -1) {
+                this.setRelayoutTop_(minTop);
+              }
               // Sync is necessary here to avoid UI jump in the next frame.
               const newScrollHeight = this.viewport_./*OK*/ getScrollHeight();
               if (newScrollHeight != state./*OK*/ scrollHeight) {
@@ -1289,6 +1289,7 @@ export class ResourcesImpl {
   /**
    * @param {number} relayoutTop
    * @private
+   * @note This is a no-op in intersection observer mode.
    */
   setRelayoutTop_(relayoutTop) {
     if (this.relayoutTop_ == -1) {
