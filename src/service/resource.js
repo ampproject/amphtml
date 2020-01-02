@@ -361,6 +361,8 @@ export class Resource {
   changeSize(newHeight, newWidth, opt_newMargins) {
     this.element./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
 
+    // TODO(willchou): Manually update layout box here in IntersectionObserver mode?
+
     // Schedule for re-measure and possible re-layout.
     this.requestMeasure();
   }

@@ -742,7 +742,7 @@ export class ResourcesImpl {
         }
       },
       mutate: () => {
-        // TODO(willchou): Should we manually update the mutatee's layout box?
+        // TODO(willchou): Manually update the mutatee's layout box?
         mutator();
 
         // No need to remeasure and set "relayout top" on element size changes
@@ -1215,7 +1215,7 @@ export class ResourcesImpl {
               state./*OK*/ scrollTop = this.viewport_./*OK*/ getScrollTop();
             },
             mutate: state => {
-              // let minTop = -1;
+              let minTop = -1;
               scrollAdjSet.forEach(request => {
                 const box = request.resource.getLayoutBox();
                 minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
@@ -1290,9 +1290,9 @@ export class ResourcesImpl {
   }
 
   /**
+   * This is a no-op in intersection observer mode.
    * @param {number} relayoutTop
    * @private
-   * @note This is a no-op in intersection observer mode.
    */
   setRelayoutTop_(relayoutTop) {
     if (this.relayoutTop_ == -1) {
@@ -2066,13 +2066,17 @@ export class ResourcesImpl {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
       if (viewportSize.height > 0 && viewportSize.width > 0) {
+        // 1. Handle all size-change requests. 1x sync mutate (+1 vsync measure/mutate for above-fold resizes).
         if (this.hasMutateWork_()) {
           this.mutateWork_();
         }
+        // 2. Build/measure/in-viewport/schedule layouts. 1x mutate & measure.
         if (!this.intersectionObserver_) {
           this.discoverWork_();
         }
+        // 3. Execute scheduled layouts and preloads. 1x mutate.
         let delay = this.work_();
+        // 4. Deferred size-change requests that's waiting for scrolling to stop.
         if (this.hasMutateWork_()) {
           // Overflow mutate work.
           delay = Math.min(delay, MUTATE_DEFER_DELAY_);
