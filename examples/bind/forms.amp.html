@@ -74,5 +74,23 @@
           </template>
       </div>
   </form>
+
+  <h2 class="sample-heading">Form validation with amp-bind input values</h2>
+  <button on="tap:AMP.setState({txt: 'hello'})">
+    set txt
+  </button>
+  <button on="tap:AMP.setState({txt: ''})">
+    clear
+  </button>
+  <form method="post" action-xhr="/form/echo-json/post" target="_blank">
+    <input type="text" name="name" placeholder="Name..." /><br />
+    <textarea required [text]="txt" name="message"></textarea><br />
+    <input type="submit" value="Submit" />
+    <div submit-success>
+      <template type="amp-mustache">
+          Success! Thanks {{name}} for submitting this message: {{message}}
+      </template>
+  </div>
+  </form>
 </body>
 </html>
