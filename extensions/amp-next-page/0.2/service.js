@@ -219,7 +219,9 @@ export class NextPageService {
       .filter(page => page.isVisible())
       .forEach(page =>
         this.handleElementHiding(
-          this.win_.document,
+          page === this.initialPage_
+            ? this.win_.document
+            : /** @type {!Document} */ (dev().assertElement(page.document)),
           page === this.initialPage_ /** isHost */
         )
       );
