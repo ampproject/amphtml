@@ -333,7 +333,7 @@ You can render success or error responses in your form by using [extended templa
 
 ### To render responses with templating:
 
-- Apply a response attribute to _any direct child_ of the `<form>` element.
+- Apply a response attribute to any descendent of the `<form>` element.
 - Render the response in the child element by including a template via `<template></template>` or `<script type="text/plain"></script>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
 - Provide a valid JSON object for responses to `submit-success` and `submit-error`. Both success and error responses should have a `Content-Type: application/json` header.
 
