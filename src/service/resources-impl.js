@@ -215,27 +215,34 @@ export class ResourcesImpl {
       this.ampdoc.getVisibilityState()
     );
 
-    // Need to use scrollingElement as root for viewport tracking in iframed pages.
-    const intersectionRoot =
-      this.ampdoc.isSingleDoc() && isIframed(this.win)
-        ? this.win.document.scrollingElement
-        : null;
+    const platform = Services.platformFor(this.win);
+    // As of 1/2020, only Chrome 81 has the required IntersectionObserver behavior (#25428).
+    if (platform.isChrome() && platform.getMajorVersion() >= 81) {
+      // Need to use scrollingElement as root for viewport tracking in iframed pages.
+      const intersectionRoot =
+        this.ampdoc.isSingleDoc() && isIframed(this.win)
+          ? this.win.document.scrollingElement
+          : null;
 
-    if (this.prerenderSize_) {
-      const verticalMargin = (this.prerenderSize_ - 1) / 2;
-      this.prerenderObserver_ = new IntersectionObserver(
+      if (this.prerenderSize_) {
+        const verticalMargin = (this.prerenderSize_ - 1) / 2;
+        this.prerenderObserver_ = new IntersectionObserver(
+          this.intersects_.bind(this),
+          {root: intersectionRoot, rootMargin: `${verticalMargin}% 0%`}
+        );
+        // TODO(willchou): Hook up prerenderObserver_ and hand-off
+        // to intersectionObserver_ during visibilityState change.
+      }
+
+      /** @private @const {?IntersectionObserver} */
+      this.intersectionObserver_ = new IntersectionObserver(
         this.intersects_.bind(this),
-        {root: intersectionRoot, rootMargin: `${verticalMargin}% 0%`}
+        {
+          root: intersectionRoot,
+          rootMargin: '50% 12.5%',
+        }
       );
-      // TODO(willchou): Hook up prerenderObserver_ and hand-off
-      // to intersectionObserver_ during visibilityState change.
     }
-
-    /** @private @const {?IntersectionObserver} */
-    this.intersectionObserver_ = new IntersectionObserver(
-      this.intersects_.bind(this),
-      {root: intersectionRoot, rootMargin: '50% 12.5%'}
-    );
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
@@ -2066,7 +2073,7 @@ export class ResourcesImpl {
       // If viewport size is 0, the manager will wait for the resize event.
       const viewportSize = this.viewport_.getSize();
       if (viewportSize.height > 0 && viewportSize.width > 0) {
-        // 1. Handle all size-change requests. 1x sync mutate (+1 vsync measure/mutate for above-fold resizes).
+        // 1. Handle all size-change requests. 1x mutate (+1 vsync measure/mutate for above-fold resizes).
         if (this.hasMutateWork_()) {
           this.mutateWork_();
         }
@@ -2076,7 +2083,7 @@ export class ResourcesImpl {
         }
         // 3. Execute scheduled layouts and preloads. 1x mutate.
         let delay = this.work_();
-        // 4. Deferred size-change requests that's waiting for scrolling to stop.
+        // 4. Deferred size-change requests (waiting for scrolling to stop) will shorten delay until next pass.
         if (this.hasMutateWork_()) {
           // Overflow mutate work.
           delay = Math.min(delay, MUTATE_DEFER_DELAY_);
