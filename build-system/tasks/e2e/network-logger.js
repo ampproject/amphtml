@@ -1,0 +1,55 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import {WebDriver} from '@types/selenium-webdriver'; // eslint-disable-line no-unused-vars
+import {logging} from 'selenium-webdriver';
+
+/** @enum {string} */
+const NetworkMethods = {
+  'REQUEST_WILL_BE_SENT': 'Network.requestWillBeSent',
+};
+
+class NetworkLogger {
+  /** @param {!WebDriver} driver */
+  constructor(driver) {
+    /** @type {WebDriver} */
+    this.driver_ = driver;
+  }
+
+  async getEntries_(networkMethod) {
+    const entries = await this.driver_
+      .manage()
+      .logs()
+      .get(logging.Type.PERFORMANCE);
+
+    return entries.filter(entry => {
+      const json = JSON.parse(entry.message);
+      entry.message = json.message;
+      return entry.message.method == networkMethod;
+    });
+  }
+
+  async getSentRequests(url) {
+    const entries = await this.getEntries_(NetworkMethods.REQUEST_WILL_BE_SENT);
+    if (url) {
+      return entries.filter(entry => entry.message.params.request.url == url);
+    }
+    return entries;
+  }
+}
+
+module.exports = {
+  NetworkLogger,
+};

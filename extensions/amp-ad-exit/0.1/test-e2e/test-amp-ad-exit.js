@@ -23,11 +23,9 @@ describes.endtoend(
   },
   env => {
     let controller;
-    let requestBank;
 
     beforeEach(() => {
       controller = env.controller;
-      requestBank = env.requestBank;
     });
 
     // Setting the time explicitly to avoid test flakiness.
@@ -93,7 +91,10 @@ describes.endtoend(
       await expect(await controller.getCurrentUrl()).to.match(
         /^http:\/\/localhost:8000\/\?product2&r=0\.\d+$/
       );
-      await requestBank.withdraw('tracking');
+      const requests = await controller.networkLogger.getSentRequests(
+        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking'
+      );
+      await expect(requests).to.have.length(1);
     });
   }
 );

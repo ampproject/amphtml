@@ -26,7 +26,7 @@ const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
-const {Builder, Capabilities} = require('selenium-webdriver');
+const {Builder, Capabilities, logging} = require('selenium-webdriver');
 const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isTravisBuild} = require('../../common/travis');
@@ -72,18 +72,6 @@ let SeleniumConfigDef;
 
 /** @const {?DescribesConfigDef} */
 let describesConfig = null;
-
-/**
- * Map the browserName to the capabilities name. (firefox for example has a
- * prefix.
- *
- * @enum {string}
- */
-const capabilitiesKeys = {
-  'chrome': 'chromeOptions',
-  'firefox': 'moz:firefoxOptions',
-  'safari': 'safariOptions',
-};
 
 /**
  * Configure all tests. This may only be called once, since it is only read once
@@ -149,9 +137,11 @@ async function createSelenium(browserName, args = {}, deviceName) {
 
 async function createDriver(browserName, args, deviceName) {
   const capabilities = Capabilities[browserName]();
-  capabilities.set(capabilitiesKeys[browserName], {'args': args});
-  const builder = new Builder().withCapabilities(capabilities);
 
+  const prefs = new logging.Preferences();
+  prefs.setLevel(logging.Type.PERFORMANCE, logging.Level.ALL);
+  capabilities.setLoggingPrefs(prefs);
+  let builder;
   switch (browserName) {
     case 'firefox':
       const firefoxOptions = new firefox.Options();
@@ -160,14 +150,18 @@ async function createDriver(browserName, args, deviceName) {
         width: DEFAULT_E2E_INITIAL_RECT.width,
         height: DEFAULT_E2E_INITIAL_RECT.height,
       });
-      builder.setFirefoxOptions(firefoxOptions);
+      builder = new Builder()
+        .forBrowser('firefox')
+        .setFirefoxOptions(firefoxOptions);
     case 'chrome':
-      const chromeOptions = new chrome.Options();
+      const chromeOptions = new chrome.Options(capabilities);
       chromeOptions.addArguments(args);
       if (deviceName) {
         chromeOptions.setMobileEmulation({deviceName});
       }
-      builder.setChromeOptions(chromeOptions);
+      builder = new Builder()
+        .forBrowser('chrome')
+        .setChromeOptions(chromeOptions);
   }
 
   return await builder.build();
