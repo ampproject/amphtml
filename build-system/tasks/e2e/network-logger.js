@@ -41,6 +41,11 @@ class NetworkLogger {
     });
   }
 
+  /**
+   * Gets sent requests with an optional url to filter by.
+   * @param {string=} url
+   * @return {Array<logging.Entry>}
+   */
   async getSentRequests(url) {
     const entries = await this.getEntries_(NetworkMethods.REQUEST_WILL_BE_SENT);
     if (url) {
