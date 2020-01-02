@@ -22,7 +22,7 @@ import {getValueForExpr} from '../../../../../src/json';
 
 /**
  * @param {!JsonObject} media
- * @param {AmpElement} apesterElement
+ * @param {!AmpElement} apesterElement
  * @param {!JsonObject} consentObj
  */
 export function handleCompanionVideo(media, apesterElement, consentObj) {
@@ -54,7 +54,7 @@ export function handleCompanionVideo(media, apesterElement, consentObj) {
     apesterElement,
     consentObj
   );
-  constructCompanionSrElement(
+  addCompanionSrElement(
     videoSettings['videoTag'],
     position,
     /** @type {!JsonObject} */ (macros),
@@ -86,14 +86,9 @@ function getCompanionPosition(video) {
  * @param {string} videoTag
  * @param {string} position
  * @param {!JsonObject} macros
- * @param {AmpElement} apesterElement
+ * @param {!AmpElement} apesterElement
  */
-function constructCompanionSrElement(
-  videoTag,
-  position,
-  macros,
-  apesterElement
-) {
+function addCompanionSrElement(videoTag, position, macros, apesterElement) {
   const size = getCompanionVideoAdSize(apesterElement);
   const ampBladeAd = createElementWithAttributes(
     /** @type {!Document} */ (apesterElement.ownerDocument),
@@ -121,7 +116,7 @@ function constructCompanionSrElement(
 }
 
 /**
- * @param {AmpElement} apesterElement
+ * @param {!AmpElement} apesterElement
  * @return {{height: number, width: number}}
  */
 export function getCompanionVideoAdSize(apesterElement) {
@@ -134,7 +129,7 @@ export function getCompanionVideoAdSize(apesterElement) {
 /**
  * @param {!JsonObject} interactionModel
  * @param {?string} campaignId
- * @param {AmpElement} apesterElement
+ * @param {!AmpElement} apesterElement
  * @param {!JsonObject} consentObj
  * @return {!JsonObject}
  */

@@ -21,41 +21,42 @@ import {dict} from '../../../../../src/utils/object';
 
 /**
  * @param {!JsonObject} media
- * @param {AmpElement} apesterElement
+ * @param {!AmpElement} apesterElement
  */
 export function handleCompanionDisplay(media, apesterElement) {
   const companionOptions = getValueForExpr(
     /**@type {!JsonObject}*/ (media),
     'campaignData.companionOptions'
   );
-  if (companionOptions) {
-    const enabledDisplayAd = getValueForExpr(
-      /**@type {!JsonObject}*/ (companionOptions),
-      'enabled'
-    );
-    const settings = getValueForExpr(
-      /**@type {!JsonObject}*/ (companionOptions),
-      'settings'
-    );
+  if (!companionOptions) {
+    return;
+  }
+  const enabledDisplayAd = getValueForExpr(
+    /**@type {!JsonObject}*/ (companionOptions),
+    'enabled'
+  );
+  const settings = getValueForExpr(
+    /**@type {!JsonObject}*/ (companionOptions),
+    'settings'
+  );
 
-    if (
-      enabledDisplayAd &&
-      settings &&
-      settings['bannerAdProvider'] === ALLOWED_AD_PROVIDER
-    ) {
-      const slot = settings['slot'];
-      const defaultBannerSizes = [[300, 250]];
-      const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
-      constructCompanionDisplayAd(slot, bannerSizes, apesterElement);
-    }
+  if (
+    enabledDisplayAd &&
+    settings &&
+    settings['bannerAdProvider'] === ALLOWED_AD_PROVIDER
+  ) {
+    const slot = settings['slot'];
+    const defaultBannerSizes = [[300, 250]];
+    const bannerSizes = settings['bannerSizes'] || defaultBannerSizes;
+    constructCompanionDisplayAd(slot, bannerSizes, apesterElement);
   }
 }
 
 /**
  * @param {string} slot
  * @param {Array} bannerSizes
- * @param {AmpElement} apesterElement
- * @return {Element}
+ * @param {!AmpElement} apesterElement
+ * @return {!Element}
  */
 function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
   const maxWidth = Math.max.apply(

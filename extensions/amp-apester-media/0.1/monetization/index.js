@@ -19,8 +19,8 @@ import {handleCompanionVideo} from './companion/video';
 
 /**
  * @param {!JsonObject} media
- * @param {AmpElement} apesterElement
- * @return {Promise}
+ * @param {!AmpElement} apesterElement
+ * @return {!Promise}
  */
 export function handleCompanionAds(media, apesterElement) {
   const monetizationSettings = media['campaignData'];

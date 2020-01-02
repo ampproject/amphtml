@@ -1,5 +1,3 @@
-/* eslint-disable google-camelcase/google-camelcase */
-
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
