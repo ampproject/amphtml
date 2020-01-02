@@ -1631,6 +1631,7 @@ export class AmpFormService {
   installFormSubmissionShortcutForTextarea_(doc) {
     doc.addEventListener('keydown', e => {
       if (
+        e.defaultPrevented ||
         e.key != Keys.ENTER ||
         !(e.ctrlKey || e.metaKey) ||
         e.target.tagName !== 'TEXTAREA'
@@ -1643,6 +1644,7 @@ export class AmpFormService {
         return;
       }
       ampForm.handleSubmitEvent_(e);
+      e.preventDefault();
     });
   }
 }
