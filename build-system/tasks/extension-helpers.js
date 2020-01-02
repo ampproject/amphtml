@@ -502,6 +502,10 @@ function buildExtensionCss(path, name, version, options) {
  */
 async function buildExtensionJs(path, name, version, latestVersion, options) {
   const filename = options.filename || name + '.js';
+  if (name === 'amp-script') {
+    await compileAmpScriptWorker(version);
+  }
+
   await compileJs(
     path + '/',
     filename,
@@ -531,20 +535,38 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
   }
+}
 
-  if (name === 'amp-script') {
-    // Copy @ampproject/worker-dom/dist/amp/worker/worker.js to dist/ folder.
-    const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
-    const file = `dist/v0/amp-script-worker-${version}`;
-    // The "js" output is minified and transpiled to ES5.
-    fs.copyFileSync(dir + 'worker.js', `${file}.js`);
-    // The "mjs" output is unminified ES6 and has debugging flags enabled.
-    fs.copyFileSync(dir + 'worker.mjs', `${file}.max.js`);
+async function compileAmpScriptWorker() {
+  const startTime = Date.now();
+
+  // Copy @ampproject/worker-dom/dist/amp/worker/worker.js to build/ folder.
+  const dir = 'node_modules/@ampproject/worker-dom/dist/amp/worker/';
+  const file = `build/amp-script-worker`;
+
+  async function getWorkerJS(filename) {
+    const workerJs = JSON.stringify(await fs.readFile(dir + filename, 'utf-8'));
+    return `export const ampScriptWorkerJs = ${workerJs}`;
   }
+
+  // The "js" output is minified and transpiled to ES5.
+  const minPromise = getWorkerJS('worker.js').then(js =>
+    fs.writeFile(`${file}.js`, js)
+  );
+
+  // The "mjs" output is unminified ES6 and has debugging flags enabled.
+  const maxPromise = getWorkerJS('worker.mjs').then(js =>
+    fs.writeFile(`${file}.max.js`, js)
+  );
+
+  return Promise.all([minPromise, maxPromise]).then(() => {
+    endBuildStep('Compiled amp-script-worker into', 'build/', startTime);
+  });
 }
 
 module.exports = {
   buildExtensions,
+  compileAmpScriptWorker,
   doBuildExtension,
   extensions,
   getExtensionsToBuild,

@@ -33,6 +33,11 @@ const {
   transferSrcsToTempDir,
 } = require('./helpers');
 const {
+  buildExtensions,
+  parseExtensionFlags,
+  compileAmpScriptWorker,
+} = require('./extension-helpers');
+const {
   createCtrlcHandler,
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
@@ -44,7 +49,6 @@ const {
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
-const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
 const {compileJison} = require('./compile-jison');
@@ -97,8 +101,7 @@ async function dist() {
 
   cleanupBuildDir();
   await prebuild();
-  await compileCss();
-  await compileJison();
+  await Promise.all([compileCss(), compileJison(), compileAmpScriptWorker()]);
 
   // This is the temp directory processing for multi-pass (single-pass does its
   // own processing). Executed after `compileCss` and `compileJison` so their

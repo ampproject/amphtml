@@ -47,9 +47,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     xhr = {
       fetchText: env.sandbox.stub(),
     };
-    xhr.fetchText
-      .withArgs(env.sandbox.match(/amp-script-worker-0.1.js/))
-      .resolves({text: () => Promise.resolve('/* noop */')});
     env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
     // Make @ampproject/worker-dom dependency a no-op for these unit tests.

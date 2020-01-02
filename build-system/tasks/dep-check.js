@@ -30,6 +30,7 @@ const {
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {BABELIFY_GLOBAL_TRANSFORM} = require('./helpers');
+const {compileAmpScriptWorker} = require('./extension-helpers.js');
 const {compileJison} = require('./compile-jison');
 const {css} = require('./css');
 const {cyan, red, yellow} = require('ansi-colors');
@@ -298,8 +299,8 @@ function runRules(modules) {
 
 async function depCheck() {
   const handlerProcess = createCtrlcHandler('dep-check');
-  await css();
-  await compileJison();
+  await Promise.all([css(), compileJison(), compileAmpScriptWorker()]);
+
   if (!isTravisBuild()) {
     log('Checking dependencies...');
   }

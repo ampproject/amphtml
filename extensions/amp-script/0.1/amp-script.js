@@ -20,17 +20,26 @@ import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
-import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {cancellation} from '../../../src/error';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
-import {getMode} from '../../../src/mode';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Encode} from '../../../src/utils/bytes';
+
+import {getMode} from '../../../src/mode';
+import {ampScriptWorkerJs as maxWorkerJs} from '../../../build/amp-script-worker.max.js';
+import {ampScriptWorkerJs as minifiedWorkerJs} from '../../../build/amp-script-worker.js';
+
+let ampScriptWorkerJs;
+if (getMode().minified) {
+  ampScriptWorkerJs = minifiedWorkerJs;
+} else {
+  ampScriptWorkerJs = maxWorkerJs;
+}
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -204,13 +213,7 @@ export class AmpScript extends AMP.BaseElement {
       return Promise.reject(cancellation());
     }
 
-    const workerAndAuthorScripts = Promise.all([
-      this.getWorkerScript_(),
-      authorScriptPromise,
-    ]).then(results => {
-      const workerScript = results[0];
-      const authorScript = results[1];
-
+    const workerAndAuthorScripts = authorScriptPromise.then(authorScript => {
       if (
         !this.development_ &&
         this.service_.sizeLimitExceeded(authorScript.length)
@@ -225,7 +228,7 @@ export class AmpScript extends AMP.BaseElement {
         this.element.classList.add('i-amphtml-broken');
         return [];
       }
-      return [workerScript, authorScript];
+      return [ampScriptWorkerJs, authorScript];
     });
 
     const sandbox = this.element.getAttribute('sandbox') || '';
@@ -261,27 +264,6 @@ export class AmpScript extends AMP.BaseElement {
       this.workerDom_ = workerDom;
     });
     return workerAndAuthorScripts;
-  }
-
-  /**
-   * @return {!Promise<string>}
-   * @private
-   */
-  getWorkerScript_() {
-    // Use `testLocation` for testing with iframes. @see testing/iframe.js.
-    const location =
-      getMode().test && this.win.testLocation
-        ? this.win.testLocation
-        : this.win.location;
-    const useLocal = getMode().localDev || getMode().test;
-    const workerUrl = calculateExtensionScriptUrl(
-      location,
-      'amp-script-worker',
-      '0.1',
-      useLocal
-    );
-    const xhr = Services.xhrFor(this.win);
-    return xhr.fetchText(workerUrl, {ampCors: false}).then(r => r.text());
   }
 
   /**

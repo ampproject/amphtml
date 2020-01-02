@@ -85,6 +85,8 @@ const CLOSURE_SRC_GLOBS = [
   'build/patched-module/**/*.js',
   'build/experiments/**/*.js',
   'build/parsers/**/*.js',
+  'build/amp-script-worker.js',
+  'build/amp-script-worker.max.js',
   // A4A has these cross extension deps.
   'extensions/amp-ad-network*/**/*-config.js',
   'extensions/amp-ad/**/*.js',
