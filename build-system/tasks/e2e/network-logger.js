@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const logging = require('selenium-webdriver');
+import {logging} from 'selenium-webdriver';
 
 /** @enum {string} */
 const NetworkMethods = {
