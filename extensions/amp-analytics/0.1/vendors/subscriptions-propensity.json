@@ -2,7 +2,6 @@
   "vars": {
     "clientId": "CLIENT_ID(__gads)",
     "data": "{\"skus\": \"${skus}\",\"source\": \"${source}\",\"active\": \"${active}\",\"product\": \"${product}\"}"
-
   },
   "requests": {
     "baseUrl": "https://pubads.g.doubleclick.net/subopt",

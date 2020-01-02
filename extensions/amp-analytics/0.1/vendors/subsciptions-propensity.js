@@ -20,6 +20,8 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
   'vars': {
     // Global variables for all requests
     'clientId': 'CLIENT_ID(__gads)',
+    'data':
+      '{"skus": "${skus}","source": "${source}","active": "${active}","product": "${product}"}',
   },
   'requests': {
     // Variables
@@ -56,8 +58,6 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'offers_shown',
-        'data':
-          '{"skus": "${skus}", "source": "${source}", "active": ${active}}',
       },
     },
     'onPaywall': {
@@ -65,8 +65,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'paywall',
-        //ASSUME: passive
-        'data': '{"active": false}',
+        'active': 'false',
       },
     },
     'onSelectOffer': {
@@ -74,8 +73,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'offer_selected',
-        // ASSUME: active
-        'data': '{"product": "${product}", "active": true}',
+        'active': 'true',
       },
     },
     'onStartBuyflow': {
@@ -83,8 +81,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'payment_flow_start',
-        // ASSUME: active
-        'data': '{"product": "${product}", "active": true}',
+        'active': 'true',
       },
     },
     'onPaymentComplete': {
@@ -92,8 +89,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'payment_complete',
-        //ASSUME: active
-        'data': '{"product": "${product}", "active": true}',
+        'active': 'true',
       },
     },
   },
