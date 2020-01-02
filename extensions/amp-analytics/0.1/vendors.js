@@ -83,7 +83,6 @@ import {PIANO_CONFIG} from './vendors/piano';
 import {PINPOLL_CONFIG} from './vendors/pinpoll';
 import {PISTATS_CONFIG} from './vendors/piStats';
 import {PRESSBOARD_CONFIG} from './vendors/pressboard';
-import {PROPENSITY_CONFIG} from './vendors/propensity';
 import {QUANTCAST_CONFIG} from './vendors/quantcast';
 import {RAKAM_CONFIG} from './vendors/rakam';
 import {REPPUBLIKA_CONFIG} from './vendors/reppublika';
@@ -93,6 +92,7 @@ import {SHINYSTAT_CONFIG} from './vendors/shinystat';
 import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SNOWPLOW_CONFIG} from './vendors/snowplow';
 import {SNOWPLOW_V2_CONFIG} from './vendors/snowplow_v2';
+import {SUBSCRIPTIONS_PROPENSITY_CONFIG} from './vendors/propensity';
 import {TEAANALYTICS_CONFIG} from './vendors/teaanalytics';
 import {TEALIUMCOLLECT_CONFIG} from './vendors/tealiumcollect';
 import {TOP100_CONFIG} from './vendors/top100';
@@ -247,7 +247,9 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'piano': includeJsonLiteral(PIANO_CONFIG),
       'pinpoll': includeJsonLiteral(PINPOLL_CONFIG),
       'pressboard': includeJsonLiteral(PRESSBOARD_CONFIG),
-      'propensity': includeJsonLiteral(PROPENSITY_CONFIG),
+      'subscriptions-propensity': includeJsonLiteral(
+        SUBSCRIPTIONS_PROPENSITY_CONFIG
+      ),
       'quantcast': includeJsonLiteral(QUANTCAST_CONFIG),
       'retargetly': includeJsonLiteral(RETARGETLY_CONFIG),
       'rakam': includeJsonLiteral(RAKAM_CONFIG),

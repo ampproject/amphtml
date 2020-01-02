@@ -16,7 +16,7 @@
 
 import {jsonLiteral} from '../../../../src/json';
 
-const PROPENSITY_CONFIG = jsonLiteral({
+const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
   'vars': {
     // Global variables for all requests
     'clientId': 'CLIENT_ID(__gads)',
@@ -104,4 +104,4 @@ const PROPENSITY_CONFIG = jsonLiteral({
   },
 });
 
-export {PROPENSITY_CONFIG};
+export {SUBSCRIPTIONS_PROPENSITY_CONFIG};
