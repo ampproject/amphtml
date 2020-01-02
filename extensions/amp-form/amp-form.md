@@ -131,6 +131,8 @@ The value for `action-xhr` can be the same or a different endpoint than `action`
 
 To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
 
+[filter formats="websites, stories, ads"]
+
 ##### data-initialize-from-url (optional)
 
 Initializes form fields from the window URL's search string, where the query parameter name matches the field's name. When this attribute is present, `<input>`, `<select>`, and `<textarea>` fields can optionally be initialized.
@@ -160,15 +162,21 @@ Limitations:
 Specifies that a prefix should be stripped prior to parsing the fetched json from the `action-xhr` endpoint. If the prefix is not present in the response, then this attribute will have no effect.
 This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
+[/filter] <!-- formats="websites, stories, ads" -->
+
 ##### Other form attributes
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
+
+[filter formats="websites, stories, ads"]
 
 ##### custom-validation-reporting
 
 This is an optional attribute that enables and selects a custom validation reporting strategy. Valid values are one of: `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
 See the [Custom Validation](#custom-validations) section for more details.
+
+[/filter] <!-- formats="websites, stories, ads" -->
 
 [filter formats="email"]
 

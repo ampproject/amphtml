@@ -49,12 +49,25 @@ Provides a way for viewers to glance at the content outline and jump to any sect
 
 The `amp-accordion` component allows you to display collapsible and expandable content sections. Each of the `amp-accordion` component’s immediate children is considered a section in the accordion. Each of these nodes must be a `<section>` tag.
 
+[filter formats="websites, ads"]
+
 - An `amp-accordion` can contain one or more `<section>` elements as its direct children.
 - Each `<section>` must contain exactly two direct children.
 - The first child (of the section) represents the heading for the section and must be a heading element (one of `h1`, `h2`, ..., `h6`, `header`).
 - The second child (of the section) can be any tag allowed in AMP HTML and represents the content of the section.
 - Clicking/tapping on the heading of a section expands or collapses the section.
 - The collapsed/expanded state of each section in the `amp-accordion` element will be preserved for the session level. To opt out of preserving this state, add the `disable-session-states` attribute to the `amp-accordion` element.
+
+[/filter] <!-- formats="websites, ads" -->
+[filter formats="email"]
+
+- An `amp-accordion` can contain one or more `<section>` elements as its direct children.
+- Each `<section>` must contain exactly two direct children.
+- The first child (of the section) represents the heading for the section and must be a heading element (one of `h1`, `h2`, ..., `h6`, `header`).
+- The second child (of the section) can be any tag allowed in AMP HTML and represents the content of the section.
+- Clicking/tapping on the heading of a section expands or collapses the section.
+
+[/filter] <!-- formats="email" -->
 
 #### Example: Displaying an accordion
 

@@ -128,6 +128,8 @@ The `amp-lightbox` exposes the following actions you can use [AMP on-syntax to t
   </tr>
 </table>
 
+[filter formats="ads"]
+
 ## <a id="a4a"></a> Using `amp-lightbox` in AMPHTML ads
 
 {% call callout('Note', type='note') %}
@@ -144,6 +146,8 @@ For AMPHTML ads, the `close-button` attribute is required. This attribute causes
 - Ensure that an exit point for the lightbox always exists, otherwise the creative could effectlively hijack the host document content via a lightbox.
 
 The `close-button` attribute is required and only allowed in AMPHTML ads. In regular AMP documents, you can render a close button wherever you need it as part of the `<amp-lightbox>` content.
+
+[/filter]<!-- formats="ads" -->
 
 ### Scrollable lightboxes are disallowed
 
