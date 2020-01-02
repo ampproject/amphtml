@@ -1593,9 +1593,12 @@ export class ResourcesImpl {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        // TODO(willchou): Is this check for stale "layout readiness" necessary?
-        // task.resource.measure();
-        // if (this.isLayoutAllowed_(task.resource, task.forceOutsideViewport)) {
+        // TODO(willchou): Is the following check for stale "layout readiness" necessary?
+        // Or are some resources just never measured until this point?
+        if (!this.intersectionObserver_) {
+          task.resource.measure();
+        }
+        if (this.isLayoutAllowed_(task.resource, task.forceOutsideViewport)) {
           task.promise = task.callback();
           task.startTime = now;
           dev().fine(TAG_, 'exec:', task.id, 'at', task.startTime);
@@ -1606,10 +1609,11 @@ export class ResourcesImpl {
               this.taskComplete_.bind(this, task, false)
             )
             .catch(/** @type {function (*)} */ (reportError));
-        // } else {
-        //   dev().fine(TAG_, 'cancelled', task.id);
-        //   task.resource.layoutCanceled();
-        // }
+        } else {
+          devAssert(!this.intersectionObserver_);
+          dev().fine(TAG_, 'cancelled', task.id);
+          task.resource.layoutCanceled();
+        }
       }
 
       task = this.queue_.peek(this.boundTaskScorer_, state);
@@ -1736,7 +1740,9 @@ export class ResourcesImpl {
    */
   taskComplete_(task, success, opt_reason) {
     this.exec_.dequeue(task);
-    // this.schedulePass(POST_TASK_PASS_DELAY_);
+    if (!this.intersectionObserver_) {
+      this.schedulePass(POST_TASK_PASS_DELAY_);
+    }
     if (!success) {
       dev().info(
         TAG_,

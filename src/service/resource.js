@@ -420,6 +420,7 @@ export class Resource {
    * @param {*} premeasuredBox
    */
   measure(premeasuredBox = null) {
+    // TODO(willchou): What to do about placeholders with IntersectionObserver?
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
