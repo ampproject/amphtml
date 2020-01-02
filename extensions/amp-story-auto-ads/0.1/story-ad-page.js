@@ -38,6 +38,7 @@ import {dict} from '../../../src/utils/object';
 import {getA4AMetaTags, getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
+import {setStyle} from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';
@@ -299,7 +300,14 @@ export class StoryAdPage {
       'id': this.id_,
     });
 
-    return createElementWithAttributes(this.doc_, 'amp-story-page', attributes);
+    const page = createElementWithAttributes(
+      this.doc_,
+      'amp-story-page',
+      attributes
+    );
+    // TODO(ccordry): Allow creative to change default background color.
+    setStyle(page, 'background-color', '#212125');
+    return page;
   }
 
   /**

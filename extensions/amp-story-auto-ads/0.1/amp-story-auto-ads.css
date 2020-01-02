@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-
-[desktop] amp-story-page[i-amphtml-loading] {
+ .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-loading][ad] {
   /* Move below viewport so that ad preloads */
   transform: scale(1.0) translateX(-100%) translateY(200%) !important;
 }
@@ -82,4 +81,16 @@ amp-ad[type="adsense"] > iframe {
   top: 0 !important;
   left: 0 !important;
   transform: translate(0) !important;
+}
+
+/* TODO(ccordry) allow advertisers to opt-in to fullscreen ads. */
+.i-amphtml-story-desktop-fullbleed .i-amphtml-story-grid-template-fill > amp-ad > iframe {
+  left: 50%!important;
+  right: auto!important;
+  margin: auto!important;
+  max-height: 75vh !important;
+  max-width: calc(3/5 * 75vh) !important;
+  min-width: 320px !important;
+  min-height: 533px !important;
+  transform: translateX(-50%) !important;
 }
