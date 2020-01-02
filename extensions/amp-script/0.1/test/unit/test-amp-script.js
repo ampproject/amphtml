@@ -447,7 +447,10 @@ describe('SanitizerImpl', () => {
       );
 
       expect(bind.setState).to.be.calledOnce;
-      expect(bind.setState).to.be.calledWithExactly({foo: 'bar'}, true, false);
+      expect(bind.setState).to.be.calledWithExactly(
+        {foo: 'bar'},
+        {skipEval: true}
+      );
     });
 
     it('AMP.setState(json), with user interaction', async () => {
@@ -461,7 +464,10 @@ describe('SanitizerImpl', () => {
       );
 
       expect(bind.setState).to.be.calledOnce;
-      expect(bind.setState).to.be.calledWithExactly({foo: 'bar'}, false, false);
+      expect(bind.setState).to.be.calledWithExactly(
+        {foo: 'bar'},
+        {skipEval: false}
+      );
     });
 
     it('AMP.setState(not_json)', async () => {
