@@ -1214,7 +1214,6 @@ describe('ValidatorRulesMakeSense', () => {
   const tagWithoutSpecNameIsUnique = {};
   const tagNameRegex =
       new RegExp('(!DOCTYPE|O:P|[A-Z0-9-]+|\\$REFERENCE_POINT)');
-  const mandatoryParentRegex = new RegExp('(!DOCTYPE|\\$ROOT|[A-Z0-9-]+)');
   const disallowedAncestorRegex = new RegExp('[A-Z0-9-]+');
   for (const tagSpec of rules.tags) {
     // Helper for message output, set a tagspec_name in this order:
@@ -1290,6 +1289,7 @@ describe('ValidatorRulesMakeSense', () => {
         'amp-mustache': ['0.1', '0.2', 'latest'],
         'amp-pixel': ['0.1', 'latest'],
         'amp-position-observer': ['0.1', 'latest'],
+        'amp-selector': ['0.1', 'latest'],
         'amp-social-share': ['0.1', 'latest'],
         'amp-video': ['0.1', 'latest'],
       };
@@ -1366,12 +1366,6 @@ describe('ValidatorRulesMakeSense', () => {
           });
         }
       }
-    }
-    // mandatory_parent
-    if (tagSpec.mandatoryParent !== null) {
-      it('mandatory parent tag name defined', () => {
-        expect(mandatoryParentRegex.test(tagSpec.mandatoryParent)).toBe(true);
-      });
     }
     // disallowed_ancestor must be a upper case alphabetic name.
     it('disallowed_ancestor defined and not equal to mandatory parent', () => {
@@ -1492,7 +1486,7 @@ describe('ValidatorRulesMakeSense', () => {
         // getNameByAttrSpecId() looks like it would do what we want, but it's
         // sufficiently wrapped in private context inside the validator that I
         // don't see a way to call it.  For now just gold the current index.
-        expect(tagSpec.attrLists[0]).toEqual(19);
+        expect(tagSpec.attrLists[0]).toEqual(20);
       });
     }
 
@@ -1577,11 +1571,15 @@ describe('ValidatorRulesMakeSense', () => {
         });
       }
       // We want to be certain not to allow SCRIPT tagspecs which don't either
-      // define a src attribute OR define a JSON or TEXT/PLAIN type.
+      // define a src attribute OR define a JSON, OCTET-STREAM, or TEXT/PLAIN
+      // type.
+      // TODO(b/146353094): Allow octet-stream scripts only during SwG
+      // Encryption.
       if (tagSpec.tagName === 'SCRIPT') {
         let hasSrc = false;
         let hasJson = false;
         let hasTextPlain = false;
+        let hasOctetStream = false;
         for (const attrSpecId of tagSpec.attrs) {
           if (attrSpecId < 0) { continue; }
           const attrSpec = rules.attrs[attrSpecId];
@@ -1594,16 +1592,21 @@ describe('ValidatorRulesMakeSense', () => {
                   value === 'application/json') {
                 hasJson = true;
               }
+              if (value === 'application/octet-stream') {
+                hasOctetStream = true;
+              }
               if (value == 'text/plain') {
                 hasTextPlain = true;
               }
             }
           }
         }
-        it('script tags must have either a src attribute or type json or '
-           + 'text/plain', () => {
-          expect(hasSrc || hasJson || hasTextPlain).toBe(true);
-        });
+        it('script tags must have either a src attribute or type json, ' +
+               'octet-stream, or text/plain',
+           () => {
+             expect(hasSrc || hasJson || hasTextPlain || hasOctetStream)
+                 .toBe(true);
+           });
       }
       // cdata_regex and mandatory_cdata
       if ((tagSpec.cdata.cdataRegex !== null) ||

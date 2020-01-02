@@ -15,7 +15,10 @@
  */
 
 import '../amp-autocomplete';
+import {AmpAutocomplete} from '../amp-autocomplete';
 import {Keys} from '../../../../src/utils/key-codes';
+import {createElementWithAttributes} from '../../../../src/dom';
+import {htmlFor} from '../../../../src/static-template';
 
 describes.realWin(
   'amp-autocomplete unit tests',
@@ -25,63 +28,90 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc, element, impl;
+    let win, doc, impl;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      return buildAmpAutocomplete().then(ampAutocomplete => {
+        impl = ampAutocomplete;
+      });
+    });
 
+    function buildAmpAutocomplete(wantSsr) {
       const form = doc.createElement('form');
-      const ampAutocomplete = doc.createElement('amp-autocomplete');
-      ampAutocomplete.setAttribute('layout', 'container');
-      ampAutocomplete.setAttribute('filter', 'substring');
+      const element = createElementWithAttributes(doc, 'amp-autocomplete', {
+        layout: 'container',
+        filter: 'substring',
+      });
 
       const input = win.document.createElement('input');
       input.setAttribute('type', 'text');
-      ampAutocomplete.appendChild(input);
+      element.appendChild(input);
 
       const script = win.document.createElement('script');
       script.setAttribute('type', 'application/json');
       script.innerHTML = '{ "items" : ["apple", "banana", "orange"] }';
-      ampAutocomplete.appendChild(script);
+      element.appendChild(script);
 
-      form.appendChild(ampAutocomplete);
+      form.appendChild(element);
       doc.body.appendChild(form);
-      return ampAutocomplete.build().then(() => {
-        element = ampAutocomplete;
-        impl = element.implementation_;
+
+      if (wantSsr) {
+        element.removeAttribute('filter');
+        element.setAttribute('src', 'example.json');
+        const template = doc.createElement('template');
+        element.appendChild(template);
+      }
+
+      const ampAutocomplete = new AmpAutocomplete(element);
+      const ssrTemplateHelper = ampAutocomplete.getSsrTemplateHelper();
+      env.sandbox.stub(ssrTemplateHelper, 'isEnabled').returns(wantSsr);
+
+      return ampAutocomplete.buildCallback().then(() => {
+        return ampAutocomplete;
       });
-    });
+    }
+
+    function getRenderedSuggestions() {
+      const html = htmlFor(doc);
+      return html`
+        <div>
+          <div data-value="apple"></div>
+          <div data-value="mango"></div>
+          <div data-value="pear"></div>
+        </div>
+      `;
+    }
 
     describe('mutatedAttributesCallback_()', () => {
-      let remoteDataSpy;
-      let filterAndRenderSpy;
+      let remoteDataSpy, autocompleteSpy;
 
       beforeEach(() => {
-        remoteDataSpy = sandbox
+        remoteDataSpy = env.sandbox
           .stub(impl, 'getRemoteData_')
           .resolves(['a', 'b', 'c']);
-        filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
+        autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
       });
 
       it('should resolve when param is {}', () => {
         return impl.mutatedAttributesCallback({}).then(() => {
           expect(remoteDataSpy).not.to.have.been.called;
-          expect(filterAndRenderSpy).not.to.have.been.called;
+          expect(autocompleteSpy).not.to.have.been.called;
         });
       });
 
       it('should resolve when src is undefined', () => {
         return impl.mutatedAttributesCallback({'src': undefined}).then(() => {
           expect(remoteDataSpy).not.to.have.been.called;
-          expect(filterAndRenderSpy).not.to.have.been.called;
+          expect(autocompleteSpy).not.to.have.been.called;
         });
       });
 
       it('should resolve when src is null', () => {
         return impl.mutatedAttributesCallback({'src': null}).then(() => {
           expect(remoteDataSpy).not.to.have.been.called;
-          expect(filterAndRenderSpy).not.to.have.been.called;
+          expect(autocompleteSpy).not.to.have.been.called;
         });
       });
 
@@ -91,8 +121,8 @@ describes.realWin(
           .then(() => {
             expect(remoteDataSpy).to.have.been.calledOnce;
             expect(impl.sourceData_).to.have.ordered.members(['a', 'b', 'c']);
-            expect(filterAndRenderSpy).to.have.been.calledOnce;
-            expect(filterAndRenderSpy).to.have.been.calledWith(
+            expect(autocompleteSpy).to.have.been.calledOnce;
+            expect(autocompleteSpy).to.have.been.calledWith(
               ['a', 'b', 'c'],
               ''
             );
@@ -105,8 +135,8 @@ describes.realWin(
           .then(() => {
             expect(remoteDataSpy).not.to.have.been.called;
             expect(impl.sourceData_).to.have.ordered.members(['a', 'b', 'c']);
-            expect(filterAndRenderSpy).to.have.been.calledOnce;
-            expect(filterAndRenderSpy).to.have.been.calledWith(
+            expect(autocompleteSpy).to.have.been.calledOnce;
+            expect(autocompleteSpy).to.have.been.calledWith(
               ['a', 'b', 'c'],
               ''
             );
@@ -119,8 +149,8 @@ describes.realWin(
           .then(() => {
             expect(remoteDataSpy).not.to.have.been.called;
             expect(impl.sourceData_).to.be.an('array').that.is.empty;
-            expect(filterAndRenderSpy).to.have.been.calledOnce;
-            expect(filterAndRenderSpy).to.have.been.calledWith([], '');
+            expect(autocompleteSpy).to.have.been.calledOnce;
+            expect(autocompleteSpy).to.have.been.calledWith([], '');
           });
       });
     });
@@ -174,22 +204,22 @@ describes.realWin(
       expect(element.innerHTML).to.equal('hello');
     });
 
-    describe('filterDataAndRenderResults_()', () => {
+    describe('autocomplete_()', () => {
       let clearAllItemsSpy;
       let renderSpy;
       let filterDataSpy;
 
       beforeEach(() => {
         expect(impl.container_).not.to.be.null;
-        expect(impl.container_.children.length).to.equal(0);
-        clearAllItemsSpy = sandbox.spy(impl, 'clearAllItems_');
-        filterDataSpy = sandbox.spy(impl, 'filterData_');
-        renderSpy = sandbox.spy(impl, 'renderResults_');
+        expect(impl.container_.children).to.have.length(0);
+        clearAllItemsSpy = env.sandbox.spy(impl, 'clearAllItems_');
+        filterDataSpy = env.sandbox.spy(impl, 'filterData_');
+        renderSpy = env.sandbox.spy(impl, 'renderResults_');
       });
 
       it('should only clear if input < minChars_', () => {
         impl.minChars_ = 3;
-        return impl.filterDataAndRenderResults_([], 'ap').then(() => {
+        return impl.autocomplete_([], 'ap').then(() => {
           expect(clearAllItemsSpy).to.have.been.calledOnce;
           expect(filterDataSpy).not.to.have.been.called;
           expect(renderSpy).not.to.have.been.called;
@@ -197,7 +227,7 @@ describes.realWin(
       });
 
       it('should only clear if data is null', () => {
-        return impl.filterDataAndRenderResults_(null, 'ap').then(() => {
+        return impl.autocomplete_(null, 'ap').then(() => {
           expect(clearAllItemsSpy).to.have.been.calledOnce;
           expect(filterDataSpy).not.to.have.been.called;
           expect(renderSpy).not.to.have.been.called;
@@ -205,7 +235,7 @@ describes.realWin(
       });
 
       it('should only clear if data is []', () => {
-        return impl.filterDataAndRenderResults_([], 'ap').then(() => {
+        return impl.autocomplete_([], 'ap').then(() => {
           expect(clearAllItemsSpy).to.have.been.calledOnce;
           expect(filterDataSpy).not.to.have.been.called;
           expect(renderSpy).not.to.have.been.called;
@@ -214,57 +244,83 @@ describes.realWin(
 
       it('should pass on valid arguments', () => {
         impl.minChars_ = 2;
-        return impl
-          .filterDataAndRenderResults_(impl.sourceData_, 'ap')
-          .then(() => {
-            expect(clearAllItemsSpy).to.have.been.calledOnce;
-            expect(filterDataSpy).to.have.been.calledWith(
-              impl.sourceData_,
-              'ap'
-            );
-            expect(renderSpy).to.have.been.calledWith(
-              ['apple'],
-              impl.container_
-            );
-            expect(impl.container_.children.length).to.equal(1);
-            expect(impl.container_.children[0].innerText).to.equal('apple');
-          });
+        return impl.autocomplete_(impl.sourceData_, 'ap').then(() => {
+          expect(clearAllItemsSpy).to.have.been.calledOnce;
+          expect(filterDataSpy).to.have.been.calledWith(impl.sourceData_, 'ap');
+          expect(renderSpy).to.have.been.calledWith(['apple'], impl.container_);
+          expect(impl.container_.children).to.have.length(1);
+          expect(impl.container_.children[0].innerText).to.equal('apple');
+        });
       });
     });
 
-    it('renderResults_() should update the container_ with plain text', () => {
-      const createSpy = sandbox.spy(impl, 'createElementFromItem_');
-      return impl.renderResults_(['apple'], impl.container_).then(() => {
-        expect(impl.container_.children.length).to.equal(1);
+    describe('getRemoteData_()', () => {
+      it('should proxy XHR to viewer', async () => {
+        impl = await buildAmpAutocomplete(true);
+        impl.element.setAttribute('src', '');
+        const rendered = getRenderedSuggestions();
+        const ssrSpy = env.sandbox
+          .stub(impl.getSsrTemplateHelper(), 'ssr')
+          .returns(Promise.resolve({rendered}));
+        await impl.getRemoteData_();
+        expect(ssrSpy).to.be.calledOnce;
+      });
+    });
+
+    describe('renderResults()', () => {
+      it('should delegate template rendering to viewer', async () => {
+        impl = await buildAmpAutocomplete(true);
+        const data = ['apple', 'mango', 'pear'];
+        env.sandbox
+          .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
+          .returns(Promise.resolve(getRenderedSuggestions()));
+        await impl.renderResults_(data, impl.container_);
+        expect(impl.getSsrTemplateHelper().applySsrOrCsrTemplate).to.be
+          .calledOnce;
+        expect(
+          impl.getSsrTemplateHelper().applySsrOrCsrTemplate
+        ).to.have.been.calledWith(impl.element, data);
+        expect(impl.container_.children[0].getAttribute('data-value')).to.equal(
+          data[0]
+        );
+        expect(impl.container_.children[1].getAttribute('data-value')).to.equal(
+          data[1]
+        );
+        expect(impl.container_.children[2].getAttribute('data-value')).to.equal(
+          data[2]
+        );
+        expect(impl.container_.children).to.have.length(3);
+      });
+
+      it('should update the container_ with plain text', async () => {
+        const createSpy = env.sandbox.spy(impl, 'createElementFromItem_');
+        await impl.renderResults_(['apple'], impl.container_);
+        expect(impl.container_.children).to.have.length(1);
         expect(impl.container_.children[0].innerText).to.equal('apple');
         expect(createSpy).to.have.been.calledOnce;
         expect(createSpy).to.have.been.calledWith('apple');
       });
-    });
 
-    it('renderResults_() should update the container_ with rich text', () => {
-      const sourceData = [{value: 'apple'}, {value: 'mango'}, {value: 'pear'}];
-      impl.templateElement_ = doc.createElement('template');
-      const renderedChildren = [];
-      sourceData.forEach(item => {
-        const renderedChild = doc.createElement('div');
-        renderedChild.setAttribute('data-value', item.value);
-        renderedChildren.push(renderedChild);
-      });
-      const renderTemplateSpy = sandbox
-        .stub(impl.templates_, 'renderTemplateArray')
-        .returns(Promise.resolve(renderedChildren));
-
-      return impl.renderResults_(sourceData, impl.container_).then(() => {
-        expect(impl.container_.children.length).to.equal(3);
+      it('should update the container_ with rich text', async () => {
+        const sourceData = [
+          {value: 'apple'},
+          {value: 'mango'},
+          {value: 'pear'},
+        ];
+        impl = await buildAmpAutocomplete(true);
+        const renderTemplateSpy = env.sandbox
+          .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
+          .returns(Promise.resolve(getRenderedSuggestions()));
+        await impl.renderResults_(sourceData, impl.container_);
+        expect(impl.container_.children).to.have.length(3);
         expect(impl.container_.children[0].getAttribute('data-value')).to.equal(
-          'apple'
+          sourceData[0].value
         );
         expect(impl.container_.children[1].getAttribute('data-value')).to.equal(
-          'mango'
+          sourceData[1].value
         );
         expect(impl.container_.children[2].getAttribute('data-value')).to.equal(
-          'pear'
+          sourceData[2].value
         );
         expect(renderTemplateSpy).to.have.been.calledOnce;
       });
@@ -307,11 +363,11 @@ describes.realWin(
       // Remaining filters should error
       impl.filter_ = 'custom';
       expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-        'Filter not yet supported: custom'
+        /Filter not yet supported:/
       );
       impl.filter_ = 'invalid';
       expect(() => impl.filterData_(['a', 'b', 'c'], 'a')).to.throw(
-        'Unexpected filter: invalid'
+        /Unexpected filter:/
       );
     });
 
@@ -386,53 +442,95 @@ describes.realWin(
     });
 
     it('should show and hide results on toggle', () => {
-      expect(impl.resultsShowing_()).to.be.false;
+      expect(impl.areResultsDisplayed_()).to.be.false;
       return impl.renderResults_(['apple'], impl.container_).then(() => {
-        expect(impl.resultsShowing_()).to.be.false;
+        expect(impl.areResultsDisplayed_()).to.be.false;
         impl.toggleResults_(true);
-        expect(impl.resultsShowing_()).to.be.true;
+        expect(impl.areResultsDisplayed_()).to.be.true;
         impl.toggleResults_(false);
-        expect(impl.resultsShowing_()).to.be.false;
+        expect(impl.areResultsDisplayed_()).to.be.false;
       });
     });
 
     describe('inputHandler_() on input', () => {
-      let renderSpy, toggleResultsSpy, updateActiveSpy;
+      let renderSpy,
+        toggleResultsSpy,
+        updateActiveSpy,
+        clearAllItemsSpy,
+        remoteDataSpy;
+
+      it('should only clear items if binding should not autocomplete', () => {
+        return impl
+          .layoutCallback()
+          .then(() => {
+            renderSpy = env.sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+            clearAllItemsSpy = env.sandbox.spy(impl, 'clearAllItems_');
+            env.sandbox
+              .stub(impl.binding_, 'shouldAutocomplete')
+              .returns(false);
+            return impl.inputHandler_();
+          })
+          .then(() => {
+            expect(clearAllItemsSpy).to.have.been.calledOnce;
+            expect(renderSpy).not.to.have.been.called;
+            expect(toggleResultsSpy).not.to.have.been.called;
+          });
+      });
+
+      it('should only fetch data when autocompleting for SSR', async () => {
+        impl = await buildAmpAutocomplete(true);
+        await impl.layoutCallback();
+        const autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
+        toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+        remoteDataSpy = env.sandbox
+          .stub(impl, 'getRemoteData_')
+          .resolves(['abc']);
+        env.sandbox.stub(impl.binding_, 'shouldAutocomplete').returns(true);
+        await impl.inputHandler_();
+        expect(remoteDataSpy).to.have.been.calledOnce;
+        expect(autocompleteSpy).to.have.been.calledOnce;
+        expect(toggleResultsSpy).to.have.been.calledOnce;
+        await impl.inputHandler_();
+        expect(remoteDataSpy).to.have.been.calledTwice;
+        expect(autocompleteSpy).to.have.been.calledTwice;
+        expect(toggleResultsSpy).to.have.been.calledTwice;
+      });
 
       it('should record and respond to input', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             impl.inputElement_.value = 'a';
-            renderSpy = sandbox.spy(impl, 'renderResults_');
-            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-            updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
-            expect(impl.suggestFirst_).to.be.false;
+            renderSpy = env.sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+            updateActiveSpy = env.sandbox.spy(impl, 'updateActiveItem_');
+            expect(impl.shouldSuggestFirst_).to.be.false;
             return impl.inputHandler_();
           })
           .then(() => {
             expect(renderSpy).to.have.been.calledOnce;
             expect(toggleResultsSpy).to.have.been.calledWith(true);
-            expect(impl.container_.children.length).to.equal(3);
+            expect(impl.container_.children).to.have.length(3);
             expect(updateActiveSpy).not.to.have.been.called;
           });
       });
 
       it('should suggest first item when present', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             impl.inputElement_.value = 'a';
-            renderSpy = sandbox.spy(impl, 'renderResults_');
-            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-            updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
-            impl.suggestFirst_ = true;
+            renderSpy = env.sandbox.spy(impl, 'renderResults_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+            updateActiveSpy = env.sandbox.spy(impl, 'updateActiveItem_');
+            impl.shouldSuggestFirst_ = true;
             return impl.inputHandler_();
           })
           .then(() => {
             expect(renderSpy).to.have.been.calledOnce;
             expect(toggleResultsSpy).to.have.been.calledWith(true);
-            expect(impl.container_.children.length).to.equal(3);
+            expect(impl.container_.children).to.have.length(3);
             expect(updateActiveSpy).to.have.been.calledWith(1);
           });
       });
@@ -443,17 +541,17 @@ describes.realWin(
       let displayInputSpy, updateActiveSpy, eventPreventSpy;
 
       beforeEach(() => {
-        displayInputSpy = sandbox.spy(impl, 'displayUserInput_');
-        updateActiveSpy = sandbox.spy(impl, 'updateActiveItem_');
-        eventPreventSpy = sandbox.spy(event, 'preventDefault');
+        displayInputSpy = env.sandbox.spy(impl, 'displayUserInput_');
+        updateActiveSpy = env.sandbox.spy(impl, 'updateActiveItem_');
+        eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
       });
 
       it('should updateActiveItem_ when results showing on Down arrow', () => {
-        sandbox
-          .stub(impl, 'resultsShowing_')
+        env.sandbox
+          .stub(impl, 'areResultsDisplayed_')
           .onFirstCall()
           .returns(true);
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             impl.activeIndex_ = 0;
@@ -467,8 +565,8 @@ describes.realWin(
       });
 
       it('should displayUserInput_ when looping on Down arrow', () => {
-        sandbox.stub(impl, 'resultsShowing_').returns(true);
-        return element
+        env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
+        return impl
           .layoutCallback()
           .then(() => {
             return impl.keyDownHandler_(event);
@@ -481,20 +579,17 @@ describes.realWin(
       });
 
       it('should display results if not already on Down arrow', () => {
-        let filterAndRenderSpy, toggleResultsSpy;
-        return element
+        let autocompleteSpy, toggleResultsSpy;
+        return impl
           .layoutCallback()
           .then(() => {
-            filterAndRenderSpy = sandbox.spy(
-              impl,
-              'filterDataAndRenderResults_'
-            );
-            toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
+            autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
+            toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
             return impl.keyDownHandler_(event);
           })
           .then(() => {
             expect(eventPreventSpy).to.have.been.calledOnce;
-            expect(filterAndRenderSpy).to.have.been.calledOnce;
+            expect(autocompleteSpy).to.have.been.calledOnce;
             expect(toggleResultsSpy).to.have.been.calledWith(true);
             expect(displayInputSpy).not.to.have.been.called;
             expect(updateActiveSpy).not.to.have.been.called;
@@ -502,7 +597,7 @@ describes.realWin(
       });
 
       it('should updateActiveItem_ on Up arrow', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             event.key = Keys.UP_ARROW;
@@ -516,7 +611,7 @@ describes.realWin(
       });
 
       it('should displayUserInput_ when looping on Up arrow', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
             event.key = Keys.UP_ARROW;
@@ -539,11 +634,11 @@ describes.realWin(
       };
       let selectItemSpy, resetSpy, clearAllSpy, eventPreventSpy;
       function layoutAndSetSpies() {
-        return element.layoutCallback().then(() => {
-          eventPreventSpy = sandbox.spy(event, 'preventDefault');
-          selectItemSpy = sandbox.spy(impl, 'selectItem_');
-          resetSpy = sandbox.spy(impl, 'resetActiveElement_');
-          clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
+        return impl.layoutCallback().then(() => {
+          eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
+          selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
+          resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
+          clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
         });
       }
 
@@ -565,7 +660,7 @@ describes.realWin(
         return layoutAndSetSpies()
           .then(() => {
             impl.activeElement_ = impl.createElementFromItem_('abc');
-            sandbox.stub(impl, 'resultsShowing_').returns(true);
+            env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
             return impl.keyDownHandler_(event);
           })
           .then(() => {
@@ -574,108 +669,63 @@ describes.realWin(
             expect(clearAllSpy).to.have.been.calledOnce;
             expect(resetSpy).to.have.been.calledOnce;
             expect(eventPreventSpy).to.have.been.calledOnce;
-            expect(impl.submitOnEnter_).to.be.false;
           });
       });
 
-      it('should call event.preventDefault when submitOnEnter_ is true', () => {
+      it('should call event.preventDefault based on binding', () => {
         return layoutAndSetSpies()
           .then(() => {
-            impl.submitOnEnter_ = true;
             impl.activeElement_ = impl.createElementFromItem_('abc');
+            env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
+            env.sandbox
+              .stub(impl.binding_, 'shouldPreventFormSubmissionOnEnter')
+              .returns(true);
             return impl.keyDownHandler_(event);
           })
           .then(() => {
-            expect(impl.inputElement_.value).to.equal('abc');
             expect(selectItemSpy).to.have.been.calledOnce;
             expect(clearAllSpy).to.have.been.calledOnce;
             expect(resetSpy).to.have.been.calledOnce;
-            expect(eventPreventSpy).not.to.have.been.called;
-            expect(impl.submitOnEnter_).to.be.true;
+            expect(eventPreventSpy).to.have.been.called;
           });
       });
     });
 
-    it('should call keyDownHandler_() on Enter not event.preventDefault', () => {
-      const event = {
-        key: Keys.ENTER,
-        preventDefault: () => {},
-        target: {textContent: 'hello'},
-      };
-      let selectItemSpy, resetSpy, clearAllSpy, eventPreventSpy;
-      return element
-        .layoutCallback()
-        .then(() => {
-          eventPreventSpy = sandbox.spy(event, 'preventDefault');
-          selectItemSpy = sandbox.spy(impl, 'selectItem_');
-          resetSpy = sandbox.spy(impl, 'resetActiveElement_');
-          clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
-          sandbox.stub(impl, 'resultsShowing_').returns(true);
-          return impl.keyDownHandler_(event);
-        })
-        .then(() => {
-          expect(impl.inputElement_.value).to.equal('');
-          expect(selectItemSpy).not.to.have.been.called;
-          expect(clearAllSpy).not.to.have.been.called;
-          expect(resetSpy).not.to.have.been.called;
-          expect(eventPreventSpy).to.have.been.calledOnce;
-          impl.activeElement_ = impl.createElementFromItem_('abc');
-          return impl.keyDownHandler_(event);
-        })
-        .then(() => {
-          expect(impl.inputElement_.value).to.equal('abc');
-          expect(selectItemSpy).to.have.been.calledOnce;
-          expect(clearAllSpy).to.have.been.calledOnce;
-          expect(resetSpy).to.have.been.calledOnce;
-          expect(eventPreventSpy).to.have.been.calledTwice;
-          expect(impl.submitOnEnter_).to.be.false;
-          impl.submitOnEnter_ = true;
-          impl.activeElement_ = impl.createElementFromItem_('abc');
-          return impl.keyDownHandler_(event);
-        })
-        .then(() => {
-          expect(impl.inputElement_.value).to.equal('abc');
-          expect(selectItemSpy).to.have.been.calledTwice;
-          expect(clearAllSpy).to.have.been.calledTwice;
-          expect(resetSpy).to.have.been.calledTwice;
-          expect(eventPreventSpy).to.have.been.calledTwice;
-          expect(impl.submitOnEnter_).to.be.true;
-        });
-    });
-
     it('should call keyDownHandler_() on Esc', () => {
-      const event = {key: Keys.ESCAPE};
-      const displayInputSpy = sandbox.spy(impl, 'displayUserInput_');
-      const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
-      const toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-      return element
+      const event = {key: Keys.ESCAPE, preventDefault: () => {}};
+      const displayInputSpy = env.sandbox.spy(impl, 'displayUserInput_');
+      const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
+      const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+      return impl
         .layoutCallback()
         .then(() => {
           impl.userInput_ = 'a';
           return impl.renderResults_(impl.sourceData_, impl.container_);
         })
         .then(() => {
-          expect(impl.container_.children.length).to.equal(3);
+          expect(impl.container_.children).to.have.length(3);
           expect(resetSpy).to.have.been.calledOnce;
           impl.toggleResults_(true);
-          expect(impl.resultsShowing_()).to.be.true;
+          expect(impl.areResultsDisplayed_()).to.be.true;
           return impl.keyDownHandler_(event);
         })
         .then(() => {
           expect(displayInputSpy).to.have.been.calledOnce;
           expect(resetSpy).to.have.been.calledTwice;
           expect(toggleResultsSpy).to.have.been.calledWith(false);
-          expect(impl.resultsShowing_()).to.be.false;
+          expect(impl.areResultsDisplayed_()).to.be.false;
         });
     });
 
     it('should call keyDownHandler_() on Tab', () => {
-      const event = {key: Keys.TAB};
+      const event = {key: Keys.TAB, preventDefault: () => {}};
+      const eventPreventSpy = env.sandbox.spy(event, 'preventDefault');
       impl.inputElement_.value = 'expected';
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
-      const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
-      return element
+      env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+      return impl
         .layoutCallback()
         .then(() => {
           return impl.keyDownHandler_(event);
@@ -683,6 +733,7 @@ describes.realWin(
         .then(() => {
           expect(impl.userInput_).to.equal(impl.inputElement_.value);
           expect(fireEventSpy).to.have.been.calledWith(impl.userInput_);
+          expect(eventPreventSpy).to.have.been.calledOnce;
         });
     });
 
@@ -690,10 +741,10 @@ describes.realWin(
       const event = {key: Keys.BACKSPACE};
 
       it('should set flag to true when suggest-first is present', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
-            impl.suggestFirst_ = true;
+            impl.shouldSuggestFirst_ = true;
             expect(impl.detectBackspace_).to.be.false;
             return impl.keyDownHandler_(event);
           })
@@ -703,10 +754,10 @@ describes.realWin(
       });
 
       it('should not set flag when suggest-first is absent', () => {
-        return element
+        return impl
           .layoutCallback()
           .then(() => {
-            expect(impl.suggestFirst_).to.be.false;
+            expect(impl.shouldSuggestFirst_).to.be.false;
             expect(impl.detectBackspace_).to.be.false;
             return impl.keyDownHandler_(event);
           })
@@ -718,15 +769,15 @@ describes.realWin(
 
     it('should call keyDownHandler_() and fallthrough on any other key', () => {
       const event = {key: Keys.LEFT_ARROW};
-      return element.layoutCallback().then(() => {
+      return impl.layoutCallback().then(() => {
         return expect(impl.keyDownHandler_(event)).to.be.fulfilled;
       });
     });
 
     it('should call toggleResultsHandler_()', () => {
-      const toggleResultsSpy = sandbox.spy(impl, 'toggleResults_');
-      const resetSpy = sandbox.spy(impl, 'resetActiveElement_');
-      return element
+      const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
+      const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
+      return impl
         .layoutCallback()
         .then(() => {
           return impl.toggleResultsHandler_(true);
@@ -748,10 +799,10 @@ describes.realWin(
     });
 
     it('should call selectHandler_() on mousedown', () => {
-      const getItemSpy = sandbox.spy(impl, 'getItemElement_');
-      const selectItemSpy = sandbox.spy(impl, 'selectItem_');
+      const getItemSpy = env.sandbox.spy(impl, 'getItemElement_');
+      const selectItemSpy = env.sandbox.spy(impl, 'selectItem_');
       let mockEl = doc.createElement('div');
-      return element
+      return impl
         .layoutCallback()
         .then(() => {
           impl.toggleResults_(true);
@@ -773,10 +824,10 @@ describes.realWin(
     });
 
     it('should fire select event from selectItem_', () => {
-      const fireEventSpy = sandbox.spy(impl, 'fireSelectEvent_');
-      const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+      const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
       const mockEl = doc.createElement('div');
-      return element.layoutCallback().then(() => {
+      return impl.layoutCallback().then(() => {
         impl.toggleResults_(true);
         mockEl.setAttribute('data-value', 'test');
         impl.selectItem_(mockEl);
@@ -788,7 +839,7 @@ describes.realWin(
 
     it('should support marking active items', () => {
       let resetSpy;
-      return element
+      return impl
         .layoutCallback()
         .then(() => {
           expect(impl.activeElement_).to.be.null;
@@ -797,13 +848,13 @@ describes.realWin(
           return impl.renderResults_(impl.sourceData_, impl.container_);
         })
         .then(() => {
-          expect(impl.container_.children.length).to.equal(3);
+          expect(impl.container_.children).to.have.length(3);
           impl.activeElement_ = doc.createElement('div');
           expect(impl.activeElement_).not.to.be.null;
           expect(impl.resetActiveElement_()).to.equal();
           expect(impl.activeElement_).to.be.null;
           impl.toggleResults_(true);
-          resetSpy = sandbox.spy(impl, 'resetActiveElement_');
+          resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
           return impl.updateActiveItem_(1);
         })
         .then(() => {
@@ -873,25 +924,22 @@ describes.realWin(
       expect(impl.selectItem_(disabledItem)).to.be.undefined;
     });
 
-    it('should not return disabled items from getEnabledItems_()', () => {
-      impl.templateElement_ = doc.createElement('template');
+    it('should not return disabled items from getEnabledItems_()', async () => {
+      impl = await buildAmpAutocomplete(true);
       const sourceData = ['apple', 'mango', 'pear'];
-      const renderedChildren = sourceData.map(item => {
-        const renderedChild = doc.createElement('div');
-        renderedChild.setAttribute('data-value', item);
-        return renderedChild;
-      });
-      renderedChildren[2].setAttribute('data-disabled', '');
-      sandbox
-        .stub(impl.templates_, 'renderTemplateArray')
-        .returns(Promise.resolve(renderedChildren));
+      const rendered = getRenderedSuggestions();
+      rendered.children[2].removeAttribute('data-value', '');
+      rendered.children[2].setAttribute('data-disabled', '');
+      env.sandbox
+        .stub(impl.getSsrTemplateHelper(), 'applySsrOrCsrTemplate')
+        .returns(Promise.resolve(rendered));
 
-      return impl.renderResults_(sourceData, impl.container_).then(() => {
-        expect(impl.container_.children.length).to.equal(3);
-        expect(impl.getEnabledItems_().length).to.equal(2);
-        expect(impl.container_.children[2].hasAttribute('aria-disabled')).to.be
-          .true;
-      });
+      await impl.renderResults_(sourceData, impl.container_);
+      expect(impl.container_.children).to.have.length(3);
+      expect(impl.getEnabledItems_()).to.have.length(2);
+      expect(
+        impl.container_.children[2].getAttribute('aria-disabled')
+      ).to.equal('true');
     });
 
     describe('fallback on error', () => {
@@ -901,15 +949,15 @@ describes.realWin(
 
       beforeEach(() => {
         impl.element.setAttribute('src', 'invalid-path');
-        fallbackSpy = sandbox.spy(impl, 'displayFallback_');
-        toggleFallbackSpy = sandbox.spy(impl, 'toggleFallback');
-        getDataSpy = sandbox
+        fallbackSpy = env.sandbox.spy(impl, 'displayFallback_');
+        toggleFallbackSpy = env.sandbox.spy(impl, 'toggleFallback');
+        getDataSpy = env.sandbox
           .stub(impl, 'getRemoteData_')
           .returns(Promise.reject('Error for test'));
       });
 
       it('should throw error when fallback is not provided', () => {
-        return element.layoutCallback().catch(e => {
+        return impl.layoutCallback().catch(e => {
           expect(getDataSpy).to.have.been.calledOnce;
           expect(fallbackSpy).to.have.been.calledWith(e);
           expect(toggleFallbackSpy).not.to.have.been.called;
@@ -917,8 +965,8 @@ describes.realWin(
       });
 
       it('should not display fallback before user interaction', () => {
-        sandbox.stub(impl, 'getFallback').returns(true);
-        return element.layoutCallback().then(() => {
+        env.sandbox.stub(impl, 'getFallback').returns(true);
+        return impl.layoutCallback().then(() => {
           expect(getDataSpy).not.to.have.been.called;
           expect(fallbackSpy).not.to.have.been.called;
           expect(toggleFallbackSpy).not.to.have.been.called;
@@ -926,14 +974,25 @@ describes.realWin(
       });
 
       it('should display fallback after user interaction if provided', () => {
-        sandbox.stub(impl, 'getFallback').returns(true);
-        return element.layoutCallback().then(() => {
+        env.sandbox.stub(impl, 'getFallback').returns(true);
+        return impl.layoutCallback().then(() => {
           impl.checkFirstInteractionAndMaybeFetchData_().then(() => {
             expect(getDataSpy).to.have.been.calledOnce;
             expect(fallbackSpy).to.have.been.calledWith('Error for test');
             expect(toggleFallbackSpy).to.have.been.calledWith(true);
           });
         });
+      });
+    });
+
+    it('should generate expected src values from "query" attribute', () => {
+      return impl.layoutCallback().then(() => {
+        impl.queryKey_ = 'q';
+        impl.srcBase_ = 'https://www.data.com/';
+        expect(impl.generateSrc_('')).to.equal('https://www.data.com/?q=');
+        expect(impl.generateSrc_('abc')).to.equal(
+          'https://www.data.com/?q=abc'
+        );
       });
     });
   }

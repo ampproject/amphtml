@@ -46,7 +46,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
   });
 
   it('should reject trigger in a disallowed environment', () => {
-    sandbox.stub(root, 'getType').callsFake(() => 'other');
+    env.sandbox.stub(root, 'getType').callsFake(() => 'other');
     allowConsoleError(() => {
       expect(() => {
         group.addTrigger({on: 'click', selector: '*'});
@@ -55,7 +55,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
   });
 
   it('should reject trigger that fails to initialize', () => {
-    sandbox.stub(root, 'getTracker').callsFake(() => {
+    env.sandbox.stub(root, 'getTracker').callsFake(() => {
       throw new Error('intentional');
     });
     expect(() => {
@@ -66,7 +66,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
   it('should add "click" trigger', () => {
     const tracker = root.getTracker('click', ClickEventTracker);
     const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const config = {on: 'click', selector: '*'};
     const handler = function() {};
     expect(group.listeners_).to.be.empty;
@@ -83,7 +83,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
       ScrollEventTracker
     );
     const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const config = {on: 'scroll', selector: '*'};
     const handler = function() {};
     expect(group.listeners_).to.be.empty;
@@ -105,7 +105,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
       CustomEventTracker
     );
     const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const config = {on: 'custom-event-1', selector: '*'};
     const handler = function() {};
     expect(group.listeners_).to.be.empty;
@@ -128,7 +128,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     expect(tracker).to.be.instanceOf(SignalTracker);
 
     const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const handler = function() {};
     group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
@@ -147,7 +147,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     expect(tracker).to.be.instanceOf(IniLoadTracker);
 
     const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const handler = function() {};
     group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
@@ -162,7 +162,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
   it('should add "timer" trigger', () => {
     const handler = function() {};
     const unlisten = function() {};
-    const stub = sandbox
+    const stub = env.sandbox
       .stub(TimerEventTracker.prototype, 'add')
       .callsFake(() => unlisten);
     const config = {on: 'timer'};
@@ -182,7 +182,7 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
     expect(tracker).to.be.instanceOf(VisibilityTracker);
 
     const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     const handler = function() {};
     group.addTrigger(config, handler);
     expect(stub).to.be.calledOnce;
@@ -191,12 +191,12 @@ describes.realWin('AnalyticsGroup', {amp: 1}, env => {
 
   it('should add "visible" trigger for hidden', () => {
     const config = {on: 'hidden'};
-    const getTrackerSpy = sandbox.spy(root, 'getTracker');
+    const getTrackerSpy = env.sandbox.spy(root, 'getTracker');
     group.addTrigger(config, () => {});
     expect(getTrackerSpy).to.be.calledWith('visible');
     const tracker = root.getTrackerOptional('visible');
     const unlisten = function() {};
-    const stub = sandbox.stub(tracker, 'add').callsFake(() => unlisten);
+    const stub = env.sandbox.stub(tracker, 'add').callsFake(() => unlisten);
     group.addTrigger(config, () => {});
     expect(stub).to.be.calledWith(analyticsElement, 'hidden', config);
   });

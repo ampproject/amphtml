@@ -43,8 +43,7 @@ let inProgress = 0;
 // There's a race in the gulp plugin of closure compiler that gets exposed
 // during various local development scenarios.
 // See https://github.com/google/closure-compiler-npm/issues/9
-const MAX_PARALLEL_CLOSURE_INVOCATIONS =
-  isTravisBuild() && argv.single_pass ? 4 : 1;
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
 
 /**
  * Prefixes the the tmp directory if we need to shadow files that have been
@@ -271,9 +270,9 @@ function compile(
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      // Transpile from ES6 to ES5 if not running with `--esm`
-      // otherwise transpilation is done by Babel
-      language_in: argv.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
+      language_in: 'ECMASCRIPT_2018',
+      // Do not transpile down to ES5 if running with `--esm`, since we do
+      // limited transpilation in Babel.
       language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
@@ -346,7 +345,7 @@ function compile(
       delete compilerOptions.define;
     }
 
-    if (!argv.single_pass && !options.typeCheckOnly) {
+    if (!argv.single_pass) {
       compilerOptions.js_module_root.push(SRC_TEMP_DIR);
     }
 
@@ -366,9 +365,13 @@ function compile(
       }
     });
 
+    const gulpSrcs = !argv.single_pass ? convertPathsToTmpRoot(srcs) : srcs;
+    const gulpBase = !argv.single_pass ? SRC_TEMP_DIR : '.';
+
     if (options.typeCheckOnly) {
       return gulp
-        .src(srcs, {base: '.'})
+        .src(gulpSrcs, {base: gulpBase})
+        .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
         .on('error', err => {
           handleTypeCheckError();
@@ -377,8 +380,6 @@ function compile(
         .pipe(nop())
         .on('end', resolve);
     } else {
-      const gulpSrcs = argv.single_pass ? srcs : convertPathsToTmpRoot(srcs);
-      const gulpBase = argv.single_pass ? '.' : SRC_TEMP_DIR;
       timeInfo.startTime = Date.now();
       return gulp
         .src(gulpSrcs, {base: gulpBase})

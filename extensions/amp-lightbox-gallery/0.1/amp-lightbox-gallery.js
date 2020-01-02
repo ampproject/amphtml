@@ -60,7 +60,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 const TAG = 'amp-lightbox-gallery';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 const SLIDE_ITEM_SELECTOR =
-  '.i-amphtml-slide-item, .i-amphtml-carousel-slide-item';
+  '.i-amphtml-slide-item, .i-amphtml-carousel-slotted';
 
 /**
  * Set of namespaces that indicate the lightbox controls mode.
@@ -187,6 +187,9 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     /** @private @const */
     this.boundMeasureMutate_ = this.measureMutateElement.bind(this);
+
+    /** @private {boolean} */
+    this.swipeStarted_ = false;
 
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
@@ -623,7 +626,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   setupGestures_() {
     const gestures = Gestures.get(dev().assertElement(this.carousel_));
-    gestures.onGesture(SwipeYRecognizer, ({data}) => {
+    gestures.onGesture(SwipeYRecognizer, e => {
+      const {data} = e;
       this.swipeGesture_(data);
     });
   }
@@ -633,14 +637,15 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    * @param {!SwipeDef} data
    */
   swipeGesture_(data) {
-    // Check if the carousel has been cleared out due to close. It is unclear
-    // how this is happening, but there are errors where the carousel is null
-    // at this point.
-    if (!this.carousel_) {
-      return;
-    }
-
     if (data.first) {
+      if (this.swipeStarted_) {
+        dev().error(
+          TAG,
+          'badly ordered swipe gestures: second first without last'
+        );
+      }
+      this.swipeStarted_ = true;
+
       const {sourceElement} = this.getCurrentElement_();
       const parentCarousel = this.getSourceElementParentCarousel_(
         sourceElement
@@ -655,8 +660,17 @@ export class AmpLightboxGallery extends AMP.BaseElement {
       return;
     }
 
+    if (!this.swipeStarted_) {
+      dev().error(
+        TAG,
+        'badly ordered swipe gestures: subsequent without first'
+      );
+      return;
+    }
+
     if (data.last) {
       this.swipeToDismiss_.endSwipe(data);
+      this.swipeStarted_ = false;
       return;
     }
 
@@ -1323,7 +1337,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   updateVideoThumbnails_() {
     const thumbnails = this.manager_
       .getThumbnails(this.currentLightboxGroupId_)
-      .map((thumbnail, index) => Object.assign({index}, thumbnail))
+      .map((thumbnail, index) => ({index, ...thumbnail}))
       .filter(thumbnail => VIDEO_TAGS[thumbnail.element.tagName]);
 
     this.mutateElement(() => {

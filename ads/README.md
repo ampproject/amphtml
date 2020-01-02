@@ -64,7 +64,7 @@ The AMP runtime provides the following information to the ad:
   </ul>
   </dd>
   <dt><code>window.context.container</code></dt>
-  <dd>Contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: <code>amp-sticky-ad</code>, <code>amp-fx-flying-carpet</code>, <code>amp-lightbox`</code>. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.</dd>
+  <dd>Contains the ad container extension name if the current ad slot has one as its DOM ancestor. An valid ad container is one of the following AMP extensions: <code>amp-sticky-ad</code>, <code>amp-fx-flying-carpet</code>, <code>amp-lightbox</code>. As they provide non-trivial user experience, ad networks might want to use this info to select their serving strategies.</dd>
   <dt><code>window.context.domFingerprint</code></dt>
   <dd>Contains a string key based on where in the page the ad slot appears. Its purpose is to identify the same ad slot across many page views. It is formed by listing the ancestor tags and their ordinal position, up to 25 levels. For example, if its value is <code>amp-ad.0,td.1,tr.0,table.0,div/id2.0,div/id1.0</code> this would mean the first amp-ad child of the second td child of the first tr child of... etc.</dd>
   <dt><code>window.context.location</code></dt>
@@ -361,6 +361,7 @@ To speed up the review process, please run `gulp lint` and `gulp check-types`, t
 
 ### Other tips
 
+- Add **cc ampproject/wg-ads** in all pull request's descriptions.
 - It's highly recommended to maintain [an integration test outside AMP repo](../3p/README.md#adding-proper-integration-tests).
 - Please consider implementing the `render-start` and `no-content-available` APIs (see [Available APIs](#available-apis)), which helps AMP to provide user a much better ad loading experience.
 - [CLA](../CONTRIBUTING.md#contributing-code): for anyone who has trouble to pass the automatic CLA check in a pull request, try to follow the guidelines provided by the CLA Bot. Common mistakes are:

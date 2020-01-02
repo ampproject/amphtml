@@ -191,17 +191,17 @@ export const NavigationDirection = {
  * animation.
  * @param {!Window} win
  * @param {!Element} page
- * @param {!../../../src/service/resources-interface.ResourcesInterface} resources
+ * @param {!../../../src/service/mutator-interface.MutatorInterface} mutator
  * @return {function(!Element, ?UnlistenDef)}
  */
-function debounceEmbedResize(win, page, resources) {
+function debounceEmbedResize(win, page, mutator) {
   return debounce(
     win,
     (el, unlisten) => {
       AmpStoryEmbeddedComponent.prepareForAnimation(
         page,
         dev().assertElement(el),
-        resources
+        mutator
       );
       if (unlisten) {
         unlisten();
@@ -247,6 +247,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
+
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
 
     const deferred = new Deferred();
 
@@ -393,13 +396,13 @@ export class AmpStoryPage extends AMP.BaseElement {
     switch (state) {
       case PageState.NOT_ACTIVE:
         this.element.removeAttribute('active');
-        this.pauseCallback();
+        this.pause_();
         this.state_ = state;
         break;
       case PageState.PLAYING:
         if (this.state_ === PageState.NOT_ACTIVE) {
           this.element.setAttribute('active', '');
-          this.resumeCallback();
+          this.resume_();
         }
 
         if (this.state_ === PageState.PAUSED) {
@@ -430,8 +433,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  pauseCallback() {
+  /**
+   * @private
+   */
+  pause_() {
     this.advancement_.stop();
 
     this.stopMeasuringVideoPerformance_();
@@ -458,8 +463,10 @@ export class AmpStoryPage extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  resumeCallback() {
+  /**
+   * @private
+   */
+  resume_() {
     this.registerAllMedia_();
 
     if (this.isActive()) {
@@ -606,7 +613,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       const debouncePrepareForAnimation = debounceEmbedResize(
         this.win,
         this.element,
-        this.resources_
+        this.mutator_
       );
 
       if (forceResize) {
@@ -830,9 +837,14 @@ export class AmpStoryPage extends AMP.BaseElement {
                 // If autoplay got rejected, display a "play" button. If
                 // autoplay was supported, dispay an error message.
                 this.isAutoplaySupported_().then(isAutoplaySupported => {
-                  isAutoplaySupported
-                    ? this.toggleErrorMessage_(true)
-                    : this.togglePlayMessage_(true);
+                  if (isAutoplaySupported) {
+                    this.toggleErrorMessage_(true);
+                    return;
+                  }
+
+                  // Error was expected, don't send the performance metrics.
+                  this.stopMeasuringVideoPerformance_(false /** sendMetrics */);
+                  this.togglePlayMessage_(true);
                 });
               }
 
@@ -1320,16 +1332,18 @@ export class AmpStoryPage extends AMP.BaseElement {
   /**
    * Stops measuring video performance metrics, if performance tracking is on.
    * Computes and sends the metrics.
+   * @param {boolean=} sendMetrics
    * @private
    */
-  stopMeasuringVideoPerformance_() {
+  stopMeasuringVideoPerformance_(sendMetrics = true) {
     if (!this.mediaPerformanceMetricsService_.isPerformanceTrackingOn()) {
       return;
     }
 
     for (let i = 0; i < this.performanceTrackedVideos_.length; i++) {
       this.mediaPerformanceMetricsService_.stopMeasuring(
-        this.performanceTrackedVideos_[i]
+        this.performanceTrackedVideos_[i],
+        sendMetrics
       );
     }
   }
@@ -1388,6 +1402,13 @@ export class AmpStoryPage extends AMP.BaseElement {
    * @private
    */
   onVideoVisibilityUpdate_(event) {
+    // AmpDoc visibility updates are handled by the PAUSED state. This method
+    // only handles video visiblity updates when the ampdoc is visible, eg:
+    // media query update.
+    if (!this.getAmpDoc().isVisible()) {
+      return;
+    }
+
     const ampVideoEl = dev().assertElement(event.target);
     const videoEl = dev().assertElement(
       childElement(ampVideoEl, el => el.tagName === 'VIDEO')
@@ -1456,6 +1477,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     this.playMessageEl_.addEventListener('click', () => {
       this.togglePlayMessage_(false);
+      this.startMeasuringVideoPerformance_();
       this.mediaPoolPromise_
         .then(mediaPool => mediaPool.blessAll())
         .then(() => this.playAllMedia_());

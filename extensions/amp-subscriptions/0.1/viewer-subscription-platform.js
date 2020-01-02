@@ -85,12 +85,22 @@ export class ViewerSubscriptionPlatform {
       'productId': this.currentProductId_,
       'origin': this.origin_,
     });
-    // TODO(chenshay): Viewer Matching: We don't know which viewer it actually
-    // is. Need to check the viewerUrl to know, or more specificlly iterate via
-    // configured platforms and check whether any of these support the viewer.
-    const encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
-      'google.com'
-    );
+    // Defaulting to google.com for now.
+    // TODO(@elijahsoria): Remove google.com and only rely on what is returned
+    // in the cryptokeys param.
+    let encryptedDocumentKey;
+    const cryptokeysNames = this.viewer_.getParam('cryptokeys') || 'google.com';
+    if (cryptokeysNames) {
+      const keyNames = cryptokeysNames.split(',');
+      for (let i = 0; i != keyNames.length; i++) {
+        encryptedDocumentKey = this.serviceAdapter_.getEncryptedDocumentKey(
+          keyNames[i]
+        );
+        if (encryptedDocumentKey) {
+          break;
+        }
+      }
+    }
     if (encryptedDocumentKey) {
       messageData['encryptedDocumentKey'] = encryptedDocumentKey;
     }
@@ -139,26 +149,41 @@ export class ViewerSubscriptionPlatform {
       }
       const entitlements = decodedData['entitlements'];
       let entitlement = Entitlement.empty('local');
-      if (Array.isArray(entitlements)) {
-        for (let index = 0; index < entitlements.length; index++) {
-          if (
-            entitlements[index]['products'].indexOf(currentProductId) !== -1
-          ) {
-            const entitlementObject = entitlements[index];
-            entitlement = new Entitlement({
-              source: 'viewer',
-              raw: token,
-              granted: true,
-              grantReason: entitlementObject.subscriptionToken
-                ? GrantReason.SUBSCRIBER
-                : '',
-              dataObject: entitlementObject,
-              decryptedDocumentKey,
-            });
-            break;
+      let entitlementObject;
+
+      if (entitlements) {
+        // Not null
+        if (Array.isArray(entitlements)) {
+          // Multi entitlement case
+          for (let index = 0; index < entitlements.length; index++) {
+            if (
+              entitlements[index]['products'].indexOf(currentProductId) !== -1
+            ) {
+              entitlementObject = entitlements[index];
+              break;
+            }
           }
+        } else if (entitlements['products'].indexOf(currentProductId) !== -1) {
+          // Single entitlment case
+          entitlementObject = entitlements;
         }
-      } else if (decodedData['metering'] && !decodedData['entitlements']) {
+
+        if (entitlementObject) {
+          // Found a match
+          entitlement = new Entitlement({
+            source: 'viewer',
+            raw: token,
+            granted: true,
+            grantReason: entitlementObject.subscriptionToken
+              ? GrantReason.SUBSCRIBER
+              : '',
+            dataObject: entitlementObject,
+            decryptedDocumentKey,
+          });
+        }
+      }
+
+      if (decodedData['metering'] && !entitlement.granted) {
         // Special case where viewer gives metering but no entitlement
         entitlement = new Entitlement({
           source: decodedData['iss'] || '',
@@ -166,18 +191,6 @@ export class ViewerSubscriptionPlatform {
           granted: true,
           grantReason: GrantReason.METERING,
           dataObject: decodedData['metering'],
-          decryptedDocumentKey,
-        });
-      } else if (entitlements) {
-        // Not null
-        entitlement = new Entitlement({
-          source: 'viewer',
-          raw: token,
-          granted: entitlements.granted,
-          grantReason: entitlements.subscriptionToken
-            ? GrantReason.SUBSCRIBER
-            : '',
-          dataObject: entitlements,
           decryptedDocumentKey,
         });
       }
