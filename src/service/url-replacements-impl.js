@@ -26,7 +26,6 @@ import {
 import {
   addMissingParamsToUrl,
   addParamsToUrl,
-  appendEncodedParamStringToUrl,
   getSourceUrl,
   isProtocolValid,
   parseQueryString,
@@ -1155,8 +1154,7 @@ export class UrlReplacements {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
     if (additionalUrlParameters) {
-      // Do not need to encode the additionalUrlParameters
-      href = appendEncodedParamStringToUrl(href, additionalUrlParameters);
+      href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
     }
 
     const isAllowedOrigin = this.isAllowedOrigin_(url);
