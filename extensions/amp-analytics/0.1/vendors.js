@@ -92,7 +92,7 @@ import {SHINYSTAT_CONFIG} from './vendors/shinystat';
 import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SNOWPLOW_CONFIG} from './vendors/snowplow';
 import {SNOWPLOW_V2_CONFIG} from './vendors/snowplow_v2';
-import {SUBSCRIPTIONS_PROPENSITY_CONFIG} from './vendors/propensity';
+import {SUBSCRIPTIONS_PROPENSITY_CONFIG} from './vendors/subscriptions-propensity';
 import {TEAANALYTICS_CONFIG} from './vendors/teaanalytics';
 import {TEALIUMCOLLECT_CONFIG} from './vendors/tealiumcollect';
 import {TOP100_CONFIG} from './vendors/top100';
