@@ -16,8 +16,14 @@
 import {logging} from 'selenium-webdriver';
 
 /** @enum {string} */
-const NetworkMethods = {
+const PerformanceMethods = {
+  'FRAME_ATTACHED': 'Page.frameAttached',
+  'FRAME_NAVIGATED': 'Page.frameNavigated',
+  'FRAME_STARTED_LOADING': 'Page.frameStartedLoading',
+  'FRAME_STOPPED_LOADING': 'Page.frameStoppedLoading',
+  'RESPONSE_RECEIVED': 'Network.responseReceived',
   'REQUEST_WILL_BE_SENT': 'Network.requestWillBeSent',
+  'WINDOW_OPEN': 'Network.windowOpen',
 };
 
 class NetworkLogger {
@@ -46,7 +52,9 @@ class NetworkLogger {
    * @return {Array<logging.Entry>}
    */
   async getSentRequests(url) {
-    const entries = await this.getEntries_(NetworkMethods.REQUEST_WILL_BE_SENT);
+    const entries = await this.getEntries_(
+      PerformanceMethods.REQUEST_WILL_BE_SENT
+    );
     if (url) {
       return entries.filter(entry => entry.message.params.request.url == url);
     }
