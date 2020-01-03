@@ -18,13 +18,11 @@ import {jsonLiteral} from '../../../../src/json';
 
 const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
   'vars': {
-    // Global variables for all requests
     'clientId': 'CLIENT_ID(__gads)',
     'data':
       '{"skus": "${skus}","source": "${source}","active": "${active}","product": "${product}"}',
   },
   'requests': {
-    // Variables
     'baseUrl': 'https://pubads.g.doubleclick.net/subopt',
     'baseParams':
       'u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&' +
@@ -32,7 +30,6 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
     'sendBase': '${baseUrl}/data?${baseParams}',
     'stateParams': 'states=${publicationId}%3A${state}%3A${productId}',
     'eventParams': 'events=${publicationId}%3A${event}%3A${data}',
-    // Requests
     'sendSubscriptionState': '${sendBase}&${stateParams}',
     'sendEvent': '${sendBase}&${eventParams}',
   },
@@ -48,8 +45,6 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'on': 'subscriptions-access-denied',
       'request': 'sendSubscriptionState',
       'vars': {
-        // NOTE: SwG is not aware of past subscriptions.  The publisher must
-        //       inform us when the user subscribed in the past.
         'state': 'non_subscriber',
       },
     },
