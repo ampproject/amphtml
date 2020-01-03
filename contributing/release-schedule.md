@@ -1,6 +1,7 @@
 # Release Schedule
 
 - [Release Channels](#release-channels)
+  - [Nightly](#nightly)
   - [Weekly](#weekly)
   - [Long-Term Stable (lts)](#long-term-stable-lts)
   - [AMP Experimental and Beta Channels](#amp-experimental-and-beta-channels)
@@ -16,6 +17,14 @@ A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a 
 The AMP runtime and extensions are provided through a variety of different _release channels_. Each channel serves a purpose for developers and for the AMP HTML Project itself. See the [release cadence section](#release-cadence) for a more detailed breakdown of how and when code from the [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository makes it into release builds.
 
 To determine if a PR has been included in any of the following release channels, look for the GitHub labels _PR Use: In Canary_, _PR Use: In Production_, or _PR Use: In LTS_ (see the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) for more details).
+
+### Nightly
+
+The **nightly** release channel is updated (as its name indicates) every weeknight. This process is automated, and there is no guarantee that any given nightly release is free of bugs or other issues. Each night after midnight (Pacific Time), the last "green" commit from the day is selected to be the release cutoff point. A green build indicates that all automated tests have passed on that bulid.
+
+The nightly release provides a mechanism to detect and resolve issues quickly and before they reach the more traffic-heavy _weekly_ release channels. It also serves to reduce the number of users affected by newly introduced issues
+
+The **nightly** release build is served to 0.05% of AMP traffic. It is possible to opt into the **nightly** channel via the `AMP_CANARY` cookie; see the [Opt-In Cookie section](#opt-in-cookie) for details.
 
 ### Weekly
 
