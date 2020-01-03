@@ -20,7 +20,7 @@ To determine if a PR has been included in any of the following release channels,
 
 ### Nightly
 
-The **nightly** release channel is updated (as its name indicates) every weeknight. This process is automated, and there is no guarantee that any given nightly release is free of bugs or other issues. Each night after midnight (Pacific Time), the last "green" commit from the day is selected to be the release cutoff point. A green build indicates that all automated tests have passed on that bulid.
+The **nightly** release channel is updated (as its name indicates) every weeknight. This process is automated, and there is no guarantee that any given nightly release is free of bugs or other issues. Each night after midnight (Pacific Time), the last "green" commit from the day is selected to be the release cutoff point. A green build indicates that all automated tests have passed on that build.
 
 The nightly release provides a mechanism to detect and resolve issues quickly and before they reach the more traffic-heavy _weekly_ release channels. It also serves to reduce the number of users affected by newly introduced issues
 
