@@ -50,6 +50,7 @@ export const UIType = {
   MOBILE: 0,
   DESKTOP_PANELS: 1, // Default desktop UI.
   DESKTOP_FULLBLEED: 2, // Desktop UI if landscape mode is enabled.
+  VERTICAL: 3, // Vertical scrolling versions, for search engine bots indexing.
 };
 
 /**
@@ -82,6 +83,7 @@ export let InteractiveComponentDef;
  *    canShowSystemLayerButtons: boolean,
  *    accessState: boolean,
  *    adState: boolean,
+ *    affiliateLinkState: !Element,
  *    bookendState: boolean,
  *    desktopState: boolean,
  *    hasSidebarState: boolean,
@@ -123,6 +125,7 @@ export const StateProperty = {
   ACCESS_STATE: 'accessState', // amp-access paywall.
   AD_STATE: 'adState',
   BOOKEND_STATE: 'bookendState',
+  AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
@@ -148,19 +151,22 @@ export const StateProperty = {
   CURRENT_PAGE_ID: 'currentPageId',
   CURRENT_PAGE_INDEX: 'currentPageIndex',
   ADVANCEMENT_MODE: 'advancementMode',
-  PAGE_IDS: 'pageIds',
+  NAVIGATION_PATH: 'navigationPath',
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
+  PAGE_IDS: 'pageIds',
 };
 
 /** @private @const @enum {string} */
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
-  ADD_TO_PAGE_IDS: 'addToPageIds',
   CHANGE_PAGE: 'setCurrentPageId',
   SET_CONSENT_ID: 'setConsentId',
   SET_ADVANCEMENT_MODE: 'setAdvancementMode',
+  SET_NAVIGATION_PATH: 'setNavigationPath',
+  SET_PAGE_IDS: 'setPageIds',
   TOGGLE_ACCESS: 'toggleAccess',
   TOGGLE_AD: 'toggleAd',
+  TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_BOOKEND: 'toggleBookend',
   TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
@@ -187,7 +193,6 @@ export const Action = {
  * @private @const {!Object<string, !function(*, *):boolean>}
  */
 const stateComparisonFunctions = {
-  [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
   [StateProperty.ACTIONS_WHITELIST]: (old, curr) => old.length !== curr.length,
   [StateProperty.INTERACTIVE_COMPONENT_STATE]:
     /**
@@ -195,6 +200,8 @@ const stateComparisonFunctions = {
      * @param {InteractiveComponentDef} curr
      */
     (old, curr) => old.element !== curr.element || old.state !== curr.state,
+  [StateProperty.NAVIGATION_PATH]: (old, curr) => old.length !== curr.length,
+  [StateProperty.PAGE_IDS]: (old, curr) => old.length !== curr.length,
 };
 
 /**
@@ -218,11 +225,6 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
       }));
-    case Action.ADD_TO_PAGE_IDS:
-      const newPageIds = [].concat(state[StateProperty.PAGE_IDS], data);
-      return /** @type {!State} */ (Object.assign({}, state, {
-        [StateProperty.PAGE_IDS]: newPageIds,
-      }));
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
       // Don't change the PAUSED_STATE if ACCESS_STATE is not changed.
@@ -238,6 +240,11 @@ const actions = (state, action, data) => {
     case Action.TOGGLE_AD:
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.AD_STATE]: !!data,
+      }));
+    // Expands or collapses the affiliate link.
+    case Action.TOGGLE_AFFILIATE_LINK:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.AFFILIATE_LINK_STATE]: data,
       }));
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
@@ -322,6 +329,13 @@ const actions = (state, action, data) => {
         [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data,
       }));
     case Action.TOGGLE_UI:
+      if (
+        state[StateProperty.UI_STATE] === UIType.VERTICAL &&
+        data !== UIType.VERTICAL
+      ) {
+        dev().error(TAG, 'Cannot switch away from UIType.VERTICAL');
+        return state;
+      }
       return /** @type {!State} */ (Object.assign({}, state, {
         // Keep DESKTOP_STATE for compatiblity with v0.1.
         [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
@@ -343,6 +357,14 @@ const actions = (state, action, data) => {
     case Action.SET_ADVANCEMENT_MODE:
       return /** @type {!State} */ (Object.assign({}, state, {
         [StateProperty.ADVANCEMENT_MODE]: data,
+      }));
+    case Action.SET_NAVIGATION_PATH:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.NAVIGATION_PATH]: data,
+      }));
+    case Action.SET_PAGE_IDS:
+      return /** @type {!State} */ (Object.assign({}, state, {
+        [StateProperty.PAGE_IDS]: data,
       }));
     default:
       dev().error(TAG, 'Unknown action %s.', action);
@@ -447,6 +469,7 @@ export class AmpStoryStoreService {
       [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: true,
       [StateProperty.ACCESS_STATE]: false,
       [StateProperty.AD_STATE]: false,
+      [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
@@ -473,8 +496,9 @@ export class AmpStoryStoreService {
       [StateProperty.CURRENT_PAGE_ID]: '',
       [StateProperty.CURRENT_PAGE_INDEX]: 0,
       [StateProperty.ADVANCEMENT_MODE]: '',
-      [StateProperty.PAGE_IDS]: [],
       [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',
+      [StateProperty.NAVIGATION_PATH]: [],
+      [StateProperty.PAGE_IDS]: [],
     });
   }
 

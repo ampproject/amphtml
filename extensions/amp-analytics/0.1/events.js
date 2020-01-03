@@ -20,6 +20,7 @@ import {Observable} from '../../../src/observable';
 import {
   PlayingStates,
   VideoAnalyticsEvents,
+  videoAnalyticsCustomEventTypeKey,
 } from '../../../src/video-interface';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict, hasOwn} from '../../../src/utils/object';
@@ -43,11 +44,16 @@ const TAG = 'amp-analytics/events';
  * @enum {string}
  */
 export const AnalyticsEventType = {
-  VISIBLE: 'visible',
   CLICK: 'click',
-  TIMER: 'timer',
-  SCROLL: 'scroll',
+  CUSTOM: 'custom',
   HIDDEN: 'hidden',
+  INI_LOAD: 'ini-load',
+  RENDER_START: 'render-start',
+  SCROLL: 'scroll',
+  STORY: 'story',
+  TIMER: 'timer',
+  VIDEO: 'video',
+  VISIBLE: 'visible',
 };
 
 const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
@@ -61,71 +67,89 @@ const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
  *   }>}
  */
 const TRACKER_TYPE = Object.freeze({
-  'click': {
-    name: 'click',
+  [AnalyticsEventType.CLICK]: {
+    name: AnalyticsEventType.CLICK,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     // Escape the temporal dead zone by not referencing a class directly.
     klass: function(root) {
       return new ClickEventTracker(root);
     },
   },
-  'scroll': {
-    name: 'scroll',
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
-      return new ScrollEventTracker(root);
-    },
-  },
-  'custom': {
-    name: 'custom',
+  [AnalyticsEventType.CUSTOM]: {
+    name: AnalyticsEventType.CUSTOM,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
       return new CustomEventTracker(root);
     },
   },
-  'render-start': {
-    name: 'render-start',
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
+  [AnalyticsEventType.HIDDEN]: {
+    name: AnalyticsEventType.VISIBLE, // Reuse tracker with visibility
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
-      return new SignalTracker(root);
+      return new VisibilityTracker(root);
     },
   },
-  'ini-load': {
-    name: 'ini-load',
+  [AnalyticsEventType.INI_LOAD]: {
+    name: AnalyticsEventType.INI_LOAD,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
     klass: function(root) {
       return new IniLoadTracker(root);
     },
   },
-  'timer': {
-    name: 'timer',
+  [AnalyticsEventType.RENDER_START]: {
+    name: AnalyticsEventType.RENDER_START,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer', 'visible']),
+    klass: function(root) {
+      return new SignalTracker(root);
+    },
+  },
+  [AnalyticsEventType.SCROLL]: {
+    name: AnalyticsEventType.SCROLL,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) {
+      return new ScrollEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.STORY]: {
+    name: AnalyticsEventType.STORY,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
+    klass: function(root) {
+      return new AmpStoryEventTracker(root);
+    },
+  },
+  [AnalyticsEventType.TIMER]: {
+    name: AnalyticsEventType.TIMER,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES,
     klass: function(root) {
       return new TimerEventTracker(root);
     },
   },
-  'visible': {
-    name: 'visible',
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
-      return new VisibilityTracker(root);
-    },
-  },
-  'hidden': {
-    name: 'visible', // Reuse tracker with visibility
-    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
-    klass: function(root) {
-      return new VisibilityTracker(root);
-    },
-  },
-  'video': {
-    name: 'video',
+  [AnalyticsEventType.VIDEO]: {
+    name: AnalyticsEventType.VIDEO,
     allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
     klass: function(root) {
       return new VideoEventTracker(root);
     },
   },
+  [AnalyticsEventType.VISIBLE]: {
+    name: AnalyticsEventType.VISIBLE,
+    allowedFor: ALLOWED_FOR_ALL_ROOT_TYPES.concat(['timer']),
+    klass: function(root) {
+      return new VisibilityTracker(root);
+    },
+  },
 });
+
+/** @visibleForTesting */
+export const trackerTypeForTesting = TRACKER_TYPE;
+
+/**
+ * @param {string} triggerType
+ * @return {boolean}
+ */
+function isAmpStoryTriggerType(triggerType) {
+  return startsWith(triggerType, 'story');
+}
 
 /**
  * @param {string} triggerType
@@ -140,9 +164,7 @@ function isVideoTriggerType(triggerType) {
  * @return {boolean}
  */
 function isReservedTriggerType(triggerType) {
-  return (
-    !!TRACKER_TYPE[triggerType] || isEnumValue(AnalyticsEventType, triggerType)
-  );
+  return isEnumValue(AnalyticsEventType, triggerType);
 }
 
 /**
@@ -151,10 +173,13 @@ function isReservedTriggerType(triggerType) {
  */
 export function getTrackerKeyName(eventType) {
   if (isVideoTriggerType(eventType)) {
-    return 'video';
+    return AnalyticsEventType.VIDEO;
+  }
+  if (isAmpStoryTriggerType(eventType)) {
+    return AnalyticsEventType.STORY;
   }
   if (!isReservedTriggerType(eventType)) {
-    return 'custom';
+    return AnalyticsEventType.CUSTOM;
   }
   return hasOwn(TRACKER_TYPE, eventType)
     ? TRACKER_TYPE[eventType].name
@@ -376,6 +401,97 @@ export class CustomEventTracker extends EventTracker {
         this.buffer_[eventType] = this.buffer_[eventType] || [];
         this.buffer_[eventType].push(event);
       }
+    }
+  }
+}
+
+// TODO(Enriqe): If needed, add support for sandbox story event.
+// (e.g. sandbox-story-xxx).
+export class AmpStoryEventTracker extends CustomEventTracker {
+  /**
+   * @param {!./analytics-root.AnalyticsRoot} root
+   */
+  constructor(root) {
+    super(root);
+  }
+
+  /** @override */
+  add(context, eventType, config, listener) {
+    const rootTarget = this.root.getRootElement();
+
+    // Fire buffered events if any.
+    const buffer = this.buffer_ && this.buffer_[eventType];
+    if (buffer) {
+      const bufferLength = buffer.length;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const event = buffer[i];
+        this.fireListener_(event, rootTarget, config, listener);
+      }
+    }
+
+    let observables = this.observables_[eventType];
+    if (!observables) {
+      observables = new Observable();
+      this.observables_[eventType] = observables;
+    }
+
+    return this.observables_[eventType].add(event => {
+      this.fireListener_(event, rootTarget, config, listener);
+    });
+  }
+
+  /**
+   * Fires listener given the specified configuration.
+   * @param {!AnalyticsEvent} event
+   * @param {!Element} rootTarget
+   * @param {!JsonObject} config
+
+   * @param {function(!AnalyticsEvent)} listener
+   */
+  fireListener_(event, rootTarget, config, listener) {
+    const type = event['type'];
+    const vars = event['vars'];
+
+    const storySpec = config['storySpec'] || {};
+    const repeat =
+      storySpec['repeat'] === undefined ? true : storySpec['repeat'];
+    const eventDetails = vars['eventDetails'];
+    const tagName = config['tagName'];
+
+    if (
+      tagName &&
+      eventDetails['tagName'] &&
+      tagName.toLowerCase() !== eventDetails['tagName']
+    ) {
+      return;
+    }
+
+    if (repeat === false && eventDetails['repeated']) {
+      return;
+    }
+
+    listener(new AnalyticsEvent(rootTarget, type, vars));
+  }
+
+  /**
+   * Triggers a custom event for the associated root, or buffers them if the
+   * observables aren't present yet.
+   * @param {!AnalyticsEvent} event
+   */
+  trigger(event) {
+    const eventType = event['type'];
+    const observables = this.observables_[eventType];
+
+    // If listeners already present - trigger right away.
+    if (observables) {
+      observables.fire(event);
+    }
+
+    // Create buffer and enqueue event if needed.
+    if (this.buffer_) {
+      this.buffer_[eventType] = this.buffer_[eventType] || [];
+      this.buffer_[eventType].push(event);
     }
   }
 }
@@ -889,7 +1005,10 @@ class TimerEventHandler {
     this.listenForStart_();
   }
 
-  /** @private @return {number} */
+  /**
+   * @private
+   * @return {number}
+   */
   calculateDuration_() {
     if (this.startTime_) {
       return Date.now() - (this.lastRequestTime_ || this.startTime_);
@@ -1158,11 +1277,8 @@ export class VideoEventTracker extends EventTracker {
 
     return this.sessionObservable_.add(event => {
       const {type} = event;
-      const isVisibleType = type === VideoAnalyticsEvents.SESSION_VISIBLE;
-      const normalizedType = isVisibleType
-        ? VideoAnalyticsEvents.SESSION
-        : type;
       const details = /** @type {?JsonObject|undefined} */ (getData(event));
+      const normalizedType = normalizeVideoEventType(type, details);
 
       if (normalizedType !== on) {
         return;
@@ -1224,7 +1340,10 @@ export class VideoEventTracker extends EventTracker {
         lastPercentage = normalizedPercentageInt;
       }
 
-      if (isVisibleType && !endSessionWhenInvisible) {
+      if (
+        type === VideoAnalyticsEvents.SESSION_VISIBLE &&
+        !endSessionWhenInvisible
+      ) {
         return;
       }
 
@@ -1237,12 +1356,48 @@ export class VideoEventTracker extends EventTracker {
         'No target specified by video session event.'
       );
       targetReady.then(target => {
-        if (target.contains(el)) {
-          listener(new AnalyticsEvent(target, normalizedType, details));
+        if (!target.contains(el)) {
+          return;
         }
+        const normalizedDetails = removeInternalVars(details);
+        listener(new AnalyticsEvent(target, normalizedType, normalizedDetails));
       });
     });
   }
+}
+
+/**
+ * Normalize video type from internal representation into the observed string
+ * from the analytics configuration.
+ * @param {string} type
+ * @param {?JsonObject|undefined} details
+ * @return {string}
+ */
+function normalizeVideoEventType(type, details) {
+  if (type == VideoAnalyticsEvents.SESSION_VISIBLE) {
+    return VideoAnalyticsEvents.SESSION;
+  }
+
+  // Custom video analytics events are listened to from one signal type,
+  // but they're configured by user with their custom name.
+  if (type == VideoAnalyticsEvents.CUSTOM) {
+    return dev().assertString(details[videoAnalyticsCustomEventTypeKey]);
+  }
+
+  return type;
+}
+
+/**
+ * @param {?JsonObject|undefined} details
+ * @return {?JsonObject|undefined}
+ */
+function removeInternalVars(details) {
+  if (!details) {
+    return details;
+  }
+  const clean = Object.assign({}, details);
+  delete clean[videoAnalyticsCustomEventTypeKey];
+  return /** @type {!JsonObject} */ (clean);
 }
 
 /**
@@ -1277,7 +1432,7 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    if (eventType == 'hidden') {
+    if (eventType === AnalyticsEventType.HIDDEN) {
       if (reportWhenSpec) {
         user().error(
           TAG,
@@ -1393,15 +1548,15 @@ export class VisibilityTracker extends EventTracker {
    * @private
    */
   createReportReadyPromiseForDocumentHidden_() {
-    const viewer = this.root.getViewer();
+    const {ampdoc} = this.root;
 
-    if (!viewer.isVisible()) {
+    if (!ampdoc.isVisible()) {
       return Promise.resolve();
     }
 
     return new Promise(resolve => {
-      viewer.onVisibilityChanged(() => {
-        if (!viewer.isVisible()) {
+      ampdoc.onVisibilityChanged(() => {
+        if (!ampdoc.isVisible()) {
           resolve();
         }
       });
@@ -1419,27 +1574,22 @@ export class VisibilityTracker extends EventTracker {
     const {win} = this.root.ampdoc;
     let unloadListener, pageHideListener;
 
-    // Listeners are provided below for both 'unload' and 'pagehide'. Fore
-    // more info, see https://developer.mozilla.org/en-US/docs/Web/Events/unload
-    // and https://developer.mozilla.org/en-US/docs/Web/Events/pagehide, but in
-    // short the difference between them is:
-    // * unload is fired when document is being unloaded. Does not fire on
-    //   Safari.
-    // * pagehide is fired when traversing away from a session history item.
-    // Usually, if one is fired, the other is too, with pagehide being fired
-    // first. An exception is that in Safari (desktop and mobile), pagehide is
-    // fired when navigating to another page, but unload is not.
-    // On mobile Chrome, and mobile Firefox, neither of these will fire if the
-    // user presses the home button, uses the OS task switcher to switch to
-    // a different app, answers an incoming call, etc.
-
-    win.addEventListener(
-      'unload',
-      (unloadListener = () => {
-        win.removeEventListener('unload', unloadListener);
-        deferred.resolve();
-      })
-    );
+    // Do not add an unload listener unless pagehide is not available.
+    // If an unload listener is present, the back/forward cache will not work.
+    // The BFCache saves pages to be instantly loaded when navigating back
+    // or forward and pauses their JavaScript. The pagehide event was added
+    // to give developers control over the behavior, and the unload listener
+    // interferes with it. To allow publishers to use the default BFCache
+    // behavior, we should not add an unload listener.
+    if (!this.supportsPageHide_()) {
+      win.addEventListener(
+        /*OK*/ 'unload',
+        (unloadListener = () => {
+          win.removeEventListener('unload', unloadListener);
+          deferred.resolve();
+        })
+      );
+    }
 
     // Note: pagehide is currently not supported on Opera Mini, nor IE<=10.
     // Documentation conflicts as to whether Safari on iOS will also fire it
@@ -1456,6 +1606,18 @@ export class VisibilityTracker extends EventTracker {
       })
     );
     return deferred.promise;
+  }
+
+  /**
+   * Detect support for the pagehide event.
+   * IE<=10 and Opera Mini do not support the pagehide event and
+   * possibly others, so we feature-detect support with this method.
+   * This is in a stubbable method for testing.
+   * @return {boolean}
+   * @private visible for testing
+   */
+  supportsPageHide_() {
+    return 'onpagehide' in this.root.ampdoc.win;
   }
 
   /**

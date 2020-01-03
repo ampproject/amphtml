@@ -28,11 +28,9 @@ import {
 } from '../linker-reader';
 import {installVariableServiceForTesting} from '../variables';
 import {mockWindowInterface} from '../../../../testing/test-helper';
-import {toggleExperiment} from '../../../../src/experiments';
 
 // TODO(ccordry): Refactor all these tests with async/await.
 describes.realWin('Linker Manager', {amp: true}, env => {
-  let sandbox;
   let ampdoc;
   let win;
   let doc;
@@ -43,18 +41,17 @@ describes.realWin('Linker Manager', {amp: true}, env => {
   let beforeSubmitStub;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     ampdoc = env.ampdoc;
     win = env.win;
     doc = win.document;
-    windowInterface = mockWindowInterface(sandbox);
+    windowInterface = mockWindowInterface(env.sandbox);
 
-    beforeSubmitStub = sandbox.stub();
-    sandbox.stub(Services, 'formSubmitForDoc').resolves({
+    beforeSubmitStub = env.sandbox.stub();
+    env.sandbox.stub(Services, 'formSubmitForDoc').resolves({
       beforeSubmit: beforeSubmitStub,
     });
 
-    sandbox.stub(Services, 'documentInfoForDoc').returns({
+    env.sandbox.stub(Services, 'documentInfoForDoc').returns({
       sourceUrl: 'https://amp.source.com/some/path?q=123',
       canonicalUrl: 'https://www.canonical.com/some/path?q=123',
     });
@@ -64,7 +61,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
     anchorClickHandlers = [];
     navigateToHandlers = [];
-    sandbox.stub(Services, 'navigationForDoc').returns({
+    env.sandbox.stub(Services, 'navigationForDoc').returns({
       registerAnchorMutator: (callback, priority) => {
         if (priority === Priority.ANALYTICS_LINKER) {
           anchorClickHandlers.push(callback);
@@ -189,8 +186,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         'Safari/537.36'
     );
     windowInterface.getUserLanguage.returns('en-US');
-    sandbox.useFakeTimers(1533329483292);
-    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
+    env.sandbox.useFakeTimers(1533329483292);
+    env.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
     doc.title = 'TEST TITLE';
     const config = {
       linkers: {
@@ -227,6 +224,29 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
   });
 
+  it('should resolve element dependent vars and macros', () => {
+    win.document.cookie = 'foo=123';
+    const config = {
+      linkers: {
+        enabled: true,
+        proxyOnly: false,
+        testLinker1: {
+          ids: {
+            yum: '${myCookie}',
+          },
+        },
+      },
+      vars: {
+        'myCookie': 'COOKIE(foo)',
+      },
+    };
+
+    const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
+    return lm.init().then(expandedIds => {
+      expect(expandedIds[0]).to.eql({yum: '123'});
+    });
+  });
+
   it('should not add params where linker value is empty', () => {
     const config = {
       linkers: {
@@ -250,8 +270,8 @@ describes.realWin('Linker Manager', {amp: true}, env => {
   });
 
   it('should generate a param valid for ingestion 5 min later', () => {
-    const clock = sandbox.useFakeTimers(1533329483292);
-    sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
+    const clock = env.sandbox.useFakeTimers(1533329483292);
+    env.sandbox.stub(Date.prototype, 'getTimezoneOffset').returns(420);
     const config = {
       linkers: {
         enabled: true,
@@ -417,7 +437,9 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
 
     it('should match all subdomain and w/o destinationDomains', () => {
-      sandbox.stub(Cookies, 'getHighestAvailableDomain').returns('test.com');
+      env.sandbox
+        .stub(Cookies, 'getHighestAvailableDomain')
+        .returns('test.com');
       const config = {
         linkers: {
           enabled: true,
@@ -448,7 +470,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
     });
 
     it('should match friendly domain as fallback', () => {
-      sandbox.stub(Cookies, 'getHighestAvailableDomain').returns(null);
+      env.sandbox.stub(Cookies, 'getHighestAvailableDomain').returns(null);
       const config = {
         linkers: {
           enabled: true,
@@ -629,23 +651,6 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       });
     });
 
-    it('should not rewrite url if href is fragment', async () => {
-      const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
-      await lm.init();
-      // Using a real anchor el here because of a.href getter will actually
-      // return the full url, not just the fragment.
-      const a = doc.createElement('a');
-      a.href = '#hello';
-      a.hostname = 'amp.source.com';
-
-      const get = (obj, prop) => obj[prop];
-      const set = sandbox.spy();
-      const aProxy = new Proxy(a, {get, set});
-
-      anchorClickHandlers.forEach(handler => handler(aProxy, {type: 'click'}));
-      expect(set, 'set on a[href=#fragment]').not.to.have.been.called;
-    });
-
     it('should not add linker if href is relative', () => {
       const lm = new LinkerManager(ampdoc, config, /* type */ null, element);
       return lm.init().then(() => {
@@ -806,13 +811,12 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
   function stubPlatform(isSafari, version) {
     const platform = Services.platformFor(ampdoc.win);
-    sandbox.stub(platform, 'isSafari').returns(isSafari);
-    sandbox.stub(platform, 'getMajorVersion').returns(version);
+    env.sandbox.stub(platform, 'isSafari').returns(isSafari);
+    env.sandbox.stub(platform, 'getMajorVersion').returns(version);
   }
 
   describe('form support', () => {
     it('should register the `beforeSubmit` callback', () => {
-      toggleExperiment(win, 'linker-form', true);
       const linkerManager = new LinkerManager(
         ampdoc,
         {
@@ -831,8 +835,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
 
       return linkerManager.init().then(() => {
         expect(beforeSubmitStub.calledOnce).to.be.true;
-        toggleExperiment(win, 'linker-form', false);
-        expect(beforeSubmitStub).to.be.calledWith(sinon.match.func);
+        expect(beforeSubmitStub).to.be.calledWith(env.sandbox.match.func);
       });
     });
 
@@ -857,7 +860,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       return linkerManager.init().then(() => {
         const form = createForm();
         form.setAttribute('action', 'https://www.ampproject.com');
-        const setterSpy = sandbox.spy();
+        const setterSpy = env.sandbox.spy();
         linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
 
         expect(setterSpy.notCalled).to.be.true;
@@ -894,11 +897,11 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         form.setAttribute('action-xhr', 'https://www.ampproject.com');
         form.setAttribute('method', 'get');
 
-        const setterSpy = sandbox.spy();
+        const setterSpy = env.sandbox.spy();
         linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
         expect(setterSpy).to.be.calledOnce;
         expect(setterSpy).to.be.calledWith(
-          sinon.match(/testLinker=1\*\w{5,7}\*foo*\w+/)
+          env.sandbox.match(/testLinker=1\*\w{5,7}\*foo*\w+/)
         );
       });
     });
@@ -926,12 +929,12 @@ describes.realWin('Linker Manager', {amp: true}, env => {
         form.setAttribute('action-xhr', 'https://www.ampproject.com');
         form.setAttribute('method', 'post');
 
-        const setterSpy = sandbox.spy();
+        const setterSpy = env.sandbox.spy();
         linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
 
         expect(setterSpy).to.be.calledOnce;
         expect(setterSpy).to.be.calledWith(
-          sinon.match(/testLinker=1\*\w{5,7}\*foo*\w+/)
+          env.sandbox.match(/testLinker=1\*\w{5,7}\*foo*\w+/)
         );
       });
     });
@@ -957,7 +960,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       return linkerManager.init().then(() => {
         const form = createForm();
         form.setAttribute('action-xhr', 'https://www.wrongdomain.com');
-        const setterSpy = sandbox.spy();
+        const setterSpy = env.sandbox.spy();
         linkerManager.handleFormSubmit_({form, actionXhrMutator: setterSpy});
         expect(setterSpy).to.not.be.called;
         expect(form.children).to.have.length(0);
@@ -1009,7 +1012,7 @@ describes.realWin('Linker Manager', {amp: true}, env => {
       return Promise.all([p1, p2]).then(() => {
         const form = createForm();
         form.setAttribute('action', 'https://www.source.com');
-        const setterSpy = sandbox.spy();
+        const setterSpy = env.sandbox.spy();
         manager1.handleFormSubmit_({form, actionXhrMutator: setterSpy});
         manager2.handleFormSubmit_({form, actionXhrMutator: setterSpy});
 

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const TREASUREDATA_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const TREASUREDATA_CONFIG = jsonLiteral({
   'vars': {
     'host': 'in.treasuredata.com',
     'writeKey': '',
@@ -43,3 +45,5 @@ export const TREASUREDATA_CONFIG = /** @type {!JsonObject} */ ({
     'event': '${base}/${table}?${baseParams}',
   },
 });
+
+export {TREASUREDATA_CONFIG};

@@ -145,7 +145,6 @@ export function runVideoPlayerIntegrationTests(
     .configure()
     .skipIfPropertiesObfuscated()
     .ifChrome()
-    .skipWindows() // TODO(#19647): Flaky on Chrome 71 on Windows 10.
     .run('Analytics Triggers', function() {
       this.timeout(TIMEOUT);
       let video;
@@ -484,7 +483,6 @@ export function runVideoPlayerIntegrationTests(
       this.timeout(TIMEOUT);
 
       let video;
-      let sandbox;
       let playButton;
       let autoFullscreen;
       let isInLandscapeStub;
@@ -497,7 +495,10 @@ export function runVideoPlayerIntegrationTests(
             autoFullscreen = manager.getAutoFullscreenManagerForTesting_();
           }
           if (!isInLandscapeStub) {
-            isInLandscapeStub = sandbox.stub(autoFullscreen, 'isInLandscape');
+            isInLandscapeStub = window.sandbox.stub(
+              autoFullscreen,
+              'isInLandscape'
+            );
           }
           isInLandscapeStub.returns(isLandscape);
         }
@@ -522,7 +523,7 @@ export function runVideoPlayerIntegrationTests(
             return whenPlaying;
           })
           .then(() => {
-            const enter = sandbox.stub(
+            const enter = window.sandbox.stub(
               video.implementation_,
               'fullscreenEnter'
             );
@@ -542,14 +543,6 @@ export function runVideoPlayerIntegrationTests(
         this.timeout(TIMEOUT);
         // Skip autoplay tests if browser does not support autoplay.
         return skipIfAutoplayUnsupported.call(this, window);
-      });
-
-      beforeEach(() => {
-        sandbox = sinon.sandbox;
-      });
-
-      afterEach(() => {
-        sandbox.restore();
       });
     });
 

@@ -103,9 +103,10 @@ class AmpApesterMedia extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    this.preconnect.url(this.displayBaseUrl_, onLayout);
-    this.preconnect.url(this.rendererBaseUrl_, onLayout);
-    this.preconnect.url(this.staticContent_, onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    preconnect.url(this.getAmpDoc(), this.displayBaseUrl_, onLayout);
+    preconnect.url(this.getAmpDoc(), this.rendererBaseUrl_, onLayout);
+    preconnect.url(this.getAmpDoc(), this.staticContent_, onLayout);
   }
 
   /** @override */
@@ -313,7 +314,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     return this.queryMedia_().then(
       response => {
         if (!response || response['status'] === 204) {
-          dev().error(TAG, 'Display', 'No Content for provided tag');
+          dev().warn(TAG, 'Display', 'No Content for provided tag');
           return this.unlayoutCallback();
         }
         const payload = response['payload'];

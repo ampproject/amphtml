@@ -19,10 +19,13 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="mixpo"
-    data-guid="b0caf856-fd92-4adb-aaec-e91948c9ffc8"
-    data-subdomain="www">
+<amp-ad
+  width="300"
+  height="250"
+  type="mixpo"
+  data-guid="b0caf856-fd92-4adb-aaec-e91948c9ffc8"
+  data-subdomain="www"
+>
 </amp-ad>
 ```
 

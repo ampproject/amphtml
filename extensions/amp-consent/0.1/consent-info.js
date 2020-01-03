@@ -26,7 +26,7 @@ import {isEnumValue, isObject} from '../../../src/types';
  * DITRYBIT: Set when the stored consent info need to be revoked next time.
  * @enum {string}
  */
-const STORAGE_KEY = {
+export const STORAGE_KEY = {
   STATE: 's',
   STRING: 'r',
   IS_DIRTY: 'd',
@@ -103,6 +103,7 @@ export function hasDirtyBit(consentInfo) {
  * Return the new consent state value based on stored state and new state
  * @param {!CONSENT_ITEM_STATE} newState
  * @param {!CONSENT_ITEM_STATE} previousState
+ * @return {!CONSENT_ITEM_STATE}
  */
 export function recalculateConsentStateValue(newState, previousState) {
   if (!isEnumValue(CONSENT_ITEM_STATE, newState)) {
@@ -239,14 +240,31 @@ export function constructConsentInfo(
 /**
  * Helper function to convert stored value to CONSENT_ITEM_STATE value
  * @param {*} value
+ * @return {!CONSENT_ITEM_STATE}
  */
-function convertValueToState(value) {
+export function convertValueToState(value) {
   if (value === true || value === 1) {
     return CONSENT_ITEM_STATE.ACCEPTED;
   } else if (value === false || value === 0) {
     return CONSENT_ITEM_STATE.REJECTED;
   }
   return CONSENT_ITEM_STATE.UNKNOWN;
+}
+
+/**
+ * Helper function to convert response enum value to CONSENT_ITEM_STATE value
+ * @param {*} value
+ * @return {?CONSENT_ITEM_STATE}
+ */
+export function convertEnumValueToState(value) {
+  if (value === 'accepted') {
+    return CONSENT_ITEM_STATE.ACCEPTED;
+  } else if (value === 'rejected') {
+    return CONSENT_ITEM_STATE.REJECTED;
+  } else if (value === 'unknown') {
+    return CONSENT_ITEM_STATE.UNKNOWN;
+  }
+  return null;
 }
 
 /**

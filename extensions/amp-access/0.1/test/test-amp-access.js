@@ -129,7 +129,7 @@ describes.fakeWin(
         'login': 'https://acme.com/l',
       });
       const service = new AccessService(ampdoc);
-      service.startInternal_ = sandbox.spy();
+      service.startInternal_ = env.sandbox.spy();
       service.start_();
       expect(service.startInternal_).to.be.calledOnce;
     });
@@ -141,10 +141,10 @@ describes.fakeWin(
         'login': 'https://acme.com/l',
       });
       const service = new AccessService(ampdoc);
-      service.sources_[0].buildLoginUrls_ = sandbox.spy();
-      service.runAuthorization_ = sandbox.spy();
-      service.scheduleView_ = sandbox.spy();
-      service.listenToBroadcasts_ = sandbox.spy();
+      service.sources_[0].buildLoginUrls_ = env.sandbox.spy();
+      service.runAuthorization_ = env.sandbox.spy();
+      service.scheduleView_ = env.sandbox.spy();
+      service.listenToBroadcasts_ = env.sandbox.spy();
 
       service.startInternal_();
       expect(service.sources_[0].buildLoginUrls_).to.be.calledOnce;
@@ -271,7 +271,7 @@ describes.fakeWin(
       win = env.win;
       ampdoc = env.ampdoc;
       document = win.document;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
@@ -301,11 +301,12 @@ describes.fakeWin(
       elementError.setAttribute('amp-access-hide', '');
       document.body.appendChild(elementError);
 
+      env.sandbox.stub(ampdoc, 'isVisible').returns(true);
+      env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+      env.sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+
       service = new AccessService(ampdoc);
       service.viewer_ = {
-        isVisible: () => true,
-        whenFirstVisible: () => Promise.resolve(),
-        onVisibilityChanged: () => {},
         broadcast: () => {},
         onBroadcast: () => {},
       };
@@ -317,9 +318,9 @@ describes.fakeWin(
         authorize: () => {},
       };
       service.sources_[0].adapter_ = adapter;
-      adapterMock = sandbox.mock(adapter);
+      adapterMock = env.sandbox.mock(adapter);
 
-      sandbox
+      env.sandbox
         .stub(service.resources_, 'mutateElement')
         .callsFake((unusedElement, mutator) => {
           mutator();
@@ -337,12 +338,12 @@ describes.fakeWin(
       const cid = {
         get: () => {},
       };
-      cidMock = sandbox.mock(cid);
+      cidMock = env.sandbox.mock(cid);
       service.cid_ = Promise.resolve(cid);
 
-      service.analyticsEvent_ = sandbox.spy();
-      service.sources_[0].analyticsEvent_ = sandbox.spy();
-      performanceMock = sandbox.mock(service.performance_);
+      service.analyticsEvent_ = env.sandbox.spy();
+      service.sources_[0].analyticsEvent_ = env.sandbox.spy();
+      performanceMock = env.sandbox.mock(service.performance_);
       performanceMock.expects('onload_').atLeast(0);
     });
 
@@ -368,7 +369,7 @@ describes.fakeWin(
         .expects('get')
         .withExactArgs(
           {scope: 'amp-access', createCookieIfNotPresent: true},
-          sinon.match(() => true)
+          env.sandbox.match(() => true)
         )
         .returns(Promise.resolve(result))
         .once();
@@ -408,7 +409,7 @@ describes.fakeWin(
         .returns(Promise.resolve({access: true}))
         .once();
       expectGetReaderId('reader1');
-      source.buildLoginUrls_ = sandbox.spy();
+      source.buildLoginUrls_ = env.sandbox.spy();
       const firstPromise = service.lastAuthorizationPromises_;
       const promise = service.runAuthorization_();
       expect(firstPromise).not.to.equal(promise);
@@ -509,7 +510,7 @@ describes.fakeWin(
         .returns(Promise.resolve({access: true}))
         .once();
 
-      const applyAuthorizationsStub = sandbox.stub();
+      const applyAuthorizationsStub = env.sandbox.stub();
       service.onApplyAuthorizations(applyAuthorizationsStub);
 
       return service.runAuthorization_().then(() => {
@@ -519,10 +520,10 @@ describes.fakeWin(
 
     it('should run authorization for broadcast events on same origin', () => {
       let broadcastHandler;
-      sandbox.stub(service.viewer_, 'onBroadcast').callsFake(handler => {
+      env.sandbox.stub(service.viewer_, 'onBroadcast').callsFake(handler => {
         broadcastHandler = handler;
       });
-      service.runAuthorization_ = sandbox.spy();
+      service.runAuthorization_ = env.sandbox.spy();
       service.listenToBroadcasts_();
       expect(broadcastHandler).to.exist;
 
@@ -586,7 +587,7 @@ describes.fakeWin(
 
       service = new AccessService(ampdoc);
 
-      mutateElementStub = sandbox
+      mutateElementStub = env.sandbox
         .stub(service.resources_, 'mutateElement')
         .callsFake((unusedElement, mutator) => {
           mutator();
@@ -598,7 +599,7 @@ describes.fakeWin(
           return Promise.resolve();
         },
       };
-      templatesMock = sandbox.mock(service.templates_);
+      templatesMock = env.sandbox.mock(service.templates_);
     });
 
     afterEach(() => {
@@ -646,7 +647,7 @@ describes.fakeWin(
       elementOn.appendChild(template2);
 
       function renderAndCheck() {
-        templatesMock = sandbox.mock(service.templates_);
+        templatesMock = env.sandbox.mock(service.templates_);
         const result1 = document.createElement('div');
         const result2 = document.createElement('div');
         templatesMock
@@ -711,6 +712,7 @@ describes.fakeWin(
     let configElement;
     let adapterMock;
     let cidMock;
+    let isVisibleStub;
     let visibilityChanged;
     let scrolled;
     let service;
@@ -719,7 +721,7 @@ describes.fakeWin(
       win = env.win;
       ampdoc = env.ampdoc;
       document = win.document;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
 
       cidServiceForDocForTesting(ampdoc);
       installPerformanceService(win);
@@ -736,6 +738,13 @@ describes.fakeWin(
       document.body.appendChild(configElement);
       document.documentElement.classList.remove('amp-access-error');
 
+      isVisibleStub = env.sandbox.stub(ampdoc, 'isVisible').returns(true);
+      env.sandbox.stub(ampdoc, 'whenFirstVisible').returns(Promise.resolve());
+      visibilityChanged = new Observable();
+      env.sandbox
+        .stub(ampdoc, 'onVisibilityChanged')
+        .callsFake(callback => visibilityChanged.add(callback));
+
       service = new AccessService(ampdoc);
 
       const adapter = {
@@ -743,25 +752,21 @@ describes.fakeWin(
         pingback: () => Promise.resolve(),
       };
       service.sources_[0].adapter_ = adapter;
-      adapterMock = sandbox.mock(adapter);
+      adapterMock = env.sandbox.mock(adapter);
 
       const cid = {
         get: () => {},
       };
-      cidMock = sandbox.mock(cid);
+      cidMock = env.sandbox.mock(cid);
       service.cid_ = Promise.resolve(cid);
 
-      service.analyticsEvent_ = sandbox.spy();
-      service.sources_[0].analyticsEvent_ = sandbox.spy();
+      service.analyticsEvent_ = env.sandbox.spy();
+      service.sources_[0].analyticsEvent_ = env.sandbox.spy();
       win.docState_ = {
         onReady: callback => callback(),
       };
 
-      visibilityChanged = new Observable();
       service.viewer_ = {
-        isVisible: () => true,
-        whenFirstVisible: () => Promise.resolve(),
-        onVisibilityChanged: callback => visibilityChanged.add(callback),
         broadcast: () => {},
       };
 
@@ -786,21 +791,24 @@ describes.fakeWin(
         .expects('get')
         .withExactArgs(
           {scope: 'amp-access', createCookieIfNotPresent: true},
-          sinon.match(() => true)
+          env.sandbox.match(() => true)
         )
         .returns(Promise.resolve(result))
         .once();
     }
 
     it('should register "viewed" signal after timeout', () => {
-      service.reportViewToServer_ = sandbox.spy();
+      service.reportViewToServer_ = env.sandbox.spy();
       const p = service.reportWhenViewed_(/* timeToView */ 2000);
       return Promise.resolve()
         .then(() => {
           clock.tick(2001);
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -812,14 +820,17 @@ describes.fakeWin(
     });
 
     it('should register "viewed" signal after scroll', () => {
-      service.reportViewToServer_ = sandbox.spy();
+      service.reportViewToServer_ = env.sandbox.spy();
       const p = service.reportWhenViewed_(/* timeToView */ 2000);
       return Promise.resolve()
         .then(() => {
           scrolled.fire();
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -831,7 +842,7 @@ describes.fakeWin(
     });
 
     it('should register "viewed" signal after click', () => {
-      service.reportViewToServer_ = sandbox.spy();
+      service.reportViewToServer_ = env.sandbox.spy();
       const p = service.reportWhenViewed_(/* timeToView */ 2000);
       return Promise.resolve()
         .then(() => {
@@ -846,7 +857,10 @@ describes.fakeWin(
           document.documentElement.dispatchEvent(clickEvent);
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -864,7 +878,7 @@ describes.fakeWin(
         lastAuthorizationResolver = resolve;
       });
       const triggerStart = 1; // First event is "access-authorization-received".
-      service.reportViewToServer_ = sandbox.spy();
+      service.reportViewToServer_ = env.sandbox.spy();
       service.reportWhenViewed_(/* timeToView */ 2000);
       return Promise.resolve()
         .then(() => {
@@ -891,15 +905,18 @@ describes.fakeWin(
     });
 
     it('should cancel "viewed" signal after click', () => {
-      service.reportViewToServer_ = sandbox.spy();
+      service.reportViewToServer_ = env.sandbox.spy();
       const p = service.reportWhenViewed_(/* timeToView */ 2000);
       return Promise.resolve()
         .then(() => {
-          service.viewer_.isVisible = () => false;
+          isVisibleStub.returns(false);
           visibilityChanged.fire();
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.have.not.been.called;
           expect(visibilityChanged.getHandlerCount()).to.equal(0);
@@ -913,7 +930,7 @@ describes.fakeWin(
         expect(ttv).to.equal(timeToView);
         return Promise.resolve();
       };
-      service.reportViewToServer_ = sandbox.spy();
+      service.reportViewToServer_ = env.sandbox.spy();
       const p1 = service.reportWhenViewed_(timeToView);
       const p2 = service.reportWhenViewed_(timeToView);
       expect(p2).to.equal(p1);
@@ -931,8 +948,8 @@ describes.fakeWin(
     it('should ignore "viewed" monitoring when pingback is disabled', () => {
       adapterMock.expects('isPingbackEnabled').returns(false);
 
-      service.reportWhenViewed_ = sandbox.spy();
-      const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+      service.reportWhenViewed_ = env.sandbox.spy();
+      const broadcastStub = env.sandbox.stub(service.viewer_, 'broadcast');
 
       service.scheduleView_(/* timeToView */ 2000);
 
@@ -942,7 +959,7 @@ describes.fakeWin(
     });
 
     it('should re-schedule "viewed" monitoring after visibility change', () => {
-      service.reportViewToServer_ = sandbox.spy();
+      service.reportViewToServer_ = env.sandbox.spy();
 
       service.scheduleView_(/* timeToView */ 2000);
 
@@ -953,11 +970,14 @@ describes.fakeWin(
         .then(() => {
           p1 = service.reportViewPromise_;
           expect(p1).to.exist;
-          service.viewer_.isVisible = () => false;
+          isVisibleStub.returns(false);
           visibilityChanged.fire();
           return p1;
         })
-        .then(() => 'SUCCESS', () => 'ERROR')
+        .then(
+          () => 'SUCCESS',
+          () => 'ERROR'
+        )
         .then(result => {
           expect(result).to.equal('ERROR');
           expect(service.reportViewToServer_).to.have.not.been.called;
@@ -965,7 +985,7 @@ describes.fakeWin(
         })
         .then(() => {
           // 2. Second attempt is rescheduled and will complete.
-          service.viewer_.isVisible = () => true;
+          isVisibleStub.returns(true);
           visibilityChanged.fire();
           const p2 = service.reportViewPromise_;
           expect(p2).to.exist;
@@ -977,7 +997,10 @@ describes.fakeWin(
             return p2;
           });
         })
-        .then(() => 'SUCCESS', reason => reason)
+        .then(
+          () => 'SUCCESS',
+          reason => reason
+        )
         .then(result => {
           expect(result).to.equal('SUCCESS');
           expect(service.reportViewToServer_).to.be.calledOnce;
@@ -987,7 +1010,7 @@ describes.fakeWin(
 
     it('should re-start "viewed" monitoring when directly requested', () => {
       service.lastAuthorizationPromise_ = Promise.resolve();
-      const whenViewedSpy = sandbox
+      const whenViewedSpy = env.sandbox
         .stub(service, 'whenViewed_')
         .callsFake(() => {
           return Promise.resolve();
@@ -1057,15 +1080,20 @@ describes.fakeWin(
     });
 
     it('should broadcast "viewed" signal to other documents', () => {
-      service.reportViewToServer_ = sandbox.stub().returns(Promise.resolve());
-      const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+      service.reportViewToServer_ = env.sandbox
+        .stub()
+        .returns(Promise.resolve());
+      const broadcastStub = env.sandbox.stub(service.viewer_, 'broadcast');
       const p = service.reportWhenViewed_(/* timeToView */ 2000);
       return Promise.resolve()
         .then(() => {
           clock.tick(2001);
           return p;
         })
-        .then(() => {}, () => {})
+        .then(
+          () => {},
+          () => {}
+        )
         .then(() => {
           expect(service.reportViewToServer_).to.be.calledOnce;
           expect(broadcastStub).to.be.calledOnce;
@@ -1109,6 +1137,9 @@ describes.fakeWin(
       document.body.appendChild(configElement);
       document.documentElement.classList.remove('amp-access-error');
 
+      env.sandbox.stub(ampdoc, 'isVisible').returns(true);
+      env.sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+
       service = new AccessService(ampdoc);
 
       const cid = {
@@ -1116,17 +1147,15 @@ describes.fakeWin(
       };
       service.cid_ = Promise.resolve(cid);
 
-      service.analyticsEvent_ = sandbox.spy();
-      serviceMock = sandbox.mock(service);
+      service.analyticsEvent_ = env.sandbox.spy();
+      serviceMock = env.sandbox.mock(service);
       service.sources_[0].openLoginDialog_ = () => {};
       service.sources_[0].loginUrlMap_[''] = 'https://acme.com/l?rid=R';
-      service.sources_[0].analyticsEvent_ = sandbox.spy();
-      service.sources_[0].getAdapter().postAction = sandbox.spy();
+      service.sources_[0].analyticsEvent_ = env.sandbox.spy();
+      service.sources_[0].getAdapter().postAction = env.sandbox.spy();
 
       service.viewer_ = {
         broadcast: () => {},
-        isVisible: () => true,
-        onVisibilityChanged: () => {},
       };
     });
 
@@ -1141,7 +1170,7 @@ describes.fakeWin(
         .expects('runAuthorization_')
         .withExactArgs()
         .once();
-      const event = {preventDefault: sandbox.spy()};
+      const event = {preventDefault: env.sandbox.spy()};
       const invocation = {
         method: 'refresh',
         event,
@@ -1176,7 +1205,7 @@ describes.fakeWin(
       win = env.win;
       ampdoc = env.ampdoc;
       document = win.document;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
 
       cidServiceForDocForTesting(ampdoc);
       installPerformanceService(win);
@@ -1192,26 +1221,27 @@ describes.fakeWin(
       document.body.appendChild(configElement);
       document.documentElement.classList.remove('amp-access-error');
 
+      env.sandbox.stub(ampdoc, 'isVisible').returns(true);
+      env.sandbox.stub(ampdoc, 'onVisibilityChanged').returns(function() {});
+
       service = new AccessService(ampdoc);
 
       const cid = {
         get: () => {},
       };
-      cidMock = sandbox.mock(cid);
+      cidMock = env.sandbox.mock(cid);
       service.cid_ = Promise.resolve(cid);
 
-      service.analyticsEvent_ = sandbox.spy();
-      serviceMock = sandbox.mock(service);
-      sourceMock = sandbox.mock(service.sources_[0]);
+      service.analyticsEvent_ = env.sandbox.spy();
+      serviceMock = env.sandbox.mock(service);
+      sourceMock = env.sandbox.mock(service.sources_[0]);
       service.sources_[0].openLoginDialog_ = () => {};
       service.sources_[0].loginUrlMap_[''] = 'https://acme.com/l?rid=R';
-      service.sources_[0].analyticsEvent_ = sandbox.spy();
-      service.sources_[0].getAdapter().postAction = sandbox.spy();
+      service.sources_[0].analyticsEvent_ = env.sandbox.spy();
+      service.sources_[0].getAdapter().postAction = env.sandbox.spy();
 
       service.viewer_ = {
         broadcast: () => {},
-        isVisible: () => true,
-        onVisibilityChanged: () => {},
       };
     });
 
@@ -1226,7 +1256,7 @@ describes.fakeWin(
         .expects('loginWithType_')
         .withExactArgs('')
         .once();
-      const event = {preventDefault: sandbox.spy()};
+      const event = {preventDefault: env.sandbox.spy()};
       const invocation = {method: 'login', event, satisfiesTrust: () => false};
       service.handleAction_(invocation);
       expect(event.preventDefault).to.not.be.called;
@@ -1241,7 +1271,7 @@ describes.fakeWin(
         .expects('loginWithType_')
         .withExactArgs('other')
         .once();
-      const event = {preventDefault: sandbox.spy()};
+      const event = {preventDefault: env.sandbox.spy()};
       const invocation = {
         method: 'login-other',
         event,
@@ -1260,7 +1290,7 @@ describes.fakeWin(
         .expects('get')
         .withExactArgs(
           {scope: 'amp-access', createCookieIfNotPresent: true},
-          sinon.match(() => true)
+          env.sandbox.match(() => true)
         )
         .returns(Promise.resolve('reader1'))
         .once();
@@ -1281,7 +1311,7 @@ describes.fakeWin(
         .expects('get')
         .withExactArgs(
           {scope: 'amp-access', createCookieIfNotPresent: true},
-          sinon.match(() => true)
+          env.sandbox.match(() => true)
         )
         .returns(Promise.resolve('reader1'))
         .atLeast(1);
@@ -1320,7 +1350,7 @@ describes.fakeWin(
         .expects('get')
         .withExactArgs(
           {scope: 'amp-access', createCookieIfNotPresent: true},
-          sinon.match(() => true)
+          env.sandbox.match(() => true)
         )
         .returns(Promise.resolve('reader1'))
         .once();
@@ -1333,7 +1363,7 @@ describes.fakeWin(
 
     it('should open dialog in the same microtask', () => {
       const source = service.sources_[0];
-      source.openLoginDialog_ = sandbox.stub();
+      source.openLoginDialog_ = env.sandbox.stub();
       source.openLoginDialog_.returns(new Promise(() => {}));
       service.loginWithType_('');
       expect(source.openLoginDialog_).to.be.calledOnce;
@@ -1356,11 +1386,11 @@ describes.fakeWin(
 
     it('should succeed login with success=true', () => {
       const source = service.sources_[0];
-      const authorizationStub = sandbox
+      const authorizationStub = env.sandbox
         .stub(source, 'runAuthorization')
         .callsFake(() => Promise.resolve());
-      const viewStub = sandbox.stub(source, 'scheduleView_');
-      const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+      const viewStub = env.sandbox.stub(source, 'scheduleView_');
+      const broadcastStub = env.sandbox.stub(service.viewer_, 'broadcast');
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
@@ -1392,7 +1422,7 @@ describes.fakeWin(
 
     it('should fail login with success=no', () => {
       const source = service.sources_[0];
-      service.runAuthorization_ = sandbox.spy();
+      service.runAuthorization_ = env.sandbox.spy();
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
@@ -1412,11 +1442,11 @@ describes.fakeWin(
 
     it('should fail login with empty response, but re-authorize', () => {
       const source = service.sources_[0];
-      const authorizationStub = sandbox
+      const authorizationStub = env.sandbox
         .stub(source, 'runAuthorization')
         .callsFake(() => Promise.resolve());
-      const viewStub = sandbox.stub(source, 'scheduleView_');
-      const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+      const viewStub = env.sandbox.stub(source, 'scheduleView_');
+      const broadcastStub = env.sandbox.stub(service.viewer_, 'broadcast');
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
@@ -1446,7 +1476,7 @@ describes.fakeWin(
 
     it('should fail login with aborted dialog', () => {
       const source = service.sources_[0];
-      service.runAuthorization_ = sandbox.spy();
+      service.runAuthorization_ = env.sandbox.spy();
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
@@ -1454,7 +1484,10 @@ describes.fakeWin(
         .once();
       return service
         .loginWithType_('')
-        .then(() => 'S', () => 'ERROR')
+        .then(
+          () => 'S',
+          () => 'ERROR'
+        )
         .then(result => {
           expect(result).to.equal('ERROR');
           expect(source.loginPromise_).to.not.exist;
@@ -1478,10 +1511,10 @@ describes.fakeWin(
         'login1': 'https://acme.com/l1?rid=R',
         'login2': 'https://acme.com/l2?rid=R',
       };
-      const authorizationStub = sandbox
+      const authorizationStub = env.sandbox
         .stub(source, 'runAuthorization')
         .callsFake(() => Promise.resolve());
-      const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+      const broadcastStub = env.sandbox.stub(service.viewer_, 'broadcast');
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l2?rid=R')
@@ -1516,9 +1549,9 @@ describes.fakeWin(
         p1Reject = reject;
       });
       const source = service.sources_[0];
-      service.runAuthorization_ = sandbox.spy();
+      service.runAuthorization_ = env.sandbox.spy();
 
-      const openLoginDialogStub = sandbox.stub(source, 'openLoginDialog_');
+      const openLoginDialogStub = env.sandbox.stub(source, 'openLoginDialog_');
       openLoginDialogStub.onCall(0).returns(p1Promise);
       openLoginDialogStub.onCall(1).returns(new Promise(() => {}));
       openLoginDialogStub.onCall(2).throws();
@@ -1538,7 +1571,10 @@ describes.fakeWin(
       // Rejecting the first login attempt does not reject the current promise.
       p1Reject();
       return p1Promise
-        .then(() => 'SUCCESS', () => 'ERROR')
+        .then(
+          () => 'SUCCESS',
+          () => 'ERROR'
+        )
         .then(res => {
           expect(res).to.equal('ERROR');
           expect(source.loginPromise_).to.equal(p3);
@@ -1547,11 +1583,11 @@ describes.fakeWin(
 
     it('should wait for token exchange post-login with success=true', () => {
       const source = service.sources_[0];
-      const authorizationStub = sandbox
+      const authorizationStub = env.sandbox
         .stub(source, 'runAuthorization')
         .callsFake(() => Promise.resolve());
-      const viewStub = sandbox.stub(source, 'scheduleView_');
-      const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+      const viewStub = env.sandbox.stub(source, 'scheduleView_');
+      const broadcastStub = env.sandbox.stub(service.viewer_, 'broadcast');
       sourceMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
@@ -1709,7 +1745,7 @@ describes.fakeWin(
       win = env.win;
       ampdoc = env.ampdoc;
       document = win.document;
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
@@ -1772,12 +1808,12 @@ describes.fakeWin(
         postAction: () => {},
       };
       sourceBeer.adapter_ = adapterBeer;
-      adapterBeerMock = sandbox.mock(adapterBeer);
+      adapterBeerMock = env.sandbox.mock(adapterBeer);
 
       sourceDonuts.adapter_ = adapterDonuts;
-      adapterDonutsMock = sandbox.mock(adapterDonuts);
+      adapterDonutsMock = env.sandbox.mock(adapterDonuts);
 
-      sandbox
+      env.sandbox
         .stub(service.resources_, 'mutateElement')
         .callsFake((unusedElement, mutator) => {
           mutator();
@@ -1795,13 +1831,13 @@ describes.fakeWin(
       const cid = {
         get: () => {},
       };
-      cidMock = sandbox.mock(cid);
+      cidMock = env.sandbox.mock(cid);
       service.cid_ = Promise.resolve(cid);
 
-      service.analyticsEvent_ = sandbox.spy();
-      sourceBeer.analyticsEvent_ = sandbox.spy();
-      sourceDonuts.analyticsEvent_ = sandbox.spy();
-      performanceMock = sandbox.mock(service.performance_);
+      service.analyticsEvent_ = env.sandbox.spy();
+      sourceBeer.analyticsEvent_ = env.sandbox.spy();
+      sourceDonuts.analyticsEvent_ = env.sandbox.spy();
+      performanceMock = env.sandbox.mock(service.performance_);
       performanceMock.expects('onload_').atLeast(0);
     });
 
@@ -1828,7 +1864,7 @@ describes.fakeWin(
         .expects('get')
         .withExactArgs(
           {scope: 'amp-access', createCookieIfNotPresent: true},
-          sinon.match(() => true)
+          env.sandbox.match(() => true)
         )
         .returns(Promise.resolve(result))
         .once();
@@ -1898,18 +1934,18 @@ describes.fakeWin(
 
     it('should succeed login flat', () => {
       expectGetReaderId('reader1');
-      const authorizationStub = sandbox
+      const authorizationStub = env.sandbox
         .stub(sourceBeer, 'runAuthorization')
         .callsFake(() => Promise.resolve());
       const viewer = Services.viewerForDoc(ampdoc);
-      const broadcastStub = sandbox.stub(viewer, 'broadcast');
-      const sourceBeerMock = sandbox.mock(sourceBeer);
+      const broadcastStub = env.sandbox.stub(viewer, 'broadcast');
+      const sourceBeerMock = env.sandbox.mock(sourceBeer);
       sourceBeerMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=reader1')
         .returns(Promise.resolve('#success=true'))
         .once();
-      sourceBeer.analyticsEvent_ = sandbox.spy();
+      sourceBeer.analyticsEvent_ = env.sandbox.spy();
       return sourceBeer
         .buildLoginUrls_()
         .then(() => service.loginWithType_('beer'))
@@ -1934,18 +1970,18 @@ describes.fakeWin(
 
     it('should succeed login hierarchy', () => {
       expectGetReaderId('reader1');
-      const authorizationStub = sandbox
+      const authorizationStub = env.sandbox
         .stub(sourceDonuts, 'runAuthorization')
         .callsFake(() => Promise.resolve());
       const viewer = Services.viewerForDoc(ampdoc);
-      const broadcastStub = sandbox.stub(viewer, 'broadcast');
-      const sourceDonutsMock = sandbox.mock(sourceDonuts);
+      const broadcastStub = env.sandbox.stub(viewer, 'broadcast');
+      const sourceDonutsMock = env.sandbox.mock(sourceDonuts);
       sourceDonutsMock
         .expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=reader1')
         .returns(Promise.resolve('#success=true'))
         .once();
-      sourceDonuts.analyticsEvent_ = sandbox.spy();
+      sourceDonuts.analyticsEvent_ = env.sandbox.spy();
       return sourceDonuts
         .buildLoginUrls_()
         .then(() => service.loginWithType_('donuts-login2'))

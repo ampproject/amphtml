@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const EULERIANANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const EULERIANANALYTICS_CONFIG = jsonLiteral({
   'vars': {
     'analyticsHost': '',
     'documentLocation': 'SOURCE_URL',
@@ -45,3 +47,5 @@ export const EULERIANANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {EULERIANANALYTICS_CONFIG};

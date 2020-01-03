@@ -49,6 +49,10 @@ tags: {  # <amp-orientation-observer>
     # Values such as: "100 100", "0 100", etc..
     value_regex: "(\\d+)\\s{1}(\\d+)"
   }
+  attrs: {
+    name: "smoothing"
+    value_regex: "[0-9]+|"
+  }
   amp_layout {
     supported_layouts: NODISPLAY
   }

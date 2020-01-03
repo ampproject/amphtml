@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Beachfront Reach video player.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -21,7 +22,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-
 # amp-reach-player
 
 Displays the Reach Player configured in the <a href="http://beachfrontreach.com">Beachfront Reach</a> platform.
@@ -32,13 +32,13 @@ Displays the Reach Player configured in the <a href="http://beachfrontreach.com"
     <td><code>&lt;script async custom-element="amp-reach-player" src="https://cdn.ampproject.org/v0/amp-reach-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-    <a href="https://ampbyexample.com/components/amp-reach-player/">Annotated code example for amp-reach-player</a>
+    <a href="https://amp.dev/documentation/examples/components/amp-reach-player/">Annotated code example for amp-reach-player</a>
     </td>
   </tr>
 </table>
@@ -53,10 +53,11 @@ Example:
 
 ```html
 <amp-reach-player
-      data-embed-id="default"
-      layout="responsive"
-      width="560"
-      height="315">
+  data-embed-id="default"
+  layout="responsive"
+  width="560"
+  height="315"
+>
 </amp-reach-player>
 ```
 
@@ -69,7 +70,7 @@ Example:
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.
 </td>
   </tr>
 </table>

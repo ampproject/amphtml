@@ -47,7 +47,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     storyEl = win.document.createElement('amp-story');
     const storyAccessEl = win.document.createElement('amp-story-access');
-    storyAccessEl.getResources = () => win.services.resources.obj;
+    storyAccessEl.getResources = () => win.__AMP_SERVICES.resources.obj;
 
     storyEl.appendChild(storyAccessEl);
 

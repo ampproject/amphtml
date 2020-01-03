@@ -40,4 +40,6 @@ export const Keys = {
   DOWN_ARROW: 'ArrowDown',
   TAB: 'Tab',
   BACKSPACE: 'Backspace',
+  HOME: 'Home',
+  END: 'End',
 };

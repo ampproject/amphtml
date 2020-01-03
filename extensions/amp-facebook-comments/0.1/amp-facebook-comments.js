@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
+import {createLoaderLogo} from '../../amp-facebook/0.1/facebook-loader';
 import {dashToUnderline} from '../../../src/string';
 import {getData, listen} from '../../../src/event-helper';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
@@ -53,13 +55,15 @@ class AmpFacebookComments extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://facebook.com', opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    preconnect.url(this.getAmpDoc(), 'https://facebook.com', opt_onLayout);
     // Hosts the facebook SDK.
-    this.preconnect.preload(
+    preconnect.preload(
+      this.getAmpDoc(),
       'https://connect.facebook.net/' + this.dataLocale_ + '/sdk.js',
       'script'
     );
-    preloadBootstrap(this.win, this.preconnect);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
   }
 
   /** @override */
@@ -113,6 +117,11 @@ class AmpFacebookComments extends AMP.BaseElement {
     if (eventData['action'] == 'ready') {
       this.toggleLoading(false);
     }
+  }
+
+  /** @override */
+  createLoaderLogoCallback() {
+    return createLoaderLogo(this.element);
   }
 
   /** @override */

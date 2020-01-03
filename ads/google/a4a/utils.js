@@ -16,10 +16,8 @@
 
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
-import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
-import {computedStyle} from '../../../src/style';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -28,6 +26,7 @@ import {
   toggleExperiment,
 } from '../../../src/experiments';
 import {getConsentPolicyState} from '../../../src/consent';
+import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getTimingDataSync} from '../../../src/service/variable-source';
@@ -39,7 +38,7 @@ import {whenUpgradedToCustomElement} from '../../../src/dom';
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 
 /** @const {number} */
-const MAX_URL_LENGTH = 16384;
+const MAX_URL_LENGTH = 15360;
 
 /** @enum {string} */
 const AmpAdImplementation = {
@@ -102,13 +101,6 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
 /** @const {Object} */
 const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-
-/** @const {!{branch: string, control: string, experiment: string}} */
-export const ADX_ADY_EXP = {
-  branch: 'amp-ad-ff-adx-ady',
-  control: '21062398',
-  experiment: '21062593',
-};
 
 /**
  * Returns the value of some navigation timing parameter.
@@ -199,10 +191,6 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
   }
-  if (new RegExp(`(^|,)${ADX_ADY_EXP.experiment}($|,)`).test(eids)) {
-    slotRect.left = slotRect.left || 1;
-    slotRect.top = slotRect.top || 1;
-  }
   return {
     'adf': DomFingerprint.generate(adElement),
     'nhd': iframeDepth,
@@ -215,12 +203,12 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} type matching typing attribute.
  * @param {function(!Element):string} groupFn
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
-export function groupAmpAdsByType(win, type, groupFn) {
+export function groupAmpAdsByType(ampdoc, type, groupFn) {
   // Look for amp-ad elements of correct type or those contained within
   // standard container type.  Note that display none containers will not be
   // included as they will never be measured.
@@ -229,21 +217,18 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // visible).
   const ampAdSelector = r =>
     r.element./*OK*/ querySelector(`amp-ad[type=${type}]`);
-  const {documentElement} = win.document;
   return (
-    Services.resourcesForDoc(documentElement)
-      .getMeasuredResources(win, r => {
-        const isAmpAdType =
-          r.element.tagName == 'AMP-AD' &&
-          r.element.getAttribute('type') == type;
-        if (isAmpAdType) {
-          return true;
-        }
-        const isAmpAdContainerElement =
-          Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!ampAdSelector(r);
-        return isAmpAdContainerElement;
-      })
+    getMeasuredResources(ampdoc, ampdoc.win, r => {
+      const isAmpAdType =
+        r.element.tagName == 'AMP-AD' && r.element.getAttribute('type') == type;
+      if (isAmpAdType) {
+        return true;
+      }
+      const isAmpAdContainerElement =
+        Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
+        !!ampAdSelector(r);
+      return isAmpAdContainerElement;
+    })
       // Need to wait on any contained element resolution followed by build
       // of child ad.
       .then(resources =>
@@ -301,7 +286,7 @@ export function googlePageParameters(a4a, startTime) {
     const viewport = Services.viewportForDoc(ampDoc);
     const viewportRect = viewport.getRect();
     const viewportSize = viewport.getSize();
-    const visibilityState = Services.viewerForDoc(ampDoc).getVisibilityState();
+    const visibilityState = ampDoc.getVisibilityState();
     return {
       'is_amp': a4a.isXhrAllowed()
         ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
@@ -623,17 +608,17 @@ export function getCsiAmpAnalyticsConfig() {
  * @param {!AMP.BaseElement} a4a The A4A element.
  * @param {?string} qqid The query ID or null if the query ID has not been set
  *     yet.
+ * @return {!JsonObject}
  */
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
-  const viewer = Services.viewerForDoc(ampdoc);
   const navStart = getNavigationTiming(win, 'navigationStart');
-  const vars = {
+  const vars = /** @type {!JsonObject} */ ({
     'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
-    'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
-  };
+    'viewerLastVisibleTime': ampdoc.getLastVisibleTime() - navStart,
+  });
   if (qqid) {
     vars['qqid'] = qqid;
   }
@@ -847,6 +832,11 @@ export function getBinaryTypeNumericalCode(type) {
       'control': '1',
       'canary': '2',
       'rc': '3',
+      'experimentA': '10',
+      'experimentB': '11',
+      'experimentC': '12',
+      'nomod': '42',
+      'mod': '43',
     }[type] || null
   );
 }
@@ -1046,51 +1036,4 @@ function getBrowserCapabilitiesBitmap(win) {
 export function getAmpRuntimeTypeParameter(win) {
   const art = getBinaryTypeNumericalCode(getBinaryType(win));
   return isCdnProxy(win) && art != '0' ? art : null;
-}
-
-/**
- * Returns the fixed size of the given element, or the fixed size of its nearest
- * ancestor that has a fixed size, if the given element has none.
- * @param {!Window} win
- * @param {?Element} element
- * @param {number=} maxDepth The maximum number of ancestors to check.
- * @return {number} The width of the given element, or of the nearest ancestor
- *    with a fixed size, if the given element has none.
- */
-export function getContainerWidth(win, element, maxDepth = 100) {
-  let el = element;
-  let depth = maxDepth;
-  // Find the first ancestor with a fixed size.
-  while (el && depth--) {
-    const layout = el.getAttribute('layout');
-    switch (layout) {
-      case Layout.FIXED:
-        return parseInt(el.getAttribute('width'), 10) || 0;
-      case Layout.RESPONSIVE:
-      case Layout.FILL:
-      case Layout.FIXED_HEIGHT:
-      case Layout.FLUID:
-        // The above layouts determine the width of the element by the
-        // containing element, or by CSS max-width property.
-        const maxWidth = parseInt(computedStyle(win, el).maxWidth, 10);
-        if (maxWidth || maxWidth == 0) {
-          return maxWidth;
-        }
-        el = el.parentElement;
-        break;
-      case Layout.CONTAINER:
-        // Container layout allows the container's size to be determined by
-        // the children within it, so in principle we can grow as large as the
-        // viewport.
-        const viewport = Services.viewportForDoc(dev().assertElement(element));
-        return viewport.getSize().width;
-      case Layout.NODISPLAY:
-      case Layout.FLEX_ITEM:
-        return 0;
-      default:
-        // If no layout is provided, we must use getComputedStyle.
-        return parseInt(computedStyle(win, el).width, 10) || 0;
-    }
-  }
-  return -1;
 }

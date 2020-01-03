@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Viqeo video player.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -31,7 +32,7 @@ Displays a <a href="https://viqeo.tv/">Viqeo</a> video player.
     <td><code>&lt;script async custom-element="amp-viqeo-player" src="https://cdn.ampproject.org/v0/amp-viqeo-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, responsive</td>
   </tr>
   <tr>
@@ -54,11 +55,12 @@ The `width` and `height` attributes determine the aspect ratio of the Viqeo embe
 
 ```html
 <amp-viqeo-player
-    data-profileid="184"
-    data-videoid="b51b70cdbb06248f4438"
-    width="640"
-    height="360"
-    layout="responsive">
+  data-profileid="184"
+  data-videoid="b51b70cdbb06248f4438"
+  width="640"
+  height="360"
+  layout="responsive"
+>
 </amp-viqeo-player>
 ```
 

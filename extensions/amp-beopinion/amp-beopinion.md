@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds BeOpinion content.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -31,7 +32,7 @@ Embeds <a href="https://beopinion.com/">BeOpinion</a> content.
     <td><code>&lt;script async custom-element="amp-beopinion" src="https://cdn.ampproject.org/v0/amp-beopinion-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong><a href="https://www.ampproject.org/docs/guides/responsive/control_layout.html">Supported Layouts</a></strong></td>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
   </tr>
 </table>
@@ -45,24 +46,31 @@ The `amp-beopinion` component allows you to embed [BeOpinion](https://beopinion.
 ### Integration examples
 
 ### As a 3rd party
+
 ```html
-<amp-beopinion width=375 height=472
-      layout="responsive"
-      data-account="589446dd42ee0d6fdd9c3dfd"
-      data-content="5a703a2f46e0fb00016d51b3"
-      data-name="content-slot">
+<amp-beopinion
+  width="375"
+  height="472"
+  layout="responsive"
+  data-account="589446dd42ee0d6fdd9c3dfd"
+  data-content="5a703a2f46e0fb00016d51b3"
+  data-name="content-slot"
+>
 </amp-beopinion>
 ```
 
 ### As an ad provider
 
 ```html
-<amp-ad width="300" height="220"
-      type="beopinion"
-      layout="responsive"
-      data-account="589446dd42ee0d6fdd9c3dfd"
-      data-name="slot_0"
-      data-my-content="0">
+<amp-ad
+  width="300"
+  height="220"
+  type="beopinion"
+  layout="responsive"
+  data-account="589446dd42ee0d6fdd9c3dfd"
+  data-name="slot_0"
+  data-my-content="0"
+>
 </amp-ad>
 ```
 
@@ -72,11 +80,12 @@ BeOpinion does not currently provide an API that yields fixed aspect ratio for e
 
 ## Placeholders & fallbacks
 
-An element marked with a `placeholder` attribute displays while the content for the content is loading or initializing.  Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-beopinion` isn't supported by the browser or if the content doesn't exist or has been deleted.
+An element marked with a `placeholder` attribute displays while the content for the content is loading or initializing. Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-beopinion` isn't supported by the browser or if the content doesn't exist or has been deleted.
 
-Visit the [Placeholders & fallbacks](https://www.ampproject.org/docs/guides/responsive/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-beopinion` component.
+Visit the [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-beopinion` component.
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>data-account (required)</strong></td>
@@ -97,10 +106,9 @@ Warning: the <code>amp-beopinion</code> element overrides this value to <code>"1
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://www.ampproject.org/docs/reference/common_attributes">common attributes</a> extended to AMP components.</td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

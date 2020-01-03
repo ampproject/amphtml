@@ -25,12 +25,12 @@ function poll(description, condition, opt_onError) {
 
 // TODO(choumx): If possible / desired, make these tests work on Single-pass,
 // on Windows (Edge, Firefox, and Chrome), and on Safari.
+// TODO (choumx@): Do not stub private method and unskip
 describe
   .configure()
   .skipSafari()
   .skipSinglePass()
-  .skipWindows()
-  .run('amp-script', function() {
+  .skip('amp-script', function() {
     this.timeout(TIMEOUT);
 
     let browser, doc, element;
@@ -40,14 +40,13 @@ describe
       {
         /* eslint-disable max-len */
         body: `
-      <amp-script layout=container src="/examples/amp-script/hello-world.js">
+      <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert Hello World!</button>
         <button id="long">Long task</button>
       </amp-script>
     `,
         /* eslint-enable max-len */
         extensions: ['amp-script'],
-        experiments: ['amp-script'],
       },
       env => {
         beforeEach(() => {
@@ -65,7 +64,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => true);
           browser.click('button#hello');
 
           yield poll('mutations applied', () => {
@@ -83,7 +84,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => false);
           browser.click('button#hello');
 
           // Give mutations time to apply.
@@ -102,10 +105,12 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => true);
           // TODO(dvoytenko): Find a way to test this with the race condition when
           // the resource is fetched before the first polling iteration.
-          const stub = sandbox.stub(impl.userActivation_, 'expandLongTask');
+          const stub = env.sandbox.stub(impl.userActivation_, 'expandLongTask');
           browser.click('button#long');
           yield poll('long task started', () => {
             return stub.callCount > 0;
@@ -119,7 +124,7 @@ describe
       {
         /* eslint-disable max-len */
         body: `
-      <amp-script layout=container src="/examples/amp-script/hello-world.js">
+      <amp-script layout=container src="/examples/amp-script/amp-script-demo.js">
         <p>Number of mutations: <span id="mutationCount">0</span></p>
         <button id="script">Insert script</button>
         <button id="img">Insert img</button>
@@ -127,7 +132,6 @@ describe
     `,
         /* eslint-enable max-len */
         extensions: ['amp-script'],
-        experiments: ['amp-script'],
       },
       env => {
         beforeEach(() => {
@@ -145,7 +149,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => true);
           browser.click('button#script');
 
           yield poll('mutations applied', () => {
@@ -166,7 +172,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => true);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => true);
           browser.click('button#img');
 
           yield poll('mutations applied', () => {
@@ -186,13 +194,12 @@ describe
         /* eslint-disable max-len */
         body: `
       <amp-script layout=fixed width=300 height=200
-          src="/examples/amp-script/hello-world.js">
+          src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert</button>
       </amp-script>
     `,
         /* eslint-enable max-len */
         extensions: ['amp-script'],
-        experiments: ['amp-script'],
       },
       env => {
         beforeEach(() => {
@@ -210,7 +217,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => false);
           browser.click('button#hello');
           yield poll('mutations applied', () => {
             const h1 = doc.querySelector('h1');
@@ -226,13 +235,12 @@ describe
         /* eslint-disable max-len */
         body: `
       <amp-script layout=fixed width=300 height=301
-          src="/examples/amp-script/hello-world.js">
+          src="/examples/amp-script/amp-script-demo.js">
         <button id="hello">Insert</button>
       </amp-script>
     `,
         /* eslint-enable max-len */
         extensions: ['amp-script'],
-        experiments: ['amp-script'],
       },
       env => {
         beforeEach(() => {
@@ -250,7 +258,9 @@ describe
           // Give event listeners in hydration a moment to attach.
           yield browser.wait(100);
 
-          sandbox.stub(impl.userActivation_, 'isActive').callsFake(() => false);
+          env.sandbox
+            .stub(impl.userActivation_, 'isActive')
+            .callsFake(() => false);
           browser.click('button#hello');
 
           // Give mutations time to apply.
