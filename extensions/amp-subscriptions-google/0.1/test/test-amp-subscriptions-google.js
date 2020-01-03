@@ -23,6 +23,7 @@ import {
   ConfiguredRuntime,
   Entitlements,
   SubscribeResponse,
+  Entitlement as SwgEntitlement,
 } from '../../../../third_party/subscriptions-project/swg';
 import {
   Entitlement,
@@ -359,12 +360,30 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     callback(callbacks.flowCanceled)({flow: 'linkAccount'});
   });
 
-  it('should log subscribe start', () => {
-    analyticsMock
-      .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.STARTED)
-      .once();
-    callback(callbacks.flowStarted)({flow: Action.SUBSCRIBE});
+  describe('should log subscribe start', () => {
+    let productId;
+    let data;
+
+    afterEach(() => {
+      analyticsMock
+        .expects('actionEvent')
+        .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.STARTED, {
+          active: true,
+          product: productId,
+        })
+        .once();
+      callback(callbacks.flowStarted)({flow: Action.SUBSCRIBE, data});
+    });
+    it('should work without a productId', () => {
+      productId = 'unknown productId';
+    });
+
+    it('should work with a productId', () => {
+      productId = 'PRODUCTID';
+      data = {
+        product: productId,
+      };
+    });
   });
 
   it('should log subscribe cancel', () => {
@@ -375,28 +394,66 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     callback(callbacks.flowCanceled)({flow: Action.SUBSCRIBE});
   });
 
-  it('should reauthorize on complete subscribe', () => {
-    analyticsMock
-      .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.SUCCESS)
-      .once();
-    const promise = Promise.resolve();
-    const response = new SubscribeResponse(
-      null,
-      null,
-      null,
-      null,
-      null,
-      () => promise
-    );
-    const resetPlatformsPromise = new Promise(resolve => {
-      env.sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
-        resolve();
+  describe('should reauthorize on complete subscribe', () => {
+    let productId;
+    let entitlements;
+    const serviceId = 'serviceId';
+
+    afterEach(() => {
+      analyticsMock
+        .expects('actionEvent')
+        .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.SUCCESS, {
+          active: true,
+          product: productId,
+        })
+        .once();
+      const promise = Promise.resolve();
+      const response = new SubscribeResponse(
+        null,
+        null,
+        null,
+        entitlements,
+        productId,
+        () => promise,
+        null
+      );
+      const resetPlatformsPromise = new Promise(resolve => {
+        env.sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
+          resolve();
+        });
       });
+      callback(callbacks.subscribeResponse)(Promise.resolve(response));
+      expect(methods.reset).to.not.be.called;
+      return resetPlatformsPromise;
     });
-    callback(callbacks.subscribeResponse)(Promise.resolve(response));
-    expect(methods.reset).to.not.be.called;
-    return resetPlatformsPromise;
+
+    it('should work without entitlements', () => {
+      productId = 'unknown subscriptionToken';
+      entitlements = null;
+    });
+
+    it('should work with poorly formatted entitlements', () => {
+      productId = 'unknown subscriptionToken';
+      entitlements = new Entitlements(
+        serviceId,
+        null,
+        [new SwgEntitlement(null, [productId], null)],
+        productId
+      );
+    });
+
+    it('should work with Google formatted entitlements', () => {
+      productId = 'myProduct';
+      const token = JSON.stringify({
+        productId,
+      });
+      entitlements = new Entitlements(
+        serviceId,
+        null,
+        [new SwgEntitlement('google', [productId], token)],
+        productId
+      );
+    });
   });
 
   it('should delegate native subscribe request', () => {
