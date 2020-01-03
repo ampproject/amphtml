@@ -9,13 +9,19 @@ The **lts** release channel provides a previous **stable** build for four-week i
 ```html
 <!-- Standard AMP HTML runtime and extension scripts -->
 <script async src="https://cdn.ampproject.org/v0.js"></script>
-<script async custom-element='amp-ad'
-     src='https://cdn.ampproject.org/v0/amp-ad-0.1.js'></script>
+<script
+  async
+  custom-element="amp-ad"
+  src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"
+></script>
 
 <!-- LTS AMP HTML runtime and extension scripts -->
 <script async src="https://cdn.ampproject.org/lts/v0.js"></script>
-<script async custom-element='amp-ad'
-     src='https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js'></script>
+<script
+  async
+  custom-element="amp-ad"
+  src="https://cdn.ampproject.org/lts/v0/amp-ad-0.1.js"
+></script>
 ```
 
 As long as all runtime and extension scripts in a page must use the same release version, requesting the LTS scripts is considered valid AMP and gets the same cache benefits as the **stable** release channel.

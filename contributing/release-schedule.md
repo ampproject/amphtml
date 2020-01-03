@@ -15,13 +15,13 @@ A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a 
 
 ## Release Channels
 
-The AMP runtime and extensions are provided through a variety of different *release channels*. Each channel serves a purpose for developers and for the AMP HTML Project itself. See the [release cadence section](#release-cadence) for a more detailed breakdown of how and when code from the [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository makes it into release builds.
+The AMP runtime and extensions are provided through a variety of different _release channels_. Each channel serves a purpose for developers and for the AMP HTML Project itself. See the [release cadence section](#release-cadence) for a more detailed breakdown of how and when code from the [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository makes it into release builds.
 
 See the [release cadence section](#release-cadence) for a more detailed breakdown of the release promotion cadence. To determine if a PR has been included in any of the following release channels, look for the GitHub labels _PR Use: In Canary_, _PR Use: In Production_, or _PR Use: In LTS_.
 
 ### Weekly
 
-The _weekly_ release channels are considered to be the primary "evergreen" release channels. A green build from the `master` branch is used to build the  **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel (see the [Detailed schedule](#detailed-schedule)).
+The _weekly_ release channels are considered to be the primary "evergreen" release channels. A green build from the `master` branch is used to build the **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel (see the [Detailed schedule](#detailed-schedule)).
 
 There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit, but with the _canary_ and _production_ configurations, respectively. The _canary_ configuration enables experimental components and features that may be turned off in _production_. Each is served to 0.5% of AMP traffic. It is possible to opt into the **experimental** or **beta** channels via the `AMP_CANARY` cookie; see the [Opt-In Cookie section](#opt-in-cookie) for details.
 
@@ -57,7 +57,6 @@ In determining how often we should push new versions of AMP to everyone, we have
 - the desire to get new features out quickly
 
 After considering all of these factors we have arrived at the 1-2 week push cycle. Thus far we have found this to be a reasonable compromise, but we will continue to evaluate all of these factors and may make changes in the future.
-
 
 ### Detailed schedule
 

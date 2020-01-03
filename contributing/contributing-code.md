@@ -208,4 +208,3 @@ If you run into any issues or have any questions when requesting a cherry-pick, 
 - **Once the cherry-pick is made you are responsible for verifying that the cherry-pick you requested fixes the reported issue and that it does not cause other issues.**
 
 **If you are requesting a cherry-pick to fix an issue in production** it is very likely you will _also_ need a cherry-pick into the **experimental**/**beta** releases since otherwise the problem your cherry-pick addresses would reappear as soon as the **beta** release is promoted to **stable**. Work with the on-duty engineer to determine if you need a cherry-pick to both release channels and make sure your cherry-pick request issue reflects what you determine.
-
