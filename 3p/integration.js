@@ -85,6 +85,7 @@ import {adplugg} from '../ads/adplugg';
 import {adpon} from '../ads/adpon';
 import {adreactor} from '../ads/adreactor';
 import {adsensor} from '../ads/adsensor';
+import {adservsolutions} from '../ads/adservsolutions';
 import {adsloom} from '../ads/adsloom';
 import {adsnative} from '../ads/adsnative';
 import {adspeed} from '../ads/adspeed';
@@ -187,6 +188,7 @@ import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativeroll} from '../ads/nativeroll';
+import {nativery} from '../ads/nativery';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
 import {nend} from '../ads/nend';
@@ -242,7 +244,9 @@ import {sovrn} from '../ads/sovrn';
 import {speakol} from '../ads/speakol';
 import {spotx} from '../ads/spotx';
 import {springAds} from '../ads/springAds';
+import {ssp} from '../ads/ssp';
 import {strossle} from '../ads/strossle';
+import {sulvo} from '../ads/sulvo';
 import {sunmedia} from '../ads/sunmedia';
 import {svknative} from '../ads/svknative';
 import {swoop} from '../ads/swoop';
@@ -305,6 +309,7 @@ const AMP_EMBED_ALLOWED = {
   mgid: true,
   miximedia: true,
   mywidget: true,
+  nativery: true,
   lentainform: true,
   opinary: true,
   outbrain: true,
@@ -358,6 +363,7 @@ register('adplugg', adplugg);
 register('adpon', adpon);
 register('adreactor', adreactor);
 register('adsensor', adsensor);
+register('adservsolutions', adservsolutions);
 register('adsloom', adsloom);
 register('adsnative', adsnative);
 register('adspeed', adspeed);
@@ -468,6 +474,7 @@ register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativeroll', nativeroll);
+register('nativery', nativery);
 register('nativo', nativo);
 register('navegg', navegg);
 register('nend', nend);
@@ -514,6 +521,7 @@ register('sekindo', sekindo);
 register('sharethrough', sharethrough);
 register('shemedia', shemedia);
 register('sklik', sklik);
+register('ssp', ssp);
 register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
@@ -525,6 +533,7 @@ register('sovrn', sovrn);
 register('spotx', spotx);
 register('springAds', springAds);
 register('strossle', strossle);
+register('sulvo', sulvo);
 register('sunmedia', sunmedia);
 register('svknative', svknative);
 register('swoop', swoop);

@@ -24,7 +24,7 @@ tags: {  # amp-bind
     version: "latest"
     # amp-bind has no associated tag which indicates usage of the extension.
     # TODO(gregable): Implement a mechanism to associate attributes with
-    # extension usage and then set this to GRANDFATHERED or ERROR.
+    # extension usage and then set this to EXEMPTED or ERROR.
     requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"
@@ -39,7 +39,7 @@ tags: {  # amp-bind
     version: "0.1"
     # amp-bind has no associated tag which indicates usage of the extension.
     # TODO(gregable): Implement a mechanism to associate attributes with
-    # extension usage and then set this to GRANDFATHERED or ERROR.
+    # extension usage and then set this to EXEMPTED or ERROR.
     requires_usage: NONE
   }
   attr_lists: "common-extension-attrs"

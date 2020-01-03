@@ -245,6 +245,8 @@ export class Scanner {
   static getCandidates(root) {
     const selector = candidateSelector('amp-img');
     const candidates = toArray(root.querySelectorAll(selector));
+    // TODO(alanorozco): DOM mutations should be wrapped in mutate contexts.
+    // Alternatively, use in-memory "visited" marker instead of attribute.
     candidates.forEach(markAsVisited);
     return candidates;
   }
@@ -283,7 +285,10 @@ export class DocMetaAnnotations {
    */
   static getAllLdJsonTypes(ampdoc) {
     return toArray(getRootNode(ampdoc).querySelectorAll(SCRIPT_LD_JSON))
-      .map(({textContent}) => (tryParseJson(textContent) || {})['@type'])
+      .map(el => {
+        const {textContent} = el;
+        return (tryParseJson(textContent) || {})['@type'];
+      })
       .filter(typeOrUndefined => typeOrUndefined);
   }
 
@@ -418,9 +423,11 @@ export function scan(ampdoc, opt_root) {
   return runCandidates(ampdoc, Scanner.getCandidates(root));
 }
 
-AMP.extension(TAG, '0.1', ({ampdoc}) => {
+AMP.extension(TAG, '0.1', AMP => {
+  const {ampdoc} = AMP;
   ampdoc.whenReady().then(() => {
-    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, ({target}) => {
+    getRootNode(ampdoc).addEventListener(AmpEvents.DOM_UPDATE, e => {
+      const {target} = e;
       scan(ampdoc, dev().assertElement(target));
     });
     scan(ampdoc);

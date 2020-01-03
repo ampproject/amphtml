@@ -72,16 +72,6 @@ const validMethods = [
   'hidecontrols',
 ];
 
-const validEvents = [
-  'canplay',
-  'load',
-  'playing',
-  'pause',
-  'ended',
-  'muted',
-  'unmuted',
-];
-
 /**
  * @param {function()} win
  * @param {*} opt_initializer
@@ -346,11 +336,6 @@ export class AmpVideoIntegration {
    * @param {string} event
    */
   postEvent(event) {
-    userAssert(
-      validEvents.indexOf(event) > -1,
-      `%s Invalid event [${event}]`,
-      TAG
-    );
     this.postToParent_(dict({'event': event}));
   }
 
@@ -379,7 +364,7 @@ export class AmpVideoIntegration {
    */
   postToParent_(data, opt_callback) {
     const id = this.callCounter_++;
-    const completeData = Object.assign({id}, data);
+    const completeData = {id, ...data};
 
     if (!getMode(this.win_).test && this.win_.parent) {
       this.win_.parent./*OK*/ postMessage(completeData, '*');

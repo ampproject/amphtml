@@ -135,13 +135,11 @@ export class TokenMaster {
    * @protected
    */
   generateKeys() {
-    const generationAlgo = Object.assign(
-      {
-        modulusLength: 2048,
-        publicExponent: Uint8Array.of(1, 0, 1),
-      },
-      this.crypto_.pkcsAlgo
-    );
+    const generationAlgo = {
+      modulusLength: 2048,
+      publicExponent: Uint8Array.of(1, 0, 1),
+      ...this.crypto_.pkcsAlgo,
+    };
     return this.crypto_.subtle.generateKey(
       /** @type {{name: string}} */ (generationAlgo),
       /* extractable */ true,

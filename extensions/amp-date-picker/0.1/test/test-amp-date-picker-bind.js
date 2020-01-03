@@ -46,7 +46,7 @@ describes.realWin(
      * }}
      */
     function createDatePicker(opt_attrs = {}, opt_parent = document.body) {
-      const attrs = Object.assign({}, DEFAULT_ATTRS, opt_attrs);
+      const attrs = {...DEFAULT_ATTRS, ...opt_attrs};
       let input = null;
       let endInput = null;
       if (attrs['mode'] === 'overlay') {
@@ -111,8 +111,8 @@ describes.realWin(
         const {picker, layoutCallback} = createDatePicker({
           src: 'https://localhost:8000/examples/date-picker.json',
         });
-        sandbox.stub(picker, 'fetchSrc_').resolves();
-        const setStateSpy = sandbox.spy(picker, 'setState_');
+        env.sandbox.stub(picker, 'fetchSrc_').resolves();
+        const setStateSpy = env.sandbox.spy(picker, 'setState_');
         await layoutCallback();
 
         await picker.mutatedAttributesCallback({

@@ -29,9 +29,9 @@ const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green} = require('ansi-colors');
+const {doServe} = require('./serve');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
-const {serve} = require('./serve');
 
 /**
  * Enables watching for file changes in css, extensions.
@@ -104,7 +104,7 @@ async function defaultTask() {
   printDefaultTaskHelp();
   parseExtensionFlags(/* preBuild */ true);
   await performPrerequisiteSteps(/* watch */ true);
-  await serve();
+  await doServe(/* lazyBuild */ true);
   log(green('JS and extensions will be lazily built when requested...'));
 }
 
@@ -122,6 +122,7 @@ build.flags = {
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
+  coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
 };
 
 watch.description = 'Watches for changes in files, re-builds when detected';

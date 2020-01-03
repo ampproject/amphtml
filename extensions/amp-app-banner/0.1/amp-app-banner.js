@@ -225,7 +225,11 @@ export class AmpIosAppBanner extends AbstractAppBanner {
     if (!this.element.parentNode) {
       return;
     }
-    this.preconnect.url('https://itunes.apple.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://itunes.apple.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -367,9 +371,16 @@ export class AmpAndroidAppBanner extends AbstractAppBanner {
     if (!this.element.parentNode) {
       return;
     }
-    this.preconnect.url('https://play.google.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://play.google.com',
+      opt_onLayout
+    );
     if (this.manifestHref_) {
-      this.preconnect.preload(this.manifestHref_);
+      Services.preconnectFor(this.win).preload(
+        this.getAmpDoc(),
+        this.manifestHref_
+      );
     }
   }
 
