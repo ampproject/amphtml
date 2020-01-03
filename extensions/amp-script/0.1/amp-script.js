@@ -659,7 +659,7 @@ export class SanitizerImpl {
                 'AMP.setState only updated page state and did not reevaluate bindings due to lack of recent user interaction.'
               );
             }
-            bind.setState(state, skipEval, /* skipAmpState */ false);
+            bind.setState(state, {skipEval});
           }
         }
       });
