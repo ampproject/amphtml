@@ -1,7 +1,6 @@
 {
   "vars": {
-    "clientId": "CLIENT_ID(__gads)",
-    "data": "{\"skus\": \"${skus}\",\"source\": \"${source}\",\"active\": \"${active}\",\"product\": \"${product}\"}"
+    "clientId": "CLIENT_ID(__gads)"
   },
   "requests": {
     "baseUrl": "https://pubads.g.doubleclick.net/subopt",
@@ -31,7 +30,8 @@
       "on": "subscriptions-action-showOffers-started",
       "request": "sendEvent",
       "vars": {
-        "event": "offers_shown"
+        "event": "offers_shown",
+        "data": "{\"skus\": \"${skus}\",\"source\": \"${source}\",\"active\": \"${active}\"}"
       }
     },
     "onPaywall": {
@@ -39,7 +39,7 @@
       "request": "sendEvent",
       "vars": {
         "event": "paywall",
-        "active": "false"
+        "data": "{\"source\": \"${source}\",\"active\": \"false\"}"
       }
     },
     "onSelectOffer": {
@@ -47,7 +47,7 @@
       "request": "sendEvent",
       "vars": {
         "event": "offer_selected",
-        "active": "true"
+        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
       }
     },
     "onStartBuyflow": {
@@ -55,7 +55,7 @@
       "request": "sendEvent",
       "vars": {
         "event": "payment_flow_start",
-        "active": "true"
+        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
       }
     },
     "onPaymentComplete": {
@@ -63,7 +63,7 @@
       "request": "sendEvent",
       "vars": {
         "event": "payment_complete",
-        "active": "true"
+        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
       }
     }
   },

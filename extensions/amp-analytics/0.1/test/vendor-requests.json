@@ -357,9 +357,9 @@
     "conversion": "https://adserver.pressboard.ca/track/attention-amp?&amp=1&url=_canonical_url_&referrer=_document_referrer_&ts=_timestamp_&ua=_user_agent_&rand=_random_&uid=_client_id_&mid=!mediaId&cid=!campaignId&sid=!storyRequestId&geoid=!geoNameId&cn=!country&rg=!region&ct=!city&dbi=!dbInstance&tz=!timeZoneOffset&hbt=1&pvid=_page_view_id_&asurl=_source_url_&ash=_scroll_height_&asnh=_screen_height_&aasnh=_available_screen_height_&avh=_viewport_height_&ast=_scroll_top_&atet=_total_engaged_time_"
   },
   "subscriptions-propensity": {
-    "sendEvent": "https://pubads.g.doubleclick.net/subopt/data?u_tz=240&v=1&cookie=_client_id_&cdm=!sourceHostName&_amp_source_origin=_source_host_&events=!publicationId%3A!event%3A%7B%22skus%22%3A%20%22!skus%22%2C%22source%22%3A%20%22!source%22%2C%22active%22%3A%20%22!active%22%2C%22product%22%3A%20%22!product%22%7D",
+    "sendEvent": "https://pubads.g.doubleclick.net/subopt/data?u_tz=240&v=1&cookie=_client_id_&cdm=!sourceHostName&_amp_source_origin=_source_host_&events=!publicationId%3A!event%3A!data",
     "sendSubscriptionState": "https://pubads.g.doubleclick.net/subopt/data?u_tz=240&v=1&cookie=_client_id_&cdm=!sourceHostName&_amp_source_origin=_source_host_&states=!publicationId%3A!state%3A!productId",
-    "eventParams": "events=!publicationId%3A!event%3A%7B%22skus%22%3A%20%22!skus%22%2C%22source%22%3A%20%22!source%22%2C%22active%22%3A%20%22!active%22%2C%22product%22%3A%20%22!product%22%7D",
+    "eventParams": "events=!publicationId%3A!event%3A!data",
     "stateParams": "states=!publicationId%3A!state%3A!productId",
     "sendBase": "https://pubads.g.doubleclick.net/subopt/data?u_tz=240&v=1&cookie=_client_id_&cdm=!sourceHostName&_amp_source_origin=_source_host_",
     "baseParams": "u_tz=240&v=1&cookie=_client_id_&cdm=!sourceHostName&_amp_source_origin=_source_host_",
