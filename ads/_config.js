@@ -1087,6 +1087,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'vdoai': {
+    prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
+    renderStartImplemented: true,
+  },
+
   'videointelligence': {
     preconnect: 'https://s.vi-serve.com',
     renderStartImplemented: true,
