@@ -219,10 +219,10 @@ google-closure-compiler@20191111.0.0:
     google-closure-compiler-osx "^20191111.0.0"
     google-closure-compiler-windows "^20191111.0.0"
 
-google-closure-library@20191111.0.0:
-  version "20191111.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-library/-/google-closure-library-20191111.0.0.tgz#921701bda4ab3bce93e4d3cdcfecd9bac4ff5750"
-  integrity sha512-TWtVpMvhVyuBmXh2qwixYQBjxYLJufZ5wrkf+CPuH+Q+CE6peyO9OefYtd40HfE4fCXC+PkJ95R0j0TSxsPa2w==
+google-closure-library@20200101.0.0:
+  version "20200101.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-library/-/google-closure-library-20200101.0.0.tgz#daa1fad3967d07ede670733c774fc51a22e556c5"
+  integrity sha512-BwCDk/aGyCWQr3UFfOL9QJMhNKV1F1i5hH45N6J1UsJtI0LDR3eD4U/plfc6ERef7wH03OyX00MubiyzKmkVMQ==
   dependencies:
     promises-aplus-tests "^2.1.2"
 
