@@ -177,6 +177,9 @@ const adConfig = jsonConfiguration({
     clientIdScope: 'amp_ecid_adensor',
     renderStartImplemented: true,
   },
+
+  'adservsolutions': {},
+
   'adsloom': {
     clientIdScope: 'AMP_ECID_ADSLOOM',
   },
@@ -638,15 +641,6 @@ const adConfig = jsonConfiguration({
     ],
   },
 
-  'mediaimpact': {
-    prefetch: 'https://ec-ns.sascdn.com/diff/251/pages/amp_default.js',
-    preconnect: [
-      'https://ww251.smartadserver.com',
-      'https://static.sascdn.com/',
-    ],
-    renderStartImplemented: true,
-  },
-
   'medianet': {
     preconnect: 'https://contextual.media.net',
     renderStartImplemented: true,
@@ -725,6 +719,10 @@ const adConfig = jsonConfiguration({
 
   'nativeroll': {
     prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
+  },
+
+  'nativery': {
+    preconnect: 'https://cdn.nativery.com',
   },
 
   'nativo': {
@@ -995,6 +993,18 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'springAds': {
+    prefetch: 'https://www.asadcdn.com/adlib/adlib_seq.js',
+    preconnect: ['https://ib.adnxs.com'],
+    renderStartImplemented: true,
+  },
+
+  'ssp': {
+    prefetch: 'https://ssp.imedia.cz/static/js/ssp.js',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
@@ -1074,6 +1084,11 @@ const adConfig = jsonConfiguration({
   'valuecommerce': {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: ['https://ad.jp.ap.valuecommerce.com'],
+    renderStartImplemented: true,
+  },
+
+  'vdoai': {
+    prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
     renderStartImplemented: true,
   },
 
@@ -1201,6 +1216,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
     renderStartImplemented: true,
   },
+
+  'sulvo': {},
 });
 
 export {adConfig};
