@@ -34,8 +34,6 @@ describes.realWin(
       queue = new IframeTransportMessageQueue(env.win, frame);
     });
 
-    afterEach(() => {});
-
     it('is empty when first created ', () => {
       expect(queue.queueSize()).to.equal(0);
     });

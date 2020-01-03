@@ -28,7 +28,6 @@ const log = require('fancy-log');
 const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
-const Promise = require('bluebird');
 const relativePath = require('path').relative;
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
@@ -112,7 +111,7 @@ exports.getFlags = function(config) {
     // accessing the symbol, we remedy this by attaching all public exports
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
-    language_in: config.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
+    language_in: 'ECMASCRIPT_2018',
     language_out: config.esm
       ? 'NO_TRANSPILE'
       : config.language_out || 'ECMASCRIPT5',

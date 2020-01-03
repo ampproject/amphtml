@@ -118,7 +118,7 @@ function withFocusedTrueHack(WrappedComponent) {
 
   /** @override */
   FocusedTrueHack.prototype.render = function() {
-    const props = Object.assign({}, this.props, dict({'focused': true}));
+    const props = {...this.props, ...dict({'focused': true})};
     return react.createElement(WrappedComponent, props);
   };
 

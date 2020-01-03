@@ -118,9 +118,9 @@ class AmpAccordion extends AMP.BaseElement {
 
       // Listen for mutations on the 'data-expand' attribute.
       const expandObserver = new this.win.MutationObserver(mutations => {
-        // [data-expand] mutations can only be triggered by high trust actions
-        // i.e. AMP.setState.
-        this.toggleExpandMutations_(mutations, ActionTrust.HIGH);
+        // [data-expand] mutations can only be triggered by AMP.setState which
+        // requires "default" trust.
+        this.toggleExpandMutations_(mutations, ActionTrust.DEFAULT);
       });
       expandObserver.observe(section, {
         attributes: true,

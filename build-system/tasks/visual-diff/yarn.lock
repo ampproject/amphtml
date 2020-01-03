@@ -118,10 +118,10 @@
   resolved "https://registry.yarnpkg.com/@oclif/screen/-/screen-1.0.4.tgz#b740f68609dfae8aa71c3a6cab15d816407ba493"
   integrity sha512-60CHpq+eqnTxLZQ4PGHYNwUX572hgpMHGPtTWMjdTMsAvlm69lZV/4ly6O3sAYkomo4NggGcomrDpBe34rxUqw==
 
-"@percy/agent@0.20.0":
-  version "0.20.0"
-  resolved "https://registry.yarnpkg.com/@percy/agent/-/agent-0.20.0.tgz#5c983ac6e883628775ef7845879ea70fcd2abb09"
-  integrity sha512-5TVP5YS1ehtW03qq22rBCfdH7p5rhuVJMMPjRlPR68sH+YjI40XL/ndcXTZq7+QuVw6MOvxa2ARgFF21pA1CCQ==
+"@percy/agent@0.20.6":
+  version "0.20.6"
+  resolved "https://registry.yarnpkg.com/@percy/agent/-/agent-0.20.6.tgz#2962ce28ac02f0dee9edd0d4663728c664ed0b5e"
+  integrity sha512-E+zfeZAz1r0i3CkAJlkg/fb3vBmh2fHqY3f7PLhSNt2aQONspoSLNDQ63XSioMRWMApLCEO5lxQ6k3KbxK91Cg==
   dependencies:
     "@oclif/command" "1.5.16"
     "@oclif/config" "^1"
@@ -143,6 +143,7 @@
     percy-client "^3.2.0"
     puppeteer "^1.13.0"
     retry-axios "^1.0.1"
+    which "^2.0.1"
     winston "^3.0.0"
 
 "@percy/agent@~0":
@@ -2034,6 +2035,13 @@ which@^1.2.9:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/which/-/which-1.3.1.tgz#a45043d54f5805316da8d62f9f50918d3da70b0a"
   integrity sha512-HxJdYWq1MTIQbJ3nw0cqssHoTNU267KlrDuGZ1WYlxDStUtKUhOaJmh112/TZmHxxUfuJqPXSOm7tDyas0OSIQ==
+  dependencies:
+    isexe "^2.0.0"
+
+which@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/which/-/which-2.0.1.tgz#f1cf94d07a8e571b6ff006aeb91d0300c47ef0a4"
+  integrity sha512-N7GBZOTswtB9lkQBZA4+zAXrjEIWAUOB93AvzUiudRzRxhUdLURQ7D/gAIMY1gatT/LTbmbcv8SiYazy3eYB7w==
   dependencies:
     isexe "^2.0.0"
 

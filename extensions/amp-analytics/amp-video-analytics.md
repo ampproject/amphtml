@@ -31,6 +31,7 @@ AMP video analytics gathers data about how users interact with videos in AMP doc
 | `<amp-nexxtv-player>` | Partial support<sup>[1]</sup> |
 | `<amp-ooyala-player>` | Partial support<sup>[1]</sup> |
 | `<amp-youtube>`       | Partial support<sup>[1]</sup> |
+| `<amp-viqeo-player>`  | Full support                  |
 
 <sup>[1]</sup> Partial support means that all [video analytics common variables](#common-variables) are included, except for `currentTime`, `duration`, `playedRangesJson`, and `playedTotal`.
 

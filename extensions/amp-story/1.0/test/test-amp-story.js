@@ -107,17 +107,17 @@ describes.realWin(
       win = env.win;
       ampdoc = env.ampdoc;
 
-      replaceStateStub = sandbox.stub(win.history, 'replaceState');
+      replaceStateStub = env.sandbox.stub(win.history, 'replaceState');
       // Required by the bookend code.
       win.document.title = 'Story';
       env.ampdoc.defaultView = env.win;
 
       const viewer = Services.viewerForDoc(env.ampdoc);
-      sandbox
+      env.sandbox
         .stub(viewer, 'hasCapability')
         .withArgs('swipe')
         .returns(hasSwipeCapability);
-      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+      env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
       registerServiceBuilder(win, 'performance', () => ({
         isPerformanceTrackingOn: () => false,
@@ -175,7 +175,10 @@ describes.realWin(
     it('should preload the bookend if navigating to the last page', async () => {
       await createStoryWithPages(1, ['cover']);
 
-      const buildBookendStub = sandbox.stub(story, 'buildAndPreloadBookend_');
+      const buildBookendStub = env.sandbox.stub(
+        story,
+        'buildAndPreloadBookend_'
+      );
       await story.layoutCallback();
       expect(buildBookendStub).to.have.been.calledOnce;
     });
@@ -183,7 +186,10 @@ describes.realWin(
     it('should not preload the bookend if not on the last page', async () => {
       await createStoryWithPages(2, ['cover']);
 
-      const buildBookendStub = sandbox.stub(story, 'buildAndPreloadBookend_');
+      const buildBookendStub = env.sandbox.stub(
+        story,
+        'buildAndPreloadBookend_'
+      );
       await story.layoutCallback();
       expect(buildBookendStub).to.not.have.been.called;
     });
@@ -191,7 +197,7 @@ describes.realWin(
     it('should prerender/load the share menu', async () => {
       await createStoryWithPages(2);
 
-      const buildShareMenuStub = sandbox.stub(story.shareMenu_, 'build');
+      const buildShareMenuStub = env.sandbox.stub(story.shareMenu_, 'build');
 
       await story.layoutCallback();
       expect(buildShareMenuStub).to.have.been.calledOnce;
@@ -214,7 +220,7 @@ describes.realWin(
 
     it('should pause/resume pages when switching pages', async () => {
       await createStoryWithPages(2, ['cover', 'page-1']);
-      sandbox.stub(story, 'maybePreloadBookend_').returns();
+      env.sandbox.stub(story, 'maybePreloadBookend_').returns();
 
       await story.layoutCallback();
       // Getting all the AmpStoryPage objects.
@@ -225,8 +231,8 @@ describes.realWin(
       const oldPage = pages[0];
       const newPage = pages[1];
 
-      const setStateOldPageStub = sandbox.stub(oldPage, 'setState');
-      const setStateNewPageStub = sandbox.stub(newPage, 'setState');
+      const setStateOldPageStub = env.sandbox.stub(oldPage, 'setState');
+      const setStateNewPageStub = env.sandbox.stub(newPage, 'setState');
       await story.switchTo_('page-1');
       expect(setStateOldPageStub).to.have.been.calledOnceWithExactly(
         PageState.NOT_ACTIVE
@@ -247,7 +253,7 @@ describes.realWin(
       expect(pages[1].hasAttribute('active')).to.be.false;
 
       // Stubbing because we need to assert synchronously
-      sandbox
+      env.sandbox
         .stub(element.implementation_, 'mutateElement')
         .callsFake(mutator => {
           mutator();
@@ -283,8 +289,10 @@ describes.realWin(
       await createStoryWithPages(2, ['cover', 'page-1']);
 
       await story.layoutCallback();
-      const paginationButtonsStub = {attach: sandbox.spy()};
-      sandbox.stub(PaginationButtons, 'create').returns(paginationButtonsStub);
+      const paginationButtonsStub = {attach: env.sandbox.spy()};
+      env.sandbox
+        .stub(PaginationButtons, 'create')
+        .returns(paginationButtonsStub);
       story.buildPaginationButtonsForTesting();
       expect(paginationButtonsStub.attach).to.have.been.calledWith(
         story.element
@@ -294,7 +302,9 @@ describes.realWin(
     it.skip('toggles `i-amphtml-story-landscape` based on height and width', () => {
       story.element.style.width = '11px';
       story.element.style.height = '10px';
-      const isDesktopStub = sandbox.stub(story, 'isDesktop_').returns(false);
+      const isDesktopStub = env.sandbox
+        .stub(story, 'isDesktop_')
+        .returns(false);
       story.vsync_ = {
         run: (task, state) => {
           if (task.measure) {
@@ -321,7 +331,7 @@ describes.realWin(
       const firstPageId = 'page-one';
       const pageCount = 2;
       await createStoryWithPages(pageCount, [firstPageId, 'page-1']);
-      const dispatchSpy = sandbox.spy(story.storeService_, 'dispatch');
+      const dispatchSpy = env.sandbox.spy(story.storeService_, 'dispatch');
 
       await story.layoutCallback();
       expect(dispatchSpy).to.have.been.calledWith(Action.CHANGE_PAGE, {
@@ -344,9 +354,9 @@ describes.realWin(
 
     it('should not block layoutCallback when bookend xhr fails', async () => {
       await createStoryWithPages(1, ['page-1']);
-      sandbox.stub(AmpStoryBookend.prototype, 'build');
+      env.sandbox.stub(AmpStoryBookend.prototype, 'build');
 
-      const bookendXhr = sandbox
+      const bookendXhr = env.sandbox
         .stub(AmpStoryBookend.prototype, 'loadConfigAndMaybeRenderBookend')
         .returns(Promise.reject());
 
@@ -478,7 +488,7 @@ describes.realWin(
       story.landscapeOrientationMedia_ = {matches: true};
       story.element.setAttribute('standalone', '');
       story.element.setAttribute('supports-landscape', '');
-      sandbox.stub(story, 'mutateElement').callsFake(fn => fn());
+      env.sandbox.stub(story, 'mutateElement').callsFake(fn => fn());
 
       story.buildCallback();
 
@@ -540,13 +550,13 @@ describes.realWin(
       it('should pause the story if there is a consent', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
-        sandbox
+        env.sandbox
           .stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {}});
 
         // Prevents amp-story-consent element from running code that is irrelevant
         // to this test.
-        sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
+        env.sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
 
         const consentEl = win.document.createElement('amp-consent');
         const storyConsentEl = win.document.createElement('amp-story-consent');
@@ -557,12 +567,12 @@ describes.realWin(
         // Never resolving consent promise, emulating a user looking at the
         // consent prompt.
         const promise = new Promise(() => {});
-        sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
+        env.sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
 
         const coverEl = element.querySelector('amp-story-page');
 
         const cover = await coverEl.getImpl();
-        const setStateStub = sandbox.stub(cover, 'setState');
+        const setStateStub = env.sandbox.stub(cover, 'setState');
         await story.layoutCallback();
         // These assertions ensure we don't spam the page state. We want to
         // avoid a situation where we set the page to active, then paused,
@@ -574,13 +584,13 @@ describes.realWin(
       });
 
       it('should play the story after the consent is resolved', async () => {
-        sandbox
+        env.sandbox
           .stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {}});
 
         // Prevents amp-story-consent element from running code that is irrelevant
         // to this test.
-        sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
+        env.sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
 
         const consentEl = win.document.createElement('amp-consent');
         const storyConsentEl = win.document.createElement('amp-story-consent');
@@ -596,12 +606,12 @@ describes.realWin(
           resolver = resolve;
         });
 
-        sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
+        env.sandbox.stub(consent, 'getConsentPolicyState').returns(promise);
 
         const coverEl = element.querySelector('amp-story-page');
 
         const cover = await coverEl.getImpl();
-        const setStateStub = sandbox.stub(cover, 'setState');
+        const setStateStub = env.sandbox.stub(cover, 'setState');
         await story.layoutCallback();
         await resolver(); // Resolving the consent.
         // These assertions ensure we don't spam the page state. We want to
@@ -618,13 +628,13 @@ describes.realWin(
       });
 
       it('should play the story if the consent was already resolved', async () => {
-        sandbox
+        env.sandbox
           .stub(Services, 'actionServiceForDoc')
           .returns({setWhitelist: () => {}, trigger: () => {}});
 
         // Prevents amp-story-consent element from running code that is irrelevant
         // to this test.
-        sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
+        env.sandbox.stub(AmpStoryConsent.prototype, 'buildCallback');
 
         const consentEl = win.document.createElement('amp-consent');
         const storyConsentEl = win.document.createElement('amp-story-consent');
@@ -635,12 +645,12 @@ describes.realWin(
 
         // Returns an already resolved promised: the user already accepted or
         // rejected the consent in a previous session.
-        sandbox.stub(consent, 'getConsentPolicyState').resolves();
+        env.sandbox.stub(consent, 'getConsentPolicyState').resolves();
 
         const coverEl = element.querySelector('amp-story-page');
 
         const cover = await coverEl.getImpl();
-        const setStateStub = sandbox.stub(cover, 'setState');
+        const setStateStub = env.sandbox.stub(cover, 'setState');
         await story.layoutCallback();
         // These assertions ensure we don't spam the page state. We want to
         // avoid a situation where we set the page to active, then paused,
@@ -660,8 +670,8 @@ describes.realWin(
       it('should pause the story when tab becomes inactive', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
-        sandbox.stub(ampdoc, 'isVisible').returns(false);
-        const onVisibilityChangedStub = sandbox.stub(
+        env.sandbox.stub(ampdoc, 'isVisible').returns(false);
+        const onVisibilityChangedStub = env.sandbox.stub(
           ampdoc,
           'onVisibilityChanged'
         );
@@ -680,8 +690,8 @@ describes.realWin(
       it('should play the story when tab becomes active', async () => {
         await createStoryWithPages(2, ['cover', 'page-1']);
 
-        sandbox.stub(ampdoc, 'isVisible').returns(true);
-        const onVisibilityChangedStub = sandbox.stub(
+        env.sandbox.stub(ampdoc, 'isVisible').returns(true);
+        const onVisibilityChangedStub = env.sandbox.stub(
           ampdoc,
           'onVisibilityChanged'
         );
@@ -727,7 +737,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         expect(setStateStub).to.have.been.calledOnceWithExactly(
           PageState.PAUSED
@@ -747,7 +757,7 @@ describes.realWin(
         await createStoryWithPages(2, ['cover', 'page-1']);
 
         await story.layoutCallback();
-        const setStateStub = sandbox.stub(story.activePage_, 'setState');
+        const setStateStub = window.sandbox.stub(story.activePage_, 'setState');
         story.getAmpDoc().overrideVisibilityState(VisibilityState.PAUSED);
         story.getAmpDoc().overrideVisibilityState(VisibilityState.ACTIVE);
         expect(setStateStub.getCall(1)).to.have.been.calledWithExactly(
@@ -771,7 +781,7 @@ describes.realWin(
           await createStoryWithPages(2, ['cover', 'page-4']);
           AmpStory.isBrowserSupported = () => false;
           story = new AmpStory(element);
-          const dispatchSpy = sandbox.spy(story.storeService_, 'dispatch');
+          const dispatchSpy = env.sandbox.spy(story.storeService_, 'dispatch');
           await story.layoutCallback();
           expect(dispatchSpy).to.have.been.calledWith(
             Action.TOGGLE_SUPPORTED_BROWSER,
@@ -784,7 +794,7 @@ describes.realWin(
 
           AmpStory.isBrowserSupported = () => false;
           story = new AmpStory(element);
-          const dispatchSpy = sandbox.spy(
+          const dispatchSpy = env.sandbox.spy(
             story.unsupportedBrowserLayer_.storeService_,
             'dispatch'
           );
@@ -819,8 +829,8 @@ describes.realWin(
         const sidebar = win.document.createElement('amp-sidebar');
         story.element.appendChild(sidebar);
 
-        const executeSpy = sandbox.spy();
-        sandbox.stub(Services, 'actionServiceForDoc').returns({
+        const executeSpy = env.sandbox.spy();
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns({
           setWhitelist: () => {},
           trigger: () => {},
           execute: executeSpy,
@@ -846,7 +856,7 @@ describes.realWin(
         const sidebar = win.document.createElement('amp-sidebar');
         story.element.appendChild(sidebar);
 
-        sandbox.stub(Services, 'actionServiceForDoc').returns({
+        env.sandbox.stub(Services, 'actionServiceForDoc').returns({
           setWhitelist: () => {},
           trigger: () => {},
           execute: () => {
@@ -900,8 +910,8 @@ describes.realWin(
       });
 
       it('should add previous visited attribute', async () => {
-        sandbox.stub(story, 'maybePreloadBookend_').returns();
-        sandbox
+        env.sandbox.stub(story, 'maybePreloadBookend_').returns();
+        env.sandbox
           .stub(utils, 'setAttributeInMutate')
           .callsFake((el, attr) => el.element.setAttribute(attr, ''));
 
@@ -917,8 +927,8 @@ describes.realWin(
         it('should register and preload the background audio', async () => {
           const src = 'https://example.com/foo.mp3';
           story.element.setAttribute('background-audio', src);
-          const registerStub = sandbox.stub(story.mediaPool_, 'register');
-          const preloadStub = sandbox
+          const registerStub = env.sandbox.stub(story.mediaPool_, 'register');
+          const preloadStub = env.sandbox
             .stub(story.mediaPool_, 'preload')
             .resolves();
 
@@ -941,7 +951,7 @@ describes.realWin(
         it('should bless the media on unmute', async () => {
           await createStoryWithPages(2, ['cover', 'page-1']);
 
-          const blessAllStub = sandbox
+          const blessAllStub = env.sandbox
             .stub(story.mediaPool_, 'blessAll')
             .resolves();
 
@@ -958,7 +968,7 @@ describes.realWin(
           story.backgroundAudioEl_ = backgroundAudioEl;
 
           await story.layoutCallback();
-          const pauseStub = sandbox.stub(story.mediaPool_, 'pause');
+          const pauseStub = env.sandbox.stub(story.mediaPool_, 'pause');
 
           story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
           story.storeService_.dispatch(Action.TOGGLE_AD, true);
@@ -979,8 +989,8 @@ describes.realWin(
           story.storeService_.dispatch(Action.TOGGLE_AD, true);
           story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
 
-          const unmuteStub = sandbox.stub(story.mediaPool_, 'unmute');
-          const playStub = sandbox.stub(story.mediaPool_, 'play');
+          const unmuteStub = env.sandbox.stub(story.mediaPool_, 'unmute');
+          const playStub = env.sandbox.stub(story.mediaPool_, 'play');
 
           story.storeService_.dispatch(Action.TOGGLE_AD, false);
 
@@ -1000,8 +1010,8 @@ describes.realWin(
           await story.layoutCallback();
           story.storeService_.dispatch(Action.TOGGLE_AD, true);
 
-          const unmuteStub = sandbox.stub(story.mediaPool_, 'unmute');
-          const playStub = sandbox.stub(story.mediaPool_, 'play');
+          const unmuteStub = env.sandbox.stub(story.mediaPool_, 'unmute');
+          const playStub = env.sandbox.stub(story.mediaPool_, 'play');
 
           story.storeService_.dispatch(Action.TOGGLE_AD, false);
 
@@ -1020,11 +1030,11 @@ describes.realWin(
           story.storeService_.dispatch(Action.TOGGLE_MUTED, false);
 
           await story.layoutCallback();
-          const coverMuteStub = sandbox.stub(
+          const coverMuteStub = env.sandbox.stub(
             story.getPageById('cover'),
             'muteAllMedia'
           );
-          const firstPageUnmuteStub = sandbox.stub(
+          const firstPageUnmuteStub = env.sandbox.stub(
             story.getPageById('page-1'),
             'unmuteAllMedia'
           );
@@ -1111,7 +1121,10 @@ describes.realWin(
 
           it('should send a message when tapping on last page in viewer', async () => {
             await createStoryWithPages(1, ['cover']);
-            const sendMessageStub = sandbox.stub(story.viewer_, 'sendMessage');
+            const sendMessageStub = env.sandbox.stub(
+              story.viewer_,
+              'sendMessage'
+            );
 
             await story.layoutCallback();
             // Click on right side of the screen to trigger page advancement.
@@ -1134,7 +1147,7 @@ describes.realWin(
         describe('without #cap=swipe', () => {
           it('should open the bookend when tapping on the last page', async () => {
             await createStoryWithPages(1, ['cover']);
-            const showPageHintStub = sandbox.stub(
+            const showPageHintStub = env.sandbox.stub(
               story.ampStoryHint_,
               'showFirstPageHintOverlay'
             );
@@ -1155,7 +1168,10 @@ describes.realWin(
 
           it('should send a message when tapping on last page in viewer', async () => {
             await createStoryWithPages(1, ['cover']);
-            const sendMessageStub = sandbox.stub(story.viewer_, 'sendMessage');
+            const sendMessageStub = env.sandbox.stub(
+              story.viewer_,
+              'sendMessage'
+            );
 
             await story.layoutCallback();
             // Click on left side of the screen to trigger page advancement.
@@ -1291,7 +1307,7 @@ describes.realWin(
             areFirstAuthorizationsCompleted: () => true,
             onApplyAuthorizations: fn => (authorizedCallback = fn),
           };
-          sandbox
+          env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
             .resolves(fakeAccessService);
 
@@ -1323,7 +1339,7 @@ describes.realWin(
             areFirstAuthorizationsCompleted: () => true,
             onApplyAuthorizations: fn => (authorizedCallback = fn),
           };
-          sandbox
+          env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
             .resolves(fakeAccessService);
 
@@ -1357,7 +1373,7 @@ describes.realWin(
             areFirstAuthorizationsCompleted: () => true,
             onApplyAuthorizations: fn => (authorizedCallback = fn),
           };
-          sandbox
+          env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
             .resolves(fakeAccessService);
 
@@ -1386,7 +1402,7 @@ describes.realWin(
             areFirstAuthorizationsCompleted: () => true,
             onApplyAuthorizations: fn => (authorizedCallback = fn),
           };
-          sandbox
+          env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
             .resolves(fakeAccessService);
 
@@ -1415,7 +1431,7 @@ describes.realWin(
             areFirstAuthorizationsCompleted: () => false,
             onApplyAuthorizations: () => {},
           };
-          sandbox
+          env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
             .resolves(fakeAccessService);
 
@@ -1443,7 +1459,7 @@ describes.realWin(
             areFirstAuthorizationsCompleted: () => false,
             onApplyAuthorizations: fn => (authorizedCallback = fn),
           };
-          sandbox
+          env.sandbox
             .stub(Services, 'accessServiceForDocOrNull')
             .resolves(fakeAccessService);
 
@@ -1489,7 +1505,7 @@ describes.realWin(
         describe('without #cap=swipe', () => {
           it('should handle touch events at the story level', async () => {
             await createStoryWithPages(2);
-            const touchmoveSpy = sandbox.spy();
+            const touchmoveSpy = env.sandbox.spy();
             story.win.document.addEventListener('touchmove', touchmoveSpy);
             dispatchSwipeEvent(100, 0);
             expect(touchmoveSpy).to.not.have.been.called;
@@ -1513,7 +1529,7 @@ describes.realWin(
 
           it('should let touch events bubble up to be forwarded', async () => {
             await createStoryWithPages(2);
-            const touchmoveSpy = sandbox.spy();
+            const touchmoveSpy = env.sandbox.spy();
             story.win.document.addEventListener('touchmove', touchmoveSpy);
             dispatchSwipeEvent(100, 0);
             expect(touchmoveSpy).to.have.been.called;

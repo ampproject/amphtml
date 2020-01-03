@@ -64,7 +64,7 @@ export function wrap(WrappedComponent) {
 
   /** @override */
   MaximumNights.prototype.render = function() {
-    const props = Object.assign({}, this.props);
+    const props = {...this.props};
     props['isOutsideRange'] = this.isOutsideRange_;
     return react.createElement(WrappedComponent, props);
   };

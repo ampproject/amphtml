@@ -46,10 +46,10 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
 
-      sandbox.stub(win.history, 'replaceState');
+      env.sandbox.stub(win.history, 'replaceState');
 
       const viewer = Services.viewerForDoc(env.ampdoc);
-      sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+      env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
       registerServiceBuilder(win, 'performance', () => ({
         isPerformanceTrackingOn: () => false,

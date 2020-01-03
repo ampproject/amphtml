@@ -54,7 +54,8 @@ describe
           win = env.win;
         });
 
-        it('should activate on tap of source image', () => {
+        // TODO(wg-ui-and-a11y, #25675) Flaky on sauce labs.
+        it.skip('should activate on tap of source image', () => {
           const lightbox = win.document.getElementById('image-lightbox-1');
           expect(lightbox).to.have.display('none');
           const ampImage = win.document.getElementById('img0');

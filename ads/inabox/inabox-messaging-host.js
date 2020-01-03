@@ -166,16 +166,15 @@ export class InaboxMessagingHost {
    * @param {!HTMLIFrameElement} iframe
    * @param {!Object} request
    * @param {!Window} source
-   * @param {string} origin
+   * @param {string} unusedOrigin
    * @return {boolean}
    */
-  handleSendPositions_(iframe, request, source, origin) {
+  handleSendPositions_(iframe, request, source, unusedOrigin) {
     const viewportRect = this.positionObserver_.getViewportRect();
     const targetRect = this.positionObserver_.getTargetRect(iframe);
     this.sendPosition_(
       request,
       source,
-      origin,
       dict({
         'viewportRect': viewportRect,
         'targetRect': targetRect,
@@ -186,12 +185,7 @@ export class InaboxMessagingHost {
     this.iframeMap_[request.sentinel].observeUnregisterFn =
       this.iframeMap_[request.sentinel].observeUnregisterFn ||
       this.positionObserver_.observe(iframe, data =>
-        this.sendPosition_(
-          request,
-          source,
-          origin,
-          /** @type {?JsonObject} */ (data)
-        )
+        this.sendPosition_(request, source, /** @type {?JsonObject} */ (data))
       );
     return true;
   }
@@ -200,14 +194,18 @@ export class InaboxMessagingHost {
    *
    * @param {!Object} request
    * @param {!Window} source
-   * @param {string} origin
    * @param {?JsonObject} data
    */
-  sendPosition_(request, source, origin, data) {
+  sendPosition_(request, source, data) {
     dev().fine(TAG, 'Sent position data to [%s] %s', request.sentinel, data);
     source./*OK*/ postMessage(
       serializeMessage(MessageType.POSITION, request.sentinel, data),
-      origin
+      // We don't need to restrict what origin we send the data to because (a)
+      // we've already verified that this iframe is whitelisted and allowed to
+      // learn its position, and (b) we're post messaging back directly to the
+      // requesting frame.  If we did restrict the origin this would not work
+      // with implementations that use a null origin to render ads.
+      '*'
     );
   }
 

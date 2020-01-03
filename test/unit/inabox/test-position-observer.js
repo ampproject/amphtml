@@ -63,9 +63,9 @@ describes.realWin('inabox-host:position-observer', {}, env => {
       viewportRect: layoutRectLtwh(0, 0, 200, 300),
       targetRect: layoutRectLtwh(3, 4, 30, 40),
     };
-    const callbackSpy11 = sandbox.stub();
-    const callbackSpy12 = sandbox.stub();
-    const callbackSpy21 = sandbox.stub();
+    const callbackSpy11 = env.sandbox.stub();
+    const callbackSpy12 = env.sandbox.stub();
+    const callbackSpy21 = env.sandbox.stub();
     observer.observe(target1, callbackSpy11);
     expect(callbackSpy11).to.be.calledWith(position1);
     observer.observe(target1, callbackSpy12);

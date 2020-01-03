@@ -353,14 +353,17 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     let scene;
     if (this.targetId_) {
       scene = user().assertElement(
+        // TODO: In friendly iframe, getAmpDoc() incorrectly fetches the parent
+        // doc. Need to change it to return the FIE AMP doc.
         this.getAmpDoc().getElementById(this.targetId_),
         'No element found with id:' + this.targetId_
       );
     } else {
       scene = this.element.parentNode;
     }
-    // Hoist body to documentElement.
-    if (this.getAmpDoc().getBody() == scene) {
+    // Hoist body to documentElement, expected to work for both ampdoc and
+    // amp4ads in friendly iframe.
+    if (this.win.document.body === scene) {
       scene = this.win.document.documentElement;
     }
 

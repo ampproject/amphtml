@@ -24,18 +24,19 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
-const BBPromise = require('bluebird');
 const childProcess = require('child_process');
 const colors = require('ansi-colors');
 const config = require('../test-configs/config');
 const extend = require('util')._extend;
 const git = require('gulp-git');
 const log = require('fancy-log');
-const request = BBPromise.promisify(require('request'));
+const util = require('util');
 
 const {GITHUB_ACCESS_TOKEN} = process.env;
-const exec = BBPromise.promisify(childProcess.exec);
-const gitExec = BBPromise.promisify(git.exec);
+
+const exec = util.promisify(childProcess.exec);
+const gitExec = util.promisify(git.exec);
+const request = util.promisify(require('request'));
 
 const {branch: overrideBranch, dryrun: isDryrun} = argv;
 
@@ -163,7 +164,7 @@ function getLastGitTag(gitMetadata) {
   const command = 'git describe --tags --abbrev=0';
 
   return exec(command).then(lastTag => {
-    gitMetadata.baseTag = lastTag.trim();
+    gitMetadata.baseTag = lastTag.stdout.trim();
     return gitMetadata;
   });
 }
@@ -182,7 +183,7 @@ function getCurrentBranchName(gitMetadata) {
   const command = 'git rev-parse --abbrev-ref HEAD';
 
   return exec(command).then(branchName => {
-    gitMetadata.branch = branchName.trim();
+    gitMetadata.branch = branchName.stdout.trim();
     return gitMetadata;
   });
 }
@@ -397,7 +398,7 @@ function getGitLog(gitMetadata) {
 function getGithubPullRequestsMetadata(gitMetadata) {
   // (erwinm): Github seems to only return data for the first 3 pages
   // from my manual testing.
-  return BBPromise.all([
+  return Promise.all([
     getClosedPullRequests(1),
     getClosedPullRequests(2),
     getClosedPullRequests(3),
@@ -421,9 +422,9 @@ function getGithubPullRequestsMetadata(gitMetadata) {
           // through github merge).
           return getPullRequest(prOptions, log);
         }
-        return BBPromise.resolve();
+        return Promise.resolve();
       });
-      return BBPromise.all(githubPrRequest).then(() => {
+      return Promise.all(githubPrRequest).then(() => {
         return gitMetadata;
       });
     });
@@ -444,9 +445,9 @@ function getGithubFilesMetadata(gitMetadata) {
       fileOptions.url = `${log.pr.url}/files`;
       return getPullRequestFiles(fileOptions, log.pr);
     }
-    return BBPromise.resolve();
+    return Promise.resolve();
   });
-  return BBPromise.all(githubFileRequests).then(() => {
+  return Promise.all(githubFileRequests).then(() => {
     return gitMetadata;
   });
 }

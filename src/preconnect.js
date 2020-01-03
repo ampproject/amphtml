@@ -21,11 +21,10 @@
 
 import {Services} from './services';
 import {dev} from './log';
-import {getService, registerServiceBuilder} from './service';
 import {htmlFor} from './static-template';
 import {parseUrlDeprecated} from './url';
+import {registerServiceBuilder} from './service';
 import {startsWith} from './string';
-import {toWin} from './types';
 import {whenDocumentComplete} from './document-ready';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
@@ -72,7 +71,7 @@ export function setPreconnectFeaturesForTesting(features) {
   preconnectFeatures = features;
 }
 
-class PreconnectService {
+export class PreconnectService {
   /**
    * @param {!Window} win
    */
@@ -319,70 +318,11 @@ class PreconnectService {
   }
 }
 
-export class Preconnect {
-  /**
-   * @param {!PreconnectService} preconnectService
-   * @param {!Element} element
-   */
-  constructor(preconnectService, element) {
-    /** @const @private {!PreconnectService} */
-    this.preconnectService_ = preconnectService;
-
-    /** @const @private {!Element} */
-    this.element_ = element;
-
-    /** @private {?./service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = null;
-  }
-
-  /**
-   * @return {!./service/ampdoc-impl.AmpDoc}
-   * @private
-   */
-  getAmpdoc_() {
-    if (!this.ampdoc_) {
-      this.ampdoc_ = Services.ampdoc(this.element_);
-    }
-    return this.ampdoc_;
-  }
-
-  /**
-   * Preconnects to a URL. Always also does a dns-prefetch because
-   * browser support for that is better.
-   * @param {string} url
-   * @param {boolean=} opt_alsoConnecting Set this flag if you also just
-   *    did or are about to connect to this host. This is for the case
-   *    where preconnect is issued immediate before or after actual connect
-   *    and preconnect is used to flatten a deep HTTP request chain.
-   *    E.g. when you preconnect to a host that an embed will connect to
-   *    when it is more fully rendered, you already know that the connection
-   *    will be used very soon.
-   */
-  url(url, opt_alsoConnecting) {
-    this.preconnectService_.url(this.getAmpdoc_(), url, opt_alsoConnecting);
-  }
-
-  /**
-   * Asks the browser to preload a URL. Always also does a preconnect
-   * because browser support for that is better.
-   *
-   * @param {string} url
-   * @param {string=} opt_preloadAs
-   */
-  preload(url, opt_preloadAs) {
-    this.preconnectService_.preload(this.getAmpdoc_(), url, opt_preloadAs);
-  }
-}
-
 /**
- * @param {!Element} element
- * @return {!Preconnect}
+ * @param {!Window} window
  */
-export function preconnectForElement(element) {
-  const serviceHolder = toWin(element.ownerDocument.defaultView);
-  registerServiceBuilder(serviceHolder, 'preconnect', PreconnectService);
-  const preconnectService = getService(serviceHolder, 'preconnect');
-  return new Preconnect(preconnectService, element);
+export function installPreconnectService(window) {
+  registerServiceBuilder(window, 'preconnect', PreconnectService);
 }
 
 /**
@@ -394,10 +334,13 @@ export function preconnectForElement(element) {
  */
 export function preconnectToOrigin(document) {
   return whenDocumentComplete(document).then(() => {
-    const element = document.documentElement;
-    const preconnect = preconnectForElement(element);
-    const info = Services.documentInfoForDoc(element);
-    preconnect.url(info.sourceUrl);
-    preconnect.url(info.canonicalUrl);
+    const win = document.defaultView;
+    if (win) {
+      const preconnect = Services.preconnectFor(win);
+      const info = Services.documentInfoForDoc(document.documentElement);
+      const ampdoc = Services.ampdoc(document);
+      preconnect.url(ampdoc, info.sourceUrl);
+      preconnect.url(ampdoc, info.canonicalUrl);
+    }
   });
 }

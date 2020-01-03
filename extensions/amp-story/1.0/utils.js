@@ -21,7 +21,11 @@ import {
 } from '../../../src/dom';
 import {createShadowRoot} from '../../../src/shadow-embed';
 import {getMode} from '../../../src/mode';
-import {getSourceOrigin} from '../../../src/url';
+import {
+  getSourceOrigin,
+  isProxyOrigin,
+  resolveRelativeUrl,
+} from '../../../src/url';
 import {getState} from '../../../src/history';
 import {setStyle} from '../../../src/style';
 import {user, userAssert} from '../../../src/log';
@@ -148,7 +152,8 @@ export function getRGBFromCssColorValue(cssValue) {
  * @param  {!Object<string, number>} rgb  ie: {r: 0, g: 0, b: 0}
  * @return {string} '#fff' or '#000'
  */
-export function getTextColorForRGB({r, g, b}) {
+export function getTextColorForRGB(rgb) {
+  const {r, g, b} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
   const getLinearRGBValue = x => {
@@ -231,6 +236,22 @@ export function getSourceOriginForElement(element, url) {
   return domainName;
 }
 
+/**
+ * Resolves an image url and optimizes it if served from the cache.
+ * @param {!Document} doc
+ * @param {string} url
+ * @return {string}
+ */
+export function resolveImgSrc(doc, url) {
+  let urlSrc = resolveRelativeUrl(url, doc.location);
+  if (isProxyOrigin(doc.location.href)) {
+    // TODO(Enriqe): add extra params for resized image, for example:
+    // (/ii/w${width}/s)
+    urlSrc = urlSrc.replace('/c/s/', '/i/s/');
+  }
+  return urlSrc;
+}
+
 /** @enum {string} */
 export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',
@@ -248,9 +269,10 @@ export const HistoryState = {
 export function setHistoryState(win, stateName, value) {
   const {history} = win;
   const state = getState(history) || {};
-  const newHistory = Object.assign({}, /** @type {!Object} */ (state), {
+  const newHistory = {
+    ...state,
     [stateName]: value,
-  });
+  };
 
   history.replaceState(newHistory, '');
 }
@@ -284,6 +306,16 @@ export function isMediaDisplayed(ampMediaEl, resource) {
     (ampMediaEl.tagName === 'AMP-AUDIO' &&
       ampMediaEl.getLayout() === Layout.NODISPLAY)
   );
+}
+
+/**
+ * Whether a Story should show the URL info dialog.
+ * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
+ * @return {boolean}
+ */
+export function shouldShowStoryUrlInfo(viewer) {
+  const showStoryUrlInfo = viewer.getParam('showStoryUrlInfo');
+  return showStoryUrlInfo ? showStoryUrlInfo !== '0' : viewer.isEmbedded();
 }
 
 /**

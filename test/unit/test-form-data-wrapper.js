@@ -68,7 +68,7 @@ describes.realWin('FormDataWrapper', {}, env => {
         afterEach(scenario.afterEach);
 
         beforeEach(() => {
-          sandbox.stub(Services, 'platformFor').returns({
+          env.sandbox.stub(Services, 'platformFor').returns({
             isIos() {
               return false;
             },
@@ -410,7 +410,7 @@ describes.realWin('FormDataWrapper', {}, env => {
 
     describe('Ios11NativeFormDataWrapper', () => {
       beforeEach(() => {
-        sandbox.stub(Services, 'platformFor').returns({
+        env.sandbox.stub(Services, 'platformFor').returns({
           isIos() {
             return true;
           },

@@ -17,7 +17,6 @@
 import '../amp-mega-menu';
 import {Keys} from '../../../../src/utils/key-codes';
 import {htmlFor} from '../../../../src/static-template';
-import {toggleExperiment} from '../../../../src/experiments';
 import {tryFocus} from '../../../../src/dom';
 
 describes.realWin(
@@ -28,18 +27,14 @@ describes.realWin(
     },
   },
   env => {
-    let win, doc, element, sandbox;
+    let win, doc, element;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      sandbox = env.sandbox;
 
       element = getAmpMegaMenu();
       doc.body.appendChild(element);
-
-      // TODO(#24898): remove this toggle when cleaning up experiment post launch.
-      toggleExperiment(win, 'amp-mega-menu', true);
     });
 
     function getAmpMegaMenu() {
@@ -204,11 +199,11 @@ describes.realWin(
       await element.unlayoutCallback();
       const impl = element.implementation_;
       const clickEvent = new Event('click');
-      const rootClickSpy = sandbox.spy(impl, 'handleRootClick_');
+      const rootClickSpy = env.sandbox.spy(impl, 'handleRootClick_');
       doc.documentElement.dispatchEvent(clickEvent);
       expect(rootClickSpy).to.not.be.called;
       const keydownEvent = new KeyboardEvent('keydown');
-      const rootKeyDownSpy = sandbox.spy(impl, 'handleRootKeyDown_');
+      const rootKeyDownSpy = env.sandbox.spy(impl, 'handleRootKeyDown_');
       doc.documentElement.dispatchEvent(keydownEvent);
       expect(rootKeyDownSpy).to.not.be.called;
     });

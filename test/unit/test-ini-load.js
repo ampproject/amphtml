@@ -21,13 +21,11 @@ import {whenContentIniLoad} from '../../src/ini-load';
 describes.realWin('friendly-iframe-embed', {amp: true}, env => {
   let win, doc;
   let ampdoc;
-  let sandbox;
 
   beforeEach(() => {
     win = env.win;
     doc = win.document;
     ampdoc = env.ampdoc;
-    sandbox = env.sandbox;
   });
 
   it('should find and await all visible content elements in given rect', async () => {
@@ -37,7 +35,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const context = doc.createElement('div');
     doc.body.appendChild(context);
     const resources = Services.resourcesForDoc(ampdoc);
-    sandbox.stub(resources, 'get').returns([
+    env.sandbox.stub(resources, 'get').returns([
       (content1 = resource(win, 'amp-img')),
       (content2 = resource(win, 'amp-video')),
       resource(win, 'amp-img', false), // resource outside rect

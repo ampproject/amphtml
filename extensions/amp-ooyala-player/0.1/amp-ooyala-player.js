@@ -68,7 +68,11 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://player.ooyala.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://player.ooyala.com',
+      opt_onLayout
+    );
   }
 
   /** @override */

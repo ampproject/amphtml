@@ -63,13 +63,13 @@ export class AmpOrientationObserver extends AMP.BaseElement {
     this.action_ = null;
 
     /** @private {Object<string, !Array<number>>} */
-    this.range_ = Object.assign({}, DEFAULT_RANGES);
+    this.range_ = {...DEFAULT_RANGES};
 
     /** @private {Object<string, number>} */
-    this.computedValue_ = Object.assign({}, DEFAULT_REST_VALUES);
+    this.computedValue_ = {...DEFAULT_REST_VALUES};
 
     /** @private {Object<string, number>} */
-    this.restValues_ = Object.assign({}, DEFAULT_REST_VALUES);
+    this.restValues_ = {...DEFAULT_REST_VALUES};
 
     /** @private {Object<string, !Array<number>>} */
     this.smoothingPoints_ = {beta: [], alpha: [], gamma: []};

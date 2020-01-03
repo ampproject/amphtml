@@ -256,7 +256,10 @@ function serialize(entries, resourceTimingSpec, ampdoc) {
     Math.round(val - relativeTo).toString(encoding['base'] || 10);
 
   const promises = filterEntries(entries, resources)
-    .map(({entry, name}) => entryToExpansionOptions(entry, name, format))
+    .map(resourceTimingEntry => {
+      const {entry, name} = resourceTimingEntry;
+      return entryToExpansionOptions(entry, name, format);
+    })
     .map(expansion =>
       variableService.expandTemplate(encoding['entry'], expansion)
     );

@@ -23,7 +23,7 @@ import {createCustomEvent} from '../../src/event-helper';
 import {createIframePromise} from '../../testing/iframe';
 import {toggleExperiment} from '../../src/experiments';
 
-describe('amp-img', () => {
+describes.sandboxed('amp-img', {}, env => {
   let sandbox;
   let screenWidth;
   let windowWidth;
@@ -33,7 +33,8 @@ describe('amp-img', () => {
                         /examples/img/hero@2x.jpg 1282w`;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
+    sandbox = env.sandbox;
+
     screenWidth = 320;
     windowWidth = 320;
     sandbox.stub(BaseElement.prototype, 'isInViewport').returns(true);
@@ -46,10 +47,6 @@ describe('amp-img', () => {
     return createIframePromise().then(iframeFixture => {
       fixture = iframeFixture;
     });
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function getImg(attributes, children) {
@@ -109,17 +106,21 @@ describe('amp-img', () => {
   });
 
   it('should preconnect the src url', () => {
+    const preconnect = {url: sandbox.stub()};
+    sandbox.stub(Services, 'preconnectFor').returns(preconnect);
+
     return getImg({
       src: '/examples/img/sample.jpg',
       width: 300,
       height: 200,
     }).then(ampImg => {
       const impl = ampImg.implementation_;
-      sandbox.stub(impl.preconnect, 'url');
       impl.preconnectCallback(true);
-      const preconnecturl = impl.preconnect.url;
-      expect(preconnecturl.called).to.be.true;
-      expect(preconnecturl).to.have.been.calledWith('/examples/img/sample.jpg');
+      expect(preconnect.url).to.be.called;
+      expect(preconnect.url).to.have.been.calledWith(
+        sandbox.match.object,
+        '/examples/img/sample.jpg'
+      );
     });
   });
 
@@ -139,16 +140,19 @@ describe('amp-img', () => {
   });
 
   it('should preconnect to the the first srcset url if src is not set', () => {
+    const preconnect = {url: sandbox.stub()};
+    sandbox.stub(Services, 'preconnectFor').returns(preconnect);
+
     return getImg({
       srcset: SRCSET_STRING,
       width: 300,
       height: 200,
     }).then(ampImg => {
       const impl = ampImg.implementation_;
-      sandbox.stub(impl.preconnect, 'url');
       impl.preconnectCallback(true);
-      expect(impl.preconnect.url.called).to.be.true;
-      expect(impl.preconnect.url).to.have.been.calledWith(
+      expect(preconnect.url).to.be.called;
+      expect(preconnect.url).to.have.been.calledWith(
+        sandbox.match.object,
         '/examples/img/hero@1x.jpg'
       );
     });
@@ -189,6 +193,18 @@ describe('amp-img', () => {
     });
   });
 
+  it('should propagate data attributes', () => {
+    return getImg({
+      src: '/examples/img/sample.jpg',
+      width: 320,
+      height: 240,
+      'data-foo': 'abc',
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img.getAttribute('data-foo')).to.equal('abc');
+    });
+  });
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;
@@ -204,9 +220,9 @@ describe('amp-img', () => {
       el.setAttribute('height', 100);
       el.getResources = () => Services.resourcesForDoc(document);
       el.getPlaceholder = sandbox.stub();
+      el.getLayoutWidth = () => 100;
       impl = new AmpImg(el);
       impl.createdCallback();
-      sandbox.stub(impl, 'getLayoutWidth').returns(100);
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};
       toggleFallbackSpy = sandbox.spy(el, 'toggleFallback');
@@ -360,6 +376,7 @@ describe('amp-img', () => {
     el.setAttribute('aria-label', 'Hello');
     el.setAttribute('aria-labelledby', 'id2');
     el.setAttribute('aria-describedby', 'id3');
+    el.getLayoutWidth = () => -1;
 
     el.getPlaceholder = sandbox.stub();
     const impl = new AmpImg(el);
@@ -460,10 +477,10 @@ describe('amp-img', () => {
       if (addBlurClass) {
         img.classList.add('i-amphtml-blurry-placeholder');
       }
+      el.getLayoutWidth = () => 200;
       el.appendChild(img);
       el.getResources = () => Services.resourcesForDoc(document);
       const impl = new AmpImg(el);
-      sandbox.stub(impl, 'getLayoutWidth').returns(200);
       impl.togglePlaceholder = sandbox.stub();
       return impl;
     }
@@ -514,9 +531,9 @@ describe('amp-img', () => {
       }
       el.getResources = () => Services.resourcesForDoc(document);
       el.getPlaceholder = sandbox.stub();
+      el.getLayoutWidth = () => layoutWidth;
       const impl = new AmpImg(el);
       impl.createdCallback();
-      sandbox.stub(impl, 'getLayoutWidth').returns(layoutWidth);
       sandbox.stub(impl, 'getLayout').returns(attributes['layout']);
       el.toggleFallback = function() {};
       el.togglePlaceholder = function() {};

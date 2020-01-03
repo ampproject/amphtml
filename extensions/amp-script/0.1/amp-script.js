@@ -47,11 +47,6 @@ const TAG = 'amp-script';
 const MAX_TOTAL_SCRIPT_SIZE = 150000;
 
 /**
- * Size-contained elements up to 300px are allowed to mutate freely.
- */
-const MAX_FREE_MUTATION_HEIGHT = 300;
-
-/**
  * See src/transfer/Phase.ts in worker-dom.
  * @enum {number}
  */
@@ -152,6 +147,14 @@ export class AmpScript extends AMP.BaseElement {
     this.service_ = service;
   }
 
+  /**
+   * @return {?UserActivationTracker}
+   * @visibleForTesting
+   */
+  getUserActivation() {
+    return this.userActivation_;
+  }
+
   /** @override */
   layoutCallback() {
     this.userActivation_ = new UserActivationTracker(this.element);
@@ -202,7 +205,12 @@ export class AmpScript extends AMP.BaseElement {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
-      sanitizer: new SanitizerImpl(this.win, this.element, sandboxTokens),
+      sanitizer: new SanitizerImpl(
+        this.win,
+        this.element,
+        sandboxTokens,
+        this.userActivation_
+      ),
       // Callbacks.
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
@@ -362,9 +370,8 @@ export class AmpScript extends AMP.BaseElement {
       phase != Phase.MUTATING ||
       // Mutation depends on the gesture state and long tasks.
       this.userActivation_.isActive() ||
-      // If the element is size-contained and small enough.
-      (isLayoutSizeDefined(this.getLayout()) &&
-        this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT);
+      // Always allow mutation if the element has a static size.
+      isLayoutSizeDefined(this.getLayout());
 
     if (allowMutation) {
       this.vsync_.mutate(flush);
@@ -479,8 +486,9 @@ export class SanitizerImpl {
    * @param {!Window} win
    * @param {!Element} element
    * @param {!Array<string>} sandboxTokens
+   * @param {!UserActivationTracker} userActivationTracker
    */
-  constructor(win, element, sandboxTokens) {
+  constructor(win, element, sandboxTokens, userActivationTracker) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -492,6 +500,9 @@ export class SanitizerImpl {
 
     /** @private @const {!Object<string, boolean>} */
     this.allowedTags_ = getAllowedTags();
+
+    /** @private @const {!UserActivationTracker} */
+    this.userActivationTracker_ = userActivationTracker;
 
     // TODO(choumx): Support opt-in for variable substitutions.
     // For now, only allow built-in AMP components except amp-pixel.
@@ -640,7 +651,15 @@ export class SanitizerImpl {
             dev().error(TAG, 'Invalid AMP.setState() argument: %s', value);
           });
           if (state) {
-            bind.setState(state, /* skipEval */ true, /* skipAmpState */ false);
+            // Only evaluate updates in case of recent user interaction.
+            const skipEval = !this.userActivationTracker_.isActive();
+            if (skipEval) {
+              user().warn(
+                TAG,
+                'AMP.setState only updated page state and did not reevaluate bindings due to lack of recent user interaction.'
+              );
+            }
+            bind.setState(state, skipEval, /* skipAmpState */ false);
           }
         }
       });

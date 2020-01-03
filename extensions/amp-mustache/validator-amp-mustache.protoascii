@@ -29,7 +29,7 @@ tags: {  # amp-mustache
     version: "0.2"
     version: "latest"
     deprecated_version: "0.1"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"

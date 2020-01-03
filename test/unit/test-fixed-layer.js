@@ -544,7 +544,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should add and remove element directly', () => {
-        const updateStub = sandbox.stub(fixedLayer, 'update');
+        const updateStub = window.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         // Add.
@@ -890,7 +890,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         expect(state['F0'].top).to.equal('0px');
 
         // Update to transient padding.
-        sandbox.stub(fixedLayer, 'update').callsFake(() => {});
+        window.sandbox.stub(fixedLayer, 'update').callsFake(() => {});
         fixedLayer.updatePaddingTop(22, /* transient */ true);
         vsyncTasks[0].measure(state);
         expect(state['F0'].fixed).to.be.true;
@@ -1160,7 +1160,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         element1.setAttribute('style', 'bottom: 10px');
         element1.style.bottom = '10px';
 
-        const userError = sandbox.stub(user(), 'error');
+        const userError = window.sandbox.stub(user(), 'error');
         fixedLayer.setup();
         // Expect error regarding inline styles.
         expect(userError).calledWithMatch(
@@ -1197,7 +1197,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
           element1.computedStyle['display'] = '';
 
-          sandbox.stub(timer, 'delay').callsFake(callback => {
+          window.sandbox.stub(timer, 'delay').callsFake(callback => {
             callback();
           });
           return mutationObserver
@@ -1217,7 +1217,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should ignore descendants of already-tracked elements', () => {
-        const updateStub = sandbox.stub(fixedLayer, 'update');
+        const updateStub = window.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         element1.appendChild(element6);
@@ -1229,7 +1229,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should replace descendants of tracked elements', () => {
-        const updateStub = sandbox.stub(fixedLayer, 'update');
+        const updateStub = window.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         element6.appendChild(element1);
@@ -1564,7 +1564,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       element1.setAttribute('style', 'bottom: 10px');
       element1.style.bottom = '10px';
 
-      const userError = sandbox.stub(user(), 'error');
+      const userError = window.sandbox.stub(user(), 'error');
       fixedLayer.setup();
       // Expect error regarding inline styles.
       expect(userError).calledWithMatch(
@@ -1601,7 +1601,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
         element1.computedStyle['display'] = '';
 
-        sandbox.stub(timer, 'delay').callsFake(callback => {
+        window.sandbox.stub(timer, 'delay').callsFake(callback => {
           callback();
         });
         return mutationObserver

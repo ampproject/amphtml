@@ -98,9 +98,8 @@ export function calculateEntryPointScriptUrl(
  * @return {!ExtensionInfoDef}
  */
 export function parseExtensionUrl(scriptUrl) {
-  const regex = /^(.*)\/(.*)-([0-9.]+)\.js$/i;
-  const matches = scriptUrl.match(regex);
-
+  // Note that the "(\.max)?" group only applies to local dev.
+  const matches = scriptUrl.match(/^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.js$/i);
   return {
     extensionId: matches ? matches[2] : undefined,
     extensionVersion: matches ? matches[3] : undefined,

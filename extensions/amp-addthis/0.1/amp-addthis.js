@@ -123,7 +123,7 @@ class AmpAddThis extends AMP.BaseElement {
     /** @private {(?JsonObject<string, string>|null)} */
     this.shareConfig_ = null;
 
-    /** @private {(?JsonObject<AtConfigDef>)} */
+    /** @private {(?JsonObject)} */
     this.atConfig_ = null;
 
     /** @private {string} */
@@ -245,13 +245,15 @@ class AmpAddThis extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url(ORIGIN, opt_onLayout);
-    this.preconnect.url(API_SERVER, opt_onLayout);
-    this.preconnect.url(COOKIELESS_API_SERVER, opt_onLayout);
-    this.preconnect.url(SHARECOUNTER_SERVER, opt_onLayout);
+    const preconnect = Services.preconnectFor(this.win);
+    const ampdoc = this.getAmpDoc();
+    preconnect.url(ampdoc, ORIGIN, opt_onLayout);
+    preconnect.url(ampdoc, API_SERVER, opt_onLayout);
+    preconnect.url(ampdoc, COOKIELESS_API_SERVER, opt_onLayout);
+    preconnect.url(ampdoc, SHARECOUNTER_SERVER, opt_onLayout);
     // Images, etc.:
-    this.preconnect.url('https://cache.addthiscdn.com', opt_onLayout);
-    this.preconnect.url('https://su.addthis.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://cache.addthiscdn.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://su.addthis.com', opt_onLayout);
   }
 
   /** @override */
@@ -407,7 +409,8 @@ class AmpAddThis extends AMP.BaseElement {
    * @param {*} [input.pubId]
    * @memberof AmpAddThis
    */
-  setupListeners_({ampDoc, loc, pubId}) {
+  setupListeners_(input) {
+    const {ampDoc, loc, pubId} = input;
     // Send "engagement" analytics on page hide.
     listen(ampDoc.win, 'pagehide', () =>
       callEng({

@@ -33,7 +33,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
   });
 
   it('should trigger `story-page-visible` on change', () => {
-    const trigger = sandbox.stub(analytics, 'triggerEvent');
+    const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
@@ -44,7 +44,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
   });
 
   it('should trigger `story-last-page-visible` when last page is visible', () => {
-    const trigger = sandbox.stub(analytics, 'triggerEvent');
+    const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
     storeService.dispatch(Action.SET_PAGE_IDS, ['cover', 'page1', 'page2']);
     storeService.dispatch(Action.CHANGE_PAGE, {
@@ -60,7 +60,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
   });
 
   it('should not mark an event as repeated the first time it fires', () => {
-    const trigger = sandbox.spy(analytics, 'triggerEvent');
+    const trigger = env.sandbox.spy(analytics, 'triggerEvent');
 
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
@@ -70,11 +70,11 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledOnceWith('story-page-visible');
 
     const details = analytics.updateDetails('story-page-visible');
-    expect(details.pageDetails).to.deep.equal({});
+    expect(details.eventDetails).to.deep.equal({});
   });
 
   it('should mark event as repeated when fired more than once', () => {
-    const trigger = sandbox.spy(analytics, 'triggerEvent');
+    const trigger = env.sandbox.spy(analytics, 'triggerEvent');
 
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
@@ -94,7 +94,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledWith('story-page-visible');
     expect(trigger).to.have.been.calledThrice;
     expect(
-      analytics.updateDetails('story-page-visible').pageDetails
+      analytics.updateDetails('story-page-visible').eventDetails
     ).to.deep.include({
       'repeated': true,
     });

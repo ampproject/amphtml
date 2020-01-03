@@ -23,7 +23,7 @@ import {loadScript, validateData} from '../3p/3p';
 export function revjet(global, data) {
   validateData(data, ['tag', 'key'], ['plc', 'opts', 'params']);
 
-  global._revjetData = Object.assign({}, data);
+  global._revjetData = {...data};
 
   loadScript(
     global,

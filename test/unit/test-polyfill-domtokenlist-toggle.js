@@ -27,7 +27,6 @@ describes.fakeWin(
     },
   },
   env => {
-    let sandbox;
     let originalToggle;
     let originalAdd;
     let element;
@@ -35,7 +34,6 @@ describes.fakeWin(
     beforeEach(() => {
       originalToggle = env.win.DOMTokenList.prototype.toggle;
       originalAdd = env.win.DOMTokenList.prototype.add;
-      sandbox = sinon.sandbox;
 
       element = env.win.document.createElement('div');
       env.win.document.body.appendChild(element);
@@ -47,7 +45,6 @@ describes.fakeWin(
       if (element.parentNode) {
         element.parentNode.removeChild(element);
       }
-      sandbox.restore();
     });
 
     it('should NOT override toggle in non-IE browsers', () => {
@@ -76,7 +73,6 @@ describes.fakeWin(
     },
   },
   env => {
-    let sandbox;
     let originalToggle;
     let originalAdd;
     let element;
@@ -84,7 +80,6 @@ describes.fakeWin(
     beforeEach(() => {
       originalToggle = env.win.DOMTokenList.prototype.toggle;
       originalAdd = env.win.DOMTokenList.prototype.add;
-      sandbox = sinon.sandbox;
 
       element = env.win.document.createElement('div');
       env.win.document.body.appendChild(element);
@@ -96,7 +91,6 @@ describes.fakeWin(
       if (element.parentNode) {
         element.parentNode.removeChild(element);
       }
-      sandbox.restore();
     });
 
     it('should polyfill DOMTokenList.toggle API', () => {

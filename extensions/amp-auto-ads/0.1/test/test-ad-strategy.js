@@ -46,7 +46,7 @@ describes.realWin(
       doc.body.appendChild(container);
       // Stub whenBuilt to resolve immediately to handle upgrade for AdSense
       // to FF impl.
-      sinon
+      env.sandbox
         .stub(win.__AMP_BASE_CE_CLASS.prototype, 'whenBuilt')
         .callsFake(() => Promise.resolve());
     });
@@ -70,7 +70,7 @@ describes.realWin(
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
       expect(placements).to.have.lengthOf(1);
 
-      const placeAdSpy = sandbox.spy(placements[0], 'placeAd');
+      const placeAdSpy = env.sandbox.spy(placements[0], 'placeAd');
 
       const attributes = {
         'type': 'adsense',
@@ -195,7 +195,7 @@ describes.realWin(
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
 
       expect(placements).to.have.lengthOf(2);
-      sandbox.stub(placements[0], 'placeAd').callsFake(() => {
+      env.sandbox.stub(placements[0], 'placeAd').callsFake(() => {
         return Promise.resolve(PlacementState.REIZE_FAILED);
       });
 
@@ -503,10 +503,10 @@ describes.realWin(
       const placements = getPlacementsFromConfigObj(ampdoc, configObj);
 
       expect(placements).to.have.lengthOf(2);
-      sandbox.stub(placements[0], 'placeAd').callsFake(() => {
+      env.sandbox.stub(placements[0], 'placeAd').callsFake(() => {
         return Promise.resolve(PlacementState.REIZE_FAILED);
       });
-      sandbox.stub(placements[1], 'placeAd').callsFake(() => {
+      env.sandbox.stub(placements[1], 'placeAd').callsFake(() => {
         return Promise.resolve(PlacementState.REIZE_FAILED);
       });
 

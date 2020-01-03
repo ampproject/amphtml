@@ -364,16 +364,6 @@ amp-story-grid-layer {
   left: 0 !important;
 }
 
-/**
- * Adds a width limit to make sure amp-twitter element only takes required
- * space, otherwise it takes whole width and causes a tooltip trigger in blank
- * space.
- * See #22334
- */
-amp-story-grid-layer amp-twitter {
-  max-width: 500px !important;
-}
-
 amp-story-grid-layer > * {
   pointer-events: auto !important;
 }
@@ -684,6 +674,7 @@ amp-story .amp-video-eq,
   animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   animation-iteration-count: infinite !important;
   opacity: 1 !important;
+  filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.25)) !important;
 }
 
 @keyframes fill-unfill-rotate {
@@ -992,4 +983,13 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
   text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
+}
+
+amp-story-quiz {
+  align-self: center;
+  width: auto !important;
+  height: auto !important;
+  /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
+  min-width: 224px !important;
+  max-width: 400px !important;
 }

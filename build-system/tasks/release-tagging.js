@@ -16,15 +16,15 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const fs = require('fs-extra');
 const git = require('gulp-git');
 const log = require('fancy-log');
-const request = BBPromise.promisify(require('request'));
+const util = require('util');
 
 const {GITHUB_ACCESS_TOKEN} = process.env;
-const gitExec = BBPromise.promisify(git.exec);
+const gitExec = util.promisify(git.exec);
+const request = util.promisify(require('request'));
 
 const isDryrun = argv.dryrun;
 const verbose = argv.verbose || argv.v;

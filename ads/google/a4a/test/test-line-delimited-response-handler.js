@@ -22,7 +22,6 @@ import {
 describe('#line-delimited-response-handler', () => {
   let chunkHandlerStub;
   let slotData;
-  let sandbox;
   let win;
   let response;
 
@@ -93,12 +92,7 @@ describe('#line-delimited-response-handler', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    chunkHandlerStub = sandbox.stub();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
+    chunkHandlerStub = window.sandbox.stub();
   });
 
   describe('stream not supported', () => {
@@ -143,7 +137,6 @@ describe('#line-delimited-response-handler', () => {
 
   describe('streaming', () => {
     let readStub;
-    let sandbox;
 
     function setup() {
       const responseString = generateResponseFormat();
@@ -161,8 +154,7 @@ describe('#line-delimited-response-handler', () => {
     }
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      readStub = sandbox.stub();
+      readStub = window.sandbox.stub();
       response = {
         text: () => Promise.resolve(),
         body: {
@@ -176,10 +168,6 @@ describe('#line-delimited-response-handler', () => {
       win = {
         TextDecoder,
       };
-    });
-
-    afterEach(() => {
-      sandbox.restore();
     });
 
     // TODO(lannka, #15748): Fails on Safari 11.1.0.

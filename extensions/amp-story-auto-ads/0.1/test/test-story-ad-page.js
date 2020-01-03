@@ -16,6 +16,7 @@
 
 import * as dom from '../../../../src/dom';
 import * as service from '../../../../src/service';
+import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {CommonSignals} from '../../../../src/common-signals';
 import {StoryAdAnalytics} from '../story-ad-analytics';
 import {StoryAdLocalization} from '../story-ad-localization';
@@ -52,7 +53,8 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       storyAutoAdsEl.getAmpDoc(),
       baseConfig,
       1, // index
-      new StoryAdLocalization(win)
+      new StoryAdLocalization(win),
+      new ButtonTextFitter(env.ampdoc)
     );
   });
 
@@ -106,7 +108,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
 
   describe('#hasTimedOut', () => {
     it('should timeout after > 10 seconds', () => {
-      const clock = sandbox.useFakeTimers(1555555555555);
+      const clock = window.sandbox.useFakeTimers(1555555555555);
       storyAdPage.build();
       expect(storyAdPage.hasTimedOut()).to.be.false;
       clock.tick(10009); // 10 second timeout.
@@ -138,7 +140,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
 
   describe('#registerLoadCallback', () => {
     it('registers given functions and executes when loaded', async () => {
-      const someFunc = sandbox.spy();
+      const someFunc = window.sandbox.spy();
       const pageElement = storyAdPage.build();
       // Stub delegateVideoAutoplay.
       pageElement.getImpl = () => Promise.resolve(pageImplMock);
@@ -224,7 +226,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       ampAdElement.setAttribute('data-vars-ctaurl', 'https://amp.dev');
       ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
 
-      const created = storyAdPage.maybeCreateCta();
+      const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
 
       const ctaLayer = doc.querySelector('amp-story-cta-layer');
@@ -241,6 +243,38 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       expect(anchor.textContent).to.equal('Install Now');
     });
 
+    it('allows custom CTA text', async () => {
+      ampAdElement.setAttribute('data-vars-ctaurl', 'https://amp.dev');
+      ampAdElement.setAttribute('data-vars-ctatype', 'I am a custom button!');
+
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.true;
+
+      const ctaLayer = doc.querySelector('amp-story-cta-layer');
+      expect(ctaLayer).to.exist;
+      const anchor = ctaLayer.firstChild;
+      expect(anchor.tagName).to.equal('A');
+      expect(anchor.target).to.equal('_blank');
+      expect(anchor.href).to.equal('https://amp.dev/');
+      expect(anchor).to.have.attribute(
+        'style',
+        'font-size: 0px; transform: scale(0);'
+      );
+      expect(anchor).to.have.class('i-amphtml-story-ad-link');
+      expect(anchor.textContent).to.equal('I am a custom button!');
+    });
+
+    it('rejects custom CTA text if it is too long', async () => {
+      ampAdElement.setAttribute('data-vars-ctaurl', 'https://amp.dev');
+      ampAdElement.setAttribute(
+        'data-vars-ctatype',
+        'I am a very long CTA that will not fit within the button limit!'
+      );
+
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.false;
+    });
+
     it('reads CTA values from amp4ads-vars meta tags', async () => {
       const iframe = doc.createElement('iframe');
       ampAdElement.appendChild(iframe);
@@ -253,7 +287,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
 
-      const created = storyAdPage.maybeCreateCta();
+      const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const anchor = doc.querySelector('a');
       expect(anchor.href).to.equal('https://www.example.com/');
@@ -281,27 +315,29 @@ describes.realWin('story-ad-page', {amp: true}, env => {
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
 
-      const created = storyAdPage.maybeCreateCta();
+      const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const anchor = doc.querySelector('a');
       expect(anchor.href).to.equal('https://amp.dev/');
       expect(anchor.textContent).to.equal('Learn More');
     });
 
-    it('throws on missing cta url', () => {
+    it('throws on missing cta url', async () => {
+      expectAsyncConsoleError(
+        '[amp-story-auto-ads:page] Both CTA Type & CTA Url are required in ad response.'
+      );
       ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
-      allowConsoleError(() => {
-        const created = storyAdPage.maybeCreateCta();
-        expect(created).to.be.false;
-      });
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.false;
     });
 
-    it('throws on missing cta type', () => {
+    it('throws on missing cta type', async () => {
+      expectAsyncConsoleError(
+        '[amp-story-auto-ads:page] Both CTA Type & CTA Url are required in ad response.'
+      );
       ampAdElement.setAttribute('data-vars-ctaurl', 'INSTALL');
-      allowConsoleError(() => {
-        const created = storyAdPage.maybeCreateCta();
-        expect(created).to.be.false;
-      });
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.false;
     });
 
     it('creates attribution badge with outlink', async () => {
@@ -317,7 +353,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         <body></body>`);
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
-      const created = storyAdPage.maybeCreateCta();
+      const created = await storyAdPage.maybeCreateCta();
       expect(created).to.be.true;
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
       expect(attribution).to.exist;
@@ -327,7 +363,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         'https://googleads.g.doubleclick.net/pagead/images/mtad/ad_choices_blue.png'
       );
 
-      const openWindowDialogStub = sandbox.stub(dom, 'openWindowDialog');
+      const openWindowDialogStub = window.sandbox.stub(dom, 'openWindowDialog');
       attribution.click();
       expect(openWindowDialogStub).to.be.calledOnce;
       expect(openWindowDialogStub).to.be.calledWithExactly(
@@ -338,6 +374,9 @@ describes.realWin('story-ad-page', {amp: true}, env => {
     });
 
     it('does not create attribution when missing icon', async () => {
+      expectAsyncConsoleError(
+        /amp-story-auto-ads attribution icon must be available/
+      );
       const iframe = doc.createElement('iframe');
       ampAdElement.appendChild(iframe);
       iframe.contentDocument.write(`
@@ -349,17 +388,16 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         <body></body>`);
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
-      allowConsoleError(() => {
-        const created = storyAdPage.maybeCreateCta();
-        expect(created).to.be.false;
-        const attribution = doc.querySelector(
-          '.i-amphtml-story-ad-attribution'
-        );
-        expect(attribution).not.to.exist;
-      });
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.false;
+      const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
+      expect(attribution).not.to.exist;
     });
 
     it('does not create attribution when missing url', async () => {
+      expectAsyncConsoleError(
+        /amp-story-auto-ads attribution url must be available/
+      );
       const iframe = doc.createElement('iframe');
       ampAdElement.appendChild(iframe);
       iframe.contentDocument.write(`
@@ -371,14 +409,10 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         <body></body>`);
 
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
-      allowConsoleError(() => {
-        const created = storyAdPage.maybeCreateCta();
-        expect(created).to.be.false;
-        const attribution = doc.querySelector(
-          '.i-amphtml-story-ad-attribution'
-        );
-        expect(attribution).not.to.exist;
-      });
+      const created = await storyAdPage.maybeCreateCta();
+      expect(created).to.be.false;
+      const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
+      expect(attribution).not.to.exist;
     });
   });
 
@@ -387,13 +421,16 @@ describes.realWin('story-ad-page', {amp: true}, env => {
 
     beforeEach(() => {
       const storyAnalytics = new StoryAdAnalytics(env.ampdoc);
-      fireEventStub = sandbox.stub(storyAnalytics, 'fireEvent');
-      sandbox.stub(service, 'getServicePromiseForDoc').resolves(storyAnalytics);
+      fireEventStub = window.sandbox.stub(storyAnalytics, 'fireEvent');
+      window.sandbox
+        .stub(service, 'getServicePromiseForDoc')
+        .resolves(storyAnalytics);
       storyAdPage = new StoryAdPage(
         storyAutoAdsEl.getAmpDoc(),
         baseConfig,
         1, // index
-        new StoryAdLocalization(win)
+        new StoryAdLocalization(win),
+        new ButtonTextFitter(env.ampdoc)
       );
     });
 
@@ -404,7 +441,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         pageElement,
         1, // adIndex
         'story-ad-request',
-        {requestTime: sinon.match.number}
+        {requestTime: window.sandbox.match.number}
       );
     });
 
@@ -421,7 +458,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         pageElement,
         1, // adIndex
         'story-ad-load',
-        {loadTime: sinon.match.number}
+        {loadTime: window.sandbox.match.number}
       );
     });
 
@@ -436,7 +473,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       ampAdElement.setAttribute('data-vars-ctatype', 'INSTALL');
       await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
 
-      storyAdPage.maybeCreateCta();
+      await storyAdPage.maybeCreateCta();
       const cta = doc.querySelector('.i-amphtml-story-ad-link');
       // Don't open new tab for test.
       cta.target = '_self';
@@ -447,7 +484,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         pageElement,
         1, // adIndex
         'story-ad-click',
-        {clickTime: sinon.match.number}
+        {clickTime: window.sandbox.match.number}
       );
     });
   });

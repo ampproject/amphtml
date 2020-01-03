@@ -27,27 +27,25 @@ import {
 import {Sources} from '../sources';
 import {toArray} from '../../../../src/types';
 
-describes.realWin('media-tasks', {}, () => {
-  let sandbox;
+describes.realWin('media-tasks', {}, env => {
   let el;
   let vsyncApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     el = document.createElement('video');
 
     // Mock vsync
     vsyncApi = {
       mutatePromise: () => {},
     };
-    sandbox.stub(vsyncApi, 'mutatePromise').resolves(callback => {
+    env.sandbox.stub(vsyncApi, 'mutatePromise').resolves(callback => {
       callback();
     });
   });
 
   describe('PauseTask', () => {
     it('should call pause()', () => {
-      const pause = sandbox.spy(el, 'pause');
+      const pause = env.sandbox.spy(el, 'pause');
       const task = new PauseTask();
       task.execute(el);
       expect(pause).to.have.been.called;
@@ -58,7 +56,7 @@ describes.realWin('media-tasks', {}, () => {
     it('should call play() if element was not yet playing', () => {
       expect(el.paused).to.be.true;
 
-      const play = sandbox.spy(el, 'play');
+      const play = env.sandbox.spy(el, 'play');
       const task = new PlayTask();
       task.execute(el);
       expect(play).to.have.been.called;
@@ -68,7 +66,7 @@ describes.realWin('media-tasks', {}, () => {
       el.play();
       expect(el.paused).to.be.false;
 
-      const play = sandbox.spy(el, 'play');
+      const play = env.sandbox.spy(el, 'play');
       const task = new PlayTask();
       task.execute(el);
       expect(play).not.to.have.been.called;
@@ -99,7 +97,7 @@ describes.realWin('media-tasks', {}, () => {
 
   describe('LoadTask', () => {
     it('should call load()', () => {
-      const load = sandbox.spy(el, 'load');
+      const load = env.sandbox.spy(el, 'load');
       const task = new LoadTask();
       task.execute(el);
       expect(load).to.have.been.called;

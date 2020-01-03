@@ -40,10 +40,10 @@ describes.realWin(
       env.iframe.height = '200';
 
       owners = Services.ownersForDoc(doc);
-      updateInViewportSpy = sandbox.spy(owners, 'updateInViewport');
-      schedulePauseSpy = sandbox.spy(owners, 'schedulePause');
-      scheduleLayoutSpy = sandbox.spy(owners, 'scheduleLayout');
-      schedulePreloadSpy = sandbox.spy(owners, 'schedulePreload');
+      updateInViewportSpy = env.sandbox.spy(owners, 'updateInViewport');
+      schedulePauseSpy = env.sandbox.spy(owners, 'schedulePause');
+      scheduleLayoutSpy = env.sandbox.spy(owners, 'scheduleLayout');
+      schedulePreloadSpy = env.sandbox.spy(owners, 'schedulePreload');
     });
 
     function getAmpScrollableCarousel() {

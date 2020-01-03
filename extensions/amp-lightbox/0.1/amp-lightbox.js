@@ -285,11 +285,11 @@ class AmpLightbox extends AMP.BaseElement {
   mutatedAttributesCallback(mutations) {
     const open = mutations['open'];
     if (open !== undefined) {
-      // Mutations via AMP.setState() require high trust.
+      // Mutations via AMP.setState() require default trust.
       if (open) {
-        this.open_(ActionTrust.HIGH);
+        this.open_(ActionTrust.DEFAULT);
       } else {
-        this.close(ActionTrust.HIGH);
+        this.close(ActionTrust.DEFAULT);
       }
     }
   }
@@ -713,7 +713,7 @@ function setTransparentBody(win, body) {
   const state = {};
   const ampdoc = Services.ampdocServiceFor(win).getAmpDoc(body);
 
-  Services.resourcesForDoc(ampdoc).measureMutateElement(
+  Services.mutatorForDoc(ampdoc).measureMutateElement(
     body,
     function measure() {
       state.alreadyTransparent =

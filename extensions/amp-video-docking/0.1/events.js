@@ -19,6 +19,7 @@ import {dev} from '../../../src/log';
 /** @enum {string} */
 export const VideoDockingEvents = {
   DISMISS_ON_TAP: 'dock-dismiss-on-tap',
+  SCROLL_BACK: 'dock-scroll-back',
 };
 
 /**

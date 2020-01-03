@@ -93,9 +93,16 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    this.preconnect.url(this.iframeSource_());
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.iframeSource_()
+    );
     // Host that serves player configuration and content redirects
-    this.preconnect.url('https://www.oo-syringe.com', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.oo-syringe.com',
+      onLayout
+    );
   }
 
   /** @override */

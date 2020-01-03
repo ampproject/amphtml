@@ -49,7 +49,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
       buildUrl: () => {},
       collectUrlVars: () => {},
     };
-    contextMock = sandbox.mock(context);
+    contextMock = env.sandbox.mock(context);
   });
 
   afterEach(() => {
@@ -99,8 +99,8 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
 
     beforeEach(() => {
       adapter = new AccessServerAdapter(ampdoc, validConfig, context);
-      xhrMock = sandbox.mock(adapter.xhr_);
-      docFetcherMock = sandbox.mock(DocumentFetcher);
+      xhrMock = env.sandbox.mock(adapter.xhr_);
+      docFetcherMock = env.sandbox.mock(DocumentFetcher);
       clientAdapter = {
         getAuthorizationUrl: () => validConfig['authorization'],
         getAuthorizationTimeout: () => 3000,
@@ -109,7 +109,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         authorize: () => Promise.resolve({}),
         pingback: () => Promise.resolve(),
       };
-      clientAdapterMock = sandbox.mock(clientAdapter);
+      clientAdapterMock = env.sandbox.mock(clientAdapter);
       adapter.clientAdapter_ = clientAdapter;
 
       adapter.isProxyOrigin_ = true;
@@ -186,7 +186,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         };
         docFetcherMock
           .expects('fetchDocument')
-          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+          .withExactArgs(env.sandbox.match.any, 'http://localhost:8000/af', {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
             headers: {
@@ -195,7 +195,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
           })
           .returns(Promise.resolve(responseDoc))
           .once();
-        const replaceSectionsStub = sandbox
+        const replaceSectionsStub = env.sandbox
           .stub(adapter, 'replaceSections_')
           .callsFake(() => {
             return Promise.resolve();
@@ -232,7 +232,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         };
         docFetcherMock
           .expects('fetchDocument')
-          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+          .withExactArgs(env.sandbox.match.any, 'http://localhost:8000/af', {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
             headers: {
@@ -276,7 +276,7 @@ describes.realWin('AccessServerAdapter', {amp: true}, env => {
         };
         docFetcherMock
           .expects('fetchDocument')
-          .withExactArgs(sinon.match.any, 'http://localhost:8000/af', {
+          .withExactArgs(env.sandbox.match.any, 'http://localhost:8000/af', {
             method: 'POST',
             body: 'request=' + encodeURIComponent(JSON.stringify(request)),
             headers: {

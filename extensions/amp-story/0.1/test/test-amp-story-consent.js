@@ -46,7 +46,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     };
 
     const styles = {'background-color': 'rgb(0, 0, 0)'};
-    getComputedStyleStub = sandbox
+    getComputedStyleStub = env.sandbox
       .stub(win, 'getComputedStyle')
       .returns(styles);
 
@@ -224,7 +224,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   });
 
   it('should whitelist the <amp-consent> actions', () => {
-    const addToWhitelistStub = sandbox.stub(
+    const addToWhitelistStub = env.sandbox.stub(
       storyConsent.actions_,
       'addToWhitelist'
     );
@@ -238,7 +238,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   });
 
   it('should broadcast the amp actions', () => {
-    sandbox.stub(storyConsent.actions_, 'trigger');
+    env.sandbox.stub(storyConsent.actions_, 'trigger');
 
     storyConsent.buildCallback();
 

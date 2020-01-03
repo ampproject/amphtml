@@ -23,20 +23,17 @@ const glob = require('glob');
 const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
-const tryConnect = require('try-net-connect');
 const {cyan} = require('ansi-colors');
-const {execOrDie, execScriptAsync} = require('../../common/exec');
+const {execOrDie} = require('../../common/exec');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('../report-test-status');
+const {startServer, stopServer} = require('../serve');
 const {watch} = require('gulp');
 
 const HOST = 'localhost';
 const PORT = 8000;
-const WEBSERVER_TIMEOUT_RETRIES = 10;
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
-
-let webServerProcess_;
 
 function installPackages_() {
   log('Running', cyan('yarn'), 'to install packages...');
@@ -48,33 +45,16 @@ function buildRuntime_() {
   execOrDie(`gulp dist --fortesting --config ${argv.config}`);
 }
 
-function launchWebServer_() {
-  log('Launching webserver at', cyan(`http://${HOST}:${PORT}`) + '...');
-  webServerProcess_ = execScriptAsync(
-    `gulp serve --compiled --host ${HOST} --port ${PORT}`,
-    {stdio: 'ignore'}
+async function launchWebServer_() {
+  await startServer(
+    {host: HOST, port: PORT},
+    {quiet: !argv.debug},
+    {compiled: true}
   );
-
-  let resolver;
-  const deferred = new Promise(resolverIn => {
-    resolver = resolverIn;
-  });
-
-  tryConnect({
-    host: HOST,
-    port: PORT,
-    retries: WEBSERVER_TIMEOUT_RETRIES, // retry timeout defaults to 1 sec
-  }).on('connected', () => {
-    return resolver(webServerProcess_);
-  });
-
-  return deferred;
 }
 
-async function cleanUp_() {
-  if (webServerProcess_ && !webServerProcess_.killed) {
-    webServerProcess_.kill('SIGKILL');
-  }
+function cleanUp_() {
+  stopServer();
 }
 
 function createMocha_() {
@@ -139,7 +119,7 @@ async function e2e() {
     await reportTestStarted();
     mocha.run(async failures => {
       // end web server
-      await cleanUp_();
+      cleanUp_();
 
       // end task
       process.exitCode = failures ? 1 : 0;
@@ -182,4 +162,5 @@ e2e.flags = {
     '  The automation engine that orchestrates the browser. ' +
     'Options are `puppeteer` or `selenium`. Default: `selenium`',
   'headless': '  Runs the browser in headless mode',
+  'debug': '  Prints debugging information while running tests',
 };

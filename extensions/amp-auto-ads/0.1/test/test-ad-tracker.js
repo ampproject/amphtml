@@ -31,7 +31,7 @@ describes.realWin('ad-tracker', {amp: true}, env => {
     win = env.win;
     doc = win.document;
 
-    sandbox.stub(Utils, 'getElementLayoutBox').callsFake(element => {
+    env.sandbox.stub(Utils, 'getElementLayoutBox').callsFake(element => {
       return Promise.resolve(element.layoutBox);
     });
 
@@ -308,7 +308,7 @@ describes.realWin('getAdConstraintsFromConfigObj', {amp: true}, env => {
   });
 
   it('should get from viewport values', () => {
-    const viewportMock = sandbox.mock(Services.viewportForDoc(ampdoc));
+    const viewportMock = env.sandbox.mock(Services.viewportForDoc(ampdoc));
     viewportMock
       .expects('getHeight')
       .returns(500)

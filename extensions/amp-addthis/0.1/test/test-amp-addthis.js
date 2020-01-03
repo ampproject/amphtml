@@ -591,7 +591,7 @@ describes.realWin(
     });
 
     it('getSessionId: returns a string of 16 characters containing 0-9 a-f', () => {
-      expect(typeof getSessionId() === 'string').to.equal(true);
+      expect(typeof getSessionId()).to.equal('string');
       expect(getSessionId().length).to.equal(16);
       expect(/^[0-9a-f]{16}$/.test(getSessionId())).to.equal(true);
 
@@ -602,7 +602,7 @@ describes.realWin(
     });
 
     it('createCUID: returns a string of 16 characters containing 0-9 a-f', () => {
-      expect(typeof createCUID() === 'string').to.equal(true);
+      expect(typeof createCUID()).to.equal('string');
 
       const a = createCUID();
       const b = createCUID();

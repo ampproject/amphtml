@@ -15,6 +15,7 @@
  */
 import {ActionTrust} from '../../../src/action-constants';
 import {Deferred} from '../../../src/utils/promise';
+import {Services} from '../../../src/services';
 import {assertHttpsUrl, resolveRelativeUrl} from '../../../src/url';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -58,16 +59,20 @@ export class Amp3dGltf extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    preloadBootstrap(this.win, this.preconnect);
-    this.preconnect.url(
+    const preconnect = Services.preconnectFor(this.win);
+    preloadBootstrap(this.win, this.getAmpDoc(), preconnect);
+    preconnect.url(
+      this.getAmpDoc(),
       'https://cdnjs.cloudflare.com/ajax/libs/three.js/91/three.js',
       opt_onLayout
     );
-    this.preconnect.url(
+    preconnect.url(
+      this.getAmpDoc(),
       'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/loaders/GLTFLoader.js',
       opt_onLayout
     );
-    this.preconnect.url(
+    preconnect.url(
+      this.getAmpDoc(),
       'https://cdn.jsdelivr.net/npm/three@0.91/examples/js/controls/OrbitControls.js',
       opt_onLayout
     );

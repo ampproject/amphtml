@@ -48,12 +48,10 @@ function getAds(type) {
   }
 }
 
-describes.fakeWin('amp-ad-csa-impl', {}, () => {
-  let sandbox;
+describes.fakeWin('amp-ad-csa-impl', {}, env => {
   let win;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     return createIframePromise(true).then(iframe => {
       win = iframe.win;
       win.context = {
@@ -76,7 +74,6 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
 
   afterEach(() => {
     win.context = {};
-    sandbox.restore();
   });
 
   describe('inputs', () => {
@@ -92,11 +89,11 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
 
     beforeEach(() => {
       // Stub everything out
-      sandbox.stub(_3p, 'loadScript').callsFake((global, url, callback) => {
+      env.sandbox.stub(_3p, 'loadScript').callsFake((global, url, callback) => {
         callback();
       });
       win._googCsa = function() {};
-      googCsaSpy = sandbox.stub(win, '_googCsa');
+      googCsaSpy = env.sandbox.stub(win, '_googCsa');
     });
 
     it('should request AFS', () => {
@@ -170,7 +167,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       setContainerHeight('300px');
       setContextHeight(100);
 
-      const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
+      const requestResizeSpy = env.sandbox.stub(win.context, 'requestResize');
 
       // Try to resize when ads are loaded
       resizeIframe(win, 'csacontainer');
@@ -197,7 +194,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       setContextHeight(400);
 
       // Set up
-      const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
+      const requestResizeSpy = env.sandbox.stub(win.context, 'requestResize');
       // Try to resize when ads are loaded
       resizeIframe(win, 'csacontainer');
 
@@ -222,7 +219,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       setContextHeight(100);
 
       // Set up
-      const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
+      const requestResizeSpy = env.sandbox.stub(win.context, 'requestResize');
       // Try to resize when ads are loaded
       resizeIframe(win, 'csacontainer');
       // Resize requests below the fold succeeed
@@ -247,7 +244,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       setContextHeight(400);
 
       // Set up
-      const requestResizeSpy = sandbox.stub(win.context, 'requestResize');
+      const requestResizeSpy = env.sandbox.stub(win.context, 'requestResize');
       // Try to resize when ads are loaded
       resizeIframe(win, 'csacontainer');
       // Resize requests below the fold succeed
@@ -270,7 +267,7 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       setContextHeight(400);
 
       // Set up
-      const noAdsSpy = sandbox.stub(win.context, 'noContentAvailable');
+      const noAdsSpy = env.sandbox.stub(win.context, 'noContentAvailable');
       // No backfill, ads don't load
       callbackWithNoBackfill(win, 'csacontainer', false);
 
@@ -282,9 +279,9 @@ describes.fakeWin('amp-ad-csa-impl', {}, () => {
       setContextHeight(400);
 
       // Set up stubs and spys
-      const noAdsSpy = sandbox.stub(win.context, 'noContentAvailable');
+      const noAdsSpy = env.sandbox.stub(win.context, 'noContentAvailable');
       win._googCsa = function() {};
-      const _googCsaSpy = sandbox.stub(win, '_googCsa').callsFake(() => {});
+      const _googCsaSpy = env.sandbox.stub(win, '_googCsa').callsFake(() => {});
 
       // Ads don't load but there is backfill
       callbackWithBackfill(win, {}, {}, 'csacontainer', false);

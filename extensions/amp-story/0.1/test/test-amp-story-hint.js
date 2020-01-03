@@ -32,10 +32,10 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     const storeService = new AmpStoryStoreService(win);
     registerServiceBuilder(win, 'story-store', () => storeService);
 
-    sandbox
+    env.sandbox
       .stub(Services, 'vsyncFor')
       .callsFake(() => ({mutate: task => task()}));
-    sandbox
+    env.sandbox
       .stub(Services, 'timerFor')
       .callsFake(() => ({delay: NOOP, cancel: NOOP}));
 
@@ -49,7 +49,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
 
   // TODO(@gmajoulet, #21618): Fails in AmpStoryHint.showHint_.
   it.skip('should be able to show navigation help overlay', () => {
-    const hideAfterTimeoutStub = sandbox
+    const hideAfterTimeoutStub = env.sandbox
       .stub(ampStoryHint, 'hideAfterTimeout')
       .callsFake(NOOP);
 
@@ -65,7 +65,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
 
   // TODO(@gmajoulet, #21618): Fails in AmpStoryHint.showHint_.
   it.skip('should be able to show no previous page help overlay', () => {
-    const hideAfterTimeoutStub = sandbox
+    const hideAfterTimeoutStub = env.sandbox
       .stub(ampStoryHint, 'hideAfterTimeout')
       .callsFake(NOOP);
 

@@ -441,14 +441,14 @@ describe('CSS parse', () => {
   });
 });
 
-describes.sandboxed('CSS resolve', {}, () => {
+describes.sandboxed('CSS resolve', {}, env => {
   const normalize = true;
   let context;
   let contextMock;
 
   beforeEach(() => {
     context = new ast.CssContext();
-    contextMock = sandbox.mock(context);
+    contextMock = env.sandbox.mock(context);
   });
 
   afterEach(() => {
@@ -462,7 +462,7 @@ describes.sandboxed('CSS resolve', {}, () => {
 
   it('should not resolve value for a const', () => {
     const node = new ast.CssNode();
-    const nodeMock = sandbox.mock(node);
+    const nodeMock = env.sandbox.mock(node);
     nodeMock
       .expects('css')
       .returns('CSS')
@@ -482,7 +482,7 @@ describes.sandboxed('CSS resolve', {}, () => {
     const node = new ast.CssNode();
     const node2 = new ast.CssNode();
     node2.css = () => 'CSS2';
-    const nodeMock = sandbox.mock(node);
+    const nodeMock = env.sandbox.mock(node);
     nodeMock
       .expects('isConst')
       .returns(false)
@@ -1063,7 +1063,7 @@ describes.sandboxed('CSS resolve', {}, () => {
         dimStack.pop();
         return res;
       };
-      sandbox
+      env.sandbox
         .stub(ast.CssPassthroughNode.prototype, 'resolve')
         .callsFake(function() {
           return new ast.CssPassthroughNode(this.css_ + dimStack.join(''));
@@ -1292,7 +1292,7 @@ describes.sandboxed('CSS resolve', {}, () => {
 
   describe('rand', () => {
     beforeEach(() => {
-      sandbox.stub(Math, 'random').callsFake(() => 0.25);
+      env.sandbox.stub(Math, 'random').callsFake(() => 0.25);
     });
 
     it('should always consider as non-const', () => {

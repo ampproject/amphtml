@@ -311,6 +311,12 @@ exports.extensionBundles = [
     type: TYPES.AD,
   },
   {
+    name: 'amp-ad-network-mytarget-impl',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.AD,
+  },
+  {
     name: 'amp-ad-exit',
     version: '0.1',
     latestVersion: '0.1',
@@ -575,12 +581,6 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
-    name: 'amp-user-location',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
     name: 'amp-gfycat',
     version: '0.1',
     latestVersion: '0.1',
@@ -636,6 +636,20 @@ exports.extensionBundles = [
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-inline-gallery',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {
+      hasCss: true,
+      cssBinaries: [
+        'amp-inline-gallery',
+        'amp-inline-gallery-pagination',
+        'amp-inline-gallery-thumbnails',
+      ],
+    },
+    type: TYPES.MISC,
   },
   {
     name: 'amp-inputmask',
@@ -739,7 +753,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-next-page',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,
@@ -778,6 +792,12 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-reach-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
+    name: 'amp-redbull-player',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
@@ -879,16 +899,17 @@ exports.extensionBundles = [
       hasCss: true,
       cssBinaries: [
         'amp-story-bookend',
-        'amp-story-tooltip',
         'amp-story-consent',
         'amp-story-draggable-drawer-header',
         'amp-story-hint',
-        'amp-story-unsupported-browser-layer',
-        'amp-story-viewport-warning-layer',
         'amp-story-info-dialog',
+        'amp-story-quiz',
         'amp-story-share',
         'amp-story-share-menu',
         'amp-story-system-layer',
+        'amp-story-tooltip',
+        'amp-story-unsupported-browser-layer',
+        'amp-story-viewport-warning-layer',
       ],
     },
     type: TYPES.MISC,

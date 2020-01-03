@@ -151,7 +151,8 @@ export class Carousel {
    *   runMutate: function(function()),
    * }} config
    */
-  constructor({win, element, scrollContainer, runMutate}) {
+  constructor(config) {
+    const {win, element, scrollContainer, runMutate} = config;
     /** @private @const */
     this.win_ = win;
 
@@ -167,6 +168,7 @@ export class Carousel {
     /** @private @const */
     this.autoAdvance_ = new AutoAdvance({
       win,
+      element,
       scrollContainer,
       advanceable: this,
     });
@@ -605,6 +607,7 @@ export class Carousel {
   updateSlides(slides) {
     this.slides_ = slides;
     this.carouselAccessibility_.updateSlides(slides);
+    // TODO(sparhami) Should need to call `this.updateUi()` here.
   }
 
   /**
@@ -733,7 +736,7 @@ export class Carousel {
         dict({
           'index': index,
           'total': this.slides_.length,
-          'offset': offset,
+          'offset': this.forwards_ ? -offset : offset,
           'slides': this.slides_,
         }),
         {
@@ -823,6 +826,22 @@ export class Carousel {
    * scrolling continually.
    */
   handleScrollEnd_() {
+    // For now, do not handle scrollend when requestedIndex_ is set (e.g.
+    // from a call to advance, via arrow buttons). This is because updating
+    // the scroll position causes a scrollend, so if you advance while a
+    // smooth scroll is in progress, the resetScrollReferencePoint_ would cause
+    // it to jump to the final slide.
+    // The scrollend is likely triggered due to what causes
+    // https://bugs.chromium.org/p/chromium/issues/detail?id=1018842, though it
+    // is unclear if this will ever be changed.
+    // TODO(https://bugs.chromium.org/p/chromium/issues/detail?id=1018842):
+    // Remove this if/when scrollend stops firing when adjusting the scroll
+    // position. We will want to make sure that this works if/when Safari
+    // impelemnts scrollend as well.
+    if (this.requestedIndex_ !== null) {
+      return;
+    }
+
     this.resetScrollReferencePoint_();
   }
 
@@ -1230,7 +1249,8 @@ export class Carousel {
    * }} options
    * @private
    */
-  scrollSlideIntoView_(slide, {smoothScroll}) {
+  scrollSlideIntoView_(slide, options) {
+    const {smoothScroll} = options;
     const runner = smoothScroll ? (el, cb) => cb() : runDisablingSmoothScroll;
     runner(this.scrollContainer_, () => {
       scrollContainerToElement(

@@ -19,12 +19,12 @@ import {UrlReplacementPolicy, batchFetchJsonFor} from '../../src/batched-json';
 import {user} from '../../src/log';
 
 describe('batchFetchJsonFor', () => {
-  let sandbox;
   // Fakes.
   const ampdoc = {win: null};
   // Service fakes.
   let urlReplacements;
   let batchedXhr;
+  let xhr;
   // Function stubs.
   let fetchJson;
   // Mutable return variables.
@@ -42,25 +42,25 @@ describe('batchFetchJsonFor', () => {
   }
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     urlReplacements = {
-      expandUrlAsync: sandbox.stub(),
-      collectUnwhitelistedVarsSync: sandbox.stub(),
+      expandUrlAsync: window.sandbox.stub(),
+      collectUnwhitelistedVarsSync: window.sandbox.stub(),
     };
-    sandbox.stub(Services, 'urlReplacementsForDoc').returns(urlReplacements);
+    window.sandbox
+      .stub(Services, 'urlReplacementsForDoc')
+      .returns(urlReplacements);
 
-    fetchJson = sandbox.stub().returns(
+    fetchJson = window.sandbox.stub().returns(
       Promise.resolve({
         json: () => Promise.resolve(data),
       })
     );
-    batchedXhr = {fetchJson};
-    sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
-  });
 
-  afterEach(() => {
-    sandbox.restore();
+    xhr = {xssiJson: () => Promise.resolve(data)};
+    window.sandbox.stub(Services, 'xhrFor').returns(xhr);
+
+    batchedXhr = {fetchJson};
+    window.sandbox.stub(Services, 'batchedXhrFor').returns(batchedXhr);
   });
 
   describe('URL replacement', () => {
@@ -102,7 +102,7 @@ describe('batchFetchJsonFor', () => {
         .withArgs('https://data.com?x=FOO&y=BAR')
         .returns(Promise.resolve('https://data.com?x=abc&y=BAR'));
 
-      const userError = sandbox.stub(user(), 'error');
+      const userError = window.sandbox.stub(user(), 'error');
       const all = UrlReplacementPolicy.ALL;
       return batchFetchJsonFor(ampdoc, el, {urlReplacement: all}).then(() => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');

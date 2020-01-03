@@ -62,10 +62,11 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-mega-menu',
-    name: 'AMP extension for a mega menu with expandable items',
-    spec: 'https://github.com/ampproject/amphtml/issues/24814',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
+    id: 'amp-consent-geo-override',
+    name: 'AMP consent modified to support CCPA',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/lannka-consent-design/extensions/amp-consent/amp-consent.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25623',
   },
   {
     id: 'amp-nested-menu',
@@ -202,6 +203,12 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
+    id: 'amp-next-page-v2',
+    name: 'Document-level (true) infinite scroll experience',
+    spec: 'https://github.com/ampproject/amphtml/issues/25500',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25634',
+  },
+  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
@@ -279,13 +286,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'macro-after-long-task',
-    name:
-      'If applicable, convert remaining micro tasks to the next macro ' +
-      ' tasks if a previous micro task execution took too long',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
-  },
-  {
     id: 'pausable-iframe',
     name: 'Use iframe freezing instead of recreating iframes.',
     spec: 'https://github.com/ampproject/amphtml/issues/24110',
@@ -309,12 +309,6 @@ export const EXPERIMENTS = [
     id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
     name: 'Use amp-ad responsive to make amp auto ads responsive.',
     spec: 'https://github.com/ampproject/amphtml/issues/24168',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
-  },
-  {
-    id: 'remove-viewer-query-params-on-navigate',
-    name: 'Removes query params from viewer iframe on navigation.',
-    spec: 'https://github.com/ampproject/amphtml/issues/25179',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
   {

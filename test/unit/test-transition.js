@@ -17,19 +17,9 @@
 import * as tr from '../../src/transition';
 
 describe('Transition', () => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('all', () => {
-    const func1 = sandbox.spy();
-    const func2 = sandbox.spy();
+    const func1 = window.sandbox.spy();
+    const func2 = window.sandbox.spy();
     const all = tr.all([func1, func2]);
 
     expect(func1).to.have.not.been.called;

@@ -48,12 +48,12 @@ export class SsrTemplateHelper {
   }
 
   /**
-   * Whether the viewer can render templates. A doc-level opt in as
+   * Whether the viewer should render templates. A doc-level opt in as
    * trusted viewers must set this capability explicitly, as a security
    * measure for potential abuse of feature.
    * @return {boolean}
    */
-  isSupported() {
+  isEnabled() {
     const ampdoc = this.viewer_.getAmpDoc();
     if (ampdoc.isSingleDoc()) {
       const htmlElement = ampdoc.getRootNode().documentElement;
@@ -62,6 +62,22 @@ export class SsrTemplateHelper {
       }
     }
     return false;
+  }
+
+  /**
+   * Asserts that the viewer is from a trusted origin.
+   *
+   * @param {!Element} element
+   * @return {!Promise}
+   */
+  assertTrustedViewer(element) {
+    return this.viewer_.isTrustedViewer().then(trusted => {
+      userAssert(
+        trusted,
+        'Refused to attempt SSR in untrusted viewer: ',
+        element
+      );
+    });
   }
 
   /**
@@ -80,15 +96,17 @@ export class SsrTemplateHelper {
     if (!opt_templates) {
       mustacheTemplate = this.templates_.maybeFindTemplate(element);
     }
-    return this.viewer_.sendMessageAwaitResponse(
-      'viewerRenderTemplate',
-      this.buildPayload_(
-        request,
-        mustacheTemplate,
-        opt_templates,
-        opt_attributes
-      )
-    );
+    return this.assertTrustedViewer(element).then(() => {
+      return this.viewer_.sendMessageAwaitResponse(
+        'viewerRenderTemplate',
+        this.buildPayload_(
+          request,
+          mustacheTemplate,
+          opt_templates,
+          opt_attributes
+        )
+      );
+    });
   }
 
   /**
@@ -96,19 +114,21 @@ export class SsrTemplateHelper {
    * If SSR is supported, data is assumed to be from ssr() above.
    * @param {!Element} element
    * @param {(?JsonObject|string|undefined|!Array)} data
-   * @return {!Promise}
+   * @return {!Promise<!Element>}
    */
   applySsrOrCsrTemplate(element, data) {
     let renderTemplatePromise;
-    if (this.isSupported()) {
+    if (this.isEnabled()) {
       userAssert(
         typeof data['html'] === 'string',
         'Server side html response must be defined'
       );
-      renderTemplatePromise = this.templates_.findAndSetHtmlForTemplate(
-        element,
-        /** @type {string} */ (data['html'])
-      );
+      renderTemplatePromise = this.assertTrustedViewer(element).then(() => {
+        return this.templates_.findAndSetHtmlForTemplate(
+          element,
+          /** @type {string} */ (data['html'])
+        );
+      });
     } else if (isArray(data)) {
       renderTemplatePromise = this.templates_.findAndRenderTemplateArray(
         element,

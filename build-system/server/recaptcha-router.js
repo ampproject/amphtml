@@ -17,8 +17,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const cors = require('./amp-cors');
 const pc = process;
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
 const multer = require('multer');
 const recaptchaRouter = require('express').Router();
 
@@ -33,7 +32,7 @@ window.grecaptcha = {
 
 const recaptchaFrameRequestHandler = (req, res, next) => {
   if (argv._.includes('unit') || argv._.includes('integration')) {
-    fs.readFileAsync(pc.cwd() + req.path, 'utf8').then(file => {
+    fs.promises.readFile(pc.cwd() + req.path, 'utf8').then(file => {
       file = file.replace(
         /initRecaptcha\(.*\)/g,
         'initRecaptcha("/recaptcha/mock.js?sitekey=")'

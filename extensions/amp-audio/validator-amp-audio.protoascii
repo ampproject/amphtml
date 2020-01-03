@@ -22,7 +22,7 @@ tags: {  # amp-audio
     version: "0.1"
     version: "latest"
     deprecated_allow_duplicates: true
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
   }
   attr_lists: "common-extension-attrs"
 }

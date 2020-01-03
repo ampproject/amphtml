@@ -46,7 +46,7 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       ampdoc = env.ampdoc;
-      consentManagerOnChangeSpy = sandbox.spy();
+      consentManagerOnChangeSpy = env.sandbox.spy();
 
       resetServiceForTesting(win, 'consentStateManager');
       registerServiceBuilder(win, 'consentStateManager', function() {
@@ -547,7 +547,7 @@ describes.realWin(
 
       beforeEach(() => {
         manager = new ConsentPolicyManager(ampdoc);
-        sandbox
+        env.sandbox
           .stub(ConsentPolicyInstance.prototype, 'getReadyPromise')
           .callsFake(() => {
             return Promise.resolve();

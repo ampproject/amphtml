@@ -19,7 +19,6 @@ import {installTimerService} from '../../src/service/timer-impl.js';
 import {stubService} from '../../testing/test-helper';
 
 describe('Input', () => {
-  let sandbox;
   let clock;
   let input;
   let eventListeners;
@@ -27,8 +26,7 @@ describe('Input', () => {
   let documentApi;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
 
     eventListeners = {};
 
@@ -53,10 +51,6 @@ describe('Input', () => {
     installTimerService(windowApi);
 
     input = new Input(windowApi);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should initialize in touch mode', () => {

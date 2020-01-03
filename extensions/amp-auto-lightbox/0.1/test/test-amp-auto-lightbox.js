@@ -52,8 +52,7 @@ describes.realWin(
   },
   env => {
     let html;
-
-    const {any} = sinon.match;
+    let any;
 
     const ldJsonSchemaTypes = Object.keys(ENABLED_LD_JSON_TYPES);
     const ogTypes = [ENABLED_OG_TYPE_ARTICLE];
@@ -104,7 +103,7 @@ describes.realWin(
 
     // necessary since element matching `withArgs` deep equals and overflows
     const matchEquals = comparison =>
-      sinon.match(subject => subject == comparison);
+      env.sandbox.match(subject => subject == comparison);
 
     function mockLoadedSignal(element, isLoadedSuccessfully) {
       const signals = new Signals();
@@ -118,6 +117,7 @@ describes.realWin(
     }
 
     beforeEach(() => {
+      any = env.sandbox.match.any;
       html = htmlFor(env.win.document);
 
       env.sandbox

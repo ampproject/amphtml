@@ -23,13 +23,11 @@ import {
 } from '../../src/document-ready';
 
 describe('documentReady', () => {
-  let sandbox;
   let testDoc;
   let eventListeners;
   const timer = Services.timerFor(window);
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     eventListeners = {};
     testDoc = {
       readyState: 'loading',
@@ -42,10 +40,6 @@ describe('documentReady', () => {
         }
       },
     };
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should interpret readyState correctly', () => {
@@ -63,7 +57,7 @@ describe('documentReady', () => {
 
   it('should call callback immediately when ready', () => {
     testDoc.readyState = 'complete';
-    const callback = sandbox.spy();
+    const callback = window.sandbox.spy();
     onDocumentReady(testDoc, callback);
     expect(callback).to.be.calledOnce;
     expect(callback.getCall(0).args).to.deep.equal([testDoc]);
@@ -71,7 +65,7 @@ describe('documentReady', () => {
 
   it('should wait to call callback until ready', () => {
     testDoc.readyState = 'loading';
-    const callback = sandbox.spy();
+    const callback = window.sandbox.spy();
     onDocumentReady(testDoc, callback);
     expect(callback).to.have.not.been.called;
     expect(eventListeners['readystatechange']).to.not.equal(undefined);
@@ -86,7 +80,7 @@ describe('documentReady', () => {
 
   it('should wait to call callback for several loading events', () => {
     testDoc.readyState = 'loading';
-    const callback = sandbox.spy();
+    const callback = window.sandbox.spy();
     onDocumentReady(testDoc, callback);
     expect(callback).to.have.not.been.called;
     expect(eventListeners['readystatechange']).to.not.equal(undefined);
@@ -107,9 +101,9 @@ describe('documentReady', () => {
   describe('whenDocumentReady', () => {
     it('should call callback immediately when ready', () => {
       testDoc.readyState = 'complete';
-      const spy = sandbox.spy();
-      const spy2 = sandbox.spy();
-      const spy3 = sandbox.spy();
+      const spy = window.sandbox.spy();
+      const spy2 = window.sandbox.spy();
+      const spy3 = window.sandbox.spy();
 
       whenDocumentReady(testDoc)
         .then(spy)
@@ -130,7 +124,7 @@ describe('documentReady', () => {
     });
 
     it('should not call callback', () => {
-      const spy = sandbox.spy();
+      const spy = window.sandbox.spy();
       whenDocumentReady(testDoc).then(spy);
       expect(spy).to.have.not.been.called;
       return timer.promise().then(() => {
@@ -140,7 +134,7 @@ describe('documentReady', () => {
 
     it('should wait to call callback until ready', () => {
       testDoc.readyState = 'loading';
-      const callback = sandbox.spy();
+      const callback = window.sandbox.spy();
       whenDocumentReady(testDoc).then(callback);
 
       return timer.promise().then(() => {
@@ -163,9 +157,9 @@ describe('documentReady', () => {
   describe('whenDocumentComplete', () => {
     it('should call callback immediately when complete', () => {
       testDoc.readyState = 'complete';
-      const spy = sandbox.spy();
-      const spy2 = sandbox.spy();
-      const spy3 = sandbox.spy();
+      const spy = window.sandbox.spy();
+      const spy2 = window.sandbox.spy();
+      const spy3 = window.sandbox.spy();
 
       whenDocumentComplete(testDoc)
         .then(spy)
@@ -186,7 +180,7 @@ describe('documentReady', () => {
     });
 
     it('should not call callback', () => {
-      const spy = sandbox.spy();
+      const spy = window.sandbox.spy();
       whenDocumentComplete(testDoc).then(spy);
       expect(spy).to.have.not.been.called;
       return timer.promise().then(() => {
@@ -196,7 +190,7 @@ describe('documentReady', () => {
 
     it('should wait to call callback until ready', () => {
       testDoc.readyState = 'loading';
-      const callback = sandbox.spy();
+      const callback = window.sandbox.spy();
       whenDocumentComplete(testDoc).then(callback);
 
       return timer.promise().then(() => {

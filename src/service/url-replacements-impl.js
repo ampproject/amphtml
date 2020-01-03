@@ -45,7 +45,6 @@ import {WindowInterface} from '../window-interface';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
 import {internalRuntimeVersion} from '../internal-version';
-import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -349,7 +348,7 @@ export class GlobalVariableSource extends VariableSource {
           const variant = variants[/** @type {string} */ (experiment)];
           userAssert(
             variant !== undefined,
-            'The value passed to VARIANT() is not a valid experiment name:' +
+            'The value passed to VARIANT() is not a valid experiment in <amp-experiment>:' +
               experiment
           );
           // When no variant assigned, use reserved keyword 'none'.
@@ -391,36 +390,6 @@ export class GlobalVariableSource extends VariableSource {
             GEO_DELIM
           ));
         }, 'AMP_GEO');
-      })
-    );
-
-    // Attempt to returns user location data if available, otherwise null.
-    this.setAsync(
-      'AMP_USER_LOCATION',
-      /** @type {AsyncResolverDef} */ (type => {
-        // Type may be "","lat","lon", and undefined
-        return this.getUserLocation_(userLocationService => {
-          return userLocationService.getReplacementLocation(
-            'AMP_USER_LOCATION',
-            type
-          );
-        }, 'AMP_USER_LOCATION');
-      })
-    );
-
-    // Returns user location data only if available,
-    // and waits for the user to approve.
-    this.setAsync(
-      'AMP_USER_LOCATION_POLL',
-      /** @type {AsyncResolverDef} */ (type => {
-        // Type may be "","lat","lon", and undefined
-        return this.getUserLocation_(userLocationService => {
-          return userLocationService.getReplacementLocation(
-            'AMP_USER_LOCATION_POLL',
-            type,
-            /*opt_poll*/ true
-          );
-        }, 'AMP_USER_LOCATION_POLL');
       })
     );
 
@@ -673,21 +642,15 @@ export class GlobalVariableSource extends VariableSource {
     );
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getFirstContentfulPaint()
-      );
+      return Services.performanceFor(win).getFirstContentfulPaint();
     });
 
     this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getFirstViewportReady()
-      );
+      return Services.performanceFor(win).getFirstViewportReady();
     });
 
     this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getMakeBodyVisible()
-      );
+      return Services.performanceFor(win).getMakeBodyVisible();
     });
 
     this.setAsync('AMP_STATE', key => {
@@ -839,28 +802,6 @@ export class GlobalVariableSource extends VariableSource {
       userAssert(geo, 'To use variable %s, amp-geo should be configured', expr);
       return getter(geo);
     });
-  }
-
-  /**
-   * Resolves the value via the user location service.
-   * @param {function(Object<string, string>)} getter
-   * @param {string} expr
-   * @return {!Promise<Object<string,(string|Array<string>)>>}
-   * @template T
-   * @private
-   */
-  getUserLocation_(getter, expr) {
-    const element = this.ampdoc.getHeadNode();
-    return Services.userLocationForDocOrNull(element).then(
-      userLocationService => {
-        userAssert(
-          userLocationService,
-          'To use variable %s, amp-user-location should be configured',
-          expr
-        );
-        return getter(userLocationService);
-      }
-    );
   }
 
   /**

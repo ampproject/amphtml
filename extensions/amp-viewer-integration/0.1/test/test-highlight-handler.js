@@ -135,7 +135,7 @@ describes.realWin(
       div1.textContent = 'highlighted text';
       root.appendChild(div1);
 
-      sandbox.stub(docready, 'whenDocumentReady').returns({
+      env.sandbox.stub(docready, 'whenDocumentReady').returns({
         then: cb => {
           docreadyCb = cb;
         },
@@ -144,16 +144,16 @@ describes.realWin(
 
     it('initialize with visibility=visible', () => {
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
-      const setScrollTop = sandbox.stub(
+      const setScrollTop = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'setScrollTop'
       );
@@ -212,12 +212,12 @@ describes.realWin(
 
     it('initialize with skipRendering', () => {
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
@@ -246,16 +246,16 @@ describes.realWin(
 
     it('initialize with skipScrollAnimation', () => {
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
-      const setScrollTop = sandbox.stub(
+      const setScrollTop = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'setScrollTop'
       );
@@ -299,12 +299,12 @@ describes.realWin(
       document.body.appendChild(script);
 
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
@@ -330,20 +330,20 @@ describes.realWin(
       // If visibility != visible, highlight texts and scroll to the start
       // position of the animation. But do not trigger the animation.
       const {ampdoc} = env;
-      const scrollStub = sandbox.stub(
+      const scrollStub = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'animateScrollIntoView'
       );
       scrollStub.returns(Promise.reject());
-      const sendMsgStub = sandbox.stub(
+      const sendMsgStub = env.sandbox.stub(
         Services.viewerForDoc(ampdoc),
         'sendMessage'
       );
-      const setScrollTop = sandbox.stub(
+      const setScrollTop = env.sandbox.stub(
         Services.viewportForDoc(ampdoc),
         'setScrollTop'
       );
-      sandbox
+      env.sandbox
         .stub(ampdoc, 'getVisibilityState')
         .returns(VisibilityState.PRERENDER);
 
@@ -369,11 +369,11 @@ describes.realWin(
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
-      sandbox
+      env.sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 50));
-      sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      env.sandbox.stub(viewport, 'getHeight').returns(300);
+      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
       // 525px (The center of the element) - 0.5 * 250px (window height)
       // - 50px (padding top) = 350px.
@@ -386,11 +386,11 @@ describes.realWin(
       expect(handler.highlightedNodes_).not.to.be.null;
 
       const viewport = Services.viewportForDoc(env.ampdoc);
-      sandbox
+      env.sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 500));
-      sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      env.sandbox.stub(viewport, 'getHeight').returns(300);
+      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
 
       // Scroll to the top of the element with PAGE_TOP_MARGIN margin
       // because it's too tall.
@@ -407,15 +407,15 @@ describes.realWin(
       // Set up an environment where calcTopToCenterHighlightedNodes_
       // returns 350.
       const viewport = Services.viewportForDoc(env.ampdoc);
-      sandbox
+      env.sandbox
         .stub(viewport, 'getLayoutRect')
         .returns(layoutRectLtwh(0, 500, 100, 50));
-      sandbox.stub(viewport, 'getHeight').returns(300);
-      sandbox.stub(viewport, 'getPaddingTop').returns(50);
+      env.sandbox.stub(viewport, 'getHeight').returns(300);
+      env.sandbox.stub(viewport, 'getPaddingTop').returns(50);
       // The current top is 500.
-      sandbox.stub(viewport, 'getScrollTop').returns(500);
+      env.sandbox.stub(viewport, 'getScrollTop').returns(500);
 
-      const setScrollTopStub = sandbox.stub(viewport, 'setScrollTop');
+      const setScrollTopStub = env.sandbox.stub(viewport, 'setScrollTop');
 
       const param = handler.mayAdjustTop_(400);
       expect(param).to.deep.equal({'nd': 150, 'od': 100});

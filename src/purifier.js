@@ -110,24 +110,15 @@ export function createPurifier(doc, opt_config) {
  * @return {!DomPurifyConfig}
  */
 function standardPurifyConfig() {
-  const config = Object.assign(
-    {},
-    PURIFY_PROFILES,
-    /** @type {!DomPurifyConfig} */ ({
-      ADD_ATTR: WHITELISTED_ATTRS,
-      // <use> is an SVG element that is not allowed by default in DOMPurify.
-      // See afterSanitizeAttributes() for special handling.
-      ADD_TAGS: ['use'],
-      FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
-      // Avoid reparenting of some elements to document head e.g. <script>.
-      FORCE_BODY: true,
-      // Avoid need for serializing to/from string by returning Node directly.
-      RETURN_DOM: true,
-      // Allows native app deeplinks. DOMPurify's remaining checks are
-      // sufficient to prevent code execution.
-      ALLOW_UNKNOWN_PROTOCOLS: true,
-    })
-  );
+  const config = {
+    ...PURIFY_PROFILES,
+    ADD_ATTR: WHITELISTED_ATTRS,
+    ADD_TAGS: ['use'],
+    FORBID_TAGS: Object.keys(BLACKLISTED_TAGS),
+    FORCE_BODY: true,
+    RETURN_DOM: true,
+    ALLOW_UNKNOWN_PROTOCOLS: true,
+  };
   return /** @type {!DomPurifyConfig} */ (config);
 }
 

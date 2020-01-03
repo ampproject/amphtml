@@ -22,7 +22,7 @@ import {
 } from '../analytics';
 import {user} from '../../../../src/log';
 
-//--> sandbox.stub(ServiceUrl, 'adsUrl', url => serverUrl + url);
+//--> env.sandbox.stub(ServiceUrl, 'adsUrl', url => serverUrl + url);
 
 const TAG = 'amp-subscriptions';
 const OPT_VARS = {'serviceId': 'service1'};
@@ -50,7 +50,7 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
     let eventStub;
 
     beforeEach(() => {
-      eventStub = sandbox.stub(analytics, 'event');
+      eventStub = env.sandbox.stub(analytics, 'event');
     });
 
     it('should trigger a service event', () => {
@@ -73,8 +73,8 @@ describes.realWin('SubscriptionAnalytics', {amp: true}, env => {
     let ampLogStub;
 
     beforeEach(() => {
-      userLogStub = sandbox.stub(user(), 'info');
-      ampLogStub = sandbox.stub(AmpAnalytics, 'triggerAnalyticsEvent');
+      userLogStub = env.sandbox.stub(user(), 'info');
+      ampLogStub = env.sandbox.stub(AmpAnalytics, 'triggerAnalyticsEvent');
     });
 
     it('should log an event', () => {
