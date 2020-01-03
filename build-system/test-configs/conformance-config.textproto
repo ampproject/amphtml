@@ -291,6 +291,7 @@ requirement: {
   # 3p ads are OK
   whitelist: 'ads/adhese.js'
   whitelist: 'ads/loka.js'
+  whitelist: 'ads/nativery.js'
   whitelist: 'ads/xlift.js'
 }
 

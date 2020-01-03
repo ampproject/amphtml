@@ -59,11 +59,8 @@ function generateVendorJsons() {
       }
 
       // convert object to JSON string with indentation of 2 spaces
-      const configString = JSON.stringify(
-        ANALYTICS_CONFIG[vendorName],
-        null,
-        2
-      );
+      const configString =
+        JSON.stringify(ANALYTICS_CONFIG[vendorName], null, 2) + '\n';
       const fileName = vendorName + '.json';
 
       promises.push(
@@ -92,12 +89,13 @@ function generateVendorJsons() {
 
 function generateCanaryBgJson_(analyticsConfig, destPath) {
   // generate separate canary JSON file for Bolt Guard (BG)
-  const bgCanaryConfig = Object.assign({}, analyticsConfig['bg'], {
+  const bgCanaryConfig = {
+    ...analyticsConfig['bg'],
     'transport': {
       'iframe':
         'https://tpc.googlesyndication.com/b4a/experimental/b4a-runner.html',
     },
-  });
+  };
   const bgCanaryConfigStr = JSON.stringify(bgCanaryConfig, null, 2);
 
   return toPromise(
