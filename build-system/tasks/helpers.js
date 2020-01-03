@@ -25,7 +25,9 @@ const file = require('gulp-file');
 const fs = require('fs-extra');
 const globby = require('globby');
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const gulpWatch = require('gulp-watch');
+const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
@@ -138,7 +140,7 @@ function doBuildJs(jsBundles, name, extraOptions) {
       target.srcDir,
       target.srcFilename,
       extraOptions.minify ? target.minifiedDestDir : target.destDir,
-      Object.assign({}, target.options, extraOptions)
+      {...target.options, ...extraOptions}
     );
   } else {
     return Promise.reject(red('Error:'), 'Could not find', cyan(name));
@@ -366,21 +368,14 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
   // TODO: @jonathantyng remove browserifyOptions #22757
-  const browserifyOptions = Object.assign(
-    {},
-    {
-      entries: entryPoint,
-      debug: true,
-      fast: true,
-    },
-    options.browserifyOptions
-  );
+  const browserifyOptions = {
+    entries: entryPoint,
+    debug: true,
+    fast: true,
+    ...options.browserifyOptions,
+  };
 
-  const babelifyOptions = Object.assign(
-    {},
-    BABELIFY_GLOBAL_TRANSFORM,
-    BABELIFY_PLUGINS
-  );
+  const babelifyOptions = {...BABELIFY_GLOBAL_TRANSFORM, ...BABELIFY_PLUGINS};
 
   let bundler = browserify(browserifyOptions).transform(
     babelify,
@@ -412,6 +407,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         )
         .pipe(source(srcFilename))
         .pipe(buffer())
+        .pipe(gulpIf(argv.coverage, istanbul()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(
           regexpSourcemaps(

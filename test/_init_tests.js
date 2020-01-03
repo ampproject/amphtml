@@ -20,7 +20,7 @@ import * as describes from '../testing/describes';
 import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
-import {adopt} from '../src/runtime';
+import {adoptWithMultidocDeps} from '../src/runtime';
 import {cancelTimersForTesting} from '../src/service/timer-impl';
 import {
   installAmpdocServices,
@@ -62,7 +62,7 @@ const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
-adopt(window);
+adoptWithMultidocDeps(window);
 
 // Override AMP.extension to buffer extension installers.
 /**

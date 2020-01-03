@@ -45,7 +45,6 @@ import {WindowInterface} from '../window-interface';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
 import {internalRuntimeVersion} from '../internal-version';
-import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -349,7 +348,7 @@ export class GlobalVariableSource extends VariableSource {
           const variant = variants[/** @type {string} */ (experiment)];
           userAssert(
             variant !== undefined,
-            'The value passed to VARIANT() is not a valid experiment name:' +
+            'The value passed to VARIANT() is not a valid experiment in <amp-experiment>:' +
               experiment
           );
           // When no variant assigned, use reserved keyword 'none'.
@@ -654,21 +653,15 @@ export class GlobalVariableSource extends VariableSource {
     );
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getFirstContentfulPaint()
-      );
+      return Services.performanceFor(win).getFirstContentfulPaint();
     });
 
     this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getFirstViewportReady()
-      );
+      return Services.performanceFor(win).getFirstViewportReady();
     });
 
     this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getMakeBodyVisible()
-      );
+      return Services.performanceFor(win).getMakeBodyVisible();
     });
 
     this.setAsync('AMP_STATE', key => {

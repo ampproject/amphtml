@@ -16,6 +16,7 @@
 
 import {
   AnalyticsPercentageTracker,
+  PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS,
   PERCENTAGE_INTERVAL,
 } from '../../src/service/video-manager-impl';
 import {PlayingStates, VideoEvents} from '../../src/video-interface';
@@ -145,6 +146,30 @@ describes.fakeWin(
           dispatchLoadedMetadata(element);
 
           expect(mockTimer.delay).to.not.have.been.called;
+        });
+      });
+
+      // TODO(#25954): This test is a bit specific and odd, but replicates
+      // what we see in prod. Possibly remove when root cause for video with
+      // duration => no duration is found.
+      [0, NaN, -1, undefined, null].forEach(invalidDuration => {
+        it(`aborts if duration is ${invalidDuration} after initially valid`, () => {
+          const {video} = mockEntry;
+          const durationStub = env.sandbox.stub(video, 'getDuration');
+          durationStub.onFirstCall().returns(1000 /* valid duration */);
+          durationStub.returns(invalidDuration);
+
+          const {element} = video;
+
+          setPlayingState(mockEntry, PlayingStates.PLAYING_MANUAL);
+          tracker.start();
+
+          dispatchLoadedMetadata(element);
+
+          expect(mockTimer.delay).to.always.have.been.calledWith(
+            env.sandbox.match.func,
+            PERCENTAGE_FREQUENCY_WHEN_PAUSED_MS
+          );
         });
       });
 
