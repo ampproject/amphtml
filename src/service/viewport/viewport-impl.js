@@ -336,14 +336,14 @@ export class ViewportImpl {
   }
 
   /** @override */
-  getLayoutRect(el) {
+  getLayoutRect(el, opt_premeasuredRect) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      const b = this.binding_.getLayoutRect(el, 0, 0);
+      const b = this.binding_.getLayoutRect(el, 0, 0, opt_premeasuredRect);
       const c = this.binding_.getLayoutRect(
         frameElement,
         scrollLeft,
@@ -357,7 +357,12 @@ export class ViewportImpl {
       );
     }
 
-    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
+    return this.binding_.getLayoutRect(
+      el,
+      scrollLeft,
+      scrollTop,
+      opt_premeasuredRect
+    );
   }
 
   /** @override */

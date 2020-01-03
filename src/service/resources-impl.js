@@ -158,7 +158,9 @@ export class ResourcesImpl {
 
     /** @const @private {!Pass} */
     this.remeasurePass_ = new Pass(this.win, () => {
+      // "Remeasuring" hack no longer needed with IntersectionObserver.
       devAssert(!this.intersectionObserver_);
+
       this.relayoutAll_ = true;
       this.schedulePass();
     });
@@ -249,7 +251,8 @@ export class ResourcesImpl {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
 
-      // No need to remeasure on viewport size change with IntersectionObserver.
+      // With IntersectionObserver, no need to relayout everything
+      // on viewport size change.
       if (!this.intersectionObserver_) {
         if (event.relayoutAll) {
           this.relayoutAll_ = true;
@@ -315,20 +318,23 @@ export class ResourcesImpl {
 
     const promises = entries.map(entry => {
       const {boundingClientRect, isIntersecting, target: element} = entry;
+      devAssert(element.isUpgraded());
       const r = Resource.forElementOptional(element);
+      devAssert(r);
 
       // discoverWork_():
-      //   Phase 1: Build and relayout as needed. All mutations happen here.
-      //     1A: Apply sizes/media-queries to un-measured/un-laid-out resources.
-      //   Phase 2: Remeasure if there were any relayouts. All reads happen here.
-      //     2A: Unload non-displayed resources.
-      //   Phase 3: Trigger "viewport enter/exit" events.
-      //   Phase 4: Schedule elements for layout within a reasonable distance from current viewport.
-      //     4A: Force build for all resources visible, measured, and in the viewport.
-      //   Phase 5: Idle Render Outside Viewport layout: layout up to 4 items with idleRenderOutsideViewport true.
-      //   Phase 6: Idle layout: layout more if we are otherwise not doing much.
+      // [x] Phase 1: Build and relayout as needed. All mutations happen here.
+      // [x]   1A: Apply sizes/media-queries to un-measured/un-laid-out resources.
+      // [ ] Phase 2: Remeasure if there were any relayouts. All reads happen here.
+      // [x]   2A: Unload non-displayed resources.
+      // [x] Phase 3: Trigger "viewport enter/exit" events.
+      // [ ] Phase 4: Schedule elements for layout within a reasonable distance from current viewport.
+      // [x]   4A: Force build for all resources visible, measured, and in the viewport.
+      // [ ] Phase 5: Idle Render Outside Viewport layout: layout up to 4 items with idleRenderOutsideViewport true.
+      // [ ] Phase 6: Idle layout: layout more if we are otherwise not doing much.
 
       // Force all intersecting, non-zero-sized, non-owned elements to be built.
+      // E.g. ensures that all in-viewport elements are built in prerender mode.
       if (
         !r.isBuilt() &&
         !r.isBuilding() &&
@@ -397,7 +403,7 @@ export class ResourcesImpl {
       const input = Services.inputFor(this.win);
       input.setupInputModeClasses(this.ampdoc);
 
-      // No need for remeasuring hacks with IntersectionObserver.
+      // With IntersectionObserver, no need for remeasuring hacks.
       if (!this.intersectionObserver_) {
         const fixPromise = ieMediaCheckAndFix(this.win);
         const remeasure = () => this.remeasurePass_.schedule();
@@ -603,15 +609,13 @@ export class ResourcesImpl {
       return null;
     }
     this.buildAttemptsCount_++;
-    if (!schedulePass) {
+    // With IntersectionObserver, no need to schedule measurements after build
+    // since these are handled during the intersection callback.
+    if (!schedulePass || this.intersectionObserver_) {
       return promise;
     }
     return promise.catch(
-      () => {
-        if (!this.intersectionObserver_) {
-          this.schedulePass();
-        }
-      },
+      () => this.schedulePass(),
       error => {
         // Build failed: remove the resource. No other state changes are
         // needed.
@@ -762,8 +766,8 @@ export class ResourcesImpl {
         // TODO(willchou): Manually update the mutatee's layout box?
         mutator();
 
-        // No need to remeasure and set "relayout top" on element size changes
-        // with IntersectionObserver since enter/exit viewport will be detected.
+        // With IntersectionObserver, no need to remeasure and set relayout
+        // on element size changes since enter/exit viewport will be detected.
         if (this.intersectionObserver_) {
           this.maybeChangeHeight_ = true;
         } else {
@@ -851,22 +855,25 @@ export class ResourcesImpl {
 
   /** @override */
   collapseElement(element) {
-    // With IntersectionObserver, no need to relayout (e.g. update media queries)
+    // With IntersectionObserver, no need to relayout or remeasure
     // due to a single element collapse.
-    if (this.intersectionObserver_) {
-      return;
-    }
-    const box = this.viewport_.getLayoutRect(element);
-    const resource = Resource.forElement(element);
-    if (box.width != 0 && box.height != 0) {
-      if (isExperimentOn(this.win, 'dirty-collapse-element')) {
-        this.dirtyElement(element);
-      } else {
-        this.setRelayoutTop_(box.top);
+    if (!this.intersectionObserver_) {
+      const box = this.viewport_.getLayoutRect(element);
+      if (box.width != 0 && box.height != 0) {
+        if (isExperimentOn(this.win, 'dirty-collapse-element')) {
+          this.dirtyElement(element);
+        } else {
+          this.setRelayoutTop_(box.top);
+        }
       }
     }
+
+    const resource = Resource.forElement(element);
     resource.completeCollapse();
-    this.schedulePass(FOUR_FRAME_DELAY_);
+
+    if (!this.intersectionObserver_) {
+      this.schedulePass(FOUR_FRAME_DELAY_);
+    }
   }
 
   /** @override */

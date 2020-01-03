@@ -21,7 +21,7 @@ import {
   marginBottomOfLastChild,
 } from './viewport-binding-def';
 import {computedStyle, px, setImportantStyles} from '../../style';
-import {dev} from '../../log';
+import {dev, devAssert} from '../../log';
 import {layoutRectLtwh} from '../../layout-rect';
 
 const TAG_ = 'Viewport';
@@ -256,8 +256,19 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
-    const b = el./*OK*/ getBoundingClientRect();
+  getLayoutRect(el, opt_scrollLeft, opt_scrollTop, opt_premeasuredRect) {
+    const b = opt_premeasuredRect || el./*OK*/ getBoundingClientRect();
+
+    // TODO(willchou): Remove after verifying.
+    if (opt_premeasuredRect) {
+      const pre = opt_premeasuredRect;
+      const bcr = el./*OK*/ getBoundingClientRect();
+      devAssert(Math.round(pre.left) == Math.round(bcr.left));
+      devAssert(Math.round(pre.top) == Math.round(bcr.top));
+      devAssert(Math.round(pre.width) == Math.round(bcr.width));
+      devAssert(Math.round(pre.height) == Math.round(bcr.height));
+    }
+
     const scrollTop =
       opt_scrollTop != undefined ? opt_scrollTop : this.getScrollTop();
     const scrollLeft =

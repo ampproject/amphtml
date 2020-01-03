@@ -419,9 +419,9 @@ export class Resource {
   /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
-   * @param {*} premeasuredBox
+   * @param {!ClientRect=} opt_premeasuredBox
    */
-  measure(premeasuredBox = null) {
+  measure(opt_premeasuredBox) {
     // TODO(willchou): What to do about placeholders with IntersectionObserver?
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
@@ -443,7 +443,7 @@ export class Resource {
     this.isMeasureRequested_ = false;
 
     const oldBox = this.layoutBox_;
-    this.layoutBox_ = this.measureViaResources_(premeasuredBox);
+    this.layoutBox_ = this.measureViaResources_(opt_premeasuredBox);
     const box = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
@@ -472,19 +472,12 @@ export class Resource {
 
   /**
    * Use resources for measurement.
-   * @param {*} premeasuredBox
-   * @return {*}
+   * @param {!ClientRect=} opt_premeasuredBox
+   * @return {!LayoutRectDef}
    */
-  measureViaResources_(premeasuredBox = null) {
+  measureViaResources_(opt_premeasuredBox) {
     const viewport = Services.viewportForDoc(this.element);
-    let box = premeasuredBox
-      ? layoutRectLtwh(
-          premeasuredBox.left + viewport.getScrollLeft(),
-          premeasuredBox.top + viewport.getScrollTop(),
-          premeasuredBox.width,
-          premeasuredBox.height
-        )
-      : viewport.getLayoutRect(this.element);
+    let box = viewport.getLayoutRect(this.element, opt_premeasuredBox);
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
