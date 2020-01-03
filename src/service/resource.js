@@ -360,9 +360,6 @@ export class Resource {
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
     this.element./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
-
-    // TODO(willchou): Manually update layout box here in IntersectionObserver mode?
-
     // Schedule for re-measure and possible re-layout.
     this.requestMeasure();
   }
@@ -422,7 +419,6 @@ export class Resource {
    * @param {!ClientRect=} opt_premeasuredBox
    */
   measure(opt_premeasuredBox) {
-    // TODO(willchou): What to do about placeholders with IntersectionObserver?
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
