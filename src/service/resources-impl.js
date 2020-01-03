@@ -313,7 +313,7 @@ export class ResourcesImpl {
 
     const toUnload = [];
 
-    entries.forEach(entry => {
+    const promises = entries.map(entry => {
       const {boundingClientRect, isIntersecting, target: element} = entry;
       const r = Resource.forElementOptional(element);
 
@@ -328,9 +328,6 @@ export class ResourcesImpl {
       //   Phase 5: Idle Render Outside Viewport layout: layout up to 4 items with idleRenderOutsideViewport true.
       //   Phase 6: Idle layout: layout more if we are otherwise not doing much.
 
-      // Build, then measure, then unload if necessary, then set inViewport, then layout.
-
-      let whenBuilt = Promise.resolve();
       // Force all intersecting, non-zero-sized, non-owned elements to be built.
       if (
         !r.isBuilt() &&
@@ -346,10 +343,9 @@ export class ResourcesImpl {
           /* scheduleWhenBuilt */ false,
           /* force */ true
         );
-        whenBuilt = r.whenBuilt();
       }
 
-      whenBuilt.then(() => {
+      return r.whenBuilt().then(() => {
         // NOT_LAID_OUT is the state after build() but before measure().
         if (r.getState() == ResourceState.NOT_LAID_OUT) {
           // TODO(willchou): Also need to do this on viewport size change.
@@ -378,14 +374,16 @@ export class ResourcesImpl {
       });
     });
 
-    if (toUnload.length) {
-      this.vsync_.mutate(() => {
-        toUnload.forEach(r => {
-          r.unload();
-          this.cleanupTasks_(r);
+    Promise.all(promises).then(() => {
+      if (toUnload.length) {
+        this.vsync_.mutate(() => {
+          toUnload.forEach(r => {
+            r.unload();
+            this.cleanupTasks_(r);
+          });
         });
-      });
-    }
+      }
+    });
   }
 
   /** @private */
