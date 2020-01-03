@@ -1,0 +1,75 @@
+{
+  "vars": {
+    "clientId": "CLIENT_ID(__gads)"
+  },
+  "requests": {
+    "baseUrl": "https://pubads.g.doubleclick.net/subopt",
+    "baseParams": "u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&_amp_source_origin=${sourceHost}",
+    "sendBase": "${baseUrl}/data?${baseParams}",
+    "stateParams": "states=${publicationId}%3A${state}%3A${productId}",
+    "eventParams": "events=${publicationId}%3A${event}%3A${data}",
+    "sendSubscriptionState": "${sendBase}&${stateParams}",
+    "sendEvent": "${sendBase}&${eventParams}"
+  },
+  "triggers": {
+    "onSubscribed": {
+      "on": "subscriptions-access-granted",
+      "request": "sendSubscriptionState",
+      "vars": {
+        "state": "subscriber"
+      }
+    },
+    "onNotSubscribed": {
+      "on": "subscriptions-access-denied",
+      "request": "sendSubscriptionState",
+      "vars": {
+        "state": "non_subscriber"
+      }
+    },
+    "onShowOffers": {
+      "on": "subscriptions-action-showOffers-started",
+      "request": "sendEvent",
+      "vars": {
+        "event": "offers_shown",
+        "data": "{\"skus\": \"${skus}\",\"source\": \"${source}\",\"active\": \"${active}\"}"
+      }
+    },
+    "onPaywall": {
+      "on": "subscriptions-paywall-activated",
+      "request": "sendEvent",
+      "vars": {
+        "event": "paywall",
+        "data": "{\"source\": \"${source}\",\"active\": \"false\"}"
+      }
+    },
+    "onSelectOffer": {
+      "on": "subscriptions-action-subscribe-started",
+      "request": "sendEvent",
+      "vars": {
+        "event": "offer_selected",
+        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
+      }
+    },
+    "onStartBuyflow": {
+      "on": "subscriptions-action-subscribe-started",
+      "request": "sendEvent",
+      "vars": {
+        "event": "payment_flow_start",
+        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
+      }
+    },
+    "onPaymentComplete": {
+      "on": "subscriptions-action-subscribe-success",
+      "request": "sendEvent",
+      "vars": {
+        "event": "payment_complete",
+        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
+      }
+    }
+  },
+  "transport": {
+    "beacon": true,
+    "xhrpost": false,
+    "image": false
+  }
+}
