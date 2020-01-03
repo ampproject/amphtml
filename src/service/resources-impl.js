@@ -307,9 +307,76 @@ export class ResourcesImpl {
    * @private
    */
   intersects_(entries, unusedObserver) {
+    // TODO(willchou): The first callback is triggered against _all_ observed elements,
+    // not just those in viewport. Is this slow or problematic?
+    dev().fine(TAG_, 'IObsCallback', entries);
+
     const toUnload = [];
 
-    entries.forEach(entry => this.intersect_(entry));
+    entries.forEach(entry => {
+      const {boundingClientRect, isIntersecting, target: element} = entry;
+      const r = Resource.forElementOptional(element);
+
+      // discoverWork_():
+      //   Phase 1: Build and relayout as needed. All mutations happen here.
+      //     1A: Apply sizes/media-queries to un-measured/un-laid-out resources.
+      //   Phase 2: Remeasure if there were any relayouts. All reads happen here.
+      //     2A: Unload non-displayed resources.
+      //   Phase 3: Trigger "viewport enter/exit" events.
+      //   Phase 4: Schedule elements for layout within a reasonable distance from current viewport.
+      //     4A: Force build for all resources visible, measured, and in the viewport.
+      //   Phase 5: Idle Render Outside Viewport layout: layout up to 4 items with idleRenderOutsideViewport true.
+      //   Phase 6: Idle layout: layout more if we are otherwise not doing much.
+
+      // Build, then measure, then unload if necessary, then set inViewport, then layout.
+
+      let whenBuilt = Promise.resolve();
+      // Force all intersecting, non-zero-sized, non-owned elements to be built.
+      if (
+        !r.isBuilt() &&
+        !r.isBuilding() &&
+        isIntersecting &&
+        r.isDisplayed(boundingClientRect) &&
+        !r.hasOwner()
+      ) {
+        dev().fine(TAG_, 'IObs: Force build');
+        this.buildOrScheduleBuildForResource_(
+          r,
+          /* checkForDupes */ true,
+          /* scheduleWhenBuilt */ false,
+          /* force */ true
+        );
+        whenBuilt = r.whenBuilt();
+      }
+
+      whenBuilt.then(() => {
+        // NOT_LAID_OUT is the state after build() but before measure().
+        if (r.getState() == ResourceState.NOT_LAID_OUT) {
+          // TODO(willchou): Also need to do this on viewport size change.
+          r.applySizesAndMediaQuery();
+        }
+
+        const wasDisplayed = r.isDisplayed();
+        r.measure(/* premeasuredBox */ boundingClientRect);
+        const isDisplayed = r.isDisplayed();
+
+        if (wasDisplayed && !isDisplayed) {
+          toUnload.push(r);
+          return;
+        }
+        if (r.hasOwner()) {
+          return;
+        }
+
+        r.setInViewport(isIntersecting);
+
+        if (isIntersecting && r.isDisplayed()) {
+          if (r.getState() === ResourceState.READY_FOR_LAYOUT) {
+            this.scheduleLayoutOrPreload(r, /* layout */ true);
+          }
+        }
+      });
+    });
 
     if (toUnload.length) {
       this.vsync_.mutate(() => {
@@ -319,67 +386,6 @@ export class ResourcesImpl {
         });
       });
     }
-  }
-
-  /**
-   * @param {!IntersectionObserverEntry} entry
-   * @param {!Array<!Resource>} toUnload Out param.
-   * @private
-   */
-  intersect_(entry, toUnload) {
-    const {boundingClientRect, isIntersecting, target: element} = entry;
-    const r = Resource.forElementOptional(element);
-
-    // Phase 1: Build and relayout as needed. All mutations happen here.
-    //   1A: Apply sizes/media-queries to un-measured/un-laid-out resources.
-    // Phase 2: Remeasure if there were any relayouts. All reads happen here.
-    //   2A: Unload non-displayed resources.
-    // Phase 3: Trigger "viewport enter/exit" events.
-    // Phase 4: Schedule elements for layout within a reasonable distance from current viewport.
-    //   4A: Force build for all resources visible, measured, and in the viewport.
-    // Phase 5: Idle Render Outside Viewport layout: layout up to 4 items with idleRenderOutsideViewport true.
-    // Phase 6: Idle layout: layout more if we are otherwise not doing much.
-
-    // Build, then measure, then unload if necessary, then set inViewport, then layout.
-
-    let whenBuilt = Promise.resolve();
-    if (!r.isBuilt() && !r.isBuilding()) {
-      this.buildOrScheduleBuildForResource_(
-        r,
-        /* checkForDupes */ true,
-        /* scheduleWhenBuilt */ false,
-        /* force */ true
-      );
-      whenBuilt = r.whenBuilt();
-    }
-
-    whenBuilt.then(() => {
-      // NOT_LAID_OUT is the state after build() but before measure().
-      if (r.getState() == ResourceState.NOT_LAID_OUT) {
-        // TODO(willchou): Also need to do this on viewport size change.
-        r.applySizesAndMediaQuery();
-      }
-
-      const wasDisplayed = r.isDisplayed();
-      r.measure(/* premeasuredBox */ boundingClientRect);
-      const isDisplayed = r.isDisplayed();
-
-      if (wasDisplayed && !isDisplayed) {
-        toUnload.push(r);
-        return;
-      }
-      if (r.hasOwner()) {
-        return;
-      }
-
-      r.setInViewport(isIntersecting);
-
-      if (isIntersecting && r.isDisplayed()) {
-        if (r.getState() === ResourceState.READY_FOR_LAYOUT) {
-          this.scheduleLayoutOrPreload(r, /* layout */ true);
-        }
-      }
-    });
   }
 
   /** @private */
@@ -478,9 +484,7 @@ export class ResourcesImpl {
     }
     this.resources_.push(resource);
 
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.observe(resource.element);
-    } else {
+    if (!this.intersectionObserver_) {
       this.remeasurePass_.schedule(1000);
     }
   }
@@ -653,6 +657,14 @@ export class ResourcesImpl {
   upgraded(element) {
     const resource = Resource.forElement(element);
     this.buildOrScheduleBuildForResource_(resource);
+
+    // Wait until upgrade to start observing intersections to give
+    // the browser a chance to layout first. This results in fewer
+    // stale client rects in the intersection entries.
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.observe(resource.element);
+    }
+
     dev().fine(TAG_, 'element upgraded:', resource.debugid);
   }
 

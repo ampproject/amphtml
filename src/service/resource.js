@@ -628,12 +628,13 @@ export class Resource {
   /**
    * Whether the resource is displayed, i.e. if it has non-zero width and
    * height.
+   * @param {*} premeasuredBox
    * @return {boolean}
    */
-  isDisplayed() {
+  isDisplayed(premeasuredBox = null) {
     const isFluid = this.element.getLayout() == Layout.FLUID;
     // TODO(jridgewell): #getSize
-    const box = this.getLayoutBox();
+    const box = premeasuredBox || this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
     return (
       (isFluid || hasNonZeroSize) &&
