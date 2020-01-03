@@ -1,6 +1,7 @@
 # Release Schedule
 
 - [Release Channels](#release-channels)
+  - [Nightly](#nightly)
   - [Weekly](#weekly)
   - [Long-Term Stable (LTS)](#long-term-stable-lts)
 - [Determining if your change is in a release](#determining-if-your-change-is-in-a-release)
@@ -19,9 +20,17 @@ The AMP runtime and extensions are provided through a variety of different *rele
 
 See the [release cadence section](#release-cadence) for a more detailed breakdown of the release promotion cadence. To determine if a PR has been included in any of the following release channels, look for the GitHub labels _PR Use: In Canary_, _PR Use: In Production_, or _PR Use: In LTS_.
 
+### Nightly
+
+The **nightly** release channel is updated (as its name indicates) every weeknight. This process is automated, and there is no guarantee that any given nightly release is free of bugs or other issues. Each night after midnight (Pacific Time), the last "green" commit from the day is selected to be the release cutoff point. A green build indicates that all automated tests have passed on that bulid.
+
+The nightly release provides a mechanism to detect and resolve issues quickly and before they reach the more traffic-heavy _weekly_ release channels. It also serves to reduce the number of users affected by newly introduced issues
+
+The **nightly** release build is served to 0.05% of AMP traffic. It is possible to opt into the **nightly** channel via the `AMP_CANARY` cookie; see the [Opt-In Cookie section](#opt-in-cookie) for details.
+
 ### Weekly
 
-The _weekly_ release channels are considered to be the primary "evergreen" release channels. A green build from the `master` branch is used to build the  **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel (see the [Detailed schedule](#detailed-schedule)).
+The _weekly_ release channels are considered to be the primary "evergreen" release channels. The last **nightly** release from the previous week is promoted to the  **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel.
 
 There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit, but with the _canary_ and _production_ configurations, respectively. The _canary_ configuration enables experimental components and features that may be turned off in _production_. Each is served to 0.5% of AMP traffic. It is possible to opt into the **experimental** or **beta** channels via the `AMP_CANARY` cookie; see the [Opt-In Cookie section](#opt-in-cookie) for details.
 
