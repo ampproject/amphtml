@@ -312,7 +312,7 @@ export class ResourcesImpl {
   intersects_(entries, unusedObserver) {
     // TODO(willchou): The first callback is triggered against _all_ observed elements,
     // not just those in viewport. Is this slow or problematic?
-    dev().fine(TAG_, 'IObsCallback', entries);
+    dev().fine(TAG_, 'intersect', entries);
 
     const toUnload = [];
 
@@ -342,7 +342,7 @@ export class ResourcesImpl {
         r.isDisplayed(boundingClientRect) &&
         !r.hasOwner()
       ) {
-        dev().fine(TAG_, 'IObs: Force build');
+        dev().fine(TAG_, 'force build:', r.debugid);
         this.buildOrScheduleBuildForResource_(
           r,
           /* checkForDupes */ true,
@@ -354,8 +354,13 @@ export class ResourcesImpl {
       return r.whenBuilt().then(() => {
         // NOT_LAID_OUT is the state after build() but before measure().
         if (r.getState() == ResourceState.NOT_LAID_OUT) {
-          // TODO(willchou): Also need to do this on viewport size change.
+          // TODO(willchou): Update media queries on viewport size change.
+
+          // TODO(willchou): This will always result in a stale layout box,
+          // e.g. .i-amphtml-hidden-by-media-query is only applied here.
+          // But where should we move this mutation to?
           r.applySizesAndMediaQuery();
+          dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         }
 
         const wasDisplayed = r.isDisplayed();
@@ -389,6 +394,8 @@ export class ResourcesImpl {
           });
         });
       }
+
+      this.signalIfReady_();
     });
   }
 
@@ -488,7 +495,15 @@ export class ResourcesImpl {
     }
     this.resources_.push(resource);
 
-    if (!this.intersectionObserver_) {
+    if (this.intersectionObserver_) {
+      // Wait until upgrade to start observing intersections to give
+      // the browser a chance to layout first. This results in fresher
+      // client rects in the intersection entry, e.g. [overflow] elements
+      // can affect element size since they're `position: relative`.
+      element.whenUpgraded().then(() => {
+        this.intersectionObserver_.observe(resource.element);
+      });
+    } else {
       this.remeasurePass_.schedule(1000);
     }
   }
@@ -652,22 +667,14 @@ export class ResourcesImpl {
       this.intersectionObserver_.unobserve(resource.element);
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
-    dev().fine(TAG_, 'element removed:', resource.debugid);
+    dev().fine(TAG_, 'resource removed:', resource.debugid);
   }
 
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
     this.buildOrScheduleBuildForResource_(resource);
-
-    // Wait until upgrade to start observing intersections to give
-    // the browser a chance to layout first. This results in fewer
-    // stale client rects in the intersection entries.
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.observe(resource.element);
-    }
-
-    dev().fine(TAG_, 'element upgraded:', resource.debugid);
+    dev().fine(TAG_, 'resource upgraded:', resource.debugid);
   }
 
   /** @override */
@@ -915,7 +922,7 @@ export class ResourcesImpl {
   /** @override */
   ampInitComplete() {
     this.ampInitialized_ = true;
-    dev().fine(TAG_, 'schedulePass: ampInitComplete');
+    dev().fine(TAG_, 'ampInitComplete');
     this.schedulePass();
   }
 
@@ -984,15 +991,10 @@ export class ResourcesImpl {
     this.vsyncScheduled_ = false;
 
     this.visibilityStateMachine_.setState(this.ampdoc.getVisibilityState());
-    if (
-      this.documentReady_ &&
-      this.ampInitialized_ &&
-      !this.ampdoc.signals().get(READY_SCAN_SIGNAL)
-    ) {
-      // This signal mainly signifies that most of elements have been measured
-      // by now. This is mostly used to avoid measuring too many elements
-      // individually. May not be called in shadow mode.
-      this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
+
+    // With IntersectionObserver, need to wait until first intersection callback completes.
+    if (!this.intersectionObserver_) {
+      this.signalIfReady_();
     }
 
     if (this.maybeChangeHeight_) {
@@ -1017,6 +1019,23 @@ export class ResourcesImpl {
       fn();
     }
     this.passCallbacks_.length = 0;
+  }
+
+  /**
+   * @private
+   */
+  signalIfReady_() {
+    if (
+      this.documentReady_ &&
+      this.ampInitialized_ &&
+      !this.ampdoc.signals().get(READY_SCAN_SIGNAL)
+    ) {
+      // This signal mainly signifies that most of elements have been measured
+      // by now. This is mostly used to avoid measuring too many elements
+      // individually. May not be called in shadow mode.
+      this.ampdoc.signals().signal(READY_SCAN_SIGNAL);
+      dev().fine(TAG_, 'signal: ready-scan');
+    }
   }
 
   /**
@@ -1393,6 +1412,7 @@ export class ResourcesImpl {
         !r.hasBeenMeasured() ||
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
+        dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         r.applySizesAndMediaQuery();
         relayoutCount++;
       }
@@ -1648,8 +1668,13 @@ export class ResourcesImpl {
       timeout = -1;
     }
 
-    dev().fine(TAG_, 'queue size:', this.queue_.getSize());
-    dev().fine(TAG_, 'exec size:', this.exec_.getSize());
+    dev().fine(
+      TAG_,
+      'queue size:',
+      this.queue_.getSize(),
+      'exec size:',
+      this.exec_.getSize()
+    );
 
     if (timeout >= 0) {
       // Still tasks in the queue, but we took too much time.
