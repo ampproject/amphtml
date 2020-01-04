@@ -577,6 +577,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /**
    * Reset the counter that tracks when to place ads.
+   * @private
    */
   resetPageCount_() {
     this.uniquePagesCount_ = 0;
