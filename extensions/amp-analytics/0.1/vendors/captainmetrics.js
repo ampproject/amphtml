@@ -27,6 +27,7 @@ const CAPTAINMETRICS_CONFIG = jsonLiteral({
     'hostDomain': 'photon.captainmetrics.com',
     'deviceId': 'CLIENT_ID(_cm_cid)',
     'sessionId': '$HASH(PAGE_VIEW_ID CLIENT_ID(_cm_cid))',
+    'page': 'SOURCE_URL',
     'projectId': '',
   },
   'requests': {
