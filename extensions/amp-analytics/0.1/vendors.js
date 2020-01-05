@@ -43,6 +43,7 @@ import {CLICKY_CONFIG} from './vendors/clicky';
 import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
 import {COMSCORE_CONFIG} from './vendors/comscore';
 import {CXENSE_CONFIG} from './vendors/cxense';
+import {DEEPBI_CONFIG} from './vendors/deepbi';
 import {DYNATRACE_CONFIG} from './vendors/dynatrace';
 import {EPICA_CONFIG} from './vendors/epica';
 import {EULERIANANALYTICS_CONFIG} from './vendors/euleriananalytics';
@@ -63,6 +64,7 @@ import {MARINSOFTWARE_CONFIG} from './vendors/marinsoftware';
 import {MEDIAMETRIE_CONFIG} from './vendors/mediametrie';
 import {MEDIARITHMICS_CONFIG} from './vendors/mediarithmics';
 import {MEDIATOR_CONFIG} from './vendors/mediator';
+import {MEMO_CONFIG} from './vendors/memo';
 import {METRIKA_CONFIG} from './vendors/metrika';
 import {MOAT_CONFIG} from './vendors/moat';
 import {MOBIFY_CONFIG} from './vendors/mobify';
@@ -89,6 +91,7 @@ import {SEGMENT_CONFIG} from './vendors/segment';
 import {SHINYSTAT_CONFIG} from './vendors/shinystat';
 import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SNOWPLOW_CONFIG} from './vendors/snowplow';
+import {SNOWPLOW_V2_CONFIG} from './vendors/snowplow_v2';
 import {TEAANALYTICS_CONFIG} from './vendors/teaanalytics';
 import {TEALIUMCOLLECT_CONFIG} from './vendors/tealiumcollect';
 import {TOP100_CONFIG} from './vendors/top100';
@@ -110,8 +113,6 @@ const DEFAULT_CONFIG = jsonLiteral({
     'ampdocHostname': 'AMPDOC_HOSTNAME',
     'ampdocUrl': 'AMPDOC_URL',
     'ampGeo': 'AMP_GEO',
-    'ampUserLocation': 'AMP_USER_LOCATION',
-    'ampUserLocationPoll': 'AMP_USER_LOCATION_POLL',
     'ampState': 'AMP_STATE',
     'ampVersion': 'AMP_VERSION',
     'ancestorOrigin': 'ANCESTOR_ORIGIN',
@@ -201,6 +202,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'colanalytics': includeJsonLiteral(COLANALYTICS_CONFIG),
       'comscore': includeJsonLiteral(COMSCORE_CONFIG),
       'cxense': includeJsonLiteral(CXENSE_CONFIG),
+      'deepbi': includeJsonLiteral(DEEPBI_CONFIG),
       'dynatrace': includeJsonLiteral(DYNATRACE_CONFIG),
       'epica': includeJsonLiteral(EPICA_CONFIG),
       'euleriananalytics': includeJsonLiteral(EULERIANANALYTICS_CONFIG),
@@ -221,6 +223,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'mediametrie': includeJsonLiteral(MEDIAMETRIE_CONFIG),
       'mediarithmics': includeJsonLiteral(MEDIARITHMICS_CONFIG),
       'mediator': includeJsonLiteral(MEDIATOR_CONFIG),
+      'memo': includeJsonLiteral(MEMO_CONFIG),
       'metrika': includeJsonLiteral(METRIKA_CONFIG),
       'moat': includeJsonLiteral(MOAT_CONFIG),
       'mobify': includeJsonLiteral(MOBIFY_CONFIG),
@@ -251,6 +254,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'shinystat': includeJsonLiteral(SHINYSTAT_CONFIG),
       'simplereach': includeJsonLiteral(SIMPLEREACH_CONFIG),
       'snowplow': includeJsonLiteral(SNOWPLOW_CONFIG),
+      'snowplow_v2': includeJsonLiteral(SNOWPLOW_V2_CONFIG),
       'teaanalytics': includeJsonLiteral(TEAANALYTICS_CONFIG),
       'tealiumcollect': includeJsonLiteral(TEALIUMCOLLECT_CONFIG),
       'top100': includeJsonLiteral(TOP100_CONFIG),
@@ -293,11 +297,10 @@ function mergeIframeTransportConfig(config, iframeTransportConfig) {
   for (const vendor in iframeTransportConfig) {
     if (hasOwn(iframeTransportConfig, vendor)) {
       const url = iframeTransportConfig[vendor];
-      config[vendor]['transport'] = Object.assign(
-        {},
-        config[vendor]['transport'],
-        {'iframe': url}
-      );
+      config[vendor]['transport'] = {
+        ...config[vendor]['transport'],
+        'iframe': url,
+      };
     }
   }
 }

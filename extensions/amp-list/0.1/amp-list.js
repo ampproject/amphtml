@@ -156,21 +156,15 @@ export class AmpList extends AMP.BaseElement {
     /**@private {?UnlistenDef} */
     this.unlistenAutoLoadMore_ = null;
 
-    this.registerAction(
-      'refresh',
-      () => {
-        if (this.layoutCompleted_) {
-          this.resetIfNecessary_();
-          return this.fetchList_(/* opt_refresh */ true);
-        }
-      },
-      ActionTrust.HIGH
-    );
+    this.registerAction('refresh', () => {
+      if (this.layoutCompleted_) {
+        this.resetIfNecessary_();
+        return this.fetchList_(/* opt_refresh */ true);
+      }
+    });
 
-    this.registerAction(
-      'changeToLayoutContainer',
-      () => this.changeToLayoutContainer_(),
-      ActionTrust.HIGH
+    this.registerAction('changeToLayoutContainer', () =>
+      this.changeToLayoutContainer_()
     );
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
@@ -372,7 +366,7 @@ export class AmpList extends AMP.BaseElement {
           promise = this.fetchList_();
         }
       } else if (typeof src === 'object') {
-        promise = renderLocalData(src);
+        promise = renderLocalData(/** @type {!Object} */ (src));
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
@@ -555,7 +549,7 @@ export class AmpList extends AMP.BaseElement {
       return Promise.resolve();
     }
     let fetch;
-    if (this.ssrTemplateHelper_.isSupported()) {
+    if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
       fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
@@ -746,7 +740,7 @@ export class AmpList extends AMP.BaseElement {
       scheduleNextPass();
       current.rejecter();
     };
-    const isSSR = this.ssrTemplateHelper_.isSupported();
+    const isSSR = this.ssrTemplateHelper_.isEnabled();
     let renderPromise = this.ssrTemplateHelper_
       .applySsrOrCsrTemplate(this.element, current.data)
       .then(result => this.updateBindings_(result, current.append))
@@ -1248,6 +1242,7 @@ export class AmpList extends AMP.BaseElement {
       urlReplacement: this.getPolicy_(),
       refresh,
       token,
+      xssiPrefix: this.element.getAttribute('xssi-prefix') || undefined,
     });
   }
 

@@ -81,12 +81,12 @@ describes.realWin(
           ? playlistResponse
           : regularResponse;
 
-      changeSizeSpy = sandbox.spy(media.implementation_, 'changeHeight');
-      attemptChangeSizeSpy = sandbox.spy(
+      changeSizeSpy = env.sandbox.spy(media.implementation_, 'changeHeight');
+      attemptChangeSizeSpy = env.sandbox.spy(
         media.implementation_,
         'attemptChangeHeight'
       );
-      xhrMock = sandbox.mock(Services.xhrFor(win));
+      xhrMock = env.sandbox.mock(Services.xhrFor(win));
       if (attributes) {
         xhrMock.expects('fetchJson').returns(
           Promise.resolve({

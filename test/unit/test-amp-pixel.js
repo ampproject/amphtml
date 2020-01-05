@@ -28,7 +28,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
     whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolver = resolve;
     });
-    sandbox
+    env.sandbox
       .stub(env.ampdoc, 'whenFirstVisible')
       .callsFake(() => whenFirstVisiblePromise);
     createPixel('https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
@@ -120,7 +120,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
   });
 
   it('should replace URL parameters', () => {
-    sandbox.stub(Math, 'random').callsFake(() => 111);
+    env.sandbox.stub(Math, 'random').callsFake(() => 111);
     const url = 'https://pubads.g.doubleclick.net/activity;r=RANDOM';
     return trigger(url).then(img => {
       expect(img.src).to.equal(
@@ -174,7 +174,7 @@ describes.realWin(
       whenFirstVisiblePromise = new Promise(resolve => {
         whenFirstVisibleResolver = resolve;
       });
-      sandbox
+      env.sandbox
         .stub(env.ampdoc, 'whenFirstVisible')
         .callsFake(() => whenFirstVisiblePromise);
 

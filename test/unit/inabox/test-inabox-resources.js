@@ -17,12 +17,10 @@ import {InaboxResources} from '../../../src/inabox/inabox-resources';
 
 describes.realWin('inabox-resources', {amp: true}, env => {
   let win;
-  let sandbox;
   let resources;
 
   beforeEach(() => {
     win = env.win;
-    sandbox = env.sandbox;
 
     resources = new InaboxResources(env.ampdoc);
   });
@@ -57,11 +55,11 @@ describes.realWin('inabox-resources', {amp: true}, env => {
   });
 
   it('upgraded', async () => {
-    const schedulePassSpy = sandbox.stub(resources, 'schedulePass');
+    const schedulePassSpy = env.sandbox.stub(resources, 'schedulePass');
     const element1 = env.createAmpElement('amp-foo');
     resources.add(element1);
     const resource1 = resources.getResourceForElement(element1);
-    const buildStub = sandbox.stub(resource1, 'build');
+    const buildStub = env.sandbox.stub(resource1, 'build');
     let resolveBuild;
     buildStub.returns(
       new Promise(resolve => {
