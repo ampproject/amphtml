@@ -285,11 +285,18 @@ export class AmpAdXOriginIframeHandler {
       setStyle(this.iframe, 'visibility', 'hidden');
     }
 
-    Promise.race([
-      renderStartPromise,
-      iframeLoadPromise,
-      timer.promise(VISIBILITY_TIMEOUT),
-    ]).then(() => {
+    // If A4A where creative is responsible for triggering render start (e.g
+    // no fill for sticky ad case), only trigger if renderStart listener promise
+    // explicitly fired (though we do not expect this to occur for A4A).
+    const triggerRenderStartPromise =
+      opt_isA4A && opt_letCreativeTriggerRenderStart
+        ? renderStartPromise
+        : Promise.race([
+            renderStartPromise,
+            iframeLoadPromise,
+            timer.promise(VISIBILITY_TIMEOUT),
+          ]);
+    triggerRenderStartPromise.then(() => {
       // Common signal RENDER_START invoked at toggle visibility time
       // Note: 'render-start' msg and common signal RENDER_START are different
       // 'render-start' msg is a way for implemented Ad to display ad earlier

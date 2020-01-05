@@ -58,11 +58,11 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
-    clock = sandbox.useFakeTimers();
+    clock = env.sandbox.useFakeTimers();
     clock.tick(1);
 
     viewer = win.__AMP_SERVICES.viewer.obj;
-    sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
+    env.sandbox.stub(ampdoc, 'getFirstVisibleTime').returns(1);
     visibilityInterface = new MockVisibilityInterface();
     root = new VisibilityManagerForMApp(ampdoc, visibilityInterface);
 
@@ -158,7 +158,7 @@ describes.fakeWin('VisibilityManagerForMapp', {amp: true}, env => {
     // There's a clock.tick(1) in beforeEach, so firstSeenTime is
     // /*tick*/1 + /*tick*/1 - /*ampdoc.getFirstVisibleTime*/ 1)
     clock.tick(1);
-    const disposed = sandbox.spy();
+    const disposed = env.sandbox.spy();
     const spec = dict({
       'totalTimeMin': 10,
       'visiblePercentageMin': 20,

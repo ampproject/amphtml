@@ -34,15 +34,12 @@ import {isFiniteNumber} from '../../../../src/types';
 describes.realWin('real-time-config-manager', {amp: true}, env => {
   let element;
   let a4aElement;
-  let sandbox;
   let fetchJsonStub;
   let getCalloutParam_, maybeExecuteRealTimeConfig_, validateRtcConfig_;
   let truncUrl_, inflateAndSendRtc_, sendErrorMessage;
   let rtc;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
-
     // Ensures window location == AMP cache passes.
     env.win.__AMP_MODE.test = true;
 
@@ -54,13 +51,13 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       'layout': 'fixed',
     });
     doc.body.appendChild(element);
-    fetchJsonStub = sandbox.stub(Xhr.prototype, 'fetchJson');
+    fetchJsonStub = env.sandbox.stub(Xhr.prototype, 'fetchJson');
     a4aElement = new AmpA4A(element);
 
     // RealTimeConfigManager uses the UrlReplacements service scoped to the A4A
     // (FIE), but for testing stub in the parent service for simplicity.
     const urlReplacements = Services.urlReplacementsForDoc(element);
-    sandbox
+    env.sandbox
       .stub(Services, 'urlReplacementsForDoc')
       .withArgs(a4aElement.element)
       .returns(urlReplacements);
@@ -72,10 +69,6 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     truncUrl_ = rtc.truncUrl_.bind(rtc);
     inflateAndSendRtc_ = rtc.inflateAndSendRtc_.bind(rtc);
     sendErrorMessage = rtc.sendErrorMessage.bind(rtc);
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function setFetchJsonStubBehavior(params, response, isString, shouldFail) {
@@ -432,7 +425,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         );
       }
       const calloutCount = 1;
-      sandbox.stub(user(), 'error').callsFake(() => {});
+      env.sandbox.stub(user(), 'error').callsFake(() => {});
       return executeTest({
         vendors,
         inflatedUrls,
@@ -794,7 +787,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     });
 
     it('should not modify rtcConfig if consent state is valid', () => {
-      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      const expectedRtcConfig = {...rtc.rtcConfig_};
       rtc.consentState_ = CONSENT_POLICY_STATE.SUFFICIENT;
       rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
@@ -802,7 +795,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     it('should clear all callouts if global setting mismatched', () => {
       rtc.rtcConfig_.sendRegardlessOfConsentState = ['INSUFFICIENT'];
-      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      const expectedRtcConfig = {...rtc.rtcConfig_};
       expectedRtcConfig.vendors = {};
       expectedRtcConfig.urls = [];
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
@@ -849,7 +842,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           'macros': {'SLOT_ID': '1'},
         },
       };
-      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      const expectedRtcConfig = {...rtc.rtcConfig_};
       expectedRtcConfig.urls = [];
       rtc.consentState_ = CONSENT_POLICY_STATE.UNKNOWN;
       rtc.modifyRtcConfigForConsentStateSettings();
@@ -867,7 +860,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
           'url': 'https://www.other-rtc.com/example2',
         },
       ];
-      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      const expectedRtcConfig = {...rtc.rtcConfig_};
       expectedRtcConfig.vendors = {};
       rtc.consentState_ = CONSENT_POLICY_STATE.INSUFFICIENT;
       rtc.modifyRtcConfigForConsentStateSettings();
@@ -893,7 +886,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         },
         'https://www.other-rtc.com/example2',
       ];
-      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      const expectedRtcConfig = {...rtc.rtcConfig_};
       expectedRtcConfig.vendors = {
         'vendorA': {
           'sendRegardlessOfConsentState': true,
@@ -931,7 +924,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
         'https://www.other-rtc.com/example2',
       ];
       rtc.rtcConfig_.sendRegardlessOfConsentState = ['INSUFFICIENT'];
-      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      const expectedRtcConfig = {...rtc.rtcConfig_};
       expectedRtcConfig.vendors = {
         'vendorA': {
           'sendRegardlessOfConsentState': true,
@@ -953,7 +946,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     it('should always clear RTC for a new consent state', () => {
       rtc.consentState_ = 'FAKE_NEW_CONSENT_STATE';
-      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      const expectedRtcConfig = {...rtc.rtcConfig_};
 
       rtc.modifyRtcConfigForConsentStateSettings();
       expectedRtcConfig.urls = [];
@@ -963,7 +956,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
     it('should not clear RTC for a null consent state', () => {
       rtc.consentState_ = null;
-      const expectedRtcConfig = Object.assign({}, rtc.rtcConfig_);
+      const expectedRtcConfig = {...rtc.rtcConfig_};
       rtc.modifyRtcConfigForConsentStateSettings();
       expect(rtc.rtcConfig_).to.deep.equal(expectedRtcConfig);
     });
@@ -977,10 +970,10 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
     beforeEach(() => {
       // Make sure that we always send the message, as we are using
       // the check Math.random() < reporting frequency.
-      sandbox.stub(Math, 'random').returns(0);
-      sandbox.stub(Xhr.prototype, 'fetch');
+      env.sandbox.stub(Math, 'random').returns(0);
+      env.sandbox.stub(Xhr.prototype, 'fetch');
       imageMock = {};
-      imageStub = sandbox.stub(env.win, 'Image').returns(imageMock);
+      imageStub = env.sandbox.stub(env.win, 'Image').returns(imageMock);
 
       errorType = RTC_ERROR_ENUM.TIMEOUT;
       errorReportingUrl = 'https://www.example.com?e=ERROR_TYPE&h=HREF';

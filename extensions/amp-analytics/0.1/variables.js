@@ -183,8 +183,6 @@ export class VariableService {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    const root_ = this.ampdoc_.getRootNode();
-
     /** @private {!JsonObject} */
     this.macros_ = dict({});
 
@@ -215,8 +213,9 @@ export class VariableService {
     );
 
     this.register_('VIDEO_STATE', (id, property) => {
+      const root = this.ampdoc_.getRootNode();
       const video = user().assertElement(
-        root_.getElementById(/** @type {string} */ (id)),
+        root.getElementById(/** @type {string} */ (id)),
         `Could not find an element with id="${id}" for VIDEO_STATE`
       );
       return Services.videoManagerForDoc(this.ampdoc_)
@@ -235,7 +234,7 @@ export class VariableService {
         cookieReader(this.ampdoc_.win, dev().assertElement(element), name),
       'CONSENT_STATE': getConsentStateStr(element),
     };
-    const merged = Object.assign({}, this.macros_, elementMacros);
+    const merged = {...this.macros_, ...elementMacros};
     return /** @type {!JsonObject} */ (merged);
   }
 

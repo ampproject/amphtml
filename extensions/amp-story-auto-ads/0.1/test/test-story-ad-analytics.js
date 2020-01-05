@@ -32,7 +32,7 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
     win = env.win;
     ampdoc = env.ampdoc;
     analytics = new StoryAdAnalytics(ampdoc);
-    triggerStub = sandbox.stub(analyticsApi, 'triggerAnalyticsEvent');
+    triggerStub = env.sandbox.stub(analyticsApi, 'triggerAnalyticsEvent');
     const doc = win.document;
     ampStoryAutoAdsEl = doc.createElement('amp-story-auto-ads');
     doc.body.appendChild(ampStoryAutoAdsEl);
@@ -55,7 +55,7 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
         {
           [AnalyticsVars.AD_INDEX]: 1,
           [AnalyticsVars.AD_LOADED]: loadTime,
-          [AnalyticsVars.AD_UNIQUE_ID]: sinon.match.string,
+          [AnalyticsVars.AD_UNIQUE_ID]: env.sandbox.match.string,
         }
       );
     });
@@ -89,7 +89,7 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
           [AnalyticsVars.AD_INDEX]: 2,
           [AnalyticsVars.AD_LOADED]: loadTime,
           [AnalyticsVars.AD_INSERTED]: insertTime,
-          [AnalyticsVars.AD_UNIQUE_ID]: sinon.match.string,
+          [AnalyticsVars.AD_UNIQUE_ID]: env.sandbox.match.string,
         }
       );
     });
@@ -159,7 +159,7 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
           [AnalyticsVars.CTA_TYPE]: 'LEARN',
           [AnalyticsVars.POSITION]: 14,
           [AnalyticsVars.AD_VIEWED]: 12345,
-          [AnalyticsVars.AD_UNIQUE_ID]: sinon.match.string,
+          [AnalyticsVars.AD_UNIQUE_ID]: env.sandbox.match.string,
         }
       );
 
@@ -180,7 +180,7 @@ describes.realWin('amp-story-auto-ads:story-ad-analytics', {amp: true}, env => {
           [AnalyticsVars.CTA_TYPE]: 'SHOP',
           [AnalyticsVars.POSITION]: 7,
           [AnalyticsVars.AD_EXITED]: 56789,
-          [AnalyticsVars.AD_UNIQUE_ID]: sinon.match.string,
+          [AnalyticsVars.AD_UNIQUE_ID]: env.sandbox.match.string,
         }
       );
     });

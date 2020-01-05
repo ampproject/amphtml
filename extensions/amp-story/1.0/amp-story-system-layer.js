@@ -27,7 +27,7 @@ import {
 import {LocalizedStringId} from '../../../src/localized-strings';
 import {ProgressBar} from './progress-bar';
 import {Services} from '../../../src/services';
-import {createShadowRootWithStyle} from './utils';
+import {createShadowRootWithStyle, shouldShowStoryUrlInfo} from './utils';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
@@ -314,9 +314,9 @@ export class SystemLayer {
       this.systemLayerEl_.setAttribute('ios', '');
     }
 
-    if (
-      Services.viewerForDoc(this.win_.document.documentElement).isEmbedded()
-    ) {
+    const viewer = Services.viewerForDoc(this.win_.document.documentElement);
+
+    if (shouldShowStoryUrlInfo(viewer)) {
       this.systemLayerEl_.classList.add('i-amphtml-embedded');
       this.getShadowRoot().setAttribute(HAS_INFO_BUTTON_ATTRIBUTE, '');
     } else {
