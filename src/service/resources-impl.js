@@ -747,24 +747,30 @@ export class ResourcesImpl {
       mutate: () => {
         mutator();
 
-        if (element.classList.contains('i-amphtml-element')) {
-          const r = Resource.forElement(element);
-          r.requestMeasure();
-        }
-        const ampElements = element.getElementsByClassName('i-amphtml-element');
-        for (let i = 0; i < ampElements.length; i++) {
-          const r = Resource.forElement(ampElements[i]);
-          r.requestMeasure();
-        }
-        this.schedulePass(FOUR_FRAME_DELAY_);
+        // TODO(willchou): Survey measureMutateElement() callers to determine
+        // which should explicitly call requestMeasure(). Always requesting
+        // measure after any mutation is overkill and possibly expensive.
 
-        // With IntersectionObserver, no need to set relayoutTop at all.
+        // With IntersectionObserver, no need to remeasure and set relayout
+        // on element size changes since enter/exit viewport will be detected.
         if (this.intersectionObserver_) {
           this.maybeChangeHeight_ = true;
         } else {
+          if (element.classList.contains('i-amphtml-element')) {
+            const r = Resource.forElement(element);
+            r.requestMeasure();
+          }
+          const ampElements = element.getElementsByClassName(
+            'i-amphtml-element'
+          );
+          for (let i = 0; i < ampElements.length; i++) {
+            const r = Resource.forElement(ampElements[i]);
+            r.requestMeasure();
+          }
           if (relayoutTop != -1) {
             this.setRelayoutTop_(relayoutTop);
           }
+          this.schedulePass(FOUR_FRAME_DELAY_);
 
           // Need to measure again in case the element has become visible or shifted.
           this.vsync_.measure(() => {
