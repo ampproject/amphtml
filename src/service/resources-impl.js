@@ -886,7 +886,9 @@ export class ResourcesImpl {
       owner.expandedCallback(element);
     }
 
-    this.schedulePass(FOUR_FRAME_DELAY_);
+    if (!this.intersectionObserver_) {
+      this.schedulePass(FOUR_FRAME_DELAY_);
+    }
   }
 
   /** @override */
@@ -902,12 +904,12 @@ export class ResourcesImpl {
    * @private
    */
   schedulePassVsync_() {
+    devAssert(!this.intersectionObserver_);
     if (this.vsyncScheduled_) {
       return;
     }
     this.vsyncScheduled_ = true;
     this.vsync_.mutate(() => {
-      dev().fine(TAG_, 'schedulePass: vsync');
       this.doPass();
     });
   }
@@ -1954,7 +1956,9 @@ export class ResourcesImpl {
         }
       );
     }
-    this.schedulePassVsync_();
+    if (!this.intersectionObserver_) {
+      this.schedulePassVsync_();
+    }
   }
 
   /**
