@@ -4,7 +4,6 @@ formats:
   - websites
 teaser:
   text: Displays a drilldown menu with arbitrary levels of nested submenus.
-experimental: true
 ---
 
 <!--
@@ -72,7 +71,7 @@ Only `<div>` tags may receive the `amp-nested-submenu` attribute. The submenu op
 The following example demonstrates an `<amp-nested-menu>` with two levels of nested submenus.
 
 [tip type="note"]
-We recommend wrapping every menu item in a `li` element to improve accessibility and keyboard support.
+Wrap every menu item in a `li` element to improve accessibility and keyboard support.
 [/tip]
 
 [example playground="true" preview="top-frame" imports="amp-sidebar"]
