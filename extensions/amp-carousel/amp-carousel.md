@@ -240,6 +240,8 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 
 ## Styling
 
+[filter formats="websites, ads"]
+
 - You may use the `amp-carousel` element selector to style it freely.
 - You may use the `.amp-carousel-slide` class selector to target carousel items.
 - The visual state of an `amp-carousel` button when it's disabled is hidden.
@@ -272,6 +274,35 @@ Note that the SVG content needs to have certain characters, including `<`, `>` a
   align-self: flex-end;
 }
 ```
+
+[/filter]<!-- formats="websites, ads" -->
+
+[filter formats="email"]
+
+- You may use the `amp-carousel` element selector to style it freely.
+- You may use the `.amp-carousel-slide` class selector to target carousel items.
+- The visual state of an `amp-carousel` button when it's disabled is hidden.
+- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own image. Some email clients may not support SVG.
+
+_Example: Overriding the default `.amp-carousel-button` inlined SVG_
+
+```css
+.amp-carousel-button-prev {
+  background-image: url('http://example.com/arrow.png');
+}
+```
+
+You can position the carousel buttons using align-self and/or relative positioning. Note that the carousel arrows are automatically flipped in RTL, so you should not change their flex order.
+
+```css
+.amp-carousel-button-prev {
+  position: relative;
+  bottom: 20px;
+  align-self: flex-end;
+}
+```
+
+[/filter]<!-- formats="email" -->
 
 ## Differences from `<amp-carousel>` 0.1
 
