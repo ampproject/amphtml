@@ -310,8 +310,6 @@ export class ResourcesImpl {
    * @private
    */
   intersects_(entries, unusedObserver) {
-    // TODO(willchou): The first callback is triggered against _all_ observed elements,
-    // not just those in viewport. Is this slow or problematic?
     dev().fine(TAG_, 'intersect', entries);
 
     const toUnload = [];
@@ -770,7 +768,6 @@ export class ResourcesImpl {
         }
       },
       mutate: () => {
-        // TODO(willchou): Manually update the mutatee's layout box?
         mutator();
 
         // With IntersectionObserver, no need to remeasure and set relayout
@@ -821,11 +818,7 @@ export class ResourcesImpl {
    * @param {!Element} element
    */
   dirtyElement(element) {
-    // With IntersectionObserver, no need to relayout (e.g. update media queries)
-    // due to a single element collapse.
-    if (this.intersectionObserver_) {
-      return;
-    }
+    devAssert(!this.intersectionObserver_);
     let relayoutAll = false;
     const isAmpElement = element.classList.contains('i-amphtml-element');
     if (isAmpElement) {
@@ -1641,11 +1634,13 @@ export class ResourcesImpl {
         const reschedule = this.reschedule_.bind(this, task);
         executing.promise.then(reschedule, reschedule);
       } else {
-        // TODO(willchou): Is the following check for stale "layout readiness" necessary?
-        // Or are some resources just never measured until this point?
+        // With IntersectionObserver, the element's client rect measurement
+        // is recent so immediate remeasuring shouldn't be necessary.
         if (!this.intersectionObserver_) {
           task.resource.measure();
         }
+        // Check if the element has exited the viewport or the page has changed
+        // visibility since the layout was scheduled.
         if (this.isLayoutAllowed_(task.resource, task.forceOutsideViewport)) {
           task.promise = task.callback();
           task.startTime = now;
