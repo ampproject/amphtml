@@ -26,7 +26,6 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-nested-menu';
@@ -66,11 +65,6 @@ export class AmpNestedMenu extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO(#25343): remove this assert when cleaning up experiment post launch.
-    userAssert(
-      isExperimentOn(this.win, 'amp-nested-menu'),
-      `Turning on the amp-nested-menu experiment is necessary to use the ${TAG} component.`
-    );
     const {element} = this;
 
     this.action_ = Services.actionServiceForDoc(this.element);
