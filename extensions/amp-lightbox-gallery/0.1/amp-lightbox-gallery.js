@@ -50,7 +50,7 @@ import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {prepareImageAnimation} from '@ampproject/animations/dist/animations.mjs';
+import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error';
 import {setStyle, setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
