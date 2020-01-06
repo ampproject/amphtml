@@ -616,7 +616,7 @@ export class ResourcesImpl {
     if (!schedulePass || this.intersectionObserver_) {
       return promise;
     }
-    return promise.catch(
+    return promise.then(
       () => this.schedulePass(),
       error => {
         // Build failed: remove the resource. No other state changes are
@@ -726,18 +726,6 @@ export class ResourcesImpl {
 
   /** @override */
   measureMutateElement(element, measurer, mutator) {
-    return this.measureMutateElementResources_(element, measurer, mutator);
-  }
-
-  /**
-   * Handles element mutation (and measurement) APIs in the Resources system.
-   *
-   * @param {!Element} element
-   * @param {?function()} measurer
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
-  measureMutateElementResources_(element, measurer, mutator) {
     const calcRelayoutTop = () => {
       devAssert(!this.intersectionObserver_);
       const box = this.viewport_.getLayoutRect(element);
@@ -1392,6 +1380,7 @@ export class ResourcesImpl {
           if (wasDisplayed && !r.isDisplayed()) {
             toUnload.push(r);
           }
+          dev().fine(TAG_, 'force remeasure:', r.debugid);
         }
       });
 
@@ -1403,7 +1392,6 @@ export class ResourcesImpl {
           });
         });
       }
-    } else {
       return;
     }
 
