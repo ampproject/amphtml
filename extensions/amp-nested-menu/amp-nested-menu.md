@@ -70,10 +70,6 @@ Only `<div>` tags may receive the `amp-nested-submenu` attribute. The submenu op
 
 The following example demonstrates an `<amp-nested-menu>` with two levels of nested submenus.
 
-[tip type="note"]
-Wrap every menu item in a `li` element to improve accessibility and keyboard support.
-[/tip]
-
 [example playground="true" preview="top-frame" imports="amp-sidebar"]
 
 ```html
@@ -202,6 +198,10 @@ The `<amp-nested-menu>` component can be styled with standard CSS.
 ## Accessibility
 
 `<amp-nested-menu>` assigns `role=button` and `tabindex=0` on each submenu open/close element. When a submenu opens, focus shifts to the submenu close element inside it. When the submenu closes, focus shifts back to the submenu open element that opened it.
+
+[tip type="note"]
+Wrap every menu item in a `li` element to improve accessibility and keyboard support.
+[/tip]
 
 The component supports arrow key navigation as follows:
 

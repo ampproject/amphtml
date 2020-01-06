@@ -331,7 +331,7 @@ Please see [this example file](https://github.com/ampproject/amphtml/blob/master
 `<amp-sidebar>` supports drilldown (nested) menus through a child component named [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md). With `<amp-nested-menu>`, `<amp-sidebar>` can support nesting one or more layers of submenus (and transition between them) as demonstrated by the following example:
 
 [tip type="note"]
-Wrap every menu item in a `li` element to improve accessibility and keyboard support.
+When using `amp-nested-menu`, wrap every menu item in a `li` element to improve accessibility and keyboard support.
 [/tip]
 
 [example playground="true" preview="top-frame" imports="amp-sidebar"]
