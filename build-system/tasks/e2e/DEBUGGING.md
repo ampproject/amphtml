@@ -10,4 +10,3 @@ Include any flags after `e2e` like normal.
 Open Chrome DevTools and click the Node logo in the top left.
 
 Click the "Play"/"Continue execution" button to continue execution.
-

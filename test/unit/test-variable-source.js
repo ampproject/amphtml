@@ -60,7 +60,11 @@ describes.fakeWin(
     });
 
     it('Works with both sync and async variables', () => {
-      varSource.setBoth('Foo', () => 'bar', () => Promise.resolve('bar'));
+      varSource.setBoth(
+        'Foo',
+        () => 'bar',
+        () => Promise.resolve('bar')
+      );
       expect(varSource.getExpr()).to.be.ok;
 
       expect(varSource.get('Foo')['sync']()).to.equal('bar');
@@ -73,7 +77,11 @@ describes.fakeWin(
     });
 
     it('Works with multiple variables', () => {
-      varSource.setBoth('Foo', () => 'bar', () => Promise.resolve('bar'));
+      varSource.setBoth(
+        'Foo',
+        () => 'bar',
+        () => Promise.resolve('bar')
+      );
       varSource.set('Baz', () => 'Foo');
       expect(varSource.getExpr()).to.be.ok;
 

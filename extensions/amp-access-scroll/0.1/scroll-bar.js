@@ -119,7 +119,7 @@ export class ScrollUserBar extends Bar {
     // Set iframe to scrollbar URL.
     this.accessSource_
       .buildUrl(
-        `${this.baseUrl_}/amp/scrollbar` +
+        `${this.baseUrl_}/html/amp/scrollbar` +
           '?rid=READER_ID' +
           '&cid=CLIENT_ID(scroll1)' +
           '&c=CANONICAL_URL' +

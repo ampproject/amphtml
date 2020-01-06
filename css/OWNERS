@@ -4,7 +4,11 @@
 {
   rules: [
     {
-      owners: [{ name: 'aghassemi' }, { name: 'camelburrito' }]
-    }
-  ]
+      owners: [
+        {name: 'ampproject/wg-ui-and-a11y'},
+        {name: 'aghassemi', requestReviews: false},
+        {name: 'camelburrito', requestReviews: false},
+      ],
+    },
+  ],
 }

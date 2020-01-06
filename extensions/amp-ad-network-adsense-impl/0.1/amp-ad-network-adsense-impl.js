@@ -20,6 +20,7 @@
 // Most other ad networks will want to put their A4A code entirely in the
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
+import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
@@ -228,6 +229,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           [FIE_CSS_CLEANUP_EXP.experiment],
         ],
       },
+      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
@@ -363,14 +365,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this,
         ADSENSE_BASE_URL,
         startTime,
-        Object.assign(
-          {
-            'adsid': identity.token || null,
-            'jar': identity.jar || null,
-            'pucrd': identity.pucrd || null,
-          },
-          parameters
-        ),
+        {
+          'adsid': identity.token || null,
+          'jar': identity.jar || null,
+          'pucrd': identity.pucrd || null,
+          ...parameters,
+        },
         experimentIds
       );
     });
@@ -533,7 +533,10 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
 
   /** @override */
   getPreconnectUrls() {
-    this.preconnect.preload(getDefaultBootstrapBaseUrl(this.win, 'nameframe'));
+    Services.preconnectFor(this.win).preload(
+      this.getAmpDoc(),
+      getDefaultBootstrapBaseUrl(this.win, 'nameframe')
+    );
     return ['https://googleads.g.doubleclick.net'];
   }
 
@@ -560,7 +563,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           event['source'] == this.iframe.contentWindow
         ) {
           this.renderStarted();
-          this.iframe.setAttribute('visible', '');
+          setStyles(this.iframe, {'visibility': ''});
           this.win.removeEventListener('message', stickyMsgListener);
         }
       };

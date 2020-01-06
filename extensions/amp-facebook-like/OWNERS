@@ -4,10 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        { name: 'eduardogoncalves' },
-        { name: 'ampproject/wg-ui-and-a11y' }
-      ]
-    }
-  ]
+      owners: [{name: 'eduardogoncalves'}, {name: 'ampproject/wg-ui-and-a11y'}],
+    },
+  ],
 }

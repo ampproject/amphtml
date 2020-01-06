@@ -27,6 +27,7 @@ import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {cancellation} from '../../../src/error';
+import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
@@ -44,11 +45,6 @@ const TAG = 'amp-script';
  * @const {number}
  */
 const MAX_TOTAL_SCRIPT_SIZE = 150000;
-
-/**
- * Size-contained elements up to 300px are allowed to mutate freely.
- */
-const MAX_FREE_MUTATION_HEIGHT = 300;
 
 /**
  * See src/transfer/Phase.ts in worker-dom.
@@ -111,13 +107,31 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.development_ = this.element.hasAttribute('development');
+    /*
+     * Development mode is enabled by satisfying two constraints:
+     *   1. Root html element has 'data-ampdevmode'
+     *   2. The amp-script tag or any of its parents must also have 'data-ampdevmode'.
+     */
+    const htmlEl = this.element.ownerDocument.documentElement;
+    this.development_ =
+      this.element.hasAttribute('development') ||
+      (htmlEl.hasAttribute('data-ampdevmode') &&
+        closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
+          htmlEl);
+
     if (this.development_) {
       user().warn(
         TAG,
         'JavaScript size and script hash requirements are disabled in development mode.',
         this.element
       );
+      if (this.element.hasAttribute('development')) {
+        user().warn(
+          TAG,
+          "The 'development' flag is deprecated. Please use 'data-ampdevmode' on the root html element instead",
+          this.element
+        );
+      }
     }
 
     return getElementServiceForDoc(this.element, TAG, TAG).then(service => {
@@ -131,6 +145,14 @@ export class AmpScript extends AMP.BaseElement {
    */
   setService(service) {
     this.service_ = service;
+  }
+
+  /**
+   * @return {?UserActivationTracker}
+   * @visibleForTesting
+   */
+  getUserActivation() {
+    return this.userActivation_;
   }
 
   /** @override */
@@ -183,7 +205,12 @@ export class AmpScript extends AMP.BaseElement {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
-      sanitizer: new SanitizerImpl(this.win, this.element, sandboxTokens),
+      sanitizer: new SanitizerImpl(
+        this.win,
+        this.element,
+        sandboxTokens,
+        this.userActivation_
+      ),
       // Callbacks.
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
@@ -343,9 +370,8 @@ export class AmpScript extends AMP.BaseElement {
       phase != Phase.MUTATING ||
       // Mutation depends on the gesture state and long tasks.
       this.userActivation_.isActive() ||
-      // If the element is size-contained and small enough.
-      (isLayoutSizeDefined(this.getLayout()) &&
-        this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT);
+      // Always allow mutation if the element has a static size.
+      isLayoutSizeDefined(this.getLayout());
 
     if (allowMutation) {
       this.vsync_.mutate(flush);
@@ -460,8 +486,9 @@ export class SanitizerImpl {
    * @param {!Window} win
    * @param {!Element} element
    * @param {!Array<string>} sandboxTokens
+   * @param {!UserActivationTracker} userActivationTracker
    */
-  constructor(win, element, sandboxTokens) {
+  constructor(win, element, sandboxTokens, userActivationTracker) {
     /** @private @const {!Window} */
     this.win_ = win;
 
@@ -473,6 +500,9 @@ export class SanitizerImpl {
 
     /** @private @const {!Object<string, boolean>} */
     this.allowedTags_ = getAllowedTags();
+
+    /** @private @const {!UserActivationTracker} */
+    this.userActivationTracker_ = userActivationTracker;
 
     // TODO(choumx): Support opt-in for variable substitutions.
     // For now, only allow built-in AMP components except amp-pixel.
@@ -621,7 +651,15 @@ export class SanitizerImpl {
             dev().error(TAG, 'Invalid AMP.setState() argument: %s', value);
           });
           if (state) {
-            bind.setState(state, /* skipEval */ true, /* skipAmpState */ false);
+            // Only evaluate updates in case of recent user interaction.
+            const skipEval = !this.userActivationTracker_.isActive();
+            if (skipEval) {
+              user().warn(
+                TAG,
+                'AMP.setState only updated page state and did not reevaluate bindings due to lack of recent user interaction.'
+              );
+            }
+            bind.setState(state, {skipEval});
           }
         }
       });

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const argv = require('minimist')(process.argv.slice(2));
 const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
@@ -30,9 +29,9 @@ const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green} = require('ansi-colors');
+const {doServe} = require('./serve');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
-const {serve} = require('./serve');
 
 /**
  * Enables watching for file changes in css, extensions.
@@ -60,21 +59,11 @@ async function build() {
  */
 function printDefaultTaskHelp() {
   log(green('Running the default ') + cyan('gulp ') + green('task.'));
-  const defaultTaskMessage =
-    green('⤷ JS and extensions will be ') +
+  log(
     green(
-      argv.eager_build
-        ? 'built after server startup.'
-        : 'lazily built when requested from the server.'
-    );
-  log(defaultTaskMessage);
-  if (!argv.eager_build) {
-    const eagerBuildMessage =
-      green('⤷ Use ') +
-      cyan('--eager_build ') +
-      green('to build JS and extensions after server startup.');
-    log(eagerBuildMessage);
-  }
+      '⤷ JS and extensions will be lazily built when requested from the server.'
+    )
+  );
 }
 
 /**
@@ -113,16 +102,10 @@ async function defaultTask() {
   process.env.NODE_ENV = 'development';
   printConfigHelp('gulp');
   printDefaultTaskHelp();
-  parseExtensionFlags(/* preBuild */ !argv.eager_build);
+  parseExtensionFlags(/* preBuild */ true);
   await performPrerequisiteSteps(/* watch */ true);
-  await serve();
-  if (!argv.eager_build) {
-    log(green('JS and extensions will be lazily built when requested...'));
-  } else {
-    log(green('Building JS and extensions...'));
-    await compileAllUnminifiedJs(/* watch */ true);
-    await buildExtensions({watch: true});
-  }
+  await doServe(/* lazyBuild */ true);
+  log(green('JS and extensions will be lazily built when requested...'));
 }
 
 module.exports = {
@@ -139,6 +122,7 @@ build.flags = {
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
+  coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
 };
 
 watch.description = 'Watches for changes in files, re-builds when detected';
@@ -153,8 +137,6 @@ watch.flags = {
 defaultTask.description =
   'Starts the dev server and lazily builds JS and extensions when requested';
 defaultTask.flags = {
-  eager_build:
-    '  Starts the dev server and builds JS and extensions after server startup',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   extensions: '  Watches and builds only the listed extensions.',
   extensions_from:

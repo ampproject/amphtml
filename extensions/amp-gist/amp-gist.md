@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Creates an iframe and displays a Gist from GitHub
 ---
+
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -51,9 +52,10 @@ This extension creates an iframe and displays a [gist from GitHub](https://help.
 
 ```html
 <amp-gist
-    data-gistid="b9bb35bc68df68259af94430f012425f"
-    layout="fixed-height"
-    height="225">
+  data-gistid="b9bb35bc68df68259af94430f012425f"
+  layout="fixed-height"
+  height="225"
+>
 </amp-gist>
 ```
 
@@ -61,10 +63,11 @@ This extension creates an iframe and displays a [gist from GitHub](https://help.
 
 ```html
 <amp-gist
-    data-gistid="a19e811dcd7df10c4da0931641538497"
-    data-file="hi.c"
-    layout="fixed-height"
-    height="185">
+  data-gistid="a19e811dcd7df10c4da0931641538497"
+  data-file="hi.c"
+  layout="fixed-height"
+  height="185"
+>
 </amp-gist>
 ```
 
@@ -91,6 +94,6 @@ This extension creates an iframe and displays a [gist from GitHub](https://help.
   </tr>
 </table>
 
-
 ## Validation
+
 See [amp-gist rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gist/validator-amp-gist.protoascii) in the AMP validator specification.

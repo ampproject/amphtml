@@ -1,3 +1,4 @@
+<!--
 # Instructions:
 
 - Pick a meaningful title for your pull request. (Use sentence case.)
@@ -8,6 +9,8 @@
   - Mention the GitHub issue that is being addressed by the pull request.
   - The keywords `Fixes`, `Closes`, or `Resolves` followed the issue number will automatically close the issue.
 
+> NOTE: All non-trivial changes (like introducing new features or components) should have an associated issue or reference an I2I (intent-to-implement: go.amp.dev/i2i). Please read through the contribution process (go.amp.dev/contributing/code) for more information.
+
 # Example of a good description:
 
 - Implement aspect X
@@ -15,7 +18,7 @@
 - Improve performance by B
 - Improve accessibility by C
 
-# Emojis for categorizing pull requests (copy-paste into description):
+# Emojis for categorizing pull requests (copy-paste emoji into description):
 
 ✨ New feature
 🐛 Bug fix
@@ -30,3 +33,4 @@
 ⏪ Reverting a previous change
 ♻️ Refactoring
 🚮 Deleting code
+-->
