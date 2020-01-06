@@ -230,6 +230,12 @@
         "process": false,
         "require": false
       }
+    },
+    {
+      "files": ["**/*.extern.js"],
+      "rules": {
+        "prettier/prettier": 2
+      }
     }
   ]
 }
