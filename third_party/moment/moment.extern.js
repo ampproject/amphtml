@@ -100,10 +100,10 @@ moment.Locale = function() {};
  * @param {string} format
  * @return {string}
  */
-moment.Locale.longDateFormat = function (format) {};
+moment.Locale.longDateFormat = function(format) {};
 
 /** @return {moment.Locale} */
-moment.prototype.localeData = function () {};
+moment.prototype.localeData = function() {};
 
 /** @return {!moment} */
-moment.prototype.duration = function () {};
+moment.prototype.duration = function() {};
