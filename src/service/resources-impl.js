@@ -759,26 +759,24 @@ export class ResourcesImpl {
       mutate: () => {
         mutator();
 
-        // With IntersectionObserver, no need to remeasure and set relayout
-        // on element size changes since enter/exit viewport will be detected.
+        if (element.classList.contains('i-amphtml-element')) {
+          const r = Resource.forElement(element);
+          r.requestMeasure();
+        }
+        const ampElements = element.getElementsByClassName('i-amphtml-element');
+        for (let i = 0; i < ampElements.length; i++) {
+          const r = Resource.forElement(ampElements[i]);
+          r.requestMeasure();
+        }
+        this.schedulePass(FOUR_FRAME_DELAY_);
+
+        // With IntersectionObserver, no need to set relayoutTop at all.
         if (this.intersectionObserver_) {
           this.maybeChangeHeight_ = true;
         } else {
-          if (element.classList.contains('i-amphtml-element')) {
-            const r = Resource.forElement(element);
-            r.requestMeasure();
-          }
-          const ampElements = element.getElementsByClassName(
-            'i-amphtml-element'
-          );
-          for (let i = 0; i < ampElements.length; i++) {
-            const r = Resource.forElement(ampElements[i]);
-            r.requestMeasure();
-          }
           if (relayoutTop != -1) {
             this.setRelayoutTop_(relayoutTop);
           }
-          this.schedulePass(FOUR_FRAME_DELAY_);
 
           // Need to measure again in case the element has become visible or shifted.
           this.vsync_.measure(() => {
@@ -859,6 +857,8 @@ export class ResourcesImpl {
     const resource = Resource.forElement(element);
     resource.completeCollapse();
 
+    // With IntersectionObserver, there's no requestMeasure() call that
+    // requires another pass (unlike completeExpand()).
     if (!this.intersectionObserver_) {
       this.schedulePass(FOUR_FRAME_DELAY_);
     }
@@ -874,9 +874,7 @@ export class ResourcesImpl {
       owner.expandedCallback(element);
     }
 
-    if (!this.intersectionObserver_) {
-      this.schedulePass(FOUR_FRAME_DELAY_);
-    }
+    this.schedulePass(FOUR_FRAME_DELAY_);
   }
 
   /** @override */
@@ -1372,6 +1370,7 @@ export class ResourcesImpl {
     //    e.g. for owner components to reposition their children.
     // 2. Support on-demand measurements via Resource.requestMeasure.
     if (this.intersectionObserver_) {
+      // TODO(willchou): DRY the following code paths.
       // Phase 1.
       this.resources_.forEach(r => {
         // NOT_LAID_OUT is the state after build() but before measure().
