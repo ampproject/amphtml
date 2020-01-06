@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as purifier from '../../../../src/purifier';
+import {Purifier} from '../../../../src/purifier/purifier';
 import * as service from '../../../../src/service';
 import {AmpMustache} from '../amp-mustache';
 import mustache from '../../../../third_party/mustache/mustache';
@@ -571,11 +571,11 @@ describes.repeated(
       });
 
       it('should not mustache render but still purify html', () => {
-        window.sandbox.spy(purifier, 'purifyHtml');
+        window.sandbox.spy(Purifier.prototype, 'purifyHtml');
         window.sandbox.spy(mustache, 'render');
         template.setHtml('<div>test</div>');
         expect(mustache.render).to.have.not.been.called;
-        expect(purifier.purifyHtml).to.have.been.called;
+        expect(Purifier.prototype.purifyHtml).to.have.been.called;
       });
     });
 
