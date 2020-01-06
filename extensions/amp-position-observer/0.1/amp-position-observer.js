@@ -353,9 +353,9 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     let scene;
     if (this.targetId_) {
       scene = user().assertElement(
-        // TODO: In friendly iframe, getAmpDoc() incorrectly fetches the parent
-        // doc. Need to change it to return the FIE AMP doc.
-        this.getAmpDoc().getElementById(this.targetId_),
+        // TODO: Change back to this.getAmpDoc once ampdoc-fie experiment is
+        // launched.
+        this.win.document.getElementById(this.targetId_),
         'No element found with id:' + this.targetId_
       );
     } else {
