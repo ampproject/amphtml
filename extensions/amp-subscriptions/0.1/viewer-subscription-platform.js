@@ -250,8 +250,8 @@ export class ViewerSubscriptionPlatform {
   }
 
   /** @override */
-  executeAction(action) {
-    return this.platform_.executeAction(action);
+  executeAction(action, sourceId) {
+    return this.platform_.executeAction(action, sourceId);
   }
 
   /** @override */

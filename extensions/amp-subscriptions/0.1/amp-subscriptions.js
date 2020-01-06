@@ -617,19 +617,21 @@ export class SubscriptionService {
   /**
    * Delegates an action to local platform.
    * @param {string} action
+   * @param {?string} sourceId
    * @return {!Promise<boolean>}
    */
-  delegateActionToLocal(action) {
-    return this.delegateActionToService(action, 'local');
+  delegateActionToLocal(action, sourceId) {
+    return this.delegateActionToService(action, 'local', sourceId);
   }
 
   /**
    * Delegates an action to specified platform.
    * @param {string} action
    * @param {string} serviceId
+   * @param {?string} sourceId
    * @return {!Promise<boolean>}
    */
-  delegateActionToService(action, serviceId) {
+  delegateActionToService(action, serviceId, sourceId = null) {
     return new Promise(resolve => {
       this.platformStore_.onPlatformResolves(serviceId, platform => {
         devAssert(platform, 'Platform is not registered');
@@ -644,7 +646,7 @@ export class SubscriptionService {
             'status': ActionStatus.STARTED,
           })
         );
-        resolve(platform.executeAction(action));
+        resolve(platform.executeAction(action, sourceId));
       });
     });
   }
