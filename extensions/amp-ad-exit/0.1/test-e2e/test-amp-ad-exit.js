@@ -91,10 +91,10 @@ describes.endtoend(
       await expect(await controller.getCurrentUrl()).to.match(
         /^http:\/\/localhost:8000\/\?product2&r=0\.\d+$/
       );
-      const requests = await controller.networkLogger.getSentRequests(
+
+      await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking'
-      );
-      await expect(requests).to.have.length(1);
+      ).to.be.sent;
     });
   }
 );

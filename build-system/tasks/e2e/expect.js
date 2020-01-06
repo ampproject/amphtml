@@ -15,10 +15,12 @@
  */
 
 const chai = require('chai');
+chai.use(require('chai-as-promised'));
 const {ControllerPromise} = require('./controller-promise');
 
 let installed;
 let lastExpectError;
+let networkLogger;
 
 function clearLastExpectError() {
   lastExpectError = null;
@@ -236,8 +238,40 @@ function overwriteUnsupported(_super) {
   };
 }
 
+function installBrowserAssertions(_networkLogger) {
+  networkLogger = _networkLogger;
+  chai.use(installBrowserWrappers);
+}
+
+function installBrowserWrappers(chai, utils) {
+  const {Assertion} = chai;
+
+  const assertAnySentRequests = function(url) {
+    chai
+      .expect(networkLogger.getSentRequests(url))
+      .to.eventually.not.have.length(0)
+      .then(() => {
+        return true;
+      })
+      .catch(() => {
+        return false;
+      });
+  };
+
+  // Assert that a request with a testUrl was sent
+  // Example usage: await expect(testUrl).to.be.sent;
+  utils.addProperty(Assertion.prototype, 'sent', function() {
+    this.assert(
+      assertAnySentRequests(this._obj),
+      'expected #{this} to be sent',
+      'expected #{this} to not be sent'
+    );
+  });
+}
+
 module.exports = {
   clearLastExpectError,
   expect,
   getLastExpectError,
+  installBrowserAssertions,
 };

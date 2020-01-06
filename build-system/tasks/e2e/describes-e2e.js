@@ -23,11 +23,15 @@ const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
 const {
+  clearLastExpectError,
+  getLastExpectError,
+  installBrowserAssertions,
+} = require('./expect');
+const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
 const {Builder, Capabilities, logging} = require('selenium-webdriver');
-const {clearLastExpectError, getLastExpectError} = require('./expect');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isTravisBuild} = require('../../common/travis');
 const {PuppeteerController} = require('./puppeteer-controller');
@@ -488,8 +492,9 @@ class EndToEndFixture {
       env.controller = controller;
       env.ampDriver = ampDriver;
       env.requestBank = requestBank;
-
       const {environment} = env;
+
+      installBrowserAssertions(controller.networkLogger);
 
       const url = new URL(testUrl);
       if (experiments.length > 0) {
