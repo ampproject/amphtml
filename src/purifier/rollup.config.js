@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
- import * as path from 'path';
+import * as path from 'path';
 import alias from '@rollup/plugin-alias';
 
+// eslint-disable-next-line no-undef
 const projectRootDir = path.resolve(__dirname);
 
 export default {
@@ -39,6 +40,6 @@ export default {
           replacement: path.resolve(projectRootDir, './noop.js'),
         },
       ],
-    })
+    }),
   ],
 };

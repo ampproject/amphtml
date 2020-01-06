@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import {Purifier} from '../../../src/purifier/purifier';
 import {dict} from '../../../src/utils/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {Purifier} from '../../../src/purifier/purifier';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import mustache from '../../../third_party/mustache/mustache';
 

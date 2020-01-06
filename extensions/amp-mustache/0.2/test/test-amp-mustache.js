@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Purifier} from '../../../../src/purifier/purifier';
 import * as service from '../../../../src/service';
 import {AmpMustache} from '../amp-mustache';
+import {Purifier} from '../../../../src/purifier/purifier';
 import mustache from '../../../../third_party/mustache/mustache';
 
 describes.repeated(

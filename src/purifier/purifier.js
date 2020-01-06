@@ -433,6 +433,10 @@ function addPurifyHooks(purifier, doc, attrRewrite) {
   purifier.addHook('afterSanitizeAttributes', afterSanitizeAttributes);
 }
 
+/**
+ * Adds triple-mustache specific AMP hooks to given DOMPurify object.
+ * @param {!DomPurifyDef} purifier
+ */
 function addPurifyHooksTripleMustache(purifier) {
   // Reference to DOMPurify's `allowedTags` whitelist.
   let allowedTags;

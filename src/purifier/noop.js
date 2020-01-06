@@ -14,20 +14,25 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line require-jsdoc
 export function dev() {
   return {
     assertElement: element => element,
   };
 }
 
+// eslint-disable-next-line require-jsdoc
 export function user() {
   return {
     error: () => {},
   };
 }
 
+// eslint-disable-next-line require-jsdoc
 export function devAssert() {}
 
+// eslint-disable-next-line require-jsdoc
 export function userAssert() {}
 
+// eslint-disable-next-line require-jsdoc
 export const urls = {};

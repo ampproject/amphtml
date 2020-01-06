@@ -705,7 +705,7 @@ describe
       html = document.createElement('html');
       const doc = {
         documentElement: html,
-        createElement: (tagName) => document.createElement(tagName),
+        createElement: tagName => document.createElement(tagName),
       };
 
       const purifier = () => new Purifier(doc, {}, rewriteAttributeValue);
@@ -810,11 +810,7 @@ describe('validateAttributeChange', () => {
     purifier.isValidAttribute = () => true;
 
     vac = (type, attr, value) =>
-      purify.validateAttributeChange(
-        document.createElement(type),
-        attr,
-        value
-      );
+      purify.validateAttributeChange(document.createElement(type), attr, value);
   });
 
   it('should validate script[type]', () => {

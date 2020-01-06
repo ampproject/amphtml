@@ -16,8 +16,8 @@
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
-import {Purifier} from '../../../src/purifier/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
