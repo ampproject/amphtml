@@ -288,6 +288,7 @@ function compile(
       ],
       entry_point: entryModuleFilenames,
       module_resolution: 'NODE',
+      package_json_entry_names: 'module,main',
       process_common_js_modules: true,
       // This strips all files from the input set that aren't explicitly
       // required.

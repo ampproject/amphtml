@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import Promise from 'promise-pjs/promise.mjs';
+import Promise from 'promise-pjs';
 
 /**
  * Sets the Promise polyfill if it does not exist.
