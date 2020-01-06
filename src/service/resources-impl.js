@@ -469,7 +469,11 @@ export class ResourcesImpl {
       resource.getState() != ResourceState.NOT_BUILT &&
       !element.reconstructWhenReparented()
     ) {
-      resource.requestMeasure();
+      // With IntersectionObserver, no need to request remeasure
+      // on reuse since initial intersection callback will trigger soon.
+      if (!this.intersectionObserver_) {
+        resource.requestMeasure();
+      }
       dev().fine(TAG_, 'resource reused:', resource.debugid);
     } else {
       // Create and add a new resource.
@@ -804,15 +808,14 @@ export class ResourcesImpl {
    */
   dirtyElement(element) {
     devAssert(!this.intersectionObserver_);
-    let relayoutAll = false;
     const isAmpElement = element.classList.contains('i-amphtml-element');
     if (isAmpElement) {
       const r = Resource.forElement(element);
       this.setRelayoutTop_(r.getLayoutBox().top);
     } else {
-      relayoutAll = true;
+      this.relayoutAll_ = true;
     }
-    this.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
+    this.schedulePass(FOUR_FRAME_DELAY_);
   }
 
   /** @override */
@@ -877,10 +880,7 @@ export class ResourcesImpl {
   }
 
   /** @override */
-  schedulePass(opt_delay, opt_relayoutAll) {
-    if (opt_relayoutAll) {
-      this.relayoutAll_ = true;
-    }
+  schedulePass(opt_delay) {
     return this.pass_.schedule(opt_delay);
   }
 
@@ -1365,6 +1365,49 @@ export class ResourcesImpl {
    * @private
    */
   discoverWork_() {
+    // With IntersectionObserver, we typically defer measurements to the
+    // intersection callback. However, we still need:
+    // 1. On viewport size changes (relayoutAll), apply sizes/media queries
+    //    AND remeasure elements to invoke onLayoutMeasure and onMeasureChanged
+    //    e.g. for owner components to reposition their children.
+    // 2. Support on-demand measurements via Resource.requestMeasure.
+    if (this.intersectionObserver_) {
+      // Phase 1.
+      this.resources_.forEach(r => {
+        // NOT_LAID_OUT is the state after build() but before measure().
+        if (this.relayoutAll_ || r.getState() == ResourceState.NOT_LAID_OUT) {
+          r.applySizesAndMediaQuery();
+          dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
+        }
+      });
+
+      // Phase 2.
+      const toUnload = [];
+      this.resources_.forEach(r => {
+        if (r.hasOwner()) {
+          return;
+        }
+        if (this.relayoutAll_ || r.isMeasureRequested()) {
+          const wasDisplayed = r.isDisplayed();
+          r.measure();
+          if (wasDisplayed && !r.isDisplayed()) {
+            toUnload.push(r);
+          }
+        }
+      });
+
+      if (toUnload.length) {
+        this.vsync_.mutate(() => {
+          toUnload.forEach(r => {
+            r.unload();
+            this.cleanupTasks_(r);
+          });
+        });
+      }
+    } else {
+      return;
+    }
+
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
     const now = Date.now();
@@ -1391,8 +1434,8 @@ export class ResourcesImpl {
         // NOT_LAID_OUT is the state after build() but before measure().
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
-        dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         r.applySizesAndMediaQuery();
+        dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         relayoutCount++;
       }
       if (r.isMeasureRequested()) {
