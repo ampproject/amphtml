@@ -2,7 +2,7 @@
 
 - [Release Channels](#release-channels)
   - [Weekly](#weekly)
-  - [Long-Term Stable (LTS)](#long-term-stable-lts)
+  - [Long-Term Stable (lts)](#long-term-stable-lts)
 - [Determining if your change is in a release](#determining-if-your-change-is-in-a-release)
 - [Release Cadence](#release-cadence)
   - [Detailed schedule](#detailed-schedule)
@@ -26,11 +26,11 @@ There are two sets of build configurations used in creating release builds: the 
 
 The **stable** release is built with the _production_ configuration and served to most AMP traffic. Since the **beta** release is also built from the _production_ configuration, it represents the exact build which will become **stable** the following week (ignoring the possibility of cherry-picks; see [Contributing Code](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
 
-### Long-Term Stable (LTS)
+### Long-Term Stable (lts)
 
-The **lts** release channel provides a previous **stable** build for four-week intervals. Every four weeks, the current **stable** release is promoted to **lts**. This is not recommended for all publishers building experiences with AMP, but is provided so that those performing a QA cycle may do so less often. Individual pages can explicitly opt into **lts** (see [LTS Readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md).
+The **lts** release channel provides a previous **stable** build for four-week intervals. Every four weeks, the current **stable** release is promoted to **lts**. This is not recommended for all publishers building experiences with AMP, but is provided so that those performing a QA cycle may do so less often. Individual pages can explicitly opt into **lts** (see [**lts** Readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md).
 
-Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the four-week cycle, the LTS release may be as much as six weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release).
+Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the four-week cycle, the **lts** release may be as much as six weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release).
 
 
 ## Determining if your change is in a release
