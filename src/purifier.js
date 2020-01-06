@@ -30,7 +30,7 @@ import {isAmp4Email} from './format';
 import {removeElement} from './dom';
 import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
-import purify from 'dompurify/dist/purify.es';
+import purify from 'dompurify';
 
 /**
  * @typedef {{addHook: !Function, removeAllHooks: !Function, sanitize: !Function}}
