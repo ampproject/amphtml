@@ -184,10 +184,11 @@ We have a well-defined process for handling requests for changes to the **experi
 
 **Keep in mind that performing a cherry-pick requires a significant amount of work from you and the on-duty engineer** and they can take a long time to process.
 
-- In general only fixes for [P0 issues](https://github.com/ampproject/amphtml/blob/master/contributing/issue-priorities.md) (causing "an outage or a critical production issue") may be cherry-picked. P0 issues are those that:
+- In general only fixes for [P0 issues](https://github.com/ampproject/amphtml/blob/master/contributing/issue-priorities.md) may be cherry-picked. P0 issues are those that:
   - cause privacy or security issues
   - cause user data loss
   - break existing AMP web pages in a significant way
+  - cause an outage or critical production issue
   - or would otherwise cause a significant harm to AMP's reputation if left unresolved
 - Regressions found in the **experimental**/**beta** releases that are not P0 _may_ be approved if they can be resolved with a rollback. Fixes other than rollbacks--no matter how simple they may seem--will not be approved because these have the potential to cause cascading problems and delay the release promotion of **beta** to **stable** for everyone.
 

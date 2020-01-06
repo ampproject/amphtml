@@ -6,7 +6,6 @@
 - [Determining if your change is in a release](#determining-if-your-change-is-in-a-release)
 - [Release Cadence](#release-cadence)
   - [Detailed schedule](#detailed-schedule)
-- [Opt-In Cookie](#opt-in-cookie)
   - [AMP Dev Channel (Experimental)](#amp-dev-channel-experimental)
   - [AMP Beta Channel (Beta)](#amp-beta-channel-beta)
 - [Release Freezes](#release-freezes)
@@ -23,7 +22,7 @@ See the [release cadence section](#release-cadence) for a more detailed breakdow
 
 The _weekly_ release channels are considered to be the primary "evergreen" release channels. A green build from the `master` branch is used to build the **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel (see the [Detailed schedule](#detailed-schedule)).
 
-There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit, but with the _canary_ and _production_ configurations, respectively. The _canary_ configuration enables experimental components and features that may be turned off in _production_. Each is served to 0.5% of AMP traffic. It is possible to opt into the **experimental** or **beta** channels via the `AMP_CANARY` cookie; see the [Opt-In Cookie section](#opt-in-cookie) for details.
+There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit, but with the _canary_ and _production_ configurations, respectively. The _canary_ configuration enables experimental components and features that may be turned off in _production_. Each is served to 0.5% of AMP traffic. It is possible to opt into the **experimental** or **beta** channels via the `AMP_CANARY` cookie.
 
 The **stable** release is built with the _production_ configuration and served to most AMP traffic. Since the **beta** release is also built from the _production_ configuration, it represents the exact build which will become **stable** the following week (ignoring the possibility of cherry-picks; see [Contributing Code](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
 
@@ -31,7 +30,8 @@ The **stable** release is built with the _production_ configuration and served t
 
 The **lts** release channel provides a previous **stable** build for four-week intervals. Every four weeks, the current **stable** release is promoted to **lts**. This is not recommended for all publishers building experiences with AMP, but is provided so that those performing a QA cycle may do so less often. Individual pages can explicitly opt into **lts** (see [LTS Readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md).
 
-One trade-off to be aware of is that, because the **lts** release is updated every four weeks, the release binaries may be as much as six weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). For this reason, sites using the **lts** release channel should not use newly introduced features. See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release).
+Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the four-week cycle, the LTS release may be as much as six weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release).
+
 
 ## Determining if your change is in a release
 
