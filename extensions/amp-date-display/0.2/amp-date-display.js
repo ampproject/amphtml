@@ -266,15 +266,15 @@ function enhanceBasicVariables(data) {
   // Override type since Object.assign is not understood
   return /** @type {!EnhancedVariablesV2Def} */ ({
     ...data,
-    yearTwoDigit: padStart(data.year % 100),
-    monthTwoDigit: padStart(data.month),
-    dayTwoDigit: padStart(data.day),
-    hourTwoDigit: padStart(data.hour),
-    hour12,
-    hour12TwoDigit: padStart(hour12),
-    minuteTwoDigit: padStart(data.minute),
-    secondTwoDigit: padStart(data.second),
-    dayPeriod: data.hour < 12 ? 'am' : 'pm',
+    'yearTwoDigit': padStart(data.year % 100),
+    'monthTwoDigit': padStart(data.month),
+    'dayTwoDigit': padStart(data.day),
+    'hourTwoDigit': padStart(data.hour),
+    'hour12': hour12,
+    'hour12TwoDigit': padStart(hour12),
+    'minuteTwoDigit': padStart(data.minute),
+    'secondTwoDigit': padStart(data.second),
+    'dayPeriod': data.hour < 12 ? 'am' : 'pm',
   });
 }
 
@@ -285,21 +285,21 @@ function enhanceBasicVariables(data) {
  */
 function getVariablesInLocal(date, locale) {
   return {
-    year: date.getFullYear(),
-    month: date.getMonth() + 1,
-    monthName: date.toLocaleDateString(locale, {month: 'long'}),
-    monthNameShort: date.toLocaleDateString(locale, {
+    'year': date.getFullYear(),
+    'month': date.getMonth() + 1,
+    'monthName': date.toLocaleDateString(locale, {month: 'long'}),
+    'monthNameShort': date.toLocaleDateString(locale, {
       month: 'short',
     }),
-    day: date.getDate(),
-    dayName: date.toLocaleDateString(locale, {weekday: 'long'}),
-    dayNameShort: date.toLocaleDateString(locale, {
+    'day': date.getDate(),
+    'dayName': date.toLocaleDateString(locale, {weekday: 'long'}),
+    'dayNameShort': date.toLocaleDateString(locale, {
       weekday: 'short',
     }),
-    hour: date.getHours(),
-    minute: date.getMinutes(),
-    second: date.getSeconds(),
-    iso: date.toISOString(),
+    'hour': date.getHours(),
+    'minute': date.getMinutes(),
+    'second': date.getSeconds(),
+    'iso': date.toISOString(),
   };
 }
 
@@ -310,29 +310,29 @@ function getVariablesInLocal(date, locale) {
  */
 function getVariablesInUTC(date, locale) {
   return {
-    year: date.getUTCFullYear(),
-    month: date.getUTCMonth() + 1,
-    monthName: date.toLocaleDateString(locale, {
+    'year': date.getUTCFullYear(),
+    'month': date.getUTCMonth() + 1,
+    'monthName': date.toLocaleDateString(locale, {
       month: 'long',
       timeZone: 'UTC',
     }),
-    monthNameShort: date.toLocaleDateString(locale, {
+    'monthNameShort': date.toLocaleDateString(locale, {
       month: 'short',
       timeZone: 'UTC',
     }),
-    day: date.getUTCDate(),
-    dayName: date.toLocaleDateString(locale, {
+    'day': date.getUTCDate(),
+    'dayName': date.toLocaleDateString(locale, {
       weekday: 'long',
       timeZone: 'UTC',
     }),
-    dayNameShort: date.toLocaleDateString(locale, {
+    'dayNameShort': date.toLocaleDateString(locale, {
       weekday: 'short',
       timeZone: 'UTC',
     }),
-    hour: date.getUTCHours(),
-    minute: date.getUTCMinutes(),
-    second: date.getUTCSeconds(),
-    iso: date.toISOString(),
+    'hour': date.getUTCHours(),
+    'minute': date.getUTCMinutes(),
+    'second': date.getUTCSeconds(),
+    'iso': date.toISOString(),
   };
 }
 
