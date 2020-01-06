@@ -234,7 +234,14 @@
     {
       "files": ["**/*.extern.js"],
       "rules": {
-        "prettier/prettier": 2
+        "no-var": "off",
+        "no-undef": "off",
+        "no-unused-vars": "off",
+        "prefer-const": "off",
+        "require-jsdoc": "off",
+        "jsdoc/check-tag-names": "off",
+        "local/closure-type-primitives": "off",
+        "google-camelcase/google-camelcase": "off"
       }
     }
   ]
