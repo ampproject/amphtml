@@ -158,7 +158,7 @@ export class ResourcesImpl {
 
     /** @const @private {!Pass} */
     this.remeasurePass_ = new Pass(this.win, () => {
-      // "Remeasuring" hack no longer needed with IntersectionObserver.
+      // With IntersectionObserver, "remeasuring" hack no longer needed.
       devAssert(!this.intersectionObserver_);
 
       this.relayoutAll_ = true;
@@ -251,15 +251,11 @@ export class ResourcesImpl {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
 
-      // With IntersectionObserver, no need to relayout everything
-      // on viewport size change.
-      if (!this.intersectionObserver_) {
-        if (event.relayoutAll) {
-          this.relayoutAll_ = true;
-          this.maybeChangeHeight_ = true;
-        }
-        this.schedulePass();
+      if (event.relayoutAll) {
+        this.relayoutAll_ = true;
+        this.maybeChangeHeight_ = true;
       }
+      this.schedulePass();
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
@@ -350,17 +346,6 @@ export class ResourcesImpl {
       }
 
       return r.whenBuilt().then(() => {
-        // NOT_LAID_OUT is the state after build() but before measure().
-        if (r.getState() == ResourceState.NOT_LAID_OUT) {
-          // TODO(willchou): Update media queries on viewport size change.
-
-          // TODO(willchou): This will always result in a stale layout box,
-          // e.g. .i-amphtml-hidden-by-media-query is only applied here.
-          // But where should we move this mutation to?
-          r.applySizesAndMediaQuery();
-          dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
-        }
-
         const wasDisplayed = r.isDisplayed();
         r.measure(/* premeasuredBox */ boundingClientRect);
         const isDisplayed = r.isDisplayed();
@@ -1380,8 +1365,6 @@ export class ResourcesImpl {
    * @private
    */
   discoverWork_() {
-    devAssert(!this.intersectionObserver_);
-
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
     const now = Date.now();
@@ -1405,6 +1388,7 @@ export class ResourcesImpl {
       if (
         relayoutAll ||
         !r.hasBeenMeasured() ||
+        // NOT_LAID_OUT is the state after build() but before measure().
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
         dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
@@ -1414,6 +1398,13 @@ export class ResourcesImpl {
       if (r.isMeasureRequested()) {
         remeasureCount++;
       }
+    }
+
+    // With IntersectionObserver, no need to relayout everything
+    // on viewport size change. However, we do still need to call
+    // applySizesAndMediaQueries() on every resource (above).
+    if (this.intersectionObserver_) {
+      return;
     }
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
@@ -1956,6 +1947,7 @@ export class ResourcesImpl {
         }
       );
     }
+    // With IntersectionObserver, remeasuring after size changes are no longer needed.
     if (!this.intersectionObserver_) {
       this.schedulePassVsync_();
     }
@@ -2119,9 +2111,7 @@ export class ResourcesImpl {
           this.mutateWork_();
         }
         // 2. Build/measure/in-viewport/schedule layouts. 1x mutate & measure.
-        if (!this.intersectionObserver_) {
-          this.discoverWork_();
-        }
+        this.discoverWork_();
         // 3. Execute scheduled layouts and preloads. 1x mutate.
         let delay = this.work_();
         // 4. Deferred size-change requests (waiting for scrolling to stop) will shorten delay until next pass.
