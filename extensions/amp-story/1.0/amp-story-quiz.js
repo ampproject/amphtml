@@ -22,6 +22,7 @@ import {
 } from './story-analytics';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-quiz-1.0.css';
+import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
@@ -108,6 +109,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
+
+    /** @private */
+    this.clientIdService_ = Services.cidForDoc(this.element);
+
+    /** @private */
+    this.clientIdPromise_ = null;
   }
 
   /** @override */
@@ -118,6 +125,22 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     this.initializeListeners_();
     this.retrieveReactionData_();
     createShadowRootWithStyle(this.element, this.quizEl_, CSS);
+  }
+
+  /**
+   * @private
+   * @return {Promise<string>}
+   */
+  getClientId_() {
+    if (!this.clientIdPromise_) {
+      this.clientIdPromise_ = this.clientIdService_.then(data => {
+        return data.get(
+          {scope: 'amp-story', createCookieIfNotPresent: true},
+          Promise.resolve()
+        );
+      });
+    }
+    return this.clientIdPromise_;
   }
 
   /**
@@ -336,7 +359,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     this.executeReactionRequest_()
       .then(response => this.handleSuccessfulDataRetrieval_(response))
       .catch(error => {
-        console.log('ERROR', error);
+        dev().error(error);
       });
     this.mockDataRetrieval_();
   }
@@ -347,7 +370,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   updateReactionData_(reactionResponse) {
     this.executeReactionRequest_(reactionResponse).catch(error => {
-      console.log('ERROR', error);
+      dev().error(error);
     });
   }
 
@@ -363,7 +386,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
 
     const requestVars = {
-      userId: '', // this.win.context.clientId, // TODO get data from AMP context
       hasUserResponded: false,
       reactionType: STORY_REACTION_TYPE_QUIZ,
       reactionId: '', // combine url & attribute
@@ -376,11 +398,14 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     const requestOptions = {
       method: 'POST',
-      mode: 'no-cors',
       body: requestVars,
     };
 
-    return this.requestService_.executeRequest(URL, null, requestOptions);
+    return this.getClientId_().then(clientId => {
+      requestVars.userId = clientId;
+      console.log(clientId);
+      return this.requestService_.executeRequest(URL, null, requestOptions);
+    });
   }
 
   /**
