@@ -78,15 +78,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       expect(actual).to.equal('https://www.google.com/a?b=1&c=2');
     });
 
-    it('does not expand nested array vars correctly', () => {
-      check('${array}', '1,2%2C1', {
-        'foo': 1,
-        'bar': 2,
-        'array': ['${foo}', '${array2}'],
-        'array2': ['${bar}', '${foo}'],
-      });
-    });
-
     it('expands complicated string', () => {
       check('${foo}', 'HELLO%2FWORLD%2BWORLD%2BHELLO%2BHELLO', {
         'foo': '${a}+${b}+${c}+${hello}',
