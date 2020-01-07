@@ -535,18 +535,10 @@ Activity.prototype.getIncrementalEngagedTime = function(name, reset) {};
 AccessService.prototype.getAccessReaderId = function() {};
 AccessService.prototype.getAuthdataField = function(field) {};
 // Same for amp-analytics
-/**
- * The "get CID" parameters.
- * - createCookieIfNotPresent: Whether CID is allowed to create a cookie when.
- *   Default value is `false`.
- * @typedef {{
- *   scope: string,
- *   createCookieIfNotPresent: (boolean|undefined),
- * }}
- */
+
 var GetCidDef;
 /**
- * @param {string|!GetCidDef} externalCidScope Name of the fallback cookie
+ * @param {string|!../../src/service/cid-impl.GetCidDef} externalCidScope Name of the fallback cookie
  *     for the case where this doc is not served by an AMP proxy. GetCidDef
  *     structure can also instruct CID to create a cookie if one doesn't yet
  *     exist in a non-proxy case.
