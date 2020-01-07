@@ -95,9 +95,7 @@ Opting into the _Beta Channel_ is intended for:
 
 Similar to the _Dev Channel_, when you opt into the _AMP Beta Channel_ you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the _AMP Beta Channel_ version of AMP.
 
-To opt your browser into the _AMP Beta Channel_, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP RC Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
-
-> Note: "RC" refers to the term "Release Candidate", which was the previous name for the **beta** release channel.
+To opt your browser into the _AMP Beta Channel_, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Beta Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
 
 **If you find an issue that appears to only occur in the _Beta Channel_ version of AMP**:
 
