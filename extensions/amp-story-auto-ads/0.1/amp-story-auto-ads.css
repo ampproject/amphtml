@@ -28,6 +28,8 @@
 .i-amphtml-story-desktop-fullbleed .i-amphtml-cta-container {
   /* Ad will be 75vh, align bottom of container to bottom of ad. */
   bottom: 12.5vh !important;
+  /* 80% (default) - 12.5 (new bottom)*/
+  top: 67.5% !important;
 }
 
 /* If you are changing anything here that affects font, please update measurer
