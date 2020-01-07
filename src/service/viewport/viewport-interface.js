@@ -144,10 +144,10 @@ export class ViewportInterface extends Disposable {
    * Note that this function should be called in vsync measure. Please consider
    * using `getClientRectAsync` instead.
    * @param {!Element} el
-   * @param {*} premeasuredRect
+   * @param {!ClientRect=} opt_premeasuredRect
    * @return {!../../layout-rect.LayoutRectDef}
    */
-  getLayoutRect(el, premeasuredRect = null) {}
+  getLayoutRect(el, opt_premeasuredRect) {}
 
   /**
    * Returns the clientRect of the element.

@@ -469,7 +469,7 @@ export class Resource {
   /**
    * Use resources for measurement.
    * @param {!ClientRect=} opt_premeasuredBox
-   * @return {!LayoutRectDef}
+   * @return {!../layout-rect.LayoutRectDef}
    */
   measureViaResources_(opt_premeasuredBox) {
     const viewport = Services.viewportForDoc(this.element);

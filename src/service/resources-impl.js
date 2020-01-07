@@ -316,8 +316,7 @@ export class ResourcesImpl {
     const promises = entries.map(entry => {
       const {boundingClientRect, isIntersecting, target: element} = entry;
       devAssert(element.isUpgraded());
-      const r = Resource.forElementOptional(element);
-      devAssert(r);
+      const r = devAssert(Resource.forElementOptional(element));
 
       // discoverWork_():
       // [x] Phase 1: Build and relayout as needed. All mutations happen here.
