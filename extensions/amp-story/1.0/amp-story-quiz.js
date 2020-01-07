@@ -1,3 +1,4 @@
+/* eslint-disable google-camelcase/google-camelcase */
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -25,6 +26,7 @@ import {StateProperty, getStoreService} from './amp-story-store-service';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
+import {getRequestService} from './amp-story-request-service';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
 
@@ -38,6 +40,15 @@ const TAG = 'amp-story-quiz';
 // and make this an enum on that class.
 /** @const {number} */
 const STORY_REACTION_TYPE_QUIZ = 0;
+
+/**
+ * @typedef {{
+ *    total_response_count: number,
+ *    has_user_responded: boolean,
+ *    responses: !Object,
+ * }}
+ */
+export let ReactionResponseType;
 
 /**
  * Generates the template for the quiz.
@@ -86,6 +97,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private {?Element} */
     this.quizEl_ = null;
 
+    /** @private {?Object} */
+    this.quizResponseData_ = null;
+
+    /** @private {!./amp-story-request-service.AmpStoryRequestService} */
+    this.requestService_ = getRequestService(this.win, this.element);
+
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
@@ -99,6 +116,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     this.adjustGridLayer_();
     this.attachContent_();
     this.initializeListeners_();
+    this.retrieveReactionData_();
     createShadowRootWithStyle(this.element, this.quizEl_, CSS);
   }
 
@@ -307,5 +325,138 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
       this.hasReceivedResponse_ = true;
     });
+
+    this.updateReactionData_(optionEl.optionIndex_);
+  }
+
+  /**
+   * @private
+   */
+  retrieveReactionData_() {
+    this.executeReactionRequest_()
+      .then(response => this.handleSuccessfulDataRetrieval_(response))
+      .catch(error => {
+        console.log('ERROR', error);
+      });
+    this.mockDataRetrieval_();
+  }
+
+  /**
+   * @private
+   * @param {number} reactionResponse
+   */
+  updateReactionData_(reactionResponse) {
+    this.executeReactionRequest_(reactionResponse).catch(error => {
+      console.log('ERROR', error);
+    });
+  }
+
+  /**
+   * @param {number} reactionResponse
+   * @return {Promise<JsonObject>}
+   * @private
+   */
+  executeReactionRequest_(reactionResponse) {
+    let URL = 'http://scooterlabs.com/echo';
+    if (this.element.hasAttribute('endpoint')) {
+      URL = this.element.getAttribute('endpoint');
+    }
+
+    const requestVars = {
+      userId: '', // this.win.context.clientId, // TODO get data from AMP context
+      hasUserResponded: false,
+      reactionType: STORY_REACTION_TYPE_QUIZ,
+      reactionId: '', // combine url & attribute
+    };
+
+    if (reactionResponse !== null) {
+      requestVars.reactionResponse = reactionResponse;
+      requestVars.hasUserResponded = true;
+    }
+
+    const requestOptions = {
+      method: 'POST',
+      mode: 'no-cors',
+      body: requestVars,
+    };
+
+    return this.requestService_.executeRequest(URL, null, requestOptions);
+  }
+
+  /**
+   * Handles incoming reaction data response
+   *
+   * RESPONSE FORMAT
+   * {
+   *  total_response_count: <number>
+   *  has_user_responded: <boolean>
+   *  responses: {
+   *    <response_id>: {
+   *      total_count:
+   *      selected_by_user:
+   *    },
+   *    ...
+   *  }
+   * }
+   * @param {ReactionResponseType} response
+   * @private
+   */
+  handleSuccessfulDataRetrieval_(response) {
+    this.quizResponseData_ = {
+      totalCount: response.data.total_response_count,
+      data: response.data.responses,
+    };
+
+    this.hasReceivedResponse_ = response.data.has_user_responded;
+    if (this.hasReceivedResponse_) {
+      this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
+
+      // Find selected option
+      let selectedOptionKey = -1;
+      Object.entries(this.quizResponseData_.data).forEach(kvPair => {
+        if (kvPair[1].selected_by_user) {
+          selectedOptionKey = kvPair[0];
+        }
+      });
+
+      this.quizEl_
+        .querySelectorAll('.i-amphtml-story-quiz-option')
+        [selectedOptionKey].classList.add(
+          'i-amphtml-story-quiz-option-selected'
+        );
+    }
+  }
+
+  /**
+   * @private
+   */
+  mockDataRetrieval_() {
+    // for now, mock successful data retrieval
+    const mockResponse = {
+      data: {
+        total_response_count: 10,
+        has_user_responded: true,
+        responses: {
+          0: {
+            total_count: 3,
+            selected_by_user: true,
+          },
+          1: {
+            total_count: 3,
+            selected_by_user: false,
+          },
+          2: {
+            total_count: 3,
+            selected_by_user: false,
+          },
+          3: {
+            total_count: 1,
+            selected_by_user: false,
+          },
+        },
+      },
+    };
+
+    this.handleSuccessfulDataRetrieval_(mockResponse);
   }
 }
