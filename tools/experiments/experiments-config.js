@@ -69,11 +69,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25623',
   },
   {
-    id: 'amp-nested-menu',
-    name: 'AMP extension for a nested drilldown menu',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25343',
-  },
-  {
     id: 'ampdoc-fie',
     name: 'Install AmpDoc on FIE level',
     spec: 'https://github.com/ampproject/amphtml/issues/22734',
