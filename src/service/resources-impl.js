@@ -349,11 +349,11 @@ export class ResourcesImpl {
       }
 
       return r.whenBuilt().then(() => {
-        const wasDisplayed = r.isDisplayed();
-        r.measure(/* premeasuredBox */ boundingClientRect);
-        const isDisplayed = r.isDisplayed();
-
-        if (wasDisplayed && !isDisplayed) {
+        const noLongerDisplayed = this.measureResource_(
+          r,
+          /* premeasuredBox */ boundingClientRect
+        );
+        if (noLongerDisplayed) {
           toUnload.push(r);
           return;
         }
@@ -372,15 +372,7 @@ export class ResourcesImpl {
     });
 
     Promise.all(promises).then(() => {
-      if (toUnload.length) {
-        this.vsync_.mutate(() => {
-          toUnload.forEach(r => {
-            r.unload();
-            this.cleanupTasks_(r);
-          });
-        });
-      }
-
+      this.unloadResources_(toUnload);
       this.signalIfReady_();
     });
   }
@@ -1348,6 +1340,33 @@ export class ResourcesImpl {
   }
 
   /**
+   * @param {!Resource} r
+   * @param {!ClientRect=} opt_premeasuredBox
+   * @return {boolean}
+   * @private
+   */
+  measureResource_(r, opt_premeasuredBox) {
+    const wasDisplayed = r.isDisplayed();
+    r.measure(opt_premeasuredBox);
+    return wasDisplayed && !r.isDisplayed();
+  }
+
+  /**
+   * @param {!Array<!Resource>} resources
+   * @private
+   */
+  unloadResources_(resources) {
+    if (resources.length) {
+      this.vsync_.mutate(() => {
+        resources.forEach(r => {
+          r.unload();
+          this.cleanupTasks_(r);
+        });
+      });
+    }
+  }
+
+  /**
    * Discovers work that needs to be done since the last pass. If viewport
    * has changed, it will try to build new elements, measure changed elements,
    * and schedule layouts and preloads within a reasonable distance of the
@@ -1393,23 +1412,15 @@ export class ResourcesImpl {
           return;
         }
         if (this.relayoutAll_ || r.isMeasureRequested()) {
-          const wasDisplayed = r.isDisplayed();
-          r.measure();
-          if (wasDisplayed && !r.isDisplayed()) {
+          const noLongerDisplayed = this.measureResource_(r);
+          if (noLongerDisplayed) {
             toUnload.push(r);
           }
           dev().fine(TAG_, 'force remeasure:', r.debugid);
         }
       });
 
-      if (toUnload.length) {
-        this.vsync_.mutate(() => {
-          toUnload.forEach(r => {
-            r.unload();
-            this.cleanupTasks_(r);
-          });
-        });
-      }
+      this.unloadResources_(toUnload);
 
       this.relayoutAll_ = false;
       return;
@@ -1494,9 +1505,8 @@ export class ResourcesImpl {
         }
 
         if (needsMeasure) {
-          const wasDisplayed = r.isDisplayed();
-          r.measure();
-          if (wasDisplayed && !r.isDisplayed()) {
+          const noLongerDisplayed = this.measureResource_(r);
+          if (noLongerDisplayed) {
             if (!toUnload) {
               toUnload = [];
             }
@@ -1508,12 +1518,7 @@ export class ResourcesImpl {
 
     // Unload all in one cycle.
     if (toUnload) {
-      this.vsync_.mutate(() => {
-        toUnload.forEach(r => {
-          r.unload();
-          this.cleanupTasks_(r);
-        });
-      });
+      this.unloadResources_(toUnload);
     }
 
     const viewportRect = this.viewport_.getRect();
