@@ -395,7 +395,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       index,
       this.localizationService_,
       devAssert(this.buttonFitter_),
-      this.storeService_
+      devAssert(this.storeService_)
     );
 
     this.maybeForceAdPlacement_(page);
