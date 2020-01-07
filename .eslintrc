@@ -234,14 +234,14 @@
     {
       "files": ["**/*.extern.js"],
       "rules": {
-        "no-var": "off",
-        "no-undef": "off",
-        "no-unused-vars": "off",
-        "prefer-const": "off",
-        "require-jsdoc": "off",
-        "jsdoc/check-tag-names": "off",
-        "local/closure-type-primitives": "off",
-        "google-camelcase/google-camelcase": "off"
+        "no-var": 0,
+        "no-undef": 0,
+        "no-unused-vars": 0,
+        "prefer-const": 0,
+        "require-jsdoc": 0,
+        "jsdoc/check-tag-names": 0,
+        "local/closure-type-primitives": 0,
+        "google-camelcase/google-camelcase": 0
       }
     }
   ]
