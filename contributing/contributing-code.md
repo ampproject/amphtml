@@ -201,10 +201,8 @@ If you run into any issues or have any questions when requesting a cherry-pick, 
 - Ensure there is a GitHub issue filed for the problem that needs to be resolved _before_ filing the cherry-pick request issue.
 - File the cherry-pick request issue using the [Cherry-pick request template](https://github.com/ampproject/amphtml/issues/new?title=%F0%9F%8C%B8%20Cherry%20pick%20request%20for%20%3CYOUR_ISSUE_NUMBER%3E%20into%20%3CRELEASE_ISSUE_NUMBER%3E%20%28Pending%29&template=cherry_pick_template.md). Follow the instructions in the template, providing all of the requested data. **Make sure you fill out this issue completely or your cherry-pick may not be seen or acted upon.**
 - Get the necessary approval for your cherry-pick (indicated via comments on the cherry-pick request issue).
-  - For cherry-picks into **experimental**/**beta**, at least one member of the [Approvers WG](https://github.com/orgs/ampproject/teams/wg-approvers/members) must approve the cherry-pick.
-  - For cherry-picks into **stable**/**lts**:
-    - if the fix is a clean rollback that does not require any other changes, at least one member of the [Approvers WG](https://github.com/orgs/ampproject/teams/wg-approvers/members) must approve the cherry-pick.
-    - otherwise, at least one member from the [Cherry-Pick Approvers group](https://github.com/orgs/ampproject/teams/cherry-pick-approvers/members) must approve the cherry-pick.
+  - For cherry-picks into **experimental**/**beta**, at least one member of the [Approvers WG](https://github.com/orgs/ampproject/teams/wg-approvers/members) must approve the cherry-pick/rollback.
+  - For cherry-picks into **stable**/**lts** at least one member from the [Cherry-Pick Approvers group](https://github.com/orgs/ampproject/teams/cherry-pick-approvers/members) must approve the cherry-pick.
 - After the cherry-pick has been approved, the person currently handling releases (on-duty engineer) will work with you to ensure the cherry-pick is made.
 - **Once the cherry-pick is made you are responsible for verifying that the cherry-pick you requested fixes the reported issue and that it does not cause other issues.**
 
