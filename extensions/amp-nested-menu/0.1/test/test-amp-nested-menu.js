@@ -48,7 +48,7 @@ describes.realWin(
       element.appendChild(ul);
       doc.body.appendChild(element);
 
-      [1, 2, 3].forEach(i => {
+      [1, 2, 3, 4].forEach(i => {
         const item = htmlFor(doc)`
           <li>
             <button amp-nested-submenu-open></button>
@@ -220,6 +220,26 @@ describes.realWin(
         bubbles: true,
       });
       openEl2.dispatchEvent(upKeyEvent);
+      expect(doc.activeElement).to.equal(openEl1);
+    });
+
+    it('should focus on first/last items when home/end key is pressed', async () => {
+      await getNestedMenu();
+      const openEl1 = doc.getElementById('open-1');
+      const openEl4 = doc.getElementById('open-4');
+      tryFocus(openEl1);
+      expect(doc.activeElement).to.equal(openEl1);
+      const endKeyEvent = new KeyboardEvent('keydown', {
+        key: Keys.END,
+        bubbles: true,
+      });
+      openEl1.dispatchEvent(endKeyEvent);
+      expect(doc.activeElement).to.equal(openEl4);
+      const homeKeyEvent = new KeyboardEvent('keydown', {
+        key: Keys.HOME,
+        bubbles: true,
+      });
+      openEl4.dispatchEvent(homeKeyEvent);
       expect(doc.activeElement).to.equal(openEl1);
     });
 
