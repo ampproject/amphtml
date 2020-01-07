@@ -53,11 +53,13 @@ const TIMEOUT_LIMIT = 10000; // 10 seconds
 /** @const {string} */
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
+/** @const {string} */
+const DESKTOP_FULLBLEED_CLASS = 'i-amphtml-story-desktop-fullbleed';
+
 /** @enum {string} */
 const PageAttributes = {
   LOADING: 'i-amphtml-loading',
   IFRAME_BODY_VISIBLE: 'amp-story-visible',
-  DESKTOP_FULLBLEED: 'i-amphtml-story-desktop-fullbleed',
 };
 
 /** @enum {string} */
@@ -536,10 +538,10 @@ export class StoryAdPage {
       return;
     }
 
-    this.adChoicesIcon_.classList.remove(PageAttributes.DESKTOP_FULLBLEED);
+    this.adChoicesIcon_.classList.remove(DESKTOP_FULLBLEED_CLASS);
 
     if (uiState === UIType.DESKTOP_FULLBLEED) {
-      this.adChoicesIcon_.classList.add(PageAttributes.DESKTOP_FULLBLEED);
+      this.adChoicesIcon_.classList.add(DESKTOP_FULLBLEED_CLASS);
     }
   }
 
