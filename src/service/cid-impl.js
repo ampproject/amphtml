@@ -404,16 +404,16 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
     return /** @type {!Promise<?string>} */ (Promise.resolve(null));
   }
 
-  if (cid.externalCidCache_[scope]) {
-    return /** @type {!Promise<?string>} */ (cid.externalCidCache_[scope]);
-  }
-
   if (existingCookie) {
     // If we created the cookie, update it's expiration time.
     if (/^amp-/.test(existingCookie)) {
       setCidCookie(win, cookieName, existingCookie);
     }
     return /** @type {!Promise<?string>} */ (Promise.resolve(existingCookie));
+  }
+
+  if (cid.externalCidCache_[scope]) {
+    return /** @type {!Promise<?string>} */ (cid.externalCidCache_[scope]);
   }
 
   const newCookiePromise = getRandomString64(win)
