@@ -19,19 +19,26 @@ import {jsonLiteral} from '../../../../src/json';
 const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
   'vars': {
     'clientId': 'CLIENT_ID(__gads)',
-    'data':
-      '{"skus": "${skus}","source": "${source}","active": "${active}","product": "${product}"}',
+    'startJson': '%7B',
+    'endJson': '%7D',
+    'q': '%22',
+    'c': '%3A',
+    ',': '%2C%20',
+    'sourceKV': '${q}source${q}${c} ${q}${source}${q}',
+    'activeKV': '${q}is_active${q}${c} ${q}${active}${q}',
+    'adnameKV': '${q}ad_name${q}${c} ${q}${adname}${q}',
+    'skusKV': '${q}skus${q}${c} ${q}${skus}${q}',
+    'productKV': '${q}product${q}${c} ${q}${product}${q}',
   },
   'requests': {
-    'baseUrl': 'https://pubads.g.doubleclick.net/subopt',
     'baseParams':
-      'u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&' +
-      '_amp_source_origin=${sourceHost}',
-    'sendBase': '${baseUrl}/data?${baseParams}',
+      'u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&_amp_source_origin=${sourceHost}',
+    'baseUrl': 'https://pubads.g.doubleclick.net/subopt/data?${baseParams}',
     'stateParams': 'states=${publicationId}%3A${state}%3A${productId}',
-    'eventParams': 'events=${publicationId}%3A${event}%3A${data}',
-    'sendSubscriptionState': '${sendBase}&${stateParams}',
-    'sendEvent': '${sendBase}&${eventParams}',
+    'eventParams':
+      'events=${publicationId}%3A${event}%3A${startJson}${keyValues}${endJson}',
+    'sendSubscriptionState': '${baseUrl}&${stateParams}',
+    'sendEvent': '${baseUrl}&${eventParams}',
   },
   'triggers': {
     'onSubscribed': {
@@ -53,6 +60,8 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'offers_shown',
+        'active': 'true',
+        'keyValues': '${skusKV}${,}${sourceKV}${,}${activeKV}',
       },
     },
     'onPaywall': {
@@ -61,6 +70,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'vars': {
         'event': 'paywall',
         'active': 'false',
+        'keyValues': '${sourceKV}${,}${activeKV}',
       },
     },
     'onSelectOffer': {
@@ -69,6 +79,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'vars': {
         'event': 'offer_selected',
         'active': 'true',
+        'keyValues': '${productKV}${,}${activeKV}',
       },
     },
     'onStartBuyflow': {
@@ -77,6 +88,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'vars': {
         'event': 'payment_flow_start',
         'active': 'true',
+        'keyValues': '${productKV}${,}${activeKV}',
       },
     },
     'onPaymentComplete': {
@@ -85,6 +97,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'vars': {
         'event': 'payment_complete',
         'active': 'true',
+        'keyValues': '${productKV}${,}${activeKV}',
       },
     },
   },

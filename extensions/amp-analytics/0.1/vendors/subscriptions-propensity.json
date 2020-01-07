@@ -1,15 +1,24 @@
 {
   "vars": {
-    "clientId": "CLIENT_ID(__gads)"
+    "clientId": "CLIENT_ID(__gads)",
+    "startJson": "%7B",
+    "endJson": "%7D",
+    "q": "%22",
+    "c": "%3A",
+    ",": "%2C%20",
+    "sourceKV": "${q}source${q}${c} ${q}${source}${q}",
+    "activeKV": "${q}is_active${q}${c} ${q}${active}${q}",
+    "adnameKV": "${q}ad_name${q}${c} ${q}${adname}${q}",
+    "skusKV": "${q}skus${q}${c} ${q}${skus}${q}",
+    "productKV": "${q}product${q}${c} ${q}${product}${q}"
   },
   "requests": {
-    "baseUrl": "https://pubads.g.doubleclick.net/subopt",
     "baseParams": "u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&_amp_source_origin=${sourceHost}",
-    "sendBase": "${baseUrl}/data?${baseParams}",
+    "baseUrl": "https://pubads.g.doubleclick.net/subopt/data?${baseParams}",
     "stateParams": "states=${publicationId}%3A${state}%3A${productId}",
-    "eventParams": "events=${publicationId}%3A${event}%3A${data}",
-    "sendSubscriptionState": "${sendBase}&${stateParams}",
-    "sendEvent": "${sendBase}&${eventParams}"
+    "eventParams": "events=${publicationId}%3A${event}%3A${startJson}${keyValues}${endJson}",
+    "sendSubscriptionState": "${baseUrl}&${stateParams}",
+    "sendEvent": "${baseUrl}&${eventParams}"
   },
   "triggers": {
     "onSubscribed": {
@@ -31,7 +40,8 @@
       "request": "sendEvent",
       "vars": {
         "event": "offers_shown",
-        "data": "{\"skus\": \"${skus}\",\"source\": \"${source}\",\"active\": \"${active}\"}"
+        "active": "true",
+        "keyValues": "${skusKV}${,}${sourceKV}${,}${activeKV}"
       }
     },
     "onPaywall": {
@@ -39,7 +49,8 @@
       "request": "sendEvent",
       "vars": {
         "event": "paywall",
-        "data": "{\"source\": \"${source}\",\"active\": \"false\"}"
+        "active": "false",
+        "keyValues": "${sourceKV}${,}${activeKV}"
       }
     },
     "onSelectOffer": {
@@ -47,7 +58,8 @@
       "request": "sendEvent",
       "vars": {
         "event": "offer_selected",
-        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
+        "active": "true",
+        "keyValues": "${productKV}${,}${activeKV}"
       }
     },
     "onStartBuyflow": {
@@ -55,7 +67,8 @@
       "request": "sendEvent",
       "vars": {
         "event": "payment_flow_start",
-        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
+        "active": "true",
+        "keyValues": "${productKV}${,}${activeKV}"
       }
     },
     "onPaymentComplete": {
@@ -63,7 +76,8 @@
       "request": "sendEvent",
       "vars": {
         "event": "payment_complete",
-        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
+        "active": "true",
+        "keyValues": "${productKV}${,}${activeKV}"
       }
     }
   },
