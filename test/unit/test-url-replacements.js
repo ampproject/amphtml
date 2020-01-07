@@ -104,15 +104,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
                 });
               });
             }
-            if (opt_options.withStoryVariableService) {
-              markElementScheduledForTesting(iframe.win, 'amp-story');
-              registerServiceBuilder(iframe.win, 'story-variable', function() {
-                return Promise.resolve({
-                  pageIndex: 546,
-                  pageId: 'id-123',
-                });
-              });
-            }
             if (opt_options.withViewerIntegrationVariableService) {
               markElementScheduledForTesting(
                 iframe.win,
@@ -237,7 +228,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(70);
+          expect(variables.length).to.equal(68);
         });
       });
 
@@ -791,27 +782,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
               '?in=SHARE_TRACKING_INCOMING&out=SHARE_TRACKING_OUTGOING'
             )
           ).to.eventually.equal('?in=&out=');
-        }
-      );
-
-      it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID', () => {
-        return expect(
-          expandUrlAsync(
-            '?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID',
-            /*opt_bindings*/ undefined,
-            {withStoryVariableService: true}
-          )
-        ).to.eventually.equal('?index=546&id=id-123');
-      });
-
-      // TODO(#16916): Make this test work with synchronous throws.
-      it.skip(
-        'should replace STORY_PAGE_INDEX and STORY_PAGE_ID' +
-          ' with empty string if amp-story is not configured',
-        () => {
-          return expect(
-            expandUrlAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID')
-          ).to.eventually.equal('?index=&id=');
         }
       );
 
