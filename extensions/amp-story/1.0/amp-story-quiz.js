@@ -43,7 +43,7 @@ const STORY_REACTION_TYPE_QUIZ = 0;
 
 /** @const {string} */
 const ENDPOINT_UNAVAILABLE_ERROR =
-  'The publisher has not specified an endpoint';
+  'The publisher has not specified a datastore endpoint';
 
 /**
  * @typedef {{
@@ -131,6 +131,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
+   * Gets a Promise to return the unique AMP clientId
+   *
    * @private
    * @return {Promise<string>}
    */
@@ -356,6 +358,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
+   * Get the Reaction data from the datastore
+   *
    * @private
    */
   retrieveReactionData_() {
@@ -370,6 +374,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
+   * Update the Reaction data in the datastore
+   *
    * @private
    * @param {number} reactionResponse
    */
@@ -383,6 +389,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
+   * Executes a Reactions API call
+   *
    * @param {number} reactionResponse
    * @return {Promise<JsonObject>}
    * @private
