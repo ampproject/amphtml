@@ -25,6 +25,11 @@
   align-items: center !important;
 }
 
+.i-amphtml-story-desktop-fullbleed .i-amphtml-cta-container {
+  /* Ad will be 75vh, align bottom of container to bottom of ad. */
+  bottom: 12.5vh !important;
+}
+
 /* If you are changing anything here that affects font, please update measurer
  in story-ad-button-text-fitter.js */
 .i-amphtml-story-ad-link {
@@ -76,8 +81,8 @@ amp-story-page[active] .i-amphtml-story-ad-link {
 }
 
 /* TODO(ccordry): refactor centering logic in amp-ad.css and remove this hack.  */
-amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
-amp-ad[type="adsense"] > iframe {
+amp-story-page amp-ad[data-a4a-upgrade-type="amp-ad-network-doubleclick-impl"] > iframe,
+amp-story-page amp-ad[type="adsense"] > iframe {
   top: 0 !important;
   left: 0 !important;
   transform: translate(0) !important;
@@ -85,12 +90,12 @@ amp-ad[type="adsense"] > iframe {
 
 /* TODO(ccordry) allow advertisers to opt-in to fullscreen ads. */
 .i-amphtml-story-desktop-fullbleed .i-amphtml-story-grid-template-fill > amp-ad > iframe {
-  left: 50%!important;
-  right: auto!important;
-  margin: auto!important;
+  left: 50% !important;
+  right: auto !important;
+  margin: auto !important;
+  min-height: 75vh !important;
   max-height: 75vh !important;
+  min-width: calc(3/5 * 75vh) !important;
   max-width: calc(3/5 * 75vh) !important;
-  min-width: 320px !important;
-  min-height: 533px !important;
   transform: translateX(-50%) !important;
 }

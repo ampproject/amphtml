@@ -22,3 +22,9 @@
   /* 1 greater than cta layer. */
   z-index: 4 !important;
 }
+
+.i-amphtml-story-desktop-fullbleed.i-amphtml-story-ad-attribution {
+  bottom: 12.5vh !important;
+  left: 50% !important;
+  transform: translateX(-22.5vh) !important;
+}

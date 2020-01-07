@@ -21,6 +21,10 @@ import {
 } from './story-ad-analytics';
 import {CommonSignals} from '../../../src/common-signals';
 import {CtaTypes} from './story-ad-localization';
+import {
+  StateProperty,
+  UIType,
+} from '../../amp-story/1.0/amp-story-store-service';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
@@ -53,6 +57,7 @@ const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 const PageAttributes = {
   LOADING: 'i-amphtml-loading',
   IFRAME_BODY_VISIBLE: 'amp-story-visible',
+  DESKTOP_FULLBLEED: 'i-amphtml-story-desktop-fullbleed',
 };
 
 /** @enum {string} */
@@ -76,8 +81,9 @@ export class StoryAdPage {
    * @param {number} index
    * @param {!./story-ad-localization.StoryAdLocalization} localization
    * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
+   * @param {../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} storeService
    */
-  constructor(ampdoc, config, index, localization, buttonFitter) {
+  constructor(ampdoc, config, index, localization, buttonFitter, storeService) {
     /** @private @const {!JsonObject} */
     this.config_ = config;
 
@@ -108,6 +114,9 @@ export class StoryAdPage {
     /** @private {?Element} */
     this.adElement_ = null;
 
+    /** @private {?Element} */
+    this.adChoicesIcon_ = null;
+
     /** @private {?Document} */
     this.adDoc_ = null;
 
@@ -128,6 +137,9 @@ export class StoryAdPage {
 
     /** @private {boolean} */
     this.viewed_ = false;
+
+    /** @private @const {../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = storeService;
   }
 
   /** @return {?Document} ad document within FIE */
@@ -488,7 +500,7 @@ export class StoryAdPage {
       })
     );
 
-    const adChoicesIcon = createElementWithAttributes(
+    this.adChoicesIcon_ = createElementWithAttributes(
       this.doc_,
       'img',
       dict({
@@ -497,13 +509,46 @@ export class StoryAdPage {
       })
     );
 
-    adChoicesIcon.addEventListener(
+    if (
+      this.storeService_.get(StateProperty.UI_STATE) ===
+      UIType.DESKTOP_FULLBLEED
+    ) {
+      this.adChoicesIcon_.classList.add(PageAttributes.DESKTOP_FULLBLEED);
+    }
+
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
+    );
+
+    this.adChoicesIcon_.addEventListener(
       'click',
       this.handleAttributionClick_.bind(this, href)
     );
 
-    createShadowRootWithStyle(root, adChoicesIcon, attributionCSS);
+    createShadowRootWithStyle(root, this.adChoicesIcon_, attributionCSS);
     this.pageElement_.appendChild(root);
+  }
+
+  /**
+   * Reacts to UI state updates and passes the information along as
+   * attributes to the shadowed attribution icon.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    if (!this.adChoicesIcon_) {
+      return;
+    }
+
+    this.adChoicesIcon_.classList.remove(PageAttributes.DESKTOP_FULLBLEED);
+
+    if (uiState === UIType.DESKTOP_FULLBLEED) {
+      this.adChoicesIcon_.classList.add(PageAttributes.DESKTOP_FULLBLEED);
+    }
   }
 
   /**
