@@ -560,6 +560,10 @@ If present, keeps the date picker overlay open after the user selects a date or 
 
 If present, keeps the date picker open after the user clears the date or dates. By default, this attribute is not present.
 
+##### hide-keyboard-shortcuts-panel
+
+If present, hides the keyboard shortcuts panel at the bottom of the picker. By default, this attribute is not present.
+
 ##### common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
