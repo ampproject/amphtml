@@ -50,7 +50,7 @@ import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {prepareImageAnimation} from '@ampproject/animations/dist/animations.mjs';
+import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error';
 import {setStyle, setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -60,7 +60,7 @@ import {triggerAnalyticsEvent} from '../../../src/analytics';
 const TAG = 'amp-lightbox-gallery';
 const DEFAULT_GALLERY_ID = 'amp-lightbox-gallery';
 const SLIDE_ITEM_SELECTOR =
-  '.i-amphtml-slide-item, .i-amphtml-carousel-slide-item';
+  '.i-amphtml-slide-item, .i-amphtml-carousel-slotted';
 
 /**
  * Set of namespaces that indicate the lightbox controls mode.
@@ -626,7 +626,8 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   setupGestures_() {
     const gestures = Gestures.get(dev().assertElement(this.carousel_));
-    gestures.onGesture(SwipeYRecognizer, ({data}) => {
+    gestures.onGesture(SwipeYRecognizer, e => {
+      const {data} = e;
       this.swipeGesture_(data);
     });
   }
@@ -1336,7 +1337,7 @@ export class AmpLightboxGallery extends AMP.BaseElement {
   updateVideoThumbnails_() {
     const thumbnails = this.manager_
       .getThumbnails(this.currentLightboxGroupId_)
-      .map((thumbnail, index) => Object.assign({index}, thumbnail))
+      .map((thumbnail, index) => ({index, ...thumbnail}))
       .filter(thumbnail => VIDEO_TAGS[thumbnail.element.tagName]);
 
     this.mutateElement(() => {

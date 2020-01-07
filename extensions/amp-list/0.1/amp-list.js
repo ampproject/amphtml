@@ -156,21 +156,15 @@ export class AmpList extends AMP.BaseElement {
     /**@private {?UnlistenDef} */
     this.unlistenAutoLoadMore_ = null;
 
-    this.registerAction(
-      'refresh',
-      () => {
-        if (this.layoutCompleted_) {
-          this.resetIfNecessary_();
-          return this.fetchList_(/* opt_refresh */ true);
-        }
-      },
-      ActionTrust.HIGH
-    );
+    this.registerAction('refresh', () => {
+      if (this.layoutCompleted_) {
+        this.resetIfNecessary_();
+        return this.fetchList_(/* opt_refresh */ true);
+      }
+    });
 
-    this.registerAction(
-      'changeToLayoutContainer',
-      () => this.changeToLayoutContainer_(),
-      ActionTrust.HIGH
+    this.registerAction('changeToLayoutContainer', () =>
+      this.changeToLayoutContainer_()
     );
 
     /** @private {?../../../src/ssr-template-helper.SsrTemplateHelper} */
@@ -372,7 +366,7 @@ export class AmpList extends AMP.BaseElement {
           promise = this.fetchList_();
         }
       } else if (typeof src === 'object') {
-        promise = renderLocalData(src);
+        promise = renderLocalData(/** @type {!Object} */ (src));
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
@@ -551,18 +545,25 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetchList_(opt_refresh = false) {
-    if (!this.element.getAttribute('src')) {
+    const elementSrc = this.element.getAttribute('src');
+    if (!elementSrc) {
       return Promise.resolve();
     }
     let fetch;
-    if (this.ssrTemplateHelper_.isSupported()) {
+    if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
       fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
+        // Bail if the src has changed while resolving the xhr request.
+        if (elementSrc !== this.element.getAttribute('src')) {
+          return;
+        }
+
         const items = this.computeListItems_(data);
         if (this.loadMoreEnabled_) {
           this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
         }
+
         return this.scheduleRender_(
           items,
           /*opt_append*/ false,
@@ -626,6 +627,7 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_(refresh) {
+    const elementSrc = this.element.getAttribute('src');
     let request;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
@@ -684,7 +686,13 @@ export class AmpList extends AMP.BaseElement {
           throw user().createError('Error proxying amp-list templates', error);
         }
       )
-      .then(data => this.scheduleRender_(data, /* append */ false));
+      .then(data => {
+        // Bail if the src has changed while resolving the xhr request.
+        if (elementSrc !== this.element.getAttribute('src')) {
+          return;
+        }
+        this.scheduleRender_(data, /* append */ false);
+      });
   }
 
   /**
@@ -746,7 +754,7 @@ export class AmpList extends AMP.BaseElement {
       scheduleNextPass();
       current.rejecter();
     };
-    const isSSR = this.ssrTemplateHelper_.isSupported();
+    const isSSR = this.ssrTemplateHelper_.isEnabled();
     let renderPromise = this.ssrTemplateHelper_
       .applySsrOrCsrTemplate(this.element, current.data)
       .then(result => this.updateBindings_(result, current.append))
@@ -1248,6 +1256,7 @@ export class AmpList extends AMP.BaseElement {
       urlReplacement: this.getPolicy_(),
       refresh,
       token,
+      xssiPrefix: this.element.getAttribute('xssi-prefix') || undefined,
     });
   }
 

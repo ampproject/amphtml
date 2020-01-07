@@ -456,9 +456,18 @@ export class AmpStoryEventTracker extends CustomEventTracker {
     const storySpec = config['storySpec'] || {};
     const repeat =
       storySpec['repeat'] === undefined ? true : storySpec['repeat'];
-    const pageDetails = vars['pageDetails'];
+    const eventDetails = vars['eventDetails'];
+    const tagName = config['tagName'];
 
-    if (repeat === false && pageDetails['repeated']) {
+    if (
+      tagName &&
+      eventDetails['tagName'] &&
+      tagName.toLowerCase() !== eventDetails['tagName']
+    ) {
+      return;
+    }
+
+    if (repeat === false && eventDetails['repeated']) {
       return;
     }
 
@@ -1386,7 +1395,7 @@ function removeInternalVars(details) {
   if (!details) {
     return details;
   }
-  const clean = Object.assign({}, details);
+  const clean = {...details};
   delete clean[videoAnalyticsCustomEventTypeKey];
   return /** @type {!JsonObject} */ (clean);
 }

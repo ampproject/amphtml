@@ -2,7 +2,6 @@
 
 [![Build Status](https://img.shields.io/travis/ampproject/amphtml/master.svg?logo=Travis%20CI&logoColor=white&style=flat-square 'Build Status')](https://travis-ci.org/ampproject/amphtml/builds)
 [![GitHub Release](https://img.shields.io/github/release/ampproject/amphtml.svg?logo=GitHub&style=flat-square 'GitHub Release')](https://github.com/ampproject/amphtml/releases/latest)
-[![Contributors](https://img.shields.io/github/contributors-anon/ampproject/amphtml.svg?logo=GitHub&style=flat-square 'Contributors')](https://github.com/ampproject/amphtml/graphs/contributors)
 [![Commits](https://img.shields.io/github/commit-activity/m/ampproject/amphtml.svg?logo=GitHub&style=flat-square 'Commits')](https://github.com/ampproject/amphtml/pulse/monthly)
 [![Badges](https://img.shields.io/badge/badges-16-brightgreen?logo=GitHub&style=flat-square)](#)
 
@@ -14,7 +13,7 @@ Metrics
 
 [![Absolute Code Coverage](https://img.shields.io/endpoint.svg?logo=Codecov&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FAbsoluteCoverageMetric 'Test coverage for the repository as computed by CodeCov')](https://codecov.io/gh/ampproject/amphtml/)
 [![Presubmit Latency](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FPresubmitLatencyMetric 'Average Travis build time over the last 90 days')](https://travis-ci.org/ampproject/amphtml/builds)
-[![Release Cherrypick Count](https://img.shields.io/endpoint.svg?logo=GitHub&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FReleaseCherrypickCountMetric 'Number of cherry-picks in releases over the last 90 days')](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aissue+title%3A+%22Cherry-pick%22)
+[![Cherrypick Issue Count](https://img.shields.io/endpoint.svg?logo=GitHub&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FCherrypickIssueCountMetric 'Number of cherry-pick issues in the last 90 days')](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=is%3Aissue+title%3A+%22Cherry-pick%22)
 [![Release Granularity](https://img.shields.io/endpoint.svg?logo=GitHub&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FReleaseGranularityMetric 'Average commits per release over the last 90 days')](https://github.com/ampproject/amphtml/releases)
 [![Travis Greenness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisGreennessMetric 'Percentage of green Travis builds over the last 90 days')](https://travis-ci.org/ampproject/amphtml/builds)
 [![Travis Flakiness](https://img.shields.io/endpoint.svg?logo=Travis%20CI&logoColor=white&style=flat-square&url=https%3A%2F%2Famp-project-metrics.appspot.com%2Fapi%2Fbadge%2FTravisFlakinessMetric 'Percentage of flaky Travis builds over the last 90 days')](https://travis-ci.org/ampproject/amphtml/builds)

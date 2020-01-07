@@ -107,7 +107,11 @@ class AmpVideo extends AMP.BaseElement {
     const videoSrc = this.getVideoSourceForPreconnect_();
     if (videoSrc) {
       this.getUrlService_().assertHttpsUrl(videoSrc, this.element);
-      this.preconnect.url(videoSrc, opt_onLayout);
+      Services.preconnectFor(this.win).url(
+        this.getAmpDoc(),
+        videoSrc,
+        opt_onLayout
+      );
     }
   }
 

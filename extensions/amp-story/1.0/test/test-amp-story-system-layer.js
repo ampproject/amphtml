@@ -41,14 +41,14 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {
-      build: sandbox.stub().returns(progressBarRoot),
-      getRoot: sandbox.stub().returns(progressBarRoot),
-      updateProgress: sandbox.spy(),
+      build: env.sandbox.stub().returns(progressBarRoot),
+      getRoot: env.sandbox.stub().returns(progressBarRoot),
+      updateProgress: env.sandbox.spy(),
     };
 
-    sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
+    env.sandbox.stub(ProgressBar, 'create').returns(progressBarStub);
 
-    sandbox.stub(Services, 'vsyncFor').returns({
+    env.sandbox.stub(Services, 'vsyncFor').returns({
       mutate: fn => fn(),
     });
 
@@ -56,7 +56,7 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
   });
 
   it('should build UI', () => {
-    const initializeListeners = sandbox
+    const initializeListeners = env.sandbox
       .stub(systemLayer, 'initializeListeners_')
       .callsFake(NOOP);
 
@@ -69,10 +69,10 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
 
   // TODO(alanorozco, #12476): Make this test work with sinon 4.0.
   it.skip('should attach event handlers', () => {
-    const rootMock = {addEventListener: sandbox.spy()};
+    const rootMock = {addEventListener: env.sandbox.spy()};
 
-    sandbox.stub(systemLayer, 'root_').callsFake(rootMock);
-    sandbox.stub(systemLayer, 'win_').callsFake(rootMock);
+    env.sandbox.stub(systemLayer, 'root_').callsFake(rootMock);
+    env.sandbox.stub(systemLayer, 'win_').callsFake(rootMock);
 
     systemLayer.initializeListeners_();
 

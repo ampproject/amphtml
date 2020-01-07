@@ -81,17 +81,13 @@ export class AmpState extends AMP.BaseElement {
       this.fetchAndUpdate_(/* isInit */ true);
     }
 
-    this.registerAction(
-      'refresh',
-      () => {
-        userAssert(
-          this.element.hasAttribute('src'),
-          'Can\'t refresh <amp-state> without "src" attribute.'
-        );
-        this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
-      },
-      ActionTrust.HIGH
-    );
+    this.registerAction('refresh', () => {
+      userAssert(
+        this.element.hasAttribute('src'),
+        'Can\'t refresh <amp-state> without "src" attribute.'
+      );
+      this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
+    });
   }
 
   /** @override */
@@ -240,7 +236,7 @@ export class AmpState extends AMP.BaseElement {
       // As a rule, initialization should skip evaluation.
       // If we're not initializing then this must be a mutation, so we must
       // skip <amp-state> evaluation to prevent update cycles.
-      bind.setState(state, /* skipEval */ isInit, /* skipAmpState */ !isInit);
+      bind.setState(state, {skipEval: isInit, skipAmpState: !isInit});
     });
   }
 
