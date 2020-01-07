@@ -114,10 +114,9 @@ export class AmpScript extends AMP.BaseElement {
      */
     const htmlEl = this.element.ownerDocument.documentElement;
     this.development_ =
-      this.element.hasAttribute('development') ||
-      (htmlEl.hasAttribute('data-ampdevmode') &&
-        closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
-          htmlEl);
+      htmlEl.hasAttribute('data-ampdevmode') &&
+      closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
+        htmlEl;
 
     if (this.development_) {
       user().warn(
