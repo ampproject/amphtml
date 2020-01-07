@@ -353,8 +353,8 @@ export class AmpVisibilityObserver extends AMP.BaseElement {
     let scene;
     if (this.targetId_) {
       scene = user().assertElement(
-        // TODO: Change back to this.getAmpDoc once ampdoc-fie experiment is
-        // launched.
+        // TODO(#22733): Change back to this.getAmpDoc once ampdoc-fie
+        // experiment is launched.
         this.win.document.getElementById(this.targetId_),
         'No element found with id:' + this.targetId_
       );
