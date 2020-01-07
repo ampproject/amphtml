@@ -326,6 +326,49 @@ When using `toolbar` feature, `autoscroll` only works if the `<nav toolbar>` ele
 
 Please see [this example file](https://github.com/ampproject/amphtml/blob/master/examples/amp-sidebar-autoscroll.amp.html) for a working example code.
 
+## Building Nested Menus
+
+`<amp-sidebar>` supports drilldown (nested) menus through a child component named [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md). With `<amp-nested-menu>`, `<amp-sidebar>` can support nesting one or more layers of submenus (and transition between them) as demonstrated by the following example:
+
+[tip type="note"]
+When using `amp-nested-menu`, wrap every menu item in a `li` element to improve accessibility and keyboard support.
+[/tip]
+
+[example playground="true" preview="top-frame" imports="amp-sidebar"]
+
+```html
+<button on="tap:sidebar1">Open Sidebar</button>
+<amp-sidebar id="sidebar1" layout="nodisplay" style="width:300px">
+  <amp-nested-menu layout="fill">
+    <ul>
+      <li>
+        <h4 amp-nested-submenu-open>Open Sub-Menu</h4>
+        <div amp-nested-submenu>
+          <ul>
+            <li>
+              <h4 amp-nested-submenu-close>Go back</h4>
+            </li>
+            <li>
+              <h4 amp-nested-submenu-open>Open Another Sub-Menu</h4>
+              <div amp-nested-submenu>
+                <h4 amp-nested-submenu-close>Go back</h4>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <a href="https://amp.dev/">Link</a>
+      </li>
+    </ul>
+  </amp-nested-menu>
+</amp-sidebar>
+```
+
+[/example]
+
+See [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md) for the full documentation on nested menus along with advanced feature such as dynamic content loading.
+
 ## UX considerations
 
 When using `<amp-sidebar>`, keep in mind that your users will often view your page on mobile in an AMP viewer, which may display a fixed-position header. In addition, browsers often display their own fixed header at the top of the page. Adding another fixed-position element at the top of the screen would take up a large amount of mobile screen space with content that gives the user no new information.
