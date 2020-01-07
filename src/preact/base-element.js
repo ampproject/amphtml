@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {Deferred} from './utils/promise';
+import {Deferred} from '../utils/promise';
 import {Fragment, createElement, render} from 'preact';
-import {Slot, createSlot} from './preact/slot';
-import {devAssert} from './log';
-import {matches} from './dom';
-import {withAmpContext} from './preact/context';
+import {Slot, createSlot} from './slot';
+import {devAssert} from '../log';
+import {matches} from '../dom';
+import {withAmpContext} from './context';
 
 /**
  * @typedef {{
