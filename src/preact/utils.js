@@ -53,23 +53,3 @@ export function useResourcesNotify() {
     }
   });
 }
-
-/**
- * @param {number} current
- * @return {number}
- */
-function increment(current) {
-  return current + 1;
-}
-
-/**
- * @return {function()}
- */
-export function useRerenderer() {
-  const state = useState(0);
-  // We only care about the setter, which is the second item of the tuple.
-  const set = state[1];
-  // useRef ensures the callback's instance identity is consistent.
-  const ref = useRef(() => set(increment));
-  return ref.current;
-}
