@@ -100,6 +100,69 @@ describes.realWin(
         const ampAd = doc.querySelector('amp-ad');
         expect(ampAd).not.to.exist;
       });
+
+      it('does not create multiple ads in stories of 8 pages', async () => {
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+
+        // Fake click to ad page.
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
+        const ampAds = doc.querySelectorAll('amp-ad');
+        expect(ampAds.length).to.equal(1);
+      });
+
+      it('creates multiple ads if enough pages', async () => {
+        storeGetterStub
+          .withArgs(StateProperty.PAGE_IDS)
+          .returns([
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            '8',
+            '9',
+            '10',
+            '11',
+            '12',
+            '13',
+            '14',
+            '15',
+          ]);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+
+        // Fake click to ad page.
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
+        const ampAds = doc.querySelectorAll('amp-ad');
+        expect(ampAds.length).to.equal(2);
+      });
+
+      it('does not fetch new ad when viewing previous ad', async () => {
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
+
+        // Fake click to ad page.
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
+        // Visit ad page again.
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
+        const ampAds = doc.querySelectorAll('amp-ad');
+        expect(ampAds.length).to.equal(1);
+      });
     });
 
     describe('service installation', () => {
@@ -165,30 +228,32 @@ describes.realWin(
 
     describe('visible attribute', () => {
       beforeEach(() => {
-        env.sandbox.stub(autoAds, 'analyticsEvent_').returns(NOOP);
-        autoAds.adPagesCreated_ = 1;
-        autoAds.adPageIds_ = {'ad-page-1': 1};
+        new MockStoryImpl(storyElement);
+        addStoryAutoAdsConfig(adElement);
       });
 
-      it('sets the visible attribute when showing', () => {
+      it('sets the visible attribute when showing', async () => {
         const setVisibleStub = env.sandbox.stub(
           autoAds,
           'setVisibleAttribute_'
         );
-        env.sandbox.stub(autoAds, 'startNextAdPage_').returns(NOOP);
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
         // Switching to ad page.
-        autoAds.handleActivePageChange_(
-          /* pageIndex */ 1,
-          /* pageId */ 'ad-page-1'
-        );
+        storeService.dispatch(Action.CHANGE_PAGE, {
+          id: 'i-amphtml-ad-page-1',
+          index: 7,
+        });
         expect(setVisibleStub.calledOnce).to.be.true;
       });
 
-      it('removes the visible attribute when showing', () => {
+      it('removes the visible attribute when exiting', async () => {
         const removeVisibleStub = env.sandbox.stub(
           autoAds,
           'removeVisibleAttribute_'
         );
+        await autoAds.buildCallback();
+        await autoAds.layoutCallback();
         autoAds.idOfAdShowing_ = 'ad-page-1';
         autoAds.handleActivePageChange_(
           /* pageIndex */ 2,
@@ -279,7 +344,9 @@ describes.realWin(
           element: storyElement,
           addPage: NOOP,
         };
+        autoAds.adPages_ = [{hasBeenViewed: () => false}];
         autoAds.setVisibleAttribute_ = NOOP;
+        autoAds.enoughPagesLeftInStory_ = NOOP;
         autoAds.adPagesCreated_ = 1;
         env.sandbox.stub(autoAds, 'startNextAdPage_');
         const analyticsStub = env.sandbox.stub(autoAds, 'analyticsEvent_');
