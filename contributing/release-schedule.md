@@ -16,32 +16,30 @@ A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a 
 
 The AMP runtime and extensions are provided through a variety of different _release channels_. Each channel serves a purpose for developers and for the AMP HTML Project itself. See the [release cadence section](#release-cadence) for a more detailed breakdown of how and when code from the [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository makes it into release builds.
 
-See the [release cadence section](#release-cadence) for a more detailed breakdown of the release promotion cadence. To determine if a PR has been included in any of the following release channels, look for the GitHub labels _PR Use: In Canary_, _PR Use: In Production_, or _PR Use: In LTS_.
+To determine if a PR has been included in any of the following release channels, look for the GitHub labels _PR Use: In Canary_, _PR Use: In Production_, or _PR Use: In LTS_ (see the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) for more details).
 
 ### Weekly
 
 The _weekly_ release channels are considered to be the primary "evergreen" release channels. A green build from the `master` branch is used to build the **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel (see the [Detailed schedule](#detailed-schedule)).
 
-There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit, but with the _canary_ and _production_ configurations, respectively. The _canary_ configuration enables experimental components and features that may be turned off in _production_. Each is served to 0.5% of AMP traffic. It is possible to opt into the **experimental** or **beta** channels via the `AMP_CANARY` cookie.
+There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit. However, the **experimental** channel uses the _canary_ configuration while the **beta** channel uses the _production_ configuration. The _canary_ configuration enables experimental components and features that may be turned off in _production_. Each is served to 0.5% of AMP traffic. It is possible to opt into the **experimental** or **beta** channels via the `AMP_CANARY` cookie.
 
-The **stable** release is built with the _production_ configuration and served to most AMP traffic. Since the **beta** release is also built from the _production_ configuration, it represents the exact build which will become **stable** the following week (ignoring the possibility of cherry-picks; see [Contributing Code](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
+The **stable** release channel is built with the _production_ configuration and served to most AMP traffic. Since the **beta** release channel is also built from the _production_ configuration, it represents the exact build which will become **stable** the following week (modulo the possibility of cherry-picks; see [Contributing Code](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#Cherry-picks)).
 
 ### Long-Term Stable (lts)
 
-The **lts** release channel provides a previous **stable** build for four-week intervals. Every four weeks, the current **stable** release is promoted to **lts**. This is not recommended for all publishers building experiences with AMP, but is provided so that those performing a QA cycle may do so less often. Individual pages can explicitly opt into **lts** (see [**lts** Readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md).
+The **lts** release channel provides a previous **stable** build for four-week intervals. Every four weeks, the current **stable** release is promoted to **lts**. This channel is not recommended for all AMP publishers. It is provided so that publishers who wish to perform a QA cycle on their website less frequently may do so by opting specific web pages into the **lts** channel (see the [**lts** readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md).
 
 Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the four-week cycle, the **lts** release may be as much as six weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) to validate if a change will be ready with your chosen release cycle.
 
 
 ## Determining if your change is in a release
 
-[_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) are used to track the status of current and past releases (from the initial cut to **experimantal**/**beta** testing to **stable**). Announcements about releases are made on the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
+[_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) are used to track the status of current and past releases; from the initial cut, to testing via **experimantal**/**beta** channels, to eventual release via the **stable** and **lts** channels. Announcements about releases are made on the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 
 You can determine what changes are in a given build using one of the following:
 
-- The [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) for each release build will include a link to the specific [release page](https://github.com/ampproject/amphtml/releases) listing the PRs in that release.
-  - The most recent _Type: Release_ issue with _(Production)_ in the title tracks the build currently in the **stable** release.
-  - The _Type: Release_ issue with _(Canary)_ in the title tracks the build currently in the **experimental**/**beta** releases.
+- The [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) for each release build will include a link to the specific [release page](https://github.com/ampproject/amphtml/releases) listing the changes contained in that release.
 - The [_PR Use: In Canary_](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20Canary%22), [_PR Use: In Production_](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20Production%22), and [_PR Use: In LTS_](https://github.com/ampproject/amphtml/issues?utf8=%E2%9C%93&q=label%3A%22PR%20use%3A%20In%20LTS%22) labels are added to PRs when they've made it into a _weekly_ or **lts** build. There may be a delay between when the build is created and when the label is added.
 
 > Note: These labels still use legacy release names. They will be renamed soon to reflect the new release channel names (**beta** and **stable**).
