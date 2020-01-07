@@ -508,14 +508,6 @@ export class StoryAdPage {
         'src': src,
       })
     );
-
-    if (
-      this.storeService_.get(StateProperty.UI_STATE) ===
-      UIType.DESKTOP_FULLBLEED
-    ) {
-      this.adChoicesIcon_.classList.add(PageAttributes.DESKTOP_FULLBLEED);
-    }
-
     this.storeService_.subscribe(
       StateProperty.UI_STATE,
       uiState => {
