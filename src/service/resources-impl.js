@@ -229,7 +229,7 @@ export class ResourcesImpl {
       // Need to use scrollingElement as root for viewport tracking in iframed pages.
       const root =
         this.ampdoc.isSingleDoc() && iframed
-          ? this.win.document.scrollingElement
+          ? this.win.document./*OK*/ scrollingElement
           : null;
       // TODO(willchou): Support changing of loading rectangle.
       const rootMargin = this.prerenderSize_

@@ -451,8 +451,9 @@ export class Resource {
     this.isMeasureRequested_ = false;
 
     const oldBox = this.layoutBox_;
-    this.layoutBox_ = this.measure_(opt_premeasuredRect);
-    const box = this.layoutBox_;
+    const {box, isFixed} = this.getMeasurement_(opt_premeasuredRect);
+    this.layoutBox_ = box;
+    this.isFixed_ = isFixed;
 
     // Note that "left" doesn't affect readiness for the layout.
     const sizeChanges = !layoutRectSizeEquals(oldBox, box);
@@ -479,10 +480,12 @@ export class Resource {
   }
 
   /**
+   * Computes and returns the current layout rectangle and position-fixed
+   * state of the element. Idempotent and does not update internal state.
    * @param {!ClientRect=} opt_premeasuredRect
-   * @return {!../layout-rect.LayoutRectDef}
+   * @return {{box: !../layout-rect.LayoutRectDef, isFixed: boolean}}
    */
-  measure_(opt_premeasuredRect) {
+  getMeasurement_(opt_premeasuredRect) {
     const viewport = Services.viewportForDoc(this.element);
     let box = viewport.getLayoutRect(this.element, opt_premeasuredRect);
 
@@ -505,7 +508,6 @@ export class Resource {
         }
       }
     }
-    this.isFixed_ = isFixed;
 
     if (isFixed) {
       // For fixed position elements, we need the relative position to the
@@ -518,7 +520,7 @@ export class Resource {
       );
     }
 
-    return box;
+    return {rect: box, isFixed};
   }
 
   /**
