@@ -124,6 +124,9 @@ export class StoryAdPage {
 
     /** @private @const {./story-ad-button-text-fitter.ButtonTextFitter} */
     this.buttonFitter_ = buttonFitter;
+
+    /** @private {boolean} */
+    this.viewed_ = false;
   }
 
   /** @return {?Document} ad document within FIE */
@@ -148,6 +151,11 @@ export class StoryAdPage {
     return this.loaded_;
   }
 
+  /** @return {boolean} */
+  hasBeenViewed() {
+    return this.viewed_;
+  }
+
   /** @return {?Element} */
   getPageElement() {
     return this.pageElement_;
@@ -166,6 +174,7 @@ export class StoryAdPage {
    * respond accordingly.
    */
   toggleVisibility() {
+    this.viewed_ = true;
     // TODO(calebcordry): Properly handle visible attribute for custom ads.
     if (this.adDoc_) {
       toggleAttribute(
