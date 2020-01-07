@@ -126,8 +126,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     this.adjustGridLayer_();
     this.attachContent_();
     this.initializeListeners_();
-    this.retrieveReactionData_();
     createShadowRootWithStyle(this.element, this.quizEl_, CSS);
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.retrieveReactionData_();
   }
 
   /**
@@ -421,7 +425,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     return this.getClientId_().then(clientId => {
       requestVars.userId = clientId;
-      console.log(clientId);
       return this.requestService_.executeRequest(URL, null, requestOptions);
     });
   }
