@@ -1572,19 +1572,22 @@ describe('ValidatorRulesMakeSense', () => {
       }
       // We want to be certain not to allow SCRIPT tagspecs which don't either
       // define a src attribute OR define a JSON, OCTET-STREAM, or TEXT/PLAIN
-      // type.
-      // TODO(b/146353094): Allow octet-stream scripts only during SwG
-      // Encryption.
+      // type. Note that OCTET-STREAM scripts can only be used during SwG
+      // Encryption (go/swg-encryption).
       if (tagSpec.tagName === 'SCRIPT') {
         let hasSrc = false;
         let hasJson = false;
         let hasTextPlain = false;
         let hasOctetStream = false;
+        let hasCiphertext = false;
         for (const attrSpecId of tagSpec.attrs) {
           if (attrSpecId < 0) { continue; }
           const attrSpec = rules.attrs[attrSpecId];
           if (attrSpec.name === 'src') {
             hasSrc = true;
+          }
+          if (attrSpec.name === 'ciphertext') {
+            hasCiphertext = true;
           }
           if (attrSpec.name === 'type' && attrSpec.valueCasei.length > 0) {
             for (const value of attrSpec.valueCasei) {
@@ -1602,9 +1605,11 @@ describe('ValidatorRulesMakeSense', () => {
           }
         }
         it('script tags must have either a src attribute or type json, ' +
-               'octet-stream, or text/plain',
+               'octet-stream (during SwG encryption), or text/plain',
            () => {
-             expect(hasSrc || hasJson || hasTextPlain || hasOctetStream)
+             expect(
+                 hasSrc || hasJson || hasTextPlain ||
+                 (hasOctetStream && hasCiphertext))
                  .toBe(true);
            });
       }
