@@ -314,6 +314,8 @@ export class ResourcesImpl {
 
     const promises = entries.map(entry => {
       const {boundingClientRect, isIntersecting, target: element} = entry;
+      // Closure Compiler doesn't recognize boundingClientRect as a ClientRect.
+      const clientRect = /** @type {!ClientRect} */ (boundingClientRect);
       devAssert(element.isUpgraded());
       const r = devAssert(Resource.forElementOptional(element));
 
@@ -334,7 +336,7 @@ export class ResourcesImpl {
         !r.isBuilt() &&
         !r.isBuilding() &&
         isIntersecting &&
-        r.isDisplayed(boundingClientRect) &&
+        r.isDisplayed(clientRect) &&
         !r.hasOwner()
       ) {
         dev().fine(TAG_, 'force build:', r.debugid);
@@ -347,7 +349,7 @@ export class ResourcesImpl {
       }
 
       return r.whenBuilt().then(() => {
-        const noLongerDisplayed = this.measureResource_(r, boundingClientRect);
+        const noLongerDisplayed = this.measureResource_(r, clientRect);
         if (noLongerDisplayed) {
           toUnload.push(r);
           return;

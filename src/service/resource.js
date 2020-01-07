@@ -520,7 +520,7 @@ export class Resource {
       );
     }
 
-    return {rect: box, isFixed};
+    return {box, isFixed};
   }
 
   /**
