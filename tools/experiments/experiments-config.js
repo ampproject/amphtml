@@ -318,6 +318,12 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
   {
+    id: 'resources-intersection-observer',
+    name: 'Use IntersectionObserver for resource scheduling.',
+    spec: 'https://github.com/ampproject/amphtml/issues/25428',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
+  },
+  {
     id: 'layoutbox-invalidate-on-scroll',
     name:
       'Invalidate the cached layoutboxes of elements nested in a scroller ' +

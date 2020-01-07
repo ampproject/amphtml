@@ -217,33 +217,36 @@ export class ResourcesImpl {
       this.ampdoc.getVisibilityState()
     );
 
-    const platform = Services.platformFor(this.win);
-    // As of 1/2020, only Chrome 81 has the required IntersectionObserver behavior (#25428).
-    if (platform.isChrome() && platform.getMajorVersion() >= 81) {
+    if (isExperimentOn(this.win, 'intersect-resources')) {
+      const platform = Services.platformFor(this.win);
+      // As of 1/2020, only Chrome 81+ has the required behavior for using
+      // rootMargin with viewport tracking in a cross-origin iframe (#25428).
+      const supportsIframes =
+        platform.isChrome() && platform.getMajorVersion() >= 81;
+      const isIframed = isIframed(this.win);
+      devAssert(supportsIframes == isIframed);
+
       // Need to use scrollingElement as root for viewport tracking in iframed pages.
-      const intersectionRoot =
-        this.ampdoc.isSingleDoc() && isIframed(this.win)
+      const root =
+        this.ampdoc.isSingleDoc() && isIframed
           ? this.win.document.scrollingElement
           : null;
-
-      if (this.prerenderSize_) {
-        const verticalMargin = (this.prerenderSize_ - 1) / 2;
-        this.prerenderObserver_ = new IntersectionObserver(
-          this.intersects_.bind(this),
-          {root: intersectionRoot, rootMargin: `${verticalMargin}% 0%`}
-        );
-        // TODO(willchou): Hook up prerenderObserver_ and hand-off
-        // to intersectionObserver_ during visibilityState change.
-      }
-
+      // TODO(willchou): Support changing of loading rectangle.
+      const rootMargin = this.prerenderSize_
+        ? `${this.prerenderSize_ - 1} 0%`
+        : '200% 25%';
       /** @private @const {?IntersectionObserver} */
       this.intersectionObserver_ = new IntersectionObserver(
         this.intersects_.bind(this),
         {
-          root: intersectionRoot,
-          rootMargin: '50% 12.5%',
+          root,
+          rootMargin,
         }
       );
+
+      // Wait for intersection callback instead of measuring all elements
+      // during the first pass.
+      this.relayoutAll_ = false;
     }
 
     // When viewport is resized, we have to re-measure all elements.
@@ -1365,10 +1368,19 @@ export class ResourcesImpl {
     // 2. Support on-demand measurements via Resource.requestMeasure.
     if (this.intersectionObserver_) {
       // TODO(willchou): DRY the following code paths.
+      // TODO(willchou): Do we need to build _all_ elements (instead of
+      // just near-viewport elements) on page-ready?
+
       // Phase 1.
       this.resources_.forEach(r => {
         // NOT_LAID_OUT is the state after build() but before measure().
         if (this.relayoutAll_ || r.getState() == ResourceState.NOT_LAID_OUT) {
+          // TODO(willchou): May need to add another ResourceState to avoid
+          // multiple invocations before the first intersection callback.
+
+          // We apply sizes/media query before the intersection callback so
+          // that the correct element size and hidden state will be measured
+          // by the observer (which avoids the need for a remeasure).
           r.applySizesAndMediaQuery();
           dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         }
@@ -1398,6 +1410,8 @@ export class ResourcesImpl {
           });
         });
       }
+
+      this.relayoutAll_ = false;
       return;
     }
 
