@@ -223,12 +223,12 @@ export class ResourcesImpl {
       // rootMargin with viewport tracking in a cross-origin iframe (#25428).
       const supportsIframes =
         platform.isChrome() && platform.getMajorVersion() >= 81;
-      const isIframed = isIframed(this.win);
-      devAssert(supportsIframes == isIframed);
+      const iframed = isIframed(this.win);
+      devAssert(supportsIframes == iframed);
 
       // Need to use scrollingElement as root for viewport tracking in iframed pages.
       const root =
-        this.ampdoc.isSingleDoc() && isIframed
+        this.ampdoc.isSingleDoc() && iframed
           ? this.win.document.scrollingElement
           : null;
       // TODO(willchou): Support changing of loading rectangle.
@@ -322,10 +322,10 @@ export class ResourcesImpl {
       // discoverWork_():
       // [x] Phase 1: Build and relayout as needed. All mutations happen here.
       // [x]   1A: Apply sizes/media-queries to un-measured/un-laid-out resources.
-      // [ ] Phase 2: Remeasure if there were any relayouts. All reads happen here.
+      // [~] Phase 2: Remeasure if there were any relayouts. All reads happen here.
       // [x]   2A: Unload non-displayed resources.
       // [x] Phase 3: Trigger "viewport enter/exit" events.
-      // [ ] Phase 4: Schedule elements for layout within a reasonable distance from current viewport.
+      // [x] Phase 4: Schedule elements for layout within a reasonable distance from current viewport.
       // [x]   4A: Force build for all resources visible, measured, and in the viewport.
       // [ ] Phase 5: Idle Render Outside Viewport layout: layout up to 4 items with idleRenderOutsideViewport true.
       // [ ] Phase 6: Idle layout: layout more if we are otherwise not doing much.
@@ -1379,14 +1379,7 @@ export class ResourcesImpl {
    * @private
    */
   discoverWork_() {
-    // With IntersectionObserver, we typically defer measurements to the
-    // intersection callback. However, we still need:
-    // 1. On viewport size changes (relayoutAll), apply sizes/media queries
-    //    AND remeasure elements to invoke onLayoutMeasure and onMeasureChanged
-    //    e.g. for owner components to reposition their children.
-    // 2. Support on-demand measurements via Resource.requestMeasure.
     if (this.intersectionObserver_) {
-      // TODO(willchou): DRY the following code paths.
       // TODO(willchou): Do we need to build _all_ elements (instead of
       // just near-viewport elements) on page-ready?
 
@@ -1406,6 +1399,12 @@ export class ResourcesImpl {
       });
 
       // Phase 2.
+      // With IntersectionObserver, we typically defer measurements to the
+      // intersection callback. However, we still need:
+      // 1. On viewport size changes (relayoutAll), apply sizes/media queries
+      //    AND remeasure elements to call onLayoutMeasure and onMeasureChanged
+      //    e.g. for owner components to reposition their children.
+      // 2. Support on-demand measurements via Resource.requestMeasure.
       const toUnload = [];
       this.resources_.forEach(r => {
         if (r.hasOwner()) {
@@ -1419,9 +1418,9 @@ export class ResourcesImpl {
           dev().fine(TAG_, 'force remeasure:', r.debugid);
         }
       });
-
       this.unloadResources_(toUnload);
 
+      // Reset relayoutAll_ flag.
       this.relayoutAll_ = false;
       return;
     }

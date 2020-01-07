@@ -514,7 +514,7 @@ export class AmpA4A extends AMP.BaseElement {
     // If layout of page has not changed, onLayoutMeasure will not be called
     // so do so explicitly.
     const resource = this.getResource();
-    if (resource.hasBeenMeasured() && !resource.isMeasureRequested()) { // TODO(willchou)
+    if (resource.hasBeenMeasured() && !resource.isMeasureRequested()) {
       this.onLayoutMeasure();
     }
   }
