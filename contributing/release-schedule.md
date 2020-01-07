@@ -20,15 +20,15 @@ To determine if a PR has been included in any of the following release channels,
 
 ### Weekly
 
-The _weekly_ release channels are considered to be the primary "evergreen" release channels. A green build from the `master` branch is used to build the **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel (see the [Detailed schedule](#detailed-schedule)).
+The _weekly_ release channels are considered to be the primary "evergreen" release channels. A green build from the `master` branch is used to build the **experimental** and **beta** release channels; the **beta** release from the previous week is promoted to the **stable** release channel (see the [detailed schedule](#detailed-schedule)).
 
-There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit. However, the **experimental** channel uses the _canary_ configuration while the **beta** channel uses the _production_ configuration. The _canary_ configuration enables experimental components and features that may be turned off in _production_. Each is served to 0.5% of AMP traffic. It is possible to opt into the **experimental** or **beta** channels via the `AMP_CANARY` cookie.
+There are two sets of build configurations used in creating release builds: the _canary_ configuration and the _production_ configuration. The **experimental** and **beta** release channels are built off of the same commit. However, the **experimental** channel uses the _canary_ configuration while the **beta** channel uses the _production_ configuration. The _canary_ configuration enables experimental components and features that may be turned off in _production_. Each is served to 0.5% of AMP traffic. It is possible to opt into the **experimental** or **beta** channels via the [experiments page](https://cdn.ampproject.org/experiments.html).
 
 The **stable** release channel is built with the _production_ configuration and served to most AMP traffic. Since the **beta** release channel is also built from the _production_ configuration, it represents the exact build which will become **stable** the following week (modulo the possibility of cherry-picks; see [Contributing Code](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#Cherry-picks)).
 
 ### Long-Term Stable (lts)
 
-The **lts** release channel provides a previous **stable** build for four-week intervals. Every four weeks, the current **stable** release is promoted to **lts**. This channel is not recommended for all AMP publishers. It is provided so that publishers who wish to perform a QA cycle on their website less frequently may do so by opting specific web pages into the **lts** channel (see the [**lts** readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md).
+The **lts** release channel provides a previous **stable** build for four-week intervals. Every four weeks, the current **stable** release is promoted to **lts**. This channel is not recommended for all AMP publishers. It is provided so that publishers who wish to perform a QA cycle on their website less frequently may do so by opting specific web pages into the **lts** channel (see the [**lts** readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
 
 Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the four-week cycle, the **lts** release may be as much as six weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) to validate if a change will be ready with your chosen release cycle.
 
@@ -62,16 +62,16 @@ We try to stick to this schedule as closely as possible, though complications ma
 - Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.org/ampproject/amphtml/branches) and are pushed to users of AMP who opted into the [AMP Dev Channel](#amp-dev-channel) or [AMP Beta Channel](#amp-beta-channel), respectively.
 - Wednesday: we check bug reports for _Dev Channel_ and _Beta Channel_ users and if everything looks fine, we push the **beta** to 1% of AMP pages
 - Thursday-Monday: we continue to monitor error rates and bug reports for _Dev Channel_ and _Beta Channel_ users and the 1% of pages with the **experimental**/**beta** builds
-- Tuesday (about a week after the **beta** release build was cut): the **beta** build is fully promoted to **stable** (i.e. all AMP pages will now use this build)
+- Tuesday the following week: the **beta** build is fully promoted to **stable** (i.e. all AMP pages will now use this build)
 
 ### AMP Dev Channel (Experimental)
 
 The _AMP Dev Channel_ is a way to opt a browser into using the **experimental** release build of the AMP JS libraries. The _Dev Channel_ **may be less stable** and it may contain features not yet available to all users.
 
-Opting into the _Dev Channel_ is great to:
+Opting into the _Dev Channel_ is intended for:
 
-- test and play with new features not yet available to all users
-- use in Quality Assurance (QA) to ensure that your site is compatible with upcoming features of AMP that are still under development
+- testing and playing with new features not yet available to all users
+- using in Quality Assurance (QA) to ensure that your site is compatible with upcoming features of AMP that are still under development
 
 When you opt into the _AMP Dev Channel_ you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the _AMP Dev Channel_ version of AMP.
 
@@ -88,10 +88,10 @@ To opt your browser into the _AMP Dev Channel_, go to [the AMP experiments page]
 
 The _AMP Beta Channel_ is a way to opt a browser into using the **beta** release build of the AMP JS libraries that will be promoted to **stable** during the subsequent release cycle (typically, a week later). It is similar to the _Dev Channel_ described above, but it will not contain the experimental features that are still under development.
 
-Opting into the _Beta Channel_ is great to:
+Opting into the _Beta Channel_ is intended for:
 
-- test and play with the version of the AMP runtime that will be released soon
-- use in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
+- testing and playing with the version of the AMP runtime that will be released soon
+- using in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
 
 Similar to the _Dev Channel_, when you opt into the _AMP Beta Channel_ you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the _AMP Beta Channel_ version of AMP.
 
