@@ -17,9 +17,7 @@
 import {Mask} from '../mask-impl';
 
 describes.sandboxed('amp-inputmask mask-impl', {}, env => {
-  class FakeElement {
-    addEventListener() {}
-  }
+  class FakeElement {}
 
   describe('config', () => {
     let constructorStub;
@@ -31,6 +29,7 @@ describes.sandboxed('amp-inputmask mask-impl', {}, env => {
       env.sandbox.stub(Mask, 'getInputmask_').returns(constructorStub);
 
       FakeElement.prototype.getAttribute = env.sandbox.stub();
+      FakeElement.prototype.addEventListener = env.sandbox.stub();
     });
 
     it(
