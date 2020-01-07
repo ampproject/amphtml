@@ -253,7 +253,6 @@ export class ResourcesImpl {
     this.viewport_.onChanged(event => {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
-
       if (event.relayoutAll) {
         this.relayoutAll_ = true;
         this.maybeChangeHeight_ = true;
@@ -304,8 +303,8 @@ export class ResourcesImpl {
   }
 
   /**
-   * @param {*} entries
-   * @param {*} unusedObserver
+   * @param {!Array<!IntersectionObserverEntry>} entries
+   * @param {!IntersectionObserver} unusedObserver
    * @private
    */
   intersects_(entries, unusedObserver) {
@@ -348,10 +347,7 @@ export class ResourcesImpl {
       }
 
       return r.whenBuilt().then(() => {
-        const noLongerDisplayed = this.measureResource_(
-          r,
-          /* premeasuredBox */ boundingClientRect
-        );
+        const noLongerDisplayed = this.measureResource_(r, boundingClientRect);
         if (noLongerDisplayed) {
           toUnload.push(r);
           return;
@@ -606,7 +602,7 @@ export class ResourcesImpl {
     }
     this.buildAttemptsCount_++;
     // With IntersectionObserver, no need to schedule measurements after build
-    // since these are handled during the intersection callback.
+    // since these are handled in the initial intersection callback.
     if (!schedulePass || this.intersectionObserver_) {
       return promise;
     }
@@ -734,6 +730,8 @@ export class ResourcesImpl {
         if (measurer) {
           measurer();
         }
+        // With IntersectionObserver, "relayout top" is no longer needed since
+        // relative positional changes won't affect correctness.
         if (!this.intersectionObserver_) {
           relayoutTop = calcRelayoutTop();
         }
@@ -743,7 +741,7 @@ export class ResourcesImpl {
 
         // TODO(willchou): Survey measureMutateElement() callers to determine
         // which should explicitly call requestMeasure(). Always requesting
-        // measure after any mutation is overkill and possibly expensive.
+        // measure after any mutation is overkill and probably expensive.
 
         // With IntersectionObserver, no need to remeasure and set relayout
         // on element size changes since enter/exit viewport will be detected.
@@ -830,7 +828,7 @@ export class ResourcesImpl {
   /** @override */
   collapseElement(element) {
     // With IntersectionObserver, no need to relayout or remeasure
-    // due to a single element collapse.
+    // due to a single element collapse (similar to "relayout top").
     if (!this.intersectionObserver_) {
       const box = this.viewport_.getLayoutRect(element);
       if (box.width != 0 && box.height != 0) {
@@ -845,8 +843,8 @@ export class ResourcesImpl {
     const resource = Resource.forElement(element);
     resource.completeCollapse();
 
-    // With IntersectionObserver, there's no requestMeasure() call that
-    // requires another pass (unlike completeExpand()).
+    // Unlike completeExpand(), there's no requestMeasure() call here that
+    // requires another pass (with IntersectionObserver).
     if (!this.intersectionObserver_) {
       this.schedulePass(FOUR_FRAME_DELAY_);
     }
@@ -880,9 +878,7 @@ export class ResourcesImpl {
       return;
     }
     this.vsyncScheduled_ = true;
-    this.vsync_.mutate(() => {
-      this.doPass();
-    });
+    this.vsync_.mutate(() => this.doPass());
   }
 
   /** @override */
@@ -958,7 +954,8 @@ export class ResourcesImpl {
 
     this.visibilityStateMachine_.setState(this.ampdoc.getVisibilityState());
 
-    // With IntersectionObserver, need to wait until first intersection callback completes.
+    // With IntersectionObserver, elements are not measured until the first
+    // intersection callback (vs. after first pass), so wait until then.
     if (!this.intersectionObserver_) {
       this.signalIfReady_();
     }
@@ -988,6 +985,9 @@ export class ResourcesImpl {
   }
 
   /**
+   * If (1) the document is fully parsed, (2) the AMP runtime (services etc.)
+   * is initialized, and (3) we did a first pass on element measurements,
+   * then fire the "ready" signal.
    * @private
    */
   signalIfReady_() {
@@ -1339,18 +1339,20 @@ export class ResourcesImpl {
   }
 
   /**
+   * Returns true if the resource was previously displayed but is no longer.
    * @param {!Resource} r
-   * @param {!ClientRect=} opt_premeasuredBox
+   * @param {!ClientRect=} opt_premeasuredRect
    * @return {boolean}
    * @private
    */
-  measureResource_(r, opt_premeasuredBox) {
+  measureResource_(r, opt_premeasuredRect) {
     const wasDisplayed = r.isDisplayed();
-    r.measure(opt_premeasuredBox);
+    r.measure(opt_premeasuredRect);
     return wasDisplayed && !r.isDisplayed();
   }
 
   /**
+   * Unloads given resources in an async mutate phase.
    * @param {!Array<!Resource>} resources
    * @private
    */
@@ -1379,31 +1381,33 @@ export class ResourcesImpl {
    */
   discoverWork_() {
     if (this.intersectionObserver_) {
+      // With IntersectionObserver, we typically defer measurements to the
+      // intersection callback. However, we still need:
+      // 1. On viewport size changes (relayoutAll), apply sizes/media queries
+      //    AND remeasure elements. The latter makes sure that we call
+      //    onLayoutMeasure/onMeasureChanged e.g. for owner components to
+      //    reposition children.
+      // 2. Support on-demand measurements via Resource.requestMeasure.
+
       // TODO(willchou): Do we need to build _all_ elements (instead of
       // just near-viewport elements) on page-ready?
 
       // Phase 1.
+      // We apply sizes/media query here before the first intersection callback
+      // so that the correct element size and hidden state will be measured
+      // by the observer (which avoids the need for a remeasure).
       this.resources_.forEach(r => {
         // NOT_LAID_OUT is the state after build() but before measure().
         if (this.relayoutAll_ || r.getState() == ResourceState.NOT_LAID_OUT) {
           // TODO(willchou): May need to add another ResourceState to avoid
           // multiple invocations before the first intersection callback.
-
-          // We apply sizes/media query before the intersection callback so
-          // that the correct element size and hidden state will be measured
-          // by the observer (which avoids the need for a remeasure).
           r.applySizesAndMediaQuery();
           dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         }
       });
 
       // Phase 2.
-      // With IntersectionObserver, we typically defer measurements to the
-      // intersection callback. However, we still need:
-      // 1. On viewport size changes (relayoutAll), apply sizes/media queries
-      //    AND remeasure elements to call onLayoutMeasure and onMeasureChanged
-      //    e.g. for owner components to reposition their children.
-      // 2. Support on-demand measurements via Resource.requestMeasure.
+      // Remeasures for viewport size changes (relayoutAll) and requestMeasure.
       const toUnload = [];
       this.resources_.forEach(r => {
         if (r.hasOwner()) {
@@ -1457,13 +1461,6 @@ export class ResourcesImpl {
       if (r.isMeasureRequested()) {
         remeasureCount++;
       }
-    }
-
-    // With IntersectionObserver, no need to relayout everything
-    // on viewport size change. However, we do still need to call
-    // applySizesAndMediaQueries() on every resource (above).
-    if (this.intersectionObserver_) {
-      return;
     }
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
@@ -1835,9 +1832,7 @@ export class ResourcesImpl {
    */
   taskComplete_(task, success, opt_reason) {
     this.exec_.dequeue(task);
-    if (!this.intersectionObserver_) {
-      this.schedulePass(POST_TASK_PASS_DELAY_);
-    }
+    this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
       dev().info(
         TAG_,

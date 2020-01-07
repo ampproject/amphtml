@@ -360,6 +360,7 @@ export class Resource {
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
     this.element./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
+
     // Schedule for re-measure and possible re-layout.
     this.requestMeasure();
   }
@@ -416,9 +417,10 @@ export class Resource {
   /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
-   * @param {!ClientRect=} opt_premeasuredBox
+   * @param {!ClientRect=} opt_premeasuredRect If provided, use this
+   *    premeasured ClientRect instead of calling getBoundingClientRect.
    */
-  measure(opt_premeasuredBox) {
+  measure(opt_premeasuredRect) {
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -449,7 +451,7 @@ export class Resource {
     this.isMeasureRequested_ = false;
 
     const oldBox = this.layoutBox_;
-    this.layoutBox_ = this.measureViaResources_(opt_premeasuredBox);
+    this.layoutBox_ = this.measure_(opt_premeasuredRect);
     const box = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
@@ -477,13 +479,12 @@ export class Resource {
   }
 
   /**
-   * Use resources for measurement.
-   * @param {!ClientRect=} opt_premeasuredBox
+   * @param {!ClientRect=} opt_premeasuredRect
    * @return {!../layout-rect.LayoutRectDef}
    */
-  measureViaResources_(opt_premeasuredBox) {
+  measure_(opt_premeasuredRect) {
     const viewport = Services.viewportForDoc(this.element);
-    let box = viewport.getLayoutRect(this.element, opt_premeasuredBox);
+    let box = viewport.getLayoutRect(this.element, opt_premeasuredRect);
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
@@ -627,13 +628,13 @@ export class Resource {
   /**
    * Whether the resource is displayed, i.e. if it has non-zero width and
    * height.
-   * @param {*} premeasuredBox
+   * @param {!ClientRect=} opt_premeasuredRect If provided, use this
+   *    premeasured ClientRect instead of using the cached layout box.
    * @return {boolean}
    */
-  isDisplayed(premeasuredBox = null) {
+  isDisplayed(opt_premeasuredRect) {
     const isFluid = this.element.getLayout() == Layout.FLUID;
-    // TODO(jridgewell): #getSize
-    const box = premeasuredBox || this.getLayoutBox();
+    const box = opt_premeasuredRect || this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
     return (
       (isFluid || hasNonZeroSize) &&
