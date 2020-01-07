@@ -245,7 +245,7 @@ function installBrowserAssertions(_networkLogger) {
 
 function installBrowserWrappers(chai, utils) {
   const {Assertion} = chai;
-  const should = chai.should();
+  const should = chai.should(); // eslint-disable-line no-unused-vars
 
   // Assert that a request with a testUrl was sent
   // Example usage: await expect(testUrl).to.have.been.sent;
