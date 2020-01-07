@@ -245,27 +245,32 @@ function installBrowserAssertions(_networkLogger) {
 
 function installBrowserWrappers(chai, utils) {
   const {Assertion} = chai;
-
-  const assertAnySentRequests = function(url) {
-    chai
-      .expect(networkLogger.getSentRequests(url))
-      .to.eventually.not.have.length(0)
-      .then(() => {
-        return true;
-      })
-      .catch(() => {
-        return false;
-      });
-  };
+  const should = chai.should();
 
   // Assert that a request with a testUrl was sent
-  // Example usage: await expect(testUrl).to.be.sent;
+  // Example usage: await expect(testUrl).to.have.been.sent;
   utils.addProperty(Assertion.prototype, 'sent', function() {
+    const assertAnySentRequests = function(url) {
+      const promise = networkLogger.getSentRequests(url);
+      return promise.should.eventually.not.have.length(0);
+    };
+
     this.assert(
       assertAnySentRequests(this._obj),
-      'expected #{this} to be sent',
-      'expected #{this} to not be sent'
+      'expected #{this} to have been sent',
+      'expected #{this} to have been sent'
     );
+  });
+
+  // Assert that a request was sent n number of times
+  // Example usage: await expect(testUrl).to.have.sentCount(n);
+  utils.addMethod(Assertion.prototype, 'sentCount', function(count) {
+    const assertSentCount = function(url, count) {
+      const promise = networkLogger.getSentRequests(url);
+      return promise.should.eventually.have.length(count);
+    };
+
+    this.assert(assertSentCount(this._obj, count));
   });
 }
 

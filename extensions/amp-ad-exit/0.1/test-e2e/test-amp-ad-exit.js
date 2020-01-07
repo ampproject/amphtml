@@ -94,7 +94,7 @@ describes.endtoend(
 
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking'
-      ).to.be.sent;
+      ).to.have.sentCount(1);
     });
   }
 );
