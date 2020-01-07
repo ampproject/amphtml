@@ -1,4 +1,3 @@
-/* eslint-disable google-camelcase/google-camelcase */
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -41,6 +40,10 @@ const TAG = 'amp-story-quiz';
 // and make this an enum on that class.
 /** @const {number} */
 const STORY_REACTION_TYPE_QUIZ = 0;
+
+/** @const {string} */
+const ENDPOINT_UNAVAILABLE_ERROR =
+  'The publisher has not specified an endpoint';
 
 /**
  * @typedef {{
@@ -359,9 +362,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     this.executeReactionRequest_()
       .then(response => this.handleSuccessfulDataRetrieval_(response))
       .catch(error => {
+        if (error === ENDPOINT_UNAVAILABLE_ERROR) {
+          return;
+        }
         dev().error(error);
       });
-    this.mockDataRetrieval_();
   }
 
   /**
@@ -370,6 +375,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   updateReactionData_(reactionResponse) {
     this.executeReactionRequest_(reactionResponse).catch(error => {
+      if (error === ENDPOINT_UNAVAILABLE_ERROR) {
+        return;
+      }
       dev().error(error);
     });
   }
@@ -380,10 +388,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   executeReactionRequest_(reactionResponse) {
-    let URL = 'http://scooterlabs.com/echo';
-    if (this.element.hasAttribute('endpoint')) {
-      URL = this.element.getAttribute('endpoint');
+    // TODO(jackbsteinberg): Add a default reactions endpoint
+    if (!this.element.hasAttribute('endpoint')) {
+      return Promise.reject(ENDPOINT_UNAVAILABLE_ERROR);
     }
+
+    const URL = this.element.getAttribute('endpoint');
 
     const requestVars = {
       hasUserResponded: false,
@@ -450,38 +460,5 @@ export class AmpStoryQuiz extends AMP.BaseElement {
           'i-amphtml-story-quiz-option-selected'
         );
     }
-  }
-
-  /**
-   * @private
-   */
-  mockDataRetrieval_() {
-    // for now, mock successful data retrieval
-    const mockResponse = {
-      data: {
-        total_response_count: 10,
-        has_user_responded: true,
-        responses: {
-          0: {
-            total_count: 3,
-            selected_by_user: true,
-          },
-          1: {
-            total_count: 3,
-            selected_by_user: false,
-          },
-          2: {
-            total_count: 3,
-            selected_by_user: false,
-          },
-          3: {
-            total_count: 1,
-            selected_by_user: false,
-          },
-        },
-      },
-    };
-
-    this.handleSuccessfulDataRetrieval_(mockResponse);
   }
 }

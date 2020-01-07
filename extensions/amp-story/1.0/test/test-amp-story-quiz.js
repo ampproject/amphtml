@@ -1,3 +1,4 @@
+/* eslint-disable google-camelcase/google-camelcase */
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -52,6 +53,39 @@ const populateQuiz = (win, quizElement, numPrompts = 1, numOptions = 4) => {
  */
 const populateStandardQuizContent = (win, quizElement) => {
   populateQuiz(win, quizElement);
+};
+
+/**
+ * Returns mock reaction data
+ *
+ * @return {Object}
+ * @private
+ */
+const getMockReactionData = () => {
+  return {
+    data: {
+      total_response_count: 10,
+      has_user_responded: true,
+      responses: {
+        0: {
+          total_count: 3,
+          selected_by_user: true,
+        },
+        1: {
+          total_count: 3,
+          selected_by_user: false,
+        },
+        2: {
+          total_count: 3,
+          selected_by_user: false,
+        },
+        3: {
+          total_count: 1,
+          selected_by_user: false,
+        },
+      },
+    },
+  };
 };
 
 describes.realWin(
@@ -198,6 +232,25 @@ describes.realWin(
       );
       expect(variables[AnalyticsVariable.STORY_REACTION_RESPONSE]).to.equal(0);
       expect(variables[AnalyticsVariable.STORY_REACTION_TYPE]).to.equal(0);
+    });
+
+    it('should update the quiz when the user has already reacted', async () => {
+      populateStandardQuizContent(win, ampStoryQuiz.element);
+      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const quizElement = ampStoryQuiz.getQuizElement();
+      const quizOptions = quizElement.querySelectorAll(
+        '.i-amphtml-story-quiz-option'
+      );
+
+      // mock a successful data retrieval
+      ampStoryQuiz.handleSuccessfulDataRetrieval_(getMockReactionData());
+
+      expect(quizElement).to.have.class('i-amphtml-story-quiz-post-selection');
+      expect(quizOptions[0]).to.have.class(
+        'i-amphtml-story-quiz-option-selected'
+      );
     });
   }
 );
