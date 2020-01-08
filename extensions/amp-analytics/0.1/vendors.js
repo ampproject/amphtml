@@ -92,6 +92,7 @@ import {SHINYSTAT_CONFIG} from './vendors/shinystat';
 import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SNOWPLOW_CONFIG} from './vendors/snowplow';
 import {SNOWPLOW_V2_CONFIG} from './vendors/snowplow_v2';
+import {SUBSCRIPTIONS_PROPENSITY_CONFIG} from './vendors/subscriptions-propensity';
 import {TEAANALYTICS_CONFIG} from './vendors/teaanalytics';
 import {TEALIUMCOLLECT_CONFIG} from './vendors/tealiumcollect';
 import {TOP100_CONFIG} from './vendors/top100';
@@ -246,6 +247,9 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'piano': includeJsonLiteral(PIANO_CONFIG),
       'pinpoll': includeJsonLiteral(PINPOLL_CONFIG),
       'pressboard': includeJsonLiteral(PRESSBOARD_CONFIG),
+      'subscriptions-propensity': includeJsonLiteral(
+        SUBSCRIPTIONS_PROPENSITY_CONFIG
+      ),
       'quantcast': includeJsonLiteral(QUANTCAST_CONFIG),
       'retargetly': includeJsonLiteral(RETARGETLY_CONFIG),
       'rakam': includeJsonLiteral(RAKAM_CONFIG),

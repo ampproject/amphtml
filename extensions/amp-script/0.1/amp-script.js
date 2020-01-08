@@ -47,11 +47,6 @@ const TAG = 'amp-script';
 const MAX_TOTAL_SCRIPT_SIZE = 150000;
 
 /**
- * Size-contained elements up to 300px are allowed to mutate freely.
- */
-const MAX_FREE_MUTATION_HEIGHT = 300;
-
-/**
  * See src/transfer/Phase.ts in worker-dom.
  * @enum {number}
  */
@@ -119,10 +114,9 @@ export class AmpScript extends AMP.BaseElement {
      */
     const htmlEl = this.element.ownerDocument.documentElement;
     this.development_ =
-      this.element.hasAttribute('development') ||
-      (htmlEl.hasAttribute('data-ampdevmode') &&
-        closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
-          htmlEl);
+      htmlEl.hasAttribute('data-ampdevmode') &&
+      closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
+        htmlEl;
 
     if (this.development_) {
       user().warn(
@@ -150,6 +144,14 @@ export class AmpScript extends AMP.BaseElement {
    */
   setService(service) {
     this.service_ = service;
+  }
+
+  /**
+   * @return {?UserActivationTracker}
+   * @visibleForTesting
+   */
+  getUserActivation() {
+    return this.userActivation_;
   }
 
   /** @override */
@@ -367,9 +369,8 @@ export class AmpScript extends AMP.BaseElement {
       phase != Phase.MUTATING ||
       // Mutation depends on the gesture state and long tasks.
       this.userActivation_.isActive() ||
-      // If the element is size-contained and small enough.
-      (isLayoutSizeDefined(this.getLayout()) &&
-        this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT);
+      // Always allow mutation if the element has a static size.
+      isLayoutSizeDefined(this.getLayout());
 
     if (allowMutation) {
       this.vsync_.mutate(flush);
@@ -657,7 +658,7 @@ export class SanitizerImpl {
                 'AMP.setState only updated page state and did not reevaluate bindings due to lack of recent user interaction.'
               );
             }
-            bind.setState(state, skipEval, /* skipAmpState */ false);
+            bind.setState(state, {skipEval});
           }
         }
       });
