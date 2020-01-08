@@ -139,7 +139,6 @@ export class Expander {
     let match = matches[matchIndex];
     let numOfPendingCalls = 0;
     let ignoringChars = false;
-    let nextArgShouldBeRaw = false;
 
     const evaluateNextLevel = encode => {
       let builder = '';
@@ -243,12 +242,10 @@ export class Expander {
           urlIndex++;
           numOfPendingCalls--;
           const binding = stack.pop();
-          const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
-          if (nextArg) {
-            results.push(nextArg);
+          if (builder.trim().length) {
+            results.push(builder.trim());
           }
           args.push(results);
-          nextArgShouldBeRaw = false;
           const value = this.evaluateBinding_(binding, /* opt_args */ args);
           return value;
         } else {
