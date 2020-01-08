@@ -96,6 +96,7 @@
           <!-- This should be in alphabetical order. _ping_ should be the first -->
           <option>_ping_</option>
           <option>didomi</option>
+          <option>Marfeel</option>
           <option>SourcePoint</option>
         </select>
         <input type="submit" value="Go">
@@ -163,6 +164,24 @@
           </div>
         </amp-consent>
         <!-- End didomi example -->
+
+      <!-- Marfeel example -->
+      <amp-consent id='marfeelConsent' layout='nodisplay' type='Marfeel'>
+        <script type="application/json">
+          {
+            "postPromptUI": "postPromptUI",
+            "clientConfig": {
+              "consentLanguage": "en",
+              "publisherLogo": "https://marfeel.mgr.consensu.org/amp/img/marfeel-logo.png"
+            }
+          }
+        </script>
+        <div id="postPromptUI">
+          Post Prompt UI
+          <button on="tap:marfeelConsent.prompt(consent=Marfeel)" role="button">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End Marfeel example -->
 
       <!-- SourcePoint example -->
       <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>
