@@ -17,14 +17,19 @@
 // eslint-disable-next-line require-jsdoc
 export function dev() {
   return {
-    assertElement: element => element,
+    assertElement: element => {
+      console.assert(element && element.nodeType == 1, 'Element expected');
+      return element;
+    },
   };
 }
 
 // eslint-disable-next-line require-jsdoc
 export function user() {
   return {
-    error: () => {},
+    error: (unusedTag, var_args) => {
+      console.error.apply(null, Array.prototype.slice.call(arguments, 1));
+    },
   };
 }
 

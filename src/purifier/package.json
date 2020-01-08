@@ -18,7 +18,7 @@
   "homepage": "https://github.com/ampproject/amphtml/tree/master/src/purifier",
   "devDependencies": {
     "@rollup/plugin-alias": "3.0.0",
-    "rollup": "1.27.14"
+    "rollup": "1.28.0"
   },
   "dependencies": {
     "dompurify": "2.0.7"
