@@ -132,7 +132,8 @@ export class Purifier {
       Object.assign(allowedTags, data.allowedTags);
     });
     // Sanitize dummy markup so that the hook is invoked.
-    this.domPurify_.sanitize('<p></p>');
+    const p = this.doc_.createElement('p');
+    this.domPurify_.sanitize(p);
     Object.keys(BLACKLISTED_TAGS).forEach(tag => {
       allowedTags[tag] = false;
     });
