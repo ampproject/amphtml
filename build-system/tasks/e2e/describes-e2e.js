@@ -497,9 +497,9 @@ class EndToEndFixture {
     }
 
     const controller =
-      config.engine == 'selenium'
-        ? new SeleniumWebDriverController(driver)
-        : new PuppeteerController(driver);
+      config.engine == 'puppeteer'
+        ? new PuppeteerController(driver)
+        : new SeleniumWebDriverController(driver);
     const ampDriver = new AmpDriver(controller);
     const requestBank = new RequestBankE2E(REQUESTBANK_URL_PREFIX, 'e2e');
     env.controller = controller;
