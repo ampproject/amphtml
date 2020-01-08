@@ -23,6 +23,7 @@ const {
 const {By, Condition, Key: SeleniumKey, error} = require('selenium-webdriver');
 const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
+const {NetworkLogger} = require('./network-logger');
 
 const {NoSuchElementError} = error;
 
@@ -84,6 +85,8 @@ class SeleniumWebDriverController {
    */
   constructor(driver) {
     this.driver = driver;
+
+    this.networkLogger = new NetworkLogger(driver);
 
     /** @private {?WebElement} */
     this.shadowRoot_ = null;
