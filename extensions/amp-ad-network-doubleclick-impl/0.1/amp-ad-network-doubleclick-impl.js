@@ -756,6 +756,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     };
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
+      PAGEVIEWID_64: () =>
+        Services.documentInfoForDoc(this.element).pageViewId64,
       HREF: () => this.win.location.href,
       REFERRER: opt_timeout => this.getReferrer_(opt_timeout),
       TGT: () =>
@@ -778,6 +780,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       },
       CANONICAL_URL: () =>
         Services.documentInfoForDoc(this.element).canonicalUrl,
+      TOP: () => this.element.getPageLayoutBox().top,
     };
   }
 
