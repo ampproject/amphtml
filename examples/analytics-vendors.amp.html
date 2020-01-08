@@ -55,6 +55,7 @@
       <option>baiduanalytics</option>
       <option>burt</option>
       <option>byside</option>
+      <option>captainmetrics</option>
       <option>chartbeat</option>
       <option>clicky</option>
       <option>colanalytics</option>
@@ -370,6 +371,71 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- End BySide example -->
+
+<!-- Captain Metrics tracking -->
+<amp-analytics type="captainmetrics" id="captainmetrics">
+<script type="application/json">
+  {
+    "vars": {
+      "projectId": "your_project_id"
+    },
+    "triggers": {
+      "pageview": {
+        "on": "visible",
+        "request": "hit",
+        "extraUrlParams": {
+          "type": "pageview",
+          "pageview": {
+            "title": "${title}",
+            "page": "${sourceUrl}",
+            "product": {
+              "externalId": "product-id",
+              "sku": "product-sku",
+              "name": "product-name",
+              "brand": "product-brand",
+              "category": "product-category",
+              "variant": "product-variant",
+              "price": 1000,
+              "currency": "EUR"
+            },
+            "props": {
+              "customProperty": "xxx"
+            }
+          }
+        }
+      },
+      "event": {
+        "on": "click",
+        "selector": "#event-test-button",
+        "request": "hit",
+        "extraUrlParams": {
+          "type": "event",
+          "event": {
+            "label": "my_event",
+            "value": 1,
+            "nonInteractive": false
+          },
+          "props": {
+            "customProperty": "xxx"
+          }
+        }
+      },
+      "hidden": {
+        "on": "hidden",
+        "request": "hit",
+        "extraUrlParams": {
+          "type": "timeSpent",
+          "timeSpent": {
+            "pageId": "${pageViewId}",
+            "secs": "${incrementalEngagedTime(cm)}"
+          }
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Captain Metrics example -->
 
 <!-- Chartbeat tracking -->
 <amp-analytics type="chartbeat" id="chartbeat">
