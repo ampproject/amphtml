@@ -24,6 +24,16 @@
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
 </head>
 <body>
+<amp-ad id="myAd2" width="300" height="250"
+        type="doubleclick"
+        data-slot="/57778053/mobile_multisize_demo"
+        rtc-config='{
+            "vendors": {
+              "browsi": {"PUB_KEY": "pub-k", "SITE_KEY": "site-k"}
+            },
+            "timeoutMillis": 500
+          }'>
+</amp-ad>
 <p>Scroll down to see content</p>
 
 <div id="container">
@@ -113,7 +123,7 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
             "vendors": {
               "browsi": {"PUB_KEY": "pub-k", "SITE_KEY": "site-k"}
             },
-            "timeoutMillis": 800
+            "timeoutMillis": 500
           }'>
   </amp-ad>
 </div>
