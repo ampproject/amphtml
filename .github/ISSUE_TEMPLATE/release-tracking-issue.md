@@ -36,7 +36,7 @@ Note: remove the backticks (``) from the link.
 - [ ] Release <RELEASE_NUMBER> promoted to Stable channel (<CL submit time>)
 
 <!--
-If this release will become the next LTS release, add/update the checkboxes above as needed e.g.
+If this release will become the next LTS release (ie. if the Monday of this week was the last Monday of the month), add/update the checkboxes above as needed e.g.
 
 - [x] Release <RELEASE_NUMBER> will be the next LTS
 - [ ] Release <RELEASE_NUMBER> promoted to LTS (<CL submit time>)
