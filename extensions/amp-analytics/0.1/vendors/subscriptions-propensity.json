@@ -35,28 +35,32 @@
       "on": "subscriptions-paywall-activated",
       "request": "sendEvent",
       "vars": {
-        "event": "paywall"
+        "event": "paywall",
+        "active": "false"
       }
     },
     "onSelectOffer": {
       "on": "subscriptions-action-subscribe-started",
       "request": "sendEvent",
       "vars": {
-        "event": "offer_selected"
+        "event": "offer_selected",
+        "active": "true"
       }
     },
     "onStartBuyflow": {
       "on": "subscriptions-action-subscribe-started",
       "request": "sendEvent",
       "vars": {
-        "event": "payment_flow_start"
+        "event": "payment_flow_start",
+        "active": "true"
       }
     },
     "onPaymentComplete": {
       "on": "subscriptions-action-subscribe-success",
       "request": "sendEvent",
       "vars": {
-        "event": "payment_complete"
+        "event": "payment_complete",
+        "active": "true"
       }
     }
   },

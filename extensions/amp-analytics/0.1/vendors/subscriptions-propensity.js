@@ -58,6 +58,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'paywall',
+        'active': 'false',
       },
     },
     'onSelectOffer': {
@@ -65,6 +66,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'offer_selected',
+        'active': 'true',
       },
     },
     'onStartBuyflow': {
@@ -72,6 +74,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'payment_flow_start',
+        'active': 'true',
       },
     },
     'onPaymentComplete': {
@@ -79,6 +82,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'payment_complete',
+        'active': 'true',
       },
     },
   },
