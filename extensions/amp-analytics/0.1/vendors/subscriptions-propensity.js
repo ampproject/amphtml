@@ -20,18 +20,16 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
   'vars': {
     'clientId': 'CLIENT_ID(__gads)',
     'data':
-      '{"skus": "${skus}","source": "${source}","active": "${active}","product": "${product}"}',
+      '{"skus": "${skus}","source": "${source}","is_active": ${active},"product": "${product}"}',
   },
   'requests': {
-    'baseUrl': 'https://pubads.g.doubleclick.net/subopt',
     'baseParams':
-      'u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&' +
-      '_amp_source_origin=${sourceHost}',
-    'sendBase': '${baseUrl}/data?${baseParams}',
-    'stateParams': 'states=${publicationId}%3A${state}%3A${productId}',
-    'eventParams': 'events=${publicationId}%3A${event}%3A${data}',
-    'sendSubscriptionState': '${sendBase}&${stateParams}',
-    'sendEvent': '${sendBase}&${eventParams}',
+      'u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&_amp_source_origin=${sourceHost}',
+    'sendBase': 'https://pubads.g.doubleclick.net/subopt/data?${baseParams}',
+    'sendSubscriptionState':
+      '${sendBase}&states=$URLENCODE(${publicationId}:${state}:${productId})',
+    'sendEvent':
+      '${sendBase}&events=$URLENCODE(${publicationId}:${event}:${data})',
   },
   'triggers': {
     'onSubscribed': {
@@ -60,7 +58,6 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'paywall',
-        'active': 'false',
       },
     },
     'onSelectOffer': {
@@ -68,7 +65,6 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'offer_selected',
-        'active': 'true',
       },
     },
     'onStartBuyflow': {
@@ -76,7 +72,6 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'payment_flow_start',
-        'active': 'true',
       },
     },
     'onPaymentComplete': {
@@ -84,7 +79,6 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'payment_complete',
-        'active': 'true',
       },
     },
   },

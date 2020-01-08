@@ -1,15 +1,13 @@
 {
   "vars": {
-    "clientId": "CLIENT_ID(__gads)"
+    "clientId": "CLIENT_ID(__gads)",
+    "data": "{\"skus\": \"${skus}\",\"source\": \"${source}\",\"is_active\": ${active},\"product\": \"${product}\"}"
   },
   "requests": {
-    "baseUrl": "https://pubads.g.doubleclick.net/subopt",
     "baseParams": "u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&_amp_source_origin=${sourceHost}",
-    "sendBase": "${baseUrl}/data?${baseParams}",
-    "stateParams": "states=${publicationId}%3A${state}%3A${productId}",
-    "eventParams": "events=${publicationId}%3A${event}%3A${data}",
-    "sendSubscriptionState": "${sendBase}&${stateParams}",
-    "sendEvent": "${sendBase}&${eventParams}"
+    "sendBase": "https://pubads.g.doubleclick.net/subopt/data?${baseParams}",
+    "sendSubscriptionState": "${sendBase}&states=$URLENCODE(${publicationId}:${state}:${productId})",
+    "sendEvent": "${sendBase}&events=$URLENCODE(${publicationId}:${event}:${data})"
   },
   "triggers": {
     "onSubscribed": {
@@ -30,40 +28,35 @@
       "on": "subscriptions-action-showOffers-started",
       "request": "sendEvent",
       "vars": {
-        "event": "offers_shown",
-        "data": "{\"skus\": \"${skus}\",\"source\": \"${source}\",\"active\": \"${active}\"}"
+        "event": "offers_shown"
       }
     },
     "onPaywall": {
       "on": "subscriptions-paywall-activated",
       "request": "sendEvent",
       "vars": {
-        "event": "paywall",
-        "data": "{\"source\": \"${source}\",\"active\": \"false\"}"
+        "event": "paywall"
       }
     },
     "onSelectOffer": {
       "on": "subscriptions-action-subscribe-started",
       "request": "sendEvent",
       "vars": {
-        "event": "offer_selected",
-        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
+        "event": "offer_selected"
       }
     },
     "onStartBuyflow": {
       "on": "subscriptions-action-subscribe-started",
       "request": "sendEvent",
       "vars": {
-        "event": "payment_flow_start",
-        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
+        "event": "payment_flow_start"
       }
     },
     "onPaymentComplete": {
       "on": "subscriptions-action-subscribe-success",
       "request": "sendEvent",
       "vars": {
-        "event": "payment_complete",
-        "data": "{\"active\": \"true\",\"product\": \"${product}\"}"
+        "event": "payment_complete"
       }
     }
   },
