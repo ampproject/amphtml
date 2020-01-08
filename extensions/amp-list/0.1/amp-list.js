@@ -192,6 +192,7 @@ export class AmpList extends AMP.BaseElement {
     // is missing attributes in the constructor.
     this.initialSrc_ = this.element.getAttribute('src');
 
+    // TODO(amphtml): Decouple "initial content" from diffing in new version.
     if (this.element.hasAttribute('diffable')) {
       // Set container to the initial content, if it exists. This allows
       // us to DOM diff with the rendered result.
@@ -545,7 +546,8 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetchList_(opt_refresh = false) {
-    if (!this.element.getAttribute('src')) {
+    const elementSrc = this.element.getAttribute('src');
+    if (!elementSrc) {
       return Promise.resolve();
     }
     let fetch;
@@ -553,10 +555,16 @@ export class AmpList extends AMP.BaseElement {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
       fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
+        // Bail if the src has changed while resolving the xhr request.
+        if (elementSrc !== this.element.getAttribute('src')) {
+          return;
+        }
+
         const items = this.computeListItems_(data);
         if (this.loadMoreEnabled_) {
           this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
         }
+
         return this.scheduleRender_(
           items,
           /*opt_append*/ false,
@@ -620,6 +628,7 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_(refresh) {
+    const elementSrc = this.element.getAttribute('src');
     let request;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
@@ -678,7 +687,13 @@ export class AmpList extends AMP.BaseElement {
           throw user().createError('Error proxying amp-list templates', error);
         }
       )
-      .then(data => this.scheduleRender_(data, /* append */ false));
+      .then(data => {
+        // Bail if the src has changed while resolving the xhr request.
+        if (elementSrc !== this.element.getAttribute('src')) {
+          return;
+        }
+        this.scheduleRender_(data, /* append */ false);
+      });
   }
 
   /**
@@ -915,6 +930,12 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Updates `this.container_` by DOM diffing its children against `elements`.
+   *
+   * TODO(amphtml): The diffing feature is dark-launched and highly complex.
+   * See markElementForDiffing() and markContainerForDiffing_() for examples.
+   * Validate whether or not this complexity is warranted before fully launching
+   * (e.g. in a new version) and pushing documentation.
+   *
    * @param {!Element} container
    * @param {!Array<!Element>} elements
    * @private
