@@ -22,7 +22,7 @@
 
 'use strict';
 
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const JSON5 = require('json5');
 const log = require('fancy-log');
 const request = require('request');

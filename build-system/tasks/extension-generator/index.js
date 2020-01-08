@@ -17,7 +17,7 @@
 
 const argv = require('minimist')(process.argv.slice(2));
 const colors = require('ansi-colors');
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const log = require('fancy-log');
 
 const year = new Date().getFullYear();

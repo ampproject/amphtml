@@ -46,7 +46,7 @@
  * compressed binaries are reduced by ~2.8% depending on logging density.
  */
 const base62ascii = require('base62/lib/ascii');
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const {
   assertAliases,
   singletonFunctions,

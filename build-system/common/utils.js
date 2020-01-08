@@ -15,7 +15,7 @@
  */
 
 const argv = require('minimist')(process.argv.slice(2));
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const globby = require('globby');
 const log = require('fancy-log');
 const {gitDiffNameOnlyMaster} = require('../common/git');

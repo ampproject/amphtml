@@ -16,7 +16,7 @@
 'use strict';
 
 const colors = require('ansi-colors');
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const log = require('fancy-log');
 const {
   isTravisBuild,

@@ -15,7 +15,7 @@
  */
 
 const file = require('gulp-file');
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const gulp = require('gulp');
 const gulpWatch = require('gulp-watch');
 const {buildExtensions, extensions} = require('./extension-helpers');

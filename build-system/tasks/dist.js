@@ -16,7 +16,7 @@
 
 const colors = require('ansi-colors');
 const file = require('gulp-file');
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const gulp = require('gulp');
 const log = require('fancy-log');
 const {

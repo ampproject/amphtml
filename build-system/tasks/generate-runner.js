@@ -15,7 +15,7 @@
  */
 'use strict';
 
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const log = require('fancy-log');
 const {cyan, green, red} = require('ansi-colors');
 const {getOutput} = require('../common/exec');

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const log = require('fancy-log');
 const {cyan} = require('colors');
 

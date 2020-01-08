@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 'use strict';
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const {transformCss} = require('../jsify-css');
 
 async function createGoldenCss() {

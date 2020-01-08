@@ -84,7 +84,6 @@
     "fetch-mock": "8.2.1",
     "find-imports": "1.1.0",
     "formidable": "1.2.1",
-    "fs-extra": "8.1.0",
     "fuse.js": "3.4.6",
     "globby": "11.0.0",
     "google-closure-compiler": "20191111.0.0",
