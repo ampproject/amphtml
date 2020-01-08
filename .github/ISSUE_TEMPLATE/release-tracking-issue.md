@@ -36,9 +36,14 @@ Note: remove the backticks (``) from the link.
 - [ ] Release <RELEASE_NUMBER> pushed to production (<CL submit time>)
 
 <!--
+If this release will become the next LTS release, add/update the checkboxes above as needed e.g.
+
+- [x] Release <RELEASE_NUMBER> will be the next LTS
+- [ ] Release <RELEASE_NUMBER> pushed to LTS (<CL submit time>)
+
 If you perform cherry picks, add/update the checkboxes above as needed e.g.
 
-- [ ] Release `[<CHERRY_PICK_RELEASE_NUMBER>](...)` created with cherry picks.
+- [ ] Release `[<CHERRY_PICK_RELEASE_NUMBER>](...)` created with cherry picks
 - [ ] Release <CHERRY_PICK_RELEASE_NUMBER> pushed to Dev Channel
 -->
 
