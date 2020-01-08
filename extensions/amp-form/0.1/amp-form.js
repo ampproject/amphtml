@@ -400,6 +400,15 @@ export class AmpForm {
       true
     );
 
+    this.form_.addEventListener(
+      AmpEvents.FORM_VALUE_CHANGE,
+      e => {
+        checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+        this.validator_.onInput(e);
+      },
+      true
+    );
+
     //  Form verification is not supported when SSRing templates is enabled.
     if (!this.ssrTemplateHelper_.isEnabled()) {
       this.form_.addEventListener('change', e => {
