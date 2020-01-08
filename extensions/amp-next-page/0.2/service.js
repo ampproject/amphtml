@@ -15,8 +15,8 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.2.css';
+import {HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {Page, PageState} from './page';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
@@ -92,7 +92,7 @@ export class NextPageService {
     this.lastScrollTop_ = 0;
 
     /** @private {?Page} */
-    this.initialPage_ = null;
+    this.hostPage_ = null;
 
     /** @private {!Object<string, !Element>} */
     this.replaceableElements_ = {};
@@ -112,8 +112,8 @@ export class NextPageService {
    */
   build(element) {
     // Create a reference to the host page
-    this.initialPage_ = this.createInitialPage();
-    this.handleElementHiding(this.win_.document, true /** isHost */);
+    this.hostPage_ = this.createHostPage();
+    this.toggleHiddenAndReplaceableElements(this.win_.document);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
@@ -135,8 +135,8 @@ export class NextPageService {
     this.element_.appendChild(this.moreBox_);
 
     if (!this.pages_) {
-      this.pages_ = [this.initialPage_];
-      this.setLastFetchedPage(this.initialPage_);
+      this.pages_ = [this.hostPage_];
+      this.setLastFetchedPage(this.hostPage_);
     }
 
     this.getPagesPromise_().then(pages => {
@@ -211,18 +211,15 @@ export class NextPageService {
 
     // If no page is visible then the host page should be
     if (!this.pages_.some(page => page.isVisible())) {
-      this.initialPage_.setVisibility(VisibilityState.VISIBLE);
+      this.hostPage_.setVisibility(VisibilityState.VISIBLE);
     }
 
     // Hide elements if necessary
     this.pages_
       .filter(page => page.isVisible())
       .forEach(page =>
-        this.handleElementHiding(
-          page === this.initialPage_
-            ? this.win_.document
-            : /** @type {!Document} */ (dev().assertElement(page.document)),
-          page === this.initialPage_ /** isHost */
+        this.toggleHiddenAndReplaceableElements(
+          /** @type {!Document} */ (dev().assertElement(page.document))
         )
       );
   }
@@ -245,7 +242,7 @@ export class NextPageService {
         const shouldHide =
           page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
           page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT ||
-          page === this.initialPage_;
+          page === this.hostPage_;
         return shouldHide && page.isVisible();
       })
       .forEach(page => page.setVisibility(VisibilityState.HIDDEN));
@@ -263,7 +260,7 @@ export class NextPageService {
    * the provided page
    * @param {?Page=} page
    */
-  setTitlePage(page = this.initialPage_) {
+  setTitlePage(page = this.hostPage_) {
     if (!page) {
       dev().warn(TAG, 'setTitlePage called before next-page-service is built');
       return;
@@ -278,7 +275,7 @@ export class NextPageService {
    * replace when they become visible
    */
   initializeHistory() {
-    const {title, url} = this.initialPage_;
+    const {title, url} = this.hostPage_;
     this.history_.push(undefined /** opt_onPop */, {title, url});
   }
 
@@ -286,13 +283,13 @@ export class NextPageService {
    *
    * @return {!Page}
    */
-  createInitialPage() {
+  createHostPage() {
     const doc = this.win_.document;
     const {title, location} = doc;
     const {href: url} = location;
     const image =
       parseSchemaImage(doc) || parseOgImage(doc) || parseFavicon(doc) || '';
-    return new Page(
+    return new HostPage(
       this,
       {
         url,
@@ -300,7 +297,8 @@ export class NextPageService {
         image,
       },
       PageState.INSERTED /** initState */,
-      VisibilityState.VISIBLE /** initVisibility */
+      VisibilityState.VISIBLE /** initVisibility */,
+      doc /** initDoc */
     );
   }
 
@@ -361,46 +359,47 @@ export class NextPageService {
     // TODO(wassgha): Allow amp-analytics after bug bash
     toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
     // Make sure all hidden elements are initially invisible
-    this.handleElementHiding(doc, false /** isHost */, false /** isVisible */);
+    this.toggleHiddenAndReplaceableElements(doc, false /** isVisible */);
   }
 
   /**
    * Hides or shows elements based on the `amp-next-page-hide` and
    * `amp-next-page-replace` attributes
    * @param {!Document} doc Document to attach.
-   * @param {boolean=} isHost Whether this is the initial page
    * @param {boolean=} isVisible Whether this page is visible or not
    */
-  handleElementHiding(doc, isHost = false, isVisible = true) {
+  toggleHiddenAndReplaceableElements(doc, isVisible = true) {
     // Hide elements that have [amp-next-page-hide] on child documents
-    if (!isHost) {
+    if (doc !== this.hostPage_.document) {
       toArray(doc.querySelectorAll('[amp-next-page-hide]')).forEach(element =>
         toggle(element, false /** opt_display */)
       );
     }
 
-    // Replace elements that have [amp-next-page-replace]
-    if (isVisible) {
-      toArray(doc.querySelectorAll('[amp-next-page-replace]')).forEach(
-        element => {
-          if (!element.getAttribute('amp-next-page-replace')) {
-            element.setAttribute(
-              'amp-next-page-replace',
-              String(Date.now() + Math.floor(Math.random() * 100))
-            );
-          }
-          const id = element.getAttribute('amp-next-page-replace');
-          if (
-            this.replaceableElements_[id] &&
-            this.replaceableElements_[id] !== element
-          ) {
-            toggle(this.replaceableElements_[id], false /** opt_display */);
-          }
-          this.replaceableElements_[id] = element;
-          toggle(element, true /** opt_display */);
-        }
-      );
+    // Element replacing is only concerned with the visible page
+    if (!isVisible) {
+      return;
     }
+
+    // Replace elements that have [amp-next-page-replace]
+    toArray(doc.querySelectorAll('[amp-next-page-replace]')).forEach(
+      element => {
+        let uniqueId = element.getAttribute('amp-next-page-replace');
+        if (!uniqueId) {
+          uniqueId = String(Date.now() + Math.floor(Math.random() * 100));
+          element.setAttribute('amp-next-page-replace', uniqueId);
+        }
+
+        if (
+          this.replaceableElements_[uniqueId] &&
+          this.replaceableElements_[uniqueId] !== element
+        ) {
+          toggle(this.replaceableElements_[uniqueId], false /** opt_display */);
+        }
+        this.replaceableElements_[uniqueId] = element;
+        toggle(element, true /** opt_display */);
+      }
+    );
   }
 
   /**
