@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import {CSS} from '../../../build/amp-mathml-0.1.css';
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
@@ -34,7 +36,10 @@ export class AmpMathml extends AMP.BaseElement {
    *
    */
   preconnectCallback() {
-    this.preconnect.url('https://cdnjs.cloudflare.com');
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cdnjs.cloudflare.com'
+    );
   }
 
   /**
@@ -72,9 +77,11 @@ export class AmpMathml extends AMP.BaseElement {
           // Don't change the width if not inlined.
           data['width'] = undefined;
         }
-        this.element
-          .getResources()
-          ./*OK*/ changeSize(this.element, data['height'], data['width']);
+        Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
+          this.element,
+          data['height'],
+          data['width']
+        );
       },
       /* opt_is3P */ true
     );

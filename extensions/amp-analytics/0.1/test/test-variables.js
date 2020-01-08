@@ -60,12 +60,12 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       'c': 'https://www.google.com/a?b=1&c=2',
     };
 
-    function check(template, expected, vars) {
-      const actual = variables.expandTemplate(
-        template,
-        new ExpansionOptions(vars),
-        fakeElement
-      );
+    function check(template, expected, vars, opt_freeze) {
+      const expansion = new ExpansionOptions(vars);
+      if (opt_freeze) {
+        expansion.freezeVar(opt_freeze);
+      }
+      const actual = variables.expandTemplate(template, expansion, fakeElement);
       return expect(actual).to.eventually.equal(expected);
     }
 
@@ -153,17 +153,15 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         ));
 
     it('respect freeze variables', () => {
-      const vars = new ExpansionOptions({
-        'fooParam': 'QUERY_PARAM',
-        'freeze': 'error',
-      });
-      vars.freezeVar('freeze');
-      const actual = variables.expandTemplate(
+      return check(
         '${fooParam(foo,bar)}${nonfreeze}${freeze}',
-        vars,
-        fakeElement
+        'bar${freeze}',
+        {
+          'fooParam': 'QUERY_PARAM',
+          'freeze': 'error',
+        },
+        'freeze'
       );
-      return expect(actual).to.eventually.equal('bar${freeze}');
     });
 
     it('expands array vars', () => {
@@ -219,11 +217,9 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     let doc;
     let win;
     let urlReplacementService;
-    let sandbox;
     let analyticsElement;
 
     beforeEach(() => {
-      sandbox = env.sandbox;
       win = env.win;
       doc = win.document;
       installLinkerReaderService(win);
@@ -245,7 +241,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     }
 
     it('handles consecutive macros in inner arguments', () => {
-      sandbox.useFakeTimers(123456789);
+      env.sandbox.useFakeTimers(123456789);
       win.location.href = 'https://example.com/?test=yes';
       return check(
         '$IF(QUERY_PARAM(test), 1.$SUBSTR(TIMESTAMP, 0, 10)QUERY_PARAM(test), ``)',
@@ -254,7 +250,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('handles consecutive macros w/o parens in inner arguments', () => {
-      sandbox.useFakeTimers(123456789);
+      env.sandbox.useFakeTimers(123456789);
       win.location.href = 'https://example.com/?test=yes';
       return check('$IF(QUERY_PARAM(test), 1.TIMESTAMP, ``)', '1.123456789');
     });
@@ -265,7 +261,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       }));
 
     it('should not trim right of string before macro', () => {
-      sandbox.useFakeTimers(123456789);
+      env.sandbox.useFakeTimers(123456789);
       win.location.href = 'https://example.com/?test=yes';
       return check(
         '$IF(QUERY_PARAM(test), foo TIMESTAMP, ``)',
@@ -388,7 +384,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('replaces LINKER_PARAM', () => {
       const linkerReader = linkerReaderServiceFor(win);
-      const linkerReaderStub = sandbox.stub(linkerReader, 'get');
+      const linkerReaderStub = env.sandbox.stub(linkerReader, 'get');
       linkerReaderStub.withArgs('gl', 'cid').returns('a1b2c3');
       linkerReaderStub.withArgs('gl', 'gclid').returns(123);
       return check(
@@ -415,7 +411,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('COOKIE resolves to empty string when inabox', async () => {
       doc.cookie = 'test=123';
-      env.win.AMP_MODE.runtime = 'inabox';
+      env.win.__AMP_MODE.runtime = 'inabox';
       await check('COOKIE(test)', '');
       doc.cookie = '';
     });

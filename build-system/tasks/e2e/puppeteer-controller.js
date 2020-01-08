@@ -301,8 +301,11 @@ class PuppeteerController {
     this.isXpathInstalled_ = true;
 
     const scripts = await Promise.all([
-      fs.readFileAsync('third_party/wgxpath/wgxpath.js', 'utf8'),
-      fs.readFileAsync('build-system/tasks/e2e/driver/query-xpath.js', 'utf8'),
+      fs.promises.readFile('third_party/wgxpath/wgxpath.js', 'utf8'),
+      fs.promises.readFile(
+        'build-system/tasks/e2e/driver/query-xpath.js',
+        'utf8'
+      ),
     ]);
     const frame = await this.getCurrentFrame_();
     await frame.evaluate(scripts.join('\n\n'));
@@ -523,7 +526,9 @@ class PuppeteerController {
     try {
       const {windowId} = await browser._connection.send(
         'Browser.getWindowForTarget',
-        {targetId}
+        {
+          targetId,
+        }
       );
 
       // Resize.
@@ -559,8 +564,10 @@ class PuppeteerController {
    * @override
    */
   async getActiveElement() {
-    const getter = () => document.activeElement;
-    const element = await this.evaluate(getter);
+    const root = await this.getRoot_();
+    const getter = root =>
+      root.activeElement || root.ownerDocument.activeElement;
+    const element = await this.evaluate(getter, root);
     return new ElementHandle(element);
   }
 
@@ -664,9 +671,32 @@ class PuppeteerController {
     this.currentFrame_ = frame;
   }
 
-  async switchToShadow(handle) {
-    const shadowHost = handle.getElement();
+  /**
+   * Switch controller to shadowRoot body hosted by given element.
+   * @param {!ElementHandle<!PuppeteerHandle} handle
+   * @return {!Promise}
+   */
+  switchToShadow(handle) {
     const getter = shadowHost => shadowHost.shadowRoot.body;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  /**
+   * Switch controller to shadowRoot hosted by given element.
+   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @return {!Promise}
+   */
+  switchToShadowRoot(handle) {
+    const getter = shadowHost => shadowHost.shadowRoot;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  /**.
+   * @param {!ElementHandle<!PuppeteerHandle>} handle
+   * @param {!Function} getter
+   */
+  async switchToShadowInternal_(handle, getter) {
+    const shadowHost = handle.getElement();
     const shadowRootBodyHandle = await this.evaluate(getter, shadowHost);
     this.shadowRoot_ = shadowRootBodyHandle.asElement();
   }

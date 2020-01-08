@@ -18,9 +18,9 @@ describes.endtoend(
   'amp-script e2e',
   {
     testUrl: 'http://localhost:8000/test/manual/amp-script/test1.amp.html',
-    experiments: ['amp-script'],
     initialRect: {width: 600, height: 600},
     environments: ['single'],
+    browsers: ['chrome', 'safari'],
   },
   async env => {
     let controller;

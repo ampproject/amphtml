@@ -21,12 +21,13 @@ import {
   parseSchemaImage,
   setMediaSession,
 } from '../../../src/mediasession-helper';
-import {Layout} from '../../../src/layout';
+import {Layout, isLayoutSizeFixed} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 const TAG = 'amp-audio';
 
@@ -50,7 +51,7 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+    return isLayoutSizeFixed(layout);
   }
 
   /** @override */
@@ -64,6 +65,38 @@ export class AmpAudio extends AMP.BaseElement {
 
     this.registerAction('play', this.play_.bind(this));
     this.registerAction('pause', this.pause_.bind(this));
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (!this.audio_) {
+      return;
+    }
+
+    const src = mutations['src'];
+    const controlsList = mutations['controlsList'];
+    const loop = mutations['loop'];
+
+    if (src !== undefined || controlsList !== undefined || loop !== undefined) {
+      if (src !== undefined) {
+        assertHttpsUrl(src, this.element);
+      }
+      this.propagateAttributes(['src', 'loop', 'controlsList'], this.audio_);
+    }
+
+    const artist = mutations['artist'];
+    const title = mutations['title'];
+    const album = mutations['album'];
+    const artwork = mutations['artwork'];
+
+    if (
+      artist !== undefined ||
+      title !== undefined ||
+      album !== undefined ||
+      artwork !== undefined
+    ) {
+      this.updateMetadata_();
+    }
   }
 
   /**
@@ -109,6 +142,13 @@ export class AmpAudio extends AMP.BaseElement {
     this.audio_ = audio;
 
     listen(this.audio_, 'playing', () => this.audioPlaying_());
+
+    listen(this.audio_, 'play', () =>
+      triggerAnalyticsEvent(this.element, 'audio-play')
+    );
+    listen(this.audio_, 'pause', () =>
+      triggerAnalyticsEvent(this.element, 'audio-pause')
+    );
   }
 
   /** @override */
@@ -117,7 +157,18 @@ export class AmpAudio extends AMP.BaseElement {
     if (layout !== Layout.NODISPLAY) {
       this.buildAudioElement();
     }
+    this.updateMetadata_();
 
+    // Resolve layoutCallback right away if the audio won't preload.
+    if (this.element.getAttribute('preload') === 'none') {
+      return this.audio_;
+    }
+
+    return this.loadPromise(this.audio_);
+  }
+
+  /** @private */
+  updateMetadata_() {
     // Gather metadata
     const {document} = this.getAmpDoc().win;
     const artist = this.getElementAttribute_('artist') || '';
@@ -139,13 +190,6 @@ export class AmpAudio extends AMP.BaseElement {
       album,
       artwork: [{src: artwork}],
     };
-
-    // Resolve layoutCallback right away if the audio won't preload.
-    if (this.element.getAttribute('preload') === 'none') {
-      return this.audio_;
-    }
-
-    return this.loadPromise(this.audio_);
   }
 
   /** @override */

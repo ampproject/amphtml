@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-export const GEMIUS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const GEMIUS_CONFIG = jsonLiteral({
   'vars': {
     'dnt': '0',
   },
   'requests': {
     'base':
-      'https://${prefix}.hit.gemius.pl/_${timestamp}/redot.gif?l=91&id=${identifier}&screen=${screenWidth}x${screenHeight}&window=${viewportWidth}x${viewportHeight}&fr=1&href=${sourceUrl}&ref=${documentReferrer}&extra=gemamp%3D1%7Campid%3D${clientId(gemius)}%7C${extraparams}&nc=${dnt}',
+      'https://${prefix}.hit.gemius.pl/_${timestamp}/redot.gif?l=91&id=${identifier}&tz=${timezone}&col=${screenColorDepth}&screen=${screenWidth}x${screenHeight}&window=${viewportWidth}x${viewportHeight}&fr=1&href=${sourceUrl}&ref=${documentReferrer}&sarg=${canonicalUrl}&extra=gemamp%3D1%7Campid%3D${clientId(gemius)}%7C${extraparams}&nc=${dnt}',
     'pageview': '${base}&et=view&hsrc=1',
     'event': '${base}&et=action&hsrc=3',
   },
@@ -36,3 +38,5 @@ export const GEMIUS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {GEMIUS_CONFIG};

@@ -122,9 +122,9 @@ export class AmpSelector extends AMP.BaseElement {
     this.registerAction(
       'selectUp',
       invocation => {
-        const {args} = invocation;
+        const {args, trust} = invocation;
         const delta = args && args['delta'] !== undefined ? -args['delta'] : -1;
-        this.select_(delta);
+        this.select_(delta, trust);
       },
       ActionTrust.LOW
     );
@@ -132,9 +132,9 @@ export class AmpSelector extends AMP.BaseElement {
     this.registerAction(
       'selectDown',
       invocation => {
-        const {args} = invocation;
+        const {args, trust} = invocation;
         const delta = args && args['delta'] !== undefined ? args['delta'] : 1;
-        this.select_(delta);
+        this.select_(delta, trust);
       },
       ActionTrust.LOW
     );
@@ -142,7 +142,7 @@ export class AmpSelector extends AMP.BaseElement {
     this.registerAction(
       'toggle',
       invocation => {
-        const {args} = invocation;
+        const {args, trust} = invocation;
         userAssert(args['index'] >= 0, "'index' must be greater than 0");
         userAssert(
           args['index'] < this.elements_.length,
@@ -150,7 +150,9 @@ export class AmpSelector extends AMP.BaseElement {
             'be less than the length of options in the <amp-selector>'
         );
         if (args && args['index'] !== undefined) {
-          this.toggle_(args['index'], args['value']);
+          return this.toggle_(args['index'], args['value'], trust);
+        } else {
+          return Promise.reject("'index' must be specified");
         }
       },
       ActionTrust.LOW
@@ -361,7 +363,8 @@ export class AmpSelector extends AMP.BaseElement {
       }
       // Newly picked option should always have focus.
       this.updateFocus_(el);
-      this.fireSelectEvent_(el);
+      // User gesture trigger is "high" trust.
+      this.fireSelectEvent_(el, ActionTrust.HIGH);
     });
   }
 
@@ -397,35 +400,38 @@ export class AmpSelector extends AMP.BaseElement {
   /**
    * Handles toggle action.
    * @param {number} index
-   * @param {boolean=} opt_value
+   * @param {boolean|undefined} value
+   * @param {!ActionTrust} trust
+   * @return {!Promise}
    * @private
    */
-  toggle_(index, opt_value) {
+  toggle_(index, value, trust) {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
     const el = this.elements_[index];
     const indexCurrentStatus = el.hasAttribute('selected');
-    const indexFinalStatus =
-      opt_value !== undefined ? opt_value : !indexCurrentStatus;
+    const indexFinalStatus = value !== undefined ? value : !indexCurrentStatus;
     const selectedIndex = this.elements_.indexOf(this.selectedElements_[0]);
 
     if (indexFinalStatus === indexCurrentStatus) {
-      return;
+      return Promise.resolve();
     }
 
     // There is a change of the `selected` attribute for the element
-    if (selectedIndex !== index) {
-      this.setSelection_(el);
-      const selectedEl = this.elements_[selectedIndex];
-      if (selectedEl) {
-        this.clearSelection_(selectedEl);
+    return this.mutateElement(() => {
+      if (selectedIndex !== index) {
+        this.setSelection_(el);
+        const selectedEl = this.elements_[selectedIndex];
+        if (selectedEl) {
+          this.clearSelection_(selectedEl);
+        }
+      } else {
+        this.clearSelection_(el);
       }
-    } else {
-      this.clearSelection_(el);
-    }
-
-    this.fireSelectEvent_(el);
+      // Propagate the trust of the originating action.
+      this.fireSelectEvent_(el, trust);
+    });
   }
 
   /**
@@ -433,9 +439,10 @@ export class AmpSelector extends AMP.BaseElement {
    * 'targetOption' - option value of the selected or deselected element.
    * 'selectedOptions' - array of option values of selected elements.
    * @param {!Element} el The element that was selected or deslected.
+   * @param {!ActionTrust} trust
    * @private
    */
-  fireSelectEvent_(el) {
+  fireSelectEvent_(el, trust) {
     const name = 'select';
     const selectEvent = createCustomEvent(
       this.win,
@@ -445,15 +452,24 @@ export class AmpSelector extends AMP.BaseElement {
         'selectedOptions': this.selectedOptions_(),
       })
     );
-    this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
+    // TODO(wg-ui-and-a11y): Remove this in Q1 2020.
+    if (trust < ActionTrust.DEFAULT) {
+      user().warn(
+        TAG,
+        '"select" event now has the same trust as the originating action. ' +
+          'See https://github.com/ampproject/amphtml/issues/24443 for details.'
+      );
+    }
+    this.action_.trigger(this.element, name, selectEvent, trust);
   }
 
   /**
    * Handles selectUp events.
    * @param {number} delta
+   * @param {!ActionTrust} trust
    * @private
    */
-  select_(delta) {
+  select_(delta, trust) {
     // Change the selection to the next element in the specified direction.
     // The selection should loop around if the user attempts to go one
     // past the beginning or end.
@@ -474,7 +490,8 @@ export class AmpSelector extends AMP.BaseElement {
     }
 
     this.setInputs_();
-    this.fireSelectEvent_(el);
+    // Propagate the trust of the source action.
+    this.fireSelectEvent_(el, trust);
   }
 
   /**
@@ -492,7 +509,9 @@ export class AmpSelector extends AMP.BaseElement {
       case Keys.LEFT_ARROW: /* fallthrough */
       case Keys.UP_ARROW: /* fallthrough */
       case Keys.RIGHT_ARROW: /* fallthrough */
-      case Keys.DOWN_ARROW:
+      case Keys.DOWN_ARROW: /* fallthrough */
+      case Keys.HOME: /* fallthrough */
+      case Keys.END:
         if (this.kbSelectMode_ != KEYBOARD_SELECT_MODES.NONE) {
           return this.navigationKeyDownHandler_(event);
         }
@@ -532,6 +551,14 @@ export class AmpSelector extends AMP.BaseElement {
         // Down is considered 'next' in both LTR and RTL.
         dir = 1;
         break;
+      case Keys.HOME:
+        // Home looks for first nonhidden element, in 'next' direction.
+        dir = 1;
+        break;
+      case Keys.END:
+        // End looks for last nonhidden element, in 'previous' direction.
+        dir = -1;
+        break;
       default:
         return Promise.resolve();
     }
@@ -542,6 +569,17 @@ export class AmpSelector extends AMP.BaseElement {
 
     return this.getElementsSizes_().then(sizes => {
       const originalIndex = this.focusedIndex_;
+
+      // For Home/End keys, start at end/beginning respectively and wrap around
+      switch (event.key) {
+        case Keys.HOME:
+          this.focusedIndex_ = this.elements_.length - 1;
+          break;
+        case Keys.END:
+          this.focusedIndex_ = 0;
+          break;
+      }
+
       do {
         // Change the focus to the next element in the specified direction.
         // The selection should loop around if the user attempts to go one

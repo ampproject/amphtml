@@ -15,6 +15,7 @@
  */
 
 import {MessageType} from '../../../src/3p-frame-messaging';
+import {Services} from '../../../src/services';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -45,17 +46,20 @@ class AmpTwitter extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    preloadBootstrap(this.win, this.preconnect);
+    const preconnect = Services.preconnectFor(this.win);
+    const ampdoc = this.getAmpDoc();
+    preloadBootstrap(this.win, ampdoc, preconnect);
     // Hosts the script that renders tweets.
-    this.preconnect.preload(
+    preconnect.preload(
+      ampdoc,
       'https://platform.twitter.com/widgets.js',
       'script'
     );
     // This domain serves the actual tweets as JSONP.
-    this.preconnect.url('https://syndication.twitter.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://syndication.twitter.com', opt_onLayout);
     // All images
-    this.preconnect.url('https://pbs.twimg.com', opt_onLayout);
-    this.preconnect.url('https://cdn.syndication.twimg.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://pbs.twimg.com', opt_onLayout);
+    preconnect.url(ampdoc, 'https://cdn.syndication.twimg.com', opt_onLayout);
   }
 
   /** @override */
@@ -120,6 +124,7 @@ class AmpTwitter extends AMP.BaseElement {
    */
   updateForSuccessState_(height) {
     this.mutateElement(() => {
+      this.toggleLoading(false);
       if (this.userPlaceholder_) {
         this.togglePlaceholder(false);
       }
@@ -128,7 +133,7 @@ class AmpTwitter extends AMP.BaseElement {
   }
 
   /**
-   * Updates wheen the tweet that failed to load. This uses the fallback
+   * Updates when the tweet failed to load. This uses the fallback
    * provided if available. If not, it uses the user specified placeholder.
    * @private
    */
@@ -137,6 +142,7 @@ class AmpTwitter extends AMP.BaseElement {
     const content = fallback || this.userPlaceholder_;
 
     this.mutateElement(() => {
+      this.toggleLoading(false);
       if (fallback) {
         this.togglePlaceholder(false);
         this.toggleFallback(true);
@@ -146,6 +152,14 @@ class AmpTwitter extends AMP.BaseElement {
         this./*OK*/ changeHeight(content./*OK*/ offsetHeight);
       }
     });
+  }
+
+  /**
+   * amp-twitter reuses the loading indicator when id changes via bind mutation
+   * @override
+   */
+  isLoadingReused() {
+    return true;
   }
 
   /** @override */
@@ -181,6 +195,15 @@ class AmpTwitter extends AMP.BaseElement {
       this.iframe_ = null;
     }
     return true;
+  }
+
+  /** @override */
+  mutatedAttributesCallback(mutations) {
+    if (this.iframe_ && mutations['data-tweetid'] != null) {
+      this.unlayoutCallback();
+      this.toggleLoading(true, /* opt_force */ true);
+      this.layoutCallback();
+    }
   }
 }
 

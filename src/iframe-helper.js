@@ -21,7 +21,7 @@ import {dict} from './utils/object';
 import {getData} from './event-helper';
 import {parseUrlDeprecated} from './url';
 import {remove} from './utils/array';
-import {setStyle} from './style';
+import {setStyle, toggle} from './style';
 import {tryParseJson} from './json';
 
 /**
@@ -29,6 +29,13 @@ import {tryParseJson} from './json';
  * @type {string}
  */
 const UNLISTEN_SENTINEL = 'unlisten';
+
+/**
+ * The iframe feature policy that forces the iframe to pause when it's not
+ * display.
+ * See https://github.com/dtapuska/iframe-freeze.
+ */
+const EXECUTION_WHILE_NOT_RENDERED = 'execution-while-not-rendered';
 
 /**
  * @typedef {{
@@ -522,7 +529,12 @@ export function looksLikeTrackingIframe(element) {
 
 // Most common ad sizes
 // Array of [width, height] pairs.
-const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
+const adSizes = [
+  [300, 250],
+  [320, 50],
+  [300, 50],
+  [320, 100],
+];
 
 /**
  * Guess whether this element might be an ad.
@@ -614,4 +626,36 @@ export function isInFie(element) {
     element.classList.contains('i-amphtml-fie') ||
     !!closestAncestorElementBySelector(element, '.i-amphtml-fie')
   );
+}
+
+/**
+ * @param {!HTMLIFrameElement} iframe
+ */
+export function makePausable(iframe) {
+  const oldAllow = (iframe.getAttribute('allow') || '').trim();
+  iframe.setAttribute(
+    'allow',
+    `${EXECUTION_WHILE_NOT_RENDERED} 'none';` + oldAllow
+  );
+}
+
+/**
+ * @param {!HTMLIFrameElement} iframe
+ * @return {boolean}
+ */
+export function isPausable(iframe) {
+  return (
+    !!iframe.featurePolicy &&
+    iframe.featurePolicy.features().indexOf(EXECUTION_WHILE_NOT_RENDERED) !=
+      -1 &&
+    !iframe.featurePolicy.allowsFeature(EXECUTION_WHILE_NOT_RENDERED)
+  );
+}
+
+/**
+ * @param {!HTMLIFrameElement} iframe
+ * @param {boolean} paused
+ */
+export function setPaused(iframe, paused) {
+  toggle(iframe, !paused);
 }

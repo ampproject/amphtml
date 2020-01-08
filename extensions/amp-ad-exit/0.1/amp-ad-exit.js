@@ -90,7 +90,9 @@ export class AmpAdExit extends AMP.BaseElement {
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
-  exit({args, event}) {
+  exit(invocation) {
+    const {args} = invocation;
+    let {event} = invocation;
     const target = this.targets_[args['target']];
     userAssert(target, `Exit target not found: '${args['target']}'`);
     userAssert(event, 'Unexpected null event');

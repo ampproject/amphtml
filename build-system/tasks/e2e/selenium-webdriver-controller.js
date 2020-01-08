@@ -37,6 +37,7 @@ const KeyToSeleniumMap = {
   [Key.Enter]: SeleniumKey.ENTER,
   [Key.Escape]: SeleniumKey.ESCAPE,
   [Key.Tab]: SeleniumKey.TAB,
+  [Key.CtrlV]: SeleniumKey.chord(SeleniumKey.CONTROL, 'v'),
 };
 
 /**
@@ -230,8 +231,11 @@ class SeleniumWebDriverController {
     this.isXpathInstalled_ = true;
 
     const scripts = await Promise.all([
-      fs.readFileAsync('third_party/wgxpath/wgxpath.js', 'utf8'),
-      fs.readFileAsync('build-system/tasks/e2e/driver/query-xpath.js', 'utf8'),
+      fs.promises.readFile('third_party/wgxpath/wgxpath.js', 'utf8'),
+      fs.promises.readFile(
+        'build-system/tasks/e2e/driver/query-xpath.js',
+        'utf8'
+      ),
     ]);
     await this.driver.executeScript(scripts.join('\n\n'));
   }
@@ -242,7 +246,8 @@ class SeleniumWebDriverController {
    */
   async getActiveElement() {
     const root = await this.getRoot_();
-    const getter = root => root.parentNode.activeElement;
+    const getter = root =>
+      root.activeElement || root.ownerDocument.activeElement;
     const activeElement = await this.driver.executeScript(getter, root);
     return new ElementHandle(activeElement);
   }
@@ -256,6 +261,17 @@ class SeleniumWebDriverController {
     const getter = root => root.ownerDocument.documentElement;
     const documentElement = await this.driver.executeScript(getter, root);
     return new ElementHandle(documentElement);
+  }
+
+  /**
+   * @return {!ControllerPromise<string>}
+   * @override
+   */
+  getCurrentUrl() {
+    return new ControllerPromise(
+      this.driver.getCurrentUrl(),
+      this.getWaitFn_(() => this.driver.getCurrentUrl())
+    );
   }
 
   /**
@@ -405,6 +421,13 @@ class SeleniumWebDriverController {
       webElement.isEnabled(),
       this.getWaitFn_(() => webElement.isEnabled())
     );
+  }
+  /**
+   * @return {!Promise<Array<string>>}
+   * @override
+   */
+  async getAllWindows() {
+    return await this.driver.getAllWindowHandles();
   }
 
   /**
@@ -589,6 +612,15 @@ class SeleniumWebDriverController {
   }
 
   /**
+   * @param {string} handle
+   * @return {!Promise}
+   * @override
+   */
+  async switchToWindow(handle) {
+    await this.driver.switchTo().window(handle);
+  }
+
+  /**
    * @param {!ElementHandle<!WebElement>} handle
    * @return {!Promise}
    */
@@ -610,12 +642,33 @@ class SeleniumWebDriverController {
     await this.driver.switchTo().defaultContent();
   }
 
+  /**
+   * Switch controller to shadowRoot body hosted by given element.
+   * @param {!ElementHandle<!WebElement>} handle
+   * @return {!Promise}
+   */
   async switchToShadow(handle) {
+    const getter = shadowHost => shadowHost.shadowRoot.body;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  /**
+   * Switch controller to shadowRoot hosted by given element.
+   * @param {!ElementHandle<!WebElement>} handle
+   * @return {!Promise}
+   */
+  async switchToShadowRoot(handle) {
+    const getter = shadowHost => shadowHost.shadowRoot;
+    return this.switchToShadowInternal_(handle, getter);
+  }
+
+  /**.
+   * @param {!ElementHandle<!WebElement>} handle
+   * @param {!Function} getter
+   */
+  async switchToShadowInternal_(handle, getter) {
     const shadowHost = handle.getElement();
-    const shadowRootBody = await this.evaluate(
-      shadowHost => shadowHost.shadowRoot.body,
-      shadowHost
-    );
+    const shadowRootBody = await this.evaluate(getter, shadowHost);
     this.shadowRoot_ = shadowRootBody;
   }
 

@@ -36,35 +36,30 @@ describe('Logging', () => {
   const RETURNS_ERROR = () => LogLevel.ERROR;
   const RETURNS_OFF = () => LogLevel.OFF;
 
-  let sandbox;
   let mode;
   let win;
   let logSpy;
   let timeoutSpy;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-
     mode = {};
-    window.AMP_MODE = mode;
+    window.__AMP_MODE = mode;
 
-    logSpy = sandbox.spy();
-    timeoutSpy = sandbox.spy();
+    logSpy = window.sandbox.spy();
+    timeoutSpy = window.sandbox.spy();
     win = {
       console: {
         log: logSpy,
       },
       location: {hash: ''},
       setTimeout: timeoutSpy,
-      reportError: error => error,
+      __AMP_REPORT_ERROR: error => error,
     };
-    sandbox.stub(self, 'reportError').callsFake(error => error);
+    window.sandbox.stub(self, '__AMP_REPORT_ERROR').callsFake(error => error);
   });
 
   afterEach(() => {
-    sandbox.restore();
-    sandbox = null;
-    window.AMP_MODE = undefined;
+    window.__AMP_MODE = undefined;
   });
 
   describe('Level', () => {
@@ -112,10 +107,10 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(4);
-      expect(logSpy.args[0][0]).to.equal('fine');
-      expect(logSpy.args[1][0]).to.equal('info');
-      expect(logSpy.args[2][0]).to.equal('warn');
-      expect(logSpy.args[3][0]).to.equal('error');
+      expect(logSpy.getCall(0)).to.be.calledWith('[test-log] fine');
+      expect(logSpy.getCall(1)).to.be.calledWith('[test-log] info');
+      expect(logSpy.getCall(2)).to.be.calledWith('[test-log] warn');
+      expect(logSpy.getCall(3)).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -129,9 +124,9 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(3);
-      expect(logSpy.args[0][0]).to.equal('info');
-      expect(logSpy.args[1][0]).to.equal('warn');
-      expect(logSpy.args[2][0]).to.equal('error');
+      expect(logSpy.getCall(0)).to.be.calledWith('[test-log] info');
+      expect(logSpy.getCall(1)).to.be.calledWith('[test-log] warn');
+      expect(logSpy.getCall(2)).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -145,8 +140,8 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.have.callCount(2);
-      expect(logSpy.args[0][0]).to.equal('warn');
-      expect(logSpy.args[1][0]).to.equal('error');
+      expect(logSpy.getCall(0)).to.be.calledWith('[test-log] warn');
+      expect(logSpy.getCall(1)).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -160,7 +155,7 @@ describe('Logging', () => {
       log.error('test-log', 'error');
 
       expect(logSpy).to.be.calledOnce;
-      expect(logSpy.args[0][0]).to.equal('error');
+      expect(logSpy).to.be.calledWith('[test-log] error');
       expect(timeoutSpy).to.have.not.been.called;
     });
 
@@ -628,7 +623,7 @@ describe('Logging', () => {
     let clock;
 
     beforeEach(() => {
-      clock = sandbox.useFakeTimers();
+      clock = window.sandbox.useFakeTimers();
       restoreAsyncErrorThrows();
     });
 
@@ -732,20 +727,17 @@ describe('Logging', () => {
   });
 
   describe('embed error', () => {
-    let sandbox;
     let iframe;
     let element;
     let element1;
     let element2;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
       iframe = document.createElement('iframe');
       document.body.appendChild(iframe);
     });
 
     afterEach(() => {
-      sandbox.restore();
       document.body.removeChild(iframe);
     });
 

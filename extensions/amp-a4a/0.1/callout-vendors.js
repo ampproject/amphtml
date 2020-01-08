@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {getMode} from '../../../src/mode';
+import {jsonConfiguration} from '../../../src/json';
 
 //////////////////////////////////////////////////////////////////
 //                                                              //
@@ -36,7 +37,7 @@ import {getMode} from '../../../src/mode';
 let RtcVendorDef;
 
 /** @const {!Object<string, RtcVendorDef>} */
-export const RTC_VENDORS = {
+const RTC_VENDORS = jsonConfiguration({
   ////////////////////////////////////////////////////////////////////
   //                                                                //
   //              !!!      IMPORTANT NOTE     !!!                   //
@@ -59,14 +60,14 @@ export const RTC_VENDORS = {
   },
   prebidappnexus: {
     url:
-      'https://prebid.adnxs.com/pbs/v1/openrtb2/amp?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF',
-    macros: ['PLACEMENT_ID'],
+      'https://prebid.adnxs.com/pbs/v1/openrtb2/amp?tag_id=PLACEMENT_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adcid=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['PLACEMENT_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
   prebidrubicon: {
     url:
-      'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF',
-    macros: ['REQUEST_ID'],
+      'https://prebid-server.rubiconproject.com/openrtb2/amp?tag_id=REQUEST_ID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&targeting=TGT&curl=CANONICAL_URL&timeout=TIMEOUT&adc=ADCID&purl=HREF&gdpr_consent=CONSENT_STRING&account=ACCOUNT_ID',
+    macros: ['REQUEST_ID', 'CONSENT_STRING', 'ACCOUNT_ID'],
     disableKeyAppend: true,
   },
   indexexchange: {
@@ -100,8 +101,8 @@ export const RTC_VENDORS = {
   },
   aps: {
     url:
-      'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&pubid=PUB_UUID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%2C%22ms%22%3A%22ATTR(data-multi-size)%22%7D%5D&pj=PARAMS',
-    macros: ['PUB_ID', 'PARAMS', 'PUB_UUID'],
+      'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&pubid=PUB_UUID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%2C%22ms%22%3A%22ATTR(data-multi-size)%22%7D%5D&pj=PARAMS&gdprc=CONSENT_STRING',
+    macros: ['PUB_ID', 'PARAMS', 'PUB_UUID', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
   openwrap: {
@@ -114,13 +115,21 @@ export const RTC_VENDORS = {
   },
   criteo: {
     url:
-      'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&curl=CANONICAL_URL&href=HREF',
-    macros: ['ZONE_ID', 'NETWORK_ID', 'PUBLISHER_SUB_ID', 'LINE_ITEM_RANGES'],
+      'https://bidder.criteo.com/amp/rtc?zid=ZONE_ID&nid=NETWORK_ID&psubid=PUBLISHER_SUB_ID&lir=LINE_ITEM_RANGES&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&timeout=TIMEOUT&curl=CANONICAL_URL&href=HREF&cst=CONSENT_STATE&cst_str=CONSENT_STRING',
+    macros: [
+      'ZONE_ID',
+      'NETWORK_ID',
+      'PUBLISHER_SUB_ID',
+      'LINE_ITEM_RANGES',
+      'CONSENT_STATE',
+      'CONSENT_STRING',
+    ],
     disableKeyAppend: true,
   },
   navegg: {
-    url: 'https://amp.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
+    url: 'https://usr.navdmp.com/usr?acc=NVG_ACC&wst=0&v=10',
     macros: ['NVG_ACC'],
+    disableKeyAppend: true,
   },
   sonobi: {
     url:
@@ -141,7 +150,12 @@ export const RTC_VENDORS = {
     macros: ['ADSLOT_ID'],
     disableKeyAppend: true,
   },
-};
+  automatad: {
+    url: 'https://pbs01.automatad.com/openrtb2/amp?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
+});
 
 // DO NOT MODIFY: Setup for tests
 if (getMode().localDev || getMode().test) {
@@ -157,3 +171,5 @@ if (getMode().localDev || getMode().test) {
     disableKeyAppend: true,
   });
 }
+
+export {RTC_VENDORS};

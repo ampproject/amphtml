@@ -20,7 +20,7 @@ tags: {  # amp-list
     name: "amp-list"
     version: "0.1"
     version: "latest"
-    requires_usage: GRANDFATHERED
+    requires_usage: EXEMPTED
     deprecated_allow_duplicates: true
   }
   attr_lists: "common-extension-attrs"
@@ -31,8 +31,8 @@ tags: {  # amp-list
   spec_name: "SCRIPT[custom-element=amp-list] (AMP4EMAIL)"
   extension_spec: {
     name: "amp-list"
+    # AMP4EMAIL doesn't allow version: "latest".
     version: "0.1"
-    version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
@@ -64,6 +64,14 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "refresh"
   }
   attrs: { name: "credentials" }
+  attrs: {
+    name: "data-amp-bind-src"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
+  }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
   attrs: {
     name: "load-more"
@@ -84,25 +92,27 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     value: "fetch"
   }
   attrs: { name: "single-item" }
+  attrs: { name: "xssi-prefix" }
   attrs: {
     name: "src"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
     value_url: {
       protocol: "https"
       allow_relative: true  # Will be set to false at a future date.
     }
     blacklisted_value_regex: "__amp_source_origin"
   }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
   # <amp-bind>
   attrs: {
     name: "[is-layout-container]"
   }
   attrs: {
     name: "[src]"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
   }
   attrs: {
     name: "[state]"
@@ -207,6 +217,10 @@ tags: {  # <amp-list>
     value: "no"
     value: "refresh"
   }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: { name: "single-item" }
@@ -220,9 +234,14 @@ tags: {  # <amp-list>
     blacklisted_value_regex: "__amp_source_origin|"
         "{{|}}"    # Mustache is disallowed in src.
   }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
+  attrs: {
+    name: "template"
+    value_oneof_set: TEMPLATE_IDS
+  }
+  # <amp-bind>
+  attrs: {
+    name: "[is-layout-container]"
+  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL
@@ -256,6 +275,10 @@ tags: {  # <amp-list>
     name: "crossorigin"
     value: "amp-viewer-auth-token-via-post"
   }
+  attrs: {
+    name: "diffable"
+    value: ""
+  }
   attrs: { name: "items" }
   attrs: { name: "max-items" }
   attrs: {
@@ -267,7 +290,7 @@ tags: {  # <amp-list>
   attrs: { name: "single-item" }
   attrs: {
     name: "src"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
     value_url: {
       protocol: "https"
       allow_relative: true
@@ -278,7 +301,7 @@ tags: {  # <amp-list>
   # <amp-bind>
   attrs: {
     name: "[src]"
-    mandatory_anyof: "['src','[src]']"
+    mandatory_anyof: "['src','[src]','data-amp-bind-src']"
   }
   attrs: {
     name: "[state]"

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
@@ -44,7 +45,11 @@ class AmpO2Player extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(onLayout) {
-    this.preconnect.url(this.domain_, onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      this.domain_,
+      onLayout
+    );
   }
 
   /** @override */

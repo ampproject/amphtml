@@ -91,7 +91,7 @@ describes.realWin(
 
     function stubAllocateVariant(sandbox, config) {
       const viewer = Services.viewerForDoc(ampdoc);
-      const stub = sandbox.stub(variant, 'allocateVariant');
+      const stub = env.sandbox.stub(variant, 'allocateVariant');
       stub
         .withArgs(ampdoc, viewer, 'experiment-1', config['experiment-1'])
         .returns(Promise.resolve('variant-a'));
@@ -174,8 +174,8 @@ describes.realWin(
     it('should match the variant to the experiment', () => {
       addConfigElement('script');
 
-      stubAllocateVariant(sandbox, config);
-      const applyStub = sandbox
+      stubAllocateVariant(env.sandbox, config);
+      const applyStub = env.sandbox
         .stub(applyExperiment, 'applyExperimentToVariant')
         .returns(Promise.resolve());
 
@@ -183,13 +183,12 @@ describes.realWin(
       return Services.variantsForDocOrNull(ampdoc.getHeadNode())
         .then(variantsService => variantsService.getVariants())
         .then(variants => {
+          expect(applyStub).to.be.calledOnce;
           expect(variants).to.jsonEqual({
             'experiment-1': 'variant-a',
             'experiment-2': 'variant-d',
             'experiment-3': null,
           });
-
-          expect(applyStub).to.be.calledOnce;
         });
     });
 
@@ -199,14 +198,12 @@ describes.realWin(
       () => {
         addConfigElement('script');
 
-        stubAllocateVariant(sandbox, config);
-        const applyStub = sandbox
+        stubAllocateVariant(env.sandbox, config);
+        const applyStub = env.sandbox
           .stub(applyExperiment, 'applyExperimentToVariant')
           .returns(Promise.resolve());
 
-        sandbox.stub(Services, 'viewerForDoc').returns({
-          getParam: () => true,
-        });
+        env.sandbox.stub(ampdoc, 'getParam').returns('true');
 
         experiment.buildCallback();
         return Services.variantsForDocOrNull(ampdoc.getHeadNode())

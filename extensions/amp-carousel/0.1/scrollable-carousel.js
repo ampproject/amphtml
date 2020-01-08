@@ -17,10 +17,10 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
-import {Layout} from '../../../src/layout';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeFixed} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {numeric} from '../../../src/transition';
 
@@ -46,14 +46,11 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     /** @private {?number} */
     this.scrollTimerId_ = null;
-
-    /** @private {boolean} */
-    this.useLayers_ = false;
   }
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
+    return isLayoutSizeFixed(layout);
   }
 
   /** @override */
@@ -62,16 +59,12 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
     this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('i-amphtml-scrollable-carousel-container');
+    // Focusable container makes it possible to fully consume Arrow key events.
+    this.container_.setAttribute('tabindex', '-1');
     this.element.appendChild(this.container_);
 
-    this.useLayers_ =
-      isExperimentOn(this.win, 'layers') &&
-      isExperimentOn(this.win, 'layers-prioritization');
-
     this.cells_.forEach(cell => {
-      if (!this.useLayers_) {
-        Services.ownersForDoc(this.element).setOwner(cell, this.element);
-      }
+      Services.ownersForDoc(this.element).setOwner(cell, this.element);
       cell.classList.add('amp-carousel-slide');
       cell.classList.add('amp-scrollable-carousel-slide');
       this.container_.appendChild(cell);
@@ -80,6 +73,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
     this.cancelTouchEvents_();
 
     this.container_.addEventListener('scroll', this.scrollHandler_.bind(this));
+    this.container_.addEventListener(
+      'keydown',
+      this.keydownHandler_.bind(this)
+    );
 
     this.registerAction(
       'goToSlide',
@@ -92,10 +89,6 @@ export class AmpScrollableCarousel extends BaseCarousel {
       },
       ActionTrust.LOW
     );
-
-    if (this.useLayers_) {
-      this.declareLayer(this.container_);
-    }
   }
 
   /** @override */
@@ -112,19 +105,15 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   layoutCallback() {
-    if (!this.useLayers_) {
-      this.doLayout_(this.pos_);
-      this.preloadNext_(this.pos_, 1);
-    }
+    this.doLayout_(this.pos_);
+    this.preloadNext_(this.pos_, 1);
     this.setControlsState();
     return Promise.resolve();
   }
 
   /** @override */
   onViewportCallback(unusedInViewport) {
-    if (!this.useLayers_) {
-      this.updateInViewport_(this.pos_, this.pos_);
-    }
+    this.updateInViewport_(this.pos_, this.pos_);
   }
 
   /** @override */
@@ -227,6 +216,20 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /**
+   * Escapes Left and Right arrow key events on the carousel container.
+   * This is to prevent them from doubly interacting with surrounding viewer
+   * contexts such as email clients when interacting with the amp-carousel.
+   * @param {!Event} event
+   * @private
+   */
+  keydownHandler_(event) {
+    const {key} = event;
+    if (key == Keys.LEFT_ARROW || key == Keys.RIGHT_ARROW) {
+      event.stopPropagation();
+    }
+  }
+
+  /**
    * @param {number} startingScrollLeft
    * @private
    */
@@ -263,12 +266,10 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   commitSwitch_(pos) {
-    if (!this.useLayers_) {
-      this.updateInViewport_(pos, this.oldPos_);
-      this.doLayout_(pos);
-      this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
-      this.oldPos_ = pos;
-    }
+    this.updateInViewport_(pos, this.oldPos_);
+    this.doLayout_(pos);
+    this.preloadNext_(pos, Math.sign(pos - this.oldPos_));
+    this.oldPos_ = pos;
     this.pos_ = pos;
     this.setControlsState();
   }
@@ -299,7 +300,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
    * @private
    */
   withinWindow_(pos, callback) {
-    const containerWidth = this.getLayoutWidth();
+    const containerWidth = this.element.getLayoutWidth();
     for (let i = 0; i < this.cells_.length; i++) {
       const cell = this.cells_[i];
       if (
@@ -368,8 +369,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
 
   /** @override */
   hasNext() {
-    // TODO(jridgewell): this could be using cached values from Layers.
-    const containerWidth = this.getLayoutWidth();
+    const containerWidth = this.element.getLayoutWidth();
     const scrollWidth = this.container_./*OK*/ scrollWidth;
     const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;

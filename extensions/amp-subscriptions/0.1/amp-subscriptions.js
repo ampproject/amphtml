@@ -98,7 +98,7 @@ export class SubscriptionService {
     /** @private {!ViewerTracker} */
     this.viewerTracker_ = new ViewerTracker(ampdoc);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
+    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(ampdoc);
 
     /** @private {?Promise} */
@@ -273,6 +273,31 @@ export class SubscriptionService {
   }
 
   /**
+   * Internal function to wrap SwG decryption handling
+   * @param {!SubscriptionPlatform} platform
+   * @return {!Promise<?./entitlement.Entitlement>}
+   * @private
+   */
+  getEntitlements_(platform) {
+    return platform.getEntitlements().then(entitlements => {
+      if (
+        entitlements.granted &&
+        this.cryptoHandler_.isDocumentEncrypted() &&
+        !entitlements.decryptedDocumentKey
+      ) {
+        const logChannel = platform.getServiceId() == 'local' ? user() : dev();
+        logChannel.error(
+          TAG,
+          `${platform.getServiceId()}: Subscription granted and encryption enabled, ` +
+            'but no decrypted document key returned.'
+        );
+        return null;
+      }
+      return entitlements;
+    });
+  }
+
+  /**
    * @param {!SubscriptionPlatform} subscriptionPlatform
    * @return {!Promise}
    */
@@ -285,10 +310,10 @@ export class SubscriptionService {
     // page to become visible, all others wait for whenFirstVisible()
     const visiblePromise = subscriptionPlatform.isPrerenderSafe()
       ? Promise.resolve()
-      : this.viewer_.whenFirstVisible();
+      : this.ampdoc_.whenFirstVisible();
     return visiblePromise.then(() => {
       return this.timer_
-        .timeoutPromise(timeout, subscriptionPlatform.getEntitlements())
+        .timeoutPromise(timeout, this.getEntitlements_(subscriptionPlatform))
         .then(entitlement => {
           entitlement =
             entitlement ||
@@ -393,8 +418,7 @@ export class SubscriptionService {
           origin
         );
         this.platformStore_.resolvePlatform('local', viewerPlatform);
-        viewerPlatform
-          .getEntitlements()
+        this.getEntitlements_(viewerPlatform)
           .then(entitlement => {
             devAssert(entitlement, 'Entitlement is null');
             // Viewer authorization is redirected to use local platform instead.
@@ -661,6 +685,14 @@ export class SubscriptionService {
       .then(entitlement => {
         return getValueForExpr(entitlement.json(), field);
       });
+  }
+
+  /**
+   * Gets Score Factors for all platforms
+   * @return {!Promise<!JsonObject>}
+   */
+  getScoreFactorStates() {
+    return this.platformStore_.getScoreFactorStates();
   }
 }
 

@@ -17,7 +17,12 @@
 
 
 /* Placeholder */
-.i-amphtml-default-placeholder {
+.i-amphtml-loader-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
   background-color: #f8f8f8;
 }
 
@@ -111,7 +116,7 @@
 }
 
 /* Positioning for various parts */
-.i-amphtml-new-loader-spinner,
+.i-amphtml-new-loader-spinner-wrapper,
 .i-amphtml-new-loader-logo,
 .i-amphtml-new-loader-shim {
   position: absolute;
@@ -122,10 +127,13 @@
 }
 
 /* The spinner itself */
+.i-amphtml-new-loader-spinner-wrapper {
+  margin: 12px;
+}
+
 .i-amphtml-new-loader-spinner {
   stroke: currentColor;
   stroke-width: 1.5px;
-  margin: 12px;
   opacity: 0;
   animation: i-amphtml-new-loader-fade-in 0.8s ease-in forwards;
   animation-delay: 1.8s;
@@ -161,7 +169,7 @@
   animation-play-state: paused;
 }
 
-.i-amphtml-new-loader.amp-active * {
+.amp-active > .i-amphtml-new-loader * {
   animation-play-state: running;
 }
 

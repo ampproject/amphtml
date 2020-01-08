@@ -89,7 +89,7 @@ describes.realWin('form-dirtiness', {}, env => {
   beforeEach(() => {
     doc = env.win.document;
     form = getForm(doc);
-    sandbox.stub(Services, 'platformFor').returns({
+    env.sandbox.stub(Services, 'platformFor').returns({
       isIos() {
         return false;
       },
@@ -452,6 +452,28 @@ describes.realWin('form-dirtiness', {}, env => {
       );
 
       expect(eventDispatched).to.not.exist;
+    });
+  });
+
+  describe('initial dirtiness', () => {
+    let newForm, input;
+
+    beforeEach(() => {
+      newForm = getForm(doc);
+      input = createElement(doc, 'input', {type: 'text', name: 'text'});
+      newForm.appendChild(input);
+    });
+
+    it('adds the dirtiness class if the form already has dirty fields', () => {
+      changeInput(input, 'changed');
+      dirtinessHandler = new FormDirtiness(newForm, env.win);
+
+      expect(newForm).to.have.class(DIRTINESS_INDICATOR_CLASS);
+    });
+
+    it('does not add the dirtiness class if the form does not have dirty fields', () => {
+      dirtinessHandler = new FormDirtiness(newForm, env.win);
+      expect(newForm).to.not.have.class(DIRTINESS_INDICATOR_CLASS);
     });
   });
 });

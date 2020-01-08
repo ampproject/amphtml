@@ -15,6 +15,7 @@
  */
 import {Action, getStoreService} from '../amp-story-store-service';
 import {getAnalyticsService} from '../story-analytics';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 
 describes.fakeWin('amp-story analytics', {}, env => {
   let analytics;
@@ -22,13 +23,17 @@ describes.fakeWin('amp-story analytics', {}, env => {
   let storeService;
 
   beforeEach(() => {
-    rootEl = env.win.document.createElement('div');
-    storeService = getStoreService(env.win);
-    analytics = getAnalyticsService(env.win, rootEl);
+    const {win} = env;
+
+    rootEl = win.document.createElement('div');
+    storeService = getStoreService(win);
+    analytics = getAnalyticsService(win, rootEl);
+    win.document.body.appendChild(rootEl);
+    installDocService(win, true);
   });
 
   it('should trigger `story-page-visible` on change', () => {
-    const trigger = sandbox.stub(analytics, 'triggerEvent');
+    const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
@@ -39,7 +44,7 @@ describes.fakeWin('amp-story analytics', {}, env => {
   });
 
   it('should trigger `story-last-page-visible` when last page is visible', () => {
-    const trigger = sandbox.stub(analytics, 'triggerEvent');
+    const trigger = env.sandbox.stub(analytics, 'triggerEvent');
 
     storeService.dispatch(Action.SET_PAGE_IDS, ['cover', 'page1', 'page2']);
     storeService.dispatch(Action.CHANGE_PAGE, {
@@ -54,29 +59,22 @@ describes.fakeWin('amp-story analytics', {}, env => {
     expect(trigger).to.have.been.calledWith('story-last-page-visible');
   });
 
-  it('should not mark an event as repeated the first time', () => {
-    analytics.element_.dispatchCustomEvent = () => {};
-    const dispatchStub = sandbox.stub(
-      analytics.element_,
-      'dispatchCustomEvent'
-    );
+  it('should not mark an event as repeated the first time it fires', () => {
+    const trigger = env.sandbox.spy(analytics, 'triggerEvent');
 
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
       index: 1,
     });
 
-    expect(dispatchStub).to.have.been.calledWithMatch('story-page-visible', {
-      'detailsForPage': {},
-    });
+    expect(trigger).to.have.been.calledOnceWith('story-page-visible');
+
+    const details = analytics.updateDetails('story-page-visible');
+    expect(details.eventDetails).to.deep.equal({});
   });
 
-  it('should mark event as repeated', () => {
-    analytics.element_.dispatchCustomEvent = () => {};
-    const dispatchStub = sandbox.stub(
-      analytics.element_,
-      'dispatchCustomEvent'
-    );
+  it('should mark event as repeated when fired more than once', () => {
+    const trigger = env.sandbox.spy(analytics, 'triggerEvent');
 
     storeService.dispatch(Action.CHANGE_PAGE, {
       id: 'test-page',
@@ -93,8 +91,12 @@ describes.fakeWin('amp-story analytics', {}, env => {
       index: 1,
     });
 
-    expect(dispatchStub).to.have.been.calledWithMatch('story-page-visible', {
-      'detailsForPage': {'repeated': true},
+    expect(trigger).to.have.been.calledWith('story-page-visible');
+    expect(trigger).to.have.been.calledThrice;
+    expect(
+      analytics.updateDetails('story-page-visible').eventDetails
+    ).to.deep.include({
+      'repeated': true,
     });
   });
 });

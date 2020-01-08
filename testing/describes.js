@@ -109,7 +109,8 @@ import {installFriendlyIframeEmbed} from '../src/friendly-iframe-embed';
 import {maybeTrackImpression} from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
-import fetchMock from 'fetch-mock';
+import fetchMock from 'fetch-mock/es5/client-bundle';
+import sinon from 'sinon'; // eslint-disable-line local/no-import
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -506,6 +507,7 @@ class IntegrationFixture {
         ? undefined
         : this.spec.extensions.join(',');
     const ampDocType = this.spec.ampdoc || 'single';
+    const style = this.spec.frameStyle;
 
     let url =
       this.spec.amp === false
@@ -527,7 +529,10 @@ class IntegrationFixture {
         src = addParamsToUrl('/amp4test/compose-shadow', {docUrl});
       }
 
-      env.iframe = createElementWithAttributes(document, 'iframe', {src});
+      env.iframe = createElementWithAttributes(document, 'iframe', {
+        src,
+        style,
+      });
       env.iframe.onload = function() {
         env.win = env.iframe.contentWindow;
         resolve();
@@ -614,7 +619,7 @@ class RealWinFixture {
         env.win = win;
 
         // Flag as being a test window.
-        win.AMP_TEST_IFRAME = true;
+        win.__AMP_TEST_IFRAME = true;
         // Set the testLocation on iframe to parent's location since location of
         // the test iframe is about:srcdoc.
         // Unfortunately location object is not configurable, so we have to
@@ -641,7 +646,12 @@ class RealWinFixture {
             get: () => customElements,
           });
         } else {
-          installCustomElements(win);
+          // The anonymous class parameter allows us to detect native classes
+          // vs transpiled classes.
+          installCustomElements(
+            win,
+            NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined
+          );
         }
 
         // Intercept event listeners
@@ -709,7 +719,7 @@ class AmpFixture {
     }
     const ampdocType = spec.ampdoc || 'single';
     const singleDoc = ampdocType == 'single' || ampdocType == 'fie';
-    installDocService(win, singleDoc);
+    installDocService(win, singleDoc, spec.params);
     const ampdocService = Services.ampdocServiceFor(win);
     env.ampdocService = ampdocService;
     installExtensionsService(win);
@@ -717,14 +727,14 @@ class AmpFixture {
     installBuiltinElements(win);
     installRuntimeServices(win);
     env.flushVsync = function() {
-      win.services.vsync.obj.runScheduledTasks_();
+      win.__AMP_SERVICES.vsync.obj.runScheduledTasks_();
     };
     if (singleDoc) {
       // Install AMP CSS for main runtime, if it hasn't been installed yet.
       completePromise = installRuntimeStylesPromise(win);
       const ampdoc = ampdocService.getAmpDoc(win.document);
       env.ampdoc = ampdoc;
-      installAmpdocServices(ampdoc, spec.params);
+      installAmpdocServices(ampdoc);
       adopt(win);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
@@ -881,7 +891,7 @@ class AmpFixture {
  * @param {!Window} win
  */
 function configureAmpTestMode(win) {
-  win.AMP_TEST = true;
+  win.__AMP_TEST = true;
 }
 
 /**

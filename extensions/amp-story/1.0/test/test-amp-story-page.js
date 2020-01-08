@@ -28,9 +28,11 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   let element;
   let gridLayerEl;
   let page;
+  let isPerformanceTrackingOn;
 
   beforeEach(() => {
     win = env.win;
+    isPerformanceTrackingOn = false;
 
     const mediaPoolRoot = {
       getElement: () => win.document.createElement('div'),
@@ -46,6 +48,10 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     const localizationService = new LocalizationService(win);
     registerServiceBuilder(win, 'localization', () => localizationService);
 
+    registerServiceBuilder(win, 'performance', () => ({
+      isPerformanceTrackingOn: () => isPerformanceTrackingOn,
+    }));
+
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
 
@@ -57,26 +63,25 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     win.document.body.appendChild(story);
 
     page = new AmpStoryPage(element);
-    sandbox.stub(page, 'mutateElement').callsFake(fn => fn());
+    env.sandbox.stub(page, 'mutateElement').callsFake(fn => fn());
   });
 
   afterEach(() => {
     element.remove();
   });
 
-  it('should build a page', () => {
+  it('should build a page', async () => {
     page.buildCallback();
     return page.layoutCallback();
   });
 
-  it('should not build the animation manager if no element is animated', () => {
+  it('should not build the animation manager if no element is animated', async () => {
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      expect(page.animationManager_).to.be.null;
-    });
+    await page.layoutCallback();
+    expect(page.animationManager_).to.be.null;
   });
 
-  it('should build the animation manager if an element is animated', () => {
+  it('should build the animation manager if an element is animated', async () => {
     // Adding an element that has to be animated.
     const animatedEl = win.document.createElement('div');
     animatedEl.setAttribute('animate-in', 'fade-in');
@@ -87,65 +92,59 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     expect(page.animationManager_).to.exist;
   });
 
-  it('should set an active attribute when state becomes active', () => {
+  it('should set an active attribute when state becomes active', async () => {
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      page.setState(PageState.PLAYING);
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
 
-      expect(page.element).to.have.attribute('active');
-    });
+    expect(page.element).to.have.attribute('active');
   });
 
-  it('should start the advancement when state becomes active', () => {
-    const advancementStartStub = sandbox.stub(page.advancement_, 'start');
+  it('should start the advancement when state becomes active', async () => {
+    const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
 
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      page.setState(PageState.PLAYING);
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
 
-      expect(advancementStartStub).to.have.been.calledOnce;
-    });
+    expect(advancementStartStub).to.have.been.calledOnce;
   });
 
-  it('should call waitForMedia after layoutCallback resolves', () => {
-    const spy = sandbox.spy(page, 'waitForMediaLayout_');
+  it('should call waitForMedia after layoutCallback resolves', async () => {
+    const spy = env.sandbox.spy(page, 'waitForMediaLayout_');
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      expect(spy).to.have.been.calledOnce;
-    });
+    await page.layoutCallback();
+    expect(spy).to.have.been.calledOnce;
   });
 
-  it('should mark page as loaded after media is loaded', () => {
-    const waitForMediaLayoutSpy = sandbox.spy(page, 'waitForMediaLayout_');
-    const markPageAsLoadedSpy = sandbox.spy(page, 'markPageAsLoaded_');
+  it('should mark page as loaded after media is loaded', async () => {
+    const waitForMediaLayoutSpy = env.sandbox.spy(page, 'waitForMediaLayout_');
+    const markPageAsLoadedSpy = env.sandbox.spy(page, 'markPageAsLoaded_');
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      expect(markPageAsLoadedSpy).to.have.been.calledAfter(
-        waitForMediaLayoutSpy
-      );
-    });
+    await page.layoutCallback();
+    expect(markPageAsLoadedSpy).to.have.been.calledAfter(waitForMediaLayoutSpy);
   });
 
-  it('should start the animations if needed when state becomes active', () => {
+  it('should start the animations if needed when state becomes active', async () => {
     // Adding an element that has to be animated.
     const animatedEl = win.document.createElement('div');
     animatedEl.setAttribute('animate-in', 'fade-in');
     element.appendChild(animatedEl);
 
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      const animateInStub = sandbox.stub(page.animationManager_, 'animateIn');
+    await page.layoutCallback();
+    const animateInStub = env.sandbox.stub(page.animationManager_, 'animateIn');
 
-      page.setState(PageState.PLAYING);
+    page.setState(PageState.PLAYING);
 
-      expect(animateInStub).to.have.been.calledOnce;
-    });
+    expect(animateInStub).to.have.been.calledOnce;
   });
 
   it('should perform media operations when state becomes active', done => {
-    sandbox
+    env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
@@ -158,7 +157,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
       .then(mediaPool => {
-        mediaPoolMock = sandbox.mock(mediaPool);
+        mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('register')
           .withExactArgs(videoEl)
@@ -193,6 +192,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       url: 'https://amp.dev',
       html: '<video src="https://example.com/video.mp3"></video>',
     });
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
     fiePromise.then(fie => {
       const fieDoc = fie.win.document;
@@ -200,7 +200,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
       let mediaPoolMock;
 
-      sandbox
+      env.sandbox
         .stub(page.resources_, 'getResourceForElement')
         .returns({isDisplayed: () => true});
 
@@ -209,7 +209,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
         .layoutCallback()
         .then(() => page.mediaPoolPromise_)
         .then(mediaPool => {
-          mediaPoolMock = sandbox.mock(mediaPool);
+          mediaPoolMock = env.sandbox.mock(mediaPool);
           mediaPoolMock
             .expects('register')
             .withExactArgs(videoEl)
@@ -239,35 +239,33 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     });
   });
 
-  it('should stop the advancement when state becomes not active', () => {
-    const advancementStopStub = sandbox.stub(page.advancement_, 'stop');
+  it('should stop the advancement when state becomes not active', async () => {
+    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
 
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      page.setState(PageState.NOT_ACTIVE);
+    await page.layoutCallback();
+    page.setState(PageState.NOT_ACTIVE);
 
-      expect(advancementStopStub).to.have.been.calledOnce;
-    });
+    expect(advancementStopStub).to.have.been.calledOnce;
   });
 
-  it('should stop the animations when state becomes not active', () => {
+  it('should stop the animations when state becomes not active', async () => {
     // Adding an element that has to be animated.
     const animatedEl = win.document.createElement('div');
     animatedEl.setAttribute('animate-in', 'fade-in');
     element.appendChild(animatedEl);
 
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      const cancelAllStub = sandbox.stub(page.animationManager_, 'cancelAll');
+    await page.layoutCallback();
+    const cancelAllStub = env.sandbox.stub(page.animationManager_, 'cancelAll');
 
-      page.setState(PageState.NOT_ACTIVE);
+    page.setState(PageState.NOT_ACTIVE);
 
-      expect(cancelAllStub).to.have.been.calledOnce;
-    });
+    expect(cancelAllStub).to.have.been.calledOnce;
   });
 
   it('should pause/rewind media when state becomes not active', done => {
-    sandbox
+    env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
 
@@ -282,7 +280,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
       .then(mediaPool => {
-        mediaPoolMock = sandbox.mock(mediaPool);
+        mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
           .withExactArgs(videoEl, true /** rewindToBeginning */)
@@ -300,19 +298,18 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       });
   });
 
-  it('should stop the advancement when state becomes paused', () => {
-    const advancementStopStub = sandbox.stub(page.advancement_, 'stop');
+  it('should stop the advancement when state becomes paused', async () => {
+    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
 
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      page.setState(PageState.PAUSED);
+    await page.layoutCallback();
+    page.setState(PageState.PAUSED);
 
-      expect(advancementStopStub).to.have.been.calledOnce;
-    });
+    expect(advancementStopStub).to.have.been.calledOnce;
   });
 
   it('should pause media when state becomes paused', done => {
-    sandbox
+    env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
     const videoEl = win.document.createElement('video');
@@ -326,7 +323,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
       .then(mediaPool => {
-        mediaPoolMock = sandbox.mock(mediaPool);
+        mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
           .withExactArgs(videoEl, false /** rewindToBeginning */)
@@ -344,7 +341,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       });
   });
 
-  it('should find pageIds in a goToPage action', () => {
+  it('should find pageIds in a goToPage action', async () => {
     const actionButton = createElementWithAttributes(win.document, 'button', {
       'id': 'actionButton',
       'on': 'tap:story.goToPage(id=pageId)',
@@ -352,15 +349,14 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     element.appendChild(actionButton);
     page.buildCallback();
 
-    return page.layoutCallback().then(() => {
-      const actions = page.actions_();
+    await page.layoutCallback();
+    const actions = page.actions_();
 
-      expect(actions.length).to.be.equal(1);
-      expect(actions[0]).to.be.equal('pageId');
-    });
+    expect(actions.length).to.be.equal(1);
+    expect(actions[0]).to.be.equal('pageId');
   });
 
-  it('should find pageIds in a goToPage action with multiple actions', () => {
+  it('should find pageIds in a goToPage action with multiple actions', async () => {
     const multipleActionButton = createElementWithAttributes(
       win.document,
       'button',
@@ -372,15 +368,14 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     element.appendChild(multipleActionButton);
     page.buildCallback();
 
-    return page.layoutCallback().then(() => {
-      const actions = page.actions_();
+    await page.layoutCallback();
+    const actions = page.actions_();
 
-      expect(actions.length).to.be.equal(1);
-      expect(actions[0]).to.be.equal('pageId');
-    });
+    expect(actions.length).to.be.equal(1);
+    expect(actions[0]).to.be.equal('pageId');
   });
 
-  it('should find pageIds in a goToPage action with multiple events', () => {
+  it('should find pageIds in a goToPage action with multiple events', async () => {
     const multipleEventsButton = createElementWithAttributes(
       win.document,
       'button',
@@ -392,44 +387,41 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     element.appendChild(multipleEventsButton);
     page.buildCallback();
 
-    return page.layoutCallback().then(() => {
-      const actions = page.actions_();
+    await page.layoutCallback();
+    const actions = page.actions_();
 
-      expect(actions.length).to.be.equal(1);
-      expect(actions[0]).to.be.equal('pageId');
-    });
+    expect(actions.length).to.be.equal(1);
+    expect(actions[0]).to.be.equal('pageId');
   });
 
-  it('should not build the open attachment UI if no attachment', () => {
+  it('should not build the open attachment UI if no attachment', async () => {
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      page.setState(PageState.PLAYING);
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
 
-      const openAttachmentEl = element.querySelector(
-        '.i-amphtml-story-page-open-attachment'
-      );
-      expect(openAttachmentEl).to.not.exist;
-    });
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+    expect(openAttachmentEl).to.not.exist;
   });
 
-  it('should build the open attachment UI if attachment', () => {
+  it('should build the open attachment UI if attachment', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
     element.appendChild(attachmentEl);
 
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      page.setState(PageState.PLAYING);
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
 
-      const openAttachmentEl = element.querySelector(
-        '.i-amphtml-story-page-open-attachment'
-      );
-      expect(openAttachmentEl).to.exist;
-    });
+    const openAttachmentEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment'
+    );
+    expect(openAttachmentEl).to.exist;
   });
 
-  it('should build the open attachment UI with custom CTA label', () => {
+  it('should build the open attachment UI with custom CTA label', async () => {
     const attachmentEl = win.document.createElement(
       'amp-story-page-attachment'
     );
@@ -437,13 +429,79 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     element.appendChild(attachmentEl);
 
     page.buildCallback();
-    return page.layoutCallback().then(() => {
-      page.setState(PageState.PLAYING);
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
 
-      const openAttachmentLabelEl = element.querySelector(
-        '.i-amphtml-story-page-open-attachment-label'
-      );
-      expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
-    });
+    const openAttachmentLabelEl = element.querySelector(
+      '.i-amphtml-story-page-open-attachment-label'
+    );
+    expect(openAttachmentLabelEl.textContent).to.equal('Custom label');
+  });
+
+  it('should start tracking media performance when entering the page', async () => {
+    env.sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+    isPerformanceTrackingOn = true;
+    const startMeasuringStub = env.sandbox.stub(
+      page.mediaPerformanceMetricsService_,
+      'startMeasuring'
+    );
+
+    const videoEl = win.document.createElement('video');
+    videoEl.setAttribute('src', 'https://example.com/video.mp3');
+    gridLayerEl.appendChild(videoEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    expect(startMeasuringStub).to.have.been.calledOnceWithExactly(videoEl);
+  });
+
+  it('should stop tracking media performance when leaving the page', async () => {
+    env.sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+    isPerformanceTrackingOn = true;
+    const stopMeasuringStub = env.sandbox.stub(
+      page.mediaPerformanceMetricsService_,
+      'stopMeasuring'
+    );
+
+    const videoEl = win.document.createElement('video');
+    videoEl.setAttribute('src', 'https://example.com/video.mp3');
+    gridLayerEl.appendChild(videoEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+    page.setState(PageState.NOT_ACTIVE);
+
+    expect(stopMeasuringStub).to.have.been.calledOnceWithExactly(
+      videoEl,
+      true /* sendMetrics */
+    );
+  });
+
+  it('should not start tracking media performance if tracking is off', async () => {
+    env.sandbox
+      .stub(page.resources_, 'getResourceForElement')
+      .returns({isDisplayed: () => true});
+    isPerformanceTrackingOn = false;
+    const startMeasuringStub = env.sandbox.stub(
+      page.mediaPerformanceMetricsService_,
+      'startMeasuring'
+    );
+
+    const videoEl = win.document.createElement('video');
+    videoEl.setAttribute('src', 'https://example.com/video.mp3');
+    gridLayerEl.appendChild(videoEl);
+
+    page.buildCallback();
+    await page.layoutCallback();
+    page.setState(PageState.PLAYING);
+
+    expect(startMeasuringStub).to.not.have.been.called;
   });
 });

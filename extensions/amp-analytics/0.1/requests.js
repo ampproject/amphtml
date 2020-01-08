@@ -30,7 +30,7 @@ export class RequestHandler {
   /**
    * @param {!Element} element
    * @param {!JsonObject} request
-   * @param {!../../../src/preconnect.Preconnect} preconnect
+   * @param {!../../../src/preconnect.PreconnectService} preconnect
    * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
    */
@@ -80,7 +80,7 @@ export class RequestHandler {
     /** @private {!Array<!Promise<!BatchSegmentDef>>} */
     this.batchSegmentPromises_ = [];
 
-    /** @private {!../../../src/preconnect.Preconnect} */
+    /** @private {!../../../src/preconnect.PreconnectService} */
     this.preconnect_ = preconnect;
 
     /** @private {./transport.Transport} */
@@ -183,7 +183,7 @@ export class RequestHandler {
         });
     }
 
-    const params = Object.assign({}, configParams, trigger['extraUrlParams']);
+    const params = {...configParams, ...trigger['extraUrlParams']};
     const timestamp = this.win.Date.now();
     const batchSegmentPromise = expandExtraUrlParams(
       this.variableService_,
@@ -259,7 +259,7 @@ export class RequestHandler {
       : baseUrlTemplatePromise;
 
     preconnectPromise.then(preUrl => {
-      this.preconnect_.url(preUrl, true);
+      this.preconnect_.url(this.ampdoc_, preUrl, true);
     });
 
     Promise.all([
@@ -430,7 +430,7 @@ export function expandPostMessage(
   }
 
   return basePromise.then(expandedMsg => {
-    const params = Object.assign({}, configParams, trigger['extraUrlParams']);
+    const params = {...configParams, ...trigger['extraUrlParams']};
     //return base url with the appended extra url params;
     return expandExtraUrlParams(
       variableService,

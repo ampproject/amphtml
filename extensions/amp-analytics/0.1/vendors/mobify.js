@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const MOBIFY_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const MOBIFY_CONFIG = jsonLiteral({
   'vars': {
     'projectSlug': 'mobify-project-id',
     'templateName': 'page-type',
@@ -66,3 +68,5 @@ export const MOBIFY_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {MOBIFY_CONFIG};

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const NIELSEN_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const NIELSEN_CONFIG = jsonLiteral({
   'vars': {
     'sessionId': 'CLIENT_ID(imrworldwide)',
     'prefix': '',
@@ -51,3 +53,5 @@ export const NIELSEN_CONFIG = /** @type {!JsonObject} */ ({
     'referrerPolicy': 'no-referrer',
   },
 });
+
+export {NIELSEN_CONFIG};

@@ -22,9 +22,7 @@ import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {adopt} from '../runtime';
-import {cssText as ampDocCss} from '../../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
-import {deactivateChunking, startupChunk} from '../chunk';
 import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
@@ -37,14 +35,15 @@ import {
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installPerformanceService} from '../service/performance-impl';
+import {installPlatformService} from '../service/platform-impl';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from '../style-installer';
 import {internalRuntimeVersion} from '../internal-version';
-import {isExperimentOn} from '../experiments';
 import {maybeValidate} from '../validator-integration';
+import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
@@ -61,10 +60,6 @@ try {
   // Should happen first.
   installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
 
-  if (isExperimentOn(self, 'inabox-no-chunking')) {
-    deactivateChunking();
-  }
-
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
   installDocService(self, /* isSingleDoc */ true);
@@ -77,20 +72,17 @@ try {
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
+  installPlatformService(self);
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);
   perf.tick('is');
 
   self.document.documentElement.classList.add('i-amphtml-inabox');
-  const fullCss =
-    (isExperimentOn(self, 'inabox-css-cleanup')
-      ? ampSharedCss
-      : ampDocCss + ampSharedCss) +
-    'html.i-amphtml-inabox{width:100%!important;height:100%!important}';
   installStylesForDoc(
     ampdoc,
-    fullCss,
+    ampSharedCss +
+      'html.i-amphtml-inabox{width:100%!important;height:100%!important}',
     () => {
       startupChunk(self.document, function services() {
         // Core services.

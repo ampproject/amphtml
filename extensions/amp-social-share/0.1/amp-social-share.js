@@ -39,7 +39,7 @@ class AmpSocialShare extends AMP.BaseElement {
     /** @private {?../../../src/service/platform-impl.Platform} */
     this.platform_ = null;
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = null;
 
     /** @private {?string} */
@@ -127,9 +127,8 @@ class AmpSocialShare extends AMP.BaseElement {
       const {protocol} = Services.urlForDoc(element).parse(href);
       const isMailTo = protocol === 'mailto:';
       const isSms = protocol === 'sms:';
-      const isIosSafari = this.platform_.isIos() && this.platform_.isSafari();
       this.target_ =
-        isIosSafari && (isMailTo || isSms)
+        this.platform_.isIos() && (isMailTo || isSms)
           ? '_top'
           : this.element.hasAttribute('data-target')
           ? this.element.getAttribute('data-target')

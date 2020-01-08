@@ -53,9 +53,6 @@ export class LiveListManager {
     /** @private @const {!Object<string, !./amp-live-list.AmpLiveList>} */
     this.liveLists_ = Object.create(null);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(this.ampdoc);
-
     /** @private @const {!../../../src/service/extensions-impl.Extensions} */
     this.extensions_ = Services.extensionsFor(this.ampdoc.win);
 
@@ -80,10 +77,10 @@ export class LiveListManager {
     /** @private @const {boolean} */
     this.isTransformed_ = isDocTransformed(ampdoc.getRootNode());
 
-    // Only start polling when doc is ready and when the viewer is visible.
+    // Only start polling when doc is ready and when the doc is visible.
     this.whenDocReady_().then(() => {
       // Switch out the poller interval if we can find a lower one and
-      // then make sure to stop polling if viewer is not visible.
+      // then make sure to stop polling if doc is not visible.
       this.interval_ = Math.min.apply(Math, this.intervals_);
 
       const initialUpdateTimes = Object.keys(this.liveLists_).map(key =>
@@ -107,7 +104,7 @@ export class LiveListManager {
       this.poller_ = new Poller(this.ampdoc.win, this.interval_, this.work_);
 
       // If no live-list is active on dom ready, we don't need to poll at all.
-      if (this.viewer_.isVisible() && this.hasActiveLiveLists_()) {
+      if (this.ampdoc.isVisible() && this.hasActiveLiveLists_()) {
         this.poller_.start();
       }
       this.setupVisibilityHandler_();
@@ -281,7 +278,7 @@ export class LiveListManager {
 
     // Polling may not be started yet if no live lists were registered by
     // doc ready in LiveListManager's constructor.
-    if (liveList.isEnabled() && this.poller_ && this.viewer_.isVisible()) {
+    if (liveList.isEnabled() && this.poller_ && this.ampdoc.isVisible()) {
       this.poller_.start();
     }
   }
@@ -296,13 +293,13 @@ export class LiveListManager {
   }
 
   /**
-   * Listens to he viewer visibility changed event.
+   * Listens to he doc visibility changed event.
    * @private
    */
   setupVisibilityHandler_() {
     // Polling should always be stopped when document is no longer visible.
-    this.viewer_.onVisibilityChanged(() => {
-      if (this.viewer_.isVisible()) {
+    this.ampdoc.onVisibilityChanged(() => {
+      if (this.ampdoc.isVisible()) {
         // We use immediate so that the user starts getting updates
         // right away when they've switched back to the page.
         this.poller_.start(/** immediate */ true);

@@ -129,7 +129,7 @@ export class LinkerManager {
         if (!element.href || event.type !== 'click') {
           return;
         }
-        this.maybeWriteHref_(element);
+        element.href = this.applyLinkers_(element.href);
       }, Priority.ANALYTICS_LINKER);
       navigation.registerNavigateToMutator(
         url => this.applyLinkers_(url),
@@ -140,20 +140,6 @@ export class LinkerManager {
     this.enableFormSupport_();
 
     return Promise.all(this.allLinkerPromises_);
-  }
-
-  /**
-   * TODO: Revisit this logic after #22787 is complete.
-   * Applys any matching linkers to the elements href. If no linkers exist,
-   * will not set href.
-   * @param {!Element} element
-   */
-  maybeWriteHref_(element) {
-    const {href} = element;
-    const maybeDecoratedUrl = this.applyLinkers_(href);
-    if (href !== maybeDecoratedUrl) {
-      element.href = maybeDecoratedUrl;
-    }
   }
 
   /**
@@ -187,7 +173,7 @@ export class LinkerManager {
     const location = WindowInterface.getLocation(this.ampdoc_.win);
     const isProxyOrigin = this.urlService_.isProxyOrigin(location);
     linkerNames.forEach(name => {
-      const mergedConfig = Object.assign({}, defaultConfig, config[name]);
+      const mergedConfig = {...defaultConfig, ...config[name]};
 
       if (mergedConfig['enabled'] !== true) {
         user().info(

@@ -15,41 +15,6 @@
  */
 
 import {Services} from './services';
-import {devAssert} from './log';
-import {htmlFor} from './static-template';
-import {isExperimentOn} from './experiments';
-import {toWin} from './types';
-
-/* LEGACY LOADER */
-
-/** @private @const */
-const LINE_LOADER_ELEMENTS = {
-  'AMP-AD': true,
-};
-
-/**
- * Creates a default "loading indicator" element. This element accepts
- * `amp-active` class in which case it may choose to run an animation.
- * @param {!Document} doc
- * @param {string} elementName
- * @return {!Element}
- */
-export function createLegacyLoaderElement(doc, elementName) {
-  if (LINE_LOADER_ELEMENTS[elementName.toUpperCase()]) {
-    return htmlFor(doc)`<div class="i-amphtml-loader-line">
-          <div class="i-amphtml-loader-moving-line"></div>
-        </div>`;
-  }
-  return htmlFor(doc)`<div class="i-amphtml-loader">
-        <div class="i-amphtml-loader-dot"></div>
-        <div class="i-amphtml-loader-dot"></div>
-        <div class="i-amphtml-loader-dot"></div>
-      </div>`;
-}
-
-/* NEW LOADER */
-/** @type {?Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>} */
-let loaderServicePromise = null;
 
 /**
  * Gets a Promise for the LoaderService, initiating a request to download the
@@ -59,13 +24,9 @@ let loaderServicePromise = null;
  * @return {!Promise<!../extensions/amp-loader/0.1/amp-loader.LoaderService>}
  */
 function getLoaderServicePromise(ampDoc, element) {
-  if (!loaderServicePromise) {
-    loaderServicePromise = Services.extensionsFor(ampDoc.win)
-      .installExtensionForDoc(ampDoc, 'amp-loader')
-      .then(() => Services.loaderServiceForDoc(element));
-  }
-
-  return loaderServicePromise;
+  return Services.extensionsFor(ampDoc.win)
+    .installExtensionForDoc(ampDoc, 'amp-loader')
+    .then(() => Services.loaderServiceForDoc(element));
 }
 
 /**
@@ -77,21 +38,19 @@ function getLoaderServicePromise(ampDoc, element) {
  * @param {!AmpElement} element
  * @param {number} elementWidth
  * @param {number} elementHeight
- * @return {!Element} New loader root element
+ * @return {!Element} The loader root element.
  */
-export function createNewLoaderElement(
+export function createLoaderElement(
   ampDoc,
   element,
   elementWidth,
   elementHeight
 ) {
-  devAssert(isNewLoaderExperimentEnabled(element));
   const startTime = Date.now();
   // We create the loader root element up front, since it is needed
-  // synchronously. We create the actually element with animations when the
+  // synchronously. We create the actual element with animations when the
   // service is ready.
   const loaderRoot = element.ownerDocument.createElement('div');
-  loaderRoot.className = 'i-amphtml-new-loader';
 
   getLoaderServicePromise(ampDoc, element).then(loaderService => {
     const endTime = Date.now();
@@ -107,14 +66,4 @@ export function createNewLoaderElement(
   });
 
   return loaderRoot;
-}
-
-/**
- * Whether the new loader experiment is enabled.
- * @param {!AmpElement} element
- * @return {boolean}
- */
-export function isNewLoaderExperimentEnabled(element) {
-  const win = toWin(element.ownerDocument.defaultView);
-  return isExperimentOn(win, 'new-loaders');
 }

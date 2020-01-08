@@ -22,7 +22,7 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {Services} from './services';
-import {adopt} from './runtime';
+import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
@@ -37,6 +37,7 @@ import {installErrorReporting} from './error';
 import {installPerformanceService} from './service/performance-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {installStandaloneExtension} from './standalone';
 import {
   installStylesForDoc,
   makeBodyVisible,
@@ -45,6 +46,7 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
+import {preconnectToOrigin} from './preconnect';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
@@ -89,6 +91,7 @@ if (shouldMainBootstrapRun) {
   startupChunk(self.document, function initial() {
     /** @const {!./service/ampdoc-impl.AmpDoc} */
     const ampdoc = ampdocService.getAmpDoc(self.document);
+    installPlatformService(self);
     installPerformanceService(self);
     /** @const {!./service/performance-impl.Performance} */
     const perf = Services.performanceFor(self);
@@ -97,7 +100,6 @@ if (shouldMainBootstrapRun) {
     ) {
       perf.addEnabledExperiment('no-boilerplate');
     }
-    installPlatformService(self);
     fontStylesheetTimeout(self);
     perf.tick('is');
     installStylesForDoc(
@@ -113,7 +115,7 @@ if (shouldMainBootstrapRun) {
           maybeTrackImpression(self);
         });
         startupChunk(self.document, function adoptWindow() {
-          adopt(self);
+          adoptWithMultidocDeps(self);
         });
         startupChunk(self.document, function builtins() {
           // Builtins.
@@ -128,9 +130,10 @@ if (shouldMainBootstrapRun) {
           function final() {
             installPullToRefreshBlocker(self);
             installAutoLightboxExtension(ampdoc);
-
+            installStandaloneExtension(ampdoc);
             maybeValidate(self);
             makeBodyVisible(self.document);
+            preconnectToOrigin(self.document);
           },
           /* makes the body visible */ true
         );

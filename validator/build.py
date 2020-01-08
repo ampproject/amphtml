@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 #
 # Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 #
@@ -43,7 +43,7 @@ def EnsureNodeJsIsInstalled():
 
   try:
     output = subprocess.check_output(['node', '--eval', 'console.log("42")'])
-    if output.strip() == '42':
+    if b'42' == output.strip():
       return
   except (subprocess.CalledProcessError, OSError):
     pass
@@ -76,8 +76,8 @@ def CheckPrereqs():
     Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation.')
 
   # Ensure 'libprotoc 2.5.0' or newer.
-  m = re.search('^(\\w+) (\\d+)\\.(\\d+)\\.(\\d+)', libprotoc_version)
-  if (m.group(1) != 'libprotoc' or
+  m = re.search(b'^(\\w+) (\\d+)\\.(\\d+)\\.(\\d+)', libprotoc_version)
+  if (m.group(1) != b'libprotoc' or
       (int(m.group(2)), int(m.group(3)), int(m.group(4))) < (2, 5, 0)):
     Die('Expected libprotoc 2.5.0 or newer, saw: %s' % libprotoc_version)
 
@@ -87,7 +87,15 @@ def CheckPrereqs():
     try:
       __import__(module)
     except ImportError:
-      Die('%s not found. Try "pip install protobuf" or follow the install instructions at https://github.com/ampproject/amphtml/blob/master/validator/README.md#installation' % module)
+      # Python3 needs pip3. Python 2 needs pip.
+      if sys.version_info < (3, 0):
+        Die('%s not found. Try "pip install protobuf" or follow the install '
+            'instructions at https://github.com/ampproject/amphtml/blob/master/'
+            'validator/README.md#installation' % module)
+      else:
+        Die('%s not found. Try "pip3 install protobuf" or follow the install '
+            'instructions at https://github.com/ampproject/amphtml/blob/master/'
+            'validator/README.md#installation' % module)
 
   # Ensure that yarn is installed.
   try:
@@ -337,8 +345,8 @@ def RunSmokeTest(out_dir):
       stdout=subprocess.PIPE,
       stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
-  if ('testdata/feature_tests/minimum_valid_amp.html: PASS\n', '', p.returncode
-     ) != (stdout, stderr, 0):
+  if (b'testdata/feature_tests/minimum_valid_amp.html: PASS\n', b'',
+      p.returncode) != (stdout, stderr, 0):
     Die('Smoke test failed. returncode=%d stdout="%s" stderr="%s"' %
         (p.returncode, stdout, stderr))
 
@@ -354,8 +362,8 @@ def RunSmokeTest(out_dir):
   (stdout, stderr) = p.communicate()
   if p.returncode != 1:
     Die('smoke test failed. Expected p.returncode==1, saw: %s' % p.returncode)
-  if not stderr.startswith('testdata/feature_tests/empty.html:1:0 '
-                           'The mandatory tag \'html'):
+  if not stderr.startswith(b'testdata/feature_tests/empty.html:1:0 '
+                           b'The mandatory tag \'html'):
     Die('smoke test failed; stderr was: "%s"' % stderr)
   logging.info('... done')
 
@@ -431,9 +439,8 @@ def CompileParseCssTestMinified(out_dir):
   CompileWithClosure(
       js_files=[
           'engine/definitions.js', 'engine/parse-css.js', 'engine/parse-url.js',
-          'engine/tokenize-css.js', 'engine/css-selectors.js',
-          'engine/json-testutil.js', 'engine/parse-css_test.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/tokenize-css.js', 'engine/json-testutil.js',
+          'engine/parse-css_test.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -453,9 +460,8 @@ def CompileParseUrlTestMinified(out_dir):
   CompileWithClosure(
       js_files=[
           'engine/definitions.js', 'engine/parse-url.js', 'engine/parse-css.js',
-          'engine/tokenize-css.js', 'engine/css-selectors.js',
-          'engine/json-testutil.js', 'engine/parse-url_test.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/tokenize-css.js', 'engine/json-testutil.js',
+          'engine/parse-url_test.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -477,8 +483,7 @@ def CompileAmp4AdsParseCssTestMinified(out_dir):
           'engine/definitions.js', 'engine/amp4ads-parse-css_test.js',
           'engine/parse-css.js', 'engine/parse-url.js',
           'engine/amp4ads-parse-css.js', 'engine/tokenize-css.js',
-          'engine/css-selectors.js', 'engine/json-testutil.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],
@@ -500,8 +505,7 @@ def CompileKeyframesParseCssTestMinified(out_dir):
           'engine/definitions.js', 'engine/keyframes-parse-css_test.js',
           'engine/parse-css.js', 'engine/parse-url.js',
           'engine/keyframes-parse-css.js', 'engine/tokenize-css.js',
-          'engine/css-selectors.js', 'engine/json-testutil.js',
-          '%s/validator-generated.js' % out_dir,
+          'engine/json-testutil.js', '%s/validator-generated.js' % out_dir,
           '%s/validator-proto-generated.js' % out_dir
       ],
       definitions=[],

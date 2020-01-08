@@ -237,19 +237,25 @@ describe
         expect(purify('a<a href="javascript:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
-        expect(purify('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
+        expect(purify('a<a href=" JAVASCRIPT:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
         expect(purify('a<a href="vbscript:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
-        expect(purify('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
+        expect(purify('a<a href=" VBSCRIPT:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
         expect(purify('a<a href="data:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
-        expect(purify('a<a href="DATA:alert">b</a>')).to.be.equal(
+        expect(purify('a<a href=" DATA:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>'
+        );
+        expect(purify('a<a href="blob:alert">b</a>')).to.be.equal(
+          'a<a target="_top">b</a>'
+        );
+        expect(purify('a<a href=" BLOB:alert">b</a>')).to.be.equal(
           'a<a target="_top">b</a>'
         );
         expect(purify('a<a href="?__amp_source_origin=foo">b</a>')).to.be.equal(
@@ -403,7 +409,7 @@ describe
       });
     });
 
-    describe('purify based on AMP format type', () => {
+    describe('AMP formats', () => {
       it('should blacklist input[type="image"] and input[type="button"] in AMP', () => {
         // Given the AMP format type.
         html.setAttribute('amp', '');
@@ -484,7 +490,7 @@ describe
       });
     });
 
-    describe('purifyTagsForTripleMustache', () => {
+    describe('purifyTagsForTripleMustache()', () => {
       it('should output basic text', () => {
         expect(purifyTagsForTripleMustache('abc')).to.be.equal('abc');
       });
@@ -675,6 +681,19 @@ describe
         expect(purify('<a [href]="foo.bar">link</a>')).to.match(
           /<a data-amp-bind-href="foo.bar" i-amphtml-binding="" i-amphtml-key="(\d+)">link<\/a>/
         );
+      });
+    });
+
+    describe('structured data', () => {
+      it('[itemprop] global attribute', () => {
+        const h1 = '<h1 itemprop="foo">h1</h1>';
+        expect(purify(h1)).to.equal(h1);
+
+        const span = '<span itemprop="bar">span</span>';
+        expect(purify(span)).to.equal(span);
+
+        const a = '<a itemprop="baz">a</a>';
+        expect(purify(a)).to.equal(a);
       });
     });
 

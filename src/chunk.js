@@ -18,7 +18,6 @@ import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
-import {isExperimentOn} from './experiments';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
@@ -54,24 +53,24 @@ function chunkServiceForDoc(elementOrAmpDoc) {
  * time to do other things) and may even be further delayed until
  * there is time.
  *
- * @param {!Document} document
+ * @param {!Document|!./service/ampdoc-impl.AmpDoc} doc
  * @param {function(?IdleDeadline)} fn
  * @param {boolean=} opt_makesBodyVisible Pass true if this service makes
  *     the body visible. This is relevant because it may influence the
  *     task scheduling strategy.
  */
-export function startupChunk(document, fn, opt_makesBodyVisible) {
+export function startupChunk(doc, fn, opt_makesBodyVisible) {
   if (deactivated) {
     resolved.then(fn);
     return;
   }
-  const service = chunkServiceForDoc(document.documentElement);
+  const service = chunkServiceForDoc(doc.documentElement || doc);
+  service.runForStartup(fn);
   if (opt_makesBodyVisible) {
     service.runForStartup(() => {
       service.bodyIsVisible_ = true;
     });
   }
-  service.runForStartup(fn);
 }
 
 /**
@@ -230,8 +229,8 @@ class Task {
    * @protected
    */
   useRequestIdleCallback_() {
-    // By default, always use requestIdleCallback.
-    return true;
+    // By default, never use requestIdleCallback.
+    return false;
   }
 }
 
@@ -247,9 +246,6 @@ class StartupTask extends Task {
    */
   constructor(fn, win, chunks) {
     super(fn);
-
-    /** @private @const */
-    this.win_ = win;
 
     /** @private @const */
     this.chunks_ = chunks;
@@ -270,11 +266,10 @@ class StartupTask extends Task {
 
   /** @override */
   useRequestIdleCallback_() {
-    // We only start using requestIdleCallback when the viewer has
+    // We only start using requestIdleCallback when the core runtime has
     // been initialized. Otherwise we risk starving ourselves
-    // before we get into a state where the viewer can tell us
-    // that we are visible.
-    return !!this.chunks_.viewer;
+    // before the render-critical work is done.
+    return this.chunks_.coreReady_;
   }
 
   /**
@@ -282,16 +277,7 @@ class StartupTask extends Task {
    * @private
    */
   isVisible_() {
-    // Ask the viewer first.
-    if (this.chunks_.viewer) {
-      return this.chunks_.viewer.isVisible();
-    }
-    // There is no viewer yet. Lets try to guess whether we are visible.
-    if (this.win_.document.hidden) {
-      return false;
-    }
-    // Viewers send a URL param if we are not visible.
-    return !/visibilityState=(hidden|prerender)/.test(this.win_.location.hash);
+    return this.chunks_.ampdoc.isVisible();
   }
 }
 
@@ -303,6 +289,8 @@ class Chunks {
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
   constructor(ampDoc) {
+    /** @protected @const {!./service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampDoc;
     /** @private @const {!Window} */
     this.win_ = ampDoc.win;
     /** @private @const {!PriorityQueue<Task>} */
@@ -310,12 +298,8 @@ class Chunks {
     /** @private @const {function(?IdleDeadline)} */
     this.boundExecute_ = this.execute_.bind(this);
     /** @private {number} */
-    this.timeSinceLastExecution_ = Date.now();
-    /** @private {boolean} */
-    this.macroAfterLongTask_ = isExperimentOn(
-      this.win_,
-      'macro-after-long-task'
-    );
+    this.durationOfLastExecution_ = 0;
+
     /**
      * Set to true if we scheduled a macro or micro task to execute the next
      * task. If true, we don't schedule another one.
@@ -335,17 +319,18 @@ class Chunks {
       }
     });
 
-    /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
-    this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
-    /**  @protected {?./service/viewer-impl.Viewer} */
-    this.viewer = null;
-    this.viewerPromise_.then(viewer => {
-      this.viewer = viewer;
-      viewer.onVisibilityChanged(() => {
-        if (viewer.isVisible()) {
-          this.schedule_();
-        }
-      });
+    /** @protected {boolean} */
+    this.coreReady_ = false;
+    Services.viewerPromiseForDoc(ampDoc).then(() => {
+      // Once the viewer has been resolved, most of core runtime has been
+      // initialized as well.
+      this.coreReady_ = true;
+    });
+
+    ampDoc.onVisibilityChanged(() => {
+      if (ampDoc.isVisible()) {
+        this.schedule_();
+      }
     });
   }
 
@@ -408,20 +393,43 @@ class Chunks {
    * @private
    */
   execute_(idleDeadline) {
-    this.scheduledImmediateInvocation_ = false;
     const t = this.nextTask_(/* opt_dequeue */ true);
     if (!t) {
+      this.scheduledImmediateInvocation_ = false;
+      this.durationOfLastExecution_ = 0;
       return false;
     }
+    let before;
     try {
-      const before = Date.now();
-      this.timeSinceLastExecution_ = before;
+      before = Date.now();
       t.runTask_(idleDeadline);
-      dev().fine(TAG, t.getName_(), 'Chunk duration', Date.now() - before);
     } finally {
-      resolved.then(() => {
-        this.schedule_();
-      });
+      // We want to capture the time of the entire task duration including
+      // scheduled immediate (from resolved promises) micro tasks.
+      // Lacking a better way to do this we just scheduled 10 nested
+      // micro tasks.
+      resolved
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then(() => {
+          this.scheduledImmediateInvocation_ = false;
+          this.durationOfLastExecution_ += Date.now() - before;
+          dev().fine(
+            TAG,
+            t.getName_(),
+            'Chunk duration',
+            Date.now() - before,
+            this.durationOfLastExecution_
+          );
+
+          this.schedule_();
+        });
     }
     return true;
   }
@@ -435,11 +443,8 @@ class Chunks {
     // If we've spent over 5 millseconds executing the
     // last instruction yeild back to the main thread.
     // 5 milliseconds is a magic number.
-    if (
-      this.macroAfterLongTask_ &&
-      this.bodyIsVisible_ &&
-      Date.now() - this.timeSinceLastExecution_ > 5
-    ) {
+    if (this.bodyIsVisible_ && this.durationOfLastExecution_ > 5) {
+      this.durationOfLastExecution_ = 0;
       this.requestMacroTask_();
       return;
     }

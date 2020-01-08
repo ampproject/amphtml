@@ -26,6 +26,7 @@ import {
   toggleExperiment,
 } from '../../../src/experiments';
 import {getConsentPolicyState} from '../../../src/consent';
+import {getMeasuredResources} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getTimingDataSync} from '../../../src/service/variable-source';
@@ -37,7 +38,7 @@ import {whenUpgradedToCustomElement} from '../../../src/dom';
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
 
 /** @const {number} */
-const MAX_URL_LENGTH = 16384;
+const MAX_URL_LENGTH = 15360;
 
 /** @enum {string} */
 const AmpAdImplementation = {
@@ -100,13 +101,6 @@ export const TRUNCATION_PARAM = {name: 'trunc', value: '1'};
 
 /** @const {Object} */
 const CDN_PROXY_REGEXP = /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org((\/.*)|($))+/;
-
-/** @const {!{branch: string, control: string, experiment: string}} */
-export const ADX_ADY_EXP = {
-  branch: 'amp-ad-ff-adx-ady',
-  control: '21062398',
-  experiment: '21062593',
-};
 
 /**
  * Returns the value of some navigation timing parameter.
@@ -197,10 +191,6 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
   if (opt_experimentIds) {
     eids = mergeExperimentIds(opt_experimentIds, eids);
   }
-  if (new RegExp(`(^|,)${ADX_ADY_EXP.experiment}($|,)`).test(eids)) {
-    slotRect.left = slotRect.left || 1;
-    slotRect.top = slotRect.top || 1;
-  }
   return {
     'adf': DomFingerprint.generate(adElement),
     'nhd': iframeDepth,
@@ -213,12 +203,12 @@ export function googleBlockParameters(a4a, opt_experimentIds) {
 }
 
 /**
- * @param {!Window} win
+ * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
  * @param {string} type matching typing attribute.
  * @param {function(!Element):string} groupFn
  * @return {!Promise<!Object<string,!Array<!Promise<!../../../src/base-element.BaseElement>>>>}
  */
-export function groupAmpAdsByType(win, type, groupFn) {
+export function groupAmpAdsByType(ampdoc, type, groupFn) {
   // Look for amp-ad elements of correct type or those contained within
   // standard container type.  Note that display none containers will not be
   // included as they will never be measured.
@@ -227,21 +217,18 @@ export function groupAmpAdsByType(win, type, groupFn) {
   // visible).
   const ampAdSelector = r =>
     r.element./*OK*/ querySelector(`amp-ad[type=${type}]`);
-  const {documentElement} = win.document;
   return (
-    Services.resourcesForDoc(documentElement)
-      .getMeasuredResources(win, r => {
-        const isAmpAdType =
-          r.element.tagName == 'AMP-AD' &&
-          r.element.getAttribute('type') == type;
-        if (isAmpAdType) {
-          return true;
-        }
-        const isAmpAdContainerElement =
-          Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
-          !!ampAdSelector(r);
-        return isAmpAdContainerElement;
-      })
+    getMeasuredResources(ampdoc, ampdoc.win, r => {
+      const isAmpAdType =
+        r.element.tagName == 'AMP-AD' && r.element.getAttribute('type') == type;
+      if (isAmpAdType) {
+        return true;
+      }
+      const isAmpAdContainerElement =
+        Object.keys(ValidAdContainerTypes).includes(r.element.tagName) &&
+        !!ampAdSelector(r);
+      return isAmpAdContainerElement;
+    })
       // Need to wait on any contained element resolution followed by build
       // of child ad.
       .then(resources =>
@@ -299,7 +286,7 @@ export function googlePageParameters(a4a, startTime) {
     const viewport = Services.viewportForDoc(ampDoc);
     const viewportRect = viewport.getRect();
     const viewportSize = viewport.getSize();
-    const visibilityState = Services.viewerForDoc(ampDoc).getVisibilityState();
+    const visibilityState = ampDoc.getVisibilityState();
     return {
       'is_amp': a4a.isXhrAllowed()
         ? AmpAdImplementation.AMP_AD_XHR_TO_IFRAME_OR_AMP
@@ -626,12 +613,11 @@ export function getCsiAmpAnalyticsConfig() {
 export function getCsiAmpAnalyticsVariables(analyticsTrigger, a4a, qqid) {
   const {win} = a4a;
   const ampdoc = a4a.getAmpDoc();
-  const viewer = Services.viewerForDoc(ampdoc);
   const navStart = getNavigationTiming(win, 'navigationStart');
   const vars = /** @type {!JsonObject} */ ({
     'correlator': getCorrelator(win, ampdoc),
     'slotId': a4a.element.getAttribute('data-amp-slot-index'),
-    'viewerLastVisibleTime': viewer.getLastVisibleTime() - navStart,
+    'viewerLastVisibleTime': ampdoc.getLastVisibleTime() - navStart,
   });
   if (qqid) {
     vars['qqid'] = qqid;
@@ -844,8 +830,13 @@ export function getBinaryTypeNumericalCode(type) {
     {
       'production': '0',
       'control': '1',
-      'canary': '2',
+      'experimental': '2',
       'rc': '3',
+      'experimentA': '10',
+      'experimentB': '11',
+      'experimentC': '12',
+      'nomod': '42',
+      'mod': '43',
     }[type] || null
   );
 }

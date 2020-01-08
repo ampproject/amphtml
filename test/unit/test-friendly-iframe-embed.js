@@ -23,7 +23,6 @@ import {
   mergeHtmlForTesting,
   setFriendlyIframeEmbedVisible,
   setSrcdocSupportedForTesting,
-  whenContentIniLoad,
 } from '../../src/friendly-iframe-embed';
 import {Services} from '../../src/services';
 import {Signals} from '../../src/utils/signals';
@@ -39,7 +38,7 @@ import {isAnimationNone} from '../../testing/test-helper';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import {loadPromise} from '../../src/event-helper';
 import {resetScheduledElementForTesting} from '../../src/service/custom-element-registry';
-import {toggleExperiment} from '../../src/experiments';
+import {toggleAmpdocFieForTesting} from '../../src/ampdoc-fie';
 import {updateFieModeForTesting} from '../../src/service/ampdoc-impl';
 
 describes.realWin('friendly-iframe-embed', {amp: true}, env => {
@@ -60,18 +59,20 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const ampdocService = {
       installFieDoc: () => {},
     };
-    extensionsMock = sandbox.mock(extensions);
-    resourcesMock = sandbox.mock(resources);
-    ampdocServiceMock = sandbox.mock(ampdocService);
-    sandbox.stub(Services, 'ampdocServiceFor').callsFake(() => ampdocService);
+    extensionsMock = env.sandbox.mock(extensions);
+    resourcesMock = env.sandbox.mock(resources);
+    ampdocServiceMock = env.sandbox.mock(ampdocService);
+    env.sandbox
+      .stub(Services, 'ampdocServiceFor')
+      .callsFake(() => ampdocService);
 
     iframe = document.createElement('iframe');
 
-    installExtensionsInChildWindowStub = sandbox
+    installExtensionsInChildWindowStub = env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'installExtensionsInChildWindow')
       .returns(Promise.resolve());
 
-    installExtensionsInFieStub = sandbox
+    installExtensionsInFieStub = env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'installExtensionsInFie')
       .returns(Promise.resolve());
   });
@@ -84,12 +85,11 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     resourcesMock.verify();
     ampdocServiceMock.verify();
     setSrcdocSupportedForTesting(undefined);
-    toggleExperiment(window, 'ampdoc-fie', false);
-    sandbox.restore();
+    toggleAmpdocFieForTesting(window, false);
   });
 
   function stubViewportScrollTop(scrollTop) {
-    sandbox.stub(Services, 'viewportForDoc').returns({
+    env.sandbox.stub(Services, 'viewportForDoc').returns({
       getScrollTop: () => scrollTop,
     });
   }
@@ -107,6 +107,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     // Attributes set.
     expect(iframe.style.visibility).to.equal('hidden');
     expect(iframe.getAttribute('referrerpolicy')).to.equal('unsafe-url');
+    expect(iframe.getAttribute('marginheight')).to.equal('0');
+    expect(iframe.getAttribute('marginwidth')).to.equal('0');
 
     // Iframe has been appended to DOM.
     expect(iframe.parentElement).to.equal(document.body);
@@ -169,12 +171,12 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
   });
 
   it('should create ampdoc and install extensions', () => {
-    toggleExperiment(window, 'ampdoc-fie', true);
+    toggleAmpdocFieForTesting(window, true);
 
     // AmpDoc is created.
     const ampdocSignals = new Signals();
     const ampdoc = {
-      setReady: sandbox.spy(),
+      setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
     };
     let childWinForAmpDoc;
@@ -182,12 +184,12 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       .expects('installFieDoc')
       .withExactArgs(
         'https://acme.org/url1',
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           // Match childWin argument.
           childWinForAmpDoc = arg;
           return true;
         }),
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           // Match options with no signals.
           expect(arg && arg.signals).to.not.be.ok;
           return true;
@@ -207,7 +209,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const readyPromise = new Promise(resolve => {
       readyResolver = resolve;
     });
-    sandbox
+    env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'whenReady')
       .callsFake(() => readyPromise);
 
@@ -221,8 +223,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
         expect(childWinForAmpDoc).to.equal(embed.win);
         expect(ampdoc).to.equal(embed.ampdoc);
         expect(installExtensionsInFieStub).to.be.calledWithMatch(
-          sinon.match.any,
-          sinon.match.same(ampdoc)
+          env.sandbox.match.any,
+          env.sandbox.match.same(ampdoc)
         );
         expect(ampdoc.setReady).to.not.be.called;
         readyResolver();
@@ -234,19 +236,19 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
   });
 
   it('should create ampdoc and install extensions with host', () => {
-    toggleExperiment(window, 'ampdoc-fie', true);
+    toggleAmpdocFieForTesting(window, true);
 
     // host.
     const hostSignals = new Signals();
     const host = document.createElement('div');
     host.signals = () => hostSignals;
-    host.renderStarted = sandbox.spy();
+    host.renderStarted = env.sandbox.spy();
     host.getLayoutBox = () => layoutRectLtwh(10, 10, 100, 200);
 
     // AmpDoc is created.
     let ampdocSignals = null;
     const ampdoc = {
-      setReady: sandbox.spy(),
+      setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
     };
     let childWinForAmpDoc;
@@ -254,12 +256,12 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       .expects('installFieDoc')
       .withExactArgs(
         'https://acme.org/url1',
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           // Match childWin argument.
           childWinForAmpDoc = arg;
           return true;
         }),
-        sinon.match(arg => {
+        env.sandbox.match(arg => {
           // Match options with no signals.
           ampdocSignals = arg && arg.signals;
           expect(ampdocSignals).to.be.ok;
@@ -280,7 +282,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const readyPromise = new Promise(resolve => {
       readyResolver = resolve;
     });
-    sandbox
+    env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'whenReady')
       .callsFake(() => readyPromise);
 
@@ -295,8 +297,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
         expect(childWinForAmpDoc).to.equal(embed.win);
         expect(ampdoc).to.equal(embed.ampdoc);
         expect(installExtensionsInFieStub).to.be.calledWithMatch(
-          sinon.match.any,
-          sinon.match.same(ampdoc)
+          env.sandbox.match.any,
+          env.sandbox.match.same(ampdoc)
         );
         expect(ampdoc.setReady).to.not.be.called;
         readyResolver();
@@ -324,8 +326,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     });
     return embedPromise.then(embed => {
       expect(installExtensionsInChildWindowStub).to.be.calledWith(
-        sinon.match.any,
-        sinon.match.same(embed.win)
+        env.sandbox.match.any,
+        env.sandbox.match.same(embed.win)
       );
     });
   });
@@ -347,25 +349,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     });
   });
 
-  it('should uninstall all resources', () => {
-    extensionsMock.expects('preloadExtension').atLeast(1);
-    const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
-      url: 'https://acme.org/url1',
-      html: '<amp-test></amp-test>',
-      extensionIds: ['amp-test'],
-    });
-    return embedPromise.then(embed => {
-      expect(installExtensionsInChildWindowStub).to.be.calledOnce;
-      resourcesMock
-        .expects('removeForChildWindow')
-        .withExactArgs(embed.win)
-        .once();
-      embed.destroy();
-    });
-  });
-
   it.skip('should install and dispose services', () => {
-    const disposeSpy = sandbox.spy();
+    const disposeSpy = env.sandbox.spy();
     const embedService = {
       dispose: disposeSpy,
     };
@@ -381,7 +366,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       }
     );
     return embedPromise.then(embed => {
-      expect(embed.win.services['c'].obj).to.equal(embedService);
+      expect(embed.win.__AMP_SERVICES['c'].obj).to.equal(embedService);
       expect(disposeSpy).to.not.be.called;
       embed.destroy();
       expect(disposeSpy).to.be.calledOnce;
@@ -389,14 +374,14 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
   });
 
   it('should dispose ampdoc', () => {
-    toggleExperiment(window, 'ampdoc-fie', true);
+    toggleAmpdocFieForTesting(window, true);
 
     // AmpDoc is created.
     const ampdocSignals = new Signals();
     const ampdoc = {
-      setReady: sandbox.spy(),
+      setReady: env.sandbox.spy(),
       signals: () => ampdocSignals,
-      dispose: sandbox.spy(),
+      dispose: env.sandbox.spy(),
     };
     ampdocServiceMock
       .expects('installFieDoc')
@@ -410,7 +395,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       .returns(Promise.resolve())
       .once();
 
-    sandbox
+    env.sandbox
       .stub(FriendlyIframeEmbed.prototype, 'whenReady')
       .returns(Promise.resolve());
 
@@ -438,7 +423,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     return embedPromise.then(embed => {
       expect(installExtensionsInChildWindowStub).to.be.calledOnce;
       expect(embed.isVisible()).to.be.false;
-      const spy = sandbox.spy();
+      const spy = env.sandbox.spy();
       embed.onVisibilityChanged(spy);
 
       setFriendlyIframeEmbedVisible(embed, false);
@@ -456,7 +441,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const host = document.createElement('amp-host');
     const hostSignals = new Signals();
     host.signals = () => hostSignals;
-    host.renderStarted = sandbox.spy();
+    host.renderStarted = env.sandbox.spy();
     host.getLayoutBox = () => layoutRectLtwh(10, 10, 100, 200);
     const embedPromise = installFriendlyIframeEmbed(iframe, document.body, {
       url: 'https://acme.org/url1',
@@ -474,8 +459,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     resourcesMock
       .expects('getResourcesInRect')
       .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(
+        env.sandbox.match(arg => arg == iframe.contentWindow),
+        env.sandbox.match(
           arg =>
             arg.left == 0 &&
             arg.top == 0 &&
@@ -513,8 +498,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     resourcesMock
       .expects('getResourcesInRect')
       .withExactArgs(
-        sinon.match(arg => arg == iframe.contentWindow),
-        sinon.match(
+        env.sandbox.match(arg => arg == iframe.contentWindow),
+        env.sandbox.match(
           arg =>
             arg.left == 10 &&
             arg.top == 10 &&
@@ -539,55 +524,6 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
         expect(embed.signals().get('ini-load')).to.be.ok;
         return embed.whenReady(); // `whenReady` should also be complete.
       });
-  });
-
-  it('should find and await all content elements', () => {
-    function resource(tagName) {
-      const res = {
-        element: {
-          tagName: tagName.toUpperCase(),
-        },
-        loadedComplete: false,
-      };
-      res.loadedOnce = () =>
-        Promise.resolve().then(() => {
-          res.loadedComplete = true;
-        });
-      return res;
-    }
-
-    let content1;
-    let content2;
-    let blacklistedAd;
-    let blacklistedAnalytics;
-    let blacklistedPixel;
-    let blacklistedAmpAdExit;
-
-    const context = document.createElement('div');
-    document.body.appendChild(context);
-    resourcesMock
-      .expects('getResourcesInRect')
-      .withArgs(sinon.match(arg => arg == window))
-      .returns(
-        Promise.resolve([
-          (content1 = resource('amp-img', 0)),
-          (content2 = resource('amp-video', 0)),
-          (blacklistedAd = resource('amp-ad', 0)),
-          (blacklistedAnalytics = resource('amp-analytics', 0)),
-          (blacklistedPixel = resource('amp-pixel', 0)),
-          (blacklistedAmpAdExit = resource('amp-ad-exit', 0)),
-        ])
-      )
-      .once();
-
-    return whenContentIniLoad(context, window).then(() => {
-      expect(content1.loadedComplete).to.be.true;
-      expect(content2.loadedComplete).to.be.true;
-      expect(blacklistedAd.loadedComplete).to.be.false;
-      expect(blacklistedAnalytics.loadedComplete).to.be.false;
-      expect(blacklistedPixel.loadedComplete).to.be.false;
-      expect(blacklistedAmpAdExit.loadedComplete).to.be.false;
-    });
   });
 
   describe('mergeHtml', () => {
@@ -763,7 +699,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       const container = {
         appendChild: child => {
           document.body.appendChild(child);
-          eventListenerSpy = sandbox.spy(
+          eventListenerSpy = env.sandbox.spy(
             child.contentWindow,
             'addEventListener'
           );
@@ -794,11 +730,11 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     beforeEach(() => {
       setSrcdocSupportedForTesting(true);
 
-      clock = sandbox.useFakeTimers();
+      clock = env.sandbox.useFakeTimers();
 
       polls = [];
       win = {
-        services: {
+        __AMP_SERVICES: {
           'extensions': {
             obj: {
               preloadExtension: () => {},
@@ -843,7 +779,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
       container = {
         appendChild: () => {},
       };
-      renderStartStub = sandbox.stub(
+      renderStartStub = env.sandbox.stub(
         FriendlyIframeEmbed.prototype,
         'startRender_'
       );
@@ -966,7 +902,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
     const winW = 600;
     const winH = 800;
 
-    const resourcesMock = {
+    const mutatorMock = {
       measureMutateElement: (unusedEl, measure, mutate) => {
         if (measure) {
           measure();
@@ -986,7 +922,7 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
 
       parent.appendChild(iframe);
 
-      sandbox
+      env.sandbox
         ./*OK*/ stub(iframe, 'getBoundingClientRect')
         .returns(layoutRectLtwh(x, y, w, h));
 
@@ -999,8 +935,8 @@ describes.realWin('friendly-iframe-embed', {amp: true}, env => {
         Promise.resolve()
       );
 
-      sandbox.stub(fie, 'getResources_').returns(resourcesMock);
-      sandbox.stub(fie, 'getBodyElement').returns(bodyElementMock);
+      env.sandbox.stub(fie, 'getMutator_').returns(mutatorMock);
+      env.sandbox.stub(fie, 'getBodyElement').returns(bodyElementMock);
 
       fie.win = win;
 
@@ -1117,7 +1053,7 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     resetScheduledElementForTesting(parentWin, 'amp-test');
     installExtensionsService(parentWin);
     extensions = Services.extensionsFor(parentWin);
-    extensionsMock = sandbox.mock(extensions);
+    extensionsMock = env.sandbox.mock(extensions);
 
     [
       'urlForDoc',
@@ -1129,8 +1065,8 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
       class FakeService {
         static installInEmbedWindow() {}
       }
-      sandbox.stub(FakeService, 'installInEmbedWindow');
-      sandbox.stub(Services, s).returns(new FakeService());
+      env.sandbox.stub(FakeService, 'installInEmbedWindow');
+      env.sandbox.stub(Services, s).returns(new FakeService());
     });
 
     iframe = parentWin.document.createElement('iframe');
@@ -1181,17 +1117,23 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
 
   it('should install built-ins', () => {
     fie.installExtensionsInChildWindow(extensions, iframeWin, []);
-    expect(iframeWin.ampExtendedElements).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.not.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-pixel']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-pixel']).to.not.equal(
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.not.equal(
       ElementStub
     );
     // Legacy elements are installed as well.
-    expect(iframeWin.ampExtendedElements['amp-ad']).to.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-embed']).to.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-video']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(
+      ElementStub
+    );
   });
 
   it('should adopt standard services', () => {
@@ -1218,11 +1160,11 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
       'amp-test',
     ]);
     // Must be stubbed already.
-    expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
     expect(
       iframeWin.document.createElement('amp-test').implementation_
     ).to.be.instanceOf(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
     // Resolve the promise.
     extensions.registerExtension(
       'amp-test',
@@ -1236,8 +1178,8 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     );
     return promise.then(() => {
       // Main extension.
-      expect(parentWin.ampExtendedElements['amp-test']).to.be.undefined;
-      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.be.undefined;
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
       expect(iframeWin.document.querySelector('style[amp-extension=amp-test]'))
         .to.exist;
       // Must be upgraded already.
@@ -1246,8 +1188,8 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
       ).to.be.instanceOf(AmpTest);
 
       // Secondary extension.
-      expect(parentWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
-      expect(iframeWin.ampExtendedElements['amp-test-sub']).to.equal(
+      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
         AmpTestSub
       );
       expect(
@@ -1264,7 +1206,7 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     class FooService {
       static installInEmbedWindow() {}
     }
-    sandbox.stub(FooService, 'installInEmbedWindow');
+    env.sandbox.stub(FooService, 'installInEmbedWindow');
     registerServiceBuilder(
       parentWin,
       'fake-service-foo',
@@ -1275,7 +1217,7 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     class BarService {
       static installInEmbedWindow() {}
     }
-    sandbox.stub(BarService, 'installInEmbedWindow');
+    env.sandbox.stub(BarService, 'installInEmbedWindow');
     registerServiceBuilder(
       parentWin,
       'fake-service-bar',
@@ -1316,22 +1258,24 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
       function() {
         // Built-ins not installed yet.
         expect(
-          iframeWin.ampExtendedElements &&
-            iframeWin.ampExtendedElements['amp-img']
+          iframeWin.__AMP_EXTENDED_ELEMENTS &&
+            iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']
         ).to.not.exist;
         // Extension is not loaded yet.
         expect(
-          iframeWin.ampExtendedElements &&
-            iframeWin.ampExtendedElements['amp-test']
+          iframeWin.__AMP_EXTENDED_ELEMENTS &&
+            iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']
         ).to.not.exist;
         preinstallCount++;
       }
     );
     expect(preinstallCount).to.equal(1);
-    expect(iframeWin.ampExtendedElements).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.not.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
 
     // Resolve the promise.
     extensions.registerExtension(
@@ -1344,7 +1288,7 @@ describes.realWin('installExtensionsInChildWindow', {amp: true}, env => {
     return promise.then(() => {
       // Extension elements are stubbed immediately, but registered only
       // after extension is loaded.
-      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
     });
   });
 
@@ -1383,11 +1327,11 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
 
   beforeEach(() => {
     parentWin = env.win;
-    toggleExperiment(parentWin, 'ampdoc-fie', true);
+    toggleAmpdocFieForTesting(parentWin, true);
     resetScheduledElementForTesting(parentWin, 'amp-test');
     installExtensionsService(parentWin);
     extensions = Services.extensionsFor(parentWin);
-    extensionsMock = sandbox.mock(extensions);
+    extensionsMock = env.sandbox.mock(extensions);
     const ampdocService = Services.ampdocServiceFor(parentWin);
     updateFieModeForTesting(ampdocService, true);
 
@@ -1425,7 +1369,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
   });
 
   afterEach(() => {
-    toggleExperiment(parentWin, 'ampdoc-fie', false);
+    toggleAmpdocFieForTesting(parentWin, false);
     if (iframe.parentElement) {
       iframe.parentElement.removeChild(iframe);
     }
@@ -1445,17 +1389,23 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
 
   it('should install built-ins', () => {
     fie.installExtensionsInFie(extensions, ampdoc, []);
-    expect(iframeWin.ampExtendedElements).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.not.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-pixel']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-pixel']).to.not.equal(
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-pixel']).to.not.equal(
       ElementStub
     );
     // Legacy elements are installed as well.
-    expect(iframeWin.ampExtendedElements['amp-ad']).to.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-embed']).to.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-video']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-ad']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-embed']).to.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-video']).to.equal(
+      ElementStub
+    );
   });
 
   it('should create new standard services', () => {
@@ -1494,11 +1444,11 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
       'amp-test',
     ]);
     // Must be stubbed already.
-    expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
     expect(
       iframeWin.document.createElement('amp-test').implementation_
     ).to.be.instanceOf(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
     // Resolve the promise.
     extensions.registerExtension(
       'amp-test',
@@ -1512,8 +1462,8 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
     );
     return promise.then(() => {
       // Main extension.
-      expect(parentWin.ampExtendedElements['amp-test']).to.be.undefined;
-      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.be.undefined;
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
       expect(iframeWin.document.querySelector('style[amp-extension=amp-test]'))
         .to.exist;
       // Must be upgraded already.
@@ -1522,8 +1472,8 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
       ).to.be.instanceOf(AmpTest);
 
       // Secondary extension.
-      expect(parentWin.ampExtendedElements['amp-test-sub']).to.be.undefined;
-      expect(iframeWin.ampExtendedElements['amp-test-sub']).to.equal(
+      expect(parentWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.be.undefined;
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test-sub']).to.equal(
         AmpTestSub
       );
       expect(
@@ -1537,7 +1487,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
   });
 
   it('should adopt extension services', () => {
-    const fooConstructorSpy = sandbox.spy();
+    const fooConstructorSpy = env.sandbox.spy();
     class FooService {
       constructor(arg) {
         fooConstructorSpy(arg);
@@ -1550,7 +1500,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
       /* opt_instantiate */ false
     );
 
-    const barConstructorSpy = sandbox.spy();
+    const barConstructorSpy = env.sandbox.spy();
     class BarService {
       constructor(arg) {
         barConstructorSpy(arg);
@@ -1597,22 +1547,24 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
         expect(ampdocArg).to.equal(ampdoc);
         // Built-ins not installed yet.
         expect(
-          iframeWin.ampExtendedElements &&
-            iframeWin.ampExtendedElements['amp-img']
+          iframeWin.__AMP_EXTENDED_ELEMENTS &&
+            iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']
         ).to.not.exist;
         // Extension is not loaded yet.
         expect(
-          iframeWin.ampExtendedElements &&
-            iframeWin.ampExtendedElements['amp-test']
+          iframeWin.__AMP_EXTENDED_ELEMENTS &&
+            iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']
         ).to.not.exist;
         preinstallCount++;
       }
     );
     expect(preinstallCount).to.equal(1);
-    expect(iframeWin.ampExtendedElements).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.exist;
-    expect(iframeWin.ampExtendedElements['amp-img']).to.not.equal(ElementStub);
-    expect(iframeWin.ampExtendedElements['amp-test']).to.equal(ElementStub);
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.exist;
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-img']).to.not.equal(
+      ElementStub
+    );
+    expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(ElementStub);
 
     // Resolve the promise.
     extensions.registerExtension(
@@ -1625,7 +1577,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
     return promise.then(() => {
       // Extension elements are stubbed immediately, but registered only
       // after extension is loaded.
-      expect(iframeWin.ampExtendedElements['amp-test']).to.equal(AmpTest);
+      expect(iframeWin.__AMP_EXTENDED_ELEMENTS['amp-test']).to.equal(AmpTest);
     });
   });
 });

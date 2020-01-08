@@ -203,3 +203,22 @@ export function asyncStringReplace(str, regex, replacer) {
   stringBuilder.push(str.slice(lastIndex));
   return Promise.all(stringBuilder).then(resolved => resolved.join(''));
 }
+
+/**
+ * Pads the beginning of a string with a substring to a target length.
+ * @param {string} s
+ * @param {number} targetLength
+ * @param {string} padString
+ * @return {*} TODO(#23582): Specify return type
+ */
+export function padStart(s, targetLength, padString) {
+  if (s.length >= targetLength) {
+    return s;
+  }
+  targetLength = targetLength - s.length;
+  let padding = padString;
+  while (targetLength > padding.length) {
+    padding += padString;
+  }
+  return padding.slice(0, targetLength) + s;
+}

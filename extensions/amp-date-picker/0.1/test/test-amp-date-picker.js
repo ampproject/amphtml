@@ -37,8 +37,7 @@ describes.realWin(
     "templates": [{
       "id": "srcTemplate",
       "dates": [
-        "2018-01-01",
-        "FREQ=WEEKLY;DTSTART=20180101T080000Z;WKST=SU;BYDAY=WE"
+        "2018-01-01"
       ]
     }, {
       "id": "defaultTemplate"
@@ -51,7 +50,7 @@ describes.realWin(
     };
 
     function createDatePicker(opt_attrs, opt_parent = document.body) {
-      const attrs = Object.assign({}, DEFAULT_ATTRS, opt_attrs);
+      const attrs = {...DEFAULT_ATTRS, ...opt_attrs};
       const element = createElementWithAttributes(
         document,
         'amp-date-picker',
@@ -97,7 +96,7 @@ describes.realWin(
      */
     function createDateTemplate(body, opt_attrs) {
       const template = createTemplate(body);
-      const attrs = Object.assign({}, DEFAULT_TEMPLATE_ATTRS, opt_attrs);
+      const attrs = {...DEFAULT_TEMPLATE_ATTRS, ...opt_attrs};
       for (const key in attrs) {
         template.setAttribute(key, attrs[key]);
       }
@@ -179,7 +178,7 @@ describes.realWin(
           'layout': 'fixed-height',
           'height': '360',
         });
-        sandbox.stub(picker, 'fetchSrc_').resolves({'date': '2018-01-01'});
+        env.sandbox.stub(picker, 'fetchSrc_').resolves({'date': '2018-01-01'});
 
         return layoutCallback().then(() => {
           expect(picker.state_.date.isSame('2018-01-01')).to.be.true;
@@ -192,7 +191,7 @@ describes.realWin(
           'height': '360',
           'type': 'range',
         });
-        sandbox.stub(picker, 'fetchSrc_').resolves({
+        env.sandbox.stub(picker, 'fetchSrc_').resolves({
           'startDate': '2018-01-01',
           'endDate': '2018-01-02',
         });
@@ -233,7 +232,7 @@ describes.realWin(
 
     describe('templates', () => {
       describe('element templates', () => {
-        it('should parse RRULE and date templates', () => {
+        it('should parse date templates', () => {
           const template = createDateTemplate('{{template}}', {
             dates: '2018-01-01',
           });
@@ -246,7 +245,7 @@ describes.realWin(
       });
 
       describe('src templates', () => {
-        it('should parse RRULE and date templates', function() {
+        it('should parse date templates', function() {
           this.timeout(4000);
           const template = createDateTemplate('{{val}}', {
             dates: '2018-01-01',
@@ -264,7 +263,6 @@ describes.realWin(
           );
           expect(srcTemplates[0].dates.contains('2018-01-01')).to.be.true;
           expect(srcTemplates[0].dates.contains('2018-01-02')).to.be.false;
-          expect(srcTemplates[0].dates.contains('2018-01-03')).to.be.true;
           expect(srcTemplates[0].template).to.equal(template);
           expect(srcDefaultTemplate).to.equal(defaultTemplate);
         });
@@ -437,7 +435,7 @@ describes.realWin(
             src: 'http://localhost:9876/date-picker/src-data/get',
           });
 
-          sandbox.stub(picker, 'fetchSrc_').resolves({
+          env.sandbox.stub(picker, 'fetchSrc_').resolves({
             blocked: ['2018-01-03'],
             highlighted: ['2018-01-04'],
           });
@@ -478,7 +476,7 @@ describes.realWin(
       describe('iterateDataRange', () => {
         it('should not iterate for an end date before start date ', () => {
           const {picker} = createDatePicker();
-          const spy = sandbox.spy();
+          const spy = env.sandbox.spy();
 
           picker.iterateDateRange_(
             moment('2018-01-03'),
@@ -491,7 +489,7 @@ describes.realWin(
 
         it('should handle both dates being the same', () => {
           const {picker} = createDatePicker();
-          const spy = sandbox.spy();
+          const spy = env.sandbox.spy();
 
           picker.iterateDateRange_(
             moment('2018-01-01'),
@@ -506,7 +504,7 @@ describes.realWin(
 
         it('should handle a null end date as both dates being the same', () => {
           const {picker} = createDatePicker();
-          const spy = sandbox.spy();
+          const spy = env.sandbox.spy();
 
           picker.iterateDateRange_(moment('2018-01-01'), null, spy);
 
@@ -517,7 +515,7 @@ describes.realWin(
 
         it('should handle both dates being different', () => {
           const {picker} = createDatePicker();
-          const spy = sandbox.spy();
+          const spy = env.sandbox.spy();
 
           picker.iterateDateRange_(
             moment('2018-01-01'),
@@ -555,7 +553,7 @@ describes.realWin(
             const input = document.createElement('input');
             input.id = 'date';
             element.appendChild(input);
-            sandbox.stub(picker.input_, 'isTouchDetected').returns(true);
+            env.sandbox.stub(picker.input_, 'isTouchDetected').returns(true);
 
             return picker
               .buildCallback()
@@ -581,7 +579,7 @@ describes.realWin(
           const input = document.createElement('input');
           input.id = 'date';
           element.appendChild(input);
-          sandbox.stub(picker.input_, 'isTouchDetected').returns(false);
+          env.sandbox.stub(picker.input_, 'isTouchDetected').returns(false);
 
           return picker
             .buildCallback()
