@@ -366,6 +366,9 @@ export class ResourcesImpl {
 
         r.setInViewport(isIntersecting);
 
+        // TODO(willchou): The lack of "update on scroll throttling" means
+        // that scrolled-over elements are no longer deferred. This results
+        // in longer delays for in-viewport elements after fast scrolling.
         if (isIntersecting && r.isDisplayed()) {
           if (r.getState() === ResourceState.READY_FOR_LAYOUT) {
             this.scheduleLayoutOrPreload(r, /* layout */ true);
