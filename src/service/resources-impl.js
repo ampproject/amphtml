@@ -224,17 +224,17 @@ export class ResourcesImpl {
       const supportsIframes =
         platform.isChrome() && platform.getMajorVersion() >= 81;
       const iframed = isIframed(this.win);
-      devAssert(supportsIframes == iframed);
+      devAssert(supportsIframes || !iframed);
 
       // Need to use scrollingElement as root for viewport tracking in iframed pages.
       const root =
         this.ampdoc.isSingleDoc() && iframed
           ? this.win.document./*OK*/ scrollingElement
           : null;
-      // TODO(willchou): Support changing of loading rectangle.
-      const rootMargin = this.prerenderSize_
-        ? `${this.prerenderSize_ - 1} 0%`
-        : '200% 25%';
+      // TODO(willchou): Is 3x viewport loading rectangle too large given that
+      // IntersectionObserver is more responsive than scroll-bound measure?
+      // TODO(willchou): Support prerenderSize_ loading rectangle.
+      const rootMargin = '200% 25%';
       /** @private @const {?IntersectionObserver} */
       this.intersectionObserver_ = new IntersectionObserver(
         this.intersects_.bind(this),
@@ -249,7 +249,8 @@ export class ResourcesImpl {
       this.relayoutAll_ = false;
     }
 
-    // When viewport is resized, we have to re-measure all elements.
+    // When user scrolling stops, run pass to check newly in-viewport elements.
+    // When viewport is resized, we have to re-measure everything.
     this.viewport_.onChanged(event => {
       this.lastScrollTime_ = Date.now();
       this.lastVelocity_ = event.velocity;
@@ -257,7 +258,10 @@ export class ResourcesImpl {
         this.relayoutAll_ = true;
         this.maybeChangeHeight_ = true;
       }
-      this.schedulePass();
+      // With IntersectionObserver, we only need to handle viewport resize.
+      if (this.relayoutAll_ || !this.intersectionObserver_) {
+        this.schedulePass();
+      }
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = Date.now();
@@ -339,13 +343,15 @@ export class ResourcesImpl {
         r.isDisplayed(clientRect) &&
         !r.hasOwner()
       ) {
-        dev().fine(TAG_, 'force build:', r.debugid);
+        // TODO(willchou): Can this cause scroll jank since we no longer wait
+        // for scrolling to stop?
         this.buildOrScheduleBuildForResource_(
           r,
           /* checkForDupes */ true,
           /* scheduleWhenBuilt */ false,
           /* force */ true
         );
+        dev().fine(TAG_, 'force build:', r.debugid);
       }
 
       return r.whenBuilt().then(() => {
