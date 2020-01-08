@@ -241,6 +241,11 @@ describes.realWin(
           output: 'hello)-WORLD',
         },
         {
+          description: 'respect whitespace within backticks',
+          input: 'TRIM(CANONICAL_URL` `CANONICAL_URL)',
+          output: 'www.google.com%20www.google.com',
+        },
+        {
           description: 'trims with the wrong number of parens',
           input: 'TRIM(FAKE(aaa)',
           output: 'FAKE(aaa',

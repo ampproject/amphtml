@@ -204,10 +204,11 @@ export class Expander {
               `The substring "${builder}" was lost during url-replacement. ` +
                 'Please ensure the url syntax is correct'
             );
-            builder = '';
           } else {
             ignoringChars = false;
+            results.push(builder);
           }
+          builder = '';
           urlIndex++;
         } else if (
           numOfPendingCalls &&
