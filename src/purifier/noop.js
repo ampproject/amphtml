@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line require-jsdoc
 export function dev() {
   return {
     assertElement: element => {
@@ -24,7 +23,6 @@ export function dev() {
   };
 }
 
-// eslint-disable-next-line require-jsdoc
 export function user() {
   return {
     error: (unusedTag, var_args) => {
@@ -33,11 +31,8 @@ export function user() {
   };
 }
 
-// eslint-disable-next-line require-jsdoc
 export function devAssert() {}
 
-// eslint-disable-next-line require-jsdoc
 export function userAssert() {}
 
-// eslint-disable-next-line require-jsdoc
 export const urls = {};
