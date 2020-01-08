@@ -44,11 +44,11 @@ export function idealmedia(global, data) {
     `${encodeURIComponent(data.widget)}.js?t=` +
     Math.floor(Date.now() / 36e5);
 
-  global['uniqId'] = (
+  global.uniqId = (
     '00000' + Math.round(Math.random() * 100000).toString(16)
   ).slice(-5);
 
-  window.context.observeIntersection(function(changes) {
+  global.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {
       window['intersectionRect' + data.widget + '_' + global.uniqId] =
         c.intersectionRect;
