@@ -203,7 +203,6 @@ The following outlines the process to request a cherry-pick.
   - For cherry-picks into **stable**/**lts** at least one member from the [Cherry-Pick Approvers group](https://github.com/orgs/ampproject/teams/cherry-pick-approvers/members) must approve the cherry-pick.
 - Once approved, the on-duty engineer handling releases will work with you to ensure the cherry-pick is made.
 - **Once the cherry-pick is made you are responsible for verifying the cherry-pick fixes the issue and does not cause other issues.**
->>>>>>> Update contributing-code with copy edits
 
 **If you are requesting a cherry-pick to fix an issue in production** it is likely you will _also_ need a cherry-pick into the **experimental**/**beta** releases. Problems cherry-picked in **stable** could be overridden after promoting **beta**. The on-duty engineer will help determine if you need to  cherry-pick both release channels.
 
