@@ -485,35 +485,11 @@ class EndToEndFixture {
    * @param {number} retries
    */
   async setup(env, browserName, retries = 0) {
+    const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
+    const config = getConfig();
+    let driver;
     try {
-      const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
-      const config = getConfig();
-      const controller = await getController(config, browserName, deviceName);
-      const ampDriver = new AmpDriver(controller);
-      const requestBank = new RequestBankE2E(REQUESTBANK_URL_PREFIX, 'e2e');
-      env.controller = controller;
-      env.ampDriver = ampDriver;
-      env.requestBank = requestBank;
-
-      const {environment} = env;
-
-      const url = new URL(testUrl);
-      if (experiments.length > 0) {
-        if (environment.includes('inabox')) {
-          // inabox experiments are toggled at server side using <meta> tag
-          url.searchParams.set('exp', experiments.join(','));
-        } else {
-          // AMP doc experiments are toggled via cookies
-          await toggleExperiments(ampDriver, url.href, experiments);
-        }
-      }
-
-      if (initialRect) {
-        const {width, height} = initialRect;
-        await controller.setWindowRect({width, height});
-      }
-
-      await ampDriver.navigateToEnvironment(environment, url.href);
+      driver = await getDriver(config, browserName, deviceName);
     } catch (ex) {
       if (retries > 0) {
         await this.setup(env, browserName, --retries);
@@ -521,6 +497,36 @@ class EndToEndFixture {
         throw ex;
       }
     }
+
+    const controller =
+      config.engine == 'selenium'
+        ? new SeleniumWebDriverController(driver)
+        : new PuppeteerController(driver);
+    const ampDriver = new AmpDriver(controller);
+    const requestBank = new RequestBankE2E(REQUESTBANK_URL_PREFIX, 'e2e');
+    env.controller = controller;
+    env.ampDriver = ampDriver;
+    env.requestBank = requestBank;
+
+    const {environment} = env;
+
+    const url = new URL(testUrl);
+    if (experiments.length > 0) {
+      if (environment.includes('inabox')) {
+        // inabox experiments are toggled at server side using <meta> tag
+        url.searchParams.set('exp', experiments.join(','));
+      } else {
+        // AMP doc experiments are toggled via cookies
+        await toggleExperiments(ampDriver, url.href, experiments);
+      }
+    }
+
+    if (initialRect) {
+      const {width, height} = initialRect;
+      await controller.setWindowRect({width, height});
+    }
+
+    await ampDriver.navigateToEnvironment(environment, url.href);
   }
 
   async teardown(env) {
@@ -534,25 +540,23 @@ class EndToEndFixture {
 }
 
 /**
- * Get the controller object for the configured engine.
+ * Get the driver for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
  * @param {?string} deviceName
- * @return {!SeleniumWebDriverController}
+ * @return {!Promise}
  */
-async function getController(
+async function getDriver(
   {engine = 'selenium', headless = false},
   browserName,
   deviceName
 ) {
   if (engine == 'puppeteer') {
-    const browser = await createPuppeteer({headless});
-    return new PuppeteerController(browser);
+    return createPuppeteer({headless});
   }
 
   if (engine == 'selenium') {
-    const driver = await createSelenium(browserName, {headless}, deviceName);
-    return new SeleniumWebDriverController(driver);
+    return createSelenium(browserName, {headless}, deviceName);
   }
 }
 
