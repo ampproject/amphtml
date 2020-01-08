@@ -197,6 +197,7 @@ export class VariableService {
     this.register_('$NOT', value => String(!value));
     this.register_('$BASE64', value => base64UrlEncodeFromString(value));
     this.register_('$HASH', this.hashMacro_.bind(this));
+    this.register_('$URLENCODE', value => encodeURIComponent(value));
     this.register_('$IF', (value, thenValue, elseValue) =>
       stringToBool(value) ? thenValue : elseValue
     );

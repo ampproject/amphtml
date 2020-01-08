@@ -276,6 +276,8 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       return check('$BASE64(Hello World!)', 'SGVsbG8gV29ybGQh');
     });
 
+    it('url encode works', () => check(':$URLENCODE(:)', ':%3A'));
+
     it('if works with true', () =>
       check('$IF(true, truthy, falsey)', 'truthy'));
 
