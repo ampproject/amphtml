@@ -15,7 +15,7 @@
  */
 
 import {hasOwn} from '../../utils/object';
-import {rethrowAsync, user, userAssert} from '../../log';
+import {rethrowAsync, user} from '../../log';
 import {trimStart} from '../../string';
 import {tryResolve} from '../../utils/promise';
 
@@ -198,16 +198,18 @@ export class Expander {
         } else if (url[urlIndex] === PARSER_IGNORE_FLAG) {
           if (!ignoringChars) {
             ignoringChars = true;
-            nextArgShouldBeRaw = true;
-            userAssert(
-              builder.trim() === '',
-              `The substring "${builder}" was lost during url-replacement. ` +
-                'Please ensure the url syntax is correct'
-            );
-            builder = '';
+            // Collect any chars that may exist before backticks, eg FOO(a`b`)
+            if (builder.trim().length) {
+              results.push(builder.trim());
+            }
           } else {
             ignoringChars = false;
+            // Collect any chars inside backticks without trimming whitespace.
+            if (builder.length) {
+              results.push(builder);
+            }
           }
+          builder = '';
           urlIndex++;
         } else if (
           numOfPendingCalls &&
@@ -215,13 +217,10 @@ export class Expander {
           !ignoringChars
         ) {
           // Commas tell us to create a new argument when in nested context and
-          // not ignoring them due to backticks. We push any string built so far,
-          // create a new array for the next argument, and reset our string
-          // builder.
+          // We push any string built so far, create a new array for the next
+          // argument, and reset our string builder.
           if (builder.length) {
-            const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
-            results.push(nextArg);
-            nextArgShouldBeRaw = false;
+            results.push(builder.trim());
           }
           args.push(results);
           results = [];
