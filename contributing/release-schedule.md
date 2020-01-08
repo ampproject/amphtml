@@ -28,9 +28,9 @@ The **stable** release channel is built with the _production_ configuration and 
 
 ### Long-Term Stable (lts)
 
-The **lts** release channel provides a previous **stable** build for four-week intervals. Every four weeks, the current **stable** release is promoted to **lts**. This channel is not recommended for all AMP publishers. It is provided so that publishers who wish to perform a QA cycle on their website less frequently may do so by opting specific web pages into the **lts** channel (see the [**lts** readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
+The **lts** release channel provides a previous **stable** build for one-month intervals. Approximately monthly, the current **stable** release is promoted to **lts**. This channel is not recommended for all AMP publishers. It is provided so that publishers who wish to perform a QA cycle on their website less frequently may do so by opting specific web pages into the **lts** channel (see the [**lts** readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
 
-Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the four-week cycle, the **lts** release may be as much as six weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) to validate if a change will be ready with your chosen release cycle.
+Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the longer cycle, the **lts** release may be as much as seven weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) to validate if a change will be ready with your chosen release cycle.
 
 ## Determining if your change is in a release
 
