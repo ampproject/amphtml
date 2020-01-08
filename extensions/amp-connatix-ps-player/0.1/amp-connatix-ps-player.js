@@ -34,7 +34,10 @@ export class AmpConnatixPsPlayer extends AMP.BaseElement {
     this.storyId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://test.amp.connatix.com';
+    this.iframeDomain_ = 'https:/cds.connatix.com';
+
+    /** @private {string} */
+    this.iframePath_ = '/p/plugins/connatix.playspace.embed.html';
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -132,7 +135,7 @@ export class AmpConnatixPsPlayer extends AMP.BaseElement {
       'playerId': this.playerId_ || undefined,
       'storyId': this.storyId_ || undefined,
     });
-    const iframeUrl = this.iframeDomain_ + '/safe_iframe_embeed.html';
+    const iframeUrl = this.iframeDomain_ + this.iframePath_;
     const src = addParamsToUrl(iframeUrl, urlParams);
 
     const iframe = element.ownerDocument.createElement('iframe');
