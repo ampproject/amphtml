@@ -27,7 +27,7 @@ export default {
     format: 'es',
     sourcemap: true,
   },
-  external: ['dompurify/dist/purify.es'],
+  external: ['dompurify'],
   plugins: [
     alias({
       entries: [
