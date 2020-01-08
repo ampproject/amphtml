@@ -6,9 +6,9 @@ The **lts** release channel provides a previous **stable** build for one-month i
 
 ## How to Opt-In
 
-### Standard AMP HTML runtime and extension scripts 
+### Standard AMP HTML runtime and extension scripts
 
-> Note: recommended for most sites 
+> Note: recommended for most sites
 
 ```html
 <script async src="https://cdn.ampproject.org/v0.js"></script>
