@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {createContext, createElement} from 'preact';
-import {useContext} from 'preact/hooks';
+import {createContext, createElement, useContext} from '.';
 
 /** @type {preact.Context} */
 let context;
@@ -51,8 +50,8 @@ export function withAmpContext(props) {
   const parent = useContext(getAmpContext());
   const current = {
     ...props,
-    'renderable': parent.renderable && props['renderable'],
-    'playable': parent.playable && props['playable'],
+    'renderable': parent['renderable'] && props['renderable'],
+    'playable': parent['playable'] && props['playable'],
     'children': undefined,
   };
 

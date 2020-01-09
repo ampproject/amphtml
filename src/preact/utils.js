@@ -15,7 +15,7 @@
  */
 
 import {getAmpContext} from './context';
-import {useContext, useEffect, useLayoutEffect} from 'preact/hooks';
+import {useContext, useEffect, useLayoutEffect} from '.';
 
 /**
  * @param {function()} callback
@@ -40,7 +40,7 @@ export function useMountLayoutEffect(callback) {
  * Every functional component **must** use this helper.
  */
 export function useResourcesNotify() {
-  const {notify} = useContext(getAmpContext());
+  const {'notify': notify} = useContext(getAmpContext());
   useLayoutEffect(() => {
     if (notify) {
       notify();

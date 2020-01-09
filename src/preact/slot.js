@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import {createElement} from 'preact';
+import {createElement, useContext, useEffect, useRef} from '.';
 import {getAmpContext} from './context';
 import {matches} from '../dom';
 import {toArray} from '../types';
-import {useContext, useEffect, useRef} from 'preact/hooks';
 import {useMountEffect} from './utils';
 
 /**
@@ -41,7 +40,7 @@ export function createSlot(element, name, props) {
  */
 export function Slot(props) {
   const context = useContext(getAmpContext());
-  const ref = useRef();
+  const ref = useRef(null);
   const slotProps = {...props, ref};
   useEffect(() => {
     const slot = ref.current;

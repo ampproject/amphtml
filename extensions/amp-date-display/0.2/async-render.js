@@ -15,7 +15,7 @@
  */
 
 import {useResourcesNotify} from '../../../src/preact/utils';
-import {useState} from 'preact/hooks';
+import {useState} from '../../../src/preact';
 
 /**
  * Renders the children prop, waiting for it to resolve if it is a promise.

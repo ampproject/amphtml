@@ -1,0 +1,108 @@
+/**
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import * as hooks from /*OK*/ 'preact/hooks';
+import * as main from /*OK*/ 'preact';
+
+// Defines the type interfaces for the approved Preact APIs.
+// TODO: hydrate, isValidElement, Component, cloneElement, toChildArray
+
+/**
+ * @param {!preact.FunctionalComponent|string} unusedType
+ * @param {(!Object|null)=} unusedProps
+ * @param {...*} var_args
+ * @return {!preact.VNode}
+ */
+export function createElement(unusedType, unusedProps, var_args) {
+  return main.createElement.apply(null, arguments);
+}
+
+/**
+ * @param {!preact.VNode} vnode
+ * @param {Node} container
+ */
+export function render(vnode, container) {
+  main.render(vnode, container, null);
+}
+
+/**
+ * @param {!JsonObject} props
+ * @return {!preact.VNode}
+ */
+export function Fragment(props) {
+  return main.Fragment(props);
+}
+
+/**
+ * @return {{current: T}}
+ * @template T
+ */
+export function createRef() {
+  return main.createRef();
+}
+
+/**
+ * @param {!Object} value
+ * @return {!preact.Context}
+ */
+export function createContext(value) {
+  return main.createContext(value);
+}
+
+// Defines the type interfaces for the approved Preact Hooks APIs.
+// TODO: useReducer, useImperativeHandle, useMemo, useCallback, useDebugValue, useErrorBoundary
+
+/**
+ * @param {S|function():S} initial
+ * @return {{0: S, 1: function((S|function(S):S)):undefined}}
+ * @template S
+ */
+export function useState(initial) {
+  return hooks.useState(initial);
+}
+
+/**
+ * @param {T} initial
+ * @return {{current: T}}
+ * @template T
+ */
+export function useRef(initial) {
+  return hooks.useRef(initial);
+}
+
+/**
+ * @param {function():(function():undefined|undefined)} effect
+ * @param {!Array<*>=} opt_deps
+ */
+export function useEffect(effect, opt_deps) {
+  hooks.useEffect(effect, opt_deps);
+}
+
+/**
+ * @param {function():(function():undefined|undefined)} effect
+ * @param {!Array<*>=} opt_deps
+ */
+export function useLayoutEffect(effect, opt_deps) {
+  hooks.useLayoutEffect(effect, opt_deps);
+}
+
+/**
+ * @param {preact.Context} context
+ * @return {!JsonObject}
+ */
+export function useContext(context) {
+  return hooks.useContext(context);
+}

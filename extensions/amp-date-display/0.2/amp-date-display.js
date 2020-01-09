@@ -16,7 +16,7 @@
 
 import {AsyncRender} from './async-render';
 import {DateDisplay} from './date-display';
-import {Fragment, createElement} from 'preact';
+import {Fragment, createElement} from '../../../src/preact';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {RenderDomTree} from './render-dom-tree';
 import {Services} from '../../../src/services';

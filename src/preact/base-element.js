@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../utils/promise';
-import {Fragment, createElement, render} from 'preact';
+import {Fragment, createElement, render} from '.';
 import {Slot, createSlot} from './slot';
 import {devAssert} from '../log';
 import {matches} from '../dom';
@@ -161,7 +161,7 @@ export function PreactBaseElement(Component, opts = {}) {
     unmount_() {
       this.mounted_ = false;
       if (this.container_) {
-        render(Fragment, this.container_);
+        render(createElement(Fragment), this.container_);
       }
     }
 
