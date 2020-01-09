@@ -157,13 +157,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       expect(script.development_).false;
     });
 
-    it('development tag present should put it in dev mode', () => {
-      element.setAttribute('development', true);
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).true;
-    });
-
     it('data-ampdevmode on just the element should not enable dev mode', () => {
       element.setAttribute('data-ampdevmode', true);
       script = new AmpScript(element);
@@ -447,7 +440,10 @@ describe('SanitizerImpl', () => {
       );
 
       expect(bind.setState).to.be.calledOnce;
-      expect(bind.setState).to.be.calledWithExactly({foo: 'bar'}, true, false);
+      expect(bind.setState).to.be.calledWithExactly(
+        {foo: 'bar'},
+        {skipEval: true}
+      );
     });
 
     it('AMP.setState(json), with user interaction', async () => {
@@ -461,7 +457,10 @@ describe('SanitizerImpl', () => {
       );
 
       expect(bind.setState).to.be.calledOnce;
-      expect(bind.setState).to.be.calledWithExactly({foo: 'bar'}, false, false);
+      expect(bind.setState).to.be.calledWithExactly(
+        {foo: 'bar'},
+        {skipEval: false}
+      );
     });
 
     it('AMP.setState(not_json)', async () => {
