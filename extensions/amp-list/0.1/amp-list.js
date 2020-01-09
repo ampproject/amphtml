@@ -340,6 +340,21 @@ export class AmpList extends AMP.BaseElement {
     );
   }
 
+  /**
+   * @param {string} src
+   * @return {boolean}
+   */
+  shouldLocalRender(src, isMutation) {
+    if (isMutation) {
+      return typeof(src) ==='object';
+    }
+
+    return (
+      isExperimentOn('amp-list-init-from-state') &&
+      src.trim().startsWith('amp-script:')
+    );
+  }
+
   /** @override */
   mutatedAttributesCallback(mutations) {
     dev().info(TAG, 'mutate:', this.element, mutations);
