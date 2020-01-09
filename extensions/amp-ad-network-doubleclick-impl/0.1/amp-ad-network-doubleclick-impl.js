@@ -138,7 +138,7 @@ const ZINDEX_EXP = 'zIndexExp';
 const ZINDEX_EXP_BRANCHES = {
   NO_ZINDEX: '21065356',
   HOLDBACK: '21065357',
-}
+};
 
 /**
  * Required size to be sent with fluid requests.
@@ -302,7 +302,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * @private {?FlexibleAdSlotDataTypeDef}
      */
     this.flexibleAdSlotData_ = null;
-    
+
     /**
      * If true, will add a z-index to flex ad slots upon expansion.
      * @private {boolean}
