@@ -23,7 +23,11 @@ import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
-import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
+import {
+  areMarginsChanged,
+  expandLayoutRect,
+  layoutRectsOverlap,
+} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
@@ -317,11 +321,11 @@ export class ResourcesImpl {
     const toUnload = [];
 
     const promises = entries.map(entry => {
-      const {boundingClientRect, isIntersecting, target: element} = entry;
+      const {boundingClientRect, isIntersecting, target, rootBounds} = entry;
       // Closure Compiler doesn't recognize boundingClientRect as a ClientRect.
       const clientRect = /** @type {!ClientRect} */ (boundingClientRect);
-      devAssert(element.isUpgraded());
-      const r = devAssert(Resource.forElementOptional(element));
+      devAssert(target.isUpgraded());
+      const r = devAssert(Resource.forElementOptional(target));
 
       // discoverWork_():
       // [x] Phase 1: Build and relayout as needed. All mutations happen here.
@@ -355,11 +359,24 @@ export class ResourcesImpl {
       }
 
       return r.whenBuilt().then(() => {
-        const noLongerDisplayed = this.measureResource_(r, clientRect);
+        const wasIntersecting = r.isInViewport();
+        let noLongerDisplayed = this.measureResource_(r, clientRect);
+        // Sometimes the intersection callback is too early to recognize
+        // client rect changes due to `display:none` (e.g. amp-accordion).
+        // These cases can still be detected since isIntersecting == false
+        // despite the target element overlapping the root's bounds.
+        if (
+          wasIntersecting &&
+          !isIntersecting &&
+          layoutRectsOverlap(clientRect, rootBounds)
+        ) {
+          noLongerDisplayed = true;
+        }
         if (noLongerDisplayed) {
           toUnload.push(r);
           return;
         }
+
         if (r.hasOwner()) {
           return;
         }
@@ -367,8 +384,9 @@ export class ResourcesImpl {
         r.setInViewport(isIntersecting);
 
         // TODO(willchou): The lack of "update on scroll throttling" means
-        // that scrolled-over elements are no longer deferred. This results
+        // that scrolled-over elements are no longer deferred, which results
         // in longer delays for in-viewport elements after fast scrolling.
+        // Fix by queueing intersection entries when scroll velocity is high.
         if (isIntersecting && r.isDisplayed()) {
           if (r.getState() === ResourceState.READY_FOR_LAYOUT) {
             this.scheduleLayoutOrPreload(r, /* layout */ true);
@@ -1374,6 +1392,7 @@ export class ResourcesImpl {
           r.unload();
           this.cleanupTasks_(r);
         });
+        dev().fine(TAG_, 'unload:', resources);
       });
     }
   }
