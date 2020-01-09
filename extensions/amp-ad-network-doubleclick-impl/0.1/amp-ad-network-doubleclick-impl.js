@@ -132,12 +132,12 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
 };
 
 /** @const {string} */
-const FLEXIBLE_AD_SLOTS_EXP = 'flexAdSlots';
+const ZINDEX_EXP = 'zIndexExp';
 
-/** @const @enum{string} */
-const FLEXIBLE_AD_SLOTS_BRANCHES = {
-  CONTROL: '21063173',
-  EXPERIMENT: '21063174',
+/**@const @enum{string} */
+const ZINDEX_EXP_BRANCHES = {
+  NO_ZINDEX: '21065356',
+  HOLDBACK: '21065357',
 };
 
 /**
@@ -297,14 +297,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      */
     this.shouldSandbox_ = false;
 
-    /** @private {boolean} */
-    this.sendFlexibleAdSlotParams_ = true;
-
     /**
      * Set after the ad request is built.
      * @private {?FlexibleAdSlotDataTypeDef}
      */
     this.flexibleAdSlotData_ = null;
+
+    /**
+     * If true, will add a z-index to flex ad slots upon expansion.
+     * @private {boolean}
+     */
+    this.inZIndexHoldBack_ = false;
   }
 
   /**
@@ -397,10 +400,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
         ),
       },
-      [FLEXIBLE_AD_SLOTS_EXP]: {
-        isTrafficEligible: () => true,
-        branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
-      },
       [[FIE_CSS_CLEANUP_EXP.branch]]: {
         isTrafficEligible: () => true,
         branches: [
@@ -408,16 +407,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           [FIE_CSS_CLEANUP_EXP.experiment],
         ],
       },
+      [ZINDEX_EXP]: {
+        isTrafficEligible: () => true,
+        branches: Object.values(ZINDEX_EXP_BRANCHES),
+      },
       ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(
       expName => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
-    if (
-      setExps[FLEXIBLE_AD_SLOTS_EXP] == FLEXIBLE_AD_SLOTS_BRANCHES.EXPERIMENT
-    ) {
-      this.sendFlexibleAdSlotParams_ = false;
+    if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
+      this.inZIndexHoldBack_ = true;
     }
   }
 
@@ -540,18 +541,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     let msz = null;
     let psz = null;
     let fws = null;
-    if (this.sendFlexibleAdSlotParams_) {
-      this.flexibleAdSlotData_ = getFlexibleAdSlotData(
-        this.win,
-        this.element.parentElement
-      );
-      const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
-      // If slotWidth is -1, that means its width must be determined by its
-      // parent container, and so should have the same value as parentWidth.
-      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
-      psz = `${parentWidth}x-1`;
-      fws = fwSignal ? fwSignal : '0';
-    }
+    this.flexibleAdSlotData_ = getFlexibleAdSlotData(
+      this.win,
+      this.element.parentElement
+    );
+    const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
+    // If slotWidth is -1, that means its width must be determined by its
+    // parent container, and so should have the same value as parentWidth.
+    msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
+    psz = `${parentWidth}x-1`;
+    fws = fwSignal ? fwSignal : '0';
     return {
       'iu': this.element.getAttribute('data-slot'),
       'co':
@@ -1283,7 +1282,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
     const isRtl = isRTL(this.win.document);
     const dirStr = isRtl ? 'Right' : 'Left';
-    const /** !Object<string, string> */ style = {'z-index': '11'};
+    const /** !Object<string, string> */ style = this.inZIndexHoldBack_
+        ? {'z-index': '11'}
+        : {};
     // Compute offset margins if the slot is not centered by default.
     if (parentStyle.textAlign != 'center') {
       const getMarginStr = marginNum => `${Math.round(marginNum)}px`;
