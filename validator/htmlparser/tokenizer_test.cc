@@ -19,7 +19,7 @@
 #include "gtest/gtest.h"
 #include "htmlparser/token.h"
 
-// TODO(amaltas): Add more complex html not-well-formed documents to cover
+// TODO: Add more complex html not-well-formed documents to cover
 // complex tokenization scenarios. Eg. <html>><head><<body;>> etc..
 
 TEST(TokenizerTest, BasicTokenizationOfADocument) {
@@ -234,7 +234,7 @@ TEST(TokenizerTest, BasicTokenizationOfADocument) {
   }
   EXPECT_EQ(tokens.size(), 8);
 
-  // TODO(amaltas): DO NOT ADD MORE TESTS HERE. Split all above tests in
+  // TODO: DO NOT ADD MORE TESTS HERE. Split all above tests in
   // their respective test cases.
 }
 

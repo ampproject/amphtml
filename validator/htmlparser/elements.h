@@ -77,7 +77,7 @@ inline constexpr std::array<Atom, 16> kVoidElements {
     Atom::WBR,
 };
 
-// TODO(amaltas): Add reference to what this means in html spec.
+// TODO: Add reference to what this means in html spec.
 inline constexpr std::array<Atom, 83> kSpecialElements {
     Atom::ADDRESS,
     Atom::APPLET,
