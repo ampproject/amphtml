@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
         FileUtil::ReadFileLines(
             options, "htmlparser/data/extras.txt", &all_names) &&
         FileUtil::ReadFileLines(
-            options, "third_party//htmlparser/data/amptags.txt", &all_names))) {
+            options, "htmlparser/data/amptags.txt", &all_names))) {
     std::cerr << "Error reading input txt files." << std::endl;
     return EXIT_FAILURE;
   }
