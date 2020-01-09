@@ -76,6 +76,158 @@ function patchWebAnimations() {
   writeIfUpdated(patchedName, file);
 }
 
+function patchPreact() {
+  const filePath = 'node_modules/preact/dist/preact.module.js';
+  const patchedPath = 'node_modules/preact/dist/preact.module.patched.js';
+  const pkgPath = 'node_modules/preact/package.json';
+  let contents = fs.readFileSync(filePath, 'utf8');
+
+  /*
+  export {
+    E as render,
+    H as hydrate,
+    h as createElement,
+    h,
+    y as Fragment,
+    p as createRef,
+    l as isValidElement,
+    d as Component,
+    I as cloneElement,
+    L as createContext,
+    b as toChildArray,
+    A as _unmount,
+    n as options
+  };
+  */
+  const typings = new Map([
+    [
+      /function h\((\w),(\w),(\w)\)/g,
+      `/**
+        * preact.createElement
+        * @param {!preact.FunctionalComponent|string} $1
+        * @param {(!Object|null)=} $2
+        * @param {...*} $3
+        * @return {!preact.VNode}
+        */
+       function h($1,$2,$3)`,
+    ],
+    [
+      /function E\((\w),(\w),(\w)\)/g,
+      `/**
+        * preact.render
+        * @param {!preact.VNode} $1
+        * @param {Node} $2
+        * @param {*} $3
+        */
+        function E($1,$2,$3)`,
+    ],
+    [
+      /function y\((\w)\)/g,
+      `/**
+        * preact.Fragment
+        * @param {!JsonObject} $1
+        * @return {!preact.VNode|null}
+        */
+        function y($1)`,
+    ],
+    [
+      /function L\((\w)\)/g,
+      `/**
+        * preact.createContext
+        * @param {!Object} $1
+        * @return {!preact.Context}
+        */
+        function L($1)`,
+    ],
+  ]);
+
+  for (const [search, replacement] of typings) {
+    if (!search.test(contents)) {
+      throw new Error(`Failed to find ${search} in preact module`);
+    }
+    if (search.test(contents)) {
+      throw new Error(`Found multiple ${search} in preact module`);
+    }
+
+    contents = contents.replace(search, replacement);
+  }
+
+  const pkgJson = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  pkgJson.module = 'dist/preact.module.patched.js';
+
+  writeIfUpdated(patchedPath, contents);
+  writeIfUpdated(pkgPath, JSON.stringify(pkgJson, null, 4));
+}
+
+function patchPreactHooks() {
+  const filePath = 'node_modules/preact/hooks/dist/hooks.module.js';
+  const patchedPath = 'node_modules/preact/hooks/dist/hooks.module.patched.js';
+  const pkgPath = 'node_modules/preact/hooks/package.json';
+  let contents = fs.readFileSync(filePath, 'utf8');
+
+  /*
+  export {
+    v as useState,
+    m as useReducer,
+    p as useEffect,
+    l as useLayoutEffect,
+    d as useRef,
+    s as useImperativeHandle,
+    y as useMemo,
+    T as useCallback,
+    w as useContext,
+    A as useDebugValue,
+    F as useErrorBoundary
+  };
+  */
+  const typings = new Map([
+    [
+      /function d\((\w)\)/g,
+      `/**
+        * hooks.useRef
+        * @param {*=} $1
+        * @return {{current: *}}
+        */
+       function d($1)`,
+    ],
+    [
+      /function p\((\w),(\w)\)/g,
+      `/**
+        * hooks.useEffect
+        * @param {function():(function()|undefined)} $1
+        * @param {!Array<*>=} $2
+        */
+       function p($1,$2)`,
+    ],
+    [
+      /function l\((\w),(\w)\)/g,
+      `/**
+        * hooks.useLayoutEffect
+        * @param {function():(function()|undefined)} $1
+        * @param {!Array<*>=} $2
+        */
+       function l($1,$2)`,
+    ],
+  ]);
+
+  for (const [search, replacement] of typings) {
+    if (!search.test(contents)) {
+      throw new Error(`Failed to find ${search} in preact/hooks module`);
+    }
+    if (search.test(contents)) {
+      throw new Error(`Found multiple ${search} in preact/hooks module`);
+    }
+
+    contents = contents.replace(search, replacement);
+  }
+
+  const pkgJson = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  pkgJson.module = 'dist/hooks.module.patched.js';
+
+  writeIfUpdated(patchedPath, contents);
+  writeIfUpdated(pkgPath, JSON.stringify(pkgJson, null, 4));
+}
+
 /**
  * Does a yarn check on node_modules, and if it is outdated, runs yarn.
  */
@@ -125,6 +277,8 @@ async function updatePackages() {
     runYarnCheck();
   }
   patchWebAnimations();
+  patchPreact();
+  patchPreactHooks();
 }
 
 module.exports = {
