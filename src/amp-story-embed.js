@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,7 @@ const CSS = `
   :host { all: initial; display: block; border-radius: 0 !important; width: 405px; height: 720px; overflow: auto; }
   .story { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
   main { display: flex; flex-direction: row; height: 100%; }
-  .i-amphtml-story-embed-loaded iframe { opacity: 1; }
-  iframe[src=""] { display: none; }
-`;
+  .i-amphtml-story-embed-loaded iframe { opacity: 1; }`;
 
 /** @const {boolean} */
 const isAMP = self.AMP && self.AMP.ampdoc;
@@ -39,24 +37,23 @@ const isAMP = self.AMP && self.AMP.ampdoc;
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
-export class AmpStoryEmbedManager {
+export class AmpStoryEmbed {
   /**
    * @param {!Window} win
-   * @param {!Document} doc
-   * @param {!Element} hostEl
+   * @param {!Element} element
    * @constructor
    */
-  constructor(win, doc, hostEl) {
+  constructor(win, element) {
     console./*OK*/ assert(
-      hostEl.childElementCount > 0,
+      element.childElementCount > 0,
       'Missing configuration.'
     );
 
     /** @private {!Element} */
-    this.hostEl_ = hostEl;
+    this.element_ = element;
 
     /** @private {!Document} */
-    this.doc_ = doc;
+    this.doc_ = win.document;
 
     /** @private {?Array<!HTMLAnchorElement>} */
     this.stories_ = null;
@@ -71,7 +68,7 @@ export class AmpStoryEmbedManager {
   /** @public */
   build() {
     this.stories_ = Array.prototype.slice.call(
-      this.hostEl_.querySelectorAll('a')
+      this.element_.querySelectorAll('a')
     );
 
     this.initializeShadowRoot_();
@@ -85,7 +82,7 @@ export class AmpStoryEmbedManager {
     this.rootEl_ = this.doc_.createElement('main');
 
     // Create shadow root
-    const shadowRoot = this.hostEl_.attachShadow({mode: 'open'});
+    const shadowRoot = this.element_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
@@ -117,15 +114,15 @@ export class AmpStoryEmbedManager {
 
     this.iframeEl_.onload = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
-      this.hostEl_.classList.remove(LoadStateClass.LOADING);
+      this.element_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.LOADED);
-      this.hostEl_.classList.add(LoadStateClass.LOADED);
+      this.element_.classList.add(LoadStateClass.LOADED);
     };
     this.iframeEl_.onerror = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
-      this.hostEl_.classList.remove(LoadStateClass.LOADING);
+      this.element_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.ERROR);
-      this.hostEl_.classList.add(LoadStateClass.ERROR);
+      this.element_.classList.add(LoadStateClass.ERROR);
     };
   }
 
@@ -151,14 +148,16 @@ export class AmpStoryEmbedManager {
 }
 
 self.onload = () => {
-  if (!isAMP) {
-    const doc = self.document;
-    const embeds = doc.getElementsByTagName('amp-story-embed');
-    for (let i = 0; i < embeds.length; i++) {
-      const embed = embeds[i];
-      const embedImpl = new AmpStoryEmbedManager(self, doc, embed);
-      embedImpl.build();
-      embedImpl.layout();
-    }
+  if (isAMP) {
+    return;
+  }
+
+  const doc = self.document;
+  const embeds = doc.getElementsByTagName('amp-story-embed');
+  for (let i = 0; i < embeds.length; i++) {
+    const embed = embeds[i];
+    const embedImpl = new AmpStoryEmbed(self, embed);
+    embedImpl.build();
+    embedImpl.layout();
   }
 };
