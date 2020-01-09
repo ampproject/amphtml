@@ -15,13 +15,7 @@
  */
 
 import {getAmpContext} from './context';
-import {
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'preact/hooks';
+import {useContext, useEffect, useLayoutEffect} from 'preact/hooks';
 
 /**
  * @param {function()} callback
