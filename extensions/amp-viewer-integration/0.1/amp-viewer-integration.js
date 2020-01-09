@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpViewerIntegrationVariableService} from './variable-service';
 import {FocusHandler} from './focus-handler';
 import {
   HighlightHandler,
@@ -31,7 +30,7 @@ import {Services} from '../../../src/services';
 import {TouchHandler} from './touch-handler';
 import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getAmpdoc, registerServiceBuilder} from '../../../src/service';
+import {getAmpdoc} from '../../../src/service';
 import {getData, listen, listenOnce} from '../../../src/event-helper';
 import {getSourceUrl} from '../../../src/url';
 import {isIframed} from '../../../src/dom';
@@ -69,14 +68,6 @@ export class AmpViewerIntegration {
      * @private {?HighlightHandler}
      */
     this.highlightHandler_ = null;
-
-    /** @const @private {!AmpViewerIntegrationVariableService} */
-    this.variableService_ = new AmpViewerIntegrationVariableService(
-      getAmpdoc(this.win.document)
-    );
-    registerServiceBuilder(this.win, 'viewer-integration-variable', () =>
-      this.variableService_.get()
-    );
   }
 
   /**

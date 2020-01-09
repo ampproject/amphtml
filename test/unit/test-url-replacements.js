@@ -228,7 +228,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(68);
+          expect(variables.length).to.equal(67);
         });
       });
 
@@ -1156,25 +1156,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
         return expandUrlAsync('?sh=AMP_VERSION').then(res => {
           expect(res).to.equal('?sh=%24internalRuntimeVersion%24');
         });
-      });
-
-      it('should replace ANCESTOR_ORIGIN', () => {
-        return expect(
-          expandUrlAsync(
-            'ANCESTOR_ORIGIN/recipes',
-            /*opt_bindings*/ undefined,
-            {
-              withViewerIntegrationVariableService: {
-                ancestorOrigin: () => {
-                  return 'http://margarine-paradise.com';
-                },
-                fragmentParam: (param, defaultValue) => {
-                  return param == 'ice_cream' ? '2' : defaultValue;
-                },
-              },
-            }
-          )
-        ).to.eventually.equal('http://margarine-paradise.com/recipes');
       });
 
       it('should replace FRAGMENT_PARAM with 2', () => {
