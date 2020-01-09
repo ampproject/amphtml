@@ -358,7 +358,6 @@ export class AmpList extends AMP.BaseElement {
     };
 
     const src = mutations['src'];
-    const state = /** @type {!JsonObject} */ (mutations)['state'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
@@ -371,9 +370,6 @@ export class AmpList extends AMP.BaseElement {
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
-    } else if (state !== undefined) {
-      user().error(TAG, '[state] is deprecated, please use [src] instead.');
-      promise = renderLocalData(state);
     }
 
     const isLayoutContainer = mutations['is-layout-container'];
