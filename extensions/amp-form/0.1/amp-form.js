@@ -70,6 +70,7 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {tryParseJson} from '../../../src/json';
 
 /** @const {string} */
 const TAG = 'amp-form';
@@ -797,19 +798,18 @@ export class AmpForm {
    */
   handleSsrTemplateResponse_(response, trust) {
     const init = response['init'];
+    // response['body'] is serialized as a string in the response.
+    const body = tryParseJson(response['body'], error =>
+      user().error(TAG, 'Failed to parse response JSON: %s', error)
+    );
     if (init) {
       const status = init['status'];
       if (status >= 300) {
         /** HTTP status codes of 300+ mean redirects and errors. */
-        return this.handleSubmitFailure_(
-          status,
-          response,
-          trust,
-          response['body']
-        );
+        return this.handleSubmitFailure_(status, response, trust, body);
       }
     }
-    return this.handleSubmitSuccess_(response, trust, response['body']);
+    return this.handleSubmitSuccess_(response, trust, body);
   }
 
   /**
@@ -1133,6 +1133,12 @@ export class AmpForm {
     }
     const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
     if (redirectTo) {
+      const doc = this.form_.ownerDocument;
+      userAssert(
+        !(doc && isAmp4Email(doc)),
+        'Redirects not supported in AMP4Email.',
+        this.form_
+      );
       userAssert(
         this.target_ != '_blank',
         'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
