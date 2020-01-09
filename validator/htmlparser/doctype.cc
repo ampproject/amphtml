@@ -108,8 +108,8 @@ void SkipLangAttribute(std::string_view* s) {
   std::string lang_val = ReadUntil(s, Strings::kWhitespace);
 }
 
-std::tuple<NodePtr, bool> ParseDoctype(std::string_view s) {
-  auto n = Node::make_node(NodeType::DOCTYPE_NODE);
+std::tuple<std::unique_ptr<Node>, bool> ParseDoctype(std::string_view s) {
+  auto n = std::unique_ptr<Node>(Node::make_node(NodeType::DOCTYPE_NODE));
   bool quirks = false;
 
   SkipLeadingWhitespace(&s);
