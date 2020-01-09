@@ -15,6 +15,7 @@
  */
 
 import {setStyle} from './style';
+import {toArray} from './types';
 
 /** @enum {string} */
 const LoadStateClass = {
@@ -55,8 +56,8 @@ export class AmpStoryEmbed {
     /** @private {!Document} */
     this.doc_ = win.document;
 
-    /** @private {?Array<!HTMLAnchorElement>} */
-    this.stories_ = null;
+    /** @private {!Array<!HTMLAnchorElement>} */
+    this.stories_ = [];
 
     /** @private {?Element} */
     this.rootEl_ = null;
@@ -66,10 +67,8 @@ export class AmpStoryEmbed {
   }
 
   /** @public */
-  build() {
-    this.stories_ = Array.prototype.slice.call(
-      this.element_.querySelectorAll('a')
-    );
+  buildCallback() {
+    this.stories_ = toArray(this.element_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
 
@@ -130,7 +129,7 @@ export class AmpStoryEmbed {
    * @return {!Promise}
    * @public
    */
-  layout() {
+  layoutCallback() {
     // TODO: Layout all child iframes.
     return this.layoutIframe_(0);
   }
@@ -157,7 +156,8 @@ self.onload = () => {
   for (let i = 0; i < embeds.length; i++) {
     const embed = embeds[i];
     const embedImpl = new AmpStoryEmbed(self, embed);
-    embedImpl.build();
-    embedImpl.layout();
+    embedImpl.buildCallback();
+    // TODO(Enriqe): add intersection observer that triggers layoutCallback().
+    embedImpl.layoutCallback();
   }
 };
