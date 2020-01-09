@@ -294,7 +294,6 @@ const AMP_EMBED_ALLOWED = {
   adsloom: true,
   adstyle: true,
   bringhub: true,
-  byplay: true,
   dable: true,
   engageya: true,
   epeex: true,

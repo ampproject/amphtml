@@ -32,6 +32,6 @@ limitations under the License.
 
 For configuration details and to generate your tags, please contact email: [byplayers@tsumikiinc.com](mailto:byplayers@tsumikiinc.com).
 
-Supported parameters:
+Required parameters:
 
 - `data-vast-url`
