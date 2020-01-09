@@ -148,54 +148,59 @@ In the following example, we have a carousel of three images with preview button
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>type</strong></td>
-    <td>Specifies the display type for the carousel items, which can be:
+### type
+
+Specifies the display type for the carousel items, which can be:
+
 <ul>
   <li><strong><code>carousel</code></strong> (default): All slides are shown and are scrollable horizontally. Each slide may specify a different width using CSS.</li>
   <li><strong><code>slides</code></strong>: Shows a single slide at a time, with each slide snapping into place as the user swipes.</li>
-</ul></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>controls (optional)</strong></td>
-    <td>Permanently displays left and right arrows for the user to navigate carousel items on mobile devices.
-By default, navigational arrows disappear after the user swipes to another slide on mobile.
-The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-next-button-aria-label (optional)</strong></td>
-    <td>Sets the aria-label for the <code>amp-carousel-button-next</code>. If no value is given, the aria-label defaults to 'Next item in carousel'.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-prev-button-aria-label (optional)</strong></td>
-    <td>Sets the aria-label for the <code>amp-carousel-button-prev</code>. If no value is given, the aria-label defaults to 'Previous item in carousel'.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>data-button-count-format (optional)</strong></td>
-    <td>A format string that looks like <code>(%s of %s)</code>, used as a suffix to the aria-label for <code>amp-carousel-button-next</code>/<code>amp-carousel-button-prev</code>. This provides information to users using a screen reader on their progress through the carousel. If no value is given, this defaults to '(%s of %s)'.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>autoplay (optional)</strong></td>
-    <td><p>Regularly advances to the next slide without user interaction. If the user manually changes slides, then autoplay is stopped.<br>
-  If present without a value:</p>
+</ul>
+
+### controls (optional)
+
+Permanently displays left and right arrows for the user to navigate carousel items on mobile devices. By default, navigational arrows disappear after the user swipes to another slide on mobile.
+
+The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.
+
+### data-next-button-aria-label (optional)
+
+Sets the aria-label for the `amp-carousel-button-next`. If no value is given, the aria-label defaults to 'Next item in carousel'.
+
+### data-prev-button-aria-label (optional)
+
+Sets the aria-label for the `amp-carousel-button-prev`. If no value is given, the aria-label defaults to 'Previous item in carousel'.
+
+### data-button-count-format (optional)
+
+A format string that looks like `(%s of %s)`, used as a suffix to the aria-label for `amp-carousel-button-next`/`amp-carousel-button-prev`. This provides information to users using a screen reader on their progress through the carousel. If no value is given, this defaults to `(%s of %s)`.
+
+### autoplay (optional)
+
+Regularly advances to the next slide without user interaction. If the user manually changes slides, then autoplay is stopped.
+
+If present without a value:
+
 <ul>
-  <li>By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the <code>delay</code> attribute.</li>
+  <li>By default, advances a slide in 5000 millisecond intervals (5 seconds); this can be overridden by the `delay` attribute.</li>
   <li>Requires at least 2 slides for autoplay to occur.</li>
 </ul>
-<p>If present with a value:</p>
+
+If present with a value:
+
 <ul>
   <li>Stops autoplaying after the requisite number of loops are made.</li>
-</ul></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>delay (optional)</strong></td>
-    <td>Specifies the duration (in milliseconds) to delay advancing to the next slide when <code>autoplay</code> is enabled.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>loop (optional)</strong></td>
-    <td><p>Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur.</p>
-<p><em>Example: Displays a slides carousel with controls, looping, and delayed autoplay</em></p>
+</ul>
+
+### delay (optional)
+
+Specifies the duration (in milliseconds) to delay advancing to the next slide when `autoplay` is enabled.
+
+### loop (optional)
+
+Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur.
+
+The example below displays a slide carousel with controls, looping, and delayed autoplay.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
 
@@ -221,20 +226,21 @@ The visibility of arrows can also be controlled via styling, and a media query c
 </amp-carousel>
 ```
 
-[/example]</td>
+[/example]
 
-  </tr>
-  <tr>
-    <td width="40%"><strong>slide (optional)</strong></td>
-    <td>Specifies what index should be shown when the carousel is first rendered. This can be updated with <code><a href="https://amp.dev/documentation/components/amp-bind">amp-bind</a></code> to change which index is shown.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
+### slide (optional)
+
+Specifies what index should be shown when the carousel is first rendered. This can be updated with [`amp-bind`](https://amp.dev/documentation/components/amp-bind) to change which index is shown.
+
+### common attributes
+
+This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
+
 </table>
 
 ## Styling
+
+[filter formats="websites, ads"]
 
 - You may use the `amp-carousel` element selector to style it freely.
 - You may use the `.amp-carousel-slide` class selector to target carousel items.
@@ -268,6 +274,35 @@ Note that the SVG content needs to have certain characters, including `<`, `>` a
   align-self: flex-end;
 }
 ```
+
+[/filter]<!-- formats="websites, ads" -->
+
+[filter formats="email"]
+
+- You may use the `amp-carousel` element selector to style it freely.
+- You may use the `.amp-carousel-slide` class selector to target carousel items.
+- The visual state of an `amp-carousel` button when it's disabled is hidden.
+- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own image. Some email clients may not support SVG.
+
+_Example: Overriding the default `.amp-carousel-button` inlined SVG_
+
+```css
+.amp-carousel-button-prev {
+  background-image: url('http://example.com/arrow.png');
+}
+```
+
+You can position the carousel buttons using align-self and/or relative positioning. Note that the carousel arrows are automatically flipped in RTL, so you should not change their flex order.
+
+```css
+.amp-carousel-button-prev {
+  position: relative;
+  bottom: 20px;
+  align-self: flex-end;
+}
+```
+
+[/filter]<!-- formats="email" -->
 
 ## Differences from `<amp-carousel>` 0.1
 
