@@ -546,6 +546,28 @@ describes.repeated(
             );
           });
 
+          describe('Initialized by amp-state', () => {
+            it('should throw an error if used without the experiment enabled', () => {
+              // TODO
+            });
+
+            it('should throw an error if amp-state does not exist in the HTML', () => {
+              // TODO
+            });
+
+            it('should throw if the amp-state does not have a json child', () => {
+              // TODO
+            });
+
+            it('should render a list using local data', () => {
+              // TODO
+            });
+
+            it('should support keying into a nested part of local data', () => {
+              // TODO
+            });
+          });
+
           describe('DOM diffing with [diffable]', () => {
             const newData = [{}];
 
