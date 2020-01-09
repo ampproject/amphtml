@@ -14,14 +14,25 @@
  * limitations under the License.
  */
 
-
-import {Timer} from '../src/timer';
+import {AmpEvents} from '../src/amp-events';
+import {BindEvents} from '../extensions/amp-bind/0.1/bind-events';
+import {FakeLocation} from './fake-dom';
+import {FormEvents} from '../extensions/amp-form/0.1/form-events';
+import {Services} from '../src/services';
+import {cssText as ampDocCss} from '../build/ampdoc.css';
+import {cssText as ampSharedCss} from '../build/ampshared.css';
+import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
+import {
+  installAmpdocServices,
+  installRuntimeServices,
+} from '../src/service/core-services';
+import {install as installCustomElements} from '../src/polyfills/custom-elements';
+import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
-import {installRuntimeServices, registerForUnitTest} from '../src/runtime';
-import {cssText} from '../build/css';
+import {installStylesLegacy} from '../src/style-installer';
+import {parseIfNeeded} from '../src/iframe-helper';
 
 let iframeCount = 0;
-
 
 /**
  * Creates an iframe from an HTML fixture for use in tests.
@@ -49,22 +60,34 @@ let iframeCount = 0;
  *   awaitEvent: function(string, number):!Promise
  * }>}
  */
-export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad) {
+export function createFixtureIframe(
+  fixture,
+  initialIframeHeight,
+  opt_beforeLoad
+) {
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
-      'amp:attached': 0,
-      'amp:error': 0,
-      'amp:stubbed': 0,
-      'amp:load:start': 0
+      [AmpEvents.ATTACHED]: 0,
+      [AmpEvents.DOM_UPDATE]: 0,
+      [AmpEvents.ERROR]: 0,
+      [AmpEvents.LOAD_END]: 0,
+      [AmpEvents.LOAD_START]: 0,
+      [AmpEvents.STUBBED]: 0,
+      [BindEvents.INITIALIZE]: 0,
+      [BindEvents.SET_STATE]: 0,
+      [BindEvents.RESCAN_TEMPLATE]: 0,
+      [FormEvents.SERVICE_INIT]: 0,
     };
-    const messages = [];
-    let html = __html__[fixture];
+    let html = __html__[fixture] // eslint-disable-line no-undef
+      .replace(
+        /__TEST_SERVER_PORT__/g,
+        window.ampTestRuntimeConfig.testServerPort
+      );
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
     }
     html = maybeSwitchToCompiledJs(html);
-    let firstLoad = true;
     window.ENABLE_LOG = true;
     // This global function will be called by the iframe immediately when it
     // starts loading. This appears to be the only way to get the correct
@@ -72,23 +95,21 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     // on that window.
     window.beforeLoad = function(win) {
       // Flag as being a test window.
-      win.AMP_TEST_IFRAME = true;
-      win.AMP_TEST = true;
+      win.__AMP_TEST_IFRAME = true;
+      win.__AMP_TEST = true;
+      // Set the testLocation on iframe to parent's location since location of
+      // the test iframe is about:srcdoc.
+      // Unfortunately location object is not configurable, so we have to define
+      // a new property.
+      win.testLocation = new FakeLocation(window.location.href, win);
       win.ampTestRuntimeConfig = window.ampTestRuntimeConfig;
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
       }
-      win.addEventListener('message', (event) => {
-        if (event.data &&
-            // Either non-3P or 3P variant of the sentinel.
-            (/^amp/.test(event.data.sentinel) ||
-             /^\d+-\d+$/.test(event.data.sentinel))) {
-          messages.push(event.data);
-        }
-      })
+      const messages = new MessageReceiver(win);
       // Function that returns a promise for when the given event fired at
       // least count times.
-      let awaitEvent = (eventName, count) => {
+      const awaitEvent = (eventName, count) => {
         if (!(eventName in events)) {
           throw new Error('Unknown custom event ' + eventName);
         }
@@ -111,40 +132,52 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         });
       }
       win.onerror = function(message, file, line, col, error) {
-        reject(new Error('Error in frame: ' + message + '\n' +
-            file + ':' + line + '\n' +
-            (error ? error.stack : 'no stack')));
+        reject(
+          new Error(
+            'Error in frame: ' +
+              message +
+              '\n' +
+              file +
+              ':' +
+              line +
+              '\n' +
+              (error ? error.stack : 'no stack')
+          )
+        );
       };
-      let errors = [];
+      const errors = [];
       win.console.error = function() {
         errors.push('Error: ' + [].slice.call(arguments).join(' '));
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
-      let setTimeout = win.setTimeout;
+      const {setTimeout} = win;
       win.setTimeout = function(fn, ms) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);
       };
-      let timeout = setTimeout(function() {
+      setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
-      }, 1000);
+      }, window.ampTestRuntimeConfig.mochaTimeout || 2000);
       // Declare the test ready to run when the document was fully parsed.
       window.afterLoad = function() {
         resolve({
-          win: win,
+          win,
           doc: win.document,
-          iframe: iframe,
-          awaitEvent: awaitEvent,
-          errors: errors,
-          messages: messages,
+          iframe,
+          awaitEvent,
+          errors,
+          messages,
         });
       };
     };
     // Add before and after load callbacks to the document.
     html = html.replace('>', '><script>parent.beforeLoad(window);</script>');
     html += '<script>parent.afterLoad(window);</script>';
-    let iframe = document.createElement('iframe');
+    const iframe = document.createElement('iframe');
+    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
+      iframe.setAttribute('scrolling', 'no');
+    }
     iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function(event) {
       reject(event.error);
@@ -180,59 +213,83 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
  * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
+ *   ampdoc: !../src/service/ampdoc-impl.AmpDoc,
  *   iframe: !Element,
  *   addElement: function(!Element):!Promise
  * }>}
  */
 export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
   return new Promise(function(resolve, reject) {
-    let iframe = document.createElement('iframe');
+    const iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
-    iframe.srcdoc = '<!doctype><html><head>' +
-        '<style>.-amp-element {display: block;}</style>' +
-        '<body style="margin:0"><div id=parent></div>';
+    iframe.srcdoc = '<!doctype><html><head><body><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
-      iframe.contentWindow.AMP_TEST_IFRAME = true;
+      iframe.contentWindow.__AMP_TEST_IFRAME = true;
+      iframe.contentWindow.testLocation = new FakeLocation(
+        window.location.href,
+        iframe.contentWindow
+      );
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
+      // Required for timer service, which now refers not to the global
+      // Promise but the passed in window Promise in it's constructor as
+      // it is an embedabble service. b\17733
+      iframe.contentWindow.Promise = window.Promise;
+      installDocService(iframe.contentWindow, /* isSingleDoc */ true);
+      const ampdoc = Services.ampdocServiceFor(
+        iframe.contentWindow
+      ).getSingleDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
-      registerForUnitTest(iframe.contentWindow);
+      // The anonymous class parameter allows us to detect native classes vs
+      // transpiled classes.
+      installCustomElements(
+        iframe.contentWindow,
+        NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined
+      );
+      installAmpdocServices(ampdoc);
+      Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
-      iframe.contentWindow.ampExtendedElements = {};
-      resolve({
-        win: iframe.contentWindow,
-        doc: iframe.contentWindow.document,
-        iframe: iframe,
-        addElement: function(element) {
-          const iWin = iframe.contentWindow;
-          const p = onInsert(iWin).then(() => {
-            // Make sure it has dimensions since no styles are available.
-            element.style.display = 'block';
-            element.build(true);
-            if (!element.getPlaceholder()) {
-              const placeholder = element.createPlaceholder();
-              if (placeholder) {
-                element.appendChild(placeholder);
-              }
-            }
-            if (element.layoutCount_ == 0) {
-              if (opt_beforeLayoutCallback) {
-                opt_beforeLayoutCallback(element);
-              }
-              return element.layoutCallback().then(() => {
-                return element;
-              });
-            }
-            return element;
+      installStylesLegacy(
+        iframe.contentWindow.document,
+        ampDocCss + ampSharedCss,
+        () => {
+          resolve({
+            win: iframe.contentWindow,
+            doc: iframe.contentWindow.document,
+            ampdoc,
+            iframe,
+            addElement: function(element) {
+              const iWin = iframe.contentWindow;
+              const p = onInsert(iWin)
+                .then(() => {
+                  return element.build();
+                })
+                .then(() => {
+                  if (!element.getPlaceholder()) {
+                    const placeholder = element.createPlaceholder();
+                    if (placeholder) {
+                      element.appendChild(placeholder);
+                    }
+                  }
+                  if (element.layoutCount_ == 0) {
+                    if (opt_beforeLayoutCallback) {
+                      opt_beforeLayoutCallback(element);
+                    }
+                    return element.layoutCallback().then(() => {
+                      return element;
+                    });
+                  }
+                  return element;
+                });
+              iWin.document.getElementById('parent').appendChild(element);
+              return p;
+            },
           });
-          iWin.document.getElementById('parent')
-              .appendChild(element);
-          return p;
         }
-      });
+      );
     };
     iframe.onerror = reject;
     document.body.appendChild(iframe);
@@ -246,18 +303,111 @@ export function createServedIframe(src) {
     iframe.src = src;
     iframe.onload = function() {
       const win = iframe.contentWindow;
-      win.AMP_TEST_IFRAME = true;
-      win.AMP_TEST = true;
+      win.__AMP_TEST_IFRAME = true;
+      win.__AMP_TEST = true;
       installRuntimeServices(win);
-      registerForUnitTest(win);
       resolve({
-        win: win,
+        win,
         doc: win.document,
-        iframe: iframe
+        iframe,
       });
     };
     iframe.onerror = reject;
     document.body.appendChild(iframe);
+  });
+}
+
+const IFRAME_STUB_URL =
+  '//ads.localhost:9876/test/fixtures/served/iframe-stub.html#';
+
+/**
+ * Creates an iframe fixture in the given window that can be used for
+ * window.postMessage related tests.
+ *
+ * It provides functions like:
+ * - instruct the iframe to post a message to the parent window
+ * - verify the iframe has received a message from the parent window
+ *
+ * See /test/fixtures/served/iframe-stub.html for implementation.
+ *
+ * @param {!Window} win
+ * @return {!HTMLIFrameElement}
+ */
+export function createIframeWithMessageStub(win) {
+  const element = win.document.createElement('iframe');
+  element.src = IFRAME_STUB_URL;
+
+  /**
+   * Instructs the iframe to send a message to parent window.
+   * @param {!Object} msg
+   */
+  element.postMessageToParent = msg => {
+    element.src = IFRAME_STUB_URL + encodeURIComponent(JSON.stringify(msg));
+  };
+
+  /**
+   * Returns a Promise that resolves when the iframe acknowledged the reception
+   * of the specified message.
+   * @param {function(?Object, !Object|string)|string} callbackOrType
+   *     A callback that determines if this is the message we expected. If a
+   *     string is passed, the determination is based on whether the message's
+   *     type matches the string.
+   */
+  element.expectMessageFromParent = callbackOrType => {
+    let filter;
+    if (typeof callbackOrType === 'string') {
+      filter = data => {
+        return 'type' in data && data.type == callbackOrType;
+      };
+    } else {
+      filter = callbackOrType;
+    }
+
+    return new Promise((resolve, reject) => {
+      function listener(event) {
+        if (event.source != element.contentWindow || !event.data.testStubEcho) {
+          return;
+        }
+        const message = event.data.receivedMessage;
+        const data = parseIfNeeded(message);
+        try {
+          if (filter(data, message)) {
+            win.removeEventListener('message', listener);
+            resolve(data || message);
+          }
+        } catch (e) {
+          win.removeEventListener('message', listener);
+          reject(e);
+        }
+      }
+      win.addEventListener('message', listener);
+    });
+  };
+
+  return element;
+}
+
+/**
+ * Returns a Promise that resolves when a post message is observed from the
+ * given source window to target window.
+ *
+ * @param {!Window} sourceWin
+ * @param {!Window} targetwin
+ * @param {!Object} msg
+ * @return {!Promise<!Object>}
+ */
+export function expectPostMessage(sourceWin, targetwin, msg) {
+  return new Promise(resolve => {
+    const listener = event => {
+      if (
+        event.source == sourceWin &&
+        JSON.stringify(msg) == JSON.stringify(event.data)
+      ) {
+        targetwin.removeEventListener('message', listener);
+        resolve(event.data);
+      }
+    };
+    targetwin.addEventListener('message', listener);
   });
 }
 
@@ -274,14 +424,15 @@ export function createServedIframe(src) {
  */
 export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
-    let start = new Date().getTime();
+    const start = Date.now();
+    const end = opt_timeout || 1600;
     function poll() {
       const ret = condition();
       if (ret) {
         clearInterval(interval);
         resolve(ret);
       } else {
-        if (new Date().getTime() - start > (opt_timeout || 1600)) {
+        if (Date.now() - start > end) {
           clearInterval(interval);
           if (opt_onError) {
             reject(opt_onError());
@@ -291,7 +442,7 @@ export function poll(description, condition, opt_onError, opt_timeout) {
         }
       }
     }
-    let interval = setInterval(poll, 8);
+    const interval = setInterval(poll, 8);
     poll();
   });
 }
@@ -307,29 +458,49 @@ export function poll(description, condition, opt_onError, opt_timeout) {
  * @return {!Promise}
  */
 export function pollForLayout(win, count, opt_timeout) {
-  let getCount = () => {
-    return win.document.querySelectorAll('.-amp-layout,.-amp-error').length;
+  const getCount = () => {
+    return win.document.querySelectorAll('.i-amphtml-layout,.i-amphtml-error')
+      .length;
   };
-  return poll('Waiting for elements to layout: ' + count, () => {
-    return getCount() >= count;
-  }, () => {
-    return new Error('Failed to find elements with layout.' +
-        ' Current count: ' + getCount() + ' HTML:\n' +
-        win.document.documentElement./*TEST*/innerHTML);
-  }, opt_timeout);
+  return poll(
+    'Waiting for elements to layout: ' + count,
+    () => {
+      return getCount() >= count;
+    },
+    () => {
+      return new Error(
+        'Failed to find elements with layout.' +
+          ' Current count: ' +
+          getCount() +
+          ' HTML:\n' +
+          win.document.documentElement./*TEST*/ innerHTML
+      );
+    },
+    opt_timeout
+  );
 }
 
 /**
  * @param {!Window} win
+ * @param {number=} opt_timeout
  * @return {!Promise}
  */
-export function expectBodyToBecomeVisible(win) {
-  return poll('expect body to become visible', () => {
-    return win && win.document && win.document.body && (
-        (win.document.body.style.visibility == 'visible'
-            && win.document.body.style.opacity != '0')
-        || win.document.body.style.opacity == '1');
-  });
+export function expectBodyToBecomeVisible(win, opt_timeout) {
+  return poll(
+    'expect body to become visible',
+    () => {
+      return (
+        win &&
+        win.document &&
+        win.document.body &&
+        ((win.document.body.style.visibility == 'visible' &&
+          win.document.body.style.opacity != '0') ||
+          win.document.body.style.opacity == '1')
+      );
+    },
+    undefined,
+    opt_timeout || 5000
+  );
 }
 
 /**
@@ -342,20 +513,22 @@ export function expectBodyToBecomeVisible(win) {
  * @param {!Window} win
  */
 export function doNotLoadExternalResourcesInTest(win) {
-  const createElement = win.document.createElement;
-  win.document.createElement = function(tagName) {
+  const {prototype} = win.Document;
+  const {createElement} = prototype;
+  prototype.createElement = function(tagName) {
     const element = createElement.apply(this, arguments);
     tagName = tagName.toLowerCase();
     if (tagName == 'iframe' || tagName == 'img') {
       // Make get/set write to a fake property instead of
       // triggering invocation.
+      element.fakeSrc = '';
       Object.defineProperty(element, 'src', {
         set: function(val) {
           this.fakeSrc = val;
         },
         get: function() {
           return this.fakeSrc;
-        }
+        },
       });
       // Triggers a load event on the element in the next micro task.
       element.triggerLoad = function() {
@@ -396,7 +569,7 @@ function onInsert(win) {
       childList: true,
       subtree: true,
     });
-  })
+  });
 }
 
 /**
@@ -406,17 +579,70 @@ function onInsert(win) {
  * @param {string} html
  * @return {string}
  */
-function maybeSwitchToCompiledJs(html) {
+export function maybeSwitchToCompiledJs(html) {
   if (window.ampTestRuntimeConfig.useCompiledJs) {
-    return html
+    return (
+      html
         // Main JS
-        .replace(/\/dist\/amp\.js/, '/dist/v0.js')
+        .replace(/\/dist\/amp\.js/g, '/dist/v0.js')
+        // Inabox
+        .replace(/\/dist\/amp-inabox/g, '/dist/amp4ads-v0')
         // Extensions
         .replace(/\.max\.js/g, '.js')
         // 3p html binary
         .replace(/\.max\.html/g, '.html')
         // 3p path
-        .replace(/dist\.3p\/current\//g, 'dist.3p/current-min/');
+        .replace(/dist\.3p\/current\//g, 'dist.3p/current-min/')
+    );
   }
   return html;
+}
+
+class MessageReceiver {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    this.events_ = [];
+    win.addEventListener('message', event => {
+      const parsedData = this.parseMessageData_(event.data);
+
+      if (
+        parsedData &&
+        // Either non-3P or 3P variant of the sentinel.
+        (/^amp/.test(parsedData.sentinel) ||
+          /^\d+-\d+$/.test(parsedData.sentinel))
+      ) {
+        this.events_.push({
+          data: parsedData,
+          userActivation: event.userActivation,
+        });
+      }
+    });
+  }
+
+  /**
+   * @param {string} type
+   * @returns {?Event}
+   */
+  getFirstMessageEventOfType(type) {
+    for (let i = 0; i < this.events_.length; ++i) {
+      if (this.events_[i].data.type === type) {
+        return this.events_[i];
+      }
+    }
+    return null;
+  }
+
+  /**
+   * @param {*} data
+   * @return {?}
+   * @private
+   */
+  parseMessageData_(data) {
+    if (typeof data == 'string' && isAmpMessage(data)) {
+      return deserializeMessage(data);
+    }
+    return data;
+  }
 }

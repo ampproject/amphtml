@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
+// Imported just for the side effect of getting the `types` it exports into
+// the type system during compile time.
+import './time';
 
 /**
  * A CurveDef is a function that returns a normtime value (0 to 1) for another
  * normtime value.
- * @typedef {function(normtime):normtime}
+ * @typedef {function(./time.normtimeDef): ./time.normtimeDef}
  */
-let CurveDef;
-
+export let CurveDef;
 
 /**
  * Returns a cubic bezier curve.
@@ -36,13 +38,11 @@ export function bezierCurve(x1, y1, x2, y2) {
   return bezier.solveYValueFromXValue.bind(bezier);
 }
 
-
 /**
  * Thanks to
  * https://closure-library.googlecode.com/git-history/docs/local_closure_goog_math_bezier.js.source.html
  */
 class Bezier {
-
   /**
    * @param {number} x0 X coordinate of the start point.
    * @param {number} y0 Y coordinate of the start point.
@@ -233,8 +233,7 @@ class Bezier {
   lerp(a, b, x) {
     return a + x * (b - a);
   }
-};
-
+}
 
 /**
  * A collection of common curves.
@@ -247,7 +246,9 @@ export const Curves = {
    * @param {number} n
    * @return {number}
    */
-  LINEAR: function(n) {return n;},
+  LINEAR(n) {
+    return n;
+  },
 
   /**
    * ease
@@ -255,7 +256,7 @@ export const Curves = {
   EASE: bezierCurve(0.25, 0.1, 0.25, 1.0),
 
   /**
-   * ease-out: slow out, fast in
+   * ease-in: slow out, fast in
    */
   EASE_IN: bezierCurve(0.42, 0.0, 1.0, 1.0),
 
@@ -270,7 +271,6 @@ export const Curves = {
   EASE_IN_OUT: bezierCurve(0.42, 0.0, 0.58, 1.0),
 };
 
-
 /**
  * @const {!Object<string, !CurveDef>}
  */
@@ -282,7 +282,6 @@ const NAME_MAP = {
   'ease-in-out': Curves.EASE_IN_OUT,
 };
 
-
 /**
  * If the argument is a string, this methods matches an existing curve by name.
  * @param {?CurveDef|string|undefined} curve
@@ -293,6 +292,22 @@ export function getCurve(curve) {
     return null;
   }
   if (typeof curve == 'string') {
+    // If the curve is a custom cubic-bezier curve
+    if (curve.indexOf('cubic-bezier') != -1) {
+      const match = curve.match(/cubic-bezier\((.+)\)/);
+      if (match) {
+        const values = match[1].split(',').map(parseFloat);
+        if (values.length == 4) {
+          for (let i = 0; i < 4; i++) {
+            if (isNaN(values[i])) {
+              return null;
+            }
+          }
+          return bezierCurve(values[0], values[1], values[2], values[3]);
+        }
+      }
+      return null;
+    }
     return NAME_MAP[curve];
   }
   return curve;

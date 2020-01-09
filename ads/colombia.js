@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import {loadScript, validateDataExists} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function colombia(global, data) {
-  validateDataExists(data, [
-    'clmb_slot', 'clmb_position', 'clmb_section',
-    'clmb_divid', 'loadingStrategy',
+  validateData(data, [
+    'clmb_slot',
+    'clmb_position',
+    'clmb_section',
+    'clmb_divid',
+    'loadingStrategy',
   ]);
   // push the two object into the '_colombia' global
   (global._colombia = global._colombia || []).push({
@@ -32,7 +35,7 @@ export function colombia(global, data) {
     clmbsection: data.clmb_section,
     clmbdivid: data.clmb_divid,
   });
-// install observation on entering/leaving the view
+  // install observation on entering/leaving the view
   global.context.observeIntersection(function(newrequest) {
     newrequest.forEach(function(d) {
       if (d.intersectionRect.height > 0) {
@@ -43,5 +46,8 @@ export function colombia(global, data) {
       }
     });
   });
-  loadScript(global, 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js');
+  loadScript(
+    global,
+    'https://static.clmbtech.com/ad/commons/js/colombia-amp.js'
+  );
 }

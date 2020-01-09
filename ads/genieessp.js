@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {validateDataExists, writeScript} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function genieessp(global, data) {
-  validateDataExists(data, ['vid', 'zid']);
+  validateData(data, ['vid', 'zid']);
 
   global.data = data;
   writeScript(global, 'https://js.gsspcln.jp/l/amp.js');

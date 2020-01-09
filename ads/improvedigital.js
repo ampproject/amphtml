@@ -13,27 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
 
-const adImproveField = ['width', 'height', 'placement', 'optin', 'keyvalue'];
-const adImproveMandatoryField = ['placement'];
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-export function improvedigital(global, data)
-{
-  checkData(data, adImproveField);
-  validateDataExists(data, adImproveMandatoryField);
+export function improvedigital(global, data) {
+  validateData(data, ['placement'], ['width', 'height', 'optin', 'keyvalue']);
 
-  let url = 'https://ad.360yield.com' +
-      '/adj?' +
-      'p=' + encodeURIComponent(data.placement) +
-      '&w=' + encodeURIComponent(data.width) +
-      '&h=' + encodeURIComponent(data.height) +
-      '&optin=' + encodeURIComponent(data.optin) +
-      '&tz=' + new Date().getTimezoneOffset();
+  let url =
+    'https://ad.360yield.com' +
+    '/adj?' +
+    'p=' +
+    encodeURIComponent(data.placement) +
+    '&w=' +
+    encodeURIComponent(data.width) +
+    '&h=' +
+    encodeURIComponent(data.height) +
+    '&optin=' +
+    encodeURIComponent(data.optin) +
+    '&tz=' +
+    new Date().getTimezoneOffset();
 
   const value = data.keyvalue;
   let newData = '';
@@ -42,11 +44,12 @@ export function improvedigital(global, data)
 
   if (value && value.length > 0) {
     const keys = value.split('&');
-    for (let i = 0; i < keys.length; i++)
-    {
-      if (!keys[i]) {continue;}
+    for (let i = 0; i < keys.length; i++) {
+      if (!keys[i]) {
+        continue;
+      }
       const segment = keys[i].split('=');
-      const segment1 = (segment[1] ? encodeURIComponent(segment[1]) : '');
+      const segment1 = segment[1] ? encodeURIComponent(segment[1]) : '';
       if (validKey > 0) {
         newData += amps;
       }

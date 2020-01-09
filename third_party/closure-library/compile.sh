@@ -19,7 +19,6 @@ java -jar $1 \
     --js "$2/goog/array/array.js" \
     --js "$2/goog/asserts/asserts.js" \
     --js "$2/goog/crypt/crypt.js" \
-    --js "base64.js" \
     --js "$2/goog/crypt/hash.js" \
     --js "$2/goog/crypt/sha2_64bit.js" \
     --js "$2/goog/crypt/sha384.js" \
@@ -29,7 +28,11 @@ java -jar $1 \
     --js "$2/goog/reflect/reflect.js" \
     --js "$2/goog/string/string.js" \
     --js_output_file "sha384-generated.js" \
-    --output_wrapper "/* Generated from closure library commit $GIT_COMMIT */%output%;export function base64(input) { return ampBase64(input) }; export function sha384(input) { return ampSha384Digest(input) };" \
+    --output_wrapper "/* Generated from closure library commit $GIT_COMMIT */
+export const sha384 = (function(){
+%output%;
+return ampSha384Digest;
+}).call(window);" \
     --manage_closure_dependencies \
     --process_closure_primitives \
     --use_types_for_optimization \

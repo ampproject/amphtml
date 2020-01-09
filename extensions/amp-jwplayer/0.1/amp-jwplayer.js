@@ -14,19 +14,57 @@
  * limitations under the License.
  */
 
-import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
-import {user} from '../../../src/log';
+import {Services} from '../../../src/services';
+import {addParamsToUrl} from '../../../src/url';
+import {dict} from '../../../src/utils/object';
+import {isLayoutSizeDefined} from '../../../src/layout';
+import {removeElement} from '../../../src/dom';
+import {userAssert} from '../../../src/log';
 
 class AmpJWPlayer extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-  /** @override */
+    /** @private {string} */
+    this.contentid_ = '';
+
+    /** @private {string} */
+    this.playerid_ = '';
+
+    /** @private {string} */
+    this.contentSearch_ = '';
+
+    /** @private {string} */
+    this.contentContextual_ = '';
+
+    /** @private {string} */
+    this.contentRecency_ = '';
+
+    /** @private {string} */
+    this.contentBackfill_ = '';
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+  }
+
+  /**
+   * @param {boolean=} onLayout
+   * @override
+   */
   preconnectCallback(onLayout) {
     // Host that serves player configuration and content redirects
-    this.preconnect.url('https://content.jwplatform.com', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://content.jwplatform.com',
+      onLayout
+    );
     // CDN which hosts jwplayer assets
-    this.preconnect.url('https://ssl.p.jwpcdn.com', onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://ssl.p.jwpcdn.com',
+      onLayout
+    );
   }
 
   /** @override */
@@ -36,52 +74,47 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-
-    /** @private @const {number} */
-    this.width_ = getLengthNumeral(width);
-
-    /** @private @const {number} */
-    this.height_ = getLengthNumeral(height);
-
-    /** @private @const {string} */
-    this.contentid_ = user.assert(
-      (this.element.getAttribute('data-playlist-id') ||
-      this.element.getAttribute('data-media-id')),
+    const {element} = this;
+    this.contentid_ = userAssert(
+      element.getAttribute('data-playlist-id') ||
+        element.getAttribute('data-media-id'),
       'Either the data-media-id or the data-playlist-id ' +
-      'attributes must be specified for <amp-jwplayer> %s',
-      this.element);
+        'attributes must be specified for <amp-jwplayer> %s',
+      element
+    );
 
-    /** @private @const {string} */
-    this.playerid_ = user.assert(
-      this.element.getAttribute('data-player-id'),
+    this.playerid_ = userAssert(
+      element.getAttribute('data-player-id'),
       'The data-player-id attribute is required for <amp-jwplayer> %s',
-      this.element);
+      element
+    );
 
-    if (!this.getPlaceholder()) {
-      this.buildImagePlaceholder_();
-    }
+    this.contentSearch_ = element.getAttribute('data-content-search') || '';
+    this.contentBackfill_ = element.getAttribute('data-content-backfill') || '';
   }
-
 
   /** @override */
   layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
-    const src = 'https://content.jwplatform.com/players/' +
-      encodeURIComponent(this.contentid_) + '-' +
-      encodeURIComponent(this.playerid_) + '.html';
+    const cid = encodeURIComponent(this.contentid_);
+    const pid = encodeURIComponent(this.playerid_);
+    const queryParams = dict({
+      'search': this.getContextualVal() || undefined,
+      'contextual': this.contentContextual_ || undefined,
+      'recency': this.contentRecency_ || undefined,
+      'backfill': this.contentBackfill_ || undefined,
+    });
+
+    const baseUrl = `https://content.jwplatform.com/players/${cid}-${pid}.html`;
+    const src = addParamsToUrl(baseUrl, queryParams);
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    iframe.width = this.width_;
-    iframe.height = this.height_;
     this.element.appendChild(iframe);
-    /** @private {?Element} */
-    this.iframe_ = iframe;
-    return loadPromise(iframe);
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -89,38 +122,66 @@ class AmpJWPlayer extends AMP.BaseElement {
     if (this.iframe_ && this.iframe_.contentWindow) {
       // The /players page can respond to "play" and "pause" commands from the
       // iframe's parent
-      this.iframe_.contentWindow./*OK*/postMessage('pause',
-        'https://content.jwplatform.com');
+      this.iframe_.contentWindow./*OK*/ postMessage(
+        'pause',
+        'https://content.jwplatform.com'
+      );
     }
   }
 
-  /** @private */
-  buildImagePlaceholder_() {
-    const imgPlaceholder = new Image();
-
-    setStyles(imgPlaceholder, {
-      'object-fit': 'cover',
-    });
-
-    imgPlaceholder.src = 'https://content.jwplatform.com/thumbs/' +
-        encodeURIComponent(this.contentid_) + '-720.jpg';
-    imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
-    imgPlaceholder.setAttribute('referrerpolicy', 'origin');
-
-    this.applyFillContent(imgPlaceholder);
-
-    // Not every media item has a thumbnail image.  If no image is found,
-    // don't add the placeholder to the DOM.
-    loadPromise(imgPlaceholder).then(() => {
-      this.element.appendChild(imgPlaceholder);
-    }).catch(() => {
-      // If the thumbnail image isn't available, we can safely ignore this
-      // error, and no image placeholder will be inserted.
-    });
+  /** @override */
+  unlayoutCallback() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true; // Call layoutCallback again.
   }
 
-};
+  /** @override */
+  createPlaceholderCallback() {
+    if (!this.element.hasAttribute('data-media-id')) {
+      return;
+    }
+    const placeholder = this.win.document.createElement('amp-img');
+    this.propagateAttributes(['aria-label'], placeholder);
+    placeholder.setAttribute(
+      'src',
+      'https://content.jwplatform.com/thumbs/' +
+        encodeURIComponent(this.contentid_) +
+        '-720.jpg'
+    );
+    placeholder.setAttribute('layout', 'fill');
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute(
+        'alt',
+        'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
+    }
+    return placeholder;
+  }
+  /**
+   *
+   * @return {*} TODO(#23582): Specify return type
+   */
+  getContextualVal() {
+    if (this.contentSearch_ === '__CONTEXTUAL__') {
+      const context = this.getAmpDoc().getHeadNode();
+      const ogTitleElement = context.querySelector('meta[property="og:title"]');
+      const ogTitle = ogTitleElement
+        ? ogTitleElement.getAttribute('content')
+        : null;
+      const title = (context.querySelector('title') || {}).textContent;
+      return ogTitle || title || '';
+    }
+    return this.contentSearch_;
+  }
+}
 
-AMP.registerElement('amp-jwplayer', AmpJWPlayer);
+AMP.extension('amp-jwplayer', '0.1', AMP => {
+  AMP.registerElement('amp-jwplayer', AmpJWPlayer);
+});

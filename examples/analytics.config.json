@@ -1,15 +1,16 @@
 {
   "requests": {
-    "event": "https://example.com?remote-test&title=${title}&r=${random}"
+    "event": "/analytics/remote-${type}?&title=${title}&r=${random}"
   },
   "vars": {
-    "title": "Example Request"
+    "title": "Example Request",
+    "type": "pageview"
   },
   "triggers": {
     "remotePageview": {
       "on": "visible",
       "request": "event"
     }
-  }
+  },
+  "transport": {"beacon": true, "xhrpost": false}
 }
-

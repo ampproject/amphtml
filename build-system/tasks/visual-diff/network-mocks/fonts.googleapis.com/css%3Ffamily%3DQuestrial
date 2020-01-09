@@ -1,0 +1,6 @@
+@font-face {
+  font-family: 'Questrial';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Questrial'), local('Questrial-Regular'), url(https://fonts.gstatic.com/s/questrial/v8/QdVUSTchPBm7nuUeVf70viFg.ttf) format('truetype');
+}

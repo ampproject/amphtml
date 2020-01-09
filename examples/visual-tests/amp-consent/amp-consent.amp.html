@@ -1,0 +1,80 @@
+<!doctype html>
+<html amp lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <title>Hello, AMPs</title>
+    <link rel="canonical" href="http://example.ampproject.org/article-metadata.html">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+    <script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js"></script>
+    <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  </head>
+  <body>
+    <h1>amp-consent</h1>
+
+    <h3>Image that is blocked by '_till_responded' consent</h3>
+    <amp-img data-block-on-consent='_till_responded'
+      src="/examples/visual-tests/picsum.photos/image1068_300x169.jpg"
+      width=30
+      height=20>
+    </amp-img>
+
+    <h3>Image that is blocked by '_till_accepted' consent</h3>
+    <amp-img data-block-on-consent='_till_accepted'
+      src="/examples/visual-tests/picsum.photos/image1068_300x169.jpg"
+      width=30
+      height=20>
+    </amp-img>
+
+    <h3>Image that is blocked by '_auto_reject' consent</h3>
+    <amp-img data-block-on-consent='_auto_reject'
+      src="/examples/visual-tests/picsum.photos/image1068_300x169.jpg"
+      width=30
+      height=20>
+    </amp-img>
+
+    <h3>Image that is blocked by 'default' consent</h3>
+    <amp-img
+      data-block-on-consent='default'
+      src="/examples/visual-tests/picsum.photos/image1068_300x169.jpg"
+      width=30
+      height=20>
+    </amp-img>
+
+    <h3>Image that is blocked by default (not specified) consent</h3>
+    <amp-img
+      id="not-specified"
+      data-block-on-consent
+      src="/examples/visual-tests/picsum.photos/image1068_300x169.jpg"
+      width=30
+      height=20>
+    </amp-img>
+
+    <h3>Image that is NOT blocked by consent</h3>
+    <amp-img
+      src="/examples/visual-tests/picsum.photos/image1068_300x169.jpg"
+      width=30
+      height=20>
+    </amp-img>
+
+    <amp-consent layout="nodisplay" id="consent-element">
+      <script type="application/json">
+        {
+          "consents": {
+            "my-consent": {
+              "checkConsentHref": "/get-consent-v1/",
+              "promptUI": "consent-ui"
+            }
+          }
+        }
+      </script>
+      <div id="consent-ui">
+        <button id="accept" on="tap:consent-element.accept" role="button">Accept</button>
+        <button id="reject" on="tap:consent-element.reject" role="button">Reject</button>
+        <button id="dismiss" on="tap:consent-element.dismiss" role="button">Dismiss</button>
+      </div>
+    </amp-consent>
+  </body>
+</html>

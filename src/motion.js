@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {timer} from './timer';
-import {vsyncFor} from './vsync';
+import {Deferred} from './utils/promise';
+import {Services} from './services';
 
-/** @const {!Funtion} */
+/** @const {function()} */
 const NOOP_CALLBACK_ = function() {};
 
 /** @const {number} */
@@ -35,7 +35,6 @@ const EXP_FRAME_CONST_ = Math.round(-FRAME_CONST_ / Math.log(0.95));
  * @const {number}
  */
 const VELOCITY_DEPR_FACTOR_ = FRAME_CONST_ * 2;
-
 
 /**
  * Calculates velocity for an object traveling the distance deltaV in the
@@ -64,7 +63,6 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
   return speed * depr + prevVelocity * (1 - depr);
 }
 
-
 /**
  * Returns a motion process that will yield when the velocity has run down to
  * zerp. For each iteration, the velocity is depreciated and the coordinates
@@ -77,15 +75,28 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
  * @param {number} veloY Starting Y velocity.
  * @param {function(number, number):boolean} callback The callback for each
  *   step of the deceleration motion.
- * @param {!Vsync=} opt_vsync Mostly for testing only.
+ * @param {!./service/vsync-impl.Vsync=} opt_vsync Mostly for testing only.
  * @return {!Motion}
  */
-export function continueMotion(contextNode, startX, startY, veloX, veloY,
-    callback, opt_vsync) {
-  return new Motion(contextNode, startX, startY, veloX, veloY,
-      callback, opt_vsync).start_();
+export function continueMotion(
+  contextNode,
+  startX,
+  startY,
+  veloX,
+  veloY,
+  callback,
+  opt_vsync
+) {
+  return new Motion(
+    contextNode,
+    startX,
+    startY,
+    veloX,
+    veloY,
+    callback,
+    opt_vsync
+  ).start();
 }
-
 
 /**
  * Motion process that allows tracking and monitoring of the running motion.
@@ -95,7 +106,7 @@ export function continueMotion(contextNode, startX, startY, veloX, veloY,
  * motion.
  * @implements {IThenable}
  */
-class Motion {
+export class Motion {
   /**
    * @param {!Node} contextNode Context node.
    * @param {number} startX Start X coordinate.
@@ -104,11 +115,11 @@ class Motion {
    * @param {number} veloY Starting Y velocity.
    * @param {function(number, number):boolean} callback The callback for each
    *   step of the deceleration motion.
-   * @param {!Vsync=} opt_vsync
+   * @param {!./service/vsync-impl.Vsync=} opt_vsync
    */
   constructor(contextNode, startX, startY, veloX, veloY, callback, opt_vsync) {
-    /** @private @const */
-    this.vsync_ = opt_vsync || vsyncFor(window);
+    /** @private @const {!./service/vsync-impl.Vsync} */
+    this.vsync_ = opt_vsync || Services.vsyncFor(self);
 
     /** @private @const {!Node} */
     this.contextNode_ = contextNode;
@@ -134,30 +145,28 @@ class Motion {
     /** @private {number} */
     this.velocityY_ = 0;
 
-    /** @private {time} */
-    this.startTime_ = timer.now();
-
-    /** @private {time} */
-    this.lastTime_ = this.startTime_;
-
-    /** @private {!Function} */
-    this.resolve_;
-
-    /** @private {!Function} */
-    this.reject_;
+    const deferred = new Deferred();
 
     /** @private {!Promise} */
-    this.promise_ = new Promise((resolve, reject) => {
-      this.resolve_ = resolve;
-      this.reject_ = reject;
-    });
+    this.promise_ = deferred.promise;
+
+    /** @private {!Function} */
+    this.resolve_ = deferred.resolve;
+
+    /** @private {!Function} */
+    this.reject_ = deferred.reject;
+
+    /** @private {boolean} */
+    this.continuing_ = false;
   }
 
-  /** @private */
-  start_() {
+  /** */
+  start() {
     this.continuing_ = true;
-    if (Math.abs(this.maxVelocityX_) <= MIN_VELOCITY_ &&
-            Math.abs(this.maxVelocityY_) <= MIN_VELOCITY_) {
+    if (
+      Math.abs(this.maxVelocityX_) <= MIN_VELOCITY_ &&
+      Math.abs(this.maxVelocityY_) <= MIN_VELOCITY_
+    ) {
       this.fireMove_();
       this.completeContinue_(true);
     } else {
@@ -179,9 +188,7 @@ class Motion {
   /**
    * Chains to the motion's promise that will resolve when the motion has
    * completed or will reject if motion has failed or was interrupted.
-   * @param {!Function=} opt_resolve
-   * @param {!Function=} opt_reject
-   * @return {!Promise}
+   * @override
    */
   then(opt_resolve, opt_reject) {
     if (!opt_resolve && !opt_reject) {
@@ -192,12 +199,12 @@ class Motion {
 
   /**
    * Callback for regardless whether the motion succeeds or fails.
-   * @param {!Function=} opt_callback
+   * @param {function()=} opt_callback
    * @return {!Promise}
    */
   thenAlways(opt_callback) {
     const callback = opt_callback || NOOP_CALLBACK_;
-    return this.then(callback, callback);
+    return /** @type {!Promise} */ (this.then(callback, callback));
   }
 
   /**
@@ -209,8 +216,9 @@ class Motion {
     this.velocityY_ = this.maxVelocityY_;
     const boundStep = this.stepContinue_.bind(this);
     const boundComplete = this.completeContinue_.bind(this, true);
-    return this.vsync_.runAnimMutateSeries(this.contextNode_, boundStep, 5000)
-        .then(boundComplete, boundComplete);
+    return this.vsync_
+      .runAnimMutateSeries(this.contextNode_, boundStep, 5000)
+      .then(boundComplete, boundComplete);
   }
 
   /**
@@ -225,7 +233,6 @@ class Motion {
       return false;
     }
 
-    this.lastTime_ = timer.now();
     this.lastX_ += timeSincePrev * this.velocityX_;
     this.lastY_ += timeSincePrev * this.velocityY_;
     if (!this.fireMove_()) {
@@ -235,8 +242,10 @@ class Motion {
     const decel = Math.exp(-timeSinceStart / EXP_FRAME_CONST_);
     this.velocityX_ = this.maxVelocityX_ * decel;
     this.velocityY_ = this.maxVelocityY_ * decel;
-    return (Math.abs(this.velocityX_) > MIN_VELOCITY_ ||
-        Math.abs(this.velocityY_) > MIN_VELOCITY_);
+    return (
+      Math.abs(this.velocityX_) > MIN_VELOCITY_ ||
+      Math.abs(this.velocityY_) > MIN_VELOCITY_
+    );
   }
 
   /**
@@ -248,7 +257,6 @@ class Motion {
       return;
     }
     this.continuing_ = false;
-    this.lastTime_ = timer.now();
     this.fireMove_();
     if (success) {
       this.resolve_();

@@ -1,71 +1,137 @@
-# amphtml-validator Node.js package (Beta!)
+# amphtml-validator Node.js Package
 
-## Using the command-line tool (Beta!)
+This package is published and available at
+https://www.npmjs.com/package/amphtml-validator.
 
-To install this as a command line tool, type `npm install -g amphtml-validator`.
+The source code is available at
+https://github.com/ampproject/amphtml/tree/master/validator/nodejs.
 
-Now let's validate a real AMP HTML page.
-```
-$ amphtml-validator https://www.ampproject.org/
-https://www.ampproject.org/: PASS
-```
+## Command Line Tool
 
-How about an empty file? Turns out an empty file is not valid AMP.
-```
-$ echo > empty.html
-$ amphtml-validator empty.html
-empty.html:1:0 The mandatory tag 'html doctype' is missing or incorrect.
-empty.html:1:0 The mandatory tag 'html ⚡ for top-level html' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup)
-empty.html:1:0 The mandatory tag 'head' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup)
-...
-```
+The `amphtml-validator` command line tool is documented here:
+https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp#command-line-tool
 
-OK, let's try a better starting point. Let's verify that this document is
-valid AMP.
-```
-$ amphtml-validator https://raw.githubusercontent.com/ampproject/amphtml/master/validator/testdata/feature_tests/minimum_valid_amp.html
-https://raw.githubusercontent.com/ampproject/amphtml/master/validator/testdata/feature_tests/minimum_valid_amp.html: PASS
-```
+## Node.js API
 
-Great, we download it and edit it. You may use `vim` if you don't like Emacs.
-```
-$ wget --output-document=hello-amp.html https://raw.githubusercontent.com/ampproject/amphtml/master/validator/testdata/feature_tests/minimum_valid_amp.html
-$ amphtml-validator hello-amp.html
-hello-amp.html: PASS
-$ emacs hello-amp.html
-```
-
-## Using the Node.js API (Beta!)
-
-This API is new and still experimental, feedback is especially welcome.
+This API is new - feedback is especially welcome.
 
 To install, use `npm install amphtml-validator` in your project directory,
 or add `amphtml-validator` as a dependency to your package.json.
 
 You may save the following example into a file, e.g., `demo.js`.
+
 ```js
 'use strict';
-const ampValidator = require('amphtml-validator');
+var amphtmlValidator = require('amphtml-validator');
 
-ampValidator.getInstance().then((validator) => {
-  const result = validator.validateString('<html>Hello, world.</html>');
-  ((result.status === 'PASS') ? console.log : console.error)(result.status);
-  for (const error of result.errors) {
-    let msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message;
+amphtmlValidator.getInstance().then(function(validator) {
+  var result = validator.validateString('<html>Hello, world.</html>');
+  (result.status === 'PASS' ? console.log : console.error)(result.status);
+  for (var ii = 0; ii < result.errors.length; ii++) {
+    var error = result.errors[ii];
+    var msg =
+      'line ' + error.line + ', col ' + error.col + ': ' + error.message;
     if (error.specUrl !== null) {
       msg += ' (see ' + error.specUrl + ')';
     }
-    ((error.severity === 'ERROR') ? console.error : console.warn)(msg);
+    (error.severity === 'ERROR' ? console.error : console.warn)(msg);
   }
 });
 ```
 
 Now try running it:
-```
+
+```sh
 $ node demo.js
 FAIL
-line 1, col 0: The mandatory attribute '⚡' is missing in tag 'html ⚡ for top-level html'. (see https://www.ampproject.org/docs/reference/spec.html#required-markup)
-line 1, col 0: The parent tag of tag 'html ⚡ for top-level html' is '$root', but it can only be '!doctype'. (see https://www.ampproject.org/docs/reference/spec.html#required-markup)
+line 1, col 0: The mandatory attribute '⚡' is missing in tag 'html ⚡ for top-level html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+line 1, col 0: The parent tag of tag 'html ⚡ for top-level html' is '$root', but it can only be '!doctype'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml.html#required-markup)
 ...
 ```
+
 As expected, this emits errors because the provided string in the example, `<html>Hello, world.</html>` is not a valid AMP HTML document.
+
+## Release Notes
+
+### 1.0.10
+
+- Fixed [#4246: amphtml-validator CLI fails on Mac OS X](https://github.com/ampproject/amphtml/issues/4246).
+
+### 1.0.11
+
+- Added support for AMP4ADS (via --html_format command line flag) and
+  argument for validateString function in the API.
+
+### 1.0.12
+
+- Added support for --user-agent option.
+
+### 1.0.13
+
+- Added newInstance method, a simple API that's not async.
+
+### 1.0.15
+
+- Added support for installing on Windows.
+  `npm install -g amphtml-validator` should now just work.
+
+### 1.0.16
+
+- `npm install amphtml-validator` (local install) should now work on Windows,
+  for `require('amphtml-validator')`.
+
+### 1.0.17
+
+- If the amphtml-validator command is already patched up for Windows, leave it
+  alone instead of failing. Relevant if the package has been installed globally
+  and now we're performing a local install on top of it.
+
+### 1.0.18
+
+- Small tweaks to this file and package.json.
+
+### 1.0.19
+
+- Set correct process exit status for old versions of Node.js (v0.10.25).
+
+### 1.0.20
+
+- Better npm post-install for virtual machines, running debian over windows with SMB shared folder.
+
+### 1.0.21
+
+- --html_format=AMP4ADS is no longer experimental.
+
+### 1.0.22
+
+- --html_format=AMP4EMAIL added.
+
+### 1.0.23
+
+- The amphtml-validator binary now requires the Node.js binary to be called node.
+  On systems where the Node.js binary is called nodejs, consider installing
+  the nodejs-legacy Debian package or better yet, NVM.
+
+### 1.0.24
+
+- Introduce node v10 support and remove node 8 support.
+
+### 1.0.25
+
+- Broken release, removed.
+
+### 1.0.26
+
+- Introduce node v12 support and remove node v10 support.
+
+### 1.0.27
+
+- Removed references to amp.validator.categorizeError.
+
+### 1.0.28
+
+- Reintroduce node v10 support and introduce node v14 support.
+
+### 1.0.29
+
+- Reintroduce node v8 support. Supports node v8, v10, v12 and v14.

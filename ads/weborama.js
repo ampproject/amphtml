@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateDataExists} from '../3p/3p';
+import {validateData, writeScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function weboramaDisplay(global, data) {
-  const mandatoryWeboramaFields = [
+  const mandatoryFields = [
     'width',
     'height',
     'wbo_account_id',
@@ -29,7 +29,7 @@ export function weboramaDisplay(global, data) {
     'wbo_fullhost',
   ];
 
-  const allWeboramaFields = [
+  const optionalFields = [
     'wbo_bid_price',
     'wbo_price_paid',
     'wbo_random',
@@ -46,13 +46,9 @@ export function weboramaDisplay(global, data) {
     'wbo_is_mobile',
     'wbo_vars',
     'wbo_weak_encoding',
-  ].concat(mandatoryWeboramaFields);
+  ];
 
-  // Warn on extra fields
-  checkData(data, allWeboramaFields);
-
-  // Validate if mandatory fields exist
-  validateDataExists(data, mandatoryWeboramaFields);
+  validateData(data, mandatoryFields, optionalFields);
 
   /*eslint "google-camelcase/google-camelcase": 0*/
   global.weborama_display_tag = {
@@ -76,7 +72,9 @@ export function weboramaDisplay(global, data) {
     publisherclick: data.wbo_publisherclick,
     // clicktrackers: data.wbo_clicktrackers,
     // imptrackers: data.wbo_imptrackers,
-    // zindex: data.wbo_zindex, // This is actually quite useless for now, since we are launced in a non-friendly iframe.
+    // This is actually quite useless for now, since we are launced in a
+    // non-friendly iframe.
+    // zindex: data.wbo_zindex,
     disable_unload_event: data.wbo_disable_unload_event,
     donottrack: data.wbo_donottrack,
     script_variant: data.wbo_script_variant,
@@ -85,5 +83,8 @@ export function weboramaDisplay(global, data) {
     weak_encoding: data.wbo_weak_encoding,
   };
 
-  writeScript(global, 'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js');
+  writeScript(
+    global,
+    'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js'
+  );
 }

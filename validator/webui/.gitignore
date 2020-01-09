@@ -2,3 +2,5 @@
 node_modules/
 # This file gets created if someone builds the standalone server.
 serve-standalone
+# This gets created by build.py.
+dist

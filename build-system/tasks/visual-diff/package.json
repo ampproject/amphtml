@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "name": "gulp-visual-diff",
+  "version": "0.1.0",
+  "description": "Gulp visual diff",
+  "devDependencies": {
+    "@percy/agent": "0.20.6",
+    "@percy/puppeteer": "1.0.8",
+    "puppeteer": "2.0.0"
+  }
+}

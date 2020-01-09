@@ -1,0 +1,18 @@
+path_classifiers:
+  docs:
+    - '**/*.md'
+  test:
+    - '**/test/**/*.js'
+    - '**/testing/**/*.js'
+  third_party:
+    - 'third_party/**/*.*'
+  externs:
+    - '**/*.extern.js'
+  build-system:
+    - 'build-system/**/*.*'
+extraction:
+  javascript:
+    index:
+      exclude: examples
+queries:
+  exclude: js/unused-local-variable

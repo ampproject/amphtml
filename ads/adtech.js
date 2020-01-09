@@ -15,14 +15,16 @@
  */
 
 import {
-  writeScript,
-  checkData,
-  validateSrcPrefix,
+  validateData,
   validateSrcContains,
-  validateDataExists,
-  } from '../3p/3p';
+  validateSrcPrefix,
+  writeScript,
+} from '../3p/3p';
 
-
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function adtech(global, data) {
   const adsrc = data.src;
   if (typeof adsrc != 'undefined') {
@@ -30,12 +32,22 @@ export function adtech(global, data) {
     validateSrcContains('/addyn/', adsrc);
     writeScript(global, adsrc);
   } else {
-    checkData(data, [
-      'atwco', 'atwdiv', 'atwheight', 'atwhtnmat',
-      'atwmn', 'atwmoat', 'atwnetid', 'atwothat', 'atwplid',
-      'atwpolar', 'atwsizes', 'atwwidth',
-    ]);
-    validateDataExists(data,['atwmn', 'atwdiv']);
+    validateData(
+      data,
+      ['atwmn', 'atwdiv'],
+      [
+        'atwco',
+        'atwheight',
+        'atwhtnmat',
+        'atwmoat',
+        'atwnetid',
+        'atwothat',
+        'atwplid',
+        'atwpolar',
+        'atwsizes',
+        'atwwidth',
+      ]
+    );
     global.atwco = data.atwco;
     global.atwdiv = data.atwdiv;
     global.atwheight = data.atwheight;
@@ -48,7 +60,6 @@ export function adtech(global, data) {
     global.atwpolar = data.atwpolar;
     global.atwsizes = data.atwsizes;
     global.atwwidth = data.atwwidth;
-    writeScript(global,'https://s.aolcdn.com/os/ads/adsWrapper3.js');
+    writeScript(global, 'https://s.aolcdn.com/os/ads/adsWrapper3.js');
   }
-
 }
