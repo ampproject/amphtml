@@ -36,7 +36,9 @@ Collects user consent with Sirdata CMP.
   </script>
   <div id="promptConsentUI">
     Post Prompt UI
-    <button on="tap:consent.prompt(consent=sirdata)" role="button">Privacy settings</button>
+    <button on="tap:consent.prompt(consent=sirdata)" role="button">
+      Privacy settings
+    </button>
   </div>
 </amp-consent>
 ```
