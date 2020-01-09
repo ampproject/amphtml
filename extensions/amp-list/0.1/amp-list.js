@@ -350,9 +350,8 @@ export class AmpList extends AMP.BaseElement {
    */
   isAmpStateSrc(src) {
     return (
-      (isExperimentOn('amp-list-init-from-state') ||
-        /*TODO: remove the true / learn how experiments work. */ true) &&
-      src.trim().startsWith('amp-state:')
+      isExperimentOn(this.win, 'amp-list-init-from-state') &&
+      startsWith(src.trim(), 'amp-state:')
     );
   }
 
@@ -361,31 +360,47 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   renderLocalData(src) {
-    let data;
+    let dataPromise;
     if (typeof src === 'string') {
-      const ampStateId = src.trim().substring('amp-state:'.length);
+      const ampStatePath = src.trim().substring('amp-state:'.length);
+      const ampStateId = ampStatePath.split('.')[0];
       const ampStateEl = this.win.document.querySelector(`#${ampStateId}`);
       if (!ampStateEl) {
         user().error(
-          'src must point to a valid amp-state, as given: %s',
+          TAG,
+          'amp-state could not be found for id: %s',
           ampStateId
         );
+        return;
       }
-      const scriptEl = ampStateEl.children[0];
-      if (!isJsonScriptTag(scriptEl)) {
+      if (!isJsonScriptTag(ampStateEl.children[0])) {
         user().error(
-          'Script within amp-state must be a valid json script tag.'
+          TAG,
+          `amp-state with id: ${ampStateEl} must have a json script tag as its first child.`
         );
+        return;
       }
-      data = JSON.parse(scriptEl.innerText);
+
+      dataPromise = Services.bindForDocOrNull(this.element).then(bind => {
+        if (!bind) {
+          user().error(
+            TAG,
+            'In order to point an amp-list at amp-state, amp-bind must be loaded'
+          );
+          return;
+        }
+        return bind.getState(ampStatePath);
+      });
     } else {
       // Remove the 'src' now that local data is used to render the list.
       this.element.setAttribute('src', '');
-      data = src;
+      dataPromise = Promise.resolve(src);
     }
-    const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
-    this.resetIfNecessary_(/* isFetch */ false);
-    return this.scheduleRender_(array, /* append */ false);
+    dataPromise.then(data => {
+      const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
+      this.resetIfNecessary_(/* isFetch */ false);
+      return this.scheduleRender_(array, /* append */ false);
+    });
   }
 
   /** @override */
