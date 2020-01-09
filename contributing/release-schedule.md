@@ -6,8 +6,7 @@
 - [Determining if your change is in a release](#determining-if-your-change-is-in-a-release)
 - [Release Cadence](#release-cadence)
   - [Detailed schedule](#detailed-schedule)
-  - [AMP Dev Channel (Experimental)](#amp-dev-channel-experimental)
-  - [AMP Beta Channel (Beta)](#amp-beta-channel-beta)
+  - [AMP Experimental and Beta Channels](#amp-experimental-and-beta-channels)
 - [Release Freezes](#release-freezes)
 
 A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change be live for all users.**
@@ -59,50 +58,39 @@ After considering all of these factors we have arrived at the 1-2 week push cycl
 
 We try to stick to this schedule as closely as possible, though complications may cause delays. You can track the latest status about any release in the [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) and the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
 
-- Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.org/ampproject/amphtml/branches) and are pushed to users of AMP who opted into the [AMP Dev Channel](#amp-dev-channel) or [AMP Beta Channel](#amp-beta-channel), respectively.
-- Wednesday: we check bug reports for _Dev Channel_ and _Beta Channel_ users and if everything looks fine, we push the **beta** to 1% of AMP pages
-- Thursday-Monday: we continue to monitor error rates and bug reports for _Dev Channel_ and _Beta Channel_ users and the 1% of pages with the **experimental**/**beta** builds
+- Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.org/ampproject/amphtml/branches) and are pushed to users of AMP who opted into the [AMP Experimental Channel](#amp-experimental-and-beta-channels) or [AMP Beta Channel](#amp-experimental-and-beta-channels), respectively.
+- Wednesday: we check bug reports for _Experimental Channel_ and _Beta Channel_ users and if everything looks fine, we push the **beta** to 1% of AMP pages
+- Thursday-Monday: we continue to monitor error rates and bug reports for _Experimental Channel_ and _Beta Channel_ users and the 1% of pages with the **experimental**/**beta** builds
 - Tuesday the following week: the **beta** build is fully promoted to **stable** (i.e. all AMP pages will now use this build)
 
-### AMP Dev Channel (Experimental)
+### AMP Experimental and Beta Channels
 
-The _AMP Dev Channel_ is a way to opt a browser into using the **experimental** release build of the AMP JS libraries. The _Dev Channel_ **may be less stable** and it may contain features not yet available to all users.
+The _AMP Experimental Channel_ is a way to opt a browser into using the **experimental** release build of the AMP JS libraries. The Experimental Channel_ **may be less stable** and it may contain features not yet available to all users.
 
-Opting into the _Dev Channel_ is intended for:
+Opting into the _Experimental Channel_ is intended for:
 
 - testing and playing with new features not yet available to all users
 - using in Quality Assurance (QA) to ensure that your site is compatible with upcoming features of AMP that are still under development
 
-When you opt into the _AMP Dev Channel_ you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the _AMP Dev Channel_ version of AMP.
+To opt your browser into the _AMP Experimental Channel_, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Experimental Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
 
-To opt your browser into the _AMP Dev Channel_, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Dev Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
-
-**If you find an issue that appears to only occur in the Dev Channel version of AMP**:
-
-- please [file an issue](https://github.com/ampproject/amphtml/issues/new) with a description of the problem
-  - include a note that the problem is new to the Dev Channel build so that it can be properly prioritized
-  - include a URL to a page that reproduces the problem
-- ping the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)) with the issue you filed so we can delay the push of the Dev Channel version to production if needed
-
-### AMP Beta Channel (Beta)
-
-The _AMP Beta Channel_ is a way to opt a browser into using the **beta** release build of the AMP JS libraries that will be promoted to **stable** during the subsequent release cycle (typically, a week later). It is similar to the _Dev Channel_ described above, but it will not contain the experimental features that are still under development.
+The _AMP Beta Channel_ is a way to opt a browser into using the **beta** release build of the AMP JS libraries that will be promoted to **stable** during the subsequent release cycle (typically, a week later). It is similar to the _Experimental Channel_ described above, but it will not contain the experimental features that are still under development.
 
 Opting into the _Beta Channel_ is intended for:
 
 - testing and playing with the version of the AMP runtime that will be released soon
 - using in Quality Assurance (QA) to ensure that your site is compatible with the next version of AMP
 
-Similar to the _Dev Channel_, when you opt into the _AMP Beta Channel_ you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the _AMP Beta Channel_ version of AMP.
+When you opt into the _Experimental_ or _Beta_ channel, you are only affecting the AMP JS libraries in your browser; there is no way to force visitors to your site to use the _AMP Experimental/Beta Channel_ version of AMP.
 
-To opt your browser into the _AMP Beta Channel_, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Beta Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
+To opt your browser into one of these channels, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Experimental Channel" or "AMP Beta Channel" experiment. Please subscribe to our [low-volume announcements](https://groups.google.com/forum/#!forum/amphtml-announce) mailing list to get notified about important/breaking changes about AMP.
 
-**If you find an issue that appears to only occur in the _Beta Channel_ version of AMP**:
+**If you find an issue that appears to only occur in the _Experimental/Beta Channel_ version of AMP**:
 
 - please [file an issue](https://github.com/ampproject/amphtml/issues/new) with a description of the problem
-  - include a note that the problem is new to the _Beta Channel_ build so that it can be properly prioritized
+  - include a note that the problem is new to the _Experimental/Beta Channel_ build so that it can be properly prioritized
   - include a URL to a page that reproduces the problem
-- ping the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)) with the issue you filed so we can delay the push of the _Beta Channel_ version to production if needed
+- ping the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)) with the issue you filed so we can delay the push of the _Experimental/Beta Channel_ version to production if needed
 
 ## Release Freezes
 

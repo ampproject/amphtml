@@ -69,7 +69,7 @@ const CHANNELS = [
     name: 'AMP Experimental Channel (more info)',
     spec:
       'https://github.com/ampproject/amphtml/blob/master/' +
-      'contributing/release-schedule.md#amp-experimental-channel',
+      'contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
   // Beta Channel
   {
@@ -77,7 +77,7 @@ const CHANNELS = [
     name: 'AMP Beta Channel (more info)',
     spec:
       'https://github.com/ampproject/amphtml/blob/master/' +
-      'contributing/release-schedule.md#amp-beta-channel',
+      'contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
 ];
 
