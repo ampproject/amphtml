@@ -20,27 +20,37 @@
 var preact = {}
 
 /**
- * @typedef {function(!JsonObject):(preact.VNode|null)}
+ * @typedef {function(!JsonObject):Preact.Renderable}
  */
-preact.FunctionalComponent
+Preact.FunctionalComponent
 
 /**
  * @interface
  */
-preact.VNode = function() {}
+Preact.VNode = function() {}
 
 /**
  * @interface
  */
-preact.Context = function() {}
+Preact.Context = function() {}
 
 /**
  * @param {!JsonObject} props
- * @return {preact.VNode|null}
+ * @return {Preact.Renderable}
  */
-preact.Context.prototype.Provider = function(props) {};
+Preact.Context.prototype.Provider = function(props) {};
 
 /**
  * @interface
  */
-preact.Context.prototype.Consumer = function() {};
+Preact.Context.prototype.Consumer = function() {};
+
+/**
+ * @typedef {string|number|boolean|null|undefined|Preact.VNode|Preact.RenderableArray}
+ */
+Preact.Renderable;
+
+/**
+ * @typedef {!Array<Preact.Renderable>}
+ */
+Preact.RenderableArray;

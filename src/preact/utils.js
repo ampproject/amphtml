@@ -15,7 +15,7 @@
  */
 
 import {getAmpContext} from './context';
-import {useContext, useEffect, useLayoutEffect} from '.';
+import {useContext, useEffect, useLayoutEffect} from './index';
 
 /**
  * @param {function()} callback

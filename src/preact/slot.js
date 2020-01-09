@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createElement, useContext, useEffect, useRef} from '.';
+import {createElement, useContext, useEffect, useRef} from './index';
 import {getAmpContext} from './context';
 import {matches} from '../dom';
 import {toArray} from '../types';
@@ -24,7 +24,7 @@ import {useMountEffect} from './utils';
  * @param {!Element} element
  * @param {string} name
  * @param {!Object|undefined} props
- * @return {!preact.VNode}
+ * @return {!Preact.VNode}
  */
 export function createSlot(element, name, props) {
   element.setAttribute('slot', name);
@@ -36,7 +36,7 @@ export function createSlot(element, name, props) {
  * Slot component.
  *
  * @param {!JsonObject} props
- * @return {!preact.VNode}
+ * @return {!Preact.VNode}
  */
 export function Slot(props) {
   const context = useContext(getAmpContext());

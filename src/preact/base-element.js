@@ -15,7 +15,7 @@
  */
 
 import {Deferred} from '../utils/promise';
-import {Fragment, createElement, render} from '.';
+import {Fragment, createElement, render} from './index';
 import {Slot, createSlot} from './slot';
 import {devAssert} from '../log';
 import {matches} from '../dom';
@@ -57,7 +57,7 @@ export let AmpElementOptions;
  * be very few exceptions, which is why we allow options to configure the
  * class.
  *
- * @param {preact.FunctionalComponent} Component
+ * @param {!Preact.FunctionalComponent} Component
  * @param {!AmpElementOptions} opts
  * @return {function(new:../base-element.BaseElement, !Element)}
  */

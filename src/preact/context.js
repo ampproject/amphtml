@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {createContext, createElement, useContext} from '.';
+import {createContext, createElement, useContext} from './index';
 
-/** @type {preact.Context} */
+/** @type {Preact.Context} */
 let context;
 
 /**
@@ -28,7 +28,7 @@ let context;
  * - playable: whether the playback is allowed in this vDOM area. If playback
  *   is not allow, the component must immediately stop the playback.
  *
- * @return {!preact.Context}
+ * @return {!Preact.Context}
  */
 export function getAmpContext() {
   return (
@@ -44,7 +44,7 @@ export function getAmpContext() {
  * A wrapper-component that recalculates and propagates AmpContext properties.
  *
  * @param {!JsonObject} props
- * @return {!preact.VNode}
+ * @return {!Preact.VNode}
  */
 export function withAmpContext(props) {
   const parent = useContext(getAmpContext());

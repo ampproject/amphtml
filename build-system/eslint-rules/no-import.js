@@ -20,12 +20,12 @@ const imports = [
   {
     import: 'preact',
     message:
-      "Please import preact from 'src/preact.js'. This gives us type safety.",
+      "Please import preact from 'src/preact'. This gives us type safety.",
   },
   {
     import: 'preact/hooks',
     message:
-      "Please import preact/hooks from 'src/preact.js'. This gives us type safety.",
+      "Please import preact/hooks from 'src/preact'. This gives us type safety.",
   },
 ];
 

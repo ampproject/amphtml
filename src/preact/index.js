@@ -15,35 +15,35 @@
  */
 
 import * as hooks from /*OK*/ 'preact/hooks';
-import * as main from /*OK*/ 'preact';
+import * as preact from /*OK*/ 'preact';
 
 // Defines the type interfaces for the approved Preact APIs.
 // TODO: hydrate, isValidElement, Component, cloneElement, toChildArray
 
 /**
- * @param {!preact.FunctionalComponent|string} unusedType
+ * @param {!Preact.FunctionalComponent|string} unusedType
  * @param {(!Object|null)=} unusedProps
  * @param {...*} var_args
- * @return {!preact.VNode}
+ * @return {!Preact.VNode}
  */
 export function createElement(unusedType, unusedProps, var_args) {
-  return main.createElement.apply(null, arguments);
+  return preact.createElement.apply(null, arguments);
 }
 
 /**
- * @param {!preact.VNode} vnode
+ * @param {!Preact.VNode} vnode
  * @param {Node} container
  */
 export function render(vnode, container) {
-  main.render(vnode, container, null);
+  preact.render(vnode, container, null);
 }
 
 /**
  * @param {!JsonObject} props
- * @return {!preact.VNode}
+ * @return {Preact.Renderable}
  */
 export function Fragment(props) {
-  return main.Fragment(props);
+  return preact.Fragment(props);
 }
 
 /**
@@ -51,15 +51,15 @@ export function Fragment(props) {
  * @template T
  */
 export function createRef() {
-  return main.createRef();
+  return preact.createRef();
 }
 
 /**
  * @param {!Object} value
- * @return {!preact.Context}
+ * @return {!Preact.Context}
  */
 export function createContext(value) {
-  return main.createContext(value);
+  return preact.createContext(value);
 }
 
 // Defines the type interfaces for the approved Preact Hooks APIs.
@@ -100,7 +100,7 @@ export function useLayoutEffect(effect, opt_deps) {
 }
 
 /**
- * @param {preact.Context} context
+ * @param {Preact.Context} context
  * @return {!JsonObject}
  */
 export function useContext(context) {

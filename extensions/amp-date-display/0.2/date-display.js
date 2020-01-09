@@ -64,14 +64,14 @@ let EnhancedVariablesV2Def;
 
 /**
  * @param {!JsonObject} props
- * @return {!preact.VNode}
+ * @return {Preact.Renderable}
  */
 export function DateDisplay(props) {
   const render = props['render'];
   const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
   useResourcesNotify();
 
-  return /** @type {!preact.VNode} */ (render(data, props['children']));
+  return render(data, props['children']);
 }
 
 /**
