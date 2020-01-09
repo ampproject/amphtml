@@ -157,13 +157,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       expect(script.development_).false;
     });
 
-    it('development tag present should put it in dev mode', () => {
-      element.setAttribute('development', true);
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).true;
-    });
-
     it('data-ampdevmode on just the element should not enable dev mode', () => {
       element.setAttribute('data-ampdevmode', true);
       script = new AmpScript(element);

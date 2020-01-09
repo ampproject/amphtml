@@ -92,6 +92,7 @@ const attributesToForward = [
   'number-of-months',
   'minimum-nights',
   'maximum-nights',
+  'hide-keyboard-shortcuts-panel',
 ];
 
 /** @enum {string} */

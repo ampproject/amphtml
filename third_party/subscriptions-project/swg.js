@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.87 */
+/** Version: 0.1.22.88 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -51,6 +51,8 @@ const AnalyticsEvent = {
   IMPRESSION_SHOW_OFFERS_SWG_BUTTON: 16,
   IMPRESSION_SELECT_OFFER_SMARTBOX: 17,
   IMPRESSION_SELECT_OFFER_SWG_BUTTON: 18,
+  IMPRESSION_SHOW_CONTRIBUTIONS_SWG_BUTTON: 19,
+  IMPRESSION_SELECT_CONTRIBUTION_SWG_BUTTON: 20,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -70,6 +72,8 @@ const AnalyticsEvent = {
   ACTION_SAVE_SUBSCR_TO_GOOGLE_CANCEL: 1016,
   ACTION_SWG_BUTTON_SHOW_OFFERS_CLICK: 1017,
   ACTION_SWG_BUTTON_SELECT_OFFER_CLICK: 1018,
+  ACTION_SWG_BUTTON_SHOW_CONTRIBUTIONS_CLICK: 1019,
+  ACTION_SWG_BUTTON_SELECT_CONTRIBUTION_CLICK: 1020,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -2005,10 +2009,16 @@ function isConnected(node) {
 }
 
 /**
+ * Returns true if current browser is a legacy version of Edge.
+ *
+ * Starting in January 2020, new versions of Edge will use the Chromium engine.
+ * These versions won't include the word "Edge" in their useragent.
+ * Instead, they'll include the word "Edg".
+ * So far, it seems safe to avoid detecting these new versions of Edge.
  * @param {!Window} win
  * @return {boolean}
  */
-function isEdgeBrowser(win) {
+function isLegacyEdgeBrowser(win) {
   const nav = win.navigator;
   return /Edge/i.test(nav && nav.userAgent);
 }
@@ -2445,7 +2455,7 @@ function isIeBrowser(win) {
  * @param {!Window} win
  * @return {boolean}
  */
-function isEdgeBrowser$1(win) {
+function isEdgeBrowser(win) {
   const nav = win.navigator;
   return /Edge/i.test(nav && nav.userAgent);
 }
@@ -2635,7 +2645,7 @@ class Messenger {
     // Safari: https://bugs.webkit.org/show_bug.cgi?id=186593
     // Chrome: https://bugs.chromium.org/p/chromium/issues/detail?id=851493
     // Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=1469422
-    const acceptsChannel = isIeBrowser(this.win_) || isEdgeBrowser$1(this.win_);
+    const acceptsChannel = isIeBrowser(this.win_) || isEdgeBrowser(this.win_);
     this.sendCommand('connect', {'acceptsChannel': acceptsChannel});
   }
 
@@ -3336,7 +3346,7 @@ class ActivityWindowPort {
     const availWidth = screen.availWidth || screen.width;
     const availHeight = screen.availHeight || screen.height;
     const isTop = this.isTopWindow_();
-    const isEdge = isEdgeBrowser$1(this.win_);
+    const isEdge = isEdgeBrowser(this.win_);
     // Limit controls to 100px width and height. Notice that it's only
     // possible to calculate controls size in the top window, not in iframes.
     // Notice that the Edge behavior is somewhat unique. If we can't find the
@@ -4165,14 +4175,14 @@ function bytesToString(bytes) {
 
 /**
  * Interpret a byte array as a UTF-8 string.
- * @param {!BufferSource} bytes
+ * @param {!Uint8Array} bytes
  * @return {string}
  */
 function utf8DecodeSync(bytes) {
   if (typeof TextDecoder !== 'undefined') {
     return new TextDecoder('utf-8').decode(bytes);
   }
-  const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
+  const asciiString = bytesToString(new Uint8Array(bytes));
   return decodeURIComponent(escape(asciiString));
 }
 
@@ -4215,74 +4225,9 @@ function base64UrlDecodeToBytes(str) {
  * limitations under the License.
  */
 
-/* @const */
-const toString_ = Object.prototype.toString;
-
 /**
- * Returns the ECMA [[Class]] of a value
- * @param {*} value
- * @return {string}
- */
-function toString$1(value) {
-  return toString_.call(value);
-}
-
-/**
- * Determines if value is actually an Object.
- * @param {*} value
- * @return {boolean}
- */
-function isObject(value) {
-  return toString$1(value) === '[object Object]';
-}
-
-/**
- * Checks whether `s` is a valid value of `enumObj`.
- *
- * @param {!Object<T>} enumObj
- * @param {T} s
- * @return {boolean}
- * @template T
- */
-function isEnumValue(enumObj, s) {
-  for (const k in enumObj) {
-    if (enumObj[k] === s) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * True if the value is a function.
- * @param {*} value
- */
-function isFunction(value) {
-  return value !== null && typeof value === 'function';
-}
-
-/**
- * True if the value is either true or false.
- * @param {?*} value
- */
-function isBoolean(value) {
-  return value === true || value === false;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @fileoverview This module declares JSON types as defined in the
+ * {@link http://json.org/}.
  */
 
 /**
@@ -4662,12 +4607,19 @@ class Entitlement {
    * @return {?string}
    */
   getSku() {
-    return (
-      /** @type {?string} */ (getPropertyFromJsonString(
-        this.subscriptionToken,
-        'productId'
-      ) || null)
+    if (this.source !== 'google') {
+      return null;
+    }
+    const sku = (
+        /** @type {?string} */ (getPropertyFromJsonString(
+            this.subscriptionToken,
+            'productId'
+        ) || null)
     );
+    if (!sku) {
+      log_4('Unable to retrieve SKU from SwG subscription token');
+    }
+    return sku;
   }
 }
 
@@ -5489,7 +5441,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.87',
+    '_client': 'SwG 0.1.22.88',
   });
 }
 
@@ -5564,12 +5516,12 @@ function getEventParams(sku) {
 class PayStartFlow {
   /**
    * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.SubscriptionRequest|string} skuOrSubscriptionRequest
+   * @param {!../api/subscriptions.SubscriptionRequest} subscriptionRequest
    * @param {!../api/subscriptions.ProductType} productType
    */
   constructor(
     deps,
-    skuOrSubscriptionRequest,
+    subscriptionRequest,
     productType = ProductType.SUBSCRIPTION
   ) {
     /** @private @const {!./deps.DepsDef} */
@@ -5585,10 +5537,7 @@ class PayStartFlow {
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!../api/subscriptions.SubscriptionRequest} */
-    this.subscriptionRequest_ =
-      typeof skuOrSubscriptionRequest == 'string'
-        ? {'skuId': skuOrSubscriptionRequest}
-        : skuOrSubscriptionRequest;
+    this.subscriptionRequest_ = subscriptionRequest;
 
     /**@private @const {!ProductType} */
     this.productType_ = productType;
@@ -5598,24 +5547,6 @@ class PayStartFlow {
 
     /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
     this.eventManager_ = deps.eventManager();
-
-    // Map the proration mode to the enum value (if proration exists).
-    this.prorationMode = this.subscriptionRequest_.replaceSkuProrationMode;
-    this.prorationEnum = 0;
-    if (this.prorationMode) {
-      this.prorationEnum = ReplaceSkuProrationModeMapping[this.prorationMode];
-    } else if (this.subscriptionRequest_.oldSku) {
-      this.prorationEnum =
-        ReplaceSkuProrationModeMapping['IMMEDIATE_WITH_TIME_PRORATION'];
-    }
-
-    // Assign one-time recurrence enum if applicable
-    this.oneTimeContribution = false;
-    this.recurrenceEnum = 0;
-    if (this.subscriptionRequest_.oneTime) {
-      this.recurrenceEnum = RecurrenceMapping['ONE_TIME'];
-      delete this.subscriptionRequest_.oneTime;
-    }
   }
 
   /**
@@ -5623,29 +5554,40 @@ class PayStartFlow {
    * @return {!Promise}
    */
   start() {
-    const req = this.subscriptionRequest_;
     // Add the 'publicationId' key to the subscriptionRequest_ object.
-    const swgPaymentRequest = Object.assign({}, req, {
+    const swgPaymentRequest = Object.assign({}, this.subscriptionRequest_, {
       'publicationId': this.pageConfig_.getPublicationId(),
     });
 
-    if (this.prorationEnum) {
-      swgPaymentRequest.replaceSkuProrationMode = this.prorationEnum;
+    // Map the proration mode to the enum value (if proration exists).
+    const prorationMode = swgPaymentRequest['replaceSkuProrationMode'];
+    if (prorationMode) {
+      swgPaymentRequest['replaceSkuProrationMode'] =
+        ReplaceSkuProrationModeMapping[prorationMode];
+    } else if (swgPaymentRequest['oldSku']) {
+      swgPaymentRequest['replaceSkuProrationMode'] =
+        ReplaceSkuProrationModeMapping['IMMEDIATE_WITH_TIME_PRORATION'];
     }
-
-    if (this.recurrenceEnum) {
-      swgPaymentRequest.paymentRecurrence = this.recurrenceEnum;
+    // Assign one-time recurrence enum if applicable
+    if (swgPaymentRequest['oneTime']) {
+      swgPaymentRequest['paymentRecurrence'] = RecurrenceMapping['ONE_TIME'];
+      delete swgPaymentRequest['oneTime'];
     }
 
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SUBSCRIBE, req);
-    if (req.oldSku) {
-      this.analyticsService_.setSku(req.oldSku);
+    const flow =
+      this.productType_ == ProductType.UI_CONTRIBUTION
+        ? SubscriptionFlows.CONTRIBUTE
+        : SubscriptionFlows.SUBSCRIBE;
+
+    this.deps_.callbacks().triggerFlowStarted(flow, this.subscriptionRequest_);
+    if (swgPaymentRequest['oldSku']) {
+      this.analyticsService_.setSku(swgPaymentRequest['oldSku']);
     }
     this.eventManager_.logSwgEvent(
       AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
       true,
-      getEventParams(req.skuId)
+      getEventParams(swgPaymentRequest['skuId'])
     );
     this.payClient_.start(
       {
@@ -5710,8 +5652,8 @@ class PayCompleteFlow {
               .eventManager()
               .logSwgEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED, false);
             deps.jserror().error('Pay failed', reason);
+            throw reason;
           }
-          throw reason;
         }
       );
     });
@@ -6076,13 +6018,8 @@ class OffersFlow {
         .toArray(),
     };
 
-    this.prorationMode = feArgsObj['replaceSkuProrationMode'] || undefined;
-
     if (options && options.oldSku) {
       feArgsObj['oldSku'] = options.oldSku;
-    }
-
-    if (feArgsObj['oldSku']) {
       log_2(feArgsObj['skus'], 'Need a sku list if old sku is provided!');
 
       // Remove old sku from offers if in list.
@@ -6105,11 +6042,10 @@ class OffersFlow {
       // so we need to check for oldSku to decide if it needs to be sent.
       // Otherwise we might accidentally block a regular subscription request.
       if (oldSku) {
-        new PayStartFlow(this.deps_, {
-          skuId: sku,
-          oldSku,
-          replaceSkuProrationMode: this.prorationMode,
-        }).start();
+        const skuSelectedResponse = new SkuSelectedResponse();
+        skuSelectedResponse.setSku(sku);
+        skuSelectedResponse.setOldSku(oldSku);
+        this.startPayFlow_(skuSelectedResponse);
         return;
       }
     }
@@ -6133,9 +6069,13 @@ class OffersFlow {
    */
   startPayFlow_(response) {
     const sku = response.getSku();
-    const oldSku = response.getOldSku();
     if (sku) {
+      const /** @type {../api/subscriptions.SubscriptionRequest} */ subscriptionRequest = {
+          'skuId': sku,
+        };
+      const oldSku = response.getOldSku();
       if (oldSku) {
+        subscriptionRequest['oldSku'] = oldSku;
         this.deps_.analytics().setSku(oldSku);
       }
       this.eventManager_.logSwgEvent(
@@ -6143,15 +6083,7 @@ class OffersFlow {
         true,
         getEventParams$1(sku)
       );
-      let skuOrSubscriptionRequest;
-      if (oldSku) {
-        skuOrSubscriptionRequest = {};
-        skuOrSubscriptionRequest['skuId'] = sku;
-        skuOrSubscriptionRequest['oldSku'] = oldSku;
-      } else {
-        skuOrSubscriptionRequest = sku;
-      }
-      new PayStartFlow(this.deps_, skuOrSubscriptionRequest).start();
+      new PayStartFlow(this.deps_, subscriptionRequest).start();
     }
   }
 
@@ -6609,7 +6541,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.87',
+        '_client': 'SwG 0.1.22.88',
       },
       args || {}
     );
@@ -6797,6 +6729,67 @@ class ClientEventManagerApi {
    * @param {!ClientEvent} event
    */
   logEvent(event) { }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Determines if value is actually an Object.
+ * @param {*} value
+ * @return {boolean}
+ */
+function isObject(value) {
+  const str = Object.prototype.toString.call(value);
+  return str === '[object Object]';
+}
+
+/**
+ * Checks whether `s` is a valid value of `enumObj`.
+ *
+ * @param {!Object<T>} enumObj
+ * @param {T} s
+ * @return {boolean}
+ * @template T
+ */
+function isEnumValue(enumObj, s) {
+  for (const k in enumObj) {
+    if (enumObj[k] === s) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * True if the value is a function.
+ * @param {*} value
+ * @return {boolean}
+ */
+function isFunction(value) {
+  return typeof value === 'function';
+}
+
+/**
+ * True if the value is either true or false.
+ * @param {?*} value
+ * @return {boolean}
+ */
+function isBoolean(value) {
+  return typeof value === 'boolean';
 }
 
 /**
@@ -7202,6 +7195,22 @@ const iframeStyles = {
   display: 'none',
 };
 
+// We will wait up to 100 ms for subsequent log events (which are messaged)
+// to the iframe code that's already loaded.
+const MAX_WAIT = 100;
+const TIMEOUT_ERROR = 'AnalyticsService timed out waiting for a response';
+
+/**
+ *
+ * @param {!string} error
+ */
+function createErrorResponse(error) {
+  const response = new FinishedLoggingResponse();
+  response.setComplete(false);
+  response.setError(error);
+  return response;
+}
+
 class AnalyticsService {
   /**
    * @param {!./deps.DepsDef} deps
@@ -7256,6 +7265,26 @@ class AnalyticsService {
     this.eventManager_.registerEventListener(
       this.handleClientEvent_.bind(this)
     );
+
+    // This code creates a 'promise to log' that we can use to ensure all
+    // logging is finished prior to redirecting the page.
+    /** @private {!number} */
+    this.unfinishedLogs_ = 0;
+
+    /** @private {?function(boolean)} */
+    this.loggingResolver_ = null;
+
+    /** @private {?Promise} */
+    this.promiseToLog_ = null;
+
+    // If logging doesn't work don't force the user to wait
+    /** @private {!boolean} */
+    this.loggingBroken_ = false;
+
+    // If logging exceeds the timeouts (see const comments above) don't make
+    // the user wait too long.
+    /** @private {?number} */
+    this.timeout_ = null;
   }
 
   /**
@@ -7342,7 +7371,7 @@ class AnalyticsService {
     if (source) {
       this.context_.setUtmSource(source);
     }
-    this.context_.setClientVersion('SwG 0.1.22.87');
+    this.context_.setClientVersion('SwG 0.1.22.88');
     this.addLabels(getOnExperiments(this.doc_.getWin()));
   }
 
@@ -7355,10 +7384,23 @@ class AnalyticsService {
       this.doc_.getBody().appendChild(this.getElement());
       this.serviceReady_ = this.activityPorts_
         .openIframe(this.iframe_, this.src_, this.args_)
-        .then(port => {
-          this.setContext_();
-          return port.whenReady().then(() => port);
-        });
+        .then(
+          port => {
+            // Register a listener for the logging to code indicate it is
+            // finished logging.
+            port.on(FinishedLoggingResponse, this.afterLogging_.bind(this));
+            this.setContext_();
+            return port.whenReady().then(() => port);
+          },
+          message => {
+            // If the port doesn't open register that logging is broken so
+            // nothing is just waiting.
+            this.loggingBroken_ = true;
+            this.afterLogging_(
+              createErrorResponse('Could not connect [' + message + ']')
+            );
+          }
+        );
     }
     return this.serviceReady_;
   }
@@ -7452,11 +7494,71 @@ class AnalyticsService {
     ) {
       return;
     }
-    this.lastAction_ = this.start().then(port => {
-      const request = this.createLogRequest_(event);
-      this.everLogged_ = true;
-      port.execute(request);
-    });
+    // Register we sent a log, the port will call this.afterLogging_ when done.
+    this.unfinishedLogs_++;
+    this.everLogged_ = true;
+    const request = this.createLogRequest_(event);
+    this.lastAction_ = this.start().then(port => port.execute(request));
+  }
+
+  /**
+   * This function is called by the iframe after it sends the log to the server.
+   * @param {FinishedLoggingResponse=} response
+   */
+  afterLogging_(response) {
+    const success = (response && response.getComplete()) || false;
+    const error = (response && response.getError()) || 'Unknown logging Error';
+    if (!success) {
+      log_5('Error when logging: ' + error);
+    }
+
+    this.unfinishedLogs_--;
+    // Nothing is waiting
+    if (this.loggingResolver_ === null) {
+      return;
+    }
+
+    if (
+      this.unfinishedLogs_ === 0 || // All logs finished
+      this.loggingBroken_ || // Logs will never finished
+      error === TIMEOUT_ERROR // Someone waited too long for logging to finish
+    ) {
+      if (this.timeout_ !== null) {
+        clearTimeout(this.timeout_);
+        this.timeout_ = null;
+      }
+      this.loggingResolver_(success);
+      this.promiseToLog_ = null;
+      this.loggingResolver_ = null;
+    }
+  }
+
+  /**
+   * Please note that logs sent after getLoggingPromise is called are not
+   * guaranteed to be finished when the promise is resolved.  You should call
+   * this function just prior to redirecting the page after SwG is finished
+   * logging.
+   * @return {!Promise}
+   */
+  getLoggingPromise() {
+    if (this.unfinishedLogs_ === 0 || this.loggingBroken_) {
+      return Promise.resolve(true);
+    }
+    if (this.promiseToLog_ === null) {
+      this.promiseToLog_ = new Promise(resolve => {
+        this.loggingResolver_ = resolve;
+      });
+
+      // The promise above should not wait forever if things go wrong.  Let
+      // the user proceed!
+      const whenDone = this.afterLogging_.bind(this);
+      this.timeout_ = setTimeout(() => {
+        this.timeout_ = null;
+        whenDone(createErrorResponse(TIMEOUT_ERROR));
+      }, MAX_WAIT);
+    }
+
+    return this.promiseToLog_;
   }
 }
 
@@ -7600,29 +7702,69 @@ class SmartSubscriptionButtonApi {
  * limitations under the License.
  */
 
+/** English is the default language. */
+const DEFAULT_LANGUAGE_CODE = 'en';
+
 /**
+ * Gets a message for a given language code, from a map of messages.
  * @param {!Object<string, string>} map
- * @param {?string|?Element} langOrElement
+ * @param {?string|?Element} languageCodeOrElement
  * @return {?string}
  */
-function msg(map, langOrElement) {
-  const lang = !langOrElement
-    ? ''
-    : typeof langOrElement == 'string'
-    ? langOrElement
-    : langOrElement.lang ||
-      (langOrElement.ownerDocument &&
-        langOrElement.ownerDocument.documentElement.lang);
-  let search = ((lang && lang.toLowerCase()) || 'en').replace(/_/g, '-');
-  while (search) {
-    if (search in map) {
-      return map[search];
-    }
-    const dash = search.lastIndexOf('-');
-    search = dash != -1 ? search.substring(0, dash) : '';
+function msg(map, languageCodeOrElement) {
+  const defaultMsg = map[DEFAULT_LANGUAGE_CODE];
+
+  // Verify params.
+  if (typeof map !== 'object' || !languageCodeOrElement) {
+    return defaultMsg;
   }
-  // "en" is always default.
-  return map['en'];
+
+  // Get language code.
+  let languageCode =
+    typeof languageCodeOrElement === 'string'
+      ? languageCodeOrElement
+      : getLanguageCodeFromElement(languageCodeOrElement);
+
+  // Normalize language code.
+  languageCode = languageCode.toLowerCase();
+  languageCode = languageCode.replace(/_/g, '-');
+
+  // Search for a message matching the language code.
+  // If a message can't be found, try again with a less specific language code.
+  const languageCodeSegments = languageCode.split('-');
+  while (languageCodeSegments.length) {
+    const key = languageCodeSegments.join('-');
+    if (key in map) {
+      return map[key];
+    }
+
+    // Simplify language code.
+    // Ex: "en-US-SF" => "en-US"
+    languageCodeSegments.pop();
+  }
+
+  // There was an attempt.
+  return defaultMsg;
+}
+
+/**
+ * Gets a language code (ex: "en-US") from a given Element.
+ * @param {!Element} element
+ * @return {string}
+ */
+function getLanguageCodeFromElement(element) {
+  if (element.lang) {
+    // Get language from element itself.
+    return element.lang;
+  }
+
+  if (element.ownerDocument && element.ownerDocument.documentElement.lang) {
+    // Get language from element's document.
+    return element.ownerDocument.documentElement.lang;
+  }
+
+  // There was an attempt.
+  return DEFAULT_LANGUAGE_CODE;
 }
 
 /**
@@ -7876,6 +8018,8 @@ class Callbacks {
     this.callbacks_ = {};
     /** @private @const {!Object<CallbackId, *>} */
     this.resultBuffer_ = {};
+    /** @private {?Promise} */
+    this.paymentResponsePromise_ = null;
   }
 
   /**
@@ -8011,10 +8155,21 @@ class Callbacks {
    * @return {boolean} Whether the callback has been found.
    */
   triggerPaymentResponse(responsePromise) {
-    return this.trigger_(
-      CallbackId.PAYMENT_RESPONSE,
-      responsePromise.then(res => res.clone())
+    this.paymentResponsePromise_ = responsePromise.then(
+      res => {
+        this.trigger_(
+          CallbackId.PAYMENT_RESPONSE,
+          Promise.resolve(res.clone())
+        );
+      },
+      reason => {
+        if (isCancelError(reason)) {
+          return;
+        }
+        throw reason;
+      }
     );
+    return !!this.callbacks_[CallbackId.PAYMENT_RESPONSE];
   }
 
   /**
@@ -8197,19 +8352,17 @@ class ContributionsFlow {
     const sku = response.getSku();
     const isOneTime = response.getOneTime();
     if (sku) {
+      const /** @type {../api/subscriptions.SubscriptionRequest} */ contributionRequest = {
+          'skuId': sku,
+        };
       if (isOneTime) {
-        const /** @type {../api/subscriptions.SubscriptionRequest} */ contributionRequest = {
-            skuId: sku,
-            oneTime: isOneTime,
-          };
-        new PayStartFlow(
-          this.deps_,
-          contributionRequest,
-          ProductType.UI_CONTRIBUTION
-        ).start();
-      } else {
-        new PayStartFlow(this.deps_, sku, ProductType.UI_CONTRIBUTION).start();
+        contributionRequest['oneTime'] = isOneTime;
       }
+      new PayStartFlow(
+        this.deps_,
+        contributionRequest,
+        ProductType.UI_CONTRIBUTION
+      ).start();
     }
   }
 
@@ -8808,27 +8961,28 @@ function onDocumentReady(doc, callback) {
 }
 
 /**
- * Calls the callback when document's state satisfies the stateFn.
+ * Calls the callback once when document's state satisfies the condition.
  * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document):boolean} condition
  * @param {function(!Document)} callback
  */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
+function onDocumentState(doc, condition, callback) {
+  if (condition(doc)) {
+    // Execute callback right now.
     callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
+    return;
   }
+
+  // Execute callback (once!) after condition is satisfied.
+  let callbackHasExecuted = false;
+  const readyListener = () => {
+    if (condition(doc) && !callbackHasExecuted) {
+      callback(doc);
+      callbackHasExecuted = true;
+      doc.removeEventListener('readystatechange', readyListener);
+    }
+  };
+  doc.addEventListener('readystatechange', readyListener);
 }
 
 /**
@@ -14583,7 +14737,6 @@ function isNativeDisabledInRequest(request) {
 
 const PAY_REQUEST_ID = 'swg-pay';
 const GPAY_ACTIVITY_REQUEST$1 = 'GPAY';
-const REDIRECT_DELAY = 250;
 const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
 /**
@@ -14631,13 +14784,13 @@ class PayClient {
       ? new PayClientBindingPayjs(
           this.win_,
           this.activityPorts_,
-          // Generates a new Google Transaction ID.
-          deps.analytics().getTransactionId()
+          deps.analytics()
         )
       : new PayClientBindingSwg(
           this.win_,
           this.activityPorts_,
-          this.dialogManager_
+          this.dialogManager_,
+          deps.analytics()
         );
   }
 
@@ -14666,9 +14819,10 @@ class PayClient {
   /**
    * @param {!Object} paymentRequest
    * @param {!PayOptionsDef=} options
+   * @return {!Promise}
    */
   start(paymentRequest, options = {}) {
-    this.binding_.start(paymentRequest, options);
+    return this.binding_.start(paymentRequest, options);
   }
 
   /**
@@ -14687,14 +14841,17 @@ class PayClientBindingSwg {
    * @param {!Window} win
    * @param {!../components/activities.ActivityPorts} activityPorts
    * @param {!../components/dialog-manager.DialogManager} dialogManager
+   * @param {!./analytics-service.AnalyticsService} analyticsService
    */
-  constructor(win, activityPorts, dialogManager) {
+  constructor(win, activityPorts, dialogManager, analyticsService) {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = activityPorts;
     /** @private @const {!../components/dialog-manager.DialogManager} */
     this.dialogManager_ = dialogManager;
+    /** @private @const {!./analytics-service.AnalyticsService} */
+    this.analytics_ = analyticsService;
   }
 
   /** @override */
@@ -14709,12 +14866,12 @@ class PayClientBindingSwg {
       // logs get sent to the server.  Ultimately we need a logging promise to
       // resolve prior to redirecting but that is not possible right now.
       const start = this.start_.bind(this);
-      this.win_.setTimeout(
-        () => start(paymentRequest, options),
-        REDIRECT_DELAY
-      );
+      return this.analytics_
+        .getLoggingPromise()
+        .then(() => start(paymentRequest, options));
     } else {
       this.start_(paymentRequest, options);
+      return Promise.resolve(true);
     }
   }
 
@@ -14793,9 +14950,9 @@ class PayClientBindingPayjs {
   /**
    * @param {!Window} win
    * @param {!../components/activities.ActivityPorts} activityPorts
-   * @param {!string} googleTransactionId
+   * @param {!./analytics-service.AnalyticsService} analyticsService
    */
-  constructor(win, activityPorts, googleTransactionId) {
+  constructor(win, activityPorts, analyticsService) {
     /** @private @const {!Window} */
     this.win_ = win;
     /** @private @const {!../components/activities.ActivityPorts} */
@@ -14810,6 +14967,9 @@ class PayClientBindingPayjs {
     /** @private {?Promise<!Object>} */
     this.response_ = null;
 
+    /** @private @const {!./analytics-service.AnalyticsService} */
+    this.analytics_ = analyticsService;
+
     /** @private @const {!RedirectVerifierHelper} */
     this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
 
@@ -14821,7 +14981,7 @@ class PayClientBindingPayjs {
           'redirectKey': this.redirectVerifierHelper_.restoreKey(),
         },
       },
-      googleTransactionId,
+      analyticsService.getTransactionId(),
       this.handleResponse_.bind(this)
     );
 
@@ -14869,6 +15029,8 @@ class PayClientBindingPayjs {
       // for AMP and similar contexts.
       this.win_ != this.top_()
     );
+    let resolver = null;
+    const promise = new Promise(resolve => (resolver = resolve));
     // Notice that the callback for verifier may execute asynchronously.
     this.redirectVerifierHelper_.useVerifier(verifier => {
       if (verifier) {
@@ -14876,14 +15038,17 @@ class PayClientBindingPayjs {
       }
       if (options.forceRedirect) {
         const client = this.client_;
-        this.win_.setTimeout(
-          () => client.loadPaymentData(paymentRequest),
-          REDIRECT_DELAY
-        );
+
+        return this.analytics_.getLoggingPromise().then(() => {
+          client.loadPaymentData(paymentRequest);
+          resolver(true);
+        });
       } else {
         this.client_.loadPaymentData(paymentRequest);
+        resolver(true);
       }
     });
+    return promise;
   }
 
   /** @override */
@@ -15785,7 +15950,7 @@ class ConfiguredRuntime {
     /** @private @const {!../api/subscriptions.Config} */
     this.config_ = defaultConfig();
 
-    if (isEdgeBrowser(this.win_)) {
+    if (isLegacyEdgeBrowser(this.win_)) {
       // TODO(dvoytenko, b/120607343): Find a way to remove this restriction
       // or move it to Web Activities.
       this.config_.windowOpenMode = WindowOpenMode.REDIRECT;
@@ -16157,7 +16322,7 @@ class ConfiguredRuntime {
       'for subscription updates please use the updateSubscription() method';
     log_2(typeof sku === 'string', errorMessage);
     return this.documentParsed_.then(() => {
-      return new PayStartFlow(this, sku).start();
+      return new PayStartFlow(this, {'skuId': sku}).start();
     });
   }
 
@@ -16186,10 +16351,15 @@ class ConfiguredRuntime {
 
   /** @override */
   contribute(skuOrSubscriptionRequest) {
+    /** @type {!../api/subscriptions.SubscriptionRequest} */
+    const request =
+      typeof skuOrSubscriptionRequest == 'string'
+        ? {'skuId': skuOrSubscriptionRequest}
+        : skuOrSubscriptionRequest;
     return this.documentParsed_.then(() => {
       return new PayStartFlow(
         this,
-        skuOrSubscriptionRequest,
+        request,
         ProductType.UI_CONTRIBUTION
       ).start();
     });
