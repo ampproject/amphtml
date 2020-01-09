@@ -277,14 +277,12 @@ export class VariableService {
       let value = options.getVar(name);
 
       if (typeof value == 'string') {
-        value = this.expandTemplateSync(
-          value,
-          new ExpansionOptions(
-            options.vars,
-            options.iterations - 1,
-            true /* noEncode */
-          )
-        );
+        value = this.expandValue_(value, options);
+      } else if (isArray(value)) {
+        // Treat each value as a template and expand
+        for (let i = 0; i < value.length; i++) {
+          value[i] = this.expandValue_(value[i], options);
+        }
       }
 
       if (!options.noEncode) {
@@ -295,6 +293,22 @@ export class VariableService {
       }
       return value;
     });
+  }
+
+  /**
+   * @param {string} value
+   * @param {!ExpansionOptions} options
+   * @return {string}
+   */
+  expandValue_(value, options) {
+    return this.expandTemplateSync(
+      value,
+      new ExpansionOptions(
+        options.vars,
+        options.iterations - 1,
+        true /* noEncode */
+      )
+    );
   }
 
   /**
