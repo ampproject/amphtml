@@ -104,12 +104,6 @@ export class AmpActionMacro extends AMP.BaseElement {
   }
 
   /** @override */
-  getLayoutPriority() {
-    // Loads after other content.
-    return LayoutPriority.METADATA;
-  }
-
-  /** @override */
   isLayoutSupported(unusedLayout) {
     return true;
   }
