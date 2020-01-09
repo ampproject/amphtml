@@ -207,7 +207,9 @@ All video analytics triggers expose the following variables. These variables are
 | `width`            | Number  | Specifies the width of video (in px).                                                                          |
 | `playedRangesJson` | String  | Represents segments of time the user has watched the video (in JSON format). For example, `[[1, 10], [5, 20]]` |
 
-Additionally, click events on videos can be captured by placing an invisible [overlay](https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/) on top of the video and then connecting the overlay to your analytics request. 
+## Click-to-play Events
+
+Click events set directly on video component elements (like `amp-video`) will not be captured consistently due to implementation details of the browser's native video player or the player component itself. You can capture click events by utilizing the [`video-play`](#video-play-trigger-on-video-play) and [`video-pause`](#video-pause-trigger-on-video-pause) triggers. Alternatively, you can [place an overlay](https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/) on top of the video and then configure a `click` analytics request that refers to the overlay element (`#myOverlay`). 
 
 ```javascript
 "triggers": {
