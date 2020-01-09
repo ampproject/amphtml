@@ -31,9 +31,6 @@ const CSS = `
   main { display: flex; flex-direction: row; height: 100%; }
   .i-amphtml-story-embed-loaded iframe { opacity: 1; }`;
 
-/** @const {boolean} */
-const isAMP = self.AMP && self.AMP.ampdoc;
-
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
@@ -147,10 +144,6 @@ export class AmpStoryEmbed {
 }
 
 self.onload = () => {
-  if (isAMP) {
-    return;
-  }
-
   const doc = self.document;
   const embeds = doc.getElementsByTagName('amp-story-embed');
   for (let i = 0; i < embeds.length; i++) {
