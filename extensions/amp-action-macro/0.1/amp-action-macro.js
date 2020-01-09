@@ -103,6 +103,17 @@ export class AmpActionMacro extends AMP.BaseElement {
     return true;
   }
 
+  /** @override */
+  getLayoutPriority() {
+    // Loads after other content.
+    return LayoutPriority.METADATA;
+  }
+
+  /** @override */
+  isLayoutSupported(unusedLayout) {
+    return true;
+  }
+
   /**
    * Checks if the invoking element is defined after the action being invoked.
    * This constraint is to prevent possible recursive calls.
