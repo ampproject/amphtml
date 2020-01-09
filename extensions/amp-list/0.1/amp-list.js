@@ -16,6 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
+import {isExperimentOn} from '../../../src/experiments';
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {
   DIFFABLE_AMP_ELEMENTS,
@@ -349,7 +350,8 @@ export class AmpList extends AMP.BaseElement {
    */
   isAmpStateSrc(src) {
     return (
-      // isExperimentOn('amp-list-init-from-state') &&
+      (isExperimentOn('amp-list-init-from-state') ||
+        /*TODO: remove the true / learn how experiments work. */ true) &&
       src.trim().startsWith('amp-state:')
     );
   }
