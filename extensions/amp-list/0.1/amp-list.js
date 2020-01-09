@@ -41,6 +41,7 @@ import {
 } from '../../../src/batched-json';
 import {
   childElementByAttr,
+  isJsonScriptTag,
   matches,
   removeChildren,
   scopedQuerySelector,
@@ -341,18 +342,48 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Returns true if src points to amp-state.
+   *
    * @param {string} src
    * @return {boolean}
    */
-  shouldLocalRender(src, isMutation) {
-    if (isMutation) {
-      return typeof(src) ==='object';
-    }
-
+  isAmpStateSrc(src) {
     return (
-      isExperimentOn('amp-list-init-from-state') &&
-      src.trim().startsWith('amp-script:')
+      // isExperimentOn('amp-list-init-from-state') &&
+      src.trim().startsWith('amp-state:')
     );
+  }
+
+  /**
+   * @param {!Array|!Object|string} data
+   * @return {!Promise}
+   */
+  renderLocalData(src) {
+    let data;
+    if (typeof src === 'string') {
+      const ampStateId = src.trim().substring('amp-state:'.length);
+      const ampStateEl = this.win.document.querySelector(`#${ampStateId}`);
+      if (!ampStateEl) {
+        user().error(
+          'src must point to a valid amp-state, as given: %s',
+          ampStateId
+        );
+      }
+      const scriptEl = ampStateEl.children[0];
+      if (!isJsonScriptTag(scriptEl)) {
+        user().error(
+          'Script within amp-state must be a valid json script tag.'
+        );
+      }
+      data = JSON.parse(scriptEl.innerText);
+    } else {
+      // Remove the 'src' now that local data is used to render the list.
+      this.element.setAttribute('src', '');
+      data = src;
+    }
+    const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
+    this.resetIfNecessary_(/* isFetch */ false);
+    return this.scheduleRender_(array, /* append */ false);
   }
 
   /** @override */
@@ -360,28 +391,16 @@ export class AmpList extends AMP.BaseElement {
     dev().info(TAG, 'mutate:', this.element, mutations);
     let promise;
 
-    /**
-     * @param {!Array|!Object} data
-     * @return {!Promise}
-     */
-    const renderLocalData = data => {
-      // Remove the 'src' now that local data is used to render the list.
-      this.element.setAttribute('src', '');
-      const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
-      this.resetIfNecessary_(/* isFetch */ false);
-      return this.scheduleRender_(array, /* append */ false);
-    };
-
     const src = mutations['src'];
     if (src !== undefined) {
-      if (typeof src === 'string') {
+      if (typeof src === 'object' || this.isAmpStateSrc(src)) {
+        promise = this.renderLocalData(/** @type {!Object} */ (src));
+      } else if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
           this.resetIfNecessary_();
           promise = this.fetchList_();
         }
-      } else if (typeof src === 'object') {
-        promise = renderLocalData(/** @type {!Object} */ (src));
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
@@ -560,7 +579,10 @@ export class AmpList extends AMP.BaseElement {
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();
+    } else if (this.isAmpStateSrc(elementSrc)) {
+      return this.renderLocalData(elementSrc);
     }
+
     let fetch;
     if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
