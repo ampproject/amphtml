@@ -21,7 +21,7 @@ import {useState} from 'preact/hooks';
  * Renders the children prop, waiting for it to resolve if it is a promise.
  *
  * @param {!JsonObject} props
- * @return {*} TODO
+ * @return {!preact.VNode|null}
  */
 export function AsyncRender(props) {
   const children = props['children'];
@@ -33,5 +33,5 @@ export function AsyncRender(props) {
     return null;
   }
 
-  return state;
+  return /** @type {!preact.VNode} */ (state);
 }

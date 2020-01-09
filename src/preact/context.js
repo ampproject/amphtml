@@ -17,15 +17,7 @@
 import {createContext, createElement} from 'preact';
 import {useContext} from 'preact/hooks';
 
-/**
- * @typedef {{
- *   Provider: *,
- *   Consumer: *,
- * }}
- */
-let ContextDef;
-
-/** @type {ContextDef} */
+/** @type {preact.Context} */
 let context;
 
 /**
@@ -37,14 +29,14 @@ let context;
  * - playable: whether the playback is allowed in this vDOM area. If playback
  *   is not allow, the component must immediately stop the playback.
  *
- * @return {!ContextDef}
+ * @return {!preact.Context}
  */
 export function getAmpContext() {
   return (
     context ||
     (context = createContext({
-      renderable: true,
-      playable: true,
+      'renderable': true,
+      'playable': true,
     }))
   );
 }
@@ -52,20 +44,20 @@ export function getAmpContext() {
 /**
  * A wrapper-component that recalculates and propagates AmpContext properties.
  *
- * @param {!Object} props
- * @return {*}
+ * @param {!JsonObject} props
+ * @return {!preact.VNode}
  */
 export function withAmpContext(props) {
   const parent = useContext(getAmpContext());
   const current = {
     ...props,
-    renderable: parent.renderable && props.renderable,
-    playable: parent.playable && props.playable,
-    children: undefined,
+    'renderable': parent.renderable && props['renderable'],
+    'playable': parent.playable && props['playable'],
+    'children': undefined,
   };
 
   return createElement(getAmpContext().Provider, {
-    children: props.children,
+    children: props['children'],
     value: current,
   });
 }

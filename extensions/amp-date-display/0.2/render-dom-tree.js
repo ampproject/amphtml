@@ -24,7 +24,7 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * Clears the host element and appends the DOM tree into it.
  *
  * @param {!JsonObject} props
- * @return {*} TODO
+ * @return {null}
  */
 export function RenderDomTree(props) {
   const {'dom': dom, 'host': host} = props;

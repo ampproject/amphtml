@@ -14,12 +14,8 @@
  * limitations under the License.
  */
 
-import {AmpEvents} from '../../../src/amp-events';
-import {createCustomEvent} from '../../../src/event-helper';
-import {dev, devAssert, userAssert} from '../../../src/log';
-import {removeChildren} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';
-import {useState} from 'preact/hooks';
+import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en';
@@ -68,59 +64,14 @@ let EnhancedVariablesV2Def;
 
 /**
  * @param {!JsonObject} props
- * @return {*} TODO
+ * @return {!preact.VNode}
  */
 export function DateDisplay(props) {
   const render = props['render'];
   const data = /** @type {!JsonObject} */ (getDataForTemplate(props));
   useResourcesNotify();
 
-  return render(data, props['children']);
-}
-
-/**
- * Renders the children prop, waiting for it to resolve if it is a promise.
- *
- * @param {!JsonObject} props
- * @return {*} TODO
- */
-export function AsyncRender(props) {
-  const children = props['children'];
-  const {0: state, 1: set} = useState(children);
-  useResourcesNotify();
-
-  if (state && state.then) {
-    Promise.resolve(children).then(set);
-    return null;
-  }
-
-  return state;
-}
-
-/**
- * Clears the host element and appends the DOM tree into it.
- *
- * @param {!JsonObject} props
- * @return {*} TODO
- */
-export function RenderDomTree(props) {
-  const {'dom': dom, 'host': host} = props;
-  useResourcesNotify();
-
-  removeChildren(dev().assertElement(host));
-  if (dom) {
-    host.appendChild(dom);
-  }
-
-  const event = createCustomEvent(
-    devAssert(host.ownerDocument.defaultView),
-    AmpEvents.DOM_UPDATE,
-    /* detail */ null,
-    {bubbles: true}
-  );
-  host.dispatchEvent(event);
-
-  return null;
+  return /** @type {!preact.VNode} */ (render(data, props['children']));
 }
 
 /**

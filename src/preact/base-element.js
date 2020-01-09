@@ -36,13 +36,13 @@ export let AmpElementProp;
  *   props: (!Object<string, !AmpElementProp>|undefined),
  *   isLayoutSupported: (
  *     function(
- *       this:./base-element.BaseElement,
- *       !./layout.Layout
+ *       this:../base-element.BaseElement,
+ *       !../layout.Layout
  *     ):boolean | undefined
  *   ),
  *   init: (
  *     function(
- *       this:./base-element.BaseElement
+ *       this:../base-element.BaseElement
  *     ):(!JsonObject|undefined) | undefined
  *   ),
  * }}
@@ -57,9 +57,9 @@ export let AmpElementOptions;
  * be very few exceptions, which is why we allow options to configure the
  * class.
  *
- * @param {function(!JsonObject):*} Component
+ * @param {preact.FunctionalComponent} Component
  * @param {!AmpElementOptions} opts
- * @return {function(new:./base-element.BaseElement, !Element)}
+ * @return {function(new:../base-element.BaseElement, !Element)}
  */
 export function PreactBaseElement(Component, opts = {}) {
   return class extends AMP.BaseElement {
