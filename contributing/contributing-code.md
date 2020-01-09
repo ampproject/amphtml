@@ -204,6 +204,6 @@ The following outlines the process to request a cherry-pick.
 - Once approved, the on-duty engineer handling releases will work with you to ensure the cherry-pick is made.
 - **Once the cherry-pick is made you are responsible for verifying the cherry-pick fixes the issue and does not cause other issues.**
 
-**If you are requesting a cherry-pick to fix an issue in production** it is likely you will _also_ need a cherry-pick into the **experimental**/**beta** releases. Problems cherry-picked in **stable** could be overridden after promoting **beta**. The on-duty engineer will help determine if you need to  cherry-pick both release channels.
+**If you are requesting a cherry-pick to fix an issue in production** it is likely you will _also_ need a cherry-pick into the **experimental**/**beta** releases. Problems cherry-picked in **stable** could be overridden after promoting **beta**. The on-duty engineer will help determine if you need to cherry-pick both release channels.
 
 If you run into any issues or have any questions when requesting a cherry-pick, please use the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
