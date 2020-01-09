@@ -376,6 +376,13 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         margin: '',
         isAlreadyCentered: true,
       },
+      {
+        direction: 'ltr',
+        parentWidth: 300,
+        newWidth: 250,
+        margin: '-25px',
+        inZIndexHoldBack: true,
+      },
     ].forEach((testCase, testNum) => {
       it(`should adjust slot CSS after expanding width #${testNum}`, () => {
         if (testCase.isMultiSizeResponse) {
@@ -408,7 +415,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           },
         };
         impl.win.document.body.dir = testCase.direction;
-        impl.inZIndexHoldback_ = testCase.inZIndexHoldback;
+        impl.inZIndexHoldBack_ = testCase.inZIndexHoldBack;
         impl.extractSize({
           get(name) {
             switch (name) {
@@ -421,7 +428,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           },
         });
         expect(impl.element.style[`margin${dirStr}`]).to.equal(testCase.margin);
-        if (!testCase.isMultiSizeResponse && testCase.inZIndexHoldback) {
+        if (!testCase.isMultiSizeResponse && testCase.inZIndexHoldBack) {
           // We use a fixed '11' value for z-index.
           expect(impl.element.style.zIndex).to.equal('11');
         }

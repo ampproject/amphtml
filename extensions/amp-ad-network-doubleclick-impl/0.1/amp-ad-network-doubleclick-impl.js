@@ -307,7 +307,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      * If true, will add a z-index to flex ad slots upon expansion.
      * @private {boolean}
      */
-    this.inZIndexHoldback_ = false;
+    this.inZIndexHoldBack_ = false;
   }
 
   /**
@@ -417,10 +417,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     Object.keys(setExps).forEach(
       expName => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
-    if (
-      setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK
-    ) {
-      this.inZIndexHoldback_ = true;
+    if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
+      this.inZIndexHoldBack_ = true;
     }
   }
 
