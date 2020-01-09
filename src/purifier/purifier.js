@@ -353,10 +353,8 @@ export class Purifier {
           /* opt_purify */ true
         )
       ) {
-        if (attrValue && !startsWith(attrName, 'data-amp-bind-')) {
-          if (attrRewrite) {
-            attrValue = attrRewrite(tagName, attrName, attrValue);
-          }
+        if (attrRewrite && attrValue && !startsWith(attrName, BIND_PREFIX)) {
+          attrValue = attrRewrite(tagName, attrName, attrValue);
         }
       } else {
         data.keepAttr = false;

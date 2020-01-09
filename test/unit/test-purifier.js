@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import * as urlRewrite from '../../src/url-rewrite';
 import {Purifier} from '../../src/purifier/purifier';
-import {rewriteAttributeValue} from '../../src/url-rewrite';
 
 describe
   .configure()
@@ -23,9 +23,19 @@ describe
   .run('DOMPurify-based', () => {
     let purify;
     let purifyTripleMustache;
+    let rewriteAttributeValueSpy;
 
     beforeEach(() => {
-      const purifier = new Purifier(document, {}, rewriteAttributeValue);
+      rewriteAttributeValueSpy = window.sandbox.spy(
+        urlRewrite,
+        'rewriteAttributeValue'
+      );
+
+      const purifier = new Purifier(
+        document,
+        {},
+        urlRewrite.rewriteAttributeValue
+      );
 
       /**
        * Helper that serializes output of purifyHtml() to string.
@@ -85,6 +95,11 @@ describe
           '<h1>a<i>b</i>c' +
             '<amp-img src="http://example.com/1.png" i-amphtml-ignore=""></amp-img></h1>'
         );
+        expect(rewriteAttributeValueSpy).to.be.calledWith(
+          'amp-img',
+          'src',
+          'http://example.com/1.png'
+        );
       });
 
       it('should NOT output security-sensitive markup', () => {
@@ -115,6 +130,7 @@ describe
         expect(purify('a<a on="tap:AMP.print">b</a>')).to.be.equal(
           'a<a on="tap:AMP.print">b</a>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       it('should output "data-, aria-, and role" attributes', () => {
@@ -126,6 +142,7 @@ describe
           '<a aria-label="bar" data-foo="bar" role="button">b</a>'
         );
         expectEqualNodeLists(actual, expected);
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(3);
       });
 
       it('should output "href" attribute', () => {
@@ -135,12 +152,14 @@ describe
           'a<a target="_top" href="http://acme.com/">b</a>'
         );
         expectEqualNodeLists(actual, expected);
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(2);
       });
 
       it('should allow arbitrary protocols', () => {
         expect(purify('<a href="foo://bar">link</a>')).to.be.equal(
           '<a target="_top" href="foo://bar">link</a>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(2);
       });
 
       it('should output "rel" attribute', () => {
@@ -152,12 +171,14 @@ describe
           'a<a href="http://acme.com/" rel="amphtml" target="_top">b</a>'
         );
         expectEqualNodeLists(actual, expected);
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(3);
       });
 
       it('should output "layout" attribute', () => {
         expect(purify('<amp-img layout="responsive"></amp-img>')).to.equal(
           '<amp-img layout="responsive" i-amphtml-ignore=""></amp-img>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       it('should output "media" attribute', () => {
@@ -166,6 +187,7 @@ describe
         ).to.equal(
           '<amp-img media="(min-width: 650px)" i-amphtml-ignore=""></amp-img>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       it('should output "sizes" attribute', () => {
@@ -174,6 +196,7 @@ describe
         ).to.equal(
           '<amp-img sizes="(min-width: 650px) 50vw, 100vw" i-amphtml-ignore=""></amp-img>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       it('should output "heights" attribute', () => {
@@ -182,6 +205,7 @@ describe
         ).to.equal(
           '<amp-img heights="(min-width:500px) 200px, 80%" i-amphtml-ignore=""></amp-img>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       it('should default target to _top with href', () => {
@@ -199,18 +223,21 @@ describe
         expect(purify('<a>b</a><a target="">d</a>')).to.equal(
           '<a>b</a><a target="_top">d</a>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       it('should output a valid target', () => {
         expect(
           purify('<a target="_top">a</a><a target="_blank">b</a>')
         ).to.equal('<a target="_top">a</a><a target="_blank">b</a>');
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(2);
       });
 
       it('should output a valid target in different case', () => {
         expect(
           purify('<a target="_TOP">a</a><a target="_BLANK">b</a>')
         ).to.equal('<a target="_top">a</a><a target="_blank">b</a>');
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(2);
       });
 
       it('should override a unallowed target', () => {
@@ -229,37 +256,40 @@ describe
             '<a target="_top">_OTHER</a>' +
             '<a target="_top">other</a>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(5);
       });
 
       it('should NOT output security-sensitive attributes', () => {
-        expect(purify('a<a onclick="alert">b</a>')).to.be.equal('a<a>b</a>');
-        expect(purify('a<a href="javascript:alert">b</a>')).to.be.equal(
-          'a<a target="_top">b</a>'
-        );
-        expect(purify('a<a href=" JAVASCRIPT:alert">b</a>')).to.be.equal(
-          'a<a target="_top">b</a>'
-        );
-        expect(purify('a<a href="vbscript:alert">b</a>')).to.be.equal(
-          'a<a target="_top">b</a>'
-        );
-        expect(purify('a<a href=" VBSCRIPT:alert">b</a>')).to.be.equal(
-          'a<a target="_top">b</a>'
-        );
-        expect(purify('a<a href="data:alert">b</a>')).to.be.equal(
-          'a<a target="_top">b</a>'
-        );
-        expect(purify('a<a href=" DATA:alert">b</a>')).to.be.equal(
-          'a<a target="_top">b</a>'
-        );
-        expect(purify('a<a href="blob:alert">b</a>')).to.be.equal(
-          'a<a target="_top">b</a>'
-        );
-        expect(purify('a<a href=" BLOB:alert">b</a>')).to.be.equal(
-          'a<a target="_top">b</a>'
-        );
-        expect(purify('a<a href="?__amp_source_origin=foo">b</a>')).to.be.equal(
-          'a<a target="_top">b</a>'
-        );
+        allowConsoleError(() => {
+          expect(purify('a<a onclick="alert">b</a>')).to.be.equal('a<a>b</a>');
+          expect(purify('a<a href="javascript:alert">b</a>')).to.be.equal(
+            'a<a target="_top">b</a>'
+          );
+          expect(purify('a<a href=" JAVASCRIPT:alert">b</a>')).to.be.equal(
+            'a<a target="_top">b</a>'
+          );
+          expect(purify('a<a href="vbscript:alert">b</a>')).to.be.equal(
+            'a<a target="_top">b</a>'
+          );
+          expect(purify('a<a href=" VBSCRIPT:alert">b</a>')).to.be.equal(
+            'a<a target="_top">b</a>'
+          );
+          expect(purify('a<a href="data:alert">b</a>')).to.be.equal(
+            'a<a target="_top">b</a>'
+          );
+          expect(purify('a<a href=" DATA:alert">b</a>')).to.be.equal(
+            'a<a target="_top">b</a>'
+          );
+          expect(purify('a<a href="blob:alert">b</a>')).to.be.equal(
+            'a<a target="_top">b</a>'
+          );
+          expect(purify('a<a href=" BLOB:alert">b</a>')).to.be.equal(
+            'a<a target="_top">b</a>'
+          );
+          expect(
+            purify('a<a href="?__amp_source_origin=foo">b</a>')
+          ).to.be.equal('a<a target="_top">b</a>');
+        });
       });
 
       it('should NOT output blacklisted values for class attributes', () => {
@@ -273,6 +303,7 @@ describe
           expect(purify('<p class="foo-i-amphtml-bar">hello</p>')).to.be.equal(
             '<p>hello</p>'
           );
+          expect(rewriteAttributeValueSpy.callCount).to.be.equal(0);
         });
       });
 
@@ -292,12 +323,14 @@ describe
         expect(purify('<div subscriptions-dialog="">link</div>')).to.equal(
           '<div subscriptions-dialog="">link</div>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(2);
       });
 
       it('should allow source::src with valid protocol', () => {
         expect(purify('<source src="https://www.foo.com/">')).to.equal(
           '<source src="https://www.foo.com/">'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       // TODO(choumx): HTTPS-only URI attributes are not enforced consistently
@@ -310,24 +343,28 @@ describe
         expect(purify('<source src="<script>bad()</script>">')).to.equal(
           '<source src="">'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       it('should allow div::template', () => {
         expect(purify('<div template="my-template-id"></div>')).to.equal(
           '<div template="my-template-id"></div>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       it('should allow form::action-xhr', () => {
         expect(purify('<form action-xhr="https://foo.com"></form>')).to.equal(
           '<form action-xhr="https://foo.com"></form>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       it('should allow input::mask-output', () => {
         expect(purify('<input mask-output="alphanumeric">')).to.equal(
           '<input mask-output="alphanumeric">'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
       });
 
       // Need to test this since DOMPurify doesn't offer a API for tag-specific
@@ -339,6 +376,7 @@ describe
         expect(purify(html)).to.equal(
           '<form action-xhr="https://foo.com"></form><p></p>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(2);
       });
 
       it('should allow <amp-form>-related attributes', () => {
@@ -360,6 +398,7 @@ describe
         expect(purify('<span validation-for="form1"></span>')).to.equal(
           '<span validation-for="form1"></span>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(2);
       });
 
       it('should avoid disallowing default-supported attributes', () => {
@@ -372,6 +411,7 @@ describe
         ).to.equal(
           '<amp-img style="color: red" i-amphtml-ignore=""></amp-img><p style="color: blue"></p>'
         );
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(2);
       });
 
       it('should allow <amp-lightbox> attributes', () => {
@@ -399,6 +439,7 @@ describe
         );
         // Other elements should NOT have [i-amphtml-key].
         expect(purify('<p></p>')).to.equal('<p></p>');
+        expect(rewriteAttributeValueSpy.callCount).to.be.equal(2);
       });
 
       it('should resolve URLs', () => {
@@ -672,24 +713,26 @@ describe
       });
 
       it('should output <use> only if href is relative', () => {
-        const href =
-          '<svg xmlns="http://www.w3.org/2000/svg"><use href="#foo"></use></svg>';
-        expect(purify(href)).to.equal(href);
+        allowConsoleError(() => {
+          const href =
+            '<svg xmlns="http://www.w3.org/2000/svg"><use href="#foo"></use></svg>';
+          expect(purify(href)).to.equal(href);
 
-        const xlink =
-          '<svg xmlns="http://www.w3.org/2000/svg"><use xlink:href="#foo"></use></svg>';
-        expect(purify(xlink)).to.equal(xlink);
+          const xlink =
+            '<svg xmlns="http://www.w3.org/2000/svg"><use xlink:href="#foo"></use></svg>';
+          expect(purify(xlink)).to.equal(xlink);
 
-        expect(
-          purify(
-            '<svg xmlns="http://www.w3.org/2000/svg"><use href="//evil"></svg>'
-          )
-        ).to.equal('<svg xmlns="http://www.w3.org/2000/svg"></svg>');
-        expect(
-          purify(
-            '<svg xmlns="http://www.w3.org/2000/svg"><use xlink:href="//evil"></svg>'
-          )
-        ).to.equal('<svg xmlns="http://www.w3.org/2000/svg"></svg>');
+          expect(
+            purify(
+              '<svg xmlns="http://www.w3.org/2000/svg"><use href="//evil"></svg>'
+            )
+          ).to.equal('<svg xmlns="http://www.w3.org/2000/svg"></svg>');
+          expect(
+            purify(
+              '<svg xmlns="http://www.w3.org/2000/svg"><use xlink:href="//evil"></svg>'
+            )
+          ).to.equal('<svg xmlns="http://www.w3.org/2000/svg"></svg>');
+        });
       });
     });
   });
@@ -708,7 +751,7 @@ describe
         createElement: tagName => document.createElement(tagName),
       };
 
-      const purifier = () => new Purifier(doc, {}, rewriteAttributeValue);
+      const purifier = () => new Purifier(doc);
 
       /**
        * Helper that serializes output of purifyHtml() to string.
@@ -732,12 +775,10 @@ describe
         // Given that the AMP format does not blacklist input types file and
         // password.
         html.setAttribute('amp', '');
-        allowConsoleError(() => {
-          expect(purify('<input type="file">')).to.equal('<input type="file">');
-          expect(purify('<input type="password">')).to.equal(
-            '<input type="password">'
-          );
-        });
+        expect(purify('<input type="file">')).to.equal('<input type="file">');
+        expect(purify('<input type="password">')).to.equal(
+          '<input type="password">'
+        );
       });
 
       it('should sanitize certain tag attributes for AMP4Email', () => {
@@ -756,15 +797,13 @@ describe
 
       it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
         html.setAttribute('amp4email', '');
-        allowConsoleError(() => {
-          expect(purify('<amp-analytics>')).to.equal('');
-          expect(purify('<amp-iframe>')).to.equal('');
-          expect(purify('<amp-list>')).to.equal('');
-          expect(purify('<amp-pixel>')).to.equal('');
-          expect(purify('<amp-twitter>')).to.equal('');
-          expect(purify('<amp-video>')).to.equal('');
-          expect(purify('<amp-youtube>')).to.equal('');
-        });
+        expect(purify('<amp-analytics>')).to.equal('');
+        expect(purify('<amp-iframe>')).to.equal('');
+        expect(purify('<amp-list>')).to.equal('');
+        expect(purify('<amp-pixel>')).to.equal('');
+        expect(purify('<amp-twitter>')).to.equal('');
+        expect(purify('<amp-video>')).to.equal('');
+        expect(purify('<amp-youtube>')).to.equal('');
 
         expect(purify('<amp-img>')).to.equal(
           '<amp-img i-amphtml-ignore=""></amp-img>'
