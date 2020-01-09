@@ -21,8 +21,8 @@ Note: remove the backticks (``) from the link.
 -->
 
 - [x] Release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)` is cut as a new canary release
-- [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta channels (<CL submit time>)
-- [ ] Release <RELEASE_NUMBER> promoted to 1% (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta (opt-in) channels (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta (1% traffic) channels (<CL submit time>)
 - [ ] Release <RELEASE_NUMBER> promoted to Stable channel (<CL submit time>)
 
 <!--
