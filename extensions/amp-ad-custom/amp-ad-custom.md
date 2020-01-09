@@ -51,11 +51,11 @@ The ad network needs to provide a new serving endpoint that returns a CORS respo
 
 ```js
 {
-  templateUrl: "https://adexample.com/amp_template_1.html"
+  templateUrl: "https://adexample.com/amp_template_1.html",
   data: {
     clickUrl: "https://buy.com/buy-1",
     buttonText: "Buy now"
-  }
+  },
   analytics: {
     type: "googleanalytics",
     config: {
