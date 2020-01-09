@@ -408,6 +408,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           },
         };
         impl.win.document.body.dir = testCase.direction;
+        impl.inZIndexHoldback_ = testCase.inZIndexHoldback;
         impl.extractSize({
           get(name) {
             switch (name) {
@@ -420,7 +421,7 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
           },
         });
         expect(impl.element.style[`margin${dirStr}`]).to.equal(testCase.margin);
-        if (!testCase.isMultiSizeResponse) {
+        if (!testCase.isMultiSizeResponse && testCase.inZIndexHoldback) {
           // We use a fixed '11' value for z-index.
           expect(impl.element.style.zIndex).to.equal('11');
         }
@@ -1006,19 +1007,6 @@ describes.realWin('amp-ad-network-doubleclick-impl', realWinConfig, env => {
         expect(url).to.match(/(\?|&)psz=[0-9]+x-1(&|$)/);
         expect(url).to.match(/(\?|&)fws=[0-9]+(&|$)/);
         expect(url).to.match(/(=|%2C)21063173(%2C|&|$)/);
-      });
-    });
-
-    it('should not include msz/psz if not in holdback experiment', () => {
-      env.sandbox
-        .stub(impl, 'randomlySelectUnsetExperiments_')
-        .returns({flexAdSlots: '21063174'});
-      impl.setPageLevelExperiments();
-      return impl.getAdUrl().then(url => {
-        expect(url).to.not.match(/(\?|&)msz=/);
-        expect(url).to.not.match(/(\?|&)psz=/);
-        expect(url).to.not.match(/(\?|&)fws=/);
-        expect(url).to.match(/(=|%2C)21063174(%2C|&|$)/);
       });
     });
 
