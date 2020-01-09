@@ -361,17 +361,23 @@ export class ResourcesImpl {
       return r.whenBuilt().then(() => {
         const wasIntersecting = r.isInViewport();
         let noLongerDisplayed = this.measureResource_(r, clientRect);
+
         // Sometimes the intersection callback is too early to recognize
-        // client rect changes due to `display:none` (e.g. amp-accordion).
+        // client rect changes due to animations (e.g. amp-accordion).
         // These cases can still be detected since isIntersecting == false
         // despite the target element overlapping the root's bounds.
         if (
+          !noLongerDisplayed &&
           wasIntersecting &&
           !isIntersecting &&
           layoutRectsOverlap(clientRect, rootBounds)
         ) {
+          // TODO(willchou): Sometimes causes an unnecessary unload when
+          // expanding an accordion with [animate] due to extra intersection
+          // callbacks during the animation.
           noLongerDisplayed = true;
         }
+
         if (noLongerDisplayed) {
           toUnload.push(r);
           return;
