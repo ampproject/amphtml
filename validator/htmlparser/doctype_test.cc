@@ -20,95 +20,78 @@
 
 TEST(DoctypeTest, ParseTest) {
   // <!doctype html> The only valid html5 doctype.
-  auto parsed_doctype = htmlparser::ParseDoctype("html");
-  auto doctype_node = std::get<0>(parsed_doctype);
-  bool quirks_mode = std::get<1>(parsed_doctype);
+  auto [doctype_node, quirks_mode] = htmlparser::ParseDoctype("html");
   EXPECT_FALSE(quirks_mode);
   EXPECT_EQ(doctype_node->Type(), htmlparser::NodeType::DOCTYPE_NODE);
   EXPECT_EQ(doctype_node->Data(), "html");
 
-  parsed_doctype = htmlparser::ParseDoctype(
+  auto [doctype_node2, quirks_mode2] = htmlparser::ParseDoctype(
       "HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" "
       "\"http://www.w3.org/TR/html4/strict.dtd\"");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_TRUE(quirks_mode);
-  EXPECT_EQ(doctype_node->Type(), htmlparser::NodeType::DOCTYPE_NODE);
-  EXPECT_FALSE(doctype_node->Attributes().empty());
-  EXPECT_EQ(doctype_node->Attributes().size(), 2);
-  EXPECT_EQ(doctype_node->Attributes()[0].key, "public");
-  EXPECT_EQ(doctype_node->Attributes()[0].value, "-//W3C//DTD HTML 4.01//EN");
-  EXPECT_EQ(doctype_node->Attributes()[1].key, "system");
-  EXPECT_EQ(doctype_node->Attributes()[1].value,
+  EXPECT_TRUE(quirks_mode2);
+  EXPECT_EQ(doctype_node2->Type(), htmlparser::NodeType::DOCTYPE_NODE);
+  EXPECT_FALSE(doctype_node2->Attributes().empty());
+  EXPECT_EQ(doctype_node2->Attributes().size(), 2);
+  EXPECT_EQ(doctype_node2->Attributes()[0].key, "public");
+  EXPECT_EQ(doctype_node2->Attributes()[0].value, "-//W3C//DTD HTML 4.01//EN");
+  EXPECT_EQ(doctype_node2->Attributes()[1].key, "system");
+  EXPECT_EQ(doctype_node2->Attributes()[1].value,
          "http://www.w3.org/TR/html4/strict.dtd");
-  EXPECT_EQ(doctype_node->Data(), "html");
+  EXPECT_EQ(doctype_node2->Data(), "html");
 
-  parsed_doctype = htmlparser::ParseDoctype("html foo bar");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_TRUE(quirks_mode);
-  EXPECT_EQ(doctype_node->Type(), htmlparser::NodeType::DOCTYPE_NODE);
+  auto [doctype_node3, quirks_mode3] = htmlparser::ParseDoctype("html foo bar");
+  EXPECT_TRUE(quirks_mode3);
+  EXPECT_EQ(doctype_node3->Type(), htmlparser::NodeType::DOCTYPE_NODE);
 
   // Spaces OK.
-  parsed_doctype = htmlparser::ParseDoctype("            html           ");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_FALSE(quirks_mode);
-  EXPECT_EQ(doctype_node->Type(), htmlparser::NodeType::DOCTYPE_NODE);
-  EXPECT_EQ(doctype_node->Data(), "html");
-  EXPECT_TRUE(doctype_node->Attributes().empty());
+  auto [doctype_node4, quirks_mode4] =
+      htmlparser::ParseDoctype("            html           ");
+  EXPECT_FALSE(quirks_mode4);
+  EXPECT_EQ(doctype_node4->Type(), htmlparser::NodeType::DOCTYPE_NODE);
+  EXPECT_EQ(doctype_node4->Data(), "html");
+  EXPECT_TRUE(doctype_node4->Attributes().empty());
 
   // Case sensitivity OK.
-  parsed_doctype = htmlparser::ParseDoctype("            HTML           ");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_FALSE(quirks_mode);
-  EXPECT_EQ(doctype_node->Type(), htmlparser::NodeType::DOCTYPE_NODE);
-  EXPECT_EQ(doctype_node->Data(), "html");
-  EXPECT_TRUE(doctype_node->Attributes().empty());
+  auto [doctype_node5, quirks_mode5] =
+      htmlparser::ParseDoctype("            HTML           ");
+  EXPECT_FALSE(quirks_mode5);
+  EXPECT_EQ(doctype_node5->Type(), htmlparser::NodeType::DOCTYPE_NODE);
+  EXPECT_EQ(doctype_node5->Data(), "html");
+  EXPECT_TRUE(doctype_node5->Attributes().empty());
 
-  parsed_doctype = htmlparser::ParseDoctype("lang=\"en\" html");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_FALSE(quirks_mode);
+  auto [doctype_node6, quirks_mode6] =
+      htmlparser::ParseDoctype("lang=\"en\" html");
+  EXPECT_FALSE(quirks_mode6);
 
-  parsed_doctype = htmlparser::ParseDoctype("html lang=\"en\"");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_FALSE(quirks_mode);
+  auto [doctype_node7, quirks_mode7] =
+      htmlparser::ParseDoctype("html lang=\"en\"");
+  EXPECT_FALSE(quirks_mode7);
 
-  parsed_doctype = htmlparser::ParseDoctype("html lang='en'");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_FALSE(quirks_mode);
+  auto [doctype_node8, quirks_mode8] =
+      htmlparser::ParseDoctype("html lang='en'");
+  EXPECT_FALSE(quirks_mode8);
 
   // lang attribute with no value.
-  parsed_doctype = htmlparser::ParseDoctype("html lang");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_FALSE(quirks_mode);
+  auto [doctype_node9, quirks_mode9] = htmlparser::ParseDoctype("html lang");
+  EXPECT_FALSE(quirks_mode9);
 
   // attribute value without quote.
-  parsed_doctype = htmlparser::ParseDoctype("html lang=en");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_FALSE(quirks_mode);
+  auto [doctype_node10, quirks_mode10] =
+      htmlparser::ParseDoctype("html lang=en");
+  EXPECT_FALSE(quirks_mode10);
 
   // Spaces and new lines.
-  parsed_doctype = htmlparser::ParseDoctype(R"DOCTYPE(          html                 lang             =
+  auto [doctype_node11, quirks_mode11]  =
+      htmlparser::ParseDoctype(R"DOCTYPE(          html                 lang             =
                           "en")DOCTYPE");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_FALSE(quirks_mode);
+  EXPECT_FALSE(quirks_mode11);
 
   // With self closing slash.
-  parsed_doctype = htmlparser::ParseDoctype("html lang /");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_FALSE(quirks_mode);
+  auto [doctype_node12, quirks_mode12] =
+      htmlparser::ParseDoctype("html lang /");
+  EXPECT_FALSE(quirks_mode12);
 
-  parsed_doctype = htmlparser::ParseDoctype("html lang=en /////////////");
-  doctype_node = std::get<0>(parsed_doctype);
-  quirks_mode = std::get<1>(parsed_doctype);
-  EXPECT_FALSE(quirks_mode);
+  auto [doctype_node13, quirks_mode13] =
+      htmlparser::ParseDoctype("html lang=en /////////////");
+  EXPECT_FALSE(quirks_mode13);
 }

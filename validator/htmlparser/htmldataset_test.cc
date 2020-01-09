@@ -163,7 +163,7 @@ void DumpIndent(std::stringbuf* buffer, int level) {
   }
 }
 
-std::optional<Error> DumpLevel(NodePtr node, std::stringbuf* buffer,
+std::optional<Error> DumpLevel(Node* node, std::stringbuf* buffer,
                                int level) {
   DumpIndent(buffer, level);
   level++;
@@ -266,7 +266,7 @@ std::optional<Error> DumpLevel(NodePtr node, std::stringbuf* buffer,
       return error("unknown node type");
   }
   buffer->sputc('\n');
-  for (NodePtr c = node->FirstChild(); c; c = c->NextSibling()) {
+  for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
     auto err = DumpLevel(c, buffer, level);
     if (err) {
       return err;
@@ -275,13 +275,13 @@ std::optional<Error> DumpLevel(NodePtr node, std::stringbuf* buffer,
   return std::nullopt;
 }
 
-std::optional<Error> Dump(NodePtr node, std::stringbuf* buffer) {
+std::optional<Error> Dump(Node* node, std::stringbuf* buffer) {
   if (!node || !(node->FirstChild())) {
     return std::nullopt;
   }
 
   int level = 0;
-  for (NodePtr c = node->FirstChild(); c; c = c->NextSibling()) {
+  for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
     auto err = DumpLevel(c, buffer, level);
     if (err) {
       return err;
@@ -291,8 +291,8 @@ std::optional<Error> Dump(NodePtr node, std::stringbuf* buffer) {
   return std::nullopt;
 }
 
-void DumpDocument(NodePtr doc) {
-  for (NodePtr c = doc->FirstChild(); c; c = c->NextSibling()) {
+void DumpDocument(Node* doc) {
+  for (Node* c = doc->FirstChild(); c; c = c->NextSibling()) {
     DumpDocument(c);
   }
 }
@@ -346,31 +346,31 @@ TEST(HTMLDatasetTest, WebkitData) {
         std::string html = test_case.text;
         if (!test_case.context.empty()) {
           Atom context_atom = AtomUtil::ToAtom(test_case.context);
-          NodePtr context_node = Node::make_node(
-              NodeType::ELEMENT_NODE,
-              context_atom);
+          auto context_node = std::unique_ptr<Node>(
+              Node::make_node(NodeType::ELEMENT_NODE, context_atom));
           if (context_atom == Atom::UNKNOWN) {
             context_node->SetData(test_case.context);
           }
-          std::vector<NodePtr> nodes =
-              ParseFragmentWithOptions(html, options, context_node);
-          NodePtr doc = Node::make_node(NodeType::DOCUMENT_NODE);
-          for (NodePtr node : nodes) {
+          std::vector<Node*> nodes =
+              ParseFragmentWithOptions(html, options, context_node.get());
+          auto doc = std::unique_ptr<Node>(
+              Node::make_node(NodeType::DOCUMENT_NODE));
+          for (Node* node : nodes) {
             doc->AppendChild(node);
           }
-          auto err = CheckTreeConsistency(doc);
+          auto err = CheckTreeConsistency(doc.get());
           EXPECT_FALSE(err) << err.value().error_msg;
           std::stringbuf output_buffer;
-          Dump(doc, &output_buffer);
+          Dump(doc.get(), &output_buffer);
           std::string output = output_buffer.str();
           EXPECT_EQ(output, test_case.want) << test_case.ToString();
           num_test_cases++;
         } else {
-          NodePtr doc = ParseWithOptions(html, options);
-          auto err = CheckTreeConsistency(doc);
+          auto doc = ParseWithOptions(html, options);
+          auto err = CheckTreeConsistency(doc.get());
           EXPECT_FALSE(err) << err.value().error_msg;
           std::stringbuf output_buffer;
-          Dump(doc, &output_buffer);
+          Dump(doc.get(), &output_buffer);
           std::string output = output_buffer.str();
           EXPECT_EQ(output, test_case.want) << test_case.ToString();
           num_test_cases++;

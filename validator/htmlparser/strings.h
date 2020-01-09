@@ -32,7 +32,7 @@ class Strings {
   // U+000D CARRIAGE RETURN (CR), or
   // U+0020 SPACE.
   inline static const std::string kWhitespace {
-    // Don't sort or re-order.
+    // Do not sort or re-order.
     ' ',
     '\t',
     '\r',
@@ -42,7 +42,7 @@ class Strings {
 
   // kWhitespace plus null char.
   inline static const std::string kWhitespaceOrNull {
-    // Don't sort or re-order.
+    // Do not sort or re-order.
     ' ',
     '\t',
     '\r',
@@ -52,7 +52,7 @@ class Strings {
     '\v'};
 
   inline static const std::string kEscapeChars {
-    // Don't sort or re-order.
+    // Do not sort or re-order.
     '&',
     '\'',
     '<',
@@ -88,7 +88,11 @@ class Strings {
   // 0b11110xxx - 4 byte sequence.
   //
   // Returns number of byte sequence needed to encode the codepoint.
-  static int CodePointByteSequenceCount(uint8_t c);
+  static int8_t CodePointByteSequenceCount(uint8_t c);
+
+  // Similar to CodePointByteSequenceCount except that it accepts entire
+  // codepoint and tells how many bytes the codepoint contains.
+  static int8_t CodePointNumBytes(char32_t c);
 
   // Decodes byte sequence to utf-8 codepoint.
   // The s points to the first byte in the sequence. Moves the cursor past
@@ -97,9 +101,24 @@ class Strings {
   // Returns 4 byte utf-8 codepoint value, or nullopt if:
   // - First byte is not valid (IsCodePoint),
   // - The three byte sequence includes unpaired surrogate which is not a scalar
-  // value.
+  //   value.
   // - Invalid utf-8 data.
   static std::optional<char32_t> DecodeUtf8Symbol(std::string_view* s);
+
+  // Same as DecodeUtf8Symbol(string_view*) except that the prefix is not
+  // updated, meaning cursor is at the first byte of the current character
+  // decoded in s.
+  static std::optional<char32_t>
+      DecodeUtf8Symbol(std::string_view s, int position = 0) {
+    if (position < 0 || position > s.size()) return std::nullopt;
+
+    if (position == 0) {
+      return DecodeUtf8Symbol(&s);
+    }
+
+    std::string_view s_at_prefix = s.substr(position);
+    return DecodeUtf8Symbol(&s_at_prefix);
+  }
 
   // Encodes a utf-8 codepoint.
   // Fills the codepoint in the following sequence:

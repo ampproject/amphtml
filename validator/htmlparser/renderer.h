@@ -58,7 +58,7 @@ enum class RenderError {
 
 class Renderer {
  public:
-  static RenderError Render(NodePtr node, std::stringbuf* output_buffer);
+  static RenderError Render(Node* node, std::stringbuf* output_buffer);
 };
 
 }  // namespace htmlparser
