@@ -102,7 +102,7 @@ struct ParseAccounting {
   // invalid syntax or is XHTML 4 or legacy doctype.
   bool quirks_mode = false;
 
-  // TODO(amaltas): Implemnent this.
+  // TODO: Implemnent this.
   int total_nodes;
 };
 
@@ -143,7 +143,7 @@ class Parser {
   // Useful for error reporting, report generation etc.
   LineCol CurrentTokenizerPosition() { return tokenizer_->CurrentPosition(); }
 
-  // TODO(amaltas): In a follow up CL make these methods accessible by getting
+  // TODO: In a follow up CL make these methods accessible by getting
   // rid of the above helper Parse methods, make constructor public to allow
   // clients to create and use Parser object.
 
@@ -346,7 +346,7 @@ class Parser {
   // to prevent formatting from "leaking" into applet, object, marquee,
   // template, td, th, and caption elements".
   //
-  // TODO(amaltas): This is just a marker. Consider making it static and const.
+  // TODO: This is just a marker. Consider making it static and const.
   std::unique_ptr<Node> scope_marker_;
 
   // The stack of open elements (section 12.2.4.2) and active formatting

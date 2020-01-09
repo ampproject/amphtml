@@ -577,7 +577,7 @@ void Parser::ResetInsertionMode() {
         break;
       case Atom::TD:
       case Atom::TH:
-        // TODO(amaltas): Remove this divergence from the HTML5 spec.
+        // TODO: Remove this divergence from the HTML5 spec.
         //
         // https://bugs.chromium.org/p/chromium/issues/detail?id=829668
         insertion_mode_ = std::bind(&Parser::InCellIM, this);
@@ -883,7 +883,7 @@ bool Parser::InHeadIM() {
         case Atom::TEMPLATE: {
           if (!open_elements_stack_.Contains(Atom::TEMPLATE)) return true;
 
-          // TODO(amaltas): Remove this divergence from the HTML5 spec.
+          // TODO: Remove this divergence from the HTML5 spec.
           //
           // See https://bugs.chromium.org/p/chromium/issues/detail?id=829668
           GenerateImpliedEndTags();
@@ -1734,7 +1734,7 @@ bool Parser::InBodyIM() {
       break;
     }
     case TokenType::ERROR_TOKEN: {
-      // TODO(amaltas): Remove this divergence from the HTML5 spec.
+      // TODO: Remove this divergence from the HTML5 spec.
       if (template_stack_.size() > 0) {
         insertion_mode_ = std::bind(&Parser::InTemplateIM, this);
         return false;

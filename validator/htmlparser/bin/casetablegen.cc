@@ -18,7 +18,7 @@
 // bazel build htmlparser/bin:casetablegen
 // bazel-bin/htmlparser/bin/casetablegen
 //
-// TODO(amaltas): Add a genrule to auto generate the header file every time
+// TODO: Add a genrule to auto generate the header file every time
 // library/software is built.
 
 #include <fstream>

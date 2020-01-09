@@ -183,7 +183,7 @@ class Node {
 
   // True, if this node is manufactured by parser as per HTML5 specification.
   // Currently, this applies only to HTML, HEAD and BODY tags.
-  // TODO(amaltas): Implement this for all manufactured tags.
+  // TODO: Implement this for all manufactured tags.
   bool IsManufactured() const {
     return is_manufactured_;
   }
