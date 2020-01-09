@@ -14,7 +14,7 @@ assignees: ''
 Note to onduty:
 
 Use this issue to track a release from the initial canary release build through
-production. The community uses this issue to keep track of what is going on
+promotion to Stable. The community uses this issue to keep track of what is going on
 with the release so please keep this issue up to date:
 
 - As you reach each stage of the release, check the appropriate checkbox and replace <CL submit time> with the "Submitted" text from the corresponding CL, e.g. "2:49 PM, Jul 25, 2018 UTC-4".
@@ -23,9 +23,9 @@ with the release so please keep this issue up to date:
   release number to the GitHub tag page the first time a given release number
   appears in the checkboxes.
 - Add any updates that may be of interest to the community (such as delays) as
-  comments on this issue, including after the release is promoted to production.
+  comments on this issue, including after the release is promoted to Stable.
 - Keep the title of the issue updated to reflect whether this issue is tracking
-  the Experimental/Beta builds or the build in Production.
+  the Experimental/Beta builds or the build in Stable.
 
 Note: remove the backticks (``) from the link.
 -->
@@ -33,7 +33,7 @@ Note: remove the backticks (``) from the link.
 - [x] Release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)` is cut as a new canary release
 - [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta Channels (<CL submit time>)
 - [ ] Release <RELEASE_NUMBER> promoted to 1% (<CL submit time>)
-- [ ] Release <RELEASE_NUMBER> promoted to production (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to Stable (<CL submit time>)
 
 <!--
 If this release will become the next LTS release, add/update the checkboxes above as needed e.g.
