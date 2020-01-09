@@ -23,7 +23,7 @@ with the release so please keep this issue up to date:
   release number to the GitHub tag page the first time a given release number
   appears in the checkboxes.
 - Add any updates that may be of interest to the community (such as delays) as
-  comments on this issue, including after the release is pushed to production.
+  comments on this issue, including after the release is promoted to production.
 - Keep the title of the issue updated to reflect whether this issue is tracking
   the Canary or the build in Production.
 
@@ -31,20 +31,20 @@ Note: remove the backticks (``) from the link.
 -->
 
 - [x] Release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)` is cut as a new canary release
-- [ ] Release <RELEASE_NUMBER> pushed to experimental channel (<CL submit time>)
-- [ ] Release <RELEASE_NUMBER> pushed to 1% (<CL submit time>)
-- [ ] Release <RELEASE_NUMBER> pushed to production (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to experimental channel (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to 1% (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to production (<CL submit time>)
 
 <!--
 If this release will become the next LTS release, add/update the checkboxes above as needed e.g.
 
 - [x] Release <RELEASE_NUMBER> will be the next LTS
-- [ ] Release <RELEASE_NUMBER> pushed to LTS (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to LTS (<CL submit time>)
 
 If you perform cherry picks, add/update the checkboxes above as needed e.g.
 
 - [ ] Release `[<CHERRY_PICK_RELEASE_NUMBER>](...)` created with cherry picks
-- [ ] Release <CHERRY_PICK_RELEASE_NUMBER> pushed to Experimental Channel
+- [ ] Release <CHERRY_PICK_RELEASE_NUMBER> promoted to Experimental Channel
 -->
 
 See the [release documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Experimental Channel.
