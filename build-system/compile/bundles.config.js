@@ -144,13 +144,13 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
-  'amp-story-embed.js': {
+  'amp-story-embed-manager.js': {
     srcDir: './src/',
-    srcFilename: 'amp-story-embed.js',
+    srcFilename: 'amp-story-embed-manager.js',
     destDir: './dist',
     minifiedDestDir: './dist',
     options: {
-      minifiedName: 'amp-story-embed-v0.js',
+      minifiedName: 'amp-story-embed-manager-v0.js',
       includePolyfills: false,
     },
   },

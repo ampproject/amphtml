@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {setStyle} from '../src/style';
+import {setStyle} from './style';
 
 /** @enum {string} */
 const LoadStateClass = {
-  LOADING: 'loading',
-  LOADED: 'loaded',
-  ERROR: 'error',
+  LOADING: 'i-amphtml-story-embed-loading',
+  LOADED: 'i-amphtml-story-embed-loaded',
+  ERROR: 'i-amphtml-story-embed-error',
 };
 
 /** @const {string} */
@@ -28,43 +28,52 @@ const CSS = `
   :host { all: initial; display: block; border-radius: 0 !important; width: 405px; height: 720px; overflow: auto; }
   .story { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
   main { display: flex; flex-direction: row; height: 100%; }
-  .loaded iframe { opacity: 1; }
+  .i-amphtml-story-embed-loaded iframe { opacity: 1; }
+  iframe[src=""] { display: none; }
 `;
+
+/** @const {boolean} */
+const isAMP = self.AMP && self.AMP.ampdoc;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
-export class AmpStoryEmbed {
+export class AmpStoryEmbedManager {
   /**
+   * @param {!Window} win
    * @param {!Document} doc
-   * @param {!Element} element
+   * @param {!Element} hostEl
    * @constructor
    */
-  constructor(doc, element) {
+  constructor(win, doc, hostEl) {
     console./*OK*/ assert(
-      element.childElementCount > 0,
+      hostEl.childElementCount > 0,
       'Missing configuration.'
     );
 
     /** @private {!Element} */
-    this.element_ = element;
+    this.hostEl_ = hostEl;
 
     /** @private {!Document} */
     this.doc_ = doc;
 
-    /** @private {!Array<!HTMLAnchorElement>} */
-    this.stories_ = Array.prototype.slice.call(element.querySelectorAll('a'));
+    /** @private {?Array<!HTMLAnchorElement>} */
+    this.stories_ = null;
 
     /** @private {?Element} */
-    this.rootEl_;
+    this.rootEl_ = null;
 
     /** @private {?HTMLIframeElement} */
-    this.iframeEl_;
+    this.iframeEl_ = null;
   }
 
   /** @public */
   build() {
+    this.stories_ = Array.prototype.slice.call(
+      this.hostEl_.querySelectorAll('a')
+    );
+
     this.initializeShadowRoot_();
 
     // TODO: Build all child iframes.
@@ -73,15 +82,15 @@ export class AmpStoryEmbed {
 
   /** @private */
   initializeShadowRoot_() {
+    this.rootEl_ = this.doc_.createElement('main');
+
     // Create shadow root
-    const shadowRoot = this.element_.attachShadow({mode: 'open'});
+    const shadowRoot = this.hostEl_.attachShadow({mode: 'open'});
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
     styleEl.textContent = CSS;
     shadowRoot.appendChild(styleEl);
-
-    this.rootEl_ = this.doc_.createElement('main');
     shadowRoot.appendChild(this.rootEl_);
   }
 
@@ -92,7 +101,6 @@ export class AmpStoryEmbed {
   buildIframe_(index) {
     const story = this.stories_[index];
     this.iframeEl_ = this.doc_.createElement('iframe');
-    this.iframeEl_.setAttribute('src', story.href);
     setStyle(
       this.iframeEl_,
       'backgroundImage',
@@ -109,19 +117,48 @@ export class AmpStoryEmbed {
 
     this.iframeEl_.onload = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
+      this.hostEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.LOADED);
+      this.hostEl_.classList.add(LoadStateClass.LOADED);
     };
     this.iframeEl_.onerror = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
+      this.hostEl_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.ERROR);
+      this.hostEl_.classList.add(LoadStateClass.ERROR);
     };
+  }
+
+  /**
+   * @return {!Promise}
+   * @public
+   */
+  layout() {
+    // TODO: Layout all child iframes.
+    return this.layoutIframe_(0);
+  }
+
+  /**
+   * @param {number} index
+   * @return {!Promise}
+   * @private
+   */
+  layoutIframe_(index) {
+    const story = this.stories_[index];
+    this.iframeEl_.setAttribute('src', story.href);
+    return Promise.resolve();
   }
 }
 
-const doc = self.document;
-const embeds = doc.getElementsByTagName('amp-story-embed');
-for (let i = 0; i < embeds.length; i++) {
-  const embed = embeds[i];
-  const embedImpl = new AmpStoryEmbed(doc, embed);
-  embedImpl.build();
-}
+self.onload = () => {
+  if (!isAMP) {
+    const doc = self.document;
+    const embeds = doc.getElementsByTagName('amp-story-embed');
+    for (let i = 0; i < embeds.length; i++) {
+      const embed = embeds[i];
+      const embedImpl = new AmpStoryEmbedManager(self, doc, embed);
+      embedImpl.build();
+      embedImpl.layout();
+    }
+  }
+};
