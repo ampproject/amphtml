@@ -138,7 +138,7 @@ export class PositionObserver {
       let j = 0, tempWin = parentWin;
       j < 10 &&
       // win can be null if the ad iframe is already destroyed
-      tempWin != null &&
+      tempWin &&
       tempWin != this.win_ &&
       tempWin != this.win_.top;
       j++, tempWin = tempWin.parent
