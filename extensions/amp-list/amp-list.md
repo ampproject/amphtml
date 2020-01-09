@@ -213,10 +213,16 @@ The `<amp-list>` element exposes a `refresh` action that other elements can refe
 
 ### Dynamic resizing
 
+[filter formats="websites, stories"]
 In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
+[/filter]<!-- formats="websites, stories" -->
+
+[filter formats="email"]
+In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
+[/filter]<!-- formats="email" -->
 
 ```html
-<button on="list.changeToLayoutContainer()">Show Grid</button>
+<button on="tap:list.changeToLayoutContainer()">Show Grid</button>
 <amp-list
   id="list"
   width="396"
@@ -232,20 +238,24 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 
 ## Attributes
 
-##### src (required)
+### src (required)
 
 The URL of the remote endpoint that returns the JSON that will be rendered
 within this `<amp-list>`. This must be a CORS HTTP service. The URL's protocol must be HTTPS.
 
-{% call callout('Important', type='caution') %}
+[tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://www.ampproject.org/docs/fundamentals/amp-cors-requests) spec.
-{% endcall %}
+[/tip]
 
 If fetching the data at the `src` URL fails, the `<amp-list>` triggers a low-trust `fetch-error` event.
 
+[filter formats="websites, stories"]
 The `src` attribute may be omitted if the `[src]` attribute exists. `[src]` supports URL and non-URL expression values; see `amp-list` in [`amp-bind` element specific attributes documentation](https://amp.dev/documentation/components/amp-bind/#element-specific-attributes) for details.
+[/filter]<!-- formats="websites, stories" -->
 
-##### credentials (optional)
+[filter formats="websites, stories"]
+
+### credentials (optional)
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
 
@@ -267,7 +277,9 @@ Here's an example that specifies including credentials to display personalized c
 </amp-list>
 ```
 
-##### items (optional)
+[/filter]<!-- formats="websites, stories" -->
+
+### items (optional)
 
 Defines the expression to locate the array to be rendered within the response. This is a dot-notated expression that navigates via fields of the JSON response.
 By defaut `<amp-list>` expects an array, the `single-item` attribute may be used to load data from an object.
@@ -284,17 +296,19 @@ When `items="items"` is specified (which, is the default) the response must be a
 }
 ```
 
-##### max-items (optional)
+### max-items (optional)
 
 An integer value specifying the maximum length of the items array to be rendered.
 The `items` array will be truncated to `max-items` entries if the returned value exceeds `max-items`.
 
-##### single-item (optional)
+### single-item (optional)
 
 Causes `<amp-list>` to treat the returned result as if it were a single element array. An object response will be wrapped in an array so
 `{items: {...}}` will behave as if it were `{items: [{...}]}`.
 
-##### xssi-prefix (optional)
+[filter formats="websites, stories"]
+
+### xssi-prefix (optional)
 
 Causes `<amp-list>` to strip a prefix from the fetched JSON before parsing. This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
@@ -310,13 +324,18 @@ We could instruct `amp-list` to remove the security prefix like so:
 <amp-list xssi-prefix=")]}" src="https://foo.com/list.json"></amp-list>
 ```
 
-##### reset-on-refresh (optional)
+[/filter]<!-- formats="websites, stories" -->
+
+[filter formats="websites, stories"]
+
+### reset-on-refresh (optional)
 
 Displays a loading indicator and placeholder again when the list's source is refreshed via `amp-bind` or the `refresh()` action.
 
 By default, this will only trigger on refreshes that cause a network fetch. To reset on all refreshes, use `reset-on-refresh="always"`.
+[/filter]<!-- formats="websites, stories" -->
 
-##### binding (optional)
+### binding (optional)
 
 For pages using `<amp-list>` that also use `amp-bind`, controls whether or not to block render on the evaluation of bindings (e.g. `[text]`) in rendered children.
 
@@ -328,9 +347,11 @@ We recommend using `binding="no"` or `binding="refresh"` for faster performance.
 
 If `binding` attribute is not provided, default is `always`.
 
+[filter formats="websites, stories"]
+
 <!-- prettier-ignore-start -->
 <!-- See: https://github.com/remarkjs/remark/issues/456 -->
-##### [is-layout-container] (optional)
+### [is-layout-container] (optional)
 <!-- prettier-ignore-end-->
 
 This is a bindable attribute that should always be `false` by default. When set to `true` via `amp-bind`, it changes the layout of the `<amp-list>` to `container`. This attribute is useful for handling dynamic resizing for amp-list.
@@ -339,9 +360,32 @@ This attribute cannot be true by default for the same reason why `<amp-list>` do
 
 Alternatively, one may also use the `changeToLayoutContainer` action.
 
-##### common attributes
+[/filter]<!-- formats="websites, stories" -->
+
+### Common attributes
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
+
+[filter formats="email"]
+
+##### Invalid AMP email attributes
+
+The AMP for Email spec disallows the use of the following attributes on the AMP email format.
+
+- `[src]`
+- `[state]`
+- `[is-layout-container]`
+- `auto-resize`
+- `credentials`
+- `data-amp-bind-src`
+- `load-more`
+- `load-more-bookmark`
+- `reset-on-refresh`
+- `xssi-prefix`
+
+[/filter] <!-- formats="email" -->
+
+[filter formats="websites, stories"]
 
 ## Load more and infinite scroll
 
@@ -510,6 +554,8 @@ For example:
 ```
 
 may make a request to something like `https://foo.com/list.json?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
+
+[/filter] <!-- formats="websites, stories" -->
 
 ## Validation
 
