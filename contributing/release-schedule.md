@@ -3,11 +3,11 @@
 - [Release Channels](#release-channels)
   - [Weekly](#weekly)
   - [Long-Term Stable (lts)](#long-term-stable-lts)
+  - [AMP Experimental and Beta Channels](#amp-experimental-and-beta-channels)
 - [Determining if your change is in a release](#determining-if-your-change-is-in-a-release)
 - [Release Cadence](#release-cadence)
   - [Detailed schedule](#detailed-schedule)
-  - [AMP Experimental and Beta Channels](#amp-experimental-and-beta-channels)
-- [Release Freezes](#release-freezes)
+  - [Release Freezes](#release-freezes)
 
 A new release of AMP is pushed to all AMP pages every week on Tuesday. **Once a change in AMP is merged into the master branch of the amphtml repository, it will typically take 1-2 weeks for the change be live for all users.**
 
@@ -42,27 +42,6 @@ You can determine what changes are in a given build using one of the following:
 
 > Note: These labels still use legacy release names. They will be renamed soon to reflect the new release channel names (**beta** and **stable**).
 
-## Release Cadence
-
-We are intentionally cautious with our release cadence.
-
-In determining how often we should push new versions of AMP to everyone, we have to weigh many factors including:
-
-- stability for the millions of sites/billions of pages built using AMP
-- cache busting that might happen when we push a new version
-- the desire to get new features out quickly
-
-After considering all of these factors we have arrived at the 1-2 week push cycle. Thus far we have found this to be a reasonable compromise, but we will continue to evaluate all of these factors and may make changes in the future.
-
-### Detailed schedule
-
-We try to stick to this schedule as closely as possible, though complications may cause delays. You can track the latest status about any release in the [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) and the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
-
-- Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.org/ampproject/amphtml/branches) and are pushed to users of AMP who opted into the [AMP Experimental Channel](#amp-experimental-and-beta-channels) or [AMP Beta Channel](#amp-experimental-and-beta-channels), respectively.
-- Wednesday: we check bug reports for _Experimental Channel_ and _Beta Channel_ users and if everything looks fine, we push the **beta** to 1% of AMP pages
-- Thursday-Monday: we continue to monitor error rates and bug reports for _Experimental Channel_ and _Beta Channel_ users and the 1% of pages with the **experimental**/**beta** builds
-- Tuesday the following week: the **beta** build is fully promoted to **stable** (i.e. all AMP pages will now use this build)
-
 ### AMP Experimental and Beta Channels
 
 The _AMP Experimental Channel_ is a way to opt a browser into using the **experimental** release build of the AMP JS libraries. The Experimental Channel_ **may be less stable** and it may contain features not yet available to all users.
@@ -92,7 +71,28 @@ To opt your browser into one of these channels, go to [the AMP experiments page]
   - include a URL to a page that reproduces the problem
 - ping the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)) with the issue you filed so we can delay the push of the _Experimental/Beta Channel_ version to production if needed
 
-## Release Freezes
+## Release Cadence
+
+We are intentionally cautious with our release cadence.
+
+In determining how often we should push new versions of AMP to everyone, we have to weigh many factors including:
+
+- stability for the millions of sites/billions of pages built using AMP
+- cache busting that might happen when we push a new version
+- the desire to get new features out quickly
+
+After considering all of these factors we have arrived at the 1-2 week push cycle. Thus far we have found this to be a reasonable compromise, but we will continue to evaluate all of these factors and may make changes in the future.
+
+### Detailed schedule
+
+We try to stick to this schedule as closely as possible, though complications may cause delays. You can track the latest status about any release in the [_Type: Release_ GitHub issues](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) and the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
+
+- Tuesday @ [11am Pacific](https://www.google.com/search?q=11am+pacific+in+current+time+zone): new **experimental** and **beta** release builds are created from the [latest master build that passes all of our tests](https://travis-ci.org/ampproject/amphtml/branches) and are pushed to users of AMP who opted into the [AMP Experimental Channel](#amp-experimental-and-beta-channels) or [AMP Beta Channel](#amp-experimental-and-beta-channels), respectively.
+- Wednesday: we check bug reports for _Experimental Channel_ and _Beta Channel_ users and if everything looks fine, we push the **beta** to 1% of AMP pages
+- Thursday-Monday: we continue to monitor error rates and bug reports for _Experimental Channel_ and _Beta Channel_ users and the 1% of pages with the **experimental**/**beta** builds
+- Tuesday the following week: the **beta** build is fully promoted to **stable** (i.e. all AMP pages will now use this build)
+
+### Release Freezes
 
 There are occasions when we will skip a release of AMP to production, known as a release freeze.
 
