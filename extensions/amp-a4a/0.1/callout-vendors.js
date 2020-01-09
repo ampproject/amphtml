@@ -72,8 +72,8 @@ const RTC_VENDORS = jsonConfiguration({
   },
   indexexchange: {
     url:
-      'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=CANONICAL_URL',
-    macros: ['SITE_ID'],
+      'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=CANONICAL_URL&consent_state=CONSENT_STATE&consent_string=CONSENT_STRING',
+    macros: ['SITE_ID', 'CONSENT_STATE', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
   lotame: {
