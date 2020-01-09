@@ -376,7 +376,7 @@ export class AmpList extends AMP.BaseElement {
       if (!isJsonScriptTag(ampStateEl.children[0])) {
         user().error(
           TAG,
-          `amp-state with id: ${ampStateEl} must have a json script tag as its first child.`
+          `In order to use amp-state with id ${ampStateId} as an initial source for amp-list, it must have a json script tag as its first child.`
         );
         return;
       }
@@ -385,7 +385,7 @@ export class AmpList extends AMP.BaseElement {
         if (!bind) {
           user().error(
             TAG,
-            'In order to point an amp-list at amp-state, amp-bind must be loaded'
+            'You must include amp-bind in order to use amp-state as an initial source for amp-list.'
           );
           return;
         }
@@ -396,6 +396,7 @@ export class AmpList extends AMP.BaseElement {
       this.element.setAttribute('src', '');
       dataPromise = Promise.resolve(src);
     }
+
     dataPromise.then(data => {
       const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
       this.resetIfNecessary_(/* isFetch */ false);
