@@ -795,26 +795,5 @@
       "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
       "loading_complete_selectors": [".i-amphtml-video-component"],
     },
-    {
-      "url": "examples/visual-tests/amp-next-page-v2/amp-next-page.load-fixed-article.html",
-      "name": "amp-next-page-v2.load-fixed-article",
-      "viewport": {"width": 800, "height": 600},
-      "loading_complete_selectors": [".i-amphtml-next-page"],
-      "enable_percy_javascript": true
-    },
-    {
-      "url": "examples/visual-tests/amp-next-page-v2/amp-next-page.load-short-article.html",
-      "name": "amp-next-page-v2.load-short-article",
-      "viewport": {"width": 800, "height": 600},
-      "loading_complete_selectors": [".i-amphtml-next-page"],
-      "enable_percy_javascript": true
-    },
-    {
-      "url": "examples/visual-tests/amp-next-page-v2/amp-next-page.scroll-too-fast.html",
-      "name": "amp-next-page-v2.scroll-too-fast",
-      "viewport": {"width": 800, "height": 600},
-      "loading_complete_selectors": [".i-amphtml-next-page"],
-      "enable_percy_javascript": true
-    },
   ]
 }
