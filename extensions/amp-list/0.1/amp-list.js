@@ -22,7 +22,7 @@ import {
   DIFF_IGNORE,
   DIFF_KEY,
   markElementForDiffing,
-} from '../../../src/sanitation';
+} from '../../../src/purifier/sanitation';
 import {Deferred} from '../../../src/utils/promise';
 import {
   Layout,
