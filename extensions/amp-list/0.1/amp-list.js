@@ -16,7 +16,6 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
-import {isExperimentOn} from '../../../src/experiments';
 import {CSS} from '../../../build/amp-list-0.1.css';
 import {
   DIFFABLE_AMP_ELEMENTS,
@@ -52,6 +51,7 @@ import {
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
@@ -62,6 +62,7 @@ import {
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 import {isArray, toArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
@@ -356,7 +357,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Array|!Object|string} data
+   * @param {!Array|!Object|string} src
    * @return {!Promise}
    */
   renderLocalData(src) {
@@ -364,30 +365,28 @@ export class AmpList extends AMP.BaseElement {
     if (typeof src === 'string') {
       const ampStatePath = src.trim().substring('amp-state:'.length);
       const ampStateId = ampStatePath.split('.')[0];
-      const ampStateEl = this.win.document.querySelector(`#${ampStateId}`);
+      const ampStateEl = this.win.document.querySelector(
+        escapeCssSelectorIdent(`#${ampStateId}`)
+      );
       if (!ampStateEl) {
-        user().error(
-          TAG,
-          'amp-state could not be found for id: %s',
-          ampStateId
-        );
-        return;
+        const errorMsg = `amp-state could not be found for id: ${ampStateId}`;
+        return Promise.reject(new Error(errorMsg));
       }
-      if (!isJsonScriptTag(ampStateEl.children[0])) {
-        user().error(
-          TAG,
-          `In order to use amp-state with id ${ampStateId} as an initial source for amp-list, it must have a json script tag as its first child.`
-        );
-        return;
+      if (
+        !ampStateEl.children ||
+        !ampStateEl.children[0] ||
+        !isJsonScriptTag(ampStateEl.children[0])
+      ) {
+        const errorMsg = `In order to use amp-state with id ${ampStateId} as an initial source for amp-list, it must have a json script tag as its first child.`;
+        return Promise.reject(user().createError(errorMsg));
       }
 
       dataPromise = Services.bindForDocOrNull(this.element).then(bind => {
         if (!bind) {
-          user().error(
+          throw user().createError(
             TAG,
             'You must include amp-bind in order to use amp-state as an initial source for amp-list.'
           );
-          return;
         }
         return bind.getState(ampStatePath);
       });
@@ -397,7 +396,7 @@ export class AmpList extends AMP.BaseElement {
       dataPromise = Promise.resolve(src);
     }
 
-    dataPromise.then(data => {
+    return dataPromise.then(data => {
       const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
       this.resetIfNecessary_(/* isFetch */ false);
       return this.scheduleRender_(array, /* append */ false);
