@@ -387,6 +387,8 @@ export class ResourcesImpl {
           return;
         }
 
+        // For just-unloaded resources, setInViewport() will be called
+        // as part of Resource.unlayout().
         r.setInViewport(isIntersecting);
 
         // TODO(willchou): The lack of "update on scroll throttling" means
