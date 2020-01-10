@@ -44,7 +44,7 @@ export function isStoryDocument(ampdoc, timeout = 2000) {
       body,
       () => !!body.firstElementChild
     );
-    // Timeout to avoid never resolving e.g. when the body has no children.
+    // Timeout to avoid never resolving e.g. the body has no element children.
     return Services.timerFor(ampdoc.win)
       .timeoutPromise(timeout, childPromise)
       .then(
