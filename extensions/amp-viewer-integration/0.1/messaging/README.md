@@ -1,6 +1,6 @@
 # AMP Viewer Messaging
 
-[![npm version](https://badge.fury.io/js/%40ampproject%2Fviewer-messaging.svg)](https://badge.fury.io/js/%40ampproject%2Fviewer-messaging)
+[![npm package](https://img.shields.io/npm/v/@ampproject/viewer-messaging)](https://www.npmjs.com/package/@ampproject/viewer-messaging)
 
 The AMP Viewer Messaging library allows an AMP Viewer to establish a
 communication channel with an AMP document.

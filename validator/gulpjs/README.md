@@ -1,6 +1,8 @@
 # Gulp AMPHTML Validator
 
-A Gulp plugin for validating [AMPHTML files](https://ampproject.org) using the official [AMPHTML Validator](https://www.npmjs.com/package/amphtml-validator).
+[![npm package](https://img.shields.io/npm/v/gulp-amphtml-validator)](https://www.npmjs.com/package/gulp-amphtml-validator)
+
+A Gulp plugin for validating [AMPHTML files](https://amp.dev) using the official [AMPHTML Validator](https://www.npmjs.com/package/amphtml-validator).
 
 ## Installation
 

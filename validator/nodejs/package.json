@@ -16,8 +16,10 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ampproject/amphtml/tree/master/validator/nodejs/"
+    "url": "https://github.com/ampproject/amphtml.git",
+    "directory": "validator/nodejs"
   },
+  "homepage": "https://github.com/ampproject/amphtml/tree/master/validator/nodejs",
   "bin": {
     "amphtml-validator": "index.js"
   },

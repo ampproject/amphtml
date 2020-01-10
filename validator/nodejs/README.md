@@ -1,5 +1,7 @@
 # amphtml-validator Node.js Package
 
+[![npm package](https://img.shields.io/npm/v/amphtml-validator)](https://www.npmjs.com/package/amphtml-validator)
+
 This package is published and available at
 https://www.npmjs.com/package/amphtml-validator.
 

@@ -16,6 +16,8 @@ limitations under the License.
 
 # amp-access-iframe-api
 
+[![npm package](https://img.shields.io/npm/v/amp-access-iframe-api)](https://www.npmjs.com/package/amp-access-iframe-api)
+
 The access iframe is an implementation of access protocol that
 supports both amp-access and amp-subscriptions.
 
