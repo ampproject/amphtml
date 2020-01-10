@@ -40,6 +40,15 @@ amp-consent {
   z-index: initial !important;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+
 /**
  * amp-hidden uses visiblity: hidden that does not propagate to shadow trees
  * because of amp-story-shadow-reset.css. Use display: none instead.

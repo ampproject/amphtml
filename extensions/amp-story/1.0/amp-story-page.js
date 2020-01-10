@@ -471,7 +471,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (this.isActive()) {
       this.advancement_.start();
-      this.maybeStartAnimations();
+      this.prefersReducedMotion_()
+        ? this.maybeFinishAnimations_()
+        : this.maybeStartAnimations_();
       this.checkPageHasAudio_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
@@ -512,13 +514,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     // On vertical rendering, render all the animations with their final state.
-    if (uiState === UIType.VERTICAL && this.animationManager_) {
-      this.signals()
-        .whenSignal(CommonSignals.LOAD_END)
-        .then(() => this.maybeApplyFirstAnimationFrame())
-        .then(() => {
-          this.animationManager_.finishAll();
-        });
+    if (uiState === UIType.VERTICAL) {
+      this.maybeFinishAnimations_();
     }
   }
 
@@ -1018,12 +1015,39 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Starts playing animations, if the animation manager is available.
+   * @private
    */
-  maybeStartAnimations() {
+  maybeStartAnimations_() {
     if (!this.animationManager_) {
       return;
     }
     this.animationManager_.animateIn();
+  }
+
+  /**
+   * Finishes playing animations instantly, if the animation manager is
+   * available.
+   * @private
+   */
+  maybeFinishAnimations_() {
+    if (!this.animationManager_) {
+      return;
+    }
+    this.signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => this.maybeApplyFirstAnimationFrame())
+      .then(() => {
+        this.animationManager_.finishAll();
+      });
+  }
+
+  /**
+   * Whether the device opted in prefers-reduced-motion.
+   * @return {boolean}
+   * @private
+   */
+  prefersReducedMotion_() {
+    return this.win.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   /**
