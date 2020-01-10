@@ -263,6 +263,10 @@ export class AmpList extends AMP.BaseElement {
       this.initializeLoadMoreElements_();
     }
 
+    if (this.isAmpStateSrc_(this.element.getAttribute('src'))) {
+      return this.renderLocalData_(this.element.getAttribute('src'));
+    }
+
     return this.fetchList_();
   }
 
@@ -371,7 +375,7 @@ export class AmpList extends AMP.BaseElement {
         escapeCssSelectorIdent(`#${ampStateId}`)
       );
       if (!ampStateEl) {
-        const errorMsg = `amp-state could not be found for id: ${ampStateId}`;
+        const errorMsg = `An amp-state element with id: ${ampStateId} could not be found.`;
         return Promise.reject(new Error(errorMsg));
       }
       if (
@@ -412,8 +416,8 @@ export class AmpList extends AMP.BaseElement {
 
     const src = mutations['src'];
     if (src !== undefined) {
-      if (typeof src === 'object' || this.isAmpStateSrc_(src)) {
-        promise = this.renderLocalData_(/** @type {!Object} */ (src));
+      if (typeof src === 'object') {
+        promise = this.renderLocalData_(src);
       } else if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
@@ -598,8 +602,6 @@ export class AmpList extends AMP.BaseElement {
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();
-    } else if (this.isAmpStateSrc_(elementSrc)) {
-      return this.renderLocalData_(elementSrc);
     }
 
     let fetch;

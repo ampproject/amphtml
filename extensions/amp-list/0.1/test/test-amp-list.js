@@ -1278,6 +1278,23 @@ describes.repeated(
                 .once();
               await list.layoutCallback();
             });
+
+            // Only valid for init.
+            it('should throw if setting [src] with "amp-state:" protocol.', async () => {
+              toggleExperiment(win, experimentName, true);
+              bind.getState = () => [1, 2, 3];
+
+              const ampStateEl = doc.createElement('amp-state');
+              ampStateEl.setAttribute('id', 'okapis');
+              const ampStateJson = doc.createElement('script');
+              ampStateJson.setAttribute('type', 'application/json');
+              ampStateEl.appendChild(ampStateJson);
+              doc.body.appendChild(ampStateEl);
+
+              expect(list.mutatedAttributesCallback({
+                'src': 'amp-state:okapis',
+              })).to.eventually.be.rejectedWith('Invalid value: amp-state:okapis');
+            });
           });
         }); // with amp-bind
       }
