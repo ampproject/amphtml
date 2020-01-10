@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-ad-attribution {
-  position: absolute;
-  bottom: 0 !important;
-  left: 0 !important;
-  max-height: 15px !important;
-  /* 1 greater than cta layer. */
-  z-index: 4 !important;
+export async function clickThroughPages(controller, numPages) {
+  for (let i = 0; i < numPages; i++) {
+    const page = await controller.findElement('[active]');
+    await controller.click(page);
+  }
 }
 
-.i-amphtml-story-ad-fullbleed.i-amphtml-story-ad-attribution {
-  /* Ad will be 75vh, align bottom of icon to bottom of ad. */
-  bottom: 12.5vh !important;
-  left: 50% !important;
-  transform: translateX(-22.5vh) !important;
+export async function switchToAdFrame(controller) {
+  const frame = await controller.findElement('#i-amphtml-ad-page-1 iframe');
+  await controller.switchToFrame(frame);
 }
