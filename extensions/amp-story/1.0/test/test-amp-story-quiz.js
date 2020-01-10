@@ -1,4 +1,3 @@
-/* eslint-disable google-camelcase/google-camelcase */
 /**
  * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
  *
@@ -244,7 +243,7 @@ describes.realWin(
         '.i-amphtml-story-quiz-option'
       );
 
-      // mock a successful data retrieval
+      // Mock a successful data retrieval.
       ampStoryQuiz.handleSuccessfulDataRetrieval_(getMockReactionData());
 
       expect(quizElement).to.have.class('i-amphtml-story-quiz-post-selection');

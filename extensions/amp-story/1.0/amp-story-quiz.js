@@ -41,10 +41,6 @@ const TAG = 'amp-story-quiz';
 /** @const {number} */
 const STORY_REACTION_TYPE_QUIZ = 0;
 
-/** @const {string} */
-const ENDPOINT_UNAVAILABLE_ERROR =
-  'The publisher has not specified a datastore endpoint';
-
 /**
  * @typedef {
  *    totalResponseCount: number,
@@ -148,7 +144,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       this.clientIdPromise_ = this.clientIdService_.then(data => {
         return data.get(
           {scope: 'amp-story', createCookieIfNotPresent: true},
-          Promise.resolve()
+          /* consent */ Promise.resolve()
         );
       });
     }
@@ -374,11 +370,14 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   retrieveReactionData_() {
     return this.executeReactionRequest_()
-      .then(response => this.handleSuccessfulDataRetrieval_(response))
-      .catch(error => {
-        if (error === ENDPOINT_UNAVAILABLE_ERROR) {
+      .then(response => {
+        if (response.hasNoEndpoint) {
           return;
         }
+
+        this.handleSuccessfulDataRetrieval_(response);
+      })
+      .catch(error => {
         dev().error(TAG, error);
       });
   }
@@ -391,24 +390,21 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   updateReactionData_(reactionValue) {
     this.executeReactionRequest_(reactionValue).catch(error => {
-      if (error === ENDPOINT_UNAVAILABLE_ERROR) {
-        return;
-      }
       dev().error(TAG, error);
     });
   }
 
   /**
-   * Executes a Reactions API call
+   * Executes a Reactions API call.
    *
    * @param {number} reactionValue
    * @return {Promise<JsonObject>}
    * @private
    */
   executeReactionRequest_(reactionValue) {
-    // TODO(jackbsteinberg): Add a default reactions endpoint
+    // TODO(jackbsteinberg): Add a default reactions endpoint.
     if (!this.element.hasAttribute('endpoint')) {
-      return Promise.reject(ENDPOINT_UNAVAILABLE_ERROR);
+      return Promise.resolve({hasNoEndpoint: true});
     }
 
     let URL = this.element.getAttribute('endpoint');
@@ -469,7 +465,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
       const selectedOptionKey = this.responseData_.data.find(
         response => response.selectedByUser
-      ).responseValue;
+      ).reactionValue;
 
       this.quizEl_
         .querySelectorAll('.i-amphtml-story-quiz-option')
