@@ -123,15 +123,37 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.quizEl_ = buildQuizTemplate(this.element);
-    this.adjustGridLayer_();
+    this.adjustLayout_();
     this.attachContent_();
-    this.initializeListeners_();
     createShadowRootWithStyle(this.element, this.quizEl_, CSS);
   }
 
   /** @override */
   layoutCallback() {
-    this.retrieveReactionData_();
+    this.handleReactionRetrieval_();
+  }
+
+  /**
+   * Retrieves quiz data and handles pre-load element interaction
+   *
+   * @private
+   */
+  handleReactionRetrieval_() {
+    // Catch pre-load tap events
+    const preloadTaps = [];
+    const preloadTapsListener = e => preloadTaps.push(e);
+    this.quizEl_.addEventListener('click', preloadTapsListener);
+
+    this.retrieveReactionData_().then(() => {
+      this.quizEl_.removeEventListener('click', preloadTapsListener);
+      this.initializeListeners_();
+
+      if (this.hasReceivedResponse_) {
+        return;
+      }
+
+      preloadTaps.forEach(tap => this.handleTap_(tap));
+    });
   }
 
   /**
@@ -180,11 +202,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /**
    * Add classes to adjust the bottom padding on the grid-layer
-   * to prevent overlap with the quiz.
+   * to prevent overlap with the quiz, and listen for RTL adjustments.
    *
    * @private
    */
-  adjustGridLayer_() {
+  adjustLayout_() {
     const gridLayer = closest(dev().assertElement(this.element), el => {
       return el.tagName.toLowerCase() === 'amp-story-grid-layer';
     });
@@ -198,6 +220,15 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     if (gridLayer.parentElement.querySelector('amp-story-page-attachment')) {
       gridLayer.classList.add('i-amphtml-story-has-page-attachment');
     }
+
+    // Add a listener for changes in the RTL state
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      rtlState => {
+        this.onRtlStateUpdate_(rtlState);
+      },
+      true /** callToInitialize */
+    );
   }
 
   /**
@@ -278,15 +309,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
-    // Add a listener for changes in the RTL state
-    this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
-      rtlState => {
-        this.onRtlStateUpdate_(rtlState);
-      },
-      true /** callToInitialize */
-    );
-
     // Add a click listener to the element to trigger the class change
     this.quizEl_.addEventListener('click', e => this.handleTap_(e));
   }
@@ -364,10 +386,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   /**
    * Get the Reaction data from the datastore
    *
+   * @return {Promise<JsonObject>}
    * @private
    */
   retrieveReactionData_() {
-    this.executeReactionRequest_()
+    return this.executeReactionRequest_()
       .then(response => this.handleSuccessfulDataRetrieval_(response))
       .catch(error => {
         if (error === ENDPOINT_UNAVAILABLE_ERROR) {
@@ -380,8 +403,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   /**
    * Update the Reaction data in the datastore
    *
-   * @private
    * @param {number} reactionValue
+   * @private
    */
   updateReactionData_(reactionValue) {
     this.executeReactionRequest_(reactionValue).catch(error => {
@@ -425,8 +448,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
         requestVars.reactionType
       }&reactionId=${encodeURIComponent(requestVars.reactionId)}`;
     }
-
-    console.log(URL, reactionValue);
 
     return this.getClientId_().then(clientId => {
       requestVars.clientId = clientId;
