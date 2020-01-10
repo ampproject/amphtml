@@ -129,12 +129,9 @@ export class AmpMustache extends BaseTemplate {
    * @private
    */
   purifyAndSetHtml_(html) {
-    const body = purifyHtml(html, this.win.document);
-    // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
-    // https://github.com/cure53/DOMPurify/pull/295
-    const root = this.win.document.createElement('div');
-    root./*OK*/ innerHTML = body./*OK*/ innerHTML;
-    return this.unwrap(root);
+    const body = purifyHtml(`<div>${html}</div>`, this.win.document);
+    const div = body.firstElementChild;
+    return this.unwrap(div);
   }
 }
 
