@@ -149,14 +149,7 @@ export class NextPageService {
       this.setLastFetchedPage(this.hostPage_);
     }
 
-    this.getPagesPromise_().then(pages => {
-      pages.forEach(page => {
-        validatePage(page, this.ampdoc_.getUrl());
-        this.pages_.push(
-          new Page(this, {url: page.url, title: page.title, image: page.image})
-        );
-      });
-    });
+    this.parseAndQueuePages_();
 
     this.getHostNextPageElement_().classList.add('i-amphtml-next-page');
 
@@ -231,7 +224,7 @@ export class NextPageService {
       .filter(page => page.isVisible())
       .forEach(page =>
         this.toggleHiddenAndReplaceableElements(
-          /** @type {!Document} */ (dev().assertElement(page.document))
+          /** @type {!Document|!ShadowRoot} */ (dev().assert(page.document))
         )
       );
   }
@@ -366,10 +359,15 @@ export class NextPageService {
    * @param {!Document} doc Document to attach.
    */
   sanitizeDoc(doc) {
-    // TODO(wassgha): Parse for more pages to queue
-
     // TODO(wassgha): Allow amp-analytics after bug bash
     toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
+
+    // Parse for more pages and queue them
+    toArray(doc.querySelectorAll('amp-next-page')).forEach(el => {
+      this.parseAndQueuePages_(el);
+      removeElement(el);
+    });
+
     // Make sure all hidden elements are initially invisible
     this.toggleHiddenAndReplaceableElements(doc, false /** isVisible */);
   }
@@ -377,7 +375,7 @@ export class NextPageService {
   /**
    * Hides or shows elements based on the `amp-next-page-hide` and
    * `amp-next-page-replace` attributes
-   * @param {!Document} doc Document to attach.
+   * @param {!Document|!ShadowRoot} doc Document to attach.
    * @param {boolean=} isVisible Whether this page is visible or not
    */
   toggleHiddenAndReplaceableElements(doc, isVisible = true) {
@@ -394,24 +392,24 @@ export class NextPageService {
     }
 
     // Replace elements that have [amp-next-page-replace]
-    toArray(doc.querySelectorAll('[amp-next-page-replace]')).forEach(
-      element => {
-        let uniqueId = element.getAttribute('amp-next-page-replace');
-        if (!uniqueId) {
-          uniqueId = String(Date.now() + Math.floor(Math.random() * 100));
-          element.setAttribute('amp-next-page-replace', uniqueId);
-        }
-
-        if (
-          this.replaceableElements_[uniqueId] &&
-          this.replaceableElements_[uniqueId] !== element
-        ) {
-          toggle(this.replaceableElements_[uniqueId], false /** opt_display */);
-        }
-        this.replaceableElements_[uniqueId] = element;
-        toggle(element, true /** opt_display */);
+    toArray(
+      doc.querySelectorAll('*:not(amp-next-page) [amp-next-page-replace]')
+    ).forEach(element => {
+      let uniqueId = element.getAttribute('amp-next-page-replace');
+      if (!uniqueId) {
+        uniqueId = String(Date.now() + Math.floor(Math.random() * 100));
+        element.setAttribute('amp-next-page-replace', uniqueId);
       }
-    );
+
+      if (
+        this.replaceableElements_[uniqueId] &&
+        this.replaceableElements_[uniqueId] !== element
+      ) {
+        toggle(this.replaceableElements_[uniqueId], false /** opt_display */);
+      }
+      this.replaceableElements_[uniqueId] = element;
+      toggle(element, true /** opt_display */);
+    });
   }
 
   /**
@@ -472,12 +470,49 @@ export class NextPageService {
   }
 
   /**
+   * Parses the amp-next-page element for inline or remote list of pages and
+   * add them to the queue
+   * @param {!Element=} element the container of the amp-next-page extension
+   * @private
+   */
+  parseAndQueuePages_(element = this.getHostNextPageElement_()) {
+    this.parsePages_(element).then(pages => {
+      pages.forEach(page => {
+        try {
+          validatePage(page, this.ampdoc_.getUrl());
+          // Prevent loops by checking if the page already exists
+          // we use initialUrl since the url can get updated if
+          // the page issues a redirect
+          if (this.pages_.some(p => p.initialUrl == page.url)) {
+            user().warn(TAG, 'Recommendation already queued');
+            return;
+          }
+          // Queue the page for fetching
+          this.pages_.push(
+            new Page(this, {
+              url: page.url,
+              title: page.title,
+              image: page.image,
+            })
+          );
+        } catch (e) {
+          user().error(TAG, 'Failed to queue page', e);
+        }
+      });
+      // To be safe, if the pages were parsed after the user
+      // finished scrolling
+      this.maybeFetchNext();
+    });
+  }
+
+  /**
+   * @param {!Element} element the container of the amp-next-page extension
    * @return {!Promise<Array>} List of pages to fetch
    * @private
    */
-  getPagesPromise_() {
-    const inlinePages = this.getInlinePages_(this.getHostNextPageElement_());
-    const src = this.element_.getAttribute('src');
+  parsePages_(element) {
+    const inlinePages = this.getInlinePages_(element);
+    const src = element.getAttribute('src');
     userAssert(
       inlinePages || src,
       '%s should contain a <script> child or a URL specified in [src]',

@@ -42,6 +42,8 @@ export class Page {
     this.title_ = meta.title;
     /** @private {string} */
     this.url_ = meta.url;
+    /** @private {string} */
+    this.initialUrl_ = meta.url;
     /** @private @const {string} */
     this.image_ = meta.image;
 
@@ -68,6 +70,11 @@ export class Page {
   }
 
   /** @return {string} */
+  get initialUrl() {
+    return this.initialUrl_;
+  }
+
+  /** @return {string} */
   get image() {
     return this.image_;
   }
@@ -82,12 +89,12 @@ export class Page {
     return this.relativePos_;
   }
 
-  /** @return {!Document|undefined} */
+  /** @return {!Document|!ShadowRoot|undefined} */
   get document() {
     if (!this.shadowDoc_) {
       return;
     }
-    return /** @type {!Document} */ (this.shadowDoc_.ampdoc.getRootNode());
+    return this.shadowDoc_.ampdoc.getRootNode();
   }
 
   /** @param {!ViewportRelativePos} position */
@@ -182,6 +189,8 @@ export class Page {
       })
       .catch(() => {
         this.state_ = PageState.FAILED;
+        // TOOD(wassgha): Silently skips this page, should we re-try or show an error state?
+        this.manager_.setLastFetchedPage(this);
       });
   }
 }
