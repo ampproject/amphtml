@@ -47,8 +47,8 @@ const ENDPOINT_UNAVAILABLE_ERROR =
 
 /**
  * @typedef {{
- *    total_response_count: number,
- *    has_user_responded: boolean,
+ *    totalResponseCount: number,
+ *    hasUserResponded: boolean,
  *    responses: !Object,
  * }}
  */
@@ -373,7 +373,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
         if (error === ENDPOINT_UNAVAILABLE_ERROR) {
           return;
         }
-        dev().error(error);
+        dev().error(TAG, error);
       });
   }
 
@@ -381,50 +381,55 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * Update the Reaction data in the datastore
    *
    * @private
-   * @param {number} reactionResponse
+   * @param {number} reactionValue
    */
-  updateReactionData_(reactionResponse) {
-    this.executeReactionRequest_(reactionResponse).catch(error => {
+  updateReactionData_(reactionValue) {
+    this.executeReactionRequest_(reactionValue).catch(error => {
       if (error === ENDPOINT_UNAVAILABLE_ERROR) {
         return;
       }
-      dev().error(error);
+      dev().error(TAG, error);
     });
   }
 
   /**
    * Executes a Reactions API call
    *
-   * @param {number} reactionResponse
+   * @param {number} reactionValue
    * @return {Promise<JsonObject>}
    * @private
    */
-  executeReactionRequest_(reactionResponse) {
+  executeReactionRequest_(reactionValue) {
     // TODO(jackbsteinberg): Add a default reactions endpoint
     if (!this.element.hasAttribute('endpoint')) {
       return Promise.reject(ENDPOINT_UNAVAILABLE_ERROR);
     }
 
-    const URL = this.element.getAttribute('endpoint');
+    let URL = this.element.getAttribute('endpoint');
 
     const requestVars = {
-      hasUserResponded: false,
       reactionType: STORY_REACTION_TYPE_QUIZ,
       reactionId: '', // combine url & attribute
     };
 
-    if (reactionResponse !== null) {
-      requestVars.reactionResponse = reactionResponse;
-      requestVars.hasUserResponded = true;
-    }
-
     const requestOptions = {
-      method: 'POST',
-      body: requestVars,
+      method: 'GET',
     };
 
+    if (reactionValue !== undefined) {
+      requestVars.reactionValue = reactionValue;
+      requestOptions.method = 'POST';
+      requestOptions.body = requestVars;
+    } else {
+      URL += `?reactionType=${
+        requestVars.reactionType
+      }&reactionId=${encodeURIComponent(requestVars.reactionId)}`;
+    }
+
+    console.log(URL, reactionValue);
+
     return this.getClientId_().then(clientId => {
-      requestVars.userId = clientId;
+      requestVars.clientId = clientId;
       return this.requestService_.executeRequest(URL, null, requestOptions);
     });
   }
@@ -434,36 +439,33 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    *
    * RESPONSE FORMAT
    * {
-   *  total_response_count: <number>
-   *  has_user_responded: <boolean>
-   *  responses: {
-   *    <response_id>: {
-   *      total_count:
-   *      selected_by_user:
+   *  totalResponseCount: <number>
+   *  hasUserResponded: <boolean>
+   *  responses: [
+   *    {
+   *      reactionValue:
+   *      totalCount:
+   *      selectedByUser:
    *    },
    *    ...
-   *  }
+   *  ]
    * }
    * @param {ReactionResponseType} response
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
     this.quizResponseData_ = {
-      totalCount: response.data.total_response_count,
+      totalCount: response.data.totalResponseCount,
       data: response.data.responses,
     };
 
-    this.hasReceivedResponse_ = response.data.has_user_responded;
+    this.hasReceivedResponse_ = response.data.hasUserResponded;
     if (this.hasReceivedResponse_) {
       this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
 
-      // Find selected option
-      let selectedOptionKey = -1;
-      Object.entries(this.quizResponseData_.data).forEach(kvPair => {
-        if (kvPair[1].selected_by_user) {
-          selectedOptionKey = kvPair[0];
-        }
-      });
+      const selectedOptionKey = this.quizResponseData_.data.find(
+        response => response.selectedByUser
+      ).responseValue;
 
       this.quizEl_
         .querySelectorAll('.i-amphtml-story-quiz-option')

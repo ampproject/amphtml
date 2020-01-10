@@ -64,24 +64,24 @@ const populateStandardQuizContent = (win, quizElement) => {
 const getMockReactionData = () => {
   return {
     data: {
-      total_response_count: 10,
-      has_user_responded: true,
+      totalResponseCount: 10,
+      hasUserResponded: true,
       responses: {
         0: {
-          total_count: 3,
-          selected_by_user: true,
+          totalCount: 3,
+          selectedByUser: true,
         },
         1: {
-          total_count: 3,
-          selected_by_user: false,
+          totalCount: 3,
+          selectedByUser: false,
         },
         2: {
-          total_count: 3,
-          selected_by_user: false,
+          totalCount: 3,
+          selectedByUser: false,
         },
         3: {
-          total_count: 1,
-          selected_by_user: false,
+          totalCount: 1,
+          selectedByUser: false,
         },
       },
     },
