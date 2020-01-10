@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {closestAncestorElementBySelector, waitForChild} from '../dom';
+import {Services} from '../services';
+import {closestAncestorElementBySelector, waitForChildPromise} from '../dom';
 
 /**
  * Checks if an element descends from `amp-story` in order to configure
@@ -30,20 +31,25 @@ export function descendsFromStory(element) {
 
 /**
  * Returns true if the document is an amp-story.
+ * Times out after `timeout` ms (default is 2000).
+ *
  * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ * @param timeout
  * @return {!Promise<boolean>}
  */
-export function isStoryDocument(ampdoc) {
-  return new Promise(resolve => {
-    ampdoc.waitForBodyOpen().then(() => {
-      const body = ampdoc.getBody();
-      waitForChild(
-        body,
-        () => !!body.firstElementChild,
-        () => {
-          resolve(body.firstElementChild.tagName === 'AMP-STORY');
-        }
+export function isStoryDocument(ampdoc, timeout = 2000) {
+  return ampdoc.waitForBodyOpen().then(() => {
+    const body = ampdoc.getBody();
+    const childPromise = waitForChildPromise(
+      body,
+      () => !!body.firstElementChild
+    );
+    // Timeout to avoid never resolving e.g. when the body has no children.
+    return Services.timerFor(ampdoc.win)
+      .timeoutPromise(timeout, childPromise)
+      .then(
+        () => body.firstElementChild.tagName === 'AMP-STORY',
+        () => false
       );
-    });
   });
 }
