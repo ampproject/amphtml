@@ -348,8 +348,9 @@ export class AmpList extends AMP.BaseElement {
    *
    * @param {string} src
    * @return {boolean}
+   * @private
    */
-  isAmpStateSrc(src) {
+  isAmpStateSrc_(src) {
     return (
       isExperimentOn(this.win, 'amp-list-init-from-state') &&
       startsWith(src, 'amp-state:')
@@ -359,8 +360,9 @@ export class AmpList extends AMP.BaseElement {
   /**
    * @param {!Array|!Object|string} src
    * @return {!Promise}
+   * @private
    */
-  renderLocalData(src) {
+  renderLocalData_(src) {
     let dataPromise;
     if (typeof src === 'string') {
       const ampStatePath = src.substring('amp-state:'.length);
@@ -410,8 +412,8 @@ export class AmpList extends AMP.BaseElement {
 
     const src = mutations['src'];
     if (src !== undefined) {
-      if (typeof src === 'object' || this.isAmpStateSrc(src)) {
-        promise = this.renderLocalData(/** @type {!Object} */ (src));
+      if (typeof src === 'object' || this.isAmpStateSrc_(src)) {
+        promise = this.renderLocalData_(/** @type {!Object} */ (src));
       } else if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
@@ -596,8 +598,8 @@ export class AmpList extends AMP.BaseElement {
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();
-    } else if (this.isAmpStateSrc(elementSrc)) {
-      return this.renderLocalData(elementSrc);
+    } else if (this.isAmpStateSrc_(elementSrc)) {
+      return this.renderLocalData_(elementSrc);
     }
 
     let fetch;
