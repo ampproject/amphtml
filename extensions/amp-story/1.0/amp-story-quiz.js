@@ -101,6 +101,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private {?Element} */
     this.quizEl_ = null;
 
+    /** @private {?Promise<JsonObject>} */
+    this.dataResponsePromise_ = null;
+
     /** @private {?Object} */
     this.quizResponseData_ = null;
 
@@ -113,47 +116,25 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
 
-    /** @private */
+    /** @private {?Promise<JsonObject>} */
     this.clientIdService_ = Services.cidForDoc(this.element);
 
-    /** @private */
+    /** @private {?Promise<JsonObject>} */
     this.clientIdPromise_ = null;
   }
 
   /** @override */
   buildCallback() {
     this.quizEl_ = buildQuizTemplate(this.element);
-    this.adjustLayout_();
+    this.adjustGridLayer_();
     this.attachContent_();
+    this.initializeListeners_();
     createShadowRootWithStyle(this.element, this.quizEl_, CSS);
   }
 
   /** @override */
   layoutCallback() {
-    this.handleReactionRetrieval_();
-  }
-
-  /**
-   * Retrieves quiz data and handles pre-load element interaction
-   *
-   * @private
-   */
-  handleReactionRetrieval_() {
-    // Catch pre-load tap events
-    const preloadTaps = [];
-    const preloadTapsListener = e => preloadTaps.push(e);
-    this.quizEl_.addEventListener('click', preloadTapsListener);
-
-    this.retrieveReactionData_().then(() => {
-      this.quizEl_.removeEventListener('click', preloadTapsListener);
-      this.initializeListeners_();
-
-      if (this.hasReceivedResponse_) {
-        return;
-      }
-
-      preloadTaps.forEach(tap => this.handleTap_(tap));
-    });
+    this.dataResponsePromise_ = this.retrieveReactionData_();
   }
 
   /**
@@ -206,7 +187,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    *
    * @private
    */
-  adjustLayout_() {
+  adjustGridLayer_() {
     const gridLayer = closest(dev().assertElement(this.element), el => {
       return el.tagName.toLowerCase() === 'amp-story-grid-layer';
     });
@@ -220,15 +201,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     if (gridLayer.parentElement.querySelector('amp-story-page-attachment')) {
       gridLayer.classList.add('i-amphtml-story-has-page-attachment');
     }
-
-    // Add a listener for changes in the RTL state
-    this.storeService_.subscribe(
-      StateProperty.RTL_STATE,
-      rtlState => {
-        this.onRtlStateUpdate_(rtlState);
-      },
-      true /** callToInitialize */
-    );
   }
 
   /**
@@ -309,6 +281,15 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   initializeListeners_() {
+    // Add a listener for changes in the RTL state
+    this.storeService_.subscribe(
+      StateProperty.RTL_STATE,
+      rtlState => {
+        this.onRtlStateUpdate_(rtlState);
+      },
+      true /** callToInitialize */
+    );
+
     // Add a click listener to the element to trigger the class change
     this.quizEl_.addEventListener('click', e => this.handleTap_(e));
   }
@@ -371,16 +352,18 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   handleOptionSelection_(optionEl) {
-    this.triggerAnalytics_(optionEl);
+    this.dataResponsePromise_.then(() => {
+      this.triggerAnalytics_(optionEl);
 
-    this.mutateElement(() => {
-      optionEl.classList.add('i-amphtml-story-quiz-option-selected');
-      this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
+      this.mutateElement(() => {
+        optionEl.classList.add('i-amphtml-story-quiz-option-selected');
+        this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
 
-      this.hasReceivedResponse_ = true;
+        this.hasReceivedResponse_ = true;
+      });
+
+      this.updateReactionData_(optionEl.optionIndex_);
     });
-
-    this.updateReactionData_(optionEl.optionIndex_);
   }
 
   /**
