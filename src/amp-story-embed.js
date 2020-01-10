@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {Messaging} from '@ampproject/viewer-messaging';
+import {parseUrlDeprecated} from './url';
 import {setStyle} from './style';
 import {toArray} from './types';
 
@@ -30,6 +32,58 @@ const CSS = `
   .story { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
   main { display: flex; flex-direction: row; height: 100%; }
   .i-amphtml-story-embed-loaded iframe { opacity: 1; }`;
+
+/** @const {string} */
+const TAG = '[AMP-STORY-EMBED]';
+
+/**
+ * Logging.
+ */
+function log() {
+  const var_args = toArray(arguments);
+  var_args.unshift(TAG);
+  console /*OK*/.log
+    .apply(console, var_args);
+}
+
+/**
+ * Gets encoded url for viewer usage.
+ * @param {string} href
+ * @return {!Location}
+ */
+function getEncodedUrl(href) {
+  const params = {
+    visibilityState: 'inactive',
+    origin: parseUrlDeprecated(self.location.href).origin,
+  };
+  log('Params: ' + JSON.stringify(params));
+
+  let inputUrl = href + '?amp_js_v=0.1#' + encodeUrl(params);
+  if (self.location.hash && self.location.hash.length > 1) {
+    inputUrl += '&' + self.location.hash.substring(1);
+  }
+  return parseUrlDeprecated(inputUrl);
+}
+
+/**
+ * Encodes string of URL parameters.
+ * @param {!Object} params
+ * @return {string}
+ */
+function encodeUrl(params) {
+  let encodedParams = '';
+  for (const name in params) {
+    const value = params[name];
+    if (value === null || value === undefined) {
+      continue;
+    }
+    if (encodedParams.length > 0) {
+      encodedParams += '&';
+    }
+    encodedParams += encodeURIComponent(name) + '=' + encodeURIComponent(value);
+  }
+  return encodedParams;
+}
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -61,6 +115,9 @@ export class AmpStoryEmbed {
 
     /** @private {?HTMLIframeElement} */
     this.iframeEl_ = null;
+
+    /** @private {boolean} */
+    this.isLaidOut_ = false;
   }
 
   /** @public */
@@ -69,8 +126,9 @@ export class AmpStoryEmbed {
 
     this.initializeShadowRoot_();
 
-    // TODO: Build all child iframes.
-    this.buildIframe_(0);
+    this.stories_.forEach(story => {
+      this.buildIframe_(story);
+    });
   }
 
   /** @private */
@@ -88,11 +146,10 @@ export class AmpStoryEmbed {
   }
 
   /**
-   * @param {number} index
+   * @param {!Element} story
    * @private
    */
-  buildIframe_(index) {
-    const story = this.stories_[index];
+  buildIframe_(story) {
     this.iframeEl_ = this.doc_.createElement('iframe');
     setStyle(
       this.iframeEl_,
@@ -102,6 +159,37 @@ export class AmpStoryEmbed {
     this.iframeEl_.classList.add('story');
     this.initializeLoadingListeners_();
     this.rootEl_.appendChild(this.iframeEl_);
+    this.initializeHandshake_(story);
+  }
+
+  /**
+   * @param {!Element} story
+   * @private
+   */
+  initializeHandshake_(story) {
+    const frameOrigin = getEncodedUrl(story.href).origin;
+
+    Messaging.waitForHandshakeFromDocument(
+      self,
+      this.iframeEl_.contentWindow,
+      frameOrigin
+    ).then(
+      messaging => {
+        // TODO(Enriqe): Appropiately set visibility to stories.
+        messaging.sendRequest('visibilitychange', {state: 'visible'}, true);
+        messaging.setDefaultHandler(() => {
+          // TODO(Enriqe): Set default handler.
+        });
+        messaging.registerHandler('moreInfoLinkUrl', () => {
+          // TODO(Enriqe): Get publisher defined `moreInfoLinkUrl` (could come
+          // from an attribute in the <amp-story-embed> element.
+          return Promise.resolve('');
+        });
+      },
+      err => {
+        log(err);
+      }
+    );
   }
 
   /** @private  */
@@ -123,23 +211,32 @@ export class AmpStoryEmbed {
   }
 
   /**
-   * @return {!Promise}
    * @public
    */
   layoutCallback() {
-    // TODO: Layout all child iframes.
-    return this.layoutIframe_(0);
+    if (this.isLaidOut_) {
+      return;
+    }
+
+    const iframes = toArray(this.rootEl_.querySelectorAll('iframe'));
+    this.stories_.forEach((story, idx) => {
+      this.layoutIframe_(story, iframes[idx]);
+    });
+    this.isLaidOut_ = true;
   }
 
   /**
-   * @param {number} index
-   * @return {!Promise}
+   * @param {!Element} story
+   * @param {!Element} iframe
    * @private
    */
-  layoutIframe_(index) {
-    const story = this.stories_[index];
-    this.iframeEl_.setAttribute('src', story.href);
-    return Promise.resolve();
+  layoutIframe_(story, iframe) {
+    this.stories_ = toArray(this.element_.querySelectorAll('a'));
+
+    const url = getEncodedUrl(story.href).href;
+    log('AMP URL = ', url);
+
+    iframe.setAttribute('src', url);
   }
 }
 
@@ -150,7 +247,18 @@ self.onload = () => {
     const embed = embeds[i];
     const embedImpl = new AmpStoryEmbed(self, embed);
     embedImpl.buildCallback();
-    // TODO(Enriqe): add intersection observer that triggers layoutCallback().
-    embedImpl.layoutCallback();
+
+    const intersectingCallback = entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+        embedImpl.layoutCallback();
+      });
+    };
+    const observer = new IntersectionObserver(intersectingCallback, {
+      threshold: 0.5,
+    });
+    observer.observe(embed);
   }
 };

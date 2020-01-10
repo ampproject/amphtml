@@ -12,6 +12,11 @@
   resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.23.2.tgz#9b27a6b96125ddca58ebef302d7d05dc6080d689"
   integrity sha512-+L2MCofSaFqTyGlp5FxqoH2JuiuHJkxVuLyim2RpMsnj9CVcfNlCdNwn2KqROw9kFnJp8gnZ7c8voqwD6yDwEg==
 
+"@ampproject/viewer-messaging@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/viewer-messaging/-/viewer-messaging-1.1.0.tgz#404f92c5754bac61014ed2272dd5e87174b9af84"
+  integrity sha512-SoR1dGl2Pl8eJlyGCU/9Gz/orOggmW/13wUh7NnuGvDYqLdlhnRBzvEGqEAlq/fQKel9ZM6RNtu85Jw8WC3K2Q==
+
 "@ava/babel-plugin-throws-helper@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@ava/babel-plugin-throws-helper/-/babel-plugin-throws-helper-4.0.0.tgz#8f5b45b7a0a79c6f4032de2101e0c221847efb62"
