@@ -41,6 +41,7 @@ import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;
+const NEAR_BOTTOM_VIEWPORT_COUNT = 1;
 
 /** @enum */
 export const Direction = {UP: 1, DOWN: -1};
@@ -308,8 +309,8 @@ export class NextPageService {
    */
   appendAndObservePage(page, doc) {
     // If the user already scrolled to the bottom, prevent rendering
-    if (this.getViewportsAway_() <= 1) {
-      // TODO(wassgha): Append a "load next article" button
+    if (this.getViewportsAway_() <= NEAR_BOTTOM_VIEWPORT_COUNT) {
+      // TODO(wassgha): Append a "load next article" button?
       return null;
     }
 
