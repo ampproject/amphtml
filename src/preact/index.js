@@ -27,7 +27,7 @@ import * as preact from /*OK*/ 'preact';
  * @return {!Preact.VNode}
  */
 export function createElement(unusedType, unusedProps, var_args) {
-  return preact.createElement.apply(null, arguments);
+  return preact.createElement.apply(undefined, arguments);
 }
 
 /**
@@ -35,7 +35,7 @@ export function createElement(unusedType, unusedProps, var_args) {
  * @param {Node} container
  */
 export function render(vnode, container) {
-  preact.render(vnode, container, null);
+  preact.render(vnode, container, undefined);
 }
 
 /**
@@ -47,7 +47,7 @@ export function Fragment(props) {
 }
 
 /**
- * @return {{current: T}}
+ * @return {{current: (T|null)}}
  * @template T
  */
 export function createRef() {
@@ -75,8 +75,8 @@ export function useState(initial) {
 }
 
 /**
- * @param {T} initial
- * @return {{current: T}}
+ * @param {T|null} initial
+ * @return {{current: (T|null)}}
  * @template T
  */
 export function useRef(initial) {

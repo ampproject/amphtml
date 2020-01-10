@@ -15,6 +15,7 @@
  */
 
 import {createElement, useContext, useEffect, useRef} from './index';
+import {dev} from '../log';
 import {getAmpContext} from './context';
 import {matches} from '../dom';
 import {toArray} from '../types';
@@ -43,7 +44,7 @@ export function Slot(props) {
   const ref = useRef(null);
   const slotProps = {...props, ref};
   useEffect(() => {
-    const slot = ref.current;
+    const slot = dev().assertElement(ref.current);
     const assignedElements = getAssignedElements(props, slot);
     slot.__assignedElements = assignedElements;
 
@@ -134,7 +135,7 @@ export function Slot(props) {
   // run every render.
   useMountEffect(() => {
     return () => {
-      const slot = ref.current;
+      const slot = dev().assertElement(ref.current);
       const affectedNodes = [];
       getAssignedElements(props, slot).forEach(node => {
         affectedNodes.push.apply(affectedNodes, getAmpElements(node));
@@ -194,7 +195,7 @@ function getAmpElements(root) {
 
 /**
  * @param {!Object} props
- * @param {!Node} slotElement
+ * @param {!Element} slotElement
  * @return {!Array<!Element>}
  */
 function getAssignedElements(props, slotElement) {

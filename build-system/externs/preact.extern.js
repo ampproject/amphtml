@@ -17,7 +17,7 @@
 /** @externs */
 
 /** @const */
-var preact = {}
+var Preact = {}
 
 /**
  * @typedef {function(!JsonObject):Preact.Renderable}
@@ -46,11 +46,11 @@ Preact.Context.prototype.Provider = function(props) {};
 Preact.Context.prototype.Consumer = function() {};
 
 /**
- * @typedef {string|number|boolean|null|undefined|Preact.VNode|Preact.RenderableArray}
+ * @typedef {string|number|boolean|null|undefined}
  */
-Preact.Renderable;
+Preact.SimpleRenderable;
 
 /**
- * @typedef {!Array<Preact.Renderable>}
+ * @typedef {Preact.SimpleRenderable|!Preact.VNode|!Array<Preact.SimpleRenderable|!Preact.VNode|!Array<Preact.SimpleRenderable|!Preact.VNode>>}
  */
-Preact.RenderableArray;
+Preact.Renderable;
