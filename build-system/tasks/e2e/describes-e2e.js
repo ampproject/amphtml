@@ -551,11 +551,11 @@ async function getDriver(
   deviceName
 ) {
   if (engine == 'puppeteer') {
-    return createPuppeteer({headless});
+    return await createPuppeteer({headless});
   }
 
   if (engine == 'selenium') {
-    return createSelenium(browserName, {headless}, deviceName);
+    return await createSelenium(browserName, {headless}, deviceName);
   }
 }
 
