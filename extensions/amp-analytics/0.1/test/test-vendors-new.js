@@ -72,9 +72,6 @@ describes.realWin(
 
     describe('vendor request tests', () => {
       for (const vendor in VENDOR_REQUESTS) {
-        if (vendor !== 'captainmetrics') {
-          continue;
-        }
         describe('analytics vendor: ' + vendor, function() {
           let config;
           let analytics;
@@ -125,16 +122,8 @@ describes.realWin(
                 const keys = Object.keys(merged);
                 for (let i = 0; i < keys.length; i++) {
                   const key = keys[i];
-                  merged[key] = () => {
-                    key = key.replace('$', '');
-
-                    const trailing = arguments
-                      ? `(${Array.prototype.slice.call(arguments).join(',')})`
-                      : '';
-                    console.log(arguments[0]);
-                    console.log(arguments[1]);
-                    console.log(trailing);
-                    return `_${key}_${trailing}`;
+                  merged[key] = (opt_param, opt_param2, opt_param3) => {
+                    return `_${key.replace('$', '')}_`;
                   };
                 }
                 return /** @type {!JsonObject} */ (merged);
@@ -196,7 +185,7 @@ describes.realWin(
               // Write this out for easy copy pasting.
               if (url !== val) {
                 throw new Error(
-                  `Vendor ${vendor}, request ${name} doesn't match` +
+                  `Vendor ${vendor}, request ${name} doesn't match. ` +
                     `Expected value ${val}, get value ${url}`
                 );
               }
