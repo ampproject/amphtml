@@ -372,10 +372,11 @@ export class AmpList extends AMP.BaseElement {
       const ampStatePath = src.substring('amp-state:'.length);
       const ampStateId = ampStatePath.split('.')[0];
       const ampStateEl = this.win.document.querySelector(
-        escapeCssSelectorIdent(`#${ampStateId}`)
+        `#${escapeCssSelectorIdent(ampStateId)}`
       );
       if (!ampStateEl) {
         const errorMsg = `An amp-state element with id: ${ampStateId} could not be found.`;
+        user().error(TAG, errorMsg);
         return Promise.reject(new Error(errorMsg));
       }
       if (
@@ -384,6 +385,7 @@ export class AmpList extends AMP.BaseElement {
         !isJsonScriptTag(ampStateEl.children[0])
       ) {
         const errorMsg = `In order to use amp-state with id ${ampStateId} as an initial source for amp-list, it must have a json script tag as its first child.`;
+        user().error(TAG, errorMsg);
         return Promise.reject(user().createError(errorMsg));
       }
 
@@ -416,8 +418,13 @@ export class AmpList extends AMP.BaseElement {
 
     const src = mutations['src'];
     if (src !== undefined) {
-      if (typeof src === 'object') {
+      if (typeof src === 'object' && src !== null) {
         promise = this.renderLocalData_(src);
+      } else if (typeof src === 'string' && this.isAmpStateSrc_(src)) {
+        this.user().error(
+          TAG,
+          'When using src as a bound attribute, you should use bind expressions instead of "amp-state:" syntax.'
+        );
       } else if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {

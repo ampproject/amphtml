@@ -892,11 +892,11 @@ describes.repeated(
 
           // Unlike [src] mutations with URLs, local data mutations should
           // always render immediately.
-          it('should render if [src] mutates with data (before layout)', () => {
+          it('should render if [src] mutates with data (before layout)', async () => {
             listMock.expects('scheduleRender_').once();
 
             element.setAttribute('src', 'https://new.com/list.json');
-            list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});
+            await list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});
             // `src` attribute should still be set to empty string.
             expect(element.getAttribute('src')).to.equal('');
           });
@@ -1204,7 +1204,7 @@ describes.repeated(
             });
           });
 
-          describe('Initialized by amp-state', () => {
+          describe.only('Initialized by amp-state', () => {
             const experimentName = 'amp-list-init-from-state';
 
             beforeEach(() => {
@@ -1225,7 +1225,7 @@ describes.repeated(
 
             it('should throw an error if amp-state does not exist in the HTML', async () => {
               toggleExperiment(win, experimentName, true);
-              const errorMsg = 'amp-state could not be found';
+              const errorMsg = 'An amp-state element with id';
               expectAsyncConsoleError(errorMsg);
               return expect(
                 list.layoutCallback()
@@ -1235,7 +1235,7 @@ describes.repeated(
             it('should throw if the amp-state does not have a json child', () => {
               toggleExperiment(win, experimentName, true);
 
-              const ampStateEl = doc.createElement('amp-script');
+              const ampStateEl = doc.createElement('amp-state');
               ampStateEl.setAttribute('id', 'okapis');
               doc.body.appendChild(ampStateEl);
 
@@ -1280,7 +1280,7 @@ describes.repeated(
             });
 
             // Only valid for init.
-            it('should throw if setting [src] with "amp-state:" protocol.', async () => {
+            it('should throw if setting [src] to an amp-state protocol.', async () => {
               toggleExperiment(win, experimentName, true);
               bind.getState = () => [1, 2, 3];
 
@@ -1291,9 +1291,14 @@ describes.repeated(
               ampStateEl.appendChild(ampStateJson);
               doc.body.appendChild(ampStateEl);
 
-              expect(list.mutatedAttributesCallback({
-                'src': 'amp-state:okapis',
-              })).to.eventually.be.rejectedWith('Invalid value: amp-state:okapis');
+              listMock.expects('scheduleRender_').returns(Promise.resolve());
+              expectAsyncConsoleError('When using src as a bound attribute');
+              await list.layoutCallback();
+              expect(
+                list.mutatedAttributesCallback({
+                  'src': 'amp-state:okapis',
+                })
+              ).to.be.undefined;
             });
           });
         }); // with amp-bind
