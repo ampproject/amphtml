@@ -383,6 +383,7 @@ const forbiddenTerms = {
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
       'extensions/amp-consent/0.1/consent-ui.js',
+      'extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
