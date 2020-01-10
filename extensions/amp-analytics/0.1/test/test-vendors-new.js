@@ -49,26 +49,26 @@ describes.realWin(
       requestVerifier = new ImagePixelVerifier(wi);
     });
 
-    // describe('Should not contain iframe transport if not whitelisted', () => {
-    //   for (const vendor in VENDOR_REQUESTS) {
-    //     it('test vendor: ' + vendor, () => {
-    //       const el = doc.createElement('amp-analytics');
-    //       el.setAttribute('type', vendor);
-    //       doc.body.appendChild(el);
-    //       const analyticsConfig = new AnalyticsConfig(el);
-    //       return analyticsConfig.loadConfig().then(config => {
-    //         if (
-    //           hasOwn(config, 'transport') &&
-    //           hasOwn(config.transport, 'iframe')
-    //         ) {
-    //           expect(config['transport']['iframe']).to.equal(
-    //             IFRAME_TRANSPORTS[vendor]
-    //           );
-    //         }
-    //       });
-    //     });
-    //   }
-    // });
+    describe('Should not contain iframe transport if not whitelisted', () => {
+      for (const vendor in VENDOR_REQUESTS) {
+        it('test vendor: ' + vendor, () => {
+          const el = doc.createElement('amp-analytics');
+          el.setAttribute('type', vendor);
+          doc.body.appendChild(el);
+          const analyticsConfig = new AnalyticsConfig(el);
+          return analyticsConfig.loadConfig().then(config => {
+            if (
+              hasOwn(config, 'transport') &&
+              hasOwn(config.transport, 'iframe')
+            ) {
+              expect(config['transport']['iframe']).to.equal(
+                IFRAME_TRANSPORTS[vendor]
+              );
+            }
+          });
+        });
+      }
+    });
 
     describe('vendor request tests', () => {
       for (const vendor in VENDOR_REQUESTS) {
@@ -186,7 +186,7 @@ describes.realWin(
               if (url !== val) {
                 throw new Error(
                   `Vendor ${vendor}, request ${name} doesn't match. ` +
-                    `Expected value ${val}, get value ${url}`
+                    `Expected value ${val}, get value ${url}.`
                 );
               }
               expect(url).to.equal(val);
