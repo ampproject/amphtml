@@ -34,7 +34,7 @@ export function descendsFromStory(element) {
  * Times out after `timeout` ms (default is 2000).
  *
  * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
- * @param timeout
+ * @param {number=} timeout
  * @return {!Promise<boolean>}
  */
 export function isStoryDocument(ampdoc, timeout = 2000) {
