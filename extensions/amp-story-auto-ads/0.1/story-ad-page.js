@@ -538,11 +538,10 @@ export class StoryAdPage {
       return;
     }
 
-    this.adChoicesIcon_.classList.remove(DESKTOP_FULLBLEED_CLASS);
-
-    if (uiState === UIType.DESKTOP_FULLBLEED) {
-      this.adChoicesIcon_.classList.add(DESKTOP_FULLBLEED_CLASS);
-    }
+    this.adChoicesIcon_.classList.toggle(
+      DESKTOP_FULLBLEED_CLASS,
+      uiState === UIType.DESKTOP_FULLBLEED
+    );
   }
 
   /**
