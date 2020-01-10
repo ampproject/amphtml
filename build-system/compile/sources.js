@@ -46,7 +46,7 @@ const COMMON_GLOBS = [
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
   'node_modules/web-animations-js/package.json',
-  'node_modules/rrule/dist/esm/src/**/*.js',
+  'node_modules/rrule/dist/es5/**/*.js',
   'node_modules/rrule/package.json',
   'node_modules/tslib/tslib.es6.js',
   'node_modules/tslib/package.json',
