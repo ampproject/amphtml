@@ -352,7 +352,7 @@ export class AmpList extends AMP.BaseElement {
   isAmpStateSrc(src) {
     return (
       isExperimentOn(this.win, 'amp-list-init-from-state') &&
-      startsWith(src.trim(), 'amp-state:')
+      startsWith(src, 'amp-state:')
     );
   }
 
@@ -363,7 +363,7 @@ export class AmpList extends AMP.BaseElement {
   renderLocalData(src) {
     let dataPromise;
     if (typeof src === 'string') {
-      const ampStatePath = src.trim().substring('amp-state:'.length);
+      const ampStatePath = src.substring('amp-state:'.length);
       const ampStateId = ampStatePath.split('.')[0];
       const ampStateEl = this.win.document.querySelector(
         escapeCssSelectorIdent(`#${ampStateId}`)
