@@ -46,11 +46,11 @@ const ENDPOINT_UNAVAILABLE_ERROR =
   'The publisher has not specified a datastore endpoint';
 
 /**
- * @typedef {{
+ * @typedef {
  *    totalResponseCount: number,
  *    hasUserResponded: boolean,
  *    responses: !Object,
- * }}
+ * }
  */
 export let ReactionResponseType;
 
@@ -95,32 +95,32 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
+    /** @private {?Promise<JsonObject>} */
+    this.clientIdService_ = Services.cidForDoc(this.element);
+
+    /** @private {?Promise<JsonObject>} */
+    this.clientIdPromise_ = null;
+
     /** @private {boolean} */
-    this.hasReceivedResponse_ = false;
+    this.hasUserSelection_ = false;
 
     /** @private {?Element} */
     this.quizEl_ = null;
 
-    /** @private {?Promise<JsonObject>} */
-    this.dataResponsePromise_ = null;
-
-    /** @private {?Object} */
-    this.quizResponseData_ = null;
-
     /** @private {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
+
+    /** @private {?Promise<JsonObject>} */
+    this.responseDataPromise_ = null;
+
+    /** @private {?Object} */
+    this.responseData_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
 
     /** @const @private {!./variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
-
-    /** @private {?Promise<JsonObject>} */
-    this.clientIdService_ = Services.cidForDoc(this.element);
-
-    /** @private {?Promise<JsonObject>} */
-    this.clientIdPromise_ = null;
   }
 
   /** @override */
@@ -134,7 +134,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.dataResponsePromise_ = this.retrieveReactionData_();
+    this.responseDataPromise_ = this.retrieveReactionData_();
   }
 
   /**
@@ -301,7 +301,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   handleTap_(e) {
-    if (this.hasReceivedResponse_) {
+    if (this.hasUserSelection_) {
       return;
     }
 
@@ -352,14 +352,14 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   handleOptionSelection_(optionEl) {
-    this.dataResponsePromise_.then(() => {
+    this.responseDataPromise_.then(() => {
       this.triggerAnalytics_(optionEl);
 
       this.mutateElement(() => {
         optionEl.classList.add('i-amphtml-story-quiz-option-selected');
         this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
 
-        this.hasReceivedResponse_ = true;
+        this.hasUserSelection_ = true;
       });
 
       this.updateReactionData_(optionEl.optionIndex_);
@@ -458,16 +458,16 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
-    this.quizResponseData_ = {
+    this.responseData_ = {
       totalCount: response.data.totalResponseCount,
       data: response.data.responses,
     };
 
-    this.hasReceivedResponse_ = response.data.hasUserResponded;
-    if (this.hasReceivedResponse_) {
+    this.hasUserSelection_ = response.data.hasUserResponded;
+    if (this.hasUserSelection_) {
       this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
 
-      const selectedOptionKey = this.quizResponseData_.data.find(
+      const selectedOptionKey = this.responseData_.data.find(
         response => response.selectedByUser
       ).responseValue;
 
