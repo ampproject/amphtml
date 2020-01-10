@@ -444,10 +444,6 @@ export class AmpStory extends AMP.BaseElement {
       this.element.removeChild(node);
     });
 
-    if (this.viewerMessagingHandler_) {
-      this.viewerMessagingHandler_.startListening();
-    }
-
     if (isExperimentOn(this.win, 'amp-story-branching')) {
       this.registerAction('goToPage', invocation => {
         const {args} = invocation;
@@ -846,6 +842,10 @@ export class AmpStory extends AMP.BaseElement {
     // there is a way to navigate to pages that does not involve using private
     // amp-story methods.
     this.viewer_.onMessage('selectPage', data => this.onSelectPage_(data));
+
+    if (this.viewerMessagingHandler_) {
+      this.viewerMessagingHandler_.startListening();
+    }
   }
 
   /** @private */
