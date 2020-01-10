@@ -54,6 +54,7 @@ import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryQuiz} from './amp-story-quiz';
 import {AmpStoryRenderService} from './amp-story-render-service';
+import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -335,6 +336,11 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.element);
+
+    /** @private @const {?AmpStoryViewerMessagingHandler} */
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
+      : null;
 
     /**
      * Store the current paused state, to make sure the story does not play on
@@ -832,7 +838,14 @@ export class AmpStory extends AMP.BaseElement {
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
 
+    // TODO(gmajoulet): migrate this to amp-story-viewer-messaging-handler once
+    // there is a way to navigate to pages that does not involve using private
+    // amp-story methods.
     this.viewer_.onMessage('selectPage', data => this.onSelectPage_(data));
+
+    if (this.viewerMessagingHandler_) {
+      this.viewerMessagingHandler_.startListening();
+    }
   }
 
   /** @private */
@@ -1323,8 +1336,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onNoNextPage_() {
-    if (this.viewer_.hasCapability('swipe')) {
-      this.viewer_./*OK*/ sendMessage('selectDocument', dict({'next': true}));
+    if (this.viewer_.hasCapability('swipe') && this.viewerMessagingHandler_) {
+      this.viewerMessagingHandler_.send('selectDocument', dict({'next': true}));
       return;
     }
 
@@ -1352,8 +1365,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onNoPreviousPage_() {
-    if (this.viewer_.hasCapability('swipe')) {
-      this.viewer_./*OK*/ sendMessage(
+    if (this.viewer_.hasCapability('swipe') && this.viewerMessagingHandler_) {
+      this.viewerMessagingHandler_.send(
         'selectDocument',
         dict({'previous': true})
       );
