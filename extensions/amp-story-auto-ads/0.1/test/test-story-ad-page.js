@@ -398,15 +398,13 @@ describes.realWin('story-ad-page', {amp: true}, env => {
       await storyAdPage.maybeCreateCta();
 
       const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
-      expect(attribution).to.have.class('i-amphtml-story-desktop-fullbleed');
+      expect(attribution).to.have.class('i-amphtml-story-ad-fullbleed');
 
       storeService.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
-      expect(attribution).not.to.have.class(
-        'i-amphtml-story-desktop-fullbleed'
-      );
+      expect(attribution).not.to.have.class('i-amphtml-story-ad-fullbleed');
 
       storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_FULLBLEED);
-      expect(attribution).to.have.class('i-amphtml-story-desktop-fullbleed');
+      expect(attribution).to.have.class('i-amphtml-story-ad-fullbleed');
     });
 
     it('does not create attribution when missing icon', async () => {

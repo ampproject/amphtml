@@ -23,7 +23,7 @@
   z-index: 4 !important;
 }
 
-.i-amphtml-story-desktop-fullbleed.i-amphtml-story-ad-attribution {
+.i-amphtml-story-ad-fullbleed.i-amphtml-story-ad-attribution {
   /* Ad will be 75vh, align bottom of icon to bottom of ad. */
   bottom: 12.5vh !important;
   left: 50% !important;

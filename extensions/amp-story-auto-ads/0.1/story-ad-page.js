@@ -54,7 +54,7 @@ const TIMEOUT_LIMIT = 10000; // 10 seconds
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
 
 /** @const {string} */
-const DESKTOP_FULLBLEED_CLASS = 'i-amphtml-story-desktop-fullbleed';
+const DESKTOP_FULLBLEED_CLASS = 'i-amphtml-story-ad-fullbleed';
 
 /** @enum {string} */
 const PageAttributes = {
