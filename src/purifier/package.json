@@ -1,15 +1,23 @@
 {
   "name": "@ampproject/purifier",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AMP-specific sanitization library",
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
-  "main": "dist/purifier.js",
-  "files": ["dist/*"],
+  "main": "dist/purifier.mjs",
+  "type": "module",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "build": "rollup -c rollup.config.js"
   },
-  "keywords": ["amp", "sanitizer", "sanitize", "purify"],
+  "keywords": [
+    "amp",
+    "sanitizer",
+    "sanitize",
+    "purify"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/ampproject/amphtml.git",

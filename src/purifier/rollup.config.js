@@ -23,7 +23,7 @@ const projectRootDir = path.resolve(__dirname);
 export default {
   input: 'purifier.js',
   output: {
-    file: 'dist/purifier.js',
+    file: 'dist/purifier.mjs',
     format: 'es',
     sourcemap: true,
   },

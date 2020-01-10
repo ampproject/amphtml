@@ -80,10 +80,10 @@ export class Purifier {
     this.keyCounter_ = 1;
 
     /** @private {!DomPurifyDef} */
-    this.domPurify_ = purify(self);
+    this.domPurify_ = purify(doc.defaultView);
 
     /** @private {!DomPurifyDef} */
-    this.domPurifyTriple_ = purify(self);
+    this.domPurifyTriple_ = purify(doc.defaultView);
 
     const config = Object.assign(opt_config || {}, standardPurifyConfig());
     this.domPurify_.setConfig(config);
