@@ -49,6 +49,9 @@
     "pageview": "//webcare.byside.com/BWA!webcareId/amp/pixel.php?webcare_id=!webcareId&bwch=!channel&lang=pt&fid=!fid&bwit=A&tuid=_client_id_&suid=&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_",
     "event": "//webcare.byside.com/BWA!webcareId/amp/signal.php?event_id=!eventId&event_label=!eventLabel&fields=!fields&webcare_id=!webcareId&bwch=!channel&lang=pt&fid=!fid&bwit=A&tuid=_client_id_&suid=&puid=_page_view_id_p_timestamp_&referrer=_document_referrer_&page=_source_url_&amppage=_ampdoc_url_&bwpt=_title_&bres=_viewport_width_x_viewport_height_&res=_screen_width_x_screen_height_&v=v20171116a&ampv=_amp_version_&viewer=_viewer_&ua=_user_agent_&r=_random_"
   },
+  "captainmetrics": {
+    "hit": "https://photon.captainmetrics.com/amp/?cId=_client_id_&sId=W2CX8IhWFDNI_pvEhheYkaODWeJu0zIDlM5YaCtUeKAvYaEfTW5Rhxy_13DvjsZy&ts=_timestamp_&rand=_random_&pId=!projectId&ampV=_amp_version_&v=1&lang=_browser_language_&ua=_user_agent_&res=_screen_height_x_screen_width_&aRes=_available_screen_height_x_available_screen_width_&off=_timezone_&tz=_timezone_code_&lp=_source_url_&ref=_external_referrer_&ampRef=_ampdoc_url_&pageId=_page_view_id_"
+  },
   "chartbeat": {
     "host": "https://ping.chartbeat.net",
     "basePrefix": "/ping?h=!domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=!uid&g0=!sections&g1=!authors&g2=!zone&g3=!sponsorName&g4=!contentType&c=120&x=_scroll_top_&y=_scroll_height_&o=_scroll_width_&w=_viewport_height_&j=!decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2",

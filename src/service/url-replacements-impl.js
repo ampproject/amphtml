@@ -261,12 +261,6 @@ export class GlobalVariableSource extends VariableSource {
       return this.getFragmentParamData_(param, defaultValue);
     });
 
-    // Returns the first item in the ancestorOrigins array, if available.
-    this.setAsync(
-      'ANCESTOR_ORIGIN',
-      this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN')
-    );
-
     /**
      * Stores client ids that were generated during this page view
      * indexed by scope.
@@ -826,29 +820,6 @@ export class GlobalVariableSource extends VariableSource {
         expr
       );
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
-    });
-  }
-
-  /**
-   * Resolves the value via amp-viewer-integration's service.
-   * @param {string} property
-   * @param {string} name
-   * @return {!AsyncResolverDef}
-   * @private
-   */
-  getViewerIntegrationValue_(property, name) {
-    return /** @type {!AsyncResolverDef} */ ((param, defaultValue = '') => {
-      const service = Services.viewerIntegrationVariableServiceForOrNull(
-        this.ampdoc.win
-      );
-      return service.then(viewerIntegrationVariables => {
-        userAssert(
-          viewerIntegrationVariables,
-          'To use variable %s amp-viewer-integration must be installed',
-          name
-        );
-        return viewerIntegrationVariables[property](param, defaultValue);
-      });
     });
   }
 }
