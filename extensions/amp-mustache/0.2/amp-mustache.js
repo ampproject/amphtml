@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {Purifier} from '../../../src/purifier/purifier';
 import {dict} from '../../../src/utils/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
+import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
@@ -38,9 +39,16 @@ export class AmpMustache extends BaseTemplate {
   constructor(element, win) {
     super(element, win);
 
+    /** @private @const {!Purifier} */
+    this.purifier_ = new Purifier(
+      this.win.document,
+      dict(),
+      rewriteAttributeValue
+    );
+
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
     mustache.setUnescapedSanitizer(value =>
-      purifyTagsForTripleMustache(value, this.win.document)
+      this.purifier_.purifyTagsForTripleMustache(value)
     );
   }
 
@@ -129,7 +137,7 @@ export class AmpMustache extends BaseTemplate {
    * @private
    */
   purifyAndSetHtml_(html) {
-    const body = purifyHtml(html, this.win.document);
+    const body = this.purifier_.purifyHtml(html);
     // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
     // https://github.com/cure53/DOMPurify/pull/295
     const root = this.win.document.createElement('div');

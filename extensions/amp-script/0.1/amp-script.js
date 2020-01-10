@@ -16,13 +16,8 @@
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
-import {
-  DomPurifyDef,
-  createPurifier,
-  getAllowedTags,
-  validateAttributeChange,
-} from '../../../src/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
@@ -494,11 +489,15 @@ export class SanitizerImpl {
     /** @private @const {!Element} */
     this.element_ = element;
 
-    /** @private @const {!DomPurifyDef} */
-    this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
+    /** @private @const {!Purifier} */
+    this.purifier_ = new Purifier(
+      win.document,
+      dict({'IN_PLACE': true}),
+      rewriteAttributeValue
+    );
 
     /** @private @const {!Object<string, boolean>} */
-    this.allowedTags_ = getAllowedTags();
+    this.allowedTags_ = this.purifier_.getAllowedTags();
 
     /** @private @const {!UserActivationTracker} */
     this.userActivationTracker_ = userActivationTracker;
@@ -551,7 +550,7 @@ export class SanitizerImpl {
     // that the tag itself is valid. E.g. a[href] is ok, but base[href] is not.
     if (this.allowedTags_[tag]) {
       const attr = attribute.toLowerCase();
-      if (validateAttributeChange(this.purifier_, node, attr, value)) {
+      if (this.purifier_.validateAttributeChange(node, attr, value)) {
         if (value == null) {
           node.removeAttribute(attr);
         } else {
@@ -601,7 +600,7 @@ export class SanitizerImpl {
 
     // worker-dom's supported properties and corresponding attribute name
     // differences are minor, e.g. acceptCharset vs. accept-charset.
-    if (validateAttributeChange(this.purifier_, node, prop, value)) {
+    if (this.purifier_.validateAttributeChange(node, prop, value)) {
       node[property] = value;
       return true;
     }
