@@ -148,6 +148,8 @@ AMP expects the response to be a JSON object like the following:
 
 **Note: The legacy `promptIfUnknown` is migrating to `consentRequired` as prompt is no longer strictly required to manage consents.**
 
+The `consentStateValue` can be thought of as a signal for the runtime to block and unblock components. The value `accepted` instructs AMP that the user has given consent (or doesn't revoke consent in the opt-out case). This can be used to serve personalized ads in some scenarios. The value `rejected` means the user doesn't give consent (or has revoked consent in the opt-out case) and vendors may decide to not serve personalized ads.
+
 Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
 
 ```json
@@ -606,7 +608,7 @@ You should try out the [advanced consent flows](https://amp.dev/documentation/ex
 
 ##### How can I show a persistent UX element for users to update their consent preferences?
 
-You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://amp.dev/documentation/examples/user-consent/basic_user_consent_flow/) for a similar implementation.
+You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://amp.dev/documentation/examples/user-consent/client_side_user_consent_flow/) for a similar implementation.
 
 ##### Can I keep the non-EU experience unchanged and just deliver an "opt-out" experience to all EU users?
 
@@ -641,5 +643,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 ## Supported Consent Management Platforms
 
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
+- Marfeel : [Website](https://www.marfeel.com/) - [Documentation](/extensions/amp-consent/cmps/marfeel.md)
 - SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/cmps/sourcepoint.md)
+
 - Your Integrated platform here!

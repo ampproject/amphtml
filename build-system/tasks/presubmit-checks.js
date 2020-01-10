@@ -130,6 +130,7 @@ const forbiddenTerms = {
       'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/prettify.js',
+      'src/purifier/noop.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -223,6 +224,14 @@ const forbiddenTerms = {
       'testing/iframe.js',
     ],
   },
+  'installMutatorServiceForDoc': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/inabox/inabox-services.js',
+      'src/service/core-services.js',
+      'src/service/mutator-impl.js',
+    ],
+  },
   'installPerformanceService': {
     message: privateServiceFactory,
     whitelist: [
@@ -230,6 +239,14 @@ const forbiddenTerms = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
+    ],
+  },
+  'installResourcesServiceForDoc': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/inabox/inabox-services.js',
+      'src/service/core-services.js',
+      'src/service/resources-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
@@ -281,15 +298,6 @@ const forbiddenTerms = {
       'src/service/resources-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/vsync-impl.js',
-    ],
-  },
-  'installResourcesServiceForDoc': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/inabox/inabox-services.js',
-      'src/service/core-services.js',
-      'src/service/resources-impl.js',
-      'src/service/standard-actions-impl.js',
     ],
   },
   'installXhrService': {
@@ -569,7 +577,7 @@ const forbiddenTerms = {
   },
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, think twice before using it',
-    whitelist: ['src/service/resources-impl.js'],
+    whitelist: ['src/service/mutator-impl.js', 'src/service/resources-impl.js'],
   },
   '\\.requireLayout\\(': {
     message:
@@ -846,6 +854,7 @@ const forbiddenTerms = {
       'test/unit/test-mode.js',
       'test/unit/test-motion.js',
       'test/unit/test-mustache.js',
+      'test/unit/test-mutator.js',
       'test/unit/test-object.js',
       'test/unit/test-observable.js',
       'test/unit/test-pass.js',
@@ -1173,7 +1182,7 @@ const forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17|18|19) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
+  'Copyright 20(15|16|17|18|19|20) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };
