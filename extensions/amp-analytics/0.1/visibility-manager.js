@@ -469,6 +469,7 @@ export class VisibilityManager {
       let layoutBox;
       if (opt_element) {
         state['opacity'] = getMinOpacity(opt_element);
+        this.resources_.schedulePassVsync();
         const resource = this.resources_.getResourceForElementOptional(
           opt_element
         );
