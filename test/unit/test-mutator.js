@@ -1135,7 +1135,7 @@ describe('mutator changeSize', () => {
 
     it(
       'should change size if in viewport, but only modifying width and ' +
-        'reflow is impossible',
+        'reflow is not possible',
       () => {
         const parent = document.createElement('div');
         parent.getLayoutWidth = () => 222;
@@ -1143,6 +1143,14 @@ describe('mutator changeSize', () => {
         element.overflowCallback = () => {};
         parent.appendChild(element);
         resource1.element = element;
+        resource1.layoutBox_ = {
+          top: 0,
+          left: 0,
+          right: 222,
+          bottom: 50,
+          height: 50,
+          width: 222,
+        };
         viewportMock
           .expects('getContentHeight')
           .returns(10000)
@@ -1157,14 +1165,69 @@ describe('mutator changeSize', () => {
         );
 
         expect(vsyncSpy).to.be.calledOnce;
-        const task = vsyncSpy.lastCall.args[0];
+        let task = vsyncSpy.lastCall.args[0];
         task.measure({});
 
         resources.mutateWork_();
+
+        expect(vsyncSpy).to.be.calledThrice;
+        task = vsyncSpy.lastCall.args[0];
+        const state = {};
+        task.measure(state);
+        task.mutate(state);
         expect(resource1.changeSize).to.be.calledOnce;
         expect(resource1.changeSize).to.be.calledWith(50, 222);
       }
     );
+
+    it(
+      'should NOT change size if in viewport, only modifying width and ' +
+        'reflow is possible',
+      () => {
+        const parent = document.createElement('div');
+        parent.getLayoutWidth = () => 222;
+        const element = document.createElement('div');
+        const sibling = document.createElement('div');
+        sibling.style.width = '1px';
+        element.overflowCallback = () => {};
+        parent.appendChild(element);
+        parent.appendChild(sibling);
+        resource1.element = element;
+        resource1.layoutBox_ = {
+          top: 0,
+          left: 0,
+          right: 222,
+          bottom: 50,
+          height: 50,
+          width: 222,
+        };
+        viewportMock
+          .expects('getContentHeight')
+          .returns(10000)
+          .atLeast(1);
+        mutator.scheduleChangeSize_(
+          resource1,
+          50,
+          222,
+          {top: 1, right: 2, bottom: 3, left: 4},
+          NO_EVENT,
+          false
+        );
+
+        expect(vsyncSpy).to.be.calledOnce;
+        let task = vsyncSpy.lastCall.args[0];
+        task.measure({});
+
+        resources.mutateWork_();
+
+        expect(vsyncSpy).to.be.calledThrice;
+        task = vsyncSpy.lastCall.args[0];
+        const state = {};
+        task.measure(state);
+        task.mutate(state);
+        expect(resource1.changeSize).to.be.calledOnce;
+        expect(resource1.changeSize).to.be.calledWith(50, 222);
+    });
 
     it(
       'should NOT change size when resized margin in viewport and should ' +
