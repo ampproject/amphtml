@@ -591,9 +591,6 @@ export class AmpList extends AMP.BaseElement {
     if (!elementSrc) {
       return Promise.resolve();
     }
-    if (this.isAmpStateSrc_(elementSrc)) {
-      return this.renderLocalData_(elementSrc);
-    }
 
     let fetch;
     if (this.ssrTemplateHelper_.isEnabled()) {
