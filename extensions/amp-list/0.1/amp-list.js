@@ -41,7 +41,6 @@ import {
 } from '../../../src/batched-json';
 import {
   childElementByAttr,
-  isJsonScriptTag,
   matches,
   removeChildren,
   scopedQuerySelector,
@@ -51,7 +50,6 @@ import {
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {escapeCssSelectorIdent} from '../../../src/css';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr} from '../../../src/json';
@@ -350,13 +348,14 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Returns true if src points to amp-state.
    *
-   * @param {string} src
+   * @param {*} src
    * @return {boolean}
    * @private
    */
   isAmpStateSrc_(src) {
     return (
       isExperimentOn(this.win, 'amp-list-init-from-state') &&
+      typeof src === 'string' &&
       startsWith(src, 'amp-state:')
     );
   }
@@ -370,31 +369,12 @@ export class AmpList extends AMP.BaseElement {
     let dataPromise;
     if (typeof src === 'string') {
       const ampStatePath = src.substring('amp-state:'.length);
-      const ampStateId = ampStatePath.split('.')[0];
-      const ampStateEl = this.win.document.querySelector(
-        `#${escapeCssSelectorIdent(ampStateId)}`
-      );
-      if (!ampStateEl) {
-        const errorMsg = `An amp-state element with id: ${ampStateId} could not be found.`;
-        user().error(TAG, errorMsg);
-        return Promise.reject(new Error(errorMsg));
-      }
-      if (
-        !ampStateEl.children ||
-        !ampStateEl.children[0] ||
-        !isJsonScriptTag(ampStateEl.children[0])
-      ) {
-        const errorMsg = `In order to use amp-state with id ${ampStateId} as an initial source for amp-list, it must have a json script tag as its first child.`;
-        user().error(TAG, errorMsg);
-        return Promise.reject(user().createError(errorMsg));
-      }
-
       dataPromise = Services.bindForDocOrNull(this.element).then(bind => {
         if (!bind) {
-          throw user().createError(
-            TAG,
-            'You must include amp-bind in order to use amp-state as an initial source for amp-list.'
-          );
+          const errorMsg =
+            'You must include amp-bind in order to use amp-state as an initial source for amp-list.';
+          user().error(TAG, errorMsg);
+          return Promise.resolve();
         }
         return bind.getState(ampStatePath);
       });
@@ -405,6 +385,9 @@ export class AmpList extends AMP.BaseElement {
     }
 
     return dataPromise.then(data => {
+      if (!data) {
+        return;
+      }
       const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
       this.resetIfNecessary_(/* isFetch */ false);
       return this.scheduleRender_(array, /* append */ false);
@@ -418,13 +401,11 @@ export class AmpList extends AMP.BaseElement {
 
     const src = mutations['src'];
     if (src !== undefined) {
-      if (typeof src === 'object' && src !== null) {
+      if (
+        src !== null &&
+        (typeof src === 'object' || this.isAmpStateSrc_(src))
+      ) {
         promise = this.renderLocalData_(src);
-      } else if (typeof src === 'string' && this.isAmpStateSrc_(src)) {
-        this.user().error(
-          TAG,
-          'When using src as a bound attribute, you should use bind expressions instead of "amp-state:" syntax.'
-        );
       } else if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
@@ -609,6 +590,9 @@ export class AmpList extends AMP.BaseElement {
     const elementSrc = this.element.getAttribute('src');
     if (!elementSrc) {
       return Promise.resolve();
+    }
+    if (this.isAmpStateSrc_(elementSrc)) {
+      return this.renderLocalData_(elementSrc);
     }
 
     let fetch;

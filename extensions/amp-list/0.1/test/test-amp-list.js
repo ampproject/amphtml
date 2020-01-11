@@ -1204,7 +1204,7 @@ describes.repeated(
             });
           });
 
-          describe.only('Initialized by amp-state', () => {
+          describe('Using amp-state: protocol', () => {
             const experimentName = 'amp-list-init-from-state';
 
             beforeEach(() => {
@@ -1218,35 +1218,12 @@ describes.repeated(
             it('should throw an error if used without the experiment enabled', async () => {
               const errorMsg = 'Invalid value: amp-state:okapis';
               expectAsyncConsoleError(errorMsg);
-              return expect(
-                list.layoutCallback()
-              ).to.eventually.be.rejectedWith(errorMsg);
+              expect(list.layoutCallback()).to.eventually.rejectedWith(
+                errorMsg
+              );
             });
 
-            it('should throw an error if amp-state does not exist in the HTML', async () => {
-              toggleExperiment(win, experimentName, true);
-              const errorMsg = 'An amp-state element with id';
-              expectAsyncConsoleError(errorMsg);
-              return expect(
-                list.layoutCallback()
-              ).to.eventually.be.rejectedWith(errorMsg);
-            });
-
-            it('should throw if the amp-state does not have a json child', () => {
-              toggleExperiment(win, experimentName, true);
-
-              const ampStateEl = doc.createElement('amp-state');
-              ampStateEl.setAttribute('id', 'okapis');
-              doc.body.appendChild(ampStateEl);
-
-              const errorMsg = 'In order to use amp-state with id';
-              expectAsyncConsoleError(errorMsg);
-              return expect(
-                list.layoutCallback()
-              ).to.eventually.be.rejectedWith(errorMsg);
-            });
-
-            it('should throw if amp-bind was not included', async () => {
+            it('should log an error if amp-bind was not included', async () => {
               toggleExperiment(win, experimentName, true);
               Services.bindForDocOrNull.returns(Promise.resolve(null));
 
@@ -1256,9 +1233,8 @@ describes.repeated(
               ampStateJson.setAttribute('type', 'application/json');
               ampStateEl.appendChild(ampStateJson);
               doc.body.appendChild(ampStateEl);
-              expect(list.layoutCallback()).to.eventually.be.rejectedWith(
-                'You must include amp-bind'
-              );
+              expectAsyncConsoleError('You must include amp-bind');
+              await list.layoutCallback();
             });
 
             it('should render a list using local data', async () => {
@@ -1277,28 +1253,6 @@ describes.repeated(
                 .withExactArgs([1, 2, 3], /*append*/ false)
                 .once();
               await list.layoutCallback();
-            });
-
-            // Only valid for init.
-            it('should throw if setting [src] to an amp-state protocol.', async () => {
-              toggleExperiment(win, experimentName, true);
-              bind.getState = () => [1, 2, 3];
-
-              const ampStateEl = doc.createElement('amp-state');
-              ampStateEl.setAttribute('id', 'okapis');
-              const ampStateJson = doc.createElement('script');
-              ampStateJson.setAttribute('type', 'application/json');
-              ampStateEl.appendChild(ampStateJson);
-              doc.body.appendChild(ampStateEl);
-
-              listMock.expects('scheduleRender_').returns(Promise.resolve());
-              expectAsyncConsoleError('When using src as a bound attribute');
-              await list.layoutCallback();
-              expect(
-                list.mutatedAttributesCallback({
-                  'src': 'amp-state:okapis',
-                })
-              ).to.be.undefined;
             });
           });
         }); // with amp-bind
