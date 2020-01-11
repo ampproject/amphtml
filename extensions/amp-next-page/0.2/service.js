@@ -168,11 +168,12 @@ export class NextPageService {
 
   /**
    * @param {boolean=} force
+   * @return {!Promise}
    */
   maybeFetchNext(force = false) {
     // If a page is already queued to be fetched, wait for it
     if (this.pages_.some(page => page.isFetching())) {
-      return;
+      return Promise.resolve();
     }
 
     if (force || this.getViewportsAway_() <= PRERENDER_VIEWPORT_COUNT) {
@@ -180,7 +181,7 @@ export class NextPageService {
         this.getPageIndex_(this.lastFetchedPage_) + 1
       ];
       if (nextPage) {
-        nextPage.fetch();
+        return nextPage.fetch();
       }
     }
   }
