@@ -74,6 +74,11 @@ function patchWebAnimations() {
     '\n' +
     '}\n';
   writeIfUpdated(patchedName, file);
+
+  const pkgPath = 'node_modules/web-animations-js/package.json';
+  const json = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  json.module = 'web-animations.install.js';
+  writeIfUpdated(pkgPath, JSON.stringify(json, null, 4));
 }
 
 /**

@@ -15,12 +15,7 @@
  */
 
 import {requireExternal} from '../../../src/module';
-import rrule from 'rrule/dist/es5/rrule';
-
-// RRule is toooo screwed up with circular imports. So we have to import the
-// ES5 variant, which only exports a default (which is an object). We can grab
-// the rrulestr property off of that default object.
-const {rrulestr} = rrule;
+import {rrulestr} from 'rrule';
 
 /** @enum {string} */
 const DateType = {

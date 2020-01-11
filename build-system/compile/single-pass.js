@@ -50,6 +50,7 @@ const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
+const {execOrDie} = require('../common/exec.js');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const argv = minimist(process.argv.slice(2));
@@ -480,7 +481,10 @@ function transformPathsToTempDir(graph, config) {
   graph.sorted.forEach(f => {
     // For now, just copy node_module files instead of transforming them.
     if (f.startsWith('node_modules/')) {
-      fs.copySync(f, `${graph.tmp}/${f}`);
+      execOrDie(
+        `npx rollup -c 'build-system/compile/rollup.config.js' -i '${f}' -o '${graph.tmp}/${f}' --banner '/* ${f} */'`,
+        {'stdio': 'ignore'}
+      );
     } else {
       const {code, map} = babel.transformFileSync(f, {
         plugins: conf.plugins({

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const pkgUp = require('pkg-up');
 const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
@@ -43,6 +44,7 @@ const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {closureCompile} = require('../compile/compile');
+const {execOrDie} = require('../common/exec.js');
 const {isTravisBuild} = require('../common/travis');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
@@ -664,8 +666,35 @@ function transferSrcsToTempDir(options = {}) {
   );
   const files = globby.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
-    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
-      fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
+    const name = `${SRC_TEMP_DIR}/${file}`;
+    if (file.startsWith('third_party/')) {
+      fs.copySync(file, name);
+      return;
+    }
+
+    if (file.startsWith('node_modules/')) {
+      if (file.endsWith('.json')) {
+        fs.copySync(file, name);
+        return;
+      }
+
+      const pkgDir = pkgUp.sync({cwd: path.dirname(file)});
+      const relative = path.relative(path.dirname(pkgDir), file);
+      const pkgContents = fs.readFileSync(pkgDir);
+      let pathIsInPkg = false;
+      JSON.parse(pkgContents, (key, value) => {
+        if (pathIsInPkg || typeof value !== 'string') {
+          return;
+        }
+        pathIsInPkg = path.relative('.', value) === relative;
+      });
+
+      if (pathIsInPkg) {
+        execOrDie(
+          `npx rollup -c 'build-system/compile/rollup.config.js' -i '${file}' -o '${name}' --banner '/* ${file} */'`,
+          {'stdio': 'ignore'}
+        );
+      }
       return;
     }
 
@@ -679,7 +708,6 @@ function transferSrcsToTempDir(options = {}) {
       retainLines: true,
       compact: false,
     });
-    const name = `${SRC_TEMP_DIR}/${file}`;
     fs.outputFileSync(name, code);
     process.stdout.write('.');
   });
