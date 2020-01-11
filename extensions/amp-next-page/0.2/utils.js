@@ -50,6 +50,7 @@ export function validatePage(page, hostUrl) {
   user().assertString(page.url, 'page url must be a string');
 
   const base = getSourceUrl(hostUrl);
+  const {origin} = parseUrlDeprecated(hostUrl);
   page.url = resolveRelativeUrl(page.url, base);
 
   const url = validateUrl(page.url, hostUrl);
