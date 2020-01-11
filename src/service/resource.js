@@ -481,7 +481,7 @@ export class Resource {
   /**
    * Computes the current layout box and position-fixed state of the element.
    * @param {!ClientRect=} opt_premeasuredRect
-   * @return {{box: !../layout-rect.LayoutRectDef, isFixed: boolean}}
+   * @private
    */
   computeMeasurements_(opt_premeasuredRect) {
     const viewport = Services.viewportForDoc(this.element);
