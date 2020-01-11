@@ -17,7 +17,8 @@
 import {createElement, useContext, useEffect, useRef} from './index';
 import {dev} from '../log';
 import {getAmpContext} from './context';
-import {matches} from '../dom';
+import {matches, toggleAttribute} from '../dom';
+import {objectsEqualShallow} from '../utils/object';
 import {toArray} from '../types';
 import {useMountEffect} from './utils';
 
@@ -155,33 +156,6 @@ export function Slot(props) {
 }
 
 /**
- * @param {*} o1
- * @param {*} o2
- * @return {boolean}
- */
-function objectsEqualShallow(o1, o2) {
-  if ((o1 === null && o2 === null) || (o1 === undefined && o2 === undefined)) {
-    return true;
-  }
-  if (o1 == null || o2 == null) {
-    return false;
-  }
-
-  for (const k in o1) {
-    if (o1[k] !== o2[k]) {
-      return false;
-    }
-  }
-  for (const k in o2) {
-    if (o2[k] !== o1[k]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/**
  * @param {!Element} root
  * @return {!Array<!Node>}
  */
@@ -200,17 +174,4 @@ function getAmpElements(root) {
  */
 function getAssignedElements(props, slotElement) {
   return props.assignedElements || toArray(slotElement.assignedElements());
-}
-
-/**
- * @param {!Element} element
- * @param {string} attr
- * @param {boolean} on
- */
-function toggleAttribute(element, attr, on) {
-  if (on) {
-    element.setAttribute(attr, '');
-  } else {
-    element.removeAttribute(attr);
-  }
 }
