@@ -39,20 +39,29 @@ module.exports = {
 function forbidPropertyManglingPlugin(babel) {
   const {types: t} = babel;
 
+  function toString(identifier) {
+    return t.inherits(t.stringLiteral(identifier.name), identifier);
+  }
+
   return {
-    name: 'ast-transform', // not required
+    name: 'forbid-property-mangling',
     visitor: {
       MemberExpression(path) {
         const {node} = path;
         if (node.computed) {
           return;
         }
-        node.computed = true;
 
-        path.get('property').replaceWith(t.stringLiteral(node.property.name));
+        const property = path.get('property');
+        if (!property.isIdentifier()) {
+          return;
+        }
+
+        node.computed = true;
+        property.replaceWith(toString(property.node));
       },
 
-      ObjectProperty(path) {
+      'Property|Method': function(path) {
         if (path.node.computed) {
           return;
         }
@@ -62,7 +71,7 @@ function forbidPropertyManglingPlugin(babel) {
           return;
         }
 
-        key.replaceWith(t.stringLiteral(key.node.name));
+        key.replaceWith(toString(key.node));
       },
     },
   };
