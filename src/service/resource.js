@@ -451,15 +451,14 @@ export class Resource {
     this.isMeasureRequested_ = false;
 
     const oldBox = this.layoutBox_;
-    const {box, isFixed} = this.getMeasurement_(opt_premeasuredRect);
-    this.layoutBox_ = box;
-    this.isFixed_ = isFixed;
+    this.computeMeasurements_(opt_premeasuredRect);
+    const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
-    const sizeChanges = !layoutRectSizeEquals(oldBox, box);
+    const sizeChanges = !layoutRectSizeEquals(oldBox, newBox);
     if (
       this.state_ == ResourceState.NOT_LAID_OUT ||
-      oldBox.top != box.top ||
+      oldBox.top != newBox.top ||
       sizeChanges
     ) {
       if (
@@ -473,21 +472,20 @@ export class Resource {
     }
 
     if (!this.hasBeenMeasured()) {
-      this.initialLayoutBox_ = box;
+      this.initialLayoutBox_ = newBox;
     }
 
-    this.element.updateLayoutBox(box, sizeChanges);
+    this.element.updateLayoutBox(newBox, sizeChanges);
   }
 
   /**
-   * Computes and returns the current layout rectangle and position-fixed
-   * state of the element. Idempotent and does not update internal state.
+   * Computes the current layout box and position-fixed state of the element.
    * @param {!ClientRect=} opt_premeasuredRect
    * @return {{box: !../layout-rect.LayoutRectDef, isFixed: boolean}}
    */
-  getMeasurement_(opt_premeasuredRect) {
+  computeMeasurements_(opt_premeasuredRect) {
     const viewport = Services.viewportForDoc(this.element);
-    let box = viewport.getLayoutRect(this.element, opt_premeasuredRect);
+    this.layoutBox_ = viewport.getLayoutRect(this.element, opt_premeasuredRect);
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
@@ -508,19 +506,18 @@ export class Resource {
         }
       }
     }
+    this.isFixed_ = isFixed;
 
     if (isFixed) {
       // For fixed position elements, we need the relative position to the
       // viewport. When accessing the layoutBox through #getLayoutBox, we'll
       // return the new absolute position.
-      box = moveLayoutRect(
-        box,
+      this.layoutBox_ = moveLayoutRect(
+        this.layoutBox_,
         -viewport.getScrollLeft(),
         -viewport.getScrollTop()
       );
     }
-
-    return {box, isFixed};
   }
 
   /**

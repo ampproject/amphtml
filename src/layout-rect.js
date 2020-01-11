@@ -109,8 +109,8 @@ export function layoutRectFromDomRect(rect) {
 
 /**
  * Returns true if the specified two rects overlap by a single pixel.
- * @param {!LayoutRectDef} r1
- * @param {!LayoutRectDef} r2
+ * @param {{top: number, bottom: number, left: number, right: number}} r1
+ * @param {{top: number, bottom: number, left: number, right: number}} r2
  * @return {boolean}
  */
 export function layoutRectsOverlap(r1, r2) {
