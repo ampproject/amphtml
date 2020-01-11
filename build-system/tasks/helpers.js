@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-const pkgUp = require('pkg-up');
 const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
@@ -31,6 +30,7 @@ const gulpWatch = require('gulp-watch');
 const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
 const path = require('path');
+const pkgUp = require('pkg-up');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
 const source = require('vinyl-source-stream');
@@ -664,7 +664,29 @@ function transferSrcsToTempDir(options = {}) {
     'transforms in',
     colors.cyan(SRC_TEMP_DIR)
   );
-  const files = globby.sync(BABEL_SRC_GLOBS);
+
+  const files = globby.sync(BABEL_SRC_GLOBS).filter(file => {
+    if (!file.startsWith('node_modules/')) {
+      return true;
+    }
+
+    const pkgDir = pkgUp.sync({cwd: path.dirname(file)});
+    const relative = path.relative(path.dirname(pkgDir), file);
+    const pkgContents = fs.readFileSync(pkgDir);
+    let pathIsInPkg = false;
+    JSON.parse(pkgContents, (key, value) => {
+      if (pathIsInPkg || typeof value !== 'string') {
+        return;
+      }
+      pathIsInPkg = path.relative('.', value) === relative;
+    });
+
+    if (pathIsInPkg) {
+      return true;
+    }
+    return false;
+  });
+
   files.forEach(file => {
     const name = `${SRC_TEMP_DIR}/${file}`;
     if (file.startsWith('third_party/')) {
@@ -678,23 +700,9 @@ function transferSrcsToTempDir(options = {}) {
         return;
       }
 
-      const pkgDir = pkgUp.sync({cwd: path.dirname(file)});
-      const relative = path.relative(path.dirname(pkgDir), file);
-      const pkgContents = fs.readFileSync(pkgDir);
-      let pathIsInPkg = false;
-      JSON.parse(pkgContents, (key, value) => {
-        if (pathIsInPkg || typeof value !== 'string') {
-          return;
-        }
-        pathIsInPkg = path.relative('.', value) === relative;
-      });
-
-      if (pathIsInPkg) {
-        execOrDie(
-          `npx rollup -c 'build-system/compile/rollup.config.js' -i '${file}' -o '${name}' --banner '/* ${file} */'`,
-          {'stdio': 'ignore'}
-        );
-      }
+      execOrDie(
+        `npx rollup --silent -c 'build-system/compile/rollup.config.js' -i '${file}' -o '${name}' --banner '/* ${file} */'`
+      );
       return;
     }
 

@@ -55,6 +55,17 @@ const COMMON_GLOBS = [
   'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
 ];
 
+const NODE_MODULES = [
+  'dompurify',
+  'promise-pjs',
+  'web-animations-js',
+  'web-activities',
+  '@ampproject/animations',
+  '@ampproject/worker-dom',
+  'preact',
+  'preact/hooks',
+];
+
 /**
  * NOTE: Keep the globs here in sync with the `CLOSURE_SRC_GLOBS`.
  */
@@ -143,4 +154,5 @@ module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
   SRC_TEMP_DIR,
+  NODE_MODULES,
 };

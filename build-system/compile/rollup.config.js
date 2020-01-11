@@ -17,8 +17,10 @@
 const babel = require('rollup-plugin-babel');
 const commonjs = require('@rollup/plugin-commonjs');
 const resolve = require('@rollup/plugin-node-resolve');
+const {NODE_MODULES} = require('./sources');
 
 module.exports = {
+  external: NODE_MODULES,
   output: {
     format: 'esm',
     freeze: false,

@@ -482,8 +482,7 @@ function transformPathsToTempDir(graph, config) {
     // For now, just copy node_module files instead of transforming them.
     if (f.startsWith('node_modules/')) {
       execOrDie(
-        `npx rollup -c 'build-system/compile/rollup.config.js' -i '${f}' -o '${graph.tmp}/${f}' --banner '/* ${f} */'`,
-        {'stdio': 'ignore'}
+        `npx rollup --silent -c 'build-system/compile/rollup.config.js' -i '${f}' -o '${graph.tmp}/${f}' --banner '/* ${f} */'`
       );
     } else {
       const {code, map} = babel.transformFileSync(f, {
