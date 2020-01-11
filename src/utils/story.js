@@ -34,19 +34,18 @@ export function descendsFromStory(element) {
  * Times out after `timeout` ms (default is 2000).
  *
  * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
- * @param {number=} timeout
  * @return {!Promise<boolean>}
  */
-export function isStoryDocument(ampdoc, timeout = 2000) {
+export function isStoryDocument(ampdoc) {
   return ampdoc.waitForBodyOpen().then(() => {
     const body = ampdoc.getBody();
     const childPromise = waitForChildPromise(
       body,
       () => !!body.firstElementChild
     );
-    // Timeout to avoid never resolving e.g. the body has no element children.
+    // 2s timeout for edge case where body has no element children.
     return Services.timerFor(ampdoc.win)
-      .timeoutPromise(timeout, childPromise)
+      .timeoutPromise(2000, childPromise)
       .then(
         () => body.firstElementChild.tagName === 'AMP-STORY',
         () => false
