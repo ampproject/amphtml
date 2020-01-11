@@ -33,48 +33,11 @@ module.exports = {
       babelrc: false,
       configFile: false,
       include: 'node_modules/**',
-      plugins: [forbidPropertyManglingPlugin],
+      plugins: [
+        require.resolve(
+          '../babel-plugins/babel-plugin-transform-stop-property-mangling'
+        ),
+      ],
     }),
   ],
 };
-
-function forbidPropertyManglingPlugin(babel) {
-  const {types: t} = babel;
-
-  function toString(identifier) {
-    return t.inherits(t.stringLiteral(identifier.name), identifier);
-  }
-
-  return {
-    name: 'forbid-property-mangling',
-    visitor: {
-      MemberExpression(path) {
-        const {node} = path;
-        if (node.computed) {
-          return;
-        }
-
-        const property = path.get('property');
-        if (!property.isIdentifier()) {
-          return;
-        }
-
-        node.computed = true;
-        property.replaceWith(toString(property.node));
-      },
-
-      'Property|Method': function(path) {
-        if (path.node.computed) {
-          return;
-        }
-
-        const key = path.get('key');
-        if (!key.isIdentifier()) {
-          return;
-        }
-
-        key.replaceWith(toString(key.node));
-      },
-    },
-  };
-}
