@@ -16,5 +16,4 @@
 
 // import '../amp-date-display';
 
-describes.enzyme('date-display component', () => {
-});
+describes.enzyme('date-display component', () => {});
