@@ -4,8 +4,8 @@
   "description": "AMP-specific sanitization library",
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
-  "main": "dist/purifier.mjs",
-  "type": "module",
+  "main": "dist/purifier.js",
+  "module": "dist/purifier.mjs",
   "files": [
     "dist/*"
   ],
