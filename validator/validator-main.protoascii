@@ -6710,9 +6710,6 @@ attr_lists: {
   attrs: { name: "amp-access-show" }
   attrs: { name: "amp-access-style" }
   attrs: { name: "amp-access-template" }
-  # TODO(wassgha): Launch with amp-next-page 1.0
-  # attrs: { name: "amp-next-page-hide" }
-  # attrs: { name: "amp-next-page-replace" }
   attrs: { name: "i-amp-access-id" }
   # amp-form specific attributes, see
   # https://github.com/ampproject/amphtml/issues/5268
