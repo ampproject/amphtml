@@ -36,7 +36,7 @@ const PROP = '__AMP_AN_ROOT';
 
 /**
  * @implements {../../../src/service.Disposable}
- * @private
+ * @protected
  * @visibleForTesting
  */
 export class InstrumentationService {

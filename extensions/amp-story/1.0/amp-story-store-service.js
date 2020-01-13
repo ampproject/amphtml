@@ -111,7 +111,11 @@ export let InteractiveComponentDef;
  */
 export let State;
 
-/** @private @const @enum {string} */
+/**
+ * @protected
+ * @const
+ * @enum {string}
+ **/
 export const StateProperty = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
@@ -156,7 +160,11 @@ export const StateProperty = {
   PAGE_IDS: 'pageIds',
 };
 
-/** @private @const @enum {string} */
+/**
+ * @protected
+ * @const
+ * @enum {string}
+ **/
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
@@ -531,7 +539,7 @@ export class AmpStoryStoreService {
   /**
    * Retrieves the embed mode config, that will override the default state.
    * @return {!Object<StateProperty, *>} Partial state
-   * @private
+   * @protected
    */
   getEmbedOverrides_() {
     const embedMode = parseEmbedMode(this.win_.location.hash);

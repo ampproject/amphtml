@@ -24,7 +24,7 @@ export class OwnersInterface {
    * within this element will be managed by the owner and not Resources manager.
    * @param {!Element} element
    * @param {!AmpElement} owner
-   * @package
+   * @public
    */
   setOwner(element, owner) {}
 

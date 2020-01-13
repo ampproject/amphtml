@@ -154,7 +154,7 @@ export function getTimingDataSync(win, startEvent, endEvent) {
  * @param {!Window} win
  * @param {string} attribute
  * @return {ResolverReturnDef}
- * @private
+ * @protected
  */
 export function getNavigationData(win, attribute) {
   const navigationInfo = win['performance'] && win['performance']['navigation'];

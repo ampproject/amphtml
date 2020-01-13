@@ -77,7 +77,7 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  *     cloneable.
  * @return {{input: string, init: !FetchInitDef}} The serialized structurally-
  *     cloneable request.
- * @private
+ * @protected
  */
 export function toStructuredCloneable(input, init) {
   const newInit = {...init};
@@ -193,7 +193,7 @@ export function fromStructuredCloneable(response, responseType) {
  * @return {!Promise<!Response|undefined>}
  *     A response returned by the interceptor if XHR is intercepted or
  *     `Promise<undefined>` otherwise.
- * @private
+ * @protected
  */
 export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (!ampdocSingle) {
@@ -373,7 +373,7 @@ function isRetriable(status) {
  * Returns the response if successful or otherwise throws an error.
  * @param {!Response} response
  * @return {!Promise<!Response>}
- * @private Visible for testing
+ * @protected
  */
 export function assertSuccess(response) {
   return new Promise(resolve => {

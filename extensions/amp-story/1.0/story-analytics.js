@@ -21,7 +21,10 @@ import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-/** @private @const {string} */
+/**
+ * @protected
+ * @const {string}
+ **/
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
 
 /** @enum {string} */

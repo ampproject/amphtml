@@ -96,7 +96,8 @@ let FxBindingDef;
 
 /**
  * Include respective `FxType`s here.
- * @private @const {!Object<!FxType, !FxBindingDef>}
+ * @protected
+ * @const {!Object<!FxType, !FxBindingDef>}
  */
 export const FxBindings = {
   [FxType.FADE_IN]: {
