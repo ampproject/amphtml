@@ -28,19 +28,14 @@ export const PageState = {
   INSERTED: 4,
 };
 
+const VISIBLE_DOC_CLASS = 'amp-next-page-document-visible';
+
 export class Page {
   /**
    * @param {!./service.NextPageService} manager
    * @param {{ url: string, title: string, image: string }} meta
-   * @param {!PageState=} initState
-   * @param {!VisibilityState=} initVisibility
    */
-  constructor(
-    manager,
-    meta,
-    initState = PageState.QUEUED,
-    initVisibility = VisibilityState.PRERENDER
-  ) {
+  constructor(manager, meta) {
     /** @private @const {!./service.NextPageService} */
     this.manager_ = manager;
     /** @private @const {string} */
@@ -53,9 +48,9 @@ export class Page {
     /** @private {?../../../src/runtime.ShadowDoc} */
     this.shadowDoc_ = null;
     /** @private {!PageState} */
-    this.state_ = initState;
+    this.state_ = PageState.QUEUED;
     /** @private {!VisibilityState} */
-    this.visibilityState_ = initVisibility;
+    this.visibilityState_ = VisibilityState.PRERENDER;
     /** @private {!ViewportRelativePos} */
     this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
   }
@@ -85,6 +80,14 @@ export class Page {
   /** @return {!ViewportRelativePos} */
   get relativePos() {
     return this.relativePos_;
+  }
+
+  /** @return {!Document|undefined} */
+  get document() {
+    if (!this.shadowDoc_) {
+      return;
+    }
+    return /** @type {!Document} */ (this.shadowDoc_.ampdoc.getRootNode());
   }
 
   /** @param {!ViewportRelativePos} position */
@@ -118,10 +121,13 @@ export class Page {
     this.visibilityState_ = visibilityState;
     if (this.shadowDoc_) {
       this.shadowDoc_.setVisibilityState(visibilityState);
+      this.shadowDoc_.ampdoc
+        .getBody()
+        .classList.toggle(VISIBLE_DOC_CLASS, this.isVisible());
     }
 
     // Switch the title and url of the page to reflect this page
-    if (visibilityState === VisibilityState.VISIBLE) {
+    if (this.isVisible()) {
       this.manager_.setTitlePage(this);
     }
   }
@@ -177,5 +183,29 @@ export class Page {
       .catch(() => {
         this.state_ = PageState.FAILED;
       });
+  }
+}
+
+export class HostPage extends Page {
+  /**
+   * @param {!./service.NextPageService} manager
+   * @param {{ url: string, title: string, image: string }} meta
+   * @param {!PageState} initState
+   * @param {!VisibilityState} initVisibility
+   * @param {!Document} initDoc
+   */
+  constructor(manager, meta, initState, initVisibility, initDoc) {
+    super(manager, meta);
+    /** @override */
+    this.state_ = initState;
+    /** @override */
+    this.visibilityState_ = initVisibility;
+    /** @private {!Document} */
+    this.document_ = initDoc;
+  }
+
+  /** @override */
+  get document() {
+    return this.document_;
   }
 }
