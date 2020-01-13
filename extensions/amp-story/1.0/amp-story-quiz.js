@@ -23,6 +23,7 @@ import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-quiz-1.0.css';
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
@@ -41,6 +42,10 @@ const TAG = 'amp-story-quiz';
 // and make this an enum on that class.
 /** @const {number} */
 const STORY_REACTION_TYPE_QUIZ = 0;
+
+/** @const {string} */
+const ENDPOINT_INVALID_ERROR =
+  'The publisher has specified an invalid datastore endpoint';
 
 /**
  * @typedef {
@@ -131,7 +136,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.responseDataPromise_ = this.retrieveReactionData_();
+    this.responseDataPromise_ = this.element.hasAttribute('endpoint')
+      ? this.retrieveReactionData_()
+      : Promise.resolve();
   }
 
   /**
@@ -359,7 +366,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
         this.hasUserSelection_ = true;
       });
 
-      this.updateReactionData_(optionEl.optionIndex_);
+      if (this.element.hasAttribute('endpoint')) {
+        this.updateReactionData_(optionEl.optionIndex_);
+      }
     });
   }
 
@@ -372,10 +381,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   retrieveReactionData_() {
     return this.executeReactionRequest_()
       .then(response => {
-        if (response.hasNoEndpoint) {
-          return;
-        }
-
         this.handleSuccessfulDataRetrieval_(response);
       })
       .catch(error => {
@@ -404,11 +409,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   executeReactionRequest_(reactionValue) {
     // TODO(jackbsteinberg): Add a default reactions endpoint.
-    if (!this.element.hasAttribute('endpoint')) {
-      return Promise.resolve({hasNoEndpoint: true});
+    if (!assertAbsoluteHttpOrHttpsUrl(this.element.getAttribute('endpoint'))) {
+      return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
-    let URL = this.element.getAttribute('endpoint');
+    let url = this.element.getAttribute('endpoint');
 
     const requestVars = dict({
       'reactionType': STORY_REACTION_TYPE_QUIZ,
@@ -426,14 +431,15 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       requestOptions['method'] = 'POST';
       requestOptions['body'] = requestVars;
     } else {
-      URL += `?reactionType=${
-        requestVars['reactionType']
-      }&reactionId=${encodeURIComponent(requestVars['reactionId'])}`;
+      url = addParamsToUrl(url, {
+        'reactionType': requestVars['reactionType'],
+        'reactionId': requestVars['reactionId'],
+      });
     }
 
     return this.getClientId_().then(clientId => {
       requestVars['clientId'] = clientId;
-      return this.requestService_.executeRequest(URL, null, requestOptions);
+      return this.requestService_.executeRequest(url, null, requestOptions);
     });
   }
 

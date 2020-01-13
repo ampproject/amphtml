@@ -85,7 +85,7 @@ export class AmpStoryRequestService {
 
   /**
    * @param {string} rawUrl
-   * @param {Object} opts
+   * @param {Object=} opts
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
    */
   executeRequest(rawUrl, opts = {}) {

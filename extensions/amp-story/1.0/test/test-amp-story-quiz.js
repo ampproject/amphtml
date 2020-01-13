@@ -18,6 +18,7 @@ import {AmpStoryQuiz} from '../amp-story-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
 import {getAnalyticsService} from '../story-analytics';
+import {getRequestService} from '../amp-story-request-service';
 import {registerServiceBuilder} from '../../../../src/service';
 
 /**
@@ -98,6 +99,7 @@ describes.realWin(
     let storyEl;
     let analytics;
     let analyticsVars;
+    let requestService;
 
     beforeEach(() => {
       win = env.win;
@@ -106,6 +108,7 @@ describes.realWin(
 
       analyticsVars = getVariableService(win);
       analytics = getAnalyticsService(win, win.document.body);
+      requestService = getRequestService(win, ampStoryQuizEl);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
@@ -123,17 +126,15 @@ describes.realWin(
       env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake(fn => fn());
     });
 
-    it('should take the html and reformat it', async () => {
+    it('should take the html and reformat it', () => {
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
-      await ampStoryQuiz.layoutCallback();
       expect(ampStoryQuiz.getQuizElement().children.length).to.equal(2);
     });
 
-    it('should structure the content in the quiz element', async () => {
+    it('should structure the content in the quiz element', () => {
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
-      await ampStoryQuiz.layoutCallback();
 
       const quizContent = ampStoryQuiz.getQuizElement().children;
       expect(quizContent[0]).to.have.class(
@@ -180,6 +181,7 @@ describes.realWin(
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
+
       const quizElement = ampStoryQuiz.getQuizElement();
       const quizOption = quizElement.querySelector(
         '.i-amphtml-story-quiz-option'
@@ -195,6 +197,7 @@ describes.realWin(
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
+
       const quizElement = ampStoryQuiz.getQuizElement();
       const quizOptions = quizElement.querySelectorAll(
         '.i-amphtml-story-quiz-option'
@@ -234,6 +237,13 @@ describes.realWin(
     });
 
     it('should update the quiz when the user has already reacted', async () => {
+      // Fill the response to the requestService with mock reaction data
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockReactionData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
@@ -242,9 +252,6 @@ describes.realWin(
       const quizOptions = quizElement.querySelectorAll(
         '.i-amphtml-story-quiz-option'
       );
-
-      // Mock a successful data retrieval.
-      ampStoryQuiz.handleSuccessfulDataRetrieval_(getMockReactionData());
 
       expect(quizElement).to.have.class('i-amphtml-story-quiz-post-selection');
       expect(quizOptions[0]).to.have.class(
