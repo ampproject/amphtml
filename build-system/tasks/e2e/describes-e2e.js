@@ -52,6 +52,15 @@ const PUPPETEER_BROWSERS = new Set(['chrome']);
 const REQUESTBANK_URL_PREFIX = 'http://localhost:8000';
 
 /**
+ * Engine types for e2e testing.
+ * @enum {string}
+ */
+const EngineType = {
+  SELENIUM: 'selenium',
+  PUPPETEER: 'puppeteer',
+};
+
+/**
  * @typedef {{
  *  browsers: string,
  *  headless: boolean,
@@ -371,7 +380,7 @@ function describeEnv(factory) {
         ? new Set(browsers.split(',').map(x => x.trim()))
         : supportedBrowsers;
 
-      if (engine === 'puppeteer') {
+      if (engine === EngineType.PUPPETEER) {
         const result = intersect(allowedBrowsers, PUPPETEER_BROWSERS);
         if (result.size === 0) {
           const browsersList = Array.from(allowedBrowsers).join(',');
@@ -497,7 +506,7 @@ class EndToEndFixture {
     }
 
     const controller =
-      config.engine == 'puppeteer'
+      config.engine == EngineType.PUPPETEER
         ? new PuppeteerController(driver)
         : new SeleniumWebDriverController(driver);
     const ampDriver = new AmpDriver(controller);
@@ -546,15 +555,15 @@ class EndToEndFixture {
  * @return {!Promise}
  */
 async function getDriver(
-  {engine = 'selenium', headless = false},
+  {engine = EngineType.SELENIUM, headless = false},
   browserName,
   deviceName
 ) {
-  if (engine == 'puppeteer') {
+  if (engine == EngineType.PUPPETEER) {
     return await createPuppeteer({headless});
   }
 
-  if (engine == 'selenium') {
+  if (engine == EngineType.SELENIUM) {
     return await createSelenium(browserName, {headless}, deviceName);
   }
 }
