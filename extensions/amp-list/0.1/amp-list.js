@@ -261,8 +261,8 @@ export class AmpList extends AMP.BaseElement {
       this.initializeLoadMoreElements_();
     }
 
-    if (this.isAmpStateSrc_(this.element.getAttribute('src'))) {
-      return this.renderLocalData_(this.element.getAttribute('src'));
+    if (this.isAmpStateSrc_()) {
+      return this.getAmpStateJson_().then(json => this.renderLocalData_(json));
     }
 
     return this.fetchList_();
@@ -346,13 +346,13 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if src points to amp-state.
+   * Returns true if element's src points to amp-state.
    *
-   * @param {*} src
    * @return {boolean}
    * @private
    */
-  isAmpStateSrc_(src) {
+  isAmpStateSrc_() {
+    const src = this.element.getAttribute('src');
     return (
       isExperimentOn(this.win, 'amp-list-init-from-state') &&
       typeof src === 'string' &&
@@ -361,37 +361,39 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * @param {!Array|!Object|string} src
+   * Returns json pointed at by an amp-state protocol src. For example,
+   * src="amp-state:json.path".
+   *
+   * @return {Promise<!Object|undefined>}
+   * @private
+   */
+  getAmpStateJson_() {
+    const src = this.element.getAttribute('src');
+    const ampStatePath = src.substring('amp-state:'.length);
+    return Services.bindForDocOrNull(this.element).then(bind => {
+      if (!bind) {
+        const errorMsg =
+          'You must include amp-bind in order to use amp-state as an initial source for amp-list.';
+        user().error(TAG, errorMsg);
+        return Promise.resolve();
+      }
+      return bind.getState(ampStatePath);
+    });
+  }
+
+  /**
+   * @param {!Array|!Object|undefined} json
    * @return {!Promise}
    * @private
    */
-  renderLocalData_(src) {
-    let dataPromise;
-    if (typeof src === 'string') {
-      const ampStatePath = src.substring('amp-state:'.length);
-      dataPromise = Services.bindForDocOrNull(this.element).then(bind => {
-        if (!bind) {
-          const errorMsg =
-            'You must include amp-bind in order to use amp-state as an initial source for amp-list.';
-          user().error(TAG, errorMsg);
-          return Promise.resolve();
-        }
-        return bind.getState(ampStatePath);
-      });
-    } else {
-      // Remove the 'src' now that local data is used to render the list.
-      this.element.setAttribute('src', '');
-      dataPromise = Promise.resolve(src);
+  renderLocalData_(json) {
+    if (typeof json === 'undefined') {
+      return Promise.resolve();
     }
 
-    return dataPromise.then(data => {
-      if (!data) {
-        return;
-      }
-      const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
-      this.resetIfNecessary_(/* isFetch */ false);
-      return this.scheduleRender_(array, /* append */ false);
-    });
+    const array = /** @type {!Array} */ (isArray(json) ? json : [json]);
+    this.resetIfNecessary_(/* isFetch */ false);
+    return this.scheduleRender_(array, /* append */ false);
   }
 
   /** @override */
@@ -401,11 +403,14 @@ export class AmpList extends AMP.BaseElement {
 
     const src = mutations['src'];
     if (src !== undefined) {
-      if (
-        src !== null &&
-        (typeof src === 'object' || this.isAmpStateSrc_(src))
-      ) {
+      if (this.isAmpStateSrc_()) {
+        promise = this.getAmpStateJson_().then(json =>
+          this.renderLocalData_(json)
+        );
+      } else if (typeof src === 'object' && src !== null) {
         promise = this.renderLocalData_(src);
+        // Remove the 'src' if it was set by a bind-expression.
+        this.element.setAttribute('src', '');
       } else if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
