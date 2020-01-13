@@ -38,7 +38,7 @@ const {PuppeteerController} = require('./puppeteer-controller');
 const SUB = ' ';
 const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
-const SETUP_RETRIES = 1;
+const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
@@ -132,7 +132,7 @@ async function createPuppeteer(opt_config = {}) {
  * @param {?string} deviceName
  * @return {!SeleniumDriver}
  */
-async function createSelenium(browserName, args = {}, deviceName) {
+function createSelenium(browserName, args = {}, deviceName) {
   switch (browserName) {
     case 'safari':
       // Safari's only option is setTechnologyPreview
@@ -145,7 +145,7 @@ async function createSelenium(browserName, args = {}, deviceName) {
   }
 }
 
-async function createDriver(browserName, args, deviceName) {
+function createDriver(browserName, args, deviceName) {
   const capabilities = Capabilities[browserName]();
 
   const prefs = new logging.Preferences();
@@ -174,7 +174,7 @@ async function createDriver(browserName, args, deviceName) {
         .setChromeOptions(chromeOptions);
   }
 
-  return await builder.build();
+  return builder.build();
 }
 
 /**
@@ -489,11 +489,12 @@ class EndToEndFixture {
    * @param {number} retries
    */
   async setup(env, browserName, retries = 0) {
-    const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
     const config = getConfig();
     let driver;
+
+    // try catch block to catch early server termination error when creating session
     try {
-      driver = await getDriver(config, browserName, deviceName);
+      driver = await getDriver(config, browserName, this.spec.deviceName);
     } catch (ex) {
       if (retries > 0) {
         await this.setup(env, browserName, --retries);
@@ -509,27 +510,20 @@ class EndToEndFixture {
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
-    const {environment} = env;
+    //const {environment} = env;
 
     installBrowserAssertions(controller.networkLogger);
 
-    const url = new URL(testUrl);
-    if (experiments.length > 0) {
-      if (environment.includes('inabox')) {
-        // inabox experiments are toggled at server side using <meta> tag
-        url.searchParams.set('exp', experiments.join(','));
+    // try catch block to catch thenable webdriver not being resolved yet
+    try {
+      await setUpTest(env, this.spec);
+    } catch (ex) {
+      if (retries > 0) {
+        await this.setup(env, browserName, --retries);
       } else {
-        // AMP doc experiments are toggled via cookies
-        await toggleExperiments(ampDriver, url.href, experiments);
+        throw ex;
       }
     }
-
-    if (initialRect) {
-      const {width, height} = initialRect;
-      await controller.setWindowRect({width, height});
-    }
-
-    await ampDriver.navigateToEnvironment(environment, url.href);
   }
 
   async teardown(env) {
@@ -548,18 +542,41 @@ class EndToEndFixture {
  * @param {?string} deviceName
  * @return {!Promise}
  */
-async function getDriver(
+function getDriver(
   {engine = EngineType.SELENIUM, headless = false},
   browserName,
   deviceName
 ) {
   if (engine == EngineType.PUPPETEER) {
-    return await createPuppeteer({headless});
+    return createPuppeteer({headless});
   }
 
   if (engine == EngineType.SELENIUM) {
-    return await createSelenium(browserName, {headless}, deviceName);
+    return createSelenium(browserName, {headless}, deviceName);
   }
+}
+
+async function setUpTest(
+  {environment, ampDriver, controller},
+  {testUrl, experiments = [], initialRect}
+) {
+  const url = new URL(testUrl);
+  if (experiments.length > 0) {
+    if (environment.includes('inabox')) {
+      // inabox experiments are toggled at server side using <meta> tag
+      url.searchParams.set('exp', experiments.join(','));
+    } else {
+      // AMP doc experiments are toggled via cookies
+      await toggleExperiments(ampDriver, url.href, experiments);
+    }
+  }
+
+  if (initialRect) {
+    const {width, height} = initialRect;
+    await controller.setWindowRect({width, height});
+  }
+
+  await ampDriver.navigateToEnvironment(environment, url.href);
 }
 
 /**
