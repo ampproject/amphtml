@@ -26,6 +26,7 @@ import {StateProperty, getStoreService} from './amp-story-store-service';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
@@ -409,27 +410,29 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     let URL = this.element.getAttribute('endpoint');
 
-    const requestVars = {
-      reactionType: STORY_REACTION_TYPE_QUIZ,
-      reactionId: '', // combine url & attribute
-    };
+    const requestVars = dict({
+      'reactionType': STORY_REACTION_TYPE_QUIZ,
+      'reactionId': `page=${this.storeService_.get(
+        StateProperty.CURRENT_PAGE_ID
+      )}&url=${this.win.location.href}`,
+    });
 
-    const requestOptions = {
-      method: 'GET',
-    };
+    const requestOptions = dict({
+      'method': 'GET',
+    });
 
     if (reactionValue !== undefined) {
-      requestVars.reactionValue = reactionValue;
-      requestOptions.method = 'POST';
-      requestOptions.body = requestVars;
+      requestVars['reactionValue'] = reactionValue;
+      requestOptions['method'] = 'POST';
+      requestOptions['body'] = requestVars;
     } else {
       URL += `?reactionType=${
-        requestVars.reactionType
-      }&reactionId=${encodeURIComponent(requestVars.reactionId)}`;
+        requestVars['reactionType']
+      }&reactionId=${encodeURIComponent(requestVars['reactionId'])}`;
     }
 
     return this.getClientId_().then(clientId => {
-      requestVars.clientId = clientId;
+      requestVars['clientId'] = clientId;
       return this.requestService_.executeRequest(URL, null, requestOptions);
     });
   }
@@ -454,6 +457,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
+    if (!('data' in response)) {
+      return;
+    }
+
     this.responseData_ = {
       totalCount: response.data.totalResponseCount,
       data: response.data.responses,
@@ -461,17 +468,26 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     this.hasUserSelection_ = response.data.hasUserResponded;
     if (this.hasUserSelection_) {
-      this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
-
       const selectedOptionKey = this.responseData_.data.find(
         response => response.selectedByUser
       ).reactionValue;
 
-      this.quizEl_
-        .querySelectorAll('.i-amphtml-story-quiz-option')
-        [selectedOptionKey].classList.add(
-          'i-amphtml-story-quiz-option-selected'
+      const options = this.quizEl_.querySelectorAll(
+        '.i-amphtml-story-quiz-option'
+      );
+
+      if (selectedOptionKey >= options.length) {
+        dev().error(
+          TAG,
+          `Quiz #${this.element.getAttribute('id')} does not have option ${
+            answerChoiceOptions[selectedOptionKey]
+          }, but user selected option ${answerChoiceOptions[selectedOptionKey]}`
         );
+        return;
+      }
+
+      this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
+      [selectedOptionKey].classList.add('i-amphtml-story-quiz-option-selected');
     }
   }
 }
