@@ -6,18 +6,12 @@
   "license": "Apache-2.0",
   "main": "dist/purifier.js",
   "module": "dist/purifier.mjs",
-  "files": [
-    "dist/*"
-  ],
+  "types": "purifier.d.ts",
+  "files": ["dist/*", "purifier.d.ts"],
   "scripts": {
     "build": "rollup -c rollup.config.js"
   },
-  "keywords": [
-    "amp",
-    "sanitizer",
-    "sanitize",
-    "purify"
-  ],
+  "keywords": ["amp", "sanitizer", "sanitize", "purify"],
   "repository": {
     "type": "git",
     "url": "https://github.com/ampproject/amphtml.git",
@@ -30,5 +24,8 @@
   },
   "dependencies": {
     "dompurify": "2.0.7"
+  },
+  "optionalDependencies": {
+    "@types/dompurify": "2.0.1"
   }
 }
