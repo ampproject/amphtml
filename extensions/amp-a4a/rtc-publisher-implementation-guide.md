@@ -23,6 +23,7 @@ To use RTC, you must meet the following requirements:
 - APS
 - Automatad
 - Criteo
+- FLUX
 - IndexExchange
 - Lotame
 - Media.net
