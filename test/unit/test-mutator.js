@@ -1227,7 +1227,8 @@ describe('mutator changeSize', () => {
         task.mutate(state);
         expect(resource1.changeSize).to.be.calledOnce;
         expect(resource1.changeSize).to.be.calledWith(50, 222);
-    });
+      }
+    );
 
     it(
       'should NOT change size when resized margin in viewport and should ' +
