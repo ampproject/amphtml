@@ -15,5 +15,15 @@
  */
 
 .i-amphtml-next-page-document {
-  overflow-y: hidden;
+  overflow: hidden;
+}
+
+.i-amphtml-next-page-document:not(.amp-next-page-document-visible)
+  [i-amphtml-fixedid] {
+  display: none;
+}
+
+.i-amphtml-next-page-document.amp-next-page-document-visible {
+  opacity: 1;
+  overflow: visible;
 }

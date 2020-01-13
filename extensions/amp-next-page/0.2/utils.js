@@ -20,8 +20,6 @@ import {
   parseUrlDeprecated,
   resolveRelativeUrl,
 } from '../../../src/url';
-import {removeElement} from '../../../src/dom';
-import {toArray} from '../../../src/types';
 import {user, userAssert} from '../../../src/log';
 
 /**
@@ -69,18 +67,4 @@ export function validatePage(page, hostUrl) {
       (url.search || '') +
       (url.hash || '');
   }
-}
-
-/**
- * Removes redundancies and unauthorized extensions and elements
- * @param {!Document} doc Document to attach.
- */
-export function sanitizeDoc(doc) {
-  // TODO(wassgha): Implement handling of sticky elements
-  // TODO(wassgha): Implement persistence of repeating elements (e.g amp-sidebar)
-
-  // TODO(wassgha): Parse for more pages to queue
-
-  // TODO(wassgha): Allow amp-analytics after bug bash
-  toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
 }
