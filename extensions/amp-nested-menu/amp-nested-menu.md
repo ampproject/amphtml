@@ -208,6 +208,7 @@ The component supports arrow key navigation as follows:
 - `LEFT`: if a submenu is open, close it and return to the parent menu.
 - `RIGHT`: if a submenu open element has focus, open the corresponding submenu.
 - `UP/DOWN`: shift focus between items within a menu (this works only if all menu items are wrapped inside `li` elements under the same list).
+- `END/HOME`: shift focus to the first/last item within a menu (similar to `UP/DOWN`)
 
 If `side=left`, then the functionalities of `LEFT` and `RIGHT` arrow keys are reversed.
 
