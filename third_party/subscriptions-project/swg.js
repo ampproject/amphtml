@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.88 */
+/** Version: 0.1.22.89 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5441,7 +5441,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.88',
+    '_client': 'SwG 0.1.22.89',
   });
 }
 
@@ -5590,7 +5590,8 @@ class PayStartFlow {
       getEventParams(swgPaymentRequest['skuId'])
     );
     this.payClient_.start(
-      {
+      /** @type {!PaymentDataRequest} */
+      ({
         'apiVersion': 1,
         'allowedPaymentMethods': ['CARD'],
         'environment': 'PRODUCTION',
@@ -5600,7 +5601,7 @@ class PayStartFlow {
           'startTimeMs': Date.now(),
           'productType': this.productType_,
         },
-      },
+      }),
       {
         forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
@@ -6541,7 +6542,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.88',
+        '_client': 'SwG 0.1.22.89',
       },
       args || {}
     );
@@ -6948,6 +6949,11 @@ class ClientEventManager {
       additionalParameters: eventParams,
     });
   }
+
+  /** @return {!Promise<null>} */
+  getReadyPromise() {
+    return this.isReadyPromise_;
+  }
 }
 
 /**
@@ -7192,12 +7198,21 @@ function getOnExperiments(win) {
 
 /** @const {!Object<string, string>} */
 const iframeStyles = {
-  display: 'none',
+  opacity: '0',
+  position: 'absolute',
+  top: '-10px',
+  left: '-10px',
+  height: '1px',
+  width: '1px',
 };
 
-// We will wait up to 100 ms for subsequent log events (which are messaged)
-// to the iframe code that's already loaded.
-const MAX_WAIT = 100;
+// The initial iframe load takes ~500 ms.  We will wait at least that long
+// before a page redirect.  Subsequent logs are much faster.  We will wait at
+// most 100 ms.
+const MAX_FIRST_WAIT = 500;
+const MAX_WAIT = 200;
+// If we logged and rapidly redirected, we will add a short delay in case
+// a message hasn't been transmitted yet.
 const TIMEOUT_ERROR = 'AnalyticsService timed out waiting for a response';
 
 /**
@@ -7231,27 +7246,19 @@ class AnalyticsService {
       'iframe',
       {}
     ));
-
     setImportantStyles(this.iframe_, iframeStyles);
-
-    /** @private @const {string} */
-    this.src_ = feUrl('/serviceiframe');
-
-    /** @private @const {string} */
-    this.publicationId_ = deps.pageConfig().getPublicationId();
-
-    this.args_ = feArgs({
-      publicationId: this.publicationId_,
-    });
+    this.doc_.getBody().appendChild(this.getElement());
 
     /** @private @type {!boolean} */
-    this.everLogged_ = false;
+    this.everStartedLog_ = false;
+
+    /** @private @type {!boolean} */
+    this.everFinishedLog_ = false;
 
     /**
      * @private @const {!AnalyticsContext}
      */
     this.context_ = new AnalyticsContext();
-
     this.context_.setTransactionId(getUuid());
 
     /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
@@ -7371,7 +7378,7 @@ class AnalyticsService {
     if (source) {
       this.context_.setUtmSource(source);
     }
-    this.context_.setClientVersion('SwG 0.1.22.88');
+    this.context_.setClientVersion('SwG 0.1.22.89');
     this.addLabels(getOnExperiments(this.doc_.getWin()));
   }
 
@@ -7380,10 +7387,8 @@ class AnalyticsService {
    */
   start() {
     if (!this.serviceReady_) {
-      // TODO(sohanirao): Potentially do this even earlier
-      this.doc_.getBody().appendChild(this.getElement());
       this.serviceReady_ = this.activityPorts_
-        .openIframe(this.iframe_, this.src_, this.args_)
+        .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
         .then(
           port => {
             // Register a listener for the logging to code indicate it is
@@ -7430,7 +7435,7 @@ class AnalyticsService {
    * @return {boolean}
    */
   getHasLogged() {
-    return this.everLogged_;
+    return this.everStartedLog_;
   }
 
   /**
@@ -7496,7 +7501,7 @@ class AnalyticsService {
     }
     // Register we sent a log, the port will call this.afterLogging_ when done.
     this.unfinishedLogs_++;
-    this.everLogged_ = true;
+    this.everStartedLog_ = true;
     const request = this.createLogRequest_(event);
     this.lastAction_ = this.start().then(port => port.execute(request));
   }
@@ -7508,21 +7513,23 @@ class AnalyticsService {
   afterLogging_(response) {
     const success = (response && response.getComplete()) || false;
     const error = (response && response.getError()) || 'Unknown logging Error';
+    const isTimeout = error === TIMEOUT_ERROR;
+
     if (!success) {
       log_5('Error when logging: ' + error);
     }
 
     this.unfinishedLogs_--;
+    if (!isTimeout) {
+      this.everFinishedLog_ = true;
+    }
+
     // Nothing is waiting
     if (this.loggingResolver_ === null) {
       return;
     }
 
-    if (
-      this.unfinishedLogs_ === 0 || // All logs finished
-      this.loggingBroken_ || // Logs will never finished
-      error === TIMEOUT_ERROR // Someone waited too long for logging to finish
-    ) {
+    if (this.unfinishedLogs_ === 0 || this.loggingBroken_ || isTimeout) {
       if (this.timeout_ !== null) {
         clearTimeout(this.timeout_);
         this.timeout_ = null;
@@ -7552,10 +7559,13 @@ class AnalyticsService {
       // The promise above should not wait forever if things go wrong.  Let
       // the user proceed!
       const whenDone = this.afterLogging_.bind(this);
-      this.timeout_ = setTimeout(() => {
-        this.timeout_ = null;
-        whenDone(createErrorResponse(TIMEOUT_ERROR));
-      }, MAX_WAIT);
+      this.timeout_ = setTimeout(
+        () => {
+          this.timeout_ = null;
+          whenDone(createErrorResponse(TIMEOUT_ERROR));
+        },
+        this.everFinishedLog_ ? MAX_WAIT : MAX_FIRST_WAIT
+      );
     }
 
     return this.promiseToLog_;
@@ -12983,7 +12993,7 @@ function validatePaymentOptions(paymentOptions) {
            .includes(paymentOptions.environment)) {
     throw new Error(
         'Parameter environment in PaymentOptions can optionally be set to ' +
-        'PRODUCTION, otherwise it defaults to TEST.');
+        'PRODUCTION, otherwise it defaults to TEST. ' + paymentOptions.environment);
   }
 }
 
@@ -13716,9 +13726,7 @@ class PaymentsWebActivityDelegate {
    */
   isVerticalCenterExperimentEnabled_(paymentDataRequest) {
     return (
-      null &&
-      paymentDataRequest['i'] &&
-      paymentDataRequest['i'].renderContainerCenter
+      null  
     );
   }
 
@@ -14735,8 +14743,6 @@ function isNativeDisabledInRequest(request) {
  * limitations under the License.
  */
 
-const PAY_REQUEST_ID = 'swg-pay';
-const GPAY_ACTIVITY_REQUEST$1 = 'GPAY';
 const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
 /**
@@ -14749,18 +14755,8 @@ const PAY_ORIGIN = {
 };
 
 /** @return {string} */
-function payOrigin() {
-  return PAY_ORIGIN['PRODUCTION'];
-}
-
-/** @return {string} */
 function payUrl() {
   return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
-}
-
-/** @return {string} */
-function payDecryptUrl() {
-  return PAY_ORIGIN['PRODUCTION'] + '/gp/p/apis/buyflow/process';
 }
 
 /**
@@ -14776,22 +14772,58 @@ class PayClient {
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
+    /** @private {?function(!Promise<!PaymentData>)} */
+    this.responseCallback_ = null;
 
-    /** @const @private {!PayClientBindingDef} */
-    this.binding_ = isExperimentOn(this.win_, ExperimentFlags.GPAY_API)
-      ? new PayClientBindingPayjs(
-          this.win_,
-          this.activityPorts_,
-          deps.analytics()
-        )
-      : new PayClientBindingSwg(
-          this.win_,
-          this.activityPorts_,
-          this.dialogManager_,
-          deps.analytics()
-        );
+    /** @private {?PaymentDataRequest} */
+    this.request_ = null;
+
+    /** @private {?Promise<!PaymentData>} */
+    this.response_ = null;
+
+    /** @private @const {!./analytics-service.AnalyticsService} */
+    this.analytics_ = deps.analytics();
+
+    /** @private @const {!RedirectVerifierHelper} */
+    this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
+
+    /** @private @const {!PaymentsAsyncClient} */
+    this.client_ = this.createClient_(
+      /** @type {!PaymentOptions} */
+      ({
+        environment: 'PRODUCTION',
+        'i': {
+          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+        },
+      }),
+      this.analytics_.getTransactionId(),
+      this.handleResponse_.bind(this)
+    );
+
+    // Prepare new verifier pair.
+    this.redirectVerifierHelper_.prepare();
+
+    /** @private @const {!./client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+  }
+
+  /**
+   * @param {!PaymentOptions} options
+   * @param {string} googleTransactionId
+   * @param {function(!Promise<!PaymentData>)} handler
+   * @return {!PaymentsAsyncClient}
+   * @private
+   */
+  createClient_(options, googleTransactionId, handler) {
+    // Assign Google Transaction ID to PaymentsAsyncClient.googleTransactionId_
+    // so it can be passed to gpay_async.js and stored in payment clearcut log.
+    PaymentsAsyncClient.googleTransactionId_ = googleTransactionId;
+    return new PaymentsAsyncClient(
+      options,
+      handler,
+      /* useIframe */ false,
+      this.activityPorts_.getOriginalWebActivityPorts()
+    );
   }
 
   /**
@@ -14812,209 +14844,15 @@ class PayClient {
    * @return {string}
    */
   getType() {
-    // TODO(dvoytenko, #406): remove once GPay API is launched.
-    return this.binding_.getType();
-  }
-
-  /**
-   * @param {!Object} paymentRequest
-   * @param {!PayOptionsDef=} options
-   * @return {!Promise}
-   */
-  start(paymentRequest, options = {}) {
-    return this.binding_.start(paymentRequest, options);
-  }
-
-  /**
-   * @param {function(!Promise<!Object>)} callback
-   */
-  onResponse(callback) {
-    this.binding_.onResponse(callback);
-  }
-}
-
-/**
- * @implements {PayClientBindingDef}
- */
-class PayClientBindingSwg {
-  /**
-   * @param {!Window} win
-   * @param {!../components/activities.ActivityPorts} activityPorts
-   * @param {!../components/dialog-manager.DialogManager} dialogManager
-   * @param {!./analytics-service.AnalyticsService} analyticsService
-   */
-  constructor(win, activityPorts, dialogManager, analyticsService) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = activityPorts;
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = dialogManager;
-    /** @private @const {!./analytics-service.AnalyticsService} */
-    this.analytics_ = analyticsService;
-  }
-
-  /** @override */
-  getType() {
-    return 'SWG';
-  }
-
-  /** @override */
-  start(paymentRequest, options) {
-    if (options.forceRedirect) {
-      // This resolves an issue with logging where the page redirects before
-      // logs get sent to the server.  Ultimately we need a logging promise to
-      // resolve prior to redirecting but that is not possible right now.
-      const start = this.start_.bind(this);
-      return this.analytics_
-        .getLoggingPromise()
-        .then(() => start(paymentRequest, options));
-    } else {
-      this.start_(paymentRequest, options);
-      return Promise.resolve(true);
-    }
-  }
-
-  /**
-   * @param {!Object} paymentRequest
-   * @param {!PayOptionsDef} options
-   */
-  start_(paymentRequest, options) {
-    const opener = this.activityPorts_.open(
-      GPAY_ACTIVITY_REQUEST$1,
-      payUrl(),
-      options.forceRedirect ? '_top' : '_blank',
-      feArgs(paymentRequest),
-      {}
-    );
-    this.dialogManager_.popupOpened((opener && opener.targetWin) || null);
-  }
-
-  /** @override */
-  onResponse(callback) {
-    const responseCallback = port => {
-      this.dialogManager_.popupClosed();
-      callback(this.validatePayResponse_(port));
-    };
-    this.activityPorts_.onResult(GPAY_ACTIVITY_REQUEST$1, responseCallback);
-    this.activityPorts_.onResult(PAY_REQUEST_ID, responseCallback);
-  }
-
-  /**
-   * @param {!../components/activities.ActivityPortDef} port
-   * @return {!Promise<!Object>}
-   * @private
-   */
-  validatePayResponse_(port) {
-    // Do not require security immediately: it will be checked below.
-    return port.acceptResult().then(result => {
-      if (result.origin != payOrigin()) {
-        throw new Error('channel mismatch');
-      }
-      const data = /** @type {!Object} */ (result.data);
-      if (data['redirectEncryptedCallbackData']) {
-        // Data is supplied as an encrypted blob.
-        const xhr = new Xhr(this.win_);
-        const url = payDecryptUrl();
-        const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
-          method: 'post',
-          headers: {'Accept': 'text/plain, application/json'},
-          credentials: 'include',
-          body: data['redirectEncryptedCallbackData'],
-          mode: 'cors',
-        });
-        return xhr
-          .fetch(url, init)
-          .then(response => response.json())
-          .then(response => {
-            const dataClone = Object.assign({}, data);
-            delete dataClone['redirectEncryptedCallbackData'];
-            return Object.assign(dataClone, response);
-          });
-      }
-      // Data is supplied directly: must be a verified and secure channel.
-      if (result.originVerified && result.secureChannel) {
-        return data;
-      }
-      throw new Error('channel mismatch');
-    });
-  }
-}
-
-/**
- * Binding based on the https://github.com/google/payjs.
- * @implements {PayClientBindingDef}
- * @package Visible for testing only.
- */
-class PayClientBindingPayjs {
-  /**
-   * @param {!Window} win
-   * @param {!../components/activities.ActivityPorts} activityPorts
-   * @param {!./analytics-service.AnalyticsService} analyticsService
-   */
-  constructor(win, activityPorts, analyticsService) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = activityPorts;
-
-    /** @private {?function(!Promise<!Object>)} */
-    this.responseCallback_ = null;
-
-    /** @private {?Object} */
-    this.request_ = null;
-
-    /** @private {?Promise<!Object>} */
-    this.response_ = null;
-
-    /** @private @const {!./analytics-service.AnalyticsService} */
-    this.analytics_ = analyticsService;
-
-    /** @private @const {!RedirectVerifierHelper} */
-    this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
-
-    /** @private @const {!PaymentsAsyncClient} */
-    this.client_ = this.createClient_(
-      {
-        environment: 'PRODUCTION',
-        'i': {
-          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
-        },
-      },
-      analyticsService.getTransactionId(),
-      this.handleResponse_.bind(this)
-    );
-
-    // Prepare new verifier pair.
-    this.redirectVerifierHelper_.prepare();
-  }
-
-  /**
-   * @param {!Object} options
-   * @param {string} googleTransactionId
-   * @param {function(!Promise<!Object>)} handler
-   * @return {!PaymentsAsyncClient}
-   * @private
-   */
-  createClient_(options, googleTransactionId, handler) {
-    // Assign Google Transaction ID to PaymentsAsyncClient.googleTransactionId_
-    // so it can be passed to gpay_async.js and stored in payment clearcut log.
-    PaymentsAsyncClient.googleTransactionId_ = googleTransactionId;
-    return new PaymentsAsyncClient(
-      options,
-      handler,
-      /* useIframe */ false,
-      this.activityPorts_.getOriginalWebActivityPorts()
-    );
-  }
-
-  /** @override */
-  getType() {
+    // TODO(alin04): remove once all references removed.
     return 'PAYJS';
   }
 
-  /** @override */
-  start(paymentRequest, options) {
+  /**
+   * @param {!PaymentDataRequest} paymentRequest
+   * @param {!PayOptionsDef=} options
+   */
+  start(paymentRequest, options = {}) {
     this.request_ = paymentRequest;
 
     if (options.forceRedirect) {
@@ -15038,10 +14876,11 @@ class PayClientBindingPayjs {
       }
       if (options.forceRedirect) {
         const client = this.client_;
-
-        return this.analytics_.getLoggingPromise().then(() => {
-          client.loadPaymentData(paymentRequest);
-          resolver(true);
+        this.eventManager_.getReadyPromise().then(() => {
+          this.analytics_.getLoggingPromise().then(() => {
+            client.loadPaymentData(paymentRequest);
+            resolver(true);
+          });
         });
       } else {
         this.client_.loadPaymentData(paymentRequest);
@@ -15051,7 +14890,9 @@ class PayClientBindingPayjs {
     return promise;
   }
 
-  /** @override */
+  /**
+   * @param {function(!Promise<!PaymentData>)} callback
+   */
   onResponse(callback) {
     this.responseCallback_ = callback;
     const response = this.response_;
@@ -15065,7 +14906,7 @@ class PayClientBindingPayjs {
   }
 
   /**
-   * @param {!Promise<!Object>} responsePromise
+   * @param {!Promise<!PaymentData>} responsePromise
    * @private
    */
   handleResponse_(responsePromise) {
@@ -15078,9 +14919,9 @@ class PayClientBindingPayjs {
   }
 
   /**
-   * @param {!Promise<!Object>} response
-   * @param {?Object} request
-   * @return {!Promise<!Object>}
+   * @param {!Promise<!PaymentData>} response
+   * @param {?PaymentDataRequest} request
+   * @return {!Promise<!PaymentData>}
    * @private
    */
   convertResponse_(response, request) {
@@ -15283,7 +15124,7 @@ class RedirectVerifierHelper {
 }
 
 /**
- * @param {!Object} paymentRequest
+ * @param {!PaymentDataRequest} paymentRequest
  * @param {string} param
  * @param {*} value
  */
@@ -15987,6 +15828,7 @@ class ConfiguredRuntime {
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this);
+    this.analyticsService_.start();
 
     /** @private @const {!PayClient} */
     this.payClient_ = new PayClient(this);
@@ -16010,6 +15852,7 @@ class ConfiguredRuntime {
     );
 
     // ALL CLEAR: DepsDef definition now complete.
+    this.eventManager_.logSwgEvent(AnalyticsEvent.IMPRESSION_PAGE_LOAD, false);
 
     /** @private @const {!OffersApi} */
     this.offersApi_ = new OffersApi(this.pageConfig_, this.fetcher_);
