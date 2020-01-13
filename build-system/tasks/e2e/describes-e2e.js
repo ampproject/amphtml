@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RequestBankE2E} from './request-bank';
-
 // import to install chromedriver and geckodriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
 require('geckodriver'); // eslint-disable-line no-unused-vars
@@ -49,7 +47,6 @@ const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
  * {@link https://github.com/GoogleChrome/puppeteer/blob/master/experimental/puppeteer-firefox/README.md}
  */
 const PUPPETEER_BROWSERS = new Set(['chrome']);
-const REQUESTBANK_URL_PREFIX = 'http://localhost:8000';
 
 /**
  * Engine types for e2e testing.
@@ -510,10 +507,8 @@ class EndToEndFixture {
         ? new PuppeteerController(driver)
         : new SeleniumWebDriverController(driver);
     const ampDriver = new AmpDriver(controller);
-    const requestBank = new RequestBankE2E(REQUESTBANK_URL_PREFIX, 'e2e');
     env.controller = controller;
     env.ampDriver = ampDriver;
-    env.requestBank = requestBank;
     const {environment} = env;
 
     installBrowserAssertions(controller.networkLogger);
@@ -538,12 +533,11 @@ class EndToEndFixture {
   }
 
   async teardown(env) {
-    const {controller, requestBank} = env;
+    const {controller} = env;
     if (controller) {
       await controller.switchToParent();
       await controller.dispose();
     }
-    await requestBank.tearDown();
   }
 }
 
