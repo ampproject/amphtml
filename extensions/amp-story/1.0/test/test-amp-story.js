@@ -54,6 +54,7 @@ describes.realWin(
     let win, ampdoc;
     let element;
     let hasSwipeCapability = false;
+    let isEmbedded = false;
     let story;
     let replaceStateStub;
 
@@ -117,6 +118,10 @@ describes.realWin(
         .stub(viewer, 'hasCapability')
         .withArgs('swipe')
         .returns(hasSwipeCapability);
+      env.sandbox
+        .stub(viewer, 'isEmbedded')
+        .withArgs()
+        .returns(isEmbedded);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
       registerServiceBuilder(win, 'performance', () => ({
@@ -1116,14 +1121,20 @@ describes.realWin(
         });
 
         describe('with #cap=swipe', () => {
-          before(() => (hasSwipeCapability = true));
-          after(() => (hasSwipeCapability = false));
+          before(() => {
+            hasSwipeCapability = true;
+            isEmbedded = true;
+          });
+          after(() => {
+            hasSwipeCapability = false;
+            isEmbedded = false;
+          });
 
           it('should send a message when tapping on last page in viewer', async () => {
             await createStoryWithPages(1, ['cover']);
             const sendMessageStub = env.sandbox.stub(
-              story.viewer_,
-              'sendMessage'
+              story.viewerMessagingHandler_,
+              'send'
             );
 
             await story.layoutCallback();
@@ -1163,14 +1174,20 @@ describes.realWin(
         });
 
         describe('with #cap=swipe', () => {
-          before(() => (hasSwipeCapability = true));
-          after(() => (hasSwipeCapability = false));
+          before(() => {
+            hasSwipeCapability = true;
+            isEmbedded = true;
+          });
+          after(() => {
+            hasSwipeCapability = false;
+            isEmbedded = false;
+          });
 
           it('should send a message when tapping on last page in viewer', async () => {
             await createStoryWithPages(1, ['cover']);
             const sendMessageStub = env.sandbox.stub(
-              story.viewer_,
-              'sendMessage'
+              story.viewerMessagingHandler_,
+              'send'
             );
 
             await story.layoutCallback();

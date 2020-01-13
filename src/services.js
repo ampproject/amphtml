@@ -359,7 +359,7 @@ export class Services {
   static mutatorForDoc(elementOrAmpDoc) {
     return /** @type {!./service/mutator-interface.MutatorInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
-      'resources'
+      'mutator'
     ));
   }
 
@@ -622,22 +622,6 @@ export class Services {
    */
   static localizationServiceV01(win) {
     return getService(win, 'localization-v01');
-  }
-
-  /**
-   * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
-   */
-  static viewerIntegrationVariableServiceForOrNull(win) {
-    return (
-      /** @type {!Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>} */
-      (getElementServiceIfAvailable(
-        win,
-        'viewer-integration-variable',
-        'amp-viewer-integration',
-        true
-      ))
-    );
   }
 
   /**

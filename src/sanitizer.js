@@ -23,7 +23,7 @@ import {
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
   isValidAttr,
-} from './sanitation';
+} from './purifier/sanitation';
 import {dict} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {isAmp4Email} from './format';

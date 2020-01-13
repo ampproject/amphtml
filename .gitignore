@@ -30,3 +30,4 @@ firebase
 .firebaserc
 firebase.json
 .firebase/
+src/purifier/dist

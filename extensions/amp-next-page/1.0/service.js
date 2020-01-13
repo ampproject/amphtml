@@ -15,11 +15,8 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-1.0.css';
+import {HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
-import {Page, PageState} from './page';
-import {
-  PositionObserver, // eslint-disable-line no-unused-vars
-} from '../../../src/service/position-observer/position-observer-impl';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
@@ -35,12 +32,15 @@ import {
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
-import {sanitizeDoc, validatePage, validateUrl} from './utils';
+import {toArray} from '../../../src/types';
+import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
+import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;
+const NEAR_BOTTOM_VIEWPORT_COUNT = 1;
 
 /** @enum */
 export const Direction = {UP: 1, DOWN: -1};
@@ -93,7 +93,10 @@ export class NextPageService {
     this.lastScrollTop_ = 0;
 
     /** @private {?Page} */
-    this.initialPage_ = null;
+    this.hostPage_ = null;
+
+    /** @private {!Object<string, !Element>} */
+    this.replaceableElements_ = {};
   }
 
   /**
@@ -109,8 +112,20 @@ export class NextPageService {
    * @param {!AmpElement} element
    */
   build(element) {
+    // Prevent multiple amp-next-page on the same document
+    if (this.isBuilt()) {
+      return;
+    }
+
+    this.element_ = element;
+
+    // Get the separator and more box (and remove the provided elements in the process)
+    this.separator_ = this.getSeparatorElement_(element);
+    this.moreBox_ = this.getMoreBoxElement_(element);
+
     // Create a reference to the host page
-    this.initialPage_ = this.createInitialPage();
+    this.hostPage_ = this.createHostPage();
+    this.toggleHiddenAndReplaceableElements(this.win_.document);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
@@ -124,16 +139,12 @@ export class NextPageService {
 
     this.visibilityObserver_ = new VisibilityObserver(this.ampdoc_);
 
-    this.element_ = element;
-    this.separator_ = this.getSeparatorElement_();
-    this.moreBox_ = this.getMoreBoxElement_();
-
     // Have the suggestion box be always visible
     this.element_.appendChild(this.moreBox_);
 
     if (!this.pages_) {
-      this.pages_ = [this.initialPage_];
-      this.setLastFetchedPage(this.initialPage_);
+      this.pages_ = [this.hostPage_];
+      this.setLastFetchedPage(this.hostPage_);
     }
 
     this.getPagesPromise_().then(pages => {
@@ -145,6 +156,8 @@ export class NextPageService {
       });
     });
 
+    this.getHostNextPageElement_().classList.add('i-amphtml-next-page');
+
     this.viewport_.onScroll(() => this.updateScroll_());
     this.viewport_.onResize(() => this.updateScroll_());
     this.updateScroll_();
@@ -154,7 +167,7 @@ export class NextPageService {
    * @return {!AmpElement}
    * @private
    */
-  getNextPageElement_() {
+  getHostNextPageElement_() {
     return dev().assertElement(this.element_);
   }
 
@@ -168,11 +181,12 @@ export class NextPageService {
 
   /**
    * @param {boolean=} force
+   * @return {!Promise}
    */
   maybeFetchNext(force = false) {
     // If a page is already queued to be fetched, wait for it
     if (this.pages_.some(page => page.isFetching())) {
-      return;
+      return Promise.resolve();
     }
 
     if (force || this.getViewportsAway_() <= PRERENDER_VIEWPORT_COUNT) {
@@ -180,7 +194,7 @@ export class NextPageService {
         this.getPageIndex_(this.lastFetchedPage_) + 1
       ];
       if (nextPage) {
-        nextPage.fetch();
+        return nextPage.fetch();
       }
     }
   }
@@ -208,8 +222,17 @@ export class NextPageService {
 
     // If no page is visible then the host page should be
     if (!this.pages_.some(page => page.isVisible())) {
-      this.initialPage_.setVisibility(VisibilityState.VISIBLE);
+      this.hostPage_.setVisibility(VisibilityState.VISIBLE);
     }
+
+    // Hide elements if necessary
+    this.pages_
+      .filter(page => page.isVisible())
+      .forEach(page =>
+        this.toggleHiddenAndReplaceableElements(
+          /** @type {!Document} */ (dev().assertElement(page.document))
+        )
+      );
   }
 
   /**
@@ -230,7 +253,7 @@ export class NextPageService {
         const shouldHide =
           page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
           page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT ||
-          page === this.initialPage_;
+          page === this.hostPage_;
         return shouldHide && page.isVisible();
       })
       .forEach(page => page.setVisibility(VisibilityState.HIDDEN));
@@ -248,7 +271,7 @@ export class NextPageService {
    * the provided page
    * @param {?Page=} page
    */
-  setTitlePage(page = this.initialPage_) {
+  setTitlePage(page = this.hostPage_) {
     if (!page) {
       dev().warn(TAG, 'setTitlePage called before next-page-service is built');
       return;
@@ -263,7 +286,7 @@ export class NextPageService {
    * replace when they become visible
    */
   initializeHistory() {
-    const {title, url} = this.initialPage_;
+    const {title, url} = this.hostPage_;
     this.history_.push(undefined /** opt_onPop */, {title, url});
   }
 
@@ -271,13 +294,13 @@ export class NextPageService {
    *
    * @return {!Page}
    */
-  createInitialPage() {
+  createHostPage() {
     const doc = this.win_.document;
     const {title, location} = doc;
     const {href: url} = location;
     const image =
       parseSchemaImage(doc) || parseOgImage(doc) || parseFavicon(doc) || '';
-    return new Page(
+    return new HostPage(
       this,
       {
         url,
@@ -285,7 +308,8 @@ export class NextPageService {
         image,
       },
       PageState.INSERTED /** initState */,
-      VisibilityState.VISIBLE /** initVisibility */
+      VisibilityState.VISIBLE /** initVisibility */,
+      doc /** initDoc */
     );
   }
 
@@ -297,15 +321,15 @@ export class NextPageService {
    */
   appendAndObservePage(page, doc) {
     // If the user already scrolled to the bottom, prevent rendering
-    if (this.getViewportsAway_() <= 1) {
-      // TODO(wassgha): Append a "load next article" button
+    if (this.getViewportsAway_() <= NEAR_BOTTOM_VIEWPORT_COUNT) {
+      // TODO(wassgha): Append a "load next article" button?
       return null;
     }
 
     const shadowRoot = this.win_.document.createElement('div');
 
-    // Handles extension deny-lists and sticky items
-    sanitizeDoc(doc);
+    // Handles extension deny-lists
+    this.sanitizeDoc(doc);
 
     // Insert the separator
     this.element_.insertBefore(this.separator_.cloneNode(true), this.moreBox_);
@@ -334,6 +358,59 @@ export class NextPageService {
       dev().error(TAG, 'failed to attach shadow document for page', e);
       return null;
     }
+  }
+
+  /**
+   * Removes redundancies and unauthorized extensions and elements
+   * @param {!Document} doc Document to attach.
+   */
+  sanitizeDoc(doc) {
+    // TODO(wassgha): Parse for more pages to queue
+
+    // TODO(wassgha): Allow amp-analytics after bug bash
+    toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
+    // Make sure all hidden elements are initially invisible
+    this.toggleHiddenAndReplaceableElements(doc, false /** isVisible */);
+  }
+
+  /**
+   * Hides or shows elements based on the `amp-next-page-hide` and
+   * `amp-next-page-replace` attributes
+   * @param {!Document} doc Document to attach.
+   * @param {boolean=} isVisible Whether this page is visible or not
+   */
+  toggleHiddenAndReplaceableElements(doc, isVisible = true) {
+    // Hide elements that have [amp-next-page-hide] on child documents
+    if (doc !== this.hostPage_.document) {
+      toArray(doc.querySelectorAll('[amp-next-page-hide]')).forEach(element =>
+        toggle(element, false /** opt_display */)
+      );
+    }
+
+    // Element replacing is only concerned with the visible page
+    if (!isVisible) {
+      return;
+    }
+
+    // Replace elements that have [amp-next-page-replace]
+    toArray(doc.querySelectorAll('[amp-next-page-replace]')).forEach(
+      element => {
+        let uniqueId = element.getAttribute('amp-next-page-replace');
+        if (!uniqueId) {
+          uniqueId = String(Date.now() + Math.floor(Math.random() * 100));
+          element.setAttribute('amp-next-page-replace', uniqueId);
+        }
+
+        if (
+          this.replaceableElements_[uniqueId] &&
+          this.replaceableElements_[uniqueId] !== element
+        ) {
+          toggle(this.replaceableElements_[uniqueId], false /** opt_display */);
+        }
+        this.replaceableElements_[uniqueId] = element;
+        toggle(element, true /** opt_display */);
+      }
+    );
   }
 
   /**
@@ -398,7 +475,7 @@ export class NextPageService {
    * @private
    */
   getPagesPromise_() {
-    const inlinePages = this.getInlinePages_();
+    const inlinePages = this.getInlinePages_(this.getHostNextPageElement_());
     const src = this.element_.getAttribute('src');
     userAssert(
       inlinePages || src,
@@ -417,14 +494,12 @@ export class NextPageService {
 
   /**
    * Reads the inline next pages from the element.
+   * @param {!Element} element the container of the amp-next-page extension
    * @return {?Array} JSON object, or null if no inline pages specified.
    * @private
    */
-  getInlinePages_() {
-    const scriptElements = childElementsByTag(
-      this.getNextPageElement_(),
-      'SCRIPT'
-    );
+  getInlinePages_(element) {
+    const scriptElements = childElementsByTag(element, 'SCRIPT');
     if (!scriptElements.length) {
       return null;
     }
@@ -449,12 +524,13 @@ export class NextPageService {
   /**
    * Reads the developer-provided separator element or defaults
    * to the internal implementation of it
+   * @param {!Element} element the container of the amp-next-page extension
    * @return {!Element}
    * @private
    */
-  getSeparatorElement_() {
+  getSeparatorElement_(element) {
     const providedSeparator = childElementByAttr(
-      this.getNextPageElement_(),
+      element,
       'amp-next-page-separator'
     );
     // TODO(wassgha): Use templates (amp-mustache) to render the separator
@@ -475,12 +551,13 @@ export class NextPageService {
   }
 
   /**
+   * @param {!Element} element the container of the amp-next-page extension
    * @return {!Element}
    * @private
    */
-  getMoreBoxElement_() {
+  getMoreBoxElement_(element) {
     const providedMoreBox = childElementByAttr(
-      this.getNextPageElement_(),
+      element,
       'amp-next-page-more-box'
     );
     // TODO(wassgha): Use templates (amp-mustache) to render the more box
