@@ -510,7 +510,6 @@ class EndToEndFixture {
     const ampDriver = new AmpDriver(controller);
     env.controller = controller;
     env.ampDriver = ampDriver;
-    //const {environment} = env;
 
     installBrowserAssertions(controller.networkLogger);
 
