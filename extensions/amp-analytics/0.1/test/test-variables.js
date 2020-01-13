@@ -145,7 +145,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         '123,xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,bar,',
         {
           'foo': 'bar',
-          'num': 456,
           'array': [
             123,
             'xy&x', // special chars should be encoded
