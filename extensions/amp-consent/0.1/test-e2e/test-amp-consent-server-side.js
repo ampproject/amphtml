@@ -37,7 +37,7 @@ describes.endtoend(
       controller = env.controller;
     });
 
-    it.skip('should respect server side decision and persist it', async () => {
+    it('should respect server side decision and persist it', async () => {
       resetAllElements();
 
       const currentUrl = await controller.getCurrentUrl();
@@ -82,7 +82,7 @@ describes.endtoend(
 
       // Check the analytics request consentState
       await expect(
-        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=sufficient'
+        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=insufficient'
       ).to.have.been.sent;
     });
   }
