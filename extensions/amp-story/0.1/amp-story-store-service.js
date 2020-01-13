@@ -47,7 +47,6 @@ export let State;
 
 /**
  * @protected
- * @const
  * @enum {string}
  **/
 export const StateProperty = {
@@ -78,7 +77,6 @@ export const StateProperty = {
 
 /**
  * @protected
- * @const
  * @enum {string}
  **/
 export const Action = {
