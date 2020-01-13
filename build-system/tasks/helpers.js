@@ -49,6 +49,7 @@ const {transpileTs} = require('../compile/typescript');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
+const extensionType = argv.esm ? 'mjs' : 'js';
 
 /**
  * Tasks that should print the `--nobuild` help text.

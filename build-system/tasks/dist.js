@@ -129,9 +129,9 @@ async function dist() {
 
   if (argv.esm) {
     await Promise.all([
-      createModuleCompatibleES5Bundle('v0.js'),
-      createModuleCompatibleES5Bundle('amp4ads-v0.js'),
-      createModuleCompatibleES5Bundle('shadow-v0.js'),
+      createModuleCompatibleES5Bundle('v0.mjs'),
+      createModuleCompatibleES5Bundle('amp4ads-v0.mjs'),
+      createModuleCompatibleES5Bundle('shadow-v0.mjs'),
     ]);
   }
 

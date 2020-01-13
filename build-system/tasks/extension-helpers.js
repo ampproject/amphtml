@@ -32,6 +32,7 @@ const {vendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
+const extType = argv.esm ? 'mjs' : 'js';
 
 /**
  * Extensions to build when `--extensions=inabox`.
@@ -507,9 +508,9 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
     filename,
     './dist/v0',
     Object.assign(options, {
-      toName: `${name}-${version}.max.js`,
-      minifiedName: `${name}-${version}.js`,
-      latestName: version === latestVersion ? `${name}-latest.js` : '',
+      toName: `${name}-${version}.max.${extType}`,
+      minifiedName: `${name}-${version}.${extType}`,
+      latestName: version === latestVersion ? `${name}-latest.${extType}` : '',
       // Wrapper that either registers the extension or schedules it for
       // execution after the main binary comes back.
       // The `function` is wrapped in `()` to avoid lazy parsing it,
@@ -524,10 +525,10 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
   if (isAliased) {
-    const src = `${name}-${version}${options.minify ? '' : '.max'}.js`;
+    const src = `${name}-${version}${options.minify ? '' : '.max'}.${extType}`;
     const dest = `${name}-${aliasBundle.aliasedVersion}${
       options.minify ? '' : '.max'
-    }.js`;
+    }.${extType}`;
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
   }
