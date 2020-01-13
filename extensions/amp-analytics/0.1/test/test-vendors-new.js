@@ -40,6 +40,7 @@ describes.realWin(
   function(env) {
     let win, doc;
     let requestVerifier;
+    let elementMacros;
 
     beforeEach(() => {
       win = env.win;
@@ -47,6 +48,10 @@ describes.realWin(
       const wi = mockWindowInterface(env.sandbox);
       wi.getLocation.returns(win.location);
       requestVerifier = new ImagePixelVerifier(wi);
+      elementMacros = {
+        'COOKIE': null,
+        'CONSENT_STATE': null,
+      };
     });
 
     describe('Should not contain iframe transport if not whitelisted', () => {
@@ -112,10 +117,6 @@ describes.realWin(
               .stub(variableService, 'getMacros')
               .callsFake(function() {
                 // Add all the macros in amp-analytics
-                const elementMacros = {
-                  'COOKIE': null,
-                  'CONSENT_STATE': null,
-                };
                 const merged = {...this.macros_, ...elementMacros};
 
                 // Change the resolving function
