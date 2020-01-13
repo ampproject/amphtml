@@ -110,19 +110,16 @@ export class NextPageService {
    * @param {!AmpElement} element
    */
   build(element) {
-    // Get the separator and more box (and remove the provided elements in the process)
-    const separator = this.getSeparatorElement_(element);
-    const moreBox = this.getMoreBoxElement_(element);
-
     // Prevent multiple amp-next-page on the same document
     if (this.isBuilt()) {
       return;
     }
 
-    // Set the parsed elements as the choice for all subsequent <amp-next-page> elements
     this.element_ = element;
-    this.separator_ = separator;
-    this.moreBox_ = moreBox;
+
+    // Get the separator and more box (and remove the provided elements in the process)
+    this.separator_ = this.getSeparatorElement_(element);
+    this.moreBox_ = this.getMoreBoxElement_(element);
 
     // Create a reference to the host page
     this.initialPage_ = this.createInitialPage();
@@ -136,6 +133,7 @@ export class NextPageService {
       Services.extensionsFor(this.win_),
       Services.timerFor(this.win_)
     );
+
     this.visibilityObserver_ = new VisibilityObserver(this.ampdoc_);
 
     // Have the suggestion box be always visible
