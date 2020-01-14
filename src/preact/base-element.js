@@ -82,52 +82,6 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 
   /**
-   * Override to provide the Component definition.
-   *
-   * @return {!Preact.FunctionalComponent}
-   */
-  static Component() {
-    devAssert(false, 'Must provide Component');
-    return () => null;
-  }
-
-  /**
-   * An override to specify an exact className prop to Preact.
-   *
-   * @return {string}
-   */
-  static className() {
-    return '';
-  }
-
-  /**
-   * Enabling passthrough mode alters the children slotting to use a single
-   * `<slot>` element for all children. This is in contrast to children mode,
-   * which creates a new named `<slot>` for every child.
-   *
-   * @return {boolean}
-   */
-  static passthrough() {
-    return false;
-  }
-
-  /**
-   * Provides a mapping of Preact prop to AmpElement DOM attributes.
-   *
-   * @return {!Object<string, !AmpElementPropDef>}
-   */
-  static props() {
-    return {};
-  }
-
-  /**
-   * @return {!Object<string, !ChildDef>|null}
-   */
-  static children() {
-    return null;
-  }
-
-  /**
    * A chance to initialize default Preact props for the element.
    *
    * @return {!JsonObject|undefined}
@@ -217,7 +171,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     // While this "creates" a new element, diffing will not create a second
     // instance of Component. Instead, the existing one already rendered into
     // this element will be reused.
-    const cv = createElement(Ctor.Component(), props);
+    const cv = createElement(Ctor.Component, props);
 
     const v = createElement(withAmpContext, this.context_, cv);
 
@@ -231,6 +185,45 @@ export class PreactBaseElement extends AMP.BaseElement {
   }
 }
 
+// Ideally, these would be Static Class Fields. But Closure can't even.
+
+/**
+ * Override to provide the Component definition.
+ *
+ * @protected {!Preact.FunctionalComponent}
+ */
+PreactBaseElement.Component = function() {
+  devAssert(false, 'Must provide Component');
+};
+
+/**
+ * An override to specify an exact className prop to Preact.
+ *
+ * @protected {string}
+ */
+PreactBaseElement.className = '';
+
+/**
+ * Enabling passthrough mode alters the children slotting to use a single
+ * `<slot>` element for all children. This is in contrast to children mode,
+ * which creates a new named `<slot>` for every child.
+ *
+ * @protected {boolean}
+ */
+PreactBaseElement.passthrough = false;
+
+/**
+ * Provides a mapping of Preact prop to AmpElement DOM attributes.
+ *
+ * @protected {!Object<string, !AmpElementPropDef>}
+ */
+PreactBaseElement.props = {};
+
+/**
+ * @protected {!Object<string, !ChildDef>|null}
+ */
+PreactBaseElement.children = null;
+
 /**
  * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
@@ -240,14 +233,19 @@ export class PreactBaseElement extends AMP.BaseElement {
 function collectProps(Ctor, element, defaultProps) {
   const props = /** @type {!JsonObject} */ ({...defaultProps});
 
+  const {
+    className,
+    props: propDefs,
+    passthrough,
+    children: childrenDefs,
+  } = Ctor;
+
   // Class.
-  const className = Ctor.className();
   if (className) {
     props['className'] = className;
   }
 
   // Props.
-  const propDefs = Ctor.props();
   for (const name in propDefs) {
     const def = propDefs[name];
     const value = element.getAttribute(def.attr);
@@ -271,8 +269,7 @@ function collectProps(Ctor, element, defaultProps) {
   // as separate properties. Thus in a carousel the plain "children" are
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
-  const childrenDefs = Ctor.children();
-  if (Ctor.passthrough()) {
+  if (passthrough) {
     devAssert(
       !childrenDefs,
       'only one of "passthrough" or "children" may be given'

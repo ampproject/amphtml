@@ -28,31 +28,7 @@ import {userAssert} from '../../../src/log';
 /** @const {string} */
 const TAG = 'amp-date-display';
 
-const props = {
-  'displayIn': {attr: 'display-in'},
-  'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
-  'locale': {attr: 'locale'},
-  'datetime': {attr: 'datetime'},
-  'timestampMs': {attr: 'timestamp-ms', type: 'number'},
-  'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
-};
-
 class AmpDateDisplay extends PreactBaseElement {
-  /** @override */
-  static Component() {
-    return DateDisplay;
-  }
-
-  /** @override */
-  static passthrough() {
-    return true;
-  }
-
-  /** @override */
-  static props() {
-    return props;
-  }
-
   /** @override */
   init() {
     const templates = Services.templatesFor(this.win);
@@ -99,6 +75,22 @@ class AmpDateDisplay extends PreactBaseElement {
     return isLayoutSizeDefined(layout);
   }
 }
+
+/** @override */
+AmpDateDisplay.Component = DateDisplay;
+
+/** @override */
+AmpDateDisplay.passthrough = true;
+
+/** @override */
+AmpDateDisplay.props = {
+  'displayIn': {attr: 'display-in'},
+  'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
+  'locale': {attr: 'locale'},
+  'datetime': {attr: 'datetime'},
+  'timestampMs': {attr: 'timestamp-ms', type: 'number'},
+  'timestampSeconds': {attr: 'timestamp-seconds', type: 'number'},
+};
 
 AMP.extension(TAG, '0.2', AMP => {
   AMP.registerElement(TAG, AmpDateDisplay);
