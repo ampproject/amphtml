@@ -176,7 +176,9 @@ function createDriver(browserName, args, deviceName) {
       if (deviceName) {
         chromeOptions.setMobileEmulation({deviceName});
       }
-      return chrome.Driver.createSession(chromeOptions);
+      const driver = chrome.Driver.createSession(chromeOptions);
+      driver.onQuit = null;
+      return driver;
   }
 }
 
@@ -493,20 +495,7 @@ class EndToEndFixture {
    */
   async setup(env, browserName, retries = 0) {
     const config = getConfig();
-    let driver;
-
-    // try catch block to catch early server termination error when creating session
-    try {
-      driver = await getDriver(config, browserName, this.spec.deviceName);
-    } catch (ex) {
-      throw new Error('retry catch' + ex.message);
-      // if (retries > 0) {
-      //   await this.setup(env, browserName, --retries);
-      // } else {
-      //   throw ex;
-      // }
-    }
-
+    const driver = getDriver(config, browserName, this.spec.deviceName);
     const controller =
       config.engine == EngineType.PUPPETEER
         ? new PuppeteerController(driver)
@@ -517,7 +506,6 @@ class EndToEndFixture {
 
     installBrowserAssertions(controller.networkLogger);
 
-    // try catch block to catch thenable webdriver not being resolved yet
     try {
       await setUpTest(env, this.spec);
     } catch (ex) {
