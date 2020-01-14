@@ -39,10 +39,16 @@ describes.endtoend(
       requestBank = env.requestBank;
     });
 
-    it.skip('should respect server side decision and clear on next visit', async () => {
+    it('should respect server side decision and clear on next visit', async () => {
       resetAllElements();
       const currentUrl = await controller.getCurrentUrl();
       const nextGeoUrl = currentUrl.replace('mx', 'ca');
+
+      // Check the analytics request consentState
+      const insufficientRequest = await requestBank.withdraw('tracking');
+      await expect(insufficientRequest.url).to.match(
+        /consentState=insufficient/
+      );
 
       // Block/unblock elements based off of 'reject' from response
       await findElements(controller);
@@ -84,8 +90,8 @@ describes.endtoend(
       });
 
       // Check the analytics request consentState
-      const req = await requestBank.withdraw('tracking');
-      await expect(req.url).to.match(/consentState=sufficient/);
+      const sufficentReqest = await requestBank.withdraw('tracking');
+      await expect(sufficentReqest.url).to.match(/consentState=sufficient/);
     });
   }
 );

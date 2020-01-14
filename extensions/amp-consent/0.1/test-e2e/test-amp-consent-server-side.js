@@ -59,7 +59,6 @@ describes.endtoend(
         'ui2': true,
         'postPromptUi': false,
       });
-      // [true, true, false]);
 
       // Navigate away to random page
       await controller.navigateTo('http://localhost:8000/');
