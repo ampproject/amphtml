@@ -109,6 +109,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private {?Element} */
     this.quizEl_ = null;
 
+    /** @private {?string} */
+    this.reactionId_ = null;
+
     /** @private {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
 
@@ -136,9 +139,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.responseDataPromise_ = this.element.hasAttribute('endpoint')
+    return (this.responseDataPromise_ = this.element.hasAttribute('endpoint')
       ? this.retrieveReactionData_()
-      : Promise.resolve();
+      : Promise.resolve());
   }
 
   /**
@@ -148,6 +151,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @return {Promise<string>}
    */
   getClientId_() {
+    if (!this.element.hasAttribute('endpoint')) {
+      this.clientIdPromise_ = Promise.resolve();
+    }
+
     if (!this.clientIdPromise_) {
       this.clientIdPromise_ = this.clientIdService_.then(data => {
         return data.get(
@@ -357,6 +364,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   handleOptionSelection_(optionEl) {
     this.responseDataPromise_.then(() => {
+      if (this.hasUserSelection_) {
+        return;
+      }
+
       this.triggerAnalytics_(optionEl);
 
       this.mutateElement(() => {
@@ -415,11 +426,17 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     let url = this.element.getAttribute('endpoint');
 
+    const quizPageId = closest(dev().assertElement(this.element), el => {
+      return el.tagName.toLowerCase() === 'amp-story-page';
+    }).getAttribute('id');
+
+    if (this.reactionId_ === null) {
+      this.reactionId_ = `CANONICAL_URL?page=${quizPageId}`;
+    }
+
     const requestVars = dict({
       'reactionType': STORY_REACTION_TYPE_QUIZ,
-      'reactionId': `page=${this.storeService_.get(
-        StateProperty.CURRENT_PAGE_ID
-      )}&url=${this.win.location.href}`,
+      'reactionId': this.reactionId_,
     });
 
     const requestOptions = dict({
@@ -463,7 +480,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
-    if (!('data' in response)) {
+    if (!(response && 'data' in response)) {
       return;
     }
 
@@ -493,7 +510,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       }
 
       this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
-      [selectedOptionKey].classList.add('i-amphtml-story-quiz-option-selected');
+      options[selectedOptionKey].classList.add(
+        'i-amphtml-story-quiz-option-selected'
+      );
     }
   }
 }

@@ -17,6 +17,7 @@
 import {AmpStoryQuiz} from '../amp-story-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from '../variable-service';
+import {Services} from '../../../../src/services';
 import {getAnalyticsService} from '../story-analytics';
 import {getRequestService} from '../amp-story-request-service';
 import {registerServiceBuilder} from '../../../../src/service';
@@ -66,24 +67,28 @@ const getMockReactionData = () => {
     data: {
       totalResponseCount: 10,
       hasUserResponded: true,
-      responses: {
-        0: {
+      responses: [
+        {
+          reactionValue: 0,
           totalCount: 3,
           selectedByUser: true,
         },
-        1: {
+        {
+          reactionValue: 1,
           totalCount: 3,
           selectedByUser: false,
         },
-        2: {
+        {
+          reactionValue: 2,
           totalCount: 3,
           selectedByUser: false,
         },
-        3: {
+        {
+          reactionValue: 3,
           totalCount: 1,
           selectedByUser: false,
         },
-      },
+      ],
     },
   };
 };
@@ -103,6 +108,11 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
+
+      env.sandbox
+        .stub(Services, 'cidForDoc')
+        .resolves({get: () => Promise.resolve('cid')});
+
       const ampStoryQuizEl = win.document.createElement('amp-story-quiz');
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
 
@@ -189,6 +199,9 @@ describes.realWin(
 
       quizOption.click();
 
+      // Microtask tick
+      await Promise.resolve();
+
       expect(quizElement).to.have.class('i-amphtml-story-quiz-post-selection');
       expect(quizOption).to.have.class('i-amphtml-story-quiz-option-selected');
     });
@@ -205,6 +218,9 @@ describes.realWin(
 
       quizOptions[0].click();
       quizOptions[1].click();
+
+      // Microtask ticks
+      await Promise.resolve();
 
       expect(quizOptions[0]).to.have.class(
         'i-amphtml-story-quiz-option-selected'
@@ -225,6 +241,9 @@ describes.realWin(
         .querySelector('.i-amphtml-story-quiz-option');
 
       option.click();
+
+      // Microtask tick
+      await Promise.resolve();
 
       expect(trigger).to.have.been.calledWith('story-reaction');
 
