@@ -29,7 +29,7 @@ export class Purifier {
     opt_attrRewrite?: AttributeRewriterDef
   );
 
-  purifyHtml(dirty: string): Node;
+  purifyHtml(dirty: string): HTMLElement;
   purifyTagsForTripleMustache(dirty: string): string;
   getAllowedTags(): {[key: string]: boolean};
   validateAttributeChange(
