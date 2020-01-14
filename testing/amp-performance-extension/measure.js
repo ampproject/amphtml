@@ -29,6 +29,12 @@ function renderMeasurement(container, label, count) {
   return countSpan;
 }
 
+function addStyleString(root, str) {
+  const node = document.createElement('style');
+  node.innerHTML = str;
+  root.appendChild(node);
+}
+
 function round(num, dec = 4) {
   return Math.round(num * Math.pow(10, dec)) / Math.pow(10, dec);
 }
@@ -47,31 +53,163 @@ function measureCLS() {
   layoutShiftObserver.observe({type: 'layout-shift', buffered: true});
 }
 
+function measureLargestContentfulPaint() {
+  const supported = PerformanceObserver.supportedEntryTypes;
+  if (!supported || supported.indexOf('largest-contentful-paint') === -1) {
+    return;
+  }
+  window.largestContentfulPaint = 0;
+  const largestContentfulPaintObserver = new PerformanceObserver(list => {
+    const entries = list.getEntries();
+    const entry = entries[entries.length - 1];
+    window.largestContentfulPaint = entry.renderTime || entry.loadTime;
+  });
+  largestContentfulPaintObserver.observe({
+    type: 'largest-contentful-paint',
+    buffered: true,
+  });
+}
+
+function measureLongTasks() {
+  const supported = PerformanceObserver.supportedEntryTypes;
+  if (!supported || supported.indexOf('longtask') === -1) {
+    return;
+  }
+  window.longTasks = [];
+  const longTaskObserver = new PerformanceObserver(list =>
+    list.getEntries().forEach(entry => window.longTasks.push(entry))
+  );
+  longTaskObserver.observe({entryTypes: ['longtask']});
+}
+
+function measureTimeToInteractive() {
+  window.measureStarted = Date.now();
+}
+
+function getMaxFirstInputDelay(firstContentfulPaint) {
+  let longest = 0;
+
+  window.longTasks.forEach(longTask => {
+    if (
+      longTask.startTime > firstContentfulPaint &&
+      longTask.duration > longest
+    ) {
+      longest = longTask.duration;
+    }
+  });
+
+  return longest;
+}
+
+function getMetric(name) {
+  const entries = performance.getEntries();
+  const entry = entries.find(entry => entry.name === name);
+  return entry ? entry.startTime : 0;
+}
+
+function getTimeToInteractive() {
+  return Date.now() - window.measureStarted;
+}
+
+measureLongTasks();
 measureCLS();
+measureTimeToInteractive();
+measureLargestContentfulPaint();
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Create a container for the metrics that is CSS-isolated from the host page
+  const resultContainer = document.createElement('div');
+  const shadow = resultContainer.attachShadow({mode: 'open'});
   const result = document.createElement('div');
   result.setAttribute('id', 'i-amphtml-performance-result');
+  shadow.appendChild(result);
+  addStyleString(
+    result,
+    `
+        #i-amphtml-performance-result {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #000000aa;
+            padding: 10px;
+            color: white;
+            z-index: 99999;
+            pointer-events: none;
+            width: 200px;
+            overflow: hidden;
+        }
+        
+        .i-amphtml-performance-line {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+        
+        .i-amphtml-performance-count {
+            margin-left: 8px;
+            font-weight: bold;
+        }
+  `
+  );
+
+  // Visible
+  const visible = getMetric('visible');
+  const vis = renderMeasurement(result, 'visible', round(visible));
+
+  // First paint
+  const firstPaint = getMetric('first-paint');
+  const fp = renderMeasurement(result, 'firstPaint', round(firstPaint));
+
+  // First contentful paint
+  const firstContentfulPaint = getMetric('first-contentful-paint');
+  const fcp = renderMeasurement(
+    result,
+    'firstContentfulPaint',
+    round(firstContentfulPaint)
+  );
+
+  // Largest contentful paint
+  const lcp = renderMeasurement(
+    result,
+    'largestContentfulPaint',
+    round(window.largestContentfulPaint)
+  );
+
+  // Max first input delay
+  renderMeasurement(
+    result,
+    'maxFirstInputDelay',
+    round(getMaxFirstInputDelay(firstContentfulPaint))
+  );
+
+  // Time to interactive
+  renderMeasurement(result, 'timeToInteractive', round(getTimeToInteractive()));
 
   // Load CLS
   renderMeasurement(
     result,
-    'Load CLS',
+    'loadCLS',
     round(window.cumulativeLayoutShift * 100)
   );
 
   // Instantaneous CLS
   const instCLS = renderMeasurement(
     result,
-    'Instantaneous CLS',
-    window.cumulativeLayoutShift * 100
+    'instantaneousCLS',
+    round(window.cumulativeLayoutShift * 100)
   );
 
   // Insert result
-  document.body.insertBefore(result, document.body.firstChild);
+  document.body.insertBefore(resultContainer, document.body.firstChild);
 
   // Instaneous measurement updates
   setInterval(() => {
     instCLS.innerText = round(window.cumulativeLayoutShift * 100);
-  }, 100);
+    vis.innerText = round(getMetric('visible'));
+    fp.innerText = round(getMetric('first-paint'));
+    fcp.innerText = round(getMetric('first-contentful-paint'));
+    lcp.innerText = round(window.largestContentfulPaint);
+  }, 250);
 });

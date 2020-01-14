@@ -13,29 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-let disabled = false;
 
-function updateBadge() {
-  if (disabled) {
-    chrome.browserAction.setBadgeText({
-      text: 'OFF',
-    });
-    chrome.browserAction.setBadgeBackgroundColor({
-      color: '#7e2013',
-    });
-  } else {
-    chrome.browserAction.setBadgeText({
-      text: 'ON',
-    });
-    chrome.browserAction.setBadgeBackgroundColor({
-      color: '#15a341',
-    });
-  }
-}
-
-chrome.browserAction.onClicked.addListener(function(tab) {
-  disabled = !disabled;
-  updateBadge();
+chrome.browserAction.setBadgeText({
+  text: 'ON',
 });
-
-updateBadge();
+chrome.browserAction.setBadgeBackgroundColor({
+  color: '#15a341',
+});
