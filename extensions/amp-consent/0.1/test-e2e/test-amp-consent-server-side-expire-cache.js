@@ -32,11 +32,9 @@ describes.endtoend(
   },
   env => {
     let controller;
-    let requestBank;
 
     beforeEach(() => {
       controller = env.controller;
-      requestBank = env.requestBank;
     });
 
     it('should respect server side decision and clear on next visit', async () => {
@@ -45,10 +43,9 @@ describes.endtoend(
       const nextGeoUrl = currentUrl.replace('mx', 'ca');
 
       // Check the analytics request consentState
-      const insufficientRequest = await requestBank.withdraw('tracking');
-      await expect(insufficientRequest.url).to.match(
-        /consentState=insufficient/
-      );
+      await expect(
+        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=insufficient'
+      ).to.have.been.sent;
 
       // Block/unblock elements based off of 'reject' from response
       await findElements(controller);
@@ -90,8 +87,9 @@ describes.endtoend(
       });
 
       // Check the analytics request consentState
-      const sufficentReqest = await requestBank.withdraw('tracking');
-      await expect(sufficentReqest.url).to.match(/consentState=sufficient/);
+      await expect(
+        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=sufficient'
+      ).to.have.been.sent;
     });
   }
 );
