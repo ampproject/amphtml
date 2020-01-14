@@ -130,7 +130,7 @@ async function createPuppeteer(opt_config = {}) {
  * @param {string} browserName
  * @param {!SeleniumConfigDef=} args
  * @param {?string} deviceName
- * @return {!SeleniumDriver}
+ * @return {!WebDriver}
  */
 function createSelenium(browserName, args = {}, deviceName) {
   switch (browserName) {
@@ -145,13 +145,19 @@ function createSelenium(browserName, args = {}, deviceName) {
   }
 }
 
+/**
+ *
+ * @param {string} browserName
+ * @param {!SeleniumConfigDef=} args
+ * @param {?string} deviceName
+ * @return {!WebDriver}
+ */
 function createDriver(browserName, args, deviceName) {
   const capabilities = Capabilities[browserName]();
 
   const prefs = new logging.Preferences();
   prefs.setLevel(logging.Type.PERFORMANCE, logging.Level.ALL);
   capabilities.setLoggingPrefs(prefs);
-  let builder;
   switch (browserName) {
     case 'firefox':
       const firefoxOptions = new firefox.Options();
@@ -160,21 +166,22 @@ function createDriver(browserName, args, deviceName) {
         width: DEFAULT_E2E_INITIAL_RECT.width,
         height: DEFAULT_E2E_INITIAL_RECT.height,
       });
-      builder = new Builder()
+      return new Builder()
         .forBrowser('firefox')
-        .setFirefoxOptions(firefoxOptions);
+        .setFirefoxOptions(firefoxOptions)
+        .build();
     case 'chrome':
       const chromeOptions = new chrome.Options(capabilities);
       chromeOptions.addArguments(args);
       if (deviceName) {
         chromeOptions.setMobileEmulation({deviceName});
       }
-      builder = new Builder()
-        .forBrowser('chrome')
-        .setChromeOptions(chromeOptions);
+      const driver = chrome.Driver.createSession(chromeOptions);
+      //TODO(estherkim): workaround. `onQuit()` was added in selenium-webdriver v4.0.0-alpha.5
+      //which is also when `Server terminated early with status 1` began appearing. Coincidence? Maybe.
+      driver.onQuit = null;
+      return driver;
   }
-
-  return builder.build();
 }
 
 /**
@@ -490,19 +497,7 @@ class EndToEndFixture {
    */
   async setup(env, browserName, retries = 0) {
     const config = getConfig();
-    let driver;
-
-    // try catch block to catch early server termination error when creating session
-    try {
-      driver = await getDriver(config, browserName, this.spec.deviceName);
-    } catch (ex) {
-      if (retries > 0) {
-        await this.setup(env, browserName, --retries);
-      } else {
-        throw ex;
-      }
-    }
-
+    const driver = getDriver(config, browserName, this.spec.deviceName);
     const controller =
       config.engine == EngineType.PUPPETEER
         ? new PuppeteerController(driver)
@@ -513,7 +508,6 @@ class EndToEndFixture {
 
     installBrowserAssertions(controller.networkLogger);
 
-    // try catch block to catch thenable webdriver not being resolved yet
     try {
       await setUpTest(env, this.spec);
     } catch (ex) {
@@ -527,7 +521,7 @@ class EndToEndFixture {
 
   async teardown(env) {
     const {controller} = env;
-    if (controller) {
+    if (controller && controller.driver) {
       await controller.switchToParent();
       await controller.dispose();
     }
@@ -539,7 +533,7 @@ class EndToEndFixture {
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
  * @param {?string} deviceName
- * @return {!Promise}
+ * @return {!ThenableWebDriver}
  */
 function getDriver(
   {engine = EngineType.SELENIUM, headless = false},
