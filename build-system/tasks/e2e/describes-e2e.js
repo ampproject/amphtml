@@ -177,6 +177,8 @@ function createDriver(browserName, args, deviceName) {
         chromeOptions.setMobileEmulation({deviceName});
       }
       const driver = chrome.Driver.createSession(chromeOptions);
+      //TODO(estherkim): workaround. `onQuit()` was added in selenium-webdriver v4.0.0-alpha.5
+      //which is also when `Server terminated early with status 1` began appearing. Coincidence? Maybe.
       driver.onQuit = null;
       return driver;
   }
