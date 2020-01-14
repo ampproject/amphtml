@@ -370,7 +370,7 @@ export class AmpList extends AMP.BaseElement {
   getAmpStateJson_(src) {
     const ampStatePath = src.substring(AMP_STATE_URI_SCHEME.length);
     return Services.bindForDocOrNull(this.element).then(bind => {
-      user().assert(
+      userAssert(
         bind,
         '"amp-state:" URLs require amp-bind to be installed.',
         this.element
