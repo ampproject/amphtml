@@ -77,10 +77,7 @@ import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
-import {
-  SwipeXYRecognizer,
-  SwipeYRecognizer,
-} from '../../../src/gesture-recognizers';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
@@ -850,18 +847,19 @@ export class AmpStory extends AMP.BaseElement {
 
   /** @private */
   installGestureRecognizers_() {
+    // If the story is within a viewer that enabled the swipe capability, this
+    // disables the navigation education overlay to enable:
+    //   - horizontal swipe events to the next story
+    //   - vertical swipe events to close the viewer, or open a page attachment
+    if (this.viewer_.hasCapability('swipe')) {
+      return;
+    }
+
     const {element} = this;
     const gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
 
-    // If the story is within a viewer that enabled the swipe capability, this
-    // disables the navigation education overlay on the X axis to enable the
-    // swipe to the next story feature.
-    const swipeRecognizer = this.viewer_.hasCapability('swipe')
-      ? SwipeYRecognizer
-      : SwipeXYRecognizer;
-
     // Shows "tap to navigate" hint when swiping.
-    gestures.onGesture(swipeRecognizer, gesture => {
+    gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
       const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
         StateProperty.INTERACTIVE_COMPONENT_STATE
