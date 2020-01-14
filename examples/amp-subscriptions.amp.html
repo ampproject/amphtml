@@ -208,7 +208,7 @@
         "request": "sendEvent",
         "vars": {
           "event": "subscriptions_landing_page",
-          "data": "{'source': 'email marketing campaign 2019', 'active': false}"
+          "data": "{\"source\": \"email marketing campaign 2019\", \"is_active\": false}"
         }
       },
       "onPastSubscriber": {
@@ -216,7 +216,7 @@
         "request": "sendSubscriptionState",
         "vars": {
           "state": "past_subscriber",
-          "productId": "myPreviousProductId"
+          "products": "'product1', 'product2'"
         }
       },
       "onAd": {
@@ -225,7 +225,7 @@
         "request": "sendEvent",
         "vars": {
           "event": "ad_shown",
-          "data": "{'ad_name': 'fall_ad or custom name'}"
+          "data": "{\"ad_name\": \"fall_ad or custom name\"}"
         }
       }
     }
