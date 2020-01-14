@@ -834,16 +834,51 @@ export class ResourcesImpl {
         ) {
           // 7. The new height (or one of the margins) is smaller than the
           // current one.
-        } else if (
-          request.newHeight == box.height &&
-          this.isWidthOnlyReflowFreeExpansion_(
-            resource.element,
-            request.newWidth || 0
-          )
-        ) {
-          // 8. Element is in viewport, but this is a width-only expansion that
-          // should not cause reflow.
-          resize = true;
+        } else if (request.newHeight == box.height) {
+          // 8. Element is in viewport, but this is a width-only expansion.
+          // Check whether this should be reflow-free, in which case,
+          // schedule a size change.
+          this.vsync_.run(
+            {
+              measure: state => {
+                state.resize = false;
+                const parent = resource.element.parentElement;
+                if (!parent) {
+                  return;
+                }
+
+                // If the element has siblings, it's possible that a width-expansion will
+                // cause some of them to be pushed down.
+                const parentWidth =
+                  (parent.getLayoutWidth && parent.getLayoutWidth()) ||
+                  parent./*OK*/ offsetWidth;
+                let cumulativeWidth = widthDiff;
+                for (let i = 0; i < parent.childElementCount; i++) {
+                  cumulativeWidth += parent.children[i]./*OK*/ offsetWidth;
+                  if (cumulativeWidth > parentWidth) {
+                    return;
+                  }
+                }
+                state.resize = true;
+              },
+              mutate: state => {
+                if (state.resize) {
+                  request.resource./*OK*/ changeSize(
+                    request.newHeight,
+                    request.newWidth,
+                    newMargins
+                  );
+                }
+                request.resource.overflowCallback(
+                  /* overflown */ !state.resize,
+                  request.newHeight,
+                  request.newWidth,
+                  newMargins
+                );
+              },
+            },
+            {}
+          );
         } else {
           // 9. Element is in viewport don't resize and try overflow callback
           // instead.
@@ -924,27 +959,6 @@ export class ResourcesImpl {
         );
       }
     }
-  }
-
-  /**
-   * Returns true if reflow will not be caused by expanding the given element's
-   * width to the given amount.
-   * @param {!Element} element
-   * @param {number} width
-   * @return {boolean}
-   */
-  isWidthOnlyReflowFreeExpansion_(element, width) {
-    const parent = element.parentElement;
-    // If the element has siblings, it's possible that a width-expansion will
-    // cause some of them to be pushed down.
-    if (!parent || parent.childElementCount > 1) {
-      return false;
-    }
-    const parentWidth =
-      (parent.getLayoutWidth && parent.getLayoutWidth()) || -1;
-    // Reflow will not happen if the parent element is at least as wide as the
-    // new width.
-    return parentWidth >= width;
   }
 
   /**
