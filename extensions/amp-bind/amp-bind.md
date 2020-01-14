@@ -10,8 +10,6 @@ teaser:
 
 # amp-bind
 
-Adds custom interactivity with data binding and expressions.
-
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -31,6 +29,12 @@ limitations under the License.
 [TOC]
 
 <table>
+  <tr>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>
+        Adds custom interactivity with data binding and expressions.
+    </td>
+  </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
     <td>
@@ -55,9 +59,11 @@ limitations under the License.
   </tr>
 </table>
 
-## Overview
+## Usage
 
-The `amp-bind` component allows you to add custom stateful interactivity to your AMP pages via data binding and JS-like expressions.
+The `amp-bind` component enables custom stateful interactivity on AMP pages. 
+
+For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely `amp-bind` for initial render.
 
 <figure class="alignment-wrapper  margin-">
 <amp-youtube
@@ -66,155 +72,225 @@ The `amp-bind` component allows you to add custom stateful interactivity to your
     width="480" height="270"></amp-youtube>
 <figcaption>Watch this video for an introduction to amp-bind.</figcaption></figure>
 
-### A simple example
-
 In the following example, tapping the button changes the `<p>` element's text from "Hello World" to "Hello amp-bind".
+
+`amp-bind` has three main concepts:
+
+1. [State](#state): A document-scope, mutable JSON state. State variables update in response to user actions. `amp-bind` does not evaluate expressions on page load. Visual elements should have their default "state" defined and not rely `amp-bind` for initial render.
+2. [Expressions](#expressions): JavaScript-like expressions that can reference the **state**. 
+3. [Bindings](#bindings): Special attributes that link an element's property to an **expression**. A property is bound by wrapping it inside brackets, in the form of `[property]`. 
+
+### Basic example
+
+[example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
 <p [text]="'Hello ' + foo">Hello World</p>
 
-<button on="tap:AMP.setState({foo: 'amp-bind'})">Say "Hello amp-bind"</button>
+<button on="tap:AMP.setState({foo: 'Interactivity'})">Say "Hello amp-bind"</button>
 ```
 
-{% call callout('Note', type='note') %}
-For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely `amp-bind` for initial render.
-{% endcall %}
+[/example]
 
-### How does it work?
+In the example above:
 
-`amp-bind` has three main components:
-
-1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button. After tapping the button, the state is `{foo: 'amp-bind'}`.
-2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello ' + foo`, which concatenates the string literal `'Hello '` and the state variable `foo`.
-   There is a limit of 100 operands what can be used in an expression.
-3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
-
-`amp-bind` takes special care to ensure speed, security and performance on AMP pages.
+- The **state** begins as empty. 
+- It has a single **binding** to `[text]`, the text content of a node, on the `<p>` element. 
+- The `[text]` value contains the **expression**,  `'Hello ' + foo`. 
+  - This expression concatenates the string 'Hello ' and the value of the **state variable** foo. 
+- When the user taps/clicks the button, it triggers the `tap` event. 
+- The `tap` event invokes the `AMP.setState()` method.
+- The `AMP.setState()` methods sets the `foo` **state variable** to the value of  `Interactivity`. 
+- The sate is no longer empty, so the pages updates the bound property to its state. 
 
 ### A slightly more complex example
 
 [filter formats="websites, stories, ads"]
 
+[example preview="top-frame" playground="true" imports="amp-bind"]
+
 ```html
-<!-- Store complex nested JSON data in <amp-state> elements. -->
-<amp-state id="myAnimals">
+  <style amp-custom>
+    .greenBorder {
+      border: 5px solid green;
+    }
+    .redBorder {
+      border: 5px solid red;
+    }
+  </style>
+</head>
+<body>
+<amp-state id="theFood">
   <script type="application/json">
     {
-      "dog": {
-        "imageUrl": "/img/dog.jpg",
-        "style": "greenBackground"
+      "cupcakes": {
+        "imageUrl": "https://amp.dev/static/samples/img/image2.jpg",
+        "style": "greenBorder"
       },
-      "cat": {
-        "imageUrl": "/img/cat.jpg",
-        "style": "redBackground"
+      "sushi": {
+        "imageUrl": "https://amp.dev/static/samples/img/image3.jpg",
+        "style": "redBorder"
       }
     }
   </script>
 </amp-state>
-
-<p [text]="'This is a ' + currentAnimal + '.'">This is a dog.</p>
-
-<!-- CSS classes can also be added or removed with [class]. -->
-<p class="greenBackground" [class]="myAnimals[currentAnimal].style">
-  Each animal has a different background color.
-</p>
-
-<!-- Or change an image's src with the [src] binding. -->
-<amp-img
+<div class="greenBorder" [class]="theFood[currentMeal].style">
+  <p>Each food has a different border color.</p>
+  <p [text]="'I want to eat ' + currentMeal + '.'">I want to eat cupcakes.</p>
+  <amp-img
   width="300"
   height="200"
-  src="/img/dog.jpg"
-  [src]="myAnimals[currentAnimal].imageUrl"
->
-</amp-img>
-
-<button on="tap:AMP.setState({currentAnimal: 'cat'})">Set to Cat</button>
+  src="https://amp.dev/static/samples/img/image2.jpg"
+  [src]="theFood[currentMeal].imageUrl">
+  </amp-img>
+</div>
+<button on="tap:AMP.setState({currentMeal: 'sushi'})">Set to sushi</button>
+<button on="tap:AMP.setState({currentMeal: 'cupcakes'})">Set to cupcakes</button>
 ```
+
+[/example]
+
+In the example above:
+
+- The `<amp-state>` component holds the complex nested JSON data. It has an `id` of "theFood" to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the  **state** is empty.
+- The page loads with visual defaults. 
+  - The `<div>` element has `class="greenBorder"` defined.
+  - The second `<p>` element has "I want cupcakes." defined within the tags.
+  - The `<amp-img>` `src` points to a url.
+- Changeable elements have **bindings** that point to **expressions**.
+  - The `[class]` attribute on the `<div>` is bound to the **theFood[currentMeal].style** expression. 
+  - The `[text]` attribute on the second `<p>` is bound to the `'I want to eat ' + currentMeal + '.'` expression. 
+  - The `[src]` attribute is bound to the `theFood[currentMeal].imageUrl` expression. 
+
+If a user clicks the "Set to sushi" button:
+- The `tap` event trigger the `AMP.setState` action.
+- The setState action turns `currentMeal` into a state and sets it to `sushi`.
+- AMP evaluates **bindings** with expressions that contain the state `currentMeal`. 
+  - `[class]="theFood[currentMeal].style"` updates `class` to `redBorder`.
+  - `[text]="'I want to eat ' + currentMeal + '.'"` updates the inner text of the second `<p>` element to "I want to eat sushi". 
+  - [src]="theFood[currentMeal].imageUrl" updates the `src` of `<amp-img>` to `https://amp.dev/static/samples/img/image3.jpg`
+
+Using `[class]="theFood[currentMeal].style"` as an example of expression syntax evaluation:
+- `[class]` is the property to update
+- `theFood` is the id of the `<amp-state>` component. 
+- `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`. 
+- `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value. 
+
 
 [/filter] <!-- formats="websites, stories, ads" -->
 
 [filter formats="email"]
 
+
+[example preview="top-frame" playground="true" imports="amp-bind"]
+
 ```html
-<!-- Store complex nested JSON data in <amp-state> elements. -->
-<amp-state id="myAnimals">
+  <style amp-custom>
+    .greenBorder {
+      border: 5px solid green;
+    }
+    .redBorder {
+      border: 5px solid red;
+    }
+  </style>
+</head>
+<body>
+<amp-state id="theFood">
   <script type="application/json">
     {
-      "dog": {
-        "imageUrl": "/img/dog.jpg",
-        "style": "greenBackground"
+      "cupcakes": {
+        "style": "greenBorder",
+        "text": "Just kidding, I want to eat cupcakes."
       },
-      "cat": {
-        "imageUrl": "/img/cat.jpg",
-        "style": "redBackground"
+      "sushi": {
+        "style": "redBorder",
+        "text": "Actually, I want to eat sushi."
       }
     }
   </script>
 </amp-state>
+<div class="greenBorder" [class]="theFood[currentMeal].style">
+  <p>Each food has a different border color.</p>
+  <p [text]="theFood[currentMeal].text">I want to eat cupcakes.</p>
+</div>
 
-<p [text]="'This is a ' + currentAnimal + '.'">This is a dog.</p>
-
-<!-- CSS classes can also be added or removed with [class]. -->
-<p class="greenBackground" [class]="myAnimals[currentAnimal].style">
-  Each animal has a different background color.
-</p>
+<button on="tap:AMP.setState({currentMeal: 'sushi'})">Set to sushi</button>
+<button on="tap:AMP.setState({currentMeal: 'cupcakes'})">Set to cupcakes</button>
 ```
 
+[/example]
+
+- The `<amp-state>` component holds the complex nested JSON data. It has an `id` of "theFood" to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on email load, the  **state** is empty.
+- The page loads with visual defaults. 
+ - The `<div>` element has `class="greenBorder"` defined.
+ - The second `<p>` element has "I want cupcakes." defined within the tags.
+ - The `<amp-img>` `src` points to a url.
+- Changeable elements have **bindings** that point to **expressions**.
+ - The `[class]` attribute on the `<div>` is bound to the **theFood[currentMeal].style** expression. 
+ - The `[text]` attribute on the second `<p>` is bound to the `"theFood[currentMeal].text"` expression. 
+
+If a user clicks the "Set to sushi" button:
+- The `tap` event trigger the `AMP.setState` action.
+- The setState action turns `currentMeal` into a state and sets it to `sushi`.
+- AMP evaluates **bindings** with expressions that contain the state `currentMeal`. 
+ - `[class]="theFood[currentMeal].style"` updates `class` to `redBorder`.
+ - `"theFood[currentMeal].text"` updates the inner text of the second `<p>` element to "Actually, I want to eat sushi.". 
+
+Using `[class]="theFood[currentMeal].style"` as an example of expression syntax evaluation:
+- `[class]` is the property to update
+- `theFood` is the id of the `<amp-state>` component. 
+- `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`. 
+- `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value.
+
 [/filter] <!-- formats="email" -->
-
-When the button is pressed:
-
-1.  **State** is updated with `currentAnimal` defined as `'cat'`.
-
-2.  **Expressions** that depend on `currentAnimal` are evaluated:
-
-    - `'This is a ' + currentAnimal + '.'` => `'This is a cat.'`
-    - `myAnimals[currentAnimal].style` => `'redBackground'`
-    - `myAnimals[currentAnimal].imageUrl` => `/img/cat.jpg`
-
-3.  **Bindings** that depend on the changed expressions are updated:
-    - The first `<p>` element's text will read "This is a cat."
-    - The second `<p>` element's `class` attribute will be "redBackground".
-    - The `amp-img` element will show the image of a cat.
-
-{% call callout('Tip', type='success') %}
-[Try out the **live demo**](https://amp.dev/documentation/examples/components/amp-bind/) for this example with code annotations!
-{% endcall %}
-
-## Details
 
 ### State
 
 Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or **state**.
 
-#### Initializing state with `amp-state`
+#### Defining and initializing state with `amp-state`
 
-`amp-bind`'s state can be initialized with the `amp-state` component:
+Before user interaction, there is no state set on the document. The `<amp-state>` component contains different **states** and their **state variables**. A **state** is set after a user interacts with an element with an event that points to the "AMP.setState()" action with a valid argument.
+
+[example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
 <amp-state id="myState">
   <script type="application/json">
-    {
-      "foo": "bar"
-    }
+  {
+    "foo": "bar"
+  }
   </script>
+</amp-state>
+<p [text]="myState.foo">There is no state set.</p>
+<button on="tap:AMP.setState({})">Set to the value of foo.</button>
+```
+[/example]
+
+Use [expressions](#expressions) to reference **state variables**. If the JSON data is not nested in the `<amp-state>` component, reference the states via dot syntax. In the above example, `myState.foo` evaluates to "bar".
+
+An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
+
+```html
+<amp-state id="myRemoteState"
+  src="/static/samples/json/websites.json">
 </amp-state>
 ```
 
-[Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
+#### Size
 
-- An `<amp-state>` element's child JSON has a maximum size of 100KB.
-- An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
+An `<amp-state>` element's child JSON has a maximum size of 100KB.
 
-#### Refreshing state
 
-The `refresh` action is supported by this component and can be used to refresh the
-state's contents.
+#### Refreshing state data
+
+The `refresh` action refetches data from data point the `src` attribute points to. It ignores the browser cache.
+
 
 ```html
-<amp-state id="amp-state" ...></amp-state>
+<amp-state id="myState" ...></amp-state>
 <!-- Clicking the button will refresh and refetch the json in amp-state. -->
-<button on="tap:amp-state.refresh"></button>
+<button on="tap:myState.refresh"></button>
 ```
 
 #### Updating state with `AMP.setState()`
