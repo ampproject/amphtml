@@ -18,6 +18,7 @@ import {ChunkPriority, chunk} from './chunk';
 import {Services} from './services';
 import {dev} from './log';
 import {isAmphtml} from './format';
+import {isStoryDocument} from './utils/story';
 
 /** @const @enum {string} */
 export const AutoLightboxEvents = {
@@ -45,10 +46,16 @@ export function installAutoLightboxExtension(ampdoc) {
   chunk(
     ampdoc,
     () => {
-      Services.extensionsFor(win).installExtensionForDoc(
-        ampdoc,
-        'amp-auto-lightbox'
-      );
+      isStoryDocument(ampdoc).then(isStory => {
+        // Do not enable on amp-story documents.
+        if (isStory) {
+          return;
+        }
+        Services.extensionsFor(win).installExtensionForDoc(
+          ampdoc,
+          'amp-auto-lightbox'
+        );
+      });
     },
     ChunkPriority.LOW
   );
