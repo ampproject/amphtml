@@ -379,34 +379,33 @@ export class AmpList extends AMP.BaseElement {
     });
   }
 
-  /**
-   * @param {!Array|!Object} json
-   * @return {!Promise}
-   * @private
-   */
-  renderLocalData_(json) {
-    const array = /** @type {!Array} */ (isArray(json) ? json : [json]);
-    this.resetIfNecessary_(/* isFetch */ false);
-    return this.scheduleRender_(array, /* append */ false);
-  }
-
   /** @override */
   mutatedAttributesCallback(mutations) {
     dev().info(TAG, 'mutate:', this.element, mutations);
     let promise;
 
+    /**
+     * @param {!Array|!Object} data
+     * @return {!Promise}
+     */
+    const renderLocalData = data => {
+      // Remove the 'src' now that local data is used to render the list.
+      this.element.setAttribute('src', '');
+      const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
+      this.resetIfNecessary_(/* isFetch */ false);
+      return this.scheduleRender_(array, /* append */ false);
+    };
+
     const src = mutations['src'];
     if (src !== undefined) {
-      if (typeof src === 'object' && src) {
-        promise = this.renderLocalData_(src);
-        // Remove the 'src' if it was set by a bind-expression.
-        this.element.setAttribute('src', '');
-      } else if (typeof src === 'string') {
+      if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
         if (this.layoutCompleted_) {
           this.resetIfNecessary_();
           promise = this.fetchList_();
         }
+      } else if (typeof src === 'object') {
+        promise = renderLocalData(/** @type {!Object} */ (src));
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
@@ -589,9 +588,10 @@ export class AmpList extends AMP.BaseElement {
 
     let fetch;
     if (this.isAmpStateSrc_(elementSrc)) {
-      fetch = this.getAmpStateJson_(elementSrc).then(json =>
-        this.renderLocalData_(json)
-      );
+      fetch = this.getAmpStateJson_(elementSrc).then(json => {
+        const array = /** @type {!Array} */ (isArray(json) ? json : [json]);
+        return this.scheduleRender_(array, /* append */ false);
+      });
     } else if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
