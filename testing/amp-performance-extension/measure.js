@@ -48,6 +48,7 @@ function measureCLS() {
   const layoutShiftObserver = new PerformanceObserver(list =>
     list
       .getEntries()
+      .filter(entry => !entry.hadRecentInput)
       .forEach(entry => (window.cumulativeLayoutShift += entry.value))
   );
   layoutShiftObserver.observe({type: 'layout-shift', buffered: true});
@@ -107,9 +108,9 @@ function getMetric(name) {
   return entry ? entry.startTime : 0;
 }
 
-function getTimeToInteractive() {
-  return Date.now() - window.measureStarted;
-}
+// function getTimeToInteractive() {
+//   return Date.now() - window.measureStarted;
+// }
 
 measureLongTasks();
 measureCLS();
@@ -154,21 +155,26 @@ document.addEventListener('DOMContentLoaded', function() {
   `
   );
 
+  // TODO(wassgha): Implement an expanded view where these metrics are shown
+
   // Visible
-  const visible = getMetric('visible');
-  const vis = renderMeasurement(result, 'visible', round(visible));
+  // const visible = getMetric('visible');
+  // const vis = renderMeasurement(result, 'visible', round(visible));
 
   // First paint
-  const firstPaint = getMetric('first-paint');
-  const fp = renderMeasurement(result, 'firstPaint', round(firstPaint));
+  // const firstPaint = getMetric('first-paint');
+  // const fp = renderMeasurement(result, 'firstPaint', round(firstPaint));
 
   // First contentful paint
   const firstContentfulPaint = getMetric('first-contentful-paint');
-  const fcp = renderMeasurement(
-    result,
-    'firstContentfulPaint',
-    round(firstContentfulPaint)
-  );
+  // const fcp = renderMeasurement(
+  //   result,
+  //   'firstContentfulPaint',
+  //   round(firstContentfulPaint)
+  // );
+
+  // Time to interactive
+  // renderMeasurement(result, 'timeToInteractive', round(getTimeToInteractive()));
 
   // Largest contentful paint
   const lcp = renderMeasurement(
@@ -183,9 +189,6 @@ document.addEventListener('DOMContentLoaded', function() {
     'maxFirstInputDelay',
     round(getMaxFirstInputDelay(firstContentfulPaint))
   );
-
-  // Time to interactive
-  renderMeasurement(result, 'timeToInteractive', round(getTimeToInteractive()));
 
   // Load CLS
   renderMeasurement(
@@ -207,11 +210,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Instaneous measurement updates
   setInterval(() => {
     instCLS.innerText = round(window.cumulativeLayoutShift * 100);
-    vis.innerText = round(getMetric('visible'));
-    fp.innerText = round(getMetric('first-paint'));
-    fcp.innerText = round(getMetric('first-contentful-paint'));
-    lcp.innerText = round(window.largestContentfulPaint);
-    mfid.innerText = round(
+    // vis.innerText = round(getMetric('visible'));
+    // fp.innerText = round(getMetric('first-paint'));
+    // fcp.innerText = round(getMetric('first-contentful-paint'));
+    lcp./*REVIEW*/ innerText = round(window.largestContentfulPaint);
+    mfid./*REVIEW*/ innerText = round(
       getMaxFirstInputDelay(getMetric('first-contentful-paint'))
     );
   }, 250);

@@ -23,7 +23,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
+      "matches": ["<all_urls>"],
       "run_at": "document_start",
       "js": ["measure.js"]
     }
