@@ -12,6 +12,7 @@
     "package.json",
     "build-system/tasks/e2e/package.json",
     "build-system/tasks/visual-diff/package.json",
+    "src/purifier/package.json",
     "validator/package.json"
   ]
 }
