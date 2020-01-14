@@ -28,26 +28,17 @@ import {withAmpContext} from './context';
  *   default: *,
  * }}
  */
-export let AmpElementProp;
+let AmpElementPropDef;
 
 /**
  * @typedef {{
- *   className: (string|undefined),
- *   props: (!Object<string, !AmpElementProp>|undefined),
- *   isLayoutSupported: (
- *     function(
- *       this:../base-element.BaseElement,
- *       !../layout.Layout
- *     ):boolean | undefined
- *   ),
- *   init: (
- *     function(
- *       this:../base-element.BaseElement
- *     ):(!JsonObject|undefined) | undefined
- *   ),
+ *   name: string,
+ *   selector: string,
+ *   single: (boolean|undefined),
+ *   props: (!JsonObject|undefined),
  * }}
  */
-export let AmpElementOptions;
+let ChildDef;
 
 /**
  * Wraps a Preact Component in a BaseElement class.
@@ -56,176 +47,209 @@ export let AmpElementOptions;
  * subclass on purpose, you're not meant to do work in the subclass! There will
  * be very few exceptions, which is why we allow options to configure the
  * class.
- *
- * @param {!Preact.FunctionalComponent} Component
- * @param {!AmpElementOptions} opts
- * @return {function(new:../base-element.BaseElement, !Element)}
  */
-export function PreactBaseElement(Component, opts = {}) {
-  return class extends AMP.BaseElement {
-    /** @param {!AmpElement} element */
-    constructor(element) {
-      super(element);
+export class PreactBaseElement extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-      /** @private {?Node} */
-      this.container_ = null;
+    /** @private {?Node} */
+    this.container_ = null;
 
-      /** @private {boolean} */
+    /** @private {boolean} */
+    this.scheduledRender_ = false;
+
+    /** @private {!Object} */
+    this.context_ = {
+      renderable: false,
+      playable: false,
+      notify: () => this.mutateElement(() => {}),
+    };
+
+    this.boundRerender_ = () => {
       this.scheduledRender_ = false;
+      this.rerender_();
+    };
 
-      /** @private {!Object} */
-      this.context_ = {
-        renderable: false,
-        playable: false,
-        notify: () => this.mutateElement(() => {}),
-      };
+    /** @private {!Deferred|null} */
+    this.scheduledRenderDeferred_ = null;
 
-      this.boundRerender_ = () => {
-        this.scheduledRender_ = false;
-        this.rerender_();
-      };
+    /** @private {!JsonObject|null|undefined} */
+    this.defaultProps_ = null;
 
-      /** @private {!Deferred|null} */
+    /** @private {boolean} */
+    this.mounted_ = true;
+  }
+
+  /**
+   * Override to provide the Component definition.
+   *
+   * @return {!Preact.FunctionalComponent}
+   */
+  static Component() {
+    devAssert(false, 'Must provide Component');
+    return () => null;
+  }
+
+  /**
+   * An override to specify an exact className prop to Preact.
+   *
+   * @return {string}
+   */
+  static className() {
+    return '';
+  }
+
+  /**
+   * Enabling passthrough mode alters the children slotting to use a single
+   * `<slot>` element for all children. This is in contrast to children mode,
+   * which creates a new named `<slot>` for every child.
+   *
+   * @return {boolean}
+   */
+  static passthrough() {
+    return false;
+  }
+
+  /**
+   * Provides a mapping of Preact prop to AmpElement DOM attributes.
+   *
+   * @return {!Object<string, !AmpElementPropDef>}
+   */
+  static props() {
+    return {};
+  }
+
+  /**
+   * @return {!Object<string, !ChildDef>|null}
+   */
+  static children() {
+    return null;
+  }
+
+  /**
+   * A chance to initialize default Preact props for the element.
+   *
+   * @return {!JsonObject|undefined}
+   */
+  init() {}
+
+  /** @override */
+  buildCallback() {
+    this.defaultProps_ = this.init() || null;
+
+    this.scheduleRender_();
+
+    // context-changed is fired on each child element to notify it that the
+    // parent has changed the wrapping context. This is equivalent to
+    // updating the Context.Provider with new data and having it propagate.
+    this.element.addEventListener('i-amphtml-context-changed', e => {
+      e.stopPropagation();
+      this.scheduleRender_();
+    });
+
+    // unmounted is fired on each child element to notify it that the parent
+    // has removed the element from the DOM tree. This is equivalent to React
+    // recursively calling componentWillUnmount.
+    this.element.addEventListener('i-amphtml-unmounted', e => {
+      e.stopPropagation();
+      this.unmount_();
+    });
+  }
+
+  /** @override */
+  layoutCallback() {
+    const deferred =
+      this.scheduledRenderDeferred_ ||
+      (this.scheduledRenderDeferred_ = new Deferred());
+    this.context_.renderable = true;
+    this.context_.playable = true;
+    this.scheduleRender_();
+    return deferred.promise;
+  }
+
+  /** @override */
+  mutatedAttributesCallback() {
+    if (this.container_) {
+      this.scheduleRender_();
+    }
+  }
+
+  /** @private */
+  scheduleRender_() {
+    if (!this.scheduledRender_) {
+      this.scheduledRender_ = true;
+      this.mutateElement(this.boundRerender_);
+    }
+  }
+
+  /** @private */
+  unmount_() {
+    this.mounted_ = false;
+    if (this.container_) {
+      render(createElement(Fragment), this.container_);
+    }
+  }
+
+  /** @private */
+  rerender_() {
+    // If the component unmounted before the scheduled render runs, exit
+    // early.
+    if (!this.mounted_) {
+      return;
+    }
+
+    const Ctor = this.constructor;
+
+    if (!this.container_) {
+      if (Ctor.children || Ctor.passthrough) {
+        this.container_ = this.element.attachShadow({mode: 'open'});
+      } else {
+        const container = this.win.document.createElement('i-amphtml-c');
+        this.container_ = container;
+        this.applyFillContent(container);
+        this.element.appendChild(container);
+      }
+    }
+
+    const props = collectProps(Ctor, this.element, this.defaultProps_);
+
+    // While this "creates" a new element, diffing will not create a second
+    // instance of Component. Instead, the existing one already rendered into
+    // this element will be reused.
+    const cv = createElement(Ctor.Component(), props);
+
+    const v = createElement(withAmpContext, this.context_, cv);
+
+    render(v, this.container_);
+
+    const deferred = this.scheduledRenderDeferred_;
+    if (deferred) {
+      deferred.resolve();
       this.scheduledRenderDeferred_ = null;
-
-      /** @private {!JsonObject|null|undefined} */
-      this.defaultProps_ = null;
-
-      /** @private {boolean} */
-      this.mounted_ = true;
     }
-
-    /** @override */
-    renderOutsideViewport() {
-      const distance = opts.renderOutsideViewport;
-      return distance == null ? super.renderOutsideViewport() : distance;
-    }
-
-    /** @override */
-    isLayoutSupported(layout) {
-      const layoutSupported = opts.isLayoutSupported;
-      return layoutSupported ? layoutSupported.call(this, layout) : true;
-    }
-
-    /** @override */
-    buildCallback() {
-      const {init} = opts;
-      this.defaultProps_ = (init && init.call(this)) || null;
-
-      this.scheduleRender_();
-
-      // context-changed is fired on each child element to notify it that the
-      // parent has changed the wrapping context. This is equivalent to
-      // updating the Context.Provider with new data and having it propagate.
-      this.element.addEventListener('i-amphtml-context-changed', e => {
-        e.stopPropagation();
-        this.scheduleRender_();
-      });
-
-      // unmounted is fired on each child element to notify it that the parent
-      // has removed the element from the DOM tree. This is equivalent to React
-      // recursively calling componentWillUnmount.
-      this.element.addEventListener('i-amphtml-unmounted', e => {
-        e.stopPropagation();
-        this.unmount_();
-      });
-    }
-
-    /** @override */
-    layoutCallback() {
-      const deferred =
-        this.scheduledRenderDeferred_ ||
-        (this.scheduledRenderDeferred_ = new Deferred());
-      this.context_.renderable = true;
-      this.context_.playable = true;
-      this.scheduleRender_();
-      return deferred.promise;
-    }
-
-    /** @override */
-    mutatedAttributesCallback() {
-      if (this.container_) {
-        this.scheduleRender_();
-      }
-    }
-
-    /** @private */
-    scheduleRender_() {
-      if (!this.scheduledRender_) {
-        this.scheduledRender_ = true;
-        this.mutateElement(this.boundRerender_);
-      }
-    }
-
-    /** @private */
-    unmount_() {
-      this.mounted_ = false;
-      if (this.container_) {
-        render(createElement(Fragment), this.container_);
-      }
-    }
-
-    /** @private */
-    rerender_() {
-      // If the component unmounted before the scheduled render runs, exit
-      // early.
-      if (!this.mounted_) {
-        return;
-      }
-
-      if (!this.container_) {
-        if (opts.children || opts.passthrough) {
-          this.container_ = this.element.attachShadow({mode: 'open'});
-        } else {
-          const container = this.win.document.createElement('i-amphtml-c');
-          this.container_ = container;
-          this.applyFillContent(container);
-          this.element.appendChild(container);
-        }
-      }
-
-      const props = collectProps(
-        this.element,
-        devAssert(opts),
-        this.defaultProps_
-      );
-
-      // While this "creates" a new element, diffing will not create a second
-      // instance of Component. Instead, the existing one already rendered into
-      // this element will be reused.
-      const cv = createElement(Component, props);
-
-      const v = createElement(withAmpContext, this.context_, cv);
-
-      render(v, this.container_);
-
-      const deferred = this.scheduledRenderDeferred_;
-      if (deferred) {
-        deferred.resolve();
-        this.scheduledRenderDeferred_ = null;
-      }
-    }
-  };
+  }
 }
 
 /**
+ * @param {typeof PreactBaseElement} Ctor
  * @param {!AmpElement} element
- * @param {!AmpElementOptions} opts
  * @param {!JsonObject|null|undefined} defaultProps
  * @return {!JsonObject}
  */
-function collectProps(element, opts, defaultProps) {
+function collectProps(Ctor, element, defaultProps) {
   const props = /** @type {!JsonObject} */ ({...defaultProps});
 
   // Class.
-  if (opts.className) {
-    props['className'] = opts.className;
+  const className = Ctor.className();
+  if (className) {
+    props['className'] = className;
   }
 
   // Props.
-  const defs = opts.props || {};
-  for (const name in defs) {
-    const def = defs[name];
+  const propDefs = Ctor.props();
+  for (const name in propDefs) {
+    const def = propDefs[name];
     const value = element.getAttribute(def.attr);
     if (value == null) {
       props[name] = def.default;
@@ -247,41 +271,42 @@ function collectProps(element, opts, defaultProps) {
   // as separate properties. Thus in a carousel the plain "children" are
   // slides, and the "arrowNext" children are passed via a "arrowNext"
   // property.
-  if (opts.passthrough) {
+  const childrenDefs = Ctor.children();
+  if (Ctor.passthrough()) {
+    devAssert(
+      !childrenDefs,
+      'only one of "passthrough" or "children" may be given'
+    );
     props['children'] = [createElement(Slot)];
-  } else if (opts.children) {
+  } else if (childrenDefs) {
     const children = [];
+    props['children'] = children;
+
     const nodes = element.getRealChildNodes();
     for (let i = 0; i < nodes.length; i++) {
       const childElement = nodes[i];
-      const match = matchChild(childElement, opts.children);
-      if (!match) {
+      const def = matchChild(childElement, childrenDefs);
+      if (!def) {
         continue;
       }
 
-      const def = opts.children[match];
-      const slotProps = (typeof def == 'object' && def.props) || {};
+      const {single, name, props: slotProps = {}} = def;
 
       // TBD: assign keys, reuse slots, etc.
-      if (def.single) {
-        props[match] = createSlot(
-          childElement,
-          `i-amphtml-${match}`,
-          slotProps
-        );
+      if (single) {
+        props[name] = createSlot(childElement, `i-amphtml-${name}`, slotProps);
       } else {
         const list =
-          match == 'children' ? children : props[match] || (props[match] = []);
+          name == 'children' ? children : props[name] || (props[name] = []);
         list.push(
           createSlot(
             childElement,
-            `i-amphtml-${match}-${list.length}`,
+            `i-amphtml-${name}-${list.length}`,
             slotProps
           )
         );
       }
     }
-    props['children'] = children;
   }
 
   return props;
@@ -290,24 +315,15 @@ function collectProps(element, opts, defaultProps) {
 /**
  * @param {!Element} element
  * @param {!Object} defs
- * @return {?string}
+ * @return {?ChildDef}
  */
 function matchChild(element, defs) {
-  if (
-    /^i-/.test(element.tagName) ||
-    element.hasAttribute('placeholder') ||
-    element.hasAttribute('fallback') ||
-    element.hasAttribute('i-amphtml')
-  ) {
-    return null;
-  }
-
   // TODO: a little slow to do this repeatedly.
   for (const match in defs) {
     const def = defs[match];
     const selector = typeof def == 'string' ? def : def.selector;
     if (matches(element, selector)) {
-      return match;
+      return def;
     }
   }
   return null;
