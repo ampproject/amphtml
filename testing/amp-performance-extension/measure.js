@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
   );
 
   // Max first input delay
-  renderMeasurement(
+  const mfid = renderMeasurement(
     result,
     'maxFirstInputDelay',
     round(getMaxFirstInputDelay(firstContentfulPaint))
@@ -211,5 +211,8 @@ document.addEventListener('DOMContentLoaded', function() {
     fp.innerText = round(getMetric('first-paint'));
     fcp.innerText = round(getMetric('first-contentful-paint'));
     lcp.innerText = round(window.largestContentfulPaint);
+    mfid.innerText = round(
+      getMaxFirstInputDelay(getMetric('first-contentful-paint'))
+    );
   }, 250);
 });
