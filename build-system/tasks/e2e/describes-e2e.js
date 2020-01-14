@@ -130,7 +130,7 @@ async function createPuppeteer(opt_config = {}) {
  * @param {string} browserName
  * @param {!SeleniumConfigDef=} args
  * @param {?string} deviceName
- * @return {!SeleniumDriver}
+ * @return {!WebDriver}
  */
 function createSelenium(browserName, args = {}, deviceName) {
   switch (browserName) {
@@ -145,13 +145,19 @@ function createSelenium(browserName, args = {}, deviceName) {
   }
 }
 
+/**
+ *
+ * @param {string} browserName
+ * @param {!SeleniumConfigDef=} args
+ * @param {?string} deviceName
+ * @return {!WebDriver}
+ */
 function createDriver(browserName, args, deviceName) {
   const capabilities = Capabilities[browserName]();
 
   const prefs = new logging.Preferences();
   prefs.setLevel(logging.Type.PERFORMANCE, logging.Level.ALL);
   capabilities.setLoggingPrefs(prefs);
-  let builder;
   switch (browserName) {
     case 'firefox':
       const firefoxOptions = new firefox.Options();
@@ -160,21 +166,18 @@ function createDriver(browserName, args, deviceName) {
         width: DEFAULT_E2E_INITIAL_RECT.width,
         height: DEFAULT_E2E_INITIAL_RECT.height,
       });
-      builder = new Builder()
+      return new Builder()
         .forBrowser('firefox')
-        .setFirefoxOptions(firefoxOptions);
+        .setFirefoxOptions(firefoxOptions)
+        .build();
     case 'chrome':
       const chromeOptions = new chrome.Options(capabilities);
       chromeOptions.addArguments(args);
       if (deviceName) {
         chromeOptions.setMobileEmulation({deviceName});
       }
-      builder = new Builder()
-        .forBrowser('chrome')
-        .setChromeOptions(chromeOptions);
+      return chrome.Driver.createSession(chromeOptions);
   }
-
-  return builder.build();
 }
 
 /**
@@ -496,11 +499,12 @@ class EndToEndFixture {
     try {
       driver = await getDriver(config, browserName, this.spec.deviceName);
     } catch (ex) {
-      if (retries > 0) {
-        await this.setup(env, browserName, --retries);
-      } else {
-        throw ex;
-      }
+      throw new Error('retry catch' + ex.message);
+      // if (retries > 0) {
+      //   await this.setup(env, browserName, --retries);
+      // } else {
+      //   throw ex;
+      // }
     }
 
     const controller =
@@ -527,7 +531,7 @@ class EndToEndFixture {
 
   async teardown(env) {
     const {controller} = env;
-    if (controller) {
+    if (controller && controller.driver) {
       await controller.switchToParent();
       await controller.dispose();
     }
@@ -539,7 +543,7 @@ class EndToEndFixture {
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
  * @param {?string} deviceName
- * @return {!Promise}
+ * @return {!ThenableWebDriver}
  */
 function getDriver(
   {engine = EngineType.SELENIUM, headless = false},
