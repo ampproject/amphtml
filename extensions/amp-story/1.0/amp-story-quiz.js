@@ -194,7 +194,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /**
    * Add classes to adjust the bottom padding on the grid-layer
-   * to prevent overlap with the quiz, and listen for RTL adjustments.
+   * to prevent overlap with the quiz.
    *
    * @private
    */
@@ -390,7 +390,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   retrieveReactionData_() {
-    return this.executeReactionRequest_()
+    return this.executeReactionRequest_(
+      dict({
+        'method': 'GET',
+      })
+    )
       .then(response => {
         this.handleSuccessfulDataRetrieval_(response);
       })
@@ -406,7 +410,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   updateReactionData_(reactionValue) {
-    this.executeReactionRequest_(reactionValue).catch(error => {
+    this.executeReactionRequest_(
+      dict({
+        'method': 'POST',
+      }),
+      reactionValue
+    ).catch(error => {
       dev().error(TAG, error);
     });
   }
@@ -414,23 +423,22 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   /**
    * Executes a Reactions API call.
    *
+   * @param {Object} requestOptions
    * @param {number} reactionValue
    * @return {Promise<JsonObject>}
    * @private
    */
-  executeReactionRequest_(reactionValue) {
+  executeReactionRequest_(requestOptions, reactionValue) {
     // TODO(jackbsteinberg): Add a default reactions endpoint.
     if (!assertAbsoluteHttpOrHttpsUrl(this.element.getAttribute('endpoint'))) {
       return Promise.reject(ENDPOINT_INVALID_ERROR);
     }
 
-    let url = this.element.getAttribute('endpoint');
-
-    const quizPageId = closest(dev().assertElement(this.element), el => {
-      return el.tagName.toLowerCase() === 'amp-story-page';
-    }).getAttribute('id');
-
     if (this.reactionId_ === null) {
+      const quizPageId = closest(dev().assertElement(this.element), el => {
+        return el.tagName.toLowerCase() === 'amp-story-page';
+      }).getAttribute('id');
+
       this.reactionId_ = `CANONICAL_URL#page=${quizPageId}`;
     }
 
@@ -439,19 +447,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       'reactionId': this.reactionId_,
     });
 
-    const requestOptions = dict({
-      'method': 'GET',
-    });
+    let url = this.element.getAttribute('endpoint');
 
-    if (reactionValue !== undefined) {
+    if (requestOptions['method'] === 'POST') {
       requestVars['reactionValue'] = reactionValue;
-      requestOptions['method'] = 'POST';
       requestOptions['body'] = requestVars;
-    } else {
-      url = addParamsToUrl(url, {
-        'reactionType': requestVars['reactionType'],
-        'reactionId': requestVars['reactionId'],
-      });
+    } else if (requestOptions['method'] === 'GET') {
+      url = addParamsToUrl(url, requestVars);
     }
 
     return this.getClientId_().then(clientId => {

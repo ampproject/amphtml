@@ -219,7 +219,7 @@ describes.realWin(
       quizOptions[0].click();
       quizOptions[1].click();
 
-      // Microtask ticks
+      // Microtask tick
       await Promise.resolve();
 
       expect(quizOptions[0]).to.have.class(
