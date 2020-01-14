@@ -33,10 +33,20 @@
     <button on="tap:AMP.setState({'foo': 'foo', 'isButtonDisabled': true, 'textClass': 'redBackground', 'imgSrc': 'https://amp.dev/static/samples/img/Shetland_Sheepdog.jpg', 'imgSize': 200, 'imgAlt': 'Sheepdog'})">Click me</button>
   </div>
 
+  <h3>"amp-state:" url example:</h3>
+  <amp-list src="amp-state:myState.animals" layout="fixed" height="200px">
+    Animals:
+    <template type="amp-mustache">
+      <li style="padding-left: 20px">{{.}}</li>
+    </template>
+  </amp-list>
+
+
   <amp-state id="myState">
     <script type="application/json">
       {
-        "myStateKey1": "myStateValue1"
+        "myStateKey1": "myStateValue1",
+        "animals": ["okapis", "bears", "pigs"]
       }
     </script>
   </amp-state>
