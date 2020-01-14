@@ -32,11 +32,9 @@ describes.endtoend(
   },
   env => {
     let controller;
-    let requestBank;
 
     beforeEach(() => {
       controller = env.controller;
-      requestBank = env.requestBank;
     });
 
     it('should work with client side decision', async () => {
@@ -99,8 +97,9 @@ describes.endtoend(
       });
 
       // Check the analytics request consentState
-      const req = await requestBank.withdraw('tracking');
-      await expect(req.url).to.match(/consentState=sufficient/);
+      await expect(
+        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=sufficient'
+      ).to.have.been.sent;
     });
   }
 );
