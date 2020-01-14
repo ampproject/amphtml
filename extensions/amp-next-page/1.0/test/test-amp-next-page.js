@@ -40,7 +40,7 @@ describes.realWin(
   'amp-next-page component',
   {
     amp: {
-      extensions: ['amp-next-page:0.2'],
+      extensions: ['amp-next-page:1.0'],
     },
   },
   env => {
