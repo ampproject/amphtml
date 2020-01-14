@@ -281,7 +281,10 @@ export class VariableService {
       } else if (isArray(value)) {
         // Treat each value as a template and expand
         for (let i = 0; i < value.length; i++) {
-          value[i] = this.expandValue_(value[i], options);
+          value[i] =
+            typeof value[i] == 'string'
+              ? this.expandValue_(value[i], options)
+              : value[i];
         }
       }
 
