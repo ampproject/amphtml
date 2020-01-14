@@ -111,11 +111,7 @@ export let InteractiveComponentDef;
  */
 export let State;
 
-/**
- * @protected
- * @const
- * @enum {string}
- **/
+/** @protected @const @enum {string} */
 export const StateProperty = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
@@ -160,11 +156,7 @@ export const StateProperty = {
   PAGE_IDS: 'pageIds',
 };
 
-/**
- * @protected
- * @const
- * @enum {string}
- **/
+/** @protected @const @enum {string} */
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
