@@ -72,6 +72,9 @@ const TAG = 'amp-list';
 const TABBABLE_ELEMENTS_QUERY =
   'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"]), audio[controls], video[controls], [contenteditable]:not([contenteditable="false"])';
 
+// Technically the ':' is not considered part of the scheme, but it is useful to include.
+const AMP_STATE_URI_SCHEME = 'amp-state:';
+
 /**
  * @typedef {{
  *   data:(?JsonObject|string|undefined|!Array),
@@ -261,10 +264,6 @@ export class AmpList extends AMP.BaseElement {
       this.initializeLoadMoreElements_();
     }
 
-    if (this.isAmpStateSrc_()) {
-      return this.getAmpStateJson_().then(json => this.renderLocalData_(json));
-    }
-
     return this.fetchList_();
   }
 
@@ -348,15 +347,15 @@ export class AmpList extends AMP.BaseElement {
   /**
    * Returns true if element's src points to amp-state.
    *
+   * @param {string} src
    * @return {boolean}
    * @private
    */
-  isAmpStateSrc_() {
-    const src = this.element.getAttribute('src');
+  isAmpStateSrc_(src) {
     return (
       isExperimentOn(this.win, 'amp-list-init-from-state') &&
       typeof src === 'string' &&
-      startsWith(src, 'amp-state:')
+      startsWith(src, AMP_STATE_URI_SCHEME)
     );
   }
 
@@ -364,33 +363,28 @@ export class AmpList extends AMP.BaseElement {
    * Returns json pointed at by an amp-state protocol src. For example,
    * src="amp-state:json.path".
    *
-   * @return {Promise<!Object|undefined>}
+   * @param {string} src
+   * @return {Promise<!Object>}
    * @private
    */
-  getAmpStateJson_() {
-    const src = this.element.getAttribute('src');
-    const ampStatePath = src.substring('amp-state:'.length);
+  getAmpStateJson_(src) {
+    const ampStatePath = src.substring(AMP_STATE_URI_SCHEME.length);
     return Services.bindForDocOrNull(this.element).then(bind => {
-      if (!bind) {
-        const errorMsg =
-          'You must include amp-bind in order to use amp-state as an initial source for amp-list.';
-        user().error(TAG, errorMsg);
-        return Promise.resolve();
-      }
+      user().assert(
+        bind,
+        '"amp-state:" URLs require amp-bind to be installed.',
+        this.element
+      );
       return bind.getState(ampStatePath);
     });
   }
 
   /**
-   * @param {!Array|!Object|undefined} json
+   * @param {!Array|!Object} json
    * @return {!Promise}
    * @private
    */
   renderLocalData_(json) {
-    if (typeof json === 'undefined') {
-      return Promise.resolve();
-    }
-
     const array = /** @type {!Array} */ (isArray(json) ? json : [json]);
     this.resetIfNecessary_(/* isFetch */ false);
     return this.scheduleRender_(array, /* append */ false);
@@ -403,11 +397,7 @@ export class AmpList extends AMP.BaseElement {
 
     const src = mutations['src'];
     if (src !== undefined) {
-      if (this.isAmpStateSrc_()) {
-        promise = this.getAmpStateJson_().then(json =>
-          this.renderLocalData_(json)
-        );
-      } else if (typeof src === 'object' && src !== null) {
+      if (typeof src === 'object' && src) {
         promise = this.renderLocalData_(src);
         // Remove the 'src' if it was set by a bind-expression.
         this.element.setAttribute('src', '');
@@ -598,7 +588,11 @@ export class AmpList extends AMP.BaseElement {
     }
 
     let fetch;
-    if (this.ssrTemplateHelper_.isEnabled()) {
+    if (this.isAmpStateSrc_(elementSrc)) {
+      fetch = this.getAmpStateJson_(elementSrc).then(json =>
+        this.renderLocalData_(json)
+      );
+    } else if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
       fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {

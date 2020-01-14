@@ -1233,8 +1233,9 @@ describes.repeated(
               ampStateJson.setAttribute('type', 'application/json');
               ampStateEl.appendChild(ampStateJson);
               doc.body.appendChild(ampStateEl);
-              expectAsyncConsoleError('You must include amp-bind');
-              await list.layoutCallback();
+              expect(list.layoutCallback()).to.eventually.throw(
+                'require amp-bind to be installed'
+              );
             });
 
             it('should render a list using local data', async () => {
