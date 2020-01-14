@@ -67,7 +67,7 @@ const MAX_TWEET_WIDTH_PX = 500;
 /**
  * Components that can be expanded.
  * @const {!Object}
- * @protected
+ * @package
  */
 export const EXPANDABLE_COMPONENTS = {
   'amp-twitter': {
