@@ -2,13 +2,13 @@
 <html ⚡>
   <head>
     <meta charset="utf-8" />
-    <title>AMP next page examples</title>
+    <title>AMP next page element visibility examples</title>
     <link rel="canonical" href="amps.html">
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
-    <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-0.2.js"></script>
+    <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-1.0.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script>
       (self.AMP=self.AMP||[]).push(function(AMP){
@@ -19,11 +19,34 @@
       .content {
         padding: 20px;
       }
+      .hidden, .fixed, .sticky {
+        background-color: #34495e;
+        color: white;
+        font-size: 16px;
+        font-family: Roboto, 'Open Sans', 'Helvetica Neue', sans-serif;
+        padding: 16px;
+        border-radius: 4px;
+        z-index: 1;
+      }
+      .fixed {
+        background-color: #e74c3c;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .sticky {
+        position: sticky;
+        top: 0;
+        left: 0;
+        background-color: #27ae60;
+      }
     </style>
 </head>
   <body>
     <div class="content">
-      <h2>Host page</h2>
+      <h2>Content discovery</h2>
       <p>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae
         libero porta nulla iaculis viverra. Vestibulum consectetur scelerisque
@@ -38,6 +61,7 @@
         varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl
         at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
       </p>
+      <div class="hidden" amp-next-page-hide>I should be visible when loaded as a host page but hidden if loaded as a next-page</div>
       <p>
         Vestibulum a nisi est. Fusce consequat iaculis vehicula. Aliquam luctus
         nunc risus, ut congue augue tristique nec. In venenatis aliquam tristique.
@@ -52,6 +76,8 @@
         enim, non pellentesque sem. Nam non sem lacinia, lacinia nisi non,
         consectetur enim.
       </p>
+      <div class="sticky" amp-next-page-replace="my-sticky-element">I should get replaced by my sibling from each loaded page (page 0)</div>
+      <div class="fixed" amp-next-page-hide>I am fixed and should be visible when loaded as a host page but hidden if loaded as a next-page (page 0)</div>
       <p>
         Maecenas sed quam nec dolor rhoncus rutrum ut non mauris. Pellentesque
         ante dolor, pretium quis enim eu, condimentum volutpat augue. Donec nulla
@@ -166,7 +192,6 @@
         varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl
         at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
       </p>
-      <a href="#" id="host-halfway"></a>
       <p>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae
         libero porta nulla iaculis viverra. Vestibulum consectetur scelerisque
@@ -266,22 +291,12 @@
           {
             "image": "/examples/img/hero@1x.jpg",
             "title": "Page 1",
-            "url": "./articles/article-short.html"
+            "url": "./articles/element-visibility-1.html"
           },
           {
             "image": "/examples/img/hero@1x.jpg",
             "title": "Page 2",
-            "url": "./articles/article-with-fixed.html"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Page 3",
-            "url": "./articles/article-long.html"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Page 4",
-            "url": "./amp-next-page.amp.html"
+            "url": "./articles/element-visibility-2.html"
           }
         ]
       </script>

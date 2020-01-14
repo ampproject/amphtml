@@ -343,10 +343,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!../extensions/amp-next-page/0.2/service.NextPageService}
+   * @return {!../extensions/amp-next-page/1.0/service.NextPageService}
    */
   static nextPageServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-next-page/0.2/service.NextPageService} */ (getServiceForDoc(
+    return /** @type {!../extensions/amp-next-page/1.0/service.NextPageService} */ (getServiceForDoc(
       elementOrAmpDoc,
       'next-page'
     ));
