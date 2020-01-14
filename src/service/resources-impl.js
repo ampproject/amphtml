@@ -841,9 +841,9 @@ export class ResourcesImpl {
           this.vsync_.run(
             {
               measure: state => {
+                state.resize = false;
                 const parent = resource.element.parentElement;
                 if (!parent) {
-                  state.resize = false;
                   return;
                 }
 
@@ -856,7 +856,6 @@ export class ResourcesImpl {
                 for (let i = 0; i < parent.childElementCount; i++) {
                   cumulativeWidth += parent.children[i]./*OK*/ offsetWidth;
                   if (cumulativeWidth > parentWidth) {
-                    state.resize = false;
                     return;
                   }
                 }
@@ -870,6 +869,12 @@ export class ResourcesImpl {
                     newMargins
                   );
                 }
+                request.resource.overflowCallback(
+                  /* overflown */ !state.resize,
+                  request.newHeight,
+                  request.newWidth,
+                  newMargins
+                );
               },
             },
             {}

@@ -1138,10 +1138,13 @@ describe('mutator changeSize', () => {
         'reflow is not possible',
       () => {
         const parent = document.createElement('div');
+        parent.style.width = '222px';
         parent.getLayoutWidth = () => 222;
         const element = document.createElement('div');
-        element.overflowCallback = () => {};
+        element.overflowCallback = overflowCallbackSpy;
         parent.appendChild(element);
+        document.body.appendChild(parent);
+
         resource1.element = element;
         resource1.layoutBox_ = {
           top: 0,
@@ -1177,6 +1180,9 @@ describe('mutator changeSize', () => {
         task.mutate(state);
         expect(resource1.changeSize).to.be.calledOnce;
         expect(resource1.changeSize).to.be.calledWith(50, 222);
+        expect(overflowCallbackSpy).to.be.calledOnce;
+        expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
+        document.body.removeChild(parent);
       }
     );
 
@@ -1185,13 +1191,17 @@ describe('mutator changeSize', () => {
         'reflow is possible',
       () => {
         const parent = document.createElement('div');
+        parent.style.width = '222px';
         parent.getLayoutWidth = () => 222;
         const element = document.createElement('div');
         const sibling = document.createElement('div');
         sibling.style.width = '1px';
-        element.overflowCallback = () => {};
+        sibling.id = 'sibling';
+        element.overflowCallback = overflowCallbackSpy;
         parent.appendChild(element);
         parent.appendChild(sibling);
+        document.body.appendChild(parent);
+
         resource1.element = element;
         resource1.layoutBox_ = {
           top: 0,
@@ -1225,8 +1235,10 @@ describe('mutator changeSize', () => {
         const state = {};
         task.measure(state);
         task.mutate(state);
-        expect(resource1.changeSize).to.be.calledOnce;
-        expect(resource1.changeSize).to.be.calledWith(50, 222);
+        expect(resource1.changeSize).to.not.be.called;
+        expect(overflowCallbackSpy).to.be.calledOnce;
+        expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
+        document.body.removeChild(parent);
       }
     );
 
