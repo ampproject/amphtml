@@ -431,7 +431,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }).getAttribute('id');
 
     if (this.reactionId_ === null) {
-      this.reactionId_ = `CANONICAL_URL?page=${quizPageId}`;
+      this.reactionId_ = `CANONICAL_URL#page=${quizPageId}`;
     }
 
     const requestVars = dict({
