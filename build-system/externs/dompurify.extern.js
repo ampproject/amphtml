@@ -51,3 +51,9 @@ DomPurifyConfig.prototype.ALLOWED_URI_REGEXP;
 DomPurifyConfig.prototype.ADD_TAGS;
 DomPurifyConfig.prototype.ADD_ATTR;
 DomPurifyConfig.prototype.ADD_URI_SAFE_ATTR;
+
+/**
+ * @typedef {{addHook: !Function, removeAllHooks: !Function, sanitize: !Function}}
+ */
+var DomPurifyDef;
+

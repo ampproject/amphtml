@@ -16,18 +16,17 @@
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
-import {
-  DomPurifyDef,
-  createPurifier,
-  getAllowedTags,
-  validateAttributeChange,
-} from '../../../src/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {cancellation} from '../../../src/error';
 import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  createPurifier,
+  getAllowedTags,
+  validateAttributeChange,
+} from '../../../src/purifier';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';

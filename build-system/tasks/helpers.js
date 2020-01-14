@@ -30,6 +30,7 @@ const gulpWatch = require('gulp-watch');
 const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
 const path = require('path');
+const pkgUp = require('pkg-up');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
 const source = require('vinyl-source-stream');
@@ -43,6 +44,7 @@ const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
 const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {closureCompile} = require('../compile/compile');
+const {execOrDie} = require('../common/exec.js');
 const {isTravisBuild} = require('../common/travis');
 const {thirdPartyFrames} = require('../test-configs/config');
 const {transpileTs} = require('../compile/typescript');
@@ -662,10 +664,45 @@ function transferSrcsToTempDir(options = {}) {
     'transforms in',
     colors.cyan(SRC_TEMP_DIR)
   );
-  const files = globby.sync(BABEL_SRC_GLOBS);
+
+  const files = globby.sync(BABEL_SRC_GLOBS).filter(file => {
+    if (!file.startsWith('node_modules/')) {
+      return true;
+    }
+
+    const pkgDir = pkgUp.sync({cwd: path.dirname(file)});
+    const relative = path.relative(path.dirname(pkgDir), file);
+    const pkgContents = fs.readFileSync(pkgDir);
+    let pathIsInPkg = false;
+    JSON.parse(pkgContents, (key, value) => {
+      if (pathIsInPkg || typeof value !== 'string') {
+        return;
+      }
+      pathIsInPkg = path.relative('.', value) === relative;
+    });
+
+    if (pathIsInPkg) {
+      return true;
+    }
+    return false;
+  });
+
   files.forEach(file => {
-    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
-      fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
+    const name = `${SRC_TEMP_DIR}/${file}`;
+    if (file.startsWith('third_party/')) {
+      fs.copySync(file, name);
+      return;
+    }
+
+    if (file.startsWith('node_modules/')) {
+      if (file.endsWith('.json')) {
+        fs.copySync(file, name);
+        return;
+      }
+
+      execOrDie(
+        `npx rollup --silent -c 'build-system/compile/rollup.config.js' -i '${file}' -o '${name}' --banner '/* ${file} */'`
+      );
       return;
     }
 
@@ -679,7 +716,6 @@ function transferSrcsToTempDir(options = {}) {
       retainLines: true,
       compact: false,
     });
-    const name = `${SRC_TEMP_DIR}/${file}`;
     fs.outputFileSync(name, code);
     process.stdout.write('.');
   });

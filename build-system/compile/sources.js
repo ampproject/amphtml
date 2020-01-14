@@ -41,22 +41,29 @@ const COMMON_GLOBS = [
   'third_party/webcomponentsjs/ShadowCSS.js',
   'node_modules/dompurify/package.json',
   'node_modules/dompurify/dist/purify.es.js',
-  'node_modules/luxon/src/**/*.js',
-  'node_modules/luxon/package.json',
   'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
   'node_modules/web-animations-js/package.json',
-  'node_modules/rrule/dist/esm/src/**/*.js',
-  'node_modules/rrule/package.json',
-  'node_modules/tslib/tslib.es6.js',
-  'node_modules/tslib/package.json',
   'node_modules/web-animations-js/web-animations.install.js',
+  'node_modules/rrule/package.json',
+  'node_modules/rrule/dist/esm/src/**/*.js',
   'node_modules/web-activities/package.json',
   'node_modules/web-activities/activity-ports.js',
   'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
   'node_modules/@ampproject/worker-dom/package.json',
   'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
+];
+
+const NODE_MODULES = [
+  'dompurify',
+  'promise-pjs',
+  'web-animations-js',
+  'web-activities',
+  '@ampproject/animations',
+  '@ampproject/worker-dom',
+  'preact',
+  'preact/hooks',
 ];
 
 /**
@@ -147,4 +154,5 @@ module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
   SRC_TEMP_DIR,
+  NODE_MODULES,
 };

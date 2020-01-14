@@ -32,11 +32,6 @@ import {rewriteAttributeValue} from './url-rewrite';
 import {startsWith} from './string';
 import purify from 'dompurify';
 
-/**
- * @typedef {{addHook: !Function, removeAllHooks: !Function, sanitize: !Function}}
- */
-export let DomPurifyDef;
-
 // TODO(choumx): Convert this into a class to avoid import side effects.
 /** @private @const {!DomPurifyDef} */
 const DomPurify = purify(self);
