@@ -49,7 +49,7 @@ const LOAD_TIMEOUT = 16000;
  *
  * @typedef {{
  *   implementationClass:
- *       function(new:../base-element.BaseElement, !Element),
+ *       typeof ../base-element.BaseElement,
  *   css: (?string|undefined),
  * }}
  */
@@ -294,7 +294,7 @@ export class Extensions {
    * class when the extension has been loaded. If necessary, adds the extension
    * script to the page.
    * @param {string} elementName
-   * @return {!Promise<function(new:../base-element.BaseElement, !Element)>}
+   * @return {!Promise<typeof ../base-element.BaseElement>}
    */
   loadElementClass(elementName) {
     return this.preloadExtension(elementName).then(extension => {
@@ -312,7 +312,7 @@ export class Extensions {
    * restricted method and it's allowed to be called only during the overall
    * extension registration.
    * @param {string} name
-   * @param {function(new:../base-element.BaseElement, !Element)} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @param {?string|undefined} css
    * @restricted
    */
