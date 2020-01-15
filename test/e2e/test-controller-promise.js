@@ -15,7 +15,7 @@
  */
 
 import {ControllerPromise} from '../../build-system/tasks/e2e/controller-promise';
-/*OK*/ import sinon from 'sinon';
+import sinon from /*OK*/ 'sinon';
 
 /**
  * This is a unit test that is located with the E2E tests because it
