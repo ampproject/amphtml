@@ -956,7 +956,9 @@ export function install(win, opt_ctor) {
       const {Reflect} = win;
 
       // "Construct" ctor using ES5 idioms
-      const instance = Object.create(opt_ctor.prototype);
+      const instance = /** @type {!Function} */ (Object.create(
+        opt_ctor.prototype
+      ));
 
       // This will throw an error unless we're in a transpiled environemnt.
       // Native classes must be called as `new Ctor`, not `Ctor.call(instance)`.
