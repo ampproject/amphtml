@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 #
 # Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 #
@@ -38,7 +38,7 @@ def Die(msg):
   Args:
     msg: The error message to emit
   """
-  print >> sys.stderr, msg
+  print(msg, file=sys.stderr)
   sys.exit(1)
 
 
@@ -49,7 +49,7 @@ def GetNodeJsCmd():
   for cmd in ['node', 'nodejs']:
     try:
       output = subprocess.check_output([cmd, '--eval', 'console.log("42")'])
-      if output.strip() == '42':
+      if output.strip().decode('utf-8') == '42':
         logging.info('... done')
         return cmd
     except (subprocess.CalledProcessError, OSError):
@@ -147,7 +147,7 @@ def CreateWebuiAppengineDist(out_dir):
   webui_out = os.path.join(out_dir, 'webui_appengine')
   shutil.copytree('.', webui_out, ignore=shutil.ignore_patterns('dist'))
   f = open(os.path.join(webui_out, 'index.html'), 'w')
-  f.write(vulcanized_index_html)
+  f.write(vulcanized_index_html.decode('utf-8'))
   f.close()
   logging.info('... success')
 
