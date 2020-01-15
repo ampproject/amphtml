@@ -151,10 +151,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @return {Promise<string>}
    */
   getClientId_() {
-    if (!this.element.hasAttribute('endpoint')) {
-      this.clientIdPromise_ = Promise.resolve();
-    }
-
     if (!this.clientIdPromise_) {
       this.clientIdPromise_ = this.clientIdService_.then(data => {
         return data.get(
@@ -357,6 +353,15 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
+   * @param {Element} selectedOption
+   * @private
+   */
+  updateQuizToPostSelectionState_(selectedOption) {
+    this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
+    selectedOption.classList.add('i-amphtml-story-quiz-option-selected');
+  }
+
+  /**
    * Triggers changes to quiz state on response interaction.
    *
    * @param {!Element} optionEl
@@ -371,8 +376,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       this.triggerAnalytics_(optionEl);
 
       this.mutateElement(() => {
-        optionEl.classList.add('i-amphtml-story-quiz-option-selected');
-        this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
+        this.updateQuizToPostSelectionState_(optionEl);
 
         this.hasUserSelection_ = true;
       });
@@ -483,6 +487,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   handleSuccessfulDataRetrieval_(response) {
     if (!(response && 'data' in response)) {
+      dev().error(
+        TAG,
+        `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
+      );
       return;
     }
 
@@ -493,28 +501,40 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     this.hasUserSelection_ = response.data.hasUserResponded;
     if (this.hasUserSelection_) {
-      const selectedOptionKey = this.responseData_.data.find(
-        response => response.selectedByUser
-      ).reactionValue;
-
-      const options = this.quizEl_.querySelectorAll(
-        '.i-amphtml-story-quiz-option'
-      );
-
-      if (selectedOptionKey >= options.length) {
-        dev().error(
-          TAG,
-          `Quiz #${this.element.getAttribute('id')} does not have option ${
-            answerChoiceOptions[selectedOptionKey]
-          }, but user selected option ${answerChoiceOptions[selectedOptionKey]}`
-        );
-        return;
-      }
-
-      this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
-      options[selectedOptionKey].classList.add(
-        'i-amphtml-story-quiz-option-selected'
-      );
+      this.updateQuizOnDataRetrieval_();
     }
+  }
+
+  /**
+   * Updates the quiz to reflect the state of the remote data.
+   *
+   * @private
+   */
+  updateQuizOnDataRetrieval_() {
+    const selectedOptionKey = this.responseData_.data.find(
+      response => response.selectedByUser
+    ).reactionValue;
+
+    if (selectedOptionKey === undefined) {
+      dev().error(TAG, `The user-selected reaction could not be found`);
+    }
+
+    const options = this.quizEl_.querySelectorAll(
+      '.i-amphtml-story-quiz-option'
+    );
+
+    if (selectedOptionKey >= options.length) {
+      dev().error(
+        TAG,
+        `Quiz #${this.element.getAttribute('id')} does not have option ${
+          answerChoiceOptions[selectedOptionKey]
+        }, but user selected option ${answerChoiceOptions[selectedOptionKey]}`
+      );
+      return;
+    }
+
+    this.mutateElement(() => {
+      this.updateQuizToPostSelectionState_(options[selectedOptionKey]);
+    });
   }
 }
