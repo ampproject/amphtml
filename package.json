@@ -173,7 +173,7 @@
     "through2": "3.0.1",
     "topological-sort": "0.3.0",
     "traverse": "0.6.6",
-    "tsickle": "0.37.1",
+    "tsickle": "0.38.0",
     "typescript": "3.7.4",
     "uglifyify": "5.0.2",
     "vinyl-buffer": "1.0.1",
