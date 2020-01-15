@@ -778,9 +778,13 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return this.element.getAttribute(name);
         }
       },
+      EL_TOP: () => this.element.getPageLayoutBox().top,
+      SCROLL_TOP: () => this.win.pageYOffset,
+      PAGE_HEIGHT: () =>
+        Services.viewportForDoc(this.getAmpDoc()).getScrollHeight(),
+      BKG_STATE: () => (this.getAmpDoc().isVisible() ? 'visible' : 'hidden'),
       CANONICAL_URL: () =>
-        Services.documentInfoForDoc(this.element).canonicalUrl,
-      TOP: () => this.element.getPageLayoutBox().top,
+        Services.documentInfoForDoc(this.element).canonicalUrl
     };
   }
 
