@@ -309,9 +309,6 @@ export class VideoDocking {
     /** @private {?VideoOrBaseElementDef} */
     this.lastDismissed_ = null;
 
-    /** @private {?RelativeY} */
-    this.lastDismissedPosY_ = null;
-
     /**
      * Memoizes x, y and scale to prevent useless mutations.
      * @private {?{x: number, y: number, scale: number}}
@@ -731,19 +728,6 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!RelativeY} posY
-   * @return {boolean}
-   * @private
-   */
-  positionMatchesScroll_(posY) {
-    const direction = this.scrollDirection_;
-    return (
-      (posY == RelativeY.TOP && direction == RelativeY.TOP) ||
-      (posY == RelativeY.BOTTOM && direction == RelativeY.BOTTOM)
-    );
-  }
-
-  /**
    * @param {!VideoOrBaseElementDef} video
    * @param {!TargetDef} target
    * @private
@@ -870,12 +854,6 @@ export class VideoDocking {
     if (this.lastDismissed_ != video) {
       return false;
     }
-    if (
-      this.lastDismissedPosY_ !== null &&
-      !this.positionMatchesScroll_(this.lastDismissedPosY_)
-    ) {
-      return false;
-    }
     if (this.isVisible_(video.element, FLOAT_TOLERANCE)) {
       this.resetDismissed_();
     }
@@ -885,7 +863,6 @@ export class VideoDocking {
   /** @private */
   resetDismissed_() {
     this.lastDismissed_ = null;
-    this.lastDismissedPosY_ = null;
   }
 
   /**
