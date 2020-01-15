@@ -114,7 +114,7 @@ export class OriginExperiments {
 
 /**
  * Handles key generation and token signing/verifying.
- * @protected
+ * @package
  */
 export class TokenMaster {
   /**

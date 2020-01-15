@@ -42,7 +42,7 @@ export function delayAfterDeferringToEventLoop(win, duration) {
  * Converts seconds to a timestamp formatted string.
  * @param {number} seconds
  * @return {string}
- * @private
+ * @package
  */
 export function secondsToTimestampString(seconds) {
   const h = Math.floor(seconds / 3600);

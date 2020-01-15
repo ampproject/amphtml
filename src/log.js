@@ -67,7 +67,6 @@ export function isUserErrorEmbed(message) {
 
 /**
  * @enum {number}
- * @private Visible for testing only.
  */
 export const LogLevel = {
   OFF: 0,

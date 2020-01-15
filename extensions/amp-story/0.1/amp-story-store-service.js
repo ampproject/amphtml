@@ -45,7 +45,7 @@ const TAG = 'amp-story';
  */
 export let State;
 
-/** @private @const @enum {string} */
+/** @package @const @enum {string} */
 export const StateProperty = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'caninsertautomaticad',
@@ -72,7 +72,7 @@ export const StateProperty = {
   CURRENT_PAGE_INDEX: 'currentpageindex',
 };
 
-/** @private @const @enum {string} */
+/** @package @const @enum {string} */
 export const Action = {
   CHANGE_PAGE: 'changepage',
   SET_CONSENT_ID: 'setconsentid',

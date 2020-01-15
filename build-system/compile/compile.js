@@ -325,17 +325,14 @@ function compile(
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
       compilerOptions.jscomp_error.push(
+        'accessControls',
         'conformanceViolations',
         'checkTypes',
         'const',
         'constantProperty',
         'globalThis'
       );
-      compilerOptions.jscomp_off.push(
-        'accessControls',
-        'moduleLoad',
-        'unknownDefines'
-      );
+      compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
       compilerOptions.conformance_configs =
         'build-system/test-configs/conformance-config.textproto';
     } else {

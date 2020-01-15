@@ -61,13 +61,13 @@ const MIN_BUTTON_PADDING = 10;
 
 /**
  * Key for share providers in bookend config.
- * @private @const {string}
+ * @package @const {string}
  */
 export const SHARE_PROVIDERS_KEY = 'shareProviders';
 
 /**
  * Deprecated key for share providers in bookend config.
- * @private @const {string}
+ * @package @const {string}
  */
 export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
 
