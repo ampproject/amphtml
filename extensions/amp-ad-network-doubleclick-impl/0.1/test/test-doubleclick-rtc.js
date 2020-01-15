@@ -418,6 +418,9 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       expect(customMacros.PAGEVIEWID_64()).to.equal(docInfo.pageViewId64);
       expect(customMacros.HREF()).to.equal(env.win.location.href);
       expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
+      expect(customMacros.TOP()).to.equal(
+        element.getBoundingClientRect().top + scrollY
+      );
       Object.keys(macros).forEach(macro => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });

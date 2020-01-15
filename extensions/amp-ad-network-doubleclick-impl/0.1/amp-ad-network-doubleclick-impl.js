@@ -756,7 +756,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     };
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
-      PAGEVIEWID_64: () => Services.documentInfoForDoc(this.element).pageViewId64,
+      PAGEVIEWID_64: () =>
+        Services.documentInfoForDoc(this.element).pageViewId64,
       HREF: () => this.win.location.href,
       REFERRER: opt_timeout => this.getReferrer_(opt_timeout),
       TGT: () =>
@@ -777,7 +778,11 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return this.element.getAttribute(name);
         }
       },
-      TOP: () => this.element.getPageLayoutBox().top,
+      EL_TOP: () => this.element.getPageLayoutBox().top,
+      SCROLL_TOP: () => this.win.pageYOffset,
+      PAGE_HEIGHT: () =>
+        Services.viewportForDoc(this.getAmpDoc()).getScrollHeight(),
+      BKG_STATE: () => (this.getAmpDoc().isVisible() ? 'visible' : 'hidden'),
       CANONICAL_URL: () =>
         Services.documentInfoForDoc(this.element).canonicalUrl,
     };
