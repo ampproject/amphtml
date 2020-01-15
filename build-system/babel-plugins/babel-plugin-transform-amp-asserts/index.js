@@ -51,10 +51,11 @@ module.exports = function(babel) {
 
   /**
    * @param {!NodePath} path
-   * @param {boolean} assertion
    * @param {string|undefined} type
+   * @param {boolean} assertion
+   * @param {boolean} remove
    */
-  function eliminate(path, assertion, type) {
+  function eliminate(path, type, assertion, remove) {
     const argument = path.get('arguments.0');
     if (!argument) {
       if (assertion) {
@@ -94,20 +95,16 @@ module.exports = function(babel) {
       }
     }
 
-    path.replaceWith(t.parenthesizedExpression(arg));
-
     if (type) {
+      path.replaceWith(t.parenthesizedExpression(arg));
       // If it starts with a capital, make the type non-nullable.
       if (/^[A-Z]/.test(type)) {
         type = '!' + type;
       }
       // Add a cast annotation to fix type.
       path.addComment('leading', `* @type {${type}} `);
-    }
-
-    const {parenthesized} = path.node.extra || {};
-    if (parenthesized) {
-      path.replaceWith(t.parenthesizedExpression(path.node));
+    } else if (!assertion) {
+      path.replaceWith(t.parenthesizedExpression(arg));
     }
   }
 
@@ -117,7 +114,7 @@ module.exports = function(babel) {
         const callee = path.get('callee');
 
         if (callee.isIdentifier({name: 'devAssert'})) {
-          return eliminate(path, true, '');
+          return eliminate(path, '', /* assertion */ true);
         }
 
         const isMemberAndCallExpression =
@@ -144,7 +141,11 @@ module.exports = function(babel) {
         }
 
         const method = prop.node.name;
-        eliminate(path, method.startsWith('assert'), typeMap[method]);
+        eliminate(
+          path,
+          typeMap[method],
+          /* assertion */ method.startsWith('assert')
+        );
       },
     },
   };
