@@ -19,10 +19,10 @@ function renderMeasurement(container, label, count) {
   line.classList.add('i-amphtml-performance-line');
   const labelSpan = document.createElement('div');
   labelSpan.classList.add('i-amphtml-performance-label');
-  labelSpan.innerText = label;
+  labelSpan./* OK */ innerText = label;
   const countSpan = document.createElement('div');
   countSpan.classList.add('i-amphtml-performance-count');
-  countSpan.innerText = count;
+  countSpan./* OK */ innerText = count;
   line.appendChild(labelSpan);
   line.appendChild(countSpan);
   container.appendChild(line);
@@ -209,12 +209,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Instaneous measurement updates
   setInterval(() => {
-    instCLS.innerText = round(window.cumulativeLayoutShift * 100);
+    instCLS./*OK*/ innerText = round(window.cumulativeLayoutShift * 100);
     // vis.innerText = round(getMetric('visible'));
     // fp.innerText = round(getMetric('first-paint'));
     // fcp.innerText = round(getMetric('first-contentful-paint'));
-    lcp./*REVIEW*/ innerText = round(window.largestContentfulPaint);
-    mfid./*REVIEW*/ innerText = round(
+    lcp./*OK*/ innerText = round(window.largestContentfulPaint);
+    mfid./*OK*/ innerText = round(
       getMaxFirstInputDelay(getMetric('first-contentful-paint'))
     );
   }, 250);
