@@ -49,7 +49,6 @@ const {transpileTs} = require('../compile/typescript');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
-const extensionType = argv.esm ? 'mjs' : 'js';
 
 /**
  * Tasks that should print the `--nobuild` help text.
@@ -258,6 +257,14 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   }
 }
 
+function toEsmName(name) {
+  return name.replace(/\.js$/, '.mjs');
+}
+
+function maybeToEsmName(name) {
+  return argv.esm ? toEsmName(name) : name;
+}
+
 /**
  * Minifies a given JavaScript file entry point.
  * @param {string} srcDir
@@ -269,7 +276,7 @@ function appendToCompiledFile(srcFilename, destFilePath) {
 function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const timeInfo = {};
   const entryPoint = path.join(srcDir, srcFilename);
-  const {minifiedName} = options;
+  const minifiedName = maybeToEsmName(options.minifiedName);
   return closureCompile(entryPoint, destDir, minifiedName, options, timeInfo)
     .then(function() {
       const destPath = path.join(destDir, minifiedName);
@@ -279,17 +286,20 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         internalRuntimeVersion
       );
       if (options.latestName) {
-        fs.copySync(destPath, path.join(destDir, options.latestName));
+        fs.copySync(
+          destPath,
+          path.join(destDir, maybeToEsmName(options.latestName))
+        );
       }
     })
     .then(() => {
       let name = minifiedName;
       if (options.latestName) {
-        name += ` → ${options.latestName}`;
+        name += ` → ${maybeToEsmName(options.latestName)}`;
       }
       if (options.singlePassCompilation) {
         altMainBundles.forEach(bundle => {
-          name += `, ${bundle.name}.js`;
+          name += `, ${maybeToEsmName(`${bundle.name}.js`)}`;
         });
         name += ', and all extensions';
       }
@@ -298,7 +308,7 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     .then(() => {
       if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
         return applyAmpConfig(
-          `${destDir}/${minifiedName}`,
+          maybeToEsmName(`${destDir}/${minifiedName}`),
           /* localDev */ !!argv.fortesting
         );
       }
@@ -309,7 +319,7 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       }
       return Promise.all(
         altMainBundles.map(({name}) =>
-          applyAmpConfig(`dist/${name}.js`, /* localDev */ !!argv.fortesting)
+          applyAmpConfig(maybeToEsmName(`dist/${name}.js`), /* localDev */ !!argv.fortesting)
         )
       );
     });
@@ -720,6 +730,7 @@ module.exports = {
   doBuildJs,
   endBuildStep,
   hostname,
+  maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
