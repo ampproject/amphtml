@@ -40,7 +40,7 @@ function getExtendedElements(win) {
 export function upgradeOrRegisterElement(win, name, toClass) {
   const knownElements = getExtendedElements(win);
   if (!knownElements[name]) {
-    registerElement(win, name, /** @type {!Function} */ (toClass));
+    registerElement(win, name, toClass);
     return;
   }
   if (knownElements[name] == toClass) {
