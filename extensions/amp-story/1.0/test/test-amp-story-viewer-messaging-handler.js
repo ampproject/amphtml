@@ -20,6 +20,7 @@ import {
   getStoreService,
 } from '../amp-story-store-service';
 import {AmpStoryViewerMessagingHandler} from '../amp-story-viewer-messaging-handler';
+import {HistoryState, setHistoryState} from '../utils';
 
 describes.fakeWin('amp-story-viewer-messaging-handler', {}, env => {
   let fakeViewerService;
@@ -88,6 +89,32 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, env => {
       expect(response).to.deep.equal({
         state: 'CURRENT_PAGE_ID',
         value: storeService.get(StateProperty.CURRENT_PAGE_ID),
+      });
+    });
+
+    it('should return the PAGE_ATTACHMENT_STATE', async () => {
+      setHistoryState(env.win, HistoryState.ATTACHMENT_PAGE_ID, 'SOME_ID');
+      const response = await fakeViewerService.receiveMessage(
+        'getDocumentState',
+        {state: 'PAGE_ATTACHMENT_STATE'}
+      );
+      expect(response).to.deep.equal({
+        state: 'PAGE_ATTACHMENT_STATE',
+        value: true,
+      });
+      setHistoryState(env.win, HistoryState.ATTACHMENT_PAGE_ID, null);
+    });
+
+    it('should return the STORY_PROGRESS', async () => {
+      storeService.dispatch(Action.SET_PAGE_IDS, [1, 2, 3, 4]);
+      storeService.dispatch(Action.CHANGE_PAGE, {id: 3, index: 2});
+      const response = await fakeViewerService.receiveMessage(
+        'getDocumentState',
+        {state: 'STORY_PROGRESS'}
+      );
+      expect(response).to.deep.equal({
+        state: 'STORY_PROGRESS',
+        value: 0.5,
       });
     });
   });
