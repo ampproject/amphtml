@@ -589,6 +589,14 @@ export class AmpList extends AMP.BaseElement {
     let fetch;
     if (this.isAmpStateSrc_(elementSrc)) {
       fetch = this.getAmpStateJson_(elementSrc).then(json => {
+        if (!json) {
+          user().warn(
+            TAG,
+            `No data was found at provided uri: ${elementSrc}`,
+            this.element
+          );
+          return;
+        }
         const array = /** @type {!Array} */ (isArray(json) ? json : [json]);
         return this.scheduleRender_(array, /* append */ false);
       });
