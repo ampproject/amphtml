@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-next-page-0.2.css';
+import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {Services} from '../../../src/services';
@@ -112,19 +112,16 @@ export class NextPageService {
    * @param {!AmpElement} element
    */
   build(element) {
-    // Get the separator and more box (and remove the provided elements in the process)
-    const separator = this.getSeparatorElement_(element);
-    const moreBox = this.getMoreBoxElement_(element);
-
     // Prevent multiple amp-next-page on the same document
     if (this.isBuilt()) {
       return;
     }
 
-    // Set the parsed elements as the choice for all subsequent <amp-next-page> elements
     this.element_ = element;
-    this.separator_ = separator;
-    this.moreBox_ = moreBox;
+
+    // Get the separator and more box (and remove the provided elements in the process)
+    this.separator_ = this.getSeparatorElement_(element);
+    this.moreBox_ = this.getMoreBoxElement_(element);
 
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
@@ -176,11 +173,12 @@ export class NextPageService {
 
   /**
    * @param {boolean=} force
+   * @return {!Promise}
    */
   maybeFetchNext(force = false) {
     // If a page is already queued to be fetched, wait for it
     if (this.pages_.some(page => page.isFetching())) {
-      return;
+      return Promise.resolve();
     }
 
     if (force || this.getViewportsAway_() <= PRERENDER_VIEWPORT_COUNT) {
@@ -188,7 +186,7 @@ export class NextPageService {
         this.getPageIndex_(this.lastFetchedPage_) + 1
       ];
       if (nextPage) {
-        nextPage.fetch();
+        return nextPage.fetch();
       }
     }
   }
@@ -224,7 +222,9 @@ export class NextPageService {
       .filter(page => page.isVisible())
       .forEach(page =>
         this.toggleHiddenAndReplaceableElements(
-          /** @type {!Document|!ShadowRoot} */ (dev().assert(page.document))
+          /** @type {!Document|!ShadowRoot} */ (dev().assertElement(
+            page.document
+          ))
         )
       );
   }

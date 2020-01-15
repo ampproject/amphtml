@@ -8,40 +8,34 @@
     <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
-    <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-0.2.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-    <script>
-      (self.AMP=self.AMP||[]).push(function(AMP){
-          AMP.toggleExperiment('amp-next-page-v2', true);
-      });
-    </script>    
     <style amp-custom>
-      .content {
-        padding: 20px;
-      }
-      .hidden, .fixed, .sticky {
-        background-color: #34495e;
-        color: white;
-        font-size: 16px;
-        font-family: Roboto, 'Open Sans', 'Helvetica Neue', sans-serif;
-        padding: 16px;
-        border-radius: 4px;
-        z-index: 1;
-      }
-      .fixed {
-        background-color: #e74c3c;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        box-sizing: border-box;
-      }
-      .sticky {
-        position: sticky;
-        top: 0;
-        left: 0;
-        background-color: #27ae60;
-      }
+        .content {
+            padding: 20px;
+        }
+        .hidden, .fixed, .sticky {
+            background-color: #34495e;
+            color: white;
+            font-size: 16px;
+            font-family: Roboto, 'Open Sans', 'Helvetica Neue', sans-serif;
+            padding: 16px;
+            border-radius: 4px;
+            z-index: 1;
+        }
+        .fixed {
+            background-color: #e74c3c;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .sticky {
+            position: sticky;
+            top: 0;
+            left: 0;
+            background-color: #27ae60;
+        }
     </style>
 </head>
   <body>
@@ -76,8 +70,8 @@
         enim, non pellentesque sem. Nam non sem lacinia, lacinia nisi non,
         consectetur enim.
       </p>
-      <div class="sticky" amp-next-page-replace="my-sticky-element">I should get replaced by my sibling from each loaded page (page 0)</div>
-      <div class="fixed" amp-next-page-hide>I am fixed and should be visible when loaded as a host page but hidden if loaded as a next-page (page 0)</div>
+      <div class="sticky" amp-next-page-replace="my-sticky-element">I got replaced by my sibling from page 2</div>
+      <div class="fixed" amp-next-page-hide>I am fixed and should be visible when loaded as a host page but hidden if loaded as a next-page (page 2)</div>
       <p>
         Maecenas sed quam nec dolor rhoncus rutrum ut non mauris. Pellentesque
         ante dolor, pretium quis enim eu, condimentum volutpat augue. Donec nulla
@@ -285,27 +279,5 @@
         rhoncus. Fusce commodo risus id sapien ultrices vehicula.
       </p>
     </div>
-    <amp-next-page>
-      <script type="application/json">
-        [
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Page 1",
-            "url": "./articles/element-visibility-1.html"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Page 2",
-            "url": "./articles/element-visibility-2.html"
-          }
-        ]
-      </script>
-      <div amp-next-page-separator>
-          Read more
-      </div>
-      <div amp-next-page-more-box>
-          Here are a few more articles ...
-      </div>  
-    </amp-next-page>
   </body>
 </html>

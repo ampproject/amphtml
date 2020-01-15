@@ -265,6 +265,7 @@ exports.rules = [
       'extensions/amp-story/1.0/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/events.js',
       // TODO(#24080) Remove this when story ads have full ad network support.
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-ad-exit/0.1/config.js',
@@ -364,11 +365,11 @@ exports.rules = [
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-next-page/0.2/service.js->' +
+      'extensions/amp-next-page/1.0/service.js->' +
         'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-next-page/0.2/visibility-observer.js->' +
+      'extensions/amp-next-page/1.0/visibility-observer.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-next-page/0.2/visibility-observer.js->' +
+      'extensions/amp-next-page/1.0/visibility-observer.js->' +
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
         'src/service/notification-ui-manager.js',

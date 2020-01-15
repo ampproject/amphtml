@@ -83,6 +83,23 @@ describes.repeated(
       expect(result./*OK*/ innerHTML).to.equal('value = abc');
     });
 
+    // https://github.com/ampproject/amphtml/pull/17401
+    it('should render attrs with non-HTML namespaces', () => {
+      innerHtmlSetup(
+        '<svg width=50 height=50><g><image xlink:href="foo.svg" width=50 height=50></image></g></svg>'
+      );
+      template.compileCallback();
+      const result = template.render({});
+      expect(result./*OK*/ outerHTML).to.equal(
+        '<svg height="50" width="50"><g><image height="50" width="50" xlink:href="foo.svg"></image></g></svg>'
+      );
+      // Make sure [xlink:href] has the right namespace.
+      const image = result.querySelector('image');
+      const href = image.getAttributeNode('xlink:href');
+      expect(href.namespaceURI).to.equal('http://www.w3.org/1999/xlink');
+      expect(href.value).to.equal('foo.svg');
+    });
+
     it('should render {{.}} from string', () => {
       textContentSetup('value = {{.}}');
       template.compileCallback();
