@@ -15,10 +15,12 @@
  */
 
 const chai = require('chai');
+chai.use(require('chai-as-promised'));
 const {ControllerPromise} = require('./controller-promise');
 
 let installed;
 let lastExpectError;
+let networkLogger;
 
 function clearLastExpectError() {
   lastExpectError = null;
@@ -236,8 +238,45 @@ function overwriteUnsupported(_super) {
   };
 }
 
+function installBrowserAssertions(_networkLogger) {
+  networkLogger = _networkLogger;
+  chai.use(installBrowserWrappers);
+}
+
+function installBrowserWrappers(chai, utils) {
+  const {Assertion} = chai;
+  const should = chai.should(); // eslint-disable-line no-unused-vars
+
+  // Assert that a request with a testUrl was sent
+  // Example usage: await expect(testUrl).to.have.been.sent;
+  utils.addProperty(Assertion.prototype, 'sent', function() {
+    const assertAnySentRequests = function(url) {
+      const promise = networkLogger.getSentRequests(url);
+      return promise.should.eventually.not.have.length(0);
+    };
+
+    this.assert(
+      assertAnySentRequests(this._obj),
+      'expected #{this} to have been sent',
+      'expected #{this} to have been sent'
+    );
+  });
+
+  // Assert that a request was sent n number of times
+  // Example usage: await expect(testUrl).to.have.sentCount(n);
+  utils.addMethod(Assertion.prototype, 'sentCount', function(count) {
+    const assertSentCount = function(url, count) {
+      const promise = networkLogger.getSentRequests(url);
+      return promise.should.eventually.have.length(count);
+    };
+
+    this.assert(assertSentCount(this._obj, count));
+  });
+}
+
 module.exports = {
   clearLastExpectError,
   expect,
   getLastExpectError,
+  installBrowserAssertions,
 };

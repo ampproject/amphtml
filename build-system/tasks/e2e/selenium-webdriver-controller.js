@@ -23,6 +23,7 @@ const {
 const {By, Condition, Key: SeleniumKey, error} = require('selenium-webdriver');
 const {ControllerPromise} = require('./controller-promise');
 const {expect} = require('chai');
+const {NetworkLogger} = require('./network-logger');
 
 const {NoSuchElementError} = error;
 
@@ -84,6 +85,8 @@ class SeleniumWebDriverController {
    */
   constructor(driver) {
     this.driver = driver;
+
+    this.networkLogger = new NetworkLogger(driver);
 
     /** @private {?WebElement} */
     this.shadowRoot_ = null;
@@ -231,8 +234,11 @@ class SeleniumWebDriverController {
     this.isXpathInstalled_ = true;
 
     const scripts = await Promise.all([
-      fs.readFileAsync('third_party/wgxpath/wgxpath.js', 'utf8'),
-      fs.readFileAsync('build-system/tasks/e2e/driver/query-xpath.js', 'utf8'),
+      fs.promises.readFile('third_party/wgxpath/wgxpath.js', 'utf8'),
+      fs.promises.readFile(
+        'build-system/tasks/e2e/driver/query-xpath.js',
+        'utf8'
+      ),
     ]);
     await this.driver.executeScript(scripts.join('\n\n'));
   }

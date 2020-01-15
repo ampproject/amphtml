@@ -22,7 +22,8 @@ import {map} from '../../../../src/utils/object';
 import {stubService} from '../../../../testing/test-helper';
 import {user} from '../../../../src/log';
 
-describes.realWin('AnalyticsConfig', {amp: false}, env => {
+// TODO(zhouyx@): Remove after ANALYTICS_VENDOR_SPLIT clean up
+describes.realWin.skip('AnalyticsConfig', {amp: false}, env => {
   let win;
   let doc;
 

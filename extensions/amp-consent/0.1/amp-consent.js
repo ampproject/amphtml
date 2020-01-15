@@ -425,9 +425,10 @@ export class AmpConsent extends AMP.BaseElement {
    */
   init_() {
     this.passSharedData_();
-    this.maybeSetDirtyBit_();
     if (isExperimentOn(this.win, 'amp-consent-geo-override')) {
       this.syncRemoteConsentState_();
+    } else {
+      this.maybeSetDirtyBit_();
     }
 
     this.getConsentRequiredPromise_()
@@ -545,17 +546,21 @@ export class AmpConsent extends AMP.BaseElement {
       if (!response) {
         return;
       }
-      const expireCache = response['expireCache'];
+      // Ideally we should fallback to true if either are true.
+      const expireCache =
+        response['expireCache'] || response['forcePromptOnNext'];
       if (expireCache) {
         this.consentStateManager_.setDirtyBit();
-        // Decision from promptUI takes precedence over consent decision from response
-      } else if (
+      }
+
+      // Decision from promptUI takes precedence over consent decision from response
+      if (
         !!response['consentRequired'] &&
         !this.consentStateChangedViaPromptUI_
       ) {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
-          response['consentString']
+          response['consentString'] || undefined
         );
       }
     });
@@ -567,17 +572,13 @@ export class AmpConsent extends AMP.BaseElement {
    * @param {string=} responseConsentString
    */
   updateCacheIfNotNull_(responseStateValue, responseConsentString) {
-    if (responseStateValue !== null || responseConsentString !== null) {
-      this.consentStateManager_.getConsentInstanceInfo().then(storedInfo => {
-        const consentStateValue =
-          convertEnumValueToState(responseStateValue) ||
-          storedInfo.consentState;
-        const consentString = responseConsentString || storedInfo.consentString;
-        this.consentStateManager_.updateConsentInstanceState(
-          consentStateValue,
-          consentString
-        );
-      });
+    const consentStateValue = convertEnumValueToState(responseStateValue);
+    // consentStateValue and consentString are treated as a pair that will update together
+    if (consentStateValue !== null) {
+      this.consentStateManager_.updateConsentInstanceState(
+        consentStateValue,
+        responseConsentString
+      );
     }
   }
 
@@ -628,10 +629,13 @@ export class AmpConsent extends AMP.BaseElement {
         const ampdoc = this.getAmpDoc();
         const sourceBase = getSourceUrl(ampdoc.getUrl());
         const resolvedHref = resolveRelativeUrl(href, sourceBase);
+        const xhrService = Services.xhrFor(this.win);
         return ampdoc.whenFirstVisible().then(() => {
-          return Services.xhrFor(this.win)
+          return xhrService
             .fetchJson(resolvedHref, init)
-            .then(res => res.json());
+            .then(res =>
+              xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
+            );
         });
       });
     }

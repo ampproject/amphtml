@@ -110,8 +110,6 @@ describes.realWin('EntitlementClass', {}, () => {
       dataObject,
     });
     const pingbackData = entitlement.jsonForPingback();
-    expect(pingbackData).to.deep.equal(
-      Object.assign({raw}, entitlement.json())
-    );
+    expect(pingbackData).to.deep.equal({raw, ...entitlement.json()});
   });
 });

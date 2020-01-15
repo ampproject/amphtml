@@ -182,7 +182,7 @@ export class IframeTransportContext {
     this.iframeMessagingClient_./*OK*/ sendMessage(
       MessageType.IFRAME_TRANSPORT_RESPONSE,
       /** @type {!JsonObject} */
-      (Object.assign({message: data}, this.baseMessage_))
+      ({message: data, ...this.baseMessage_})
     );
   }
 }

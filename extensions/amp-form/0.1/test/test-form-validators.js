@@ -113,8 +113,8 @@ describes.realWin('form-validators', {amp: true}, env => {
 
   beforeEach(() => {
     // Force sync mutateElement to make testing easier.
-    const resources = Services.resourcesForDoc(env.ampdoc);
-    env.sandbox.stub(resources, 'mutateElement').callsArg(1);
+    const mutator = Services.mutatorForDoc(env.ampdoc);
+    env.sandbox.stub(mutator, 'mutateElement').callsArg(1);
   });
 
   describe('getFormValidator', () => {

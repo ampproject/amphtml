@@ -91,7 +91,7 @@ if (getMode().localDev) {
 }
 
 /**
- * Builds the expriments tbale.
+ * Builds the expriments table.
  */
 function build() {
   const {host} = window.location;

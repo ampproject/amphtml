@@ -93,6 +93,8 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 
 ### A slightly more complex example
 
+[filter formats="websites, stories, ads"]
+
 ```html
 <!-- Store complex nested JSON data in <amp-state> elements. -->
 <amp-state id="myAnimals">
@@ -128,6 +130,37 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 
 <button on="tap:AMP.setState({currentAnimal: 'cat'})">Set to Cat</button>
 ```
+
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+```html
+<!-- Store complex nested JSON data in <amp-state> elements. -->
+<amp-state id="myAnimals">
+  <script type="application/json">
+    {
+      "dog": {
+        "imageUrl": "/img/dog.jpg",
+        "style": "greenBackground"
+      },
+      "cat": {
+        "imageUrl": "/img/cat.jpg",
+        "style": "redBackground"
+      }
+    }
+  </script>
+</amp-state>
+
+<p [text]="'This is a ' + currentAnimal + '.'">This is a dog.</p>
+
+<!-- CSS classes can also be added or removed with [class]. -->
+<p class="greenBackground" [class]="myAnimals[currentAnimal].style">
+  Each animal has a different background color.
+</p>
+```
+
+[/filter] <!-- formats="email" -->
 
 When the button is pressed:
 
@@ -364,17 +397,31 @@ encodeURIComponent('Hello world')</pre>
 
 `amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that takes zero or more arguments and references the current state. A macro can be invoked like a function by referencing its `id` attribute value from anywhere in your doc.
 
+[example preview="inline" playground="true" imports="amp-bind"]
+
 ```html
 <amp-bind-macro
   id="circleArea"
   arguments="radius"
   expression="3.14 * radius * radius"
 ></amp-bind-macro>
-
-<div>
-  The circle has an area of <span [text]="circleArea(myCircle.radius)">0</span>.
-</div>
+<p>
+  Input a radius value
+</p>
+<input
+  type="number"
+  min="0"
+  max="100"
+  value="0"
+  on="input-throttled:AMP.setState({myCircle:{radius: event.value}})"
+/>
+<p>
+  The circle has an area of
+  <span [text]="circleArea(myCircle.radius)">0</span>.
+</p>
 ```
+
+[/example]
 
 A macro can also call other macros <i>defined before itself</i>. A macro cannot call itself recursively.
 
@@ -433,161 +480,344 @@ Notes on bindings:
 
 #### Element-specific attributes
 
-Only binding to the following components and attributes are allowed:
+Binding to the following components and attributes are allowed:
 
-<table>
-  <tr>
-    <th>Component</th>
-    <th>Attribute(s)</th>
-    <th>Behavior</th>
-  </tr>
-  <tr>
-    <td class="col-thirty"><code>&lt;amp-brightcove&gt;</code></td>
-    <td class="col-fourty"><code>[data-account]</code><br><code>[data-embed]</code><br><code>[data-player]</code><br><code>[data-player-id]</code><br><code>[data-playlist-id]</code><br><code>[data-video-id]</code></td>
-    <td class="col-thirty">Changes the displayed Brightcove video.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-carousel type=slides&gt;</code></td>
-    <td><code>[slide]</code><sup>*</sup></td>
-    <td>Changes the currently displayed slide index. <a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-date-picker&gt;</code></td>
-    <td>
-      <code>[min]</code><br>
-      <code>[max]</code>
-    </td>
-    <td>
-      Sets the earliest selectable date<br>
-      Sets the latest selectable date
-    </td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-google-document-embed&gt;</code></td>
-    <td><code>[src]</code><br><code>[title]</code></td>
-    <td>Displays the document at the updated URL.<br>Changes the document's title.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-iframe&gt;</code></td>
-    <td><code>[src]</code></td>
-    <td>Changes the iframe's source URL.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-img&gt;</code></td>
-    <td><code>[alt]</code><br><code>[attribution]</code><br><code>[src]</code><br><code>[srcset]</code></td>
-    <td>Recommend binding to <code>[srcset]</code> instead of <code>[src]</code> to support responsive images.<br>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-img#attributes">amp-img attributes</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-lightbox&gt;</code></td>
-    <td><code>[open]</code><sup>*</sup></td>
-    <td>
-      Toggles display of the lightbox. Tip: Use <code>on="lightboxClose: AMP.setState(...)"</code> to update variables when the lightbox is closed.
-    </td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-list&gt;</code></td>
-    <td><code>[src]</code></td>
-    <td>
-      If expression is a string, fetches and renders JSON from the string URL.
-      If expression is an object or array, renders the expression data.
-    </td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-selector&gt;</code></td>
-    <td><code>[selected]</code><sup>*</sup><br><code>[disabled]</code></td>
-    <td>Changes the currently selected children element(s)<br>identified by their <code>option</code> attribute values. Supports a comma-separated list of values for multiple selection. <a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">See an example</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-state&gt;</code></td>
-    <td><code>[src]</code></td>
-    <td>Fetches JSON from the new URL and merges it into the existing state. <em>Note the following update will ignore <code>&lt;amp-state&gt;</code> elements to prevent cycles.</em></td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-twitter&gt;</code></td>
-    <td><code>[data-tweetid]</code></td>
-    <td>Changes the displayed Tweet.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-video&gt;</code></td>
-    <td><code>[alt]</code><br><code>[attribution]</code><br><code>[controls]</code><br><code>[loop]</code><br><code>[poster]</code><br><code>[preload]</code><br><code>[src]</code></td>
-    <td>See corresponding <a href="https://www.ampproject.org/docs/reference/components/media/amp-video#attributes">amp-video attributes</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;amp-youtube&gt;</code></td>
-    <td><code>[data-videoid]</code></td>
-    <td>Changes the displayed YouTube video.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;a&gt;</code></td>
-    <td><code>[href]</code></td>
-    <td>Changes the link.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;button&gt;</code></td>
-    <td><code>[disabled]</code><br><code>[type]</code><br><code>[value]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes">button attributes</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;details&gt;</code></td>
-    <td><code>[open]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes">details attributes</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;fieldset&gt;</code></td>
-    <td><code>[disabled]</code></td>
-    <td>Enables or disables the fieldset.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;image&gt;</code></td>
-    <td><code>[xlink:href]</code><br>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image">image attributes</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;input&gt;</code></td>
-    <td><code>[accept]</code><br><code>[accessKey]</code><br><code>[autocomplete]</code><br><code>[checked]</code><br><code>[disabled]</code><br><code>[height]</code><br><code>[inputmode]</code><br><code>[max]</code><br><code>[maxlength]</code><br><code>[min]</code><br><code>[minlength]</code><br><code>[multiple]</code><br><code>[pattern]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[selectiondirection]</code><br><code>[size]</code><br><code>[spellcheck]</code><br><code>[step]</code><br><code>[type]</code><br><code>[value]</code><br><code>[width]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes">input attributes</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;option&gt;</code></td>
-    <td><code>[disabled]</code><br><code>[label]</code><br><code>[selected]</code><br><code>[value]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#Attributes">option attributes</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;optgroup&gt;</code></td>
-    <td><code>[disabled]</code><br><code>[label]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes">optgroup attributes</a></td>
-  </tr>
-  <tr>
-    <td><code>&lt;section&gt;</code></td>
-    <td><code>[data-expand]</code></td>
-    <td>Changes the expansion of a <code>section</code> in an <a href="https://amp.dev/documentation/components/amp-accordion">amp-accordion</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;select&gt;</code></td>
-    <td><code>[autofocus]</code><br><code>[disabled]</code><br><code>[multiple]</code><br><code>[required]</code><br><code>[size]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes">select attributes</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;source&gt;</code></td>
-    <td><code>[src]</code><br><code>[type]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source#Attributes">source attributes</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;track&gt;</code></td>
-    <td><code>[label]</code><br><code>[src]</code><br><code>[srclang]</code></td>
-    <td>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes">track attributes</a>.</td>
-  </tr>
-  <tr>
-    <td><code>&lt;textarea&gt;</code></td>
-    <td><code>[autocomplete]</code><br><code>[autofocus]</code><br><code>[cols]</code><br><code>[disabled]</code><br><code>[defaultText]</code><br><code>[maxlength]</code><br><code>[minlength]</code><br><code>[placeholder]</code><br><code>[readonly]</code><br><code>[required]</code><br><code>[rows]</code><br><code>[selectiondirection]</code><br><code>[selectionend]</code><br><code>[selectionstart]</code><br><code>[spellcheck]</code><br><code>[wrap]</code></td>
-    <td>Use <code>[defaultText]</code> to update initial text, and <code>[text]</code> to update current text.<br>See corresponding <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes">textarea attributes</a>.</td>
-  </tr>
-</table>
-<sup>*</sup>Denotes bindable attributes that don't have a non-bindable counterpart.
+[filter formats="websites"]
+
+##### `<amp-brightcove>`
+
+- `[data-account]`
+- `[data-embed]`
+- `[data-player]`
+- `[data-player-id]`
+- `[data-playlist-id]`
+- `[data-video-id]` Changes the displayed Brightcove video.
+  [/filter] <!-- formats="websites" -->
+
+##### `<amp-carousel type=slides>`
+
+- `[slide]` Changes the currently displayed slide index.
+
+[See an example](https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind).
+
+[filter formats="websites"]
+
+##### `<amp-date-picker>`
+
+- `[min]` Sets the earliest selectable date
+- `[max]` Sets the latest selectable date
+
+##### `<amp-google-document-embed>`
+
+- `[src]` Displays the document at the updated URL.
+- `[title]` Changes the document's title.
+
+##### `<amp-iframe>`
+
+- `[src]` Changes the iframe's source URL.
+
+[/filter] <!-- formats="websites" -->
+[filter formats="websites, ads"]
+
+##### `<amp-img>`
+
+- `[alt]`
+- `[attribution]`
+- `[src]`
+- `[srcset]`
+
+Bind to `[srcset]` instead of `[src]` to support responsive images. See corresponding [`amp-img` attributes](../../builtins/amp-img.md#attributes).
+[/filter] <!-- formats="websites, ads" -->
+[filter formats="email"]
+
+##### `<amp-img>`
+
+- `[alt]`
+- `[attribution]`
+  [/filter] <!-- formats="email" -->
+
+##### `<amp-lightbox>`
+
+- `[open]` Toggles display of the lightbox.
+
+[tip type="default"]
+Use `on="lightboxClose: AMP.setState(...)"` to update variables when the lightbox is closed.
+[/tip]
+
+[filter formats="websites, stories"]
+
+##### `<amp-list>`
+
+- `[src]`
+
+If the expression is a string, it fetches and renders JSON from the string URL. If the expression is an object or array, it renders the expression data.
+[/filter] <!-- formats="websites, stories" -->
+
+[filter formats="websites, email"]
+
+##### `<amp-selector>`
+
+- `[selected]` Changes the currently selected children element(s) identified by their `option` attribute values. Supports a comma-separated list of values for multiple selection. [See an example](https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/?format=email#linking-carousels-with-amp-bind).
+- `[disabled]`
+
+[tip type="note"]
+`[selected]` does not have a non-bindable attribute. The AMP Validator will throw an error if `selected` is used.
+[/tip]
+
+[/filter] <!-- formats="websites, email" -->
+
+[filter formats="websites, stories, ads"]
+
+##### `<amp-state>`
+
+- `[src]`
+
+Fetches JSON from the new URL and merges it into the existing state. The following update will ignore `<amp-state>`elements to prevent cycles.
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="websites, stories"]
+
+##### `<amp-twitter>`
+
+- `[data-tweetid]` Changes the displayed Tweet.
+
+[/filter] <!-- formats="websites" -->
+
+[filter formats="websites, stories, ads"]
+
+##### `<amp-video>`
+
+- `[alt]`
+- `[attribution]`
+- `[controls]`
+- `[loop]`
+- `[poster]`
+- `[preload]`
+- `[src]`
+
+See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes).
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="websites, ads"]
+
+##### `<amp-youtube>`
+
+- `[data-videoid]` Changes the displayed YouTube video.
+
+[/filter] <!-- formats="websites, ads" -->
+
+[filter formats="websites, stories, ads"]
+
+##### `<a>`
+
+- `[href]` Changes the link.
+
+##### `<button>`
+
+- `[disabled]`
+- `[type]`
+- `[value]`
+
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### `<button>`
+
+- `[disabled]`
+- `[value]`
+
+See corresponding [button attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes).
+
+[/filter] <!-- formats="email" -->
+
+##### `<details>`
+
+- `[open]`
+
+See corresponding [details attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes).
+
+##### `<fieldset>`
+
+- `[disabled]` Enables or disables the fieldset.
+
+##### `<image>`
+
+- `[xlink:href]`
+
+See corresponding [image attributes](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image).
+
+[filter formats="websites, stories, ads"]
+
+##### `<input>`
+
+- `[accept]`
+- `[accessKey]`
+- `[autocomplete]`
+- `[checked]`
+- `[disabled]`
+- `[height]`
+- `[inputmode]`
+- `[max]`
+- `[maxlength]`
+- `[multiple]`
+- `[pattern]`
+- `[placeholder]`
+- `[readonly]`
+- `[required]`
+- `[selectiondirection]`
+- `[size]`
+- `[spellcheck]`
+- `[step]`
+- `[type]`
+- `[value]`
+- `[width]`
+
+See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
+
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### `<input>`
+
+- `[autocomplete]`
+- `[disabled]`
+- `[height]`
+- `[max]`
+- `[maxlength]`
+- `[multiple]`
+- `[pattern]`
+- `[placeholder]`
+- `[readonly]`
+- `[required]`
+- `[size]`
+- `[spellcheck]`
+- `[step]`
+- `[value]`
+- `[width]`
+
+See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
+
+[/filter] <!-- formats="email" -->
+
+##### `<option>`
+
+- `[disabled]`
+- `[label]`
+- `[selected]`
+- `[value]`
+
+See corresponding [option attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#Attributes).
+
+##### `<optgroup>`
+
+- `[disabled]`
+- `[label]`
+
+See corresponding [optgroup attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes).
+
+##### `<section>`
+
+- `[data-expand]` Changes the expansion of a `section` in an [`amp-accordion`](../amp-accordion/amp-accordion.md).
+
+[filter formats="websites, stories, ads"]
+
+##### `<select>`
+
+- `[autofocus]`
+- `[disabled]`
+- `[multiple]`
+- `[required]`
+- `[size]`
+
+See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
+
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### `<select>`
+
+- `[disabled]`
+- `[multiple]`
+- `[required]`
+- `[size]`
+
+See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
+
+[/filter] <!-- formats="email" -->
+
+##### `<source>`
+
+- `[src]`
+- `[type]`
+
+See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source#Attributes).
+
+##### `<track>`
+
+- [label]
+- [src]
+- [srclang]
+
+See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes).
+
+[filter formats="websites, stories, ads"]
+
+##### `<textarea>`
+
+- `[autocomplete]`
+- `[autofocus]`
+- `[cols]`
+- `[disabled]`
+- `[defaultText]`
+- `[maxlength]`
+- `[minlength]`
+- `[placeholder]`
+- `[readonly]`
+- `[required]`
+- `[rows]`
+- `[selectiondirection]`
+- `[selectionend]`
+- `[selectionstart]`
+- `[spellcheck]`
+- `[wrap]`
+
+Use `[defaultText]` to update initial text, and `[text]` to update current text. See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
+
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### `<textarea>`
+
+- `[autocomplete]`
+- `[cols]`
+- `[disabled]`
+- `[defaultText]`
+- `[maxlength]`
+- `[minlength]`
+- `[placeholder]`
+- `[readonly]`
+- `[required]`
+- `[rows]`
+- `[spellcheck]`
+- `[wrap]`
+
+Use `[defaultText]` to update initial text, and `[text]` to update current text. See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
+
+[/filter] <!-- formats="email" -->
 
 ## Debugging
 
-Test in development mode (with the URL fragment `#development=1`) to highlight warnings and errors during development and to access special debugging functions.
+[filter formats="websites, stories, ads"]
+Test in development mode, byt adding the URL fragment `#development=1` to highlight warnings and errors during development and to access special debugging functions.
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+Test in development mode by saving the email as an HTML file. Test in the browser by adding the URL fragment `#development=1` to highlight warnings and errors during development and to access special debugging functions.
+[/filter] <!-- formats="email" -->
 
 ### Warnings
 
@@ -658,6 +888,7 @@ Use `AMP.printState()` to print the current state to the console.
 
 ### `<amp-state>` specification
 
+[filter formats="websites, stories, ads"]
 An `amp-state` element may contain either a child `<script>` element **OR** a `src` attribute containing a CORS URL to a remote JSON endpoint, but not both.
 
 ```html
@@ -672,33 +903,67 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 <amp-state id="myRemoteState" src="https://data.com/articles.json"> </amp-state>
 ```
 
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+An `amp-state` element must contain a child `<script>` element.
+
+```html
+<amp-state id="myLocalState">
+  <script type="application/json">
+    {
+      "foo": "bar"
+    }
+  </script>
+</amp-state>
+```
+
+[/filter] <!-- formats="email" -->
+
+[filter formats="websites, stories, ads"]
+
 #### XHR batching
 
 AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.
 
 For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
 
+[/filter] <!-- formats="websites, stories, ads" -->
+
 #### Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>src</strong></td>
-    <td><p>The URL of the remote endpoint that will return the JSON that will update this <code>amp-state</code>. This must be a CORS HTTP service.</p>
-<p>The <code>src</code> attribute allows all standard URL variable substitutions. See the <a href="../../spec/amp-var-substitutions.md">Substitutions Guide</a> for more info.</p>
-<p>{% call callout('Important', type='caution') %}
-  The endpoint must implement the requirements specified in the <a href="https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests">CORS Requests in AMP</a> spec.
-  {% endcall %}</p></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>credentials (optional)</strong></td>
-    <td><p>Defines a <code>credentials</code> option as specified by the <a href="https://fetch.spec.whatwg.org/">Fetch API</a>.</p>
-<ul>
-  <li>Supported values: `omit`, `include`</li>
-  <li>Default: `omit`</li>
-</ul>
-<p>To send credentials, pass the value of <code>include</code>. If this value is set, the response must follow the <a href="https://www.ampproject.org/docs/fundamentals/amp-cors-requests#cors-security-in-amp">AMP CORS security guidelines</a>.</p></td>
-  </tr>
-</table>
+[filter formats="websites, stories, ads"]
+
+##### src
+
+The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+
+[tip type="important]
+The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
+[/tip]
+
+##### credentials (optional)
+
+Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
+
+- Supported values: `omit`, `include`
+- Default: `omit`
+
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### Invalid AMP email attributes
+
+The AMP for Email spec disallows the use of the following attributes on the AMP email format.
+
+- `[src]`
+- `src`
+- `credentials`
+- `overridable`
+
+[/filter] <!-- formats="email" -->
 
 ### Deep-merge with `AMP.setState()`
 

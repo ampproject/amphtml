@@ -89,7 +89,7 @@ describes.repeated(
           setBindService = resolve;
 
           ssrTemplateHelper = {
-            isSupported: () => false,
+            isEnabled: () => false,
             ssr: () => Promise.resolve(),
             applySsrOrCsrTemplate: env.sandbox.stub(),
           };
@@ -692,7 +692,7 @@ describes.repeated(
 
           describe('SSR templates', () => {
             beforeEach(() => {
-              env.sandbox.stub(ssrTemplateHelper, 'isSupported').returns(true);
+              env.sandbox.stub(ssrTemplateHelper, 'isEnabled').returns(true);
             });
 
             it('should error if proxied fetch fails', () => {
@@ -893,6 +893,43 @@ describes.repeated(
             list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});
             // `src` attribute should still be set to empty string.
             expect(element.getAttribute('src')).to.equal('');
+          });
+
+          it('should not render if [src] has changed since the fetch was initiated', async () => {
+            const foo = doc.createElement('div');
+            const bar = doc.createElement('div');
+
+            // firstPromise won't resolve until the render triggered by secondPromise completes.
+            let resolveFirstPromise;
+            const firstPromise = new Promise(resolve => {
+              resolveFirstPromise = () => resolve({items: [foo]});
+            });
+            const secondPromise = Promise.resolve({items: [bar]});
+
+            listMock
+              .expects('fetch_')
+              .onFirstCall()
+              .returns(firstPromise)
+              .onSecondCall()
+              .returns(secondPromise)
+              .twice();
+
+            // Even though there are two fetches, the render associated with
+            // the first one should be cancelled due to an outdated src.
+            listMock
+              .expects('scheduleRender_')
+              .withArgs([bar])
+              .returns(Promise.resolve())
+              .once();
+
+            element.setAttribute('src', 'https://foo.com/list.json');
+            const layout1Promise = list.layoutCallback();
+
+            element.setAttribute('src', 'https://bar.com/list.json');
+            const layout2Promise = list.layoutCallback();
+            layout2Promise.then(() => resolveFirstPromise());
+
+            await Promise.all([layout1Promise, layout2Promise]);
           });
 
           it('should render if [src] mutates with data', () => {
