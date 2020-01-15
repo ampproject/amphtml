@@ -121,8 +121,7 @@ function createBaseCustomElementClass(win) {
   if (win.__AMP_BASE_CE_CLASS) {
     return win.__AMP_BASE_CE_CLASS;
   }
-  const htmlElement =
-    /** @type {typeof HTMLElement} */ (win.HTMLElement);
+  const htmlElement = /** @type {typeof HTMLElement} */ (win.HTMLElement);
 
   /**
    * @abstract @extends {HTMLElement}
