@@ -1,11 +1,13 @@
 {
   "name": "@ampproject/purifier",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "AMP-specific sanitization library",
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
   "main": "dist/purifier.js",
-  "files": ["dist/*"],
+  "module": "dist/purifier.mjs",
+  "types": "purifier.d.ts",
+  "files": ["dist/*", "purifier.d.ts"],
   "scripts": {
     "build": "rollup -c rollup.config.js"
   },
@@ -22,5 +24,8 @@
   },
   "dependencies": {
     "dompurify": "2.0.7"
+  },
+  "optionalDependencies": {
+    "@types/dompurify": "2.0.1"
   }
 }
