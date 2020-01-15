@@ -22,7 +22,6 @@ import {tryParseJson} from '../../../src/json';
  * @param {!Window} win
  * @param {!Response} response
  * @param {function(string, boolean)} lineCallback
- * @private
  */
 export function lineDelimitedStreamer(win, response, lineCallback) {
   let line = '';
@@ -71,7 +70,6 @@ export function lineDelimitedStreamer(win, response, lineCallback) {
  * Given each line, groups such that the first is JSON parsed and second
  * html unescaped.
  * @param {function(string, !Object<string, *>, boolean)} callback
- * @private
  * @return {function(string, boolean)}
  */
 export function metaJsonCreativeGrouper(callback) {

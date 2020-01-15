@@ -20,7 +20,7 @@ import {userAssert} from '../../../src/log';
  * Single implementation of autocomplete. This supports autocompleting
  * a single input value in its entirety.
  * @implements {./autocomplete-binding-def.AutocompleteBindingDef}
- * @private
+ * @package
  */
 export class AutocompleteBindingSingle {
   /**

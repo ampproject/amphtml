@@ -81,7 +81,6 @@ let ViewportRatioDef;
 
 /**
  * A Resource binding for an AmpElement.
- * @package
  */
 export class Resource {
   /**
@@ -821,7 +820,6 @@ export class Resource {
    * once layout is complete. Only allowed to be called on a upgraded, built
    * and displayed element.
    * @return {!Promise}
-   * @package
    */
   startLayout() {
     if (this.layoutPromise_) {
