@@ -122,6 +122,7 @@ export const TRIPLE_MUSTACHE_WHITELISTED_TAGS = [
   'b',
   'br',
   'caption',
+  'col',
   'colgroup',
   'code',
   'del',
