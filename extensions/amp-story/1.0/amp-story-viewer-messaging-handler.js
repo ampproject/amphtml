@@ -19,19 +19,45 @@ import {
   StateProperty,
   getStoreService,
 } from './amp-story-store-service';
+import {AnalyticsVariable, getVariableService} from './variable-service';
+import {HistoryState, getHistoryState} from './utils';
+import {dev} from '../../../src/log';
 
-/** @typedef {{property: !StateProperty}} */
+/** @type {string} */
+const TAG = 'amp-story-viewer-messaging-handler';
+
+/** @enum {number} */
+const DataSources = {
+  STORE_SERVICE: 0,
+  HISTORY: 1,
+  VARIABLE_SERVICE: 2,
+};
+
+/**
+ * @typedef {{
+ *   dataSource: !DataSources,
+ *   property: (!StateProperty|!HistoryState|!AnalyticsVariable)
+ * }}
+ */
 let GetStateConfigurationDef;
 
-// TODO(#26020): implement and allow retrieving PAGE_ATTACHMENT_STATE.
-// TODO(gmajoulet): implement and allow retrieving STORY_PROGRESS.
 /** @enum {!GetStateConfigurationDef} */
 const GET_STATE_CONFIGURATIONS = {
   'CURRENT_PAGE_ID': {
+    dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.CURRENT_PAGE_ID,
   },
   'MUTED_STATE': {
+    dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.MUTED_STATE,
+  },
+  'PAGE_ATTACHMENT_STATE': {
+    dataSource: DataSources.HISTORY,
+    property: HistoryState.ATTACHMENT_PAGE_ID,
+  },
+  'STORY_PROGRESS': {
+    dataSource: DataSources.VARIABLE_SERVICE,
+    property: AnalyticsVariable.STORY_PROGRESS,
   },
 };
 
@@ -58,8 +84,14 @@ export class AmpStoryViewerMessagingHandler {
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(win);
 
+    /** @private @const {!./variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(win);
+
     /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = viewer;
+
+    /** @private @const {!Window} */
+    this.win_ = win;
   }
 
   /**
@@ -97,7 +129,22 @@ export class AmpStoryViewerMessagingHandler {
       return Promise.reject(`Invalid 'state' parameter`);
     }
 
-    const value = this.storeService_.get(config.property);
+    let value;
+
+    switch (config.dataSource) {
+      case DataSources.HISTORY:
+        value = !!getHistoryState(this.win_, config.property);
+        break;
+      case DataSources.STORE_SERVICE:
+        value = this.storeService_.get(config.property);
+        break;
+      case DataSources.VARIABLE_SERVICE:
+        value = this.variableService_.get()[config.property];
+        break;
+      default:
+        dev().error(TAG, 'Unknown data source %s.', config.dataSource);
+        break;
+    }
 
     return Promise.resolve({state, value});
   }
