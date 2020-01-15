@@ -110,7 +110,7 @@ import {maybeTrackImpression} from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
 import fetchMock from 'fetch-mock/es5/client-bundle';
-import sinon from 'sinon'; // eslint-disable-line local/no-import
+import sinon from /*OK*/ 'sinon';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';

@@ -143,3 +143,28 @@ export function omit(o, props) {
     return acc;
   }, {});
 }
+
+/**
+ * @param {!Object|null|undefined} o1
+ * @param {!Object|null|undefined} o2
+ * @return {boolean}
+ */
+export function objectsEqualShallow(o1, o2) {
+  if (o1 == null || o2 == null) {
+    // Null is only equal to null, and undefined to undefined.
+    return o1 === o2;
+  }
+
+  for (const k in o1) {
+    if (o1[k] !== o2[k]) {
+      return false;
+    }
+  }
+  for (const k in o2) {
+    if (o2[k] !== o1[k]) {
+      return false;
+    }
+  }
+
+  return true;
+}
