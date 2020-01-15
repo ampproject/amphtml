@@ -53,9 +53,8 @@ module.exports = function(babel) {
    * @param {!NodePath} path
    * @param {string|undefined} type
    * @param {boolean} assertion
-   * @param {boolean} remove
    */
-  function eliminate(path, type, assertion, remove) {
+  function eliminate(path, type, assertion) {
     const argument = path.get('arguments.0');
     if (!argument) {
       if (assertion) {
