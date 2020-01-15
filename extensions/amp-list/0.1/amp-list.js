@@ -364,7 +364,7 @@ export class AmpList extends AMP.BaseElement {
    * src="amp-state:json.path".
    *
    * @param {string} src
-   * @return {Promise<!Object>}
+   * @return {Promise<*>}
    * @private
    */
   getAmpStateJson_(src) {
@@ -589,7 +589,7 @@ export class AmpList extends AMP.BaseElement {
     let fetch;
     if (this.isAmpStateSrc_(elementSrc)) {
       fetch = this.getAmpStateJson_(elementSrc).then(json => {
-        if (!json) {
+        if (typeof json === 'undefined') {
           user().warn(
             TAG,
             `No data was found at provided uri: ${elementSrc}`,
