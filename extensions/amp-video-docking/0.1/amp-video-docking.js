@@ -848,7 +848,7 @@ export class VideoDocking {
    */
   trigger_(action) {
     const element = dev().assertElement(
-      this.isDockedToSlot_() ? this.getSlot_() : this.getDockedVideo_().element
+      this.getUsableSlot_() || this.getDockedVideo_().element
     );
 
     const trust = ActionTrust.LOW;
@@ -1261,7 +1261,7 @@ export class VideoDocking {
       return;
     }
 
-    if (this.isDockedToSlot_()) {
+    if (this.isDockedToType_(TargetType.SLOT)) {
       return;
     }
 
@@ -1300,14 +1300,12 @@ export class VideoDocking {
   }
 
   /**
+   * @param {!TargetType} type
    * @return {boolean}
    * @private
    */
-  isDockedToSlot_() {
-    if (!this.currentlyDocked_) {
-      return false;
-    }
-    return this.currentlyDocked_.target.type == TargetType.SLOT;
+  isDockedToType_(type) {
+    return this.currentlyDocked_ && this.currentlyDocked_.target.type == type;
   }
 
   /**
