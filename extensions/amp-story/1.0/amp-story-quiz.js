@@ -48,11 +48,11 @@ const ENDPOINT_INVALID_ERROR =
   'The publisher has specified an invalid datastore endpoint';
 
 /**
- * @typedef {
+ * @typedef {{
  *    totalResponseCount: number,
  *    hasUserResponded: boolean,
  *    responses: !Object,
- * }
+ * }}
  */
 export let ReactionResponseType;
 
