@@ -13,7 +13,7 @@ assignees: ''
 <!--
 Note to onduty:
 
-Use this issue to track a release from the initial canary release build through
+Use this issue to track a release from the initial experimental/beta release build through
 promotion to Stable. The community uses this issue to keep track of what is going on
 with the release so please keep this issue up to date:
 
@@ -23,7 +23,7 @@ with the release so please keep this issue up to date:
   release number to the GitHub tag page the first time a given release number
   appears in the checkboxes.
 - Add any updates that may be of interest to the community (such as delays) as
-  comments on this issue, including after the release is promoted to Stable.
+  comments on this issue, including after the release is promoted to Stable (and, in some cases, LTS).
 - Keep the title of the issue updated to reflect whether this issue is tracking
   the Experimental/Beta builds or the build in Stable.
 
@@ -33,7 +33,7 @@ Note: remove the backticks (``) from the link.
 - [x] Release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)` is cut as a new canary release
 - [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta (opt-in) channels (<CL submit time>)
 - [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta (1% traffic) channels (<CL submit time>)
-- [ ] Release <RELEASE_NUMBER> promoted to Stable channel(<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to Stable channel (<CL submit time>)
 
 <!--
 If this release will become the next LTS release, add/update the checkboxes above as needed e.g.
