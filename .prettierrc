@@ -10,7 +10,11 @@
     },
     {
       "files": "*.md",
-      "options": {"parser": "markdown"}
+      "options": {
+        "proseWrap": "always",
+        "printWidth": 80,
+        "parser": "markdown"
+      }
     },
     {
       "files": [".eslintrc", ".prettierrc", ".renovaterc.json", "*.json"],
