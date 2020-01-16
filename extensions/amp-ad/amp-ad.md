@@ -431,6 +431,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [ValueCommerce](../../ads/valuecommerce.md)
 - [video intelligence](../../ads/videointelligence.md)
 - [Videonow](../../ads/videonow.md)
+- [Vidoomy](../../ads/vidoomy.md)
 - [Viralize](../../ads/viralize.md)
 - [UAS](../../ads/uas.md)
 - [ucfunnel](../../ads/ucfunnel.md)
