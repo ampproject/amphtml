@@ -14,7 +14,7 @@ assignees: ''
 Note to onduty:
 
 Use this issue to track a release from the initial experimental/beta release build through
-promotion to Stable. The community uses this issue to keep track of what is going on
+promotion to stable and LTS. The community uses this issue to keep track of what is going on
 with the release so please keep this issue up to date:
 
 - As you reach each stage of the release, check the appropriate checkbox and replace <CL submit time> with the "Submitted" text from the corresponding CL, e.g. "2:49 PM, Jul 25, 2018 UTC-4".
