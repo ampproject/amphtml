@@ -16,55 +16,56 @@
 
 import {AmpStoryEmbed, layoutEmbed} from '../../src/amp-story-embed';
 
-describe('amp-story-embed', () => {
-  describes.realWin('AmpStoryEmbed', {amp: false}, env => {
-    let win;
-    let storyEmbed;
-    let embedEl;
-    let url;
+describes.realWin('AmpStoryEmbed', {amp: false}, env => {
+  let win;
+  let storyEmbed;
+  let embedEl;
+  let url;
 
-    function buildStoryEmbed() {
-      embedEl = win.document.createElement('amp-story-embed');
-      const storyAnchor = win.document.createElement('a');
-      url =
-        'https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/?testParam=true';
-      storyAnchor.setAttribute('href', url);
-      embedEl.appendChild(storyAnchor);
-      storyEmbed = new AmpStoryEmbed(win, embedEl);
-      win.document.body.appendChild(embedEl);
-    }
+  function buildStoryEmbed() {
+    embedEl = win.document.createElement('amp-story-embed');
+    const storyAnchor = win.document.createElement('a');
+    url =
+      'https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
+    storyAnchor.setAttribute('href', url);
+    embedEl.appendChild(storyAnchor);
+    storyEmbed = new AmpStoryEmbed(win, embedEl);
+    win.document.body.appendChild(embedEl);
+  }
 
-    beforeEach(() => {
-      win = env.win;
-      buildStoryEmbed();
-    });
+  beforeEach(() => {
+    win = env.win;
+    buildStoryEmbed();
+  });
 
-    it('should build an iframe for each story', () => {
-      storyEmbed.buildCallback();
-      layoutEmbed(storyEmbed);
+  it('should build an iframe for each story', () => {
+    storyEmbed.buildCallback();
+    layoutEmbed(storyEmbed);
 
-      const shadowRoot = storyEmbed.getRoot();
-      expect(shadowRoot.children.length).to.equal(1);
-    });
+    const shadowRoot = storyEmbed.getRoot();
+    expect(shadowRoot.children.length).to.equal(1);
+  });
 
-    it('should correctly append params at the end of the story url', () => {
-      storyEmbed.buildCallback();
-      layoutEmbed(storyEmbed);
+  it('should correctly append params at the end of the story url', () => {
+    storyEmbed.buildCallback();
+    layoutEmbed(storyEmbed);
 
-      const shadowRoot = storyEmbed.getRoot();
-      expect(shadowRoot.firstElementChild.getAttribute('src')).to.equals(
-        url + '?amp_js_v=0.1#&visibilityState=inactive&origin=about%3Asrcdoc'
-      );
-    });
+    const shadowRoot = storyEmbed.getRoot();
+    expect(shadowRoot.firstElementChild.getAttribute('src')).to.equals(
+      url + '?amp_js_v=0.1#&visibilityState=inactive&origin=about%3Asrcdoc'
+    );
+  });
 
-    it('should correctly append params at the end of a story url with existing params', () => {
-      storyEmbed.buildCallback();
-      layoutEmbed(storyEmbed);
+  it('should correctly append params at the end of a story url with existing params', () => {
+    url += '?testParam=true';
+    embedEl.firstElementChild.setAttribute('href', url);
 
-      const shadowRoot = storyEmbed.getRoot();
-      expect(shadowRoot.firstElementChild.getAttribute('src')).to.equals(
-        url + '&amp_js_v=0.1#&visibilityState=inactive&origin=about%3Asrcdoc'
-      );
-    });
+    storyEmbed.buildCallback();
+    layoutEmbed(storyEmbed);
+
+    const shadowRoot = storyEmbed.getRoot();
+    expect(shadowRoot.firstElementChild.getAttribute('src')).to.equals(
+      url + '&amp_js_v=0.1#&visibilityState=inactive&origin=about%3Asrcdoc'
+    );
   });
 });
