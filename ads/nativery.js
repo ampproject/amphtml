@@ -44,7 +44,9 @@ export function nativery(global, data) {
   // install observation to check if is in viewport
   const unlisten = global.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {
-      global._nativery.visible = Math.floor((c.intersectionRect.height / c.boundingClientRect.height) * 100);
+      global._nativery.visible = Math.floor(
+        (c.intersectionRect.height / c.boundingClientRect.height) * 100
+      );
       if (global._nativery.visible) {
         unlisten();
       }
