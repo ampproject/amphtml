@@ -24,7 +24,7 @@ const TAG = 'amp-autocomplete';
  * Inline implementation of autocomplete. This supports autocompleting
  * multiple input values as part of a larger freeform input element.
  * @implements {./autocomplete-binding-def.AutocompleteBindingDef}
- * @private
+ * @package
  */
 export class AutocompleteBindingInline {
   /**
