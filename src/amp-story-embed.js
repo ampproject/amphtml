@@ -15,7 +15,8 @@
  */
 
 import {Messaging} from '@ampproject/viewer-messaging';
-import {parseUrlWithA, serializeQueryString} from './url';
+import {addParamsToUrl, parseUrlWithA} from './url';
+import {dict} from './utils/object';
 import {setStyle} from './style';
 import {toArray} from './types';
 
@@ -27,12 +28,15 @@ const LoadStateClass = {
 };
 
 /** @const {string} */
+const IFRAME_ID_ATTR_NAME = 'story-embed-iframe-id';
+
+/** @const {string} */
 const SCROLL_THROTTLE_MS = 500;
 
 /** @const {string} */
 const CSS = `
   :host { all: initial; display: block; border-radius: 0 !important; width: 405px; height: 720px; overflow: auto; }
-  .story { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
+  .story-embed-iframe { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
   main { display: flex; flex-direction: row; height: 100%; }
   .i-amphtml-story-embed-loaded iframe { opacity: 1; }`;
 
@@ -55,9 +59,6 @@ export class AmpStoryEmbed {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {?Element} */
-    this.cachedA_ = null;
-
     /** @private {number} */
     this.iframeIdCounter_ = 0;
 
@@ -70,6 +71,9 @@ export class AmpStoryEmbed {
     /** @private {!Document} */
     this.doc_ = win.document;
 
+    /** @private {!Element} */
+    this.cachedA_ = this.doc_.createElement('a');
+
     /** @private {!Array<!HTMLAnchorElement>} */
     this.stories_ = [];
 
@@ -78,6 +82,14 @@ export class AmpStoryEmbed {
 
     /** @private {boolean} */
     this.isLaidOut_ = false;
+  }
+
+  /**
+   * @public
+   * @return {!Element}
+   */
+  getElement() {
+    return this.element_;
   }
 
   /** @public */
@@ -115,22 +127,19 @@ export class AmpStoryEmbed {
       'backgroundImage',
       story.getAttribute('data-poster-portrait-src')
     );
-    iframeEl.setAttribute('id', 'i' + this.iframeIdCounter_++);
-    iframeEl.classList.add('story');
+    iframeEl.setAttribute(IFRAME_ID_ATTR_NAME, 'i' + this.iframeIdCounter_++);
+    iframeEl.classList.add('story-embed-iframe');
 
     this.initializeLoadingListeners_(iframeEl);
     this.rootEl_.appendChild(iframeEl);
 
     this.initializeHandshake_(story, iframeEl).then(
       messaging => {
-        this.messagingFor_[iframeEl.id] = messaging;
+        const iframeId = iframeEl[IFRAME_ID_ATTR_NAME];
+        this.messagingFor_[iframeId] = messaging;
 
         // TODO(Enriqe): Appropiately set visibility to stories.
-        this.messagingFor_[iframeEl.id].sendRequest(
-          'visibilitychange',
-          {state: 'visible'},
-          true
-        );
+        this.displayStory_(iframeId);
       },
       err => {
         console /*OK*/
@@ -197,8 +206,6 @@ export class AmpStoryEmbed {
    * @private
    */
   layoutIframe_(story, iframe) {
-    this.stories_ = toArray(this.element_.querySelectorAll('a'));
-
     const {href} = this.getEncodedUrl_(story.href);
 
     iframe.setAttribute('src', href);
@@ -212,60 +219,101 @@ export class AmpStoryEmbed {
    */
   getEncodedUrl_(href) {
     const {location} = this.win_;
-    if (!this.cachedA_) {
-      this.cachedA_ = this.doc_.createElement('a');
-    }
     const url = parseUrlWithA(this.cachedA_, location.href);
-    const params = {
-      visibilityState: 'inactive',
-      origin: url.origin,
+
+    const params = dict({
+      'amp_js_v': '0.1',
+      'visibilityState': 'inactive',
+      'origin': url.origin,
+    });
+
+    let inputUrl = addParamsToUrl(href, params);
+    inputUrl = inputUrl.replace('amp_js_v=0.1', 'amp_js_v=0.1#');
+
+    return parseUrlWithA(this.cachedA_, inputUrl);
+  }
+
+  /**
+   * Sends a message to the story document to make it visible.
+   *
+   * @private
+   * @param {string} iframeId
+   */
+  displayStory_(iframeId) {
+    this.messagingFor_[iframeId].sendRequest(
+      'visibilitychange',
+      {state: 'visible'},
+      true
+    );
+  }
+}
+
+/**
+ * Fallback for when IntersectionObserver is not supported. Calls layoutCallback
+ * on the embed when it is close to the viewport.
+ * @param {!AmpStoryEmbed} embedImpl
+ */
+function layoutFallback(embedImpl) {
+  let tick = true;
+
+  self.addEventListener('scroll', () => {
+    if (!tick) {
+      return;
+    }
+
+    setTimeout(() => {
+      tick = true;
+
+      const embedTop = embedImpl.getElement()./*OK*/ getBoundingClientRect()
+        .top;
+      if (self./*OK*/ innerHeight * 2 > embedTop) {
+        embedImpl.layoutCallback();
+      }
+    }, SCROLL_THROTTLE_MS);
+
+    tick = false;
+  });
+}
+
+/**
+ * Calls layoutCallback on the embed when it is close to the viewport.
+ * @param {!AmpStoryEmbed} embedImpl
+ */
+function layoutEmbed(embedImpl) {
+  if (IntersectionObserver && self === self.parent) {
+    const intersectingCallback = entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+        embedImpl.layoutCallback();
+      });
     };
 
-    let inputUrl = href + '?amp_js_v=0.1#' + serializeQueryString(params);
-    const {hash} = location;
-    if (hash && hash.length > 1) {
-      inputUrl += '&' + hash.substring(1);
-    }
-    return parseUrlWithA(this.cachedA_, inputUrl);
+    const observer = new IntersectionObserver(intersectingCallback, {
+      rootMargin: '100%',
+    });
+    observer.observe(embedImpl.getElement());
+    return;
+  }
+
+  layoutFallback(embedImpl);
+}
+
+/**
+ * Builds and layouts the embeds when appropiate.
+ */
+function loadEmbeds() {
+  const doc = self.document;
+  const embeds = doc.getElementsByTagName('amp-story-embed');
+  for (let i = 0; i < embeds.length; i++) {
+    const embedEl = embeds[i];
+    const embedImpl = new AmpStoryEmbed(self, embedEl);
+    embedImpl.buildCallback();
+    layoutEmbed(embedImpl);
   }
 }
 
 self.onload = () => {
-  const doc = self.document;
-  const embeds = doc.getElementsByTagName('amp-story-embed');
-  for (let i = 0; i < embeds.length; i++) {
-    const embed = embeds[i];
-    const embedImpl = new AmpStoryEmbed(self, embed);
-    embedImpl.buildCallback();
-
-    if (IntersectionObserver && self === self.parent) {
-      const intersectingCallback = entries => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) {
-            return;
-          }
-          embedImpl.layoutCallback();
-        });
-      };
-
-      const observer = new IntersectionObserver(intersectingCallback, {
-        rootMargin: '200%',
-      });
-      observer.observe(embed);
-    } else {
-      let tick = false;
-      self.addEventListener('scroll', () => {
-        if (!tick) {
-          setTimeout(() => {
-            const embedTop = embed.getBoundingClientRect().top;
-            tick = false;
-            if (self.innerHeight * 2 > embedTop) {
-              embedImpl.layoutCallback();
-            }
-          }, SCROLL_THROTTLE_MS);
-        }
-        tick = true;
-      });
-    }
-  }
+  loadEmbeds();
 };
