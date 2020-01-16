@@ -715,7 +715,11 @@ let BindRescanOptionsDef;
 
 /**
  * Options bag used in Bind.setState().
- * @typedef {{skipEval: (boolean|undefined), skipAmpState: (boolean|undefined)}}
+ * @typedef {{
+ *    skipEval: (boolean|undefined),
+ *    skipAmpState: (boolean|undefined),
+ *    constrain: (Array<!Element>|undefined),
+ * }}
  */
 let BindSetStateOptionsDef;
 
