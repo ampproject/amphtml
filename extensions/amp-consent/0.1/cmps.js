@@ -44,7 +44,7 @@ CMP_CONFIG['didomi'] = {
 CMP_CONFIG['sirdata'] = {
   'consentInstanceId': 'sirdata',
   'checkConsentHref': 'https://sddan.mgr.consensu.org/api/v1/public/amp/check',
-  'promptUISrc': 'http://ui.sddan.mgr.consensu.org/amp.html',
+  'promptUISrc': 'https://ui.sddan.mgr.consensu.org/amp.html',
 };
 
 CMP_CONFIG['SourcePoint'] = {
