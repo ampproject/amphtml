@@ -383,11 +383,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       }
 
       this.triggerAnalytics_(optionEl);
+      this.hasUserSelection_ = true;
 
       this.mutateElement(() => {
         this.updateQuizToPostSelectionState_(optionEl);
-
-        this.hasUserSelection_ = true;
       });
 
       if (this.element.hasAttribute('endpoint')) {
