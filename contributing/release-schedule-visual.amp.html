@@ -6,11 +6,13 @@
     <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
     <title>AMP release schedule visualization</title>
     <link rel="canonical" href="release-schedule-visual.amp.html">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Noto+Sans|Poppins">
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <meta name="amp-script-src" content="sha384-CbfxNqnGzHYSDCrfBfpjwZu12Iy2L1YRXVmZLSVXpE4N4nS2YwMlGMMEglUiRC8f">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <style amp-custom>
       body {
+        font-family: "Noto Sans", sans-serif;
         padding: 1em;
       }
       #calendar {
@@ -20,27 +22,28 @@
         grid-auto-flow: dense;
       }
       #calendar[data-direction="top"] {
-        grid-template-rows: 1fr 150px 1fr 150px 150px 150px 1fr 1fr 150px;
+        grid-template-rows: auto 150px auto 150px 150px 150px auto auto 150px;
       }
       #calendar[data-direction="bottom"] {
-        grid-template-rows: 1fr 150px 1fr 1fr 150px 150px 150px 1fr 150px;
+        grid-template-rows: auto 150px auto auto 150px 150px 150px auto 150px;
       }
       [data-direction="top"] .bottom,
       [data-direction="bottom"] .top {
         display: none;
       }
       .box {
+        border-radius: .25em;
         padding: 1em;
         text-align: center;
-        transition: all .15s ease-in-out;
       }
       .header {
-        font-weight: bold;
         grid-row: 1 / 2;
       }
       .instructions {
-        background-color: wheat;
+        background-image: linear-gradient(225deg, #f1f068 0%, #2db932 75%);
+        border-radius: .5em;
         grid-column: 1 / 9;
+        padding: .5em;
       }
       .week-1-instructions {
         grid-row: 3 / 4;
@@ -49,9 +52,11 @@
         grid-row: 8 / 9;
       }
       .sidebar {
-        font-weight: bold;
-        font-size: smaller;
+        font-size: x-small;
         grid-column: 1 / 2;
+      }
+      .ellipsis {
+        font-size: x-small;
       }
       [data-direction="top"] .ellipsis {
         grid-row: 7 / 8;
@@ -59,8 +64,17 @@
       [data-direction="bottom"] .ellipsis {
         grid-row: 4 / 5;
       }
+      .header,
+      .sidebar,
+      .ellipsis {
+        font-weight: bold;
+        color: #005af0;
+        font-family: "Poppins", sans-serif;
+      }
       .content {
         border: 1px dotted silver;
+        color: #ffffff;
+        font-size: small;
       }
       .content.week-1,
       .content.week-5 {
@@ -68,34 +82,31 @@
       }
       .content.week-1:hover,
       .content.week-5:hover {
+        background-image: linear-gradient(225deg, #fff300 0%, #ff8f00 75%);
+        color: #000000;
         cursor: pointer;
-        background-color: red;
       }
       .nightly {
-        background-color: orange;
+        background-image: linear-gradient(225deg, #00dcc0 0%, #34c2cb 75%);
       }
       .opt-in {
-        background-color: yellow;
+        background-image: linear-gradient(225deg, #34c2cb 0%, #3fa8d5 75%);
       }
       .beta {
-        background-color: green;
-        color: white;
+        background-image: linear-gradient(225deg, #3fa8d5 0%, #3d8edf 75%);
       }
       .opt-in-beta {
-        background-image: linear-gradient(135deg, yellow 25%, green 25%, green 50%, yellow 50%, yellow 75%, green 75%, green 100%);
-        background-size: 30px 30px;
-        color: white;
-      }
-      .opt-in-beta span {
-        background-color: #00000099;
+        background-image: linear-gradient(225deg, #34c2cb 0%, #3d8edf 75%);
       }
       .stable {
-        background-color: blue;
-        color: white;
+        background-image: linear-gradient(225deg, #3d8edf 0%, #3174e7 75%);
       }
       .lts {
-        background-color: purple;
-        color: white;
+        background-image: linear-gradient(225deg, #3174e7 0%, #005af0 75%);
+      }
+      code {
+        font-family: "Fira Mono", monospace;
+        font-weight: medium;
       }
       @media (max-width: 1023px) {
         #calendar {
@@ -103,16 +114,14 @@
           grid-template-columns: 4em repeat(7, 1fr);
         }
         #calendar[data-direction="top"] {
-          grid-template-rows: 1fr 100px 1fr 100px 100px 100px 1fr 1fr 100px;
+          grid-template-rows: auto 100px auto 100px 100px 100px auto auto 100px;
         }
         #calendar[data-direction="bottom"] {
-          grid-template-rows: 1fr 100px 1fr 1fr 100px 100px 100px 1fr 100px;
+          grid-template-rows: auto 100px auto auto 100px 100px 100px auto 100px;
         }
         .box {
-          padding: 4px;
-        }
-        .content {
           font-size: small;
+          padding: 4px;
         }
       }
       @media (max-width: 757px) {
@@ -120,10 +129,13 @@
           gap: 2px;
         }
         #calendar[data-direction="top"] {
-          grid-template-rows: 1fr 75px 1fr 75px 75px 75px 1fr 1fr 75px;
+          grid-template-rows: auto 75px auto 75px 75px 75px auto auto 75px;
         }
         #calendar[data-direction="bottom"] {
-          grid-template-rows: 1fr 75px 1fr 1fr 75px 75px 75px 1fr 75px;
+          grid-template-rows: auto 75px auto auto 75px 75px 75px auto 75px;
+        }
+        .box {
+          font-size: x-small;
         }
         .content span {
           font-size: 0;
@@ -131,13 +143,13 @@
           hyphens: auto;
         }
         .content span code {
-          font-size: x-small;
+          font-size: xx-small;
         }
         .header {
           font-size: 0;
         }
         .header::first-letter {
-          font-size: medium;
+          font-size: small;
         }
       }
     </style>
