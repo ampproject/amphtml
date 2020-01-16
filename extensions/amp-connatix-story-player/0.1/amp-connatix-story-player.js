@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
+import {Layout} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
-import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
 
-export class AmpConnatixPsPlayer extends AMP.BaseElement {
+export class AmpConnatixStoryPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -31,10 +31,14 @@ export class AmpConnatixPsPlayer extends AMP.BaseElement {
     this.playerId_ = '';
 
     /** @private {string} */
+
     this.storyId_ = '';
 
+    /** @private {Layout} */
+    this.layout_ = Layout.RESPONSIVE;
+
     /** @private {string} */
-    this.iframeDomain_ = 'https:/cds.connatix.com';
+    this.iframeDomain_ = 'https://cds.connatix.com';
 
     /** @private {string} */
     this.iframePath_ = '/p/plugins/connatix.playspace.embed.html';
@@ -78,6 +82,33 @@ export class AmpConnatixPsPlayer extends AMP.BaseElement {
         this.destroyPlayerFrame_();
         this.attemptCollapse();
       }
+      if (e.data.eventName === 'cnx_layout_change') {
+        console.log('layoutChange');
+        console.log(e.data.width);
+        console.log(e.data.height);
+        this.attemptChangeSize(e.data.height, e.data.width).then(
+          () => {
+            if (e.data.height !== undefined) {
+              console.log(this.element);
+              this.element.setAttribute('height', e.data.height);
+            }
+            if (e.data.width !== undefined) {
+              console.log(this.element);
+              this.element.setAttribute('width', e.data.width);
+            }
+          },
+          e => {
+            console.log(e);
+          }
+        );
+        // this.attemptChangeSize(e.data.height, e.data.width).then(() => {});
+      }
+      // if (e.data.eventName === 'cnx_size_change') {
+      //   console.log('layoutChange');
+      //   console.log(e.data.width);
+      //   console.log(e.data.height);
+      //   this.attemptChangeSize(e.data.height, e.data.width).then(() => {});
+      // }
     });
   }
 
@@ -90,6 +121,9 @@ export class AmpConnatixPsPlayer extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
     }
+    if (this.win) {
+      this.win.removeEventListener('resize', this.sendCommand_);
+    }
   }
 
   /** @override */
@@ -99,7 +133,7 @@ export class AmpConnatixPsPlayer extends AMP.BaseElement {
     // Player id is mandatory
     this.playerId_ = userAssert(
       element.getAttribute('data-player-id'),
-      'The data-player-id attribute is required for <amp-connatix-ps-player> %s',
+      'The data-player-id attribute is required for <amp-connatix-story-player> %s',
       element
     );
 
@@ -124,7 +158,8 @@ export class AmpConnatixPsPlayer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+    this.layout_ = layout;
+    return layout === Layout.RESPONSIVE;
   }
 
   /** @override */
@@ -149,18 +184,16 @@ export class AmpConnatixPsPlayer extends AMP.BaseElement {
     element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
+    this.win.addEventListener('resize', e =>
+      this.sendCommand_({
+        eventName: 'cnx_viewport_resize',
+        viewportWidth: e.target.innerWidth,
+        viewportHeight: e.target.innerHeight,
+      })
+    );
     // Return a load promise for the frame so the runtime knows when the
     // component is ready.
-    const a = this.loadPromise(iframe);
-    // this.attemptChangeSize(432, 640).then(
-    //   () => {
-    //     this.element.setAttribute('height', 632);
-    //     this.element.setAttribute('width', 640);
-    //     this.element.setAttribute('layout', 'responsive');
-    //   },
-    //   () => {}
-    // );
-    return a;
+    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -175,6 +208,6 @@ export class AmpConnatixPsPlayer extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-connatix-ps-player', '0.1', AMP => {
-  AMP.registerElement('amp-connatix-ps-player', AmpConnatixPsPlayer);
+AMP.extension('amp-connatix-story-player', '0.1', AMP => {
+  AMP.registerElement('amp-connatix-story-player', AmpConnatixStoryPlayer);
 });

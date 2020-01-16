@@ -470,7 +470,7 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
-    name: 'amp-connatix-ps-player',
+    name: 'amp-connatix-story-player',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
