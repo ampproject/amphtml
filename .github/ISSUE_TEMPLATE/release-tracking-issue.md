@@ -36,12 +36,17 @@ Note: remove the backticks (``) from the link.
 - [ ] Release <RELEASE_NUMBER> pushed to production (<CL submit time>)
 
 <!--
+If this release will become the next LTS release, add/update the checkboxes above as needed e.g.
+
+- [x] Release <RELEASE_NUMBER> will be the next LTS
+- [ ] Release <RELEASE_NUMBER> pushed to LTS (<CL submit time>)
+
 If you perform cherry picks, add/update the checkboxes above as needed e.g.
 
-- [ ] Release `[<CHERRY_PICK_RELEASE_NUMBER>](...)` created with cherry picks.
+- [ ] Release `[<CHERRY_PICK_RELEASE_NUMBER>](...)` created with cherry picks
 - [ ] Release <CHERRY_PICK_RELEASE_NUMBER> pushed to Dev Channel
 -->
 
 See the [release documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Dev Channel.
 
-If you find a bug in this build, please file an [issue](https://github.com/ampproject/amphtml/issues/new). If you believe the bug should be fixed in this build, follow the instructions in the [cherry picks documentation](https://bit.ly/amp-cherry-pick).
+If you find a bug in this build, please file an [issue](https://github.com/ampproject/amphtml/issues/new). If you believe the bug should be fixed in this build, follow the instructions in the [cherry picks documentation](https://go.amp.dev/cherry-picks).

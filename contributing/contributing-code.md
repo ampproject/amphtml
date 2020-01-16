@@ -175,3 +175,35 @@ These guidelines are specific to the amphtml repository. Other ampproject repos 
   - When creating a new directory (such as when creating a new AMP extension) the author of the pull request should designate themselves as an Owner of that directory.
   - Owners of an area may approve other Owners at or below their area of expertise following the normal PR process. To request becoming an Owner create a PR adding yourself to the appropriate OWNERS file and assign/cc a current Owner for that directory.
 - The list of Owners for a directory can be found in the [OWNERS](https://github.com/ampproject/amphtml/search?o=asc&q=filename%3A"OWNERS"&s=indexed) file in the directory or a parent directory.
+
+## Cherry-picks
+
+We have a well-defined process for handling requests for changes to the **experimental**/**beta**, **stable**, or **lts** release builds. These changes are known as "cherry-picks".
+
+**The bar for getting a cherry-pick into a live release is very high** because our goal is to produce high quality launches on a predictable schedule.
+
+**Keep in mind that performing a cherry-pick requires a significant amount of work from you and the on-duty engineer** and they can take a long time to process.
+
+- In general only fixes for [P0 issues](https://github.com/ampproject/amphtml/blob/master/contributing/issue-priorities.md) may be cherry-picked. P0 issues are those that:
+  - cause privacy or security issues
+  - cause user data loss
+  - break existing AMP web pages in a significant way
+  - cause an outage or critical production issue
+  - or would otherwise cause a significant harm to AMP's reputation if left unresolved
+- Regressions found in the **experimental**/**beta** releases that are not P0 _may_ be approved if they can be resolved with a rollback. Fixes other than rollbacks--no matter how simple they may seem--will not be approved because these have the potential to cause cascading problems and delay the release promotion of **beta** to **stable** for everyone.
+
+### Process for requesting a cherry-pick
+
+The following outlines the process to request a cherry-pick.
+
+- Ensure there is a [GitHub issue](https://github.com/ampproject/amphtml/issues/new/choose) filed for the problem that needs to be resolved _before_ filing the cherry-pick request issue.
+- File the cherry-pick request issue using the [Cherry-pick request template](https://github.com/ampproject/amphtml/issues/new?title=%F0%9F%8C%B8%20Cherry%20pick%20request%20for%20%3CYOUR_ISSUE_NUMBER%3E%20into%20%3CRELEASE_ISSUE_NUMBER%3E%20%28Pending%29&template=cherry_pick_template.md). Follow the instructions in the template, providing all the requested data. **Make sure you fill out this issue completely or your cherry-pick may not be seen or acted upon.**
+- Get the necessary approval for your cherry-pick, indicated via comments on the cherry-pick request issue.
+  - For cherry-picks into **experimental**/**beta**, at least one member of the [Approvers WG](https://github.com/orgs/ampproject/teams/wg-approvers/members) must approve the cherry-pick/rollback.
+  - For cherry-picks into **stable**/**lts** at least one member from the [Cherry-Pick Approvers group](https://github.com/orgs/ampproject/teams/cherry-pick-approvers/members) must approve the cherry-pick.
+- Once approved, the on-duty engineer handling releases will work with you to ensure the cherry-pick is made.
+- **Once the cherry-pick is made you are responsible for verifying the cherry-pick fixes the issue and does not cause other issues.**
+
+**If you are requesting a cherry-pick to fix an issue in production** it is likely you will _also_ need a cherry-pick into the **experimental**/**beta** releases. Problems cherry-picked in **stable** could be overridden after promoting **beta**. The on-duty engineer will help determine if you need to cherry-pick both release channels.
+
+If you run into any issues or have any questions when requesting a cherry-pick, please use the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).

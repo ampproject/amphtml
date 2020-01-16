@@ -82,7 +82,7 @@ async function checkTypes() {
           {
             include3pDirectories: true,
             includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js'],
+            extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
             typeCheckOnly: true,
           }
         ),

@@ -31,6 +31,7 @@ import {
 import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
+import {Keys} from '../../../src/utils/key-codes';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
@@ -70,6 +71,7 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {isAmp4Email} from '../../../src/format';
 import {isArray, toArray, toWin} from '../../../src/types';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
+import {tryParseJson} from '../../../src/json';
 
 /** @const {string} */
 const TAG = 'amp-form';
@@ -152,8 +154,8 @@ export class AmpForm {
     /** @const @private {!../../../src/service/action-impl.ActionService} */
     this.actions_ = Services.actionServiceForDoc(this.form_);
 
-    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(this.form_);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(this.form_);
 
     /** @const @private {!../../../src/service/viewer-interface.ViewerInterface}  */
     this.viewer_ = Services.viewerForDoc(this.form_);
@@ -254,6 +256,13 @@ export class AmpForm {
       );
     }
     return url;
+  }
+
+  /**
+   * @return {string|undefined} the value of the form's xssi-prefix attribute.
+   */
+  getXssiPrefix() {
+    return this.form_.getAttribute('xssi-prefix');
   }
 
   /**
@@ -391,8 +400,17 @@ export class AmpForm {
       true
     );
 
+    this.form_.addEventListener(
+      AmpEvents.FORM_VALUE_CHANGE,
+      e => {
+        checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+        this.validator_.onInput(e);
+      },
+      true
+    );
+
     //  Form verification is not supported when SSRing templates is enabled.
-    if (!this.ssrTemplateHelper_.isSupported()) {
+    if (!this.ssrTemplateHelper_.isEnabled()) {
       this.form_.addEventListener('change', e => {
         this.verifier_.onCommit().then(updatedErrors => {
           const {updatedElements, errors} = updatedErrors;
@@ -688,7 +706,7 @@ export class AmpForm {
    */
   handleXhrSubmit_(trust) {
     let p;
-    if (this.ssrTemplateHelper_.isSupported()) {
+    if (this.ssrTemplateHelper_.isEnabled()) {
       p = this.handleSsrTemplate_(trust);
     } else {
       this.submittingWithTrust_(trust);
@@ -790,19 +808,18 @@ export class AmpForm {
    */
   handleSsrTemplateResponse_(response, trust) {
     const init = response['init'];
+    // response['body'] is serialized as a string in the response.
+    const body = tryParseJson(response['body'], error =>
+      user().error(TAG, 'Failed to parse response JSON: %s', error)
+    );
     if (init) {
       const status = init['status'];
       if (status >= 300) {
         /** HTTP status codes of 300+ mean redirects and errors. */
-        return this.handleSubmitFailure_(
-          status,
-          response,
-          trust,
-          response['body']
-        );
+        return this.handleSubmitFailure_(status, response, trust, body);
       }
     }
-    return this.handleSubmitSuccess_(response, trust, response['body']);
+    return this.handleSubmitSuccess_(response, trust, body);
   }
 
   /**
@@ -950,8 +967,8 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmitSuccess_(response, incomingTrust) {
-    return response
-      .json()
+    return this.xhr_
+      .xssiJson(response, this.getXssiPrefix())
       .then(
         json =>
           this.handleSubmitSuccess_(
@@ -1000,7 +1017,9 @@ export class AmpForm {
     let promise;
     if (e && e.response) {
       const error = /** @type {!Error} */ (e);
-      promise = error.response.json().catch(() => null);
+      promise = this.xhr_
+        .xssiJson(error.response, this.getXssiPrefix())
+        .catch(() => null);
     } else {
       promise = Promise.resolve(null);
     }
@@ -1070,7 +1089,7 @@ export class AmpForm {
    * @private
    */
   assertSsrTemplate_(value, msg) {
-    const supported = this.ssrTemplateHelper_.isSupported();
+    const supported = this.ssrTemplateHelper_.isEnabled();
     userAssert(
       supported === value,
       '[amp-form]: viewerRenderTemplate | %s',
@@ -1124,6 +1143,12 @@ export class AmpForm {
     }
     const redirectTo = response.headers.get(REDIRECT_TO_HEADER);
     if (redirectTo) {
+      const doc = this.form_.ownerDocument;
+      userAssert(
+        !(doc && isAmp4Email(doc)),
+        'Redirects not supported in AMP4Email.',
+        this.form_
+      );
       userAssert(
         this.target_ != '_blank',
         'Redirecting to target=_blank using AMP-Redirect-To is currently ' +
@@ -1232,7 +1257,7 @@ export class AmpForm {
           .then(rendered => {
             rendered.id = messageId;
             rendered.setAttribute('i-amphtml-rendered', '');
-            return this.resources_.mutateElement(
+            return this.mutator_.mutateElement(
               dev().assertElement(container),
               () => {
                 container.appendChild(rendered);
@@ -1251,7 +1276,7 @@ export class AmpForm {
         // this container are now visible so they get scheduled for layout.
         // This will be unnecessary when the AMP Layers implementation is
         // complete.
-        this.resources_.mutateElement(container, () => {});
+        this.mutator_.mutateElement(container, () => {});
       }
     }
 
@@ -1572,7 +1597,8 @@ export class AmpFormService {
 
       this.installSubmissionHandlers_(root.querySelectorAll('form'));
       AmpFormTextarea.install(ampdoc);
-      this.installGlobalEventListener_(root);
+      this.installDomUpdateEventListener_(root);
+      this.installFormSubmissionShortcutForTextarea_(root);
     });
   }
 
@@ -1600,9 +1626,34 @@ export class AmpFormService {
    * @param {!Document|!ShadowRoot} doc
    * @private
    */
-  installGlobalEventListener_(doc) {
+  installDomUpdateEventListener_(doc) {
     doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
+    });
+  }
+
+  /**
+   * Listen for Ctrl/Cmd + Enter in textarea elements
+   * to trigger form submission when relevant.
+   * @param {!Document|!ShadowRoot} doc
+   */
+  installFormSubmissionShortcutForTextarea_(doc) {
+    doc.addEventListener('keydown', e => {
+      if (
+        e.defaultPrevented ||
+        e.key != Keys.ENTER ||
+        !(e.ctrlKey || e.metaKey) ||
+        e.target.tagName !== 'TEXTAREA'
+      ) {
+        return;
+      }
+      const {form} = e.target;
+      const ampForm = form ? formOrNullForElement(form) : null;
+      if (!ampForm) {
+        return;
+      }
+      ampForm.handleSubmitEvent_(e);
+      e.preventDefault();
     });
   }
 }

@@ -111,7 +111,7 @@ export let InteractiveComponentDef;
  */
 export let State;
 
-/** @private @const @enum {string} */
+/** @const @enum {string} */
 export const StateProperty = {
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
@@ -156,7 +156,7 @@ export const StateProperty = {
   PAGE_IDS: 'pageIds',
 };
 
-/** @private @const @enum {string} */
+/** @const @enum {string} */
 export const Action = {
   ADD_TO_ACTIONS_WHITELIST: 'addToActionsWhitelist',
   CHANGE_PAGE: 'setCurrentPageId',
@@ -214,17 +214,19 @@ const stateComparisonFunctions = {
 const actions = (state, action, data) => {
   switch (action) {
     case Action.ADD_NEW_PAGE_ID:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.NEW_PAGE_AVAILABLE_ID]: data,
-      }));
+      });
     case Action.ADD_TO_ACTIONS_WHITELIST:
       const newActionsWhitelist = [].concat(
         state[StateProperty.ACTIONS_WHITELIST],
         data
       );
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.ACTIONS_WHITELIST]: newActionsWhitelist,
-      }));
+      });
     // Triggers the amp-acess paywall.
     case Action.TOGGLE_ACCESS:
       // Don't change the PAUSED_STATE if ACCESS_STATE is not changed.
@@ -232,36 +234,42 @@ const actions = (state, action, data) => {
         return state;
       }
 
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.ACCESS_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
-      }));
+      });
     // Triggers the ad UI.
     case Action.TOGGLE_AD:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.AD_STATE]: !!data,
-      }));
+      });
     // Expands or collapses the affiliate link.
     case Action.TOGGLE_AFFILIATE_LINK:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.AFFILIATE_LINK_STATE]: data,
-      }));
+      });
     // Shows or hides the bookend.
     case Action.TOGGLE_BOOKEND:
       if (!state[StateProperty.CAN_SHOW_BOOKEND]) {
         return state;
       }
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.BOOKEND_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_CAN_SHOW_BOOKEND:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.CAN_SHOW_BOOKEND]: !!data,
-      }));
+      });
     case Action.TOGGLE_INTERACTIVE_COMPONENT:
       data = /** @type {InteractiveComponentDef} */ (data);
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.PAUSED_STATE]:
           data.state === EmbeddedComponentState.EXPANDED ||
           data.state === EmbeddedComponentState.FOCUSED,
@@ -269,65 +277,77 @@ const actions = (state, action, data) => {
           data.state !== EmbeddedComponentState.EXPANDED ||
           state.uiState === UIType.DESKTOP_PANELS,
         [StateProperty.INTERACTIVE_COMPONENT_STATE]: data,
-      }));
+      });
     // Shows or hides the info dialog.
     case Action.TOGGLE_INFO_DIALOG:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.INFO_DIALOG_STATE]: !!data,
         [StateProperty.PAUSED_STATE]: !!data,
-      }));
+      });
     // Shows or hides the audio controls.
     case Action.TOGGLE_STORY_HAS_AUDIO:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.STORY_HAS_AUDIO_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_STORY_HAS_BACKGROUND_AUDIO:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.STORY_HAS_BACKGROUND_AUDIO_STATE]: !!data,
-      }));
+      });
     // Mutes or unmutes the story media.
     case Action.TOGGLE_MUTED:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.MUTED_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_PAGE_HAS_AUDIO:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.PAGE_HAS_AUDIO_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_PAUSED:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.PAUSED_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_RTL:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.RTL_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_SIDEBAR:
       // Don't change the PAUSED_STATE if SIDEBAR_STATE is not changed.
       if (state[StateProperty.SIDEBAR_STATE] === data) {
         return state;
       }
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.PAUSED_STATE]: !!data,
         [StateProperty.SIDEBAR_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_HAS_SIDEBAR:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.HAS_SIDEBAR_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_SUPPORTED_BROWSER:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.SUPPORTED_BROWSER_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_SHARE_MENU:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.PAUSED_STATE]: !!data,
         [StateProperty.SHARE_MENU_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_SYSTEM_UI_IS_VISIBLE:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.SYSTEM_UI_IS_VISIBLE_STATE]: !!data,
-      }));
+      });
     case Action.TOGGLE_UI:
       if (
         state[StateProperty.UI_STATE] === UIType.VERTICAL &&
@@ -336,36 +356,42 @@ const actions = (state, action, data) => {
         dev().error(TAG, 'Cannot switch away from UIType.VERTICAL');
         return state;
       }
-      return /** @type {!State} */ (Object.assign({}, state, {
-        // Keep DESKTOP_STATE for compatiblity with v0.1.
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.DESKTOP_STATE]: data === UIType.DESKTOP_PANELS,
         [StateProperty.UI_STATE]: data,
-      }));
+      });
     case Action.TOGGLE_VIEWPORT_WARNING:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.VIEWPORT_WARNING_STATE]: !!data,
-      }));
+      });
     case Action.SET_CONSENT_ID:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.CONSENT_ID]: data,
-      }));
+      });
     case Action.CHANGE_PAGE:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.CURRENT_PAGE_ID]: data.id,
         [StateProperty.CURRENT_PAGE_INDEX]: data.index,
-      }));
+      });
     case Action.SET_ADVANCEMENT_MODE:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.ADVANCEMENT_MODE]: data,
-      }));
+      });
     case Action.SET_NAVIGATION_PATH:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.NAVIGATION_PATH]: data,
-      }));
+      });
     case Action.SET_PAGE_IDS:
-      return /** @type {!State} */ (Object.assign({}, state, {
+      return /** @type {!State} */ ({
+        ...state,
         [StateProperty.PAGE_IDS]: data,
-      }));
+      });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -387,11 +413,10 @@ export class AmpStoryStoreService {
     this.listeners_ = {};
 
     /** @private {!State} */
-    this.state_ = /** @type {!State} */ (Object.assign(
-      {},
-      this.getDefaultState_(),
-      this.getEmbedOverrides_()
-    ));
+    this.state_ = /** @type {!State} */ ({
+      ...this.getDefaultState_(),
+      ...this.getEmbedOverrides_(),
+    });
   }
 
   /**
@@ -436,7 +461,7 @@ export class AmpStoryStoreService {
    * @param  {*} data
    */
   dispatch(action, data) {
-    const oldState = Object.assign({}, this.state_);
+    const oldState = {...this.state_};
     this.state_ = actions(this.state_, action, data);
 
     let comparisonFn;
@@ -506,7 +531,7 @@ export class AmpStoryStoreService {
   /**
    * Retrieves the embed mode config, that will override the default state.
    * @return {!Object<StateProperty, *>} Partial state
-   * @private
+   * @protected
    */
   getEmbedOverrides_() {
     const embedMode = parseEmbedMode(this.win_.location.hash);
