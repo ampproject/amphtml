@@ -81,7 +81,7 @@ In determining how often we should push new versions of AMP to everyone, we have
 - cache busting that might happen when we push a new version
 - the desire to get new features out quickly
 
-After considering all of these factors we have arrived at the 1-2 week push cycle. Thus far we have found this to be a reasonable compromise, but we will continue to evaluate all of these factors and may make changes in the future.
+After considering all of these factors, we have arrived at the 1-2 week push cycle. Thus far, we have found this to be a reasonable compromise, but we will continue to evaluate all of these factors and may make changes in the future.
 
 ### Detailed schedule
 
