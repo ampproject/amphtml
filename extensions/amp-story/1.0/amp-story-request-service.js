@@ -71,7 +71,7 @@ export class AmpStoryRequestService {
       const credentials = bookendEl.getAttribute(
         BOOKEND_CREDENTIALS_ATTRIBUTE_NAME
       );
-      return this.executeRequest(rawUrl, {credentials});
+      return this.executeRequest(rawUrl, credentials ? {credentials} : {});
     }
 
     // Fallback. Check for an inline json config.
