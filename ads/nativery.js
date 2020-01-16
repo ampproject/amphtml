@@ -48,7 +48,7 @@ export function nativery(global, data) {
         (c.intersectionRect.height / c.boundingClientRect.height) * 100,
         10
       );
-      if(global._nativery.visible) {
+      if (global._nativery.visible) {
         unlisten();
       }
     });
