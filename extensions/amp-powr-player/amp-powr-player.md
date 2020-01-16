@@ -3,7 +3,9 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: An amp-powr-player component displays the Powr Player as configured in the Powr platform.
+  text:
+    An amp-powr-player component displays the Powr Player as configured in the
+    Powr platform.
 ---
 
 <!---
@@ -24,7 +26,8 @@ limitations under the License.
 
 # amp-powr-player
 
-An <code>amp-powr-player</code> component displays the Powr Player as configured in the <a href="https://powr.com">Powr</a> platform.
+An <code>amp-powr-player</code> component displays the Powr Player as configured
+in the <a href="https://powr.com">Powr</a> platform.
 
 <table>
   <tr>
@@ -41,7 +44,8 @@ An <code>amp-powr-player</code> component displays the Powr Player as configured
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the player
+embedded in responsive layouts.
 
 Example:
 
@@ -104,4 +108,6 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
 
 ## Validation
 
-See [amp-powr-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-powr-player/validator-amp-powr-player.protoascii) in the AMP validator specification.
+See
+[amp-powr-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-powr-player/validator-amp-powr-player.protoascii)
+in the AMP validator specification.

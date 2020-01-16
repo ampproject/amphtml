@@ -45,4 +45,5 @@ Required parameters:
 Optional parameters:
 
 - data-click-tracker - Specify whether there is a third party click-tracker.
-- data-viewability - Specify whether the tag should record viewability statistics.
+- data-viewability - Specify whether the tag should record viewability
+  statistics.

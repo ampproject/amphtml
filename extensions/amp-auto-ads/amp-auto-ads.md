@@ -3,7 +3,9 @@ $category@: ads-analytics
 formats:
   - websites
 teaser:
-  text: Dynamically injects ads into an AMP page by using a remotely-served configuration file.
+  text:
+    Dynamically injects ads into an AMP page by using a remotely-served
+    configuration file.
 ---
 
 <!---
@@ -24,7 +26,8 @@ limitations under the License.
 
 # amp-auto-ads
 
-Dynamically injects ads into an AMP page by using a remotely-served configuration file.
+Dynamically injects ads into an AMP page by using a remotely-served
+configuration file.
 
 <table>
   <tr>
@@ -102,12 +105,18 @@ should be specified on the tag.
 
 ## Configuration Spec
 
-The configuration defines where on the page `<amp-auto-ads>` can place ads. The configuration is fetched from a third-party ad network at the URL defined in `ad-network-config.js`. The configuration should be a serialized JSON object matching the [`ConfigObj`](#configobj) definition described below.
+The configuration defines where on the page `<amp-auto-ads>` can place ads. The
+configuration is fetched from a third-party ad network at the URL defined in
+`ad-network-config.js`. The configuration should be a serialized JSON object
+matching the [`ConfigObj`](#configobj) definition described below.
 
 ### Example Configuration
 
 The following example specifies that the ad should be positioned immediately
-positions immediately after all `<P class='paragraph'>` elements that are within the third `<DIV id='domId'>` on the page. An ad placed in any of these positions should be of type BANNER and have a top margin of 4px and a bottom margin of 10px.
+positions immediately after all `<P class='paragraph'>` elements that are within
+the third `<DIV id='domId'>` on the page. An ad placed in any of these positions
+should be of type BANNER and have a top margin of 4px and a bottom margin of
+10px.
 
 ```json
 {
@@ -322,7 +331,8 @@ The ENUM values for the `pos` field in the `placements` configuration object:
 
 #### AttributesEnum
 
-The ENUM value indicates attributes from configuration object for different ad formats:
+The ENUM value indicates attributes from configuration object for different ad
+formats:
 
 <table>
   <tr>
@@ -401,9 +411,10 @@ The fields to specify in the `adConstraints` configuration object:
 
 #### SubsequentMinSpacingObj
 
-The fields to specify in the `subsequentMinSpacing` configuration object. `subsequentMinSpacing` entries
-can be used to change the spacing required between any additional ads based on the number of ads already on
-the page. As an example, consider the following scenario:
+The fields to specify in the `subsequentMinSpacing` configuration object.
+`subsequentMinSpacing` entries can be used to change the spacing required
+between any additional ads based on the number of ads already on the page. As an
+example, consider the following scenario:
 
 <ul>
   <li>2 existing ads on the page</li>
@@ -457,4 +468,6 @@ it to be clear of other ads by at least 1000px.
 
 ## Validation
 
-See [amp-auto-ads rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-auto-ads/validator-amp-auto-ads.protoascii) in the AMP validator specification.
+See
+[amp-auto-ads rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-auto-ads/validator-amp-auto-ads.protoascii)
+in the AMP validator specification.

@@ -33,7 +33,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the AdSensor support team via e-mail: support@adsensor.com.
+For details on the configuration semantics, please contact the AdSensor support
+team via e-mail: support@adsensor.com.
 
 ## Supported parameters
 

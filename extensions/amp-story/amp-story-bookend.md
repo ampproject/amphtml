@@ -24,7 +24,8 @@ limitations under the License.
 
 # `amp-story-bookend`
 
-The `amp-story-bookend` is the last screen of the story. It contains related links, sharing options, call to action links, and more.
+The `amp-story-bookend` is the last screen of the story. It contains related
+links, sharing options, call to action links, and more.
 
 <table>
   <tr>
@@ -67,7 +68,8 @@ Importing the JSON configuration through the `src` attribute:
 ></amp-story>
 ```
 
-If you don't want to fetch the bookend configuration from a server, you can also specify it inline:
+If you don't want to fetch the bookend configuration from a server, you can also
+specify it inline:
 
 ```html
 <amp-story standalone>
@@ -85,7 +87,8 @@ If you don't want to fetch the bookend configuration from a server, you can also
 ></amp-story>
 ```
 
-Next, you must fill in the JSON configuration. This is where you customize the bookend. The overall structure of the config looks like so:
+Next, you must fill in the JSON configuration. This is where you customize the
+bookend. The overall structure of the config looks like so:
 
 ```json
 {
@@ -99,17 +102,21 @@ Next, you must fill in the JSON configuration. This is where you customize the b
 }
 ```
 
-It is required to specify you are using the v1.0 version by including the first line.
+It is required to specify you are using the v1.0 version by including the first
+line.
 
 ### Bookend components
 
-The bookend is made up of a variety of components. These components can be articles, call to action links, text, and more.
+The bookend is made up of a variety of components. These components can be
+articles, call to action links, text, and more.
 
-They are specified in the `components` field of the configured JSON. See the [Example JSON response](#example-json-response) section below for an example.
+They are specified in the `components` field of the configured JSON. See the
+[Example JSON response](#example-json-response) section below for an example.
 
 #### heading
 
-The `heading` component has a `text` field, which can be used to append a title to a group of articles.
+The `heading` component has a `text` field, which can be used to append a title
+to a group of articles.
 
 ```json
 {
@@ -122,12 +129,12 @@ The `heading` component has a `text` field, which can be used to append a title 
 src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-heading.png" width="386" height="123">
 <noscript>
 <img alt="Bookend heading component" src="img/amp-story-bookend-component-heading.png" />
-</noscript>
-</amp-img>
+</noscript> </amp-img>
 
 #### small
 
-The `small` component can be used to link to related articles. This component requires the following fields: `title`, `url`, and optionally an `image`.
+The `small` component can be used to link to related articles. This component
+requires the following fields: `title`, `url`, and optionally an `image`.
 
 ```json
 {
@@ -142,12 +149,14 @@ The `small` component can be used to link to related articles. This component re
 src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-small.png" width="379" height="192">
 <noscript>
 <img alt="Bookend small component" src="img/amp-story-bookend-component-small.png" />
-</noscript>
-</amp-img>
+</noscript> </amp-img>
 
 #### landscape
 
-The `landscape` component can be used for alternative formats of content, like videos. This component requires the following fields: `title`, `url`, and `image`. Optionally, you can add a `category` field, which displays a subheading above the title.
+The `landscape` component can be used for alternative formats of content, like
+videos. This component requires the following fields: `title`, `url`, and
+`image`. Optionally, you can add a `category` field, which displays a subheading
+above the title.
 
 ```json
 {
@@ -163,12 +172,13 @@ The `landscape` component can be used for alternative formats of content, like v
 src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-landscape.png" width="388" height="410">
 <noscript>
 <img alt="Bookend landscape component" src="img/amp-story-bookend-component-landscape.png" />
-</noscript>
-</amp-img>
+</noscript> </amp-img>
 
 #### portrait
 
-The `portrait` component can be used to link to other stories. This component requires the following fields: `title`, `url`, and `image`. Optionally, you can add a `category` field, which displays a subheading above the title.
+The `portrait` component can be used to link to other stories. This component
+requires the following fields: `title`, `url`, and `image`. Optionally, you can
+add a `category` field, which displays a subheading above the title.
 
 ```json
 {
@@ -184,12 +194,13 @@ The `portrait` component can be used to link to other stories. This component re
 src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-portrait.png" width="382" height="522">
 <noscript>
 <img alt="Bookend portrait component" src="img/amp-story-bookend-component-portrait.png" />
-</noscript>
-</amp-img>
+</noscript> </amp-img>
 
 #### cta-link
 
-The `cta-link` component lets you specify links for call to actions (e.g., `Read More` or `Subscribe`). This component has a `links` key, which specifies an array of links. Each link is an object with a `text` and `url` values.
+The `cta-link` component lets you specify links for call to actions (e.g.,
+`Read More` or `Subscribe`). This component has a `links` key, which specifies
+an array of links. Each link is an object with a `text` and `url` values.
 
 ```json
 {
@@ -211,12 +222,13 @@ The `cta-link` component lets you specify links for call to actions (e.g., `Read
 src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-cta-links.png" width="381" height="81">
 <noscript>
 <img alt="Bookend cta-links component" src="img/amp-story-bookend-component-cta-links.png" />
-</noscript>
-</amp-img>
+</noscript> </amp-img>
 
 #### textbox
 
-The `textbox` component lets you specify text inside the bookend (for example, photo credits). This component requires a `text` array, where each element of the array is a line of text.
+The `textbox` component lets you specify text inside the bookend (for example,
+photo credits). This component requires a `text` array, where each element of
+the array is a line of text.
 
 ```json
 {
@@ -234,12 +246,14 @@ The `textbox` component lets you specify text inside the bookend (for example, p
 src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-bookend-component-textbox.png" width="591" height="358">
 <noscript>
 <img alt="Bookend textbox component" src="img/amp-story-bookend-component-textbox.png" />
-</noscript>
-</amp-img>
+</noscript> </amp-img>
 
 **AMP-to-AMP linking**
 
-For documents displayed in an AMP viewer, links typically navigate `_top` or open in a new window. Links to AMP pages, however, may continue to be displayed in the viewer. To enable this behavior, add `"amphtml": true` to a component that supports links. For example:
+For documents displayed in an AMP viewer, links typically navigate `_top` or
+open in a new window. Links to AMP pages, however, may continue to be displayed
+in the viewer. To enable this behavior, add `"amphtml": true` to a component
+that supports links. For example:
 
 ```json
 ...
@@ -269,19 +283,36 @@ For documents displayed in an AMP viewer, links typically navigate `_top` or ope
 
 ### Social sharing
 
-The configuration for social sharing is defined in the `shareProviders` field of the response object, and it's optional.
+The configuration for social sharing is defined in the `shareProviders` field of
+the response object, and it's optional.
 
-This field should contain a string, where each string respresents a share provider's name (e.g. `twitter`).
+This field should contain a string, where each string respresents a share
+provider's name (e.g. `twitter`).
 
-When extra parameters are required, an object with key-value pairs should be used. The object should contain a key `provider` with a value (e.g. `facebook`) corresponding to the provider's name. The next key-values will depend on the share provider.
+When extra parameters are required, an object with key-value pairs should be
+used. The object should contain a key `provider` with a value (e.g. `facebook`)
+corresponding to the provider's name. The next key-values will depend on the
+share provider.
 
-The list of available providers is the same as in the [amp-social-share](https://amp.dev/documentation/components/amp-social-share) component.
+The list of available providers is the same as in the
+[amp-social-share](https://amp.dev/documentation/components/amp-social-share)
+component.
 
-Each of these providers has a different set of available parameters ([see `data-param-*`](https://amp.dev/documentation/components/amp-social-share#data-param-*)). The configuration object takes these parameters without the `data-param-` prefix (for example, the `data-param-app_id` would appear in the configuration object as `app_id`).
+Each of these providers has a different set of available parameters
+([see `data-param-*`](https://amp.dev/documentation/components/amp-social-share#data-param-*)).
+The configuration object takes these parameters without the `data-param-` prefix
+(for example, the `data-param-app_id` would appear in the configuration object
+as `app_id`).
 
 ### JSON configuration
 
-The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON configuration of the bookend. It is described as a URL endpoint that accepts GET requests and returns a JSON response with the contents of the bookend. If omitted, the amp-story component renders a default UI for the end screen. The system is responsible for fetching the data necessary to render related and trending articles. This can be served from a static JSON file, or dynamically-generated (e.g., to calculate what is currently trending).
+The `<amp-story-bookend>` must have a `src` attribute pointing to the JSON
+configuration of the bookend. It is described as a URL endpoint that accepts GET
+requests and returns a JSON response with the contents of the bookend. If
+omitted, the amp-story component renders a default UI for the end screen. The
+system is responsible for fetching the data necessary to render related and
+trending articles. This can be served from a static JSON file, or
+dynamically-generated (e.g., to calculate what is currently trending).
 
 ### Example JSON response
 

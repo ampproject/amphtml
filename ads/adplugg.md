@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For additional info, see AdPlugg's [AMP Ad Help](https://www.adplugg.com/support/help/amp-ads).
+For additional info, see AdPlugg's
+[AMP Ad Help](https://www.adplugg.com/support/help/amp-ads).
 
 ### Required parameters
 

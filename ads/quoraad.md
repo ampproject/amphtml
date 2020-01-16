@@ -26,7 +26,8 @@ limitations under the License.
 
 ## Configuration
 
-Please consult internal reference documents on AMP. This is used only for first-party ads on quora.com.
+Please consult internal reference documents on AMP. This is used only for
+first-party ads on quora.com.
 
 Required parameter:
 

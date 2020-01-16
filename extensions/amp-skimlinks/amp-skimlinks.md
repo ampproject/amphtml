@@ -39,16 +39,23 @@ Run skimlinks inside your AMP page
 
 ## Overview
 
-Skimlinks allows you to monetise your content through affiliate marketing. It gives you instant access to over 24,000 merchant affiliate programs without the hassle of network sign ups, approvals or creating affiliate links.
+Skimlinks allows you to monetise your content through affiliate marketing. It
+gives you instant access to over 24,000 merchant affiliate programs without the
+hassle of network sign ups, approvals or creating affiliate links.
 
-`amp-skimlinks` is the AMP version of the traditional Skimlinks scripts which allows you to automatically turn your normal merchant links into monetisable links and gives you access to analytics data about how your content is performing.
+`amp-skimlinks` is the AMP version of the traditional Skimlinks scripts which
+allows you to automatically turn your normal merchant links into monetisable
+links and gives you access to analytics data about how your content is
+performing.
 
 ## Getting started
 
-A skimlinks account is required in order to use [amp-skimlinks](https://skimlinks.com/)
+A skimlinks account is required in order to use
+[amp-skimlinks](https://skimlinks.com/)
 
-**Add the required script**
-Inside the `<head>...</head>` section of your AMP page, insert this code before the line `<script async src="https://cdn.ampproject.org/v0.js"></script>`
+**Add the required script** Inside the `<head>...</head>` section of your AMP
+page, insert this code before the line
+`<script async src="https://cdn.ampproject.org/v0.js"></script>`
 
 Code:
 
@@ -60,8 +67,8 @@ Code:
 ></script>
 ```
 
-**Add the amp-skimlinks extension**
-Inside the `<body>...</body>` section of your AMP page, insert this code:
+**Add the amp-skimlinks extension** Inside the `<body>...</body>` section of
+your AMP page, insert this code:
 
 Code:
 
@@ -154,8 +161,11 @@ link-selector="article:not(.no-skimlinks) a"
 
 ## Validation
 
-See [amp-skimlinks rules](validator-amp-skimlinks.protoascii) in the AMP validator specification.
+See [amp-skimlinks rules](validator-amp-skimlinks.protoascii) in the AMP
+validator specification.
 
 ## Analytics data
 
-amp-skimlinks uses amp-analytics to collect analytics data. If you require any more information about our privacy policy please visit https://skimlinks.com/privacy-policies/.
+amp-skimlinks uses amp-analytics to collect analytics data. If you require any
+more information about our privacy policy please visit
+https://skimlinks.com/privacy-policies/.

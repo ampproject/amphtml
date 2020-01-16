@@ -31,7 +31,9 @@ limitations under the License.
 
 ## Configuration
 
-For configuration semantics, see [Imedia's documentation](https://iimedia.sbeta.cz/html/navod-im3light/) or contact reklama-pozadavky@firma.seznam.cz
+For configuration semantics, see
+[Imedia's documentation](https://iimedia.sbeta.cz/html/navod-im3light/) or
+contact reklama-pozadavky@firma.seznam.cz
 
 Required parameters:
 

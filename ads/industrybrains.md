@@ -32,7 +32,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration semantics, see [Industrybrains documentation](https://www.industrybrains.com/doc/publisher-solutions).
+For configuration semantics, see
+[Industrybrains documentation](https://www.industrybrains.com/doc/publisher-solutions).
 
 Supported parameters:
 

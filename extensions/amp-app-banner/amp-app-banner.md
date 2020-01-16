@@ -3,7 +3,9 @@ $category@: layout
 formats:
   - websites
 teaser:
-  text: A wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app.
+  text:
+    A wrapper and minimal UI for a cross-platform, fixed-position banner showing
+    a call-to-action to install an app.
 ---
 
 <!--
@@ -24,7 +26,10 @@ limitations under the License.
 
 # amp-app-banner
 
-A wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
+A wrapper and minimal UI for a cross-platform, fixed-position banner showing a
+call-to-action to install an app. Includes conditional logic to direct to the
+right app on the right platform, and to hide permanently if the user dismisses
+the banner.
 
 <table>
   <tr>
@@ -49,19 +54,37 @@ A wrapper and minimal UI for a cross-platform, fixed-position banner showing a c
 
 ## Behavior
 
-`amp-app-banner` is a wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
+`amp-app-banner` is a wrapper and minimal UI for a cross-platform,
+fixed-position banner showing a call-to-action to install an app. Includes
+conditional logic to direct to the right app on the right platform, and to hide
+permanently if the user dismisses the banner.
 
 ## Data Sources
 
-To extend and promote the usage of the natively supported app banners on <a href="https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html">iOS</a> and <a href="https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android?hl=en#span-idnativenative-app-install-bannerspan">Android</a>, we are using the exact data-sources the native app banners use on the respective platforms. iOS uses a `<meta name="apple-itunes-app">` tag in the head of the document and Android uses a `<link rel="manifest">`.
+To extend and promote the usage of the natively supported app banners on
+<a href="https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/PromotingAppswithAppBanners/PromotingAppswithAppBanners.html">iOS</a>
+and
+<a href="https://developers.google.com/web/updates/2015/03/increasing-engagement-with-app-install-banners-in-chrome-for-android?hl=en#span-idnativenative-app-install-bannerspan">Android</a>,
+we are using the exact data-sources the native app banners use on the respective
+platforms. iOS uses a `<meta name="apple-itunes-app">` tag in the head of the
+document and Android uses a `<link rel="manifest">`.
 
-The AMP runtime parses the meta tag content attribute on iOS extracting the App ID and `app-argument` (usually used for deep-linking URIs - app-protocols like `whatsapp://` or `medium://`). On Android, the AMP runtimes makes an XHR request to fetch the `manifest.json` file, and parses its content to extract `app_id` from `related_applications` and it calculates the app store URL as well as open-in-app URL:
+The AMP runtime parses the meta tag content attribute on iOS extracting the App
+ID and `app-argument` (usually used for deep-linking URIs - app-protocols like
+`whatsapp://` or `medium://`). On Android, the AMP runtimes makes an XHR request
+to fetch the `manifest.json` file, and parses its content to extract `app_id`
+from `related_applications` and it calculates the app store URL as well as
+open-in-app URL:
 
 ```text
 android-app://${appId}/${protocol}/${host}${pathname}
 ```
 
-**Note**: The protocol/host/pathname are calculated from the canonical URL of the AMP document, and your native app needs to register the links in their manifest as <a href="https://developer.android.com/training/app-indexing/deep-linking.html">documented here</a>.
+**Note**: The protocol/host/pathname are calculated from the canonical URL of
+the AMP document, and your native app needs to register the links in their
+manifest as
+<a href="https://developer.android.com/training/app-indexing/deep-linking.html">documented
+here</a>.
 
 ### App manifest example
 
@@ -97,13 +120,24 @@ android-app://${appId}/${protocol}/${host}${pathname}
 
 ## Appearance Behavior
 
-`amp-app-banner` provides no default UI and leaves the UI to the developer. The developer can build any kind of UI inside the banner and style it accordingly. There is one UI element that has limits to the amount of customization--the "X" button that dismisses the banner. This button can be styled with the `.amp-app-banner-dismiss-button` class. It should be kept visible and easily accessible on mobile devices, to avoid blocking content.
+`amp-app-banner` provides no default UI and leaves the UI to the developer. The
+developer can build any kind of UI inside the banner and style it accordingly.
+There is one UI element that has limits to the amount of customization--the "X"
+button that dismisses the banner. This button can be styled with the
+`.amp-app-banner-dismiss-button` class. It should be kept visible and easily
+accessible on mobile devices, to avoid blocking content.
 
-One required UI element is the `button[open-button]` button, which is the click target for the banner to install the app, or open the deep-link if the app is already installed.
+One required UI element is the `button[open-button]` button, which is the click
+target for the banner to install the app, or open the deep-link if the app is
+already installed.
 
 ### OS/Browser/Viewer Dependencies
 
-Because native app banners currently are not shown in the viewer context, `<amp-app-banner>` is shown inside of the viewer when the appropriate markup is present. Because system-level app banners are already shown in Android/Chrome and iOS/Safari OS/Browser combinations, `<amp-app-banner>` is hidden in those contexts to avoid redundancy.
+Because native app banners currently are not shown in the viewer context,
+`<amp-app-banner>` is shown inside of the viewer when the appropriate markup is
+present. Because system-level app banners are already shown in Android/Chrome
+and iOS/Safari OS/Browser combinations, `<amp-app-banner>` is hidden in those
+contexts to avoid redundancy.
 
 <table>
   <tr>
@@ -128,7 +162,9 @@ Because native app banners currently are not shown in the viewer context, `<amp-
 
 ## Dismissal Persistence
 
-Currently, the banner will be displayed always unless it was dismissed. Once dismissed, the banner will never be displayed on that domain unless the user visits on a different browser or clears their local storage.
+Currently, the banner will be displayed always unless it was dismissed. Once
+dismissed, the banner will never be displayed on that domain unless the user
+visits on a different browser or clears their local storage.
 
 ## Tags
 
@@ -136,7 +172,8 @@ Currently, the banner will be displayed always unless it was dismissed. Once dis
 
 - The `<meta>` tag must have the `name` and `content` attributes.
 - The value of the `content` attribute must contain `app-id=`.
-- The `<link>` tag must have the `"rel='manifest'"` attribute and value, as well as the `href` attribute.
+- The `<link>` tag must have the `"rel='manifest'"` attribute and value, as well
+  as the `href` attribute.
 
 ## Attributes
 
@@ -166,7 +203,8 @@ Currently, the banner will be displayed always unless it was dismissed. Once dis
 
 ## Additional Validations
 
-- Cannot have `<amp-ad>`, `<amp-sticky-ad>`, `<amp-embed>`, or `<amp-iframe>` as descendants
+- Cannot have `<amp-ad>`, `<amp-sticky-ad>`, `<amp-embed>`, or `<amp-iframe>` as
+  descendants
 - Height cannot exceed 100px
 - Must be a direct child of `<body>`
 - Android manifest `href` must be served over `https`
@@ -202,4 +240,6 @@ Currently, the banner will be displayed always unless it was dismissed. Once dis
 
 ## Validation
 
-See [amp-app-banner rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-app-banner/validator-amp-app-banner.protoascii) in the AMP validator specification.
+See
+[amp-app-banner rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-app-banner/validator-amp-app-banner.protoascii)
+in the AMP validator specification.

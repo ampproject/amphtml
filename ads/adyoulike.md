@@ -34,7 +34,8 @@ Serves ads from [Adyoulike](https://www.adyoulike.com/).
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact [Adyoulike](https://www.adyoulike.com/#contact).
+For configuration details and to generate your tags, please contact
+[Adyoulike](https://www.adyoulike.com/#contact).
 
 ### Required parameters
 

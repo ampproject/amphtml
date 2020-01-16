@@ -33,7 +33,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see Relap's documentation. Currently supports all anchor-based widgets.
+For semantics of configuration, please see Relap's documentation. Currently
+supports all anchor-based widgets.
 
 Supported parameters:
 

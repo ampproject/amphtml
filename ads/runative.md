@@ -38,7 +38,8 @@ Serves ads from the [RUNative](https://www.runative.com/).
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ### Required parameters
 
@@ -46,7 +47,8 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Optional parameters
 
-- `data-ad-type` - types of ads: `img-left`, `img-right`, `label-over`, `label-under`
+- `data-ad-type` - types of ads: `img-left`, `img-right`, `label-over`,
+  `label-under`
 - `data-keywords` - title of ad
 - `data-title` - title of ad
 - `data-cols` - number of cols 1 till 6

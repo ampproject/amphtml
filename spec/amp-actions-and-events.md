@@ -18,7 +18,8 @@ limitations under the License.
 
 [TOC]
 
-The `on` attribute is used to install event handlers on elements. The events that are supported depend on the element.
+The `on` attribute is used to install event handlers on elements. The events
+that are supported depend on the element.
 
 The value for the syntax is a simple domain-specific language of the form:
 
@@ -69,24 +70,31 @@ See the table below for descriptions of each part of the syntax.
 
 ## Handling multiple events
 
-You can listen to multiple events on an element by separating the events with a semicolon `;`.
+You can listen to multiple events on an element by separating the events with a
+semicolon `;`.
 
 Example: `on="submit-success:lightbox1;submit-error:lightbox2"`
 
 ## Multiple actions for one event
 
-You can execute multiple actions in sequence for the same event by separating the actions with a comma ','.
+You can execute multiple actions in sequence for the same event by separating
+the actions with a comma ','.
 
 Example: `on="tap:target1.actionA,target2.actionB"`
 
 ## Globally-defined events and actions
 
-AMP defines a `tap` event globally that you can listen to on any HTML element (including AMP elements).
+AMP defines a `tap` event globally that you can listen to on any HTML element
+(including AMP elements).
 
-AMP also defines the `hide`, `show` and `toggleVisibility` actions globally that you can trigger on any HTML element.
+AMP also defines the `hide`, `show` and `toggleVisibility` actions globally that
+you can trigger on any HTML element.
 
-{% call callout('Note', type='note') %}
-An element can only be shown if it was previously hidden by a `hide` or `toggleVisibility` action, or by using the [`hidden`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden) attribute. The `show` action does not support elements hidden by CSS `display:none` or AMP's `layout=nodisplay`.
+{% call callout('Note', type='note') %} An element can only be shown if it was
+previously hidden by a `hide` or `toggleVisibility` action, or by using the
+[`hidden`](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden)
+attribute. The `show` action does not support elements hidden by CSS
+`display:none` or AMP's `layout=nodisplay`.
 
 For example, the following is possible in AMP:
 
@@ -580,7 +588,9 @@ event.response</pre></td>
 
 ### Video elements
 
-The actions below are supported in the following AMP video elements: `amp-video`, `amp-youtube`, `amp-3q-player`, `amp-brid-player`, `amp-dailymotion`, `amp-delight-player`, `amp-ima-video`.
+The actions below are supported in the following AMP video elements:
+`amp-video`, `amp-youtube`, `amp-3q-player`, `amp-brid-player`,
+`amp-dailymotion`, `amp-delight-player`, `amp-ima-video`.
 
 <table>
   <tr>
@@ -628,12 +638,13 @@ The actions below are supported in the following AMP video elements: `amp-video`
 
 ## Special targets
 
-The following are targets provided by the AMP system that have special requirements:
+The following are targets provided by the AMP system that have special
+requirements:
 
 ### Target: AMP
 
-The `AMP` target is provided by the AMP runtime and implements top-level
-actions that apply to the whole document.
+The `AMP` target is provided by the AMP runtime and implements top-level actions
+that apply to the whole document.
 
 <table>
   <tr>
@@ -680,15 +691,23 @@ actions that apply to the whole document.
   </tr>
 </table>
 
-<sup>1</sup>When used with <a href="#multiple-actions-for-one-event">multiple actions</a>, subsequent actions will wait for <code>setState()</code> or <code>pushState()</code> to complete before invocation. Only a single <code>setState()</code> or <code>pushState()</code> is allowed per event.
+<sup>1</sup>When used with <a href="#multiple-actions-for-one-event">multiple
+actions</a>, subsequent actions will wait for <code>setState()</code> or
+<code>pushState()</code> to complete before invocation. Only a single
+<code>setState()</code> or <code>pushState()</code> is allowed per event.
 
 ### Target: amp-access
 
-The `amp-access` target is provided by the [amp-access](https://amp.dev/documentation/components/amp-access.html) component.
+The `amp-access` target is provided by the
+[amp-access](https://amp.dev/documentation/components/amp-access.html)
+component.
 
 The `amp-access` target is special for these reasons:
 
-1.  You can't give an arbitrary ID to this target. The target is always `amp-access`.
-2.  The actions for `amp-access` are dynamic depending on the structure of the [AMP Access Configuration](https://amp.dev/documentation/components/amp-access#configuration).
+1.  You can't give an arbitrary ID to this target. The target is always
+    `amp-access`.
+2.  The actions for `amp-access` are dynamic depending on the structure of the
+    [AMP Access Configuration](https://amp.dev/documentation/components/amp-access#configuration).
 
-See [details](https://amp.dev/documentation/components/amp-access#login-link) about using the `amp-access` target.
+See [details](https://amp.dev/documentation/components/amp-access#login-link)
+about using the `amp-access` target.

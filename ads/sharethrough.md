@@ -33,7 +33,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please [contact Sharethrough](mailto:pubsupport@sharethrough.com).
+For semantics of configuration, please
+[contact Sharethrough](mailto:pubsupport@sharethrough.com).
 
 ### Required parameters
 

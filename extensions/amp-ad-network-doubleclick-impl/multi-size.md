@@ -23,7 +23,8 @@ their corresponding dimensions specified by the `width` and `height` attributes,
 or the `data-override-width` and `data-override-height` attributes, if they are
 set. Further, the secondary sizes must not be smaller than 2/3rds, in any of the
 two dimensions, of their primary size counterpart, unless
-`data-multi-size-validation` is explicitly set to false. See below for some valid and invalid examples.
+`data-multi-size-validation` is explicitly set to false. See below for some
+valid and invalid examples.
 
 <b>Note that multi-size slots may have unexpected interactions with
 `layout="responsive"`. For this reason it is strongly encouraged that multi-size
@@ -31,10 +32,19 @@ slots use `layout="fixed"`.</b>
 
 #### Attributes
 
-Below the term `primary size` refers to the width and height pair specified by the `width` and `height` attributes of the tag.
+Below the term `primary size` refers to the width and height pair specified by
+the `width` and `height` attributes of the tag.
 
-- `data-multi-size` A string of comma separated sizes, which if present, forces the tag to request an ad with all of the given sizes, including the primary size. Each individual size must be a number (the width) followed by a lowercase 'x' followed by a number (the height). Each dimension specified this way must not be larger than its counterpart in the primary size. Further, each dimension must be no less than 2/3rds of the corresponding primary dimension, unless `data-mutli-size-validation` is set to false.
-- `data-multi-size-validation` If set to false, this will allow secondary sizes (those specified in the `data-multi-size` attribute) to be less than 2/3rds of the corresponding primary size. By default this is assumed to be true.
+- `data-multi-size` A string of comma separated sizes, which if present, forces
+  the tag to request an ad with all of the given sizes, including the primary
+  size. Each individual size must be a number (the width) followed by a
+  lowercase 'x' followed by a number (the height). Each dimension specified this
+  way must not be larger than its counterpart in the primary size. Further, each
+  dimension must be no less than 2/3rds of the corresponding primary dimension,
+  unless `data-mutli-size-validation` is set to false.
+- `data-multi-size-validation` If set to false, this will allow secondary sizes
+  (those specified in the `data-multi-size` attribute) to be less than 2/3rds of
+  the corresponding primary size. By default this is assumed to be true.
 
 Example - Valid multi-size request
 
@@ -50,7 +60,8 @@ Example - Valid multi-size request
 </amp-ad>
 ```
 
-Example - Invalid multi-size request (multi-size size is too small relative to overrides)
+Example - Invalid multi-size request (multi-size size is too small relative to
+overrides)
 
 ```html
 <amp-ad

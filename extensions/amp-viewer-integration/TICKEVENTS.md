@@ -18,11 +18,10 @@ limitations under the License.
 
 When implementing a viewer one can use the tick events for performance tracking.
 
-We use very short string names as tick labels, so the table below
-further describes these labels.
-Every start label has an assumed e\_`label` for its "end" counterpart label.
-As an example if we executed `perf.tick('label')` we assume we have a counterpart
-`perf.tick('e_label')`.
+We use very short string names as tick labels, so the table below further
+describes these labels. Every start label has an assumed e\_`label` for its
+"end" counterpart label. As an example if we executed `perf.tick('label')` we
+assume we have a counterpart `perf.tick('e_label')`.
 
 | Name                                  | id             | Description                                                                                                                                                                                        |
 | ------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

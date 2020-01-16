@@ -15,8 +15,8 @@ https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/val
 
 This API is new - feedback is especially welcome.
 
-To install, use `npm install amphtml-validator` in your project directory,
-or add `amphtml-validator` as a dependency to your package.json.
+To install, use `npm install amphtml-validator` in your project directory, or
+add `amphtml-validator` as a dependency to your package.json.
 
 You may save the following example into a file, e.g., `demo.js`.
 
@@ -49,18 +49,20 @@ line 1, col 0: The parent tag of tag 'html ⚡ for top-level html' is '$root', b
 ...
 ```
 
-As expected, this emits errors because the provided string in the example, `<html>Hello, world.</html>` is not a valid AMP HTML document.
+As expected, this emits errors because the provided string in the example,
+`<html>Hello, world.</html>` is not a valid AMP HTML document.
 
 ## Release Notes
 
 ### 1.0.10
 
-- Fixed [#4246: amphtml-validator CLI fails on Mac OS X](https://github.com/ampproject/amphtml/issues/4246).
+- Fixed
+  [#4246: amphtml-validator CLI fails on Mac OS X](https://github.com/ampproject/amphtml/issues/4246).
 
 ### 1.0.11
 
-- Added support for AMP4ADS (via --html_format command line flag) and
-  argument for validateString function in the API.
+- Added support for AMP4ADS (via --html_format command line flag) and argument
+  for validateString function in the API.
 
 ### 1.0.12
 
@@ -72,8 +74,8 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ### 1.0.15
 
-- Added support for installing on Windows.
-  `npm install -g amphtml-validator` should now just work.
+- Added support for installing on Windows. `npm install -g amphtml-validator`
+  should now just work.
 
 ### 1.0.16
 
@@ -96,7 +98,8 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ### 1.0.20
 
-- Better npm post-install for virtual machines, running debian over windows with SMB shared folder.
+- Better npm post-install for virtual machines, running debian over windows with
+  SMB shared folder.
 
 ### 1.0.21
 
@@ -108,9 +111,9 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ### 1.0.23
 
-- The amphtml-validator binary now requires the Node.js binary to be called node.
-  On systems where the Node.js binary is called nodejs, consider installing
-  the nodejs-legacy Debian package or better yet, NVM.
+- The amphtml-validator binary now requires the Node.js binary to be called
+  node. On systems where the Node.js binary is called nodejs, consider
+  installing the nodejs-legacy Debian package or better yet, NVM.
 
 ### 1.0.24
 

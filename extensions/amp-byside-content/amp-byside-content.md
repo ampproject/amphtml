@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-byside-content
 
-Displays dynamic content from the <a href="http://www.byside.com/">BySide service</a>.
+Displays dynamic content from the <a href="http://www.byside.com/">BySide
+service</a>.
 
 <table>
   <tr>
@@ -40,11 +41,13 @@ Displays dynamic content from the <a href="http://www.byside.com/">BySide servic
 ## Behavior
 
 The `amp-byside-content` component is available for BySide customers and
-displays dynamic content that can be retrieved from the [BySide](http://www.byside.com/) customization mechanisms.
+displays dynamic content that can be retrieved from the
+[BySide](http://www.byside.com/) customization mechanisms.
 
 Example:
 
-The `width` and `height` attributes determine the aspect ratio of the embedded BySide content in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the embedded
+BySide content in responsive layouts.
 
 ```html
 <amp-byside-content
@@ -89,11 +92,16 @@ The `width` and `height` attributes determine the aspect ratio of the embedded B
 
 ## Privacy and cookies policy
 
-[BySide](http://www.byside.com) is committed to respect and protect your privacy and developing technology that gives you the most powerful and safe online experience. BySide privacy statement and cookies policy can be found on the following url's:
+[BySide](http://www.byside.com) is committed to respect and protect your privacy
+and developing technology that gives you the most powerful and safe online
+experience. BySide privacy statement and cookies policy can be found on the
+following url's:
 
 - [http://www.byside.com/privacy.html](http://www.byside.com/privacy.html)
 - [http://www.byside.com/cookies.html](http://www.byside.com/cookies.html)
 
 ## Validation
 
-See [amp-byside-content rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-byside-content/validator-amp-byside-content.protoascii) in the AMP validator specification.
+See
+[amp-byside-content rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-byside-content/validator-amp-byside-content.protoascii)
+in the AMP validator specification.

@@ -18,7 +18,8 @@ limitations under the License.
 
 ## Example
 
-ReadMo only requires a section code to run. Please work your account manager to properly configure your AMP section.
+ReadMo only requires a section code to run. Please work your account manager to
+properly configure your AMP section.
 
 ### Basic
 
@@ -42,7 +43,10 @@ ReadMo only requires a section code to run. Please work your account manager to 
 
 ### Optional parameters
 
-- `data-module` : Type of module to render (`end-of-article`, `smart-feed`, `smart-feed-video`, `side-rail`)
+- `data-module` : Type of module to render (`end-of-article`, `smart-feed`,
+  `smart-feed-video`, `side-rail`)
 - `data-infinite` : If true, will enable infinite feed
-- `data-title` : Text that will appear above the module (defaults to "You May Like")
-- `data-sponsored-by-label` : Custom text override to the "Sponsored by" label that appears next to the advertiser name
+- `data-title` : Text that will appear above the module (defaults to "You May
+  Like")
+- `data-sponsored-by-label` : Custom text override to the "Sponsored by" label
+  that appears next to the advertiser name

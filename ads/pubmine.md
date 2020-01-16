@@ -42,9 +42,11 @@ limitations under the License.
 
 ## Configuration
 
-For further configuration information, please [contact Pubmine](https://wordpress.com/help/contact).
+For further configuration information, please
+[contact Pubmine](https://wordpress.com/help/contact).
 
-Please note that the height parameter should be 15 greater than your ad size to ensure there is enough room for the "Report this ad" link.
+Please note that the height parameter should be 15 greater than your ad size to
+ensure there is enough room for the "Report this ad" link.
 
 ### Required parameters
 

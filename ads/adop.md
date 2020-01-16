@@ -32,7 +32,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact http://adop.cc
+For configuration details and to generate your tags, please contact
+http://adop.cc
 
 ### Required parameters
 

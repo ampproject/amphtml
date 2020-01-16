@@ -24,7 +24,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please visit [www.sekindo.com](http://www.sekindo.com).
+For details on the configuration semantics, please visit
+[www.sekindo.com](http://www.sekindo.com).
 
 ### Required parameters
 

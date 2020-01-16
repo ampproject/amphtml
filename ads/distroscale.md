@@ -28,7 +28,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration semantics, please [contact DistroScale](http://www.distroscale.com).
+For configuration semantics, please
+[contact DistroScale](http://www.distroscale.com).
 
 ### Required parameters
 

@@ -49,7 +49,9 @@ limitations under the License.
 
 ## Supported Functions
 
-The `amp-viewer-assistance` extension currently has two functions that can be invoked via AMP expressions. For example, you may invoke the signIn function on a button tap:
+The `amp-viewer-assistance` extension currently has two functions that can be
+invoked via AMP expressions. For example, you may invoke the signIn function on
+a button tap:
 
 ```html
 <button on="tap:amp-viewer-assistance.signIn">
@@ -74,7 +76,8 @@ The `amp-viewer-assistance` extension currently has two functions that can be in
 
 ### UpdateActionState Payloads
 
-A valid `amp-viewer-assistance.updateActionState` payload can either be an `update` object of the format:
+A valid `amp-viewer-assistance.updateActionState` payload can either be an
+`update` object of the format:
 
 ```js
 {
@@ -83,11 +86,16 @@ A valid `amp-viewer-assistance.updateActionState` payload can either be an `upda
 }
 ```
 
-or an `error` standard [Response](https://developer.mozilla.org/en-US/docs/Web/API/Response) object.
+or an `error` standard
+[Response](https://developer.mozilla.org/en-US/docs/Web/API/Response) object.
 
 ## Handling Errors
 
-In the event of an error with the `amp-list` extension, we can listen to the `fetch-error` event and call `amp-viewer-assistance.updateActionState` to pass the error to the viewer. With an `error` parameter, `amp-viewer-assistance` will transform the parameter into a `FAILED_ACTION_STATUS` payload before sending it to the viewer.
+In the event of an error with the `amp-list` extension, we can listen to the
+`fetch-error` event and call `amp-viewer-assistance.updateActionState` to pass
+the error to the viewer. With an `error` parameter, `amp-viewer-assistance` will
+transform the parameter into a `FAILED_ACTION_STATUS` payload before sending it
+to the viewer.
 
 ```html
 <amp-list
@@ -100,7 +108,8 @@ In the event of an error with the `amp-list` extension, we can listen to the `fe
 
 ## Messages Sent
 
-There are several messages that can be sent from the amp-viewer-assistance extension to the external viewer.
+There are several messages that can be sent from the amp-viewer-assistance
+extension to the external viewer.
 
 <table>
   <tr>
@@ -127,7 +136,10 @@ There are several messages that can be sent from the amp-viewer-assistance exten
 
 ## Events Triggered
 
-In order to act upon a successful sign in from the viewer assistance, a `signedIn` event is emitted from the `amp-viewer-assistance` script element. On the element, an expression can be attached via the `on` attribute. In this example, we are showing a success message after a user has signed in:
+In order to act upon a successful sign in from the viewer assistance, a
+`signedIn` event is emitted from the `amp-viewer-assistance` script element. On
+the element, an expression can be attached via the `on` attribute. In this
+example, we are showing a success message after a user has signed in:
 
 ```html
 <script
@@ -162,7 +174,14 @@ In order to act upon a successful sign in from the viewer assistance, a `signedI
 
 ## Utilizing an Identity Token
 
-Given a viewer with identity capabilities, the `amp-viewer-assistance` extension can pass an identity token back to the amphtml run-time to attach to remote XHRs. To attach the identity token to a remote XHR request in an `amp-state`, `amp-list`, or `amp-form` element, simply attach the attribute `crossorigin="amp-viewer-auth-token-via-post"` to the performing element. The request will be transformed into a POST request, and within the request body will be an `ampViewerAuthToken` variable set to the authorization token from the viewer.
+Given a viewer with identity capabilities, the `amp-viewer-assistance` extension
+can pass an identity token back to the amphtml run-time to attach to remote
+XHRs. To attach the identity token to a remote XHR request in an `amp-state`,
+`amp-list`, or `amp-form` element, simply attach the attribute
+`crossorigin="amp-viewer-auth-token-via-post"` to the performing element. The
+request will be transformed into a POST request, and within the request body
+will be an `ampViewerAuthToken` variable set to the authorization token from the
+viewer.
 
 Here are some examples:
 
@@ -214,9 +233,14 @@ AUTH_TOKEN_FROM_VIEWER_ASSISTANCE
 
 ### Identity Class
 
-Upon a successful sign in or identity token retrieval from the viewer, an `amp-viewer-assistance-identity-available` class will be attached to the root element of the AMP document. This can be used to manipulate elements with compound CSS classes.
+Upon a successful sign in or identity token retrieval from the viewer, an
+`amp-viewer-assistance-identity-available` class will be attached to the root
+element of the AMP document. This can be used to manipulate elements with
+compound CSS classes.
 
-In this example, we have a message telling the user they are signed out. If the identity is available through the extension, the message's `display` attribute will be overwritten to `display:none`.
+In this example, we have a message telling the user they are signed out. If the
+identity is available through the extension, the message's `display` attribute
+will be overwritten to `display:none`.
 
 ```css
 .signedOutMessage {
@@ -230,7 +254,8 @@ In this example, we have a message telling the user they are signed out. If the 
 
 ## Example
 
-Wrapping up the above, here is an example implementation of a page utilizing sign in, as well as an `updateActionState` after a form submission.
+Wrapping up the above, here is an example implementation of a page utilizing
+sign in, as well as an `updateActionState` after a form submission.
 
 ```html
 <script

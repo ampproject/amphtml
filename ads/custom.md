@@ -16,18 +16,19 @@ limitations under the License.
 
 # Custom (experimental)
 
-Custom does not represent a specific network. Rather, it provides a way for
-a site to display simple ads on a self-service basis. You must provide
-your own ad server to deliver the ads in json format as shown below.
+Custom does not represent a specific network. Rather, it provides a way for a
+site to display simple ads on a self-service basis. You must provide your own ad
+server to deliver the ads in json format as shown below.
 
-Each ad must contain a [mustache](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/amp-mustache.md)
+Each ad must contain a
+[mustache](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/amp-mustache.md)
 template.
 
 Each ad must contain the URL that will be used to fetch data from the server.
 
 Usually, there will be multiple ads on a page. The best way of dealing with this
-is to give all the ads the same ad server URL and give each ad a different slot id:
-this will result in a single call to the ad server.
+is to give all the ads the same ad server URL and give each ad a different slot
+id: this will result in a single call to the ad server.
 
 An alternative is to use a different URL for each ad, according to some format
 understood by the ad server(s) which you are calling.
@@ -60,7 +61,10 @@ understood by the ad server(s) which you are calling.
 
 ### Two ads with different slots
 
-The template can be specified outside the `amp-ad` tag for sharing. You can refer to the template using its ID via the `template` attribute of `amp-ad`. You can also provide a `data-slot` attribute for each `amp-ad`, so they can share one single remote request to fetch the ads data.
+The template can be specified outside the `amp-ad` tag for sharing. You can
+refer to the template using its ID via the `template` attribute of `amp-ad`. You
+can also provide a `data-slot` attribute for each `amp-ad`, so they can share
+one single remote request to fetch the ads data.
 
 ```html
 <template type="amp-mustache" id="amp-template-id">
@@ -165,35 +169,40 @@ The template can be specified outside the `amp-ad` tag for sharing. You can refe
 ### data-url (mandatory)
 
 This must be starting with `https://`, and it must be the address of an ad
-server returning json in the format defined below. This endpoint must be available
-cross-origin. (See [CORS in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests).)
+server returning json in the format defined below. This endpoint must be
+available cross-origin. (See
+[CORS in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests).)
 
 ### data-slot (optional)
 
 On the assumption that most pages have multiple ad slots, this is passed to the
-ad server to tell it which slot is being fetched. This can be any alphanumeric string.
+ad server to tell it which slot is being fetched. This can be any alphanumeric
+string.
 
-If you have only a single ad for a given value of `data-url`, it's OK not to bother with
-the slot id. However, do not use two ads for the same `data-url` where one has a slot id
-specified and the other does not.
+If you have only a single ad for a given value of `data-url`, it's OK not to
+bother with the slot id. However, do not use two ads for the same `data-url`
+where one has a slot id specified and the other does not.
 
 ## Ad server
 
-The ad server will be called once for each value of `data-url` on the page: for the vast
-majority of applications, all your ads will be from a single server so it will be
-called only once.
+The ad server will be called once for each value of `data-url` on the page: for
+the vast majority of applications, all your ads will be from a single server so
+it will be called only once.
 
-A parameter like `?ampslots=1,2` will be appended to the URL specified by `data-url` in order
-to specify the slots being fetched. See the examples above for details.
+A parameter like `?ampslots=1,2` will be appended to the URL specified by
+`data-url` in order to specify the slots being fetched. See the examples above
+for details.
 
-The ad server should return a json object containing a record for each slot in the request, keyed by the
-slot id in `data-slot`. The record format is defined by your template. For the examples above,
-the record contains three fields:
+The ad server should return a json object containing a record for each slot in
+the request, keyed by the slot id in `data-slot`. The record format is defined
+by your template. For the examples above, the record contains three fields:
 
-- src - string to go into the source parameter of the image to be displayed. This can be a
-  web reference (in which case it must be `https:` or a `data:` URI including the base64-encoded image.
+- src - string to go into the source parameter of the image to be displayed.
+  This can be a web reference (in which case it must be `https:` or a `data:`
+  URI including the base64-encoded image.
 - href - URL to which the user is to be directed when he clicks on the ad
-- info - A string with additional info about the ad that was served, mmaybe for use with analytics
+- info - A string with additional info about the ad that was served, mmaybe for
+  use with analytics
 
 Here is an example response, assuming two slots named simply 1 and 2:
 
@@ -212,7 +221,8 @@ Here is an example response, assuming two slots named simply 1 and 2:
 }
 ```
 
-If no slot was specified, the server returns a single template rather than an array.
+If no slot was specified, the server returns a single template rather than an
+array.
 
 ```json
 {
@@ -222,7 +232,8 @@ If no slot was specified, the server returns a single template rather than an ar
 }
 ```
 
-The ad server must enforce [AMP CORS](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+The ad server must enforce
+[AMP CORS](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
 Here is an example set of the relevant response headers:
 
 ```html
@@ -231,10 +242,14 @@ Access-Control-Allow-Origin:https://my--ad--server-com.cdn.ampproject.org
 
 ## Analytics
 
-To get analytics of how your ads are performing, use the [amp-analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md) tag.
+To get analytics of how your ads are performing, use the
+[amp-analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md)
+tag.
 
-Here is an example of how to make it work with Google Analytics events. Note that the variables can be set either by the code
-that displays the page (as in `eventAction`) or in variables passed back by the ad server (as in `eventCategory` and `eventLabel`).
+Here is an example of how to make it work with Google Analytics events. Note
+that the variables can be set either by the code that displays the page (as in
+`eventAction`) or in variables passed back by the ad server (as in
+`eventCategory` and `eventLabel`).
 
 ```html
 <amp-ad
@@ -285,4 +300,5 @@ that displays the page (as in `eventAction`) or in variables passed back by the 
 
 ## To do
 
-Add support for json variables in the data-url - and perhaps other variable substitutions in the way amp-list does
+Add support for json variables in the data-url - and perhaps other variable
+substitutions in the way amp-list does

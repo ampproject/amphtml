@@ -24,7 +24,8 @@ limitations under the License.
 
 ## Configuration
 
-For more information, please [see Yengo's FAQ](http://www.yengo.com/text/faqs?publishers).
+For more information, please
+[see Yengo's FAQ](http://www.yengo.com/text/faqs?publishers).
 
 ### Required parameters
 

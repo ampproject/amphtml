@@ -41,7 +41,8 @@ limitations under the License.
 </amp-ad>
 ```
 
-Note that the `width` and `height` mentioned should be maximum of the width-hight combinations mentioned in `json.sizes`.
+Note that the `width` and `height` mentioned should be maximum of the
+width-hight combinations mentioned in `json.sizes`.
 
 ### Targetings
 
@@ -69,7 +70,8 @@ Note that the `width` and `height` mentioned should be maximum of the width-high
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ### Supported parameters via `json` attribute
 

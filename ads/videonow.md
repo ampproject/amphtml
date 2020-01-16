@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please contact [Videonow](http://videonow.ru/html/advertisers/).
+For semantics of configuration, please contact
+[Videonow](http://videonow.ru/html/advertisers/).
 
 Supported parameters:
 

@@ -32,7 +32,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact [AffiliateB](https://www.affiliate-b.com/web/contact/form.php).
+For configuration details and to generate your tags, please contact
+[AffiliateB](https://www.affiliate-b.com/web/contact/form.php).
 
 Supported parameters:
 

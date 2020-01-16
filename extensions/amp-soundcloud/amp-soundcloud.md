@@ -45,7 +45,8 @@ Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
 
 ## Examples
 
-With the responsive layout, the `width` and `height` from the example should yield correct layouts for 1:1 aspect ratio embeds:
+With the responsive layout, the `width` and `height` from the example should
+yield correct layouts for 1:1 aspect ratio embeds:
 
 Visual Mode:
 
@@ -104,4 +105,6 @@ The value for this attribute is the ID of a playlist, an integer.</td>
 
 ## Validation
 
-See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/validator-amp-soundcloud.protoascii) in the AMP validator specification.
+See
+[amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/validator-amp-soundcloud.protoascii)
+in the AMP validator specification.

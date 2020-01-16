@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-megaphone
 
-Displays a <a href="https://megaphone.fm/">Megaphone.fm</a> podcast episode or playlist.
+Displays a <a href="https://megaphone.fm/">Megaphone.fm</a> podcast episode or
+playlist.
 
 <table>
   <tr>
@@ -45,7 +46,8 @@ Displays a <a href="https://megaphone.fm/">Megaphone.fm</a> podcast episode or p
 
 ## Examples
 
-With the fixed height layout, the element will expand to fill the width of the page while keeping the `height` constant:
+With the fixed height layout, the element will expand to fill the width of the
+page while keeping the `height` constant:
 
 Light Mode:
 
@@ -110,4 +112,6 @@ The value for this attribute is the Megaphone.fm ID of a playlist.</td>
 
 ## Validation
 
-See [amp-megaphone rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-megaphone/validator-amp-megaphone.protoascii) in the AMP validator specification.
+See
+[amp-megaphone rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-megaphone/validator-amp-megaphone.protoascii)
+in the AMP validator specification.

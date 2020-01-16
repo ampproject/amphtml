@@ -30,7 +30,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://www.nend.net/inquiries/form/
+For configuration details and to generate your tags, please contact
+https://www.nend.net/inquiries/form/
 
 Supported parameters:
 

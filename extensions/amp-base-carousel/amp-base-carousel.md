@@ -3,7 +3,9 @@ $category@: layout
 formats:
   - websites
 teaser:
-  text: Displays multiple similar pieces of content along a horizontal axis or vertical axis.
+  text:
+    Displays multiple similar pieces of content along a horizontal axis or
+    vertical axis.
 experimental: true
 ---
 
@@ -25,7 +27,8 @@ limitations under the License.
 
 # amp-base-carousel
 
-A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
+A generic carousel for displaying multiple similar pieces of content along a
+horizontal or vertical axis.
 
 <table>
   <tr>
@@ -52,17 +55,22 @@ A generic carousel for displaying multiple similar pieces of content along a hor
 
 ## Behavior
 
-Each of the `amp-base-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
+Each of the `amp-base-carousel` component’s immediate children is considered an
+item in the carousel. Each of these nodes may also have arbitrary HTML children.
 
-The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
+The carousel consists of an arbitrary number of items, as well as optional
+navigational arrows to go forward or backwards a single item.
 
-The carousel advances between items if the user swipes or uses the customizable arrow buttons.
+The carousel advances between items if the user swipes or uses the customizable
+arrow buttons.
 
 ## Attributes
 
 ### Using Media Queries
 
-The attributes for `<amp-base-carousel>` can be configured to use different options based on a media query. You can also use a value without any media queries. The format looks like:
+The attributes for `<amp-base-carousel>` can be configured to use different
+options based on a media query. You can also use a value without any media
+queries. The format looks like:
 
 ```html
 <amp-base-carousel
@@ -70,7 +78,11 @@ The attributes for `<amp-base-carousel>` can be configured to use different opti
 ></amp-base-carousel>
 ```
 
-The media queries are evaluated from left to right, with the first matching media query being used. A default value (without a media query) is required. In this case, if the page has a screen width of 1000px or more, `valueOne` is used. If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or smaller, `defaultValue` is used.
+The media queries are evaluated from left to right, with the first matching
+media query being used. A default value (without a media query) is required. In
+this case, if the page has a screen width of 1000px or more, `valueOne` is used.
+If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or
+smaller, `defaultValue` is used.
 
 ### Configuration Options
 
@@ -179,11 +191,13 @@ The media queries are evaluated from left to right, with the first matching medi
 
 ## Styling
 
-- You may use the `amp-base-carousel` element selector to style the carousel freely.
+- You may use the `amp-base-carousel` element selector to style the carousel
+  freely.
 
 ### Customizing Arrow Buttons
 
-Arrow buttons can be customized by passing in your own custom markup. For example, you can recreate the default styling with the following HTML and CSS:
+Arrow buttons can be customized by passing in your own custom markup. For
+example, you can recreate the default styling with the following HTML and CSS:
 
 ```css
 .carousel-prev,
@@ -219,7 +233,10 @@ Arrow buttons can be customized by passing in your own custom markup. For exampl
 </amp-base-carousel>
 ```
 
-If you want more customization for the arrow buttons, you can use the `next` and `prev` actions. For example, if you want to place buttons under the carousel and use the words "Previous" and "Next" instead of having them in the default location, you can use the following HTML:
+If you want more customization for the arrow buttons, you can use the `next` and
+`prev` actions. For example, if you want to place buttons under the carousel and
+use the words "Previous" and "Next" instead of having them in the default
+location, you can use the following HTML:
 
 ```html
   <amp-base-carousel id="carousel-1" …>
@@ -235,7 +252,10 @@ If you want more customization for the arrow buttons, you can use the `next` and
 
 ### RTL
 
-`<amp-base-carousel>` currently requires that you let it know when it is in an right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will generally work without this, there may be a few bugs. You can let the carousel know that it should operate as `rtl` as follows:
+`<amp-base-carousel>` currently requires that you let it know when it is in an
+right-to-left (rtl) context (e.g. Arabic, Hebrew pages). While the carousel will
+generally work without this, there may be a few bugs. You can let the carousel
+know that it should operate as `rtl` as follows:
 
 ```html
 <amp-base-carousel dir="rtl" …>
@@ -243,11 +263,13 @@ If you want more customization for the arrow buttons, you can use the `next` and
 </amp-base-carousel>
 ```
 
-If the carousel is in a RTL context, and you want the carousel to operate as LTR, you can explicitly set the `dir="ltr"` on the carousel.
+If the carousel is in a RTL context, and you want the carousel to operate as
+LTR, you can explicitly set the `dir="ltr"` on the carousel.
 
 ### Slide layout
 
-Slides are automatically sized by the carousel when **not** specifying `mixed-lengths`. You should give the slides `layout="flex-item"`:
+Slides are automatically sized by the carousel when **not** specifying
+`mixed-lengths`. You should give the slides `layout="flex-item"`:
 
 ```html
 <amp-base-carousel …>
@@ -255,13 +277,24 @@ Slides are automatically sized by the carousel when **not** specifying `mixed-le
 </amp-base-carousel>
 ```
 
-The slides have a default height of `100%` when the carousel is laid out horizontally. This can easily be changed with CSS or by using `layout="fixed-height"`. When specifying the height, the slide will be vertically centered within the carousel.
+The slides have a default height of `100%` when the carousel is laid out
+horizontally. This can easily be changed with CSS or by using
+`layout="fixed-height"`. When specifying the height, the slide will be
+vertically centered within the carousel.
 
-If you want to horizontally center your slide content, you will want to create a wrapping element, and use that to center the content.
+If you want to horizontally center your slide content, you will want to create a
+wrapping element, and use that to center the content.
 
 ### Number of Visible Slides
 
-When changing the number of visible slides using `visible-slides`, in response to a media query, you will likely want to change the aspect ratio of the carousel itself to match the new number of visible slides. For example, if you want to show three slides at a time with a one by one aspect ratio, you would want an aspect ratio of three by one for the carousel itself. Similiarly, with four slides at a time you would want an aspect ratio of four by one. In addition, when changing `visible-slides`, you likely want to change `advance-count`.
+When changing the number of visible slides using `visible-slides`, in response
+to a media query, you will likely want to change the aspect ratio of the
+carousel itself to match the new number of visible slides. For example, if you
+want to show three slides at a time with a one by one aspect ratio, you would
+want an aspect ratio of three by one for the carousel itself. Similiarly, with
+four slides at a time you would want an aspect ratio of four by one. In
+addition, when changing `visible-slides`, you likely want to change
+`advance-count`.
 
 ```html
 <!-- Using an aspect ratio of 3:2 for the slides in this example. -->
@@ -280,4 +313,6 @@ When changing the number of visible slides using `visible-slides`, in response t
 
 ## Validation
 
-See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-base-carousel/validator-amp-base-carousel.protoascii) in the AMP validator specification.
+See
+[amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-base-carousel/validator-amp-base-carousel.protoascii)
+in the AMP validator specification.

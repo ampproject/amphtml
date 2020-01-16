@@ -16,7 +16,9 @@ limitations under the License.
 
 # MANTIS® Ad Network
 
-Please visit the [MANTIS® Ad Network website](https://www.mantisadnetwork.com) for more information about MANTIS. If you have an issues implementing these tags, please [contact MANTIS](http://www.mantisadnetwork.com/contact/).
+Please visit the [MANTIS® Ad Network website](https://www.mantisadnetwork.com)
+for more information about MANTIS. If you have an issues implementing these
+tags, please [contact MANTIS](http://www.mantisadnetwork.com/contact/).
 
 ## Examples
 
@@ -40,7 +42,8 @@ Supported parameters:
 
 ### Content Recommendation
 
-Depending on your page design, you may need to play with the `"heights="` parameter to ensure the styling works for your layout.
+Depending on your page design, you may need to play with the `"heights="`
+parameter to ensure the styling works for your layout.
 
 ```html
 <amp-embed

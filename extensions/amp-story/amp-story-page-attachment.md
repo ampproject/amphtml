@@ -3,7 +3,9 @@ $category@: presentation
 formats:
   - stories
 teaser:
-  text: An additional pane of content that can be associated with a single page of an AMP story.
+  text:
+    An additional pane of content that can be associated with a single page of
+    an AMP story.
 ---
 
 <!--
@@ -24,8 +26,11 @@ limitations under the License.
 
 # `amp-story-page-attachment`
 
-Story page attachments allow you to provide additional AMPHTML content to specific pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element.
-A UI prompt to open the attachment will automatically be added at the bottom of every page that configured an attachment.
+Story page attachments allow you to provide additional AMPHTML content to
+specific pages. This content can be revealed by users through a "swipe up"
+gesture, or a tap on the call to action element. A UI prompt to open the
+attachment will automatically be added at the bottom of every page that
+configured an attachment.
 
 <table>
   <tr>
@@ -52,14 +57,17 @@ A UI prompt to open the attachment will automatically be added at the bottom of 
 
 ## Placement
 
-The `<amp-story-page-attachment>` element must be the last child of `<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The attachment AMPHTML content is expected to be provided inline in your AMP Story, within this `<amp-story-page-attachment>` tag.
+The `<amp-story-page-attachment>` element must be the last child of
+`<amp-story-page>`, and must have the `layout="nodisplay"` attribute. The
+attachment AMPHTML content is expected to be provided inline in your AMP Story,
+within this `<amp-story-page-attachment>` tag.
 
 ## Optional customization
 
 ### `data-cta-text`
 
-Customizes the call to action text displayed on the UI prompt to open the attachment.
-Default: "Swipe up"
+Customizes the call to action text displayed on the UI prompt to open the
+attachment. Default: "Swipe up"
 
 ```html
 <amp-story-page-attachment layout="nodisplay" data-cta-text="Read more"
@@ -69,8 +77,7 @@ Default: "Swipe up"
 
 ### `data-title`
 
-Displays the provided title in the page attachment header.
-Default: `null`
+Displays the provided title in the page attachment header. Default: `null`
 
 ```html
 <amp-story-page-attachment layout="nodisplay" data-title="My title"
@@ -80,8 +87,8 @@ Default: `null`
 
 ### `theme`
 
-Enables light or dark mode for the page attachment header and content background.
-Values: "light" (default), "dark"
+Enables light or dark mode for the page attachment header and content
+background. Values: "light" (default), "dark"
 
 ```html
 <amp-story-page-attachment layout="nodisplay" theme="dark"
@@ -91,7 +98,10 @@ Values: "light" (default), "dark"
 
 ## Allowed content and components
 
-Story page attachments allow the same HTML elements as AMP Story along with additional components listed below, such as third party video players or social media embeds. This means you can add additional content that is too verbose or disallowed in an AMP Story page.
+Story page attachments allow the same HTML elements as AMP Story along with
+additional components listed below, such as third party video players or social
+media embeds. This means you can add additional content that is too verbose or
+disallowed in an AMP Story page.
 
 <summary>List of allowed AMP components in a page attachment</summary>
 <ul>

@@ -25,7 +25,8 @@ limitations under the License.
 
 # `amp-mega-menu`
 
-Horizontal navigation bar with menu items that open/close content containers on click.
+Horizontal navigation bar with menu items that open/close content containers on
+click.
 
 <table>
   <tr>
@@ -44,15 +45,20 @@ Horizontal navigation bar with menu items that open/close content containers on 
 
 ## Overview
 
-`<amp-mega-menu>` provides a way to organize and display large collections of navigational content at the top of an AMP page. The component is intended primarily for desktop and tablet use cases, and it can be used jointly with [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md) to create a responsive menu.
+`<amp-mega-menu>` provides a way to organize and display large collections of
+navigational content at the top of an AMP page. The component is intended
+primarily for desktop and tablet use cases, and it can be used jointly with
+[`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md) to create a responsive
+menu.
 
 ## Usage
 
-The `<amp-mega-menu>` component includes a single `<nav>` element containing either a `<ul>` or `<ol>`, where each `<li>` element is a menu item.
+The `<amp-mega-menu>` component includes a single `<nav>` element containing
+either a `<ul>` or `<ol>`, where each `<li>` element is a menu item.
 
-[tip type="note"]
-The `<nav>` element must be parented by either the `<amp-mega-menu>` component or a `<template>`, and it must have `<ul>` or `<ol>` as its only child.
-[/tip]
+[tip type="note"] The `<nav>` element must be parented by either the
+`<amp-mega-menu>` component or a `<template>`, and it must have `<ul>` or `<ol>`
+as its only child. [/tip]
 
 Each menu item can contain any of the following tags as direct children:
 
@@ -64,12 +70,20 @@ Each menu item can contain any of the following tags as direct children:
 
 ### Toggleable dropdowns
 
-A menu item should have either one child (e.g. an anchor link or element with tap action), or two if the item expands into a dropdown container. In the latter case, the two children must conform to the following specs:
+A menu item should have either one child (e.g. an anchor link or element with
+tap action), or two if the item expands into a dropdown container. In the latter
+case, the two children must conform to the following specs:
 
-1. A `<button>` or element with `role=button`: this element is used to toggle the dropdown container (but only if the former has no registered tap action) and receives focus when navigating between items.
-2. A `<div>` with `role=dialog`: this element will be rendered as a container that holds additional content under an item, and it is initially hidden.
+1. A `<button>` or element with `role=button`: this element is used to toggle
+   the dropdown container (but only if the former has no registered tap action)
+   and receives focus when navigating between items.
+2. A `<div>` with `role=dialog`: this element will be rendered as a container
+   that holds additional content under an item, and it is initially hidden.
 
-A mask will cover the rest of the page when a dropdown is open. Content, such as a title banner, can appear above the mask. Apply a background color on the content and place it, alongside the `<amp-mega-menu>`, inside a `<header>` element.
+A mask will cover the rest of the page when a dropdown is open. Content, such as
+a title banner, can appear above the mask. Apply a background color on the
+content and place it, alongside the `<amp-mega-menu>`, inside a `<header>`
+element.
 
 Each dropdown may contain any of the following AMP elements:
 
@@ -81,9 +95,11 @@ Each dropdown may contain any of the following AMP elements:
 - `<amp-list>`
 - `<amp-video>`
 
-The example below demonstrates an `<amp-mega-menu>` with three menu items. The first two are toggleable and the third is an external link.
+The example below demonstrates an `<amp-mega-menu>` with three menu items. The
+first two are toggleable and the third is an external link.
 
-[example playground="true" preview="top-frame" orientation="landscape" imports="amp-mega-menu"]
+[example playground="true" preview="top-frame" orientation="landscape"
+imports="amp-mega-menu"]
 
 ```html
 <amp-mega-menu height="30" layout="fixed-height">
@@ -121,11 +137,15 @@ The example below demonstrates an `<amp-mega-menu>` with three menu items. The f
 
 ### Dynamic content rendering
 
-Fetch content of `<amp-mega-menu>` dynamically from a JSON endpoint using [`<amp-list>`](../amp-list/amp-list.md) and [`<amp-mustache>`](../amp-mustache/amp-mustache.md) template.
+Fetch content of `<amp-mega-menu>` dynamically from a JSON endpoint using
+[`<amp-list>`](../amp-list/amp-list.md) and
+[`<amp-mustache>`](../amp-mustache/amp-mustache.md) template.
 
-The example below demonstrates this ability by nesting `<amp-list>` inside `<amp-mega-menu>`.
+The example below demonstrates this ability by nesting `<amp-list>` inside
+`<amp-mega-menu>`.
 
-[example playground="true" preview="top-frame" orientation="landscape" imports="amp-mega-menu,amp-list" template="amp-mustache"]
+[example playground="true" preview="top-frame" orientation="landscape"
+imports="amp-mega-menu,amp-list" template="amp-mustache"]
 
 ```html
 <amp-mega-menu height="60" layout="fixed-height">
@@ -193,9 +213,12 @@ Here is the JSON file used:
 
 ### Responsive design with `<amp-sidebar>`
 
-Some viewports may be too narrow to display the content of `<amp-mega-menu>` in a single row. For these use cases, use media queries to switch between `<amp-mega-menu>` and `<amp-sidebar>`.
+Some viewports may be too narrow to display the content of `<amp-mega-menu>` in
+a single row. For these use cases, use media queries to switch between
+`<amp-mega-menu>` and `<amp-sidebar>`.
 
-The example below hides `<amp-mega-menu>` when the viewport width is less than 500px. It replaces `<amp-mega-menu>` with a button that opens `<amp-sidebar>`.
+The example below hides `<amp-mega-menu>` when the viewport width is less than
+500px. It replaces `<amp-mega-menu>` with a button that opens `<amp-sidebar>`.
 
 [example playground="true" preview="top-frame"]
 
@@ -278,8 +301,10 @@ The example below hides `<amp-mega-menu>` when the viewport width is less than 5
 The `<amp-mega-menu>` component can be styled with standard CSS.
 
 - The `<nav>` element and dropdown elements have a default white background.
-- When open, the dropdown containers will fill the entire viewport width. This can be overridden with the left and width properties.
-- Expanding a menu item applies the `open` attribute to the `<amp-mega-menu>` component as well as the expanded `<li>` element.
+- When open, the dropdown containers will fill the entire viewport width. This
+  can be overridden with the left and width properties.
+- Expanding a menu item applies the `open` attribute to the `<amp-mega-menu>`
+  component as well as the expanded `<li>` element.
 
 The example below customizes:
 
@@ -352,7 +377,9 @@ The example below customizes:
 
 ## Accessibility
 
-`<amp-mega-menu>` assigns the following ARIA attributes on the children of each expandable menu item. Screen readers use these attributes to associate buttons with toggleable containers and trap focus inside opened containers.
+`<amp-mega-menu>` assigns the following ARIA attributes on the children of each
+expandable menu item. Screen readers use these attributes to associate buttons
+with toggleable containers and trap focus inside opened containers.
 
 ```html
 <li>
@@ -365,7 +392,8 @@ The example below customizes:
 </li>
 ```
 
-In addition, to assist screen reader users, an invisible but tabbable close button is added to the start and end of each `role=dialog` element.
+In addition, to assist screen reader users, an invisible but tabbable close
+button is added to the start and end of each `role=dialog` element.
 
 Keyboard support for the component includes:
 
@@ -373,13 +401,19 @@ Keyboard support for the component includes:
 - Enter/Space keys to trigger an active menu item button.
 - Esc key to collapse the mega menu.
 
-Open on hover is not currently supported by `<amp-mega-menu>` due to UX and accessibility concerns. In particular, we want to avoid scenarios where:
+Open on hover is not currently supported by `<amp-mega-menu>` due to UX and
+accessibility concerns. In particular, we want to avoid scenarios where:
 
-- A user moves cursor over a button that toggles the dropdown menu and clicks, which immediately closes the dropdown after opening it on hover.
-- A user wants to click on an element below a closed dropdown but accidentally opens it on hover and clicks inside the dropdown instead.
+- A user moves cursor over a button that toggles the dropdown menu and clicks,
+  which immediately closes the dropdown after opening it on hover.
+- A user wants to click on an element below a closed dropdown but accidentally
+  opens it on hover and clicks inside the dropdown instead.
 
-More information on this topic can be found in the [Accessibility Developer Guide](https://www.accessibility-developer-guide.com/examples/widgets/dropdown/).
+More information on this topic can be found in the
+[Accessibility Developer Guide](https://www.accessibility-developer-guide.com/examples/widgets/dropdown/).
 
 ## Validation
 
-See [amp-mega-menu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mega-menu/validator-amp-mega-menu.protoascii) in the AMP validator specification.
+See
+[amp-mega-menu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mega-menu/validator-amp-mega-menu.protoascii)
+in the AMP validator specification.

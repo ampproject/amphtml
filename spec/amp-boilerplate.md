@@ -22,7 +22,8 @@ AMP HTML documents must contain the following boilerplate in their `head` tag.
 Validation is currently done with regular expressions, so it's important to keep
 mutations as minimal as possible. Currently, the allowed mutations are:
 
-1. Inserting arbitrary whitespace immediately after the `style` tag opens, and immediately before it closes
+1. Inserting arbitrary whitespace immediately after the `style` tag opens, and
+   immediately before it closes
 2. Replacing any space in the snippet below with arbitrary whitespace.
 
 <!-- prettier-ignore-start -->

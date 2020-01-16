@@ -51,9 +51,12 @@ limitations under the License.
 
 ## Configuration
 
-For `<YourSmartAdServerDomain>`, use the domain assigned to your network (e. g. www3.smartadserver.com); It can be found in Smart AdServer's config.js library (e.g., `http://www3.smartadserver.com/config.js?nwid=1234`).
+For `<YourSmartAdServerDomain>`, use the domain assigned to your network (e. g.
+www3.smartadserver.com); It can be found in Smart AdServer's config.js library
+(e.g., `http://www3.smartadserver.com/config.js?nwid=1234`).
 
-For semantics of configuration, please see [Smart AdServer help center](http://help.smartadserver.com/).
+For semantics of configuration, please see
+[Smart AdServer help center](http://help.smartadserver.com/).
 
 ### Supported parameters
 

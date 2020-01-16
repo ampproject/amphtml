@@ -3,7 +3,9 @@ $category@: presentation
 formats:
   - stories
 teaser:
-  text: A single layer of a single page of an AMP story that positions its content in a grid-based layout.
+  text:
+    A single layer of a single page of an AMP story that positions its content
+    in a grid-based layout.
 ---
 
 <!--
@@ -24,7 +26,9 @@ limitations under the License.
 
 # `amp-story-grid-layer`
 
-The `<amp-story-grid-layer>` component lays its children out into a grid. Its implementation is based off of the [CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
+The `<amp-story-grid-layer>` component lays its children out into a grid. Its
+implementation is based off of the
+[CSS Grid Spec](https://www.w3.org/TR/css-grid-1/).
 
 <table>
   <tr>
@@ -61,11 +65,14 @@ The `<amp-story-grid-layer>` component lays its children out into a grid. Its im
 
 ### template [required]
 
-The `template` attribute determines the layout of the grid layer. Available templates are described in the [Templates](#templates) section below.
+The `template` attribute determines the layout of the grid layer. Available
+templates are described in the [Templates](#templates) section below.
 
 ### grid-area [optional]
 
-This attribute is specified on children of `<amp-story-grid-layer>`. `grid-area` specifies the named area (from using a `template` that defines them) in which the element containing this attribute should appear.
+This attribute is specified on children of `<amp-story-grid-layer>`. `grid-area`
+specifies the named area (from using a `template` that defines them) in which
+the element containing this attribute should appear.
 
 Example:
 
@@ -79,15 +86,18 @@ Example:
 
 ## Templates
 
-The following are available templates to specify for the layout of the grid layer.
+The following are available templates to specify for the layout of the grid
+layer.
 
-{% call callout('Tip', type='success') %}
-To see the layout templates in use, check out the [layouts demo on AMP By Example](https://amp.dev/documentation/examples/style-layout/amp_story_layouts/).
+{% call callout('Tip', type='success') %} To see the layout templates in use,
+check out the
+[layouts demo on AMP By Example](https://amp.dev/documentation/examples/style-layout/amp_story_layouts/).
 {% endcall %}
 
 ### fill
 
-The `fill` template shows its first child full bleed. All other children are not shown.
+The `fill` template shows its first child full bleed. All other children are not
+shown.
 
 Names Areas: (none)
 
@@ -107,7 +117,9 @@ Example:
 
 ### vertical
 
-The `vertical` template lays its elements out along the y-axis. By default, its elements are aligned to the top, and can take up the entirety of the screen along the x-axis.
+The `vertical` template lays its elements out along the y-axis. By default, its
+elements are aligned to the top, and can take up the entirety of the screen
+along the x-axis.
 
 Names Areas: (none)
 
@@ -127,7 +139,9 @@ Names Areas: (none)
 
 ### horizontal
 
-The `horizontal` template lays its elements out along the x-axis. By default, its elements are aligned to the start of the line and can take up the entirety of the screen along the y-axis.
+The `horizontal` template lays its elements out along the x-axis. By default,
+its elements are aligned to the start of the line and can take up the entirety
+of the screen along the y-axis.
 
 Names Areas: (none)
 
@@ -147,7 +161,8 @@ Names Areas: (none)
 
 ### thirds
 
-The `thirds` template divides the screen into three equally-sized rows, and allows you to slot content into each area.
+The `thirds` template divides the screen into three equally-sized rows, and
+allows you to slot content into each area.
 
 Named Areas:
 
@@ -333,12 +348,20 @@ An `amp-story-grid-layer` can contain any of the following elements:
 
 ### Landscape half-half UI
 
-The landscape half-half pre templated UI will resize the `<amp-story-grid-layer>` element to take half of the screen rather than the full screen, and be positioned either on the half left or half right of the viewport. This attribute only affects landscape viewports, and is ignored on portrait viewports.
-This template makes it easier to design full bleed landscape stories: splitting the screen in two halves gives each half a portrait ratio on most devices, allowing re-using the portrait assets, design, and templates already built for portrait stories.
+The landscape half-half pre templated UI will resize the
+`<amp-story-grid-layer>` element to take half of the screen rather than the full
+screen, and be positioned either on the half left or half right of the viewport.
+This attribute only affects landscape viewports, and is ignored on portrait
+viewports. This template makes it easier to design full bleed landscape stories:
+splitting the screen in two halves gives each half a portrait ratio on most
+devices, allowing re-using the portrait assets, design, and templates already
+built for portrait stories.
 
-The `position` attribute on the `<amp-story-grid-layer>` element accepts two values: `landscape-half-left` or `landscape-half-right`.
+The `position` attribute on the `<amp-story-grid-layer>` element accepts two
+values: `landscape-half-left` or `landscape-half-right`.
 
-Note: your story needs to enable the `supports-landscape` mode to use this template.
+Note: your story needs to enable the `supports-landscape` mode to use this
+template.
 
 Example:
 

@@ -2,9 +2,12 @@
 
 ## Problem
 
-The [Signed Exchanges](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html)
-(**SXG**) spec introduces a [new format](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#application-signed-exchange)
-for delivery of web content. AMP's [use of SXG](https://amphtml.wordpress.com/2018/01/09/improving-urls-for-amp-pages/)
+The
+[Signed Exchanges](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html)
+(**SXG**) spec introduces a
+[new format](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#application-signed-exchange)
+for delivery of web content. AMP's
+[use of SXG](https://amphtml.wordpress.com/2018/01/09/improving-urls-for-amp-pages/)
 requires additional information to enable proper content negotation on a URL.
 
 ### "Understands" vs "Prefers"
@@ -20,13 +23,14 @@ computational overhead, and able to modify state).
 
 Therefore, the need arises for the origin to distinguish requests from users and
 requests from SXG intermediaries. That is, there is a difference between "I can
-understand the SXG format" and "I prefer an SXG if available". `Accept: application/signed-exchange` indicates the former. No currently-defined header
-indicates the latter.
+understand the SXG format" and "I prefer an SXG if available".
+`Accept: application/signed-exchange` indicates the former. No currently-defined
+header indicates the latter.
 
 ### Target-specific constraints
 
-AMP SXG are intended for [privacy-preserving
-prefetch](https://wicg.github.io/webpackage/draft-yasskin-webpackage-use-cases.html#private-prefetch)
+AMP SXG are intended for
+[privacy-preserving prefetch](https://wicg.github.io/webpackage/draft-yasskin-webpackage-use-cases.html#private-prefetch)
 from a referring page (such as a Google Search results page) to a coordinating
 AMP cache (such as the Google AMP Cache). If the referrer wishes to prefetch
 subresources as well, they must also be served from a coordinating AMP cache, in
@@ -37,19 +41,20 @@ Therefore, the requestor of an SXG may require the origin to produce an SXG
 tailored to the AMP Cache that is requesting it, by rewriting its subresource
 URLs appropriately.
 
-AMP caches may may require the origin to apply [AMP
-transforms](amp-cache-modifications.md), and may only accept specific versions
-of those transforms. This allows the AMP cache to:
+AMP caches may may require the origin to apply
+[AMP transforms](amp-cache-modifications.md), and may only accept specific
+versions of those transforms. This allows the AMP cache to:
 
 1. Make continuous improvements to the AMP transforms and the transformed AMP
    validation code.
-2. Try to satisfy [AMP's design principles](https://www.ampproject.org/about/amp-design-principles/),
-   especially as deficiencies in the transforms are found, by guaranteeing
-   that its cache of SXGs don't contain those deficiencies.
+2. Try to satisfy
+   [AMP's design principles](https://www.ampproject.org/about/amp-design-principles/),
+   especially as deficiencies in the transforms are found, by guaranteeing that
+   its cache of SXGs don't contain those deficiencies.
 3. Keep its validation code of bounded complexity, by not needing to validate
    all possible versions of the transforms.
-4. Guarantee that all responses it fetches from publishers are useful, and
-   don't require a second fetch for unsigned content.
+4. Guarantee that all responses it fetches from publishers are useful, and don't
+   require a second fetch for unsigned content.
 
 ## Solution
 
@@ -73,7 +78,8 @@ minimal understanding of the underlying format.
 
 ## Header syntax
 
-The header value is a [parameterised list from header-structure-07](https://tools.ietf.org/html/draft-ietf-httpbis-header-structure-07#section-3.3).
+The header value is a
+[parameterised list from header-structure-07](https://tools.ietf.org/html/draft-ietf-httpbis-header-structure-07#section-3.3).
 
 ## Server behavior
 
@@ -88,7 +94,8 @@ For each identifier:
 
 1.  If the identifier contains a `v` parameter, then its value represents a set
     of AMP transform versions. The server should respond with an SXG only if it
-    can produce one of the versions in that set (see [Version negotation](#version-negotiation)).
+    can produce one of the versions in that set (see
+    [Version negotation](#version-negotiation)).
 2.  If the identifier contains any parameters besides those mentioned above,
     then this identifier cannot be satisfied. The server should attempt to match
     the next one. (This reserves the parameter space for future additional
@@ -97,9 +104,10 @@ For each identifier:
     prefetching intermediary, and therefore its subresource URLs needn't be (but
     may be) rewritten.
 4.  Otherwise, if the identifier is an `id` from the list in
-    [caches.json](../build-system/global-configs/caches.json), then the SXG should have its subresource URLs
-    rewritten. That `id`'s corresponding `cacheDomain` indicates the
-    fully-qualified domain name that forms the basis for the URL rewrites.
+    [caches.json](../build-system/global-configs/caches.json), then the SXG
+    should have its subresource URLs rewritten. That `id`'s corresponding
+    `cacheDomain` indicates the fully-qualified domain name that forms the basis
+    for the URL rewrites.
 5.  Otherwise, the identifier is invalid and cannot be satisfied. The server
     should attempt to match the next one.
 
@@ -110,9 +118,11 @@ out-of-date with the canonical linked above.
 
 This section uses the ABNF rules of
 [RFCF5234](https://tools.ietf.org/html/rfc5234), augmented with the list
-extension defined in [RFC7230 section 7](https://tools.ietf.org/html/rfc7230#section-7),
-the OWS rule from [RFC7230 section 3.2.3](https://tools.ietf.org/html/rfc7230#section-3.2.3),
-and the "sh-" rules in [header-structure-07](https://tools.ietf.org/html/draft-ietf-httpbis-header-structure-07).
+extension defined in
+[RFC7230 section 7](https://tools.ietf.org/html/rfc7230#section-7), the OWS rule
+from [RFC7230 section 3.2.3](https://tools.ietf.org/html/rfc7230#section-3.2.3),
+and the "sh-" rules in
+[header-structure-07](https://tools.ietf.org/html/draft-ietf-httpbis-header-structure-07).
 
 The `v` parameter value must be a string. Its value (after parsing as a string)
 must conform to the following ABNF:
@@ -181,10 +191,10 @@ to aid caching proxies that understand that header.
 ### URL rewrites
 
 The exact set of rewrites is not yet fully specified; a few
-[examples](amp-cache-modifications.md#user-content-cache-urls)
-are available, and a [reference implementation](https://github.com/ampproject/amppackager)
-will soon be available. In the interim, the Google AMP Cache will not require
-any rewrites (and, as a result, will not prefetch any subresources).
+[examples](amp-cache-modifications.md#user-content-cache-urls) are available,
+and a [reference implementation](https://github.com/ampproject/amppackager) will
+soon be available. In the interim, the Google AMP Cache will not require any
+rewrites (and, as a result, will not prefetch any subresources).
 
 The list of rewrites is limited to base URLs within `caches.json` in order to
 provide the publisher some assurance that the rewritten subresources are
@@ -192,26 +202,27 @@ faithful representations of the original subresources.
 
 For the sake of security, all script source URLs will need to be on
 `cdn.ampproject.org`, regardless of the target AMP cache. This provides the
-publisher additional assurance that the JS is not an arbitrary payload. It would be
-nice to get rid of this dependency; something like [signature-based
-SRI](https://github.com/mikewest/signature-based-sri) might be feasible.
+publisher additional assurance that the JS is not an arbitrary payload. It would
+be nice to get rid of this dependency; something like
+[signature-based SRI](https://github.com/mikewest/signature-based-sri) might be
+feasible.
 
 ## Interaction with content negotation
 
-If the URL serves multiple variants, and is thus subject to [HTTP proactive
-negotation](https://tools.ietf.org/html/rfc7231#section-3.4.1), then
-`AMP-Cache-Transform` should only take effect after proactive negotiation has
-selected a resource of content type `application/signed-exchange`. In theory,
-there may be an interaction with content negotation. For instance, assume the
-request is:
+If the URL serves multiple variants, and is thus subject to
+[HTTP proactive negotation](https://tools.ietf.org/html/rfc7231#section-3.4.1),
+then `AMP-Cache-Transform` should only take effect after proactive negotiation
+has selected a resource of content type `application/signed-exchange`. In
+theory, there may be an interaction with content negotation. For instance,
+assume the request is:
 
 ```http
 Accept-Language: en, de
 AMP-Cache-Transform: google
 ```
 
-and the server can only deliver a resource of `de`+`google` or `en`+`cloudflare`.
-In this case, content negotiation may select `en`, and then
+and the server can only deliver a resource of `de`+`google` or
+`en`+`cloudflare`. In this case, content negotiation may select `en`, and then
 `AMP-Cache-Transform` negotiation would see that the constraint cannot be
 satisfied. In practice, it is expected that this will not happen. Servers should
 avoid such pessimizing interactions with HTTP content negotiation, by being able
@@ -241,9 +252,8 @@ following is true:
 2.  Any of:
     1. `spec` does not include a `v` parameter.
     2. `spec`'s `v` parameter is a valid `v_spec`, the response has a `v`
-       parameter (specifying a single version as per
-       [above](#response-header)), and the response's `v` is an element of the
-       request's `v`.
+       parameter (specifying a single version as per [above](#response-header)),
+       and the response's `v` is an element of the request's `v`.
 3.  `spec` does not include any parameter other than those mentioned above.
 
 The above is merely informational; a cache may choose any strategy that doesn't
@@ -253,8 +263,8 @@ above).
 ## Future work
 
 As this defines a new content negotiation header field, we should ensure that it
-meets the criteria set for integration with [HTTP
-Variants](https://tools.ietf.org/html/draft-ietf-httpbis-variants-04#section-6).
+meets the criteria set for integration with
+[HTTP Variants](https://tools.ietf.org/html/draft-ietf-httpbis-variants-04#section-6).
 
 ## Alternatives considered
 
@@ -262,11 +272,11 @@ Variants](https://tools.ietf.org/html/draft-ietf-httpbis-variants-04#section-6).
 
 Alternatively, one could use
 [q-values](https://tools.ietf.org/html/rfc7231#section-5.3.1) for specifying
-preference of `application/signed-exchange` over other variants, and [media type
-parameters](https://tools.ietf.org/html/rfc7231#section-3.1.1.1) for specifying
-target and version requirements. These are idiomatic applications of existing
-syntaxes, but may come with some downsides. This is an area under investigation
-and
+preference of `application/signed-exchange` over other variants, and
+[media type parameters](https://tools.ietf.org/html/rfc7231#section-3.1.1.1) for
+specifying target and version requirements. These are idiomatic applications of
+existing syntaxes, but may come with some downsides. This is an area under
+investigation and
 [discussion](https://lists.w3.org/Archives/Public/ietf-http-wg/2019JanMar/0174.html);
 feel free to get involved.
 
@@ -279,12 +289,12 @@ subresource URLs, would send:
 AMP-Cache-Transform: any
 ```
 
-The responder may send an SXG with subresource URLs rewritten for a
-particular cache or with the original subresource URLs, or a non-SXG response.
+The responder may send an SXG with subresource URLs rewritten for a particular
+cache or with the original subresource URLs, or a non-SXG response.
 
 A requestor wishing to receive an SXG to be served from and prefetched from the
-Google AMP Cache (e.g. [Googlebot](https://support.google.com/webmasters/answer/182072))
-would send:
+Google AMP Cache (e.g.
+[Googlebot](https://support.google.com/webmasters/answer/182072)) would send:
 
 ```http
 AMP-Cache-Transform: google

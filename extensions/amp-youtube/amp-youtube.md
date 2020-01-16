@@ -46,7 +46,8 @@ Displays a <a href="https://www.youtube.com/">YouTube</a> video.
 
 ## Example
 
-With the responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
+With the responsive layout, the width and height from the example should yield
+correct layouts for 16:9 aspect ratio videos:
 
 ```html
 <amp-youtube
@@ -143,4 +144,6 @@ With the responsive layout, the width and height from the example should yield c
 
 ## Validation
 
-See [amp-youtube rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/validator-amp-youtube.protoascii) in the AMP validator specification.
+See
+[amp-youtube rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/validator-amp-youtube.protoascii)
+in the AMP validator specification.

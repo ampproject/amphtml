@@ -16,12 +16,16 @@ limitations under the License.
 
 # AMP Ad Refresh
 
-AMP Ad Refresh permits amp-ad tags using Fast Fetch to undergo periodic refresh events. Each such event issues a new ad request and attempts to display the returned creative.
+AMP Ad Refresh permits amp-ad tags using Fast Fetch to undergo periodic refresh
+events. Each such event issues a new ad request and attempts to display the
+returned creative.
 
 ### Network Configuration
 
-For a network to make use of Refresh, its corresponding implementation must create an instance of RefreshManager and call
-`initiateRefreshCycle`. The simplest way to do so is to use the exported `getRefreshManager` function from refresh-manager.js:
+For a network to make use of Refresh, its corresponding implementation must
+create an instance of RefreshManager and call `initiateRefreshCycle`. The
+simplest way to do so is to use the exported `getRefreshManager` function from
+refresh-manager.js:
 
 ```javascript
 import {getRefreshManager} from '../../amp-a4a/0.1/refresh-manager';
@@ -32,7 +36,10 @@ const refreshManager = getRefreshManager(this);
 refreshManager.initiateRefreshCycle();
 ```
 
-While `getRefreshManager` is convenient, it does not allow for customization. It returns a RefreshManager with default configurations (specified in the table below). To customize the RefreshManager, you must invoke its constructor directly:
+While `getRefreshManager` is convenient, it does not allow for customization. It
+returns a RefreshManager with default configurations (specified in the table
+below). To customize the RefreshManager, you must invoke its constructor
+directly:
 
 ```javascript
 import {
@@ -53,7 +60,12 @@ const refreshManager = new RefreshManager(this, refreshConfig, refreshInterval);
 refreshManager.initiateRefreshCycle();
 ```
 
-Optionally, a network may override AmpA4A's `refresh` method, which would allow it to insert custom logic in between refresh events. Note: RefreshManager passes a callback to `refresh` which must be invoked in order to reset the cycle; if it is not invoked, the RefreshManager will become idle until either the callback or `initiateRefreshCycle` is called. If `refresh` is not overridden, this is handled automatically by AmpA4A.
+Optionally, a network may override AmpA4A's `refresh` method, which would allow
+it to insert custom logic in between refresh events. Note: RefreshManager passes
+a callback to `refresh` which must be invoked in order to reset the cycle; if it
+is not invoked, the RefreshManager will become idle until either the callback or
+`initiateRefreshCycle` is called. If `refresh` is not overridden, this is
+handled automatically by AmpA4A.
 
 <table>
   <tr>

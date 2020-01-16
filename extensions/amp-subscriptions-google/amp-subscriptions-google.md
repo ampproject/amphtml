@@ -56,15 +56,20 @@ Implements subscription-style access protocol for Subscribe with Google.
 
 ## Introduction
 
-The `amp-subscriptions-google` is the extension that enables Subscribe with Google in an AMP page.
+The `amp-subscriptions-google` is the extension that enables Subscribe with
+Google in an AMP page.
 
-See [amp-subscriptions](../amp-subscriptions/amp-subscriptions.md) for more details on AMP Subscriptions.
+See [amp-subscriptions](../amp-subscriptions/amp-subscriptions.md) for more
+details on AMP Subscriptions.
 
-See [Subscribe with Google GitHub repo](https://github.com/subscriptions-project/swg-js) for details on the project itself.
+See
+[Subscribe with Google GitHub repo](https://github.com/subscriptions-project/swg-js)
+for details on the project itself.
 
 ## Configuration
 
-The `amp-subscriptions-google` is configured as part of `amp-subscriptions` configuration.
+The `amp-subscriptions-google` is configured as part of `amp-subscriptions`
+configuration.
 
 ```html
 <head>
@@ -96,9 +101,14 @@ The `amp-subscriptions-google` is configured as part of `amp-subscriptions` conf
 
 ## Entitlements pingback
 
-As described in [amp-subscriptions](../amp-subscriptions/amp-subscriptions.md#pingback-endpoint), if a `pingbackUrl` is specified by the local service, the entitlements response returned by the "winning" service will be sent to the `pingbackUrl` via a POST request.
+As described in
+[amp-subscriptions](../amp-subscriptions/amp-subscriptions.md#pingback-endpoint),
+if a `pingbackUrl` is specified by the local service, the entitlements response
+returned by the "winning" service will be sent to the `pingbackUrl` via a POST
+request.
 
-If `subscribe.google.com` is the "winning" service, the request to the `pingbackUrl` will be of the following format:
+If `subscribe.google.com` is the "winning" service, the request to the
+`pingbackUrl` will be of the following format:
 
 ```json
 {
@@ -115,7 +125,9 @@ If `subscribe.google.com` is the "winning" service, the request to the `pingback
 }
 ```
 
-Where `data` matches the [entitlements response](https://github.com/subscriptions-project/swg-js/blob/master/docs/entitlements-flow.md#entitlement-response) format.
+Where `data` matches the
+[entitlements response](https://github.com/subscriptions-project/swg-js/blob/master/docs/entitlements-flow.md#entitlement-response)
+format.
 
 ## Example with markup
 

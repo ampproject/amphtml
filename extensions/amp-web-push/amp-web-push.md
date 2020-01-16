@@ -24,7 +24,9 @@ limitations under the License.
 
 # amp-web-push
 
-Allows users to subscribe to <a href="https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/">web push notifications</a>.
+Allows users to subscribe to
+<a href="https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/">web
+push notifications</a>.
 
 <table>
   <tr>
@@ -43,11 +45,16 @@ Allows users to subscribe to <a href="https://developers.google.com/web/fundamen
 
 ## Behavior
 
-Developers compose widgets that appear based on a user's subscription state. Widgets are composed of AMP elements and can be as simple as a button or a text link.
+Developers compose widgets that appear based on a user's subscription state.
+Widgets are composed of AMP elements and can be as simple as a button or a text
+link.
 
 _Example_
 
-Clicking the subscription widget pops up a page prompting the user for notification permissions and signals the service worker (configured below) to subscribe the user to push in the background. Clicking the unsubscription widget signals the worker to unsubscribe the user from push in the background.
+Clicking the subscription widget pops up a page prompting the user for
+notification permissions and signals the service worker (configured below) to
+subscribe the user to push in the background. Clicking the unsubscription widget
+signals the worker to unsubscribe the user from push in the background.
 
 ```html
 <!-- A subscription widget -->
@@ -86,7 +93,10 @@ Widgets are initially hidden while the user's subscription state is computed.</t
 
 ## Configuration
 
-The `amp-web-push` component requires extra integration on your site. You will need to upload two HTML files (provided) on your site as well as an amp-web-push compatible service worker JavaScript file. These three files form the configuration described below.
+The `amp-web-push` component requires extra integration on your site. You will
+need to upload two HTML files (provided) on your site as well as an amp-web-push
+compatible service worker JavaScript file. These three files form the
+configuration described below.
 
 ```html
 <amp-web-push
@@ -96,7 +106,8 @@ The `amp-web-push` component requires extra integration on your site. You will n
 ></amp-web-push>
 ```
 
-All properties are <strong>required</strong>, and all URLs must begin with the same origin (e.g. `https://example.com`).
+All properties are <strong>required</strong>, and all URLs must begin with the
+same origin (e.g. `https://example.com`).
 
 <table>
   <tr>
@@ -160,4 +171,6 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
 
 ## Validation
 
-See [amp-web-push rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/validator-amp-web-push.protoascii) in the AMP validator specification.
+See
+[amp-web-push rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/validator-amp-web-push.protoascii)
+in the AMP validator specification.

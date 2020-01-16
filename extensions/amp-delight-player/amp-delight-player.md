@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-delight-player
 
-The <code>amp-delight-player</code> element displays a cloud-hosted [Delight Player](https://delight-vr.com/).
+The <code>amp-delight-player</code> element displays a cloud-hosted
+[Delight Player](https://delight-vr.com/).
 
 <table>
   <tr>
@@ -41,8 +42,9 @@ The <code>amp-delight-player</code> element displays a cloud-hosted [Delight Pla
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
-The `data-content-id` attribute is required to load the correct video.
+The `width` and `height` attributes determine the aspect ratio of the player
+embedded in responsive layouts. The `data-content-id` attribute is required to
+load the correct video.
 
 Example:
 
@@ -95,8 +97,11 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
 
 ## Actions
 
-`amp-delight-player` exposes four self-explanatory actions: `play`, `pause`, `mute` and `unmute`.
+`amp-delight-player` exposes four self-explanatory actions: `play`, `pause`,
+`mute` and `unmute`.
 
 ## Validation
 
-See [amp-delight-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/validator-amp-delight-player.protoascii) in the AMP validator specification.
+See
+[amp-delight-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-delight-player/validator-amp-delight-player.protoascii)
+in the AMP validator specification.

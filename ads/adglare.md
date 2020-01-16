@@ -33,7 +33,8 @@ limitations under the License.
 
 ## Configuration
 
-For more information, read AdGlare's blog article about [AMP Ad Tags](https://www.adglare.com/kb/51/amp-ad-server).
+For more information, read AdGlare's blog article about
+[AMP Ad Tags](https://www.adglare.com/kb/51/amp-ad-server).
 
 ### Required parameters
 

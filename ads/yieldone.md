@@ -31,7 +31,9 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact [YieldOne](https://yieldone.com/service/contact/media/index.php) or email: `y1dev@platform-one.co.jp`.
+For configuration details and to generate your tags, please contact
+[YieldOne](https://yieldone.com/service/contact/media/index.php) or email:
+`y1dev@platform-one.co.jp`.
 
 Supported parameters:
 

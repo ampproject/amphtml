@@ -47,8 +47,8 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-google-document-embed` component displays document files like Word documents,
-Excel spreadsheets, and PDFs.
+The `amp-google-document-embed` component displays document files like Word
+documents, Excel spreadsheets, and PDFs.
 
 Example:
 
@@ -70,8 +70,12 @@ The URL of the document.
 
 ##### common attributes
 
-This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
+This element includes
+[common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Validation
 
-See [amp-google-document-embed rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-google-document-embed/validator-amp-google-document-embed.protoascii) in the AMP validator specification.
+See
+[amp-google-document-embed rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-google-document-embed/validator-amp-google-document-embed.protoascii)
+in the AMP validator specification.

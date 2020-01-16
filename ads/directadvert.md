@@ -25,7 +25,8 @@ limitations under the License.
 
 ## Configuration
 
-For more information, please [see the Directadvert FAQ](https://www.directadvert.ru/text/help).
+For more information, please
+[see the Directadvert FAQ](https://www.directadvert.ru/text/help).
 
 ### Required parameters
 

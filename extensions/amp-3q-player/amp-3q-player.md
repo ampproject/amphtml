@@ -41,7 +41,8 @@ Embeds videos from <a href="https://www.3qsdn.com/en/">3Q SDN</a>.
 
 ## Example
 
-With the `responsive` layout, the width and height in this should yield correct layouts for 16:9 aspect ratio videos:
+With the `responsive` layout, the width and height in this should yield correct
+layouts for 16:9 aspect ratio videos:
 
 ```html
 <amp-3q-player
@@ -79,4 +80,6 @@ With the `responsive` layout, the width and height in this should yield correct 
 
 ## Validation
 
-See [amp-3q-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3q-player/validator-amp-3q-player.protoascii) in the AMP validator specification.
+See
+[amp-3q-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3q-player/validator-amp-3q-player.protoascii)
+in the AMP validator specification.

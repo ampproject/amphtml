@@ -42,15 +42,23 @@ limitations under the License.
 
 ## Overview
 
-At [Narrativ](https://narrativ.com/), we transform static commerce links into dynamic, multimerchant nodes. With a library of millions of products matched to expert reviews from top commerce publishers, we lift publisher revenue through real-time bidding and data solutions.
+At [Narrativ](https://narrativ.com/), we transform static commerce links into
+dynamic, multimerchant nodes. With a library of millions of products matched to
+expert reviews from top commerce publishers, we lift publisher revenue through
+real-time bidding and data solutions.
 
-This AMP extension is our Linkmate service in AMP. See the full documentation for Linkmate [here](http://docs.narrativ.com/en/stable/linkmate.html).
+This AMP extension is our Linkmate service in AMP. See the full documentation
+for Linkmate [here](http://docs.narrativ.com/en/stable/linkmate.html).
 
 ## Getting started
 
-Your account must be a member of our Linkmate program to use this feature. For more information about this program, feel free to contact your account manager or [hello@narrativ.com](mailto:hello@narrativ.com).
+Your account must be a member of our Linkmate program to use this feature. For
+more information about this program, feel free to contact your account manager
+or [hello@narrativ.com](mailto:hello@narrativ.com).
 
-NOTE: If you plan to use `amp-smartlinks` alongside other affiliate partners you will need to specify the meta tag shown below. The tag will specify the order in which the affiliate tags fire.
+NOTE: If you plan to use `amp-smartlinks` alongside other affiliate partners you
+will need to specify the meta tag shown below. The tag will specify the order in
+which the affiliate tags fire.
 
 In your AMP page you will have to add the following snippets:
 
@@ -116,4 +124,5 @@ In your AMP page you will have to add the following snippets:
 
 ## Validation
 
-See [amp-smartlinks rules](validator-amp-smartlinks.protoascii) in the AMP validator specification.
+See [amp-smartlinks rules](validator-amp-smartlinks.protoascii) in the AMP
+validator specification.

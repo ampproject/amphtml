@@ -71,4 +71,6 @@ Playlist Mode:
 
 ## Validation
 
-See [amp-apester-media rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-apester-media/validator-amp-apester-media.protoascii) in the AMP validator specification.
+See
+[amp-apester-media rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-apester-media/validator-amp-apester-media.protoascii)
+in the AMP validator specification.

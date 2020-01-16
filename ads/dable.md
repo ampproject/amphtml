@@ -33,7 +33,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://admin.dable.io.
+For configuration details and to generate your tags, please contact
+https://admin.dable.io.
 
 ### Required parameters
 

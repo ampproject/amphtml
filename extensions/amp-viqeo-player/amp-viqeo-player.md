@@ -51,7 +51,8 @@ Displays a <a href="https://viqeo.tv/">Viqeo</a> video player.
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the Viqeo embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the Viqeo
+embedded in responsive layouts.
 
 ```html
 <amp-viqeo-player

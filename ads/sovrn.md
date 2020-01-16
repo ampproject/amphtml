@@ -42,7 +42,8 @@ limitations under the License.
 
 ## Configuration
 
-For existing sovrn customers, feel free to contact amp-implementations@sovrn.com for assistance with setting up your amp-ad tagid.
+For existing sovrn customers, feel free to contact amp-implementations@sovrn.com
+for assistance with setting up your amp-ad tagid.
 
 For new customers, please see www.sovrn.com to sign up and get started!
 
@@ -54,5 +55,6 @@ Supported parameters:
 - `data-u`
 - `data-iid`
 - `data-aid`
-- `data-tf: A Boolean value used only for testing. Either remove it or set it to false for real world production work.
+- `data-tf: A Boolean value used only for testing. Either remove it or set it to
+  false for real world production work.
 - `data-z`

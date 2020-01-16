@@ -33,7 +33,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration semantics, please see [AdSpeed documentation](https://www.adspeed.com/Knowledges/1950/Ad-Tag/Accelerated-Mobile-Pages-Project-AMP-Ad.html).
+For configuration semantics, please see
+[AdSpeed documentation](https://www.adspeed.com/Knowledges/1950/Ad-Tag/Accelerated-Mobile-Pages-Project-AMP-Ad.html).
 
 Supported parameters:
 

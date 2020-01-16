@@ -77,11 +77,13 @@ The `amp-action-macro` component allows for the creation of reusable actions.
 
 ##### id
 
-Used to uniquely identify the action. This is referenced in an action invocation.
+Used to uniquely identify the action. This is referenced in an action
+invocation.
 
 ##### execute
 
-The action to invoke. Any valid amp action is allowed here. See [actions and events in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
+The action to invoke. Any valid amp action is allowed here. See
+[actions and events in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events).
 
 e.g.
 
@@ -104,5 +106,5 @@ e.g.
 
 ##### arguments
 
-Used to define arguments that can be used in the called invocation and substituted
-in the amp action macro call.
+Used to define arguments that can be used in the called invocation and
+substituted in the amp action macro call.

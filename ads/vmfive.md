@@ -62,7 +62,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact http://vmfive.com/index.html#contact
+For configuration details and to generate your tags, please contact
+http://vmfive.com/index.html#contact
 
 Supported parameters:
 

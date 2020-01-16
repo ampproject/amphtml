@@ -45,7 +45,8 @@ Displays the AOL O2Player.
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the player
+embedded in responsive layouts.
 
 Example:
 
@@ -93,7 +94,9 @@ Example:
 
 ## Validation
 
-See [amp-o2-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/validator-amp-o2-player.protoascii) in the AMP validator specification.
+See
+[amp-o2-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-o2-player/validator-amp-o2-player.protoascii)
+in the AMP validator specification.
 
 The following lists validation errors specific to the `amp-o2-player` tag:
 

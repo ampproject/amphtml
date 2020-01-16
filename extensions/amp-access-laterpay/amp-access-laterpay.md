@@ -3,7 +3,9 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Allows publishers to easily integrate with the LaterPay micropayments platform.
+  text:
+    Allows publishers to easily integrate with the LaterPay micropayments
+    platform.
 ---
 
 <!---
@@ -24,7 +26,10 @@ limitations under the License.
 
 # amp-access-laterpay
 
-Allows publishers to easily integrate with the <a href="https://www.laterpay.net">LaterPay</a> micropayments platform. <code>amp-access-laterpay</code> is based on, and requires <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.
+Allows publishers to easily integrate with the
+<a href="https://www.laterpay.net">LaterPay</a> micropayments platform.
+<code>amp-access-laterpay</code> is based on, and requires
+<a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.
 
 <table>
   <tr>
@@ -52,29 +57,55 @@ Allows publishers to easily integrate with the <a href="https://www.laterpay.net
 
 ## Behavior
 
-<a href="https://laterpay.net">LaterPay</a> is a micropayment platform that allows users to buy any online content with just two clicks, and get immediate access – without upfront registration, personal data, or payment. Users only pay, once their purchases have reached a total of \$5 or 5€ across websites. Content providers can sell individual items or time passes, which allow flatrate access or time limited access to content.
+<a href="https://laterpay.net">LaterPay</a> is a micropayment platform that
+allows users to buy any online content with just two clicks, and get immediate
+access – without upfront registration, personal data, or payment. Users only
+pay, once their purchases have reached a total of \$5 or 5€ across websites.
+Content providers can sell individual items or time passes, which allow flatrate
+access or time limited access to content.
 
-If you're integrating LaterPay via the [Connector Script integration](https://docs.laterpay.net/connector/) you won't be able to use that integration on AMP pages. `amp-access-laterpay` is analogous to Connector Script, providing a similar set of features, but built for AMP pages.
+If you're integrating LaterPay via the
+[Connector Script integration](https://docs.laterpay.net/connector/) you won't
+be able to use that integration on AMP pages. `amp-access-laterpay` is analogous
+to Connector Script, providing a similar set of features, but built for AMP
+pages.
 
-It's also possible to sell content via LaterPay simply using `amp-access-laterpay` as the sole integration method.
+It's also possible to sell content via LaterPay simply using
+`amp-access-laterpay` as the sole integration method.
 
-The `amp-access-laterpay` component uses AMP Access internally to provide a behavior similar to AMP Access, but tailored for usage with the LaterPay service.
+The `amp-access-laterpay` component uses AMP Access internally to provide a
+behavior similar to AMP Access, but tailored for usage with the LaterPay
+service.
 
-If you have your own paywall service that you'd like to use with AMP Access and would like to use it together with LaterPay on the same page, it's <a href="#using-amp-access-laterpay-together-with-amp-access ">also possible to do so</a>.
+If you have your own paywall service that you'd like to use with AMP Access and
+would like to use it together with LaterPay on the same page, it's
+<a href="#using-amp-access-laterpay-together-with-amp-access ">also possible to
+do so</a>.
 
-The `amp-access-laterpay` component does not require an authorization or pingback configuration, because it is pre-configured to work with the LaterPay service. It also does not require manual setup of login links.
+The `amp-access-laterpay` component does not require an authorization or
+pingback configuration, because it is pre-configured to work with the LaterPay
+service. It also does not require manual setup of login links.
 
-The different purchase options can be configured on the publisher's LaterPay account, and the component will retrieve the configuration and create a list of available purchase options.
+The different purchase options can be configured on the publisher's LaterPay
+account, and the component will retrieve the configuration and create a list of
+available purchase options.
 
-You can refer to the documentation on configuring the [LaterPay Connector](https://docs.laterpay.net/connector/configuration/), LaterPay's existing front-end integration, to learn how to configure the purchase options.
+You can refer to the documentation on configuring the
+[LaterPay Connector](https://docs.laterpay.net/connector/configuration/),
+LaterPay's existing front-end integration, to learn how to configure the
+purchase options.
 
-The generated list can be styled and presented according to the publisher's preference.
+The generated list can be styled and presented according to the publisher's
+preference.
 
-This component also relies on [Access Content Markup](https://amp.dev/documentation/components/amp-access#access-content-markup) to show and hide content.
+This component also relies on
+[Access Content Markup](https://amp.dev/documentation/components/amp-access#access-content-markup)
+to show and hide content.
 
 ## Configuration
 
-Configuration is similar to AMP Access, but no authorization, pingback and login links are required.
+Configuration is similar to AMP Access, but no authorization, pingback and login
+links are required.
 
 ```html
 <script id="amp-access" type="application/json">
@@ -146,9 +177,13 @@ The following values can be set in the `laterpay` config object:
 
 Access Content Markup should be used in the same way as with AMP Access.
 
-The element with id `amp-access-laterpay-dialog` will render a list of purchase options when the user does not have access to the article. This list has some very basic styling and can be customized to feel more integrated in the publisher's page.
+The element with id `amp-access-laterpay-dialog` will render a list of purchase
+options when the user does not have access to the article. This list has some
+very basic styling and can be customized to feel more integrated in the
+publisher's page.
 
-Make sure you add the `amp-access-laterpay` class if you want to use the default styling.
+Make sure you add the `amp-access-laterpay` class if you want to use the default
+styling.
 
 ```html
 <section amp-access="NOT error AND NOT access" amp-access-hide>
@@ -166,9 +201,12 @@ Make sure you add the `amp-access-laterpay` class if you want to use the default
 
 ## Styling
 
-Multiple classes are applied to some of the elements in the generated markup. Elements with no classes can be referred unambiguously through CSS element selectors.
+Multiple classes are applied to some of the elements in the generated markup.
+Elements with no classes can be referred unambiguously through CSS element
+selectors.
 
-Some basic layout CSS already exists, but it's recommended that publishers style it to match the look and feel of their pages.
+Some basic layout CSS already exists, but it's recommended that publishers style
+it to match the look and feel of their pages.
 
 The structure created for the dialog looks as follows:
 
@@ -212,9 +250,11 @@ The structure created for the dialog looks as follows:
 
 ## Localization
 
-The text shown in the dialog for the purchase options will be defined by the publisher in the LaterPay Connector UI.
+The text shown in the dialog for the purchase options will be defined by the
+publisher in the LaterPay Connector UI.
 
-The remaining text is part of the extended component and can be changed and localized via the configuration options as follows:
+The remaining text is part of the extended component and can be changed and
+localized via the configuration options as follows:
 
 ```html
 <script id="amp-access" type="application/json">
@@ -229,7 +269,8 @@ The remaining text is part of the extended component and can be changed and loca
 </script>
 ```
 
-The following message keys can be translated or customized, but be aware that they should retain their original meaning and intent.
+The following message keys can be translated or customized, but be aware that
+they should retain their original meaning and intent.
 
 <table>
   <tr>
@@ -271,19 +312,30 @@ The following message keys can be translated or customized, but be aware that th
 
 ## Analytics
 
-Given that `amp-access-laterpay` is based on `amp-access` it supports all the [analytics events](https://amp.dev/documentation/components/amp-access#integration-with-amp-analytics) sent by `amp-access`.
+Given that `amp-access-laterpay` is based on `amp-access` it supports all the
+[analytics events](https://amp.dev/documentation/components/amp-access#integration-with-amp-analytics)
+sent by `amp-access`.
 
-The examples at https://ampexample.laterpay.net/ are all configured to send these analytics events if you'd like to see a more complete example as to how this would look in practice.
+The examples at https://ampexample.laterpay.net/ are all configured to send
+these analytics events if you'd like to see a more complete example as to how
+this would look in practice.
 
 ## Using AMP Access LaterPay together with AMP Access
 
-If you have an existing subscription system and you intend to use LaterPay only for individual article sales, it's possible to have both sale methods coexist in the same page, using both AMP Access and AMP Access LaterPay together.
+If you have an existing subscription system and you intend to use LaterPay only
+for individual article sales, it's possible to have both sale methods coexist in
+the same page, using both AMP Access and AMP Access LaterPay together.
 
-First of, please refer to the [AMP Access](https://amp.dev/documentation/components/amp-access) documentation to learn how to configure AMP Access with your existing paywall.
+First of, please refer to the
+[AMP Access](https://amp.dev/documentation/components/amp-access) documentation
+to learn how to configure AMP Access with your existing paywall.
 
-The [multiple providers](https://amp.dev/documentation/components/amp-access#multiple-access-providers) section explains how to setup multiple providers with namespaces.
+The
+[multiple providers](https://amp.dev/documentation/components/amp-access#multiple-access-providers)
+section explains how to setup multiple providers with namespaces.
 
-When using it with LaterPay and an existing paywall integration, the necessary configuration can look something like this:
+When using it with LaterPay and an existing paywall integration, the necessary
+configuration can look something like this:
 
 ```html
 <script id="amp-access" type="application/json">
@@ -334,15 +386,19 @@ Where as the content access markup could end up looking like this:
 </div>
 ```
 
-You can find a more complete example at https://ampexample.laterpay.net/dual-amp-access.html
+You can find a more complete example at
+https://ampexample.laterpay.net/dual-amp-access.html
 
 ## Related Documentation
 
 - [AMP Access](https://amp.dev/documentation/components/amp-access)
 - [LaterPay](https://www.laterpay.net)
 - [LaterPay: How we do MicroPayments](https://docs.laterpay.net/how_we_do_micropayments/)
-- [LaterPay Connector](https://connectormwi.laterpay.net/docs/index.html) - Similar to AMP Access LaterPay but for non AMP pages.
+- [LaterPay Connector](https://connectormwi.laterpay.net/docs/index.html) -
+  Similar to AMP Access LaterPay but for non AMP pages.
 
 ## Validation
 
-See [amp-access-laterpay rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-laterpay/validator-amp-access-laterpay.protoascii) in the AMP validator specification.
+See
+[amp-access-laterpay rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access-laterpay/validator-amp-access-laterpay.protoascii)
+in the AMP validator specification.

@@ -41,12 +41,14 @@ limitations under the License.
 
 ## Overview
 
-`amp-link-rewriter` allows publishers to rewrite URL based on configurable pattern.
+`amp-link-rewriter` allows publishers to rewrite URL based on configurable
+pattern.
 
 ## Getting started
 
-**Add the required script**
-Inside the `<head>...</head>` section of your AMP page, insert this code before the line `<script async src="https://cdn.ampproject.org/v0.js"></script>`
+**Add the required script** Inside the `<head>...</head>` section of your AMP
+page, insert this code before the line
+`<script async src="https://cdn.ampproject.org/v0.js"></script>`
 
 Code:
 
@@ -58,8 +60,9 @@ Code:
 ></script>
 ```
 
-**Add the amp-link-rewriter extension**
-Inside the `<body>...</body>` section of your AMP page, insert code as shown below the example (it has to be customized for every vendor use case):
+**Add the amp-link-rewriter extension** Inside the `<body>...</body>` section of
+your AMP page, insert code as shown below the example (it has to be customized
+for every vendor use case):
 
 Code:
 
@@ -132,7 +135,9 @@ The final code should look like:
 
 ##### output (required)
 
-The "output" property has to be a string value with the redirection url plus a query string of placeholders that will be shifted with values defined in the config JSON 'vars' property, or in the anchor itself as a data attribute.
+The "output" property has to be a string value with the redirection url plus a
+query string of placeholders that will be shifted with values defined in the
+config JSON 'vars' property, or in the anchor itself as a data attribute.
 
 Example:
 
@@ -149,7 +154,8 @@ Example:
 </amp-link-rewriter>
 ```
 
-We can also define data values in the anchor data attribute as the following example:
+We can also define data values in the anchor data attribute as the following
+example:
 
 ```html
 <a
@@ -172,7 +178,12 @@ The resulting, rewritten URL would be:
 `https://visit.foo.net?eid=231&cid=12345`
 ```
 
-Apart from vars defined in the _vars_ property of the JSON configuration, or as a data attribute, there are other pre-defined _vars_ which are AMP URL MACROs plus anchor attributes id and href that could be used for replacing values in the output pattern. The AMP URL MACROs available are DOCUMENT_REFERRER and SOURCE_URL. The following table shows the relationship between defined data and placeholders.
+Apart from vars defined in the _vars_ property of the JSON configuration, or as
+a data attribute, there are other pre-defined _vars_ which are AMP URL MACROs
+plus anchor attributes id and href that could be used for replacing values in
+the output pattern. The AMP URL MACROs available are DOCUMENT_REFERRER and
+SOURCE_URL. The following table shows the relationship between defined data and
+placeholders.
 
 | value        | source | example                                        | placeholder         |
 | ------------ | ------ | ---------------------------------------------- | ------------------- |
@@ -188,7 +199,8 @@ Apart from vars defined in the _vars_ property of the JSON configuration, or as 
 
 ##### section (optional)
 
-The "section" property defines an array of css selector expressions that filter areas where the url rewriting should operate.
+The "section" property defines an array of css selector expressions that filter
+areas where the url rewriting should operate.
 
 Example:
 
@@ -199,11 +211,16 @@ Example:
 }
 ```
 
-In the previous example, the html sections defined with attribute ID equal to "product-listing-1" and "product-listing-2" will be considered for url rewriting.
+In the previous example, the html sections defined with attribute ID equal to
+"product-listing-1" and "product-listing-2" will be considered for url
+rewriting.
 
 ##### attribute (optional)
 
-The "attribute" property defines a list of rules to match the anchor elements retrieved from the filtered sections. These rules are built from regular expressions associated with html element attributes as "id", "href", "class" or "rel".
+The "attribute" property defines a list of rules to match the anchor elements
+retrieved from the filtered sections. These rules are built from regular
+expressions associated with html element attributes as "id", "href", "class" or
+"rel".
 
 Example:
 
@@ -217,9 +234,14 @@ Example:
 }
 ```
 
-The anchors within the html area with id 'product-listing-1' will have to match the regex expression defined for the attribute href and class. The regex expression will be wrapped with ^ and \$ for a full match.
-In this example, it means that all the anchors with `youtube.com` and 'mobile.vodafone.de' will be excluded. Also, the included anchors need to have a class attribute with the value 'comments'
+The anchors within the html area with id 'product-listing-1' will have to match
+the regex expression defined for the attribute href and class. The regex
+expression will be wrapped with ^ and \$ for a full match. In this example, it
+means that all the anchors with `youtube.com` and 'mobile.vodafone.de' will be
+excluded. Also, the included anchors need to have a class attribute with the
+value 'comments'
 
 ## Validation
 
-See [amp-link-rewriter rules](validator-amp-link-rewriter.protoascii) in the AMP validator specification.
+See [amp-link-rewriter rules](validator-amp-link-rewriter.protoascii) in the AMP
+validator specification.

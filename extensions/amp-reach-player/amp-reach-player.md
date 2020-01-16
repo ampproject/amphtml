@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-reach-player
 
-Displays the Reach Player configured in the <a href="http://beachfrontreach.com">Beachfront Reach</a> platform.
+Displays the Reach Player configured in the
+<a href="http://beachfrontreach.com">Beachfront Reach</a> platform.
 
 <table>
   <tr>
@@ -47,7 +48,8 @@ Displays the Reach Player configured in the <a href="http://beachfrontreach.com"
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the player
+embedded in responsive layouts.
 
 Example:
 
@@ -77,4 +79,6 @@ Example:
 
 ## Validation
 
-See [amp-reach-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/validator-amp-reach-player.protoascii) in the AMP validator specification.
+See
+[amp-reach-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/validator-amp-reach-player.protoascii)
+in the AMP validator specification.

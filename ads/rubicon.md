@@ -16,7 +16,10 @@ limitations under the License.
 
 # Rubicon Project
 
-If you want to serve ads via your Ad Server then there is no need to use the adapter when using Smart Tags. These can simply be served via your Ad Server in the normal fashion. You simply need to ensure that you are using secure tags (https).
+If you want to serve ads via your Ad Server then there is no need to use the
+adapter when using Smart Tags. These can simply be served via your Ad Server in
+the normal fashion. You simply need to ensure that you are using secure tags
+(https).
 
 The Rubicon Project adapter supports Smart Tags directly on the page.
 
@@ -65,7 +68,8 @@ For semantics of configuration, please contact your Rubicon Account Director @
 
 #### Ad size
 
-By default the ad size is based on the `width` and `height` attributes of the `amp-ad` tag.
+By default the ad size is based on the `width` and `height` attributes of the
+`amp-ad` tag.
 
 #### Supported parameters
 

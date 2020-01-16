@@ -55,7 +55,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [Plista's documentation](https://goo.gl/nm9f41).
+For semantics of configuration, please see
+[Plista's documentation](https://goo.gl/nm9f41).
 
 Supported parameters:
 

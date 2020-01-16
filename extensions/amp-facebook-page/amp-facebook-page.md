@@ -47,7 +47,8 @@ limitations under the License.
 
 ## Overview
 
-You can use the `amp-facebook-page` component to embed the [Facebook page plugin](https://developers.facebook.com/docs/plugins/page-plugin).
+You can use the `amp-facebook-page` component to embed the
+[Facebook page plugin](https://developers.facebook.com/docs/plugins/page-plugin).
 
 **Example**
 
@@ -101,4 +102,6 @@ You can use the `amp-facebook-page` component to embed the [Facebook page plugin
 
 ## Validation
 
-See [amp-facebook-page rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-page/validator-amp-facebook-page.protoascii) in the AMP validator specification.
+See
+[amp-facebook-page rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-page/validator-amp-facebook-page.protoascii)
+in the AMP validator specification.

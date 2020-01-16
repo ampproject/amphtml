@@ -5,7 +5,9 @@ formats:
   - ads
   - email
 teaser:
-  text: Allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.
+  text:
+    Allows elements to mutate in response to user actions or data changes via
+    data binding and simple JS-like expressions.
 ---
 
 # amp-bind
@@ -57,7 +59,8 @@ limitations under the License.
 
 ## Overview
 
-The `amp-bind` component allows you to add custom stateful interactivity to your AMP pages via data binding and JS-like expressions.
+The `amp-bind` component allows you to add custom stateful interactivity to your
+AMP pages via data binding and JS-like expressions.
 
 <figure class="alignment-wrapper  margin-">
 <amp-youtube
@@ -68,7 +71,8 @@ The `amp-bind` component allows you to add custom stateful interactivity to your
 
 ### A simple example
 
-In the following example, tapping the button changes the `<p>` element's text from "Hello World" to "Hello amp-bind".
+In the following example, tapping the button changes the `<p>` element's text
+from "Hello World" to "Hello amp-bind".
 
 ```html
 <p [text]="'Hello ' + foo">Hello World</p>
@@ -76,20 +80,30 @@ In the following example, tapping the button changes the `<p>` element's text fr
 <button on="tap:AMP.setState({foo: 'amp-bind'})">Say "Hello amp-bind"</button>
 ```
 
-{% call callout('Note', type='note') %}
-For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely `amp-bind` for initial render.
-{% endcall %}
+{% call callout('Note', type='note') %} For performance and to avoid the risk of
+unexpected content jumping, `amp-bind` does not evaluate expressions on page
+load. This means that the visual elements should be given a default state and
+not rely `amp-bind` for initial render. {% endcall %}
 
 ### How does it work?
 
 `amp-bind` has three main components:
 
-1. [State](#state): A document-scope, mutable JSON state. In the example above, the state is empty before tapping the button. After tapping the button, the state is `{foo: 'amp-bind'}`.
-2. [Expressions](#expressions): These are JavaScript-like expressions that can reference the **state**. The example above has a single expression, `'Hello ' + foo`, which concatenates the string literal `'Hello '` and the state variable `foo`.
-   There is a limit of 100 operands what can be used in an expression.
-3. [Bindings](#bindings): These are special attributes of the form `[property]` that link an element's property to an **expression**. The example above has a single binding, `[text]`, which updates the `<p>` element's text every time the expression's value changes.
+1. [State](#state): A document-scope, mutable JSON state. In the example above,
+   the state is empty before tapping the button. After tapping the button, the
+   state is `{foo: 'amp-bind'}`.
+2. [Expressions](#expressions): These are JavaScript-like expressions that can
+   reference the **state**. The example above has a single expression,
+   `'Hello ' + foo`, which concatenates the string literal `'Hello '` and the
+   state variable `foo`. There is a limit of 100 operands what can be used in an
+   expression.
+3. [Bindings](#bindings): These are special attributes of the form `[property]`
+   that link an element's property to an **expression**. The example above has a
+   single binding, `[text]`, which updates the `<p>` element's text every time
+   the expression's value changes.
 
-`amp-bind` takes special care to ensure speed, security and performance on AMP pages.
+`amp-bind` takes special care to ensure speed, security and performance on AMP
+pages.
 
 ### A slightly more complex example
 
@@ -178,14 +192,15 @@ When the button is pressed:
     - The `amp-img` element will show the image of a cat.
 
 {% call callout('Tip', type='success') %}
-[Try out the **live demo**](https://amp.dev/documentation/examples/components/amp-bind/) for this example with code annotations!
-{% endcall %}
+[Try out the **live demo**](https://amp.dev/documentation/examples/components/amp-bind/)
+for this example with code annotations! {% endcall %}
 
 ## Details
 
 ### State
 
-Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or **state**.
+Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or
+**state**.
 
 #### Initializing state with `amp-state`
 
@@ -201,15 +216,17 @@ Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or 
 </amp-state>
 ```
 
-[Expressions](#expressions) can reference state variables via dot syntax. In this example, `myState.foo` will evaluate to `"bar"`.
+[Expressions](#expressions) can reference state variables via dot syntax. In
+this example, `myState.foo` will evaluate to `"bar"`.
 
 - An `<amp-state>` element's child JSON has a maximum size of 100KB.
-- An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
+- An `<amp-state>` element can also specify a CORS URL instead of a child JSON
+  script. See the [Appendix](#amp-state-specification) for details.
 
 #### Refreshing state
 
-The `refresh` action is supported by this component and can be used to refresh the
-state's contents.
+The `refresh` action is supported by this component and can be used to refresh
+the state's contents.
 
 ```html
 <amp-state id="amp-state" ...></amp-state>
@@ -219,7 +236,10 @@ state's contents.
 
 #### Updating state with `AMP.setState()`
 
-The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state.
+The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges
+an object literal into the state. For example, when the below button is pressed,
+`AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object
+literal with the state.
 
 ```html
 <!-- Like JavaScript, you can reference existing
@@ -229,9 +249,11 @@ The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges a
 ></button>
 ```
 
-In general, nested objects will be merged up to a maximum depth of 10. All variables, including those introduced by `amp-state`, can be overidden.
+In general, nested objects will be merged up to a maximum depth of 10. All
+variables, including those introduced by `amp-state`, can be overidden.
 
-When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property.
+When triggered by certain events, `AMP.setState()` also can access event-related
+data on the `event` property.
 
 ```html
 <!-- The "change" event of this <input> element contains
@@ -241,9 +263,10 @@ When triggered by certain events, `AMP.setState()` also can access event-related
 
 #### Modifying history with `AMP.pushState()`
 
-The [`AMP.pushState()`](../../spec/amp-actions-and-events.md#amp) action is similar to `AMP.setState()` except it also pushes a new entry
-onto the browser history stack. Popping this history entry (e.g. by navigating back) restores
-the previous value of variables set by `AMP.pushState()`.
+The [`AMP.pushState()`](../../spec/amp-actions-and-events.md#amp) action is
+similar to `AMP.setState()` except it also pushes a new entry onto the browser
+history stack. Popping this history entry (e.g. by navigating back) restores the
+previous value of variables set by `AMP.pushState()`.
 
 For example:
 
@@ -251,8 +274,10 @@ For example:
 <button on="tap:AMP.pushState({foo: '123'})">Set 'foo' to 123</button>
 ```
 
-- Tapping the button will set variable `foo` to 123 and push a new history entry.
-- Navigating back will restore `foo` to its previous value, "bar" (equivalent to calling `AMP.setState({foo: 'bar'})`.
+- Tapping the button will set variable `foo` to 123 and push a new history
+  entry.
+- Navigating back will restore `foo` to its previous value, "bar" (equivalent to
+  calling `AMP.setState({foo: 'bar'})`.
 
 ### Expressions
 
@@ -261,12 +286,20 @@ Expressions are similar to JavaScript with some important differences.
 #### Differences from JavaScript
 
 - Expressions may only access the containing document's [state](#state).
-- Expressions **do not** have access to `window` or `document`. `global` references the top-level state.
-- Only [white-listed functions](#white-listed-functions) and operators may be used. Custom functions, classes and loops are disallowed. Arrow functions are allowed as function parameters e.g. `[1, 2, 3].map(x => x + 1)`.
-- Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
-- A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
+- Expressions **do not** have access to `window` or `document`. `global`
+  references the top-level state.
+- Only [white-listed functions](#white-listed-functions) and operators may be
+  used. Custom functions, classes and loops are disallowed. Arrow functions are
+  allowed as function parameters e.g. `[1, 2, 3].map(x => x + 1)`.
+- Undefined variables and array-index-out-of-bounds return `null` instead of
+  `undefined` or throwing errors.
+- A single expression is currently capped at 50 operands for performance. Please
+  [contact us](https://github.com/ampproject/amphtml/issues/new) if this is
+  insufficient for your use case.
 
-The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
+The full expression grammar and implementation can be found in
+[bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and
+[bind-expression.js](./0.1/bind-expression.js).
 
 #### Examples
 
@@ -390,12 +423,17 @@ encodeURIComponent('Hello world')</pre>
   </tr>
 </table>
 
-<sup>1</sup>Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`. Also, `sort()` and `splice()` return modified copies instead of operating in-place.<br>
-<sup>2</sup>Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
+<sup>1</sup>Single-parameter arrow functions can't have parentheses, e.g. use
+`x => x + 1` instead of `(x) => x + 1`. Also, `sort()` and `splice()` return
+modified copies instead of operating in-place.<br> <sup>2</sup>Static functions
+are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
 
 #### Defining macros with `amp-bind-macro`
 
-`amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that takes zero or more arguments and references the current state. A macro can be invoked like a function by referencing its `id` attribute value from anywhere in your doc.
+`amp-bind` expression fragments can be reused by defining an `amp-bind-macro`.
+The `amp-bind-macro` element allows you to define an expression that takes zero
+or more arguments and references the current state. A macro can be invoked like
+a function by referencing its `id` attribute value from anywhere in your doc.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -423,13 +461,17 @@ encodeURIComponent('Hello world')</pre>
 
 [/example]
 
-A macro can also call other macros <i>defined before itself</i>. A macro cannot call itself recursively.
+A macro can also call other macros <i>defined before itself</i>. A macro cannot
+call itself recursively.
 
 ### Bindings
 
-A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). An alternative, XML-compatible syntax can also be used in the form of `data-amp-bind-property`.
+A **binding** is a special attribute of the form `[property]` that links an
+element's property to an [expression](#expressions). An alternative,
+XML-compatible syntax can also be used in the form of `data-amp-bind-property`.
 
-When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
+When the **state** changes, expressions are re-evaluated and the bound elements'
+properties are updated with the new expression results.
 
 `amp-bind` supports data bindings on five types of element state:
 
@@ -475,8 +517,14 @@ Notes on bindings:
 
 - For security reasons, binding to `innerHTML` is disallowed.
 - All attribute bindings are sanitized for unsafe values (e.g., `javascript:`).
-- Boolean expression results toggle boolean attributes. For example: `<amp-video [controls]="expr"...>`. When `expr` evaluates to `true`, the `<amp-video>` element has the `controls` attribute. When `expr` evaluates to `false`, the `controls` attribute is removed.
-- Bracket characters `[` and `]` in attribute names can be problematic when writing XML (e.g. XHTML, JSX) or writing attributes via DOM APIs. In these cases, use the alternative syntax `data-amp-bind-x="foo"` instead of `[x]="foo"`.
+- Boolean expression results toggle boolean attributes. For example:
+  `<amp-video [controls]="expr"...>`. When `expr` evaluates to `true`, the
+  `<amp-video>` element has the `controls` attribute. When `expr` evaluates to
+  `false`, the `controls` attribute is removed.
+- Bracket characters `[` and `]` in attribute names can be problematic when
+  writing XML (e.g. XHTML, JSX) or writing attributes via DOM APIs. In these
+  cases, use the alternative syntax `data-amp-bind-x="foo"` instead of
+  `[x]="foo"`.
 
 #### Element-specific attributes
 
@@ -491,8 +539,8 @@ Binding to the following components and attributes are allowed:
 - `[data-player]`
 - `[data-player-id]`
 - `[data-playlist-id]`
-- `[data-video-id]` Changes the displayed Brightcove video.
-  [/filter] <!-- formats="websites" -->
+- `[data-video-id]` Changes the displayed Brightcove video. [/filter]
+  <!-- formats="websites" -->
 
 ##### `<amp-carousel type=slides>`
 
@@ -516,8 +564,7 @@ Binding to the following components and attributes are allowed:
 
 - `[src]` Changes the iframe's source URL.
 
-[/filter] <!-- formats="websites" -->
-[filter formats="websites, ads"]
+[/filter] <!-- formats="websites" --> [filter formats="websites, ads"]
 
 ##### `<amp-img>`
 
@@ -526,23 +573,21 @@ Binding to the following components and attributes are allowed:
 - `[src]`
 - `[srcset]`
 
-Bind to `[srcset]` instead of `[src]` to support responsive images. See corresponding [`amp-img` attributes](../../builtins/amp-img.md#attributes).
-[/filter] <!-- formats="websites, ads" -->
-[filter formats="email"]
+Bind to `[srcset]` instead of `[src]` to support responsive images. See
+corresponding [`amp-img` attributes](../../builtins/amp-img.md#attributes).
+[/filter] <!-- formats="websites, ads" --> [filter formats="email"]
 
 ##### `<amp-img>`
 
 - `[alt]`
-- `[attribution]`
-  [/filter] <!-- formats="email" -->
+- `[attribution]` [/filter] <!-- formats="email" -->
 
 ##### `<amp-lightbox>`
 
 - `[open]` Toggles display of the lightbox.
 
-[tip type="default"]
-Use `on="lightboxClose: AMP.setState(...)"` to update variables when the lightbox is closed.
-[/tip]
+[tip type="default"] Use `on="lightboxClose: AMP.setState(...)"` to update
+variables when the lightbox is closed. [/tip]
 
 [filter formats="websites, stories"]
 
@@ -550,19 +595,22 @@ Use `on="lightboxClose: AMP.setState(...)"` to update variables when the lightbo
 
 - `[src]`
 
-If the expression is a string, it fetches and renders JSON from the string URL. If the expression is an object or array, it renders the expression data.
+If the expression is a string, it fetches and renders JSON from the string URL.
+If the expression is an object or array, it renders the expression data.
 [/filter] <!-- formats="websites, stories" -->
 
 [filter formats="websites, email"]
 
 ##### `<amp-selector>`
 
-- `[selected]` Changes the currently selected children element(s) identified by their `option` attribute values. Supports a comma-separated list of values for multiple selection. [See an example](https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/?format=email#linking-carousels-with-amp-bind).
+- `[selected]` Changes the currently selected children element(s) identified by
+  their `option` attribute values. Supports a comma-separated list of values for
+  multiple selection.
+  [See an example](https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/?format=email#linking-carousels-with-amp-bind).
 - `[disabled]`
 
-[tip type="note"]
-`[selected]` does not have a non-bindable attribute. The AMP Validator will throw an error if `selected` is used.
-[/tip]
+[tip type="note"] `[selected]` does not have a non-bindable attribute. The AMP
+Validator will throw an error if `selected` is used. [/tip]
 
 [/filter] <!-- formats="websites, email" -->
 
@@ -572,8 +620,9 @@ If the expression is a string, it fetches and renders JSON from the string URL. 
 
 - `[src]`
 
-Fetches JSON from the new URL and merges it into the existing state. The following update will ignore `<amp-state>`elements to prevent cycles.
-[/filter] <!-- formats="websites, stories, ads" -->
+Fetches JSON from the new URL and merges it into the existing state. The
+following update will ignore `<amp-state>`elements to prevent cycles. [/filter]
+<!-- formats="websites, stories, ads" -->
 
 [filter formats="websites, stories"]
 
@@ -595,8 +644,9 @@ Fetches JSON from the new URL and merges it into the existing state. The followi
 - `[preload]`
 - `[src]`
 
-See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes).
-[/filter] <!-- formats="websites, stories, ads" -->
+See corresponding
+[`amp-video` attributes](../amp-video/amp-video.md#attributes). [/filter]
+<!-- formats="websites, stories, ads" -->
 
 [filter formats="websites, ads"]
 
@@ -627,7 +677,8 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 - `[disabled]`
 - `[value]`
 
-See corresponding [button attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes).
+See corresponding
+[button attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Attributes).
 
 [/filter] <!-- formats="email" -->
 
@@ -635,7 +686,8 @@ See corresponding [button attributes](https://developer.mozilla.org/en-US/docs/W
 
 - `[open]`
 
-See corresponding [details attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes).
+See corresponding
+[details attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes).
 
 ##### `<fieldset>`
 
@@ -645,7 +697,8 @@ See corresponding [details attributes](https://developer.mozilla.org/en-US/docs/
 
 - `[xlink:href]`
 
-See corresponding [image attributes](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image).
+See corresponding
+[image attributes](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image).
 
 [filter formats="websites, stories, ads"]
 
@@ -673,7 +726,8 @@ See corresponding [image attributes](https://developer.mozilla.org/en-US/docs/We
 - `[value]`
 - `[width]`
 
-See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
+See corresponding
+[input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
 
 [/filter] <!-- formats="websites, stories, ads" -->
 
@@ -697,7 +751,8 @@ See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/We
 - `[value]`
 - `[width]`
 
-See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
+See corresponding
+[input attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#Attributes).
 
 [/filter] <!-- formats="email" -->
 
@@ -708,18 +763,21 @@ See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/We
 - `[selected]`
 - `[value]`
 
-See corresponding [option attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#Attributes).
+See corresponding
+[option attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#Attributes).
 
 ##### `<optgroup>`
 
 - `[disabled]`
 - `[label]`
 
-See corresponding [optgroup attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes).
+See corresponding
+[optgroup attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes).
 
 ##### `<section>`
 
-- `[data-expand]` Changes the expansion of a `section` in an [`amp-accordion`](../amp-accordion/amp-accordion.md).
+- `[data-expand]` Changes the expansion of a `section` in an
+  [`amp-accordion`](../amp-accordion/amp-accordion.md).
 
 [filter formats="websites, stories, ads"]
 
@@ -731,7 +789,8 @@ See corresponding [optgroup attributes](https://developer.mozilla.org/en-US/docs
 - `[required]`
 - `[size]`
 
-See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
+See corresponding
+[select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
 
 [/filter] <!-- formats="websites, stories, ads" -->
 
@@ -744,7 +803,8 @@ See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/W
 - `[required]`
 - `[size]`
 
-See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
+See corresponding
+[select attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select#Attributes).
 
 [/filter] <!-- formats="email" -->
 
@@ -753,7 +813,8 @@ See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/W
 - `[src]`
 - `[type]`
 
-See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source#Attributes).
+See corresponding
+[source attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source#Attributes).
 
 ##### `<track>`
 
@@ -761,7 +822,8 @@ See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/W
 - [src]
 - [srclang]
 
-See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes).
+See corresponding
+[track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes).
 
 [filter formats="websites, stories, ads"]
 
@@ -784,7 +846,9 @@ See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/We
 - `[spellcheck]`
 - `[wrap]`
 
-Use `[defaultText]` to update initial text, and `[text]` to update current text. See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
+Use `[defaultText]` to update initial text, and `[text]` to update current text.
+See corresponding
+[textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
 
 [/filter] <!-- formats="websites, stories, ads" -->
 
@@ -805,23 +869,30 @@ Use `[defaultText]` to update initial text, and `[text]` to update current text.
 - `[spellcheck]`
 - `[wrap]`
 
-Use `[defaultText]` to update initial text, and `[text]` to update current text. See corresponding [textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
+Use `[defaultText]` to update initial text, and `[text]` to update current text.
+See corresponding
+[textarea attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/textarea#Attributes).
 
 [/filter] <!-- formats="email" -->
 
 ## Debugging
 
-[filter formats="websites, stories, ads"]
-Test in development mode, byt adding the URL fragment `#development=1` to highlight warnings and errors during development and to access special debugging functions.
-[/filter] <!-- formats="websites, stories, ads" -->
+[filter formats="websites, stories, ads"] Test in development mode, byt adding
+the URL fragment `#development=1` to highlight warnings and errors during
+development and to access special debugging functions. [/filter]
+<!-- formats="websites, stories, ads" -->
 
-[filter formats="email"]
-Test in development mode by saving the email as an HTML file. Test in the browser by adding the URL fragment `#development=1` to highlight warnings and errors during development and to access special debugging functions.
-[/filter] <!-- formats="email" -->
+[filter formats="email"] Test in development mode by saving the email as an HTML
+file. Test in the browser by adding the URL fragment `#development=1` to
+highlight warnings and errors during development and to access special debugging
+functions. [/filter] <!-- formats="email" -->
 
 ### Warnings
 
-In development mode, `amp-bind` will issue a warning when the default value of a bound attribute doesn't match its corresponding expression's initial result. This can help prevent unintended mutations caused by changes in other state variables. For example:
+In development mode, `amp-bind` will issue a warning when the default value of a
+bound attribute doesn't match its corresponding expression's initial result.
+This can help prevent unintended mutations caused by changes in other state
+variables. For example:
 
 ```html
 <!-- The element's default class value ('def') doesn't match the expression result for [class] ('abc'),
@@ -829,7 +900,9 @@ In development mode, `amp-bind` will issue a warning when the default value of a
 <p [class]="'abc'" class="def"></p>
 ```
 
-In development mode, `amp-bind` will also issue a warning when dereferencing undefined variables or properties. This can also help prevent unintended mutations due to `null` expression results. For example:
+In development mode, `amp-bind` will also issue a warning when dereferencing
+undefined variables or properties. This can also help prevent unintended
+mutations due to `null` expression results. For example:
 
 ```html
 <amp-state id="myAmpState">
@@ -845,7 +918,8 @@ In development mode, `amp-bind` will also issue a warning when dereferencing und
 
 ### Errors
 
-There are several types of runtime errors that may be encountered when working with `amp-bind`.
+There are several types of runtime errors that may be encountered when working
+with `amp-bind`.
 
 <table>
   <tr>
@@ -888,8 +962,9 @@ Use `AMP.printState()` to print the current state to the console.
 
 ### `<amp-state>` specification
 
-[filter formats="websites, stories, ads"]
-An `amp-state` element may contain either a child `<script>` element **OR** a `src` attribute containing a CORS URL to a remote JSON endpoint, but not both.
+[filter formats="websites, stories, ads"] An `amp-state` element may contain
+either a child `<script>` element **OR** a `src` attribute containing a CORS URL
+to a remote JSON endpoint, but not both.
 
 ```html
 <amp-state id="myLocalState">
@@ -905,8 +980,8 @@ An `amp-state` element may contain either a child `<script>` element **OR** a `s
 
 [/filter] <!-- formats="websites, stories, ads" -->
 
-[filter formats="email"]
-An `amp-state` element must contain a child `<script>` element.
+[filter formats="email"] An `amp-state` element must contain a child `<script>`
+element.
 
 ```html
 <amp-state id="myLocalState">
@@ -924,9 +999,13 @@ An `amp-state` element must contain a child `<script>` element.
 
 #### XHR batching
 
-AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a
+single JSON data request as a data source for multiple consumers (e.g., multiple
+`amp-state` elements) on an AMP page.
 
-For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
+For example, if your `amp-state` element makes an XHR to an endpoint, while the
+XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and
+will instead return the results from the first XHR.
 
 [/filter] <!-- formats="websites, stories, ads" -->
 
@@ -936,27 +1015,35 @@ For example, if your `amp-state` element makes an XHR to an endpoint, while the 
 
 ##### src
 
-The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+The URL of the remote endpoint that will return the JSON that will update this
+`amp-state`. This must be a CORS HTTP service. The `src` attribute allows all
+standard URL variable substitutions. See the
+[Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
-[tip type="important]
-The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
-[/tip]
+[tip type="important] The endpoint must implement the requirements specified in
+the
+[CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests)
+spec. [/tip]
 
 ##### credentials (optional)
 
-Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
+Defines a `credentials` option as specified by the
+[Fetch API](https://fetch.spec.whatwg.org/).
 
 - Supported values: `omit`, `include`
 - Default: `omit`
 
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
+To send credentials, pass the value of `include`. If this value is set, the
+response must follow the
+[AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
 [/filter] <!-- formats="websites, stories, ads" -->
 
 [filter formats="email"]
 
 ##### Invalid AMP email attributes
 
-The AMP for Email spec disallows the use of the following attributes on the AMP email format.
+The AMP for Email spec disallows the use of the following attributes on the AMP
+email format.
 
 - `[src]`
 - `src`
@@ -967,7 +1054,11 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 
 ### Deep-merge with `AMP.setState()`
 
-When `AMP.setState()` is called `amp-bind` deep-merges the provided object literal with the current state. All variables from the object literal are written to the state directly except for nested objects, which are recursively merged. Primitives and arrays are in the state are always overwritten by variables of the same name in the object literal.
+When `AMP.setState()` is called `amp-bind` deep-merges the provided object
+literal with the current state. All variables from the object literal are
+written to the state directly except for nested objects, which are recursively
+merged. Primitives and arrays are in the state are always overwritten by
+variables of the same name in the object literal.
 
 Consider the following example:
 
@@ -1012,7 +1103,8 @@ When the first button is pressed, the state changes to:
 }
 ```
 
-When the second button is pressed, `amp-bind` will recursively merge the object literal argument, `{employee: {age: 64}}`, into the existing state.
+When the second button is pressed, `amp-bind` will recursively merge the object
+literal argument, `{employee: {age: 64}}`, into the existing state.
 
 ```javascript
 {
@@ -1024,15 +1116,18 @@ When the second button is pressed, `amp-bind` will recursively merge the object 
 }
 ```
 
-`employee.age` has been updated, however `employee.name` and `employee.vehicle` keys have not changed.
+`employee.age` has been updated, however `employee.name` and `employee.vehicle`
+keys have not changed.
 
 #### Circular references
 
-`AMP.setState(object)` will throw a runtime error if `object` contains a circular reference.
+`AMP.setState(object)` will throw a runtime error if `object` contains a
+circular reference.
 
 #### Removing a variable
 
-Remove an existing state variable by setting its value to `null` in `AMP.setState()`.
+Remove an existing state variable by setting its value to `null` in
+`AMP.setState()`.
 
 For example:
 

@@ -77,31 +77,38 @@ the element `src`, or inlined as a `script` element child.
 </amp-next-page>
 ```
 
-If loading the next document is successful it will be appended to the end of
-the current document as a child of the `amp-next-page` component, moving any
-content after it further down the page. Because of this the component should
-usually be placed directly after the unique content of a given page: for
-example, at the end of a news article or recipe, but before the footer or
-other content repeated across articles.
+If loading the next document is successful it will be appended to the end of the
+current document as a child of the `amp-next-page` component, moving any content
+after it further down the page. Because of this the component should usually be
+placed directly after the unique content of a given page: for example, at the
+end of a news article or recipe, but before the footer or other content repeated
+across articles.
 
 The component will render a total maximum of three documents on screen in a
-component will render a maximum of three documents (total) on screen at one single instance. This limit may be changed or removed in the future.
+component will render a maximum of three documents (total) on screen at one
+single instance. This limit may be changed or removed in the future.
 
-[tip type="important"]
-**Important** [`<amp-analytics>`](../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`.
-Tracking page views is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md) or `<amp-analytics>` on the host page.
-[/tip]
+[tip type="important"] **Important**
+[`<amp-analytics>`](../amp-analytics/amp-analytics.md) is
+[currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on
+pages users land on through `<amp-next-page>`. Tracking page views is supported
+through [`<amp-pixel>`](../../builtins/amp-pixel.md) or `<amp-analytics>` on the
+host page. [/tip]
 
 ### Analytics triggers
 
-Partial support for analytics is included through the initial host page via two separate events. These are triggered by `<amp-next-page>` and you can track them in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
+Partial support for analytics is included through the initial host page via two
+separate events. These are triggered by `<amp-next-page>` and you can track them
+in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics)
+config:
 
 | Event                  | Fired when                                               |
 | ---------------------- | -------------------------------------------------------- |
 | `amp-next-page-scroll` | The user scrolls to a new page                           |
 | `amp-next-page-click`  | The user click on an article from the recommendation box |
 
-Both of the `triggers` provide the variables `fromUrl` and `toUrl` referring to the previous and current pages. They can be used as follows:
+Both of the `triggers` provide the variables `fromUrl` and `toUrl` referring to
+the previous and current pages. They can be used as follows:
 
 ```html
 <amp-analytics>
@@ -127,10 +134,10 @@ Both of the `triggers` provide the variables `fromUrl` and `toUrl` referring to 
 
 ### Recommendation box
 
-If the user reaches the end of a page before the next has loaded (or if the
-next page fails to load), a box will be displayed with links to the next three
-pages. This box will also be displayed after the maximum number of articles
-have been rendered.
+If the user reaches the end of a page before the next has loaded (or if the next
+page fails to load), a box will be displayed with links to the next three pages.
+This box will also be displayed after the maximum number of articles have been
+rendered.
 
 The appearance of these links can be customized by styling the following
 classes:
@@ -143,7 +150,8 @@ classes:
 ### Separator
 
 A separator is rendered between each loaded document. By default this is
-rendered as a full-width hairline. It can be customised by styling the `.amp-next-page-default-separator` class.
+rendered as a full-width hairline. It can be customised by styling the
+`.amp-next-page-default-separator` class.
 
 Alternatively, you can specify a custom separator containing arbitrary HTML
 content as a child of the `amp-next-page` component by using the `separator`
@@ -159,9 +167,9 @@ attribute.
 
 ### Element hiding
 
-Elements which are common across multiple pages can be programmatically
-hidden in child documents, to avoid e.g. stacking up multiple page footers at
-the end of the document, or to hide the page header from each subsequent page.
+Elements which are common across multiple pages can be programmatically hidden
+in child documents, to avoid e.g. stacking up multiple page footers at the end
+of the document, or to hide the page header from each subsequent page.
 
 Elements can be hidden by specifying one or more string CSS selectors in the
 `hideSelectors` key of the element config. Elements matching any of the
@@ -200,8 +208,8 @@ The <code>src</code> attribute is required unless a config has been specified in
 
 ## Configuration spec
 
-The configuration defines the documents recommended by `amp-next-page` to
-the user as a JSON object.
+The configuration defines the documents recommended by `amp-next-page` to the
+user as a JSON object.
 
 | Key                | Value                                                             |
 | ------------------ | ----------------------------------------------------------------- |
@@ -241,8 +249,8 @@ read, and hides the header and footer elements from each child document.
 
 ## Substitutions
 
-The `amp-next-page` src allows all standard URL variable substitutions. See
-the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+The `amp-next-page` src allows all standard URL variable substitutions. See the
+[Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 For example:
 
@@ -251,8 +259,8 @@ For example:
 ```
 
 may make a request to something like
-`https://foo.com/config.json?0.8390278471201` where the RANDOM value is
-randomly generated upon each impression.
+`https://foo.com/config.json?0.8390278471201` where the RANDOM value is randomly
+generated upon each impression.
 
 ## Validation
 

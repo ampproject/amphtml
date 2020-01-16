@@ -77,7 +77,13 @@ This extension creates an iframe and renders a MathML formula.
 
 #### Example: Inline formula
 
-This is an example of a formula of `` <amp-mathml layout="container" inline data-formula="`x`"></amp-mathml> ``, `<amp-mathml layout="container" inline data-formula="\(x = {-b \pm \sqrt{b^2-4ac} \over 2a}\)"></amp-mathml>` placed inline in the middle of a block of text. `<amp-mathml layout="container" inline data-formula="\( \cos(θ+φ) \)"></amp-mathml>` This shows how the formula will fit inside a block of text and can be styled with CSS.
+This is an example of a formula of
+`` <amp-mathml layout="container" inline data-formula="`x`"></amp-mathml> ``,
+`<amp-mathml layout="container" inline data-formula="\(x = {-b \pm \sqrt{b^2-4ac} \over 2a}\)"></amp-mathml>`
+placed inline in the middle of a block of text.
+`<amp-mathml layout="container" inline data-formula="\( \cos(θ+φ) \)"></amp-mathml>`
+This shows how the formula will fit inside a block of text and can be styled
+with CSS.
 
 ## Attributes
 
@@ -91,4 +97,6 @@ If specified, the component renders inline (`inline-block` in CSS).
 
 ## Validation
 
-See [amp-mathml rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mathml/validator-amp-mathml.protoascii) in the AMP validator specification.
+See
+[amp-mathml rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mathml/validator-amp-mathml.protoascii)
+in the AMP validator specification.

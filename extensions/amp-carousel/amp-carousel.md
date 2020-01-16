@@ -25,7 +25,8 @@ limitations under the License.
 
 # amp-carousel
 
-A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be flexible and performant.
+A generic carousel for displaying multiple similar pieces of content along a
+horizontal axis; meant to be flexible and performant.
 
 <table>
   <tr>
@@ -48,11 +49,16 @@ A generic carousel for displaying multiple similar pieces of content along a hor
 
 ## Behavior
 
-Each of the `amp-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
+Each of the `amp-carousel` component’s immediate children is considered an item
+in the carousel. Each of these nodes may also have arbitrary HTML children.
 
-The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards. For `type="slides"`, the arrows moves one item at a time. For `type="carousel"`, the arrows move one carousel's width forwards or backwards at a time.
+The carousel consists of an arbitrary number of items, as well as optional
+navigational arrows to go forward or backwards. For `type="slides"`, the arrows
+moves one item at a time. For `type="carousel"`, the arrows move one carousel's
+width forwards or backwards at a time.
 
-The carousel advances between items if the user swipes or clicks an optional navigation arrow.
+The carousel advances between items if the user swipes or clicks an optional
+navigation arrow.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
 
@@ -80,9 +86,14 @@ The carousel advances between items if the user swipes or clicks an optional nav
 
 ### Advancing to a specific slide
 
-Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a carousel with the "carousel-id" ID to the slide at index=N (the first slide is at index=0, the second slide is at index=1, and so on).
+Setting a method for the `on` attribute on an element to
+`tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a
+carousel with the "carousel-id" ID to the slide at index=N (the first slide is
+at index=0, the second slide is at index=1, and so on).
 
-In the following example, we have a carousel of three images with preview buttons below the carousel. When a user clicks one of the buttons, the corresponding carousel item displays.
+In the following example, we have a carousel of three images with preview
+buttons below the carousel. When a user clicks one of the buttons, the
+corresponding carousel item displays.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
 
@@ -159,25 +170,35 @@ Specifies the display type for the carousel items, which can be:
 
 ### controls (optional)
 
-Permanently displays left and right arrows for the user to navigate carousel items on mobile devices. By default, navigational arrows disappear after the user swipes to another slide on mobile.
+Permanently displays left and right arrows for the user to navigate carousel
+items on mobile devices. By default, navigational arrows disappear after the
+user swipes to another slide on mobile.
 
-The visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless only a single child is present.
+The visibility of arrows can also be controlled via styling, and a media query
+can be used to only display arrows at certain screen widths. On desktop, arrows
+are always displayed unless only a single child is present.
 
 ### data-next-button-aria-label (optional)
 
-Sets the aria-label for the `amp-carousel-button-next`. If no value is given, the aria-label defaults to 'Next item in carousel'.
+Sets the aria-label for the `amp-carousel-button-next`. If no value is given,
+the aria-label defaults to 'Next item in carousel'.
 
 ### data-prev-button-aria-label (optional)
 
-Sets the aria-label for the `amp-carousel-button-prev`. If no value is given, the aria-label defaults to 'Previous item in carousel'.
+Sets the aria-label for the `amp-carousel-button-prev`. If no value is given,
+the aria-label defaults to 'Previous item in carousel'.
 
 ### data-button-count-format (optional)
 
-A format string that looks like `(%s of %s)`, used as a suffix to the aria-label for `amp-carousel-button-next`/`amp-carousel-button-prev`. This provides information to users using a screen reader on their progress through the carousel. If no value is given, this defaults to `(%s of %s)`.
+A format string that looks like `(%s of %s)`, used as a suffix to the aria-label
+for `amp-carousel-button-next`/`amp-carousel-button-prev`. This provides
+information to users using a screen reader on their progress through the
+carousel. If no value is given, this defaults to `(%s of %s)`.
 
 ### autoplay (optional)
 
-Regularly advances to the next slide without user interaction. If the user manually changes slides, then autoplay is stopped.
+Regularly advances to the next slide without user interaction. If the user
+manually changes slides, then autoplay is stopped.
 
 If present without a value:
 
@@ -194,13 +215,16 @@ If present with a value:
 
 ### delay (optional)
 
-Specifies the duration (in milliseconds) to delay advancing to the next slide when `autoplay` is enabled.
+Specifies the duration (in milliseconds) to delay advancing to the next slide
+when `autoplay` is enabled.
 
 ### loop (optional)
 
-Allows the user to advance past the first item or the final item. There must be at least 3 slides for looping to occur.
+Allows the user to advance past the first item or the final item. There must be
+at least 3 slides for looping to occur.
 
-The example below displays a slide carousel with controls, looping, and delayed autoplay.
+The example below displays a slide carousel with controls, looping, and delayed
+autoplay.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
 
@@ -230,11 +254,16 @@ The example below displays a slide carousel with controls, looping, and delayed 
 
 ### slide (optional)
 
-Specifies what index should be shown when the carousel is first rendered. This can be updated with [`amp-bind`](https://amp.dev/documentation/components/amp-bind) to change which index is shown.
+Specifies what index should be shown when the carousel is first rendered. This
+can be updated with
+[`amp-bind`](https://amp.dev/documentation/components/amp-bind) to change which
+index is shown.
 
 ### common attributes
 
-This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
+This element includes
+[common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 </table>
 
@@ -245,7 +274,9 @@ This element includes [common attributes](https://amp.dev/documentation/guides-a
 - You may use the `amp-carousel` element selector to style it freely.
 - You may use the `.amp-carousel-slide` class selector to target carousel items.
 - The visual state of an `amp-carousel` button when it's disabled is hidden.
-- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
+- By default, `.amp-carousel-button` uses an inlined SVG as the background-image
+  of the buttons. You may override this with your own SVG or image as in the
+  example below.
 
 _Example: Default `.amp-carousel-button` inlined SVG_
 
@@ -263,9 +294,14 @@ _Example: Overriding the default `.amp-carousel-button` inlined SVG_
 }
 ```
 
-Note that the SVG content needs to have certain characters, including `<`, `>` and `#` encoded. This can be done using a tool like [SVGO](https://github.com/svg/svgo) or using [`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
+Note that the SVG content needs to have certain characters, including `<`, `>`
+and `#` encoded. This can be done using a tool like
+[SVGO](https://github.com/svg/svgo) or using
+[`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
 
-- You can position the carousel buttons using align-self and/or relative positioning. Note that the carousel arrows are automatically flipped in RTL, so you should not change their flex order.
+- You can position the carousel buttons using align-self and/or relative
+  positioning. Note that the carousel arrows are automatically flipped in RTL,
+  so you should not change their flex order.
 
 ```css
 .amp-carousel-button-prev {
@@ -282,7 +318,9 @@ Note that the SVG content needs to have certain characters, including `<`, `>` a
 - You may use the `amp-carousel` element selector to style it freely.
 - You may use the `.amp-carousel-slide` class selector to target carousel items.
 - The visual state of an `amp-carousel` button when it's disabled is hidden.
-- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own image. Some email clients may not support SVG.
+- By default, `.amp-carousel-button` uses an inlined SVG as the background-image
+  of the buttons. You may override this with your own image. Some email clients
+  may not support SVG.
 
 _Example: Overriding the default `.amp-carousel-button` inlined SVG_
 
@@ -292,7 +330,9 @@ _Example: Overriding the default `.amp-carousel-button` inlined SVG_
 }
 ```
 
-You can position the carousel buttons using align-self and/or relative positioning. Note that the carousel arrows are automatically flipped in RTL, so you should not change their flex order.
+You can position the carousel buttons using align-self and/or relative
+positioning. Note that the carousel arrows are automatically flipped in RTL, so
+you should not change their flex order.
 
 ```css
 .amp-carousel-button-prev {
@@ -312,9 +352,15 @@ You can position the carousel buttons using align-self and/or relative positioni
 ### Migration Notes
 
 - Update the required script from `amp-carousel-0.1` to `amp-carousel-0.2`.
-- Ensure any CSS for positioning next/previous arrows is still valid. See the [styling](#styling) for more information on arrow positioning.
-- Ensure any CSS used to style the carousel is still valid. The internal DOM structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors targetting internal elements such as `amp-carousel > div`. Any selectors using the `.amp-class-name` format should still work.
+- Ensure any CSS for positioning next/previous arrows is still valid. See the
+  [styling](#styling) for more information on arrow positioning.
+- Ensure any CSS used to style the carousel is still valid. The internal DOM
+  structure of `<amp-carousel>` 0.2 differs from 0.1, effecting CSS selectors
+  targetting internal elements such as `amp-carousel > div`. Any selectors using
+  the `.amp-class-name` format should still work.
 
 ## Validation
 
-See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/validator-amp-carousel.protoascii) in the AMP validator specification.
+See
+[amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/validator-amp-carousel.protoascii)
+in the AMP validator specification.

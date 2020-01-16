@@ -47,7 +47,8 @@ limitations under the License.
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the player
+embedded in responsive layouts.
 
 Example:
 
@@ -121,8 +122,13 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
 
 ## Player configuration
 
-To support AMP's video interface, which is recommended, make sure you configure players used with the AMP Support plugin. See [Brightcove's support documentation](https://support.brightcove.com/amp) for player configuration instructions.
+To support AMP's video interface, which is recommended, make sure you configure
+players used with the AMP Support plugin. See
+[Brightcove's support documentation](https://support.brightcove.com/amp) for
+player configuration instructions.
 
 ## Validation
 
-See [amp-brightcove rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/validator-amp-brightcove.protoascii) in the AMP validator specification.
+See
+[amp-brightcove rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/validator-amp-brightcove.protoascii)
+in the AMP validator specification.

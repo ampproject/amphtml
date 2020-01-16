@@ -31,7 +31,8 @@ limitations under the License.
 
 ### Configuration
 
-For configuration details, please contact [LOGLY](https://www.logly.co.jp/forms/contact).
+For configuration details, please contact
+[LOGLY](https://www.logly.co.jp/forms/contact).
 
 Supported parameters:
 

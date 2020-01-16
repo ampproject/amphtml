@@ -38,7 +38,9 @@ limitations under the License.
 
 ## Configuration
 
-For configuration semantics, please see [Content.ad AMP Widget](http://help.content.ad/how-can-i-make-widget-amp-mobile-site/) documentation.
+For configuration semantics, please see
+[Content.ad AMP Widget](http://help.content.ad/how-can-i-make-widget-amp-mobile-site/)
+documentation.
 
 Supported parameters:
 

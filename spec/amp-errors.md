@@ -17,13 +17,15 @@ limitations under the License.
 # Error reporting in AMP
 
 AMP reports errors to the endpoint specified by the `errorReportingUrl` config
-property. E.g. `https://amp-error-reporting.appspot.com/r` for `cdn.ampproject.org`.
+property. E.g. `https://amp-error-reporting.appspot.com/r` for
+`cdn.ampproject.org`.
 
 The following fields are reported:
 
 - `v=string` - AMP version
 - `m=string` - the error message
-- `a=1` - whether the error is labeled as "user" error (as opposed to a "dev" error).
+- `a=1` - whether the error is labeled as "user" error (as opposed to a "dev"
+  error).
 - `ex=1` - whether the error is labeled as "expected".
 - `3p=1` - whether the error occured in the 3p context.
 - `ca=1` - whether this is a canary version of AMP.
@@ -44,9 +46,9 @@ The following fields are reported:
 
 The "expected" errors are marked with `&ex=1`.
 
-An expected error is identified by the `.expected` property on the `Error` object being `true`.
-You can use the `Log.prototype.expectedError` method to create an error that is marked
-as expected.
+An expected error is identified by the `.expected` property on the `Error`
+object being `true`. You can use the `Log.prototype.expectedError` method to
+create an error that is marked as expected.
 
 An "expected" error is still an error, i.e. some features are disabled or not
 functioning fully because of it. However, it's an expected error. E.g. as is the

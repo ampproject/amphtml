@@ -16,7 +16,8 @@ limitations under the License.
 
 # Mixi.Media
 
-Mixi.Media is a service for personalizing content network. Please visit our [Mixi.Media](https://Mixi.Media/dashboard) for more information.
+Mixi.Media is a service for personalizing content network. Please visit our
+[Mixi.Media](https://Mixi.Media/dashboard) for more information.
 
 ## Example
 
@@ -26,7 +27,8 @@ Mixi.Media is a service for personalizing content network. Please visit our [Mix
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ### Required parameters
 

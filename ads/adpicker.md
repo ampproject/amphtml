@@ -25,7 +25,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, visit [adpicker.net](https://adpicker.net).
+For details on the configuration semantics, visit
+[adpicker.net](https://adpicker.net).
 
 ### Required parameters
 

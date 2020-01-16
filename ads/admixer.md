@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration semantics, see [Admixer documentation](http://docs.admixer.net/3/en/topic/amp-configuration).
+For configuration semantics, see
+[Admixer documentation](http://docs.admixer.net/3/en/topic/amp-configuration).
 
 ### Required parameters
 

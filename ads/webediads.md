@@ -71,7 +71,8 @@ This method allow you to call one ad position with a specific configuration.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ### Supported parameters
 

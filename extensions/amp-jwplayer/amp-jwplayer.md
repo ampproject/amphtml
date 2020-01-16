@@ -45,7 +45,8 @@ Displays a cloud-hosted <a href="https://www.jwplayer.com/">JW Player</a>.
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the player
+embedded in responsive layouts.
 
 Example:
 
@@ -105,4 +106,6 @@ Example:
 
 ## Validation
 
-See [amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/validator-amp-jwplayer.protoascii) in the AMP validator specification.
+See
+[amp-jwplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/validator-amp-jwplayer.protoascii)
+in the AMP validator specification.

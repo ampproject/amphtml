@@ -41,4 +41,5 @@ A fake cmp type that is only used for local development.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the [ad network](#configuration) or refer to their [documentation](#ping).
+For details on the configuration semantics, please contact the
+[ad network](#configuration) or refer to their [documentation](#ping).

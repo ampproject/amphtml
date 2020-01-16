@@ -18,12 +18,13 @@ limitations under the License.
 
 The `amp-ima-video` extension has built in compatibility with the
 `<amp-consent>` component. You can set up a consent dialog by following
-instructions in [the amp-consent readme](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md).
+instructions in
+[the amp-consent readme](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md).
 
 ## Blocking based on user consent
 
-After setting up your consent dialog, add the `data-block-on-consent` parameter to
-your `<amp-ima-video>` component, like so:
+After setting up your consent dialog, add the `data-block-on-consent` parameter
+to your `<amp-ima-video>` component, like so:
 
 ```html
 <amp-ima-video

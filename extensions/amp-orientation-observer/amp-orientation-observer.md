@@ -3,7 +3,9 @@ $category@: layout
 formats:
   - websites
 teaser:
-  text: Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
+  text:
+    Monitors the orientation of an element within the viewport as a user
+    scrolls, and dispatches events that can be used with other AMP components.
 ---
 
 <!---
@@ -24,8 +26,8 @@ limitations under the License.
 
 # amp-orientation-observer
 
-Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with
-other AMP components.
+Monitors the orientation of an element within the viewport as a user scrolls,
+and dispatches events that can be used with other AMP components.
 
 <table>
   <tr>
@@ -47,15 +49,21 @@ other AMP components.
 
 ## Overview
 
-The `amp-orientation-observer` component monitors the orientation of a device, and dispatches low-trust level events (`alpha`, `beta`, `gamma`) that report changes in the device's orientation along the `alpha`, `beta` and `gamma` axises in terms of `angle` and `percent`. These can be used to trigger actions (_Only Low Trust Actions_) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation)).
+The `amp-orientation-observer` component monitors the orientation of a device,
+and dispatches low-trust level events (`alpha`, `beta`, `gamma`) that report
+changes in the device's orientation along the `alpha`, `beta` and `gamma` axises
+in terms of `angle` and `percent`. These can be used to trigger actions (_Only
+Low Trust Actions_) on other components (e.g.,
+[amp-animation](https://amp.dev/documentation/components/amp-animation)).
 
-{% call callout('Note', type='note') %}
-The `amp-orientation-observer` component is only useful when used with other components and does not do anything on its own.
-{% endcall %}
+{% call callout('Note', type='note') %} The `amp-orientation-observer` component
+is only useful when used with other components and does not do anything on its
+own. {% endcall %}
 
 #### Events
 
-These are the low-trust level events that the `amp-orientation-observer` component dispatches:
+These are the low-trust level events that the `amp-orientation-observer`
+component dispatches:
 
 | Event   | Description                                                                                                  |
 | ------- | ------------------------------------------------------------------------------------------------------------ |
@@ -65,11 +73,16 @@ These are the low-trust level events that the `amp-orientation-observer` compone
 
 ## What can I do with amp-orientation-observer?
 
-Currently, [amp-animation](https://amp.dev/documentation/components/amp-animation) and several video players in AMP are the only components that allow low-trust events to trigger their actions (e.g., starting an animation, seeking to a position within the animation, pausing a video, etc.).
+Currently,
+[amp-animation](https://amp.dev/documentation/components/amp-animation) and
+several video players in AMP are the only components that allow low-trust events
+to trigger their actions (e.g., starting an animation, seeking to a position
+within the animation, pausing a video, etc.).
 
 ### Scroll-bound animations
 
-Imagine an animation where the hour hand of a clock rotates as the user scrolls the page.
+Imagine an animation where the hour hand of a clock rotates as the user scrolls
+the page.
 
 ```html
 <!-- An animation that rotates a clock hand 180 degrees. -->
@@ -117,15 +130,23 @@ Imagine an animation where the hour hand of a clock rotates as the user scrolls 
 
 ##### alpha-range (optional)
 
-Specifies that the associated action should only take place for changes between the specified range along the z axis. Specified as a space separated list of 2 values (e.g., `alpha-range="0 180"`). By default, the related action is triggered for all changes between `0` and `360 degrees`.
+Specifies that the associated action should only take place for changes between
+the specified range along the z axis. Specified as a space separated list of 2
+values (e.g., `alpha-range="0 180"`). By default, the related action is
+triggered for all changes between `0` and `360 degrees`.
 
 ##### beta-range (optional)
 
-Specifies that the associated action should only take place for changes between the specified range along the x axis. Specified as a space separated list of 2 values (e.g., `beta-range="0 180"`). By default, the related action is triggered for all changes between `0` and `360 degrees`.
+Specifies that the associated action should only take place for changes between
+the specified range along the x axis. Specified as a space separated list of 2
+values (e.g., `beta-range="0 180"`). By default, the related action is triggered
+for all changes between `0` and `360 degrees`.
 
-_Example: Using beta-range to limit the range of degrees to watch along the x axis_
+_Example: Using beta-range to limit the range of degrees to watch along the x
+axis_
 
-Imagine an animation where the hour hand of a clock rotates as the user scrolls the page.
+Imagine an animation where the hour hand of a clock rotates as the user scrolls
+the page.
 
 ```html
 <amp-orientation-observer
@@ -138,12 +159,19 @@ Imagine an animation where the hour hand of a clock rotates as the user scrolls 
 
 ##### gamma-range (optional)
 
-Specifies that the associated action should only take place for changes between the specified range along the y axis. Specified as a space separated list of 2 values (e.g., `gamma-range="0 90"`. By default the related action is triggered for all changes between `0` and `360 degrees`.
+Specifies that the associated action should only take place for changes between
+the specified range along the y axis. Specified as a space separated list of 2
+values (e.g., `gamma-range="0 90"`. By default the related action is triggered
+for all changes between `0` and `360 degrees`.
 
 ##### smoothing (optional)
 
-When enabled, outputs a moving average of the last `n` values instead of the raw value read from the sensor. By default, when activated, smoothing will be set to 4 points.
+When enabled, outputs a moving average of the last `n` values instead of the raw
+value read from the sensor. By default, when activated, smoothing will be set to
+4 points.
 
 ## Validation
 
-See [amp-orientation-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-orientation-observer/validator-amp-orientation-observer.protoascii) in the AMP validator specification.
+See
+[amp-orientation-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-orientation-observer/validator-amp-orientation-observer.protoascii)
+in the AMP validator specification.

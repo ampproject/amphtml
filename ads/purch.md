@@ -32,11 +32,13 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 Supported parameters:
 
 - `data-pid`: placement id
 - `data-divid`: div id of unit
 - `data-config`: Optinal parameter to control the ad behaviour.
-- `data-config.targeting`: Optinal config parameter to pass key-values to DFP/GAM.
+- `data-config.targeting`: Optinal config parameter to pass key-values to
+  DFP/GAM.

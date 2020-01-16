@@ -42,7 +42,8 @@ limitations under the License.
 
 ## Configuration
 
-For more information, please [contact Monetizer101](http://monetizer101.com/apply-now/).
+For more information, please
+[contact Monetizer101](http://monetizer101.com/apply-now/).
 
 Required parameters:
 

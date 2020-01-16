@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-riddle-quiz
 
-Displays any <a href="https://www.riddle.com/">Riddle</a> item content (e.g., quiz, list, poll, etc.)
+Displays any <a href="https://www.riddle.com/">Riddle</a> item content (e.g.,
+quiz, list, poll, etc.)
 
 <table>
   <tr>
@@ -37,7 +38,8 @@ Displays any <a href="https://www.riddle.com/">Riddle</a> item content (e.g., qu
   </tr>
 </table>
 
-This component embeds <a href="https://www.riddle.com/">Riddle</a> content (e.g., quiz, list, poll, etc.).
+This component embeds <a href="https://www.riddle.com/">Riddle</a> content
+(e.g., quiz, list, poll, etc.).
 
 ## Example
 
@@ -66,4 +68,6 @@ This component embeds <a href="https://www.riddle.com/">Riddle</a> content (e.g.
 
 ## Validation
 
-See [amp-riddle-quiz rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-riddle-quiz/validator-amp-riddle-quiz.protoascii) in the AMP validator specification.
+See
+[amp-riddle-quiz rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-riddle-quiz/validator-amp-riddle-quiz.protoascii)
+in the AMP validator specification.

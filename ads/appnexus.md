@@ -39,7 +39,8 @@ limitations under the License.
 
 ### AST single ad call with keywords
 
-Note: you should use either the basic setup or AST setup. Do not mix types on the same page.
+Note: you should use either the basic setup or AST setup. Do not mix types on
+the same page.
 
 ```html
 <amp-ad
@@ -112,11 +113,16 @@ requested when user scrolls to this tag
 
 ## Configuration
 
-See AppNexus [Tiny Tag documentation](https://wiki.appnexus.com/display/adnexusdocumentation/Dynamic+TinyTag+Parameters) or [AST documentation](https://wiki.appnexus.com/pages/viewpage.action?pageId=75793258) for details on input parameters.
+See AppNexus
+[Tiny Tag documentation](https://wiki.appnexus.com/display/adnexusdocumentation/Dynamic+TinyTag+Parameters)
+or
+[AST documentation](https://wiki.appnexus.com/pages/viewpage.action?pageId=75793258)
+for details on input parameters.
 
 ### Enable debugging
 
-To enable debugging with the AST type of tags, just set `data-debug=true` in all your amp-ad tags.
+To enable debugging with the AST type of tags, just set `data-debug=true` in all
+your amp-ad tags.
 
 ```html
 <amp-ad

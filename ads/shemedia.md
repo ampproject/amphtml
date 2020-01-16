@@ -16,7 +16,10 @@ limitations under the License.
 
 # SHE Media
 
-Your site must be an active member of the [SHE Media Partner Network](http://www.shemedia.com). Please contact [Support](mailto:support@shemedia.com) for specific tags for your site and information on configuration semantics.
+Your site must be an active member of the
+[SHE Media Partner Network](http://www.shemedia.com). Please contact
+[Support](mailto:support@shemedia.com) for specific tags for your site and
+information on configuration semantics.
 
 ## Examples
 
@@ -41,7 +44,9 @@ Your site must be an active member of the [SHE Media Partner Network](http://www
 
 ### Optional parameters
 
-- `json` - Boomerang configuration key values can be passed using the `boomerangConfig` property. Custom targeting key values can be passed to Boomerang using the `targeting` property.
+- `json` - Boomerang configuration key values can be passed using the
+  `boomerangConfig` property. Custom targeting key values can be passed to
+  Boomerang using the `targeting` property.
 
 ### Support
 

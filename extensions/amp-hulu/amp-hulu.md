@@ -70,4 +70,6 @@ Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.
 
 ## Validation
 
-See [amp-hulu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-hulu/validator-amp-hulu.protoascii) in the AMP validator specification.
+See
+[amp-hulu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-hulu/validator-amp-hulu.protoascii)
+in the AMP validator specification.

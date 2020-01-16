@@ -25,7 +25,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on configuration, see [Pressboard documentation](http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp).
+For details on configuration, see
+[Pressboard documentation](http://help.pressboard.ca/publisher-resources/getting-started/implementing-google-amp).
 
 ### Required parameters
 

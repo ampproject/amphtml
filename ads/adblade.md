@@ -32,7 +32,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, see [Adblade's documentation](https://www.adblade.com/doc/publisher-solutions).
+For semantics of configuration, see
+[Adblade's documentation](https://www.adblade.com/doc/publisher-solutions).
 
 Supported parameters:
 

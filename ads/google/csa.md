@@ -33,7 +33,8 @@ Javascript object you would pass in the ad request of a standard CSA request.
 </amp-ad>
 ```
 
-Please see documentation for [AdSense for Search](https://developers.google.com/custom-search-ads/docs/implementation-guide)
+Please see documentation for
+[AdSense for Search](https://developers.google.com/custom-search-ads/docs/implementation-guide)
 for more information.
 
 ## AdSense For Shopping (AFSh)
@@ -53,21 +54,24 @@ Javascript object you would pass in the ad request of a standard CSA request.
 </amp-ad>
 ```
 
-To request an AFSh ad with a width equal to the screen width, use "auto" for
-the CSA width parameter. Please note that "auto" width is not supported in
-non-AMP implementations.
+To request an AFSh ad with a width equal to the screen width, use "auto" for the
+CSA width parameter. Please note that "auto" width is not supported in non-AMP
+implementations.
 
-Note that only the [multiple-format](https://developers.google.com/adsense-for-shopping/docs/multiplereference) AdSense for Shopping ads are supported under this integration.
+Note that only the
+[multiple-format](https://developers.google.com/adsense-for-shopping/docs/multiplereference)
+AdSense for Shopping ads are supported under this integration.
 
-Please see documentation for [AdSense for Shopping](https://developers.google.com/adsense-for-shopping/docs/implementation-guide)
+Please see documentation for
+[AdSense for Shopping](https://developers.google.com/adsense-for-shopping/docs/implementation-guide)
 for more information.
 
 ### AFSh with AFS Backfill
 
 To request AFS ads when AFSh does not return any ads, include both the
 **data-afs-\*** and **data-afsh-\*** attributes in the amp-ad tag. If AFSh does
-not return ads, AMP will request AFS ads with the values from the **data-afs-\***
-attributes.
+not return ads, AMP will request AFS ads with the values from the
+**data-afs-\*** attributes.
 
 ```html
 <amp-ad
@@ -84,12 +88,17 @@ attributes.
 ## Requirements
 
 - Each amp-ad tag contains one adblock. Only one **data-afs-adblock-options**
-  and/or one **data-afsh-adblock-options** attribute can be specified in the tag.
+  and/or one **data-afsh-adblock-options** attribute can be specified in the
+  tag.
 - Above the fold ads are required to have a minimum height of 300 pixels.
 - When requesting ads above the fold:
-- You must use the maxTop parameter instead of the number parameter to specify the number of ads.
-- You can only request one ad ("maxTop": 1) in an ad unit that is above the fold.
-- You must use a fallback div to show alternate content when no ads are returned. If no ads are returned the ad will not be collapsed because it is above the fold.
+- You must use the maxTop parameter instead of the number parameter to specify
+  the number of ads.
+- You can only request one ad ("maxTop": 1) in an ad unit that is above the
+  fold.
+- You must use a fallback div to show alternate content when no ads are
+  returned. If no ads are returned the ad will not be collapsed because it is
+  above the fold.
 
 <!-- TODO(#19207): Address missing demo -->
 <!--

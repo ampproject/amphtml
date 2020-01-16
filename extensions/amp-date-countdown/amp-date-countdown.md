@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-date-countdown
 
-Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.
+Display a sequence of backward counting to indicate the time remaining before an
+event is scheduled to occur.
 
 <table>
   <tr>
@@ -51,7 +52,12 @@ Display a sequence of backward counting to indicate the time remaining before an
   </noscript>
 </amp-img>
 
-The `amp-date-countdown` provides countdown time data that you can render in your AMP page. By providing specific [attributes](#attributes) in the `amp-date-countdown` tag, the `amp-date-countdown` extension returns a list of time parameters, which you can pass to an `amp-mustache` template for rendering. Refer to the [ list below for each returned time parameter](#returned-time-parameters).
+The `amp-date-countdown` provides countdown time data that you can render in
+your AMP page. By providing specific [attributes](#attributes) in the
+`amp-date-countdown` tag, the `amp-date-countdown` extension returns a list of
+time parameters, which you can pass to an `amp-mustache` template for rendering.
+Refer to the
+[ list below for each returned time parameter](#returned-time-parameters).
 
 ### Example
 
@@ -97,7 +103,8 @@ This table lists the format you can specify in your Mustache template:
 
 #### Samples of formatted values
 
-This table provides examples of formatted values specified in a Mustache template, and a sample of what the output:
+This table provides examples of formatted values specified in a Mustache
+template, and a sample of what the output:
 
 | Format                                          | Sample Output                        | Remarks                |
 | ----------------------------------------------- | ------------------------------------ | ---------------------- |
@@ -111,7 +118,8 @@ This table provides examples of formatted values specified in a Mustache templat
 
 ## Attributes
 
-You must specify at least one of these required attributes: `end-date`, `timeleft-ms`, `timestamp-ms`, `timestamp-seconds`.
+You must specify at least one of these required attributes: `end-date`,
+`timeleft-ms`, `timestamp-ms`, `timestamp-seconds`.
 
 ##### end-date
 
@@ -119,28 +127,36 @@ An ISO formatted date to count down to. For example, `2020-06-01T00:00:00+08:00`
 
 ##### timestamp-ms
 
-A POSIX epoch value in milliseconds; assumed to be UTC timezone. For example, `timestamp-ms="1521880470000"`.
+A POSIX epoch value in milliseconds; assumed to be UTC timezone. For example,
+`timestamp-ms="1521880470000"`.
 
 ##### timestamp-seconds
 
-A POSIX epoch value in seconds; assumed to be UTC timezone. For example, `timestamp-seconds="1521880470"`.
+A POSIX epoch value in seconds; assumed to be UTC timezone. For example,
+`timestamp-seconds="1521880470"`.
 
 ##### timeleft-ms
 
-A value in milliseconds left to be counting down. For example, 48 hours left `timeleft-ms="172800000"`.
+A value in milliseconds left to be counting down. For example, 48 hours left
+`timeleft-ms="172800000"`.
 
 ##### offset-seconds (optional)
 
-A positive or negative number that represents the number of seconds to add or subtract from the `end-date`. For example, `offset-seconds="60"` adds 60 seconds to the end-date.
+A positive or negative number that represents the number of seconds to add or
+subtract from the `end-date`. For example, `offset-seconds="60"` adds 60 seconds
+to the end-date.
 
 ##### when-ended (optional)
 
-Specifies whether to stop the timer when it reaches 0 seconds. The value can be set to `stop` (default) to indicate the timer to stop at 0 seconds and will not pass the final date or `continue` to indicate the timer should continue after reaching 0 seconds.
+Specifies whether to stop the timer when it reaches 0 seconds. The value can be
+set to `stop` (default) to indicate the timer to stop at 0 seconds and will not
+pass the final date or `continue` to indicate the timer should continue after
+reaching 0 seconds.
 
 ##### locale (optional)
 
-An internationalization language string for each timer unit. The default value is `en` (for English).
-Supported values:
+An internationalization language string for each timer unit. The default value
+is `en` (for English). Supported values:
 
 | Code  | Language            |
 | ----- | ------------------- |
@@ -163,14 +179,18 @@ Supported values:
 
 ##### biggest-unit (optional)
 
-Allows the `amp-date-countdown` component to calculate the time difference based on the specified `biggest-unit` value. For example, assume there are `50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result displays `1210 hours` left.
+Allows the `amp-date-countdown` component to calculate the time difference based
+on the specified `biggest-unit` value. For example, assume there are
+`50 days 10 hours` left, if the `biggest-unit` is set to `hours`, the result
+displays `1210 hours` left.
 
 - Supported values: `days`, `hours`, `minutes`, `seconds`
 - Default: `days`
 
 ## Events
 
-The `amp-date-countdown` component exposes the following event that you can use [AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
+The `amp-date-countdown` component exposes the following event that you can use
+[AMP on-syntax to trigger](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events):
 
 | Event     | Description                                                                                                                                                                                                                                                                                                             |
 | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -221,4 +241,6 @@ Renders as:
 
 ## Validation
 
-See [amp-date-countdown rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-countdown/validator-amp-date-countdown.protoascii) in the AMP validator specification.
+See
+[amp-date-countdown rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-date-countdown/validator-amp-date-countdown.protoascii)
+in the AMP validator specification.

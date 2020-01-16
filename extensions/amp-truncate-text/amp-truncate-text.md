@@ -46,7 +46,9 @@ limitations under the License.
 
 ## Behavior
 
-Truncates text with an ellipsis, optionally showing an overflow element when there is overflow. The overflow element is always placed at the end of the content and must be a direct child of `<amp-truncate-text>`.
+Truncates text with an ellipsis, optionally showing an overflow element when
+there is overflow. The overflow element is always placed at the end of the
+content and must be a direct child of `<amp-truncate-text>`.
 
 ## Children
 
@@ -79,7 +81,10 @@ Truncates text with an ellipsis, optionally showing an overflow element when the
 
 ## Using a Custom Action
 
-If you do not want to expand in place, you can use `slot="persistent"` to perform a custom acton, such as navigating to another page with additional information. This can be useful when there is more content than would make sense to expand inline.
+If you do not want to expand in place, you can use `slot="persistent"` to
+perform a custom acton, such as navigating to another page with additional
+information. This can be useful when there is more content than would make sense
+to expand inline.
 
 ```html
 <amp-truncate-text layout="fixed-height" height="3em">
@@ -88,7 +93,9 @@ If you do not want to expand in place, you can use `slot="persistent"` to perfor
 </amp-truncate-text>
 ```
 
-You can also customize the action for an element with `slot="collapsed"` by using either an anchor tag or a tap action. Note that this will not show up if the text fits. For example:
+You can also customize the action for an element with `slot="collapsed"` by
+using either an anchor tag or a tap action. Note that this will not show up if
+the text fits. For example:
 
 ```html
 <amp-truncate-text layout="fixed-height" height="3em">
@@ -97,7 +104,10 @@ You can also customize the action for an element with `slot="collapsed"` by usin
 </amp-truncate-text>
 ```
 
-By default, clicking within an element that has `slot="expanded"` will collapse the content. Like for `slot="collapsed"`, using an anchor tag or a tap action will allow you to override the behavior to do something else, like link to another page.
+By default, clicking within an element that has `slot="expanded"` will collapse
+the content. Like for `slot="collapsed"`, using an anchor tag or a tap action
+will allow you to override the behavior to do something else, like link to
+another page.
 
 ```html
 <amp-truncate-text layout="fixed-height" height="3em">
@@ -109,4 +119,6 @@ By default, clicking within an element that has `slot="expanded"` will collapse 
 
 ## Validation
 
-See [amp-truncate-text rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-truncate-text/validator-amp-truncate-text.protoascii) in the AMP validator specification.
+See
+[amp-truncate-text rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-truncate-text/validator-amp-truncate-text.protoascii)
+in the AMP validator specification.

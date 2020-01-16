@@ -41,7 +41,11 @@ Embeds <a href="https://beopinion.com/">BeOpinion</a> content.
 
 ## Behavior
 
-The `amp-beopinion` component allows you to embed [BeOpinion](https://beopinion.com/) content in your AMP page for a given BeOpinion account. BeOpinion is a tool for content creators to add interactive blocks such as polls and quizzes to their pages. BeOpinion mostly works with journalists of major media groups in Europe.
+The `amp-beopinion` component allows you to embed
+[BeOpinion](https://beopinion.com/) content in your AMP page for a given
+BeOpinion account. BeOpinion is a tool for content creators to add interactive
+blocks such as polls and quizzes to their pages. BeOpinion mostly works with
+journalists of major media groups in Europe.
 
 ### Integration examples
 
@@ -76,13 +80,24 @@ The `amp-beopinion` component allows you to embed [BeOpinion](https://beopinion.
 
 ## Appearance
 
-BeOpinion does not currently provide an API that yields fixed aspect ratio for embedded contents. Currently, AMP automatically proportionally scales the content to fit the provided size, but this may yield less than ideal appearance. You might need to manually tweak the provided width and height. Also, you can use the `media` attribute to select the aspect ratio based on the screen width.
+BeOpinion does not currently provide an API that yields fixed aspect ratio for
+embedded contents. Currently, AMP automatically proportionally scales the
+content to fit the provided size, but this may yield less than ideal appearance.
+You might need to manually tweak the provided width and height. Also, you can
+use the `media` attribute to select the aspect ratio based on the screen width.
 
 ## Placeholders & fallbacks
 
-An element marked with a `placeholder` attribute displays while the content for the content is loading or initializing. Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-beopinion` isn't supported by the browser or if the content doesn't exist or has been deleted.
+An element marked with a `placeholder` attribute displays while the content for
+the content is loading or initializing. Placeholders are hidden once the AMP
+component's content displays. An element marked with a `fallback` attribute
+displays if `amp-beopinion` isn't supported by the browser or if the content
+doesn't exist or has been deleted.
 
-Visit the [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-beopinion` component.
+Visit the
+[Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders)
+guide to learn more about how placeholders and fallbacks interact for the
+`amp-beopinion` component.
 
 ## Attributes
 
@@ -112,4 +127,6 @@ Warning: the <code>amp-beopinion</code> element overrides this value to <code>"1
 
 ## Validation
 
-See [amp-beopinion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-beopinion/validator-amp-beopinion.protoascii) in the AMP validator specification.
+See
+[amp-beopinion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-beopinion/validator-amp-beopinion.protoascii)
+in the AMP validator specification.

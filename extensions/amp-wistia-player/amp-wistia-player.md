@@ -64,4 +64,5 @@ Displays a <a href="https://wistia.com">Wistia</a> video.
 
 ## Validation
 
-See [amp-wistia-player rules](validator-amp-wistia-player.protoascii) in the AMP validator specification.
+See [amp-wistia-player rules](validator-amp-wistia-player.protoascii) in the AMP
+validator specification.

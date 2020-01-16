@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact [PolymorphicAds](https://www.polymorphicads.jp)
+For configuration details and to generate your tags, please contact
+[PolymorphicAds](https://www.polymorphicads.jp)
 
 Supported parameters:
 

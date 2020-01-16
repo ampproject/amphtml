@@ -42,7 +42,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://lokaplatform.com/contact/
+For configuration details and to generate your tags, please contact
+https://lokaplatform.com/contact/
 
 Supported parameters:
 
@@ -59,4 +60,5 @@ Optional JSON fields:
 
 ## Design information
 
-Please visit [SCENE](https://lokaplatform.com/scene) and sign up as publisher to create your own placement.
+Please visit [SCENE](https://lokaplatform.com/scene) and sign up as publisher to
+create your own placement.

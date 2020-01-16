@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the Adverticum support team via e-mail: support@adverticum.com.
+For details on the configuration semantics, please contact the Adverticum
+support team via e-mail: support@adverticum.com.
 
 ### Required parameters
 
@@ -43,4 +44,5 @@ For details on the configuration semantics, please contact the Adverticum suppor
 
 ## Support and contact
 
-For further information and specific configuration please contact the Adverticum support team via e-mail: support@adverticum.com
+For further information and specific configuration please contact the Adverticum
+support team via e-mail: support@adverticum.com

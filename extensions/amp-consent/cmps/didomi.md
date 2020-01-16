@@ -16,7 +16,9 @@ limitations under the License.
 
 # DIDOMI
 
-Collect and enforce user consent with the Didomi Consent Management Platform. Use the [Didomi Console](https://console.didomi.io/) to create and configure your consent notices.
+Collect and enforce user consent with the Didomi Consent Management Platform.
+Use the [Didomi Console](https://console.didomi.io/) to create and configure
+your consent notices.
 
 ## Example
 
@@ -37,4 +39,5 @@ Collect and enforce user consent with the Didomi Consent Management Platform. Us
 
 ## Configuration
 
-Visit the [Didomi Console](https://console.didomi.io/) and our [Documentation](https://developers.didomi.io/cmp/amp) for more information.
+Visit the [Didomi Console](https://console.didomi.io/) and our
+[Documentation](https://developers.didomi.io/cmp/amp) for more information.

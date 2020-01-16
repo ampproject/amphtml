@@ -3,7 +3,9 @@ $category@: layout
 formats:
   - websites
 teaser:
-  text: Wraps its children in a unique full-screen scrolling container allowing you to display a full-screen ad without taking up the entire viewport.
+  text:
+    Wraps its children in a unique full-screen scrolling container allowing you
+    to display a full-screen ad without taking up the entire viewport.
 ---
 
 <!---
@@ -24,7 +26,9 @@ limitations under the License.
 
 # amp-fx-flying-carpet
 
-A flying carpet wraps its children in a unique full-screen scrolling container. In particular, this allows you to display a full-screen ad without taking up the entire viewport, making for a better user experience.
+A flying carpet wraps its children in a unique full-screen scrolling container.
+In particular, this allows you to display a full-screen ad without taking up the
+entire viewport, making for a better user experience.
 
 <table>
   <tr>
@@ -37,13 +41,14 @@ A flying carpet wraps its children in a unique full-screen scrolling container. 
   </tr>
 </table>
 
-[tip type="note"]
-Check if your ad network permits use of flying carpets when implementing the `amp-fx-flying-carpet` to display adds.
-[/tip][toc]
+[tip type="note"] Check if your ad network permits use of flying carpets when
+implementing the `amp-fx-flying-carpet` to display adds. [/tip][toc]
 
 ## Behavior
 
-`amp-fx-flying-carpet` displays its children inside a container of fixed height. As the user scrolls the page, the flying carpet reveals more of it contents, sliding across its children as if peering through a window in the page.
+`amp-fx-flying-carpet` displays its children inside a container of fixed height.
+As the user scrolls the page, the flying carpet reveals more of it contents,
+sliding across its children as if peering through a window in the page.
 
 Example:
 
@@ -60,8 +65,10 @@ Example:
 
 The following requirements are imposed on `amp-fx-flying-carpet` positioning:
 
-- It should be positioned so that it doesn't obscure the first viewport (outside of top 75%).
-- It should be positioned so that its top can reach or be above the top of the last viewport when scrolled.
+- It should be positioned so that it doesn't obscure the first viewport (outside
+  of top 75%).
+- It should be positioned so that its top can reach or be above the top of the
+  last viewport when scrolled.
 
 ## Attributes
 
@@ -83,4 +90,6 @@ The following requirements are imposed on `amp-fx-flying-carpet` positioning:
 
 ## Validation
 
-See [amp-fx-flying-carpet rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-flying-carpet/validator-amp-fx-flying-carpet.protoascii) in the AMP validator specification.
+See
+[amp-fx-flying-carpet rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-flying-carpet/validator-amp-fx-flying-carpet.protoascii)
+in the AMP validator specification.

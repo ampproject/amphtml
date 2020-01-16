@@ -45,7 +45,8 @@ Embeds the Facebook comments plugin.
 
 ## Overview
 
-You can use the `amp-facebook-comments` component to embed the [Facebook comments plugin](https://developers.facebook.com/docs/plugins/comments).
+You can use the `amp-facebook-comments` component to embed the
+[Facebook comments plugin](https://developers.facebook.com/docs/plugins/comments).
 
 **Example**
 
@@ -91,4 +92,6 @@ You can use the `amp-facebook-comments` component to embed the [Facebook comment
 
 ## Validation
 
-See [amp-facebook-comments rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-comments/validator-amp-facebook-comments.protoascii) in the AMP validator specification.
+See
+[amp-facebook-comments rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-comments/validator-amp-facebook-comments.protoascii)
+in the AMP validator specification.

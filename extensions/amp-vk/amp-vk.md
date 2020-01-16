@@ -39,7 +39,8 @@ Embeds a <a href="https://vk.com/">VK</a> post or poll widget.
 
 ## Behavior
 
-You can use the `amp-vk` component to embed a [VK](https://vk.com/) post or poll widget.
+You can use the `amp-vk` component to embed a [VK](https://vk.com/) post or poll
+widget.
 
 Example of a post widget:
 
@@ -72,7 +73,9 @@ Example of a poll widget:
 
 ## Attributes
 
-For additional information about widgets attributes, please see [VK post widget documentation](https://vk.com/dev/widget_post) and [VK poll widget documentation](https://vk.com/dev/widget_poll).
+For additional information about widgets attributes, please see
+[VK post widget documentation](https://vk.com/dev/widget_post) and
+[VK poll widget documentation](https://vk.com/dev/widget_poll).
 
 <table>
   <tr>
@@ -107,4 +110,6 @@ For additional information about widgets attributes, please see [VK post widget 
 
 ## Validation
 
-See [amp-vk rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vk/validator-amp-vk.protoascii) in the AMP validator specification.
+See
+[amp-vk rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vk/validator-amp-vk.protoascii)
+in the AMP validator specification.

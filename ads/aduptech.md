@@ -80,7 +80,8 @@ Uses available width and the given `height`.
 
 ### Responsive
 
-Uses available space but respecting aspect ratio by given `width` and `height` (for example 10:3).
+Uses available space but respecting aspect ratio by given `width` and `height`
+(for example 10:3).
 
 ```html
 <amp-ad
@@ -109,4 +110,5 @@ Uses available space but respecting aspect ratio by given `width` and `height` (
 
 ## Design/Layout
 
-Please visit [www.adup-tech.com](http://www.adup-tech.com) and sign up as publisher to create your own placement.
+Please visit [www.adup-tech.com](http://www.adup-tech.com) and sign up as
+publisher to create your own placement.

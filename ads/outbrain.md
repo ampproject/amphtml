@@ -18,7 +18,9 @@ limitations under the License.
 
 ## Example installation of the Outbrain widget
 
-The examples below must be accompanied by AMP-enabled widgets delivered by Outbrain’s Account Management Team, do not directly install this code with existing widgets.
+The examples below must be accompanied by AMP-enabled widgets delivered by
+Outbrain’s Account Management Team, do not directly install this code with
+existing widgets.
 
 ### Basic
 
@@ -42,7 +44,8 @@ The examples below must be accompanied by AMP-enabled widgets delivered by Outbr
 </amp-sticky-ad>
 ```
 
-Note that `<amp-sticky-ad />` component requires the following script to be included in the page:
+Note that `<amp-sticky-ad />` component requires the following script to be
+included in the page:
 
 ```html
 <script
@@ -52,11 +55,13 @@ Note that `<amp-sticky-ad />` component requires the following script to be incl
 ></script>
 ```
 
-See [AMP documentation](https://amp.dev/documentation/components/amp-sticky-ad) for more information regarding `<amp-sticky-ad />` component.
+See [AMP documentation](https://amp.dev/documentation/components/amp-sticky-ad)
+for more information regarding `<amp-sticky-ad />` component.
 
 ## Configuration
 
-For details on the configuration semantics, please contact Outbrain’s Account Management Team.\
+For details on the configuration semantics, please contact Outbrain’s Account
+Management Team.\
 These configurations are relevant for both `<amp-ad />` and `<amp-embed />`.
 
 ### Required parameters
@@ -67,11 +72,14 @@ These configurations are relevant for both `<amp-ad />` and `<amp-embed />`.
 
 - `data-htmlURL`: The URL of the standard html version of the page.
 - `data-ampURL`: The URL of the AMP version of the page.
-- `data-styleFile`: Provide publisher an option to pass CSS file in order to inherit the design for the AMP displayed widget. **Consult with Account Manager regarding CSS options**.
+- `data-styleFile`: Provide publisher an option to pass CSS file in order to
+  inherit the design for the AMP displayed widget. **Consult with Account
+  Manager regarding CSS options**.
 
 ### User Consent
 
-The widget will check for user consent to decide whether personalized or non-personalized recommendations should be displayed.
+The widget will check for user consent to decide whether personalized or
+non-personalized recommendations should be displayed.
 
 The following rules will be applied:
 
@@ -84,8 +92,15 @@ The following rules will be applied:
 
 ### Widget is cut off
 
-According to the AMP API, "resizes are honored when the resize will not adjust the content the user is currently reading. That is, if the ad is above the viewport's contents, it'll resize. Same if it's below. If it's in the viewport, it ignores it."
+According to the AMP API, "resizes are honored when the resize will not adjust
+the content the user is currently reading. That is, if the ad is above the
+viewport's contents, it'll resize. Same if it's below. If it's in the viewport,
+it ignores it."
 
 **Resolution**
 
-You can set an initial height of what the widget height is supposed to be. That is, instead of `height="100"`, if the widget's final height is 600px, then set `height="600"`. Setting the initial height **_will not_** finalize the widget height if it's different from the actual. The widget will resize to it's true dimensions after the widget leaves the viewport.
+You can set an initial height of what the widget height is supposed to be. That
+is, instead of `height="100"`, if the widget's final height is 600px, then set
+`height="600"`. Setting the initial height **_will not_** finalize the widget
+height if it's different from the actual. The widget will resize to it's true
+dimensions after the widget leaves the viewport.

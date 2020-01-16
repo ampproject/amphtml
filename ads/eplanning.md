@@ -36,7 +36,9 @@ limitations under the License.
 
 ## Configuration
 
-For configuration semantics, please see [e-planning's documentation](https://www.e-planning.net). For support contact support@e-planning.net.
+For configuration semantics, please see
+[e-planning's documentation](https://www.e-planning.net). For support contact
+support@e-planning.net.
 
 Supported parameters:
 

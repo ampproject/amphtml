@@ -25,7 +25,8 @@ limitations under the License.
 
 # amp-viz-vega
 
-Displays visualizations created using <a href="https://vega.github.io/vega/">Vega</a> visualization grammar.
+Displays visualizations created using
+<a href="https://vega.github.io/vega/">Vega</a> visualization grammar.
 
 <table>
   <tr>
@@ -51,11 +52,11 @@ Displays visualizations created using <a href="https://vega.github.io/vega/">Veg
 ## What is Vega?
 
 Vega is a visualization grammar, a declarative format for creating and saving
-interactive visualization designs. Vega's runtime uses [D3](https://github.com/d3/d3)
-behind the scene to draw.
+interactive visualization designs. Vega's runtime uses
+[D3](https://github.com/d3/d3) behind the scene to draw.
 
-Please visit [Vega's website](https://vega.github.io/vega/)
-to learn more and play with samples.
+Please visit [Vega's website](https://vega.github.io/vega/) to learn more and
+play with samples.
 
 ## Example
 

@@ -24,7 +24,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please see [Ad Generation's documentation](https://github.com/AdGeneration/sdk/wiki).
+For details on the configuration semantics, please see
+[Ad Generation's documentation](https://github.com/AdGeneration/sdk/wiki).
 
 Supported parameters:
 

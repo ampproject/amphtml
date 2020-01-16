@@ -16,7 +16,10 @@ limitations under the License.
 
 # AMP for Email Supported Components
 
-The following is the list of [AMP components](https://amp.dev/documentation/components/?format=email) that are currently supported in AMP email messages. The components are grouped into the following categories:
+The following is the list of
+[AMP components](https://amp.dev/documentation/components/?format=email) that
+are currently supported in AMP email messages. The components are grouped into
+the following categories:
 
 - [Dynamic Content](#dynamic-content)
 - [Layout](#layout)

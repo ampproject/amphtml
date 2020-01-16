@@ -71,7 +71,11 @@ Unsupported features:
 
 ### CORS
 
-`amp-3d-gltf` makes a `fetch` request from the origin `https://<random>.ampproject.net` so `access-control-allow-origin: *.ampproject.net` must be set on the response header of the endpoint specified as `src`. Wildcard is needed since the origin has a random sub-domain component to it.
+`amp-3d-gltf` makes a `fetch` request from the origin
+`https://<random>.ampproject.net` so
+`access-control-allow-origin: *.ampproject.net` must be set on the response
+header of the endpoint specified as `src`. Wildcard is needed since the origin
+has a random sub-domain component to it.
 
 ## Attributes
 
@@ -123,4 +127,6 @@ Default value is <code>false</code>.</td>
 
 ## Validation
 
-See [amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii) in the AMP validator specification.
+See
+[amp-3d-gltf rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-3d-gltf/validator-amp-3d-gltf.protoascii)
+in the AMP validator specification.

@@ -25,7 +25,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details, see [AdsNative's documentation](http://dev.adsnative.com).
+For configuration details, see
+[AdsNative's documentation](http://dev.adsnative.com).
 
 ### Required parameters
 
@@ -41,4 +42,5 @@ For configuration details, see [AdsNative's documentation](http://dev.adsnative.
 - `data-anwid`: the widget id
 - `data-antid`: the template id
 - `data-ancat`: a comma separated list of categories
-- `data-ankv`: a list of key value pairs in the format `"key1:value1, key2:value2"`.
+- `data-ankv`: a list of key value pairs in the format
+  `"key1:value1, key2:value2"`.

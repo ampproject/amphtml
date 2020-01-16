@@ -16,7 +16,9 @@ limitations under the License.
 
 # AMP Validator Chrome Extension
 
-This is the source code to the publicly available [AMP Validator](https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc) Chrome extension.
+This is the source code to the publicly available
+[AMP Validator](https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc)
+Chrome extension.
 
 ## Building the extension
 
@@ -29,5 +31,5 @@ Once these tools are installed, run `./build_extension.sh`.
 
 ## Installing locally
 
-Once built this extension can be installed locally through Chrome's [Developer
-Mode](https://developer.chrome.com/extensions/faq#faq-dev-01)
+Once built this extension can be installed locally through Chrome's
+[Developer Mode](https://developer.chrome.com/extensions/faq#faq-dev-01)

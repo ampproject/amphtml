@@ -48,4 +48,5 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://www.valuecommerce.ne.jp/info/
+For configuration details and to generate your tags, please contact
+https://www.valuecommerce.ne.jp/info/

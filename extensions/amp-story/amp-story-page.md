@@ -24,7 +24,8 @@ limitations under the License.
 
 # `amp-story-page`
 
-The `<amp-story-page>` component represents the content to display on a single page of a story.
+The `<amp-story-page>` component represents the content to display on a single
+page of a story.
 
 <table>
   <tr>
@@ -91,14 +92,21 @@ The `<amp-story-page>` component represents the content to display on a single p
 
 ### id [required]
 
-A unique identifier for the page. Can be used for styling the page and its descendants in CSS, and is also used to uniquely identify the page in the URL fragment.
+A unique identifier for the page. Can be used for styling the page and its
+descendants in CSS, and is also used to uniquely identify the page in the URL
+fragment.
 
 ### auto-advance-after [optional]
 
-Specifies when to auto-advance to the next page. If omitted, the page will not automatically advance. The value for `auto-advance-after` must be either:
+Specifies when to auto-advance to the next page. If omitted, the page will not
+automatically advance. The value for `auto-advance-after` must be either:
 
-- A positive amount of [time](https://developer.mozilla.org/en-US/docs/Web/CSS/time) to wait before automatically advancing to the next page
-- An ID of an [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement) or video-interface video whose completion will trigger the auto-advance
+- A positive amount of
+  [time](https://developer.mozilla.org/en-US/docs/Web/CSS/time) to wait before
+  automatically advancing to the next page
+- An ID of an
+  [HTMLMediaElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement)
+  or video-interface video whose completion will trigger the auto-advance
 
 For example:
 
@@ -121,4 +129,7 @@ For example:
 
 ## Children (of amp-story-page)
 
-The `<amp-story-page>` component contains one or more [layers](amp-story-grid-layer.md). Layers are stacked bottom-up (the first layer specified in the DOM is at the bottom; the last layer specified in the DOM is at the top).
+The `<amp-story-page>` component contains one or more
+[layers](amp-story-grid-layer.md). Layers are stacked bottom-up (the first layer
+specified in the DOM is at the bottom; the last layer specified in the DOM is at
+the top).

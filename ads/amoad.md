@@ -46,7 +46,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact [AMoAd](http://www.amoad.com/form2/).
+For configuration details and to generate your tags, please contact
+[AMoAd](http://www.amoad.com/form2/).
 
 Supported parameters:
 

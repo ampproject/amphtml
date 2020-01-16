@@ -32,7 +32,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [MADS documentation](http://wiki.mads.com/sites/javascript-ad-tags/).
+For semantics of configuration, please see
+[MADS documentation](http://wiki.mads.com/sites/javascript-ad-tags/).
 
 Supported parameters:
 

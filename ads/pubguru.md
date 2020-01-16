@@ -35,7 +35,8 @@ limitations under the License.
 
 `data-slot` - The adUnit id from the associated Dfp network.
 
-`data-publisher` - Unique publisher name given to you in your PubGuru administration panel.
+`data-publisher` - Unique publisher name given to you in your PubGuru
+administration panel.
 
 `width` + `height` - Required for all `<amp-ad>` units. Specifies the ad size.
 

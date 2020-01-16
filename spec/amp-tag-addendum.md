@@ -18,7 +18,11 @@ limitations under the License.
 
 ## Overview
 
-AMP HTML allows for most HTML5 standard tags and a few additional tags specific to the AMP runtime. The [AMP Spec](amp-html-format.md) broadly defines the set of tags that are disallowed. AMP Validator implementations, however, must be implemented using a tag whitelist. This addendum lists the set of tags which an AMP Validator should whitelist.
+AMP HTML allows for most HTML5 standard tags and a few additional tags specific
+to the AMP runtime. The [AMP Spec](amp-html-format.md) broadly defines the set
+of tags that are disallowed. AMP Validator implementations, however, must be
+implemented using a tag whitelist. This addendum lists the set of tags which an
+AMP Validator should whitelist.
 
 If an HTML tag is not in this list, the AMP Validator does not consider that tag
 valid in any context. However, many of these tags have additional restrictions.
@@ -29,7 +33,9 @@ validation requirements for each tag.
 
 ## HTML5 Tag Whitelist
 
-Below we list the allowed tags in the order in which they are appear in the HTML5 spec in section 4 [The Elements of HTML](http://www.w3.org/TR/html5/single-page.html#html-elements).
+Below we list the allowed tags in the order in which they are appear in the
+HTML5 spec in section 4
+[The Elements of HTML](http://www.w3.org/TR/html5/single-page.html#html-elements).
 
 ### 4.1 The root element
 
@@ -112,7 +118,8 @@ Below we list the allowed tags in the order in which they are appear in the HTML
 
 ### 4.7 Embedded Content
 
-AMP HTML allows only limited embedded content except via its own tags (ex: amp-img).
+AMP HTML allows only limited embedded content except via its own tags (ex:
+amp-img).
 
 ### 4.7.8
 
@@ -120,7 +127,8 @@ AMP HTML allows only limited embedded content except via its own tags (ex: amp-i
 
 ### 4.7.15 SVG
 
-SVG tags are not in the HTML5 namespace. They are listed below without section ids.
+SVG tags are not in the HTML5 namespace. They are listed below without section
+ids.
 
 `<svg>`  
 `<g>`  
@@ -204,8 +212,7 @@ These may be removed in future versions of AMP
 `<amp-anim>`  
 `<amp-youtube>`  
 `<amp-twitter>`  
-`<amp-vine>`
-`<amp-instagram>`  
+`<amp-vine>` `<amp-instagram>`  
 `<amp-iframe>`  
 `<amp-pixel>`  
 `<amp-audio>`  

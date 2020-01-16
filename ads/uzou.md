@@ -16,7 +16,8 @@ limitations under the License.
 
 # UZOU
 
-For initial installation, let us know from [this form](https://docs.google.com/forms/d/e/1FAIpQLSdq18-oOnVZNuJG2pAAzMyjyfCVU69RryUJWwjwMbYLkOY4Zg/viewform).
+For initial installation, let us know from
+[this form](https://docs.google.com/forms/d/e/1FAIpQLSdq18-oOnVZNuJG2pAAzMyjyfCVU69RryUJWwjwMbYLkOY4Zg/viewform).
 
 ## Example
 
@@ -30,11 +31,14 @@ For initial installation, let us know from [this form](https://docs.google.com/f
 </amp-ad>
 ```
 
-Uzou widget code must be published by [our administration screen](https://uzou.speee-ad.jp/). Please do not directly install the above code.
+Uzou widget code must be published by
+[our administration screen](https://uzou.speee-ad.jp/). Please do not directly
+install the above code.
 
 ## Parameters
 
-For the widget design or configuration details, please contact your account manager.
+For the widget design or configuration details, please contact your account
+manager.
 
 Supported parameters:
 

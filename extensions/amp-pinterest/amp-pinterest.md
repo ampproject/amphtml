@@ -45,7 +45,8 @@ Displays a Pinterest widget, Save button, or Follow button.
 
 ## Examples
 
-Use the `amp-pinterest` component to display a Save button, Pin widget, or Follow button.
+Use the `amp-pinterest` component to display a Save button, Pin widget, or
+Follow button.
 
 **Example: Save button**
 
@@ -94,15 +95,20 @@ Must be set to `buttonPin`.
 
 ##### data-url (required)
 
-Contains the fully-qualified URL intended to be saved as a pin or re-made into a widget.
+Contains the fully-qualified URL intended to be saved as a pin or re-made into a
+widget.
 
 ##### data-media (required)
 
-Contains the fully-qualified URL of the image intended to be saved as a pin. If the pin will eventually contain multimedia (such as YouTube), it should point to a high-resolution thumbnail.
+Contains the fully-qualified URL of the image intended to be saved as a pin. If
+the pin will eventually contain multimedia (such as YouTube), it should point to
+a high-resolution thumbnail.
 
 ##### data-description (required)
 
-Contains the default description that appears in the pin create form; please choose carefully, since many Pinners will close the form without pinning if it doesn't make sense.
+Contains the default description that appears in the pin create form; please
+choose carefully, since many Pinners will close the form without pinning if it
+doesn't make sense.
 
 ### Sizing the Save button
 
@@ -112,7 +118,8 @@ Default small rectangular button:
 height=20 width=40
 ```
 
-Small rectangular button with pin count to the right, using `data-count="beside"`:
+Small rectangular button with pin count to the right, using
+`data-count="beside"`:
 
 ```html
 height=20 width=85
@@ -130,13 +137,15 @@ Large rectangular button using `data-tall="true"`:
 height=28 width=56
 ```
 
-Large rectangular button with pin count to the right, using `data-tall="true"` and `data-count="beside"`:
+Large rectangular button with pin count to the right, using `data-tall="true"`
+and `data-count="beside"`:
 
 ```html
 height=28 width=107
 ```
 
-Large rectangular button with pin count on top, using `data-tall="true"` and `data-count="above"`:
+Large rectangular button with pin count on top, using `data-tall="true"` and
+`data-count="above"`:
 
 ```html
 height=66 width=56
@@ -176,7 +185,8 @@ Must be set to `embedPin`.
 
 ##### data-url (required)
 
-Must contain the fully-qualified URL of the Pinterest resource to be shown as a widget.
+Must contain the fully-qualified URL of the Pinterest resource to be shown as a
+widget.
 
 ```html
 data-url="https://www.pinterest.com/pin/99360735500167749/"
@@ -184,8 +194,12 @@ data-url="https://www.pinterest.com/pin/99360735500167749/"
 
 ##### alt
 
-This property like the the `alt` attribute on an `<img>` tag specifies the alternate text. If not provided it will be infered from the pin data provided by the Pinterest API.
+This property like the the `alt` attribute on an `<img>` tag specifies the
+alternate text. If not provided it will be infered from the pin data provided by
+the Pinterest API.
 
 ## Validation
 
-See [amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/validator-amp-pinterest.protoascii) in the AMP validator specification.
+See
+[amp-pinterest rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/validator-amp-pinterest.protoascii)
+in the AMP validator specification.

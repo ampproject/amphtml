@@ -16,7 +16,8 @@ limitations under the License.
 
 # SVK Native
 
-SVK Native is a content discovery platform. Please visit our [svk-native.ru](https://svk-native.ru) for more information.
+SVK Native is a content discovery platform. Please visit our
+[svk-native.ru](https://svk-native.ru) for more information.
 
 ## Example
 
@@ -30,7 +31,8 @@ SVK Native is a content discovery platform. Please visit our [svk-native.ru](htt
 
 ## Configuration
 
-For details on the configuration semantics, please contact your SVK Native personal manager.
+For details on the configuration semantics, please contact your SVK Native
+personal manager.
 
 ### Required parameters
 

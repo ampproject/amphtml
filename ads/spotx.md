@@ -46,7 +46,9 @@ limitations under the License.
 
 ## Configuration
 
-The SpotX `amp-ad` integration has many of the same capabilities and options as our SpotX EASI integration. For full list of options, please see the [SpotX EASI integration documentation](https://developer.spotxchange.com/content/local/docs/sdkDocs/EASI/README.md#common-javascript-attributes).
+The SpotX `amp-ad` integration has many of the same capabilities and options as
+our SpotX EASI integration. For full list of options, please see the
+[SpotX EASI integration documentation](https://developer.spotxchange.com/content/local/docs/sdkDocs/EASI/README.md#common-javascript-attributes).
 
 ### Required parameters
 

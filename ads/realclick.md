@@ -30,7 +30,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact [Realclick](http://www.realclick.co.kr/)
+For configuration details and to generate your tags, please contact
+[Realclick](http://www.realclick.co.kr/)
 
 Supported parameters:
 

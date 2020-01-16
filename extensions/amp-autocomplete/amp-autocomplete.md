@@ -3,7 +3,9 @@ $category: dynamic-content
 formats:
   - websites
 teaser:
-  text: Suggests completed results corresponding to the user input as they type into the input field.
+  text:
+    Suggests completed results corresponding to the user input as they type into
+    the input field.
 ---
 
 <!--
@@ -49,9 +51,14 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-autocomplete` extension should be used for suggesting completed items based on user input to help users carry out their task more quickly.
+The `amp-autocomplete` extension should be used for suggesting completed items
+based on user input to help users carry out their task more quickly.
 
-This can be used to power search experiences, in cases where the user may not know the full range of potential inputs, or in forms to help ensure inputs where there may be multiple ways to express the same intent (using a state abbreviation instead of its full name, for example) yield more predictable results.
+This can be used to power search experiences, in cases where the user may not
+know the full range of potential inputs, or in forms to help ensure inputs where
+there may be multiple ways to express the same intent (using a state
+abbreviation instead of its full name, for example) yield more predictable
+results.
 
 Example:
 

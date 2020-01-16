@@ -1,6 +1,7 @@
 # Gulp AMPHTML Validator
 
-A Gulp plugin for validating [AMPHTML files](https://ampproject.org) using the official [AMPHTML Validator](https://www.npmjs.com/package/amphtml-validator).
+A Gulp plugin for validating [AMPHTML files](https://ampproject.org) using the
+official [AMPHTML Validator](https://www.npmjs.com/package/amphtml-validator).
 
 ## Installation
 
@@ -31,7 +32,8 @@ gulp.task('amphtml:validate', () => {
 });
 ```
 
-To treat warnings as errors, replace the last line of the validation closure with:
+To treat warnings as errors, replace the last line of the validation closure
+with:
 
 ```js
 // Exit the process with error code (1) if an AMP validation warning or

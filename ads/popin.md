@@ -32,7 +32,8 @@ limitations under the License.
 
 ### Configuration
 
-For configuration details, please contact http://www.popin.cc/discovery/#contact.
+For configuration details, please contact
+http://www.popin.cc/discovery/#contact.
 
 Supported parameters:
 

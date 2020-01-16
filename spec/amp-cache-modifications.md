@@ -1,12 +1,22 @@
 # AMP cache modifications best practices
 
-These are guidelines for what AMP cache implementations should look like. Some items are required for overall security of the platform while others are suggestions for performance improvements. All modifications are made to both AMP and AMP4ADS documents except where noted.
+These are guidelines for what AMP cache implementations should look like. Some
+items are required for overall security of the platform while others are
+suggestions for performance improvements. All modifications are made to both AMP
+and AMP4ADS documents except where noted.
 
-For example, given a [recent version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.amp.html) of [everything.amp.html](https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html), the output after modifications will be [this version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.cache.html).
+For example, given a
+[recent version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.amp.html)
+of
+[everything.amp.html](https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html),
+the output after modifications will be
+[this version](https://github.com/ampproject/amphtml/tree/master/spec/amp-cache-modifications.everything.cache.html).
 
 ### HTML Sanitization
 
-The AMP Cache parses and re-serializes all documents to remove any ambiguities in parsing the document which might result in subtly different parses in different browsers.
+The AMP Cache parses and re-serializes all documents to remove any ambiguities
+in parsing the document which might result in subtly different parses in
+different browsers.
 
 #### All HTML comments are stripped
 
@@ -43,7 +53,8 @@ The AMP Cache parses and re-serializes all documents to remove any ambiguities i
 
 #### All tags are closed, except for HTML5 void elements
 
-[Void elements](https://www.w3.org/TR/html5/syntax.html#void-elements) are tags that have no end tag and also no contents. All other tags are closed.
+[Void elements](https://www.w3.org/TR/html5/syntax.html#void-elements) are tags
+that have no end tag and also no contents. All other tags are closed.
 
 <details>
 <summary>example</summary>
@@ -102,12 +113,20 @@ The AMP Cache parses and re-serializes all documents to remove any ambiguities i
 
 ### URL Rewrites
 
-The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to rebase relative URLs found in the document so that the URL remains the same when loaded from the AMP Cache. The other reason is to improve performance by selecting a different equivalent resource. This includes rewriting image and font URLs to use a cached copy and rewriting AMP javascript URLs to use a copy with longer cache lifetimes.
+The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to
+rebase relative URLs found in the document so that the URL remains the same when
+loaded from the AMP Cache. The other reason is to improve performance by
+selecting a different equivalent resource. This includes rewriting image and
+font URLs to use a cached copy and rewriting AMP javascript URLs to use a copy
+with longer cache lifetimes.
 
 #### All relative `href` , `src`, `bookend-config-src`, `data-iframe-src` and `data-no-service-worker-fallback-shell-url` URLs are rewritten as absolute URLs
 
-`bookend-confg-src` is part of `<amp-story>` [spec](https://amp.dev/documentation/components/amp-story)
-`data-iframe-src` and `data-no-service-worker-fallback-shell-url` are part of `<amp-install-serviceworker>` [spec](https://amp.dev/documentation/components/amp-install-serviceworker)
+`bookend-confg-src` is part of `<amp-story>`
+[spec](https://amp.dev/documentation/components/amp-story) `data-iframe-src` and
+`data-no-service-worker-fallback-shell-url` are part of
+`<amp-install-serviceworker>`
+[spec](https://amp.dev/documentation/components/amp-install-serviceworker)
 
 <details>
 <summary>example</summary>
@@ -159,8 +178,11 @@ The AMP Cache rewrites URLs found in the AMP HTML for two purposes. One is to re
 
 #### Anchor tags must have a target of `_blank` or `_top`
 
-_Condition_:
-If `<a>` tag does not have attribute `target=_blank` or `target=_top` then add a `target=`. This added `target=` will be either be `target=_blank` or `target=_top`. If the document has `<base target=...>` of either `_top` or `_blank` then use that value. Otherwise all other `target` values are rewritten to `_top`.
+_Condition_: If `<a>` tag does not have attribute `target=_blank` or
+`target=_top` then add a `target=`. This added `target=` will be either be
+`target=_blank` or `target=_top`. If the document has `<base target=...>` of
+either `_top` or `_blank` then use that value. Otherwise all other `target`
+values are rewritten to `_top`.
 
 <details>
 <summary>example</summary>
@@ -178,7 +200,9 @@ If `<a>` tag does not have attribute `target=_blank` or `target=_top` then add a
 
 #### Insert `<link as=script href=https://cdn.ampproject.org/v0.js rel=preload>`
 
-Before the AMP Runtime `script` tag, insert a `link` tag that tells the browser the AMP Runtime `script` tag is high priority despite being an async `script` tag.
+Before the AMP Runtime `script` tag, insert a `link` tag that tells the browser
+the AMP Runtime `script` tag is high priority despite being an async `script`
+tag.
 
 <details>
 <summary>example</summary>
@@ -191,10 +215,12 @@ Before the AMP Runtime `script` tag, insert a `link` tag that tells the browser 
 
 #### Insert `<link rel=icon>`
 
-When a given AMP document does not have a favicon present, insert one. Inserted tag is of the form `<link href={document_protocol}://{document_domain}/favicon.ico rel=icon>`.
+When a given AMP document does not have a favicon present, insert one. Inserted
+tag is of the form
+`<link href={document_protocol}://{document_domain}/favicon.ico rel=icon>`.
 
-_Condition_:
-No `<link>` tag present with attribute `rel` equal to any of the following: `icon`, `icon shortcut`, `shortcut icon`.
+_Condition_: No `<link>` tag present with attribute `rel` equal to any of the
+following: `icon`, `icon shortcut`, `shortcut icon`.
 
 <details>
 <summary>example</summary>
@@ -208,8 +234,7 @@ No `<link>` tag present with attribute `rel` equal to any of the following: `ico
 
 #### Rewrite `<link rel=manifest>` to `<link rel=origin-manifest>`
 
-_Condition_:
-`<link rel=manifest>` tag present in the document.
+_Condition_: `<link rel=manifest>` tag present in the document.
 
 <details>
 <summary>example</summary>
@@ -222,10 +247,11 @@ _Condition_:
 
 #### Insert `<meta content=always name=referrer>` [required]
 
-If the document was fetched from HTTP origins and does not have a meta referrer tag then insert one.
+If the document was fetched from HTTP origins and does not have a meta referrer
+tag then insert one.
 
-_Condition_:
-No `<meta name=referrer ...>` tag present and document was fetched from HTTP and not HTTPS.
+_Condition_: No `<meta name=referrer ...>` tag present and document was fetched
+from HTTP and not HTTPS.
 
 <details>
 <summary>example</summary>
@@ -238,7 +264,8 @@ No `<meta name=referrer ...>` tag present and document was fetched from HTTP and
 
 #### Insert `<meta content=noindex name=robots>` [required]
 
-AMP Cache pages should not show up in search result pages. The cache also uses [`robots.txt`](https://cdn.ampproject.org/robots.txt) to enforce this.
+AMP Cache pages should not show up in search result pages. The cache also uses
+[`robots.txt`](https://cdn.ampproject.org/robots.txt) to enforce this.
 
 <details>
 <summary>example</summary>
@@ -251,7 +278,10 @@ AMP Cache pages should not show up in search result pages. The cache also uses [
 
 #### Rewrite all `<meta>` tags to be the first children of `<head>`.
 
-Some `<meta>` tags are used by AMP Components and providing them before the AMP Component's script has loaded is important. As a result we move all `<meta>` tags to be the first children of `<head>`. An example of one of these tags is `<meta name="amp-experiments-opt-in" ...>`.
+Some `<meta>` tags are used by AMP Components and providing them before the AMP
+Component's script has loaded is important. As a result we move all `<meta>`
+tags to be the first children of `<head>`. An example of one of these tags is
+`<meta name="amp-experiments-opt-in" ...>`.
 
 <details>
 <summary>example</summary>
@@ -268,8 +298,8 @@ Some `<meta>` tags are used by AMP Components and providing them before the AMP 
 
 The AMP Cache removes any resource hints in the original document.
 
-_Condition_
-Any `<link>` tag present with attribute `rel` equal to any of the following:
+_Condition_ Any `<link>` tag present with attribute `rel` equal to any of the
+following:
 
 - `dns-prefetch`
 - `preconnect`
@@ -288,8 +318,7 @@ Any `<link>` tag present with attribute `rel` equal to any of the following:
 
 #### Remove non-whitelisted `<meta>` tags
 
-_Condition_:
-Remove any `<meta>` tags except for those that:
+_Condition_: Remove any `<meta>` tags except for those that:
 
 - have attribute `charset`
 - do not have attributes `content`, `itemprop`, `name` and `property`
@@ -322,12 +351,12 @@ Remove any `<meta>` tags except for those that:
 
 #### Remove `amp-live-list` children based on `amp_latest_update_time` parameter
 
-This is discussed in detail at [Server side filtering for `amp-live-list`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
+This is discussed in detail at
+[Server side filtering for `amp-live-list`](https://github.com/ampproject/amphtml/blob/master/extensions/amp-live-list/amp-live-list-server-side-filtering.md)
 
 #### Remove attribute `nonce`
 
-_Condition_:
-Remove `nonce` attribute from every tag.
+_Condition_: Remove `nonce` attribute from every tag.
 
 <details>
 <summary>example</summary>
@@ -340,11 +369,14 @@ Remove `nonce` attribute from every tag.
 
 ### Optimizations
 
-These are modifications that either reduce the byte size of the document or decreases the time to render. An AMP cache is not required to implement these.
+These are modifications that either reduce the byte size of the document or
+decreases the time to render. An AMP cache is not required to implement these.
 
 #### The AMP engine javascript URL is rewritten to most recent stable version
 
-If possible, rewrite to use the stable version. Otherwise use the unversioned path. The stable version takes the form `<script async src=https://cdn.ampproject.org/rtv/{version}/v0.js></script>`.
+If possible, rewrite to use the stable version. Otherwise use the unversioned
+path. The stable version takes the form
+`<script async src=https://cdn.ampproject.org/rtv/{version}/v0.js></script>`.
 
 <details>
 <summary>example</summary>
@@ -357,10 +389,11 @@ If possible, rewrite to use the stable version. Otherwise use the unversioned pa
 
 #### Insert `<link href=https://fonts.gstatic.com rel="dns-prefetch preconnect" crossorigin>`
 
-The AMP Cache adds prefetch hint tags for browsers to assist in loading resources earlier and thus speed up page loads.
+The AMP Cache adds prefetch hint tags for browsers to assist in loading
+resources earlier and thus speed up page loads.
 
-_Condition_:
-Has a stylesheet of the form: `<link href=https://fonts.googleapis.com/... rel=stylesheet>`.
+_Condition_: Has a stylesheet of the form:
+`<link href=https://fonts.googleapis.com/... rel=stylesheet>`.
 
 <details>
 <summary>example</summary>
@@ -373,7 +406,13 @@ Has a stylesheet of the form: `<link href=https://fonts.googleapis.com/... rel=s
 
 #### Prioritize AMP engine javascript and other render blocking scripts in `<head>`
 
-The AMP Cache places the [AMP engine javascript](https://cdn.ampproject.org/v0.js) as the second child of `<head>` right after `<meta charset=utf-8>`. It then emits any other render blocking custom-element script tags followed by the remaining custom-element `<script>` tags in the document. Render blocking custom-element `<script>` tags are listed in [SERVICES at render-delaying-services.js](https://github.com/ampproject/amphtml/blob/master/src/render-delaying-services.js#L28).
+The AMP Cache places the
+[AMP engine javascript](https://cdn.ampproject.org/v0.js) as the second child of
+`<head>` right after `<meta charset=utf-8>`. It then emits any other render
+blocking custom-element script tags followed by the remaining custom-element
+`<script>` tags in the document. Render blocking custom-element `<script>` tags
+are listed in
+[SERVICES at render-delaying-services.js](https://github.com/ampproject/amphtml/blob/master/src/render-delaying-services.js#L28).
 
 <details>
 <summary>example</summary>
@@ -386,7 +425,8 @@ The AMP Cache places the [AMP engine javascript](https://cdn.ampproject.org/v0.j
 
 #### Remove duplicate custom-element extensions in `<head>`
 
-If a custom-element `<script>` tag is included more than once, the AMP Cache removes all but one.
+If a custom-element `<script>` tag is included more than once, the AMP Cache
+removes all but one.
 
 <details>
 <summary>example</summary>
@@ -401,12 +441,15 @@ If a custom-element `<script>` tag is included more than once, the AMP Cache rem
 
 This is currently a work in progress.
 
-If a custom-element `<script>` tag is included in `<head>` but not used in `<body>` then remove it. There are several exceptions to this listed under _Condition_.
+If a custom-element `<script>` tag is included in `<head>` but not used in
+`<body>` then remove it. There are several exceptions to this listed under
+_Condition_.
 
-_Condition_:
-Remove unused custom-element extensions with the following exceptions:
+_Condition_: Remove unused custom-element extensions with the following
+exceptions:
 
-- Do not remove any custom-element extensions if `<amp-live-list>` is present within the document
+- Do not remove any custom-element extensions if `<amp-live-list>` is present
+  within the document
 - Do not remove any of the following custom-element extensions:
 - amp-access
 - amp-access-laterpay
@@ -429,8 +472,7 @@ Remove unused custom-element extensions with the following exceptions:
 
 Remove whitespace in `<head>` except for tags that should preserve whitespace.
 
-_Condition_:
-Remove whitespace except for within these tags:
+_Condition_: Remove whitespace except for within these tags:
 
 - `<script>`
 - `<style>`
@@ -446,9 +488,12 @@ Remove whitespace except for within these tags:
 
 #### Remove unnecessary attribute value quotes in entire document [WIP]
 
-This is currently a work in progress for AMP documents and implemented for AMP4ADS documents.
+This is currently a work in progress for AMP documents and implemented for
+AMP4ADS documents.
 
-Remove quotes from around an attribute’s value unless the attribute’s value has an ASCII character in the set { 0x20(space), 0x22("), 0x27('), 0x3E(>), 0x60(\`) }.
+Remove quotes from around an attribute’s value unless the attribute’s value has
+an ASCII character in the set { 0x20(space), 0x22("), 0x27('), 0x3E(>), 0x60(\`)
+}.
 
 <details>
 <summary>example</summary>
@@ -465,7 +510,8 @@ These are AMP4ADS specific modifications and not implemented for AMP documents.
 
 #### Prioritize AMP4ADS engine javascript in `<head>`
 
-The AMP Cache places the AMP4ADS engine javascript as the second child of `<head>` right after `<meta charset=utf-8>`.
+The AMP Cache places the AMP4ADS engine javascript as the second child of
+`<head>` right after `<meta charset=utf-8>`.
 
 <details>
 <summary>example</summary>

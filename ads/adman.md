@@ -32,7 +32,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please see [Adman documentation](http://www.adman.gr/docs).
+For details on the configuration semantics, please see
+[Adman documentation](http://www.adman.gr/docs).
 
 ### Required parameters
 

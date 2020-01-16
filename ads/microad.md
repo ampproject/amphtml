@@ -35,7 +35,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, contact compass-support@microad.co.jp
+For configuration details and to generate your tags, contact
+compass-support@microad.co.jp
 
 Supported parameters:
 

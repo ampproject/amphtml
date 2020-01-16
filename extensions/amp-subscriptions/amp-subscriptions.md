@@ -56,34 +56,44 @@ Implements subscription-style access protocol.
 
 ## Introduction
 
-The `amp-subscriptions` extension implements subscription-style access/paywall rules.
+The `amp-subscriptions` extension implements subscription-style access/paywall
+rules.
 
 ## Relationship to `amp-access`
 
-The `amp-subscriptions` extension is similar to [`amp-access`](../amp-access/amp-access.md)
-and in many features builds on top of `amp-access`. However, it's a much more
-specialized version of access/paywall protocol. Some of the key differences are:
+The `amp-subscriptions` extension is similar to
+[`amp-access`](../amp-access/amp-access.md) and in many features builds on top
+of `amp-access`. However, it's a much more specialized version of access/paywall
+protocol. Some of the key differences are:
 
 1. The `amp-subscriptions` entitlements response is similar to the amp-access
    authorization, but it's strictly defined and standardized.
 2. The `amp-subscriptions` extension allows multiple services to be configured
-   for the page to participate in access/paywall decisions. Services are executed
-   concurrently and prioritized based on which service returns the positive response.
+   for the page to participate in access/paywall decisions. Services are
+   executed concurrently and prioritized based on which service returns the
+   positive response.
 3. AMP viewers are allowed to provide `amp-subscriptions` a signed authorization
-   response based on an independent agreement with publishers as a proof of access.
-4. In `amp-subscriptions` content markup is standardized allowing apps and crawlers to easily detect premium content sections.
+   response based on an independent agreement with publishers as a proof of
+   access.
+4. In `amp-subscriptions` content markup is standardized allowing apps and
+   crawlers to easily detect premium content sections.
 
-Because of standardization of markup, support for multiple providers, and improved viewer
-support it is recommended that new publisher and paywall provider implementations
-use `amp-subscriptions`.
+Because of standardization of markup, support for multiple providers, and
+improved viewer support it is recommended that new publisher and paywall
+provider implementations use `amp-subscriptions`.
 
 ## Services
 
-There could be one or more services configured for `amp-subscriptions`. There could be a local service or vendor services. A local service is configured fully within the page, including its authorization/pingback endpoints, as well as login and subscribe actions. A vendor service is registered as an AMP extension that cooperates with the main `amp-subscriptions` extension.
+There could be one or more services configured for `amp-subscriptions`. There
+could be a local service or vendor services. A local service is configured fully
+within the page, including its authorization/pingback endpoints, as well as
+login and subscribe actions. A vendor service is registered as an AMP extension
+that cooperates with the main `amp-subscriptions` extension.
 
 ## Product configuration
 
-`amp-subscriptions` relies on the Schema.org page-level configuration for two main properties:
+`amp-subscriptions` relies on the Schema.org page-level configuration for two
+main properties:
 
 1.  The product ID that the user must be granted to view the content.
 2.  Whether this content requires this product at this time.
@@ -116,7 +126,8 @@ Using JSON-LD, the markup would look like:
 
 Thus, notice that:
 
-1.  The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
+1.  The product ID is "norcal_tribune.com:basic"
+    (`"productID": "norcal_tribune.com:basic"`).
 2.  This document is currently locked (`"isAccessibleForFree": false`).
 
 ## Microdata markup
@@ -137,14 +148,19 @@ Using Microdata, the markup could look like this:
 </div>
 ```
 
-A usable configuration will provide `NewsArticle` typed item with `isAccessibleForFree` property and a subitem of type `Product` that specifies the `productID`.
+A usable configuration will provide `NewsArticle` typed item with
+`isAccessibleForFree` property and a subitem of type `Product` that specifies
+the `productID`.
 
 In this example:
 
-1.  The product ID is "norcal_tribune.com:basic" (`"productID": "norcal_tribune.com:basic"`).
+1.  The product ID is "norcal_tribune.com:basic"
+    (`"productID": "norcal_tribune.com:basic"`).
 2.  This document is currently locked (`"isAccessibleForFree": false`).
 
-The configuration is resolved as soon as `productID` and `isAccessibleForFree` are found. It is, therefore, advised to place the configuration as high up in the DOM tree as possible.
+The configuration is resolved as soon as `productID` and `isAccessibleForFree`
+are found. It is, therefore, advised to place the configuration as high up in
+the DOM tree as possible.
 
 ## Service configuration
 
@@ -175,38 +191,57 @@ The `amp-subscriptions` extension must be configured using JSON configuration:
 </script>
 ```
 
-The `services` property contains an array of service configurations. There must be one "local" service and zero or more vendor services.
+The `services` property contains an array of service configurations. There must
+be one "local" service and zero or more vendor services.
 
-If you'd like to test the document's behavior in the context of a particular viewer, you can add `#viewerUrl=` fragment parameter. For instance, `#viewerUrl=https://www.google.com` would emulate a document's behavior inside a Google viewer.
+If you'd like to test the document's behavior in the context of a particular
+viewer, you can add `#viewerUrl=` fragment parameter. For instance,
+`#viewerUrl=https://www.google.com` would emulate a document's behavior inside a
+Google viewer.
 
 ## Selecting a service
 
-If no service returns an entitlement that grants access, all services are compared by calculating a score for each and the highest scoring service is selected. Each service has a `"baseScore"` (default 0). A value < 100 in the `baseScore` key in any service configuration represents the initial score for that service. If no `baseScore` is specified it defaults to `0`.
+If no service returns an entitlement that grants access, all services are
+compared by calculating a score for each and the highest scoring service is
+selected. Each service has a `"baseScore"` (default 0). A value < 100 in the
+`baseScore` key in any service configuration represents the initial score for
+that service. If no `baseScore` is specified it defaults to `0`.
 
-The score is calculated by taking the `baseScore` for the service and adding dynamically calculated weights from `score[factorName]` configuration multiplied by the value returned by each service for that `factorName`. Services may return a value between [-1..1] for factors they support. If a service is not aware of a factor or does not support it `0` will be returned.
+The score is calculated by taking the `baseScore` for the service and adding
+dynamically calculated weights from `score[factorName]` configuration multiplied
+by the value returned by each service for that `factorName`. Services may return
+a value between [-1..1] for factors they support. If a service is not aware of a
+factor or does not support it `0` will be returned.
 
-If publisher wishes to ignore a score factor they may either explicitly set it's value to `0` or omit it from the `score` map.
+If publisher wishes to ignore a score factor they may either explicitly set it's
+value to `0` or omit it from the `score` map.
 
 Available scoring factors:
 
-1. `supportsViewer` returns `1` when a service can cooperate with the current AMP viewer environment for this page view.
-1. `isReadyToPay` returns `1` when the user is known to the service and the service has a form of payment on file allowing a purchase without entering payment details.
+1. `supportsViewer` returns `1` when a service can cooperate with the current
+   AMP viewer environment for this page view.
+1. `isReadyToPay` returns `1` when the user is known to the service and the
+   service has a form of payment on file allowing a purchase without entering
+   payment details.
 
-All scoring factors have default value of `0`. In the event of a tie the local service wins.
+All scoring factors have default value of `0`. In the event of a tie the local
+service wins.
 
 ## Error fallback
 
-If all configured services fail to get the entitlements, the entitlement configured under `fallbackEntitlement` section will be used as a fallback entitlement for `local` service. The document's unblocking will be based on this fallback entitlement.
+If all configured services fail to get the entitlements, the entitlement
+configured under `fallbackEntitlement` section will be used as a fallback
+entitlement for `local` service. The document's unblocking will be based on this
+fallback entitlement.
 
 ### The "local" service configuration
 
-Two modes of operation are supported for the local service,
-"remote" and "iframe".
+Two modes of operation are supported for the local service, "remote" and
+"iframe".
 
-In the remote mode authorization and pingback requests
-are sent via CORS requests to the specified endpoints. In the
-"iframe" mode authorization and pingback are provided by
-messaging to a publisher supplied iframe.
+In the remote mode authorization and pingback requests are sent via CORS
+requests to the specified endpoints. In the "iframe" mode authorization and
+pingback are provided by messaging to a publisher supplied iframe.
 
 The "local" service is configured as following
 
@@ -262,20 +297,23 @@ The properties in the "local" service are (remote mode):
 - "type" - optional type, defaults to "remote"
 - "authorizationUrl" - the authorization endpoint URL.
 - "pingbackUrl" - the pingback endpoint URL.
-- "actions" - a named map of action URLs. At a minimum there must be two actions specified: "login" and "subscribe".
+- "actions" - a named map of action URLs. At a minimum there must be two actions
+  specified: "login" and "subscribe".
 
-In iframe mode the `authorzationUrl` and `pingbackUrl` are deleted
-and replaced by:
+In iframe mode the `authorzationUrl` and `pingbackUrl` are deleted and replaced
+by:
 
 - "iframeSrc" - publisher supplied iframe
 - "iframeVars - AMP variables to be sent to the iframe
 - "type" - must be "iframe"
 
-See [amp-access-iframe](../amp-access/0.1/iframe-api/README.md) for details of the messaging protocol.
+See [amp-access-iframe](../amp-access/0.1/iframe-api/README.md) for details of
+the messaging protocol.
 
 ### The vendor service configuration
 
-The vendor service configuration must reference the service ID and can contain any additional properties allowed by the vendor service.
+The vendor service configuration must reference the service ID and can contain
+any additional properties allowed by the vendor service.
 
 ```html
 <script type="application/json" id="amp-subscriptions">
@@ -294,9 +332,14 @@ See the vendor service's documentation for details.
 
 ## Authorization endpoint and entitlements
 
-Authorization is an endpoint provided by the local service and called by the AMP Runtime. It is a credentialed CORS GET endpoint. This endpoint returns the Entitlements object that can be used by the Content Markup to hide or show different parts of the document. Authorization endpoint is specified using the "authorizationUrl" property in the config.
+Authorization is an endpoint provided by the local service and called by the AMP
+Runtime. It is a credentialed CORS GET endpoint. This endpoint returns the
+Entitlements object that can be used by the Content Markup to hide or show
+different parts of the document. Authorization endpoint is specified using the
+"authorizationUrl" property in the config.
 
-The Entitlement response returned by the authorization endpoint must conform to the predefined format:
+The Entitlement response returned by the authorization endpoint must conform to
+the predefined format:
 
 ```js
 {
@@ -310,37 +353,64 @@ The properties in the Entitlement response are:
 
 - `granted` - boolean stating if the access to the document is granted or not.
 
-- `grantReason` - the string of the reason for giving the access to the document, recognized reasons are either SUBSCRIBER meaning the user is fully subscribed or METERING meaning user is on metering.
+- `grantReason` - the string of the reason for giving the access to the
+  document, recognized reasons are either SUBSCRIBER meaning the user is fully
+  subscribed or METERING meaning user is on metering.
 
-- `data` - free-form data which can be used for template rendering, e.g. messaging related to metering or article count.
+- `data` - free-form data which can be used for template rendering, e.g.
+  messaging related to metering or article count.
 
-In cases where the access is granted by a means other than the Entitlement response, messaging via the data property may not be seen by the user. Do not use `data` for granting/denying access to content, conditional display of content based on user access, or displaying user or account related information.
+In cases where the access is granted by a means other than the Entitlement
+response, messaging via the data property may not be seen by the user. Do not
+use `data` for granting/denying access to content, conditional display of
+content based on user access, or displaying user or account related information.
 
-Notice, while it's not explicitly visible, all vendor services also implement authorization endpoints of their own and conform to the same response format.
+Notice, while it's not explicitly visible, all vendor services also implement
+authorization endpoints of their own and conform to the same response format.
 
 ## Pingback endpoint
 
-Pingback is an endpoint provided by in the "local" service configuration and called by the AMP Runtime. It is a credentialed CORS POST endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. One of the main goals of the Pingback is for the Publisher to update metering information.
+Pingback is an endpoint provided by in the "local" service configuration and
+called by the AMP Runtime. It is a credentialed CORS POST endpoint. AMP Runtime
+calls this endpoint automatically when the Reader has started viewing the
+document. One of the main goals of the Pingback is for the Publisher to update
+metering information.
 
-Pingback is optional. It's only enabled when the "pingbackUrl" property is specified.
+Pingback is optional. It's only enabled when the "pingbackUrl" property is
+specified.
 
-By default, as the body, pingback POST request receives the entitlement object returned by the "winning" authorization endpoint. However if the config for the "local" service contains `pingbackAllEntitlements: true` the body will contain an array of all the entitlments received, from all services, including those which do not grant access.
+By default, as the body, pingback POST request receives the entitlement object
+returned by the "winning" authorization endpoint. However if the config for the
+"local" service contains `pingbackAllEntitlements: true` the body will contain
+an array of all the entitlments received, from all services, including those
+which do not grant access.
 
-**Important:** The pingback JSON object is sent with `Content-type: text/plain`. This is intentional as it removes the need for a CORS preflight check.
+**Important:** The pingback JSON object is sent with `Content-type: text/plain`.
+This is intentional as it removes the need for a CORS preflight check.
 
 ## Actions
 
-Actions are provided in the "local" service configuration in the "actions" property. It's a named set of action. Any number of actions can be configured this way, but two actions are required: "login" and "subscribe".
+Actions are provided in the "local" service configuration in the "actions"
+property. It's a named set of action. Any number of actions can be configured
+this way, but two actions are required: "login" and "subscribe".
 
-All actions work the same way: the popup window is opened for the specified URL. The page opened in the popup window can perform the target action, such as login/subscribe/etc, and it's expected to return by redirecting to the URL specified by the "return" query parameter.
+All actions work the same way: the popup window is opened for the specified URL.
+The page opened in the popup window can perform the target action, such as
+login/subscribe/etc, and it's expected to return by redirecting to the URL
+specified by the "return" query parameter.
 
-Notice, while not explicitly visible, any vendor service can also implement its own actions. Or it can delegate to the "login" service to execute "login" or "subscribe" action.
+Notice, while not explicitly visible, any vendor service can also implement its
+own actions. Or it can delegate to the "login" service to execute "login" or
+"subscribe" action.
 
 ### Action delegation
 
-In the markup the actions can be delegated to other services for them to execute the actions. This can be achieved by specifying `subscriptions-service` attribute.
+In the markup the actions can be delegated to other services for them to execute
+the actions. This can be achieved by specifying `subscriptions-service`
+attribute.
 
-e.g. In order to ask google subscriptions to perform subscribe even when `local` service is selected:
+e.g. In order to ask google subscriptions to perform subscribe even when `local`
+service is selected:
 
 ```html
   <button subscriptions-action='subscribe' subscriptions-service='subscribe.google.com>Subscribe</button>
@@ -348,7 +418,9 @@ e.g. In order to ask google subscriptions to perform subscribe even when `local`
 
 ### Action decoration
 
-In addition to delegation of the action to another service, you can also ask another service to decorate the element. Just add the attribute `subsciptions-decorate` to get the element decorated.
+In addition to delegation of the action to another service, you can also ask
+another service to decorate the element. Just add the attribute
+`subsciptions-decorate` to get the element decorated.
 
 ```html
 <button
@@ -362,9 +434,12 @@ In addition to delegation of the action to another service, you can also ask ano
 
 ## Showing/hiding premium and fallback content
 
-The premium sections are shown/hidden automatically based on the authorization/entitlements response. There are two types of sections of this kind.
+The premium sections are shown/hidden automatically based on the
+authorization/entitlements response. There are two types of sections of this
+kind.
 
-The premium content is marked up using `subscriptions-section="content"` attribute. For instance:
+The premium content is marked up using `subscriptions-section="content"`
+attribute. For instance:
 
 ```html
 <section subscriptions-section="content">
@@ -372,9 +447,14 @@ The premium content is marked up using `subscriptions-section="content"` attribu
 </section>
 ```
 
-_Important_: Do not apply `subscriptions-section="content"` to the whole page. Doing so may cause a visible flash when content is later displayed, and may prevent your page from being indexed by search engines. We recommend that the content in the first viewport be allowed to render regardless of subscription state.
+_Important_: Do not apply `subscriptions-section="content"` to the whole page.
+Doing so may cause a visible flash when content is later displayed, and may
+prevent your page from being indexed by search engines. We recommend that the
+content in the first viewport be allowed to render regardless of subscription
+state.
 
-The fallback content is marked up using `subscriptions-section="content-not-granted"` attribute. For instance:
+The fallback content is marked up using
+`subscriptions-section="content-not-granted"` attribute. For instance:
 
 ```html
 <section subscriptions-section="content-not-granted">
@@ -384,7 +464,13 @@ The fallback content is marked up using `subscriptions-section="content-not-gran
 
 ## Using Scores to Display Content
 
-The score factors returned by each configured service can be used to control the display of content within dialogs. For example `factors['subscribe.google.com'].isReadyToPay` would be the "ready to pay" score factor from the `subscribe.google.com` service (also known as `amp-subscriptions-google`). Similarly `factors['local'].isReadyToPay` would be for the local service and `scores['subscribe.google.com'].supportsViewer` would be the score factor for the Google service supporting the current viewer.
+The score factors returned by each configured service can be used to control the
+display of content within dialogs. For example
+`factors['subscribe.google.com'].isReadyToPay` would be the "ready to pay" score
+factor from the `subscribe.google.com` service (also known as
+`amp-subscriptions-google`). Similarly `factors['local'].isReadyToPay` would be
+for the local service and `scores['subscribe.google.com'].supportsViewer` would
+be the score factor for the Google service supporting the current viewer.
 
 Sample usage:
 
@@ -402,7 +488,8 @@ Sample usage:
 
 ## Action markup
 
-An action declared in the "actions" configuration can be marked up using `subscriptions-action` attribute.
+An action declared in the "actions" configuration can be marked up using
+`subscriptions-action` attribute.
 
 For instance, this button will execute the "subscribe" action:
 
@@ -412,13 +499,16 @@ For instance, this button will execute the "subscribe" action:
 </button>
 ```
 
-By default, the actions are hidden and must be explicitly shown using the `subscriptions-display` expression.
+By default, the actions are hidden and must be explicitly shown using the
+`subscriptions-display` expression.
 
 ## Paywall dialogs
 
-The paywall dialogs are shown automatically based on the authorization/entitlements response.
+The paywall dialogs are shown automatically based on the
+authorization/entitlements response.
 
-A dialog is marked up using the `subscriptions-dialog` and `subscriptions-display` attributes:
+A dialog is marked up using the `subscriptions-dialog` and
+`subscriptions-display` attributes:
 
 ```html
 <div subscriptions-dialog subscriptions-display="EXPR">
@@ -427,7 +517,9 @@ A dialog is marked up using the `subscriptions-dialog` and `subscriptions-displa
 </div>
 ```
 
-The element on which `subscriptions-dialog` dialog is specified can also be a `<template>` element in which case it will be initially rendered before being displayed as a dialog. For instance:
+The element on which `subscriptions-dialog` dialog is specified can also be a
+`<template>` element in which case it will be initially rendered before being
+displayed as a dialog. For instance:
 
 ```html
 <template type="amp-mustache" subscriptions-dialog subscriptions-display="EXPR">
@@ -441,9 +533,15 @@ The first dialog with matching `subscriptions-display` is shown.
 
 ## Expressions
 
-The `subscriptions-display` attribute uses expressions for actions and dialogs. The value of `subscriptions-display` is a boolean expression defined in a SQL-like language. The grammar is defined in [amp-access Appendix A](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
+The `subscriptions-display` attribute uses expressions for actions and dialogs.
+The value of `subscriptions-display` is a boolean expression defined in a
+SQL-like language. The grammar is defined in
+[amp-access Appendix A](../amp-access/amp-access.md#appendix-a-amp-access-expression-grammar).
 
-Values in the `data` object of an Entitlements response can be used to build expressions. In this example the values of `isLoggedIn` and `isSubscriber` are in the `data` object and are used to conditionally show UI for login and upgrading your account:
+Values in the `data` object of an Entitlements response can be used to build
+expressions. In this example the values of `isLoggedIn` and `isSubscriber` are
+in the `data` object and are used to conditionally show UI for login and
+upgrading your account:
 
 ```html
 <section>
@@ -477,12 +575,14 @@ The `amp-subscriptions` extension triggers the following analytics signals:
 
 2. `subscriptions-service-registered`
 
-- Triggered when `amp-subscriptions` is able to resolve the instance of the service. A service is free to initialize itself at anytime on the page.
+- Triggered when `amp-subscriptions` is able to resolve the instance of the
+  service. A service is free to initialize itself at anytime on the page.
 - Data: `serviceId` of the selected service.
 
 3. `subscriptions-service-activated`
 
-- Triggered when a configured service is selected and activated for use. See [Selecting a service](#selecting-a-service).
+- Triggered when a configured service is selected and activated for use. See
+  [Selecting a service](#selecting-a-service).
 - Data: `serviceId` of the selected service.
 
 4. `subscriptions-entitlement-resolved`
@@ -492,27 +592,33 @@ The `amp-subscriptions` extension triggers the following analytics signals:
 
 5. `subscriptions-access-granted`
 
-- Triggered when the entitlement from the selected service grants access to the document.
+- Triggered when the entitlement from the selected service grants access to the
+  document.
 - Data: `serviceId` of the selected service.
 
 6. `subscriptions-paywall-activated`
 
-- Triggered when the entitlement from the selected service does not grant access to the document.
+- Triggered when the entitlement from the selected service does not grant access
+  to the document.
 - Data: `serviceId` of the selected service.
 
 7. `subscriptions-access-denied`
 
-- Triggered when the entitlement from the selected service denies access to the document.
+- Triggered when the entitlement from the selected service denies access to the
+  document.
 - Data: `serviceId` of the selected service.
 
 8. `subscriptions-service-re-authorized`
 
-- Triggered when re-authorization of a service is complete. A service can request re-authorization after any action is performed e.g., `login`. A new entitlement is fetched for the service after re-authorization is complete.
+- Triggered when re-authorization of a service is complete. A service can
+  request re-authorization after any action is performed e.g., `login`. A new
+  entitlement is fetched for the service after re-authorization is complete.
 - Data: `serviceId` of the selected service.
 
 9. `subscriptions-action-delegated`
 
-- Triggered just before a delegated service action is handed off to the other service. See [Action delegation](#action-delegation).
+- Triggered just before a delegated service action is handed off to the other
+  service. See [Action delegation](#action-delegation).
 - Data: `serviceId` and the delegated `action` of the selected service.
 
 10. `subscriptions-action-ActionName-started`
@@ -527,27 +633,32 @@ The `amp-subscriptions` extension triggers the following analytics signals:
 
 12. `subscriptions-action-ActionName-success`
 
-- Triggered when the execution result of action `ActionName` is reported as a success.
+- Triggered when the execution result of action `ActionName` is reported as a
+  success.
 - Data: none.
 
 13. `subscriptions-action-ActionName-rejected`
 
-- Triggered when the execution result of action `ActionName` is reported as a failure.
+- Triggered when the execution result of action `ActionName` is reported as a
+  failure.
 - Data: none.
 
 14. `subscriptions-link-requested`
 
-- Triggered when a subscription account linking request is initiated by the selected service.
+- Triggered when a subscription account linking request is initiated by the
+  selected service.
 - Data: `serviceId` of the selected service.
 
 15. `subscriptions-link-complete`
 
-- Triggered when subscription account linking has been completed by the selected service.
+- Triggered when subscription account linking has been completed by the selected
+  service.
 - Data: `serviceId` of the selected service.
 
 16. `subscriptions-link-canceled`
 
-- Triggered when a subscription account linking request initiated by the selected service has been cancelled.
+- Triggered when a subscription account linking request initiated by the
+  selected service has been cancelled.
 - Data: `serviceId` of the selected service.
 
 ## Available vendor services

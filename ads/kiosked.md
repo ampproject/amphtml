@@ -24,8 +24,8 @@ limitations under the License.
 
 ## Configuration
 
-You need to get a `scriptid` parameter from one of our account managers.
-For testing purposes you can use `data-scriptid="91"`.
+You need to get a `scriptid` parameter from one of our account managers. For
+testing purposes you can use `data-scriptid="91"`.
 
 ### Required parameters
 

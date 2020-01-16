@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-kaltura-player
 
-An <code>amp-kaltura-player</code> component displays the Kaltura Player as used in Kaltura's <a href="https://corp.kaltura.com/">Video Platform</a>.
+An <code>amp-kaltura-player</code> component displays the Kaltura Player as used
+in Kaltura's <a href="https://corp.kaltura.com/">Video Platform</a>.
 
 <table>
   <tr>
@@ -45,7 +46,8 @@ An <code>amp-kaltura-player</code> component displays the Kaltura Player as used
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the player
+embedded in responsive layouts.
 
 Example:
 
@@ -93,4 +95,6 @@ Example:
 
 ## Validation
 
-See [amp-kaltura-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-kaltura-player/validator-amp-kaltura-player.protoascii) in the AMP validator specification.
+See
+[amp-kaltura-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-kaltura-player/validator-amp-kaltura-player.protoascii)
+in the AMP validator specification.

@@ -24,8 +24,8 @@ limitations under the License.
 
 # amp-call-tracking
 
-Dynamically replaces a phone number in a hyperlink to enable call
-tracking. Executes a CORS request to substitute the number.
+Dynamically replaces a phone number in a hyperlink to enable call tracking.
+Executes a CORS request to substitute the number.
 
 <table>
   <tr>
@@ -47,8 +47,8 @@ tracking. Executes a CORS request to substitute the number.
 ## Usage
 
 The `<amp-call-tracking>` tag must wrap a normal anchor tag that hyperlinks a
-phone number. This phone number will be replaced with the values provided
-by a CORS endpoint.
+phone number. This phone number will be replaced with the values provided by a
+CORS endpoint.
 
 **Example**
 
@@ -58,9 +58,8 @@ by a CORS endpoint.
 </amp-call-tracking>
 ```
 
-{% call callout('Note', type='note') %}
-Each unique CORS endpoint is called only once per page.
-{% endcall %}
+{% call callout('Note', type='note') %} Each unique CORS endpoint is called only
+once per page. {% endcall %}
 
 ## Attributes
 
@@ -81,7 +80,9 @@ Each unique CORS endpoint is called only once per page.
 
 ## Validation
 
-See [amp-call-tracking rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-call-tracking/validator-amp-call-tracking.protoascii) in the AMP validator specification.
+See
+[amp-call-tracking rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-call-tracking/validator-amp-call-tracking.protoascii)
+in the AMP validator specification.
 
 ## See also
 

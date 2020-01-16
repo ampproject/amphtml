@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please see [AdSpirit's documentation](http://help.adspirit.de/help/).
+For details on the configuration semantics, please see
+[AdSpirit's documentation](http://help.adspirit.de/help/).
 
 Supported parameters:
 

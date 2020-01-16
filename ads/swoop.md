@@ -36,11 +36,13 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ### Required parameters
 
-- `layout`: AMP layout style, should match the `layout` attribute of the `amp-ad` tag
+- `layout`: AMP layout style, should match the `layout` attribute of the
+  `amp-ad` tag
 - `publisher`: Publisher ID
 - `placement`: Placement type
 - `slot`: Slot ID

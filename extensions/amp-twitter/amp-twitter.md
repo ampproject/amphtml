@@ -46,11 +46,13 @@ Displays a Twitter Tweet or Moment.
 
 ## Behavior
 
-The `amp-twitter` component allows you to embed a Tweet or Moment for the specified Twitter ID.
+The `amp-twitter` component allows you to embed a Tweet or Moment for the
+specified Twitter ID.
 
 Here's an example of a basic embedded Tweet:
 
-[example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+[example preview="inline" playground="true" imports="amp-twitter"
+imports="amp-twitter"]
 
 ```html
 <amp-twitter
@@ -66,17 +68,30 @@ Here's an example of a basic embedded Tweet:
 
 ## Appearance
 
-Twitter does not currently provide an API that yields fixed aspect ratio for embedded Tweets or Moments. Currently, AMP automatically proportionally scales the Tweet or Moment to fit the provided size, but this may yield less than ideal appearance. You might need to manually tweak the provided width and height. Also, you can use the `media` attribute to select the aspect ratio based on the screen width.
+Twitter does not currently provide an API that yields fixed aspect ratio for
+embedded Tweets or Moments. Currently, AMP automatically proportionally scales
+the Tweet or Moment to fit the provided size, but this may yield less than ideal
+appearance. You might need to manually tweak the provided width and height.
+Also, you can use the `media` attribute to select the aspect ratio based on the
+screen width.
 
 ## Placeholders & fallbacks
 
-An element marked with a `placeholder` attribute displays while the content for the Tweet or Moment is loading or initializing. Placeholders are hidden once the AMP component's content displays. An element marked with a `fallback` attribute displays if `amp-twitter` isn't supported by the browser or if the Tweet or Moment doesn't exist or has been deleted.
+An element marked with a `placeholder` attribute displays while the content for
+the Tweet or Moment is loading or initializing. Placeholders are hidden once the
+AMP component's content displays. An element marked with a `fallback` attribute
+displays if `amp-twitter` isn't supported by the browser or if the Tweet or
+Moment doesn't exist or has been deleted.
 
-Visit the [Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders) guide to learn more about how placeholders and fallbacks interact for the `amp-twitter` component.
+Visit the
+[Placeholders & fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders)
+guide to learn more about how placeholders and fallbacks interact for the
+`amp-twitter` component.
 
 _Example: Specifying a placeholder_
 
-[example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+[example preview="inline" playground="true" imports="amp-twitter"
+imports="amp-twitter"]
 
 ```html
 <amp-twitter
@@ -102,7 +117,8 @@ _Example: Specifying a placeholder_
 
 _Example: Specifying a placeholder and a fallback_
 
-[example preview="inline" playground="true" imports="amp-twitter" imports="amp-twitter"]
+[example preview="inline" playground="true" imports="amp-twitter"
+imports="amp-twitter"]
 
 ```html
 <amp-twitter
@@ -159,4 +175,6 @@ For details on the available options, see Twitter's docs <a href="https://develo
 
 ## Validation
 
-See [amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/validator-amp-twitter.protoascii) in the AMP validator specification.
+See
+[amp-twitter rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/validator-amp-twitter.protoascii)
+in the AMP validator specification.

@@ -45,11 +45,12 @@ Displays an Instagram embed.
 
 ## Behavior
 
-The `width` and `height` attributes are special for the Instagram embed.
-These should be the actual width and height of the Instagram image.
-The system automatically adds space for the "chrome" that Instagram adds around the image.
+The `width` and `height` attributes are special for the Instagram embed. These
+should be the actual width and height of the Instagram image. The system
+automatically adds space for the "chrome" that Instagram adds around the image.
 
-Many Instagrams are square. When you set `layout="responsive"` any value where `width` and `height` are the same will work.
+Many Instagrams are square. When you set `layout="responsive"` any value where
+`width` and `height` are the same will work.
 
 Example:
 
@@ -64,9 +65,12 @@ Example:
 </amp-instagram>
 ```
 
-If the Instagram is not square you will need to enter the actual dimensions of the image.
+If the Instagram is not square you will need to enter the actual dimensions of
+the image.
 
-When using non-responsive layout you will need to account for the extra space added for the "instagram chrome" around the image. This is currently 48px above and below the image and 8px on the sides.
+When using non-responsive layout you will need to account for the extra space
+added for the "instagram chrome" around the image. This is currently 48px above
+and below the image and 8px on the sides.
 
 ## Attributes
 
@@ -89,4 +93,6 @@ For example, in https://instagram.com/p/fBwFP, <code>fBwFP</code> is the data-sh
 
 ## Validation
 
-See [amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/validator-amp-instagram.protoascii) in the AMP validator specification.
+See
+[amp-instagram rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/validator-amp-instagram.protoascii)
+in the AMP validator specification.

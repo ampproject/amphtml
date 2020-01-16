@@ -32,7 +32,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, contact [Bidtellect](mailto:technology@bidtellect.com).
+For details on the configuration semantics, contact
+[Bidtellect](mailto:technology@bidtellect.com).
 
 ### Required parameters
 
@@ -52,4 +53,5 @@ For details on the configuration semantics, contact [Bidtellect](mailto:technolo
 - `data-videotypeid`: Defines how it will be rendered the video player.
 - `data-videocloseicon`: Enable close button on the video player.
 - `data-targetid`: Allows the placement to render inside a target HTML element.
-- `data-bustframe`: Allows the placement to bust out of nested iframes recursively.
+- `data-bustframe`: Allows the placement to bust out of nested iframes
+  recursively.

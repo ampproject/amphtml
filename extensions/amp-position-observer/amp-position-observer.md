@@ -4,7 +4,9 @@ formats:
   - websites
   - ads
 teaser:
-  text: Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
+  text:
+    Monitors the orientation of an element within the viewport as a user
+    scrolls, and dispatches events that can be used with other AMP components.
 ---
 
 <!---
@@ -25,8 +27,8 @@ limitations under the License.
 
 # amp-position-observer
 
-Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with
-other AMP components.
+Monitors the position of an element within the viewport as a user scrolls, and
+dispatches events that can be used with other AMP components.
 
 <table>
   <tr>
@@ -52,25 +54,29 @@ other AMP components.
 
 ## Overview
 
-The `amp-position-observer` component monitors the position of an
-element within the viewport as a user scrolls, and dispatches
-`enter`, `exit` and `scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**), which can be used to trigger actions (**Only Low Trust Actions**) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation).
+The `amp-position-observer` component monitors the position of an element within
+the viewport as a user scrolls, and dispatches `enter`, `exit` and
+`scroll:<Position In Viewport As a Percentage>` events (**Low Trust Level**),
+which can be used to trigger actions (**Only Low Trust Actions**) on other
+components (e.g.,
+[amp-animation](https://amp.dev/documentation/components/amp-animation).
 
-{% call callout('Note', type='note') %}
-The `amp-position-observer` component is only useful when used with other components and does not do anything on its own.
+{% call callout('Note', type='note') %} The `amp-position-observer` component is
+only useful when used with other components and does not do anything on its own.
 {% endcall %}
 
 ## What can I do with amp-position-observer?
 
-Currently, [amp-animation](https://amp.dev/documentation/components/amp-animation)
-and several video players in AMP are the only components that allow low-trust events
+Currently,
+[amp-animation](https://amp.dev/documentation/components/amp-animation) and
+several video players in AMP are the only components that allow low-trust events
 to trigger their actions (e.g., starting an animation, seeking to a position
 within the animation, pausing a video, etc.).
 
 ### Scroll-bound animations
 
-The `amp-animation` component exposes a `seekTo` action that can be tied to the `scroll` event
-of `amp-position-observer` to implement scroll-bound animations.
+The `amp-animation` component exposes a `seekTo` action that can be tied to the
+`scroll` event of `amp-position-observer` to implement scroll-bound animations.
 
 #### Example: Animation rotates as user scrolls
 
@@ -128,19 +134,20 @@ the page.
 
 ### Animation scenes that start/pause based on visibility in the viewport
 
-The `amp-animation` component also exposes `start` and `pause` actions that can be tied to the
-`enter` and `exit` events of `amp-position-observer` to control when an animation
-starts/pauses based on visibility.
+The `amp-animation` component also exposes `start` and `pause` actions that can
+be tied to the `enter` and `exit` events of `amp-position-observer` to control
+when an animation starts/pauses based on visibility.
 
-The `amp-position-observer` component exposes various visibility configurations such as
-`intersection-ratios` and `viewport-margins` (similar to [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)) that
-can be used to fine-tune when the target is considered visible.
+The `amp-position-observer` component exposes various visibility configurations
+such as `intersection-ratios` and `viewport-margins` (similar to
+[IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API))
+that can be used to fine-tune when the target is considered visible.
 
 #### Example: Animation starts and pauses based on visibility
 
-Consider the same clock animation, but this time the hand animates with time, except
-we like the animation to start when clock is at least 50% visible and pause as soon
-as clock becomes less than 50% visible.
+Consider the same clock animation, but this time the hand animates with time,
+except we like the animation to start when clock is at least 50% visible and
+pause as soon as clock becomes less than 50% visible.
 
 <amp-img alt="visibility demo" layout="fixed" src="https://user-images.githubusercontent.com/2099009/29105727-a7d9a80a-7c84-11e7-8d4a-794f38ea5a5c.gif" width="304" height="540">
   <noscript>
@@ -241,4 +248,6 @@ as clock becomes less than 50% visible.
 
 ## Validation
 
-See [amp-position-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-position-observer/validator-amp-position-observer.protoascii) in the AMP validator specification.
+See
+[amp-position-observer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-position-observer/validator-amp-position-observer.protoascii)
+in the AMP validator specification.

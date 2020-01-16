@@ -30,7 +30,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [Sklik.czdocumentation](https://napoveda.sklik.cz/partner/reklamni-kod/).
+For semantics of configuration, please see
+[Sklik.czdocumentation](https://napoveda.sklik.cz/partner/reklamni-kod/).
 
 Supported parameters:
 

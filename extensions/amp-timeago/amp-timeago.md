@@ -4,7 +4,9 @@ formats:
   - websites
   - email
 teaser:
-  text: Provides fuzzy timestamps by formatting dates as "time ago" (for example, 3 hours ago).
+  text:
+    Provides fuzzy timestamps by formatting dates as "time ago" (for example, 3
+    hours ago).
 ---
 
 <!--
@@ -25,7 +27,8 @@ limitations under the License.
 
 # amp-timeago
 
-Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 hours ago).
+Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3
+hours ago).
 
 <table>
   <tr>
@@ -46,7 +49,8 @@ Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 
 
 ## Behavior
 
-Provides fuzzy timestamps that you can use on your AMP pages. This component is based on <a href="https://github.com/hustcc/timeago.js">timeago.js</a>.
+Provides fuzzy timestamps that you can use on your AMP pages. This component is
+based on <a href="https://github.com/hustcc/timeago.js">timeago.js</a>.
 
 Example:
 
@@ -123,4 +127,6 @@ Example:
 
 ## Validation
 
-See [amp-timeago rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-timeago/validator-amp-timeago.protoascii) in the AMP validator specification.
+See
+[amp-timeago rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-timeago/validator-amp-timeago.protoascii)
+in the AMP validator specification.

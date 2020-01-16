@@ -75,7 +75,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ### Required parameters
 
@@ -85,12 +86,16 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Optional parameters
 
-- `instance`: ID of section instance in case we multiple times used the same section on the same page. Can contain only letters and numbers.Strictly required to use the same section multiple times per page.
+- `instance`: ID of section instance in case we multiple times used the same
+  section on the same page. Can contain only letters and numbers.Strictly
+  required to use the same section multiple times per page.
 - `click3rd`: 3rd party click watcher.
 - `adServerUrl`
 - `cacheSafe`
 - `pageIdModifier`
-- `custom`: Custom targeting properties. You may use 3 types for its properties: `{String}`, `{Number}` and `{Array}`. The following array usage example translates into: `arrayKey=value1&arrayKey=1&stringKey=stringValue...`
+- `custom`: Custom targeting properties. You may use 3 types for its properties:
+  `{String}`, `{Number}` and `{Array}`. The following array usage example
+  translates into: `arrayKey=value1&arrayKey=1&stringKey=stringValue...`
 
   ```text
   {

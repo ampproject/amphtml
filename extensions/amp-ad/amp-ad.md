@@ -8,15 +8,18 @@ teaser:
 
 # amp-ad / amp-embed
 
-A container to display an ad. The <code>amp-embed</code> is an alias to the <code>amp-ad</code> tag, deriving all of its functionality with a different tag name. Use <code>amp-embed</code> when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.
+A container to display an ad. The <code>amp-embed</code> is an alias to the
+<code>amp-ad</code> tag, deriving all of its functionality with a different tag
+name. Use <code>amp-embed</code> when semantically more accurate. AMP documents
+only support ads/embeds served via HTTPS.
 
 # <a name="amp-ad"></a> `amp-ad` / `amp-embed`
 
 [TOC]
 
-{% call callout('Note', type='note') %}
-The specification of `amp-ad` / `amp-embed` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
-{% endcall %}
+{% call callout('Note', type='note') %} The specification of `amp-ad` /
+`amp-embed` is likely to significantly evolve over time. The current approach is
+designed to bootstrap the format to be able to show ads. {% endcall %}
 
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
@@ -55,14 +58,21 @@ limitations under the License.
 
 ## Behavior
 
-Ads are loaded like all other resources in AMP documents, with a special
-custom element called `<amp-ad>`. No ad network-provided JavaScript is allowed to run inside the AMP document. Instead, the AMP runtime loads an iframe from a
+Ads are loaded like all other resources in AMP documents, with a special custom
+element called `<amp-ad>`. No ad network-provided JavaScript is allowed to run
+inside the AMP document. Instead, the AMP runtime loads an iframe from a
 different origin (via iframe sandbox) as the AMP document and executes the ad
 network’s JS inside that iframe sandbox.
 
-The `<amp-ad>` requires width and height values to be specified according to the [rule](<https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#(tl;dr)-summary-of-layout-requirements-&-behaviors>) of its layout type. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+The `<amp-ad>` requires width and height values to be specified according to the
+[rule](<https://amp.dev/documentation/guides-and-tutorials/learn/amp-html-layout/#(tl;dr)-summary-of-layout-requirements-&-behaviors>)
+of its layout type. It requires a `type` argument that select what ad network is
+displayed. All `data-*` attributes on the tag are automatically passed as
+arguments to the code that eventually renders the ad. What `data-` attributes
+are required for a given type of network depends and must be documented with the
+ad network.
 
-#### Example: Displaying a few ads
+## Example: Displaying a few ads
 
 [example preview="inline" playground="true" imports="amp-ad"]
 
@@ -148,7 +158,10 @@ The `<amp-ad>` requires width and height values to be specified according to the
 
 ## Placeholder
 
-Optionally, `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing. Learn more in [Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders).
+Optionally, `amp-ad` supports a child element with the `placeholder` attribute.
+If supported by the ad network, this element is shown until the ad is available
+for viewing. Learn more in
+[Placeholders & Fallbacks](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders).
 
 ```html
 <amp-ad width="300" height="250" type="foo">
@@ -158,9 +171,17 @@ Optionally, `amp-ad` supports a child element with the `placeholder` attribute. 
 
 ## No ad available
 
-If no ad is availabel for the slot, AMP attempts to collapse the `amp-ad` element (that is, set to `display: none`). AMP determines that this operation can be performed without affecting the user's scroll position. If the ad is in the current viewport, the ad will not be collapsed because it affects the user's scroll position; however, if the ad is outside of the current viewport, it will be collapsed.
+If no ad is availabel for the slot, AMP attempts to collapse the `amp-ad`
+element (that is, set to `display: none`). AMP determines that this operation
+can be performed without affecting the user's scroll position. If the ad is in
+the current viewport, the ad will not be collapsed because it affects the user's
+scroll position; however, if the ad is outside of the current viewport, it will
+be collapsed.
 
-In the case that the attempt to collapse fails. The `amp-ad` component supports a child element with the `fallback` attribute. If there is a fallback element in presence, the customized fallback element is shown. Otherwise AMP will apply a default fallback.
+In the case that the attempt to collapse fails. The `amp-ad` component supports
+a child element with the `fallback` attribute. If there is a fallback element in
+presence, the customized fallback element is shown. Otherwise AMP will apply a
+default fallback.
 
 Example with fallback:
 
@@ -174,20 +195,30 @@ Example with fallback:
 
 There are 3 ways to monetize videos in AMP with video ads:
 
-1. AMP natively supports a number video players like BrightCove, DailyMotion, etc. that can monetize ads. For a full list, see the [media](https://www.ampproject.org/docs/reference/components#media) components.
+1. AMP natively supports a number video players like BrightCove, DailyMotion,
+   etc. that can monetize ads. For a full list, see the
+   [media](https://www.ampproject.org/docs/reference/components#media)
+   components.
 
-2. Use the [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video.html) component that comes with a built-in IMA SDK and HTML5 video player
+2. Use the
+   [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video.html)
+   component that comes with a built-in IMA SDK and HTML5 video player
 
-3. If you use a video player that is not supported in AMP, you can serve your custom player using [amp-iframe](https://amp.dev/documentation/examples/components/amp-iframe/).
-   When using `amp-iframe` approach:
-   _ Make sure there is a poster if loading the player in the first viewport. [Details](https://amp.dev/documentation/components/amp-iframe#iframe-with-placeholder).
+3. If you use a video player that is not supported in AMP, you can serve your
+   custom player using
+   [amp-iframe](https://amp.dev/documentation/examples/components/amp-iframe/).
+   When using `amp-iframe` approach: _ Make sure there is a poster if loading
+   the player in the first viewport.
+   [Details](https://amp.dev/documentation/components/amp-iframe#iframe-with-placeholder).
    _ Video and poster must be served over HTTPS.
 
 ## Running ads from a custom domain
 
-AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
+AMP supports loading the bootstrap iframe that is used to load ads from a custom
+domain such as your own domain.
 
-To enable this, copy the file [remote.html](../../3p/remote.html) to your web server. Next up add the following meta tag to your AMP file(s):
+To enable this, copy the file [remote.html](../../3p/remote.html) to your web
+server. Next up add the following meta tag to your AMP file(s):
 
 ```html
 <meta
@@ -196,28 +227,51 @@ To enable this, copy the file [remote.html](../../3p/remote.html) to your web se
 />
 ```
 
-The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It cannot reside on the same origin as your AMP files. For example, if you host AMP files on `www.example.com`, this URL must not be on `www.example.com` but `something-else.example.com` is OK. See ["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
+The `content` attribute of the meta tag is the absolute URL to your copy of the
+remote.html file on your web server. This URL must use a "https" schema. It
+cannot reside on the same origin as your AMP files. For example, if you host AMP
+files on `www.example.com`, this URL must not be on `www.example.com` but
+`something-else.example.com` is OK. See
+["Iframe origin policy"](../../spec/amp-iframe-origin-policy.md) for further
+details on allowed origins for iframes.
 
 ### Security
 
-**Validate incoming data** before passing it on to the `draw3p` function, to make sure your iframe only does things it expects to do. This is true, in particular, for ad networks that allow custom JavaScript injection.
+**Validate incoming data** before passing it on to the `draw3p` function, to
+make sure your iframe only does things it expects to do. This is true, in
+particular, for ad networks that allow custom JavaScript injection.
 
-Iframes should also enforce that they are only iframed into origins that they expect to be iframed into. The origins would be:
+Iframes should also enforce that they are only iframed into origins that they
+expect to be iframed into. The origins would be:
 
 - your own origins
 - `https://cdn.ampproject.org` for the AMP cache
 
-In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
+In the case of the AMP cache you also need to check that the "source origin"
+(origin of the document served by cdn.ampproject.org) is one of your origins.
 
-Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the [allow-from](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options) directive for full browser support.
+Enforcing origins can be done with the 3rd argument to `draw3p` and must
+additionally be done using the
+[allow-from](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options)
+directive for full browser support.
 
 ### Enhance incoming ad configuration
 
-This is completely optional: It is sometimes desired to enhance the ad request before making the ad request to the ad server.
+This is completely optional: It is sometimes desired to enhance the ad request
+before making the ad request to the ad server.
 
-If your ad network supports [fast fetch](https://amp.dev/documentation/guides-and-tutorials/contribute/adnetwork_integration#creating-an-amp-ad-implementation), then please use [Real Time Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md) (RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and RTC)
+If your ad network supports
+[fast fetch](https://amp.dev/documentation/guides-and-tutorials/contribute/adnetwork_integration#creating-an-amp-ad-implementation),
+then please use
+[Real Time Config](https://github.com/ampproject/amphtml/blob/master/extensions/amp-a4a/rtc-documentation.md)
+(RTC). (e.g. DoubleClick and AdSense integrations both support fast fetch and
+RTC)
 
-If your ad network uses delayed fetch, you can pass a callback to the `draw3p` function call in the [remote.html](../../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
+If your ad network uses delayed fetch, you can pass a callback to the `draw3p`
+function call in the [remote.html](../../3p/remote.html) file. The callback
+receives the incoming configuration as first argument and then receives another
+callback as second argument (Called `done` in the example below). This callback
+must be called with the updated config in order for ad rendering to proceed.
 
 Example:
 
@@ -234,12 +288,17 @@ draw3p(function(config, done) {
 
 ## Styling
 
-`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
-This is due to the UX implications of full page overlay ads. It may be considered to allow similar ad formats in the future inside of AMP controlled containers that maintain certain UX invariants.
+`<amp-ad>` elements may not themselves have or be placed in containers that have
+CSS `position: fixed` set (with the exception of `amp-lightbox`). This is due to
+the UX implications of full page overlay ads. It may be considered to allow
+similar ad formats in the future inside of AMP controlled containers that
+maintain certain UX invariants.
 
 ## Validation
 
-See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/validator-amp-ad.protoascii) in the AMP validator specification.
+See
+[amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad/validator-amp-ad.protoascii)
+in the AMP validator specification.
 
 ## Supported ad networks
 

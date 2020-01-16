@@ -1,9 +1,14 @@
 # Code Ownership and AMP
 
-This document describes the code ownership (OWNERS) model for the AMP open source
-project. This model is used in the [amphtml repository](https://github.com/ampproject/amphtml) and may be used by other AMP repositories as well.
+This document describes the code ownership (OWNERS) model for the AMP open
+source project. This model is used in the
+[amphtml repository](https://github.com/ampproject/amphtml) and may be used by
+other AMP repositories as well.
 
-For more information on the overall code contribution process that the OWNERS model is a part of, see the [Contributing code and features](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md) documentation.
+For more information on the overall code contribution process that the OWNERS
+model is a part of, see the
+[Contributing code and features](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md)
+documentation.
 
 The goals of enforcing AMP code ownership are as follows:
 
@@ -60,19 +65,21 @@ An earlier version of this bot was limited by GitHub's API, which could only
 post comments to pull requests. This did not scale well at the time, and use of
 the bot was discontinued.
 
-Today, GitHub supports a new [status API](https://developer.github.com/v3/repos/statuses/)
-that will be used by the bot to directly update the status of pull requests as
-described above. Stay tuned for the latest changes.
+Today, GitHub supports a new
+[status API](https://developer.github.com/v3/repos/statuses/) that will be used
+by the bot to directly update the status of pull requests as described above.
+Stay tuned for the latest changes.
 
 ## Approvals required before merging a change
 
-Any change in AMP requires the approval of at least one owner of the code the change
-modifies, but this is a subset of the required approvals before a change may be merged.
-See the [code contribution process](./contributing-code.md) for more details.
+Any change in AMP requires the approval of at least one owner of the code the
+change modifies, but this is a subset of the required approvals before a change
+may be merged. See the [code contribution process](./contributing-code.md) for
+more details.
 
 ## Criteria for being listed as an owner in an `OWNERS` file
 
-The `OWNERS` file for each directory will typically list the creator(s) of
-the component or extension it contains, along with those who are most familiar
-with the directory contents. To be added to an OWNERS file create a PR and
-go through the normal [code contribution process](./contributing-code.md).
+The `OWNERS` file for each directory will typically list the creator(s) of the
+component or extension it contains, along with those who are most familiar with
+the directory contents. To be added to an OWNERS file create a PR and go through
+the normal [code contribution process](./contributing-code.md).

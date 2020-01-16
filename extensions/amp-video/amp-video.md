@@ -28,7 +28,8 @@ limitations under the License.
 
 [TOC]
 
-A replacement for the HTML5 <code>video</code> tag; only to be used for direct HTML5 video file embeds.
+A replacement for the HTML5 <code>video</code> tag; only to be used for direct
+HTML5 video file embeds.
 
 <table>
   <tr>
@@ -49,14 +50,23 @@ A replacement for the HTML5 <code>video</code> tag; only to be used for direct H
 
 ## Behavior
 
-The `amp-video` component loads the video resource specified by its `src` attribute lazily, at a time determined by the runtime. You can control an `amp-video` component much the same way as a standard HTML5 `<video>` tag.
+The `amp-video` component loads the video resource specified by its `src`
+attribute lazily, at a time determined by the runtime. You can control an
+`amp-video` component much the same way as a standard HTML5 `<video>` tag.
 
-The `amp-video` component accepts up to four unique types of HTML nodes as children:
+The `amp-video` component accepts up to four unique types of HTML nodes as
+children:
 
-- `source` tags: Just like in the HTML `<video>` tag, you can add `<source>` tag children to specify different source media files to play.
-- `track` tags to enable subtitles in the video. If the track is hosted on a different origin than the document, you must add the `crossorigin` attribute to the `<amp-video>` tag.
+- `source` tags: Just like in the HTML `<video>` tag, you can add `<source>` tag
+  children to specify different source media files to play.
+- `track` tags to enable subtitles in the video. If the track is hosted on a
+  different origin than the document, you must add the `crossorigin` attribute
+  to the `<amp-video>` tag.
 - a placeholder for before the video starts
-- a fallback if the browser doesn’t support HTML5 video: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 video is not supported on the user’s browser.
+- a fallback if the browser doesn’t support HTML5 video: One or zero immediate
+  child nodes can have the `fallback` attribute. If present, this node and its
+  children form the content that displays if HTML5 video is not supported on the
+  user’s browser.
 
 #### Example
 
@@ -82,7 +92,9 @@ The `amp-video` component accepts up to four unique types of HTML nodes as child
 
 ## Analytics
 
-`amp-video` supports analytics out of the box. See [video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md) for more information.
+`amp-video` supports analytics out of the box. See
+[video analytics](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-video-analytics.md)
+for more information.
 
 ## Attributes
 
@@ -150,7 +162,11 @@ when the video has autoplay.</td>
 
 ## Media Session API attributes
 
-The `amp-video` component implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session), which enables developers to specify more information about the video file. The additional information for the video displays in the notification center of the user's device (along with the play/pause controls).
+The `amp-video` component implements the
+[Media Session API](https://developers.google.com/web/updates/2017/02/media-session),
+which enables developers to specify more information about the video file. The
+additional information for the video displays in the notification center of the
+user's device (along with the play/pause controls).
 
 <table>
   <tr>
@@ -173,7 +189,9 @@ The `amp-video` component implements the [Media Session API](https://developers.
 
 Example:
 
-This example contains both the `poster` and `artwork` attributes. The `poster` serves as the placeholder image before the video plays, while `artwork` is the image that displays in the notification via the MediaSession API.
+This example contains both the `poster` and `artwork` attributes. The `poster`
+serves as the placeholder image before the video plays, while `artwork` is the
+image that displays in the notification via the MediaSession API.
 
 ```html
 <amp-video
@@ -192,10 +210,17 @@ This example contains both the `poster` and `artwork` attributes. The `poster` s
 
 ## Click-to-Play overlay
 
-Providing a click-to-play overlay is a common UX feature for video players on the web. For example, you could display a custom play icon that the user can click, as well as include the title of the video, different sized poster images, and so on. Because the `amp-video` component supports the standard `play` AMP action, you can easily implement click-to-play.
+Providing a click-to-play overlay is a common UX feature for video players on
+the web. For example, you could display a custom play icon that the user can
+click, as well as include the title of the video, different sized poster images,
+and so on. Because the `amp-video` component supports the standard `play` AMP
+action, you can easily implement click-to-play.
 
-For a detailed example, visit AMP By Example's [Click-to-play overlay for amp-video](https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/).
+For a detailed example, visit AMP By Example's
+[Click-to-play overlay for amp-video](https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/).
 
 ## Validation
 
-See [amp-video rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
+See
+[amp-video rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)
+in the AMP validator specification.

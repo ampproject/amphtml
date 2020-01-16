@@ -16,7 +16,8 @@ limitations under the License.
 
 # Insticator
 
-Our embed serves content and ads that align with your audience. It reflects your visitor's interests and increases engagement.
+Our embed serves content and ads that align with your audience. It reflects your
+visitor's interests and increases engagement.
 
 ## Example of Insticator's Embed implementation
 
@@ -33,7 +34,8 @@ Our embed serves content and ads that align with your audience. It reflects your
 
 ## Configuration
 
-For details on the configuration semantics, please contact [Insticator](https://www.insticator.com/contact/).
+For details on the configuration semantics, please contact
+[Insticator](https://www.insticator.com/contact/).
 
 ### Required parameters
 

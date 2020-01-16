@@ -24,7 +24,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration information, see [atomx documentation](https://wiki.atomx.com/tags).
+For configuration information, see
+[atomx documentation](https://wiki.atomx.com/tags).
 
 ### Required Parameters
 
@@ -33,5 +34,7 @@ For configuration information, see [atomx documentation](https://wiki.atomx.com/
 ### Optional parameters
 
 - `data-click` - URL to pre-pend to the click URL to enable tracking.
-- `data-uv1`, `data-uv2`, `data-uv3` - User value to pass in to the tag. Can be used to track & report on custom values. Needs to be a whole number between 1 and 4,294,967,295.
+- `data-uv1`, `data-uv2`, `data-uv3` - User value to pass in to the tag. Can be
+  used to track & report on custom values. Needs to be a whole number between 1
+  and 4,294,967,295.
 - `data-context` - Conversion Callback Context

@@ -2,10 +2,12 @@
 
 [![npm package](https://img.shields.io/npm/v/@ampproject/purifier)](https://www.npmjs.com/package/@ampproject/purifier)
 
-The AMP Purifier library contains an AMP-specific configuration for [DOMPurify](https://github.com/cure53/DOMPurify).
+The AMP Purifier library contains an AMP-specific configuration for
+[DOMPurify](https://github.com/cure53/DOMPurify).
 
-This library is internally used by [`amp-mustache`](https://amp.dev/documentation/components/amp-mustache/)
-to sanitize rendered Mustache.js templates before displaying them.
+This library is internally used by
+[`amp-mustache`](https://amp.dev/documentation/components/amp-mustache/) to
+sanitize rendered Mustache.js templates before displaying them.
 
 ## Installation
 
@@ -106,7 +108,8 @@ A <body> element containing the sanitized `html` markup.
 `purifyTagsForTripleMustache(html)`
 
 Uses DOMPurify to sanitize HTML with stricter policy for unescaped templates
-e.g. triple mustache. See [`amp-mustache` documentation](https://amp.dev/documentation/components/amp-mustache/#validation)
+e.g. triple mustache. See
+[`amp-mustache` documentation](https://amp.dev/documentation/components/amp-mustache/#validation)
 for more information.
 
 #### `html`

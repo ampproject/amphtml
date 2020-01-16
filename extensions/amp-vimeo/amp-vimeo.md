@@ -45,7 +45,8 @@ Displays a <a href="https://vimeo.com">Vimeo</a> video.
 
 ## Example
 
-With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
+With responsive layout, the width and height from the example should yield
+correct layouts for 16:9 aspect ratio videos:
 
 ```html
 <amp-vimeo
@@ -77,4 +78,6 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
 
 ## Validation
 
-See [amp-vimeo rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/validator-amp-vimeo.protoascii) in the AMP validator specification.
+See
+[amp-vimeo rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/validator-amp-vimeo.protoascii)
+in the AMP validator specification.

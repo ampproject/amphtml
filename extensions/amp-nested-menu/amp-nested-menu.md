@@ -43,11 +43,16 @@ Drilldown menu component with items that open nested submenus on tap.
 
 ## Overview
 
-`<amp-nested-menu>` enables layered content organization within [`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md). A sidebar with `<amp-nested-menu>` can be used jointly with [`<amp-mega-menu>`](../amp-mega-menu/amp-mega-menu.md) to create a responsive menu.
+`<amp-nested-menu>` enables layered content organization within
+[`<amp-sidebar>`](../amp-sidebar/0.1/amp-sidebar.md). A sidebar with
+`<amp-nested-menu>` can be used jointly with
+[`<amp-mega-menu>`](../amp-mega-menu/amp-mega-menu.md) to create a responsive
+menu.
 
 ## Usage
 
-The `<amp-nested-menu>` component must be placed inside `<amp-sidebar>`. The component may contain the following AMP elements:
+The `<amp-nested-menu>` component must be placed inside `<amp-sidebar>`. The
+component may contain the following AMP elements:
 
 - [`<amp-img>`](../../builtins/amp-img.md)
 - [`<amp-list>`](../amp-list/amp-list.md)
@@ -55,20 +60,28 @@ The `<amp-nested-menu>` component must be placed inside `<amp-sidebar>`. The com
 
 ### Nested submenus
 
-`<amp-nested-menu>` supports nesting one or more layers of submenus. It uses the following attributes on its descendants as identifiers for the submenu functionality:
+`<amp-nested-menu>` supports nesting one or more layers of submenus. It uses the
+following attributes on its descendants as identifiers for the submenu
+functionality:
 
-- `amp-nested-submenu`: this identifies a hidden submenu container. When opened, the element slides in and takes the place of its parent menu (either `<amp-nested-menu>` or another submenu).
-- `amp-nested-submenu-open`: this identifies an element that opens a submenu on tap. It must be a sibling of the said submenu.
-- `amp-nested-submenu-close`: this identifies an element that closes the closest containing submenu. The element must be the descendant of a submenu.
+- `amp-nested-submenu`: this identifies a hidden submenu container. When opened,
+  the element slides in and takes the place of its parent menu (either
+  `<amp-nested-menu>` or another submenu).
+- `amp-nested-submenu-open`: this identifies an element that opens a submenu on
+  tap. It must be a sibling of the said submenu.
+- `amp-nested-submenu-close`: this identifies an element that closes the closest
+  containing submenu. The element must be the descendant of a submenu.
 
-Only `<div>` tags may receive the `amp-nested-submenu` attribute. The submenu open/close attributes can be applied to any of the tags below:
+Only `<div>` tags may receive the `amp-nested-submenu` attribute. The submenu
+open/close attributes can be applied to any of the tags below:
 
 - `<h1>`, `<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`
 - `<button>`
 - `<span>`
 - `<div>`
 
-The following example demonstrates an `<amp-nested-menu>` with two levels of nested submenus.
+The following example demonstrates an `<amp-nested-menu>` with two levels of
+nested submenus.
 
 [example playground="true" preview="top-frame" imports="amp-sidebar"]
 
@@ -111,11 +124,15 @@ The following example demonstrates an `<amp-nested-menu>` with two levels of nes
 
 ### Dynamic content rendering
 
-Fetch content of `<amp-nested-menu>` dynamically from a JSON endpoint using [`<amp-list>`](../amp-list/amp-list.md) and [`amp-mustache`](../amp-mustache/amp-mustache.md) template.
+Fetch content of `<amp-nested-menu>` dynamically from a JSON endpoint using
+[`<amp-list>`](../amp-list/amp-list.md) and
+[`amp-mustache`](../amp-mustache/amp-mustache.md) template.
 
-The example below demonstrates this ability by nesting `<amp-nested-menu>` inside `<amp-list>`.
+The example below demonstrates this ability by nesting `<amp-nested-menu>`
+inside `<amp-list>`.
 
-[example playground="true" preview="top-frame" imports="amp-sidebar,amp-list" template="amp-mustache"]
+[example playground="true" preview="top-frame" imports="amp-sidebar,amp-list"
+template="amp-mustache"]
 
 ```html
 <button on="tap:sidebar2">Open Sidebar</button>
@@ -197,21 +214,28 @@ The `<amp-nested-menu>` component can be styled with standard CSS.
 
 ## Accessibility
 
-`<amp-nested-menu>` assigns `role=button` and `tabindex=0` on each submenu open/close element. When a submenu opens, focus shifts to the submenu close element inside it. When the submenu closes, focus shifts back to the submenu open element that opened it.
+`<amp-nested-menu>` assigns `role=button` and `tabindex=0` on each submenu
+open/close element. When a submenu opens, focus shifts to the submenu close
+element inside it. When the submenu closes, focus shifts back to the submenu
+open element that opened it.
 
-[tip type="note"]
-Wrap every menu item in a `li` element to improve accessibility and keyboard support.
-[/tip]
+[tip type="note"] Wrap every menu item in a `li` element to improve
+accessibility and keyboard support. [/tip]
 
 The component supports arrow key navigation as follows:
 
 - `LEFT`: if a submenu is open, close it and return to the parent menu.
 - `RIGHT`: if a submenu open element has focus, open the corresponding submenu.
-- `UP/DOWN`: shift focus between items within a menu (this works only if all menu items are wrapped inside `li` elements under the same list).
-- `END/HOME`: shift focus to the first/last item within a menu (similar to `UP/DOWN`)
+- `UP/DOWN`: shift focus between items within a menu (this works only if all
+  menu items are wrapped inside `li` elements under the same list).
+- `END/HOME`: shift focus to the first/last item within a menu (similar to
+  `UP/DOWN`)
 
-If `side=left`, then the functionalities of `LEFT` and `RIGHT` arrow keys are reversed.
+If `side=left`, then the functionalities of `LEFT` and `RIGHT` arrow keys are
+reversed.
 
 ## Validation
 
-See [amp-nested-menu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nested-menu/validator-amp-nested-menu.protoascii) in the AMP validator specification.
+See
+[amp-nested-menu rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nested-menu/validator-amp-nested-menu.protoascii)
+in the AMP validator specification.

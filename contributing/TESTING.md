@@ -39,7 +39,10 @@ This document provides details for testing and building your AMP code.
 
 ## Testing commands
 
-Before running these commands, make sure you have Node.js, yarn, and Gulp installed. For installation instructions, see the [One-time setup](getting-started-quick.md#one-time-setup) section in the Quick Start guide.
+Before running these commands, make sure you have Node.js, yarn, and Gulp
+installed. For installation instructions, see the
+[One-time setup](getting-started-quick.md#one-time-setup) section in the Quick
+Start guide.
 
 | Command                                                   | Description                                                                                                                                                                                                                                   |
 | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -136,19 +139,27 @@ For manual testing build AMP and start the Node.js server by running `gulp`.
 There are 3 serving modes:
 
 - DEFAULT mode serves unminified AMP. You want to use this during normal dev.
-- COMPILED mode serves minified AMP. This is closer to the prod setup. This is only available after running `gulp dist --fortesting`. Serve MIN mode by adding `--compiled` to `gulp` command.
-- CDN mode serves prod. These remote files would not reflect your local changes. Serve CDN mode by adding `--cdn` to `gulp` command.
-- <RTV_NUMBER> mode serves the bundle from the given RTV number, where <RTV_NUMBER> is a 15 digit number. Ex. `001907161745080`
+- COMPILED mode serves minified AMP. This is closer to the prod setup. This is
+  only available after running `gulp dist --fortesting`. Serve MIN mode by
+  adding `--compiled` to `gulp` command.
+- CDN mode serves prod. These remote files would not reflect your local changes.
+  Serve CDN mode by adding `--cdn` to `gulp` command.
+- <RTV_NUMBER> mode serves the bundle from the given RTV number, where
+  <RTV_NUMBER> is a 15 digit number. Ex. `001907161745080`
 
-To switch serving mode during runtime, go to http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the following values: `default`, `compiled`, `cdn` or `<RTV_NUMBER>`.
+To switch serving mode during runtime, go to
+http://localhost:8000/serve_mode=$mode and set the `$mode` to one of the
+following values: `default`, `compiled`, `cdn` or `<RTV_NUMBER>`.
 
 ### Examples
 
-The content in the `examples` directory can be reached at: http://localhost:8000/examples/
+The content in the `examples` directory can be reached at:
+http://localhost:8000/examples/
 
 ### Document proxy
 
-AMP ships with a local proxy for testing production AMP documents with the local JS version.
+AMP ships with a local proxy for testing production AMP documents with the local
+JS version.
 
 For any public AMP document like: `http://output.jsbin.com/pegizoq/quiet`,
 
@@ -158,16 +169,20 @@ directly:
 
 `http://localhost:8000/proxy/output.jsbin.com/pegizoq/quiet`.
 
-**Note:** The local proxy will serve minified or unminified JS based on the current serve mode. When serve mode is `cdn`, the local proxy will serve remote JS.
-When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
-flag so that we do not strip out the localhost code paths. (We do some
-code elimination to trim down the file size for the file we deploy to production)
+**Note:** The local proxy will serve minified or unminified JS based on the
+current serve mode. When serve mode is `cdn`, the local proxy will serve remote
+JS. When accessing minified JS make sure you run `gulp dist` with the
+`--fortesting` flag so that we do not strip out the localhost code paths. (We do
+some code elimination to trim down the file size for the file we deploy to
+production)
 
-If the origin resource is on HTTPS, the URLs are http://localhost:8000/proxy/s/output.jsbin.com/pegizoq/quiet
+If the origin resource is on HTTPS, the URLs are
+http://localhost:8000/proxy/s/output.jsbin.com/pegizoq/quiet
 
 ### <a name="a4a-envelope"></a>A4A envelope (/a4a/, /a4a-3p/)
 
-If you are working on AMPHTML ads, you can use the local A4A envelope for testing local and production AMP documents with the local JS version.
+If you are working on AMPHTML ads, you can use the local A4A envelope for
+testing local and production AMP documents with the local JS version.
 
 A4A can be run either of these two modes:
 
@@ -177,57 +192,78 @@ A4A can be run either of these two modes:
 The following forms are supported:
 
 - local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.html
-- proxied document with local sources: http://localhost:8000/a4a[-3p]/proxy/output.jsbin.com/pegizoq/quiet
+- proxied document with local sources:
+  http://localhost:8000/a4a[-3p]/proxy/output.jsbin.com/pegizoq/quiet
 
 When accessing minified JS make sure you run `gulp dist` with the `--fortesting`
-flag so that we do not strip out the localhost code paths. (We do some
-code elimination to trim down the file size for the file we deploy to production)
+flag so that we do not strip out the localhost code paths. (We do some code
+elimination to trim down the file size for the file we deploy to production)
 
-If the origin resource is on HTTPS, the URLs are http://localhost:8000/a4a[-3p]/proxy/s/output.jsbin.com/pegizoq/quiet
+If the origin resource is on HTTPS, the URLs are
+http://localhost:8000/a4a[-3p]/proxy/s/output.jsbin.com/pegizoq/quiet
 
-Notice that all documents are assumed to have a "fake" signature. Thus, this functionality is only available in the
-`localDev` mode.
+Notice that all documents are assumed to have a "fake" signature. Thus, this
+functionality is only available in the `localDev` mode.
 
 Additionally, the following query parameters can be provided:
 
 - `width` - the width of the `amp-ad` (default "300")
 - `height` - the height of the `amp-ad` (default "250")
-- `offset` - the offset to push the `amp-ad` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
+- `offset` - the offset to push the `amp-ad` down the page (default "0px"). Can
+  be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
 
 ### In-a-box envelope (/inabox/)
 
-If you are working on AMP In-a-box Ads, you can use the local in-a-box envelope for testing local and production AMP documents with the local JS version.
+If you are working on AMP In-a-box Ads, you can use the local in-a-box envelope
+for testing local and production AMP documents with the local JS version.
 
 The following forms are supported:
 
 - local document: http://localhost:8000/inabox/examples/animations.amp.html
-- proxied document with local sources: http://localhost:8000/inabox/proxy/output.jsbin.com/pegizoq/quiet
+- proxied document with local sources:
+  http://localhost:8000/inabox/proxy/output.jsbin.com/pegizoq/quiet
 
 Additionally, the following query parameters can be provided:
 
 - `width` - the width of the `iframe` (default "300")
 - `height` - the height of the `iframe` (default "250")
-- `offset` - the offset to push the `iframe` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
+- `offset` - the offset to push the `iframe` down the page (default "0px"). Can
+  be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
 
 ### Chrome extension
 
-For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](../testing/local-amp-chrome-extension/README.md).
+For testing documents on arbitrary URLs with your current local version of the
+AMP runtime we created a
+[Chrome extension](../testing/local-amp-chrome-extension/README.md).
 
 ## Testing on Sauce Labs
 
-We use [Sauce Labs](https://saucelabs.com) to perform cross-browser testing (thanks Sauce Labs!). In general local testing (i.e. gulp [unit|integration]) and the automatic test run on [Travis](https://travis-ci.org/ampproject/amphtml/pull_requests) that happens when you send a pull request are sufficient, but if you want to run your tests across multiple environments/browsers before sending your PR we recommend using Sauce Labs as well.
+We use [Sauce Labs](https://saucelabs.com) to perform cross-browser testing
+(thanks Sauce Labs!). In general local testing (i.e. gulp [unit|integration])
+and the automatic test run on
+[Travis](https://travis-ci.org/ampproject/amphtml/pull_requests) that happens
+when you send a pull request are sufficient, but if you want to run your tests
+across multiple environments/browsers before sending your PR we recommend using
+Sauce Labs as well.
 
 To run the tests on Sauce Labs:
 
-- Create a Sauce Labs account. If you are only going to use your account for open source projects like this one you can sign up for a free [Open Sauce](https://saucelabs.com/solutions/open-source) account. (If you create an account through the normal account creation mechanism you'll be signing up for a free trial that expires; you can contact Sauce Labs customer service to switch your account to Open Sauce if you did this accidentally.)
-- Set the `SAUCE_USERNAME` and `SAUCE_ACCESS_KEY` environment variables. On Linux add this to your `.bashrc`:
+- Create a Sauce Labs account. If you are only going to use your account for
+  open source projects like this one you can sign up for a free
+  [Open Sauce](https://saucelabs.com/solutions/open-source) account. (If you
+  create an account through the normal account creation mechanism you'll be
+  signing up for a free trial that expires; you can contact Sauce Labs customer
+  service to switch your account to Open Sauce if you did this accidentally.)
+- Set the `SAUCE_USERNAME` and `SAUCE_ACCESS_KEY` environment variables. On
+  Linux add this to your `.bashrc`:
 
   ```sh
   export SAUCE_USERNAME=<Sauce Labs username>
   export SAUCE_ACCESS_KEY=<Sauce Labs access key>
   ```
 
-  You can find your Sauce Labs access key on the [User Settings](https://saucelabs.com/beta/user-settings) page.
+  You can find your Sauce Labs access key on the
+  [User Settings](https://saucelabs.com/beta/user-settings) page.
 
 - Run the proxy and then run the tests:
 
@@ -242,33 +278,64 @@ To run the tests on Sauce Labs:
   ./build-system/sauce_connect/stop_sauce_connect.sh
   ```
 
-- It may take several seconds for the proxy to start and for the tests to start. You can see the status of your tests on the Sauce Labs [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard. (You can also see the status of your proxy on the [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
-- The tunnel ID used during local development is the email address of the author of the latest commit on the local branch.
+- It may take several seconds for the proxy to start and for the tests to start.
+  You can see the status of your tests on the Sauce Labs
+  [Automated Tests](https://saucelabs.com/beta/dashboard/tests) dashboard. (You
+  can also see the status of your proxy on the
+  [Tunnels](https://saucelabs.com/beta/tunnels) dashboard.
+- The tunnel ID used during local development is the email address of the author
+  of the latest commit on the local branch.
 
 ## Visual Diff Tests
 
-In addition to building the AMP runtime and running `gulp [unit|integration]`, the automatic test run on Travis includes a set of visual diff tests to make sure a new commit to `master` does not result in unintended changes to how pages are rendered. The tests load a few well-known pages in a browser and compare the results with known good versions of the same pages.
+In addition to building the AMP runtime and running `gulp [unit|integration]`,
+the automatic test run on Travis includes a set of visual diff tests to make
+sure a new commit to `master` does not result in unintended changes to how pages
+are rendered. The tests load a few well-known pages in a browser and compare the
+results with known good versions of the same pages.
 
 The technology stack used is:
 
 - [Percy](https://percy.io/), a visual regression testing service for webpages
-- [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a driver capable of loading webpages for diffing
-- [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that integrates Puppeteer with Percy
-- [Headless Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome/Chromium browser in headless mode
+- [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a driver
+  capable of loading webpages for diffing
+- [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that
+  integrates Puppeteer with Percy
+- [Headless Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md),
+  the Chrome/Chromium browser in headless mode
 
-The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. All PRs will show a check called `percy/amphtml` in addition to the `continuous-integration/travis-ci/pr` check. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
+The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on
+GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of
+the same name. All PRs will show a check called `percy/amphtml` in addition to
+the `continuous-integration/travis-ci/pr` check. If your PR results in visual
+diff(s), clicking on the `details` link will show you the snapshots with the
+diffs highlighted.
 
 ### Failing Tests
 
-When a test run fails due to visual diffs being present, click the `details` link next to `percy/amphtml` in your PR and examine the results. By default, Percy highlights the changes between snapshots in red. Clicking on the new snapshot will show it in its raw form. If the diffs indicate a problem that is likely to be due to your PR, you can try running the visual diffs locally in order to debug (see section below). However, if you are sure that the problem is not due to your PR, you may click the green `Approve` button on Percy to approve the snapshots and unblock your PR from being merged.
+When a test run fails due to visual diffs being present, click the `details`
+link next to `percy/amphtml` in your PR and examine the results. By default,
+Percy highlights the changes between snapshots in red. Clicking on the new
+snapshot will show it in its raw form. If the diffs indicate a problem that is
+likely to be due to your PR, you can try running the visual diffs locally in
+order to debug (see section below). However, if you are sure that the problem is
+not due to your PR, you may click the green `Approve` button on Percy to approve
+the snapshots and unblock your PR from being merged.
 
 ### Flaky Tests
 
-If a Percy test flakes and you would like to trigger a rerun, you can't do that from within Percy. Instead, from your PR on GitHub open up the "Details" for the `continuous-integration/travis-ci/pr` check to load the Travis run for your PR. There you should see a "passed" test shard labeled "Visual Diff Tests". Click the "Restart Job" icon on just that shard to trigger a rerun on Percy.
+If a Percy test flakes and you would like to trigger a rerun, you can't do that
+from within Percy. Instead, from your PR on GitHub open up the "Details" for the
+`continuous-integration/travis-ci/pr` check to load the Travis run for your PR.
+There you should see a "passed" test shard labeled "Visual Diff Tests". Click
+the "Restart Job" icon on just that shard to trigger a rerun on Percy.
 
 ### Running Visual Diff Tests Locally
 
-You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`:
+You can also run the visual tests locally during development. You must first
+create a free Percy account at [https://percy.io](https://percy.io), create a
+project, and set the `PERCY_TOKEN` environment variable using the unique value
+you find at `https://percy.io/<org>/<project>/integrations`:
 
 ```sh
 export PERCY_TOKEN="<unique-percy-token>"
@@ -288,9 +355,12 @@ Next, run the `gulp` task that invokes the visual diff tests:
 gulp visual-diff --nobuild
 ```
 
-Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp dist --fortesting` on each execution.
+Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run
+`gulp dist --fortesting` on each execution.
 
-The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome in headless mode. You can see the results at `https://percy.io/<org>/<project>`.
+The build will use the Percy credentials set via environment variables in the
+previous step, and run the tests on your local install of Chrome in headless
+mode. You can see the results at `https://percy.io/<org>/<project>`.
 
 To see debugging info during Percy runs, you can run:
 
@@ -304,31 +374,46 @@ To run tests without uploading snapshots to Percy, you can run:
 gulp visual-diff --percy_disabled
 ```
 
-The debug flags `--chrome_debug` and `--webserver_debug` can be used independently. To enable both debug flags, you can also run:
+The debug flags `--chrome_debug` and `--webserver_debug` can be used
+independently. To enable both debug flags, you can also run:
 
 ```sh
  gulp visual-diff --debug
 ```
 
-To execute only a subset of the tests (i.e., when creating or debugging an existing test) use the `--grep` regular expression flag. e.g., `gulp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP component name between `<amp-a...>` through `<amp-f...>`.
+To execute only a subset of the tests (i.e., when creating or debugging an
+existing test) use the `--grep` regular expression flag. e.g.,
+`gulp visual-diff --grep="amp-[a-f]"` will execute on tests that have an AMP
+component name between `<amp-a...>` through `<amp-f...>`.
 
-After each run, a new set of results will be available at `https://percy.io/<org>/<project>`.
+After each run, a new set of results will be available at
+`https://percy.io/<org>/<project>`.
 
 ## Testing on devices
 
 ### Testing with ngrok
 
-It's much faster to debug with local build (`gulp` + `http://localhost:8000/`). In Chrome you can use [DevTools port forwarding](https://developers.google.com/web/tools/chrome-devtools/remote-debugging/local-server). However, iOS Safari does not give a similar option. Instead, you can use [ngrok](https://ngrok.com/). Just [download](https://ngrok.com/download) the ngrok binary for your platform and run it like this:
+It's much faster to debug with local build (`gulp` + `http://localhost:8000/`).
+In Chrome you can use
+[DevTools port forwarding](https://developers.google.com/web/tools/chrome-devtools/remote-debugging/local-server).
+However, iOS Safari does not give a similar option. Instead, you can use
+[ngrok](https://ngrok.com/). Just [download](https://ngrok.com/download) the
+ngrok binary for your platform and run it like this:
 
 ```sh
 ngrok http 8000
 ```
 
-Once started, the ngrok will print URLs for both `http` and `https`. E.g. `http://73774d8c.ngrok.io/` and `https://73774d8c.ngrok.io/`. These URLs can be used to debug on iOS and elsewhere.
+Once started, the ngrok will print URLs for both `http` and `https`. E.g.
+`http://73774d8c.ngrok.io/` and `https://73774d8c.ngrok.io/`. These URLs can be
+used to debug on iOS and elsewhere.
 
 ### Testing with Firebase
 
-For deploying and testing local AMP builds on [Firebase](https://firebase.google.com/), install firebase and initialize firebase within this directory\* (a `firebase` folder can be generated with the command, `gulp firebase`).
+For deploying and testing local AMP builds on
+[Firebase](https://firebase.google.com/), install firebase and initialize
+firebase within this directory\* (a `firebase` folder can be generated with the
+command, `gulp firebase`).
 
 ```sh
 npm install -g firebase-tools
@@ -338,15 +423,30 @@ gulp firebase
 firebase deploy
 ```
 
-- When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
+- When initializing firebase within the directory via `firebase init`, make sure
+  to select the following options when asked:
 
-* "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
+* "Which Firebase CLI features do you want to setup for this folder?" select
+  `Hosting: Configure and deploy Firebase Hosting sites`.
 * "What do you want to use as your public directory?" enter `firebase`.
-* "Select a default Firebase project for this directory:" select your project name if it's already created, otherwise choose `[don't setup a new project]` and add one later.
-  - Note: If you haven't already, you will have to create a project via the [Firebase Console](https://console.firebase.google.com) after you are done initializing and before you deploy. Once you create the project, you can make it active in your CLI with `firebase use your-project-name` or give it an alias by selecting your project after running `firebase use --add`.
-* "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
+* "Select a default Firebase project for this directory:" select your project
+  name if it's already created, otherwise choose `[don't setup a new project]`
+  and add one later.
+  - Note: If you haven't already, you will have to create a project via the
+    [Firebase Console](https://console.firebase.google.com) after you are done
+    initializing and before you deploy. Once you create the project, you can
+    make it active in your CLI with `firebase use your-project-name` or give it
+    an alias by selecting your project after running `firebase use --add`.
+* "Configure as a single-page app (rewrite all urls to /index.html)?" select
+  `n`.
 
-`gulp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`). When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
+`gulp firebase` will generate a `firebase` folder and copy over all files from
+`dist`, `examples` and `test/manual`. It will rewrite all urls in the copied
+files to point to the local versions of AMP (i.e. the ones copied from `dist` to
+`firebase/dist`). When you initialize firebase, you should set the `firebase`
+`public` directory to `firebase`. This way `firebase deploy` will just directly
+copy and deploy the contents of the generated `firebase` folder. As an example,
+your `firebase.json` file can look something like this:
 
 ```json
 {
@@ -357,15 +457,22 @@ firebase deploy
 }
 ```
 
-If you are only testing a single file, you can use `gulp firebase --file=path/to/my/file.amp.html` to avoid copying over all of `test/manual` and `examples`. It will copy over the specified file to `firebase/index.html`, which simplifies debugging.
+If you are only testing a single file, you can use
+`gulp firebase --file=path/to/my/file.amp.html` to avoid copying over all of
+`test/manual` and `examples`. It will copy over the specified file to
+`firebase/index.html`, which simplifies debugging.
 
-After deploying, you can access your project publically at its hosting URL `https://your-project-name.firebaseapp.com`.
+After deploying, you can access your project publically at its hosting URL
+`https://your-project-name.firebaseapp.com`.
 
-Additionally, you can create multiple projects and switch between them in the CLI using `firebase use your-project-name`.
+Additionally, you can create multiple projects and switch between them in the
+CLI using `firebase use your-project-name`.
 
 #### Testing Ads
 
-Testing ads in deployed demos requires whitelisting of 3p urls. You can do this by adding your intended deployment hostname as an environemnt variable `AMP_TESTING_HOST` and using the `fortesting` flag. For example:
+Testing ads in deployed demos requires whitelisting of 3p urls. You can do this
+by adding your intended deployment hostname as an environemnt variable
+`AMP_TESTING_HOST` and using the `fortesting` flag. For example:
 
 ```sh
 export AMP_TESTING_HOST="my-project.firebaseapp.com"
@@ -373,11 +480,16 @@ gulp firebase --fortesting
 firebase deploy
 ```
 
-This will write "my-project.firebaseapp.com" as a third party url to relevant attributes in `AMP_CONFIG`, which is prepended to `amp.js` and `integration.js` files in the firebase folder. If you're curious about how this is done, feel free to inspect `build-system/tasks/firebase.js`.
+This will write "my-project.firebaseapp.com" as a third party url to relevant
+attributes in `AMP_CONFIG`, which is prepended to `amp.js` and `integration.js`
+files in the firebase folder. If you're curious about how this is done, feel
+free to inspect `build-system/tasks/firebase.js`.
 
 ## End-to-End Tests
 
-You can run and create E2E tests locally during development. Currently tests only run on Chrome, but support for additional browsers is underway. These tests have not been added to our CI build yet - but they will be added soon.
+You can run and create E2E tests locally during development. Currently tests
+only run on Chrome, but support for additional browsers is underway. These tests
+have not been added to our CI build yet - but they will be added soon.
 
 Run all tests with:
 
@@ -385,6 +497,8 @@ Run all tests with:
 gulp e2e
 ```
 
-The task will kick off `gulp build` and then `gulp serve` before running the tests. To skip building the runtime, use `--nobuild`.
+The task will kick off `gulp build` and then `gulp serve` before running the
+tests. To skip building the runtime, use `--nobuild`.
 
-[Consult the E2E testing documentation](../build-system/tasks/e2e/README.md) to learn how to create your own end-to-end tests.
+[Consult the E2E testing documentation](../build-system/tasks/e2e/README.md) to
+learn how to create your own end-to-end tests.

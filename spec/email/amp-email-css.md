@@ -28,7 +28,8 @@ When using an internal stylesheet, the CSS is specified inside a single
 ### Inline styles
 
 In addition to an internal stylesheet, inline styles can be specified on any
-element using the [`style` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-style).
+element using the
+[`style` attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#attr-style).
 
 ### External stylesheet
 
@@ -40,20 +41,29 @@ Using `<link rel="stylesheet" href="...">` is not allowed anywhere in the email.
 
 ### Simple selectors
 
-- [Type selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors) `elementname`
-- [Class selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors) `.classname`
-- [ID selector](https://developer.mozilla.org/en-US/docs/Web/CSS/ID_selectors) `#idname`
-- [Universal selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Universal_selectors) `*`
+- [Type selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors)
+  `elementname`
+- [Class selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Class_selectors)
+  `.classname`
+- [ID selector](https://developer.mozilla.org/en-US/docs/Web/CSS/ID_selectors)
+  `#idname`
+- [Universal selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Universal_selectors)
+  `*`
 
-Warning: [Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors)
+Warning:
+[Attribute selector](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors)
 `[attr=value]` are not currently supported by all email providers.
 
 ### Combinators
 
-- [Adjacent sibling combinator](https://developer.mozilla.org/en-US/docs/Web/CSS/Adjacent_sibling_combinator) `A + B`
-- [General sibling combinator](https://developer.mozilla.org/en-US/docs/Web/CSS/General_sibling_combinator) `A ~ B`
-- [Child combinator](https://developer.mozilla.org/en-US/docs/Web/CSS/Child_combinator) `A > B`
-- [Descendant combinator](https://developer.mozilla.org/en-US/docs/Web/CSS/Descendant_combinator) `A B`
+- [Adjacent sibling combinator](https://developer.mozilla.org/en-US/docs/Web/CSS/Adjacent_sibling_combinator)
+  `A + B`
+- [General sibling combinator](https://developer.mozilla.org/en-US/docs/Web/CSS/General_sibling_combinator)
+  `A ~ B`
+- [Child combinator](https://developer.mozilla.org/en-US/docs/Web/CSS/Child_combinator)
+  `A > B`
+- [Descendant combinator](https://developer.mozilla.org/en-US/docs/Web/CSS/Descendant_combinator)
+  `A B`
 
 ### Pseudo-classes
 
@@ -329,7 +339,8 @@ Custom fonts are **not** supported in AMP for Email.
 
 ## Media features
 
-List of [media features](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries#Media_features)
+List of
+[media features](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries#Media_features)
 supported for conditionally applying rules via `@media` queries.
 
 - [`device-width`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/device-width)

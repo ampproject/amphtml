@@ -30,7 +30,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact [LockerDome](https://lockerdome.com).
+For details on the configuration semantics, please contact
+[LockerDome](https://lockerdome.com).
 
 ### Required parameters
 

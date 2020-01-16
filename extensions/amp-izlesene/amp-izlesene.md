@@ -41,7 +41,8 @@ Displays an embedded <a href="https://www.izlesene.com/">Izlesene</a> video.
 
 ## Example
 
-With responsive layout the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
+With responsive layout the width and height from the example should yield
+correct layouts for 16:9 aspect ratio videos:
 
 ```html
 <amp-izlesene
@@ -83,4 +84,6 @@ With responsive layout the width and height from the example should yield correc
 
 ## Validation
 
-See [amp-izlesene rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-izlesene/validator-amp-izlesene.protoascii) in the AMP validator specification.
+See
+[amp-izlesene rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-izlesene/validator-amp-izlesene.protoascii)
+in the AMP validator specification.

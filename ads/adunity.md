@@ -35,16 +35,16 @@ limitations under the License.
 
 ### Required attributes
 
-`data-au-account` - account number
-`data-au-site` - site id
+`data-au-account` - account number `data-au-site` - site id
 
 ### Optional attributes
 
 `data-au-section` - section of the site (i.e. hp - homepage), can be empty value
-`data-au-zone` - zone id of the ad
-`data-au-dual` - this is used to fetch ads for both desktop and mobile devices automatically
-`data-au-isdemo` - used to fetch demo ad
+`data-au-zone` - zone id of the ad `data-au-dual` - this is used to fetch ads
+for both desktop and mobile devices automatically `data-au-isdemo` - used to
+fetch demo ad
 
 ### Other attributes
 
-For more information please see ad network documentation at <https://kb.adunity.com>
+For more information please see ad network documentation at
+<https://kb.adunity.com>

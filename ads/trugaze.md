@@ -61,7 +61,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ## Supported parameters
 
@@ -74,4 +75,5 @@ For details on the configuration semantics, please contact the ad network or ref
 | data-multi-size | Comma separated list of other sizes | No       |
 | json            | Custom targeting map                | No       |
 
-Note: if any of the required parameters is not present, the ad slot will not be filled.
+Note: if any of the required parameters is not present, the ad slot will not be
+filled.

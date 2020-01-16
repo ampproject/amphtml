@@ -39,21 +39,24 @@ Dynamically inserts ads into a Story.
 
 # Getting Started
 
-For information on how to include ads in your AMP Stories, [refer to our guide](https://amp.dev/documentation/guides-and-tutorials/develop/advertise_amp_stories).
+For information on how to include ads in your AMP Stories,
+[refer to our guide](https://amp.dev/documentation/guides-and-tutorials/develop/advertise_amp_stories).
 
 # Best practices for creating an AMP Story ad
 
-If you are interested in creating an ad for the AMP Story platform, [refer to our best practices guide](https://amp.dev/documentation/guides-and-tutorials/develop/story_ads_best_practices).
+If you are interested in creating an ad for the AMP Story platform,
+[refer to our best practices guide](https://amp.dev/documentation/guides-and-tutorials/develop/story_ads_best_practices).
 
 ## Behavior
 
 `amp-story-auto-ads` extension dynamically inserts ads (implemented as `amp-ad`)
-into the story while content is being consumed by the user. The current algorithm expects at least a story containing 7 pages.
+into the story while content is being consumed by the user. The current
+algorithm expects at least a story containing 7 pages.
 
 Each `amp-ad` is inserted as a full screen story page. To prevent showing
 blank/unloaded ads, the ad is pre-rendered completely in the background before
-making it visible to the user. Based on user interactions, the extension decides when
-and where to insert ads.
+making it visible to the user. Based on user interactions, the extension decides
+when and where to insert ads.
 
 Ad in story can be skipped the same way as normal story pages by tapping on the
 right part of the screen.
@@ -83,8 +86,8 @@ looks like the following:
 `ad-attributes` is a map of key-value pairs, which are the attributes of the
 `amp-ad` element to be inserted.
 
-The above example will insert the following `amp-ad` element, which represents
-a [ad served by doubleclick](../../extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md):
+The above example will insert the following `amp-ad` element, which represents a
+[ad served by doubleclick](../../extensions/amp-ad-network-doubleclick-impl/amp-ad-network-doubleclick-impl-internal.md):
 
 ```html
 <amp-ad type="doubleclick" data-slot="/30497360/a4a/amp_story_dfp_example">
@@ -100,7 +103,9 @@ If you wish to pass any additional data (e.g. targeting information) as
 attributes to the created `<amp-ad>` tag, simply add the additional key value
 pairs to the `ad-attributes` JSON object.
 
-A common use case is to pass targeting data or RTC configuration to the underlying `amp-ad` element. A more complex configuration may look something like this:
+A common use case is to pass targeting data or RTC configuration to the
+underlying `amp-ad` element. A more complex configuration may look something
+like this:
 
 ```html
 <amp-story-auto-ads>
@@ -161,8 +166,9 @@ algorithm will then skip the slot after this page when trying to insert an ad.
 
 ## Analytics
 
-When using `amp-story-auto-ads` several new [analytics triggers](../../extensions/amp-analytics/amp-analytics.md)
-and [variables] will be available for your analytics configuration.
+When using `amp-story-auto-ads` several new
+[analytics triggers](../../extensions/amp-analytics/amp-analytics.md) and
+[variables] will be available for your analytics configuration.
 
 ### Triggers
 
@@ -178,12 +184,12 @@ and [variables] will be available for your analytics configuration.
 
 ### Variables
 
-The following variables will be avaiable in roughly sequential order. The variables
-can then be used in any following pings. For instance, a request using the
-`story-ad-load` trigger will not have access to the `viewTime` variable as it has
-not happened yet (this will resolve to an empty string). Whereas a request sent
-using the `story-ad-exit` trigger would be able to get the value of all the previous
-events (`requestTime`, `loadTime`, `insertTime` etc.)
+The following variables will be avaiable in roughly sequential order. The
+variables can then be used in any following pings. For instance, a request using
+the `story-ad-load` trigger will not have access to the `viewTime` variable as
+it has not happened yet (this will resolve to an empty string). Whereas a
+request sent using the `story-ad-exit` trigger would be able to get the value of
+all the previous events (`requestTime`, `loadTime`, `insertTime` etc.)
 
 | Name          | Definition                                                                                                                       |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------------- |

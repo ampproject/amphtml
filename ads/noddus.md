@@ -30,7 +30,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, see [Noddus documentation](https://www.noddus.com).
+For details on the configuration semantics, see
+[Noddus documentation](https://www.noddus.com).
 
 ### Required parameters
 

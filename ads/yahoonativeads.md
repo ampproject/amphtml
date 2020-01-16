@@ -18,7 +18,8 @@ limitations under the License.
 
 ## Example
 
-Yahoo Native Ads only requires a configured section code to run. Please work with your account manager to configure your AMP sections.
+Yahoo Native Ads only requires a configured section code to run. Please work
+with your account manager to configure your AMP sections.
 
 ### Basic
 

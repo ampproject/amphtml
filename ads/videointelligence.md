@@ -32,7 +32,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration information, please check [docs.vi.ai/](https://docs.vi.ai/general/integrations/).
+For configuration information, please check
+[docs.vi.ai/](https://docs.vi.ai/general/integrations/).
 
 ### Required parameters
 

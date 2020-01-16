@@ -15,13 +15,10 @@
 
 ---
 
-\$category: presentation
-formats:
+\$category: presentation formats:
 
 - websites
-- email
-  teaser:
-  text: FILL THIS IN.
+- email teaser: text: FILL THIS IN.
 
 ---
 
@@ -83,4 +80,6 @@ FILL THIS IN. Does this extension allow for properties to configure?
 
 ## Validation
 
-See [amp-viewer-gpay-inline rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-gpay-inline/validator-amp-viewer-gpay-inline.protoascii) in the AMP validator specification.
+See
+[amp-viewer-gpay-inline rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-gpay-inline/validator-amp-viewer-gpay-inline.protoascii)
+in the AMP validator specification.

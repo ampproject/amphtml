@@ -32,7 +32,8 @@ limitations under the License.
 
 ### Configuration
 
-For configuration details, please contact https://www.excite.co.jp/guide/wisteria/
+For configuration details, please contact
+https://www.excite.co.jp/guide/wisteria/
 
 Supported parameters:
 

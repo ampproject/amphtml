@@ -49,11 +49,17 @@ limitations under the License.
 
 ### `postPromptUI`
 
-The value of `postPromptUI` should be the id of the html tag in which the consent ui will be attached to. In our example above, the value of `postPromptUI` is `my-consent-prompt-ui` since we have a div with that id.
+The value of `postPromptUI` should be the id of the html tag in which the
+consent ui will be attached to. In our example above, the value of
+`postPromptUI` is `my-consent-prompt-ui` since we have a div with that id.
 
 ### Opening the Privacy Manager
 
-Notice in the example above, we have a `button` with the attribute `on="tap.consent.prompt(consent=SourcePoint)"`. The id of your `<amp-consent>` element is relevant here. Notice how the id of our `<amp-consent>` is `consent`, that's why the `on` attribute has the value "tap.**consent**.prompt(consent=SourcePoint)"
+Notice in the example above, we have a `button` with the attribute
+`on="tap.consent.prompt(consent=SourcePoint)"`. The id of your `<amp-consent>`
+element is relevant here. Notice how the id of our `<amp-consent>` is `consent`,
+that's why the `on` attribute has the value
+"tap.**consent**.prompt(consent=SourcePoint)"
 
 ## Configuration (`clientConfig`)
 
@@ -69,4 +75,6 @@ Notice in the example above, we have a `button` with the attribute `on="tap.cons
 
 ## Getting Help
 
-For more information on how to integrate AMP to your page please visit our [help portal](http://help.sourcepoint.com/en) or contact your account manager directly.
+For more information on how to integrate AMP to your page please visit our
+[help portal](http://help.sourcepoint.com/en) or contact your account manager
+directly.

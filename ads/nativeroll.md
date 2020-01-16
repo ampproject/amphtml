@@ -6,7 +6,8 @@
 
 **Configuration**
 
-For configuration, please contact [NativeRoll](https://nativeroll.tv/#feedback:support)
+For configuration, please contact
+[NativeRoll](https://nativeroll.tv/#feedback:support)
 
 Supported parameters:
 

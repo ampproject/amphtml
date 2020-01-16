@@ -53,8 +53,11 @@ FILL THIS IN. What does this extension do?
 
 ##### data-mediaid
 
-The Mowplayer media id. This is an alphanumeric sequence that can be found in the Content section in your Mowplayer platform.
+The Mowplayer media id. This is an alphanumeric sequence that can be found in
+the Content section in your Mowplayer platform.
 
 ## Validation
 
-See [amp-mowplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mowplayer/validator-amp-mowplayer.protoascii) in the AMP validator specification.
+See
+[amp-mowplayer rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mowplayer/validator-amp-mowplayer.protoascii)
+in the AMP validator specification.

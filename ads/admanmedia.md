@@ -26,7 +26,8 @@ Please visit [www.admanmedia.com](http://www.admanmedia.com) for more details.
 
 ## Configuration
 
-For details on the configuration semantics, see [Admanmedia documentation](http://www.admanmedia.com).
+For details on the configuration semantics, see
+[Admanmedia documentation](http://www.admanmedia.com).
 
 ### Required parameters
 

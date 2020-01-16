@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please see [AdFox's documentation](https://specs.adfox.ru/page/254/).
+For details on the configuration semantics, please see
+[AdFox's documentation](https://specs.adfox.ru/page/254/).
 
 ### Required parameters
 

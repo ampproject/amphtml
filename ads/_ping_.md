@@ -34,7 +34,8 @@ A fake ad type that is only used for local development.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the [ad network](#configuration) or refer to their [documentation](#ping).
+For details on the configuration semantics, please contact the
+[ad network](#configuration) or refer to their [documentation](#ping).
 
 ### Required parameters
 
@@ -49,9 +50,12 @@ For details on the configuration semantics, please contact the [ad network](#con
 
 ## User Consent Integration
 
-When [user consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#blocking-behaviors) is required. \_Ping\_ ad approaches user consent in the following ways:
+When
+[user consent](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#blocking-behaviors)
+is required. \_Ping\_ ad approaches user consent in the following ways:
 
 - `CONSENT_POLICY_STATE.SUFFICIENT`: Serve a personalized ad to the user.
 - `CONSENT_POLICY_STATE.INSUFFICIENT`: Serve a non-personalized ad to the user.
-- `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED`: Serve a personalized ad to the user.
+- `CONSENT_POLICY_STATE.UNKNOWN_NOT_REQUIRED`: Serve a personalized ad to the
+  user.
 - `CONSENT_POLICY_STATE.UNKNOWN`: Will not serve an ad to the user.

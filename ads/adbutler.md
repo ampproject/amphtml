@@ -33,7 +33,8 @@ Serves ads from [AdButler](https://www.adbutler.com/).
 
 ## Configuration
 
-For details on the configuration semantics, please see [AdButler's documentation](http://www.adbutlerhelp.com/amp-configuration).
+For details on the configuration semantics, please see
+[AdButler's documentation](http://www.adbutlerhelp.com/amp-configuration).
 
 ### Required parameters
 

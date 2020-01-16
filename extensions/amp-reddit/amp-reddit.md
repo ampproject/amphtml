@@ -112,4 +112,6 @@ Use the `amp-reddit` component to embed a Reddit post or comment.
 
 ## Validation
 
-See [amp-reddit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reddit/validator-amp-reddit.protoascii) in the AMP validator specification.
+See
+[amp-reddit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reddit/validator-amp-reddit.protoascii)
+in the AMP validator specification.

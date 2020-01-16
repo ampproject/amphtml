@@ -45,11 +45,15 @@ limitations under the License.
 ## Overview
 
 The `amp-ad-exit` element is configured with a JSON child script element and
-exposes an "exit" action to other elements in the [AMPHTML ad)](https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec). Elements can be annotated to exit when tapped, passing a target name and extra URL parameter values to insert. The exit action performs these steps:
+exposes an "exit" action to other elements in the
+[AMPHTML ad)](https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec).
+Elements can be annotated to exit when tapped, passing a target name and extra
+URL parameter values to insert. The exit action performs these steps:
 
 1. Parse the JSON config (if it hasn't yet been parsed).
 2. Find the requested exit target.
-3. Determine whether the exit should be allowed by processing the click event through declared filters.
+3. Determine whether the exit should be allowed by processing the click event
+   through declared filters.
 4. Rewrite URL variables (see [Variable Substitution](#variable-substitution))
 5. Ping any click tracking URLs.
 6. Perform the navigation by opening the target URL in a new tab.
@@ -124,11 +128,14 @@ exposes an "exit" action to other elements in the [AMPHTML ad)](https://amp.dev/
 Filters are specified in the `filters` section of the config. Targets reference
 filters by their property name in the `filters` section.
 
-There are three types of filters: location-based, time-based, and element-based. Other filters (such as a confirmation prompt) could be added as needed.
+There are three types of filters: location-based, time-based, and element-based.
+Other filters (such as a confirmation prompt) could be added as needed.
 
 ### clickLocation filter
 
-The `clickLocation` filter type specifies the minimum distance a click must be from the edges of the creative or the edges of a specific element in the creative. The clickLocation filter may have the following properties:
+The `clickLocation` filter type specifies the minimum distance a click must be
+from the edges of the creative or the edges of a specific element in the
+creative. The clickLocation filter may have the following properties:
 
 <table>
   <tr>
@@ -165,7 +172,9 @@ The `clickLocation` filter type specifies the minimum distance a click must be f
 
 ### clickDelay filter
 
-The `clickDelay` filter type specifies the time to wait before responding to clicks. The `amp-ad-exit` element imposes a minimum delay of 1 second on all exits. The `clickDelay` filter requires the following properties:
+The `clickDelay` filter type specifies the time to wait before responding to
+clicks. The `amp-ad-exit` element imposes a minimum delay of 1 second on all
+exits. The `clickDelay` filter requires the following properties:
 
 <table>
   <tr>
@@ -185,7 +194,10 @@ The `clickDelay` filter type specifies the time to wait before responding to cli
   </tr>
 </table>
 
-Note that the default 1 second click delay uses time from extension load as interval. However, this can be overridden to use startTimingEvent value via options object in the root of the config. All other click filters will use the startTimingEvent if a value is not explicitly given. Example:
+Note that the default 1 second click delay uses time from extension load as
+interval. However, this can be overridden to use startTimingEvent value via
+options object in the root of the config. All other click filters will use the
+startTimingEvent if a value is not explicitly given. Example:
 
 ```html
 <amp-ad-exit id="exit-api">
@@ -216,11 +228,16 @@ Note that the default 1 second click delay uses time from extension load as inte
 </amp-ad-exit>
 ```
 
-In this case, the default click protection will impose a 1 second delay from navigationStart with two additional, specified click protections of 2 seconds from navigationStart and 3 seconds from DOMContentLoaded start.
+In this case, the default click protection will impose a 1 second delay from
+navigationStart with two additional, specified click protections of 2 seconds
+from navigationStart and 3 seconds from DOMContentLoaded start.
 
 ### inactiveElement filter
 
-The `inactiveElement` filter type specifies elements that should not cause exits when they are the source of an event. The `amp-ad-exit` element ignores clicks on the previous/next buttons of an `amp-carousel` by default. The `inactiveElement` filter requires the following properties:
+The `inactiveElement` filter type specifies elements that should not cause exits
+when they are the source of an event. The `amp-ad-exit` element ignores clicks
+on the previous/next buttons of an `amp-carousel` by default. The
+`inactiveElement` filter requires the following properties:
 
 <table>
   <tr>
@@ -298,9 +315,10 @@ You can override this behavior with a "transport" object on the config:
 
 ## Variable Substitution
 
-URL variable substitution works like standard [AMP variable substitution](../../spec/amp-var-substitutions.md) with
-custom variables and a limited set of platform variables. Variable substitution
-applies to navigation URLs and click tracking URLs.
+URL variable substitution works like standard
+[AMP variable substitution](../../spec/amp-var-substitutions.md) with custom
+variables and a limited set of platform variables. Variable substitution applies
+to navigation URLs and click tracking URLs.
 
 ### Platform variables
 
@@ -325,17 +343,17 @@ applies to navigation URLs and click tracking URLs.
 
 ### Custom variables
 
-Custom variables must begin with an underscore. Define variables in the
-config alongside the navigation target. Variables should have a `"defaultValue"`
+Custom variables must begin with an underscore. Define variables in the config
+alongside the navigation target. Variables should have a `"defaultValue"`
 property. The default value can be overridden in the `exit` action invocation:
 
 Variable values can also come from 3P analytics. Use
-`<amp-analytics type='example-3p-vendor'>` to install a 3P analytics
-vendor iframe and reference it in the variable definition with the
+`<amp-analytics type='example-3p-vendor'>` to install a 3P analytics vendor
+iframe and reference it in the variable definition with the
 `"iframeTransportSignal"` property. The format of `"iframeTransportSignal"` is
-`"IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"`, where `example-3p-vendor`
-is the name of the vendor and `collected-data` is a key in the message from the
-vendor iframe. There must not be a space after the comma.
+`"IFRAME_TRANSPORT_SIGNAL(example-3p-vendor,collected-data)"`, where
+`example-3p-vendor` is the name of the vendor and `collected-data` is a key in
+the message from the vendor iframe. There must not be a space after the comma.
 
 Example:
 
@@ -371,11 +389,10 @@ Example:
 By convention, user-defined variables should be in `_camelCase`. System
 variables are in `ALL_CAPS`.
 
-{% call callout('Warning', type='caution') %}
-Be careful with your variable names. Substitution works by simple
-string replacement. _Any_ occurrence of the variable in the URL will be
-replaced. For example, if you define a custom variable named "\_b" with value
-"foo", `/?a_b_c=_b` will become `/?afoo_c=foo`.
+{% call callout('Warning', type='caution') %} Be careful with your variable
+names. Substitution works by simple string replacement. _Any_ occurrence of the
+variable in the URL will be replaced. For example, if you define a custom
+variable named "\_b" with value "foo", `/?a_b_c=_b` will become `/?afoo_c=foo`.
 {% endcall %}
 
 ## Behaviors
@@ -384,11 +401,18 @@ Behaviors specify additional properties of the exit action.
 
 ### Click Target
 
-The `clickTarget` behavior specifies where a target's click should try to open. A click defaults to opening a new tab, if it is possible in the environment. With this behavior a user can specify that the click should try open the same tab, by setting this to `"_top"`. If this is not set to `"_top"`, then it will fall back to opening a new tab.
+The `clickTarget` behavior specifies where a target's click should try to open.
+A click defaults to opening a new tab, if it is possible in the environment.
+With this behavior a user can specify that the click should try open the same
+tab, by setting this to `"_top"`. If this is not set to `"_top"`, then it will
+fall back to opening a new tab.
 
 ## `exit` action
 
-The `amp-ad-exit` element exposes an `exit` action that other elements reference in `on="tap:..."` attributes. The action accepts a "target" string parameter that must match a named `NavigationTarget` in the `ExitConfig`. Custom variables beginning with an underscore can also be passed in.
+The `amp-ad-exit` element exposes an `exit` action that other elements reference
+in `on="tap:..."` attributes. The action accepts a "target" string parameter
+that must match a named `NavigationTarget` in the `ExitConfig`. Custom variables
+beginning with an underscore can also be passed in.
 
 <table>
   <tr>
@@ -410,7 +434,8 @@ The `amp-ad-exit` element exposes an `exit` action that other elements reference
 
 ## Configuration spec
 
-See the `AmpAdExitConfig` typedef in [config.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/0.1/config.js).
+See the `AmpAdExitConfig` typedef in
+[config.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/0.1/config.js).
 
 ## Attributes
 
@@ -423,5 +448,7 @@ See the `AmpAdExitConfig` typedef in [config.js](https://github.com/ampproject/a
 
 ## Validation
 
-The `amp-ad-exit` element is only available for [AMPHTML ads)](https://www.ampproject.org/docs/ads/amphtml_ads).
-See [amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/validator-amp-ad-exit.protoascii) for the AMP validator specification.
+The `amp-ad-exit` element is only available for
+[AMPHTML ads)](https://www.ampproject.org/docs/ads/amphtml_ads). See
+[amp-ad-exit rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-ad-exit/validator-amp-ad-exit.protoascii)
+for the AMP validator specification.

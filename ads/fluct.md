@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For more information, please [contact fluct](https://corp.fluct.jp/en/contact.php).
+For more information, please
+[contact fluct](https://corp.fluct.jp/en/contact.php).
 
 ### Required parameters
 

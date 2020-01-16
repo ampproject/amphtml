@@ -24,8 +24,8 @@ limitations under the License.
 
 # amp-playbuzz
 
-Displays any Playbuzz item content (e.g., list, poll, etc.)<br>
-Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com
+Displays any Playbuzz item content (e.g., list, poll, etc.)<br> Can be any item
+URL taken from <a href="http://www.playbuzz.com">playbuzz.com
 
 <table>
   <tr>
@@ -112,4 +112,6 @@ With optional parameters (info, share-buttons, comments):
 
 ## Validation
 
-See [amp-playbuzz rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-playbuzz/validator-amp-playbuzz.protoascii) in the AMP validator specification.
+See [amp-playbuzz
+rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-playbuzz/validator-amp-playbuzz.protoascii)
+in the AMP validator specification.

@@ -47,7 +47,12 @@ A runtime-managed animated image, typically a GIF.
 
 ## Behavior
 
-The `amp-anim` component is almost identical to the `amp-img` element, but allows the AMP runtime to reduce CPU usage when the animation is off-screen. Like [other elements](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders), it supports an optional `placeholder` child, to display while the `src` file is loading:
+The `amp-anim` component is almost identical to the `amp-img` element, but
+allows the AMP runtime to reduce CPU usage when the animation is off-screen.
+Like
+[other elements](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders),
+it supports an optional `placeholder` child, to display while the `src` file is
+loading:
 
 ```html
 <amp-anim width="400" height="300" src="my-gif.gif">
@@ -56,15 +61,17 @@ The `amp-anim` component is almost identical to the `amp-img` element, but allow
 </amp-anim>
 ```
 
-In the future, additional functionality, such as animation playback control, could be added.
+In the future, additional functionality, such as animation playback control,
+could be added.
 
 ## Attributes
 
 ### src
 
 Similar to the `src` attribute on the `img` tag. The value must be a URL that
-points to a publicly-cacheable image file. Cache providers and email clients may rewrite these
-URLs when ingesting AMP files to point to a cached version of the image.
+points to a publicly-cacheable image file. Cache providers and email clients may
+rewrite these URLs when ingesting AMP files to point to a cached version of the
+image.
 
 [filter formats="email"]
 
@@ -86,21 +93,26 @@ A string of alternate text, similar to the `alt` attribute on `img`.
 
 ### attribution
 
-A string that indicates the attribution of the image. For example, `attribution="CC courtesy of Cats on Flicker"`.
+A string that indicates the attribution of the image. For example,
+`attribution="CC courtesy of Cats on Flicker"`.
 
 ### height and width
 
-An explicit size of the image, which is used by the AMP runtime to determine the aspect ratio without fetching the image.
+An explicit size of the image, which is used by the AMP runtime to determine the
+aspect ratio without fetching the image.
 
 ### Common attributes
 
-This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
+This element includes
+[common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 [filter formats="email"]
 
 ### Invalid AMP email attributes
 
-The AMP for Email spec disallows the use of the following attributes on the AMP email format.
+The AMP for Email spec disallows the use of the following attributes on the AMP
+email format.
 
 - `srcset`
 - `object-fit`
@@ -121,4 +133,6 @@ amp-anim {
 
 ## Validation
 
-See [amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/validator-amp-anim.protoascii) in the AMP validator specification.
+See
+[amp-anim rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/validator-amp-anim.protoascii)
+in the AMP validator specification.

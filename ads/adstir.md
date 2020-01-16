@@ -31,7 +31,9 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please refer to [your publisher account](https://ad-stir.com/login) or [contact AdStir](https://ad-stir.com/contact).
+For configuration details and to generate your tags, please refer to
+[your publisher account](https://ad-stir.com/login) or
+[contact AdStir](https://ad-stir.com/contact).
 
 Supported parameters:
 

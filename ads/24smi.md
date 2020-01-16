@@ -32,7 +32,8 @@ Provides support for [24smi](https://partner.24smi.info/) widgets.
 
 ## Configuration
 
-For details on the configuration semantics, please contact [24smi](https://partner.24smi.info).
+For details on the configuration semantics, please contact
+[24smi](https://partner.24smi.info).
 
 ### Required parameters
 

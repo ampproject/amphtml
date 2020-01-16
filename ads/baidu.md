@@ -24,7 +24,8 @@ limitations under the License.
 
 ## Configuration
 
-For additional detials and support, see [baidu ad union website](http://union.baidu.com/product/prod-cpro.html).
+For additional detials and support, see
+[baidu ad union website](http://union.baidu.com/product/prod-cpro.html).
 
 ### Required Parameters
 

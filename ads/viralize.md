@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For further configuration details, please contact [Viralize](https://viralize.com/contact-us/).
+For further configuration details, please contact
+[Viralize](https://viralize.com/contact-us/).
 
 ## Required parameters
 
@@ -39,4 +40,5 @@ For further configuration details, please contact [Viralize](https://viralize.co
 
 ## Optional parameters
 
-- `data-extra`: JSON object representing any other query parameter that could be passed to the unit.
+- `data-extra`: JSON object representing any other query parameter that could be
+  passed to the unit.

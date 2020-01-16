@@ -47,7 +47,8 @@ limitations under the License.
 
 ## Overview
 
-You can use the `amp-facebook-like` component to embed the [Facebook like button plugin](https://developers.facebook.com/docs/plugins/like-button).
+You can use the `amp-facebook-like` component to embed the
+[Facebook like button plugin](https://developers.facebook.com/docs/plugins/like-button).
 
 **Example**
 
@@ -114,4 +115,6 @@ If your web site or online service, or a portion of your service, is directed to
 
 ## Validation
 
-See [amp-facebook-like rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-like/validator-amp-facebook-like.protoascii) in the AMP validator specification.
+See
+[amp-facebook-like rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook-like/validator-amp-facebook-like.protoascii)
+in the AMP validator specification.

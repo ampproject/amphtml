@@ -34,7 +34,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration and implementation details, please contact the Fusion support team: support@adtoma.com
+For configuration and implementation details, please contact the Fusion support
+team: support@adtoma.com
 
 Supported parameters:
 
@@ -44,4 +45,6 @@ Supported parameters:
 - `data-space`
 - `data-parameters`
 
-Parameters should be passed as `key&value` pairs `&` separated. Missing value equals `true`. So `...&isMobile&...` from the example above stands for `...&isMobile=true&...`.
+Parameters should be passed as `key&value` pairs `&` separated. Missing value
+equals `true`. So `...&isMobile&...` from the example above stands for
+`...&isMobile=true&...`.

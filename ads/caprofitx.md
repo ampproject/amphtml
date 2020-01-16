@@ -31,8 +31,8 @@ limitations under the License.
 
 ## Configurations
 
-For details on the configuration semantics and to generate your tags,
-please email ca_profitx_support@cyberagent.co.jp.
+For details on the configuration semantics and to generate your tags, please
+email ca_profitx_support@cyberagent.co.jp.
 
 Supported parameters:
 

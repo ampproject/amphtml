@@ -46,7 +46,8 @@ limitations under the License.
 
 ## Example
 
-Example with RESPONSIVE layout - width and height attributes determine the aspect ratio of the player embedded.
+Example with RESPONSIVE layout - width and height attributes determine the
+aspect ratio of the player embedded.
 
 ```html
 <amp-minute-media-player
@@ -139,4 +140,6 @@ Example with FIXED layout - fixed width and height.
 
 ## Validation
 
-See [amp-minute-media-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-minute-media-player/validator-amp-minute-media-player.protoascii) in the AMP validator specification.
+See
+[amp-minute-media-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-minute-media-player/validator-amp-minute-media-player.protoascii)
+in the AMP validator specification.

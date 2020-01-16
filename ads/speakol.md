@@ -18,7 +18,9 @@ limitations under the License.
 
 Speakol support for AMP.
 
-For configuration details and to generate your tags, please refer to [your publisher account](https://publishers.speakol.com) or contact info@speakol.com.
+For configuration details and to generate your tags, please refer to
+[your publisher account](https://publishers.speakol.com) or contact
+info@speakol.com.
 
 ## Example - Passback
 

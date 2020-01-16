@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-redbull-player
 
-Displays a <a href="https://player.redbull.com/demo/index.html">Red Bull Video Player</a>.
+Displays a <a href="https://player.redbull.com/demo/index.html">Red Bull Video
+Player</a>.
 
 <table>
   <tr>
@@ -75,4 +76,6 @@ Displays a <a href="https://player.redbull.com/demo/index.html">Red Bull Video P
 
 ## Validation
 
-See [amp-redbull-player rules]`(https://github.com/ampproject/amphtml/blob/master/extensions/amp-redbull-player/validator-amp-player-player.protoascii)` in the AMP validator specification.
+See [amp-redbull-player
+rules]`(https://github.com/ampproject/amphtml/blob/master/extensions/amp-redbull-player/validator-amp-player-player.protoascii)`
+in the AMP validator specification.

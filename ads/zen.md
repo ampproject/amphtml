@@ -24,7 +24,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please see [Zen's documentation](https://yandex.ru/support/zen/index.html).
+For details on the configuration semantics, please see
+[Zen's documentation](https://yandex.ru/support/zen/index.html).
 
 ### Required parameters
 

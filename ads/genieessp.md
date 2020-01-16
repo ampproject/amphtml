@@ -16,7 +16,8 @@ limitations under the License.
 
 # Geniee SSP
 
-Please visit [Geniee SSP website](https://www.geniee.co.jp/) for more information.
+Please visit [Geniee SSP website](https://www.geniee.co.jp/) for more
+information.
 
 ## Example
 
@@ -33,7 +34,8 @@ Please visit [Geniee SSP website](https://www.geniee.co.jp/) for more informatio
 
 ## Configuration
 
-For semantics of configuration, please see Geniee SSP documentation or [contact Geniee SSP](http://en.geniee.co.jp/inquiry/).
+For semantics of configuration, please see Geniee SSP documentation or
+[contact Geniee SSP](http://en.geniee.co.jp/inquiry/).
 
 Supported parameters:
 

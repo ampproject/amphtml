@@ -24,7 +24,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, please contact https://www.fout.co.jp/freakout/contact/.
+For configuration details and to generate your tags, please contact
+https://www.fout.co.jp/freakout/contact/.
 
 ### Required parameters
 

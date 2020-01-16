@@ -16,8 +16,9 @@ limitations under the License.
 
 # Media.net
 
-Media.net adapter supports the integration of both, its Contextual Monetization solution and the Header Bidding solution.
-The example listed below states the configuration and the implementation related details.
+Media.net adapter supports the integration of both, its Contextual Monetization
+solution and the Header Bidding solution. The example listed below states the
+configuration and the implementation related details.
 
 ## Example
 
@@ -54,7 +55,9 @@ The example listed below states the configuration and the implementation related
 
 ### Dimensions
 
-The ad size depends on the `width` and `height` attributes specified in the `amp-ad` tag. The `amp-ad` component requires the following mandatory HTML attributes to be added before parsing the Ad.
+The ad size depends on the `width` and `height` attributes specified in the
+`amp-ad` tag. The `amp-ad` component requires the following mandatory HTML
+attributes to be added before parsing the Ad.
 
 - `width`
 - `height`
@@ -68,7 +71,8 @@ If you have questions, please feel free to reach out to your Media.net contact.
 
 **Mandatory Parameters**
 
-- `data-tagtype` - This parameter represents the product the publisher is using; It should be **`cm`** for our **Contextual Monetization solution**
+- `data-tagtype` - This parameter represents the product the publisher is using;
+  It should be **`cm`** for our **Contextual Monetization solution**
 - `data-cid` - Represents the unique customer identifier
 - `data-crid` - Media.net Ad unit
 
@@ -80,7 +84,8 @@ If you have questions, please feel free to reach out to your Media.net contact.
 
 **Mandatory Parameters**
 
-- `data-tagtype` - This parameter represents the product the publisher is using; It should be **`headerbidder`** for our **Header Bidding solution**
+- `data-tagtype` - This parameter represents the product the publisher is using;
+  It should be **`headerbidder`** for our **Header Bidding solution**
 - `data-cid` - Represents the unique customer identifier
 - `data-slot` - Ad unit as specified in DFP
 - `data-multi-size` - Multi-size support
@@ -98,5 +103,4 @@ If you have questions, please feel free to reach out to your Media.net contact.
 
 For further queries, please feel free to reach out to your contact at Media.net.
 
-Otherwise you can write to our support team:
-Email: **pubsupport@media.net**
+Otherwise you can write to our support team: Email: **pubsupport@media.net**

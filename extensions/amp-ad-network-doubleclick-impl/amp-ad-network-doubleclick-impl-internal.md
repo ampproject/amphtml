@@ -107,11 +107,15 @@ Example - Google Ad Manager Ad
 
 ### Configuration
 
-For semantics of configuration, please see [ad network documentation](https://developers.google.com/doubleclick-gpt/reference).
+For semantics of configuration, please see
+[ad network documentation](https://developers.google.com/doubleclick-gpt/reference).
 
 #### Ad size
 
-By default the ad size is based on the `width` and `height` attributes of the `amp-ad` tag. In order to explicitly request different ad dimensions from those values, pass the attributes `data-override-width` and `data-override-height` to the ad.
+By default the ad size is based on the `width` and `height` attributes of the
+`amp-ad` tag. In order to explicitly request different ad dimensions from those
+values, pass the attributes `data-override-width` and `data-override-height` to
+the ad.
 
 Example:
 
@@ -127,23 +131,32 @@ Example:
 </amp-ad>
 ```
 
-For multi-size attributes, see the <a href="multi-size.md">multi-size documentation page</a>.
+For multi-size attributes, see the <a href="multi-size.md">multi-size
+documentation page</a>.
 
 ### Supported parameters
 
 - `data-slot`: Full path of the ad unit with the network code and unit code.
-- `data-multi-size`: See the <a href="multi-size.md">multi-size documentation page</a> for details.
+- `data-multi-size`: See the <a href="multi-size.md">multi-size documentation
+  page</a> for details.
 - `data-multi-size-validation`
 
 Supported via `json` attribute:
 
-- `categoryExclusions`: Sets a slot-level category exclusion for the given label name.
+- `categoryExclusions`: Sets a slot-level category exclusion for the given label
+  name.
 - `cookieOptions`: Sets options for ignoring DFP cookies on the current page.
-  - 0: Enables DFP cookies on ad requests on the page. This option is set by default.
-  - 1: Ignores DFP cookies on subsequent ad requests and prevents cookies from being created on the page.
-- `tagForChildDirectedTreatment`: Configures whether the slot should be treated as child-directed.
-  See the TFCD article for <a href="https://support.google.com/dfp_sb/answer/3721907">Small Business</a> or <a href="https://support.google.com/dfp_premium/answer/3671211">Premium</a> for more details and allowed values.
-- `targeting`: Sets a custom targeting parameter for this slot. Values must of the form:
+  - 0: Enables DFP cookies on ad requests on the page. This option is set by
+    default.
+  - 1: Ignores DFP cookies on subsequent ad requests and prevents cookies from
+    being created on the page.
+- `tagForChildDirectedTreatment`: Configures whether the slot should be treated
+  as child-directed. See the TFCD article for
+  <a href="https://support.google.com/dfp_sb/answer/3721907">Small Business</a>
+  or <a href="https://support.google.com/dfp_premium/answer/3671211">Premium</a>
+  for more details and allowed values.
+- `targeting`: Sets a custom targeting parameter for this slot. Values must of
+  the form:
   - `"<key_string>":"<value_string>"` or
   - `"<key_string>":["<value1>", "<value2>", ...]`. See below for example.
 
@@ -162,8 +175,10 @@ Example with json attribute:
 
 ### Supported DFP Formats
 
-- Anchor Ads / Adhesion Units may be implemented using <a href="../../extensions/amp-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
-- Expandable formats can now leverage the <a href="safeframe.md">Safeframe API</a>.
+- Anchor Ads / Adhesion Units may be implemented using
+  <a href="../../extensions/amp-sticky-ad/amp-sticky-ad.md">amp-sticky-ads</a>.
+- Expandable formats can now leverage the <a href="safeframe.md">Safeframe
+  API</a>.
 
 ### Unsupported DFP Formats
 

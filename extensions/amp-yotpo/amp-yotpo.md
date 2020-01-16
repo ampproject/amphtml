@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-yotpo
 
-Embeds a <a href="https://support.yotpo.com/en/on-site/reviews-widget">Yotpo</a> on-site widget.
+Embeds a <a href="https://support.yotpo.com/en/on-site/reviews-widget">Yotpo</a>
+on-site widget.
 
 <table>
   <tr>
@@ -39,7 +40,8 @@ Embeds a <a href="https://support.yotpo.com/en/on-site/reviews-widget">Yotpo</a>
 
 ## Overview
 
-You can use the `amp-yotpo` extension to display [Yotpo on-site widgets](https://support.yotpo.com/en/on-site/reviews-widget).
+You can use the `amp-yotpo` extension to display
+[Yotpo on-site widgets](https://support.yotpo.com/en/on-site/reviews-widget).
 
 _Example: Display the Yotpo bottom line widget_
 
@@ -93,4 +95,6 @@ When using the <code>amp-yotpo</code> extension, for each corresponding Yotpo at
 
 ## Validation
 
-See [amp-yotpo rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-yotpo/validator-amp-yotpo.protoascii) in the AMP validator specification.
+See
+[amp-yotpo rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-yotpo/validator-amp-yotpo.protoascii)
+in the AMP validator specification.

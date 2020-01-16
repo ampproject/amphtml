@@ -16,8 +16,10 @@ limitations under the License.
 
 # Improve Digital
 
-Please refer to [Improve Digital Help Center](https://improvedigital.zendesk.com/hc/en-us) for more
-information on how to get the required placement IDs and [optional] keyvalue cases.
+Please refer to
+[Improve Digital Help Center](https://improvedigital.zendesk.com/hc/en-us) for
+more information on how to get the required placement IDs and [optional]
+keyvalue cases.
 
 ## Example
 

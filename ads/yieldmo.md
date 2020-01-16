@@ -25,7 +25,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics configuration, please [contact Yieldmo](https://yieldmo.com/#contact).
+For semantics configuration, please
+[contact Yieldmo](https://yieldmo.com/#contact).
 
 Supported parameters:
 
@@ -33,7 +34,8 @@ Supported parameters:
 
 ## Multi-size Ad
 
-Yieldmo implicitly handles rendering different sized ads that are bid to the same placement. No additional configuration is required for the tag.
+Yieldmo implicitly handles rendering different sized ads that are bid to the
+same placement. No additional configuration is required for the tag.
 
 ---
 

@@ -16,7 +16,8 @@
 
 # PromoteIQ
 
-Provides support for AMP integration with [PromoteIQ](https://www.promoteiq.com/).
+Provides support for AMP integration with
+[PromoteIQ](https://www.promoteiq.com/).
 
 ## Example
 

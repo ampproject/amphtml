@@ -16,7 +16,8 @@ limitations under the License.
 
 # AdinCube
 
-Visit [dashboard.adincube.com](https://dashboard.adincube.com/dashboard) to create a publisher account and get access to our AMP ads.
+Visit [dashboard.adincube.com](https://dashboard.adincube.com/dashboard) to
+create a publisher account and get access to our AMP ads.
 
 ## Examples
 
@@ -52,11 +53,14 @@ Uses fixed size by the given `width` and `height`.
 </amp-sticky-ad>
 ```
 
-Refer to the [amp-sticky-ad](https://amp.dev/documentation/components/amp-sticky-ad) documentation to see how to implement this ad.
+Refer to the
+[amp-sticky-ad](https://amp.dev/documentation/components/amp-sticky-ad)
+documentation to see how to implement this ad.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ### Required parameters
 

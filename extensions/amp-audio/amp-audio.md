@@ -26,7 +26,8 @@ limitations under the License.
 
 # amp-audio
 
-A replacement for the HTML5 <code>audio</code> tag. The <code>amp-audio</code> component is only to be used for direct HTML5 audio file embeds.
+A replacement for the HTML5 <code>audio</code> tag. The <code>amp-audio</code>
+component is only to be used for direct HTML5 audio file embeds.
 
 <table>
   <tr>
@@ -47,14 +48,26 @@ A replacement for the HTML5 <code>audio</code> tag. The <code>amp-audio</code> c
 
 ## Behavior
 
-The `amp-audio` component loads the audio resource specified by its `src` attribute at a time determined by the runtime. It can be controlled in much the same way as a standard HTML5 `audio` tag.
-Like all embedded external resources in an AMP file, the audio is "lazily" loaded, only when the `amp-audio` element is in or near the viewport
+The `amp-audio` component loads the audio resource specified by its `src`
+attribute at a time determined by the runtime. It can be controlled in much the
+same way as a standard HTML5 `audio` tag. Like all embedded external resources
+in an AMP file, the audio is "lazily" loaded, only when the `amp-audio` element
+is in or near the viewport
 
-The `amp-audio` component accepts up to three unique types of HTML nodes as children:
+The `amp-audio` component accepts up to three unique types of HTML nodes as
+children:
 
-- `source` tags: Just like in the HTML `<audio>` tag, you can add `<source>` tag children to specify different source media files to play.
-- a placeholder for before the audio starts: One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the audio. A click or tap anywhere inside of the `amp-audio` container will replace the placeholder with the audio itself.
-- a fallback if the browser doesn’t support HTML5 audio: One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that displays if HTML5 audio is not supported on the user’s browser.
+- `source` tags: Just like in the HTML `<audio>` tag, you can add `<source>` tag
+  children to specify different source media files to play.
+- a placeholder for before the audio starts: One or zero immediate child nodes
+  can have the `placeholder` attribute. If present, this node and its children
+  form a placeholder that will display instead of the audio. A click or tap
+  anywhere inside of the `amp-audio` container will replace the placeholder with
+  the audio itself.
+- a fallback if the browser doesn’t support HTML5 audio: One or zero immediate
+  child nodes can have the `fallback` attribute. If present, this node and its
+  children form the content that displays if HTML5 audio is not supported on the
+  user’s browser.
 
 For example:
 
@@ -104,7 +117,11 @@ it is ready.</td>
 
 ## Media Session Attributes
 
-`amp-audio` implements the [Media Session API](https://developers.google.com/web/updates/2017/02/media-session) enabling developers to specify more information about the audio file that is playing to be displayed in the notification center of user's devices (along with play/pause controls).
+`amp-audio` implements the
+[Media Session API](https://developers.google.com/web/updates/2017/02/media-session)
+enabling developers to specify more information about the audio file that is
+playing to be displayed in the notification center of user's devices (along with
+play/pause controls).
 
 <table>
   <tr>
@@ -143,13 +160,20 @@ Example:
 
 ## Analytics
 
-AMP audio analytics gathers data about how users interact with audios in AMP documents. AMP audio extension issues analytics events during their lifecycle. These events can be reported through the analytics configuration using `audio-*` triggers. `audio-play` and `audio-pause` are the two analytics events supported now.
+AMP audio analytics gathers data about how users interact with audios in AMP
+documents. AMP audio extension issues analytics events during their lifecycle.
+These events can be reported through the analytics configuration using `audio-*`
+triggers. `audio-play` and `audio-pause` are the two analytics events supported
+now.
 
-See [the AMP Analytics component](../amp-analytics/amp-analytics.md) for details on _amp-analytics_ configuration.
+See [the AMP Analytics component](../amp-analytics/amp-analytics.md) for details
+on _amp-analytics_ configuration.
 
 ### Audio play trigger (`"on": "audio-play"`)
 
-The `audio-play` trigger is fired when the audio begins playing from a user clicking play or from autoplay beginning or resuming. Use these configurations to fire a request for this event.
+The `audio-play` trigger is fired when the audio begins playing from a user
+clicking play or from autoplay beginning or resuming. Use these configurations
+to fire a request for this event.
 
 ```javascript
 "triggers": {
@@ -163,7 +187,9 @@ The `audio-play` trigger is fired when the audio begins playing from a user clic
 
 ### Audio pause trigger (`"on": "audio-pause"`)
 
-The `audio-pause` trigger is fired when the audio stops playing from a user clicking pause, from autoplay pausing, or from the audio reaching the end. Use these configurations to fire a request for this event.
+The `audio-pause` trigger is fired when the audio stops playing from a user
+clicking pause, from autoplay pausing, or from the audio reaching the end. Use
+these configurations to fire a request for this event.
 
 ```javascript
 "triggers": {
@@ -177,4 +203,6 @@ The `audio-pause` trigger is fired when the audio stops playing from a user clic
 
 ## Validation
 
-See [amp-audio rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/validator-amp-audio.protoascii) in the AMP validator specification.
+See
+[amp-audio rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/validator-amp-audio.protoascii)
+in the AMP validator specification.

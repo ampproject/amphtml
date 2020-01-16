@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-springboard-player
 
-Displays the Springboard Player used in the <a href="http://publishers.springboardplatform.com">Springboard
+Displays the Springboard Player used in the
+<a href="http://publishers.springboardplatform.com">Springboard
 
 <table>
   <tr>
@@ -46,7 +47,8 @@ Displays the Springboard Player used in the <a href="http://publishers.springboa
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the player
+embedded in responsive layouts.
 
 ```html
 <amp-springboard-player
@@ -98,4 +100,6 @@ The `width` and `height` attributes determine the aspect ratio of the player emb
 
 ## Validation
 
-See [amp-springboard-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/validator-amp-springboard-player.protoascii) in the AMP validator specification.
+See [amp-springboard-player
+rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/validator-amp-springboard-player.protoascii)
+in the AMP validator specification.

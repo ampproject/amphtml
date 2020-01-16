@@ -63,7 +63,8 @@ limitations under the License.
 
 ## Usage
 
-One to three paragraph explaining the component usage. List important functionality. Explain why developers care about it.
+One to three paragraph explaining the component usage. List important
+functionality. Explain why developers care about it.
 
 [filter formats=“websites”]
 
@@ -118,8 +119,10 @@ What is allowed, what isn't.
 
 Description of attribute. Use cases for this attribute.
 
-- `attribute-value-option-one` (default): `attribute-option-one-value` does this to `${name}`.
-- `attribute-value-option-two`: `attribute-option-two-value` does this to `${name}`.
+- `attribute-value-option-one` (default): `attribute-option-one-value` does this
+  to `${name}`.
+- `attribute-value-option-two`: `attribute-option-two-value` does this to
+  `${name}`.
 
 ### `optional-attribute-name` (optional)
 
@@ -129,13 +132,15 @@ Here, I write what `optional-attribute-name` will do to `${name}`.
 
 ### `action-name`
 
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `${name}` needs to be identified with an `id` to work.
+Description of action. Use cases of `action-name`. Include all the nuances, such
+as: `${name}` needs to be identified with an `id` to work.
 
 ## Events (optional)
 
 ### `event-name`
 
-Description of event. Use cases of event-name. Include all the nuances, such as: `${name}` needs to be identified with an `id` to work.
+Description of event. Use cases of event-name. Include all the nuances, such as:
+`${name}` needs to be identified with an `id` to work.
 
 [example preview=”top-frame” playground=”true”]
 
@@ -180,4 +185,6 @@ Accessibility information related to `${name}`.
 
 ## Validation
 
-See [\${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii) in the AMP validator specification.
+See
+[\${name} rules](https://github.com/ampproject/amphtml/blob/master/extensions/${name}/validator-${name}.protoascii)
+in the AMP validator specification.

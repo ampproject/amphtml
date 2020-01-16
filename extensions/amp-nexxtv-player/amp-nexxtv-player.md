@@ -41,7 +41,8 @@ Displays a media stream from the nexxOMNIA platform.
 
 ## Example
 
-With the responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
+With the responsive layout, the width and height from the example should yield
+correct layouts for 16:9 aspect ratio videos:
 
 ```html
 <amp-nexxtv-player
@@ -110,4 +111,6 @@ With the responsive layout, the width and height from the example should yield c
 
 ## Validation
 
-See [amp-nexxtv-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nexxtv-player/validator-amp-nexxtv-player.protoascii) in the AMP validator specification.
+See
+[amp-nexxtv-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-nexxtv-player/validator-amp-nexxtv-player.protoascii)
+in the AMP validator specification.

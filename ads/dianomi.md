@@ -27,7 +27,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration semantics and to learn more about how we can help you deliver AMP Ads, please [contact dianomi](http://www.dianomi.com/).
+For configuration semantics and to learn more about how we can help you deliver
+AMP Ads, please [contact dianomi](http://www.dianomi.com/).
 
 ### Supported parameters
 

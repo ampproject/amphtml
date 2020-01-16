@@ -49,13 +49,16 @@ Displays a social share button.
 
 ## Overview
 
-The `amp-social-share` component displays a social share button for various social platform providers.
+The `amp-social-share` component displays a social share button for various
+social platform providers.
 
 ## Examples
 
 **Example: Basic social share button**
 
-The share button guesses some defaults for you for some pre-configured providers. It assumes that the current document canonical url is the URL you want to share and the page title is the text you want to share.
+The share button guesses some defaults for you for some pre-configured
+providers. It assumes that the current document canonical url is the URL you
+want to share and the page title is the text you want to share.
 
 ```html
 <amp-social-share type="twitter"></amp-social-share>
@@ -63,7 +66,8 @@ The share button guesses some defaults for you for some pre-configured providers
 
 **Example: Passing parameters**
 
-When you want to pass parameters to the share endpoint, you can specify `data-param-<attribute>` that will be appended to the share endpoint.
+When you want to pass parameters to the share endpoint, you can specify
+`data-param-<attribute>` that will be appended to the share endpoint.
 
 ```html
 <amp-social-share
@@ -76,7 +80,8 @@ When you want to pass parameters to the share endpoint, you can specify `data-pa
 </amp-social-share>
 ```
 
-Linkedin is one of the pre-configured providers, so you do not need to provide the `data-share-endpoint` attribute.
+Linkedin is one of the pre-configured providers, so you do not need to provide
+the `data-share-endpoint` attribute.
 
 ## Attributes
 
@@ -104,7 +109,9 @@ Some popular providers have pre-configured share endpoints. For details, see the
 
 ## Pre-configured providers
 
-The `amp-social-share` component provides [some pre-configured providers](0.1/amp-social-share-config.js) that know their sharing endpoints as well as some default parameters.
+The `amp-social-share` component provides
+[some pre-configured providers](0.1/amp-social-share-config.js) that know their
+sharing endpoints as well as some default parameters.
 
 <table>
   <tr>
@@ -217,11 +224,14 @@ The `amp-social-share` component provides [some pre-configured providers](0.1/am
 
 ## Non-configured providers
 
-In addition to pre-configured providers, you can use non-configured providers by specifying additional attributes in the `amp-social-share` component.
+In addition to pre-configured providers, you can use non-configured providers by
+specifying additional attributes in the `amp-social-share` component.
 
 **Example: Creating a share button for a non-configured provider**
 
-The following example creates a share button through Facebook Messenger by setting the `data-share-endpoint` attribute to the correct endpoint for the Facebook Messenger custom protocol.
+The following example creates a share button through Facebook Messenger by
+setting the `data-share-endpoint` attribute to the correct endpoint for the
+Facebook Messenger custom protocol.
 
 ```html
 <amp-social-share
@@ -232,21 +242,25 @@ The following example creates a share button through Facebook Messenger by setti
 </amp-social-share>
 ```
 
-As these providers are not pre-configured, you'll need to create the appropriate button image and styles for the provider.
+As these providers are not pre-configured, you'll need to create the appropriate
+button image and styles for the provider.
 
 ## Styles
 
 ### Default Styles
 
-By default, `amp-social-share` includes some popular pre-configured providers. Buttons for these providers are styled with the provider's official color and logo. The default width is 60px, and the default height is 44px.
+By default, `amp-social-share` includes some popular pre-configured providers.
+Buttons for these providers are styled with the provider's official color and
+logo. The default width is 60px, and the default height is 44px.
 
-{% call callout('Tip', type='success') %}
-Visit [AMP Start](https://ampstart.com/components#links-and-sharing) for responsive, pre-styled share links that you can use in your AMP pages.
-{% endcall %}
+{% call callout('Tip', type='success') %} Visit
+[AMP Start](https://ampstart.com/components#links-and-sharing) for responsive,
+pre-styled share links that you can use in your AMP pages. {% endcall %}
 
 ### Custom Styles
 
-Sometimes you want to provide your own style. You can simply override the provided styles like the following:
+Sometimes you want to provide your own style. You can simply override the
+provided styles like the following:
 
 ```css
 amp-social-share[type='twitter'] {
@@ -257,7 +271,11 @@ amp-social-share[type='twitter'] {
 
 ## Variable Substitution
 
-You can use [global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md) in the `<amp-social-share>` element. In the example below, `TITLE` is substituted with the page title and `CANONICAL_URL` with the document's canonical URL.
+You can use
+[global AMP variables substitution](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md)
+in the `<amp-social-share>` element. In the example below, `TITLE` is
+substituted with the page title and `CANONICAL_URL` with the document's
+canonical URL.
 
 ```html
 <amp-social-share
@@ -269,4 +287,6 @@ You can use [global AMP variables substitution](https://github.com/ampproject/am
 
 ## Validation
 
-See [amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/validator-amp-social-share.protoascii) in the AMP validator specification.
+See
+[amp-social-share rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-social-share/validator-amp-social-share.protoascii)
+in the AMP validator specification.

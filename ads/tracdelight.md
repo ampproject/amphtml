@@ -32,7 +32,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [ad network documentation](http://docs.tracdelight.com/).
+For semantics of configuration, please see
+[ad network documentation](http://docs.tracdelight.com/).
 
 Required parameters:
 
@@ -41,8 +42,10 @@ Required parameters:
 
 Optional parameters
 
-- data-mode: how to embed the widget. Possible values are "iframe" or "inline" (default: "iframe")
+- data-mode: how to embed the widget. Possible values are "iframe" or "inline"
+  (default: "iframe")
 
 ## Support
 
-If you have any questions, please refer to your contact at tracdelight or contact support@tracdelight.com.
+If you have any questions, please refer to your contact at tracdelight or
+contact support@tracdelight.com.

@@ -55,7 +55,8 @@ Serves ads from [Adhese](https://www.adhese.com).
 
 ## Configuration
 
-For details on the configuration semantics, see the [Adhese website](https://www.adhese.com) or contact Adhese support.
+For details on the configuration semantics, see the
+[Adhese website](https://www.adhese.com) or contact Adhese support.
 
 ### Required parameters
 

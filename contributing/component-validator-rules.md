@@ -1,26 +1,27 @@
 # Contributing Validator Rules for an AMP Extended Component
 
-This doc describes how to create a basic validator ruleset for a new [AMP
-Extended Component](https://amp.dev/documentation/components/). It
-does not describe every possible validator feature, but rather goes over some
-of the most common rules used when creating a new AMP Extended Component.
+This doc describes how to create a basic validator ruleset for a new
+[AMP Extended Component](https://amp.dev/documentation/components/). It does not
+describe every possible validator feature, but rather goes over some of the most
+common rules used when creating a new AMP Extended Component.
 
 ## Getting Started
 
 Before writing any of your `.protoascii` or `validator-*.html` files, please
 [see the Installation and Usage sections of the AMP Validator](https://github.com/ampproject/amphtml/blob/master/validator/README.md).
 
-This repo uses a [python script](https://github.com/ampproject/amphtml/blob/master/validator/build.py) to run golden tests using the AMP validator.
-Thus it is a good idea to ensure,
-that your development environment is configured correctly,
-before writing new tests to avoid any confusion.
+This repo uses a
+[python script](https://github.com/ampproject/amphtml/blob/master/validator/build.py)
+to run golden tests using the AMP validator. Thus it is a good idea to ensure,
+that your development environment is configured correctly, before writing new
+tests to avoid any confusion.
 
 ## Example
 
 As a concrete example, imagine you are creating an extended component that
-displays an image of a cat inside an AMP document. This extended component
-loads one of a set of 3 different pre-built cat images, so that the user
-doesn't need to host the images on their server. Each image has a cat name:
+displays an image of a cat inside an AMP document. This extended component loads
+one of a set of 3 different pre-built cat images, so that the user doesn't need
+to host the images on their server. Each image has a cat name:
 
 - Oscar
 - Chloe
@@ -38,20 +39,19 @@ Common usage of this extended component might look like:
 
 Your first step will be writing the extended component JavaScript code. Place
 this code in the amphtml src tree at the location of
-`amphtml/extensions/amp-cat/0.1/`. This document only describes how to
-specify validation rules for an extended component - it does not cover
-implementing its runtime behavior. For the latter, see the codelab [Creating
-your first AMP
-Component](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/).
+`amphtml/extensions/amp-cat/0.1/`. This document only describes how to specify
+validation rules for an extended component - it does not cover implementing its
+runtime behavior. For the latter, see the codelab
+[Creating your first AMP Component](https://codelabs.developers.google.com/codelabs/creating-your-first-amp-component/).
 
 ## Validation Rules
 
-Once you have built the extended component JavaScript, you are ready to submit validator
-rules. You may do this in the same Pull Request, or a later Pull Request for
-simplicity.
+Once you have built the extended component JavaScript, you are ready to submit
+validator rules. You may do this in the same Pull Request, or a later Pull
+Request for simplicity.
 
-You will be creating a rules file as well as two test files. The paths for
-these files, using the `<amp-cat>` example above, would be:
+You will be creating a rules file as well as two test files. The paths for these
+files, using the `<amp-cat>` example above, would be:
 
 **Rules File**
 
@@ -144,8 +144,7 @@ Let's see it broken down:
 #
 ```
 
-This is the AMP HTML license statement required at the top of every AMP
-file.
+This is the AMP HTML license statement required at the top of every AMP file.
 
 ### amp-cat extended component
 
@@ -162,11 +161,10 @@ to validate a tag that looks something like the following:
 html_format: AMP;
 ```
 
-This tells the validator that this tag
-should be valid in AMP format documents. Tags can also be valid in `AMP4ADS`
-format documents, if the tag should be used in an ad format. If you are unsure,
-leave the tag as an `AMP` format tag only for now. Additional formats can be
-added later.
+This tells the validator that this tag should be valid in AMP format documents.
+Tags can also be valid in `AMP4ADS` format documents, if the tag should be used
+in an ad format. If you are unsure, leave the tag as an `AMP` format tag only
+for now. Additional formats can be added later.
 
 ```js
 tag_name: 'SCRIPT';
@@ -184,8 +182,8 @@ The following fields describe the HTML Tag attributes we expect for this
 
 The `extension_spec` field indicates that this `<script>` tag is a new amp
 extension with the "amp-cat" name. This will add requirements for the
-`custom-element=amp-cat` attribute, specific values for the `src` attribute,
-as well as a link to documentation on ampproject.org for all error messages.
+`custom-element=amp-cat` attribute, specific values for the `src` attribute, as
+well as a link to documentation on ampproject.org for all error messages.
 
 ```js
     version: "0.1"
@@ -194,11 +192,12 @@ as well as a link to documentation on ampproject.org for all error messages.
 ```
 
 These fields define a list of all allowed version numbers. Currently, almost all
-extended components are at version `0.1`, and we also allow `latest` to be specified.
+extended components are at version `0.1`, and we also allow `latest` to be
+specified.
 
-The combination of the `version` and `name` fields of the
-`extension_spec` define the allowed values of the `src` attribute in the
-script tag, for example `src=https://cdn.ampproject.org/v0/amp-cat-0.1.js`.
+The combination of the `version` and `name` fields of the `extension_spec`
+define the allowed values of the `src` attribute in the script tag, for example
+`src=https://cdn.ampproject.org/v0/amp-cat-0.1.js`.
 
 ```js
   attr_lists: "common-extension-attrs"
@@ -223,8 +222,8 @@ to validate a tag that looks something like the following:
 html_format: AMP;
 ```
 
-Same as the extended component tag above, this tells the validator that this tag is only
-valid for AMP format documents.
+Same as the extended component tag above, this tells the validator that this tag
+is only valid for AMP format documents.
 
 ```js
 tag_name: 'AMP-CAT';
@@ -323,8 +322,8 @@ value_regex: '\\d+';
 value_regex_casei: '[a-z0-9]+';
 ```
 
-Specifies that only values matching these RegEx patterns is an allowed value,
-as case-sensitive and case-instensitive variants.
+Specifies that only values matching these RegEx patterns is an allowed value, as
+case-sensitive and case-instensitive variants.
 
 ```js
 value_url: {
@@ -348,8 +347,8 @@ Only one of:
 - `value_regex_casei`
 - `value_url`
 
-may be specified for a single attribute. However, multiple values may be specified
-for `value` and `value_casei` as seen in the example above.
+may be specified for a single attribute. However, multiple values may be
+specified for `value` and `value_casei` as seen in the example above.
 
 Unless specified, attributes are all optional. To specify that an attribute is
 mandatory, use the `mandatory` field:
@@ -379,7 +378,8 @@ attrs: {
 
 ### Additional Common Validation Rules
 
-So let's say we want to add some additional rules to our original element validation rules:
+So let's say we want to add some additional rules to our original element
+validation rules:
 
 ```js
 tags: {  # <amp-cat>
@@ -406,13 +406,15 @@ tags: {  # <amp-cat>
 
 #### Mandatory Parent
 
-Let's say we want `<amp-cat>` to ONLY be a valid element if it is a DIRECT child of a div element. We could add:
+Let's say we want `<amp-cat>` to ONLY be a valid element if it is a DIRECT child
+of a div element. We could add:
 
 ```js
 mandatory_parent: 'DIV';
 ```
 
-as a key/value of the `tags`. If `<amp-cat>` can be a DIRECT or INDIRECT (nested) child of a div element, we could add:
+as a key/value of the `tags`. If `<amp-cat>` can be a DIRECT or INDIRECT
+(nested) child of a div element, we could add:
 
 ```js
 mandatory_ancestor: 'DIV';
@@ -422,18 +424,19 @@ as a key/value of the `tags`.
 
 ## Test Files
 
-It is a good idea to contribute test files along with your validator rules
-which at minimum demonstrate a correct usage of your validator rules.
+It is a good idea to contribute test files along with your validator rules which
+at minimum demonstrate a correct usage of your validator rules.
 
 A good place to start is to copy
-[minimum_valid_amp.html](https://github.com/ampproject/amphtml/blob/master/validator/testdata/feature_tests/minimum_valid_amp.html) to a new file named, for example:
+[minimum_valid_amp.html](https://github.com/ampproject/amphtml/blob/master/validator/testdata/feature_tests/minimum_valid_amp.html)
+to a new file named, for example:
 
 <pre>
 amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat</b>.html
 </pre>
 
-It a basic AMP HTML document. Open this file and then make the
-following modifications.
+It a basic AMP HTML document. Open this file and then make the following
+modifications.
 
 **Change the Test Description**
 
@@ -442,7 +445,8 @@ of the test. Change this to describe which extension this test is for.
 
 **Add your extension script tag**
 
-In the document `<head>` section, add the extension `<script>` tag used by this extension:
+In the document `<head>` section, add the extension `<script>` tag used by this
+extension:
 
 <pre>
 &lt;script async custom-element='<b>amp-cat</b>'
@@ -462,13 +466,19 @@ Optionally, you may add more than one valid variant and/or invalid examples.
 
 ## Test Output files
 
-After creating your validator html file, You need to create the corresponding `.out` file to act as your test results. These are used to verify if the validator is validating your extension correctly. To do this, navigate to the root of the project, `amphtml/` and run `gulp validator --update_tests`. This should generate a matching `.out` file, and for this example, it would be:
+After creating your validator html file, You need to create the corresponding
+`.out` file to act as your test results. These are used to verify if the
+validator is validating your extension correctly. To do this, navigate to the
+root of the project, `amphtml/` and run `gulp validator --update_tests`. This
+should generate a matching `.out` file, and for this example, it would be:
 
 <pre>
 amphtml/extensions/<b>amp-cat</b>/0.1/test/validator-<b>amp-cat.out</b>
 </pre>
 
-After generating the `.out` file, you should check it's contents that it gives the correct validation results/errors. If you only added valid examples, this file should contain a single line:
+After generating the `.out` file, you should check it's contents that it gives
+the correct validation results/errors. If you only added valid examples, this
+file should contain a single line:
 
 ```sh
 PASS
@@ -496,7 +506,8 @@ output to stdout, which can be used for updating the test file.
 ## Final Note on Rules
 
 This document attempts to summarize some of the more commonly used rules for
-creating validator extended components. More complex rules are possible and new rule
-types can even be added as needed. If your goals are not met by the rules in
-this document, [don't hesitate to
-contact](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels) the AMP developers and ask for suggestions.
+creating validator extended components. More complex rules are possible and new
+rule types can even be added as needed. If your goals are not met by the rules
+in this document,
+[don't hesitate to contact](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels)
+the AMP developers and ask for suggestions.

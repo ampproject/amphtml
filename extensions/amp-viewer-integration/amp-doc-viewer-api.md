@@ -18,22 +18,32 @@ limitations under the License.
 
 ## Introduction
 
-This document explains the API between an AMP Viewer and the AMP document(s) it contains.
+This document explains the API between an AMP Viewer and the AMP document(s) it
+contains.
 
 ## API
 
 ### Initialization
 
-When an AMP Viewer opens an AMP document, it can include initialization parameters. The parameters are set as key value pairs encoded as a query string in the hash fragment of the AMP document URL. For example:
-www.amp.dev?origin=https%3A%2F%2Fplayground.amp.dev
-Some parameters are read by the AMP runtime (the core library that initializes and manages all components, included as v0.js) and configure its behavior and others are read by the [Viewer integration script](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js) in order to establish the communication channel used by the rest of the API. An initialization parameter is enabled or disabled via the '1' or '0' value respectively.
+When an AMP Viewer opens an AMP document, it can include initialization
+parameters. The parameters are set as key value pairs encoded as a query string
+in the hash fragment of the AMP document URL. For example:
+www.amp.dev?origin=https%3A%2F%2Fplayground.amp.dev Some parameters are read by
+the AMP runtime (the core library that initializes and manages all components,
+included as v0.js) and configure its behavior and others are read by the
+[Viewer integration script](https://github.com/ampproject/amphtml/blob/master/extensions/amp-viewer-integration/0.1/amp-viewer-integration.js)
+in order to establish the communication channel used by the rest of the API. An
+initialization parameter is enabled or disabled via the '1' or '0' value
+respectively.
 
 #### Viewer Integration Script Parameters
 
-Documents served via a cache URL, e.g. cdn.ampproject.org/v/, will include the Viewer integration script. This script adds behavior and enables communication with a parent Viewer.
+Documents served via a cache URL, e.g. cdn.ampproject.org/v/, will include the
+Viewer integration script. This script adds behavior and enables communication
+with a parent Viewer.
 
-`cap`<br/>
-A comma delimited list of capabilities supported by the Viewer. Other boolean parameters should be deprecated and replaced with an entry in cap.
+`cap`<br/> A comma delimited list of capabilities supported by the Viewer. Other
+boolean parameters should be deprecated and replaced with an entry in cap.
 
 | Parameter              | Supported messages                    | Description                                                                     |
 | ---------------------- | ------------------------------------- | ------------------------------------------------------------------------------- |
@@ -49,8 +59,9 @@ A comma delimited list of capabilities supported by the Viewer. Other boolean pa
 | `viewerRenderTemplate` | `viewerRenderTemplate`                | Proxies all mustache template rendering to the Viewer.                          |
 | `xhrInterceptor`       | `xhr`                                 | Proxies all XHRs through the Viewer.                                            |
 
-`origin`<br/>
-The origin of the Viewer. The Viewer Integration will verify this is an allowed domain and this will be the target of all messages sent from the AMP document to the Viewer.
+`origin`<br/> The origin of the Viewer. The Viewer Integration will verify this
+is an allowed domain and this will be the target of all messages sent from the
+AMP document to the Viewer.
 
 ### AMP Runtime Parameters
 
@@ -74,11 +85,13 @@ The origin of the Viewer. The Viewer Integration will verify this is an allowed 
 
 ### Messaging
 
-The AMP Viewer and AMP document communicate via [postMessage](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
+The AMP Viewer and AMP document communicate via
+[postMessage](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage).
 
 #### Viewer Integration Messages
 
-The messages in this section are sent by the Viewer Integration Script and are not used by the AMP runtime.
+The messages in this section are sent by the Viewer Integration Script and are
+not used by the AMP runtime.
 
 #### Document to Viewer
 

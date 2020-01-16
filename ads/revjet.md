@@ -16,7 +16,8 @@ limitations under the License.
 
 # RevJet
 
-Serves ads from the [RevJet Marketing Creative Platform](https://www.revjet.com/).
+Serves ads from the
+[RevJet Marketing Creative Platform](https://www.revjet.com/).
 
 ## Example
 
@@ -34,7 +35,8 @@ Serves ads from the [RevJet Marketing Creative Platform](https://www.revjet.com/
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ### Required parameters
 

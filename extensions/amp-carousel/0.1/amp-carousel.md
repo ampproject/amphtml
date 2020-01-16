@@ -26,7 +26,8 @@ limitations under the License.
 
 # amp-carousel
 
-A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be highly flexible and performant.
+A generic carousel for displaying multiple similar pieces of content along a
+horizontal axis; meant to be highly flexible and performant.
 
 <table>
   <tr>
@@ -52,11 +53,16 @@ A generic carousel for displaying multiple similar pieces of content along a hor
 
 ## Behavior
 
-Each of the `amp-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
+Each of the `amp-carousel` component’s immediate children is considered an item
+in the carousel. Each of these nodes may also have arbitrary HTML children.
 
-The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards. For `type="slides"`, the arrows moves one item at a time. For `type="carousel"`, the arrows move one carousel's width forwards or backwards at a time.
+The carousel consists of an arbitrary number of items, as well as optional
+navigational arrows to go forward or backwards. For `type="slides"`, the arrows
+moves one item at a time. For `type="carousel"`, the arrows move one carousel's
+width forwards or backwards at a time.
 
-The carousel advances between items if the user swipes or clicks an optional navigation arrow.
+The carousel advances between items if the user swipes or clicks an optional
+navigation arrow.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
 
@@ -84,9 +90,14 @@ The carousel advances between items if the user swipes or clicks an optional nav
 
 ### Advancing to a specific slide
 
-Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a carousel with the "carousel-id" ID to the slide at index=N (the first slide is at index=0, the second slide is at index=1, and so on).
+Setting a method for the `on` attribute on an element to
+`tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a
+carousel with the "carousel-id" ID to the slide at index=N (the first slide is
+at index=0, the second slide is at index=1, and so on).
 
-In the following example, we have a carousel of three images with preview buttons below the carousel. When a user clicks one of the buttons, the corresponding carousel item displays.
+In the following example, we have a carousel of three images with preview
+buttons below the carousel. When a user clicks one of the buttons, the
+corresponding carousel item displays.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
 
@@ -246,7 +257,9 @@ The visibility of arrows can also be controlled via styling, and a media query c
 - You may use the `amp-carousel` element selector to style it freely.
 - You may use the `.amp-carousel-slide` class selector to target carousel items.
 - The visual state of an `amp-carousel` button when it's disabled is hidden.
-- By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
+- By default, `.amp-carousel-button` uses an inlined SVG as the background-image
+  of the buttons. You may override this with your own SVG or image as in the
+  example below.
 
 _Example: Default `.amp-carousel-button` inlined SVG_
 
@@ -266,16 +279,29 @@ _Example: Overriding the default `.amp-carousel-button` inlined SVG_
 }
 ```
 
-Note that the SVG content needs to have certain characters, including `<`, `>` and `#` encoded. This can be done using a tool like [SVGO](https://github.com/svg/svgo) or using [`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
+Note that the SVG content needs to have certain characters, including `<`, `>`
+and `#` encoded. This can be done using a tool like
+[SVGO](https://github.com/svg/svgo) or using
+[`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
 
 ## Supported Layouts for Slides
 
-As noted above, the `type="slides"` designation on `amp-carousel 0.1` supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.
+As noted above, the `type="slides"` designation on `amp-carousel 0.1` supports
+the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`,
+`nodisplay`, and `responsive`.
 
-Publishers should be aware that while this mode explictly supports `fixed` layout sizes, it also employs `display: flex;` in its styling. In other words nested elements can have `layout=fixed` sizing, though via styling it only respects absolute width up to 100%. One way to workaround this limitation is by using `flex-shrink: 0` on any fixed layout slides.
+Publishers should be aware that while this mode explictly supports `fixed`
+layout sizes, it also employs `display: flex;` in its styling. In other words
+nested elements can have `layout=fixed` sizing, though via styling it only
+respects absolute width up to 100%. One way to workaround this limitation is by
+using `flex-shrink: 0` on any fixed layout slides.
 
-For an accessible and smooth user experience, it is generally good practice when using `type="slides"` that all children of that carousel and the carousel itself share the same dimensional ratios as well as the same layout type.
+For an accessible and smooth user experience, it is generally good practice when
+using `type="slides"` that all children of that carousel and the carousel itself
+share the same dimensional ratios as well as the same layout type.
 
 ## Validation
 
-See [amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/validator-amp-carousel.protoascii) in the AMP validator specification.
+See
+[amp-carousel rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/validator-amp-carousel.protoascii)
+in the AMP validator specification.

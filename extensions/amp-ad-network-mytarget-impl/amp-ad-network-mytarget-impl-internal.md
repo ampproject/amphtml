@@ -18,7 +18,11 @@ limitations under the License.
 
 ### amp-ad-network-mytarget-impl
 
-myTarget implementation of AMP Ad tag which requests early by XHR and renders natively within the page if a valid AMP Ad is returned. Should not be directly referenced by pages and instead is dynamically loaded via the amp-ad tag. However, in order to remove an async script load of this library, publishers can include its script declaration.
+myTarget implementation of AMP Ad tag which requests early by XHR and renders
+natively within the page if a valid AMP Ad is returned. Should not be directly
+referenced by pages and instead is dynamically loaded via the amp-ad tag.
+However, in order to remove an async script load of this library, publishers can
+include its script declaration.
 
 <table>
   <tr>

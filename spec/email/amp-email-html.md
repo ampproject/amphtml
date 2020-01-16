@@ -16,11 +16,11 @@ limitations under the License.
 
 # Supported HTML in AMP for Email
 
-Note: This list is non-normative and is for reference purposes only. The AMP Validator rules are authoritative
-on the supported HTML tags and attributes.
+Note: This list is non-normative and is for reference purposes only. The AMP
+Validator rules are authoritative on the supported HTML tags and attributes.
 
-In addition to the [supported AMP components](amp-email-components.md), the following HTML tags are
-allowed in AMP for Email.
+In addition to the [supported AMP components](amp-email-components.md), the
+following HTML tags are allowed in AMP for Email.
 
 ## Supported tags
 

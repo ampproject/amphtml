@@ -41,24 +41,28 @@ limitations under the License.
 
 ## Behavior
 
-The `amp-embedly-card` component provides you with responsive and shareable embeds to drive the reach of your websites,
-blog posts, and articles from any URL using <a href="http://docs.embed.ly/docs/cards">Embedly cards</a>.
+The `amp-embedly-card` component provides you with responsive and shareable
+embeds to drive the reach of your websites, blog posts, and articles from any
+URL using <a href="http://docs.embed.ly/docs/cards">Embedly cards</a>.
 
-Cards are the easiest way to leverage Embedly. For any media, cards provide a responsive embed with built-in embed analytics.
+Cards are the easiest way to leverage Embedly. For any media, cards provide a
+responsive embed with built-in embed analytics.
 
 _Example: Embedding multiple resources_
 
-If you have a paid plan, use the `amp-embedly-key` component to set your api key.
-You just need one `amp-embedly-key` per AMP page.
+If you have a paid plan, use the `amp-embedly-key` component to set your api
+key. You just need one `amp-embedly-key` per AMP page.
 
 ```html
 <amp-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a" layout="nodisplay">
 </amp-embedly-key>
 ```
 
-If you are a paid user, setting the `amp-embedly-key` tag removes Embedly's branding from the cards.
+If you are a paid user, setting the `amp-embedly-key` tag removes Embedly's
+branding from the cards.
 
-Within your AMP page, you can include one or multiple `amp-embedly-card` components:
+Within your AMP page, you can include one or multiple `amp-embedly-card`
+components:
 
 ```html
 <amp-embedly-card
@@ -135,4 +139,6 @@ Not all image URLs are supported, if the image is not loaded, try a different im
 
 ## Validation
 
-See [amp-embedly-card rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-embedly-card/validator-amp-embedly-card.protoascii) in the AMP validator specification.
+See
+[amp-embedly-card rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-embedly-card/validator-amp-embedly-card.protoascii)
+in the AMP validator specification.

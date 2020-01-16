@@ -33,7 +33,8 @@ limitations under the License.
 
 ## Configuration
 
-For parameters, configuration or any questions, contact [GumGum](http://gumgum.com/contact/).
+For parameters, configuration or any questions, contact
+[GumGum](http://gumgum.com/contact/).
 
 ### Required parameters
 

@@ -36,9 +36,15 @@ Imonomy supports Header Tag style bidding using Doubleclick as the ad server.
 
 For semantics of configuration, please contact your account manager at Imonomy.
 
-If you use `remote.html` in your AMP pages, you must add `imonomy` into the array that outlines the list of acceptable types. For example, `['doubleclick']` should be changed to `['doubleclick', 'imonomy']`. If you do not use `remote.html`, this step is not required.
+If you use `remote.html` in your AMP pages, you must add `imonomy` into the
+array that outlines the list of acceptable types. For example, `['doubleclick']`
+should be changed to `['doubleclick', 'imonomy']`. If you do not use
+`remote.html`, this step is not required.
 
-Ad size is based on the `width` and `height` attributes of the `amp-ad` tag by default. Both width and height override attributes (`data-override-width` and `data-override-height`) and multi-size ads (via `data-multi-size`) are supported.
+Ad size is based on the `width` and `height` attributes of the `amp-ad` tag by
+default. Both width and height override attributes (`data-override-width` and
+`data-override-height`) and multi-size ads (via `data-multi-size`) are
+supported.
 
 ### Required parameters
 
@@ -46,4 +52,6 @@ Ad size is based on the `width` and `height` attributes of the `amp-ad` tag by d
 - `data-sub-id`
 - `data-slot`
 
-Additional parameters including `json` will be passed through in the resulting call to DFP. For details please see the [Doubleclick documentation](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md).
+Additional parameters including `json` will be passed through in the resulting
+call to DFP. For details please see the
+[Doubleclick documentation](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md).

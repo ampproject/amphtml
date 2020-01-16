@@ -16,10 +16,15 @@ limitations under the License.
 
 ## AMP GitHub Issue Priorities
 
-The AMP team is using the below priorities and guidelines to make it easier to order issues by the level of attention they need.
-These guidelines can give you also a good overview of when to expect updates or closure of issues.
+The AMP team is using the below priorities and guidelines to make it easier to
+order issues by the level of attention they need. These guidelines can give you
+also a good overview of when to expect updates or closure of issues.
 
-If you would like to give a hint regarding the priority of the issue you can add the appropriate priority [GitHub label](https://github.com/ampproject/amphtml/labels). Note that the priority may be changed as the issue is triaged based on the project's roadmap and backlog.
+If you would like to give a hint regarding the priority of the issue you can add
+the appropriate priority
+[GitHub label](https://github.com/ampproject/amphtml/labels). Note that the
+priority may be changed as the issue is triaged based on the project's roadmap
+and backlog.
 
 ### Priorities & Guidelines
 

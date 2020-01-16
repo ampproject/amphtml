@@ -24,7 +24,8 @@ limitations under the License.
 
 # amp-brid-player
 
-An <code>amp-brid-player</code> displays the Brid Player used in <a href="https://www.brid.tv/">Brid.tv</a> Video Platform.
+An <code>amp-brid-player</code> displays the Brid Player used in
+<a href="https://www.brid.tv/">Brid.tv</a> Video Platform.
 
 <table>
   <tr>
@@ -45,7 +46,8 @@ An <code>amp-brid-player</code> displays the Brid Player used in <a href="https:
 
 ## Example
 
-The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
+The `width` and `height` attributes determine the aspect ratio of the player
+embedded in responsive layouts.
 
 Example:
 
@@ -109,4 +111,6 @@ Embed code must either have video, playlist or outstream attribute.
 
 ## Validation
 
-See [amp-brid-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/validator-amp-brid-player.protoascii) in the AMP validator specification.
+See
+[amp-brid-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/validator-amp-brid-player.protoascii)
+in the AMP validator specification.

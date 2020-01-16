@@ -14,4 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-This documentation has moved to the [amp-story-auto-ads folder](../amp-story-auto-ads/amp-story-auto-ads.md).
+This documentation has moved to the
+[amp-story-auto-ads folder](../amp-story-auto-ads/amp-story-auto-ads.md).

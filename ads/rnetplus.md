@@ -16,7 +16,8 @@ limitations under the License.
 
 # RnetPlus
 
-Provides support for [rnetplus](https://admin.rnet.plus/help/) Rambler&Co RNetPlus.
+Provides support for [rnetplus](https://admin.rnet.plus/help/) Rambler&Co
+RNetPlus.
 
 ## Example
 
@@ -32,7 +33,8 @@ Provides support for [rnetplus](https://admin.rnet.plus/help/) Rambler&Co RNetPl
 
 ## Configuration
 
-For details on the configuration semantics, please contact [Rambler](https://admin.rnet.plus/).
+For details on the configuration semantics, please contact
+[Rambler](https://admin.rnet.plus/).
 
 ### Required parameters
 

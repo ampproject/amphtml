@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration details and to generate your tags, contact http://www.opt.ne.jp/contact_detail/id=8.
+For configuration details and to generate your tags, contact
+http://www.opt.ne.jp/contact_detail/id=8.
 
 Supported parameters:
 

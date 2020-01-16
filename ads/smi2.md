@@ -16,7 +16,8 @@ limitations under the License.
 
 # Smi2
 
-SMI2 is a service for personalizing content network. Please visit our [smi2.net](https://smi2.net) for more information.
+SMI2 is a service for personalizing content network. Please visit our
+[smi2.net](https://smi2.net) for more information.
 
 ## Example
 
@@ -26,7 +27,8 @@ SMI2 is a service for personalizing content network. Please visit our [smi2.net]
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ### Required parameters
 

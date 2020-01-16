@@ -46,7 +46,9 @@ Defines and runs animations.
 
 ## Overview
 
-AMP Animations rely on [Web Animations API](https://www.w3.org/TR/web-animations/) to define and run animations in AMP documents.
+AMP Animations rely on
+[Web Animations API](https://www.w3.org/TR/web-animations/) to define and run
+animations in AMP documents.
 
 ## Format
 
@@ -54,8 +56,8 @@ An `amp-animation` element defines such an animation as a JSON structure.
 
 ### Top-level animation specification
 
-The top-level object defines an overall animation process which consists of an arbitrary number of animation components
-defined as an `animations` array:
+The top-level object defines an overall animation process which consists of an
+arbitrary number of animation components defined as an `animations` array:
 
 ```html
 <amp-animation layout="nodisplay">
@@ -79,11 +81,15 @@ defined as an `animations` array:
 
 ### Placement in DOM
 
-`<amp-animation>` is only allowed to be placed as a direct child of `<body>` element if `trigger="visibility"`. If `trigger` is not specified and animation's playback is controlled programmatically via its actions, it can be placed anywhere in the DOM.
+`<amp-animation>` is only allowed to be placed as a direct child of `<body>`
+element if `trigger="visibility"`. If `trigger` is not specified and animation's
+playback is controlled programmatically via its actions, it can be placed
+anywhere in the DOM.
 
 ### Animation component
 
-Each animation component is a [keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
+Each animation component is a
+[keyframes effect](https://www.w3.org/TR/web-animations/#dom-keyframeeffect-keyframeeffect)
 and is comprised of:
 
 - Target element(s) referenced by a selector
@@ -105,27 +111,34 @@ and is comprised of:
 
 ### Conditions
 
-Conditions can specify whether this animation component is included in the final animation.
+Conditions can specify whether this animation component is included in the final
+animation.
 
 #### Media query
 
-Media query can be specified using the `media` property. This property can contain any expression allowed
-for [Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia) API and corresponds to `@media` CSS rule.
+Media query can be specified using the `media` property. This property can
+contain any expression allowed for
+[Window.matchMedia](https://developer.mozilla.org/en-US/docs/Web/API/Window/matchMedia)
+API and corresponds to `@media` CSS rule.
 
-If value is specified for an animation component, the animation component will only be included if the
-media query will match the current environment.
+If value is specified for an animation component, the animation component will
+only be included if the media query will match the current environment.
 
 #### Supports condition
 
-Supports condition can be specified using the `supports` property. This property can contain any expression allowed
-for [CSS.supports](https://developer.mozilla.org/en-US/docs/Web/API/CSS/supports) API and corresponds to `@supports` CSS rule.
+Supports condition can be specified using the `supports` property. This property
+can contain any expression allowed for
+[CSS.supports](https://developer.mozilla.org/en-US/docs/Web/API/CSS/supports)
+API and corresponds to `@supports` CSS rule.
 
-If value is specified for an animation component, the animation component will only be included if the
-supports condition will match the current environment.
+If value is specified for an animation component, the animation component will
+only be included if the supports condition will match the current environment.
 
 ### Animation `switch` statement
 
-In some cases it's convenient to combine multiple [conditional animations](#conditions) with an optional default into a single animation. This can be done using `switch` animation statement in this format:
+In some cases it's convenient to combine multiple
+[conditional animations](#conditions) with an optional default into a single
+animation. This can be done using `switch` animation statement in this format:
 
 ```js
 {
@@ -147,9 +160,12 @@ In some cases it's convenient to combine multiple [conditional animations](#cond
 }
 ```
 
-In `switch` animation, the candidates are evaluated in the defined order and the first animation that matches [conditional statements](#conditions) is executed and the rest are ignored.
+In `switch` animation, the candidates are evaluated in the defined order and the
+first animation that matches [conditional statements](#conditions) is executed
+and the rest are ignored.
 
-For instance, this animation runs motion-path animation if supported and falls back to transform:
+For instance, this animation runs motion-path animation if supported and falls
+back to transform:
 
 ```json
 {
@@ -173,7 +189,11 @@ For instance, this animation runs motion-path animation if supported and falls b
 
 ### Variables
 
-An animation component can declare CSS variables that will be used for timing and keyframes values via `var()` expressions. `var()` expressions are evaluated using the current target context. The CSS variables specified in animation components are propagated to nested animations, applied to animation targets and thus override CSS variables used in final animations.
+An animation component can declare CSS variables that will be used for timing
+and keyframes values via `var()` expressions. `var()` expressions are evaluated
+using the current target context. The CSS variables specified in animation
+components are propagated to nested animations, applied to animation targets and
+thus override CSS variables used in final animations.
 
 For instance:
 
@@ -199,16 +219,23 @@ For instance:
 
 In this sample:
 
-- `--delay` is propagated into nested animations and used as a delay of `#target1` animation.
-- `--x` is propagated into nested animations but overriden by the `#target1` animation and later used for `transform` property.
-- `--y` is not specified anywhere in the `<amp-animation>` and thus will be queried on the `#target1` element. It defaults to `0px` if not defined in CSS either.
+- `--delay` is propagated into nested animations and used as a delay of
+  `#target1` animation.
+- `--x` is propagated into nested animations but overriden by the `#target1`
+  animation and later used for `transform` property.
+- `--y` is not specified anywhere in the `<amp-animation>` and thus will be
+  queried on the `#target1` element. It defaults to `0px` if not defined in CSS
+  either.
 
-For more information on `var()`, see the [`var()` and `calc()` section](#var-and-calc-expressions).
+For more information on `var()`, see the
+[`var()` and `calc()` section](#var-and-calc-expressions).
 
 ### Timing properties
 
-Top-level animation and animation components may contain timing properties. These properties are defined in detail in the
-[AnimationEffectTimingProperties](https://www.w3.org/TR/web-animations/#dictdef-animationeffecttimingproperties) of the Web Animation spec. The set of properties allowed here includes:
+Top-level animation and animation components may contain timing properties.
+These properties are defined in detail in the
+[AnimationEffectTimingProperties](https://www.w3.org/TR/web-animations/#dictdef-animationeffecttimingproperties)
+of the Web Animation spec. The set of properties allowed here includes:
 
 <table>
   <tr>
@@ -267,7 +294,9 @@ Top-level animation and animation components may contain timing properties. Thes
   </tr>
 </table>
 
-All timing properties allow either a direct numeric/string values or CSS values. For instance, "duration" can be specified as `1000` or `1s` or `1000ms`. In addition, `calc()` and `var()` and other CSS expressions are also allowed.
+All timing properties allow either a direct numeric/string values or CSS values.
+For instance, "duration" can be specified as `1000` or `1s` or `1000ms`. In
+addition, `calc()` and `var()` and other CSS expressions are also allowed.
 
 An example of timing properties in JSON:
 
@@ -283,11 +312,15 @@ An example of timing properties in JSON:
 }
 ```
 
-Animation components inherit timing properties specified for the top-level animation.
+Animation components inherit timing properties specified for the top-level
+animation.
 
 ### Subtargets
 
-Everywhere where `selector` can be specified, it's possible to also specify `subtargets: []`. Subtargets can override timing properties or variables defined in the animation for specific subtargets indicated via either an index or a CSS selector.
+Everywhere where `selector` can be specified, it's possible to also specify
+`subtargets: []`. Subtargets can override timing properties or variables defined
+in the animation for specific subtargets indicated via either an index or a CSS
+selector.
 
 For instance:
 
@@ -309,13 +342,18 @@ For instance:
 }
 ```
 
-In this example, by default all targets matched by the ".target" have delay of 100ms and "--y" of 100px. However, the first target (`index: 0`) is overriden to have delay of 200ms; and odd targets are overriden to have "--y" of 200px.
+In this example, by default all targets matched by the ".target" have delay of
+100ms and "--y" of 100px. However, the first target (`index: 0`) is overriden to
+have delay of 200ms; and odd targets are overriden to have "--y" of 200px.
 
 Notice, that multiple subtargets can match one target element.
 
 ### Keyframes
 
-Keyframes can be specified in numerous ways described in the [keyframes section](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument) of the Web Animations spec or as a string refering to the `@keyframes` name in the CSS.
+Keyframes can be specified in numerous ways described in the
+[keyframes section](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument)
+of the Web Animations spec or as a string refering to the `@keyframes` name in
+the CSS.
 
 Some typical examples of keyframes definitions are below.
 
@@ -327,7 +365,8 @@ Shorthand object-form "to" format specifies the final state at 100%:
 }
 ```
 
-Shorthand object-form "from-to" format specifies the starting and final states at 0 and 100%:
+Shorthand object-form "from-to" format specifies the starting and final states
+at 0 and 100%:
 
 ```text
 {
@@ -338,7 +377,8 @@ Shorthand object-form "from-to" format specifies the starting and final states a
 }
 ```
 
-Shorthand object-form "value-array" format specifies multiple values for starting, final states and multiple (equal-spaced) offsets:
+Shorthand object-form "value-array" format specifies multiple values for
+starting, final states and multiple (equal-spaced) offsets:
 
 ```text
 {
@@ -349,7 +389,8 @@ Shorthand object-form "value-array" format specifies multiple values for startin
 }
 ```
 
-The array-form specifies keyframes. Offsets are assigned automatically at 0, 100% and spaced evenly in-between:
+The array-form specifies keyframes. Offsets are assigned automatically at 0,
+100% and spaced evenly in-between:
 
 ```text
 {
@@ -383,13 +424,16 @@ The array-form can also include "easing":
 }
 ```
 
-For additional keyframes formats refer to [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument).
+For additional keyframes formats refer to
+[Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument).
 
-The property values allow any valid CSS values, including `calc()`, `var()` and other CSS expressions.
+The property values allow any valid CSS values, including `calc()`, `var()` and
+other CSS expressions.
 
 #### Keyframes from CSS
 
-Another way to specify keyframes is in the document's stylesheet (`<style>` tag) as `@keyframes` CSS rule. For instance:
+Another way to specify keyframes is in the document's stylesheet (`<style>` tag)
+as `@keyframes` CSS rule. For instance:
 
 ```html
 <style amp-custom>
@@ -413,29 +457,41 @@ Another way to specify keyframes is in the document's stylesheet (`<style>` tag)
 </amp-animation>
 ```
 
-CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the JSON per [Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument). However, there are some nuances:
+CSS `@keyframes` are mostly equivalent to inlining keyframes definition in the
+JSON per
+[Web Animations spec](https://www.w3.org/TR/web-animations/#processing-a-keyframes-argument).
+However, there are some nuances:
 
-- For broad-platform support, vendor prefixes, e.g. `@-ms-keyframes {}` or `-moz-transform` may be needed. Vendor prefixes are not needed and not allowed in the JSON format, but in CSS they could be necessary.
-- Platforms that do not support `calc()` and `var()` will not be able to take advantage of `amp-animation` polyfills when keyframes are specified in CSS. It's thus recommended to always include fallback values in CSS.
-- CSS extensions such as [`width()`, `height()`, `num()`, `rand()`, `index()` and `length()`](#css-extensions) cannot be used in CSS.
+- For broad-platform support, vendor prefixes, e.g. `@-ms-keyframes {}` or
+  `-moz-transform` may be needed. Vendor prefixes are not needed and not allowed
+  in the JSON format, but in CSS they could be necessary.
+- Platforms that do not support `calc()` and `var()` will not be able to take
+  advantage of `amp-animation` polyfills when keyframes are specified in CSS.
+  It's thus recommended to always include fallback values in CSS.
+- CSS extensions such as
+  [`width()`, `height()`, `num()`, `rand()`, `index()` and `length()`](#css-extensions)
+  cannot be used in CSS.
 
 #### White listed properties for keyframes
 
-Not all CSS properties can be used in keyframes. Only CSS properties that modern browsers can optimize and
-animate quickly are white listed. This list will grow as more properties are confirmed to provide good
-performance. Currently the list contains:
+Not all CSS properties can be used in keyframes. Only CSS properties that modern
+browsers can optimize and animate quickly are white listed. This list will grow
+as more properties are confirmed to provide good performance. Currently the list
+contains:
 
 - [`opacity`](https://developer.mozilla.org/en-US/docs/Web/CSS/opacity)
 - [`transform`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform)
 - [`visibility`](https://developer.mozilla.org/en-US/docs/Web/CSS/visibility)
 - [`offset-distance`](https://developer.mozilla.org/en-US/docs/Web/CSS/offset-distance)
 
-Notice that the use of vendor prefixed CSS properties is neither needed nor allowed.
+Notice that the use of vendor prefixed CSS properties is neither needed nor
+allowed.
 
 ### Abbreviated forms of animation configuration
 
-If the animation only involves a single element and a single keyframes effect is sufficient, the configuration
-can be reduced to this one animation component only. For instance:
+If the animation only involves a single element and a single keyframes effect is
+sufficient, the configuration can be reduced to this one animation component
+only. For instance:
 
 ```html
 <amp-animation layout="nodisplay">
@@ -449,8 +505,9 @@ can be reduced to this one animation component only. For instance:
 </amp-animation>
 ```
 
-If the animation is comprised of a list of components, but doesn't have top-level animation, the configuration
-can be reduced to an array of components. For instance:
+If the animation is comprised of a list of components, but doesn't have
+top-level animation, the configuration can be reduced to an array of components.
+For instance:
 
 ```html
 <amp-animation layout="nodisplay">
@@ -474,7 +531,12 @@ can be reduced to an array of components. For instance:
 
 ### Animation composition
 
-Animations can reference other animations thus combining several `amp-animation` declarations into a single final animation. Referencing an animation from another animation is mostly the same as nesting. The reason why one would want to split animations into different elements would be to reuse the same animation from several places or to simply make each animation declaration smaller and more manageable.
+Animations can reference other animations thus combining several `amp-animation`
+declarations into a single final animation. Referencing an animation from
+another animation is mostly the same as nesting. The reason why one would want
+to split animations into different elements would be to reuse the same animation
+from several places or to simply make each animation declaration smaller and
+more manageable.
 
 For instance:
 
@@ -499,11 +561,13 @@ For instance:
 </amp-animation>
 ```
 
-This sample animation, will combine "anim2" animation as part of "anim1". The "anim2" is included
-without a target (`selector`). In such case, the included animation is expected to reference its own target.
+This sample animation, will combine "anim2" animation as part of "anim1". The
+"anim2" is included without a target (`selector`). In such case, the included
+animation is expected to reference its own target.
 
-Another form allows the including animation to provide the target or multiple targets. In that case, the included
-animation is executed for each matched target. For instance:
+Another form allows the including animation to provide the target or multiple
+targets. In that case, the included animation is executed for each matched
+target. For instance:
 
 ```html
 <amp-animation id="anim1" layout="nodisplay">
@@ -526,13 +590,16 @@ animation is executed for each matched target. For instance:
 </amp-animation>
 ```
 
-Here, whether the ".target-class" matches one element, several or none - the "anim2" is executed for each matched target.
+Here, whether the ".target-class" matches one element, several or none - the
+"anim2" is executed for each matched target.
 
-The variables and timing properties specified in the caller animation are passed to the included animation as well.
+The variables and timing properties specified in the caller animation are passed
+to the included animation as well.
 
 ### `var()` and `calc()` expressions
 
-`amp-animation` allows use of `var()` and `calc()` expressions for timing and keyframes values.
+`amp-animation` allows use of `var()` and `calc()` expressions for timing and
+keyframes values.
 
 For instance:
 
@@ -552,7 +619,11 @@ For instance:
 </amp-animation>
 ```
 
-Both `var()` and `calc()` polyfilled on platforms that do not directly support them. `var()` properties are extracted from the corresponding target elements. However, it's unfortunately impossible to fully polyfill `var()`. Thus, where compatibility is important, it's strongly recommended to include default values in the `var()` expressions. For instance:
+Both `var()` and `calc()` polyfilled on platforms that do not directly support
+them. `var()` properties are extracted from the corresponding target elements.
+However, it's unfortunately impossible to fully polyfill `var()`. Thus, where
+compatibility is important, it's strongly recommended to include default values
+in the `var()` expressions. For instance:
 
 ```html
 <amp-animation layout="nodisplay">
@@ -568,17 +639,28 @@ Both `var()` and `calc()` polyfilled on platforms that do not directly support t
 </amp-animation>
 ```
 
-Animation components can specify their own variables as `--var-name` fields. These variables are propagated into nested animations and override variables of target elements specified via stylesheet (`<style>` tag). `var()` expressions first try to resolve variable values specified in the animations and then by querying target styles.
+Animation components can specify their own variables as `--var-name` fields.
+These variables are propagated into nested animations and override variables of
+target elements specified via stylesheet (`<style>` tag). `var()` expressions
+first try to resolve variable values specified in the animations and then by
+querying target styles.
 
 ### CSS extensions
 
-`amp-animation` provides several CSS extensions for typical animations needs: `rand()`, `num()`, `width()`, and `height()`. These functions can be used everywhere where CSS values can be used within `amp-animation`, including timing and keyframes values.
+`amp-animation` provides several CSS extensions for typical animations needs:
+`rand()`, `num()`, `width()`, and `height()`. These functions can be used
+everywhere where CSS values can be used within `amp-animation`, including timing
+and keyframes values.
 
 #### CSS `index()` extension
 
-The `index()` function returns an index of the current target element in the animation effect. This is most relevant when multiple targets are animated with the same effect using `selector` property. The first target matched by the selector will have index `0`, the second will have index `1` and so on.
+The `index()` function returns an index of the current target element in the
+animation effect. This is most relevant when multiple targets are animated with
+the same effect using `selector` property. The first target matched by the
+selector will have index `0`, the second will have index `1` and so on.
 
-Among other things, this property can be combined with `calc()` expressions and be used to create staggered effect. For instance:
+Among other things, this property can be combined with `calc()` expressions and
+be used to create staggered effect. For instance:
 
 ```json
 {
@@ -589,7 +671,8 @@ Among other things, this property can be combined with `calc()` expressions and 
 
 #### CSS `length()` extension
 
-The `length()` function returns the number of target elements in the animation effect. This is most relevant when combined with `index()`:
+The `length()` function returns the number of target elements in the animation
+effect. This is most relevant when combined with `index()`:
 
 ```json
 {
@@ -610,7 +693,8 @@ The form without arguments simply returns the random number between 0 and 1.
 }
 ```
 
-The second form has two arguments and returns the random value between these two arguments.
+The second form has two arguments and returns the random value between these two
+arguments.
 
 ```json
 {
@@ -620,17 +704,28 @@ The second form has two arguments and returns the random value between these two
 
 #### CSS `width()` and `height()` extensions
 
-The `width()` and `height()` extensions return the width/height of the animated element or the element specified by the selector. The returned value is in pixels, e.g. `100px`.
+The `width()` and `height()` extensions return the width/height of the animated
+element or the element specified by the selector. The returned value is in
+pixels, e.g. `100px`.
 
 The following forms are supported:
 
 - `width()` and `height()` - width/height of the animated element.
-- `width('.selector')` and `height('.selector')` - width/height of the element specified by the selector. Any CSS selector can be used. For instance, `width('#container > li')`.
-- `width(closest('.selector'))` and `height(closest('.selector'))` - width/height of the element specified by the closest selector.
+- `width('.selector')` and `height('.selector')` - width/height of the element
+  specified by the selector. Any CSS selector can be used. For instance,
+  `width('#container > li')`.
+- `width(closest('.selector'))` and `height(closest('.selector'))` -
+  width/height of the element specified by the closest selector.
 
-The `width()` and `height()` are epsecially useful for transforms. The `left`, `top` and similar CSS properties that can use `%` values to express animations proportional to container size. However, `transform` property interpretes `%` values differently - as a percent of the selected element. Thus, the `width()` and `height()` can be used to express transform animations in terms of container elements and similar.
+The `width()` and `height()` are epsecially useful for transforms. The `left`,
+`top` and similar CSS properties that can use `%` values to express animations
+proportional to container size. However, `transform` property interpretes `%`
+values differently - as a percent of the selected element. Thus, the `width()`
+and `height()` can be used to express transform animations in terms of container
+elements and similar.
 
-These functions can be combined with `calc()`, `var()` and other CSS expressions. For instance:
+These functions can be combined with `calc()`, `var()` and other CSS
+expressions. For instance:
 
 ```json
 {
@@ -640,13 +735,15 @@ These functions can be combined with `calc()`, `var()` and other CSS expressions
 
 #### CSS `num()` extension
 
-The `num()` function returns a number representation of a CSS value. For instance:
+The `num()` function returns a number representation of a CSS value. For
+instance:
 
 - `num(11px)` yields `11`;
 - `num(110ms)` yields `110`;
 - etc.
 
-For instance, the following expression calculates the delay in seconds proportional to the element's width:
+For instance, the following expression calculates the delay in seconds
+proportional to the element's width:
 
 ```json
 {
@@ -658,11 +755,29 @@ For instance, the following expression calculates the delay in seconds proportio
 
 SVGs are awesome and we certainly recommend their use for animations!
 
-SVG animations are supported via the same CSS properties described in [White listed properties for keyframes](#whitelisted-properties-for-keyframes) with some nuances:
+SVG animations are supported via the same CSS properties described in
+[White listed properties for keyframes](#whitelisted-properties-for-keyframes)
+with some nuances:
 
-- IE/Edge SVG elements [do not support CSS `transform` properties](https://stackoverflow.com/questions/34434005/svg-transform-property-not-taking-acount-in-ie-edge). The `transform` animation itself is polyfilled. However, initial state defined in a stylesheet is not applied. If the initial transformed state is important on IE/Edge, it's recommended to duplicate it via [SVG `transform` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform).
-- While `transform` CSS is polyfilled for IE/Edge, unfortunately, it's impossible to polyfill `transform-origin`. Thus, where compatibility with IE/Edge is desired, it's recommended to only use the default `transform-origin`.
-- Most of the browsers currently have issues interpreting `transform-origin` CSS correctly. See issues for [Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=740300), [Safari](https://bugs.webkit.org/show_bug.cgi?id=174285) and [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1379340). Most of this confusion should be resolved once [CSS `transform-box`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box) is implemented. Where `transform-origin` is important, it's recommended to also include the desired `transform-box` CSS for future compatibility.
+- IE/Edge SVG elements
+  [do not support CSS `transform` properties](https://stackoverflow.com/questions/34434005/svg-transform-property-not-taking-acount-in-ie-edge).
+  The `transform` animation itself is polyfilled. However, initial state defined
+  in a stylesheet is not applied. If the initial transformed state is important
+  on IE/Edge, it's recommended to duplicate it via
+  [SVG `transform` attribute](https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform).
+- While `transform` CSS is polyfilled for IE/Edge, unfortunately, it's
+  impossible to polyfill `transform-origin`. Thus, where compatibility with
+  IE/Edge is desired, it's recommended to only use the default
+  `transform-origin`.
+- Most of the browsers currently have issues interpreting `transform-origin` CSS
+  correctly. See issues for
+  [Chrome](https://bugs.chromium.org/p/chromium/issues/detail?id=740300),
+  [Safari](https://bugs.webkit.org/show_bug.cgi?id=174285) and
+  [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1379340). Most of this
+  confusion should be resolved once
+  [CSS `transform-box`](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box)
+  is implemented. Where `transform-origin` is important, it's recommended to
+  also include the desired `transform-box` CSS for future compatibility.
 
 ## Triggering animation
 
@@ -670,7 +785,8 @@ The animation can be triggered via a `trigger` attribute or an `on` action.
 
 ### `trigger` attribute
 
-The only available value for the `trigger` attribute is `visibility`. The animation runs when the underlying document or embed are visible (in viewport).
+The only available value for the `trigger` attribute is `visibility`. The
+animation runs when the underlying document or embed are visible (in viewport).
 
 For instance:
 
@@ -680,7 +796,10 @@ For instance:
 </amp-animation>
 ```
 
-Important: If the `amp-animation` component is a direct child of the document `body`, and not imported through an embedded element, it will start as soon as the `body` is loaded, regardless if it, or the animated element, is placed below the initial viewport.
+Important: If the `amp-animation` component is a direct child of the document
+`body`, and not imported through an embedded element, it will start as soon as
+the `body` is loaded, regardless if it, or the animated element, is placed below
+the initial viewport.
 
 ### Triggering via `on` action
 
@@ -697,14 +816,18 @@ For instance:
 
 `amp-animation` element exports the following actions:
 
-- `start` - Starts the animation is it's not running already. Timing properties and variables
-  can be specified as action arguments. E.g. `anim1.start(delay=-100, --scale=2)`.
-- `restart` - Starts the animation or restarts the currently running one. Timing properties and variables
-  can be specified as action arguments. E.g. `anim1.start(delay=-100, --scale=2)`.
+- `start` - Starts the animation is it's not running already. Timing properties
+  and variables can be specified as action arguments. E.g.
+  `anim1.start(delay=-100, --scale=2)`.
+- `restart` - Starts the animation or restarts the currently running one. Timing
+  properties and variables can be specified as action arguments. E.g.
+  `anim1.start(delay=-100, --scale=2)`.
 - `pause` - Pauses the currently running animation.
 - `resume` - Resumes the currently running animation.
 - `togglePause` - Toggles pause/resume actions.
-- `seekTo` - Pauses the animation and seeks to the point of time specified by the `time` argument in milliseconds or `percent` argument as a percentage point in the timeline.
+- `seekTo` - Pauses the animation and seeks to the point of time specified by
+  the `time` argument in milliseconds or `percent` argument as a percentage
+  point in the timeline.
 - `reverse` - Reverses the animation.
 - `finish` - Finishes the animation.
 - `cancel` - Cancels the animation.

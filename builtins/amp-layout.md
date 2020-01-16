@@ -29,11 +29,17 @@ limitations under the License.
 
 ## Overview
 
-The `amp-layout` component allows you to apply aspect-ratio based responsive layouts to any element. The `amp-layout` component works similarly to the [layout](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute) attribute on existing AMP components, but supports any HTML markup as children. Other supported layouts all work with `amp-layout` (e.g., fixed-height, fixed, etc.).
+The `amp-layout` component allows you to apply aspect-ratio based responsive
+layouts to any element. The `amp-layout` component works similarly to the
+[layout](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute)
+attribute on existing AMP components, but supports any HTML markup as children.
+Other supported layouts all work with `amp-layout` (e.g., fixed-height, fixed,
+etc.).
 
 **Example**
 
-This example uses `amp-layout` to create a responsive container around a circle drawn with inline SVG.
+This example uses `amp-layout` to create a responsive container around a circle
+drawn with inline SVG.
 
 ```html
 <amp-layout layout="responsive" width="1" height="1">
@@ -46,8 +52,12 @@ This example uses `amp-layout` to create a responsive container around a circle 
 
 ## Attributes
 
-This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) extended to AMP components.
+This element includes
+[common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
+extended to AMP components.
 
 ## Validation
 
-See [amp-layout rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii) in the AMP validator specification.
+See
+[amp-layout rules](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)
+in the AMP validator specification.

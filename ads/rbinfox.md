@@ -30,7 +30,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see [Rb.Infox documentation](https://adm.infox.sg).
+For semantics of configuration, please see
+[Rb.Infox documentation](https://adm.infox.sg).
 
 ### Required parameters
 

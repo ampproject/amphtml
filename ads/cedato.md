@@ -43,4 +43,5 @@ For additional details and support contact support@cedato.com.
 - `data-serving-domain`: the domain from which the player is served
 - `data-subid`: player subid
 - `data-version`: version of the player that is being used
-- `data-extra-params`: additional player tag parameters can be set in the 'extra-params' query string, all parts have to be encoded.
+- `data-extra-params`: additional player tag parameters can be set in the
+  'extra-params' query string, all parts have to be encoded.

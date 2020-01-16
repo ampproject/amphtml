@@ -46,7 +46,8 @@ Displays a <a href="https://gist.github.com/">GitHub Gist</a>.
 
 ## Behavior
 
-This extension creates an iframe and displays a [gist from GitHub](https://help.github.com/articles/about-gists/).
+This extension creates an iframe and displays a
+[gist from GitHub](https://help.github.com/articles/about-gists/).
 
 #### Example: Embedding multiple files
 
@@ -96,4 +97,6 @@ This extension creates an iframe and displays a [gist from GitHub](https://help.
 
 ## Validation
 
-See [amp-gist rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gist/validator-amp-gist.protoascii) in the AMP validator specification.
+See
+[amp-gist rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-gist/validator-amp-gist.protoascii)
+in the AMP validator specification.

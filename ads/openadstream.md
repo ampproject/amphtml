@@ -58,7 +58,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or
+refer to their documentation.
 
 ### Required parameters
 
@@ -68,4 +69,5 @@ For details on the configuration semantics, please contact the ad network or ref
 
 ### Optional parameters
 
-- `query`: Query parameter to be sent with request. Keywords and keynames, taxonomy etc.
+- `query`: Query parameter to be sent with request. Keywords and keynames,
+  taxonomy etc.

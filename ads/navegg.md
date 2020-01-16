@@ -20,7 +20,8 @@ Serves ads to AMP pages using Navegg data.
 
 ## Example
 
-To get Navegg integration working you only need to specify the `rtc-config` parameter with your Navegg Account ID:
+To get Navegg integration working you only need to specify the `rtc-config`
+parameter with your Navegg Account ID:
 
 ```html
 <amp-ad width="320" height="50"
@@ -32,6 +33,9 @@ To get Navegg integration working you only need to specify the `rtc-config` para
 
 ### Configuration
 
-The Navegg adapter only supports DoubleClick for now. For the most up-to-date list of DoubleClick supported parameters and usage, refer to the [DoubleClick reference guide](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md).
+The Navegg adapter only supports DoubleClick for now. For the most up-to-date
+list of DoubleClick supported parameters and usage, refer to the
+[DoubleClick reference guide](https://github.com/ampproject/amphtml/blob/master/ads/google/doubleclick.md).
 
-For any help, please contact [Navegg](https://www.navegg.com/en/institutional/#contact).
+For any help, please contact
+[Navegg](https://www.navegg.com/en/institutional/#contact).

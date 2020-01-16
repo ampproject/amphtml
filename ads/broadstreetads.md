@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For configuration semantics, see the [Broadstreet Ads documentation](https://information.broadstreetads.com/amp-configuration/).
+For configuration semantics, see the
+[Broadstreet Ads documentation](https://information.broadstreetads.com/amp-configuration/).
 
 ### Required parameters
 

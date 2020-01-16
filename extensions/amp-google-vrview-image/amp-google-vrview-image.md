@@ -51,12 +51,15 @@ VR image
 
 ## Overview
 
-See [Google VR View](https://developers.google.com/vr/concepts/vrview) for more details.
+See [Google VR View](https://developers.google.com/vr/concepts/vrview) for more
+details.
 
 VR view supports mono and stereo 360 images. Note:
 
-- VR view images can be stored as png, jpeg, or gif. Recommend is jpeg for improved compression.
-- For maximum compatibility and performance, image dimensions should be powers of two (e.g., 2048 or 4096).
+- VR view images can be stored as png, jpeg, or gif. Recommend is jpeg for
+  improved compression.
+- For maximum compatibility and performance, image dimensions should be powers
+  of two (e.g., 2048 or 4096).
 - Mono images should be 2:1 aspect ratio (e.g. 4096 x 2048).
 - Stereo images should be 1:1 aspect ratio (e.g. 4096 x 4096).
 

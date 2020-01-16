@@ -31,7 +31,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please contact [smartclip](mailto:adtech@smartclip.de).
+For semantics of configuration, please contact
+[smartclip](mailto:adtech@smartclip.de).
 
 Supported parameters:
 

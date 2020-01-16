@@ -45,7 +45,8 @@ Displays a <a href="http://www.dailymotion.com/">Dailymotion</a> video.
 
 ## Example
 
-With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos.
+With responsive layout, the width and height from the example should yield
+correct layouts for 16:9 aspect ratio videos.
 
 ```html
 <amp-dailymotion
@@ -150,4 +151,6 @@ With responsive layout, the width and height from the example should yield corre
 
 ## Validation
 
-See [amp-dailymotion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/validator-amp-dailymotion.protoascii) in the AMP validator specification.
+See
+[amp-dailymotion rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/validator-amp-dailymotion.protoascii)
+in the AMP validator specification.

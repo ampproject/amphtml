@@ -47,10 +47,12 @@ Trigger and monitor the loading of custom fonts on AMP pages.
 
 ## Behavior
 
-The `amp-font` extension should be used for controlling timeouts on font loading.
+The `amp-font` extension should be used for controlling timeouts on font
+loading.
 
-The `amp-font` extension allows adding and removing CSS classes from `document.documentElement`
-or `document.body` based on whether a font was loaded or is in error-state.
+The `amp-font` extension allows adding and removing CSS classes from
+`document.documentElement` or `document.body` based on whether a font was loaded
+or is in error-state.
 
 Example:
 
@@ -71,11 +73,14 @@ Example:
 ></amp-font>
 ```
 
-The extension observes loading of a font and when it loads executes the optional attributes `on-load-add-class` and `on-load-remove-class` and when there is any error or timeout runs `on-error-remove-class` and `on-error-add-class`.
-These classes are toggled on the `documentElement` for standalone documents, and on `body` for documents
-without a `documentElement` i.e. inside a `ShadowRoot`.
+The extension observes loading of a font and when it loads executes the optional
+attributes `on-load-add-class` and `on-load-remove-class` and when there is any
+error or timeout runs `on-error-remove-class` and `on-error-add-class`. These
+classes are toggled on the `documentElement` for standalone documents, and on
+`body` for documents without a `documentElement` i.e. inside a `ShadowRoot`.
 
-Using these classes authors can guard whether a font is displayed and get the following results:
+Using these classes authors can guard whether a font is displayed and get the
+following results:
 
 - get a short (e.g. 3000ms) timeout in Safari similar to other browsers
 - implement FOIT where the page renders with no text before the font comes in
@@ -122,4 +127,6 @@ The `amp-font` extension accepts the `layout` value: `nodisplay`
 
 ## Validation
 
-See [amp-font rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/validator-amp-font.protoascii) in the AMP validator specification.
+See
+[amp-font rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/validator-amp-font.protoascii)
+in the AMP validator specification.
