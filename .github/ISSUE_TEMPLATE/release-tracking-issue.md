@@ -39,7 +39,7 @@ Note: remove the backticks (``) from the link.
 On the second Monday of each month, the current stable version will be promoted to the LTS release channel. In other words: 
 
 - If this release is promoted to stable on the first Monday of a given month, it needs to be promoted to LTS on the second Monday of the same month.
-- If this release is promoted to stable on the second, third, fourth, or fifth Monday of a given month, it will never be promoted to LTS.
+- If this release is promoted to stable on the second, third, fourth, or fifth Monday of a given month, it is not an LTS release candidate (but will be included in a later LTS release).
 
 Based on the above, if this release must be promoted to LTS, copy-paste the following checkbox into the list above.
 
