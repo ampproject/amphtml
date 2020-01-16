@@ -92,6 +92,14 @@ export class AmpStoryEmbed {
     return this.element_;
   }
 
+  /**
+   * @visibleForTesting
+   * @return {!Element}
+   */
+  getRoot() {
+    return this.rootEl_;
+  }
+
   /** @public */
   buildCallback() {
     this.stories_ = toArray(this.element_.querySelectorAll('a'));
@@ -264,22 +272,33 @@ function layoutFallback(embedImpl) {
     setTimeout(() => {
       tick = true;
 
-      const embedTop = embedImpl.getElement()./*OK*/ getBoundingClientRect()
-        .top;
-      if (self./*OK*/ innerHeight * 2 > embedTop) {
-        embedImpl.layoutCallback();
-      }
+      layoutIfVisible(embedImpl);
     }, SCROLL_THROTTLE_MS);
 
     tick = false;
   });
+
+  // Calls it once it in case scroll event never fires.
+  layoutIfVisible(embedImpl);
+}
+
+/**
+ * Checks if embed is close to the viewport and calls layoutCallback when it is.
+ * @param {!AmpStoryEmbed} embedImpl
+ */
+function layoutIfVisible(embedImpl) {
+  const embedTop = embedImpl.getElement()./*OK*/ getBoundingClientRect().top;
+  if (self./*OK*/ innerHeight * 2 > embedTop) {
+    embedImpl.layoutCallback();
+  }
 }
 
 /**
  * Calls layoutCallback on the embed when it is close to the viewport.
  * @param {!AmpStoryEmbed} embedImpl
+ * @visibleForTesting
  */
-function layoutEmbed(embedImpl) {
+export function layoutEmbed(embedImpl) {
   if (IntersectionObserver && self === self.parent) {
     const intersectingCallback = entries => {
       entries.forEach(entry => {
