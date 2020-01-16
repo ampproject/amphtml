@@ -49,9 +49,18 @@ const ENDPOINT_INVALID_ERROR =
 
 /**
  * @typedef {{
+ *    reactionValue: number,
+ *    totalCount: number,
+ *    selectedByUser: boolean,
+ * }}
+ */
+export let ReactionType;
+
+/**
+ * @typedef {{
  *    totalResponseCount: number,
  *    hasUserResponded: boolean,
- *    responses: !Object,
+ *    responses: !Array<ReactionType>,
  * }}
  */
 export let ReactionResponseType;
@@ -97,7 +106,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
-    /** @private {?Promise<JsonObject>} */
+    /** @private {?Promise<!../../../src/service/cid-impl.CidDef>} */
     this.clientIdService_ = Services.cidForDoc(this.element);
 
     /** @private {?Promise<JsonObject>} */
@@ -115,10 +124,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private {!./amp-story-request-service.AmpStoryRequestService} */
     this.requestService_ = getRequestService(this.win, this.element);
 
-    /** @private {?Promise<JsonObject>} */
+    /** @private {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
     this.responseDataPromise_ = null;
 
-    /** @private {?Object} */
+    /** @private {?ReactionResponseType} */
     this.responseData_ = null;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
@@ -390,7 +399,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   /**
    * Get the Reaction data from the datastore
    *
-   * @return {Promise<JsonObject>}
+   * @return {?Promise<?ReactionResponseType|?JsonObject|undefined>}
    * @private
    */
   retrieveReactionData_() {
@@ -428,8 +437,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * Executes a Reactions API call.
    *
    * @param {Object} requestOptions
-   * @param {number} reactionValue
-   * @return {Promise<JsonObject>}
+   * @param {number=} reactionValue
+   * @return {Promise<ReactionResponseType|undefined>}
    * @private
    */
   executeReactionRequest_(requestOptions, reactionValue) {
@@ -462,7 +471,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     return this.getClientId_().then(clientId => {
       requestVars['clientId'] = clientId;
-      return this.requestService_.executeRequest(url, null, requestOptions);
+      return this.requestService_.executeRequest(url, requestOptions);
     });
   }
 
@@ -482,7 +491,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    *    ...
    *  ]
    * }
-   * @param {ReactionResponseType} response
+   * @param {ReactionResponseType|undefined} response
    * @private
    */
   handleSuccessfulDataRetrieval_(response) {
@@ -494,12 +503,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       return;
     }
 
-    this.responseData_ = {
-      totalCount: response.data.totalResponseCount,
-      data: response.data.responses,
-    };
+    this.responseData_ = response.data;
 
-    this.hasUserSelection_ = response.data.hasUserResponded;
+    this.hasUserSelection_ = this.responseData_.hasUserResponded;
     if (this.hasUserSelection_) {
       this.updateQuizOnDataRetrieval_();
     }
@@ -511,9 +517,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   updateQuizOnDataRetrieval_() {
-    const selectedOptionKey = this.responseData_.data.find(
-      response => response.selectedByUser
-    ).reactionValue;
+    let selectedOptionKey;
+    this.responseData_.responses.forEach(response => {
+      if (response.selectedByUser) {
+        selectedOptionKey = response.reactionValue;
+      }
+    });
 
     if (selectedOptionKey === undefined) {
       dev().error(TAG, `The user-selected reaction could not be found`);
