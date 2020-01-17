@@ -68,7 +68,7 @@ Example:
 >
 ```
 
-The `amp-timeago` component requires a placeholder in the text node. The calculated timestamp replaces the placeholder once ready. Use the placeholder as a fallback to display to users if `amp-timeago` is unable to process the fuzzy timestamp. 
+The `amp-timeago` component requires a placeholder in the text node. The calculated timestamp replaces the placeholder once ready. Use the placeholder as a fallback to display to users if `amp-timeago` is unable to process the fuzzy timestamp.
 
 [/example]
 
