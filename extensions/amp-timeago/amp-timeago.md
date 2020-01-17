@@ -68,6 +68,8 @@ Example:
 >
 ```
 
+Although it will be overridden, there must be at least one character in the amp-timeago `text node`.
+
 [/example]
 
 ## Attributes
