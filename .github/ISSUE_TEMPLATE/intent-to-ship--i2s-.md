@@ -81,23 +81,23 @@ Retain all the considerations below that are applicable to your issue. If a cons
 
 - #### Accessibility Considerations
 <!--
-Reach out to the UI and Accessibility WG for assistance. https://github.com/ampproject/wg-ui-and-a11y
+Enter a short snippet for the accessibility considerations of the design. If none apply, enter n/a including a short sentence if not obvious. If you need assistance, reach out to the UI and Accessibility WG for assistance. https://github.com/ampproject/wg-ui-and-a11y
 -->
 - #### Performance Considerations
 <!--
-Reach out to the Performance WG for assistance. https://github.com/ampproject/wg-performance
+Enter a short snippet for the performance considerations of the design. If none apply, enter n/a including a short sentence if not obvious. If you need assistance, reach out to the Performance WG for assistance. https://github.com/ampproject/wg-performance
 -->
 - #### Privacy Considerations
 <!--
-Reach out to the Security and Privacy WG for assistance. https://github.com/ampproject/wg-security-privacy
+Enter a short snippet for the privacy considerations of the design. If none apply, enter n/a including a short sentence if not obvious. If you need assistance, reach out to the Security and Privacy WG for assistance. https://github.com/ampproject/wg-security-privacy
 -->
 - #### Security Considerations
 <!--
-Reach out to the Security and Privacy WG for assistance. https://github.com/ampproject/wg-security-privacy
+Enter a short snippet for the security considerations of the design. If none apply, enter n/a including a short sentence if not obvious. If you need assistance, reach out to the Security and Privacy WG for assistance. https://github.com/ampproject/wg-security-privacy
 -->
 - #### Analytics Considerations
 <!--
-Reach out to the Analytics WG for assistance. https://github.com/ampproject/wg-analytics
+Enter a short snippet for the analytics considerations of the design. If none apply, enter n/a including a short sentence if not obvious. If you need assistance, reach out to the Analytics WG for assistance. https://github.com/ampproject/wg-analytics
 -->
 
 ### Launch checklist
