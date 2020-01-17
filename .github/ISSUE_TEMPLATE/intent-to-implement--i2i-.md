@@ -15,13 +15,6 @@ See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-
 If you haven't already done so, sign the Contributor License Agreement (CLA) as soon as possible to avoid delays merging your code. A signed CLA is not necessary to submit this I2I or to send a pull request, but it will be needed before your code can be merged. See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#contributor-license-agreement for more information on CLAs.
 -->
 
-## Status
-- [ ] Draft
-- [ ] Ready for review
-<!--
-Issues that aren't marked "Ready for review" are considered drafts. Draft I2Is are encouraged for complex proposals and/or those expected to impact many stakeholders or parts of the project in order to promote promote broader community awareness and get earlier feedback.
--->
-
 ## Summary
 
 <!--
@@ -55,20 +48,8 @@ The launch tracker is meant to be an easy way of sharing a project's status with
 You should add a link to the launch tracker for this work here if applicable. One ideal template and instructions can be found here: bit.ly/amp-launch-tracker
 -->
 
-## Consideration checklist
-### Software Design
-- [ ] Design shows understanding of problem statement/priority
-- [ ] Acceptance/success criteria for problem being solved is clear
-- [ ] Brought to design review
 <!--
-Mark as done once this design has been presented at a [Design Review](https://github.com/ampproject/amphtml/blob/master/contributing/design-reviews.md).
--->
-
-<!--
-Please cc those that you want to notify about this I2I, including a reviewer once you have found one. 
-For a list of potential WGs to cc please see https://github.com/ampproject/meta/tree/master/working-groups.
-Please note that the Approvers WG is cced below by default.
-See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md for help in finding a reviewer.
+Add anyone to this cc line that you want to notify about this I2I, including a reviewer once you have found one. See https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md for help in finding a reviewer.
 -->
 
 /cc @ampproject/wg-approvers
