@@ -8,7 +8,7 @@
     <link rel="canonical" href="release-schedule-visual.amp.html">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Noto+Sans|Poppins">
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-    <meta name="amp-script-src" content="sha384-CbfxNqnGzHYSDCrfBfpjwZu12Iy2L1YRXVmZLSVXpE4N4nS2YwMlGMMEglUiRC8f">
+    <meta name="amp-script-src" content="sha384-nUTQObN6e9PL3jOH7VL1HiyQFnry3RPNDg4BEmJYCBuzkzz36tBPxin7e6iK_fJn">
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <style amp-custom>
       body {
@@ -429,11 +429,15 @@
           event.currentTarget.textContent = descriptions[selectedWeek].selected;
           for (let [channel, [channelWeek, channelDay]] of Object.entries(channels[selectedWeek][selectedDay])) {
             const channelElm = document.querySelectorAll('.content')
-            .filter(
-                elm => elm.getAttribute('data-week') === channelWeek
-                && elm.getAttribute('data-day') === channelDay
-            )[0];
-            
+              .filter(
+                  elm => elm.getAttribute('data-week') === channelWeek
+                  && elm.getAttribute('data-day') === channelDay
+              )[0];
+
+            while (channelElm.firstChild) {
+              channelElm.firstChild.remove();
+            }
+
             const {prefix, suffix} = descriptions[selectedWeek][channel];
             channelElm.appendChild(createSpan(prefix, channel, suffix));
             channelElm.classList.add(channel);
@@ -446,7 +450,7 @@
             document.querySelectorAll(`.${channel}`).forEach(elm => {
               elm.classList.remove(channel);
               while (elm.firstChild) {
-                elm.removeChild(elm.firstChild);
+                elm.firstChild.remove();
               }
             });
           }
