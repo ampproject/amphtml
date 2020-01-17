@@ -28,28 +28,6 @@ limitations under the License.
 Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with
 other AMP components.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/examples/visual-effects/basics_of_scrollbound_effects/">Basics of scrollbound effects tutorial</a></li>
-        <li><a href="https://codepen.io/collection/nMJYrv/">CodePen collection with samples</a></li>
-      </ul>
-    </td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Overview
 
 The `amp-position-observer` component monitors the position of an

@@ -27,17 +27,6 @@ limitations under the License.
 Displays any Playbuzz item content (e.g., list, poll, etc.)<br>
 Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-playbuzz" src="https://cdn.ampproject.org/v0/amp-playbuzz-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed-height, responsive</td>
-  </tr>
-</table>
-
 ## Examples
 
 Playbuzz Item by plain url (without info, share-buttons, comments)

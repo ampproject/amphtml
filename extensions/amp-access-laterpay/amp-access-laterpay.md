@@ -26,30 +26,6 @@ limitations under the License.
 
 Allows publishers to easily integrate with the <a href="https://www.laterpay.net">LaterPay</a> micropayments platform. <code>amp-access-laterpay</code> is based on, and requires <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Scripts</strong></td>
-    <td>
-        <small>Notice that you need scripts for "amp-access-laterpay", "amp-access" and "amp-analytics".</small>
-      <div>
-        <code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code>
-      </div>
-      <div>
-        <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
-      </div>
-      <div>
-        <code>&lt;script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.2.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-access-laterpay/">annotated amp-access-laterpay</a> example.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 <a href="https://laterpay.net">LaterPay</a> is a micropayment platform that allows users to buy any online content with just two clicks, and get immediate access – without upfront registration, personal data, or payment. Users only pay, once their purchases have reached a total of \$5 or 5€ across websites. Content providers can sell individual items or time passes, which allow flatrate access or time limited access to content.

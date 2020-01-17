@@ -28,23 +28,6 @@ limitations under the License.
 
 Trigger and monitor the loading of custom fonts on AMP pages.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-font" src="https://cdn.ampproject.org/v0/amp-font-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-font/">Annotated code example for amp-font</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 The `amp-font` extension should be used for controlling timeouts on font loading.

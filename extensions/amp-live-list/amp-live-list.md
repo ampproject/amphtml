@@ -29,29 +29,6 @@ Warning: Currently, content served via an AMP cache may be slow to receive live 
 
 A wrapper and minimal UI for content that updates live in the client instance as new content is available in the source document.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-live-list" src="https://cdn.ampproject.org/v0/amp-live-list-0.1.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container, fixed-height</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><ul>
-    <li><a href="https://amp.dev/documentation/examples/components/amp-live-list/">Annotated code example for amp-live-list</a></li>
-    <li><a href="https://amp.dev/documentation/examples/news-publishing/live_blog/">Annotated code example with amp-live-list for a live blog</a></li>
-    </ul>
-    </td>
-  </tr>
-</table>
-
 ## Behavior
 
 `amp-live-list` provides instant content updates from the client.

@@ -2,7 +2,8 @@
 $category@: presentation
 formats:
   - websites
-teaser: text:
+teaser:
+  text: The amp-date-display component displays time data that you can render in your AMP page.
 ---
 
 <!--
@@ -21,32 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-date-display`"></a> `amp-date-display`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Display a date value. The displayed string can be configured to different locales, formats and timezones.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-date-display" src="https://cdn.ampproject.org/v0/amp-date-display-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-date-display/">amp-date-display example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
+# amp-date-display
 
 ## Behavior
 

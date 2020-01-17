@@ -26,17 +26,6 @@ limitations under the License.
 
 Displays any <a href="https://www.riddle.com/">Riddle</a> item content (e.g., quiz, list, poll, etc.)
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-riddle-quiz" src="https://cdn.ampproject.org/v0/amp-riddle-quiz-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>responsive</td>
-  </tr>
-</table>
-
 This component embeds <a href="https://www.riddle.com/">Riddle</a> content (e.g., quiz, list, poll, etc.).
 
 ## Example

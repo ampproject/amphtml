@@ -27,19 +27,6 @@ limitations under the License.
 
 Conduct user experience experiments (such as A/B testing and multivariate testing) on an AMP document and collect corresponding data with <code>amp-pixel</code> or <code>amp-analytics</code>.
 
-<table>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-experiment" src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-experiment/">amp-experiment example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 The `<amp-experiment>` element is used to conduct user experience experiments (such as [A/B testing and multivariate testing](https://en.wikipedia.org/wiki/A/B_testing)) on an AMP document. It provides hooks to define customizable variants and allocates traffic to each of the variants based on the configuration. For each page view, the variant allocation is also exposed to `amp-pixel` and `amp-analytics` so that the necessary data can be collected to perform statistical comparison across variants.

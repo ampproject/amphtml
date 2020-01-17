@@ -27,36 +27,6 @@ limitations under the License.
 
 Dynamically loads more documents recommended for the user.
 
-<table>
-  <tr>
-    <td><strong>Availability</strong></td>
-    <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a> <a href="https://github.com/ampproject/amphtml/blob/3a06c99f259b66998b61935a5ee5f0075481bfd2/tools/experiments/README.md#enable-an-experiment-for-a-particular-document"> (Document opt-in allowed)</a></td>
-  </tr>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td>
-      <code>
-        &lt;script async custom-element="amp-next-page"
-        src="https://cdn.ampproject.org/v0/amp-next-page-0.1.js">&lt;/script>
-      </code>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <strong>
-        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a>
-      </strong>
-    </td>
-    <td>N/A</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-next-page/">amp-next-page example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 Given a list of pages, `amp-next-page` tries to load them after the current

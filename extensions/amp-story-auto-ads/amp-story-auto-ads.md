@@ -26,17 +26,6 @@ limitations under the License.
 
 Dynamically inserts ads into a Story.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>N/A</td>
-  </tr>
-</table>
-
 # Getting Started
 
 For information on how to include ads in your AMP Stories, [refer to our guide](https://amp.dev/documentation/guides-and-tutorials/develop/advertise_amp_stories).

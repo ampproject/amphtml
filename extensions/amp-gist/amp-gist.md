@@ -27,23 +27,6 @@ limitations under the License.
 
 Displays a <a href="https://gist.github.com/">GitHub Gist</a>.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-gist" src="https://cdn.ampproject.org/v0/amp-gist-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed-height</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-gist/">Annotated code example for amp-gist</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 This extension creates an iframe and displays a [gist from GitHub](https://help.github.com/articles/about-gists/).

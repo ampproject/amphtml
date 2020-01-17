@@ -27,23 +27,6 @@ limitations under the License.
 
 Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 hours ago).
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed, fixed-height, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-timeago/">amp-timeago example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 Provides fuzzy timestamps that you can use on your AMP pages. This component is based on <a href="https://github.com/hustcc/timeago.js">timeago.js</a>.
