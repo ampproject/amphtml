@@ -15,6 +15,15 @@
         font-family: "Noto Sans", sans-serif;
         padding: 1em;
       }
+      body .touch-only {
+        display: none;
+      }
+      body.amp-mode-touch .touch-only {
+        display: unset;
+      }
+      body.amp-mode-touch .no-touch-only {
+        display: none;
+      }
       #calendar {
         display: grid;
         gap: 10px;
@@ -165,8 +174,8 @@
         <div class="box header">Saturday</div>
         <div class="box header">Sunday</div>
 
-        <div class="box instructions week-1-instructions" data-week="1">Hover/tap on days above to see when the code merged on that day will be available on each release channel</div>
-        <div class="box instructions week-5-instructions" data-week="5">Hover/tap on days below to see when the latest code merge occurred so as to be included in each release channel</div>
+        <div class="box instructions week-1-instructions" data-week="1"><span class="touch-only">Tap</span><span class="no-touch-only">Hover</span> on days above to see when the code merged on that day will be available on each release channel</div>
+        <div class="box instructions week-5-instructions" data-week="5"><span class="touch-only">Tap</span><span class="no-touch-only">Hover</span> on days below to see when the latest code merge occurred so as to be included in each release channel</div>
 
         <div class="box sidebar week-1" data-week="1">
           <span class="top">N</span>
