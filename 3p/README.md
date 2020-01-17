@@ -66,5 +66,5 @@ Review the [ads/README](../ads/README.md) for further details on ad integration.
 You should ensure there are integration tests for your extension. These should be added to the AMP
 repo where it makes sense. In some cases this won't be possible because it relies on bringing up
 third-party infrastructure. In these cases you should maintain testing for the extension on your
-infrastructure against both production AMP and [canary](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-dev-channel).
+infrastructure against both production AMP and [canary](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#amp-experimental-and-beta-channels).
 Upon any monitored failures, an escalation can be raised in [regular AMP communication channel](https://github.com/ampproject/amphtml/blob/master/CONTRIBUTING.md#discussion-channels).
