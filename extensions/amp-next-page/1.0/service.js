@@ -24,16 +24,18 @@ import {
   childElementsByTag,
   isJsonScriptTag,
   removeElement,
+  scopedQuerySelector,
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
+import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
-import {toggle} from '../../../src/style';
 import {tryParseJson} from '../../../src/json';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
@@ -41,6 +43,13 @@ import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;
 const NEAR_BOTTOM_VIEWPORT_COUNT = 1;
+const FORGET_PAGE_COUNT = 5;
+
+const NEXT_PAGE_CLASS = 'i-amphtml-next-page';
+const DOC_CLASS = 'i-amphtml-next-page-document';
+const DOC_CONTAINER_CLASS = 'i-amphtml-next-page-document-container';
+const SHADOW_ROOT_CLASS = 'i-amphtml-next-page-shadow-root';
+const PLACEHOLDER_CLASS = 'i-amphtml-next-page-placeholder';
 
 /** @enum */
 export const Direction = {UP: 1, DOWN: -1};
@@ -61,6 +70,12 @@ export class NextPageService {
      * @const {!../../../src/service/viewport/viewport-interface.ViewportInterface}
      */
     this.viewport_ = Services.viewportForDoc(ampdoc);
+
+    /**
+     * @private
+     * @const {!../../../src/service/mutator-interface.MutatorInterface}
+     */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /** @private {?Element} */
     this.separator_ = null;
@@ -148,7 +163,7 @@ export class NextPageService {
 
     this.parseAndQueuePages_();
 
-    this.getHostNextPageElement_().classList.add('i-amphtml-next-page');
+    this.getHostNextPageElement_().classList.add(NEXT_PAGE_CLASS);
 
     this.viewport_.onScroll(() => this.updateScroll_());
     this.viewport_.onResize(() => this.updateScroll_());
@@ -187,6 +202,8 @@ export class NextPageService {
       ];
       if (nextPage) {
         return nextPage.fetch();
+      } else {
+        return Promise.resolve();
       }
     }
   }
@@ -205,6 +222,7 @@ export class NextPageService {
           page.setVisibility(VisibilityState.VISIBLE);
         }
         this.hidePreviousPages(index);
+        this.resumeForgottenPages(index);
       } else if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
           page.setVisibility(VisibilityState.HIDDEN);
@@ -222,35 +240,63 @@ export class NextPageService {
       .filter(page => page.isVisible())
       .forEach(page =>
         this.toggleHiddenAndReplaceableElements(
-          /** @type {!Document|!ShadowRoot} */ (dev().assertElement(
-            page.document
-          ))
+          /** @type {!Document|!ShadowRoot} */ (devAssert(page.document))
         )
       );
   }
 
   /**
    * Makes sure that all pages preceding the current page are
-   * marked hidden if they are out of the viewport
+   * marked hidden if they are out of the viewport and additionally
+   * paused/forgotten if they are too far from the current page
    * @param {number} index index of the page to start at
    */
   hidePreviousPages(index) {
+    const scrollingDown = this.scrollDirection_ === Direction.DOWN;
+    // Hide the host (first) page if needed
+    if (scrollingDown && this.hostPage_.isVisible()) {
+      this.hostPage_.setVisibility(VisibilityState.HIDDEN);
+    }
+
     // Get all the pages that the user scrolled past (or didn't see yet)
-    const previousPages =
-      this.scrollDirection_ === Direction.UP
-        ? this.pages_.slice(index + 1)
-        : this.pages_.slice(0, index);
+    const previousPages = scrollingDown
+      ? this.pages_.slice(1, index).reverse()
+      : this.pages_.slice(index + 1);
 
     // Find the ones that should be hidden (no longer inside the viewport)
     previousPages
       .filter(page => {
         const shouldHide =
           page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
-          page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT ||
-          page === this.hostPage_;
-        return shouldHide && page.isVisible();
+          page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT;
+        return shouldHide;
       })
-      .forEach(page => page.setVisibility(VisibilityState.HIDDEN));
+      .forEach((page, away) => {
+        // Hide all pages that are in the viewport
+        if (page.isVisible()) {
+          page.setVisibility(VisibilityState.HIDDEN);
+        }
+        // Pause those that are too far away
+        if (away >= FORGET_PAGE_COUNT) {
+          page.pause();
+        }
+      });
+  }
+
+  /**
+   * Makes sure that all pages that are a few pages away from the
+   * currently visible page are re-inserted (if forgotten) and
+   * ready to become visible soon
+   * @param {number} index index of the page to start at
+   */
+  resumeForgottenPages(index) {
+    // Get all the pages that should be resumed
+    const nearViewportPages = this.pages_
+      .slice(1) // Ignore host page
+      .slice(index - FORGET_PAGE_COUNT - 1, index + FORGET_PAGE_COUNT + 1)
+      .filter(page => page.isPaused());
+
+    nearViewportPages.forEach(page => page.resume());
   }
 
   /**
@@ -285,7 +331,7 @@ export class NextPageService {
   }
 
   /**
-   *
+   * Creates the initial (host) page based on the window's metadata
    * @return {!Page}
    */
   createHostPage() {
@@ -308,50 +354,144 @@ export class NextPageService {
   }
 
   /**
-   *
+   * Create a container element for the document and insert it into
+   * the amp-next-page element
    * @param {!Page} page
-   * @param {!Document} doc
+   * @return {!Element}
+   */
+  createDocumentContainerForPage(page) {
+    const container = this.win_.document.createElement('div');
+    container.classList.add(DOC_CONTAINER_CLASS);
+
+    const shadowRoot = this.win_.document.createElement('div');
+    shadowRoot.classList.add(SHADOW_ROOT_CLASS);
+    container.appendChild(shadowRoot);
+
+    // Insert the separator
+    container.appendChild(this.separator_.cloneNode(true));
+
+    // Insert the container
+    this.element_.insertBefore(container, this.moreBox_);
+
+    // Observe this page's visibility
+    this.visibilityObserver_.observe(
+      shadowRoot /** element */,
+      container /** parent */,
+      position => {
+        page.relativePos = position;
+        this.updateVisibility();
+      }
+    );
+
+    return container;
+  }
+
+  /**
+   * Appends the given document to the host page and installs
+   * a visibility observer to monitor it
+   * @param {!Page} page
+   * @param {!Document} content
+   * @param {boolean=} force
    * @return {?../../../src/runtime.ShadowDoc}
    */
-  appendAndObservePage(page, doc) {
+  attachDocumentToPage(page, content, force = false) {
     // If the user already scrolled to the bottom, prevent rendering
-    if (this.getViewportsAway_() <= NEAR_BOTTOM_VIEWPORT_COUNT) {
+    if (this.getViewportsAway_() <= NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
       // TODO(wassgha): Append a "load next article" button?
       return null;
     }
 
-    const shadowRoot = this.win_.document.createElement('div');
+    const container = dev().assertElement(page.container);
+    let shadowRoot = scopedQuerySelector(
+      container,
+      `> .${escapeCssSelectorIdent(SHADOW_ROOT_CLASS)}`
+    );
+
+    // Page has previously been deactivated so the shadow root
+    // will need to replace placeholder
+    // TODO(wassgha) This wouldn't be needed once we can resume a ShadowDoc
+    if (!shadowRoot) {
+      devAssert(page.isPaused());
+      const placeholder = dev().assertElement(
+        scopedQuerySelector(
+          container,
+          `> .${escapeCssSelectorIdent(PLACEHOLDER_CLASS)}`
+        ),
+        'Paused page does not have a placeholder'
+      );
+
+      shadowRoot = this.win_.document.createElement('div');
+      shadowRoot.classList.add(SHADOW_ROOT_CLASS);
+
+      container.replaceChild(shadowRoot, placeholder);
+    }
 
     // Handles extension deny-lists
-    this.sanitizeDoc(doc);
-
-    // Insert the separator
-    this.element_.insertBefore(this.separator_.cloneNode(true), this.moreBox_);
-
-    // Insert the shadow doc and observe its position
-    this.element_.insertBefore(shadowRoot, this.moreBox_);
-    this.visibilityObserver_.observe(shadowRoot, this.element_, position => {
-      page.relativePos = position;
-      this.updateVisibility();
-    });
+    this.sanitizeDoc(content);
 
     // Try inserting the shadow document
     try {
-      const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {
-        visibilityState: VisibilityState.PRERENDER,
-      });
+      const amp = this.multidocManager_.attachShadowDoc(
+        shadowRoot,
+        content,
+        '',
+        {
+          visibilityState: VisibilityState.PRERENDER,
+        }
+      );
 
       const ampdoc = devAssert(amp.ampdoc);
       installStylesForDoc(ampdoc, CSS, null, false, TAG);
 
       const body = ampdoc.getBody();
-      body.classList.add('i-amphtml-next-page-document');
+      body.classList.add(DOC_CLASS);
 
       return amp;
     } catch (e) {
       dev().error(TAG, 'failed to attach shadow document for page', e);
       return null;
     }
+  }
+
+  /**
+   * Closes the shadow document of an inserted page and replaces it
+   * with a placeholder
+   * @param {!Page} page
+   * @return {!Promise}
+   */
+  closeDocument(page) {
+    if (page.isPaused()) {
+      return Promise.resolve();
+    }
+
+    const container = dev().assertElement(page.container);
+    const shadowRoot = dev().assertElement(
+      scopedQuerySelector(
+        container,
+        `> .${escapeCssSelectorIdent(SHADOW_ROOT_CLASS)}`
+      )
+    );
+
+    // Create a placeholder that gets displayed when the document becomes inactive
+    const placeholder = this.win_.document.createElement('div');
+    placeholder.classList.add(PLACEHOLDER_CLASS);
+
+    let docHeight = 0;
+    let docWidth = 0;
+    return this.mutator_.measureMutateElement(
+      shadowRoot,
+      () => {
+        docHeight = shadowRoot./*REVIEW*/ offsetHeight;
+        docWidth = shadowRoot./*REVIEW*/ offsetWidth;
+      },
+      () => {
+        setStyles(placeholder, {
+          'height': `${docHeight}px`,
+          'width': `${docWidth}px`,
+        });
+        container.replaceChild(placeholder, shadowRoot);
+      }
+    );
   }
 
   /**
@@ -375,7 +515,7 @@ export class NextPageService {
   /**
    * Hides or shows elements based on the `amp-next-page-hide` and
    * `amp-next-page-replace` attributes
-   * @param {!Document|!ShadowRoot} doc Document to attach.
+   * @param {!Document|!ShadowRoot} doc Document of interest
    * @param {boolean=} isVisible Whether this page is visible or not
    */
   toggleHiddenAndReplaceableElements(doc, isVisible = true) {
