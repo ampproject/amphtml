@@ -69,8 +69,14 @@ export class AdSenseNetworkConfig {
       'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
     });
     const dataAdHost = this.autoAmpAdsElement_.getAttribute('data-ad-host');
+    const dataAdHostChannel = this.autoAmpAdsElement_.getAttribute(
+      'data-ad-host-channel'
+    );
     if (dataAdHost) {
       attributesObj['data-ad-host'] = dataAdHost;
+      if (dataAdHostChannel) {
+        attributesObj['data-ad-host-channel'] = dataAdHostChannel;
+      }
     }
     return attributesObj;
   }
