@@ -47,6 +47,10 @@ limitations under the License.
     </td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
+    <td>container, fill, fixed, fixed-height, flex-item, intrinsic, responsive</td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Tutorials</strong></td>
     <td>
       <ul>
