@@ -44,7 +44,7 @@ You can determine what changes are in a given build using one of the following:
 
 ### AMP Experimental and Beta Channels
 
-The _AMP Experimental Channel_ is a way to opt a browser into using the **experimental** release build of the AMP JS libraries. The Experimental Channel\_ **may be less stable** and it may contain features not yet available to all users.
+The _AMP Experimental Channel_ is a way to opt a browser into using the **experimental** release build of the AMP JS libraries. The _Experimental Channel_ **may be less stable** and it may contain features not yet available to all users.
 
 Opting into the _Experimental Channel_ is intended for:
 
