@@ -21,49 +21,32 @@ const SCROLL_THROTTLE_MS = 500;
 
 export class AmpStoryEmbedManager {
   /**
-   * Fallback for when IntersectionObserver is not supported. Calls layoutCallback
-   * on the embed when it is close to the viewport.
-   * @param {!AmpStoryEmbed} embedImpl
+   * @param {!Window} win
+   * @constructor
    */
-  layoutFallback_(embedImpl) {
-    let tick = true;
+  constructor(win) {
+    /** @private {!Window} */
+    this.win_ = win;
 
-    self.addEventListener('scroll', () => {
-      if (!tick) {
-        return;
-      }
-
-      setTimeout(() => {
-        tick = true;
-
-        this.layoutIfVisible_(embedImpl);
-      }, SCROLL_THROTTLE_MS);
-
-      tick = false;
-    });
-
-    // Calls it once it in case scroll event never fires.
-    this.layoutIfVisible_(embedImpl);
+    /** @private {?AmpStoryEmbed} */
+    this.currentEmbed_ = null;
   }
 
   /**
-   * Checks if embed is close to the viewport and calls layoutCallback when it is.
-   * @param {!AmpStoryEmbed} embedImpl
+   * @public
+   * @return {!AmpStoryEmbed}
    */
-  layoutIfVisible_(embedImpl) {
-    const embedTop = embedImpl.getElement()./*OK*/ getBoundingClientRect().top;
-    if (self./*OK*/ innerHeight * 2 > embedTop) {
-      embedImpl.layoutCallback();
-    }
+  getEmbed() {
+    return this.currentEmbed_;
   }
 
   /**
    * Calls layoutCallback on the embed when it is close to the viewport.
    * @param {!AmpStoryEmbed} embedImpl
-   * @visibleForTesting
+   * @private
    */
-  layoutEmbed(embedImpl) {
-    if (IntersectionObserver && self === self.parent) {
+  layoutEmbed_(embedImpl) {
+    if (IntersectionObserver && this.win_ === this.win_.parent) {
       const intersectingCallback = entries => {
         entries.forEach(entry => {
           if (!entry.isIntersecting) {
@@ -84,16 +67,57 @@ export class AmpStoryEmbedManager {
   }
 
   /**
+   * Fallback for when IntersectionObserver is not supported. Calls
+   * layoutCallback on the embed when it is close to the viewport.
+   * @param {!AmpStoryEmbed} embedImpl
+   * @private
+   */
+  layoutFallback_(embedImpl) {
+    let tick = true;
+
+    this.win_.addEventListener('scroll', () => {
+      if (!tick) {
+        return;
+      }
+
+      setTimeout(() => {
+        tick = true;
+
+        this.layoutIfVisible_(embedImpl);
+      }, SCROLL_THROTTLE_MS);
+
+      tick = false;
+    });
+
+    // Calls it once it in case scroll event never fires.
+    this.layoutIfVisible_(embedImpl);
+  }
+
+  /**
+   * Checks if embed is close to the viewport and calls layoutCallback when it
+   * is.
+   * @param {!AmpStoryEmbed} embedImpl
+   * @private
+   */
+  layoutIfVisible_(embedImpl) {
+    const embedTop = embedImpl.getElement()./*OK*/ getBoundingClientRect().top;
+    if (this.win_./*OK*/ innerHeight * 2 > embedTop) {
+      embedImpl.layoutCallback();
+    }
+  }
+
+  /**
    * Builds and layouts the embeds when appropiate.
+   * @public
    */
   loadEmbeds() {
-    const doc = self.document;
+    const doc = this.win_.document;
     const embeds = doc.getElementsByTagName('amp-story-embed');
     for (let i = 0; i < embeds.length; i++) {
       const embedEl = embeds[i];
-      const embedImpl = new AmpStoryEmbed(self, embedEl);
-      embedImpl.buildCallback();
-      this.layoutEmbed(embedImpl);
+      this.currentEmbed_ = new AmpStoryEmbed(this.win_, embedEl);
+      this.currentEmbed_.buildCallback();
+      this.layoutEmbed_(this.currentEmbed_);
     }
   }
 }

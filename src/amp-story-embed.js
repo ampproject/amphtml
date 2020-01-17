@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
+import {AmpStoryEmbedManager} from './amp-story-embed-manager';
 import {Messaging} from '@ampproject/viewer-messaging';
-import {addParamsToUrl, parseUrlWithA} from './url';
+import {
+  addParamsToUrl,
+  getFragment,
+  parseUrlWithA,
+  removeFragment,
+} from './url';
 import {dict} from './utils/object';
+import {findIndex} from './utils/array';
 import {setStyle} from './style';
 import {toArray} from './types';
 
@@ -26,12 +33,6 @@ const LoadStateClass = {
   LOADED: 'i-amphtml-story-embed-loaded',
   ERROR: 'i-amphtml-story-embed-error',
 };
-
-/** @const {string} */
-const IFRAME_ID_ATTR_NAME = 'story-embed-iframe-id';
-
-/** @const {string} */
-const SCROLL_THROTTLE_MS = 500;
 
 /** @const {string} */
 const CSS = `
@@ -59,11 +60,11 @@ export class AmpStoryEmbed {
     /** @private {!Window} */
     this.win_ = win;
 
-    /** @private {number} */
-    this.iframeIdCounter_ = 0;
-
-    /** @private {!Object<string, Messaging>} */
+    /** @private {!Object<number, Messaging>} */
     this.messagingFor_ = {};
+
+    /** @private {!Array<!Element>} */
+    this.iframes_ = [];
 
     /** @private {!Element} */
     this.element_ = element;
@@ -135,19 +136,23 @@ export class AmpStoryEmbed {
       'backgroundImage',
       story.getAttribute('data-poster-portrait-src')
     );
-    iframeEl.setAttribute(IFRAME_ID_ATTR_NAME, 'i' + this.iframeIdCounter_++);
     iframeEl.classList.add('story-embed-iframe');
+    this.iframes_.push(iframeEl);
 
     this.initializeLoadingListeners_(iframeEl);
     this.rootEl_.appendChild(iframeEl);
 
     this.initializeHandshake_(story, iframeEl).then(
       messaging => {
-        const iframeId = iframeEl[IFRAME_ID_ATTR_NAME];
-        this.messagingFor_[iframeId] = messaging;
+        const iframeIdx = findIndex(
+          this.iframes_,
+          iframe => iframe === iframeEl
+        );
+
+        this.messagingFor_[iframeIdx] = messaging;
 
         // TODO(Enriqe): Appropiately set visibility to stories.
-        this.displayStory_(iframeId);
+        this.displayStory_(iframeIdx);
       },
       err => {
         console /*OK*/
@@ -159,11 +164,11 @@ export class AmpStoryEmbed {
   /**
    * @param {!Element} story
    * @param {!Element} iframeEl
-   * @return {Promise<Messaging>}
+   * @return {!Promise<!Messaging>}
    * @private
    */
   initializeHandshake_(story, iframeEl) {
-    const frameOrigin = this.getEncodedUrl_(story.href).origin;
+    const frameOrigin = this.getEncodedLocation_(story.href).origin;
 
     return Messaging.waitForHandshakeFromDocument(
       this.win_,
@@ -181,13 +186,11 @@ export class AmpStoryEmbed {
 
     iframeEl.onload = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
-      this.element_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.LOADED);
       this.element_.classList.add(LoadStateClass.LOADED);
     };
     iframeEl.onerror = () => {
       this.rootEl_.classList.remove(LoadStateClass.LOADING);
-      this.element_.classList.remove(LoadStateClass.LOADING);
       this.rootEl_.classList.add(LoadStateClass.ERROR);
       this.element_.classList.add(LoadStateClass.ERROR);
     };
@@ -201,9 +204,8 @@ export class AmpStoryEmbed {
       return;
     }
 
-    const iframes = toArray(this.rootEl_.querySelectorAll('iframe'));
     // TODO(Enriqe): Layout all child iframes.
-    this.layoutIframe_(this.stories_[0], iframes[0]);
+    this.layoutIframe_(this.stories_[0], this.iframes_[0]);
 
     this.isLaidOut_ = true;
   }
@@ -214,7 +216,7 @@ export class AmpStoryEmbed {
    * @private
    */
   layoutIframe_(story, iframe) {
-    const {href} = this.getEncodedUrl_(story.href);
+    const {href} = this.getEncodedLocation_(story.href);
 
     iframe.setAttribute('src', href);
   }
@@ -225,7 +227,7 @@ export class AmpStoryEmbed {
    * @return {!Location}
    * @private
    */
-  getEncodedUrl_(href) {
+  getEncodedLocation_(href) {
     const {location} = this.win_;
     const url = parseUrlWithA(this.cachedA_, location.href);
 
@@ -235,20 +237,27 @@ export class AmpStoryEmbed {
       'origin': url.origin,
     });
 
-    let inputUrl = addParamsToUrl(href, params);
-    inputUrl = inputUrl.replace('amp_js_v=0.1', 'amp_js_v=0.1#');
+    const fragmentParam = getFragment(href);
+    const noFragmentUrl = removeFragment(href);
+    let inputUrl = addParamsToUrl(noFragmentUrl, params);
+
+    // Prepend fragment of original url.
+    const prependFragment = match => {
+      // Remove the last '&' after amp_js_v=0.1 and replace with a '#'.
+      return fragmentParam + match.slice(0, -1) + '#';
+    };
+    inputUrl = inputUrl.replace(/[?&]amp_js_v=0.1&/, prependFragment);
 
     return parseUrlWithA(this.cachedA_, inputUrl);
   }
 
   /**
    * Sends a message to the story document to make it visible.
-   *
    * @private
-   * @param {string} iframeId
+   * @param {number} iframeIdx
    */
-  displayStory_(iframeId) {
-    this.messagingFor_[iframeId].sendRequest(
+  displayStory_(iframeIdx) {
+    this.messagingFor_[iframeIdx].sendRequest(
       'visibilitychange',
       {state: 'visible'},
       true
@@ -256,83 +265,7 @@ export class AmpStoryEmbed {
   }
 }
 
-/**
- * Fallback for when IntersectionObserver is not supported. Calls layoutCallback
- * on the embed when it is close to the viewport.
- * @param {!AmpStoryEmbed} embedImpl
- */
-function layoutFallback(embedImpl) {
-  let tick = true;
-
-  self.addEventListener('scroll', () => {
-    if (!tick) {
-      return;
-    }
-
-    setTimeout(() => {
-      tick = true;
-
-      layoutIfVisible(embedImpl);
-    }, SCROLL_THROTTLE_MS);
-
-    tick = false;
-  });
-
-  // Calls it once it in case scroll event never fires.
-  layoutIfVisible(embedImpl);
-}
-
-/**
- * Checks if embed is close to the viewport and calls layoutCallback when it is.
- * @param {!AmpStoryEmbed} embedImpl
- */
-function layoutIfVisible(embedImpl) {
-  const embedTop = embedImpl.getElement()./*OK*/ getBoundingClientRect().top;
-  if (self./*OK*/ innerHeight * 2 > embedTop) {
-    embedImpl.layoutCallback();
-  }
-}
-
-/**
- * Calls layoutCallback on the embed when it is close to the viewport.
- * @param {!AmpStoryEmbed} embedImpl
- * @visibleForTesting
- */
-export function layoutEmbed(embedImpl) {
-  if (IntersectionObserver && self === self.parent) {
-    const intersectingCallback = entries => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) {
-          return;
-        }
-        embedImpl.layoutCallback();
-      });
-    };
-
-    const observer = new IntersectionObserver(intersectingCallback, {
-      rootMargin: '100%',
-    });
-    observer.observe(embedImpl.getElement());
-    return;
-  }
-
-  layoutFallback(embedImpl);
-}
-
-/**
- * Builds and layouts the embeds when appropiate.
- */
-function loadEmbeds() {
-  const doc = self.document;
-  const embeds = doc.getElementsByTagName('amp-story-embed');
-  for (let i = 0; i < embeds.length; i++) {
-    const embedEl = embeds[i];
-    const embedImpl = new AmpStoryEmbed(self, embedEl);
-    embedImpl.buildCallback();
-    layoutEmbed(embedImpl);
-  }
-}
-
 self.onload = () => {
-  loadEmbeds();
+  const manager = new AmpStoryEmbedManager(self);
+  manager.loadEmbeds();
 };

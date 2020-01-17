@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpStoryEmbed, layoutEmbed} from '../../src/amp-story-embed';
+import {AmpStoryEmbedManager} from '../../src/amp-story-embed-manager';
 
 describes.realWin('AmpStoryEmbed', {amp: false}, env => {
   let win;
-  let storyEmbed;
   let embedEl;
   let url;
+  let manager;
 
   function buildStoryEmbed() {
     embedEl = win.document.createElement('amp-story-embed');
@@ -29,8 +29,8 @@ describes.realWin('AmpStoryEmbed', {amp: false}, env => {
       'https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
     storyAnchor.setAttribute('href', url);
     embedEl.appendChild(storyAnchor);
-    storyEmbed = new AmpStoryEmbed(win, embedEl);
     win.document.body.appendChild(embedEl);
+    manager = new AmpStoryEmbedManager(win);
   }
 
   beforeEach(() => {
@@ -39,33 +39,33 @@ describes.realWin('AmpStoryEmbed', {amp: false}, env => {
   });
 
   it('should build an iframe for each story', () => {
-    storyEmbed.buildCallback();
-    layoutEmbed(storyEmbed);
-
+    manager.loadEmbeds();
+    const storyEmbed = manager.getEmbed();
     const shadowRoot = storyEmbed.getRoot();
+
     expect(shadowRoot.children.length).to.equal(1);
   });
 
   it('should correctly append params at the end of the story url', () => {
-    storyEmbed.buildCallback();
-    layoutEmbed(storyEmbed);
-
+    manager.loadEmbeds();
+    const storyEmbed = manager.getEmbed();
     const shadowRoot = storyEmbed.getRoot();
+
     expect(shadowRoot.firstElementChild.getAttribute('src')).to.equals(
-      url + '?amp_js_v=0.1#&visibilityState=inactive&origin=about%3Asrcdoc'
+      url + '?amp_js_v=0.1#visibilityState=inactive&origin=about%3Asrcdoc'
     );
   });
 
   it('should correctly append params at the end of a story url with existing params', () => {
-    url += '?testParam=true';
+    url += '?testParam=true#myhash=hashValue';
     embedEl.firstElementChild.setAttribute('href', url);
 
-    storyEmbed.buildCallback();
-    layoutEmbed(storyEmbed);
-
+    manager.loadEmbeds();
+    const storyEmbed = manager.getEmbed();
     const shadowRoot = storyEmbed.getRoot();
+
     expect(shadowRoot.firstElementChild.getAttribute('src')).to.equals(
-      url + '&amp_js_v=0.1#&visibilityState=inactive&origin=about%3Asrcdoc'
+      url + '&amp_js_v=0.1#visibilityState=inactive&origin=about%3Asrcdoc'
     );
   });
 });
