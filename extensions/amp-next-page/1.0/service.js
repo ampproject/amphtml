@@ -221,8 +221,8 @@ export class NextPageService {
         if (!page.isVisible()) {
           page.setVisibility(VisibilityState.VISIBLE);
         }
-        this.hidePreviousPages(index);
-        this.resumeForgottenPages(index);
+        this.hidePreviousPages_(index);
+        this.resumeForgottenPages_(index);
       } else if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
           page.setVisibility(VisibilityState.HIDDEN);
@@ -250,8 +250,18 @@ export class NextPageService {
    * marked hidden if they are out of the viewport and additionally
    * paused/forgotten if they are too far from the current page
    * @param {number} index index of the page to start at
+   * @param {?number} forgetPageCountForTesting
+   * @return {!Promise}
+   * @private
    */
-  hidePreviousPages(index) {
+  hidePreviousPages_(index, forgetPageCountForTesting) {
+    // The distance (in pages) to the currently visible page after which
+    // we start unloading pages from memory
+    const forgetPageCount =
+      forgetPageCountForTesting === undefined
+        ? FORGET_PAGE_COUNT
+        : forgetPageCountForTesting;
+
     const scrollingDown = this.scrollDirection_ === Direction.DOWN;
     // Hide the host (first) page if needed
     if (scrollingDown && this.hostPage_.isVisible()) {
@@ -264,23 +274,25 @@ export class NextPageService {
       : this.pages_.slice(index + 1);
 
     // Find the ones that should be hidden (no longer inside the viewport)
-    previousPages
-      .filter(page => {
-        const shouldHide =
-          page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
-          page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT;
-        return shouldHide;
-      })
-      .forEach((page, away) => {
-        // Hide all pages that are in the viewport
-        if (page.isVisible()) {
-          page.setVisibility(VisibilityState.HIDDEN);
-        }
-        // Pause those that are too far away
-        if (away >= FORGET_PAGE_COUNT) {
-          page.pause();
-        }
-      });
+    return Promise.all(
+      previousPages
+        .filter(page => {
+          const shouldHide =
+            page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
+            page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT;
+          return shouldHide;
+        })
+        .map((page, away) => {
+          // Hide all pages that are in the viewport
+          if (page.isVisible()) {
+            page.setVisibility(VisibilityState.HIDDEN);
+          }
+          // Pause those that are too far away
+          if (away >= forgetPageCount) {
+            return page.pause();
+          }
+        })
+    );
   }
 
   /**
@@ -288,12 +300,21 @@ export class NextPageService {
    * currently visible page are re-inserted (if forgotten) and
    * ready to become visible soon
    * @param {number} index index of the page to start at
+   * @param {?number} forgetPageCountForTesting
+   * @private
    */
-  resumeForgottenPages(index) {
+  resumeForgottenPages_(index, forgetPageCountForTesting) {
+    // The distance (in pages) to the currently visible page after which
+    // we start unloading pages from memory
+    const forgetPageCount =
+      forgetPageCountForTesting === undefined
+        ? FORGET_PAGE_COUNT
+        : forgetPageCountForTesting;
+
     // Get all the pages that should be resumed
     const nearViewportPages = this.pages_
       .slice(1) // Ignore host page
-      .slice(index - FORGET_PAGE_COUNT - 1, index + FORGET_PAGE_COUNT + 1)
+      .slice(index - forgetPageCount - 1, index + forgetPageCount + 1)
       .filter(page => page.isPaused());
 
     nearViewportPages.forEach(page => page.resume());

@@ -148,10 +148,8 @@ export class Page {
       return;
     }
 
-    const willBeVisible = visibilityState === VisibilityState.VISIBLE;
-
     //Reload the page if necessary
-    if (this.isPaused() && willBeVisible) {
+    if (this.isPaused() && visibilityState === VisibilityState.VISIBLE) {
       this.resume();
     }
 
@@ -173,12 +171,13 @@ export class Page {
   /**
    * Creates a placeholder in place of the original page and unloads
    * the shadow root from memory
+   * @return {!Promise}
    */
   pause() {
     if (!this.shadowDoc_) {
       return;
     }
-    this.shadowDoc_.close().then(() => {
+    return this.shadowDoc_.close().then(() => {
       this.manager_.closeDocument(this /** page */).then(() => {
         this.shadowDoc_ = null;
         this.visibilityState_ = VisibilityState.HIDDEN;
@@ -188,16 +187,12 @@ export class Page {
   }
 
   /**
-   * Removes the placeholder and appends the page's content again
+   * Removes the placeholder and re-renders the page after its shadow
+   * root has been removed
    */
   resume() {
     this.attach_(devAssert(this.cachedContent_));
   }
-
-  /**
-   * Re-renders the page after its shadow root has been removed
-   */
-  reload() {}
 
   /**
    * @return {boolean}
@@ -240,8 +235,8 @@ export class Page {
         this.container_ = this.manager_.createDocumentContainerForPage(
           this /** page */
         );
-        // TODO(wassgha): To further optimize, this should be parsed from the service worker
-        // instead of stored in memory
+        // TODO(wassgha): To further optimize, this should ideally
+        // be parsed from the service worker instead of stored in memory
         this.cachedContent_ = content;
         this.attach_(content);
       })
