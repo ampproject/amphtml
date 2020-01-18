@@ -68,7 +68,7 @@ Example:
 >
 ```
 
-Although it will be overridden, there must be at least one character in the `amp-timeago` text node.
+The `amp-timeago` component requires a placeholder in the text node. The calculated timestamp replaces the placeholder once ready. Use the placeholder as a fallback to display to users if `amp-timeago` is unable to process the fuzzy timestamp.
 
 [/example]
 
