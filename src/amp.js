@@ -26,7 +26,7 @@ import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
-import {getModeObject} from './mode-object';
+import {getMode} from './mode';
 import {
   installAmpdocServices,
   installBuiltinElements,
@@ -101,7 +101,7 @@ if (shouldMainBootstrapRun) {
     ) {
       perf.addEnabledExperiment('no-boilerplate');
     }
-    if (getModeObject().esm) {
+    if (getMode().esm) {
       perf.addEnabledExperiment('esm');
     }
     fontStylesheetTimeout(self);
