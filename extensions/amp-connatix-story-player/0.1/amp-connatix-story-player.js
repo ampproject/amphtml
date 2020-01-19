@@ -78,41 +78,6 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
         this.destroyPlayerFrame_();
         this.attemptCollapse();
       }
-      if (e.data.eventName === 'cnx_layout_change') {
-        console.log('layoutChange');
-        console.log(e.data.width);
-        console.log(e.data.height);
-        // this.element.changeSize(e.data.height, e.data.width);
-        // const mutator = Services.mutatorForDoc(this.getAmpDoc());
-        // mutator./*OK*/ changeSize(this.element, e.data.height, e.data.width);
-        // mutator./*OK*/ mutateElement(this.element, () => {
-        //   this.element.overflowCallback(
-        //     /* overflown */ false,
-        //     e.data.height,
-        //     e.data.width,
-        //   );
-        // });
-        // this.attemptChangeSize(e.data.height, e.data.width).then(
-        //   () => {
-        //     if (e.data.height !== undefined) {
-        //       console.log(this.element);
-        //       this.element.setAttribute('height', e.data.height);
-        //     }
-        //     if (e.data.width !== undefined) {
-        //       console.log(this.element);
-        //       this.element.setAttribute('width', e.data.width);
-        //     }
-        //     this.applyFillContent(this.iframe_, /* replacedContent */ true);
-        //     const viewport = Services.viewportForDoc(this.element);
-        //     const box = viewport.getLayoutRect(this.element);
-        //     console.log(box);
-        //     console.log(this.element.updateLayoutBox);
-        //   },
-        //   e => {
-        //     console.log(e);
-        //   }
-        // );
-      }
     });
   }
 
@@ -192,7 +157,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
         eventName: 'cnx_viewport_resize',
         viewportWidth: e.target.innerWidth,
         viewportHeight: e.target.innerHeight,
-      })
+      });
     );
     // Return a load promise for the frame so the runtime knows when the
     // component is ready.
