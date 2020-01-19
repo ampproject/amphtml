@@ -31,11 +31,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     this.playerId_ = '';
 
     /** @private {string} */
-
     this.storyId_ = '';
-
-    /** @private {Layout} */
-    this.layout_ = Layout.RESPONSIVE;
 
     /** @private {string} */
     this.iframeDomain_ = 'https://cds.connatix.com';
@@ -86,29 +82,37 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
         console.log('layoutChange');
         console.log(e.data.width);
         console.log(e.data.height);
-        this.attemptChangeSize(e.data.height, e.data.width).then(
-          () => {
-            if (e.data.height !== undefined) {
-              console.log(this.element);
-              this.element.setAttribute('height', e.data.height);
-            }
-            if (e.data.width !== undefined) {
-              console.log(this.element);
-              this.element.setAttribute('width', e.data.width);
-            }
-          },
-          e => {
-            console.log(e);
-          }
-        );
-        // this.attemptChangeSize(e.data.height, e.data.width).then(() => {});
+        // this.element.changeSize(e.data.height, e.data.width);
+        // const mutator = Services.mutatorForDoc(this.getAmpDoc());
+        // mutator./*OK*/ changeSize(this.element, e.data.height, e.data.width);
+        // mutator./*OK*/ mutateElement(this.element, () => {
+        //   this.element.overflowCallback(
+        //     /* overflown */ false,
+        //     e.data.height,
+        //     e.data.width,
+        //   );
+        // });
+        // this.attemptChangeSize(e.data.height, e.data.width).then(
+        //   () => {
+        //     if (e.data.height !== undefined) {
+        //       console.log(this.element);
+        //       this.element.setAttribute('height', e.data.height);
+        //     }
+        //     if (e.data.width !== undefined) {
+        //       console.log(this.element);
+        //       this.element.setAttribute('width', e.data.width);
+        //     }
+        //     this.applyFillContent(this.iframe_, /* replacedContent */ true);
+        //     const viewport = Services.viewportForDoc(this.element);
+        //     const box = viewport.getLayoutRect(this.element);
+        //     console.log(box);
+        //     console.log(this.element.updateLayoutBox);
+        //   },
+        //   e => {
+        //     console.log(e);
+        //   }
+        // );
       }
-      // if (e.data.eventName === 'cnx_size_change') {
-      //   console.log('layoutChange');
-      //   console.log(e.data.width);
-      //   console.log(e.data.height);
-      //   this.attemptChangeSize(e.data.height, e.data.width).then(() => {});
-      // }
     });
   }
 
@@ -158,7 +162,6 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    this.layout_ = layout;
     return layout === Layout.RESPONSIVE;
   }
 
