@@ -30,7 +30,7 @@ export const PageState = {
   PAUSED: 5,
 };
 
-const VISIBLE_DOC_CLASS = 'amp-next-page-document-visible';
+const VISIBLE_DOC_CLASS = 'next-page-visible';
 
 export class Page {
   /**

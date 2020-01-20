@@ -23,11 +23,13 @@ import {
   childElementByAttr,
   childElementsByTag,
   isJsonScriptTag,
+  removeChildren,
   removeElement,
   scopedQuerySelector,
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
+import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
@@ -76,6 +78,9 @@ export class NextPageService {
      * @const {!../../../src/service/mutator-interface.MutatorInterface}
      */
     this.mutator_ = Services.mutatorForDoc(ampdoc);
+
+    /** @private @const {!../../../src/service/template-impl.Templates} */
+    this.templates_ = Services.templatesFor(this.win_);
 
     /** @private {?Element} */
     this.separator_ = null;
@@ -383,12 +388,15 @@ export class NextPageService {
     const container = this.win_.document.createElement('div');
     container.classList.add(DOC_CONTAINER_CLASS);
 
+    // Insert the separator
+    const separatorInstance = this.separator_.cloneNode(true);
+    container.appendChild(separatorInstance);
+    this.maybeRenderSeparatorTemplate_(separatorInstance, page);
+
+    // Insert the document
     const shadowRoot = this.win_.document.createElement('div');
     shadowRoot.classList.add(SHADOW_ROOT_CLASS);
     container.appendChild(shadowRoot);
-
-    // Insert the separator
-    container.appendChild(this.separator_.cloneNode(true));
 
     // Insert the container
     this.element_.insertBefore(container, this.moreBox_);
@@ -416,7 +424,7 @@ export class NextPageService {
    */
   attachDocumentToPage(page, content, force = false) {
     // If the user already scrolled to the bottom, prevent rendering
-    if (this.getViewportsAway_() <= NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
+    if (this.getViewportsAway_() < NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
       // TODO(wassgha): Append a "load next article" button?
       return null;
     }
@@ -533,15 +541,15 @@ export class NextPageService {
   }
 
   /**
-   * Hides or shows elements based on the `amp-next-page-hide` and
-   * `amp-next-page-replace` attributes
+   * Hides or shows elements based on the `next-page-hide` and
+   * `next-page-replace` attributes
    * @param {!Document|!ShadowRoot} doc Document of interest
    * @param {boolean=} isVisible Whether this page is visible or not
    */
   toggleHiddenAndReplaceableElements(doc, isVisible = true) {
-    // Hide elements that have [amp-next-page-hide] on child documents
+    // Hide elements that have [next-page-hide] on child documents
     if (doc !== this.hostPage_.document) {
-      toArray(doc.querySelectorAll('[amp-next-page-hide]')).forEach(element =>
+      toArray(doc.querySelectorAll('[next-page-hide]')).forEach(element =>
         toggle(element, false /** opt_display */)
       );
     }
@@ -551,14 +559,14 @@ export class NextPageService {
       return;
     }
 
-    // Replace elements that have [amp-next-page-replace]
+    // Replace elements that have [next-page-replace]
     toArray(
-      doc.querySelectorAll('*:not(amp-next-page) [amp-next-page-replace]')
+      doc.querySelectorAll('*:not(amp-next-page) [next-page-replace]')
     ).forEach(element => {
-      let uniqueId = element.getAttribute('amp-next-page-replace');
+      let uniqueId = element.getAttribute('next-page-replace');
       if (!uniqueId) {
         uniqueId = String(Date.now() + Math.floor(Math.random() * 100));
-        element.setAttribute('amp-next-page-replace', uniqueId);
+        element.setAttribute('next-page-replace', uniqueId);
       }
 
       if (
@@ -725,11 +733,7 @@ export class NextPageService {
    * @private
    */
   getSeparatorElement_(element) {
-    const providedSeparator = childElementByAttr(
-      element,
-      'amp-next-page-separator'
-    );
-    // TODO(wassgha): Use templates (amp-mustache) to render the separator
+    const providedSeparator = childElementByAttr(element, 'separator');
     if (providedSeparator) {
       removeElement(providedSeparator);
     }
@@ -741,9 +745,41 @@ export class NextPageService {
    * @private
    */
   buildDefaultSeparator_() {
-    const separator = this.win_.document.createElement('div');
-    separator.classList.add('amp-next-page-separator');
-    return separator;
+    const html = htmlFor(this.element_);
+    return html`
+      <div
+        class="amp-next-page-default-separator"
+        aria-label="Next article separator"
+      >
+        Next article
+      </div>
+    `;
+  }
+
+  /**
+   * Renders the template inside the separator element using
+   * data from the current article (if a template is present)
+   *
+   * @param {!Element} separator
+   * @param {!Page} page
+   * @return {!Promise}
+   */
+  maybeRenderSeparatorTemplate_(separator, page) {
+    if (!this.templates_.hasTemplate(separator)) {
+      return Promise.resolve();
+    }
+    this.templates_
+      .findAndRenderTemplate(separator, {
+        title: page.title,
+        url: page.url,
+        image: page.image,
+      })
+      .then(rendered => {
+        return this.mutator_.mutateElement(separator, () => {
+          removeChildren(dev().assertElement(separator));
+          separator.appendChild(rendered);
+        });
+      });
   }
 
   /**
@@ -752,10 +788,7 @@ export class NextPageService {
    * @private
    */
   getMoreBoxElement_(element) {
-    const providedMoreBox = childElementByAttr(
-      element,
-      'amp-next-page-more-box'
-    );
+    const providedMoreBox = childElementByAttr(element, 'more-box');
     // TODO(wassgha): Use templates (amp-mustache) to render the more box
     if (providedMoreBox) {
       removeElement(providedMoreBox);
@@ -770,7 +803,7 @@ export class NextPageService {
   buildDefaultMoreBox_() {
     // TODO(wassgha): Better default more box
     const moreBox = this.win_.document.createElement('div');
-    moreBox.classList.add('amp-next-page-more-box');
+    moreBox.classList.add('amp-next-page-default-more-box');
     return moreBox;
   }
 }
