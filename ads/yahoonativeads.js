@@ -29,21 +29,6 @@ export function yahoonativeads(global, data) {
   global.publisherUrl = data.url;
   global.amp = true;
 
-  global.context.observeIntersection(
-    entries => {
-      entries.forEach(entry => {
-        if (global.Native) {
-          global.Native.onViewChange({
-            intersectionRatio: entry.intersectionRatio,
-          });
-        }
-      });
-    },
-    {
-      threshold: [0, 0.5, 1],
-    }
-  );
-
   loadScript(global, 'https://s.yimg.com/dy/ads/native.js', () =>
     global.context.renderStart()
   );
