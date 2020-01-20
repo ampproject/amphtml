@@ -195,17 +195,16 @@ export class NextPageService {
     if (this.pages_.some(page => page.isFetching())) {
       return Promise.resolve();
     }
-
-    if (force || this.getViewportsAway_() <= PRERENDER_VIEWPORT_COUNT) {
-      const nextPage = this.pages_[
-        this.getPageIndex_(this.lastFetchedPage_) + 1
-      ];
-      if (nextPage) {
-        return nextPage.fetch();
-      } else {
-        return Promise.resolve();
-      }
+    // If we're still too far from the bottom, early return
+    if (this.getViewportsAway_() > PRERENDER_VIEWPORT_COUNT && !force) {
+      return Promise.resolve();
     }
+
+    const nextPage = this.pages_[this.getPageIndex_(this.lastFetchedPage_) + 1];
+    if (!nextPage) {
+      return Promise.resolve();
+    }
+    return nextPage.fetch();
   }
 
   /**
@@ -250,7 +249,7 @@ export class NextPageService {
    * marked hidden if they are out of the viewport and additionally
    * paused/forgotten if they are too far from the current page
    * @param {number} index index of the page to start at
-   * @param {?number} forgetPageCountForTesting
+   * @param {number=} forgetPageCountForTesting
    * @return {!Promise}
    * @private
    */
@@ -300,7 +299,7 @@ export class NextPageService {
    * currently visible page are re-inserted (if forgotten) and
    * ready to become visible soon
    * @param {number} index index of the page to start at
-   * @param {?number} forgetPageCountForTesting
+   * @param {number=} forgetPageCountForTesting
    * @private
    */
   resumeForgottenPages_(index, forgetPageCountForTesting) {

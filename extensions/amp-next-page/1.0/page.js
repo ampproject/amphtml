@@ -175,7 +175,7 @@ export class Page {
    */
   pause() {
     if (!this.shadowDoc_) {
-      return;
+      return Promise.resolve();
     }
     return this.shadowDoc_.close().then(() => {
       this.manager_.closeDocument(this /** page */).then(() => {
