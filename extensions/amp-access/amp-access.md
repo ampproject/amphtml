@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Provides an AMP paywall and subscription support.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
