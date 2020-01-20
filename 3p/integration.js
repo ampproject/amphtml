@@ -555,6 +555,7 @@ register('valuecommerce', valuecommerce);
 register('vdoai', vdoai);
 register('videointelligence', videointelligence);
 register('videonow', videonow);
+register('vidoomy', vidoomy);
 register('viqeoplayer', viqeoplayer);
 register('viralize', viralize);
 register('vmfive', vmfive);
@@ -580,7 +581,6 @@ register('zergnet', zergnet);
 register('zucks', zucks);
 register('speakol', speakol);
 
-register('vidoomy',vidoomy);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
