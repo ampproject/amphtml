@@ -25,9 +25,11 @@ limitations under the License.
 
 # amp-timeago
 
-Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 hours ago).
-
 <table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Provides fuzzy timestamps that you can use on your AMP pages, based on <a href="https://github.com/hustcc/timeago.js">timeago.js</a>.</td>
+  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-timeago" src="https://cdn.ampproject.org/v0/amp-timeago-0.1.js">&lt;/script></code></td>
@@ -46,9 +48,14 @@ Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 
 
 ## Behavior
 
-Provides fuzzy timestamps that you can use on your AMP pages. This component is based on <a href="https://github.com/hustcc/timeago.js">timeago.js</a>.
+Use the amp-timago component to count up to, or away from, a specified date and time.
+
+The component replaces the text node with a fuzzy timestamp, such as `in 30 years` or `3 hours ago`.
+If using the `cutoff` attribute, and time has past the cutoff, the text node will display the specified date in the `datetime` attribute.
 
 Example:
+
+[example preview="inline" playground="true" imports="amp-timeago"]
 
 ```html
 <amp-timeago
@@ -60,6 +67,10 @@ Example:
   >Saturday 11 April 2017 00.37</amp-timeago
 >
 ```
+
+The `amp-timeago` component requires a placeholder in the text node. The calculated timestamp replaces the placeholder once ready. Use the placeholder as a fallback to display to users if `amp-timeago` is unable to process the fuzzy timestamp.
+
+[/example]
 
 ## Attributes
 
