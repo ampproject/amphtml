@@ -30,14 +30,18 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.playerId_ = '';
 
+    /** @private {number} */
+    // 0 - Portrait, 1 - Landscape
+    this.orientation_ = 0;
+
     /** @private {string} */
     this.storyId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://cds.connatix.com';
+    this.iframeDomain_ = 'https://test.amp.connatix.com'; //'https://cds.connatix.com';
 
     /** @private {string} */
-    this.iframePath_ = '/p/plugins/connatix.playspace.embed.html';
+    this.iframePath_ = '/safe_iframe_embeed.html';
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
@@ -106,6 +110,20 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
       element
     );
 
+     // Orientation is mandatory
+     // 0 - Portrait
+     // 1 - landscape
+     this.orientation_ = userAssert(
+      element.getAttribute('data-orientation'),
+      'The data-orientation attribute is required for <amp-connatix-story-player> %s',
+      element
+    );
+
+    const orientation = parseInt(this.orientation_, 10);
+    if (orientation !== 0 && orientation !== 1) {
+      console.error('Wrong orientation value. 0 - Portrait, 1 - Landscape');
+    }
+
     // Story id is optional
     this.storyId_ = element.getAttribute('data-story-id') || '';
 
@@ -136,6 +154,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     // Url Params for iframe source
     const urlParams = dict({
       'playerId': this.playerId_ || undefined,
+      'orientation': this.orientation_ || undefined,
       'storyId': this.storyId_ || undefined,
     });
     const iframeUrl = this.iframeDomain_ + this.iframePath_;
@@ -157,7 +176,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
         eventName: 'cnx_viewport_resize',
         viewportWidth: e.target.innerWidth,
         viewportHeight: e.target.innerHeight,
-      });
+      })
     );
     // Return a load promise for the frame so the runtime knows when the
     // component is ready.
