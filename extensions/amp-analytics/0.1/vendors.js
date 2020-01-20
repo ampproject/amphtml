@@ -38,6 +38,7 @@ import {BAIDUANALYTICS_CONFIG} from './vendors/baiduanalytics';
 import {BG_CONFIG} from './vendors/bg';
 import {BURT_CONFIG} from './vendors/burt';
 import {BYSIDE_CONFIG} from './vendors/byside';
+import {CAPTAINMETRICS_CONFIG} from './vendors/captainmetrics';
 import {CHARTBEAT_CONFIG} from './vendors/chartbeat';
 import {CLICKY_CONFIG} from './vendors/clicky';
 import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
@@ -91,6 +92,8 @@ import {SEGMENT_CONFIG} from './vendors/segment';
 import {SHINYSTAT_CONFIG} from './vendors/shinystat';
 import {SIMPLEREACH_CONFIG} from './vendors/simplereach';
 import {SNOWPLOW_CONFIG} from './vendors/snowplow';
+import {SNOWPLOW_V2_CONFIG} from './vendors/snowplow_v2';
+import {SUBSCRIPTIONS_PROPENSITY_CONFIG} from './vendors/subscriptions-propensity';
 import {TEAANALYTICS_CONFIG} from './vendors/teaanalytics';
 import {TEALIUMCOLLECT_CONFIG} from './vendors/tealiumcollect';
 import {TOP100_CONFIG} from './vendors/top100';
@@ -114,7 +117,6 @@ const DEFAULT_CONFIG = jsonLiteral({
     'ampGeo': 'AMP_GEO',
     'ampState': 'AMP_STATE',
     'ampVersion': 'AMP_VERSION',
-    'ancestorOrigin': 'ANCESTOR_ORIGIN',
     'authdata': 'AUTHDATA',
     'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
     'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
@@ -196,6 +198,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'bg': includeJsonLiteral(BG_CONFIG),
       'burt': includeJsonLiteral(BURT_CONFIG),
       'byside': includeJsonLiteral(BYSIDE_CONFIG),
+      'captainmetrics': includeJsonLiteral(CAPTAINMETRICS_CONFIG),
       'chartbeat': includeJsonLiteral(CHARTBEAT_CONFIG),
       'clicky': includeJsonLiteral(CLICKY_CONFIG),
       'colanalytics': includeJsonLiteral(COLANALYTICS_CONFIG),
@@ -245,6 +248,9 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'piano': includeJsonLiteral(PIANO_CONFIG),
       'pinpoll': includeJsonLiteral(PINPOLL_CONFIG),
       'pressboard': includeJsonLiteral(PRESSBOARD_CONFIG),
+      'subscriptions-propensity': includeJsonLiteral(
+        SUBSCRIPTIONS_PROPENSITY_CONFIG
+      ),
       'quantcast': includeJsonLiteral(QUANTCAST_CONFIG),
       'retargetly': includeJsonLiteral(RETARGETLY_CONFIG),
       'rakam': includeJsonLiteral(RAKAM_CONFIG),
@@ -253,6 +259,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'shinystat': includeJsonLiteral(SHINYSTAT_CONFIG),
       'simplereach': includeJsonLiteral(SIMPLEREACH_CONFIG),
       'snowplow': includeJsonLiteral(SNOWPLOW_CONFIG),
+      'snowplow_v2': includeJsonLiteral(SNOWPLOW_V2_CONFIG),
       'teaanalytics': includeJsonLiteral(TEAANALYTICS_CONFIG),
       'tealiumcollect': includeJsonLiteral(TEALIUMCOLLECT_CONFIG),
       'top100': includeJsonLiteral(TOP100_CONFIG),
@@ -295,11 +302,10 @@ function mergeIframeTransportConfig(config, iframeTransportConfig) {
   for (const vendor in iframeTransportConfig) {
     if (hasOwn(iframeTransportConfig, vendor)) {
       const url = iframeTransportConfig[vendor];
-      config[vendor]['transport'] = Object.assign(
-        {},
-        config[vendor]['transport'],
-        {'iframe': url}
-      );
+      config[vendor]['transport'] = {
+        ...config[vendor]['transport'],
+        'iframe': url,
+      };
     }
   }
 }

@@ -721,6 +721,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
   },
 
+  'nativery': {
+    preconnect: 'https://cdn.nativery.com',
+  },
+
   'nativo': {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
@@ -995,6 +999,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'ssp': {
+    prefetch: 'https://ssp.imedia.cz/static/js/ssp.js',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
@@ -1074,6 +1084,11 @@ const adConfig = jsonConfiguration({
   'valuecommerce': {
     prefetch: 'https://amp.valuecommerce.com/amp_bridge.js',
     preconnect: ['https://ad.jp.ap.valuecommerce.com'],
+    renderStartImplemented: true,
+  },
+
+  'vdoai': {
+    prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
     renderStartImplemented: true,
   },
 

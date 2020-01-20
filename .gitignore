@@ -30,4 +30,4 @@ firebase
 .firebaserc
 firebase.json
 .firebase/
-extensions/amp-analytics/0.1/vendors/*.json
+src/purifier/dist

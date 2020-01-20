@@ -51,6 +51,14 @@ export function isUserErrorMessage(message) {
 
 /**
  * @param {string} message
+ * @return {string} The new message without USER_ERROR_SENTINEL
+ */
+export function stripUserError(message) {
+  return message.replace(USER_ERROR_SENTINEL, '');
+}
+
+/**
+ * @param {string} message
  * @return {boolean} Whether this message was a a user error from an iframe embed.
  */
 export function isUserErrorEmbed(message) {
@@ -59,7 +67,6 @@ export function isUserErrorEmbed(message) {
 
 /**
  * @enum {number}
- * @private Visible for testing only.
  */
 export const LogLevel = {
   OFF: 0,

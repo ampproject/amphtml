@@ -130,6 +130,7 @@ const forbiddenTerms = {
       'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/prettify.js',
+      'src/purifier/noop.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -223,6 +224,14 @@ const forbiddenTerms = {
       'testing/iframe.js',
     ],
   },
+  'installMutatorServiceForDoc': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/inabox/inabox-services.js',
+      'src/service/core-services.js',
+      'src/service/mutator-impl.js',
+    ],
+  },
   'installPerformanceService': {
     message: privateServiceFactory,
     whitelist: [
@@ -230,6 +239,14 @@ const forbiddenTerms = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
+    ],
+  },
+  'installResourcesServiceForDoc': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/inabox/inabox-services.js',
+      'src/service/core-services.js',
+      'src/service/resources-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
@@ -283,15 +300,6 @@ const forbiddenTerms = {
       'src/service/vsync-impl.js',
     ],
   },
-  'installResourcesServiceForDoc': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/inabox/inabox-services.js',
-      'src/service/core-services.js',
-      'src/service/resources-impl.js',
-      'src/service/standard-actions-impl.js',
-    ],
-  },
   'installXhrService': {
     message: privateServiceFactory,
     whitelist: [
@@ -307,7 +315,7 @@ const forbiddenTerms = {
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
-      'extensions/amp-next-page/0.2/service.js',
+      'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'extensions/amp-video-docking/0.1/amp-video-docking.js',
       'src/service/position-observer/position-observer-impl.js',
@@ -375,6 +383,7 @@ const forbiddenTerms = {
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
       'extensions/amp-consent/0.1/consent-ui.js',
+      'extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
@@ -418,6 +427,7 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
+      'extensions/amp-story/1.0/amp-story-quiz.js',
     ],
   },
   'getBaseCid': {
@@ -569,7 +579,7 @@ const forbiddenTerms = {
   },
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, think twice before using it',
-    whitelist: ['src/service/resources-impl.js'],
+    whitelist: ['src/service/mutator-impl.js', 'src/service/resources-impl.js'],
   },
   '\\.requireLayout\\(': {
     message:
@@ -846,6 +856,7 @@ const forbiddenTerms = {
       'test/unit/test-mode.js',
       'test/unit/test-motion.js',
       'test/unit/test-mustache.js',
+      'test/unit/test-mutator.js',
       'test/unit/test-object.js',
       'test/unit/test-observable.js',
       'test/unit/test-pass.js',
@@ -1134,6 +1145,7 @@ const forbiddenTermsSrcInclusive = {
       'testing/local-amp-chrome-extension/background.js',
       'tools/errortracker/errortracker.go',
       'tools/experiments/experiments.js',
+      'validator/engine/validator.js',
       'validator/engine/validator-in-browser.js',
       'validator/nodejs/index.js',
       'validator/webui/serve-standalone.go',
@@ -1172,7 +1184,7 @@ const forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17|18|19) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
+  'Copyright 20(15|16|17|18|19|20) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };

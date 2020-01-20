@@ -489,7 +489,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-date-display',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },
@@ -643,7 +643,11 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     options: {
       hasCss: true,
-      cssBinaries: ['amp-inline-gallery', 'amp-inline-gallery-pagination'],
+      cssBinaries: [
+        'amp-inline-gallery',
+        'amp-inline-gallery-pagination',
+        'amp-inline-gallery-thumbnails',
+      ],
     },
     type: TYPES.MISC,
   },
@@ -749,7 +753,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-next-page',
-    version: ['0.1', '0.2'],
+    version: ['0.1', '1.0'],
     latestVersion: '0.1',
     options: {hasCss: true},
     type: TYPES.MISC,

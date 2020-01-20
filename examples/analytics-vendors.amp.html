@@ -55,6 +55,7 @@
       <option>baiduanalytics</option>
       <option>burt</option>
       <option>byside</option>
+      <option>captainmetrics</option>
       <option>chartbeat</option>
       <option>clicky</option>
       <option>colanalytics</option>
@@ -103,6 +104,7 @@
       <option>shinystat</option>
       <option>simplereach</option>
       <option>snowplow</option>
+      <option>snowplow_v2</option>
       <option>teaanalytics</option>
       <option>tealiumcollect</option>
       <option>top100</option>
@@ -369,6 +371,71 @@ For complete documentation and additional examples please see: https://marketing
   </script>
 </amp-analytics>
 <!-- End BySide example -->
+
+<!-- Captain Metrics tracking -->
+<amp-analytics type="captainmetrics" id="captainmetrics">
+<script type="application/json">
+  {
+    "vars": {
+      "projectId": "your_project_id"
+    },
+    "triggers": {
+      "pageview": {
+        "on": "visible",
+        "request": "hit",
+        "extraUrlParams": {
+          "type": "pageview",
+          "pageview": {
+            "title": "${title}",
+            "page": "${sourceUrl}",
+            "product": {
+              "externalId": "product-id",
+              "sku": "product-sku",
+              "name": "product-name",
+              "brand": "product-brand",
+              "category": "product-category",
+              "variant": "product-variant",
+              "price": 1000,
+              "currency": "EUR"
+            },
+            "props": {
+              "customProperty": "xxx"
+            }
+          }
+        }
+      },
+      "event": {
+        "on": "click",
+        "selector": "#event-test-button",
+        "request": "hit",
+        "extraUrlParams": {
+          "type": "event",
+          "event": {
+            "label": "my_event",
+            "value": 1,
+            "nonInteractive": false
+          },
+          "props": {
+            "customProperty": "xxx"
+          }
+        }
+      },
+      "hidden": {
+        "on": "hidden",
+        "request": "hit",
+        "extraUrlParams": {
+          "type": "timeSpent",
+          "timeSpent": {
+            "pageId": "${pageViewId}",
+            "secs": "${incrementalEngagedTime(cm)}"
+          }
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Captain Metrics example -->
 
 <!-- Chartbeat tracking -->
 <amp-analytics type="chartbeat" id="chartbeat">
@@ -1307,6 +1374,95 @@ For complete documentation and additional examples please see: https://marketing
 </amp-analytics>
 <!-- End Snowplow Analytics example -->
 
+<!-- Snowplow v2 Analytics tracking -->
+<amp-analytics type="snowplow_v2" id="snowplow_v2" data-credentials="include">
+<script type="application/json">
+  {
+    "vars": {
+      "collectorHost": "collector.snplow.net",
+      "appId": "amp-examples-v2.0.1",
+      "userId": "someUserId",
+      "customContexts":  "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/gdpr/jsonschema/1-0-0\",\"data\":{\"basisForProcessing\":\"legitimate_interests\"}}"
+    },
+    "linkers": {
+      "enabled": true,
+      "proxyOnly": false,
+      "destinationDomains": ["localhost"]
+    },
+    "triggers": {
+      "defaultPageview": {
+        "on": "visible",
+        "request": "pageView"
+      },
+      "trackFirstPagePing": {
+        "on": "timer",
+        "request": "pagePing",
+        "timerSpec": {
+          "interval": 10,
+          "maxTimerLength": 9.99,
+          "immediate": false,
+          "startSpec": {
+            "on": "visible",
+            "selector": ":root"
+          },
+          "stopSpec": {
+            "on": "hidden",
+            "selector": ":root"
+          }
+        }
+      },
+      "trackPagePings": {
+        "on": "timer",
+        "request": "pagePing",
+        "timerSpec": {
+          "interval": 30,
+          "maxTimerLength": 1800,
+          "immediate": false,
+          "startSpec": {
+            "on": "visible",
+            "selector": ":root"
+          },
+          "stopSpec": {
+            "on": "hidden",
+            "selector": ":root"
+          }
+        }
+      },
+      "trackSelfDescribingEvent": {
+        "on": "click",
+        "selector": "a",
+        "request": "selfDescribingEvent",
+        "vars": {
+          "customEventSchemaVendor": "com.snowplowanalytics.snowplow",
+          "customEventSchemaName": "link_click",
+          "customEventSchemaVersion": "1-0-1",
+          "customEventSchemaData": "{\"targetUrl\":\"${targetUrl}\",\"elementId\":\"TEST\",\"elementContent\":\"${elementContent}\"}"
+        }
+      },
+      "clickOnTest1Trigger": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "structEvent",
+        "vars": {
+          "structEventCategory": "examples",
+          "structEventAction": "clicked-test1"
+        }
+      },
+      "clickOnTopTrigger": {
+        "on": "click",
+        "selector": "#top",
+        "request": "structEvent",
+        "vars": {
+          "structEventCategory": "examples",
+          "structEventAction": "clicked-header"
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Snowplow Analytics example -->
+
 <!-- TEA Analytics Example
     Ensure you replace app_id with your appId.
     Ensure you replace channel with correct value.
@@ -1691,6 +1847,9 @@ For complete documentation and additional examples please see: https://marketing
 <span id="test1" class="box" data-vars-title="Example request with element level overrides">
   Click here to generate an event
 </span>
+<p>
+Example of <a id="ext" data-vars-target-url="../"  data-vars-element-id="home" data-vars-element-content="Internal Link" href="../">Internal Link</a>.
+</p>
 <p>
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pellentesque augue quis elementum tempus. Pellentesque sit amet neque bibendum, sagittis purus vitae, pellentesque magna. Vestibulum non viverra metus, eget feugiat lacus. Nulla in maximus orci. Maecenas id turpis vel ipsum vestibulum bibendum ut sit amet magna. Nullam hendrerit ex at est eleifend, nec dignissim nibh rutrum. Aliquam quis tellus et nibh faucibus laoreet in eget turpis. Nam quam nisl, porttitor vel ex eget, dapibus placerat dui. Mauris commodo pellentesque leo, eu tempus quam. In hac habitasse platea dictumst. Suspendisse non ante finibus, luctus augue non, luctus orci. Vestibulum ornare lacinia aliquam. In sollicitudin vehicula vulputate. Sed mi elit, commodo nec sapien nec, pretium bibendum leo. Donec id justo tortor. Ut in mauris dapibus, laoreet metus vitae, dictum nisi.
 </p>

@@ -95,11 +95,7 @@ export class Entitlement {
    * @return {!JsonObject}
    */
   jsonForPingback() {
-    return /** @type {!JsonObject} */ (Object.assign(
-      {},
-      {'raw': this.raw},
-      this.json()
-    ));
+    return /** @type {!JsonObject} */ ({'raw': this.raw, ...this.json()});
   }
 
   /**

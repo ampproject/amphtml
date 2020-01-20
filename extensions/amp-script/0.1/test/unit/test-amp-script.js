@@ -157,13 +157,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       expect(script.development_).false;
     });
 
-    it('development tag present should put it in dev mode', () => {
-      element.setAttribute('development', true);
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).true;
-    });
-
     it('data-ampdevmode on just the element should not enable dev mode', () => {
       element.setAttribute('data-ampdevmode', true);
       script = new AmpScript(element);
@@ -253,7 +246,7 @@ describe('SanitizerImpl', () => {
 
   beforeEach(() => {
     win = new FakeWindow();
-    s = new SanitizerImpl(win, /* element */ null, []);
+    s = new SanitizerImpl(win, /* element */ null, [], {});
     el = win.document.createElement('div');
   });
 
@@ -436,8 +429,9 @@ describe('SanitizerImpl', () => {
       window.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
-    it('AMP.setState(json)', async () => {
+    it('AMP.setState(json), without user interaction', async () => {
       window.sandbox.spy(bind, 'setState');
+      s.userActivationTracker_.isActive = () => false;
 
       await s.setStorage(
         StorageLocation.AMP_STATE,
@@ -446,7 +440,27 @@ describe('SanitizerImpl', () => {
       );
 
       expect(bind.setState).to.be.calledOnce;
-      expect(bind.setState).to.be.calledWithExactly({foo: 'bar'}, true, false);
+      expect(bind.setState).to.be.calledWithExactly(
+        {foo: 'bar'},
+        {skipEval: true}
+      );
+    });
+
+    it('AMP.setState(json), with user interaction', async () => {
+      window.sandbox.spy(bind, 'setState');
+      s.userActivationTracker_.isActive = () => true;
+
+      await s.setStorage(
+        StorageLocation.AMP_STATE,
+        /* key */ null,
+        '{"foo":"bar"}'
+      );
+
+      expect(bind.setState).to.be.calledOnce;
+      expect(bind.setState).to.be.calledWithExactly(
+        {foo: 'bar'},
+        {skipEval: false}
+      );
     });
 
     it('AMP.setState(not_json)', async () => {

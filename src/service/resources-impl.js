@@ -23,12 +23,11 @@ import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
-import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
-import {closest, hasNextNodeInDocumentOrder} from '../dom';
-import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
+import {expandLayoutRect} from '../layout-rect';
 import {getSourceUrl} from '../url';
+import {hasNextNodeInDocumentOrder} from '../dom';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
 import {isExperimentOn} from '../experiments';
@@ -49,29 +48,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60; // 1min
 const FOUR_FRAME_DELAY_ = 70;
-
-/**
- * The internal structure of a ChangeHeightRequest.
- * @typedef {{
- *   newMargins: !../layout-rect.LayoutMarginsChangeDef,
- *   currentMargins: !../layout-rect.LayoutMarginsDef
- * }}
- */
-let MarginChangeDef;
-
-/**
- * The internal structure of a ChangeHeightRequest.
- * @typedef {{
- *   resource: !Resource,
- *   newHeight: (number|undefined),
- *   newWidth: (number|undefined),
- *   marginChange: (!MarginChangeDef|undefined),
- *   event: (?Event|undefined),
- *   force: boolean,
- *   callback: (function(boolean)|undefined),
- * }}
- */
-let ChangeSizeRequestDef;
 
 /**
  * @implements {ResourcesInterface}
@@ -172,7 +148,7 @@ export class ResourcesImpl {
     this.boundTaskScorer_ = this.calcTaskScore_.bind(this);
 
     /**
-     * @private {!Array<!ChangeSizeRequestDef>}
+     * @private {!Array<!./resources-interface.ChangeSizeRequestDef>}
      */
     this.requestsChangeSize_ = [];
 
@@ -241,10 +217,6 @@ export class ResourcesImpl {
       dev().fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
-    });
-
-    this.activeHistory_.onFocus(element => {
-      this.checkPendingChangeSize_(element);
     });
 
     // Schedule initial passes. This must happen in a startup task
@@ -541,186 +513,6 @@ export class ResourcesImpl {
   }
 
   /** @override */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    this.scheduleChangeSize_(
-      Resource.forElement(element),
-      newHeight,
-      newWidth,
-      opt_newMargins,
-      /* event */ undefined,
-      /* force */ true,
-      opt_callback
-    );
-  }
-
-  /** @override */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {
-    return new Promise((resolve, reject) => {
-      this.scheduleChangeSize_(
-        Resource.forElement(element),
-        newHeight,
-        newWidth,
-        opt_newMargins,
-        opt_event,
-        /* force */ false,
-        success => {
-          if (success) {
-            resolve();
-          } else {
-            reject(new Error('changeSize attempt denied'));
-          }
-        }
-      );
-    });
-  }
-
-  /** @override */
-  measureElement(measurer) {
-    return this.vsync_.measurePromise(measurer);
-  }
-
-  /** @override */
-  mutateElement(element, mutator) {
-    return this.measureMutateElement(element, null, mutator);
-  }
-
-  /** @override */
-  measureMutateElement(element, measurer, mutator) {
-    return this.measureMutateElementResources_(element, measurer, mutator);
-  }
-
-  /**
-   * Handles element mutation (and measurement) APIs in the Resources system.
-   *
-   * @param {!Element} element
-   * @param {?function()} measurer
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
-  measureMutateElementResources_(element, measurer, mutator) {
-    const calcRelayoutTop = () => {
-      const box = this.viewport_.getLayoutRect(element);
-      if (box.width != 0 && box.height != 0) {
-        return box.top;
-      }
-      return -1;
-    };
-    let relayoutTop = -1;
-    // TODO(jridgewell): support state
-    return this.vsync_.runPromise({
-      measure: () => {
-        if (measurer) {
-          measurer();
-        }
-        relayoutTop = calcRelayoutTop();
-      },
-      mutate: () => {
-        mutator();
-
-        if (element.classList.contains('i-amphtml-element')) {
-          const r = Resource.forElement(element);
-          r.requestMeasure();
-        }
-        const ampElements = element.getElementsByClassName('i-amphtml-element');
-        for (let i = 0; i < ampElements.length; i++) {
-          const r = Resource.forElement(ampElements[i]);
-          r.requestMeasure();
-        }
-        if (relayoutTop != -1) {
-          this.setRelayoutTop_(relayoutTop);
-        }
-        this.schedulePass(FOUR_FRAME_DELAY_);
-
-        // Need to measure again in case the element has become visible or
-        // shifted.
-        this.vsync_.measure(() => {
-          const updatedRelayoutTop = calcRelayoutTop();
-          if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
-            this.setRelayoutTop_(updatedRelayoutTop);
-            this.schedulePass(FOUR_FRAME_DELAY_);
-          }
-          this.maybeChangeHeight_ = true;
-        });
-      },
-    });
-  }
-
-  /**
-   * Dirties the cached element measurements after a mutation occurs.
-   *
-   * TODO(jridgewell): This API needs to be audited. Common practice is
-   * to pass the amp-element in as the root even though we are only
-   * mutating children. If the amp-element is passed, we invalidate
-   * everything in the parent layer above it, where only invalidating the
-   * amp-element was necessary (only children were mutated, only
-   * amp-element's scroll box is affected).
-   *
-   * @param {!Element} element
-   */
-  dirtyElement(element) {
-    let relayoutAll = false;
-    const isAmpElement = element.classList.contains('i-amphtml-element');
-    if (isAmpElement) {
-      const r = Resource.forElement(element);
-      this.setRelayoutTop_(r.getLayoutBox().top);
-    } else {
-      relayoutAll = true;
-    }
-    this.schedulePass(FOUR_FRAME_DELAY_, relayoutAll);
-  }
-
-  /** @override */
-  attemptCollapse(element) {
-    return new Promise((resolve, reject) => {
-      this.scheduleChangeSize_(
-        Resource.forElement(element),
-        0,
-        0,
-        /* newMargin */ undefined,
-        /* event */ undefined,
-        /* force */ false,
-        success => {
-          if (success) {
-            const resource = Resource.forElement(element);
-            resource.completeCollapse();
-            resolve();
-          } else {
-            reject(dev().createExpectedError('collapse attempt denied'));
-          }
-        }
-      );
-    });
-  }
-
-  /** @override */
-  collapseElement(element) {
-    const box = this.viewport_.getLayoutRect(element);
-    const resource = Resource.forElement(element);
-    if (box.width != 0 && box.height != 0) {
-      if (isExperimentOn(this.win, 'dirty-collapse-element')) {
-        this.dirtyElement(element);
-      } else {
-        this.setRelayoutTop_(box.top);
-      }
-    }
-    resource.completeCollapse();
-    this.schedulePass(FOUR_FRAME_DELAY_);
-  }
-
-  /** @override */
-  expandElement(element) {
-    const resource = Resource.forElement(element);
-    resource.completeExpand();
-
-    const owner = resource.getOwner();
-    if (owner) {
-      owner.expandedCallback(element);
-    }
-
-    this.schedulePass(FOUR_FRAME_DELAY_);
-  }
-
-  /** @override */
   schedulePass(opt_delay, opt_relayoutAll) {
     if (opt_relayoutAll) {
       this.relayoutAll_ = true;
@@ -728,11 +520,30 @@ export class ResourcesImpl {
     return this.pass_.schedule(opt_delay);
   }
 
-  /**
-   * Schedules the work pass at the latest with the specified delay.
-   * @private
-   */
-  schedulePassVsync_() {
+  /** @override */
+  updateOrEnqueueMutateTask(resource, newRequest) {
+    let request = null;
+    for (let i = 0; i < this.requestsChangeSize_.length; i++) {
+      if (this.requestsChangeSize_[i].resource == resource) {
+        request = this.requestsChangeSize_[i];
+        break;
+      }
+    }
+
+    if (request) {
+      request.newHeight = newRequest.newHeight;
+      request.newWidth = newRequest.newWidth;
+      request.marginChange = newRequest.marginChange;
+      request.event = newRequest.event;
+      request.force = newRequest.force || request.force;
+      request.callback = newRequest.callback;
+    } else {
+      this.requestsChangeSize_.push(newRequest);
+    }
+  }
+
+  /** @override */
+  schedulePassVsync() {
     if (this.vsyncScheduled_) {
       return;
     }
@@ -744,6 +555,20 @@ export class ResourcesImpl {
   ampInitComplete() {
     this.ampInitialized_ = true;
     this.schedulePass();
+  }
+
+  /** @override */
+  setRelayoutTop(relayoutTop) {
+    if (this.relayoutTop_ == -1) {
+      this.relayoutTop_ = relayoutTop;
+    } else {
+      this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
+    }
+  }
+
+  /** @override */
+  maybeHeightChanged() {
+    this.maybeChangeHeight_ = true;
   }
 
   /** @override */
@@ -899,7 +724,7 @@ export class ResourcesImpl {
         const {
           resource,
           event,
-        } = /** @type {!ChangeSizeRequestDef} */ (request);
+        } = /** @type {!./resources-interface.ChangeSizeRequestDef} */ (request);
         const box = resource.getLayoutBox();
 
         let topMarginDiff = 0;
@@ -1009,16 +834,51 @@ export class ResourcesImpl {
         ) {
           // 7. The new height (or one of the margins) is smaller than the
           // current one.
-        } else if (
-          request.newHeight == box.height &&
-          this.isWidthOnlyReflowFreeExpansion_(
-            resource.element,
-            request.newWidth || 0
-          )
-        ) {
-          // 8. Element is in viewport, but this is a width-only expansion that
-          // should not cause reflow.
-          resize = true;
+        } else if (request.newHeight == box.height) {
+          // 8. Element is in viewport, but this is a width-only expansion.
+          // Check whether this should be reflow-free, in which case,
+          // schedule a size change.
+          this.vsync_.run(
+            {
+              measure: state => {
+                state.resize = false;
+                const parent = resource.element.parentElement;
+                if (!parent) {
+                  return;
+                }
+
+                // If the element has siblings, it's possible that a width-expansion will
+                // cause some of them to be pushed down.
+                const parentWidth =
+                  (parent.getLayoutWidth && parent.getLayoutWidth()) ||
+                  parent./*OK*/ offsetWidth;
+                let cumulativeWidth = widthDiff;
+                for (let i = 0; i < parent.childElementCount; i++) {
+                  cumulativeWidth += parent.children[i]./*OK*/ offsetWidth;
+                  if (cumulativeWidth > parentWidth) {
+                    return;
+                  }
+                }
+                state.resize = true;
+              },
+              mutate: state => {
+                if (state.resize) {
+                  request.resource./*OK*/ changeSize(
+                    request.newHeight,
+                    request.newWidth,
+                    newMargins
+                  );
+                }
+                request.resource.overflowCallback(
+                  /* overflown */ !state.resize,
+                  request.newHeight,
+                  request.newWidth,
+                  newMargins
+                );
+              },
+            },
+            {}
+          );
         } else {
           // 9. Element is in viewport don't resize and try overflow callback
           // instead.
@@ -1054,7 +914,7 @@ export class ResourcesImpl {
       }
 
       if (minTop != -1) {
-        this.setRelayoutTop_(minTop);
+        this.setRelayoutTop(minTop);
       }
 
       // Execute scroll-adjusting resize requests, if any.
@@ -1082,7 +942,7 @@ export class ResourcesImpl {
                 }
               });
               if (minTop != -1) {
-                this.setRelayoutTop_(minTop);
+                this.setRelayoutTop(minTop);
               }
               // Sync is necessary here to avoid UI jump in the next frame.
               const newScrollHeight = this.viewport_./*OK*/ getScrollHeight();
@@ -1102,27 +962,6 @@ export class ResourcesImpl {
   }
 
   /**
-   * Returns true if reflow will not be caused by expanding the given element's
-   * width to the given amount.
-   * @param {!Element} element
-   * @param {number} width
-   * @return {boolean}
-   */
-  isWidthOnlyReflowFreeExpansion_(element, width) {
-    const parent = element.parentElement;
-    // If the element has siblings, it's possible that a width-expansion will
-    // cause some of them to be pushed down.
-    if (!parent || parent.childElementCount > 1) {
-      return false;
-    }
-    const parentWidth =
-      (parent.getLayoutWidth && parent.getLayoutWidth()) || -1;
-    // Reflow will not happen if the parent element is at least as wide as the
-    // new width.
-    return parentWidth >= width;
-  }
-
-  /**
    * Returns true if element is within 15% and 1000px of document bottom.
    * Caller can provide current/initial layout boxes as an optimization.
    * @param {!./resource.Resource} resource
@@ -1138,45 +977,6 @@ export class ResourcesImpl {
     const box = opt_layoutBox || resource.getLayoutBox();
     const initialBox = opt_initialLayoutBox || resource.getInitialLayoutBox();
     return box.bottom >= threshold || initialBox.bottom >= threshold;
-  }
-
-  /**
-   * @param {number} relayoutTop
-   * @private
-   */
-  setRelayoutTop_(relayoutTop) {
-    if (this.relayoutTop_ == -1) {
-      this.relayoutTop_ = relayoutTop;
-    } else {
-      this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
-    }
-  }
-
-  /**
-   * Reschedules change size request when an overflown element is activated.
-   * @param {!Element} element
-   * @private
-   */
-  checkPendingChangeSize_(element) {
-    const resourceElement = closest(
-      element,
-      el => !!Resource.forElementOptional(el)
-    );
-    if (!resourceElement) {
-      return;
-    }
-    const resource = Resource.forElement(resourceElement);
-    const pendingChangeSize = resource.getPendingChangeSize();
-    if (pendingChangeSize !== undefined) {
-      this.scheduleChangeSize_(
-        resource,
-        pendingChangeSize.height,
-        pendingChangeSize.width,
-        pendingChangeSize.margins,
-        /* event */ undefined,
-        /* force */ true
-      );
-    }
   }
 
   /**
@@ -1599,160 +1399,6 @@ export class ResourcesImpl {
       );
       return Promise.reject(opt_reason);
     }
-  }
-
-  /**
-   * Schedules change of the element's height.
-   * @param {!Resource} resource
-   * @param {number|undefined} newHeight
-   * @param {number|undefined} newWidth
-   * @param {!../layout-rect.LayoutMarginsChangeDef|undefined} newMargins
-   * @param {?Event|undefined} event
-   * @param {boolean} force
-   * @param {function(boolean)=} opt_callback A callback function
-   * @private
-   */
-  scheduleChangeSize_(
-    resource,
-    newHeight,
-    newWidth,
-    newMargins,
-    event,
-    force,
-    opt_callback
-  ) {
-    if (resource.hasBeenMeasured() && !newMargins) {
-      this.completeScheduleChangeSize_(
-        resource,
-        newHeight,
-        newWidth,
-        undefined,
-        event,
-        force,
-        opt_callback
-      );
-    } else {
-      // This is a rare case since most of times the element itself schedules
-      // resize requests. However, this case is possible when another element
-      // requests resize of a controlled element. This also happens when a
-      // margin size change is requested, since existing margins have to be
-      // measured in this instance.
-      this.vsync_.measure(() => {
-        if (!resource.hasBeenMeasured()) {
-          resource.measure();
-        }
-        const marginChange = newMargins
-          ? {
-              newMargins,
-              currentMargins: this.getLayoutMargins_(resource),
-            }
-          : undefined;
-        this.completeScheduleChangeSize_(
-          resource,
-          newHeight,
-          newWidth,
-          marginChange,
-          event,
-          force,
-          opt_callback
-        );
-      });
-    }
-  }
-
-  /**
-   * Returns the layout margins for the resource.
-   * @param {!Resource} resource
-   * @return {!../layout-rect.LayoutMarginsDef}
-   * @private
-   */
-  getLayoutMargins_(resource) {
-    const style = computedStyle(this.win, resource.element);
-    return {
-      top: parseInt(style.marginTop, 10) || 0,
-      right: parseInt(style.marginRight, 10) || 0,
-      bottom: parseInt(style.marginBottom, 10) || 0,
-      left: parseInt(style.marginLeft, 10) || 0,
-    };
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @param {number|undefined} newHeight
-   * @param {number|undefined} newWidth
-   * @param {!MarginChangeDef|undefined} marginChange
-   * @param {?Event|undefined} event
-   * @param {boolean} force
-   * @param {function(boolean)=} opt_callback A callback function
-   * @private
-   */
-  completeScheduleChangeSize_(
-    resource,
-    newHeight,
-    newWidth,
-    marginChange,
-    event,
-    force,
-    opt_callback
-  ) {
-    resource.resetPendingChangeSize();
-    const layoutBox = resource.getPageLayoutBox();
-    if (
-      (newHeight === undefined || newHeight == layoutBox.height) &&
-      (newWidth === undefined || newWidth == layoutBox.width) &&
-      (marginChange === undefined ||
-        !areMarginsChanged(
-          marginChange.currentMargins,
-          marginChange.newMargins
-        ))
-    ) {
-      if (
-        newHeight === undefined &&
-        newWidth === undefined &&
-        marginChange === undefined
-      ) {
-        dev().error(
-          TAG_,
-          'attempting to change size with undefined dimensions',
-          resource.debugid
-        );
-      }
-      // Nothing to do.
-      if (opt_callback) {
-        opt_callback(/* success */ true);
-      }
-      return;
-    }
-
-    let request = null;
-    for (let i = 0; i < this.requestsChangeSize_.length; i++) {
-      if (this.requestsChangeSize_[i].resource == resource) {
-        request = this.requestsChangeSize_[i];
-        break;
-      }
-    }
-
-    if (request) {
-      request.newHeight = newHeight;
-      request.newWidth = newWidth;
-      request.marginChange = marginChange;
-      request.event = event;
-      request.force = force || request.force;
-      request.callback = opt_callback;
-    } else {
-      this.requestsChangeSize_.push(
-        /** {!ChangeSizeRequestDef} */ {
-          resource,
-          newHeight,
-          newWidth,
-          marginChange,
-          event,
-          force,
-          callback: opt_callback,
-        }
-      );
-    }
-    this.schedulePassVsync_();
   }
 
   /**

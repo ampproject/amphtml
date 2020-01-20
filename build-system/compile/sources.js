@@ -39,12 +39,22 @@ const COMMON_GLOBS = [
   'third_party/timeagojs/**/*.js',
   'third_party/vega/**/*.js',
   'third_party/webcomponentsjs/ShadowCSS.js',
+  'node_modules/dompurify/package.json',
   'node_modules/dompurify/dist/purify.es.js',
+  'node_modules/promise-pjs/package.json',
   'node_modules/promise-pjs/promise.mjs',
+  'node_modules/web-animations-js/package.json',
   'node_modules/web-animations-js/web-animations.install.js',
+  'node_modules/web-activities/package.json',
   'node_modules/web-activities/activity-ports.js',
+  'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/worker-dom/package.json',
   'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
+  'node_modules/preact/package.json',
+  'node_modules/preact/dist/*.js',
+  'node_modules/preact/hooks/package.json',
+  'node_modules/preact/hooks/dist/*.js',
 ];
 
 /**
@@ -115,8 +125,6 @@ const CLOSURE_SRC_GLOBS = [
   'extensions/amp-geo/**/*.js',
   // Needed for AmpViewerAssistanceService
   'extensions/amp-viewer-assistance/**/*.js',
-  // Needed for AmpViewerIntegrationVariableService
-  'extensions/amp-viewer-integration/**/*.js',
   // Needed for amp-smartlinks dep on amp-skimlinks
   'extensions/amp-skimlinks/0.1/**/*.js',
   'src/*.js',

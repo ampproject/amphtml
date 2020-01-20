@@ -40,6 +40,7 @@ requirement: {
   error_message: 'History.p.state is broken in IE11. Please use the helper methods provided in src/history.js'
   value: 'History.prototype.state'
   whitelist: 'src/history.js'
+  whitelist: 'extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js'
 }
 
 # Strings
@@ -291,6 +292,7 @@ requirement: {
   # 3p ads are OK
   whitelist: 'ads/adhese.js'
   whitelist: 'ads/loka.js'
+  whitelist: 'ads/nativery.js'
   whitelist: 'ads/xlift.js'
 }
 
