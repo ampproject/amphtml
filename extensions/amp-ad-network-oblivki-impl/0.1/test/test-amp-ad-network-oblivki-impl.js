@@ -127,7 +127,7 @@ describes.realWin(
           'src',
           'https://oblivki.biz/amp/a4a/?block-key=1&is_a4a=1'
         );
-        const base = 'https://oblivki.biz/amp/a4a/?';
+        const base = 'https://oblivki.biz/amp/a4a/';
         expect(oblivkiImpl.getAdUrl().substring(0, base.length)).to.equal(base);
       });
       it('should be valid', () => {
@@ -135,7 +135,7 @@ describes.realWin(
           'src',
           'https://oblivki.biz/amp/?block-key=1&is_a4a=1'
         );
-        const base = 'https://oblivki.biz/amp/a4a/?';
+        const base = 'https://oblivki.biz/amp/a4a/';
         expect(oblivkiImpl.getAdUrl().substring(0, base.length)).to.equal(base);
       });
     });
