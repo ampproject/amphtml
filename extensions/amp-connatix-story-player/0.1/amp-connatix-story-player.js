@@ -38,10 +38,10 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     this.storyId_ = '';
 
     /** @private {string} */
-    this.iframeDomain_ = 'https://test.amp.connatix.com'; //'https://cds.connatix.com';
+    this.iframeDomain_ = 'https://cds.connatix.com';
 
     /** @private {string} */
-    this.iframePath_ = '/safe_iframe_embeed.html';
+    this.iframePath_ = '/p/plugins/connatix.playspace.embed.html';
 
     /** @private {?HTMLIFrameElement} */
     this.iframe_ = null;
