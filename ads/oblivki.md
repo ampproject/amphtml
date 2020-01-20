@@ -26,7 +26,7 @@ limitations under the License.
   data-use-a4a="true"
   data-block-key="XgSNxZnGpAmULblp9d23"
   src="https://oblivki.biz/amp/a4a?key=XgSNxZnGpAmULblp9d23"
->
+></amp-ad>
 ```
 
 ## Configuration
