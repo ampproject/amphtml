@@ -30,9 +30,8 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.playerId_ = '';
 
-    /** @private {number} */
-    // 0 - Portrait, 1 - Landscape
-    this.orientation_ = 0;
+    /** @private {string} */
+    this.orientation_ = '';
 
     /** @private {string} */
     this.storyId_ = '';
@@ -111,18 +110,13 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     );
 
      // Orientation is mandatory
-     // 0 - Portrait
-     // 1 - landscape
      this.orientation_ = userAssert(
       element.getAttribute('data-orientation'),
       'The data-orientation attribute is required for <amp-connatix-story-player> %s',
       element
     );
 
-    const orientation = parseInt(this.orientation_, 10);
-    if (orientation !== 0 && orientation !== 1) {
-      console.error('Wrong orientation value. 0 - Portrait, 1 - Landscape');
-    }
+    // userAssert(this.orientation_.toLowerCase() === 'landscape' || this.orientation_.toLowerCase() === 'portrait', 'Wrong orientation value. Possible orientation values: portrait or landscape');
 
     // Story id is optional
     this.storyId_ = element.getAttribute('data-story-id') || '';
