@@ -2,9 +2,6 @@
   "name": "amp-validator",
   "version": "0.1.0",
   "description": "Validator for AMP HTML (amp.dev)",
-  "engines": {
-    "node": "^12.0.0"
-  },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
   "repository": {

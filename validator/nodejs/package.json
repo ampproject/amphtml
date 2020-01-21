@@ -9,9 +9,6 @@
     "AMP HTML",
     "Accelerated Mobile Pages"
   ],
-  "engines": {
-    "node": "^8 || ^10 || ^12 || ^14"
-  },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
   "repository": {
