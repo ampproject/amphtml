@@ -1721,7 +1721,7 @@ describes.sandboxed('FixedLayer Setup Execution Bailouts', {}, () => {
       test: false,
       version: '$internalRuntimeVersion$',
     };
-    
+
     const vsyncTasks = [];
     vsyncApi = {
       runPromise: task => {
@@ -1773,72 +1773,76 @@ describes.sandboxed('FixedLayer Setup Execution Bailouts', {}, () => {
   });
 });
 
-describes.sandboxed('FixedLayer Setup Execution Bailouts with Local Development', {}, () => {
-  let win;
-  let ampdoc;
-  let viewer;
-  let vsyncApi;
+describes.sandboxed(
+  'FixedLayer Setup Execution Bailouts with Local Development',
+  {},
+  () => {
+    let win;
+    let ampdoc;
+    let viewer;
+    let vsyncApi;
 
-  beforeEach(() => {
-    win = new FakeWindow();
-    window.__AMP_MODE = {
-      localDev: true,
-      development: false,
-      minified: false,
-      test: false,
-      version: '$internalRuntimeVersion$',
-    };
-    
-    const vsyncTasks = [];
-    vsyncApi = {
-      runPromise: task => {
-        vsyncTasks.push(task);
-        return Promise.resolve();
-      },
-      mutate: mutator => {
-        vsyncTasks.push({mutate: mutator});
-      },
-    };
-  });
+    beforeEach(() => {
+      win = new FakeWindow();
+      window.__AMP_MODE = {
+        localDev: true,
+        development: false,
+        minified: false,
+        test: false,
+        version: '$internalRuntimeVersion$',
+      };
 
-  it('should perform setup when served canonically', () => {
-    ampdoc = new AmpDocSingle(win);
-    installPlatformService(win);
-    installTimerService(win);
-    installViewerServiceForDoc(ampdoc);
-    viewer = Services.viewerForDoc(ampdoc);
-    viewer.isEmbedded = () => false;
+      const vsyncTasks = [];
+      vsyncApi = {
+        runPromise: task => {
+          vsyncTasks.push(task);
+          return Promise.resolve();
+        },
+        mutate: mutator => {
+          vsyncTasks.push({mutate: mutator});
+        },
+      };
+    });
 
-    const fixedLayer = new FixedLayer(
-      ampdoc,
-      vsyncApi,
-      /* borderTop */ 0,
-      /* paddingTop */ 11,
-      /* transfer */ false
-    );
-    const executed = fixedLayer.setup();
-    expect(executed).to.be.true;
-  });
+    it('should perform setup when served canonically', () => {
+      ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => false;
 
-  it('should perform setup when served within a viewer', () => {
-    ampdoc = new AmpDocSingle(win);
-    installPlatformService(win);
-    installTimerService(win);
-    installViewerServiceForDoc(ampdoc);
-    viewer = Services.viewerForDoc(ampdoc);
-    viewer.isEmbedded = () => true;
+      const fixedLayer = new FixedLayer(
+        ampdoc,
+        vsyncApi,
+        /* borderTop */ 0,
+        /* paddingTop */ 11,
+        /* transfer */ false
+      );
+      const executed = fixedLayer.setup();
+      expect(executed).to.be.true;
+    });
 
-    const fixedLayer = new FixedLayer(
-      ampdoc,
-      vsyncApi,
-      /* borderTop */ 0,
-      /* paddingTop */ 11,
-      /* transfer */ false
-    );
-    const executed = fixedLayer.setup();
-    expect(executed).to.be.true;
-  });
-});
+    it('should perform setup when served within a viewer', () => {
+      ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
+
+      const fixedLayer = new FixedLayer(
+        ampdoc,
+        vsyncApi,
+        /* borderTop */ 0,
+        /* paddingTop */ 11,
+        /* transfer */ false
+      );
+      const executed = fixedLayer.setup();
+      expect(executed).to.be.true;
+    });
+  }
+);
 
 describes.realWin('FixedLayer', {}, env => {
   let win, doc;
