@@ -467,6 +467,13 @@ export class ViewportBindingInabox {
     /** @private {?UnlistenDef} */
     this.unobserveFunction_ = null;
 
+    const unloadListener = this.win.addEventListener('unload', () => {
+      if (this.unobserveFunction_) {
+        this.unobserveFunction_();
+        this.unobserveFunction_ = null;
+        this.win.removeEventListener('unload', unloadListener);
+      }
+    });
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
