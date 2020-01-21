@@ -336,7 +336,7 @@ export class NextPageService {
 
     // Insert the shadow doc and observe its position
     this.element_.insertBefore(shadowRoot, this.moreBox_);
-    this.visibilityObserver_.observe(shadowRoot, this.element_, position => {
+    this.visibilityObserver_.observe(this.element_, position => {
       page.relativePos = position;
       this.updateVisibility();
     });
