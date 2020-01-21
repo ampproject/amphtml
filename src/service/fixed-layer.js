@@ -97,9 +97,7 @@ export class FixedLayer {
     this.elements_ = [];
 
     /** @const @private {!Pass} */
-    this.updatePass_ = new Pass(ampdoc.win, () => {
-      this.update();
-    });
+    this.updatePass_ = new Pass(ampdoc.win, () => this.update());
 
     /** @private {?function()} */
     this.hiddenObserverUnlistener_ = null;
@@ -131,12 +129,12 @@ export class FixedLayer {
     }
 
     if (opt_lightbox && opt_onComplete) {
-      opt_onComplete.then(() => {
+      opt_onComplete.then(() =>
         this.scanNode_(
           dev().assertElement(opt_lightbox),
           /* lightboxMode */ true
-        );
-      });
+        )
+      );
     }
   }
 
@@ -160,6 +158,11 @@ export class FixedLayer {
    * Must be always called after DOMReady.
    */
   setup() {
+    const isEmbedded = !!this.ampdoc.getParent();
+    if (!isEmbedded) {
+      return;
+    }
+
     const root = this.ampdoc.getRootNode();
     const stylesheets = root.styleSheets;
     if (!stylesheets) {
