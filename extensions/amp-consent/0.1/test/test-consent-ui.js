@@ -294,6 +294,31 @@ describes.realWin(
           })
         );
       });
+
+      describe('fullscreen user interaction experiment', () => {
+        beforeEach(() => {
+          toggleExperiment(win, 'amp-consent-restrict-fullscreen', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(win, 'amp-consent-restrict-fullscreen', false);
+        });
+
+        it('should not change document.activeElement', () => {
+          const {activeElement} = doc;
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+          const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+
+          return whenCalled(showIframeSpy).then(() =>
+            expect(activeElement).to.equal(doc.activeElement)
+          );
+        });
+      });
     });
 
     describe('overlay', () => {
