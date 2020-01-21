@@ -23,7 +23,7 @@
 let DeferredDef;
 
 /**
- * @typedef {!Function}
+ * @typedef {!typeof HTMLElement}
  */
 let CustomElementConstructorDef;
 
@@ -63,7 +63,7 @@ const TRACK_SUBTREE = {
 /**
  * Asserts that the custom element name conforms to the spec.
  *
- * @param {!Function} SyntaxError
+ * @param {!typeof SyntaxError} SyntaxError
  * @param {string} name
  */
 function assertValidName(SyntaxError, name) {
@@ -840,8 +840,10 @@ function wrapHTMLElement(win) {
 /**
  * Setups up prototype inheritance
  *
- * @param {!Function} superClass
- * @param {!Function} subClass
+ * @param {!typeof SUPER} superClass
+ * @param {!typeof SUB} subClass
+ * @template SUPER
+ * @template SUB
  */
 function subClass(superClass, subClass) {
   // Object.getOwnPropertyDescriptor(superClass.prototype, 'constructor')
