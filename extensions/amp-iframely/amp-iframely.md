@@ -92,8 +92,6 @@ There are two ways to identify rich media. Either with the help of Iframely-issu
   </tr>
 </table>
 
-If you use Iframely with your own CDN, set its domain as `data-domain` attribute. By default, <code>cdn.iframe.ly</code> is used to source component's iFrame.
-
 ### Placing
 
 `amp-iframely` supports responsive and fixed-height layouts:

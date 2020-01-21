@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {addParamToUrl, addParamsToUrl} from '../../../src/url';
 import {createElementWithAttributes, removeElement} from '../../../src/dom';
+import {getStyle, setStyle} from '../../../src/style';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {setStyle, toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 export const TAG = 'amp-iframely';
-const DOMAIN = 'cdn.iframe.ly';
 
 /**
  * Finds an iFrame that sent a message by its contentWindow.
@@ -49,29 +49,42 @@ export class AmpIframely extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /**
+     * Address of Iframely media (3rd party rich media or a summary card for the URL).
+     * @private {string}
+     */
     this.src_ = null;
 
     /**
-     * The main Iframely iframe element.
+     * The main iFrame element that loads Iframely media.
      * @private {?Element}
      */
-    this.iframely_ = null;
+    this.iframe_ = null;
 
-    /** ID of Iframely content, if available */
-    this.id = null;
+    /**
+     * ID of Iframely content, if available
+     * @private {?string}
+     */
+    this.widgetId_ = null;
 
-    /** Domain of Iframely CDN */
-    this.base = null;
+    /**
+     * Domain of Iframely CDN
+     * @private {?string}
+     */
+    this.base_ = null;
 
-    /** Alternatively, identify with Iframely CDN via `url` and `key` hash params */
-    this.url = null;
-    this.key = null;
+    /**
+     * Alternatively, identify with Iframely CDN via `url` and `key` hash params
+     * @private {?string}
+     */
+    this.url_ = null;
+    /** @private {?string} */
+    this.key_ = null;
 
-    /** hardcoded allow attribute for iframe */
-    this.allow_ =
-      'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *; autoplay *;';
-
-    /** other data- options that will be passed into iFrame src*/
+    /**
+     * other data- options that will be passed into iFrame src
+     * @private {?Object}
+     * */
     this.options_ = null;
   }
 
@@ -83,15 +96,18 @@ export class AmpIframely extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** Populating parameters once */
-    this.id = this.element.getAttribute('data-id');
-    this.url = this.element.getAttribute('data-url');
-    this.key = this.element.getAttribute('data-key');
-    this.options_ = this.parseOptions();
-    const domain = this.element.getAttribute('data-domain') || DOMAIN;
-    this.base = `https://${domain
-      .replace(/^(https?:)?\/\//g, '')
-      .replace(/\/.*$/i, '')}/`;
-    this.parseAttributes();
+    this.widgetId_ = this.element.getAttribute('data-id');
+    this.url_ = this.element.getAttribute('data-url');
+    this.key_ = this.element.getAttribute('data-key');
+    this.options_ = this.parseOptions_();
+    let domain = 'cdn.iframe.ly';
+    const requestedDomain = this.element.getAttribute('data-domain');
+    if (requestedDomain && this.isValidDomain_(requestedDomain)) {
+      domain = requestedDomain;
+    }
+    this.base_ = `https://${domain}/`;
+    this.parseAttributes_();
+    setStyle(this.element, 'box-sizing', 'border-box');
   }
 
   /**
@@ -99,8 +115,8 @@ export class AmpIframely extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    if (this.preconnect && this.preconnect.url) {
-      this.preconnect.url(this.base, opt_onLayout);
+    if (this.preconnect && this.preconnect.url_) {
+      this.preconnect.url(this.base_, opt_onLayout);
     }
   }
 
@@ -115,9 +131,9 @@ export class AmpIframely extends AMP.BaseElement {
     const isImg = this.element.getAttribute('data-img') !== null;
 
     if (isImg || (layout === 'responsive' && !resizable)) {
-      /** using iframely placeholder image */
-      let src = this.constructPlaceholderSrc();
-      src += this.appendOptions();
+      /** using Iframely placeholder image */
+      let src = this.constructPlaceholderSrc_();
+      src = addParamsToUrl(src, this.options_);
       return createElementWithAttributes(
         this.element.ownerDocument,
         'amp-img',
@@ -134,19 +150,26 @@ export class AmpIframely extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    /** attach amp-iframe */
+    /** attach iFrame */
     const me = this;
-    const iframely = this.element.ownerDocument.createElement('iframe');
-    setStyle(iframely, 'border', '0');
-    iframely.setAttribute('allow', this.allow_);
-    this.src_ += this.appendOptions();
-    iframely.src = this.src_;
-    this.applyFillContent(iframely);
-    this.element.appendChild(iframely);
+    this.iframe_ = this.element.ownerDocument.createElement('iframe');
+    setStyle(this.iframe_, 'border', '0');
+    this.iframe_.setAttribute(
+      'allow',
+      'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *;'
+    );
+    this.iframe_.setAttribute(
+      'sandbox',
+      'allow-scripts allow-same-origin allow-popups allow-forms allow-presentation'
+    );
+    this.src_ = addParamsToUrl(this.src_, this.options_);
+    this.iframe_.src = this.src_;
+    this.applyFillContent(this.iframe_);
+    this.element.appendChild(this.iframe_);
 
     /**
      * Handling Iframely messages
-     * @param {window.event.source} event - event to check iframely against
+     * @param {window.event.source} event - event to check
      * */
     function receiveMessage(event) {
       const iframes = me.element.getElementsByTagName('iframe');
@@ -155,8 +178,7 @@ export class AmpIframely extends AMP.BaseElement {
       }
     }
     window.addEventListener('message', receiveMessage, false);
-    this.iframely_ = iframely;
-    return this.loadPromise(iframely);
+    return this.loadPromise(this.iframe_);
   }
 
   /**
@@ -174,25 +196,32 @@ export class AmpIframely extends AMP.BaseElement {
     if (data) {
       if (data.method === 'resize') {
         /** Set the size of the card according to the message from Iframely */
-        me./*OK*/ changeHeight(data['height']);
+        const height = this.addBorderHeight_(me, data['height']);
+        me.attemptChangeHeight(height).catch(() => {});
       }
       if (data.method === 'setIframelyEmbedData') {
         /** apply Iframely card styles if present */
-        const media = data.data.media || null;
-        if (media && media.frame_style) {
-          const styles = media.frame_style.split(';');
+        const media = data['data']['media'] || null;
+        if (media && media['frame_style']) {
+          const styles = media['frame_style'].split(';');
           styles.forEach(function(style) {
-            const styleValue = style.split(':')[1];
-            switch (style.split(':')[0]) {
-              case 'border':
-                setStyle(me.element, 'border', styleValue);
-                break;
-              case 'border-radius':
-                setStyle(me.element, 'border-radius', styleValue);
-                break;
-              case 'box-shadow':
-                setStyle(me.element, 'box-shadow', styleValue);
-                break;
+            const props = style.split(':');
+            if (props.length === 2) {
+              const styleName = props[0].trim(),
+                styleValue = props[1].trim();
+              switch (styleName) {
+                case 'border':
+                  /** Because of the border-box sizing, changing border width doesn't change the size of the box. */
+                  setStyle(me.element, 'border', styleValue);
+                  /** Because Iframely sends border message before even building card's content, no change of iFrame's height is necessary here. */
+                  break;
+                case 'border-radius':
+                  setStyle(me.element, 'border-radius', styleValue);
+                  break;
+                case 'box-shadow':
+                  setStyle(me.element, 'box-shadow', styleValue);
+                  break;
+              }
             }
           });
         }
@@ -203,18 +232,24 @@ export class AmpIframely extends AMP.BaseElement {
             /** Apply height for media with updated "aspect-ratio" and "padding-bottom". */
             height =
               box.width / media['aspect-ratio'] + media['padding-bottom'];
-            me./*OK*/ changeHeight(height);
+            height = this.addBorderHeight_(me, height);
+            me.attemptChangeHeight(height).catch(() => {});
           } else {
             height = box.width / media['aspect-ratio'];
             if (Math.abs(box.height - height) > 1) {
               /** Apply new height for updated "aspect-ratio". */
-              me./*OK*/ changeHeight(height);
+              height = this.addBorderHeight_(me, height);
+              me.attemptChangeHeight(height).catch(() => {});
             }
           }
         }
       }
       if (data.method === 'cancelWidget') {
-        toggle(me.element, false);
+        me.attemptCollapse().catch(() => {
+          if (me.iframe_) {
+            removeElement(me.iframe_);
+          }
+        });
       }
     }
   }
@@ -222,15 +257,19 @@ export class AmpIframely extends AMP.BaseElement {
   /**
    * Constructing placeholder image SRC
    * @return {string} url of the placeholder
+   * @private
    * */
-  constructPlaceholderSrc() {
+  constructPlaceholderSrc_() {
     let src = null;
-    if (this.id) {
-      const id = encodeURIComponent(this.id);
-      src = `${this.base}${id}/thumbnail?amp=1`;
+    if (this.widgetId_) {
+      const url = this.base_ + this.widgetId_ + '/thumbnail';
+      src = addParamToUrl(url, 'amp', '1');
     } else {
-      const url = encodeURIComponent(this.url);
-      src = `${this.base}api/thumbnail?url=${url}&key=${this.key}&amp=1`;
+      src = addParamsToUrl(this.base_ + 'api/thumbnail', {
+        'url': this.url_,
+        'key': this.key_,
+        'amp': '1',
+      });
     }
     return src;
   }
@@ -238,68 +277,73 @@ export class AmpIframely extends AMP.BaseElement {
   /**
    * Test component call for required params
    * @return {null}
+   * @private
    * */
-  parseAttributes() {
+  parseAttributes_() {
     userAssert(
       this.element.getAttribute('data-id') ||
-        this.element.getAttribute('data-url'),
+      this.element.getAttribute('data-url'),
       'Iframely requires either "data-id" or a pair of "data-url" and "data-key" parameters for <%s> %s',
       TAG,
       this.element
     );
-    if (!this.id) {
-      if (this.url) {
+    if (!this.widgetId_) {
+      if (this.url_) {
         userAssert(
-          this.key,
+          this.key_,
           'Iframely data-key must also be set when you specify data-url parameter at <%s> %s',
           TAG,
           this.element
         );
       }
-      if (this.key) {
+      if (this.key_) {
         userAssert(
-          this.url,
+          this.url_,
           'Iframely data-url must also be set when you specify data-key parameter at <%s> %s',
           TAG,
           this.element
         );
         userAssert(
-          16 < this.key.length || this.key.length > 256,
+          16 < this.key_.length || this.key_.length > 256,
           'Iframely data-key should be between 16 and 256 characters parameter at <%s> %s',
           TAG,
           this.element
         );
       }
-      if (this.key || this.url) {
+      if (this.key_ || this.url_) {
         userAssert(
-          !this.id,
+          !this.widgetId_,
           'Iframely data-id should not be set when there is already a pair of data-url and data-key for <%s> %s',
           TAG,
           this.element
         );
       }
     }
-    if ((this.id && this.url) || (this.id && this.key)) {
+    if ((this.widgetId_ && this.url_) || (this.widgetId_ && this.key_)) {
       userAssert(
-        !this.id,
+        !this.widgetId_,
         'Only one way of setting either data-id or data-url and data-key supported for <%s> %s',
         TAG,
         this.element
       );
     }
-    if (this.id) {
-      this.src_ = `${this.base}${this.id}?amp=1`;
+    if (this.widgetId_) {
+      this.src_ = addParamToUrl(this.base_ + this.widgetId_, 'amp', '1');
     } else {
-      const url = encodeURIComponent(this.url);
-      this.src_ = `${this.base}api/iframe?url=${url}&key=${this.key}&amp=1`;
+      this.src_ = addParamsToUrl(this.base_ + 'api/iframe', {
+        'url': this.url_,
+        'key': this.key_,
+        'amp': '1',
+      });
     }
   }
 
   /**
    * Parse other data-* attributes and append them to API query url
-   * @return {object} of iframely options
+   * @return {object} of Iframely options
+   * @private
    * */
-  parseOptions() {
+  parseOptions_() {
     const options = {};
     const exclude = [
       'data-id',
@@ -319,28 +363,56 @@ export class AmpIframely extends AMP.BaseElement {
     return options;
   }
 
-  /**
-   * Pass other options into URL query string if present
-   * @return {string} string of encoded iframely options to append to query url
-   * */
-  appendOptions() {
-    let str = '';
-    if (this.options_) {
-      for (const key in this.options_) {
-        const value = encodeURIComponent(this.options_[key]);
-        str += `&${key}=${value}`;
-      }
-    }
-    return str;
-  }
-
   /** @override */
   unlayoutCallback() {
-    if (this.iframely_) {
-      removeElement(this.iframely_);
-      this.iframely_ = null;
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
     }
-    return true; // Call layoutCallback again.
+    return true; // Request layoutCallback again.
+  }
+
+  /**
+   * Validates that requested domain is a valid Iframely domain
+   * @param {string} domainName - of domain to check against a whitelist
+   * @return {boolean} if domain is valid
+   * @private
+   * */
+  isValidDomain_(domainName) {
+    const whitelistedDomains = [
+      /^(?:[^\.\/]+\.)?iframe\.ly$/i,
+      /^if\-cdn\.com$/i,
+      /^iframely\.net$/i,
+      /^oembed\.vice\.com$/i,
+      /^iframe\.nbcnews\.com$/i,
+    ];
+    for (const i in whitelistedDomains) {
+      if (whitelistedDomains[i].test(domainName)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Adds border height, if any, to a given internal iFrame height value.
+   * @param {AmpIframely} me - component instance in the current state
+   * @param {string} currentHeight - required internal height value
+   * @return {number} height value
+   * @private
+   * */
+  addBorderHeight_(me, currentHeight) {
+    const borderValue = getStyle(me.element, 'border');
+    if (borderValue) {
+      let borderWidth = borderValue.match(/(\d+)px/) || 0;
+      if (borderWidth) {
+        borderWidth = parseInt(borderWidth[1], 10);
+        borderWidth = borderWidth * 2;
+      }
+      return currentHeight + borderWidth;
+    } else {
+      return currentHeight;
+    }
   }
 }
 

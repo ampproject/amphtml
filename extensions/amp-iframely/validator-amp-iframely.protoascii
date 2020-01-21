@@ -41,7 +41,10 @@ tags: {  # <amp-iframely>
 
   # optional attributes
   attrs: { name: "data-img" value: "" }
-  attrs: { name: "data-domain" }
+  attrs: {
+    name: "data-domain"
+    value_regex: "^((?:[^\\.\\/]+\\.)?iframe\\.ly|if\\-cdn\\.com|iframely\\.net|oembed\\.vice\\.com|iframe\\.nbcnews\\.com)$"
+  }
   attrs: { name: "resizable" value: "" }
   # data-* attributes are converted into options
   # for building iframely widget from url

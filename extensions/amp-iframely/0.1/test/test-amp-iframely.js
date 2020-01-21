@@ -134,8 +134,9 @@ describes.realWin(
         expect(iframe.getAttribute('style')).to.equal('border: 0px;');
         // Allow string for iframe
         expect(iframe.getAttribute('allow')).to.equal(
-          'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *; autoplay *;'
+          'encrypted-media *; accelerometer *; gyroscope *; picture-in-picture *; camera *; microphone *;'
         );
+        expect(iframe.getAttribute('allow')).to.not.include('autoplay');
       });
     });
 
@@ -170,8 +171,29 @@ describes.realWin(
       });
     });
 
-    it('renders iframe and image placeholder with proper domain', () => {
+    it('does not render iframe and image placeholder with wrong domain', () => {
       const domain = 'mydomain.com';
+      const properDomain = 'cdn.iframe.ly';
+      const data = {
+        'data-id': TestID,
+        'data-domain': domain,
+        'width': '100',
+        'height': '100',
+        'layout': 'responsive',
+      };
+      return renderIframely(data).then(iframely => {
+        const image = iframely.querySelector('amp-img');
+        expect(image).to.not.be.null;
+        expect(image.getAttribute('src')).to.equal(
+          `https://${properDomain}/${TestID}/thumbnail?amp=1`
+        );
+        const iframe = iframely.querySelector('iframe');
+        expect(iframe.src).to.equal(`https://${properDomain}/${TestID}?amp=1`);
+      });
+    });
+
+    it('renders iframe and image placeholder with proper domain', () => {
+      const domain = 'iframe.ly';
       const data = {
         'data-id': TestID,
         'data-domain': domain,
