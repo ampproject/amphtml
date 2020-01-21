@@ -16,6 +16,7 @@
 import '../amp-next-page';
 import {PageState} from '../page';
 import {Services} from '../../../../src/services';
+import {ViewportRelativePos} from '../visibility-observer';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {setStyle} from '../../../../src/style';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -270,8 +271,48 @@ describes.realWin(
         );
       });
 
-      it('adds the hidden class to elements that should be hidden', () => {
-        // TODO(wassgha): Implement once #26235 is merged
+      it('adds the hidden class to elements that should be hidden', async () => {
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
+        env.fetchMock.get(
+          /\/document1/,
+          `${MOCK_NEXT_PAGE} <div amp-next-page-hide id="hidden" />`
+        );
+        await service.maybeFetchNext();
+
+        expect(
+          service.pages_[1].document.getElementById('hidden')
+        ).to.have.attribute('hidden');
+      });
+
+      it('replaces elements with their most recent instance', async () => {
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
+        env.fetchMock.get(
+          /\/document1/,
+          `${MOCK_NEXT_PAGE} <div amp-next-page-replace="replace-me" instance="1" />`
+        );
+        await service.maybeFetchNext();
+        service.pages_[1].setVisibility(VisibilityState.VISIBLE);
+
+        env.fetchMock.get(
+          /\/document2/,
+          `${MOCK_NEXT_PAGE} <div amp-next-page-replace="replace-me" instance="2" />`
+        );
+        await service.maybeFetchNext();
+        service.pages_[1].relativePos = ViewportRelativePos.INSIDE_VIEWPORT;
+        service.updateVisibility();
+        service.pages_[1].relativePos = ViewportRelativePos.OUTSIDE_VIEWPORT;
+        service.pages_[2].relativePos = ViewportRelativePos.INSIDE_VIEWPORT;
+        service.updateVisibility();
+
+        expect(service.pages_[1].document.querySelector('[instance="1"]')).to.be
+          .ok;
+        expect(
+          service.pages_[1].document.querySelector('[instance="1"]')
+        ).to.have.attribute('hidden');
+        expect(service.pages_[2].document.querySelector('[instance="1"]')).to
+          .not.be.ok;
       });
 
       it('removes amp-analytics tags from child documents', async () => {
@@ -283,12 +324,8 @@ describes.realWin(
         );
         await service.maybeFetchNext();
 
-        // TODO(wassgha): Replace `.shadowDoc_.ampdoc.getRootNode()` with `.document` once #26235 is merged
-        expect(
-          service.pages_[1].shadowDoc_.ampdoc
-            .getRootNode()
-            .getElementById('analytics1')
-        ).to.be.null;
+        expect(service.pages_[1].document.getElementById('analytics1')).to.be
+          .null;
       });
     });
 
