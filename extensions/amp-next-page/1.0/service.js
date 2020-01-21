@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-1.0.css';
-import {HostPage, Page, PageState} from './page';
+import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -536,6 +536,8 @@ export class NextPageService {
       removeElement(el);
     });
 
+    doc.body.classList.add(HIDDEN_DOC_CLASS);
+
     // Make sure all hidden elements are initially invisible
     this.toggleHiddenAndReplaceableElements(doc, false /** isVisible */);
   }
@@ -745,7 +747,7 @@ export class NextPageService {
    * @private
    */
   buildDefaultSeparator_() {
-    const html = htmlFor(this.element_);
+    const html = htmlFor(this.getHostNextPageElement_());
     return html`
       <div
         class="amp-next-page-default-separator"
@@ -768,12 +770,13 @@ export class NextPageService {
     if (!this.templates_.hasTemplate(separator)) {
       return Promise.resolve();
     }
-    this.templates_
-      .findAndRenderTemplate(separator, {
-        title: page.title,
-        url: page.url,
-        image: page.image,
-      })
+    const data = /** @type {!JsonObject} */ ({
+      title: page.title,
+      url: page.url,
+      image: page.image,
+    });
+    return this.templates_
+      .findAndRenderTemplate(separator, data)
       .then(rendered => {
         return this.mutator_.mutateElement(separator, () => {
           removeChildren(dev().assertElement(separator));

@@ -30,7 +30,8 @@ export const PageState = {
   PAUSED: 5,
 };
 
-const VISIBLE_DOC_CLASS = 'next-page-visible';
+export const VISIBLE_DOC_CLASS = 'amp-next-page-visible';
+export const HIDDEN_DOC_CLASS = 'amp-next-page-hidden';
 
 export class Page {
   /**
@@ -160,6 +161,9 @@ export class Page {
       this.shadowDoc_.ampdoc
         .getBody()
         .classList.toggle(VISIBLE_DOC_CLASS, this.isVisible());
+      this.shadowDoc_.ampdoc
+        .getBody()
+        .classList.toggle(HIDDEN_DOC_CLASS, !this.isVisible());
     }
 
     if (this.isVisible()) {
