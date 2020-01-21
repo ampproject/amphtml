@@ -427,6 +427,7 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
+      'extensions/amp-story/1.0/amp-story-quiz.js',
     ],
   },
   'getBaseCid': {
