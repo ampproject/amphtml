@@ -281,6 +281,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     optionText.textContent = option.textContent;
     convertedOption.appendChild(optionText);
 
+    // Add text container for percentage display
+    const percentageText = document.createElement('span');
+    percentageText.classList.add('i-amphtml-story-quiz-percentage-text');
+    percentageText.textContent = '0%';
+    convertedOption.appendChild(percentageText);
+
     if (option.hasAttribute('correct')) {
       convertedOption.setAttribute('correct', 'correct');
     }
@@ -368,6 +374,109 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   updateQuizToPostSelectionState_(selectedOption) {
     this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
     selectedOption.classList.add('i-amphtml-story-quiz-option-selected');
+
+    if (!this.responseData_) {
+      this.quizEl_.classList.add('i-amphtml-story-quiz-no-data');
+    }
+  }
+
+  /**
+   * @private
+   */
+  updateOptionPercentages_() {
+    if (!this.responseData_) {
+      return;
+    }
+
+    const options = Array.from(
+      this.quizEl_.querySelectorAll('.i-amphtml-story-quiz-option')
+    );
+
+    // TODO: PREPROCCESS PERCENTAGES
+    const percentages = this.preprocessPercentages_(options.length);
+
+    // update percentage text
+    this.responseData_['responses'].forEach(response => {
+      options[response['reactionValue']].querySelector(
+        '.i-amphtml-story-quiz-percentage-text'
+      ).textContent = `${percentages[response['reactionValue']]}%`;
+    });
+
+    // update percentage CSS vars
+  }
+
+  /**
+   * Preprocess the percentages for display
+   *
+   * @param {number} numOptions
+   * @return {Array<number>}
+   * @private
+   */
+  preprocessPercentages_(numOptions) {
+    const totalResponseCount = this.responseData_['totalResponseCount'];
+    let percentages = new Array(numOptions).fill(0);
+
+    for (let i = 0; i < this.responseData_['responses'].length; i++) {
+      percentages[i] = (
+        100 *
+        (this.responseData_['responses'][i]['totalCount'] / totalResponseCount)
+      ).toFixed(2);
+    }
+
+    // now perform truncations, preserving order, ties, and adding to 100
+    const total = percentages.reduce(
+      (currentTotal, currentValue) =>
+        (currentTotal += Math.round(currentValue)),
+      0
+    );
+
+    if (total === 100) {
+      return percentages.map(percentage => Math.round(percentage));
+    } else {
+      // trunc, preserve ties, order, & 100 sum
+      let remainder = 100 - total;
+
+      let preserveOriginal = percentages.map((percentage, index) => {
+        return {
+          originalIndex: index,
+          value: percentage,
+          remainder: (percentage - Math.trunc(percentage)).toFixed(2),
+        };
+      });
+      preserveOriginal.sort((left, right) => right.remainder - left.remainder);
+      const finalPercentages = [];
+
+      while (remainder > 0 && preserveOriginal.length !== 0) {
+        // grab highest remainder
+        const highestRemainderObj = preserveOriginal[0];
+
+        const ties = preserveOriginal.filter(
+          percentageObj => percentageObj.value === highestRemainderObj.value
+        );
+        preserveOriginal = preserveOriginal.filter(
+          percentageObj => percentageObj.value !== highestRemainderObj.value
+        );
+
+        ties.forEach(percentageObj => {
+          finalPercentages[percentageObj.originalIndex] =
+            Math.trunc(percentageObj.value) +
+            (ties.length <= remainder ? 1 : 0);
+        });
+
+        // update remainder
+        remainder -= ties.length;
+      }
+
+      preserveOriginal.forEach(percentageObj => {
+        finalPercentages[percentageObj.originalIndex] = Math.trunc(
+          percentageObj.value
+        );
+      });
+
+      percentages = finalPercentages;
+    }
+
+    return percentages;
   }
 
   /**
@@ -385,7 +494,17 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       this.triggerAnalytics_(optionEl);
       this.hasUserSelection_ = true;
 
+      if (this.responseData_) {
+        this.responseData_['totalResponseCount']++;
+        this.responseData_['responses'].forEach(response => {
+          if (response['reactionValue'] === optionEl.optionIndex_) {
+            response['totalCount']++;
+          }
+        });
+      }
+
       this.mutateElement(() => {
+        this.updateOptionPercentages_();
         this.updateQuizToPostSelectionState_(optionEl);
       });
 
@@ -517,7 +636,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   updateQuizOnDataRetrieval_() {
     let selectedOptionKey;
-    this.responseData_.responses.forEach(response => {
+    this.responseData_['responses'].forEach(response => {
       if (response.selectedByUser) {
         selectedOptionKey = response.reactionValue;
       }
@@ -541,7 +660,20 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       return;
     }
 
+    if (this.responseData_['responses'].length > options.length) {
+      dev().error(
+        TAG,
+        `Quiz #${this.element.getAttribute('id')} has ${
+          options.length
+        } options, but response returned ${
+          this.responseData_['responses'].length
+        } options`
+      );
+      return;
+    }
+
     this.mutateElement(() => {
+      this.updateOptionPercentages_();
       this.updateQuizToPostSelectionState_(options[selectedOptionKey]);
     });
   }
