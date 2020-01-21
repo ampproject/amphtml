@@ -10,9 +10,6 @@
     "AMP HTML",
     "Accelerated Mobile Pages"
   ],
-  "engines": {
-    "node": ">=0.10.25"
-  },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
   "repository": {

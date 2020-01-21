@@ -2,9 +2,6 @@
   "name": "amp-validator-webui",
   "version": "0.1.0",
   "description": "Web UI for Validator for AMP HTML (www.ampproject.org)",
-  "engines": {
-    "node": "^12.0.0"
-  },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
   "repository": {
