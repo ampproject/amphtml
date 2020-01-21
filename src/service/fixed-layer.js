@@ -30,6 +30,7 @@ import {
 import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
+import {getMode} from '../mode';
 import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
 
@@ -160,7 +161,7 @@ export class FixedLayer {
    */
   setup() {
     const viewer = Services.viewerForDoc(this.ampdoc);
-    if (viewer && !viewer.isEmbedded()) {
+    if (!getMode().localDev && !viewer.isEmbedded()) {
       // FixedLayer is not needed for standalone documents.
       return false;
     }

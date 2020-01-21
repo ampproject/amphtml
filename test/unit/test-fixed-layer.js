@@ -1706,19 +1706,22 @@ describes.sandboxed('FixedLayer', {}, () => {
   });
 });
 
-describes.sandboxed('FixedLayer Shortcut Setup', {}, () => {
+describes.sandboxed('FixedLayer Setup Execution Bailouts', {}, () => {
+  let win;
   let ampdoc;
   let viewer;
   let vsyncApi;
 
   beforeEach(() => {
-    const win = new FakeWindow();
-    ampdoc = new AmpDocSingle(win);
-    installPlatformService(win);
-    installTimerService(win);
-    installViewerServiceForDoc(ampdoc);
-    viewer = Services.viewerForDoc(ampdoc);
-
+    win = new FakeWindow();
+    window.__AMP_MODE = {
+      localDev: false,
+      development: false,
+      minified: false,
+      test: false,
+      version: '$internalRuntimeVersion$',
+    };
+    
     const vsyncTasks = [];
     vsyncApi = {
       runPromise: task => {
@@ -1732,6 +1735,11 @@ describes.sandboxed('FixedLayer Shortcut Setup', {}, () => {
   });
 
   it('should not perform setup when served canonically', () => {
+    ampdoc = new AmpDocSingle(win);
+    installPlatformService(win);
+    installTimerService(win);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
     viewer.isEmbedded = () => false;
 
     const fixedLayer = new FixedLayer(
@@ -1746,6 +1754,78 @@ describes.sandboxed('FixedLayer Shortcut Setup', {}, () => {
   });
 
   it('should perform setup when served within a viewer', () => {
+    ampdoc = new AmpDocSingle(win);
+    installPlatformService(win);
+    installTimerService(win);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
+    viewer.isEmbedded = () => true;
+
+    const fixedLayer = new FixedLayer(
+      ampdoc,
+      vsyncApi,
+      /* borderTop */ 0,
+      /* paddingTop */ 11,
+      /* transfer */ false
+    );
+    const executed = fixedLayer.setup();
+    expect(executed).to.be.true;
+  });
+});
+
+describes.sandboxed('FixedLayer Setup Execution Bailouts with Local Development', {}, () => {
+  let win;
+  let ampdoc;
+  let viewer;
+  let vsyncApi;
+
+  beforeEach(() => {
+    win = new FakeWindow();
+    window.__AMP_MODE = {
+      localDev: true,
+      development: false,
+      minified: false,
+      test: false,
+      version: '$internalRuntimeVersion$',
+    };
+    
+    const vsyncTasks = [];
+    vsyncApi = {
+      runPromise: task => {
+        vsyncTasks.push(task);
+        return Promise.resolve();
+      },
+      mutate: mutator => {
+        vsyncTasks.push({mutate: mutator});
+      },
+    };
+  });
+
+  it('should perform setup when served canonically', () => {
+    ampdoc = new AmpDocSingle(win);
+    installPlatformService(win);
+    installTimerService(win);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
+    viewer.isEmbedded = () => false;
+
+    const fixedLayer = new FixedLayer(
+      ampdoc,
+      vsyncApi,
+      /* borderTop */ 0,
+      /* paddingTop */ 11,
+      /* transfer */ false
+    );
+    const executed = fixedLayer.setup();
+    expect(executed).to.be.true;
+  });
+
+  it('should perform setup when served within a viewer', () => {
+    ampdoc = new AmpDocSingle(win);
+    installPlatformService(win);
+    installTimerService(win);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
     viewer.isEmbedded = () => true;
 
     const fixedLayer = new FixedLayer(
