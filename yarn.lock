@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.2.0.tgz#82b6b68b6fe0eacbcc95d3f0a82ddf19a0e2b316"
   integrity sha512-CiMdKK9eMa6eqhqZc9bq86nPdgbALY+E8rKgUPR7wf2wGUNTm/jtFZQ7fn4sj/oggn0wvadBokabErtl1m1KSw==
 
-"@ampproject/worker-dom@0.22.0":
-  version "0.22.0"
-  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.22.0.tgz#76ea126179609f04a75f599cc8cab0eebdd18d19"
-  integrity sha512-DQHYU3Ue4TRUgAcMOtBZIrd5tVzfnNniy2EIcwRve0EhEvljS/GPVesncMoXSoNFQpOIeeQyPaOh31JwM1gz8w==
+"@ampproject/worker-dom@0.23.2":
+  version "0.23.2"
+  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.23.2.tgz#9b27a6b96125ddca58ebef302d7d05dc6080d689"
+  integrity sha512-+L2MCofSaFqTyGlp5FxqoH2JuiuHJkxVuLyim2RpMsnj9CVcfNlCdNwn2KqROw9kFnJp8gnZ7c8voqwD6yDwEg==
 
 "@ava/babel-plugin-throws-helper@^4.0.0":
   version "4.0.0"
@@ -2051,10 +2051,10 @@
     array-from "^2.1.1"
     lodash.get "^4.4.2"
 
-"@sinonjs/samsam@^4.2.1":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-4.2.1.tgz#cee77dc95f8d00339633e1683e026f2d73ed1d3a"
-  integrity sha512-7+5S4C4wpug5pzHS+z/63+XUwsH7dtyYELDafoT1QnfruFh7eFjlDWwZXltUB0GLk6y5eMeAt34Bjx8wJ4KfSA==
+"@sinonjs/samsam@^4.2.2":
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-4.2.2.tgz#0f6cb40e467865306d8a20a97543a94005204e23"
+  integrity sha512-z9o4LZUzSD9Hl22zV38aXNykgFeVj8acqfFabCY6FY83n/6s/XwNJyYYldz6/9lBJanpno9h+oL6HTISkviweA==
   dependencies:
     "@sinonjs/commons" "^1.6.0"
     lodash.get "^4.4.2"
@@ -5341,10 +5341,10 @@ diff@3.5.0:
   resolved "https://registry.yarnpkg.com/diff/-/diff-3.5.0.tgz#800c0dd1e0a8bfbc95835c202ad220fe317e5a12"
   integrity sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==
 
-diff@^4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.1.tgz#0c667cb467ebbb5cea7f14f135cc2dba7780a8ff"
-  integrity sha512-s2+XdvhPCOF01LRQBC8hf4vhbVmI2CGS5aZnxLJlT5FtdhPCDFq80q++zK2KlrVorVDdL5BOGZ/VfLrVtYNF+Q==
+diff@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
+  integrity sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
 
 diffie-hellman@^5.0.0:
   version "5.0.3"
@@ -5902,10 +5902,10 @@ eslint-plugin-chai-expect@2.1.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-chai-expect/-/eslint-plugin-chai-expect-2.1.0.tgz#9dd1d8e5a80543fdec956f6aef7f83f2241ca92b"
   integrity sha512-rd0/4mjMV6c3i0o4DKkWI4uaFN9DK707kW+/fDphaDI6HVgxXnhML9Xgt5vHnTXmSSnDhupuCFBgsEAEpchXmQ==
 
-eslint-plugin-eslint-plugin@2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-eslint-plugin/-/eslint-plugin-eslint-plugin-2.2.0.tgz#6cac90a8085f658e892b155dda130deac54cfa51"
-  integrity sha512-X5+NT9a2GuwWyb3sHJdEEe6aD/30Fhi3/9XCmYHe/OSnWKUhmKOxFTfFM1AXZfJXjAoX7811bnoLI3fZr5AX5Q==
+eslint-plugin-eslint-plugin@2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-eslint-plugin/-/eslint-plugin-eslint-plugin-2.2.1.tgz#9d567f2bb6891935d5d3e741f66c9ac42dc688fd"
+  integrity sha512-nvmoefIqdFX+skyCt/dN9HaeSNyL8A9UvEtCqCFfJBjKpAR0uRL3SGPLlvDsnfXWtN72G/viowvpA33VjQkGCg==
 
 eslint-plugin-google-camelcase@0.0.2:
   version "0.0.2"
@@ -6537,10 +6537,10 @@ fbjs@^0.8.4:
     setimmediate "^1.0.5"
     ua-parser-js "^0.7.18"
 
-fetch-mock@8.2.1:
-  version "8.2.1"
-  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-8.2.1.tgz#9ce26cb111713c55942f62843f962773937dcc19"
-  integrity sha512-v4YRwlAYZQmj+z1geAMn1RRbrnLXA61JtYfj2HdVDFOguzc/wTBYkH1vi78HOUA3DY2GgCLkcD1aq9vLAO/OKA==
+fetch-mock@8.3.1:
+  version "8.3.1"
+  resolved "https://registry.yarnpkg.com/fetch-mock/-/fetch-mock-8.3.1.tgz#9c79aab22fa1752fe00b487e2b271ecfc1138461"
+  integrity sha512-7IEIUvkHO6zOHbDSzkMAvkb2mx3N5xy9BS4RjFnIe8kCUDOomoNKBDKGwhTj5E0uuieo8rg55c6cUKorJuk4rg==
   dependencies:
     babel-runtime "^6.26.0"
     core-js "^3.0.0"
@@ -7226,46 +7226,46 @@ glogg@^1.0.0:
   dependencies:
     sparkles "^1.0.0"
 
-google-closure-compiler-java@^20191111.0.0:
-  version "20191111.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-java/-/google-closure-compiler-java-20191111.0.0.tgz#3fb9c464f49a73b5de3fa8ac3c2ef9c2b747266d"
-  integrity sha512-JgsQtJVVgDuj50VPQV1OgHxMy78daTL3d607V6zF/qETl3rEEiazEGfXDGUX/1V1SUOW+Y03Ct9bcO3LMxNlxg==
+google-closure-compiler-java@^20200112.0.0:
+  version "20200112.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-java/-/google-closure-compiler-java-20200112.0.0.tgz#2b99f5e2869a573a1b35558ff3b6e6bc054a116f"
+  integrity sha512-h/ExDCXAw88nOniQSbbK6et31kOwmaDxl6t52dnETCIzituQtGToPzy21vUel1o8o+FvWUybLoap+dEYBam1pA==
 
-google-closure-compiler-js@^20191111.0.0:
-  version "20191111.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-js/-/google-closure-compiler-js-20191111.0.0.tgz#94112796826d50d0b3717c80ab633a60d2617ff7"
-  integrity sha512-W3Oy5NF5CMgUv31CMbgLN7zhdCTVMTnNI//iEPYMotzXfX8viyOnTMipDDwJNeMnY7lfXbQrYOo+QkWP6WzZtg==
+google-closure-compiler-js@^20200112.0.0:
+  version "20200112.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-js/-/google-closure-compiler-js-20200112.0.0.tgz#cb9fc1636671f3ce927e668e29db69b65cae6f2d"
+  integrity sha512-xW47rSuiRaql6q1YN7+b3FXIW74b1nCcENVwm9cigw1H5gWoBMBJOmpZiXnjMfmYC+MALjPQ8giMzvSeP+2X5A==
 
-google-closure-compiler-linux@^20191111.0.0:
-  version "20191111.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20191111.0.0.tgz#f66eb017b24c474565a903f966472e7a4c05efd9"
-  integrity sha512-pxxB83Ae7G9OHFSOEzOYlp844YyqQgU1RXBpCGBKeDAQrs3dykHqRhNGZdI7N1tsby/pT+hKL1US2l/CslPqag==
+google-closure-compiler-linux@^20200112.0.0:
+  version "20200112.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-linux/-/google-closure-compiler-linux-20200112.0.0.tgz#e6c7943cc0114046dbe9fc685e4d7d4eb536c1dc"
+  integrity sha512-imTfdYP7BVTzzp3y7MuZP+98nEkbX7LZsZtxalNpl56vd+Ysc9/vOHXS14CdSoThaXIVlzX/lfjOlBRqPow+ew==
 
-google-closure-compiler-osx@^20191111.0.0:
-  version "20191111.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20191111.0.0.tgz#4b841fca5857dd05fbcf4ae312781e52e37c732e"
-  integrity sha512-sviL1DLN+dDfYBLzmU6+2Yk19P1uzUHQuKaXrHxEYZkU4jTJNq/TC4xi6t0ZgvLQEm2Vf7xhOrt80TYKnoQaVg==
+google-closure-compiler-osx@^20200112.0.0:
+  version "20200112.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-osx/-/google-closure-compiler-osx-20200112.0.0.tgz#df7a22c0dc32702b47c8ac4521f79bbe439effad"
+  integrity sha512-E3S1KqZw4+Zov0VXCkjomPrYhyuuV6jH9InBchQ7cZfipFJjhQmSRf39u4Mu0sINW7GXfODZbzBwOXhEIquFQw==
 
-google-closure-compiler-windows@^20191111.0.0:
-  version "20191111.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler-windows/-/google-closure-compiler-windows-20191111.0.0.tgz#da49d1814261fffbbe7bde1efc49c35eb533e89e"
-  integrity sha512-iKdz2bWrrM4zLv3USCRtWX4kLWzZhbj/afh/W6giLxg5XQzbNg+UpVF+2G6f/LEYK9UNBgS2TdyNTuw8mod+Mg==
+google-closure-compiler-windows@^20200112.0.0:
+  version "20200112.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler-windows/-/google-closure-compiler-windows-20200112.0.0.tgz#8300d1e651f2c84ed565e729ccf40d6ed7e63771"
+  integrity sha512-+5+UJFKXH0LGnYEHSVJxWwhtvX/MI6uebkAQkhma0057QsKs8fOToWuHL8/UbJULB4WUPa3DlHy0+Izs5z6lCQ==
 
-google-closure-compiler@20191111.0.0:
-  version "20191111.0.0"
-  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20191111.0.0.tgz#c2584b87d855cc4e23d5805e8f7269eb9a9166f2"
-  integrity sha512-Ji+FaqYKXNbJ78N5Do6hu61mPrB9D+8xSnmRO59u2CrIbmNCtoFnqkCAAL4Ye8LR8foRqtkDdiKJSblpe+5ttg==
+google-closure-compiler@20200112.0.0:
+  version "20200112.0.0"
+  resolved "https://registry.yarnpkg.com/google-closure-compiler/-/google-closure-compiler-20200112.0.0.tgz#98d79ed2926b5c9a04c759c3f0853f2102c06ba2"
+  integrity sha512-8d43B3hU2pAFy6MD946oslArRe11jPJ/h/VaPPiiSMoSMFxnDpd8jjVJfM2solFSNOOZ9OacA6g/RVGMyp5lvg==
   dependencies:
     chalk "2.x"
-    google-closure-compiler-java "^20191111.0.0"
-    google-closure-compiler-js "^20191111.0.0"
+    google-closure-compiler-java "^20200112.0.0"
+    google-closure-compiler-js "^20200112.0.0"
     minimist "1.x"
     vinyl "2.x"
     vinyl-sourcemaps-apply "^0.2.0"
   optionalDependencies:
-    google-closure-compiler-linux "^20191111.0.0"
-    google-closure-compiler-osx "^20191111.0.0"
-    google-closure-compiler-windows "^20191111.0.0"
+    google-closure-compiler-linux "^20200112.0.0"
+    google-closure-compiler-osx "^20200112.0.0"
+    google-closure-compiler-windows "^20200112.0.0"
 
 got@^9.6.0:
   version "9.6.0"
@@ -9270,15 +9270,14 @@ jsdoctypeparser@^6.1.0:
   resolved "https://registry.yarnpkg.com/jsdoctypeparser/-/jsdoctypeparser-6.1.0.tgz#acfb936c26300d98f1405cb03e20b06748e512a8"
   integrity sha512-UCQBZ3xCUBv/PLfwKAJhp6jmGOSLFNKzrotXGNgbKhWvz27wPsCsVeP7gIcHPElQw2agBmynAitXqhxR58XAmA==
 
-jsdom@16.0.0:
-  version "16.0.0"
-  resolved "https://registry.yarnpkg.com/jsdom/-/jsdom-16.0.0.tgz#da67380ffd869ff5832558da7e60a32058079e01"
-  integrity sha512-zYGVgSyf/Y/e3fOJICIyEgtTMV3lyYlsokXa7U0GWMzYKT2kN6iyBQLGbuLD+0/OLC2bnGGB4DuWtZSG2o7Gqw==
+jsdom@16.0.1:
+  version "16.0.1"
+  resolved "https://registry.yarnpkg.com/jsdom/-/jsdom-16.0.1.tgz#5a5214cf69609531bf6fa5b6322fdd90ceed5bf7"
+  integrity sha512-wKJe/APzq+ak9i+2ybWE20lDIhF9AkGKSZf8UsjPN39acatFB6oA7K397kQvHVikds0yQono2h6J7UjbPtPOWw==
   dependencies:
     abab "^2.0.3"
     acorn "^7.1.0"
     acorn-globals "^4.3.2"
-    array-equal "^1.0.0"
     cssom "^0.4.4"
     cssstyle "^2.0.0"
     data-urls "^2.0.0"
@@ -9288,7 +9287,6 @@ jsdom@16.0.0:
     html-encoding-sniffer "^2.0.0"
     nwsapi "^2.2.0"
     parse5 "5.1.1"
-    pn "^1.1.0"
     request "^2.88.0"
     request-promise-native "^1.0.8"
     saxes "^4.0.2"
@@ -13571,15 +13569,15 @@ sinon-chai@3.4.0:
   resolved "https://registry.yarnpkg.com/sinon-chai/-/sinon-chai-3.4.0.tgz#06fb88dee80decc565106a3061d380007f21e18d"
   integrity sha512-BpVxsjEkGi6XPbDXrgWUe7Cb1ZzIfxKUbu/MmH5RoUnS7AXpKo3aIYIyQUg0FMvlUL05aPt7VZuAdaeQhEnWxg==
 
-sinon@8.0.2:
-  version "8.0.2"
-  resolved "https://registry.yarnpkg.com/sinon/-/sinon-8.0.2.tgz#cc5f6daa9cc351b86b03faaca1e9c3650a04ae11"
-  integrity sha512-8W1S7BnCyvk7SK+Xi15B1QAVLuS81G/NGmWefPb31+ly6xI3fXaug/g5oUdfc8+7ruC4Ay51AxuLlYm8diq6kA==
+sinon@8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/sinon/-/sinon-8.1.0.tgz#30f82371ac6e7d4dccb77fa1525f5ea748c636ff"
+  integrity sha512-6/05TR+8QhEgTbyMWaConm8iPL609Eno7SqToPq63wC/jS/6NMEI4NxqtzlLkk3r/KcZT9xPXQodH0oJ917Hbg==
   dependencies:
     "@sinonjs/commons" "^1.7.0"
     "@sinonjs/formatio" "^4.0.1"
-    "@sinonjs/samsam" "^4.2.1"
-    diff "^4.0.1"
+    "@sinonjs/samsam" "^4.2.2"
+    diff "^4.0.2"
     lolex "^5.1.2"
     nise "^3.0.1"
     supports-color "^7.1.0"
@@ -14379,10 +14377,10 @@ ternary-stream@^3.0.0:
     merge-stream "^2.0.0"
     through2 "^3.0.1"
 
-terser@4.4.3:
-  version "4.4.3"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-4.4.3.tgz#401abc52b88869cf904412503b1eb7da093ae2f0"
-  integrity sha512-0ikKraVtRDKGzHrzkCv5rUNDzqlhmhowOBqC0XqUHFpW+vJ45+20/IFBcebwKfiS2Z9fJin6Eo+F1zLZsxi8RA==
+terser@4.6.3:
+  version "4.6.3"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-4.6.3.tgz#e33aa42461ced5238d352d2df2a67f21921f8d87"
+  integrity sha512-Lw+ieAXmY69d09IIc/yqeBqXpEQIpDGZqT34ui1QWXIUpR2RjbqEkT8X7Lgex19hslSqcWM5iMN2kM11eMsESQ==
   dependencies:
     commander "^2.20.0"
     source-map "~0.6.1"
@@ -14783,10 +14781,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typescript@3.7.4:
-  version "3.7.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.4.tgz#1743a5ec5fef6a1fa9f3e4708e33c81c73876c19"
-  integrity sha512-A25xv5XCtarLwXpcDNZzCGvW2D1S3/bACratYBx2sax8PefsFhlYmkQicKHvpYflFS8if4zne5zT5kpJ7pzuvw==
+typescript@3.7.5:
+  version "3.7.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.5.tgz#0692e21f65fd4108b9330238aac11dd2e177a1ae"
+  integrity sha512-/P5lkRXkWHNAbcJIiHPfRoKqyd7bsyCma1hZNUGfn20qm64T6ZBlrzprymeu918H+mB/0rIg2gGK/BXkhhYgBw==
 
 ua-parser-js@^0.7.18:
   version "0.7.20"
