@@ -202,7 +202,6 @@ async function compileCoreRuntime(watch, minify) {
  */
 async function compileAllJs(watch, minify) {
   const startTime = Date.now();
-  await compileCoreRuntime(watch, minify);
   await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
     doBuildJs(jsBundles, 'alp.max.js', {watch, minify}),
@@ -219,6 +218,7 @@ async function compileAllJs(watch, minify) {
     doBuildJs(jsBundles, 'amp-shadow.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-inabox.js', {watch, minify}),
   ]);
+  await compileCoreRuntime(watch, minify);
   endBuildStep(
     minify ? 'Minified' : 'Compiled',
     'all runtime JS files',
