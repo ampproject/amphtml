@@ -147,18 +147,22 @@ function build() {
   const rtvInput = document.getElementById('rtv');
   const rtvButton = document.getElementById('rtv-submit');
   rtvInput.addEventListener('input', () => {
-    rtvButton.disabled = !(rtvInput.value == '' || RTV_PATTERN.test(rtvInput.value));
+    rtvButton.disabled = !(
+      rtvInput.value == '' || RTV_PATTERN.test(rtvInput.value)
+    );
     rtvButton.textContent = rtvInput.value == '' ? 'opt-out' : 'opt-in';
   });
   rtvButton.addEventListener('click', () => {
     if (rtvInput.value == '') {
       showConfirmation_(
         'Do you really want to opt OUT of specific RTV',
-        setAmpCanaryCookie_.bind(null, AMP_CANARY_COOKIE.DISABLED));
+        setAmpCanaryCookie_.bind(null, AMP_CANARY_COOKIE.DISABLED)
+      );
     } else if (RTV_PATTERN.test(rtvInput.value)) {
       showConfirmation_(
         `Do you really want to opt into the specific RTV ${rtvInput.value}?`,
-        setAmpCanaryCookie_.bind(null, rtvInput.value));
+        setAmpCanaryCookie_.bind(null, rtvInput.value)
+      );
     }
   });
 
