@@ -31,7 +31,7 @@ function renderMeasurement(container, label, count) {
 
 function addStyleString(root, str) {
   const node = document.createElement('style');
-  node.innerHTML = str;
+  node./*OK*/ innerHTML = str;
   root.appendChild(node);
 }
 
