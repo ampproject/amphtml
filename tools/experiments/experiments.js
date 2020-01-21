@@ -34,6 +34,10 @@ setReportError(reportError);
 const COOKIE_MAX_AGE_DAYS = 180; // 6 month
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const COOKIE_MAX_AGE_MS = COOKIE_MAX_AGE_DAYS * MS_PER_DAY;
+const RTV_COOKIE_MAX_AGE_MS = MS_PER_DAY / 2;
+
+const RTV_PATTERN = /^\d{15}$/;
+
 /**
  * @typedef {{
  *   id: string,
@@ -51,6 +55,7 @@ let ExperimentDef;
  */
 const CANARY_EXPERIMENT_ID = 'dev-channel';
 const RC_EXPERIMENT_ID = 'rc-channel';
+const RTV_EXPERIMENT_ID = 'rtv-channel';
 
 /**
  * The different states of the AMP_CANARY cookie.
@@ -137,6 +142,30 @@ function build() {
     experimentsTable.setAttribute('hidden', '');
   } else {
     redirect.setAttribute('hidden', '');
+  }
+
+  const rtvInput = document.getElementById('rtv');
+  const rtvButton = document.getElementById('rtv-submit');
+  rtvInput.addEventListener('input', () => {
+    rtvButton.disabled = !(rtvInput.value == '' || RTV_PATTERN.test(rtvInput.value));
+    rtvButton.textContent = rtvInput.value == '' ? 'opt-out' : 'opt-in';
+  });
+  rtvButton.addEventListener('click', () => {
+    if (rtvInput.value == '') {
+      showConfirmation_(
+        'Do you really want to opt OUT of specific RTV',
+        setAmpCanaryCookie_.bind(null, AMP_CANARY_COOKIE.DISABLED));
+    } else if (RTV_PATTERN.test(rtvInput.value)) {
+      showConfirmation_(
+        `Do you really want to opt into the specific RTV ${rtvInput.value}?`,
+        setAmpCanaryCookie_.bind(null, rtvInput.value));
+    }
+  });
+
+  if (isExperimentOn_(RTV_EXPERIMENT_ID)) {
+    rtvInput.value = getCookie(window, 'AMP_CANARY');
+    rtvInput.dispatchEvent(new Event('input'));
+    document.getElementById('rtv-details').open = true;
   }
 }
 
@@ -237,24 +266,31 @@ function updateExperimentRow(experiment) {
  * @return {boolean}
  */
 function isExperimentOn_(id) {
-  if (id == CANARY_EXPERIMENT_ID) {
-    return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.CANARY;
-  } else if (id == RC_EXPERIMENT_ID) {
-    return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.RC;
+  switch (id) {
+    case CANARY_EXPERIMENT_ID:
+      return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.CANARY;
+    case RC_EXPERIMENT_ID:
+      return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.RC;
+    case RTV_EXPERIMENT_ID:
+      return RTV_PATTERN.test(getCookie(window, 'AMP_CANARY'));
+    default:
+      return isExperimentOn(window, /*OK*/ id);
   }
-  return isExperimentOn(window, /*OK*/ id);
 }
 
 /**
  * Opts in to / out of the "canary" or "rc" runtime types by setting the
  * AMP_CANARY cookie.
- * @param {string} cookieState One of AMP_CANARY_COOKIE.{DISABLED|CANARY|RC}
+ * @param {string} cookieState One of AMP_CANARY_COOKIE.{DISABLED|CANARY|RC} or
+ *   a 15-digit RTV.
  */
 function setAmpCanaryCookie_(cookieState) {
-  const validUntil =
-    cookieState != AMP_CANARY_COOKIE.DISABLED
-      ? Date.now() + COOKIE_MAX_AGE_MS
-      : 0;
+  let validUntil = 0;
+  if (RTV_PATTERN.test(cookieState)) {
+    validUntil = Date.now() + RTV_COOKIE_MAX_AGE_MS;
+  } else if (cookieState != AMP_CANARY_COOKIE.DISABLED) {
+    validUntil = Date.now() + COOKIE_MAX_AGE_MS;
+  }
   const cookieOptions = {
     // Set explicit domain, so the cookie gets sent to sub domains.
     domain: location.hostname,
@@ -279,7 +315,7 @@ function setAmpCanaryCookie_(cookieState) {
 function toggleExperiment_(id, name, opt_on) {
   const currentlyOn = isExperimentOn_(id);
   const on = opt_on === undefined ? !currentlyOn : opt_on;
-  // Protect against click jacking.
+  // Protect against accidental choice.
   const confirmMessage = on
     ? 'Do you really want to activate the AMP experiment'
     : 'Do you really want to deactivate the AMP experiment';
@@ -348,7 +384,7 @@ function getAmpConfig() {
   xhr.send(null);
   return promise
     .then(text => {
-      const match = text.match(/self\.AMP_CONFIG=([^;]+)/);
+      const match = text.match(/self\.AMP_CONFIG=({.+?})/);
       if (!match) {
         throw new Error("Can't find AMP_CONFIG in: " + text);
       }
