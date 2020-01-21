@@ -177,24 +177,33 @@ async function bootstrapThirdPartyFrames(watch, minify) {
 }
 
 /**
+ * Compile and optionally minify the core runtime.
+ * @param {boolean} watch
+ * @param {boolean} minify
+ * @return {!Promise}
+ */
+async function compileCoreRuntime(watch, minify) {
+  await doBuildJs(jsBundles, 'amp.js', {
+    watch,
+    minify,
+    wrapper: wrappers.mainBinary,
+    singlePassCompilation: argv.single_pass,
+    esmPassCompilation: argv.esm,
+    includeOnlyESMLevelPolyfills: argv.esm,
+  });
+}
+
+/**
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  * @param {boolean} watch
  * @param {boolean} minify
  * @return {!Promise}
  */
-function compileAllJs(watch, minify) {
+async function compileAllJs(watch, minify) {
   const startTime = Date.now();
-  return Promise.all([
+  await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
-    doBuildJs(jsBundles, 'amp.js', {
-      watch,
-      minify,
-      wrapper: wrappers.mainBinary,
-      singlePassCompilation: argv.single_pass,
-      esmPassCompilation: argv.esm,
-      includeOnlyESMLevelPolyfills: argv.esm,
-    }),
     doBuildJs(jsBundles, 'alp.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'examiner.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'ww.max.js', {watch, minify}),
@@ -208,13 +217,13 @@ function compileAllJs(watch, minify) {
     doBuildJs(jsBundles, 'amp-inabox-host.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-shadow.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-inabox.js', {watch, minify}),
-  ]).then(() => {
-    endBuildStep(
-      minify ? 'Minified all' : 'Compiled all',
-      'runtime JS files',
-      startTime
-    );
-  });
+  ]);
+  await compileCoreRuntime(watch, minify);
+  endBuildStep(
+    minify ? 'Minified' : 'Compiled',
+    'all runtime JS files',
+    startTime
+  );
 }
 
 /**
@@ -692,6 +701,7 @@ module.exports = {
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
   compileAllUnminifiedJs,
+  compileCoreRuntime,
   compileJs,
   compileTs,
   devDependencies,
