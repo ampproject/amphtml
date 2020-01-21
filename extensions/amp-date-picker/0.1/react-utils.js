@@ -20,7 +20,7 @@ import {requireExternal} from '../../../src/module';
  * Create a React component that can render Promises.
  * Note: The nested class cannot be named Deferred, since src/promise.js already
  * exports a class with that name.
- * @return {function(new:React.Component, !Object)}
+ * @return {typeof React.Component}
  */
 function createDeferred_() {
   const react = requireExternal('react');
@@ -97,12 +97,12 @@ function shallowDiffers(a, b) {
   return false;
 }
 
-/** @private {?function(new:React.Component, !Object)} */
+/** @private {?typeof React.Component} */
 let DeferredType_ = null;
 
 /**
  * Creates a single date picker.
- * @return {function(new:React.Component, !Object)} A date picker class
+ * @return {typeof React.Component} A date picker class
  */
 export function createDeferred() {
   if (!DeferredType_) {

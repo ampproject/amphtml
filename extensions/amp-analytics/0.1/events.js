@@ -63,7 +63,7 @@ const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
  * @const {!Object<string, {
  *     name: string,
  *     allowedFor: !Array<string>,
- *     klass: function(new:./events.EventTracker)
+ *     klass: typeof ./events.EventTracker
  *   }>}
  */
 const TRACKER_TYPE = Object.freeze({
@@ -188,7 +188,7 @@ export function getTrackerKeyName(eventType) {
 
 /**
  * @param {string} parentType
- * @return {!Object<string, function(new:EventTracker)>}
+ * @return {!Object<string, typeof EventTracker>}
  */
 export function getTrackerTypesForParentType(parentType) {
   const filtered = {};
