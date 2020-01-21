@@ -156,17 +156,19 @@ export class FixedLayer {
 
   /**
    * Must be always called after DOMReady.
+   * @return {boolean}
    */
   setup() {
-    const isEmbedded = !!this.ampdoc.getParent();
-    if (!isEmbedded) {
-      return;
+    const viewer = Services.viewerForDoc(this.ampdoc);
+    if (viewer && !viewer.isEmbedded()) {
+      // FixedLayer is not needed for standalone documents.
+      return false;
     }
 
     const root = this.ampdoc.getRootNode();
     const stylesheets = root.styleSheets;
     if (!stylesheets) {
-      return;
+      return true;
     }
 
     this.fixedSelectors_.length = 0;
@@ -210,6 +212,8 @@ export class FixedLayer {
           ' slightly different layout.'
       );
     }
+
+    return true;
   }
 
   /**
