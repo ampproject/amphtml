@@ -245,11 +245,7 @@ export class AmpIframely extends AMP.BaseElement {
         }
       }
       if (data.method === 'cancelWidget') {
-        me.attemptCollapse().catch(() => {
-          if (me.iframe_) {
-            removeElement(me.iframe_);
-          }
-        });
+        me.attemptCollapse().catch(() => {});
       }
     }
   }
