@@ -22,6 +22,7 @@ const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
+  compileCoreRuntime,
   compileJs,
   endBuildStep,
   hostname,
@@ -112,11 +113,15 @@ async function dist() {
 
   // Steps that use closure compiler. Small ones before large (parallel) ones.
   await startNailgunServer(distNailgunPort, /* detached */ false);
-  await buildExperiments({minify: true, watch: false});
-  await buildLoginDone('0.1', {minify: true, watch: false});
-  await buildWebPushPublisherFiles({minify: true, watch: false});
-  await compileAllMinifiedJs();
-  await buildExtensions({minify: true, watch: false});
+  if (argv.core_runtime_only) {
+    await compileCoreRuntime(/* watch */ false, /* minify */ true);
+  } else {
+    await buildExperiments({minify: true, watch: false});
+    await buildLoginDone('0.1', {minify: true, watch: false});
+    await buildWebPushPublisherFiles({minify: true, watch: false});
+    await compileAllMinifiedJs();
+    await buildExtensions({minify: true, watch: false});
+  }
   await stopNailgunServer(distNailgunPort);
 
   if (argv.esm) {
@@ -127,9 +132,10 @@ async function dist() {
     ]);
   }
 
-  await formatExtractedMessages();
-  await generateFileListing();
-
+  if (!argv.core_runtime_only) {
+    await formatExtractedMessages();
+    await generateFileListing();
+  }
   return exitCtrlcHandler(handlerProcess);
 }
 
@@ -434,6 +440,7 @@ dist.flags = {
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
+  core_runtime_only: '  Builds only the core runtime.',
   single_pass_dest:
     '  The directory closure compiler will write out to ' +
     'with --single_pass mode. The default directory is `dist`',
