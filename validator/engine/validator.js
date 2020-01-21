@@ -6224,7 +6224,8 @@ amp.validator.ValidationHandler =
    */
       cdata(text) {
         // Validate that JSON can be parsed.
-        if (this.context_.getTagStack().isScriptTypeJsonChild()) {
+        if (!this.context_.getTagStack().hasAncestor('TEMPLATE') &&
+            this.context_.getTagStack().isScriptTypeJsonChild()) {
           try {
             JSON.parse(text);
           } catch (e) {
