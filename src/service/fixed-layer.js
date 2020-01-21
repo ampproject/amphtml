@@ -180,7 +180,7 @@ export class FixedLayer {
       // Rare but may happen if the document is being concurrently disposed.
       if (!stylesheet) {
         dev().error(TAG, 'Aborting setup due to null stylesheet.');
-        return;
+        return true;
       }
       const {disabled, ownerNode} = stylesheet;
       if (
