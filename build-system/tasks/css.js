@@ -18,13 +18,8 @@ const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
 const gulpWatch = require('gulp-watch');
-const {
-  endBuildStep,
-  mkdirSync,
-  printNobuildHelp,
-  toPromise,
-} = require('./helpers');
 const {buildExtensions, extensions} = require('./extension-helpers');
+const {endBuildStep, mkdirSync, toPromise} = require('./helpers');
 const {jsifyCssAsync} = require('./jsify-css');
 const {maybeUpdatePackages} = require('./update-packages');
 
@@ -34,7 +29,6 @@ const {maybeUpdatePackages} = require('./update-packages');
  */
 async function css() {
   maybeUpdatePackages();
-  printNobuildHelp();
   return compileCss();
 }
 
@@ -65,10 +59,9 @@ const cssEntryPoints = [
 /**
  * Compile all the css and drop in the build folder
  * @param {boolean} watch
- * @param {boolean=} opt_compileAll
  * @return {!Promise}
  */
-function compileCss(watch, opt_compileAll) {
+function compileCss(watch) {
   if (watch) {
     gulpWatch('css/**/*.css', function() {
       compileCss();
@@ -111,7 +104,7 @@ function compileCss(watch, opt_compileAll) {
    * @param {string} outJs
    * @param {string} outCss
    * @param {boolean} append
-   * @return {*} TODO(#23582): Specify return type
+   * @return {!Promise}
    */
   function writeCssEntryPoint(path, outJs, outCss, append) {
     return jsifyCssAsync(`css/${path}`).then(css =>
@@ -134,12 +127,7 @@ function compileCss(watch, opt_compileAll) {
   });
 
   return promise
-    .then(() =>
-      buildExtensions({
-        compileOnlyCss: true,
-        compileAll: opt_compileAll,
-      })
-    )
+    .then(() => buildExtensions({compileOnlyCss: true}))
     .then(() => {
       endBuildStep('Recompiled all CSS files into', 'build/', startTime);
     });

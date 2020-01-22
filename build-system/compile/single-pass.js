@@ -18,7 +18,8 @@ const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
-const conf = require('../build.conf');
+const conf = require('./build.conf');
+const del = require('del');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -27,8 +28,7 @@ const log = require('fancy-log');
 const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
-const Promise = require('bluebird');
-const relativePath = require('path').relative;
+const pkgUp = require('pkg-up');
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
@@ -36,20 +36,21 @@ const tempy = require('tempy');
 const terser = require('terser');
 const through = require('through2');
 const {
+  extensionAliasBundles,
   extensionBundles,
   altMainBundles,
   TYPES,
-} = require('../../bundles.config');
+} = require('./bundles.config');
 const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
-const {isTravisBuild} = require('../travis');
+const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
-const wrappers = require('../compile-wrappers');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const wrappers = require('./compile-wrappers');
+const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =
@@ -59,7 +60,7 @@ if (!singlePassDest.endsWith('/')) {
   singlePassDest = `${singlePassDest}/`;
 }
 
-const SPLIT_MARKER = `/** SPLIT${Math.floor(Math.random() * 10000)} */`;
+const SPLIT_MARKER = `/** SPLIT_SINGLE_PASS */`;
 
 // Used to store transforms and compile v0.js
 const transformDir = tempy.directory();
@@ -104,16 +105,19 @@ exports.getFlags = function(config) {
     source_map_include_content: !!argv.full_sourcemaps,
     source_map_location_mapping: ['|/'],
     //new_type_inf: true,
-    language_in: 'ES6',
     // By default closure puts all of the public exports on the global, but
     // because of the wrapper modules (to mitigate async loading of scripts)
     // that we add to the js binaries this prevents other js binaries from
     // accessing the symbol, we remedy this by attaching all public exports
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
-    language_out: config.language_out || 'ES5',
-    module_output_path_prefix: config.writeTo || 'out/',
+    language_in: 'ECMASCRIPT_2018',
+    language_out: config.esm
+      ? 'NO_TRANSPILE'
+      : config.language_out || 'ECMASCRIPT5',
+    chunk_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
+    package_json_entry_names: 'module,main',
     process_common_js_modules: true,
     externs: config.externs,
     define: config.define,
@@ -161,7 +165,11 @@ exports.getBundleFlags = function(g) {
   Object.keys(g.packages)
     .sort()
     .forEach(function(pkg) {
-      srcs.push(pkg);
+      g.bundles[mainBundle].modules.push(pkg);
+      fs.outputFileSync(
+        `${g.tmp}/${pkg}`,
+        JSON.stringify(JSON.parse(readFile(pkg)), null, 4)
+      );
     });
 
   // Build up the weird flag structure that closure compiler calls
@@ -209,7 +217,7 @@ exports.getBundleFlags = function(g) {
         name,
       };
     }
-    // And now build --module $name:$numberOfJsFiles:$bundleDeps
+    // And now build --chunk $name:$numberOfJsFiles:$bundleDeps
     let cmd = name + ':' + bundle.modules.length;
     const bundleDeps = [];
     if (!isMain) {
@@ -228,7 +236,7 @@ exports.getBundleFlags = function(g) {
         }
       }
     }
-    flagsArray.push('--module', cmd);
+    flagsArray.push('--chunk', cmd);
     if (bundleKeys.length > 1) {
       function massageWrapper(w) {
         return w.replace('<%= contents %>', '%s');
@@ -243,7 +251,7 @@ exports.getBundleFlags = function(g) {
         const configEntry = getExtensionBundleConfig(originalName);
         const marker = configEntry ? SPLIT_MARKER : '';
         flagsArray.push(
-          '--module_wrapper',
+          '--chunk_wrapper',
           name +
             ':' +
             massageWrapper(
@@ -260,7 +268,6 @@ exports.getBundleFlags = function(g) {
       throw new Error('Expect to build more than one bundle.');
     }
   });
-  flagsArray.push('--js_module_root', `${g.tmp}/node_modules/`);
   flagsArray.push('--js_module_root', `${g.tmp}/`);
   return flagsArray;
 };
@@ -310,6 +317,8 @@ exports.getGraph = function(entryModules, config) {
     debug: true,
     deps: true,
     detectGlobals: false,
+    fast: true,
+    browserField: 'module',
   })
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
@@ -338,14 +347,21 @@ exports.getGraph = function(entryModules, config) {
         })
         .forEach(function(row) {
           const id = unifyPath(
-            exports.maybeAddDotJs(relativePath(process.cwd(), row.id))
+            exports.maybeAddDotJs(path.relative(process.cwd(), row.id))
           );
           topo.addNode(id, id);
-          const deps = (edges[id] = Object.keys(row.deps)
+          const deps = Object.keys(row.deps)
             .sort()
-            .map(function(dep) {
-              return unifyPath(relativePath(process.cwd(), row.deps[dep]));
-            }));
+            .map(dep => {
+              dep = unifyPath(path.relative(process.cwd(), row.deps[dep]));
+              if (dep.startsWith('node_modules/')) {
+                const pkgJson = pkgUp.sync({cwd: path.dirname(dep)});
+                const jsonId = unifyPath(path.relative(process.cwd(), pkgJson));
+                graph.packages[jsonId] = true;
+              }
+              return dep;
+            });
+          edges[id] = deps;
           graph.deps[id] = deps;
           if (row.entry) {
             graph.depOf[id] = {};
@@ -454,15 +470,11 @@ function setupBundles(graph) {
  * @param {!Object} config
  */
 function transformPathsToTempDir(graph, config) {
-  if (isTravisBuild()) {
-    // New line after all the compilation progress dots on Travis.
-    console.log('\n');
-  }
   log(
     'Performing single-pass',
     colors.cyan('babel'),
     'transforms in',
-    colors.cyan(graph.tmp)
+    colors.cyan(graph.tmp) + '...'
   );
   // `sorted` will always have the files that we need.
   graph.sorted.forEach(f => {
@@ -548,11 +560,13 @@ function isAltMainBundle(name) {
   });
 }
 
-exports.singlePassCompile = async function(entryModule, options) {
+exports.singlePassCompile = async function(entryModule, options, timeInfo) {
+  timeInfo.startTime = Date.now();
   return exports
     .getFlags({
       modules: [entryModule].concat(extensions),
       writeTo: singlePassDest,
+      esm: options.esm,
       define: options.define,
       externs: options.externs,
       hideWarningsFor: options.hideWarningsFor,
@@ -562,6 +576,8 @@ exports.singlePassCompile = async function(entryModule, options) {
     .then(intermediateBundleConcat)
     .then(eliminateIntermediateBundles)
     .then(thirdPartyConcat)
+    .then(cleanupWeakModuleFiles)
+    .then(copyAliasedExtensions)
     .catch(err => {
       err.showStack = false; // Useless node_modules stack
       throw err;
@@ -675,13 +691,31 @@ function postPrepend(extension, prependContents) {
   });
 }
 
+/**
+ * Copies JS for aliased extensions. (CSS is already dropped in place.)
+ */
+function copyAliasedExtensions() {
+  Object.keys(extensionAliasBundles).forEach(aliasedExtension => {
+    const {version, aliasedVersion} = extensionAliasBundles[aliasedExtension];
+    const src = `${aliasedExtension}-${version}.js`;
+    const dest = `${aliasedExtension}-${aliasedVersion}.js`;
+    fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
+    fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
+  });
+}
+
+/**
+ * Cleans up the weak module files written out by closure compiler.
+ * @return {!Promise}
+ */
+function cleanupWeakModuleFiles() {
+  const weakModuleJsFile = 'dist/$weak$.js';
+  const weakModuleMapFile = 'dist/$weak$.js.map';
+  return del([weakModuleJsFile, weakModuleMapFile]);
+}
+
 function compile(flagsArray) {
-  if (isTravisBuild()) {
-    log(
-      'Minifying single-pass runtime targets with',
-      colors.cyan('closure-compiler')
-    );
-  }
+  log('Minifying single-pass JS with', colors.cyan('closure-compiler') + '...');
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
     gulp
@@ -693,8 +727,15 @@ function compile(flagsArray) {
         handleSinglePassCompilerError();
         reject(err);
       })
+      .pipe(gulpIf(!argv.pseudo_names, checkForUnknownDeps()))
+      .on('error', reject)
       .pipe(sourcemaps.write('.'))
-      .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
+      .pipe(
+        gulpIf(
+          /(\/amp-|\/_base)/,
+          rename(path => (path.dirname += '/v0'))
+        )
+      )
       .pipe(gulp.dest('.'))
       .on('end', resolve);
   });

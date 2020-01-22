@@ -42,14 +42,14 @@ const LOADER_PROP = '__AMP_EXT_LDR';
  * (8 seconds is the same as the CSS boilerplate timoeout)
  * @const
  */
-const LOAD_TIMEOUT = 8000;
+const LOAD_TIMEOUT = 16000;
 
 /**
  * Contains data for the declaration of a custom element.
  *
  * @typedef {{
  *   implementationClass:
- *       function(new:../base-element.BaseElement, !Element),
+ *       typeof ../base-element.BaseElement,
  *   css: (?string|undefined),
  * }}
  */
@@ -239,20 +239,54 @@ export class Extensions {
   /**
    * Reloads the new version of the extension.
    * @param {string} extensionId
-   * @param {!Element} oldScriptElement
    * @return {!Promise<!ExtensionDef>}
    */
-  reloadExtension(extensionId, oldScriptElement) {
-    // "Disconnect" the old script element and extension record.
+  reloadExtension(extensionId) {
+    // Ignore inserted script elements to prevent recursion.
+    const el = this.getExtensionScript_(
+      extensionId,
+      /* includeInserted */ false
+    );
+    devAssert(el, 'Cannot find script for extension: %s', extensionId);
+    // The previously awaited extension loader must not have finished or
+    // failed.
     const holder = this.extensions_[extensionId];
     if (holder) {
       devAssert(!holder.loaded && !holder.error);
-      delete this.extensions_[extensionId];
+      holder.scriptPresent = false;
     }
-    oldScriptElement.removeAttribute('custom-element');
-    oldScriptElement.setAttribute('i-amphtml-loaded-new-version', extensionId);
-    const urlParts = parseExtensionUrl(oldScriptElement.src);
+    el.setAttribute('i-amphtml-loaded-new-version', extensionId);
+    const urlParts = parseExtensionUrl(el.src);
     return this.preloadExtension(extensionId, urlParts.extensionVersion);
+  }
+
+  /**
+   * Returns the extension <script> element and attribute for the given
+   * extension ID, if it exists. Otherwise, returns null.
+   * @param {string} extensionId
+   * @param {boolean=} includeInserted If true, includes script elements that
+   *   are inserted by the runtime dynamically. Default is true.
+   * @return {?Element}
+   * @private
+   */
+  getExtensionScript_(extensionId, includeInserted = true) {
+    // Always ignore <script> elements that have a mismatched RTV.
+    const modifier =
+      ':not([i-amphtml-loaded-new-version])' +
+      (includeInserted ? '' : ':not([i-amphtml-inserted])');
+    // We have to match against "src" because a few extensions, such as
+    // "amp-viewer-integration", do not have "custom-element" attribute.
+    const matches = this.win.document.head./*OK*/ querySelectorAll(
+      `script[src*="/${extensionId}-"]` + modifier
+    );
+    for (let i = 0; i < matches.length; i++) {
+      const match = matches[i];
+      const urlParts = parseExtensionUrl(match.src);
+      if (urlParts.extensionId === extensionId) {
+        return match;
+      }
+    }
+    return null;
   }
 
   /**
@@ -260,7 +294,7 @@ export class Extensions {
    * class when the extension has been loaded. If necessary, adds the extension
    * script to the page.
    * @param {string} elementName
-   * @return {!Promise<function(new:../base-element.BaseElement, !Element)>}
+   * @return {!Promise<typeof ../base-element.BaseElement>}
    */
   loadElementClass(elementName) {
     return this.preloadExtension(elementName).then(extension => {
@@ -278,7 +312,7 @@ export class Extensions {
    * restricted method and it's allowed to be called only during the overall
    * extension registration.
    * @param {string} name
-   * @param {function(new:../base-element.BaseElement, !Element)} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @param {?string|undefined} css
    * @restricted
    */
@@ -294,7 +328,7 @@ export class Extensions {
    * Installs the specified element implementation in the ampdoc.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @param {?string|undefined} css
    * @private
    */
@@ -317,7 +351,7 @@ export class Extensions {
   /**
    * @param {!Window} win
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @private
    */
   registerElementInWindow_(win, name, implementationClass) {
@@ -511,9 +545,7 @@ export class Extensions {
       return false;
     }
     if (holder.scriptPresent === undefined) {
-      const scriptInHead = this.win.document.head./*OK*/ querySelector(
-        `[custom-element="${extensionId}"]`
-      );
+      const scriptInHead = this.getExtensionScript_(extensionId);
       holder.scriptPresent = !!scriptInHead;
     }
     return !holder.scriptPresent;
@@ -533,12 +565,22 @@ export class Extensions {
       opt_extensionVersion = '';
     } else {
       scriptElement.setAttribute(
-        isTemplateExtension(extensionId) ? 'custom-template' : 'custom-element',
+        this.attributeForExtension_(extensionId),
         extensionId
       );
     }
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
+
+    // Propagate nonce to all generated script tags.
+    const currentScript = this.win.document.head.querySelector('script[nonce]');
+    if (currentScript) {
+      scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
+    }
+
+    // Allow error information to be collected
+    // https://github.com/ampproject/amphtml/issues/7353
+    scriptElement.setAttribute('crossorigin', 'anonymous');
     let loc = this.win.location;
     if (getMode().test && this.win.testLocation) {
       loc = this.win.testLocation;
@@ -551,6 +593,17 @@ export class Extensions {
     );
     scriptElement.src = scriptSrc;
     return scriptElement;
+  }
+
+  /**
+   * @param {string} extensionId
+   * @return {string}
+   * @private
+   */
+  attributeForExtension_(extensionId) {
+    return isTemplateExtension(extensionId)
+      ? 'custom-template'
+      : 'custom-element';
   }
 }
 

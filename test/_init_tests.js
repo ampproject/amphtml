@@ -20,7 +20,8 @@ import * as describes from '../testing/describes';
 import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
-import {adopt} from '../src/runtime';
+import {adoptWithMultidocDeps} from '../src/runtime';
+import {cancelTimersForTesting} from '../src/service/timer-impl';
 import {
   installAmpdocServices,
   installRuntimeServices,
@@ -36,6 +37,7 @@ import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen'
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
+import sinon from /*OK*/ 'sinon';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
@@ -44,6 +46,7 @@ let consoleErrorSandbox;
 let testName;
 let expectedAsyncErrors;
 let rethrowAsyncSandbox;
+let consoleInfoLogWarnSandbox;
 const originalConsoleError = console /*OK*/.error;
 
 // Used to clean up global state between tests.
@@ -59,7 +62,7 @@ const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
-adopt(window);
+adoptWithMultidocDeps(window);
 
 // Override AMP.extension to buffer extension installers.
 /**
@@ -157,10 +160,6 @@ class TestConfig {
     return this.skip(function() {
       return window.__karma__.config.amp.singlePass;
     });
-  }
-
-  skipWindows() {
-    return this.skip(() => this.platform.isWindows());
   }
 
   enableIe() {
@@ -363,9 +362,10 @@ function restoreConsoleError() {
 function maybeStubConsoleInfoLogWarn() {
   const {verboseLogging} = window.__karma__.config;
   if (!verboseLogging) {
-    sinon.sandbox.stub(console, 'info').callsFake(() => {});
-    sinon.sandbox.stub(console, 'log').callsFake(() => {});
-    sinon.sandbox.stub(console, 'warn').callsFake(() => {});
+    consoleInfoLogWarnSandbox = sinon.createSandbox();
+    consoleInfoLogWarnSandbox.stub(console, 'info').callsFake(() => {});
+    consoleInfoLogWarnSandbox.stub(console, 'log').callsFake(() => {});
+    consoleInfoLogWarnSandbox.stub(console, 'warn').callsFake(() => {});
   }
 }
 
@@ -377,7 +377,7 @@ function preventAsyncErrorThrows() {
     rethrowAsyncSandbox = sinon.createSandbox();
     rethrowAsyncSandbox.stub(log, 'rethrowAsync').callsFake((...args) => {
       const error = log.createErrorVargs.apply(null, args);
-      self.reportError(error);
+      self.__AMP_REPORT_ERROR(error);
       throw error;
     });
   };
@@ -403,7 +403,7 @@ beforeEach(function() {
   this.timeout(BEFORE_AFTER_TIMEOUT);
   beforeTest();
   testName = this.currentTest.fullTitle();
-  window.sandbox = sinon.sandbox = sinon.createSandbox();
+  window.sandbox = sinon.createSandbox();
   maybeStubConsoleInfoLogWarn();
   preventAsyncErrorThrows();
   warnForConsoleError();
@@ -413,12 +413,12 @@ beforeEach(function() {
 
 function beforeTest() {
   activateChunkingForTesting();
-  window.AMP_MODE = undefined;
+  window.__AMP_MODE = undefined;
   window.context = undefined;
   window.AMP_CONFIG = {
     canary: 'testSentinel',
   };
-  window.AMP_TEST = true;
+  window.__AMP_TEST = true;
   installDocService(window, /* isSingleDoc */ true);
   const ampdoc = Services.ampdocServiceFor(window).getSingleDoc();
   installRuntimeServices(window);
@@ -433,7 +433,10 @@ afterEach(function() {
   that = this;
   const globalState = Object.keys(global);
   const windowState = Object.keys(window);
-  sinon.sandbox.restore();
+  if (consoleInfoLogWarnSandbox) {
+    consoleInfoLogWarnSandbox.restore();
+  }
+  window.sandbox.restore();
   restoreConsoleError();
   restoreAsyncErrorThrows();
   this.timeout(BEFORE_AFTER_TIMEOUT);
@@ -455,7 +458,7 @@ afterEach(function() {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
-  window.AMP_MODE = undefined;
+  window.__AMP_MODE = undefined;
   delete window.document['__AMPDOC'];
 
   if (windowState.length != initialWindowState.length) {
@@ -483,6 +486,7 @@ afterEach(function() {
   resetAccumulatedErrorMessagesForTesting();
   resetExperimentTogglesForTesting(window);
   resetEvtListenerOptsSupportForTesting();
+  cancelTimersForTesting();
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

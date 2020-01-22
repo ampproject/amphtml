@@ -17,11 +17,13 @@
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
+import {calculateScriptBaseUrl} from '../../../src/service/extension-location';
 import {deepMerge, dict, hasOwn} from '../../../src/utils/object';
 import {dev, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
 import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
+import {isCanary} from '../../../src/experiments';
 import {variableServiceForDoc} from './variables';
 
 const TAG = 'amp-analytics/config';
@@ -64,10 +66,64 @@ export class AnalyticsConfig {
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
 
-    return this.fetchRemoteConfig_()
+    return Promise.all([this.fetchRemoteConfig_(), this.fetchVendorConfig_()])
       .then(this.processConfigs_.bind(this))
+      .then(this.checkWarningMessage_.bind(this))
       .then(this.addExperimentParams_.bind(this))
       .then(() => this.config_);
+  }
+
+  /**
+   * Constructs the URL where the given vendor config is located
+   * @private
+   * @param {string} vendor the vendor name
+   * @return {string} the URL to request the vendor config file from
+   */
+  getVendorUrl_(vendor) {
+    const baseUrl = calculateScriptBaseUrl(
+      this.win_.location,
+      getMode().localDev
+    );
+    // bg has a special canary config
+    const canary = vendor === 'bg' && isCanary(self) ? '.canary' : '';
+    return `${baseUrl}/rtv/${
+      getMode().rtvVersion
+    }/v0/analytics-vendors/${vendor}${canary}.json`;
+  }
+
+  /**
+   * Returns a promise that resolves when vendor config is ready (or
+   * immediately if no vendor config is specified)
+   * @private
+   * @return {!Promise<undefined>}
+   */
+  fetchVendorConfig_() {
+    if (!ANALYTICS_VENDOR_SPLIT) {
+      return Promise.resolve();
+    }
+
+    const type = this.element_.getAttribute('type');
+    if (!type) {
+      return Promise.resolve();
+    }
+
+    const vendorUrl = this.getVendorUrl_(type);
+
+    const TAG = this.getName_();
+    dev().fine(TAG, 'Fetching vendor config', vendorUrl);
+
+    return Services.xhrFor(toWin(this.win_))
+      .fetchJson(vendorUrl)
+      .then(res => res.json())
+      .then(
+        jsonValue => {
+          this.predefinedConfig_[type] = jsonValue;
+          dev().fine(TAG, 'Vendor config loaded for ' + type, jsonValue);
+        },
+        err => {
+          user().error(TAG, 'Error loading vendor config: ', vendorUrl, err);
+        }
+      );
   }
 
   /**
@@ -80,21 +136,21 @@ export class AnalyticsConfig {
     const type = this.element_.getAttribute('type');
     const rtv = getMode().rtvVersion;
     const isRc = rtv ? rtv.substring(0, 2) === '03' : false;
-    // eslint-disable-next-line no-undef
-    const isExperiment = ANALYTICS_VENDOR_SPLIT;
 
     if (
       type === 'googleanalytics' &&
-      (isRc || isExperiment) &&
+      (isRc || ANALYTICS_VENDOR_SPLIT) &&
       this.config_['requests']
     ) {
       if (this.config_['requests']['pageview']) {
         this.config_['requests']['pageview'][
           'baseUrl'
-        ] += `&aae=${isExperiment}`;
+        ] += `&aae=${ANALYTICS_VENDOR_SPLIT}`;
       }
       if (this.config_['requests']['timing']) {
-        this.config_['requests']['timing']['baseUrl'] += `&aae=${isExperiment}`;
+        this.config_['requests']['timing'][
+          'baseUrl'
+        ] += `&aae=${ANALYTICS_VENDOR_SPLIT}`;
       }
     }
   }
@@ -212,6 +268,28 @@ export class AnalyticsConfig {
           }
         );
     });
+  }
+
+  /**
+   * Check if config has warning, display on console and
+   * remove the property.
+   * @private
+   */
+  checkWarningMessage_() {
+    if (this.config_['warningMessage']) {
+      const TAG = this.getName_();
+      const type = this.element_.getAttribute('type');
+      const remoteConfigUrl = this.element_.getAttribute('config');
+
+      user().warn(
+        TAG,
+        'Warning from analytics vendor%s%s: %s',
+        type ? ' ' + type : '',
+        remoteConfigUrl ? ' with remote config url ' + remoteConfigUrl : '',
+        String(this.config_['warningMessage'])
+      );
+      delete this.config_['warningMessage'];
+    }
   }
 
   /**

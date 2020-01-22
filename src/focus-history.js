@@ -60,7 +60,7 @@ export class FocusHistory {
       // implemented here. We wait for a blur to arrive on the main window
       // and after a short time check which element is active.
       Services.timerFor(win).delay(() => {
-        this.pushFocus_(this.win.document.activeElement);
+        this.pushFocus_(dev().assertElement(this.win.document.activeElement));
       }, 500);
     };
     this.win.document.addEventListener('focus', this.captureFocus_, true);

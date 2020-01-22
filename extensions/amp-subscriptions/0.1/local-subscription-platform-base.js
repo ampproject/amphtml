@@ -109,7 +109,11 @@ export class LocalSubscriptionBasePlatform {
    * @protected
    */
   initializeListeners_() {
-    this.rootNode_.addEventListener('click', e => {
+    // Listen for `click` events bubbling up to the root node.
+    // If the root node has a `body` property, listen to events on that instead,
+    // to fix an iOS shadow DOM bug (https://github.com/ampproject/amphtml/issues/25754).
+    const el = this.rootNode_.body || this.rootNode_;
+    el.addEventListener('click', e => {
       const element = closestAncestorElementBySelector(
         dev().assertElement(e.target),
         '[subscriptions-action]'
@@ -149,11 +153,32 @@ export class LocalSubscriptionBasePlatform {
 
   /** @override */
   activate(entitlement) {
-    const renderState = entitlement.json();
-    this.urlBuilder_.setAuthResponse(renderState);
-    this.actions_.build().then(() => {
+    // Note all platforms are resolved at this stage
+    // Get the factor states of each platform and
+    // add them to the renderState object
+    this.createRenderState_(entitlement).then(renderState => {
       this.renderer_.render(renderState);
     });
+  }
+
+  /**
+   * Factored out for testability
+   * @param {./entitlement.Entitlement} entitlement
+   * @return {!Promise<!JsonObject>}
+   * @private
+   */
+  createRenderState_(entitlement) {
+    const renderState = entitlement.json();
+    return this.serviceAdapter_
+      .getScoreFactorStates()
+      .then(scoresValues => {
+        renderState['factors'] = scoresValues;
+        return this.urlBuilder_.setAuthResponse(renderState);
+      })
+      .then(() => {
+        return this.actions_.build();
+      })
+      .then(() => renderState);
   }
 
   /** @override */

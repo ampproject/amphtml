@@ -25,13 +25,13 @@ const {
   gitDiffStatMaster,
   gitTravisMasterBaseline,
   shortSha,
-} = require('../git');
+} = require('../common/git');
 const {
   isTravisBuild,
   travisBuildNumber,
   travisPullRequestSha,
-} = require('../travis');
-const {execOrDie, execWithError, exec} = require('../exec');
+} = require('../common/travis');
+const {execOrDie, execWithError, exec} = require('../common/exec');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const BUILD_OUTPUT_FILE = isTravisBuild()
@@ -42,8 +42,7 @@ const DIST_OUTPUT_FILE = isTravisBuild()
   : '';
 
 const BUILD_OUTPUT_DIRS = 'build/ dist/ dist.3p/ EXTENSIONS_CSS_MAP';
-const DIST_OUTPUT_DIRS =
-  'build/ dist/ dist.3p/ dist.tools/ EXTENSIONS_CSS_MAP examples/ test/manual/';
+const APP_SERVING_DIRS = 'dist.tools/ examples/ test/manual/';
 
 const OUTPUT_STORAGE_LOCATION = 'gs://amp-travis-builds';
 const OUTPUT_STORAGE_KEY_FILE = 'sa-travis-key.json';
@@ -64,8 +63,8 @@ function printChangeSummary(fileName) {
 
   if (isTravisBuild()) {
     console.log(
-      `${fileLogPrefix} ${colors.cyan('origin/master')} is currently at ` +
-        `commit ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
+      `${fileLogPrefix} Latest commit from ${colors.cyan('master')} included ` +
+        `in this build: ${colors.cyan(shortSha(gitTravisMasterBaseline()))}`
     );
     commitSha = travisPullRequestSha();
   } else {
@@ -244,6 +243,7 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
 function downloadOutput_(functionName, outputFileName, outputDirs) {
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   const buildOutputDownloadUrl = `${OUTPUT_STORAGE_LOCATION}/${outputFileName}`;
+  const dirsToUnzip = outputDirs.split(' ');
 
   console.log(
     `${fileLogPrefix} Downloading build output from ` +
@@ -259,7 +259,9 @@ function downloadOutput_(functionName, outputFileName, outputDirs) {
     `${fileLogPrefix} Extracting ` + colors.cyan(outputFileName) + '...'
   );
   exec('echo travis_fold:start:unzip_results && echo');
-  execOrDie(`unzip -o ${outputFileName}`);
+  dirsToUnzip.forEach(dir => {
+    execOrDie(`unzip ${outputFileName} '${dir.replace('/', '/*')}'`);
+  });
   exec('echo travis_fold:end:unzip_results');
 
   console.log(fileLogPrefix, 'Verifying extracted files...');
@@ -327,7 +329,7 @@ function downloadBuildOutput(functionName) {
  * @param {string} functionName
  */
 function downloadDistOutput(functionName) {
-  downloadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
+  downloadOutput_(functionName, DIST_OUTPUT_FILE, BUILD_OUTPUT_DIRS);
 }
 
 /**
@@ -343,7 +345,8 @@ function uploadBuildOutput(functionName) {
  * @param {string} functionName
  */
 function uploadDistOutput(functionName) {
-  uploadOutput_(functionName, DIST_OUTPUT_FILE, DIST_OUTPUT_DIRS);
+  const distOutputDirs = `${BUILD_OUTPUT_DIRS} ${APP_SERVING_DIRS}`;
+  uploadOutput_(functionName, DIST_OUTPUT_FILE, distOutputDirs);
 }
 
 /**
@@ -367,7 +370,8 @@ function decryptTravisKey_() {
   // openssl 1.0.2g, which is used by Travis to decrypt.
   execOrDie(
     `openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
-      `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`
+      `build-system/common/sa-travis-key.json.enc -out ` +
+      `${OUTPUT_STORAGE_KEY_FILE} -d`
   );
 }
 

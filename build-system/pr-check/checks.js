@@ -30,7 +30,7 @@ const {
   timedExecOrDie: timedExecOrDieBase,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../common/travis');
 const {reportAllExpectedTests} = require('../tasks/report-test-status');
 const {runYarnChecks} = require('./yarn-checks');
 
@@ -38,7 +38,7 @@ const FILENAME = 'checks.js';
 const timedExecOrDie = (cmd, unusedFileName) =>
   timedExecOrDieBase(cmd, FILENAME);
 
-function main() {
+async function main() {
   const startTime = startTimer(FILENAME, FILENAME);
   if (!runYarnChecks(FILENAME)) {
     stopTimedJob(FILENAME, startTime);
@@ -49,22 +49,23 @@ function main() {
     timedExecOrDie('gulp update-packages');
     timedExecOrDie('gulp check-exact-versions');
     timedExecOrDie('gulp lint');
+    timedExecOrDie('gulp prettify');
     timedExecOrDie('gulp presubmit');
     timedExecOrDie('gulp ava');
     timedExecOrDie('gulp babel-plugin-tests');
     timedExecOrDie('gulp caches-json');
-    timedExecOrDie('gulp json-syntax');
     timedExecOrDie('gulp dev-dashboard-tests');
     timedExecOrDie('gulp dep-check');
     timedExecOrDie('gulp check-types');
   } else {
     printChangeSummary(FILENAME);
     const buildTargets = determineBuildTargets(FILENAME);
-    reportAllExpectedTests(buildTargets);
+    await reportAllExpectedTests(buildTargets);
     timedExecOrDie('gulp update-packages');
 
     timedExecOrDie('gulp check-exact-versions');
     timedExecOrDie('gulp lint');
+    timedExecOrDie('gulp prettify');
     timedExecOrDie('gulp presubmit');
 
     if (buildTargets.has('AVA')) {
@@ -77,16 +78,20 @@ function main() {
 
     if (buildTargets.has('CACHES_JSON')) {
       timedExecOrDie('gulp caches-json');
-      timedExecOrDie('gulp json-syntax');
     }
 
     // Check document links only for PR builds.
     if (buildTargets.has('DOCS')) {
-      timedExecOrDie('gulp check-links');
+      timedExecOrDie('gulp check-links --local_changes');
     }
 
     if (buildTargets.has('DEV_DASHBOARD')) {
       timedExecOrDie('gulp dev-dashboard-tests');
+    }
+
+    // Validate owners syntax only for PR builds.
+    if (buildTargets.has('OWNERS')) {
+      timedExecOrDie('gulp check-owners --local_changes');
     }
 
     if (buildTargets.has('RUNTIME')) {

@@ -20,6 +20,21 @@ const typedefs = new Map();
 
 module.exports = function(context) {
   return {
+    Program() {
+      // When relinting a file, remove all typedefs that it declared.
+      const filename = context.getFilename();
+      const keys = [];
+      for (const [key, file] of typedefs) {
+        if (file === filename) {
+          keys.push(key);
+        }
+      }
+
+      for (const key of keys) {
+        typedefs.delete(key);
+      }
+    },
+
     VariableDeclaration(node) {
       if (!node.leadingComments) {
         return;

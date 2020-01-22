@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
+
+
 /* Placeholder */
-.i-amphtml-default-placeholder {
+.i-amphtml-loader-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
   background-color: #f8f8f8;
 }
 
@@ -25,213 +32,172 @@
   position: absolute;
   top: 50%;
   left: 50%;
+  transform: translate(-50%, -50%);
+  /* Firefox: Need a size for the SVG, or it is sized to 300x300 by default. */
+  width: 0;
+  height: 0;
+  color: #aaa;
 }
 
-.i-amphtml-new-loader-size-default {
-  margin-left: -36px;
-  margin-top: -36px;
+.i-amphtml-new-loader-size-default,
+.i-amphtml-new-loader-size-small {
   width: 72px;
   height: 72px;
 }
 
-.i-amphtml-new-loader-size-small {
-  margin-left: -24px;
-  margin-top: -24px;
-  width: 48px;
-  height: 48px;
-}
-
  /* Logo */
 .i-amphtml-new-loader-logo {
-  transform-origin: 60px 60px;
+  transform-origin: center;
   opacity: 0;
   animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in forwards;
   animation-delay: 0.6s;
   animation-delay: calc(0.6s - var(--loader-delay-offset));
 }
-/* Default logo fades away, custom ones don't*/
+
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-logo {
+  display: none;
+}
+
 .i-amphtml-new-loader-logo-default {
-  animation:
-      i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in forwards,
-      i-amphtml-new-loader-fade-out 0.8s ease-out forwards;
-  animation-delay: 0.6s, 1.8s;
-  animation-delay:
-      calc(0.6s - var(--loader-delay-offset)),
-      calc(1.8s - var(--loader-delay-offset));
+  fill: currentColor;
+  /* Default logo fades away, custom ones don't*/
+  animation: i-amphtml-new-loader-fade-out 0.8s ease-out forwards;
+  animation-delay: 1.8s;
+  animation-delay: calc(1.8s - var(--loader-delay-offset));
 }
+
 /* Background shim */
+.i-amphtml-new-loader-has-shim {
+  color: #fff !important;
+}
+
 .i-amphtml-new-loader-shim {
-  transform-origin: 60px 60px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: none;
+  transform-origin: center;
   opacity: 0;
-  fill: rgba(0, 0, 0, .6);
-  r: 36;
+  background-color: rgba(0, 0, 0, .6);
   animation: i-amphtml-new-loader-scale-and-fade-in 0.8s ease-in forwards;
   animation-delay: 0.6s;
   animation-delay: calc(0.6s - var(--loader-delay-offset));
+}
+
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-shim {
+  display: initial;
 }
 
 .i-amphtml-new-loader-size-small .i-amphtml-new-loader-shim {
-  r: 24;
+  width: 48px;
+  height: 48px;
+  margin: 12px;
 }
 
-/*
-  shim forces spinner and logo fills to be white.
-  using i-amphtml-new-loader-white-on-shim and
-  i-amphtml-new-loader-transparent-on-shim each logo can customize which
-  parts become white and which parts become transparent when on a shim.
-*/
-.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-white-on-shim {
-  fill: #ffffff !important;
+.i-amphtml-new-loader-has-shim {
+  color: #fff !important;
 }
+
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-shim {
+  display: initial;
+}
+
+.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-logo-default {
+  display: none;
+}
+
 .i-amphtml-new-loader-has-shim .i-amphtml-new-loader-transparent-on-shim {
+ /*
+  * The shim sets the color to white above, for anything using currentColor.
+  * Other parts can specify that they want to be transparent while the shim is
+  * present using the `i-amphtml-new-loader-transparent-on-shim` class.
+  */
   fill: transparent !important;
 }
-.i-amphtml-new-loader-has-shim .i-amphtml-new-loader-spinner-segment {
-  stroke: #ffffff !important
+
+/* Positioning for various parts */
+.i-amphtml-new-loader-spinner-wrapper,
+.i-amphtml-new-loader-logo,
+.i-amphtml-new-loader-shim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }
 
- /* Spinner and its segments */
+/* The spinner itself */
+.i-amphtml-new-loader-spinner-wrapper {
+  margin: 12px;
+}
+
 .i-amphtml-new-loader-spinner {
-  transform-origin: 60px 60px;
-  opacity: 0;
-  fill: transparent;
-  stroke: #aaa;
+  stroke: currentColor;
   stroke-width: 1.5px;
+  opacity: 0;
   animation: i-amphtml-new-loader-fade-in 0.8s ease-in forwards;
   animation-delay: 1.8s;
   animation-delay: calc(1.8s - var(--loader-delay-offset));
 }
 
-.i-amphtml-new-loader-size-default .i-amphtml-new-loader-spinner {
-  stroke-dasharray: 36 118;
-  stroke-dashoffset: 52;
-}
-.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner {
-  stroke-dasharray: 18 59;
-  stroke-dashoffset: 26;
-  /*
-   * Small loader does not have a logo but its spinner appears at the same
-   * time as the logo for the default spinner does.
-   */
-  animation-delay: 0.6s;
-  animation-delay: calc(0.6s - var(--loader-delay-offset));
-}
-.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner-segment {
-  animation-delay: 1.4s, 2s;
-  animation-delay:
-      calc(1.4s - var(--loader-delay-offset)),
-      calc(2s - var(--loader-delay-offset));
-}
-
-.i-amphtml-new-loader-spinner-segment {
-  transform-origin: 60px 60px;
+.i-amphtml-new-loader-spinner-path {
   animation:
-      none 0.6s cubic-bezier(0.5, 0, 0.8, 1) forwards,
-      none 1.2s linear infinite forwards;
+    frame-position-first-spin 0.6s steps(30),
+    frame-position-infinite-spin 1.2s steps(59) infinite;
   animation-delay: 2.8s, 3.4s;
   animation-delay:
       calc(2.8s - var(--loader-delay-offset)),
       calc(3.4s - var(--loader-delay-offset));
 }
 
-.i-amphtml-new-loader-size-default .i-amphtml-new-loader-spinner-segment {
-  r: 22;
-}
-.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner-segment {
-  r: 11;
-}
-
-.i-amphtml-new-loader-spinner-segment:nth-child(1) {
-  transform: rotate(90deg);
-  animation-name: i-amphtml-new-loader-first-spin-1, i-amphtml-new-loader-spin-1;
-}
-.i-amphtml-new-loader-spinner-segment:nth-child(2) {
-  transform: rotate(180deg);
-  animation-name: i-amphtml-new-loader-first-spin-2, i-amphtml-new-loader-spin-2;
-}
-.i-amphtml-new-loader-spinner-segment:nth-child(3) {
-  transform: rotate(270deg);
-  animation-name: i-amphtml-new-loader-first-spin-3, i-amphtml-new-loader-spin-3;
-}
-.i-amphtml-new-loader-spinner-segment:nth-child(4) {
-  animation-name: i-amphtml-new-loader-first-spin-4, none;
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner {
+  /** Scale down the spinner to a 12px radius, default is 22. */
+  transform: scale(calc(12/ 22));
+  /** Increase the stroke-width to counteract the scaling. */
+  stroke-width: calc(1.5px * 22 / 12);
 }
 
- /* Animations only run when active */
+.i-amphtml-new-loader-size-small .i-amphtml-new-loader-spinner-path {
+  animation-delay: 1.4s, 2s;
+  animation-delay:
+      calc(1.4s - var(--loader-delay-offset)),
+      calc(2s - var(--loader-delay-offset));
+}
+
+/* Animations only run when active */
 .i-amphtml-new-loader * {
   animation-play-state: paused;
 }
-.i-amphtml-new-loader.amp-active * {
+
+.amp-active > .i-amphtml-new-loader * {
   animation-play-state: running;
 }
 
- /* Animation keyframes */
-@keyframes i-amphtml-new-loader-spin-1 {
-  0% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(90deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+/* Ads */
+.i-amphtml-new-loader-ad-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
-@keyframes i-amphtml-new-loader-spin-2 {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+
+.i-amphtml-new-loader-ad-label {
+  /*
+   * Make sure inherited font properties or those set via other selectors do
+   * not impact rendering of the label.
+   */
+  all: initial !important; 
+  display: inline-block !important;
+  padding: 0 0.4ch !important;
+  border: 1px solid currentColor !important;
+  border-radius: 2px !important;
+  color: currentColor !important;
+  font-size: 11px !important;
+  font-family: sans-serif !important;
+  line-height: 1.1 !important;
 }
-@keyframes i-amphtml-new-loader-spin-3 {
-  0% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(270deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-@keyframes i-amphtml-new-loader-first-spin-1 {
-  0% {
-    transform: rotate(90deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-@keyframes i-amphtml-new-loader-first-spin-2 {
-  0% {
-    transform: rotate(180deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-@keyframes i-amphtml-new-loader-first-spin-3 {
-  0% {
-    transform: rotate(270deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-@keyframes i-amphtml-new-loader-first-spin-4 {
-  0% {
-    transform: rotate(0deg);
-  }
-  99% {
-    opacity: 1;
-  }
-  100% {
-    transform: rotate(360deg);
-    opacity: 0;
-  }
-}
+
 @keyframes i-amphtml-new-loader-fade-in {
   0% {
     opacity: 0;
@@ -258,5 +224,30 @@
   }
   100% {
     opacity: 1;
+  }
+}
+
+@keyframes frame-position-first-spin {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    /* This value is steps * svgSize from spinner,js */
+    transform: translateX(-1440px);
+  }
+}
+
+@keyframes frame-position-infinite-spin {
+  from {
+    /* This value is steps * svgSize from spinner,js */
+    transform: translateX(-1440px);
+  }
+
+  to {
+    /*
+     * This value is based on the transform for the first spin and
+     * (2 * steps - 1) * svgSize from spinner,js */
+    transform: translateX(-4272px);
   }
 }

@@ -15,6 +15,7 @@
  */
 
 import * as iframeHelper from '../../../src/iframe-helper';
+import {FrameOverlayManager} from '../../../ads/inabox/frame-overlay-manager';
 import {Observable} from '../../../src/observable';
 import {PositionObserver} from '../../../ads/inabox/position-observer';
 import {Services} from '../../../src/services';
@@ -33,6 +34,7 @@ const NOOP = () => {};
 describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   let win;
   let binding;
+  let bindingFriendly;
   let element;
   let positionCallback;
   let onScrollCallback;
@@ -49,7 +51,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   ) {
     const methodName = opt_once ? 'requestOnce' : 'makeRequest';
 
-    return sandbox
+    return env.sandbox
       ./*OK*/ stub(binding.iframeClient_, methodName)
       .callsFake((req, res, cb) => {
         expect(req).to.equal(requestType);
@@ -90,28 +92,28 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     };
     win.frameElement = iframeElement;
 
+    toggleExperiment(win, 'inabox-viewport-friendly', false);
     installIframeMessagingClient(win);
     installPlatformService(win);
     binding = new ViewportBindingInabox(win);
-    measureSpy = sandbox.spy();
+    env.sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
+    toggleExperiment(win, 'inabox-viewport-friendly', true);
+    bindingFriendly = new ViewportBindingInabox(win);
+    measureSpy = env.sandbox.spy();
     element = {
       getBoundingClientRect() {
         return layoutRectLtwh(0, 0, 100, 100);
       },
       measure: measureSpy,
     };
-    sandbox
+    env.sandbox
       .stub(Services.resourcesForDoc(win.document), 'get')
       .returns([element]);
-    sandbox.stub(Services, 'resourcesPromiseForDoc').returns(
+    env.sandbox.stub(Services, 'resourcesPromiseForDoc').returns(
       new Promise(resolve => {
         resolve();
       })
     );
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   describe('should work for size, layoutRect and position observer', () => {
@@ -119,7 +121,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     let targetRect;
 
     it('cross domain', () => {
-      sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(false);
       stubIframeClientMakeRequest(
         'send-positions',
         'position',
@@ -134,9 +135,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     });
 
     it('same domain', () => {
-      sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
-      toggleExperiment(win, 'inabox-viewport-friendly', true);
-      sandbox
+      binding = bindingFriendly;
+      env.sandbox
         .stub(PositionObserver.prototype, 'observe')
         .callsFake((e, callback) => {
           topWindowObservable.add(() => callback({viewportRect, targetRect}));
@@ -154,8 +154,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     });
 
     function testPositionCallback() {
-      onScrollCallback = sandbox.spy();
-      onResizeCallback = sandbox.spy();
+      onScrollCallback = env.sandbox.spy();
+      onResizeCallback = env.sandbox.spy();
       binding.onScroll(onScrollCallback);
       binding.onResize(onResizeCallback);
 
@@ -177,7 +177,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(binding.getLayoutRect(element)).to.deep.equal(
         layoutRectLtwh(10, 20, 100, 100)
       );
-      sandbox.reset();
+      env.sandbox.reset();
 
       // Scroll, viewport position changed
       positionCallback({
@@ -191,7 +191,7 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(binding.getLayoutRect(element)).to.deep.equal(
         layoutRectLtwh(10, 20, 100, 100)
       );
-      sandbox.reset();
+      env.sandbox.reset();
 
       // Resize, viewport size changed
       positionCallback({
@@ -205,11 +205,11 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       expect(binding.getLayoutRect(element)).to.deep.equal(
         layoutRectLtwh(10, 20, 100, 100)
       );
-      sandbox.reset();
+      env.sandbox.reset();
 
       // DOM change, target position changed
-      sandbox.restore();
-      sandbox
+      env.sandbox.restore();
+      env.sandbox
         .stub(Services.resourcesForDoc(win.document), 'get')
         .returns([element]);
       positionCallback({
@@ -230,14 +230,14 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
     const allResourcesMock = Array(5)
       .fill(undefined)
       .map(() => ({
-        measure: sandbox.spy(),
+        measure: env.sandbox.spy(),
       }));
 
-    sandbox
+    env.sandbox
       .stub(binding, 'getChildResources')
       .callsFake(() => allResourcesMock);
 
-    const prepareContainer = sandbox
+    const prepareContainer = env.sandbox
       .stub(binding, 'prepareBodyForOverlay_')
       .returns(Promise.resolve());
 
@@ -255,7 +255,9 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
             width: 1000,
             height: 2000,
           },
-        })
+        }),
+      /* opt_sync */ undefined,
+      /* opt_once */ true
     );
 
     return binding.updateLightboxMode(true).then(() => {
@@ -269,14 +271,16 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should reset content and request resize on leave overlay mode', () => {
-    const resetContainer = sandbox
+    const resetContainer = env.sandbox
       .stub(binding, 'resetBodyForOverlay_')
       .returns(Promise.resolve());
 
     const makeRequest = stubIframeClientMakeRequest(
       'cancel-full-overlay-frame',
       'cancel-full-overlay-frame-response',
-      (req, res, cb) => cb({success: true})
+      (req, res, cb) => cb({success: true}),
+      /* opt_sync */ undefined,
+      /* opt_once */ true
     );
 
     return binding.updateLightboxMode(false).then(() => {
@@ -295,17 +299,21 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       height: 300,
     };
 
-    const updateBoxRectStub = sandbox
+    const updateBoxRectStub = env.sandbox
       .stub(binding, 'updateBoxRect_')
       .callsFake(NOOP);
 
     stubIframeClientMakeRequest(
       'full-overlay-frame',
       'full-overlay-frame-response',
-      (req, res, cb) => cb({success: true, boxRect})
+      (req, res, cb) => cb({success: true, boxRect}),
+      /* opt_sync */ undefined,
+      /* opt_once */ true
     );
 
-    sandbox.stub(binding, 'prepareBodyForOverlay_').returns(Promise.resolve());
+    env.sandbox
+      .stub(binding, 'prepareBodyForOverlay_')
+      .returns(Promise.resolve());
 
     yield binding.updateLightboxMode(true);
 
@@ -322,21 +330,72 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
       height: 300,
     };
 
-    const updateBoxRectStub = sandbox
+    const updateBoxRectStub = env.sandbox
       .stub(binding, 'updateBoxRect_')
       .callsFake(NOOP);
 
     stubIframeClientMakeRequest(
       'cancel-full-overlay-frame',
       'cancel-full-overlay-frame-response',
-      (req, res, cb) => cb({success: true, boxRect})
+      (req, res, cb) => cb({success: true, boxRect}),
+      /* opt_sync */ undefined,
+      /* opt_once */ true
     );
 
-    sandbox.stub(binding, 'resetBodyForOverlay_').returns(Promise.resolve());
+    env.sandbox
+      .stub(binding, 'resetBodyForOverlay_')
+      .returns(Promise.resolve());
 
     yield binding.updateLightboxMode(false);
 
     expect(updateBoxRectStub).to.be.calledWith(boxRect);
+  });
+
+  it('should update box rect when expanding/collapsing - friendly iframe case', function*() {
+    const boxRect = {
+      left: 20,
+      top: 10,
+      bottom: 310,
+      right: 420,
+      width: 400,
+      height: 300,
+    };
+    const boxRect2 = {
+      left: 2,
+      top: 1,
+      bottom: 31,
+      right: 42,
+      width: 40,
+      height: 30,
+    };
+    env.sandbox
+      .stub(FrameOverlayManager.prototype, 'expandFrame')
+      .callsFake((i, callback) => {
+        callback(boxRect);
+      });
+    env.sandbox
+      .stub(FrameOverlayManager.prototype, 'collapseFrame')
+      .callsFake((i, callback) => {
+        callback(boxRect2);
+      });
+
+    const updateBoxRectStub = env.sandbox
+      .stub(bindingFriendly, 'updateBoxRect_')
+      .callsFake(NOOP);
+    env.sandbox
+      .stub(bindingFriendly, 'prepareBodyForOverlay_')
+      .returns(Promise.resolve());
+    env.sandbox
+      .stub(bindingFriendly, 'resetBodyForOverlay_')
+      .returns(Promise.resolve());
+
+    yield bindingFriendly.updateLightboxMode(true);
+
+    expect(updateBoxRectStub).to.be.calledWith(boxRect);
+
+    yield bindingFriendly.updateLightboxMode(false);
+
+    expect(updateBoxRectStub).to.be.calledWith(boxRect2);
   });
 
   // TODO(zhouyx, #12476): Make this test work with sinon 4.0.
@@ -346,8 +405,8 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
 
     const el = document.createElement('div');
 
-    sandbox.stub(win, 'innerWidth').callsFake(w);
-    sandbox.stub(win, 'innerHeight').callsFake(h);
+    env.sandbox.stub(win, 'innerWidth').callsFake(w);
+    env.sandbox.stub(win, 'innerHeight').callsFake(h);
 
     yield prepareBodyForOverlay(win, el);
 
@@ -379,7 +438,6 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should request the position async from host', () => {
-    sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(false);
     const requestSpy = stubIframeClientMakeRequest(
       'send-positions',
       'position',
@@ -398,31 +456,29 @@ describes.fakeWin('inabox-viewport', {amp: {}}, env => {
   });
 
   it('should request the position directly from host if friendly', () => {
-    // this is implicit but we make it explicit anyway for clarity
-    sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
-    toggleExperiment(win, 'inabox-viewport-friendly', true);
-    sandbox
+    env.sandbox
       .stub(PositionObserver.prototype, 'getTargetRect')
       .returns(layoutRectLtwh(10, 20, 100, 100));
-    return binding.getRootClientRectAsync().then(rect => {
+    return bindingFriendly.getRootClientRectAsync().then(rect => {
       expect(rect).to.jsonEqual(layoutRectLtwh(10, 20, 100, 100));
     });
   });
 
   it('should disconnect friendly listener and reconnect again properly', () => {
-    const unobserveFunction = sandbox.spy();
-    const observeFunction = sandbox.stub(PositionObserver.prototype, 'observe');
+    const unobserveFunction = env.sandbox.spy();
+    const observeFunction = env.sandbox.stub(
+      PositionObserver.prototype,
+      'observe'
+    );
     observeFunction.returns(unobserveFunction);
-    toggleExperiment(win, 'inabox-viewport-friendly', true);
-    sandbox./*OK*/ stub(iframeHelper, 'canInspectWindow').returns(true);
-    return binding
+    return bindingFriendly
       .connect()
       .then(() => {
         expect(observeFunction).to.be.calledOnce;
         expect(unobserveFunction).to.not.be.called;
-        binding.disconnect();
+        bindingFriendly.disconnect();
         expect(unobserveFunction).to.be.called;
-        return binding.connect();
+        return bindingFriendly.connect();
       })
       .then(() => {
         expect(observeFunction).to.be.calledTwice;

@@ -31,7 +31,7 @@ if (getMode().test || getMode().localDev) {
   CMP_CONFIG['_ping_'] = {
     'consentInstanceId': '_ping_',
     'checkConsentHref': '/get-consent-v1',
-    'promptUISrc': '/test/manual/diy-consent.html',
+    'promptUISrc': '/examples/amp-consent/diy-consent.html',
   };
 }
 
@@ -39,4 +39,16 @@ CMP_CONFIG['didomi'] = {
   'consentInstanceId': 'didomi',
   'checkConsentHref': 'https://api.privacy-center.org/amp/check-consent',
   'promptUISrc': 'https://sdk-amp.privacy-center.org/loader.html',
+};
+
+CMP_CONFIG['Marfeel'] = {
+  'consentInstanceId': 'Marfeel',
+  'checkConsentHref': 'https://live.mrf.io/cmp/consents/amp',
+  'promptUISrc': 'https://marfeel.mgr.consensu.org/amp/index.html',
+};
+
+CMP_CONFIG['SourcePoint'] = {
+  'consentInstanceId': 'SourcePoint',
+  'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
+  'promptUISrc': 'https://amp.pm.sourcepoint.mgr.consensu.org/',
 };

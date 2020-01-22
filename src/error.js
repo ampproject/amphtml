@@ -67,9 +67,9 @@ const USER_ERROR_THROTTLE_THRESHOLD = 0.1;
  * Collects error messages, so they can be included in subsequent reports.
  * That allows identifying errors that might be caused by previous errors.
  */
-let accumulatedErrorMessages = self.AMPErrors || [];
+let accumulatedErrorMessages = self.__AMP_ERRORS || [];
 // Use a true global, to avoid multi-module inclusion issues.
-self.AMPErrors = accumulatedErrorMessages;
+self.__AMP_ERRORS = accumulatedErrorMessages;
 
 /**
  * Pushes element into array, keeping at most the most recent limit elements

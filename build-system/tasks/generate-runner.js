@@ -17,16 +17,18 @@
 
 const fs = require('fs-extra');
 const log = require('fancy-log');
-const {cyan, red} = require('ansi-colors');
-const {getOutput} = require('../exec');
-const {gitCommitHash, gitDiffPath} = require('../git');
-const {isTravisBuild} = require('../travis');
+const {cyan, green, red} = require('ansi-colors');
+const {getOutput} = require('../common/exec');
+const {gitCommitHash, gitDiffPath} = require('../common/git');
+const {isTravisBuild} = require('../common/travis');
 
 const antExecutable = 'third_party/ant/bin/ant';
 const runnerDir = 'build-system/runner';
 const buildFile = `${runnerDir}/build.xml`;
 const runnerDistDir = `${runnerDir}/dist`;
 const generatedAtCommitFile = 'GENERATED_AT_COMMIT';
+const setupInstructionsUrl =
+  'https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md#building-amp-and-starting-a-local-server';
 
 /**
  * Determines if runner.jar needs to be regenerated
@@ -102,31 +104,33 @@ function writeGeneratedAtCommitFile(runnerJarDir) {
  * Generates the custom closure compiler binary (runner.jar) and drops it in the
  * given subdirectory of build-system/runner/dist/ (to enable concurrent usage)
  * @param {string} subDir
- *
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function generateRunner(subDir) {
   const generateCmd = `${antExecutable} -buildfile ${buildFile} -Ddist.dir dist/${subDir} jar`;
   const runnerJarDir = `${runnerDistDir}/${subDir}`;
   writeGeneratedAtCommitFile(runnerJarDir);
   const result = getOutput(generateCmd);
-  if (result.stderr) {
+  if (0 !== result.status) {
     log(
       red('ERROR:'),
       'Could not generate custom closure compiler',
       cyan(`${runnerJarDir}/runner.jar`)
     );
     console.error(red(result.stdout), red(result.stderr));
+    log(
+      green('INFO:'),
+      'If the errors above are in java execution, see',
+      cyan(`${setupInstructionsUrl}`)
+    );
     const reason = new Error('Compiler generation failed');
     reason.showStack = false;
     return Promise.reject(reason);
   } else {
-    if (!isTravisBuild()) {
-      log(
-        'Generated custom closure compiler',
-        cyan(`${runnerJarDir}/runner.jar`)
-      );
-    }
+    log(
+      'Generated custom closure compiler',
+      cyan(`${runnerJarDir}/runner.jar`)
+    );
   }
 }
 

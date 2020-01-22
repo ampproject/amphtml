@@ -17,11 +17,11 @@
 
 const gulp = require('gulp');
 const gulpAva = require('gulp-ava');
-const {isTravisBuild} = require('../travis');
+const {isTravisBuild} = require('../common/travis');
 
 /**
  * Runs ava tests.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Vinyl}
  */
 async function ava() {
   return gulp

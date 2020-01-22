@@ -109,7 +109,7 @@ export class BindEvaluator {
   /**
    * Evaluates all expressions with the given `scope` data returns two maps:
    * expression strings to results and expression strings to errors.
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @return {!BindEvaluateBindingsResultDef}
    */
   evaluateBindings(scope) {
@@ -117,6 +117,8 @@ export class BindEvaluator {
     const cache = Object.create(null);
     /** @type {!Object<string, !BindEvaluatorErrorDef>} */
     const errors = Object.create(null);
+
+    this.setGlobals_(scope);
 
     // First, evaluate all of the expression strings in the bindings.
     this.bindings_.forEach(binding => {
@@ -148,6 +150,10 @@ export class BindEvaluator {
       if (result === undefined) {
         return;
       }
+      // Don't validate non-primitive expression results e.g. arrays, objects.
+      if (result !== null && typeof result === 'object') {
+        return;
+      }
       // IMPORTANT: We need to validate expression results on each binding
       // since validity depends on the `tagName` and `property` rather than
       // just the `result`.
@@ -169,7 +175,7 @@ export class BindEvaluator {
   /**
    * Evaluates and returns a single expression string.
    * @param {string} expressionString
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @return {!BindEvaluateExpressionResultDef}
    */
   evaluateExpression(expressionString, scope) {
@@ -177,11 +183,22 @@ export class BindEvaluator {
     if (!parsed.expression) {
       return {result: null, error: parsed.error};
     }
+    this.setGlobals_(scope);
     const evaluated = this.evaluate_(parsed.expression, scope);
     if (!evaluated.result) {
       return {result: null, error: evaluated.error};
     }
     return {result: evaluated.result, error: null};
+  }
+
+  /**
+   * Sets global references in scope if they're not already set or overriden.
+   * @param {!JsonObject} scope
+   */
+  setGlobals_(scope) {
+    if (!('global' in scope)) {
+      scope['global'] = scope;
+    }
   }
 
   /**
@@ -207,7 +224,7 @@ export class BindEvaluator {
   /**
    * Evaluate a single expression with the given scope.
    * @param {!BindExpression} expression
-   * @param {!Object} scope
+   * @param {!JsonObject} scope
    * @return {{result: ?BindExpressionResultDef, error: ?BindEvaluatorErrorDef}}
    * @private
    */

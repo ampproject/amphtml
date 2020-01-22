@@ -1,0 +1,22 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
+
+{
+  rules: [
+    {
+      owners: [{name: 'dvoytenko'}, {name: 'ampproject/wg-runtime'}],
+    },
+    {
+      pattern: '{iframe-video,mediasession-helper,video-*}.js',
+      owners: [{name: 'ampproject/wg-ui-and-a11y'}],
+    },
+    {
+      pattern: '{cid-*,*-cid-*,*-cid}.js',
+      owners: [{name: 'ampproject/wg-analytics'}],
+    },
+    {
+      pattern: 'amp-story-embed.js',
+      owners: [{name: 'newmuis'}, {name: 'gmajoulet'}, {name: 'enriqe'}],
+    },
+  ],
+}

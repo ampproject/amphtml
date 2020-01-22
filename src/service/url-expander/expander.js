@@ -25,10 +25,6 @@ const PARSER_IGNORE_FLAG = '`';
 /** @private @const {string} */
 const TAG = 'Expander';
 
-/** A whitelist for replacements whose values should not be %-encoded. */
-/** @const {Object<string, boolean>} */
-export const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
-
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
   /**
@@ -170,10 +166,11 @@ export class Expander {
             };
           } else {
             // Macro is from the global source.
-            binding = Object.assign({}, this.variableSource_.get(match.name), {
+            binding = {
+              ...this.variableSource_.get(match.name),
               name: match.name,
               encode,
-            });
+            };
           }
 
           urlIndex = match.stop + 1;
@@ -315,14 +312,12 @@ export class Expander {
       binding = bindingInfo.async || bindingInfo.sync;
     }
 
-    // We should only ever encode the top level resolution, or not at all.
-    const shouldEncode = encode && !NOENCODE_WHITELIST[name];
     if (this.sync_) {
       const result = this.evaluateBindingSync_(binding, name, opt_args);
-      return shouldEncode ? encodeURIComponent(result) : result;
+      return encode ? encodeURIComponent(result) : result;
     } else {
       return this.evaluateBindingAsync_(binding, name, opt_args).then(result =>
-        shouldEncode ? encodeURIComponent(result) : result
+        encode ? encodeURIComponent(result) : result
       );
     }
   }

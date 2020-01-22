@@ -33,7 +33,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with local mode', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -50,7 +50,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with remote mode', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -67,7 +67,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('should allow no versions', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -84,7 +84,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('should handles single pass experiment', () => {
-      window.AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
+      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -96,7 +96,7 @@ describes.sandboxed('Extension Location', {}, () => {
         true
       );
       expect(script).to.equal(
-        'http://localhost:8000/dist/rtv/123/sp/v0/no-version.js'
+        'http://localhost:8000/dist/rtv/123/v0/no-version.js'
       );
     });
   });
@@ -125,7 +125,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with remote mode', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -139,7 +139,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('with remote mode & rtv', () => {
-      window.AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123'};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -154,7 +154,7 @@ describes.sandboxed('Extension Location', {}, () => {
     });
 
     it('should handle single pass experiment', () => {
-      window.AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
+      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -165,12 +165,12 @@ describes.sandboxed('Extension Location', {}, () => {
         /* isLocalDev */ false,
         /* opt_rtv */ true
       );
-      expect(script).to.equal('https://cdn.ampproject.org/rtv/123/sp/ww.js');
+      expect(script).to.equal('https://cdn.ampproject.org/rtv/123/ww.js');
     });
   });
 
   describe('get correct URL parts', () => {
-    it('unversioned urls', () => {
+    it('non-RTV urls', () => {
       const urlParts = parseExtensionUrl(
         'https://cdn.ampproject.org/v0/amp-ad-1.0.js'
       );
@@ -178,12 +178,28 @@ describes.sandboxed('Extension Location', {}, () => {
       expect(urlParts.extensionVersion).to.equal('1.0');
     });
 
-    it('versioned urls', () => {
+    it('RTV urls', () => {
       const urlParts = parseExtensionUrl(
         'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.js'
       );
       expect(urlParts.extensionId).to.equal('amp-ad');
       expect(urlParts.extensionVersion).to.equal('0.1');
+    });
+
+    it('extensions with "latest" version', () => {
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/v0/amp-ad-latest.js'
+      );
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('latest');
+    });
+
+    it('extensions with .max suffix', () => {
+      const urlParts = parseExtensionUrl(
+        'https://cdn.ampproject.org/v0/amp-ad-latest.max.js'
+      );
+      expect(urlParts.extensionId).to.equal('amp-ad');
+      expect(urlParts.extensionVersion).to.equal('latest');
     });
   });
 });

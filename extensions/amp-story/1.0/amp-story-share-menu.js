@@ -15,12 +15,18 @@
  */
 
 import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
+import {
   Action,
   StateProperty,
   UIType,
   getStoreService,
 } from './amp-story-store-service';
 import {CSS} from '../../../build/amp-story-share-menu-1.0.css';
+import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {ShareWidget} from './amp-story-share';
 import {closest} from '../../../src/dom';
@@ -87,6 +93,9 @@ export class ShareMenu {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
+
+    /** @private {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
 
     /** @private @const {!Element} */
     this.parentEl_ = storyEl;
@@ -190,6 +199,13 @@ export class ShareMenu {
       this.element_.addEventListener('click', event =>
         this.onShareMenuClick_(event)
       );
+
+      this.win_.addEventListener('keyup', event => {
+        if (event.key == Keys.ESCAPE) {
+          event.preventDefault();
+          this.close_();
+        }
+      });
     }
   }
 
@@ -216,18 +232,22 @@ export class ShareMenu {
         this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
       });
     }
+    this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
+    this.analyticsService_.triggerEvent(
+      isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.element_
+    );
   }
 
   /**
    * Handles click events and maybe closes the menu for the fallback UI.
    * @param  {!Event} event
-   * @return {*} TODO(#23582): Specify return type
    */
   onShareMenuClick_(event) {
     const el = dev().assertElement(event.target);
 
     if (el.classList.contains('i-amphtml-story-share-menu-close-button')) {
-      return this.close_();
+      this.close_();
     }
 
     // Closes the menu if click happened outside of the menu main container.

@@ -23,16 +23,9 @@ import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toArray} from '../../src/types';
 
 describes.sandboxed('DOM', {}, env => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = env.sandbox;
-  });
-
   afterEach(() => {
     setScopeSelectorSupportedForTesting(undefined);
     setShadowDomSupportedVersionForTesting(undefined);
-    sandbox.restore();
   });
 
   it('should remove all children', () => {
@@ -89,35 +82,25 @@ describes.sandboxed('DOM', {}, env => {
   });
 
   it('isConnectedNode (no Node.p.isConnected)', () => {
-    if (!Object.hasOwnProperty.call(Node.prototype, 'isConnected')) {
-      return;
-    }
+    env.sandbox.deleteProperty(Node.prototype, 'isConnected');
+    expect(dom.isConnectedNode(document)).to.be.true;
 
-    const desc = Object.getOwnPropertyDescriptor(Node.prototype, 'isConnected');
-    try {
-      delete Node.prototype.isConnected;
+    const a = document.createElement('div');
+    expect(dom.isConnectedNode(a)).to.be.false;
 
-      expect(dom.isConnectedNode(document)).to.be.true;
+    const b = document.createElement('div');
+    b.appendChild(a);
 
-      const a = document.createElement('div');
-      expect(dom.isConnectedNode(a)).to.be.false;
+    document.body.appendChild(b);
+    expect(dom.isConnectedNode(a)).to.be.true;
 
-      const b = document.createElement('div');
-      b.appendChild(a);
+    const shadow = a.attachShadow({mode: 'open'});
+    const c = document.createElement('div');
+    shadow.appendChild(c);
+    expect(dom.isConnectedNode(c)).to.be.true;
 
-      document.body.appendChild(b);
-      expect(dom.isConnectedNode(a)).to.be.true;
-
-      const shadow = a.attachShadow({mode: 'open'});
-      const c = document.createElement('div');
-      shadow.appendChild(c);
-      expect(dom.isConnectedNode(c)).to.be.true;
-
-      document.body.removeChild(b);
-      expect(dom.isConnectedNode(c)).to.be.false;
-    } finally {
-      Object.defineProperty(Node.prototype, 'isConnected', desc);
-    }
+    document.body.removeChild(b);
+    expect(dom.isConnectedNode(c)).to.be.false;
   });
 
   it('rootNodeFor', () => {
@@ -134,33 +117,24 @@ describes.sandboxed('DOM', {}, env => {
   });
 
   it('rootNodeFor (no Node.p.getRootNode)', () => {
-    if (!Object.hasOwnProperty.call(Node.prototype, 'getRootNode')) {
-      return;
-    }
+    env.sandbox.deleteProperty(Node.prototype, 'getRootNode');
 
-    const desc = Object.getOwnPropertyDescriptor(Node.prototype, 'getRootNode');
-    try {
-      delete Node.prototype.getRootNode;
+    const a = document.createElement('div');
+    expect(dom.rootNodeFor(a)).to.equal(a);
 
-      const a = document.createElement('div');
-      expect(dom.rootNodeFor(a)).to.equal(a);
+    const b = document.createElement('div');
+    a.appendChild(b);
+    expect(dom.rootNodeFor(b)).to.equal(a);
 
-      const b = document.createElement('div');
-      a.appendChild(b);
-      expect(dom.rootNodeFor(b)).to.equal(a);
+    const c = document.createElement('div');
+    b.appendChild(c);
+    expect(dom.rootNodeFor(c)).to.equal(a);
 
-      const c = document.createElement('div');
-      b.appendChild(c);
-      expect(dom.rootNodeFor(c)).to.equal(a);
-
-      const polyfill = document.createElement('i-amphtml-shadow-root');
-      const e = document.createElement('div');
-      polyfill.appendChild(e);
-      a.appendChild(polyfill);
-      expect(dom.rootNodeFor(e)).to.equal(polyfill);
-    } finally {
-      Object.defineProperty(Node.prototype, 'getRootNode', desc);
-    }
+    const polyfill = document.createElement('i-amphtml-shadow-root');
+    const e = document.createElement('div');
+    polyfill.appendChild(e);
+    a.appendChild(polyfill);
+    expect(dom.rootNodeFor(e)).to.equal(polyfill);
   });
 
   describe('isShadowRoot', () => {
@@ -216,7 +190,7 @@ describes.sandboxed('DOM', {}, env => {
   });
 
   it('closest should stop search at opt_stopAt', () => {
-    const cbSpy = sandbox.spy();
+    const cbSpy = env.sandbox.spy();
     const cb = el => {
       cbSpy();
       return el.tagName == 'DIV';
@@ -577,11 +551,11 @@ describes.sandboxed('DOM', {}, env => {
     const fragment = document.createDocumentFragment();
     [0, 1, 2].forEach(() => fragment.appendChild(document.createElement('i')));
 
-    const iSpy = sandbox.spy();
+    const iSpy = env.sandbox.spy();
     dom.iterateCursor(fragment.querySelectorAll('i'), iSpy);
     expect(iSpy).to.be.calledThrice;
 
-    const bSpy = sandbox.spy();
+    const bSpy = env.sandbox.spy();
     dom.iterateCursor(fragment.querySelectorAll('b'), bSpy);
     expect(bSpy).to.have.not.been.called;
   });
@@ -589,7 +563,7 @@ describes.sandboxed('DOM', {}, env => {
   it('iterateCursor should allow null elements in a list', () => {
     const list = ['wow', null, 'cool'];
 
-    const spy = sandbox.spy();
+    const spy = env.sandbox.spy();
     dom.iterateCursor(list, spy);
     expect(spy).to.be.calledThrice;
   });
@@ -660,13 +634,13 @@ describes.sandboxed('DOM', {}, env => {
 
     it('should immediately return if child is available', () => {
       parent.appendChild(child);
-      const spy = sandbox.spy();
+      const spy = env.sandbox.spy();
       dom.waitForChild(parent, contains, spy);
       expect(spy).to.be.calledOnce;
     });
 
     it('should wait until child is available', () => {
-      const spy = sandbox.spy();
+      const spy = env.sandbox.spy();
       dom.waitForChild(parent, contains, spy);
       expect(spy).to.have.not.been.called;
 
@@ -686,8 +660,8 @@ describes.sandboxed('DOM', {}, env => {
     it('should prefer MutationObserver and disconnect when done', () => {
       let mutationCallback;
       const mutationObserver = {
-        observe: sandbox.spy(),
-        disconnect: sandbox.spy(),
+        observe: env.sandbox.spy(),
+        disconnect: env.sandbox.spy(),
       };
       const parent = {
         ownerDocument: {
@@ -701,7 +675,7 @@ describes.sandboxed('DOM', {}, env => {
       };
       let checkFuncValue = false;
       const checkFunc = () => checkFuncValue;
-      const spy = sandbox.spy();
+      const spy = env.sandbox.spy();
 
       dom.waitForChild(parent, checkFunc, spy);
       expect(spy).to.have.not.been.called;
@@ -731,7 +705,7 @@ describes.sandboxed('DOM', {}, env => {
           intervalCallback = callback;
           return 123;
         },
-        clearInterval: sandbox.spy(),
+        clearInterval: env.sandbox.spy(),
       };
       const parent = {
         ownerDocument: {
@@ -740,7 +714,7 @@ describes.sandboxed('DOM', {}, env => {
       };
       let checkFuncValue = false;
       const checkFunc = () => checkFuncValue;
-      const spy = sandbox.spy();
+      const spy = env.sandbox.spy();
 
       dom.waitForChild(parent, checkFunc, spy);
       expect(spy).to.have.not.been.called;
@@ -900,7 +874,7 @@ describes.sandboxed('DOM', {}, env => {
           throw new Error('not mocked');
         },
       };
-      windowMock = sandbox.mock(windowApi);
+      windowMock = env.sandbox.mock(windowApi);
     });
 
     afterEach(() => {
@@ -1029,6 +1003,21 @@ describes.sandboxed('DOM', {}, env => {
       });
     });
 
+    it('should not retry with noopener set', () => {
+      windowMock
+        .expects('open')
+        .withExactArgs('https://example.com/', '_blank', 'noopener,width=1')
+        .returns(null)
+        .once();
+      const res = dom.openWindowDialog(
+        windowApi,
+        'https://example.com/',
+        '_blank',
+        'noopener,width=1'
+      );
+      expect(res).to.be.null;
+    });
+
     it('should retry only non-top target', () => {
       windowMock
         .expects('open')
@@ -1092,7 +1081,7 @@ describes.sandboxed('DOM', {}, env => {
       const element = {
         focus() {},
       };
-      const focusSpy = sandbox.spy(element, 'focus');
+      const focusSpy = env.sandbox.spy(element, 'focus');
       dom.tryFocus(element);
       expect(focusSpy).to.have.been.called;
     });
@@ -1103,7 +1092,7 @@ describes.sandboxed('DOM', {}, env => {
           throw new Error('Cannot focus');
         },
       };
-      const focusSpy = sandbox.spy(element, 'focus');
+      const focusSpy = env.sandbox.spy(element, 'focus');
       dom.tryFocus(element);
       expect(focusSpy).to.have.been.called;
       expect(focusSpy).to.not.throw;

@@ -77,10 +77,9 @@ const allowedJsonBodyTypes_ = [isArray, isObject];
  *     cloneable.
  * @return {{input: string, init: !FetchInitDef}} The serialized structurally-
  *     cloneable request.
- * @private
  */
 export function toStructuredCloneable(input, init) {
-  const newInit = Object.assign({}, init);
+  const newInit = {...init};
   if (isFormDataWrapper(init.body)) {
     const wrapper = /** @type {!FormDataWrapperInterface} */ (init.body);
     newInit.headers['Content-Type'] = 'multipart/form-data;charset=utf-8';
@@ -193,17 +192,16 @@ export function fromStructuredCloneable(response, responseType) {
  * @return {!Promise<!Response|undefined>}
  *     A response returned by the interceptor if XHR is intercepted or
  *     `Promise<undefined>` otherwise.
- * @private
  */
 export function getViewerInterceptResponse(win, ampdocSingle, input, init) {
   if (!ampdocSingle) {
     return Promise.resolve();
   }
 
-  const viewer = Services.viewerForDoc(ampdocSingle);
   const whenUnblocked = init.prerenderSafe
     ? Promise.resolve()
-    : viewer.whenFirstVisible();
+    : ampdocSingle.whenFirstVisible();
+  const viewer = Services.viewerForDoc(ampdocSingle);
   const urlIsProxy = isProxyOrigin(input);
   const viewerCanIntercept = viewer.hasCapability('xhrInterceptor');
   const interceptorDisabledForLocalDev =
@@ -373,7 +371,6 @@ function isRetriable(status) {
  * Returns the response if successful or otherwise throws an error.
  * @param {!Response} response
  * @return {!Promise<!Response>}
- * @private Visible for testing
  */
 export function assertSuccess(response) {
   return new Promise(resolve => {

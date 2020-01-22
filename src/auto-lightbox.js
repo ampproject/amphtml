@@ -17,8 +17,8 @@
 import {ChunkPriority, chunk} from './chunk';
 import {Services} from './services';
 import {dev} from './log';
-import {getMode} from './mode';
 import {isAmphtml} from './format';
+import {isStoryDocument} from './utils/story';
 
 /** @const @enum {string} */
 export const AutoLightboxEvents = {
@@ -28,50 +28,34 @@ export const AutoLightboxEvents = {
 };
 
 /**
- * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
- * @return {boolean}
- */
-function isProxyOriginOrLocalDev(ampdoc) {
-  // Allow `localDev` in lieu of proxy origin for manual testing, except in
-  // tests where we need to actually perform the check.
-  const {win} = ampdoc;
-  if (getMode(win).localDev && !getMode(win).test) {
-    return true;
-  }
-
-  // An attached node is required for proxy origin check. If no elements are
-  // present, short-circuit.
-  if (!ampdoc.isSingleDoc()) {
-    return false;
-  }
-
-  const {documentElement} = ampdoc.getRootNode();
-  if (!documentElement) {
-    return false;
-  }
-
-  // TODO(alanorozco): Additionally check for transformed, webpackaged flag.
-  // See git.io/fhQ0a (#20359) for details.
-  return Services.urlForDoc(documentElement).isProxyOrigin(win.location);
-}
-
-/**
+ * Installs the amp-auto-lightbox extension.
+ *
+ * This extension conditionally loads amp-lightbox-gallery for images and videos
+ * that fulfill a set criteria on certain documents.
+ *
+ * Further information on spec/auto-lightbox.md and the amp-auto-lightbox extension
+ * code.
  * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
  */
 export function installAutoLightboxExtension(ampdoc) {
   const {win} = ampdoc;
-  // Only enabled on proxy origins for which the document is tagged as
-  // <html amp> or <html ⚡>.
-  if (!isAmphtml(win.document) || !isProxyOriginOrLocalDev(ampdoc)) {
+  // Only enabled on single documents tagged as <html amp> or <html ⚡>.
+  if (!isAmphtml(win.document) || !ampdoc.isSingleDoc()) {
     return;
   }
   chunk(
     ampdoc,
     () => {
-      Services.extensionsFor(win).installExtensionForDoc(
-        ampdoc,
-        'amp-auto-lightbox'
-      );
+      isStoryDocument(ampdoc).then(isStory => {
+        // Do not enable on amp-story documents.
+        if (isStory) {
+          return;
+        }
+        Services.extensionsFor(win).installExtensionForDoc(
+          ampdoc,
+          'amp-auto-lightbox'
+        );
+      });
     },
     ChunkPriority.LOW
   );

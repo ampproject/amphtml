@@ -21,8 +21,6 @@ import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {isExperimentOn} from './experiments';
-import {preconnectForElement} from './preconnect';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -129,16 +127,14 @@ export class BaseElement {
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement should be declared in
-    build-system/amp.multipass.extern.js, this is so closure compiler doesn't
-    reuse the same symbol it would use in the core compilation unit for the
-    private property in the extensions compilation unit's private properties.
-     */
+    build-system/externs/amp.multipass.extern.js. This is so closure compiler
+    doesn't reuse the same symbol it would use in the core compilation unit for
+    the private property in the extensions compilation unit's private
+    properties.
+    */
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
-
-    /** @package {number} */
-    this.layoutWidth_ = -1;
 
     /** @package {boolean} */
     this.inViewport_ = false;
@@ -157,22 +153,6 @@ export class BaseElement {
 
     /** @private {?string} */
     this.defaultActionAlias_ = null;
-
-    /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectForElement(this.element);
-
-    /** @public {?Object} For use by sub classes */
-    this.config = null;
-
-    /**
-     * The time at which this element was scheduled for layout relative to the
-     * epoch. This value will be set to 0 until the this element has been
-     * scheduled.
-     * Note that this value may change over time if the element is enqueued,
-     * then dequeued and re-enqueued by the scheduler.
-     * @public {number}
-     */
-    this.layoutScheduleTime = 0;
   }
 
   /**
@@ -270,17 +250,6 @@ export class BaseElement {
    */
   getVsync() {
     return Services.vsyncFor(this.win);
-  }
-
-  /**
-   * Returns the layout width for this element. A `-1` value indicates that the
-   * layout is not yet known. A `0` value indicates that the element is not
-   * visible.
-   * @return {number}
-   * @public
-   */
-  getLayoutWidth() {
-    return this.layoutWidth_;
   }
 
   /**
@@ -400,18 +369,6 @@ export class BaseElement {
   }
 
   /**
-   * Sets this element as the owner of the specified element. By setting itself
-   * as an owner, the element declares that it will manage the lifecycle of
-   * the owned element itself. This element, as an owner, will have to call
-   * {@link scheduleLayout}, {@link schedulePreload}, {@link updateInViewport}
-   * and similar methods.
-   * @param {!Element} element
-   */
-  setAsOwner(element) {
-    this.element.getResources().setOwner(element, this.element);
-  }
-
-  /**
    * Subclasses can override this method to opt-in into being called to
    * prerender when document itself is not yet visible (pre-render mode).
    *
@@ -421,6 +378,18 @@ export class BaseElement {
    * @return {boolean}
    */
   prerenderAllowed() {
+    return false;
+  }
+
+  /**
+   * Subclasses can override this method to indicate that it is has
+   * render-blocking service.
+   *
+   * The return value of this function is used to determine if the element
+   * built _and_ laid out will be prioritized.
+   * @return {boolean}
+   */
+  isBuildRenderBlocking() {
     return false;
   }
 
@@ -437,10 +406,13 @@ export class BaseElement {
   /**
    * Subclasses can override this method to provide a svg logo that will be
    * displayed as the loader.
-   * @return {?Element}
+   * @return {{
+   *  content: (!Element|undefined),
+   *  color: (string|undefined),
+   * }}
    */
   createLoaderLogoCallback() {
-    return null;
+    return {};
   }
 
   /**
@@ -568,21 +540,6 @@ export class BaseElement {
   }
 
   /**
-   * Instructs the element that its activation is requested based on some
-   * user event. Intended to be implemented by actual components.
-   * @param {!./service/action-impl.ActionInvocation} unusedInvocation
-   */
-  activate(unusedInvocation) {}
-
-  /**
-   * Minimum event trust required for activate().
-   * @return {ActionTrust}
-   */
-  activationTrust() {
-    return ActionTrust.HIGH;
-  }
-
-  /**
    * Returns a promise that will resolve or fail based on the element's 'load'
    * and 'error' events.
    * @param {T} element
@@ -612,7 +569,7 @@ export class BaseElement {
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ActionTrust.HIGH) {
+  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.initActionMap_();
     this.actionMap_[alias] = {handler, minTrust};
   }
@@ -627,7 +584,7 @@ export class BaseElement {
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ActionTrust.HIGH
+    minTrust = ActionTrust.DEFAULT
   ) {
     devAssert(
       !this.defaultActionAlias_,
@@ -666,14 +623,6 @@ export class BaseElement {
   }
 
   /**
-   * Returns the most optimal DPR currently recommended.
-   * @return {number}
-   */
-  getDpr() {
-    return this.win.devicePixelRatio || 1;
-  }
-
-  /**
    * Utility method that propagates attributes from this element
    * to the given element.
    * If `opt_removeMissingAttrs` is true, then also removes any specified
@@ -687,10 +636,32 @@ export class BaseElement {
     attributes = isArray(attributes) ? attributes : [attributes];
     for (let i = 0; i < attributes.length; i++) {
       const attr = attributes[i];
-      if (this.element.hasAttribute(attr)) {
-        element.setAttribute(attr, this.element.getAttribute(attr));
+      const val = this.element.getAttribute(attr);
+      if (null !== val) {
+        element.setAttribute(attr, val);
       } else if (opt_removeMissingAttrs) {
         element.removeAttribute(attr);
+      }
+    }
+  }
+
+  /**
+   * Utility method to propagate all data attributes from this element
+   * to the target element. (For use with arbitrary data attributes.)
+   * Removes any data attributes that are missing on this element from
+   * the target element.
+   * @param {!Element} targetElement
+   */
+  propagateDataset(targetElement) {
+    for (const key in targetElement.dataset) {
+      if (!(key in this.element.dataset)) {
+        delete targetElement.dataset[key];
+      }
+    }
+
+    for (const key in this.element.dataset) {
+      if (targetElement.dataset[key] !== this.element.dataset[key]) {
+        targetElement.dataset[key] = this.element.dataset[key];
       }
     }
   }
@@ -830,7 +801,7 @@ export class BaseElement {
 
   /**
    * Returns the viewport within which the element operates.
-   * @return {!./service/viewport/viewport-impl.Viewport}
+   * @return {!./service/viewport/viewport-interface.ViewportInterface}
    */
   getViewport() {
     return Services.viewportForDoc(this.getAmpDoc());
@@ -853,9 +824,11 @@ export class BaseElement {
    * @public
    */
   changeHeight(newHeight) {
-    this.element
-      .getResources()
-      ./*OK*/ changeSize(this.element, newHeight, /* newWidth */ undefined);
+    Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
@@ -864,7 +837,7 @@ export class BaseElement {
    * is no longer visible.
    */
   collapse() {
-    this.element.getResources().collapseElement(this.element);
+    Services.mutatorForDoc(this.getAmpDoc()).collapseElement(this.element);
   }
 
   /**
@@ -872,7 +845,9 @@ export class BaseElement {
    * @return {!Promise}
    */
   attemptCollapse() {
-    return this.element.getResources().attemptCollapse(this.element);
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptCollapse(
+      this.element
+    );
   }
 
   /**
@@ -890,9 +865,11 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return this.element
-      .getResources()
-      .attemptChangeSize(this.element, newHeight, /* newWidth */ undefined);
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
@@ -907,13 +884,18 @@ export class BaseElement {
    * The promise is resolved if the height is successfully updated.
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
+   * @param {?Event=} opt_event
    * @return {!Promise}
    * @public
    */
-  attemptChangeSize(newHeight, newWidth) {
-    return this.element
-      .getResources()
-      .attemptChangeSize(this.element, newHeight, newWidth);
+  attemptChangeSize(newHeight, newWidth, opt_event) {
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+      this.element,
+      newHeight,
+      newWidth,
+      /* newMargin */ undefined,
+      opt_event
+    );
   }
 
   /**
@@ -924,7 +906,7 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureElement(measurer) {
-    return this.element.getResources().measureElement(measurer);
+    return Services.mutatorForDoc(this.getAmpDoc()).measureElement(measurer);
   }
 
   /**
@@ -962,9 +944,11 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureMutateElement(measurer, mutator, opt_element) {
-    return this.element
-      .getResources()
-      .measureMutateElement(opt_element || this.element, measurer, mutator);
+    return Services.mutatorForDoc(this.getAmpDoc()).measureMutateElement(
+      opt_element || this.element,
+      measurer,
+      mutator
+    );
   }
 
   /**
@@ -982,7 +966,7 @@ export class BaseElement {
    * is no longer visible.
    */
   expand() {
-    this.element.getResources().expandElement(this.element);
+    Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
   }
 
   /**
@@ -1029,21 +1013,5 @@ export class BaseElement {
    */
   user() {
     return user(this.element);
-  }
-
-  /**
-   * Declares a child element (or ourselves) as a Layer
-   * @param {!Element=} opt_element
-   * @return {undefined}
-   */
-  declareLayer(opt_element) {
-    devAssert(
-      isExperimentOn(this.win, 'layers'),
-      'Layers must be enabled to declare layer.'
-    );
-    if (opt_element) {
-      devAssert(this.element.contains(opt_element));
-    }
-    return this.element.getLayers().declareLayer(opt_element || this.element);
   }
 }

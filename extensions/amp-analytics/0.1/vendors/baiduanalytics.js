@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const BAIDUANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const BAIDUANALYTICS_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://hm.baidu.com',
     'base': '${host}/hm.gif?si=${token}&nv=0&st=4&v=pixel-1.0&rnd=${timestamp}',
@@ -27,3 +29,5 @@ export const BAIDUANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {BAIDUANALYTICS_CONFIG};

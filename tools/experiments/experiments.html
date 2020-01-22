@@ -40,6 +40,11 @@
       color: #147bc1;
     }
 
+    .version {
+      color: gray;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
     .content {
       margin: 16px;
       display: block;
@@ -190,10 +195,24 @@
   </section>
 
   <section class="desc">
+    <h2>Version</h2>
+    <p>
+      This is version <span class="version">$internalRuntimeVersion$</span> of the AMP runtime.
+      For a list of commits contained in this release, click
+      <a target="_blank" href="https://github.com/ampproject/amphtml/releases/tag/$internalRuntimeVersion$">here</a>.
+    </p>
+  </section>
+
+  <section class="desc">
     <h2>Release channels</h2>
     <p>
       These switches control which release channel (prod, RC, or dev) of AMP JS
       will be served through the <a href="https://developers.google.com/amp/cache/">Google AMP Cache</a>.
+    </p>
+    <p>
+      <em>Note:</em> These controls set a cookie on the domain name <code>cdn.ampproject.org</code>. If your browser is
+      set to block all third-party cookies, they will not function. Make sure third-party cookies are enabled, or
+      whitelisted on the websites that you are testing.
     </p>
   </section>
 

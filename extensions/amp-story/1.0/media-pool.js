@@ -28,12 +28,13 @@ import {
   UnmuteTask,
   UpdateSourcesTask,
 } from './media-tasks';
+import {MEDIA_LOAD_FAILURE_SRC_PROPERTY} from '../../../src/event-helper';
 import {Services} from '../../../src/services';
 import {Sources} from './sources';
 import {ampMediaElementFor} from './utils';
 import {dev, devAssert} from '../../../src/log';
 import {findIndex} from '../../../src/utils/array';
-import {isConnectedNode} from '../../../src/dom';
+import {isConnectedNode, matches} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
 import {userInteractedWith} from '../../../src/video-interface';
@@ -274,16 +275,36 @@ export class MediaPool {
           /** @type {!PoolBoundElementDef} */ (i == 1
             ? mediaElSeed
             : mediaElSeed.cloneNode(/* deep */ true));
+        mediaEl.addEventListener('error', this.onMediaError_, {capture: true});
         const sources = this.getDefaultSource_(type);
         mediaEl.id = POOL_ELEMENT_ID_PREFIX + poolIdCounter++;
         mediaEl[MEDIA_ELEMENT_ORIGIN_PROPERTY_NAME] = MediaElementOrigin.POOL;
-        this.enqueueMediaElementTask_(mediaEl, new UpdateSourcesTask(sources));
+        this.enqueueMediaElementTask_(
+          mediaEl,
+          new UpdateSourcesTask(this.win_, sources)
+        );
         // TODO(newmuis): Check the 'error' field to see if MEDIA_ERR_DECODE
         // is returned.  If so, we should adjust the pool size/distribution
         // between media types.
         this.unallocated[type].push(mediaEl);
       }
     });
+  }
+
+  /**
+   * Handles HTMLMediaElement and children HTMLSourceElement error events. Marks
+   * the media as errored, as there is no other way to check if the load failed
+   * when the media is using HTMLSourceElements.
+   * @param {!Event} event
+   * @private
+   */
+  onMediaError_(event) {
+    const target = dev().assertElement(event.target);
+    if (!matches(target, 'source:last-of-type, video[src]')) {
+      return;
+    }
+    const media = target.tagName === 'SOURCE' ? target.parentElement : target;
+    media[MEDIA_LOAD_FAILURE_SRC_PROPERTY] = media.currentSrc || true;
   }
 
   /**
@@ -527,7 +548,7 @@ export class MediaPool {
         this.maybeResetAmpMedia_(ampMediaForDomEl);
         this.enqueueMediaElementTask_(
           poolMediaEl,
-          new UpdateSourcesTask(sources)
+          new UpdateSourcesTask(this.win_, sources)
         );
         this.enqueueMediaElementTask_(poolMediaEl, new LoadTask());
       },
@@ -570,7 +591,7 @@ export class MediaPool {
 
     return this.enqueueMediaElementTask_(
       poolMediaEl,
-      new UpdateSourcesTask(defaultSources)
+      new UpdateSourcesTask(this.win_, defaultSources)
     );
   }
 
@@ -732,7 +753,7 @@ export class MediaPool {
 
     // This media element has not yet been registered.
     placeholderEl.id = id;
-    const sources = Sources.removeFrom(placeholderEl);
+    const sources = Sources.removeFrom(this.win_, placeholderEl);
     this.sources_[id] = sources;
     this.placeholderEls_[id] = placeholderEl;
 

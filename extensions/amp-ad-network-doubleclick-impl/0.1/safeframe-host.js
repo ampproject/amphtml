@@ -161,15 +161,14 @@ export class SafeframeHostApi {
     this.creativeSize_ = creativeSize;
 
     /** @private {{width:number, height:number}} */
-    this.initialCreativeSize_ = /** @type {{width:number, height:number}} */ (Object.assign(
-      {},
-      creativeSize
-    ));
+    this.initialCreativeSize_ = /** @type {{width:number, height:number}} */ ({
+      ...creativeSize,
+    });
 
     /** @protected {?Promise} */
     this.delay_ = null;
 
-    /** @private {../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = this.baseInstance_.getViewport();
 
     /** @private {boolean} */
@@ -746,7 +745,13 @@ export class SafeframeHostApi {
         this.checkStillCurrent_();
         this.onFluidResize_(newHeight);
       })
-      .catch(err => user().warn(TAG, err));
+      .catch(err => {
+        user().warn(TAG, err);
+        const {width, height} = this.baseInstance_.getSlotSize();
+        if (width && height) {
+          this.onFluidResize_(height);
+        }
+      });
   }
 
   /**

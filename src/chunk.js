@@ -18,7 +18,6 @@ import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
-import {isExperimentOn} from './experiments';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
@@ -54,16 +53,24 @@ function chunkServiceForDoc(elementOrAmpDoc) {
  * time to do other things) and may even be further delayed until
  * there is time.
  *
- * @param {!Document} document
+ * @param {!Document|!./service/ampdoc-impl.AmpDoc} doc
  * @param {function(?IdleDeadline)} fn
+ * @param {boolean=} opt_makesBodyVisible Pass true if this service makes
+ *     the body visible. This is relevant because it may influence the
+ *     task scheduling strategy.
  */
-export function startupChunk(document, fn) {
+export function startupChunk(doc, fn, opt_makesBodyVisible) {
   if (deactivated) {
     resolved.then(fn);
     return;
   }
-  const service = chunkServiceForDoc(document.documentElement);
+  const service = chunkServiceForDoc(doc.documentElement || doc);
   service.runForStartup(fn);
+  if (opt_makesBodyVisible) {
+    service.runForStartup(() => {
+      service.bodyIsVisible_ = true;
+    });
+  }
 }
 
 /**
@@ -222,8 +229,8 @@ class Task {
    * @protected
    */
   useRequestIdleCallback_() {
-    // By default, always use requestIdleCallback.
-    return true;
+    // By default, never use requestIdleCallback.
+    return false;
   }
 }
 
@@ -235,29 +242,13 @@ class StartupTask extends Task {
   /**
    * @param {function(?IdleDeadline)} fn
    * @param {!Window} win
-   * @param {!Promise<!./service/viewer-impl.Viewer>} viewerPromise
+   * @param {!Chunks} chunks
    */
-  constructor(fn, win, viewerPromise) {
+  constructor(fn, win, chunks) {
     super(fn);
 
-    /** @private {!Window} */
-    this.win_ = win;
-
-    /** @private {?./service/viewer-impl.Viewer} */
-    this.viewer_ = null;
-
-    viewerPromise.then(viewer => {
-      this.viewer_ = viewer;
-
-      if (this.viewer_.isVisible()) {
-        this.runTask_(/* idleDeadline */ null);
-      }
-      this.viewer_.onVisibilityChanged(() => {
-        if (this.viewer_.isVisible()) {
-          this.runTask_(/* idleDeadline */ null);
-        }
-      });
-    });
+    /** @private @const */
+    this.chunks_ = chunks;
   }
 
   /** @override */
@@ -275,11 +266,10 @@ class StartupTask extends Task {
 
   /** @override */
   useRequestIdleCallback_() {
-    // We only start using requestIdleCallback when the viewer has
+    // We only start using requestIdleCallback when the core runtime has
     // been initialized. Otherwise we risk starving ourselves
-    // before we get into a state where the viewer can tell us
-    // that we are visible.
-    return !!this.viewer_;
+    // before the render-critical work is done.
+    return this.chunks_.coreReady_;
   }
 
   /**
@@ -287,16 +277,7 @@ class StartupTask extends Task {
    * @private
    */
   isVisible_() {
-    // Ask the viewer first.
-    if (this.viewer_) {
-      return this.viewer_.isVisible();
-    }
-    // There is no viewer yet. Lets try to guess whether we are visible.
-    if (this.win_.document.hidden) {
-      return false;
-    }
-    // Viewers send a URL param if we are not visible.
-    return !/visibilityState=(hidden|prerender)/.test(this.win_.location.hash);
+    return this.chunks_.ampdoc.isVisible();
   }
 }
 
@@ -308,26 +289,47 @@ class Chunks {
    * @param {!./service/ampdoc-impl.AmpDoc} ampDoc
    */
   constructor(ampDoc) {
+    /** @protected @const {!./service/ampdoc-impl.AmpDoc} */
+    this.ampdoc = ampDoc;
     /** @private @const {!Window} */
     this.win_ = ampDoc.win;
     /** @private @const {!PriorityQueue<Task>} */
     this.tasks_ = new PriorityQueue();
     /** @private @const {function(?IdleDeadline)} */
     this.boundExecute_ = this.execute_.bind(this);
-
-    /** @private @const {!Promise<!./service/viewer-impl.Viewer>} */
-    this.viewerPromise_ = Services.viewerPromiseForDoc(ampDoc);
     /** @private {number} */
-    this.timeSinceLastExecution_ = Date.now();
-    /** @private {boolean} */
-    this.macroAfterLongTask_ = isExperimentOn(
-      this.win_,
-      'macro-after-long-task'
+    this.durationOfLastExecution_ = 0;
+
+    /**
+     * Set to true if we scheduled a macro or micro task to execute the next
+     * task. If true, we don't schedule another one.
+     * Not set to true if we use rIC, because we always want to transition
+     * to immeditate invocation from that state.
+     * @private {boolean}
+     */
+    this.scheduledImmediateInvocation_ = false;
+    /** @private {boolean} Whether the document can actually be painted. */
+    this.bodyIsVisible_ = this.win_.document.documentElement.hasAttribute(
+      'i-amphtml-no-boilerplate'
     );
 
     this.win_.addEventListener('message', e => {
       if (getData(e) == 'amp-macro-task') {
         this.execute_(/* idleDeadline */ null);
+      }
+    });
+
+    /** @protected {boolean} */
+    this.coreReady_ = false;
+    Services.viewerPromiseForDoc(ampDoc).then(() => {
+      // Once the viewer has been resolved, most of core runtime has been
+      // initialized as well.
+      this.coreReady_ = true;
+    });
+
+    ampDoc.onVisibilityChanged(() => {
+      if (ampDoc.isVisible()) {
+        this.schedule_();
       }
     });
   }
@@ -347,7 +349,7 @@ class Chunks {
    * @param {function(?IdleDeadline)} fn
    */
   runForStartup(fn) {
-    const t = new StartupTask(fn, this.win_, this.viewerPromise_);
+    const t = new StartupTask(fn, this.win_, this);
     this.enqueueTask_(t, Number.POSITIVE_INFINITY);
   }
 
@@ -359,9 +361,7 @@ class Chunks {
    */
   enqueueTask_(task, priority) {
     this.tasks_.enqueue(task, priority);
-    resolved.then(() => {
-      this.schedule_();
-    });
+    this.schedule_();
   }
 
   /**
@@ -395,15 +395,42 @@ class Chunks {
   execute_(idleDeadline) {
     const t = this.nextTask_(/* opt_dequeue */ true);
     if (!t) {
+      this.scheduledImmediateInvocation_ = false;
+      this.durationOfLastExecution_ = 0;
       return false;
     }
-    const before = Date.now();
-    this.timeSinceLastExecution_ = before;
-    t.runTask_(idleDeadline);
-    resolved.then(() => {
-      this.schedule_();
-    });
-    dev().fine(TAG, t.getName_(), 'Chunk duration', Date.now() - before);
+    let before;
+    try {
+      before = Date.now();
+      t.runTask_(idleDeadline);
+    } finally {
+      // We want to capture the time of the entire task duration including
+      // scheduled immediate (from resolved promises) micro tasks.
+      // Lacking a better way to do this we just scheduled 10 nested
+      // micro tasks.
+      resolved
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then()
+        .then(() => {
+          this.scheduledImmediateInvocation_ = false;
+          this.durationOfLastExecution_ += Date.now() - before;
+          dev().fine(
+            TAG,
+            t.getName_(),
+            'Chunk duration',
+            Date.now() - before,
+            this.durationOfLastExecution_
+          );
+
+          this.schedule_();
+        });
+    }
     return true;
   }
 
@@ -416,10 +443,8 @@ class Chunks {
     // If we've spent over 5 millseconds executing the
     // last instruction yeild back to the main thread.
     // 5 milliseconds is a magic number.
-    if (
-      this.macroAfterLongTask_ &&
-      Date.now() - this.timeSinceLastExecution_ > 5
-    ) {
+    if (this.bodyIsVisible_ && this.durationOfLastExecution_ > 5) {
+      this.durationOfLastExecution_ = 0;
       this.requestMacroTask_();
       return;
     }
@@ -433,11 +458,15 @@ class Chunks {
    * @private
    */
   schedule_() {
+    if (this.scheduledImmediateInvocation_) {
+      return;
+    }
     const nextTask = this.nextTask_();
     if (!nextTask) {
       return;
     }
     if (nextTask.immediateTriggerCondition_()) {
+      this.scheduledImmediateInvocation_ = true;
       this.executeAsap_(/* idleDeadline */ null);
       return;
     }

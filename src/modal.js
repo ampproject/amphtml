@@ -234,7 +234,8 @@ export function setModalAsClosed(element) {
   devAssert(topModalElement === element);
 
   // Put aria-hidden back to how it was before the call.
-  hiddenElementInfos.forEach(({element, prevValue}) => {
+  hiddenElementInfos.forEach(hiddenElementInfo => {
+    const {element, prevValue} = hiddenElementInfo;
     restoreAttributeValue(element, 'aria-hidden', prevValue);
   });
   // Re-hide any internal elements that should be hidden.
@@ -255,4 +256,12 @@ export function setModalAsClosed(element) {
  */
 export function clearModalStack() {
   modalEntryStack.length = 0;
+}
+
+/**
+ * @return {number} The number of entries in the stack, for testing.
+ * @package Visible for testing
+ */
+export function getModalStackLength() {
+  return modalEntryStack.length;
 }

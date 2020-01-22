@@ -20,6 +20,8 @@ import {
   parseQueryString,
   parseUrlDeprecated,
 } from '../url';
+
+import {getRandomString64} from './cid-impl';
 import {isArray} from '../types';
 import {map} from '../utils/object';
 import {registerServiceBuilderForDoc} from '../service';
@@ -32,6 +34,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *     - sourceUrl: the source url of an amp document.
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
+ *     - pageViewId64: Id for this page view. High entropy but should be unique
  *       for concurrent page views of a user().
  *     - linkRels: A map object of link tag's rel (key) and corresponding
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
@@ -45,6 +48,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
+ *   pageViewId64: !Promise<string>,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
  *   replaceParams: ?Object<string, string|!Array<string>>
@@ -69,6 +73,8 @@ export class DocInfo {
     this.ampdoc_ = ampdoc;
     /** @private {?DocumentInfoDef} */
     this.info_ = null;
+    /** @private {?Promise<string>} */
+    this.pageViewId64_ = null;
   }
 
   /** @return {!DocumentInfoDef} */
@@ -99,6 +105,15 @@ export class DocInfo {
       },
       canonicalUrl,
       pageViewId,
+      get pageViewId64() {
+        // Must be calculated async since getRandomString64() can load the
+        // amp-crypto-polyfill on some browsers, and extensions service
+        // may not be registered yet.
+        if (!this.pageViewId64_) {
+          this.pageViewId64_ = getRandomString64(ampdoc.win);
+        }
+        return this.pageViewId64_;
+      },
       linkRels,
       metaTags,
       replaceParams,

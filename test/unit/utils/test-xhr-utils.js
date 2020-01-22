@@ -25,12 +25,6 @@ import {
 } from '../../../src/utils/xhr-utils';
 
 describes.sandboxed('utils/xhr-utils', {}, env => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = env.sandbox;
-  });
-
   describe('setupAMPCors', () => {
     it('should set AMP-Same-Origin header', () => {
       // Given a same origin request.
@@ -100,9 +94,10 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
 
     beforeEach(() => {
       ampDocSingle = {
-        getRootNode: () => {
+        getRootNode() {
           return {documentElement: doc};
         },
+        whenFirstVisible: env.sandbox.stub().returns(Promise.resolve()),
       };
       doc = document.createElement('html');
       doc.setAttribute('allow-xhr-interception', 'true');
@@ -111,12 +106,13 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       viewer = {
         hasCapability: unusedParam => true,
         isTrustedViewer: () => Promise.resolve(true),
-        sendMessageAwaitResponse: sandbox.stub().returns(Promise.resolve({})),
-        whenFirstVisible: sandbox.stub().returns(Promise.resolve()),
+        sendMessageAwaitResponse: env.sandbox
+          .stub()
+          .returns(Promise.resolve({})),
       };
-      viewerForDoc = sandbox.stub(Services, 'viewerForDoc').returns(viewer);
+      viewerForDoc = env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
       win = {
-        AMP_MODE: {
+        __AMP_MODE: {
           localDev: false,
         },
         location: {
@@ -148,7 +144,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       init = {
         bypassInterceptorForDev: true,
       };
-      win.AMP_MODE = {
+      win.__AMP_MODE = {
         localDev: true,
       };
 
@@ -201,7 +197,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     it('should wait for visibility', async () => {
       await getViewerInterceptResponse(win, ampDocSingle, input, init);
 
-      expect(viewer.whenFirstVisible).to.have.been.calledOnce;
+      expect(ampDocSingle.whenFirstVisible).to.have.been.calledOnce;
     });
 
     it('should not wait for visibility if prerenderSafe', async () => {
@@ -211,7 +207,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
 
       await getViewerInterceptResponse(win, ampDocSingle, input, init);
 
-      expect(viewer.whenFirstVisible).to.not.have.been.called;
+      expect(ampDocSingle.whenFirstVisible).to.not.have.been.called;
     });
   });
 
@@ -236,7 +232,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     );
 
     it('should return an auth token if one is present', () => {
-      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
         Promise.resolve({
           getIdTokenPromise: () => Promise.resolve('idToken'),
         })
@@ -249,7 +245,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     });
 
     it('should return an empty auth token if there is not one present', () => {
-      sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+      env.sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
         Promise.resolve({
           getIdTokenPromise: () => Promise.resolve(undefined),
         })
@@ -265,7 +261,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
       'should return an empty auth token if there is an issue retrieving ' +
         'the identity token',
       () => {
-        sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
+        env.sandbox.stub(Services, 'viewerAssistanceForDocOrNull').returns(
           Promise.reject({
             getIdTokenPromise: () => Promise.reject(),
           })
@@ -279,7 +275,7 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
     );
 
     it('should assert that amp-viewer-assistance extension is present', () => {
-      sandbox
+      window.sandbox
         .stub(Services, 'viewerAssistanceForDocOrNull')
         .returns(Promise.resolve());
       const el = document.createElement('html');

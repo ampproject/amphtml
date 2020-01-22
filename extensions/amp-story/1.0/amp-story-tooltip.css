@@ -104,7 +104,6 @@
   text-shadow: none !important;
   font-weight: 500 !important;
   display: flex !important;
-  justify-content: space-between !important;
   align-items: center !important;
   background: white !important;
   box-shadow: 0px 6px 16px rgba(0,0,0,0.16) !important;
@@ -121,7 +120,7 @@
   overflow: hidden !important;
   white-space: nowrap !important;
   max-width: 172px !important;
-  margin: 0px 10px !important;
+  margin: 0px 5px !important;
   font-family: 'Roboto', sans-serif !important;
   font-size: 14px !important;
   color: #3C4043 !important;
@@ -132,6 +131,7 @@
 .i-amphtml-story-tooltip-custom-icon {
   width: 24px !important;
   height: 24px !important;
+  margin: 0px 5px !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;
@@ -145,6 +145,7 @@
 .i-amphtml-tooltip-action-icon {
   width: 16px !important;
   height: 16px !important;
+  margin: 0px 5px !important;
   padding-bottom: 2px !important;
 }
 
@@ -169,4 +170,8 @@
   top: -8px !important;
   border-top: 0px !important;
   border-bottom: 10px solid white !important;
+}
+
+.amp-social-share-twitter-no-background {
+  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet"><g fill="none" fill-rule="evenodd"><path d="M0 0h400v400H0z"/><path fill="%231da1f2" fill-rule="nonzero" d="M153.62 301.59c94.34 0 145.94-78.16 145.94-145.94 0-2.22 0-4.43-.15-6.63A104.36 104.36 0 0 0 325 122.47a102.38 102.38 0 0 1-29.46 8.07 51.47 51.47 0 0 0 22.55-28.37 102.79 102.79 0 0 1-32.57 12.45c-15.9-16.906-41.163-21.044-61.625-10.093-20.461 10.95-31.032 34.266-25.785 56.873A145.62 145.62 0 0 1 92.4 107.81c-13.614 23.436-6.66 53.419 15.88 68.47A50.91 50.91 0 0 1 85 169.86v.65c.007 24.416 17.218 45.445 41.15 50.28a51.21 51.21 0 0 1-23.16.88c6.72 20.894 25.976 35.208 47.92 35.62a102.92 102.92 0 0 1-63.7 22 104.41 104.41 0 0 1-12.21-.74 145.21 145.21 0 0 0 78.62 23"/></g></svg>');
 }

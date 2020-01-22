@@ -96,10 +96,10 @@ export class ConsentUI {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = baseInstance.getAmpDoc();
 
-    /** @private {!../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.ampdoc_);
 
-    /** @private {?../../../src/service/viewer-impl.Viewer} */
+    /** @private {?../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.ampdoc_);
 
     /** @private {!Element} */
@@ -542,6 +542,7 @@ export class ConsentUI {
     classList.remove(consentUiClasses.in);
     this.isIframeVisible_ = false;
     this.ui_.removeAttribute('name');
+    toggle(dev().assertElement(this.placeholder_), false);
     removeElement(dev().assertElement(this.ui_));
   }
 

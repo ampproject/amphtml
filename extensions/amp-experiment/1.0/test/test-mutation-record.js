@@ -117,5 +117,15 @@ describes.realWin(
         }).to.throw(/selector/);
       });
     });
+
+    it('should error when selecting internal element', () => {
+      const mutation = getAttributeMutation();
+      mutation['target'] = 'i-amphtml-foo';
+      allowConsoleError(() => {
+        expect(() => {
+          getElementsFromMutationRecordSelector(doc, mutation);
+        }).to.throw(/i-amphtml/);
+      });
+    });
   }
 );

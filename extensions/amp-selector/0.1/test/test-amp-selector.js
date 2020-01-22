@@ -15,6 +15,7 @@
  */
 
 import '../amp-selector';
+import {ActionTrust} from '../../../../src/action-constants';
 import {AmpEvents} from '../../../../src/amp-events';
 import {Keys} from '../../../../src/utils/key-codes';
 
@@ -50,7 +51,7 @@ describes.realWin(
         const numberOfChildren = config.count || 3;
         let selectedCount = config.selectedCount || 0;
         let disabledCount = config.disabledCount || 0;
-
+        const rectArray = [];
         for (let i = 0; i < numberOfChildren; i++) {
           const child = win.document.createElement('div');
           child.setAttribute('width', '10');
@@ -75,7 +76,7 @@ describes.realWin(
               disabledCount--;
             }
           }
-
+          rectArray.push({width: 10, height: 10});
           const childAttributes = options.optionAttributes || {};
           Object.keys(childAttributes).forEach(key => {
             child.setAttribute(key, childAttributes[key]);
@@ -83,6 +84,9 @@ describes.realWin(
 
           ampSelector.appendChild(child);
         }
+        env.sandbox
+          .stub(ampSelector.implementation_, 'getElementsSizes_')
+          .resolves(rectArray);
         win.document.body.appendChild(ampSelector);
         return ampSelector;
       }
@@ -94,13 +98,13 @@ describes.realWin(
           preventDefault: () => {},
           target: opt_target,
         };
-        impl.keyDownHandler_(event);
+        return impl.keyDownHandler_(event);
       }
 
       it('should build properly', function*() {
         let ampSelector = getSelector({});
         let impl = ampSelector.implementation_;
-        let initSpy = sandbox.spy(impl, 'init_');
+        let initSpy = env.sandbox.spy(impl, 'init_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.false;
         expect(initSpy).to.be.calledOnce;
@@ -115,7 +119,7 @@ describes.realWin(
           },
         });
         impl = ampSelector.implementation_;
-        initSpy = sandbox.spy(impl, 'init_');
+        initSpy = env.sandbox.spy(impl, 'init_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.true;
         expect(initSpy).to.be.calledOnce;
@@ -131,7 +135,7 @@ describes.realWin(
           },
         });
         impl = ampSelector.implementation_;
-        initSpy = sandbox.spy(impl, 'init_');
+        initSpy = env.sandbox.spy(impl, 'init_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.true;
         expect(initSpy).to.be.calledOnce;
@@ -161,8 +165,8 @@ describes.realWin(
         let ampSelector = getSelector({});
         let impl = ampSelector.implementation_;
         impl.mutateElement = fn => fn();
-        let setInputsSpy = sandbox.spy(impl, 'setInputs_');
-        let initSpy = sandbox.spy(impl, 'init_');
+        let setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
+        let initSpy = env.sandbox.spy(impl, 'init_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.false;
         expect(initSpy).to.have.been.calledOnce;
@@ -176,8 +180,8 @@ describes.realWin(
           },
         });
         impl = ampSelector.implementation_;
-        setInputsSpy = sandbox.spy(impl, 'setInputs_');
-        initSpy = sandbox.spy(impl, 'init_');
+        setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
+        initSpy = env.sandbox.spy(impl, 'init_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.false;
         expect(initSpy).to.have.been.calledOnce;
@@ -199,8 +203,8 @@ describes.realWin(
           },
         });
         const impl = ampSelector.implementation_;
-        const initSpy = sandbox.spy(impl, 'init_');
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        const initSpy = env.sandbox.spy(impl, 'init_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         yield ampSelector.build();
         expect(impl.isMultiple_).to.be.true;
         expect(initSpy).to.have.been.calledOnce;
@@ -220,8 +224,8 @@ describes.realWin(
           },
         });
         const impl = ampSelector.implementation_;
-        const initSpy = sandbox.spy(impl, 'init_');
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        const initSpy = env.sandbox.spy(impl, 'init_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         yield ampSelector.build();
 
         expect(impl.isMultiple_).to.be.true;
@@ -240,9 +244,9 @@ describes.realWin(
         });
 
         const impl = ampSelector.implementation_;
-        const initSpy = sandbox.spy(impl, 'init_');
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
-        const clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
+        const initSpy = env.sandbox.spy(impl, 'init_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
+        const clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
         yield ampSelector.build();
 
         const options = impl.getElementsForTesting();
@@ -272,8 +276,8 @@ describes.realWin(
         });
 
         const impl = ampSelector.implementation_;
-        const initSpy = sandbox.spy(impl, 'init_');
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        const initSpy = env.sandbox.spy(impl, 'init_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         yield ampSelector.build();
 
         const options = impl.getElementsForTesting();
@@ -304,8 +308,8 @@ describes.realWin(
         });
 
         const impl = ampSelector.implementation_;
-        const initSpy = sandbox.spy(impl, 'init_');
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        const initSpy = env.sandbox.spy(impl, 'init_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
         yield ampSelector.build();
 
         const options = impl.getElementsForTesting();
@@ -463,8 +467,8 @@ describes.realWin(
         yield ampSelector.build();
 
         let options = impl.getElementsForTesting();
-        let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        let clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        let setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
         let e = {
           target: options[3],
         };
@@ -507,8 +511,8 @@ describes.realWin(
         yield ampSelector.build();
 
         options = impl.getElementsForTesting();
-        clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
         e = {
           target: options[4],
@@ -549,8 +553,8 @@ describes.realWin(
         impl = ampSelector.implementation_;
         impl.mutateElement = fn => fn();
         yield ampSelector.build();
-        clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
         e = {
           target: impl.element.children[0],
@@ -576,8 +580,8 @@ describes.realWin(
         yield ampSelector.build();
 
         let options = impl.getElementsForTesting();
-        let clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        let setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        let clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        let setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
         keyPress(ampSelector, Keys.ENTER, options[3]);
         expect(options[3].hasAttribute('selected')).to.be.true;
@@ -606,8 +610,8 @@ describes.realWin(
         yield ampSelector.build();
 
         options = impl.getElementsForTesting();
-        clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
         keyPress(ampSelector, Keys.SPACE, options[4]);
         expect(options[4].hasAttribute('selected')).to.be.true;
@@ -641,8 +645,8 @@ describes.realWin(
         impl = ampSelector.implementation_;
         impl.mutateElement = fn => fn();
         yield ampSelector.build();
-        clearSelectionSpy = sandbox.spy(impl, 'clearSelection_');
-        setSelectionSpy = sandbox.spy(impl, 'setSelection_');
+        clearSelectionSpy = env.sandbox.spy(impl, 'clearSelection_');
+        setSelectionSpy = env.sandbox.spy(impl, 'setSelection_');
 
         keyPress(ampSelector, Keys.SPACE, impl.element.children[0]);
         expect(setSelectionSpy).to.not.have.been.called;
@@ -661,7 +665,7 @@ describes.realWin(
         ampSelector.build();
 
         const options = impl.getElementsForTesting();
-        const setInputsSpy = sandbox.spy(impl, 'setInputs_');
+        const setInputsSpy = env.sandbox.spy(impl, 'setInputs_');
 
         expect(options[0].hasAttribute('selected')).to.be.true;
         expect(options[3].hasAttribute('selected')).to.be.false;
@@ -719,7 +723,7 @@ describes.realWin(
       it(
         'should trigger `toggle` action even when no `value` argument is' +
           ' provided to the function',
-        () => {
+        async () => {
           const ampSelector = getSelector({
             config: {
               count: 5,
@@ -734,8 +738,9 @@ describes.realWin(
 
           // Test the case where the element to be `selected` and the currently
           // selected element are different
+
           let args = {'index': 2};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -746,11 +751,12 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are the same
           args = {'index': 2};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
           });
+
           expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
         }
       );
@@ -758,7 +764,7 @@ describes.realWin(
       it(
         'should trigger `toggle` action even with specified `value`' +
           ' argument',
-        () => {
+        async () => {
           const ampSelector = getSelector({
             config: {
               count: 5,
@@ -774,7 +780,7 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are different
           let args = {'index': 2, 'value': true};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -785,7 +791,7 @@ describes.realWin(
           // Test the case where the element to be `selected` and the currently
           // selected element are the same
           args = {'index': 2, 'value': true};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -795,7 +801,7 @@ describes.realWin(
           // Test the case where the element to be removed as `selected` and
           // the currently selected element are the same
           args = {'index': 2, 'value': false};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -808,7 +814,7 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
 
           args = {'index': 2, 'value': false};
-          impl.executeAction({
+          await impl.executeAction({
             method: 'toggle',
             args,
             satisfiesTrust: () => true,
@@ -830,7 +836,7 @@ describes.realWin(
         impl.mutateElement = fn => fn();
 
         const options = impl.getElementsForTesting();
-        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         impl.clickHandler_({target: options[3]});
 
         expect(triggerSpy).to.be.calledOnce;
@@ -840,9 +846,12 @@ describes.realWin(
         expect(event).to.have.property('detail');
         expect(event.detail).to.have.property('targetOption', '3');
         expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
+
+        const trust = triggerSpy.firstCall.args[3];
+        expect(trust).to.equal(ActionTrust.HIGH);
       });
 
-      it('should trigger "select" event when an item is toggled', () => {
+      it('should trigger "select" event when an item is toggled', async () => {
         const ampSelector = getSelector({
           config: {
             count: 5,
@@ -853,12 +862,13 @@ describes.realWin(
         const impl = ampSelector.implementation_;
         impl.mutateElement = fn => fn();
 
-        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         const args = {'index': 3, 'value': true};
-        impl.executeAction({
+        await impl.executeAction({
           method: 'toggle',
           args,
           satisfiesTrust: () => true,
+          trust: 789,
         });
 
         expect(triggerSpy).to.be.calledOnce;
@@ -868,6 +878,9 @@ describes.realWin(
         expect(event).to.have.property('detail');
         expect(event.detail).to.have.property('targetOption', '3');
         expect(event.detail).to.have.deep.property('selectedOptions', ['3']);
+
+        const trust = triggerSpy.firstCall.args[3];
+        expect(trust).to.equal(789);
       });
 
       it('should trigger "select" event for multiple selections', function*() {
@@ -887,7 +900,7 @@ describes.realWin(
         impl.mutateElement = fn => fn();
 
         const options = impl.getElementsForTesting();
-        const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
         impl.clickHandler_({target: options[2]});
 
         expect(triggerSpy).to.be.calledOnce;
@@ -901,6 +914,9 @@ describes.realWin(
           '1',
           '2',
         ]);
+
+        const trust = triggerSpy.firstCall.args[3];
+        expect(trust).to.equal(ActionTrust.HIGH);
       });
 
       it(
@@ -918,7 +934,7 @@ describes.realWin(
           ampSelector.children[0].setAttribute('selected', '');
           ampSelector.build();
           const impl = ampSelector.implementation_;
-          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+          const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
@@ -926,6 +942,7 @@ describes.realWin(
           impl.executeAction({
             method: 'selectDown',
             satisfiesTrust: () => true,
+            trust: 789,
           });
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
@@ -937,6 +954,9 @@ describes.realWin(
           expect(event).to.have.property('detail');
           expect(event.detail).to.have.property('targetOption', '1');
           expect(event.detail).to.have.deep.property('selectedOptions', ['1']);
+
+          const trust = triggerSpy.firstCall.args[3];
+          expect(trust).to.equal(789);
         }
       );
 
@@ -955,12 +975,16 @@ describes.realWin(
           ampSelector.children[0].setAttribute('selected', '');
           ampSelector.build();
           const impl = ampSelector.implementation_;
-          const triggerSpy = sandbox.spy(impl.action_, 'trigger');
+          const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
 
           expect(ampSelector.hasAttribute('multiple')).to.be.false;
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
 
-          impl.executeAction({method: 'selectUp', satisfiesTrust: () => true});
+          impl.executeAction({
+            method: 'selectUp',
+            satisfiesTrust: () => true,
+            trust: 789,
+          });
 
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[5].hasAttribute('selected')).to.be.true;
@@ -972,6 +996,9 @@ describes.realWin(
           expect(event).to.have.property('detail');
           expect(event.detail).to.have.property('targetOption', '5');
           expect(event.detail).to.have.deep.property('selectedOptions', ['5']);
+
+          const trust = triggerSpy.firstCall.args[3];
+          expect(trust).to.equal(789);
         }
       );
 
@@ -1119,7 +1146,7 @@ describes.realWin(
               count: 3,
             },
           });
-          const spy = sandbox.spy(
+          const spy = env.sandbox.spy(
             ampSelector.implementation_,
             'navigationKeyDownHandler_'
           );
@@ -1144,14 +1171,69 @@ describes.realWin(
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
-            keyPress(ampSelector, Keys.LEFT_ARROW);
+            return keyPress(ampSelector, Keys.LEFT_ARROW)
+              .then(() => {
+                expect(ampSelector.children[0].tabIndex).to.equal(-1);
+                expect(ampSelector.children[1].tabIndex).to.equal(-1);
+                expect(ampSelector.children[2].tabIndex).to.equal(0);
+                return keyPress(ampSelector, Keys.RIGHT_ARROW);
+              })
+              .then(() => {
+                expect(ampSelector.children[0].tabIndex).to.equal(0);
+                expect(ampSelector.children[1].tabIndex).to.equal(-1);
+                expect(ampSelector.children[2].tabIndex).to.equal(-1);
+              });
+          }
+        );
+
+        it(
+          'should update focus when the user presses the home key when ' +
+            'keyboard-select-mode is enabled',
+          () => {
+            const ampSelector = getSelector({
+              attributes: {
+                'keyboard-select-mode': 'focus',
+              },
+              config: {
+                count: 3,
+              },
+            });
+            ampSelector.children[2].setAttribute('selected', '');
+            ampSelector.children[0].setAttribute('hidden', '');
+            ampSelector.build();
             expect(ampSelector.children[0].tabIndex).to.equal(-1);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(0);
-            keyPress(ampSelector, Keys.RIGHT_ARROW);
+            return keyPress(ampSelector, Keys.HOME).then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            });
+          }
+        );
+
+        it(
+          'should update focus when the user presses the end key when ' +
+            'keyboard-select-mode is enabled',
+          () => {
+            const ampSelector = getSelector({
+              attributes: {
+                'keyboard-select-mode': 'focus',
+              },
+              config: {
+                count: 3,
+              },
+            });
+            ampSelector.children[2].setAttribute('hidden', '');
+            ampSelector.build();
             expect(ampSelector.children[0].tabIndex).to.equal(0);
             expect(ampSelector.children[1].tabIndex).to.equal(-1);
             expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            return keyPress(ampSelector, Keys.END).then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
+            });
           }
         );
 
@@ -1211,14 +1293,24 @@ describes.realWin(
           expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
           expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-          keyPress(ampSelector, Keys.DOWN_ARROW);
-          expect(ampSelector.children[0].hasAttribute('selected')).to.be.false;
-          expect(ampSelector.children[1].hasAttribute('selected')).to.be.true;
-          expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
-          keyPress(ampSelector, Keys.UP_ARROW);
-          expect(ampSelector.children[0].hasAttribute('selected')).to.be.true;
-          expect(ampSelector.children[1].hasAttribute('selected')).to.be.false;
-          expect(ampSelector.children[2].hasAttribute('selected')).to.be.false;
+          return keyPress(ampSelector, Keys.DOWN_ARROW)
+            .then(() => {
+              expect(ampSelector.children[0].hasAttribute('selected')).to.be
+                .false;
+              expect(ampSelector.children[1].hasAttribute('selected')).to.be
+                .true;
+              expect(ampSelector.children[2].hasAttribute('selected')).to.be
+                .false;
+              return keyPress(ampSelector, Keys.UP_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].hasAttribute('selected')).to.be
+                .true;
+              expect(ampSelector.children[1].hasAttribute('selected')).to.be
+                .false;
+              expect(ampSelector.children[2].hasAttribute('selected')).to.be
+                .false;
+            });
         });
       });
 
@@ -1306,29 +1398,35 @@ describes.realWin(
           expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
           // Note that the newly added third child is ignored.
-          keyPress(ampSelector, Keys.LEFT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(0);
-          expect(ampSelector.children[2].tabIndex).to.equal(-1);
+          keyPress(ampSelector, Keys.LEFT_ARROW)
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
-          const e = new CustomEvent(AmpEvents.DOM_UPDATE, {bubbles: true});
-          newChild.dispatchEvent(e);
+              const e = new CustomEvent(AmpEvents.DOM_UPDATE, {bubbles: true});
+              newChild.dispatchEvent(e);
 
-          // `newChild` should be focused since it has the 'selected' attribute.
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(-1);
-          expect(ampSelector.children[2].tabIndex).to.equal(0);
+              // `newChild` should be focused since it has the 'selected' attribute.
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(-1);
+              expect(ampSelector.children[2].tabIndex).to.equal(0);
 
-          // Tabbing between children now works for `newChild`.
-          keyPress(ampSelector, Keys.LEFT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(0);
-          expect(ampSelector.children[2].tabIndex).to.equal(-1);
+              // Tabbing between children now works for `newChild`.
+              return keyPress(ampSelector, Keys.LEFT_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(0);
+              expect(ampSelector.children[2].tabIndex).to.equal(-1);
 
-          keyPress(ampSelector, Keys.RIGHT_ARROW);
-          expect(ampSelector.children[0].tabIndex).to.equal(-1);
-          expect(ampSelector.children[1].tabIndex).to.equal(-1);
-          expect(ampSelector.children[2].tabIndex).to.equal(0);
+              return keyPress(ampSelector, Keys.RIGHT_ARROW);
+            })
+            .then(() => {
+              expect(ampSelector.children[0].tabIndex).to.equal(-1);
+              expect(ampSelector.children[1].tabIndex).to.equal(-1);
+              expect(ampSelector.children[2].tabIndex).to.equal(0);
+            });
         });
       });
     });

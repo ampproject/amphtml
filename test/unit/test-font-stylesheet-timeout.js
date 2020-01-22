@@ -36,12 +36,12 @@ describes.realWin(
           win.setTimeout = self.setTimeout;
           readyState = 'interactive';
           responseStart = 0;
-          Object.defineProperty(win.document, 'readyState', {
+          env.sandbox.defineProperty(win.document, 'readyState', {
             get() {
               return readyState;
             },
           });
-          Object.defineProperty(win.performance.timing, 'responseStart', {
+          env.sandbox.defineProperty(win.performance.timing, 'responseStart', {
             get() {
               return responseStart;
             },
@@ -196,7 +196,7 @@ describes.realWin(
               null,
             ];
             let index = 0;
-            Object.defineProperty(win.document, 'fonts', {
+            env.sandbox.defineProperty(win.document, 'fonts', {
               get: () => {
                 return {
                   values: () => {

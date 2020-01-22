@@ -15,6 +15,7 @@
  */
 import {Builder} from '../web-animations';
 import {NativeWebAnimationRunner} from '../runners/native-web-animation-runner';
+import {Services} from '../../../../src/services';
 import {WebAnimationPlayState} from '../web-animation-types';
 import {isArray, isObject} from '../../../../src/types';
 import {poll} from '../../../../testing/iframe';
@@ -24,6 +25,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   let win, doc;
   let vsync;
   let resources;
+  let owners;
   let requireLayoutSpy;
   let target1, target2;
   let warnStub;
@@ -31,7 +33,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   beforeEach(() => {
     win = env.win;
     doc = win.document;
-    sandbox.stub(win, 'matchMedia').callsFake(query => {
+    env.sandbox.stub(win, 'matchMedia').callsFake(query => {
       if (query == 'match') {
         return {matches: true};
       }
@@ -43,7 +45,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     if (!win.CSS) {
       win.CSS = {supports: () => {}};
     }
-    sandbox.stub(win.CSS, 'supports').callsFake(condition => {
+    env.sandbox.stub(win.CSS, 'supports').callsFake(condition => {
       if (condition == 'supported: 1') {
         return true;
       }
@@ -52,14 +54,15 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       }
       throw new Error('unknown condition: ' + condition);
     });
-    warnStub = sandbox.stub(user(), 'warn');
+    warnStub = env.sandbox.stub(user(), 'warn');
 
-    vsync = win.services.vsync.obj;
-    sandbox.stub(vsync, 'measurePromise').callsFake(callback => {
+    vsync = Services.vsyncFor(win);
+    env.sandbox.stub(vsync, 'measurePromise').callsFake(callback => {
       return Promise.resolve(callback());
     });
-    resources = win.services.resources.obj;
-    requireLayoutSpy = sandbox.spy(resources, 'requireLayout');
+    resources = Services.resourcesForDoc(env.ampdoc);
+    owners = Services.ownersForDoc(env.ampdoc);
+    requireLayoutSpy = env.sandbox.spy(owners, 'requireLayout');
 
     target1 = doc.createElement('div');
     target1.id = 'target1';
@@ -82,9 +85,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       doc,
       'https://acme.org/',
       /* vsync */ null,
-      /* resources */ null
+      /* owners */ null
     );
-    sandbox.stub(builder, 'requireLayout');
+    env.sandbox.stub(builder, 'requireLayout');
     const scanner = builder.createScanner_([]);
     const success = scanner.scan(spec);
     if (success) {
@@ -141,8 +144,8 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       );
     });
     expect(warnStub).to.not.be.calledWith(
-      sinon.match.any,
-      sinon.match(arg => {
+      env.sandbox.match.any,
+      env.sandbox.match(arg => {
         return /fractional/.test(arg);
       })
     );
@@ -372,7 +375,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should propagate vars', () => {
-    sandbox.stub(win, 'getComputedStyle').callsFake(target => {
+    env.sandbox.stub(win, 'getComputedStyle').callsFake(target => {
       if (target == target2) {
         return {
           getPropertyValue: prop => {
@@ -680,7 +683,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 
   it('should parse rand function', () => {
-    sandbox.stub(Math, 'random').callsFake(() => 0.25);
+    env.sandbox.stub(Math, 'random').callsFake(() => 0.25);
     const {keyframes} = scan({
       target: target1,
       keyframes: {
@@ -796,7 +799,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       doc,
       'https://acme.org/',
       vsync,
-      /* resources */ null
+      /* owners */ null
     );
     const cssContext = builder.css_;
     expect(cssContext.supports('supported: 0')).to.be.false;
@@ -975,9 +978,9 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       doc,
       'https://acme.org/',
       vsync,
-      /* resources */ null
+      /* owners */ null
     );
-    sandbox.stub(builder, 'requireLayout');
+    env.sandbox.stub(builder, 'requireLayout');
     const spec = {target: target1, delay: 101, keyframes: {}};
     const args = {
       'duration': 1001,
@@ -1010,8 +1013,8 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
       animation2.id = 'animation2';
       doc.body.appendChild(animation2);
 
-      builder = new Builder(win, doc, 'https://acme.org/', vsync, resources);
-      sandbox.stub(builder, 'requireLayout');
+      builder = new Builder(win, doc, 'https://acme.org/', vsync, owners);
+      env.sandbox.stub(builder, 'requireLayout');
       scanner = builder.createScanner_([]);
     });
 
@@ -1211,7 +1214,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
           selector: '.target',
           animation: 'animation2',
           delay: 'calc((index() + 1) * 1s)',
-          subtargets: [{index: 0, '--y': '11px'}, {index: 1, '--y': '12px'}],
+          subtargets: [
+            {index: 0, '--y': '11px'},
+            {index: 1, '--y': '12px'},
+          ],
         })
         .then(requests => {
           expect(requests).to.have.length(2);
@@ -1225,7 +1231,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     it('should propagate vars and index by selector from child', () => {
       animation2Spec = {
         delay: 'calc((index() + 1) * 1s)',
-        subtargets: [{index: 0, '--y': '11px'}, {index: 1, '--y': '12px'}],
+        subtargets: [
+          {index: 0, '--y': '11px'},
+          {index: 1, '--y': '12px'},
+        ],
         duration: 2000,
         keyframes: {},
       };
@@ -1255,10 +1264,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
         doc,
         'https://acme.org/',
         /* vsync */ null,
-        /* resources */ null
+        /* owners */ null
       );
       css = builder.css_;
-      parseSpy = sandbox.spy(css, 'resolveAsNode_');
+      parseSpy = env.sandbox.spy(css, 'resolveAsNode_');
     });
 
     it('should measure styles', () => {
@@ -1275,7 +1284,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     });
 
     it('should use cache', () => {
-      const spy = sandbox.spy(win, 'getComputedStyle');
+      const spy = env.sandbox.spy(win, 'getComputedStyle');
 
       // First: target1.
       expect(css.measure(target1, 'display')).to.equal('block');
@@ -1381,7 +1390,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
 
     // TODO(dvoytenko, #12476): Make this test work with sinon 4.0.
     it.skip('should read a var', () => {
-      const stub = sandbox.stub(css, 'measure').callsFake(() => '10px');
+      const stub = env.sandbox.stub(css, 'measure').callsFake(() => '10px');
       expect(css.getVar('--var1')).to.be.null;
       expect(warnStub).to.have.callCount(1);
       expect(warnStub.args[0][1]).to.match(/Variable not found/);
@@ -1539,12 +1548,12 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     beforeEach(() => {
       amp1 = env.createAmpElement();
       amp2 = env.createAmpElement();
-      sandbox.stub(amp1, 'isUpgraded').callsFake(() => true);
-      sandbox.stub(amp2, 'isUpgraded').callsFake(() => true);
-      sandbox.stub(amp1, 'isBuilt').callsFake(() => true);
-      sandbox.stub(amp2, 'isBuilt').callsFake(() => true);
-      sandbox.stub(amp1, 'whenBuilt').callsFake(() => Promise.resolve());
-      sandbox.stub(amp2, 'whenBuilt').callsFake(() => Promise.resolve());
+      env.sandbox.stub(amp1, 'isUpgraded').callsFake(() => true);
+      env.sandbox.stub(amp2, 'isUpgraded').callsFake(() => true);
+      env.sandbox.stub(amp1, 'isBuilt').callsFake(() => true);
+      env.sandbox.stub(amp2, 'isBuilt').callsFake(() => true);
+      env.sandbox.stub(amp1, 'whenBuilt').callsFake(() => Promise.resolve());
+      env.sandbox.stub(amp2, 'whenBuilt').callsFake(() => Promise.resolve());
       resources.add(amp1);
       resources.add(amp2);
     });
@@ -1557,13 +1566,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     }
 
     function createRunner(spec) {
-      const builder = new Builder(
-        win,
-        doc,
-        'https://acme.org/',
-        vsync,
-        resources
-      );
+      const builder = new Builder(win, doc, 'https://acme.org/', vsync, owners);
       return builder.createRunner(spec);
     }
 
@@ -1585,10 +1588,10 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
     it.skip('should block AMP elements', () => {
       const r1 = resources.getResourceForElement(amp1);
       const r2 = resources.getResourceForElement(amp2);
-      sandbox.stub(r1, 'whenBuilt').callsFake(() => Promise.resolve());
-      sandbox.stub(r2, 'whenBuilt').callsFake(() => Promise.resolve());
-      sandbox.stub(r1, 'isDisplayed').callsFake(() => true);
-      sandbox.stub(r2, 'isDisplayed').callsFake(() => true);
+      env.sandbox.stub(r1, 'whenBuilt').callsFake(() => Promise.resolve());
+      env.sandbox.stub(r2, 'whenBuilt').callsFake(() => Promise.resolve());
+      env.sandbox.stub(r1, 'isDisplayed').callsFake(() => true);
+      env.sandbox.stub(r2, 'isDisplayed').callsFake(() => true);
       let runner;
       createRunner([
         {target: amp1, keyframes: {}},
@@ -1622,7 +1625,7 @@ describes.realWin('MeasureScanner', {amp: 1}, env => {
   });
 });
 
-describes.sandboxed('NativeWebAnimationRunner', {}, () => {
+describes.sandboxed('NativeWebAnimationRunner', {}, env => {
   let target1, target2;
   let target1Mock, target2Mock;
   let keyframes1, keyframes2;
@@ -1665,20 +1668,20 @@ describes.sandboxed('NativeWebAnimationRunner', {}, () => {
     timing2 = {};
     anim1 = new WebAnimationStub();
     anim2 = new WebAnimationStub();
-    anim1Mock = sandbox.mock(anim1);
-    anim2Mock = sandbox.mock(anim2);
+    anim1Mock = env.sandbox.mock(anim1);
+    anim2Mock = env.sandbox.mock(anim2);
 
     target1 = {style: createStyle(), animate: () => anim1};
-    target1Mock = sandbox.mock(target1);
+    target1Mock = env.sandbox.mock(target1);
     target2 = {style: createStyle(), animate: () => anim2};
-    target2Mock = sandbox.mock(target2);
+    target2Mock = env.sandbox.mock(target2);
 
     runner = new NativeWebAnimationRunner([
       {target: target1, keyframes: keyframes1, timing: timing1},
       {target: target2, keyframes: keyframes2, timing: timing2},
     ]);
 
-    playStateSpy = sandbox.spy();
+    playStateSpy = env.sandbox.spy();
     runner.onPlayStateChanged(playStateSpy);
   });
 
@@ -1969,7 +1972,7 @@ describes.sandboxed('NativeWebAnimationRunner', {}, () => {
     runner.start();
     expect(runner.getPlayState()).to.equal(WebAnimationPlayState.RUNNING);
 
-    sandbox.stub(runner, 'getTotalDuration_').returns(500);
+    env.sandbox.stub(runner, 'getTotalDuration_').returns(500);
     anim1Mock
       .expects('pause')
       .callThrough()

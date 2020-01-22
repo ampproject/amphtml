@@ -55,7 +55,7 @@ export const SINGLE_PASS_EXPERIMENT_IDS = {
  */
 export function extractUrlExperimentId(win, element) {
   const expParam =
-    Services.viewerForDoc(element).getParam('exp') ||
+    Services.ampdoc(element).getParam('exp') ||
     parseQueryString(win.location.search)['exp'];
   if (!expParam) {
     return null;

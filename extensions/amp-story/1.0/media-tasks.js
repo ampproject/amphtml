@@ -353,11 +353,15 @@ export class BlessTask extends MediaTask {
  */
 export class UpdateSourcesTask extends MediaTask {
   /**
+   * @param {!Window} win
    * @param {!Sources} newSources The sources to which the media element should
    *     be updated.
    */
-  constructor(newSources) {
+  constructor(win, newSources) {
     super('update-src');
+
+    /** @private {!Window} */
+    this.win_ = win;
 
     /** @private @const {!Sources} */
     this.newSources_ = newSources;
@@ -365,8 +369,8 @@ export class UpdateSourcesTask extends MediaTask {
 
   /** @override */
   executeInternal(mediaEl) {
-    Sources.removeFrom(mediaEl);
-    this.newSources_.applyToElement(mediaEl);
+    Sources.removeFrom(this.win_, mediaEl);
+    this.newSources_.applyToElement(this.win_, mediaEl);
     return Promise.resolve();
   }
 }

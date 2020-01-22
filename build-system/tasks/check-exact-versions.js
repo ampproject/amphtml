@@ -17,9 +17,9 @@
 
 const colors = require('ansi-colors');
 const log = require('fancy-log');
-const {getStderr} = require('../exec');
-const {gitDiffFileMaster} = require('../git');
-const {isTravisBuild} = require('../travis');
+const {getStderr} = require('../common/exec');
+const {gitDiffFileMaster} = require('../common/git');
+const {isTravisBuild} = require('../common/travis');
 
 const PACKAGE_JSON_PATHS = [
   'package.json',
@@ -31,7 +31,7 @@ const checkerExecutable = 'npx npm-exact-versions';
 
 /**
  * Makes sure all package.json files in the repo use exact versions.
- * @return {*} TODO(#23582): Specify return type
+ * @return {!Promise}
  */
 async function checkExactVersions() {
   let success = true;
