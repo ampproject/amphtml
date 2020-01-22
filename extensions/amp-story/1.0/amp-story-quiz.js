@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
+import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
+import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-quiz-1.0.css';
+import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
+import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
 import {closest} from '../../../src/dom';
 import {createShadowRootWithStyle} from './utils';
 import {dev} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
+import {getRequestService} from './amp-story-request-service';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
 
@@ -28,8 +38,35 @@ const answerChoiceOptions = ['A', 'B', 'C', 'D'];
 /** @const {string} */
 const TAG = 'amp-story-quiz';
 
+// TODO(jackbsteinberg): Refactor quiz to extend a general interactive element class
+// and make this an enum on that class.
+/** @const {number} */
+const STORY_REACTION_TYPE_QUIZ = 0;
+
+/** @const {string} */
+const ENDPOINT_INVALID_ERROR =
+  'The publisher has specified an invalid datastore endpoint';
+
 /**
- * Generates the template for the quiz
+ * @typedef {{
+ *    reactionValue: number,
+ *    totalCount: number,
+ *    selectedByUser: boolean,
+ * }}
+ */
+export let ReactionType;
+
+/**
+ * @typedef {{
+ *    totalResponseCount: number,
+ *    hasUserResponded: boolean,
+ *    responses: !Array<ReactionType>,
+ * }}
+ */
+export let ReactionResponseType;
+
+/**
+ * Generates the template for the quiz.
  *
  * @param {!Element} element
  * @return {!Element}
@@ -45,7 +82,7 @@ const buildQuizTemplate = element => {
 };
 
 /**
- * Generates the template for each option
+ * Generates the template for each option.
  *
  * @param {!Element} option
  * @return {!Element}
@@ -66,14 +103,38 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
+    /** @private @const {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win, element);
+
+    /** @private {?Promise<!../../../src/service/cid-impl.CidDef>} */
+    this.clientIdService_ = Services.cidForDoc(this.element);
+
+    /** @private {?Promise<JsonObject>} */
+    this.clientIdPromise_ = null;
+
     /** @private {boolean} */
-    this.hasReceivedResponse_ = false;
+    this.hasUserSelection_ = false;
 
     /** @private {?Element} */
     this.quizEl_ = null;
 
+    /** @private {?string} */
+    this.reactionId_ = null;
+
+    /** @private {!./amp-story-request-service.AmpStoryRequestService} */
+    this.requestService_ = getRequestService(this.win, this.element);
+
+    /** @private {?Promise<?ReactionResponseType|?JsonObject|undefined>} */
+    this.responseDataPromise_ = null;
+
+    /** @private {?ReactionResponseType} */
+    this.responseData_ = null;
+
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
+
+    /** @const @private {!./variable-service.AmpStoryVariableService} */
+    this.variableService_ = getVariableService(this.win);
   }
 
   /** @override */
@@ -83,6 +144,31 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     this.attachContent_();
     this.initializeListeners_();
     createShadowRootWithStyle(this.element, this.quizEl_, CSS);
+  }
+
+  /** @override */
+  layoutCallback() {
+    return (this.responseDataPromise_ = this.element.hasAttribute('endpoint')
+      ? this.retrieveReactionData_()
+      : Promise.resolve());
+  }
+
+  /**
+   * Gets a Promise to return the unique AMP clientId
+   *
+   * @private
+   * @return {Promise<string>}
+   */
+  getClientId_() {
+    if (!this.clientIdPromise_) {
+      this.clientIdPromise_ = this.clientIdService_.then(data => {
+        return data.get(
+          {scope: 'amp-story', createCookieIfNotPresent: true},
+          /* consent */ Promise.resolve()
+        );
+      });
+    }
+    return this.clientIdPromise_;
   }
 
   /**
@@ -113,17 +199,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
   /**
    * Add classes to adjust the bottom padding on the grid-layer
-   * to prevent overlap with the quiz
+   * to prevent overlap with the quiz.
    *
    * @private
    */
   adjustGridLayer_() {
     const gridLayer = closest(dev().assertElement(this.element), el => {
-      const tagName = el.tagName.toLowerCase();
-
-      if (tagName === 'amp-story-grid-layer') {
-        return true;
-      }
+      return el.tagName.toLowerCase() === 'amp-story-grid-layer';
     });
 
     gridLayer.classList.add('i-amphtml-story-has-quiz');
@@ -187,12 +269,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   configureOption_(option, index) {
     const convertedOption = buildOptionTemplate(dev().assertElement(option));
 
-    // Fill in the answer choice
+    // Fill in the answer choice and set the option ID
     convertedOption.querySelector(
       '.i-amphtml-story-quiz-answer-choice'
     ).textContent = answerChoiceOptions[index];
+    convertedOption.optionIndex_ = index;
 
-    // Transfer the option information into a span then remove the option
+    // Extract and structure the option information
     const optionText = document.createElement('span');
     optionText.classList.add('i-amphtml-story-quiz-option-text');
     optionText.textContent = option.textContent;
@@ -203,7 +286,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
     this.element.removeChild(option);
 
-    // Add the option to the quiz element
     this.quizEl_
       .querySelector('.i-amphtml-story-quiz-option-container')
       .appendChild(convertedOption);
@@ -224,18 +306,18 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       true /** callToInitialize */
     );
 
-    // Add a click listener to the element to trigger the class change via tapping the prompt
+    // Add a click listener to the element to trigger the class change
     this.quizEl_.addEventListener('click', e => this.handleTap_(e));
   }
 
   /**
-   * Handles a tap event on the quiz element
+   * Handles a tap event on the quiz element.
    *
    * @param {Event} e
    * @private
    */
   handleTap_(e) {
-    if (this.hasReceivedResponse_) {
+    if (this.hasUserSelection_) {
       return;
     }
 
@@ -253,17 +335,214 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * Triggers changes to quiz state on response interaction
+   * Triggers the analytics event for quiz response.
+   *
+   * @param {!Element} optionEl
+   * @private
+   */
+  triggerAnalytics_(optionEl) {
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_REACTION_ID,
+      this.element.getAttribute('id')
+    );
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_REACTION_RESPONSE,
+      optionEl.optionIndex_
+    );
+    this.variableService_.onVariableUpdate(
+      AnalyticsVariable.STORY_REACTION_TYPE,
+      STORY_REACTION_TYPE_QUIZ
+    );
+
+    this.element[ANALYTICS_TAG_NAME] = 'amp-story-quiz';
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.REACTION,
+      this.element
+    );
+  }
+
+  /**
+   * @param {Element} selectedOption
+   * @private
+   */
+  updateQuizToPostSelectionState_(selectedOption) {
+    this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
+    selectedOption.classList.add('i-amphtml-story-quiz-option-selected');
+  }
+
+  /**
+   * Triggers changes to quiz state on response interaction.
    *
    * @param {!Element} optionEl
    * @private
    */
   handleOptionSelection_(optionEl) {
-    this.mutateElement(() => {
-      optionEl.classList.add('i-amphtml-story-quiz-option-selected');
-      this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
+    this.responseDataPromise_.then(() => {
+      if (this.hasUserSelection_) {
+        return;
+      }
 
-      this.hasReceivedResponse_ = true;
+      this.triggerAnalytics_(optionEl);
+      this.hasUserSelection_ = true;
+
+      this.mutateElement(() => {
+        this.updateQuizToPostSelectionState_(optionEl);
+      });
+
+      if (this.element.hasAttribute('endpoint')) {
+        this.updateReactionData_(optionEl.optionIndex_);
+      }
+    });
+  }
+
+  /**
+   * Get the Reaction data from the datastore
+   *
+   * @return {?Promise<?ReactionResponseType|?JsonObject|undefined>}
+   * @private
+   */
+  retrieveReactionData_() {
+    return this.executeReactionRequest_(
+      dict({
+        'method': 'GET',
+      })
+    )
+      .then(response => {
+        this.handleSuccessfulDataRetrieval_(response);
+      })
+      .catch(error => {
+        dev().error(TAG, error);
+      });
+  }
+
+  /**
+   * Update the Reaction data in the datastore
+   *
+   * @param {number} reactionValue
+   * @private
+   */
+  updateReactionData_(reactionValue) {
+    this.executeReactionRequest_(
+      dict({
+        'method': 'POST',
+      }),
+      reactionValue
+    ).catch(error => {
+      dev().error(TAG, error);
+    });
+  }
+
+  /**
+   * Executes a Reactions API call.
+   *
+   * @param {Object} requestOptions
+   * @param {number=} reactionValue
+   * @return {Promise<ReactionResponseType|undefined>}
+   * @private
+   */
+  executeReactionRequest_(requestOptions, reactionValue) {
+    // TODO(jackbsteinberg): Add a default reactions endpoint.
+    if (!assertAbsoluteHttpOrHttpsUrl(this.element.getAttribute('endpoint'))) {
+      return Promise.reject(ENDPOINT_INVALID_ERROR);
+    }
+
+    if (this.reactionId_ === null) {
+      const quizPageId = closest(dev().assertElement(this.element), el => {
+        return el.tagName.toLowerCase() === 'amp-story-page';
+      }).getAttribute('id');
+
+      this.reactionId_ = `CANONICAL_URL#page=${quizPageId}`;
+    }
+
+    const requestVars = dict({
+      'reactionType': STORY_REACTION_TYPE_QUIZ,
+      'reactionId': this.reactionId_,
+    });
+
+    let url = this.element.getAttribute('endpoint');
+
+    if (requestOptions['method'] === 'POST') {
+      requestVars['reactionValue'] = reactionValue;
+      requestOptions['body'] = requestVars;
+    } else if (requestOptions['method'] === 'GET') {
+      url = addParamsToUrl(url, requestVars);
+    }
+
+    return this.getClientId_().then(clientId => {
+      requestVars['clientId'] = clientId;
+      return this.requestService_.executeRequest(url, requestOptions);
+    });
+  }
+
+  /**
+   * Handles incoming reaction data response
+   *
+   * RESPONSE FORMAT
+   * {
+   *  totalResponseCount: <number>
+   *  hasUserResponded: <boolean>
+   *  responses: [
+   *    {
+   *      reactionValue:
+   *      totalCount:
+   *      selectedByUser:
+   *    },
+   *    ...
+   *  ]
+   * }
+   * @param {ReactionResponseType|undefined} response
+   * @private
+   */
+  handleSuccessfulDataRetrieval_(response) {
+    if (!(response && 'data' in response)) {
+      dev().error(
+        TAG,
+        `Invalid reaction response, expected { data: ReactionResponseType, ...} but received ${response}`
+      );
+      return;
+    }
+
+    this.responseData_ = response.data;
+
+    this.hasUserSelection_ = this.responseData_.hasUserResponded;
+    if (this.hasUserSelection_) {
+      this.updateQuizOnDataRetrieval_();
+    }
+  }
+
+  /**
+   * Updates the quiz to reflect the state of the remote data.
+   *
+   * @private
+   */
+  updateQuizOnDataRetrieval_() {
+    let selectedOptionKey;
+    this.responseData_.responses.forEach(response => {
+      if (response.selectedByUser) {
+        selectedOptionKey = response.reactionValue;
+      }
+    });
+
+    if (selectedOptionKey === undefined) {
+      dev().error(TAG, `The user-selected reaction could not be found`);
+    }
+
+    const options = this.quizEl_.querySelectorAll(
+      '.i-amphtml-story-quiz-option'
+    );
+
+    if (selectedOptionKey >= options.length) {
+      dev().error(
+        TAG,
+        `Quiz #${this.element.getAttribute('id')} does not have option ${
+          answerChoiceOptions[selectedOptionKey]
+        }, but user selected option ${answerChoiceOptions[selectedOptionKey]}`
+      );
+      return;
+    }
+
+    this.mutateElement(() => {
+      this.updateQuizToPostSelectionState_(options[selectedOptionKey]);
     });
   }
 }

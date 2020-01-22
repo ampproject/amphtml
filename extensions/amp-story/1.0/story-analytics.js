@@ -21,7 +21,7 @@ import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-/** @private @const {string} */
+/** @package @const {string} */
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
 
 /** @enum {string} */
@@ -37,6 +37,7 @@ export const StoryAnalyticsEvent = {
   PAGE_ATTACHMENT_ENTER: 'story-page-attachment-enter',
   PAGE_ATTACHMENT_EXIT: 'story-page-attachment-exit',
   PAGE_VISIBLE: 'story-page-visible',
+  REACTION: 'story-reaction',
   STORY_MUTED: 'story-audio-muted',
   STORY_UNMUTED: 'story-audio-unmuted',
 };
@@ -48,6 +49,7 @@ export const AdvancementMode = {
   AUTO_ADVANCE_MEDIA: 'autoAdvanceMedia',
   MANUAL_ADVANCE: 'manualAdvance',
   ADVANCE_TO_ADS: 'manualAdvanceFromAd',
+  VIEWER_SELECT_PAGE: 'viewerSelectPage',
 };
 
 /** @typedef {!Object<string, !PageEventCountDef>} */
@@ -176,10 +178,7 @@ export class StoryAnalyticsService {
       );
     }
 
-    return /** @type {!JsonObject} */ (Object.assign(
-      {eventDetails: details},
-      vars
-    ));
+    return /** @type {!JsonObject} */ ({eventDetails: details, ...vars});
   }
 
   /**

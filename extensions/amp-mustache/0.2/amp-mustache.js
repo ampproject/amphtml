@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
+import {Purifier} from '../../../src/purifier/purifier';
 import {dict} from '../../../src/utils/object';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
-import {purifyHtml, purifyTagsForTripleMustache} from '../../../src/purifier';
+import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import mustache from '../../../third_party/mustache/mustache';
 
 const TAG = 'amp-mustache';
 
 const BaseTemplate =
-  /** @type {function(new:../../../src/service/template-impl.BaseTemplate)} */ (AMP.BaseTemplate);
+  /** @type {typeof ../../../src/service/template-impl.BaseTemplate} */ (AMP.BaseTemplate);
 
 /**
  * Implements an AMP template for Mustache.js.
@@ -38,9 +39,16 @@ export class AmpMustache extends BaseTemplate {
   constructor(element, win) {
     super(element, win);
 
+    /** @private @const {!Purifier} */
+    this.purifier_ = new Purifier(
+      this.win.document,
+      dict(),
+      rewriteAttributeValue
+    );
+
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
     mustache.setUnescapedSanitizer(value =>
-      purifyTagsForTripleMustache(value, this.win.document)
+      this.purifier_.purifyTagsForTripleMustache(value)
     );
   }
 
@@ -112,7 +120,7 @@ export class AmpMustache extends BaseTemplate {
     let mustacheData = data;
     // Also render any nested templates.
     if (typeof data === 'object') {
-      mustacheData = Object.assign({}, data, this.nestedTemplates_);
+      mustacheData = {...data, ...this.nestedTemplates_};
     }
     const html = mustache.render(
       this.template_,
@@ -129,12 +137,9 @@ export class AmpMustache extends BaseTemplate {
    * @private
    */
   purifyAndSetHtml_(html) {
-    const body = purifyHtml(html, this.win.document);
-    // TODO(choumx): Remove innerHTML usage once DOMPurify bug is fixed.
-    // https://github.com/cure53/DOMPurify/pull/295
-    const root = this.win.document.createElement('div');
-    root./*OK*/ innerHTML = body./*OK*/ innerHTML;
-    return this.unwrap(root);
+    const body = this.purifier_.purifyHtml(`<div>${html}</div>`);
+    const div = body.firstElementChild;
+    return this.unwrap(div);
   }
 }
 

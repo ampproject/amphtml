@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.85 */
+/** Version: 0.1.22.91 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -51,6 +51,8 @@ const AnalyticsEvent = {
   IMPRESSION_SHOW_OFFERS_SWG_BUTTON: 16,
   IMPRESSION_SELECT_OFFER_SMARTBOX: 17,
   IMPRESSION_SELECT_OFFER_SWG_BUTTON: 18,
+  IMPRESSION_SHOW_CONTRIBUTIONS_SWG_BUTTON: 19,
+  IMPRESSION_SELECT_CONTRIBUTION_SWG_BUTTON: 20,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -70,6 +72,8 @@ const AnalyticsEvent = {
   ACTION_SAVE_SUBSCR_TO_GOOGLE_CANCEL: 1016,
   ACTION_SWG_BUTTON_SHOW_OFFERS_CLICK: 1017,
   ACTION_SWG_BUTTON_SELECT_OFFER_CLICK: 1018,
+  ACTION_SWG_BUTTON_SHOW_CONTRIBUTIONS_CLICK: 1019,
+  ACTION_SWG_BUTTON_SELECT_CONTRIBUTION_CLICK: 1020,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -239,6 +243,9 @@ class AnalyticsContext {
 
     /** @private {?string} */
     this.clientVersion_ = (data[10] == null) ? null : data[10];
+
+    /** @private {?string} */
+    this.url_ = (data[11] == null) ? null : data[11];
   }
 
   /**
@@ -382,6 +389,20 @@ class AnalyticsContext {
   }
 
   /**
+   * @return {?string}
+   */
+  getUrl() {
+    return this.url_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUrl(value) {
+    this.url_ = value;
+  }
+
+  /**
    * @return {!Array}
    * @override
    */
@@ -398,6 +419,7 @@ class AnalyticsContext {
       this.readyToPay_,  // field 8 - ready_to_pay
       this.label_,  // field 9 - label
       this.clientVersion_,  // field 10 - client_version
+      this.url_,  // field 11 - url
     ];
   }
 
@@ -724,6 +746,71 @@ class EventParams {
    */
   label() {
     return 'EventParams';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
+class FinishedLoggingResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.complete_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.error_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getComplete() {
+    return this.complete_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setComplete(value) {
+    this.complete_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getError() {
+    return this.error_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setError(value) {
+    this.error_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.complete_,  // field 1 - complete
+      this.error_,  // field 2 - error
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'FinishedLoggingResponse';
   }
 }
 
@@ -1107,6 +1194,7 @@ const PROTO_MAP = {
   'AnalyticsRequest': AnalyticsRequest,
   'EntitlementsResponse': EntitlementsResponse,
   'EventParams': EventParams,
+  'FinishedLoggingResponse': FinishedLoggingResponse,
   'LinkSaveTokenRequest': LinkSaveTokenRequest,
   'LinkingInfoResponse': LinkingInfoResponse,
   'SkuSelectedResponse': SkuSelectedResponse,
@@ -1939,10 +2027,16 @@ function isConnected(node) {
 }
 
 /**
+ * Returns true if current browser is a legacy version of Edge.
+ *
+ * Starting in January 2020, new versions of Edge will use the Chromium engine.
+ * These versions won't include the word "Edge" in their useragent.
+ * Instead, they'll include the word "Edg".
+ * So far, it seems safe to avoid detecting these new versions of Edge.
  * @param {!Window} win
  * @return {boolean}
  */
-function isEdgeBrowser(win) {
+function isLegacyEdgeBrowser(win) {
   const nav = win.navigator;
   return /Edge/i.test(nav && nav.userAgent);
 }
@@ -2379,7 +2473,7 @@ function isIeBrowser(win) {
  * @param {!Window} win
  * @return {boolean}
  */
-function isEdgeBrowser$1(win) {
+function isEdgeBrowser(win) {
   const nav = win.navigator;
   return /Edge/i.test(nav && nav.userAgent);
 }
@@ -2569,7 +2663,7 @@ class Messenger {
     // Safari: https://bugs.webkit.org/show_bug.cgi?id=186593
     // Chrome: https://bugs.chromium.org/p/chromium/issues/detail?id=851493
     // Firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=1469422
-    const acceptsChannel = isIeBrowser(this.win_) || isEdgeBrowser$1(this.win_);
+    const acceptsChannel = isIeBrowser(this.win_) || isEdgeBrowser(this.win_);
     this.sendCommand('connect', {'acceptsChannel': acceptsChannel});
   }
 
@@ -3270,7 +3364,7 @@ class ActivityWindowPort {
     const availWidth = screen.availWidth || screen.width;
     const availHeight = screen.availHeight || screen.height;
     const isTop = this.isTopWindow_();
-    const isEdge = isEdgeBrowser$1(this.win_);
+    const isEdge = isEdgeBrowser(this.win_);
     // Limit controls to 100px width and height. Notice that it's only
     // possible to calculate controls size in the top window, not in iframes.
     // Notice that the Edge behavior is somewhat unique. If we can't find the
@@ -4099,14 +4193,14 @@ function bytesToString(bytes) {
 
 /**
  * Interpret a byte array as a UTF-8 string.
- * @param {!BufferSource} bytes
+ * @param {!Uint8Array} bytes
  * @return {string}
  */
 function utf8DecodeSync(bytes) {
   if (typeof TextDecoder !== 'undefined') {
     return new TextDecoder('utf-8').decode(bytes);
   }
-  const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
+  const asciiString = bytesToString(new Uint8Array(bytes));
   return decodeURIComponent(escape(asciiString));
 }
 
@@ -4149,74 +4243,9 @@ function base64UrlDecodeToBytes(str) {
  * limitations under the License.
  */
 
-/* @const */
-const toString_ = Object.prototype.toString;
-
 /**
- * Returns the ECMA [[Class]] of a value
- * @param {*} value
- * @return {string}
- */
-function toString$1(value) {
-  return toString_.call(value);
-}
-
-/**
- * Determines if value is actually an Object.
- * @param {*} value
- * @return {boolean}
- */
-function isObject(value) {
-  return toString$1(value) === '[object Object]';
-}
-
-/**
- * Checks whether `s` is a valid value of `enumObj`.
- *
- * @param {!Object<T>} enumObj
- * @param {T} s
- * @return {boolean}
- * @template T
- */
-function isEnumValue(enumObj, s) {
-  for (const k in enumObj) {
-    if (enumObj[k] === s) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * True if the value is a function.
- * @param {*} value
- */
-function isFunction(value) {
-  return value !== null && typeof value === 'function';
-}
-
-/**
- * True if the value is either true or false.
- * @param {?*} value
- */
-function isBoolean(value) {
-  return value === true || value === false;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @fileoverview This module declares JSON types as defined in the
+ * {@link http://json.org/}.
  */
 
 /**
@@ -4248,6 +4277,18 @@ function tryParseJson(json, onFailed) {
     }
     return undefined;
   }
+}
+
+/**
+ * Converts the passed string into a JSON object (if possible) and returns the
+ * value of the propertyName on that object.
+ * @param {string} jsonString
+ * @param {string} propertyName
+ * @return {*}
+ */
+function getPropertyFromJsonString(jsonString, propertyName) {
+  const json = tryParseJson(jsonString);
+  return (json && json[propertyName]) || null;
 }
 
 /**
@@ -4577,6 +4618,26 @@ class Entitlement {
       ? /** @type {!Array<Object>} */ (json)
       : [json];
     return jsonList.map(json => Entitlement.parseFromJson(json));
+  }
+
+  /**
+   * Returns the SKU associated with this entitlement.
+   * @return {?string}
+   */
+  getSku() {
+    if (this.source !== 'google') {
+      return null;
+    }
+    const sku = (
+        /** @type {?string} */ (getPropertyFromJsonString(
+            this.subscriptionToken,
+            'productId'
+        ) || null)
+    );
+    if (!sku) {
+      log_4('Unable to retrieve SKU from SwG subscription token');
+    }
+    return sku;
   }
 }
 
@@ -5398,7 +5459,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.85',
+    '_client': 'SwG 0.1.22.91',
   });
 }
 
@@ -5442,6 +5503,7 @@ function cacheParam(cacheKey) {
  *
  * In other words, Flow = Payments + Account Creation.
  */
+
 /**
  * String values input by the publisher are mapped to the number values.
  * @type {!Object<string, number>}
@@ -5472,12 +5534,12 @@ function getEventParams(sku) {
 class PayStartFlow {
   /**
    * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.SubscriptionRequest|string} skuOrSubscriptionRequest
+   * @param {!../api/subscriptions.SubscriptionRequest} subscriptionRequest
    * @param {!../api/subscriptions.ProductType} productType
    */
   constructor(
     deps,
-    skuOrSubscriptionRequest,
+    subscriptionRequest,
     productType = ProductType.SUBSCRIPTION
   ) {
     /** @private @const {!./deps.DepsDef} */
@@ -5493,10 +5555,7 @@ class PayStartFlow {
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!../api/subscriptions.SubscriptionRequest} */
-    this.subscriptionRequest_ =
-      typeof skuOrSubscriptionRequest == 'string'
-        ? {'skuId': skuOrSubscriptionRequest}
-        : skuOrSubscriptionRequest;
+    this.subscriptionRequest_ = subscriptionRequest;
 
     /**@private @const {!ProductType} */
     this.productType_ = productType;
@@ -5506,23 +5565,6 @@ class PayStartFlow {
 
     /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
     this.eventManager_ = deps.eventManager();
-
-    // Map the proration mode to the enum value (if proration exists).
-    this.prorationMode = this.subscriptionRequest_.replaceSkuProrationMode;
-    this.prorationEnum = 0;
-    if (this.prorationMode) {
-      this.prorationEnum = ReplaceSkuProrationModeMapping[this.prorationMode];
-    } else if (this.subscriptionRequest_.oldSku) {
-      this.prorationEnum =
-        ReplaceSkuProrationModeMapping['IMMEDIATE_WITH_TIME_PRORATION'];
-    }
-
-    // Assign one-time recurrence enum if applicable
-    this.oneTimeContribution = false;
-    this.recurrenceEnum = 0;
-    if (this.subscriptionRequest_.oneTime) {
-      this.recurrenceEnum = RecurrenceMapping['ONE_TIME'];
-    }
   }
 
   /**
@@ -5530,32 +5572,45 @@ class PayStartFlow {
    * @return {!Promise}
    */
   start() {
-    const req = this.subscriptionRequest_;
     // Add the 'publicationId' key to the subscriptionRequest_ object.
-    const swgPaymentRequest = Object.assign({}, req, {
+    const swgPaymentRequest = Object.assign({}, this.subscriptionRequest_, {
       'publicationId': this.pageConfig_.getPublicationId(),
     });
 
-    if (this.prorationEnum) {
-      swgPaymentRequest.replaceSkuProrationMode = this.prorationEnum;
+    // Map the proration mode to the enum value (if proration exists).
+    const prorationMode = swgPaymentRequest['replaceSkuProrationMode'];
+    if (prorationMode) {
+      swgPaymentRequest['replaceSkuProrationMode'] =
+        ReplaceSkuProrationModeMapping[prorationMode];
+    } else if (swgPaymentRequest['oldSku']) {
+      swgPaymentRequest['replaceSkuProrationMode'] =
+        ReplaceSkuProrationModeMapping['IMMEDIATE_WITH_TIME_PRORATION'];
     }
-
-    if (this.recurrenceEnum) {
-      swgPaymentRequest.oneTime = this.recurrenceEnum;
+    // Assign one-time recurrence enum if applicable
+    if (swgPaymentRequest['oneTime']) {
+      swgPaymentRequest['paymentRecurrence'] = RecurrenceMapping['ONE_TIME'];
+      delete swgPaymentRequest['oneTime'];
     }
 
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SUBSCRIBE, req);
-    if (req.oldSku) {
-      this.analyticsService_.setSku(req.oldSku);
+    const flow =
+      this.productType_ == ProductType.UI_CONTRIBUTION
+        ? SubscriptionFlows.CONTRIBUTE
+        : SubscriptionFlows.SUBSCRIBE;
+
+    this.deps_.callbacks().triggerFlowStarted(flow, this.subscriptionRequest_);
+    if (swgPaymentRequest['oldSku']) {
+      this.analyticsService_.setSku(swgPaymentRequest['oldSku']);
     }
     this.eventManager_.logSwgEvent(
       AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
       true,
-      getEventParams(req.skuId)
+      getEventParams(swgPaymentRequest['skuId'])
     );
+    PayCompleteFlow.waitingForPayClient_ = true;
     this.payClient_.start(
-      {
+      /** @type {!PaymentDataRequest} */
+      ({
         'apiVersion': 1,
         'allowedPaymentMethods': ['CARD'],
         'environment': 'PRODUCTION',
@@ -5565,7 +5620,7 @@ class PayStartFlow {
           'startTimeMs': Date.now(),
           'productType': this.productType_,
         },
-      },
+      }),
       {
         forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
@@ -5608,7 +5663,12 @@ class PayCompleteFlow {
         },
         reason => {
           if (isCancelError(reason)) {
-            deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
+            const productType = /** @type {!Object} */ (reason)['productType'];
+            const flow =
+              productType == ProductType.UI_CONTRIBUTION
+                ? SubscriptionFlows.CONTRIBUTE
+                : SubscriptionFlows.SUBSCRIBE;
+            deps.callbacks().triggerFlowCanceled(flow);
             deps
               .eventManager()
               .logSwgEvent(AnalyticsEvent.ACTION_USER_CANCELED_PAYFLOW, true);
@@ -5617,8 +5677,8 @@ class PayCompleteFlow {
               .eventManager()
               .logSwgEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED, false);
             deps.jserror().error('Pay failed', reason);
+            throw reason;
           }
-          throw reason;
         }
       );
     });
@@ -5750,6 +5810,9 @@ class PayCompleteFlow {
   }
 }
 
+/** @private {boolean} */
+PayCompleteFlow.waitingForPayClient_ = false;
+
 /**
  * @param {!./deps.DepsDef} deps
  * @param {!Promise<!Object>} payPromise
@@ -5757,13 +5820,13 @@ class PayCompleteFlow {
  * @return {!Promise<!SubscribeResponse>}
  */
 function validatePayResponse(deps, payPromise, completeHandler) {
+  const wasRedirect = !PayCompleteFlow.waitingForPayClient_;
+  PayCompleteFlow.waitingForPayClient_ = false;
   return payPromise.then(data => {
     // 1) We log against a random TX ID which is how we track a specific user
     //    anonymously.
     // 2) If there was a redirect to gPay, we may have lost our stored TX ID.
     // 3) Pay service is supposed to give us the TX ID it logged against.
-
-    const hasLogged = deps.analytics().getHasLogged();
     let eventType = AnalyticsEvent.UNKNOWN;
     let eventParams = undefined;
     if (typeof data !== 'object' || !data['googleTransactionId']) {
@@ -5773,16 +5836,16 @@ function validatePayResponse(deps, payPromise, completeHandler) {
       // lost all connection to the events that preceded the payment event and
       // we at least want to know why that data was lost.
       eventParams = new EventParams();
-      eventParams.setHadLogged(hasLogged);
+      eventParams.setHadLogged(!wasRedirect);
       eventType = AnalyticsEvent.EVENT_GPAY_NO_TX_ID;
     } else {
       const oldTxId = deps.analytics().getTransactionId();
       const newTxId = data['googleTransactionId'];
 
-      if (!hasLogged) {
+      if (wasRedirect) {
         // This is the expected case for full redirects.  It may be happening
-        // unexpectedly at other times too though and we want to be aware of it
-        // if it does.
+        // unexpectedly at other times too though and we want to be aware of
+        // it if it does.
         deps.analytics().setTransactionId(newTxId);
         eventType = AnalyticsEvent.EVENT_GPAY_CANNOT_CONFIRM_TX_ID;
       } else {
@@ -5812,8 +5875,9 @@ function validatePayResponse(deps, payPromise, completeHandler) {
 function parseSubscriptionResponse(deps, data, completeHandler) {
   let swgData = null;
   let raw = null;
-  let productType = null;
+  let productType = ProductType.SUBSCRIPTION;
   let oldSku = null;
+
   if (data) {
     if (typeof data == 'string') {
       raw = /** @type {string} */ (data);
@@ -5821,21 +5885,18 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
       // Assume it's a json object in the format:
       // `{integratorClientCallbackData: "..."}` or `{swgCallbackData: "..."}`.
       const json = /** @type {!Object} */ (data);
-      if ('productType' in data) {
-        productType = data['productType'];
-      }
       if ('swgCallbackData' in json) {
         swgData = /** @type {!Object} */ (json['swgCallbackData']);
       } else if ('integratorClientCallbackData' in json) {
         raw = json['integratorClientCallbackData'];
       }
-      if ('swgRequest' in data) {
-        oldSku = data['swgRequest']['oldSku'] || null;
+      if ('paymentRequest' in data) {
+        oldSku = (data['paymentRequest']['swg'] || {})['oldSku'];
+        productType =
+          (data['paymentRequest']['i'] || {})['productType'] ||
+          ProductType.SUBSCRIPTION;
       }
     }
-  }
-  if (!productType) {
-    productType = ProductType.SUBSCRIPTION;
   }
   if (raw && !swgData) {
     raw = atob(raw);
@@ -5901,8 +5962,12 @@ function parseEntitlements(deps, swgData) {
  * @return {?string}
  */
 function parseSkuFromPurchaseDataSafe(purchaseData) {
-  const json = tryParseJson(purchaseData.raw);
-  return (json && json['productId']) || null;
+  return (
+    /** @type {?string} */ (getPropertyFromJsonString(
+      purchaseData.raw,
+      'productId'
+    ) || null)
+  );
 }
 
 /**
@@ -5967,27 +6032,16 @@ class OffersFlow {
       isClosable = false; // Default is to hide Close button.
     }
 
-    const feArgsObj = {
-      'productId': deps.pageConfig().getProductId(),
-      'publicationId': deps.pageConfig().getPublicationId(),
+    const feArgsObj = deps.activities().addDefaultArguments({
       'showNative': deps.callbacks().hasSubscribeRequestCallback(),
       'productType': ProductType.SUBSCRIPTION,
       'list': (options && options.list) || 'default',
       'skus': (options && options.skus) || null,
       'isClosable': isClosable,
-      'analyticsContext': deps
-        .analytics()
-        .getContext()
-        .toArray(),
-    };
-
-    this.prorationMode = feArgsObj['replaceSkuProrationMode'] || undefined;
+    });
 
     if (options && options.oldSku) {
       feArgsObj['oldSku'] = options.oldSku;
-    }
-
-    if (feArgsObj['oldSku']) {
       log_2(feArgsObj['skus'], 'Need a sku list if old sku is provided!');
 
       // Remove old sku from offers if in list.
@@ -6010,24 +6064,23 @@ class OffersFlow {
       // so we need to check for oldSku to decide if it needs to be sent.
       // Otherwise we might accidentally block a regular subscription request.
       if (oldSku) {
-        new PayStartFlow(this.deps_, {
-          skuId: sku,
-          oldSku,
-          replaceSkuProrationMode: this.prorationMode,
-        }).start();
+        const skuSelectedResponse = new SkuSelectedResponse();
+        skuSelectedResponse.setSku(sku);
+        skuSelectedResponse.setOldSku(oldSku);
+        this.startPayFlow_(skuSelectedResponse);
         return;
       }
     }
 
-    /** @private @const {!string} */
-    this.skus_ = (feArgsObj['skus'] || []).join(',') || ALL_SKUS;
+    /** @private  @const {!Array<!string>} */
+    this.skus_ = feArgsObj['skus'] || [ALL_SKUS];
 
     /** @private @const {!ActivityIframeView} */
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
       this.activityPorts_,
       feUrl('/offersiframe'),
-      feArgs(feArgsObj),
+      feArgsObj,
       /* shouldFadeBody */ true
     );
   }
@@ -6038,9 +6091,13 @@ class OffersFlow {
    */
   startPayFlow_(response) {
     const sku = response.getSku();
-    const oldSku = response.getOldSku();
     if (sku) {
+      const /** @type {../api/subscriptions.SubscriptionRequest} */ subscriptionRequest = {
+          'skuId': sku,
+        };
+      const oldSku = response.getOldSku();
       if (oldSku) {
+        subscriptionRequest['oldSku'] = oldSku;
         this.deps_.analytics().setSku(oldSku);
       }
       this.eventManager_.logSwgEvent(
@@ -6048,15 +6105,7 @@ class OffersFlow {
         true,
         getEventParams$1(sku)
       );
-      let skuOrSubscriptionRequest;
-      if (oldSku) {
-        skuOrSubscriptionRequest = {};
-        skuOrSubscriptionRequest['skuId'] = sku;
-        skuOrSubscriptionRequest['oldSku'] = oldSku;
-      } else {
-        skuOrSubscriptionRequest = sku;
-      }
-      new PayStartFlow(this.deps_, skuOrSubscriptionRequest).start();
+      new PayStartFlow(this.deps_, subscriptionRequest).start();
     }
   }
 
@@ -6094,7 +6143,11 @@ class OffersFlow {
     if (this.activityIframeView_) {
       // So no error if skipped to payment screen.
       // Start/cancel events.
-      this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SHOW_OFFERS);
+      // The second parameter is required by Propensity in AMP.
+      this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SHOW_OFFERS, {
+        skus: this.skus_,
+        source: 'SwG',
+      });
       this.activityIframeView_.onCancel(() => {
         this.deps_
           .callbacks()
@@ -6111,12 +6164,6 @@ class OffersFlow {
       this.activityIframeView_.on(
         ViewSubscriptionsResponse,
         this.startNativeFlow_.bind(this)
-      );
-
-      this.eventManager_.logSwgEvent(
-        AnalyticsEvent.IMPRESSION_OFFERS,
-        null,
-        getEventParams$1(this.skus_)
       );
 
       return this.dialogManager_.openView(this.activityIframeView_);
@@ -6371,15 +6418,17 @@ class ActivityIframePort$1 {
   /**
    * @param {!HTMLIFrameElement} iframe
    * @param {string} url
+   * @param {!../runtime/deps.DepsDef} deps
    * @param {?Object=} args
    */
-  constructor(iframe, url, args) {
+  constructor(iframe, url, deps, args) {
     /** @private @const {!web-activities/activity-ports.ActivityIframePort} */
     this.iframePort_ = new activityPorts_2(iframe, url, args);
     /** @private @const {!Object<string, function(!Object)>} */
     this.callbackMap_ = {};
-    /** @private {?function(!../proto/api_messages.Message)} */
-    this.callbackOriginal_ = null;
+
+    /** @private @const {../runtime/deps.DepsDef} */
+    this.deps_ = deps;
   }
 
   /**
@@ -6399,9 +6448,6 @@ class ActivityIframePort$1 {
     return this.iframePort_.connect().then(() => {
       // Attach a callback to receive messages after connection complete
       this.iframePort_.onMessage(data => {
-        if (this.callbackOriginal_) {
-          this.callbackOriginal_(data);
-        }
         const response = data && data['RESPONSE'];
         if (!response) {
           return;
@@ -6411,6 +6457,17 @@ class ActivityIframePort$1 {
           cb(deserialize(response));
         }
       });
+
+      if (this.deps_ && this.deps_.eventManager()) {
+        this.on(AnalyticsRequest, request => {
+          this.deps_.eventManager().logEvent({
+            eventType: request.getEvent(),
+            eventOriginator: EventOriginator.SWG_SERVER,
+            isFromUserAction: request.getMeta().getIsFromUserAction(),
+            additionalParameters: request.getParams(),
+          });
+        });
+      }
     });
   }
 
@@ -6466,7 +6523,13 @@ class ActivityIframePort$1 {
    * @template T
    */
   on(message, callback) {
-    const label = getLabel(message);
+    let label = null;
+    try {
+      label = getLabel(message);
+    } catch (ex) {
+      // Thrown if message is not a proto object and has no label
+      label = null;
+    }
     if (!label) {
       throw new Error('Invalid data type');
     } else if (this.callbackMap_[label]) {
@@ -6510,7 +6573,8 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.85',
+        '_client': 'SwG 0.1.22.91',
+        'supportsEventManager': true,
       },
       args || {}
     );
@@ -6524,7 +6588,7 @@ class ActivityPorts$1 {
    * @return {!Promise<!ActivityIframePort>}
    */
   openActivityIframePort_(iframe, url, args) {
-    const activityPort = new ActivityIframePort$1(iframe, url, args);
+    const activityPort = new ActivityIframePort$1(iframe, url, this.deps_, args);
     return activityPort.connect().then(() => activityPort);
   }
 
@@ -6701,6 +6765,67 @@ class ClientEventManagerApi {
 }
 
 /**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Determines if value is actually an Object.
+ * @param {*} value
+ * @return {boolean}
+ */
+function isObject(value) {
+  const str = Object.prototype.toString.call(value);
+  return str === '[object Object]';
+}
+
+/**
+ * Checks whether `s` is a valid value of `enumObj`.
+ *
+ * @param {!Object<T>} enumObj
+ * @param {T} s
+ * @return {boolean}
+ * @template T
+ */
+function isEnumValue(enumObj, s) {
+  for (const k in enumObj) {
+    if (enumObj[k] === s) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * True if the value is a function.
+ * @param {*} value
+ * @return {boolean}
+ */
+function isFunction(value) {
+  return typeof value === 'function';
+}
+
+/**
+ * True if the value is either true or false.
+ * @param {?*} value
+ * @return {boolean}
+ */
+function isBoolean(value) {
+  return typeof value === 'boolean';
+}
+
+/**
  * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -6855,6 +6980,11 @@ class ClientEventManager {
       isFromUserAction,
       additionalParameters: eventParams,
     });
+  }
+
+  /** @return {!Promise<null>} */
+  getReadyPromise() {
+    return this.isReadyPromise_;
   }
 }
 
@@ -7100,8 +7230,33 @@ function getOnExperiments(win) {
 
 /** @const {!Object<string, string>} */
 const iframeStyles = {
-  display: 'none',
+  opacity: '0',
+  position: 'absolute',
+  top: '-10px',
+  left: '-10px',
+  height: '1px',
+  width: '1px',
 };
+
+// The initial iframe load takes ~500 ms.  We will wait at least that long
+// before a page redirect.  Subsequent logs are much faster.  We will wait at
+// most 100 ms.
+const MAX_FIRST_WAIT = 500;
+const MAX_WAIT = 200;
+// If we logged and rapidly redirected, we will add a short delay in case
+// a message hasn't been transmitted yet.
+const TIMEOUT_ERROR = 'AnalyticsService timed out waiting for a response';
+
+/**
+ *
+ * @param {!string} error
+ */
+function createErrorResponse(error) {
+  const response = new FinishedLoggingResponse();
+  response.setComplete(false);
+  response.setError(error);
+  return response;
+}
 
 class AnalyticsService {
   /**
@@ -7123,28 +7278,17 @@ class AnalyticsService {
       'iframe',
       {}
     ));
-
     setImportantStyles(this.iframe_, iframeStyles);
-
-    /** @private @const {string} */
-    this.src_ = feUrl('/serviceiframe');
-
-    /** @private @const {string} */
-    this.publicationId_ = deps.pageConfig().getPublicationId();
-
-    this.args_ = feArgs({
-      publicationId: this.publicationId_,
-    });
+    this.doc_.getBody().appendChild(this.getElement());
 
     /** @private @type {!boolean} */
-    this.everLogged_ = false;
+    this.everFinishedLog_ = false;
 
     /**
      * @private @const {!AnalyticsContext}
      */
     this.context_ = new AnalyticsContext();
-
-    this.context_.setTransactionId(getUuid());
+    this.setStaticContext_();
 
     /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
     this.serviceReady_ = null;
@@ -7157,6 +7301,26 @@ class AnalyticsService {
     this.eventManager_.registerEventListener(
       this.handleClientEvent_.bind(this)
     );
+
+    // This code creates a 'promise to log' that we can use to ensure all
+    // logging is finished prior to redirecting the page.
+    /** @private {!number} */
+    this.unfinishedLogs_ = 0;
+
+    /** @private {?function(boolean)} */
+    this.loggingResolver_ = null;
+
+    /** @private {?Promise} */
+    this.promiseToLog_ = null;
+
+    // If logging doesn't work don't force the user to wait
+    /** @private {!boolean} */
+    this.loggingBroken_ = false;
+
+    // If logging exceeds the timeouts (see const comments above) don't make
+    // the user wait too long.
+    /** @private {?number} */
+    this.timeout_ = null;
   }
 
   /**
@@ -7185,6 +7349,13 @@ class AnalyticsService {
    */
   setSku(sku) {
     this.context_.setSku(sku);
+  }
+
+  /**
+   * @param {string} url
+   */
+  setUrl(url) {
+    this.context_.setUrl(url);
   }
 
   /**
@@ -7228,23 +7399,33 @@ class AnalyticsService {
   /**
    * @private
    */
-  setContext_() {
+  setStaticContext_() {
+    const context = this.context_;
+    // These values should all be available during page load.
+    context.setTransactionId(getUuid());
+    context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
+    context.setClientVersion('SwG 0.1.22.91');
+
     const utmParams = parseQueryString$1(this.getQueryString_());
-    this.context_.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
     const campaign = utmParams['utm_campaign'];
     const medium = utmParams['utm_medium'];
     const source = utmParams['utm_source'];
     if (campaign) {
-      this.context_.setUtmCampaign(campaign);
+      context.setUtmCampaign(campaign);
     }
     if (medium) {
-      this.context_.setUtmMedium(medium);
+      context.setUtmMedium(medium);
     }
     if (source) {
-      this.context_.setUtmSource(source);
+      context.setUtmSource(source);
     }
-    this.context_.setClientVersion('SwG 0.1.22.85');
-    this.addLabels(getOnExperiments(this.doc_.getWin()));
+
+    const urlNode = this.doc_
+      .getRootNode()
+      .querySelector("link[rel='canonical']");
+    if (urlNode && urlNode.href) {
+      context.setUrl(urlNode.href);
+    }
   }
 
   /**
@@ -7252,14 +7433,33 @@ class AnalyticsService {
    */
   start() {
     if (!this.serviceReady_) {
-      // TODO(sohanirao): Potentially do this even earlier
-      this.doc_.getBody().appendChild(this.getElement());
+      // Please note that currently openIframe reads the current analytics
+      // context and that it may not contain experiments activated late during
+      // the publishers code lifecycle.
+      this.addLabels(getOnExperiments(this.doc_.getWin()));
       this.serviceReady_ = this.activityPorts_
-        .openIframe(this.iframe_, this.src_, this.args_)
-        .then(port => {
-          this.setContext_();
-          return port.whenReady().then(() => port);
-        });
+        .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
+        .then(
+          port => {
+            // Register a listener for the logging to code indicate it is
+            // finished logging.
+            port.on(FinishedLoggingResponse, this.afterLogging_.bind(this));
+            return port.whenReady().then(() => {
+              // The publisher should be done setting experiments but runtime
+              // will forward them here if they aren't.
+              this.addLabels(getOnExperiments(this.doc_.getWin()));
+              return port;
+            });
+          },
+          message => {
+            // If the port doesn't open register that logging is broken so
+            // nothing is just waiting.
+            this.loggingBroken_ = true;
+            this.afterLogging_(
+              createErrorResponse('Could not connect [' + message + ']')
+            );
+          }
+        );
     }
     return this.serviceReady_;
   }
@@ -7282,14 +7482,6 @@ class AnalyticsService {
    */
   getContext() {
     return this.context_;
-  }
-
-  /**
-   * Returns true if any logs have already be sent to the analytics server.
-   * @return {boolean}
-   */
-  getHasLogged() {
-    return this.everLogged_;
   }
 
   /**
@@ -7353,11 +7545,76 @@ class AnalyticsService {
     ) {
       return;
     }
-    this.lastAction_ = this.start().then(port => {
-      const request = this.createLogRequest_(event);
-      this.everLogged_ = true;
-      port.execute(request);
-    });
+    // Register we sent a log, the port will call this.afterLogging_ when done.
+    this.unfinishedLogs_++;
+    this.lastAction_ = this.start().then(port =>
+      port.execute(this.createLogRequest_(event))
+    );
+  }
+
+  /**
+   * This function is called by the iframe after it sends the log to the server.
+   * @param {FinishedLoggingResponse=} response
+   */
+  afterLogging_(response) {
+    const success = (response && response.getComplete()) || false;
+    const error = (response && response.getError()) || 'Unknown logging Error';
+    const isTimeout = error === TIMEOUT_ERROR;
+
+    if (!success) {
+      log_5('Error when logging: ' + error);
+    }
+
+    this.unfinishedLogs_--;
+    if (!isTimeout) {
+      this.everFinishedLog_ = true;
+    }
+
+    // Nothing is waiting
+    if (this.loggingResolver_ === null) {
+      return;
+    }
+
+    if (this.unfinishedLogs_ === 0 || this.loggingBroken_ || isTimeout) {
+      if (this.timeout_ !== null) {
+        clearTimeout(this.timeout_);
+        this.timeout_ = null;
+      }
+      this.loggingResolver_(success);
+      this.promiseToLog_ = null;
+      this.loggingResolver_ = null;
+    }
+  }
+
+  /**
+   * Please note that logs sent after getLoggingPromise is called are not
+   * guaranteed to be finished when the promise is resolved.  You should call
+   * this function just prior to redirecting the page after SwG is finished
+   * logging.
+   * @return {!Promise}
+   */
+  getLoggingPromise() {
+    if (this.unfinishedLogs_ === 0 || this.loggingBroken_) {
+      return Promise.resolve(true);
+    }
+    if (this.promiseToLog_ === null) {
+      this.promiseToLog_ = new Promise(resolve => {
+        this.loggingResolver_ = resolve;
+      });
+
+      // The promise above should not wait forever if things go wrong.  Let
+      // the user proceed!
+      const whenDone = this.afterLogging_.bind(this);
+      this.timeout_ = setTimeout(
+        () => {
+          this.timeout_ = null;
+          whenDone(createErrorResponse(TIMEOUT_ERROR));
+        },
+        this.everFinishedLog_ ? MAX_WAIT : MAX_FIRST_WAIT
+      );
+    }
+
+    return this.promiseToLog_;
   }
 }
 
@@ -7501,29 +7758,69 @@ class SmartSubscriptionButtonApi {
  * limitations under the License.
  */
 
+/** English is the default language. */
+const DEFAULT_LANGUAGE_CODE = 'en';
+
 /**
+ * Gets a message for a given language code, from a map of messages.
  * @param {!Object<string, string>} map
- * @param {?string|?Element} langOrElement
+ * @param {?string|?Element} languageCodeOrElement
  * @return {?string}
  */
-function msg(map, langOrElement) {
-  const lang = !langOrElement
-    ? ''
-    : typeof langOrElement == 'string'
-    ? langOrElement
-    : langOrElement.lang ||
-      (langOrElement.ownerDocument &&
-        langOrElement.ownerDocument.documentElement.lang);
-  let search = ((lang && lang.toLowerCase()) || 'en').replace(/_/g, '-');
-  while (search) {
-    if (search in map) {
-      return map[search];
-    }
-    const dash = search.lastIndexOf('-');
-    search = dash != -1 ? search.substring(0, dash) : '';
+function msg(map, languageCodeOrElement) {
+  const defaultMsg = map[DEFAULT_LANGUAGE_CODE];
+
+  // Verify params.
+  if (typeof map !== 'object' || !languageCodeOrElement) {
+    return defaultMsg;
   }
-  // "en" is always default.
-  return map['en'];
+
+  // Get language code.
+  let languageCode =
+    typeof languageCodeOrElement === 'string'
+      ? languageCodeOrElement
+      : getLanguageCodeFromElement(languageCodeOrElement);
+
+  // Normalize language code.
+  languageCode = languageCode.toLowerCase();
+  languageCode = languageCode.replace(/_/g, '-');
+
+  // Search for a message matching the language code.
+  // If a message can't be found, try again with a less specific language code.
+  const languageCodeSegments = languageCode.split('-');
+  while (languageCodeSegments.length) {
+    const key = languageCodeSegments.join('-');
+    if (key in map) {
+      return map[key];
+    }
+
+    // Simplify language code.
+    // Ex: "en-US-SF" => "en-US"
+    languageCodeSegments.pop();
+  }
+
+  // There was an attempt.
+  return defaultMsg;
+}
+
+/**
+ * Gets a language code (ex: "en-US") from a given Element.
+ * @param {!Element} element
+ * @return {string}
+ */
+function getLanguageCodeFromElement(element) {
+  if (element.lang) {
+    // Get language from element itself.
+    return element.lang;
+  }
+
+  if (element.ownerDocument && element.ownerDocument.documentElement.lang) {
+    // Get language from element's document.
+    return element.ownerDocument.documentElement.lang;
+  }
+
+  // There was an attempt.
+  return DEFAULT_LANGUAGE_CODE;
 }
 
 /**
@@ -7777,6 +8074,8 @@ class Callbacks {
     this.callbacks_ = {};
     /** @private @const {!Object<CallbackId, *>} */
     this.resultBuffer_ = {};
+    /** @private {?Promise} */
+    this.paymentResponsePromise_ = null;
   }
 
   /**
@@ -7912,10 +8211,21 @@ class Callbacks {
    * @return {boolean} Whether the callback has been found.
    */
   triggerPaymentResponse(responsePromise) {
-    return this.trigger_(
-      CallbackId.PAYMENT_RESPONSE,
-      responsePromise.then(res => res.clone())
+    this.paymentResponsePromise_ = responsePromise.then(
+      res => {
+        this.trigger_(
+          CallbackId.PAYMENT_RESPONSE,
+          Promise.resolve(res.clone())
+        );
+      },
+      reason => {
+        if (isCancelError(reason)) {
+          return;
+        }
+        throw reason;
+      }
     );
+    return !!this.callbacks_[CallbackId.PAYMENT_RESPONSE];
   }
 
   /**
@@ -8098,19 +8408,17 @@ class ContributionsFlow {
     const sku = response.getSku();
     const isOneTime = response.getOneTime();
     if (sku) {
+      const /** @type {../api/subscriptions.SubscriptionRequest} */ contributionRequest = {
+          'skuId': sku,
+        };
       if (isOneTime) {
-        const /** @type {../api/subscriptions.SubscriptionRequest} */ contributionRequest = {
-            skuId: sku,
-            oneTime: isOneTime,
-          };
-        new PayStartFlow(
-          this.deps_,
-          contributionRequest,
-          ProductType.UI_CONTRIBUTION
-        ).start();
-      } else {
-        new PayStartFlow(this.deps_, sku, ProductType.UI_CONTRIBUTION).start();
+        contributionRequest['oneTime'] = isOneTime;
       }
+      new PayStartFlow(
+        this.deps_,
+        contributionRequest,
+        ProductType.UI_CONTRIBUTION
+      ).start();
     }
   }
 
@@ -8709,27 +9017,28 @@ function onDocumentReady(doc, callback) {
 }
 
 /**
- * Calls the callback when document's state satisfies the stateFn.
+ * Calls the callback once when document's state satisfies the condition.
  * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document):boolean} condition
  * @param {function(!Document)} callback
  */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
+function onDocumentState(doc, condition, callback) {
+  if (condition(doc)) {
+    // Execute callback right now.
     callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
+    return;
   }
+
+  // Execute callback (once!) after condition is satisfied.
+  let callbackHasExecuted = false;
+  const readyListener = () => {
+    if (condition(doc) && !callbackHasExecuted) {
+      callback(doc);
+      callbackHasExecuted = true;
+      doc.removeEventListener('readystatechange', readyListener);
+    }
+  };
+  doc.addEventListener('readystatechange', readyListener);
 }
 
 /**
@@ -10111,18 +10420,6 @@ function irtpStringToBoolean(value) {
  * @enum {string}
  */
 const ExperimentFlags = {
-  /**
-   * Enables GPay API in SwG.
-   * Cleanup issue: #406.
-   */
-  GPAY_API: 'gpay-api',
-
-  /**
-   * Enables GPay native support.
-   * Cleanup issue: #441.
-   */
-  GPAY_NATIVE: 'gpay-native',
-
   /**
    * Enables the feature that allows you to replace one subscription
    * for another in the subscribe() API.
@@ -12736,7 +13033,7 @@ function validatePaymentOptions(paymentOptions) {
            .includes(paymentOptions.environment)) {
     throw new Error(
         'Parameter environment in PaymentOptions can optionally be set to ' +
-        'PRODUCTION, otherwise it defaults to TEST.');
+        'PRODUCTION, otherwise it defaults to TEST. ' + paymentOptions.environment);
   }
 }
 
@@ -13469,9 +13766,7 @@ class PaymentsWebActivityDelegate {
    */
   isVerticalCenterExperimentEnabled_(paymentDataRequest) {
     return (
-      null &&
-      paymentDataRequest['i'] &&
-      paymentDataRequest['i'].renderContainerCenter
+      null  
     );
   }
 
@@ -14488,9 +14783,6 @@ function isNativeDisabledInRequest(request) {
  * limitations under the License.
  */
 
-const PAY_REQUEST_ID = 'swg-pay';
-const GPAY_ACTIVITY_REQUEST$1 = 'GPAY';
-
 const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
 /**
@@ -14503,18 +14795,8 @@ const PAY_ORIGIN = {
 };
 
 /** @return {string} */
-function payOrigin() {
-  return PAY_ORIGIN['PRODUCTION'];
-}
-
-/** @return {string} */
 function payUrl() {
   return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
-}
-
-/** @return {string} */
-function payDecryptUrl() {
-  return PAY_ORIGIN['PRODUCTION'] + '/gp/p/apis/buyflow/process';
 }
 
 /**
@@ -14530,22 +14812,58 @@ class PayClient {
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
+    /** @private {?function(!Promise<!PaymentData>)} */
+    this.responseCallback_ = null;
 
-    /** @const @private {!PayClientBindingDef} */
-    this.binding_ = isExperimentOn(this.win_, ExperimentFlags.GPAY_API)
-      ? new PayClientBindingPayjs(
-          this.win_,
-          this.activityPorts_,
-          // Generates a new Google Transaction ID.
-          deps.analytics().getTransactionId()
-        )
-      : new PayClientBindingSwg(
-          this.win_,
-          this.activityPorts_,
-          this.dialogManager_
-        );
+    /** @private {?PaymentDataRequest} */
+    this.request_ = null;
+
+    /** @private {?Promise<!PaymentData>} */
+    this.response_ = null;
+
+    /** @private @const {!./analytics-service.AnalyticsService} */
+    this.analytics_ = deps.analytics();
+
+    /** @private @const {!RedirectVerifierHelper} */
+    this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
+
+    /** @private @const {!PaymentsAsyncClient} */
+    this.client_ = this.createClient_(
+      /** @type {!PaymentOptions} */
+      ({
+        environment: 'PRODUCTION',
+        'i': {
+          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+        },
+      }),
+      this.analytics_.getTransactionId(),
+      this.handleResponse_.bind(this)
+    );
+
+    // Prepare new verifier pair.
+    this.redirectVerifierHelper_.prepare();
+
+    /** @private @const {!./client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+  }
+
+  /**
+   * @param {!PaymentOptions} options
+   * @param {string} googleTransactionId
+   * @param {function(!Promise<!PaymentData>)} handler
+   * @return {!PaymentsAsyncClient}
+   * @private
+   */
+  createClient_(options, googleTransactionId, handler) {
+    // Assign Google Transaction ID to PaymentsAsyncClient.googleTransactionId_
+    // so it can be passed to gpay_async.js and stored in payment clearcut log.
+    PaymentsAsyncClient.googleTransactionId_ = googleTransactionId;
+    return new PaymentsAsyncClient(
+      options,
+      handler,
+      /* useIframe */ false,
+      this.activityPorts_.getOriginalWebActivityPorts()
+    );
   }
 
   /**
@@ -14566,180 +14884,17 @@ class PayClient {
    * @return {string}
    */
   getType() {
-    // TODO(dvoytenko, #406): remove once GPay API is launched.
-    return this.binding_.getType();
-  }
-
-  /**
-   * @param {!Object} paymentRequest
-   * @param {!PayOptionsDef=} options
-   */
-  start(paymentRequest, options = {}) {
-    this.binding_.start(paymentRequest, options);
-  }
-
-  /**
-   * @param {function(!Promise<!Object>)} callback
-   */
-  onResponse(callback) {
-    this.binding_.onResponse(callback);
-  }
-}
-
-/**
- * @implements {PayClientBindingDef}
- */
-class PayClientBindingSwg {
-  /**
-   * @param {!Window} win
-   * @param {!../components/activities.ActivityPorts} activityPorts
-   * @param {!../components/dialog-manager.DialogManager} dialogManager
-   */
-  constructor(win, activityPorts, dialogManager) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = activityPorts;
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = dialogManager;
-  }
-
-  /** @override */
-  getType() {
-    return 'SWG';
-  }
-
-  /** @override */
-  start(paymentRequest, options) {
-    const opener = this.activityPorts_.open(
-      GPAY_ACTIVITY_REQUEST$1,
-      payUrl(),
-      options.forceRedirect ? '_top' : '_blank',
-      feArgs(paymentRequest),
-      {}
-    );
-    this.dialogManager_.popupOpened((opener && opener.targetWin) || null);
-  }
-
-  /** @override */
-  onResponse(callback) {
-    const responseCallback = port => {
-      this.dialogManager_.popupClosed();
-      callback(this.validatePayResponse_(port));
-    };
-    this.activityPorts_.onResult(GPAY_ACTIVITY_REQUEST$1, responseCallback);
-    this.activityPorts_.onResult(PAY_REQUEST_ID, responseCallback);
-  }
-
-  /**
-   * @param {!../components/activities.ActivityPortDef} port
-   * @return {!Promise<!Object>}
-   * @private
-   */
-  validatePayResponse_(port) {
-    // Do not require security immediately: it will be checked below.
-    return port.acceptResult().then(result => {
-      if (result.origin != payOrigin()) {
-        throw new Error('channel mismatch');
-      }
-      const data = /** @type {!Object} */ (result.data);
-      if (data['redirectEncryptedCallbackData']) {
-        // Data is supplied as an encrypted blob.
-        const xhr = new Xhr(this.win_);
-        const url = payDecryptUrl();
-        const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
-          method: 'post',
-          headers: {'Accept': 'text/plain, application/json'},
-          credentials: 'include',
-          body: data['redirectEncryptedCallbackData'],
-          mode: 'cors',
-        });
-        return xhr
-          .fetch(url, init)
-          .then(response => response.json())
-          .then(response => {
-            const dataClone = Object.assign({}, data);
-            delete dataClone['redirectEncryptedCallbackData'];
-            return Object.assign(dataClone, response);
-          });
-      }
-      // Data is supplied directly: must be a verified and secure channel.
-      if (result.originVerified && result.secureChannel) {
-        return data;
-      }
-      throw new Error('channel mismatch');
-    });
-  }
-}
-
-/**
- * Binding based on the https://github.com/google/payjs.
- * @implements {PayClientBindingDef}
- * @package Visible for testing only.
- */
-class PayClientBindingPayjs {
-  /**
-   * @param {!Window} win
-   * @param {!../components/activities.ActivityPorts} activityPorts
-   * @param {!string} googleTransactionId
-   */
-  constructor(win, activityPorts, googleTransactionId) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = activityPorts;
-
-    /** @private {?function(!Promise<!Object>)} */
-    this.responseCallback_ = null;
-
-    /** @private {?Promise<!Object>} */
-    this.response_ = null;
-
-    /** @private @const {!RedirectVerifierHelper} */
-    this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
-
-    /** @private @const {!PaymentsAsyncClient} */
-    this.client_ = this.createClient_(
-      {
-        environment: 'PRODUCTION',
-        'i': {
-          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
-        },
-      },
-      googleTransactionId,
-      this.handleResponse_.bind(this)
-    );
-
-    // Prepare new verifier pair.
-    this.redirectVerifierHelper_.prepare();
-  }
-
-  /**
-   * @param {!Object} options
-   * @param {string} googleTransactionId
-   * @param {function(!Promise<!Object>)} handler
-   * @return {!PaymentsAsyncClient}
-   * @private
-   */
-  createClient_(options, googleTransactionId, handler) {
-    // Assign Google Transaction ID to PaymentsAsyncClient.googleTransactionId_
-    // so it can be passed to gpay_async.js and stored in payment clearcut log.
-    PaymentsAsyncClient.googleTransactionId_ = googleTransactionId;
-    return new PaymentsAsyncClient(
-      options,
-      handler,
-      /* useIframe */ false,
-      this.activityPorts_.getOriginalWebActivityPorts()
-    );
-  }
-
-  /** @override */
-  getType() {
+    // TODO(alin04): remove once all references removed.
     return 'PAYJS';
   }
 
-  /** @override */
-  start(paymentRequest, options) {
+  /**
+   * @param {!PaymentDataRequest} paymentRequest
+   * @param {!PayOptionsDef=} options
+   */
+  start(paymentRequest, options = {}) {
+    this.request_ = paymentRequest;
+
     if (options.forceRedirect) {
       paymentRequest = Object.assign(paymentRequest, {
         'forceRedirect': options.forceRedirect || false,
@@ -14750,55 +14905,91 @@ class PayClientBindingPayjs {
       'disableNative',
       // The page cannot be iframed at this time. May be relaxed later
       // for AMP and similar contexts.
-      this.win_ != this.top_() ||
-        // Experiment must be enabled.
-        !isExperimentOn(this.win_, ExperimentFlags.GPAY_NATIVE)
+      this.win_ != this.top_()
     );
+    let resolver = null;
+    const promise = new Promise(resolve => (resolver = resolve));
     // Notice that the callback for verifier may execute asynchronously.
     this.redirectVerifierHelper_.useVerifier(verifier => {
       if (verifier) {
         setInternalParam(paymentRequest, 'redirectVerifier', verifier);
       }
-      this.client_.loadPaymentData(paymentRequest);
+      if (options.forceRedirect) {
+        const client = this.client_;
+        this.eventManager_.getReadyPromise().then(() => {
+          this.analytics_.getLoggingPromise().then(() => {
+            client.loadPaymentData(paymentRequest);
+            resolver(true);
+          });
+        });
+      } else {
+        this.client_.loadPaymentData(paymentRequest);
+        resolver(true);
+      }
     });
+    return promise;
   }
 
-  /** @override */
+  /**
+   * @param {function(!Promise<!PaymentData>)} callback
+   */
   onResponse(callback) {
     this.responseCallback_ = callback;
     const response = this.response_;
     if (response) {
       Promise.resolve().then(() => {
         if (response) {
-          callback(this.convertResponse_(response));
+          callback(this.convertResponse_(response, this.request_));
         }
       });
     }
   }
 
   /**
-   * @param {!Promise<!Object>} responsePromise
+   * @param {!Promise<!PaymentData>} responsePromise
    * @private
    */
   handleResponse_(responsePromise) {
     this.response_ = responsePromise;
     if (this.responseCallback_) {
-      this.responseCallback_(this.convertResponse_(this.response_));
+      this.responseCallback_(
+        this.convertResponse_(this.response_, this.request_)
+      );
     }
   }
 
   /**
-   * @param {!Promise<!Object>} response
-   * @return {!Promise<!Object>}
+   * @param {!Promise<!PaymentData>} response
+   * @param {?PaymentDataRequest} request
+   * @return {!Promise<!PaymentData>}
    * @private
    */
-  convertResponse_(response) {
-    return response.catch(reason => {
-      if (typeof reason == 'object' && reason['statusCode'] == 'CANCELED') {
-        return Promise.reject(createCancelError(this.win_));
-      }
-      return Promise.reject(reason);
-    });
+  convertResponse_(response, request) {
+    return response
+      .then(
+        // Temporary client side solution to remember the
+        // input params. TODO: Remove this once server-side
+        // input preservation is done and is part of the response.
+        res => {
+          if (request) {
+            res['paymentRequest'] = request;
+          }
+          return res;
+        }
+      )
+      .catch(reason => {
+        if (typeof reason == 'object' && reason['statusCode'] == 'CANCELED') {
+          const error = createCancelError(this.win_);
+          if (request) {
+            error['productType'] =
+              /** @type {!PaymentDataRequest} */ (request)['i']['productType'];
+          } else {
+            error['productType'] = null;
+          }
+          return Promise.reject(error);
+        }
+        return Promise.reject(reason);
+      });
   }
 
   /**
@@ -14980,7 +15171,7 @@ class RedirectVerifierHelper {
 }
 
 /**
- * @param {!Object} paymentRequest
+ * @param {!PaymentDataRequest} paymentRequest
  * @param {string} param
  * @param {*} value
  */
@@ -15142,12 +15333,13 @@ class PropensityServer {
    * @return {string}
    */
   propensityUrl_(url) {
-    url = url + '&u_tz=240&v=' + this.version_;
+    url = addQueryParam(url, 'u_tz', '240');
+    url = addQueryParam(url, 'v', String(this.version_));
     const clientId = this.getClientId_();
     if (clientId) {
-      url = url + '&cookie=' + clientId;
+      url = addQueryParam(url, 'cookie', clientId);
     }
-    url = url + '&cdm=' + this.win_.location.hostname;
+    url = addQueryParam(url, 'cdm', this.win_.location.hostname);
     return url;
   }
 
@@ -15160,11 +15352,11 @@ class PropensityServer {
       method: 'GET',
       credentials: 'include',
     });
-    let userState = this.publicationId_ + ':' + state;
+    let url = adsUrl('/subopt/data');
+    url = addQueryParam(url, 'states', this.publicationId_ + ':' + state);
     if (productsOrSkus) {
-      userState = userState + ':' + encodeURIComponent(productsOrSkus);
+      url = addQueryParam(url, 'extrainfo', productsOrSkus);
     }
-    const url = adsUrl('/subopt/data?states=') + encodeURIComponent(userState);
     return this.fetcher_.fetch(this.propensityUrl_(url), init);
   }
 
@@ -15178,11 +15370,11 @@ class PropensityServer {
       method: 'GET',
       credentials: 'include',
     });
-    let eventInfo = this.publicationId_ + ':' + event;
+    let url = adsUrl('/subopt/data');
+    url = addQueryParam(url, 'events', this.publicationId_ + ':' + event);
     if (context) {
-      eventInfo = eventInfo + ':' + encodeURIComponent(context);
+      url = addQueryParam(url, 'extrainfo', context);
     }
-    const url = adsUrl('/subopt/data?events=') + encodeURIComponent(eventInfo);
     return this.fetcher_.fetch(this.propensityUrl_(url), init);
   }
 
@@ -15647,7 +15839,7 @@ class ConfiguredRuntime {
     /** @private @const {!../api/subscriptions.Config} */
     this.config_ = defaultConfig();
 
-    if (isEdgeBrowser(this.win_)) {
+    if (isLegacyEdgeBrowser(this.win_)) {
       // TODO(dvoytenko, b/120607343): Find a way to remove this restriction
       // or move it to Web Activities.
       this.config_.windowOpenMode = WindowOpenMode.REDIRECT;
@@ -15684,6 +15876,7 @@ class ConfiguredRuntime {
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this);
+    this.analyticsService_.start();
 
     /** @private @const {!PayClient} */
     this.payClient_ = new PayClient(this);
@@ -15707,6 +15900,7 @@ class ConfiguredRuntime {
     );
 
     // ALL CLEAR: DepsDef definition now complete.
+    this.eventManager_.logSwgEvent(AnalyticsEvent.IMPRESSION_PAGE_LOAD, false);
 
     /** @private @const {!OffersApi} */
     this.offersApi_ = new OffersApi(this.pageConfig_, this.fetcher_);
@@ -15817,6 +16011,11 @@ class ConfiguredRuntime {
           break;
         case 'experiments':
           v.forEach(experiment => setExperiment(this.win_, experiment, true));
+          if (this.analytics()) {
+            // If analytics service isn't set up yet, then it will get the
+            // experiments later.
+            this.analytics().addLabels(v);
+          }
           break;
         case 'analyticsMode':
           if (v != AnalyticsMode.DEFAULT && v != AnalyticsMode.IMPRESSIONS) {
@@ -15873,7 +16072,20 @@ class ConfiguredRuntime {
   getEntitlements(encryptedDocumentKey) {
     return this.entitlementsManager_
       .getEntitlements(encryptedDocumentKey)
-      .then(entitlements => entitlements.clone());
+      .then(entitlements => {
+        // Auto update internal things tracking the user's current SKU.
+        if (entitlements) {
+          try {
+            const skus = entitlements.entitlements.map(
+              entitlement => entitlement.getSku() || 'unknown subscriptionToken'
+            );
+            if (skus.length > 0) {
+              this.analyticsService_.setSku(skus.join(','));
+            }
+          } catch (ex) {}
+        }
+        return entitlements.clone();
+      });
   }
 
   /** @override */
@@ -16006,7 +16218,7 @@ class ConfiguredRuntime {
       'for subscription updates please use the updateSubscription() method';
     log_2(typeof sku === 'string', errorMessage);
     return this.documentParsed_.then(() => {
-      return new PayStartFlow(this, sku).start();
+      return new PayStartFlow(this, {'skuId': sku}).start();
     });
   }
 
@@ -16035,10 +16247,15 @@ class ConfiguredRuntime {
 
   /** @override */
   contribute(skuOrSubscriptionRequest) {
+    /** @type {!../api/subscriptions.SubscriptionRequest} */
+    const request =
+      typeof skuOrSubscriptionRequest == 'string'
+        ? {'skuId': skuOrSubscriptionRequest}
+        : skuOrSubscriptionRequest;
     return this.documentParsed_.then(() => {
       return new PayStartFlow(
         this,
-        skuOrSubscriptionRequest,
+        request,
         ProductType.UI_CONTRIBUTION
       ).start();
     });

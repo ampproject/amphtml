@@ -29,7 +29,7 @@ import {
 import {createElementWithAttributes} from '../../src/dom';
 
 function fakeLocalStorage(initial = {}) {
-  const state = Object.assign({}, initial);
+  const state = {...initial};
   return {
     getItem: key => (key in state ? state[key] : null),
     setItem: (key, value) => (state[key] = value),
@@ -121,6 +121,7 @@ describe('isExperimentOn', () => {
   function expectExperiment(storedString, experimentId) {
     resetExperimentTogglesForTesting(win);
     win.localStorage.setItem('amp-experiment-toggles', storedString);
+    // eslint-disable-next-line chai-expect/missing-assertion
     return expect(isExperimentOn(win, /*OK*/ experimentId));
   }
 
@@ -233,6 +234,7 @@ describe('toggleExperiment', () => {
     };
     const on = toggleExperiment(win, experimentId, opt_on);
     const newString = win.localStorage.getItem('amp-experiment-toggles');
+    // eslint-disable-next-line chai-expect/missing-assertion
     return expect(`${on}; ${newString}`);
   }
 

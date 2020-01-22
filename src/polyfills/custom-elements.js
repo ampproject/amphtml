@@ -23,7 +23,7 @@
 let DeferredDef;
 
 /**
- * @typedef {!Function}
+ * @typedef {!typeof HTMLElement}
  */
 let CustomElementConstructorDef;
 
@@ -63,7 +63,7 @@ const TRACK_SUBTREE = {
 /**
  * Asserts that the custom element name conforms to the spec.
  *
- * @param {!Function} SyntaxError
+ * @param {!typeof SyntaxError} SyntaxError
  * @param {string} name
  */
 function assertValidName(SyntaxError, name) {
@@ -840,8 +840,10 @@ function wrapHTMLElement(win) {
 /**
  * Setups up prototype inheritance
  *
- * @param {!Function} superClass
- * @param {!Function} subClass
+ * @param {!typeof SUPER} superClass
+ * @param {!typeof SUB} subClass
+ * @template SUPER
+ * @template SUB
  */
 function subClass(superClass, subClass) {
   // Object.getOwnPropertyDescriptor(superClass.prototype, 'constructor')
@@ -956,7 +958,9 @@ export function install(win, opt_ctor) {
       const {Reflect} = win;
 
       // "Construct" ctor using ES5 idioms
-      const instance = Object.create(opt_ctor.prototype);
+      const instance = /** @type {!Function} */ (Object.create(
+        opt_ctor.prototype
+      ));
 
       // This will throw an error unless we're in a transpiled environemnt.
       // Native classes must be called as `new Ctor`, not `Ctor.call(instance)`.

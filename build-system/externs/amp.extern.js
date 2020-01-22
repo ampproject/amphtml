@@ -56,7 +56,7 @@ var FormDataWrapperInterface = function() {};
 FormDataWrapperInterface.prototype.entries = function() {};
 FormDataWrapperInterface.prototype.getFormData = function() {};
 
-FormData.prototype.entries = function () {};
+FormData.prototype.entries = function() {};
 
 /**
  * A type for Objects that can be JSON serialized or that come from
@@ -111,7 +111,6 @@ ExtensionPayload.prototype.v;
 /** @type {!Array<string>|string|undefined} */
 ExtensionPayload.prototype.i;
 
-
 /**
  * @typedef {?JsonObject|undefined|string|number|!Array<JsonValue>}
  */
@@ -121,7 +120,7 @@ var JsonValue;
  * @constructor
  * @dict
  */
-function VideoAnalyticsDetailsDef() {};
+function VideoAnalyticsDetailsDef() {}
 /** @type {boolean} */
 VideoAnalyticsDetailsDef.prototype.autoplay;
 /** @type {number} */
@@ -143,7 +142,6 @@ VideoAnalyticsDetailsDef.prototype.state;
 /** @type {number} */
 VideoAnalyticsDetailsDef.prototype.width;
 
-
 // Node.js global
 var process = {};
 process.env;
@@ -164,7 +162,7 @@ window.context.experimentToggles;
 window.context.master;
 window.context.isMaster;
 window.context.ampcontextVersion;
-window.context.ampcontextFilepath
+window.context.ampcontextFilepath;
 window.context.canary;
 window.context.canonicalUrl;
 window.context.consentSharedData;
@@ -354,15 +352,15 @@ ReactDatesConstants.HORIZONTAL_ORIENTATION;
 var Inputmask = class {};
 
 /** @param {!Object} unusedOpts */
-Inputmask.extendAliases = function (unusedOpts) {};
+Inputmask.extendAliases = function(unusedOpts) {};
 
 /** @param {!Object} unusedOpts */
-Inputmask.extendDefaults = function (unusedOpts) {};
+Inputmask.extendDefaults = function(unusedOpts) {};
 
 /** @param {!Element} unusedElement */
-Inputmask.prototype.mask = function (unusedElement) {};
+Inputmask.prototype.mask = function(unusedElement) {};
 
-Inputmask.prototype.remove = function () {};
+Inputmask.prototype.remove = function() {};
 
 /** @dict */
 window.AMP.dependencies = {};
@@ -380,7 +378,7 @@ IntersectionObserverEntry.prototype.rootBounds;
 // TODO (remove after we update closure compiler externs)
 window.PerformancePaintTiming;
 window.PerformanceObserver;
-Object.prototype.entryTypes
+Object.prototype.entryTypes;
 
 /** @typedef {number}  */
 var time;
@@ -390,7 +388,6 @@ var time;
  * @typedef {function()}
  */
 var UnlistenDef;
-
 
 /**
  * Just an element, but used with AMP custom elements..
@@ -410,27 +407,27 @@ AmpElement.prototype.elementName = function() {};
 
 var Signals = class {};
 /**
-  * @param {string} unusedName
-  * @return {number|!Error|null}
-  */
+ * @param {string} unusedName
+ * @return {number|!Error|null}
+ */
 Signals.prototype.get = function(unusedName) {};
 
 /**
-  * @param {string} unusedName
-  * @return {!Promise<time>}
-  */
+ * @param {string} unusedName
+ * @return {!Promise<time>}
+ */
 Signals.prototype.whenSignal = function(unusedName) {};
 
 /**
-  * @param {string} unusedName
-  * @param {time=} unusedOpt_time
-  */
+ * @param {string} unusedName
+ * @param {time=} unusedOpt_time
+ */
 Signals.prototype.signal = function(unusedName, unusedOpt_time) {};
 
 /**
-  * @param {string} unusedName
-  * @param {!Error} unusedError
-  */
+ * @param {string} unusedName
+ * @param {!Error} unusedError
+ */
 Signals.prototype.rejectSignal = function(unusedName, unusedError) {};
 
 /** @param {string} unusedName */
@@ -527,7 +524,7 @@ grecaptcha.execute;
 // Validator
 var amp;
 amp.validator;
-amp.validator.validateUrlAndLog = function(string, doc) {}
+amp.validator.validateUrlAndLog = function(string, doc) {};
 
 // Temporary Access types (delete when amp-access is compiled
 // for type checking).
@@ -570,7 +567,10 @@ var GetCidDef;
  *      given.
  */
 Cid.prototype.get = function(
-    externalCidScope, consent, opt_persistenceConsent) {}
+  externalCidScope,
+  consent,
+  opt_persistenceConsent
+) {};
 
 AmpStoryVariableService.prototype.onStateChange = function(event) {};
 AmpStoryVariableService.pageIndex;
@@ -713,6 +713,16 @@ let BindEvaluateExpressionResultDef;
  */
 let BindRescanOptionsDef;
 
+/**
+ * Options bag used in Bind.setState().
+ * @typedef {{
+ *    skipEval: (boolean|undefined),
+ *    skipAmpState: (boolean|undefined),
+ *    constrain: (Array<!Element>|undefined),
+ * }}
+ */
+let BindSetStateOptionsDef;
+
 /////////////////////////////
 ////// Web Anmomation externs
 /////////////////////////////
@@ -726,7 +736,6 @@ let BindRescanOptionsDef;
  */
 var WebAnimationDef;
 
-
 /**
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
@@ -737,7 +746,6 @@ var WebAnimationDef;
  * }}
  */
 var WebMultiAnimationDef;
-
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -750,7 +758,6 @@ var WebMultiAnimationDef;
  */
 var WebSwitchAnimationDef;
 
-
 /**
  * @mixes WebAnimationSelectorDef
  * @mixes WebAnimationTimingDef
@@ -761,7 +768,6 @@ var WebSwitchAnimationDef;
  * }}
  */
 var WebCompAnimationDef;
-
 
 /**
  * @mixes WebAnimationSelectorDef
@@ -774,12 +780,10 @@ var WebCompAnimationDef;
  */
 var WebKeyframeAnimationDef;
 
-
 /**
  * @typedef {!Object<string, *>|!Array<!Object<string, *>>}
  */
 var WebKeyframesDef;
-
 
 /**
  * See https://developer.mozilla.org/en-US/docs/Web/API/AnimationEffectTimingProperties
@@ -798,7 +802,6 @@ var WebKeyframesDef;
  */
 var WebAnimationTimingDef;
 
-
 /**
  * Indicates an extension to a type that allows specifying vars. Vars are
  * specified as properties with the name in the format of `--varName`.
@@ -807,7 +810,6 @@ var WebAnimationTimingDef;
  * @typedef {Object}
  */
 var WebAnimationVarsDef;
-
 
 /**
  * Defines media parameters for an animation.
@@ -820,7 +822,6 @@ var WebAnimationVarsDef;
  */
 var WebAnimationConditionalDef;
 
-
 /**
  * @typedef {{
  *   target: (!Element|undefined),
@@ -829,7 +830,6 @@ var WebAnimationConditionalDef;
  * }}
  */
 var WebAnimationSelectorDef;
-
 
 /**
  * @mixes WebAnimationTimingDef
@@ -846,7 +846,6 @@ var ampInaboxPositionObserver;
 ampInaboxPositionObserver.observe;
 ampInaboxPositionObserver.getTargetRect;
 ampInaboxPositionObserver.getViewportRect;
-
 
 /**
  * TODO(dvoytenko): remove FeaturePolicy once it's added in Closure externs.

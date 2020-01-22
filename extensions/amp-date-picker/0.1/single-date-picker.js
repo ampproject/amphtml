@@ -21,7 +21,7 @@ import {withDatePickerCommon} from './date-picker-common';
 
 /**
  * Create a SingleDatePicker React component
- * @return {function(new:React.Component, !JsonObject)} A single date picker component class
+ * @return {typeof React.Component} A single date picker component class
  */
 function createSingleDatePickerBase() {
   const constants = /** @type {!JsonObject} */ (requireExternal(
@@ -30,7 +30,7 @@ function createSingleDatePickerBase() {
 
   const DAY_SIZE = constants['DAY_SIZE'];
   const HORIZONTAL_ORIENTATION = constants['HORIZONTAL_ORIENTATION'];
-  const DayPickerSingleDateController = /** @type {function(new: React.Component, !JsonObject)} */ (requireExternal(
+  const DayPickerSingleDateController = /** @type {typeof  React.Component} */ (requireExternal(
     'react-dates'
   )['DayPickerSingleDateController']);
 
@@ -96,8 +96,8 @@ function createSingleDatePickerBase() {
  * Fixes bug where overlay single date pickers do not open to
  * the month containing the selected date.
  * https://github.com/airbnb/react-dates/issues/931
- * @param {function(new:React.Component, !JsonObject)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, !JsonObject)} A class with a preset focused prop
+ * @param {typeof React.Component} WrappedComponent A date-picker component to wrap
+ * @return {typeof React.Component} A class with a preset focused prop
  */
 function withFocusedTrueHack(WrappedComponent) {
   const react = requireExternal('react');
@@ -118,19 +118,19 @@ function withFocusedTrueHack(WrappedComponent) {
 
   /** @override */
   FocusedTrueHack.prototype.render = function() {
-    const props = Object.assign({}, this.props, dict({'focused': true}));
+    const props = {...this.props, ...dict({'focused': true})};
     return react.createElement(WrappedComponent, props);
   };
 
   return FocusedTrueHack;
 }
 
-/** @private {?function(new:React.Component, !JsonObject)} */
+/** @private {?typeof React.Component} */
 let SingleDatePicker_ = null;
 
 /**
  * Creates a single date picker, injecting its dependencies
- * @return {function(new:React.Component, !JsonObject)} A date picker component class
+ * @return {typeof React.Component} A date picker component class
  */
 export function createSingleDatePicker() {
   if (!SingleDatePicker_) {

@@ -26,7 +26,6 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
 
 const TAG = 'amp-nested-menu';
@@ -66,11 +65,6 @@ export class AmpNestedMenu extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO(#25343): remove this assert when cleaning up experiment post launch.
-    userAssert(
-      isExperimentOn(this.win, 'amp-nested-menu'),
-      `Turning on the amp-nested-menu experiment is necessary to use the ${TAG} component.`
-    );
     const {element} = this;
 
     this.action_ = Services.actionServiceForDoc(this.element);
@@ -270,11 +264,13 @@ export class AmpNestedMenu extends AMP.BaseElement {
         return;
       case Keys.LEFT_ARROW: /* fallthrough */
       case Keys.RIGHT_ARROW:
-        this.handleHorizontalArrowKeyDown_(e);
+        this.handleMenuNavigation_(e);
         break;
       case Keys.UP_ARROW: /* fallthrough */
       case Keys.DOWN_ARROW:
-        this.handleVerticalArrowKeyDown_(e);
+      case Keys.HOME:
+      case Keys.END:
+        this.handleMenuItemNavigation_(e);
         break;
     }
   }
@@ -284,7 +280,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
    * @param {!Event} e
    * @private
    */
-  handleHorizontalArrowKeyDown_(e) {
+  handleMenuNavigation_(e) {
     let back = e.key == Keys.LEFT_ARROW;
     // Press right arrow key to go back if submenu opened from left.
     if (this.side_ == Side.LEFT) {
@@ -301,12 +297,12 @@ export class AmpNestedMenu extends AMP.BaseElement {
   }
 
   /**
-   * Handle up/down arrow key down event to navigate between items;
+   * Handle up/down/home/end key down event to navigate between items;
    * this requires each menu item to be under a li element and focusable.
    * @param {!Event} e
    * @private
    */
-  handleVerticalArrowKeyDown_(e) {
+  handleMenuItemNavigation_(e) {
     const target = dev().assertElement(e.target);
     const parentMenu = this.getParentMenu_(target);
     const item = closest(target, e => e.tagName == 'LI', parentMenu);
@@ -314,14 +310,26 @@ export class AmpNestedMenu extends AMP.BaseElement {
     if (!item) {
       return;
     }
-    const nextItem =
-      e.key == Keys.UP_ARROW
-        ? item.previousElementSibling
-        : item.nextElementSibling;
+
+    let nextItem;
+    if (e.key === Keys.UP_ARROW) {
+      nextItem = item.previousElementSibling;
+    } else if (e.key === Keys.DOWN_ARROW) {
+      nextItem = item.nextElementSibling;
+    } else if (e.key === Keys.HOME) {
+      nextItem = item.parentElement.firstElementChild;
+    } else if (e.key === Keys.END) {
+      nextItem = item.parentElement.lastElementChild;
+    } else {
+      // not a recognized key
+      return;
+    }
+
     // have reached the beginning or end of the list.
     if (!nextItem) {
       return;
     }
+
     const focusElement = nextItem.querySelector('button,a[href],[tabindex]');
     if (focusElement) {
       e.preventDefault();

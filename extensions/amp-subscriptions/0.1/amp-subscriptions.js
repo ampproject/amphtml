@@ -273,6 +273,32 @@ export class SubscriptionService {
   }
 
   /**
+   * Internal function to wrap SwG decryption handling
+   * @param {!SubscriptionPlatform} platform
+   * @return {!Promise<?./entitlement.Entitlement>}
+   * @private
+   */
+  getEntitlements_(platform) {
+    return platform.getEntitlements().then(entitlements => {
+      if (
+        entitlements &&
+        entitlements.granted &&
+        this.cryptoHandler_.isDocumentEncrypted() &&
+        !entitlements.decryptedDocumentKey
+      ) {
+        const logChannel = platform.getServiceId() == 'local' ? user() : dev();
+        logChannel.error(
+          TAG,
+          `${platform.getServiceId()}: Subscription granted and encryption enabled, ` +
+            'but no decrypted document key returned.'
+        );
+        return null;
+      }
+      return entitlements;
+    });
+  }
+
+  /**
    * @param {!SubscriptionPlatform} subscriptionPlatform
    * @return {!Promise}
    */
@@ -288,7 +314,7 @@ export class SubscriptionService {
       : this.ampdoc_.whenFirstVisible();
     return visiblePromise.then(() => {
       return this.timer_
-        .timeoutPromise(timeout, subscriptionPlatform.getEntitlements())
+        .timeoutPromise(timeout, this.getEntitlements_(subscriptionPlatform))
         .then(entitlement => {
           entitlement =
             entitlement ||
@@ -393,8 +419,7 @@ export class SubscriptionService {
           origin
         );
         this.platformStore_.resolvePlatform('local', viewerPlatform);
-        viewerPlatform
-          .getEntitlements()
+        this.getEntitlements_(viewerPlatform)
           .then(entitlement => {
             devAssert(entitlement, 'Entitlement is null');
             // Viewer authorization is redirected to use local platform instead.

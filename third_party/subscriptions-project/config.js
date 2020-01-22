@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.85 */
+/** Version: 0.1.22.91 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -58,27 +58,28 @@ function onDocumentReady(doc, callback) {
 }
 
 /**
- * Calls the callback when document's state satisfies the stateFn.
+ * Calls the callback once when document's state satisfies the condition.
  * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document):boolean} condition
  * @param {function(!Document)} callback
  */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
+function onDocumentState(doc, condition, callback) {
+  if (condition(doc)) {
+    // Execute callback right now.
     callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
+    return;
   }
+
+  // Execute callback (once!) after condition is satisfied.
+  let callbackHasExecuted = false;
+  const readyListener = () => {
+    if (condition(doc) && !callbackHasExecuted) {
+      callback(doc);
+      callbackHasExecuted = true;
+      doc.removeEventListener('readystatechange', readyListener);
+    }
+  };
+  doc.addEventListener('readystatechange', readyListener);
 }
 
 /**
@@ -493,28 +494,8 @@ function hasNextNodeInDocumentOrder(element, stopNode) {
  */
 
 /**
- * Determines if value is actually an Array.
- * @param {*} value
- * @return {boolean}
- */
-function isArray(value) {
-  return Array.isArray(value);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @fileoverview This module declares JSON types as defined in the
+ * {@link http://json.org/}.
  */
 
 /**
@@ -700,7 +681,7 @@ class TypeChecker {
    * @private
    */
   toArray_(value) {
-    return isArray(value) ? value : [value];
+    return Array.isArray(value) ? value : [value];
   }
 }
 
@@ -876,7 +857,7 @@ class JsonLdParser {
     if (value == null || value === '') {
       return null;
     }
-    return isArray(value) ? value : [value];
+    return Array.isArray(value) ? value : [value];
   }
 
   /**

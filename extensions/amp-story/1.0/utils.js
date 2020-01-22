@@ -269,9 +269,10 @@ export const HistoryState = {
 export function setHistoryState(win, stateName, value) {
   const {history} = win;
   const state = getState(history) || {};
-  const newHistory = Object.assign({}, /** @type {!Object} */ (state), {
+  const newHistory = {
+    ...state,
     [stateName]: value,
-  });
+  };
 
   history.replaceState(newHistory, '');
 }

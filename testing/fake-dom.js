@@ -459,7 +459,7 @@ export class FakeLocation {
    */
   change_(args) {
     const change = parseUrlDeprecated(this.url_.href);
-    Object.assign({}, change, args);
+    ({...change, ...args});
     this.changes.push(change);
   }
 
