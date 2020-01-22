@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.89 */
+/** Version: 0.1.22.91 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -243,6 +243,9 @@ class AnalyticsContext {
 
     /** @private {?string} */
     this.clientVersion_ = (data[10] == null) ? null : data[10];
+
+    /** @private {?string} */
+    this.url_ = (data[11] == null) ? null : data[11];
   }
 
   /**
@@ -386,6 +389,20 @@ class AnalyticsContext {
   }
 
   /**
+   * @return {?string}
+   */
+  getUrl() {
+    return this.url_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUrl(value) {
+    this.url_ = value;
+  }
+
+  /**
    * @return {!Array}
    * @override
    */
@@ -402,6 +419,7 @@ class AnalyticsContext {
       this.readyToPay_,  // field 8 - ready_to_pay
       this.label_,  // field 9 - label
       this.clientVersion_,  // field 10 - client_version
+      this.url_,  // field 11 - url
     ];
   }
 
@@ -5441,7 +5459,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.89',
+    '_client': 'SwG 0.1.22.91',
   });
 }
 
@@ -5589,6 +5607,7 @@ class PayStartFlow {
       true,
       getEventParams(swgPaymentRequest['skuId'])
     );
+    PayCompleteFlow.waitingForPayClient_ = true;
     this.payClient_.start(
       /** @type {!PaymentDataRequest} */
       ({
@@ -5644,7 +5663,12 @@ class PayCompleteFlow {
         },
         reason => {
           if (isCancelError(reason)) {
-            deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
+            const productType = /** @type {!Object} */ (reason)['productType'];
+            const flow =
+              productType == ProductType.UI_CONTRIBUTION
+                ? SubscriptionFlows.CONTRIBUTE
+                : SubscriptionFlows.SUBSCRIBE;
+            deps.callbacks().triggerFlowCanceled(flow);
             deps
               .eventManager()
               .logSwgEvent(AnalyticsEvent.ACTION_USER_CANCELED_PAYFLOW, true);
@@ -5786,6 +5810,9 @@ class PayCompleteFlow {
   }
 }
 
+/** @private {boolean} */
+PayCompleteFlow.waitingForPayClient_ = false;
+
 /**
  * @param {!./deps.DepsDef} deps
  * @param {!Promise<!Object>} payPromise
@@ -5793,13 +5820,13 @@ class PayCompleteFlow {
  * @return {!Promise<!SubscribeResponse>}
  */
 function validatePayResponse(deps, payPromise, completeHandler) {
+  const wasRedirect = !PayCompleteFlow.waitingForPayClient_;
+  PayCompleteFlow.waitingForPayClient_ = false;
   return payPromise.then(data => {
     // 1) We log against a random TX ID which is how we track a specific user
     //    anonymously.
     // 2) If there was a redirect to gPay, we may have lost our stored TX ID.
     // 3) Pay service is supposed to give us the TX ID it logged against.
-
-    const hasLogged = deps.analytics().getHasLogged();
     let eventType = AnalyticsEvent.UNKNOWN;
     let eventParams = undefined;
     if (typeof data !== 'object' || !data['googleTransactionId']) {
@@ -5809,16 +5836,16 @@ function validatePayResponse(deps, payPromise, completeHandler) {
       // lost all connection to the events that preceded the payment event and
       // we at least want to know why that data was lost.
       eventParams = new EventParams();
-      eventParams.setHadLogged(hasLogged);
+      eventParams.setHadLogged(!wasRedirect);
       eventType = AnalyticsEvent.EVENT_GPAY_NO_TX_ID;
     } else {
       const oldTxId = deps.analytics().getTransactionId();
       const newTxId = data['googleTransactionId'];
 
-      if (!hasLogged) {
+      if (wasRedirect) {
         // This is the expected case for full redirects.  It may be happening
-        // unexpectedly at other times too though and we want to be aware of it
-        // if it does.
+        // unexpectedly at other times too though and we want to be aware of
+        // it if it does.
         deps.analytics().setTransactionId(newTxId);
         eventType = AnalyticsEvent.EVENT_GPAY_CANNOT_CONFIRM_TX_ID;
       } else {
@@ -6005,19 +6032,13 @@ class OffersFlow {
       isClosable = false; // Default is to hide Close button.
     }
 
-    const feArgsObj = {
-      'productId': deps.pageConfig().getProductId(),
-      'publicationId': deps.pageConfig().getPublicationId(),
+    const feArgsObj = deps.activities().addDefaultArguments({
       'showNative': deps.callbacks().hasSubscribeRequestCallback(),
       'productType': ProductType.SUBSCRIPTION,
       'list': (options && options.list) || 'default',
       'skus': (options && options.skus) || null,
       'isClosable': isClosable,
-      'analyticsContext': deps
-        .analytics()
-        .getContext()
-        .toArray(),
-    };
+    });
 
     if (options && options.oldSku) {
       feArgsObj['oldSku'] = options.oldSku;
@@ -6059,7 +6080,7 @@ class OffersFlow {
       this.win_,
       this.activityPorts_,
       feUrl('/offersiframe'),
-      feArgs(feArgsObj),
+      feArgsObj,
       /* shouldFadeBody */ true
     );
   }
@@ -6143,12 +6164,6 @@ class OffersFlow {
       this.activityIframeView_.on(
         ViewSubscriptionsResponse,
         this.startNativeFlow_.bind(this)
-      );
-
-      this.eventManager_.logSwgEvent(
-        AnalyticsEvent.IMPRESSION_OFFERS,
-        null,
-        getEventParams$1(this.skus_.join(','))
       );
 
       return this.dialogManager_.openView(this.activityIframeView_);
@@ -6403,15 +6418,17 @@ class ActivityIframePort$1 {
   /**
    * @param {!HTMLIFrameElement} iframe
    * @param {string} url
+   * @param {!../runtime/deps.DepsDef} deps
    * @param {?Object=} args
    */
-  constructor(iframe, url, args) {
+  constructor(iframe, url, deps, args) {
     /** @private @const {!web-activities/activity-ports.ActivityIframePort} */
     this.iframePort_ = new activityPorts_2(iframe, url, args);
     /** @private @const {!Object<string, function(!Object)>} */
     this.callbackMap_ = {};
-    /** @private {?function(!../proto/api_messages.Message)} */
-    this.callbackOriginal_ = null;
+
+    /** @private @const {../runtime/deps.DepsDef} */
+    this.deps_ = deps;
   }
 
   /**
@@ -6431,9 +6448,6 @@ class ActivityIframePort$1 {
     return this.iframePort_.connect().then(() => {
       // Attach a callback to receive messages after connection complete
       this.iframePort_.onMessage(data => {
-        if (this.callbackOriginal_) {
-          this.callbackOriginal_(data);
-        }
         const response = data && data['RESPONSE'];
         if (!response) {
           return;
@@ -6443,6 +6457,17 @@ class ActivityIframePort$1 {
           cb(deserialize(response));
         }
       });
+
+      if (this.deps_ && this.deps_.eventManager()) {
+        this.on(AnalyticsRequest, request => {
+          this.deps_.eventManager().logEvent({
+            eventType: request.getEvent(),
+            eventOriginator: EventOriginator.SWG_SERVER,
+            isFromUserAction: request.getMeta().getIsFromUserAction(),
+            additionalParameters: request.getParams(),
+          });
+        });
+      }
     });
   }
 
@@ -6498,7 +6523,13 @@ class ActivityIframePort$1 {
    * @template T
    */
   on(message, callback) {
-    const label = getLabel(message);
+    let label = null;
+    try {
+      label = getLabel(message);
+    } catch (ex) {
+      // Thrown if message is not a proto object and has no label
+      label = null;
+    }
     if (!label) {
       throw new Error('Invalid data type');
     } else if (this.callbackMap_[label]) {
@@ -6542,7 +6573,8 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.89',
+        '_client': 'SwG 0.1.22.91',
+        'supportsEventManager': true,
       },
       args || {}
     );
@@ -6556,7 +6588,7 @@ class ActivityPorts$1 {
    * @return {!Promise<!ActivityIframePort>}
    */
   openActivityIframePort_(iframe, url, args) {
-    const activityPort = new ActivityIframePort$1(iframe, url, args);
+    const activityPort = new ActivityIframePort$1(iframe, url, this.deps_, args);
     return activityPort.connect().then(() => activityPort);
   }
 
@@ -7250,16 +7282,13 @@ class AnalyticsService {
     this.doc_.getBody().appendChild(this.getElement());
 
     /** @private @type {!boolean} */
-    this.everStartedLog_ = false;
-
-    /** @private @type {!boolean} */
     this.everFinishedLog_ = false;
 
     /**
      * @private @const {!AnalyticsContext}
      */
     this.context_ = new AnalyticsContext();
-    this.context_.setTransactionId(getUuid());
+    this.setStaticContext_();
 
     /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
     this.serviceReady_ = null;
@@ -7323,6 +7352,13 @@ class AnalyticsService {
   }
 
   /**
+   * @param {string} url
+   */
+  setUrl(url) {
+    this.context_.setUrl(url);
+  }
+
+  /**
    * @param {!Array<string>} labels
    */
   addLabels(labels) {
@@ -7363,23 +7399,33 @@ class AnalyticsService {
   /**
    * @private
    */
-  setContext_() {
+  setStaticContext_() {
+    const context = this.context_;
+    // These values should all be available during page load.
+    context.setTransactionId(getUuid());
+    context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
+    context.setClientVersion('SwG 0.1.22.91');
+
     const utmParams = parseQueryString$1(this.getQueryString_());
-    this.context_.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
     const campaign = utmParams['utm_campaign'];
     const medium = utmParams['utm_medium'];
     const source = utmParams['utm_source'];
     if (campaign) {
-      this.context_.setUtmCampaign(campaign);
+      context.setUtmCampaign(campaign);
     }
     if (medium) {
-      this.context_.setUtmMedium(medium);
+      context.setUtmMedium(medium);
     }
     if (source) {
-      this.context_.setUtmSource(source);
+      context.setUtmSource(source);
     }
-    this.context_.setClientVersion('SwG 0.1.22.89');
-    this.addLabels(getOnExperiments(this.doc_.getWin()));
+
+    const urlNode = this.doc_
+      .getRootNode()
+      .querySelector("link[rel='canonical']");
+    if (urlNode && urlNode.href) {
+      context.setUrl(urlNode.href);
+    }
   }
 
   /**
@@ -7387,6 +7433,10 @@ class AnalyticsService {
    */
   start() {
     if (!this.serviceReady_) {
+      // Please note that currently openIframe reads the current analytics
+      // context and that it may not contain experiments activated late during
+      // the publishers code lifecycle.
+      this.addLabels(getOnExperiments(this.doc_.getWin()));
       this.serviceReady_ = this.activityPorts_
         .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
         .then(
@@ -7394,8 +7444,12 @@ class AnalyticsService {
             // Register a listener for the logging to code indicate it is
             // finished logging.
             port.on(FinishedLoggingResponse, this.afterLogging_.bind(this));
-            this.setContext_();
-            return port.whenReady().then(() => port);
+            return port.whenReady().then(() => {
+              // The publisher should be done setting experiments but runtime
+              // will forward them here if they aren't.
+              this.addLabels(getOnExperiments(this.doc_.getWin()));
+              return port;
+            });
           },
           message => {
             // If the port doesn't open register that logging is broken so
@@ -7428,14 +7482,6 @@ class AnalyticsService {
    */
   getContext() {
     return this.context_;
-  }
-
-  /**
-   * Returns true if any logs have already be sent to the analytics server.
-   * @return {boolean}
-   */
-  getHasLogged() {
-    return this.everStartedLog_;
   }
 
   /**
@@ -7501,9 +7547,9 @@ class AnalyticsService {
     }
     // Register we sent a log, the port will call this.afterLogging_ when done.
     this.unfinishedLogs_++;
-    this.everStartedLog_ = true;
-    const request = this.createLogRequest_(event);
-    this.lastAction_ = this.start().then(port => port.execute(request));
+    this.lastAction_ = this.start().then(port =>
+      port.execute(this.createLogRequest_(event))
+    );
   }
 
   /**
@@ -10374,12 +10420,6 @@ function irtpStringToBoolean(value) {
  * @enum {string}
  */
 const ExperimentFlags = {
-  /**
-   * Enables GPay API in SwG.
-   * Cleanup issue: #406.
-   */
-  GPAY_API: 'gpay-api',
-
   /**
    * Enables the feature that allows you to replace one subscription
    * for another in the subscribe() API.
@@ -14939,7 +14979,14 @@ class PayClient {
       )
       .catch(reason => {
         if (typeof reason == 'object' && reason['statusCode'] == 'CANCELED') {
-          return Promise.reject(createCancelError(this.win_));
+          const error = createCancelError(this.win_);
+          if (request) {
+            error['productType'] =
+              /** @type {!PaymentDataRequest} */ (request)['i']['productType'];
+          } else {
+            error['productType'] = null;
+          }
+          return Promise.reject(error);
         }
         return Promise.reject(reason);
       });
@@ -15286,12 +15333,13 @@ class PropensityServer {
    * @return {string}
    */
   propensityUrl_(url) {
-    url = url + '&u_tz=240&v=' + this.version_;
+    url = addQueryParam(url, 'u_tz', '240');
+    url = addQueryParam(url, 'v', String(this.version_));
     const clientId = this.getClientId_();
     if (clientId) {
-      url = url + '&cookie=' + clientId;
+      url = addQueryParam(url, 'cookie', clientId);
     }
-    url = url + '&cdm=' + this.win_.location.hostname;
+    url = addQueryParam(url, 'cdm', this.win_.location.hostname);
     return url;
   }
 
@@ -15304,11 +15352,11 @@ class PropensityServer {
       method: 'GET',
       credentials: 'include',
     });
-    let userState = this.publicationId_ + ':' + state;
+    let url = adsUrl('/subopt/data');
+    url = addQueryParam(url, 'states', this.publicationId_ + ':' + state);
     if (productsOrSkus) {
-      userState = userState + ':' + encodeURIComponent(productsOrSkus);
+      url = addQueryParam(url, 'extrainfo', productsOrSkus);
     }
-    const url = adsUrl('/subopt/data?states=') + encodeURIComponent(userState);
     return this.fetcher_.fetch(this.propensityUrl_(url), init);
   }
 
@@ -15322,11 +15370,11 @@ class PropensityServer {
       method: 'GET',
       credentials: 'include',
     });
-    let eventInfo = this.publicationId_ + ':' + event;
+    let url = adsUrl('/subopt/data');
+    url = addQueryParam(url, 'events', this.publicationId_ + ':' + event);
     if (context) {
-      eventInfo = eventInfo + ':' + encodeURIComponent(context);
+      url = addQueryParam(url, 'extrainfo', context);
     }
-    const url = adsUrl('/subopt/data?events=') + encodeURIComponent(eventInfo);
     return this.fetcher_.fetch(this.propensityUrl_(url), init);
   }
 
@@ -15963,6 +16011,11 @@ class ConfiguredRuntime {
           break;
         case 'experiments':
           v.forEach(experiment => setExperiment(this.win_, experiment, true));
+          if (this.analytics()) {
+            // If analytics service isn't set up yet, then it will get the
+            // experiments later.
+            this.analytics().addLabels(v);
+          }
           break;
         case 'analyticsMode':
           if (v != AnalyticsMode.DEFAULT && v != AnalyticsMode.IMPRESSIONS) {
