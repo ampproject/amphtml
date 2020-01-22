@@ -147,13 +147,11 @@ function build() {
   const rtvInput = document.getElementById('rtv');
   const rtvButton = document.getElementById('rtv-submit');
   rtvInput.addEventListener('input', () => {
-    rtvButton.disabled = !(
-      rtvInput.value == '' || RTV_PATTERN.test(rtvInput.value)
-    );
-    rtvButton.textContent = rtvInput.value == '' ? 'opt-out' : 'opt-in';
+    rtvButton.disabled = rtvInput.value && !RTV_PATTERN.test(rtvInput.value);
+    rtvButton.textContent = rtvInput.value ? 'opt-in' : 'opt-out';
   });
   rtvButton.addEventListener('click', () => {
-    if (rtvInput.value == '') {
+    if (!rtvInput.value) {
       showConfirmation_(
         'Do you really want to opt out of RTV?',
         setAmpCanaryCookie_.bind(null, AMP_CANARY_COOKIE.DISABLED)
@@ -388,7 +386,7 @@ function getAmpConfig() {
   xhr.send(null);
   return promise
     .then(text => {
-      const match = text.match(/self\.AMP_CONFIG=({.+?})/);
+      const match = text.match(/self\.AMP_CONFIG=(\{.+?\})/);
       if (!match) {
         throw new Error("Can't find AMP_CONFIG in: " + text);
       }
