@@ -405,6 +405,10 @@ export class AmpList extends AMP.BaseElement {
           promise = this.fetchList_();
         }
       } else if (typeof src === 'object') {
+        if (this.ssrTemplateHelper_.isEnabled()) {
+          user().error(TAG, '"[src]" may not be bound in SSR mode.');
+          return Promise.resolve();
+        }
         promise = renderLocalData(/** @type {!Object} */ (src));
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
@@ -588,6 +592,11 @@ export class AmpList extends AMP.BaseElement {
 
     let fetch;
     if (this.isAmpStateSrc_(elementSrc)) {
+      if (this.ssrTemplateHelper_.isEnabled()) {
+        user().error(TAG, '"amp-state" URIs cannot be used in SSR mode.');
+        return Promise.resolve();
+      }
+
       fetch = this.getAmpStateJson_(elementSrc).then(json => {
         if (typeof json === 'undefined') {
           user().warn(

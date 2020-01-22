@@ -808,6 +808,31 @@ describes.repeated(
                 attrs
               );
             });
+
+            it('"amp-state:" uri should skip rendering and emit an error', async () => {
+              toggleExperiment(win, 'amp-list-init-from-state', true);
+
+              const ampStateEl = doc.createElement('amp-state');
+              ampStateEl.setAttribute('id', 'okapis');
+              const ampStateJson = doc.createElement('script');
+              ampStateJson.setAttribute('type', 'application/json');
+              ampStateEl.appendChild(ampStateJson);
+              doc.body.appendChild(ampStateEl);
+              list.element.setAttribute('src', 'amp-state:okapis');
+
+              listMock.expects('scheduleRender_').never();
+
+              allowConsoleError(async () => {
+                await list.layoutCallback();
+              });
+            });
+
+            it('Bound [src] should skip rendering and emit an error', async () => {
+              listMock.expects('scheduleRender_').never();
+              allowConsoleError(async () => {
+                await list.mutatedAttributesCallback({src: {}});
+              });
+            });
           });
 
           // TODO(aghassemi, #12476): Make this test work with sinon 4.0.
