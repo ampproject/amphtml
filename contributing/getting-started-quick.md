@@ -112,6 +112,8 @@ git checkout -b <branch name> master
 1. Edit files in your favorite editor
 2. Make sure your changes satisfy AMP's [code quality and style rules](getting-started-e2e.md#code-quality-and-style)
 3. If your code requires a new dependency, run `yarn add --dev --exact [packagename]`, which automatically updates `package.json` and `yarn.lock`
+   - If it is a build-time dependency, use the `--dev` flag
+   - If it is a runtime dependency, add it to `build-system/compile/sources.js`
 4. If you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
 5. Add each file you change: `git add <file>`
 6. Create a commit: `git commit -m "<your commit message>"`
