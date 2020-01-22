@@ -155,12 +155,12 @@ function build() {
   rtvButton.addEventListener('click', () => {
     if (rtvInput.value == '') {
       showConfirmation_(
-        'Do you really want to opt OUT of specific RTV',
+        'Do you really want to opt out of RTV?',
         setAmpCanaryCookie_.bind(null, AMP_CANARY_COOKIE.DISABLED)
       );
     } else if (RTV_PATTERN.test(rtvInput.value)) {
       showConfirmation_(
-        `Do you really want to opt into the specific RTV ${rtvInput.value}?`,
+        `Do you really want to opt in to RTV ${rtvInput.value}?`,
         setAmpCanaryCookie_.bind(null, rtvInput.value)
       );
     }
@@ -321,8 +321,8 @@ function toggleExperiment_(id, name, opt_on) {
   const on = opt_on === undefined ? !currentlyOn : opt_on;
   // Protect against accidental choice.
   const confirmMessage = on
-    ? 'Do you really want to activate the AMP experiment'
-    : 'Do you really want to deactivate the AMP experiment';
+    ? 'Do you really want to activate the AMP experiment?'
+    : 'Do you really want to deactivate the AMP experiment?';
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == CANARY_EXPERIMENT_ID) {
