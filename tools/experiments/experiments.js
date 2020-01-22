@@ -53,9 +53,9 @@ let ExperimentDef;
  * interpreted by the server to deliver a different version of the AMP
  * JS libraries.
  */
-const CANARY_EXPERIMENT_ID = 'dev-channel';
-const RC_EXPERIMENT_ID = 'rc-channel';
-const RTV_EXPERIMENT_ID = 'rtv-channel';
+const EXPERIMENTAL_CHANNEL_ID = 'experimental-channel';
+const BETA_CHANNEL_ID = 'beta-channel';
+const RTV_CHANNEL_ID = 'rtv-channel';
 
 /**
  * The different states of the AMP_CANARY cookie.
@@ -70,7 +70,7 @@ const AMP_CANARY_COOKIE = {
 const CHANNELS = [
   // Experimental Channel
   {
-    id: CANARY_EXPERIMENT_ID,
+    id: EXPERIMENTAL_CHANNEL_ID,
     name: 'AMP Experimental Channel (more info)',
     spec:
       'https://github.com/ampproject/amphtml/blob/master/' +
@@ -78,7 +78,7 @@ const CHANNELS = [
   },
   // Beta Channel
   {
-    id: RC_EXPERIMENT_ID,
+    id: BETA_CHANNEL_ID,
     name: 'AMP Beta Channel (more info)',
     spec:
       'https://github.com/ampproject/amphtml/blob/master/' +
@@ -166,7 +166,7 @@ function build() {
     }
   });
 
-  if (isExperimentOn_(RTV_EXPERIMENT_ID)) {
+  if (isExperimentOn_(RTV_CHANNEL_ID)) {
     rtvInput.value = getCookie(window, 'AMP_CANARY');
     rtvInput.dispatchEvent(new Event('input'));
     document.getElementById('rtv-details').open = true;
@@ -271,11 +271,11 @@ function updateExperimentRow(experiment) {
  */
 function isExperimentOn_(id) {
   switch (id) {
-    case CANARY_EXPERIMENT_ID:
+    case EXPERIMENTAL_CHANNEL_ID:
       return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.CANARY;
-    case RC_EXPERIMENT_ID:
+    case BETA_CHANNEL_ID:
       return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.RC;
-    case RTV_EXPERIMENT_ID:
+    case RTV_CHANNEL_ID:
       return RTV_PATTERN.test(getCookie(window, 'AMP_CANARY'));
     default:
       return isExperimentOn(window, /*OK*/ id);
@@ -325,11 +325,11 @@ function toggleExperiment_(id, name, opt_on) {
     : 'Do you really want to deactivate the AMP experiment?';
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
-    if (id == CANARY_EXPERIMENT_ID) {
+    if (id == EXPERIMENTAL_CHANNEL_ID) {
       setAmpCanaryCookie_(
         on ? AMP_CANARY_COOKIE.CANARY : AMP_CANARY_COOKIE.DISABLED
       );
-    } else if (id == RC_EXPERIMENT_ID) {
+    } else if (id == BETA_CHANNEL_ID) {
       setAmpCanaryCookie_(
         on ? AMP_CANARY_COOKIE.RC : AMP_CANARY_COOKIE.DISABLED
       );
