@@ -29,7 +29,8 @@ import {parseQueryString_} from './url-parse-query-string';
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
- *   singlePassType: (string|undefined)
+ *   singlePassType: (string|undefined),
+ *   esm: (boolean|undefined)
  * }}
  */
 export let ModeDef;
@@ -79,7 +80,7 @@ function getMode_(win) {
     // from the URL.
     win.location.originalHash || win.location.hash
   );
-  const singlePassType = AMP_CONFIG.spt;
+  const {spt: singlePassType, esm} = AMP_CONFIG;
 
   const searchQuery = parseQueryString_(win.location.search);
 
@@ -103,6 +104,7 @@ function getMode_(win) {
       ) >= 0 || win.AMP_DEV_MODE
     ),
     examiner: hashQuery['development'] == '2',
+    esm,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
     minified: IS_MINIFIED,
