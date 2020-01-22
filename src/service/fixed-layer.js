@@ -30,6 +30,7 @@ import {
 import {closest, domOrderComparator, matches} from '../dom';
 import {dev, user} from '../log';
 import {endsWith} from '../string';
+import {getMode} from '../mode';
 import {isExperimentOn} from '../experiments';
 import {remove} from '../utils/array';
 
@@ -97,9 +98,7 @@ export class FixedLayer {
     this.elements_ = [];
 
     /** @const @private {!Pass} */
-    this.updatePass_ = new Pass(ampdoc.win, () => {
-      this.update();
-    });
+    this.updatePass_ = new Pass(ampdoc.win, () => this.update());
 
     /** @private {?function()} */
     this.hiddenObserverUnlistener_ = null;
@@ -131,12 +130,12 @@ export class FixedLayer {
     }
 
     if (opt_lightbox && opt_onComplete) {
-      opt_onComplete.then(() => {
+      opt_onComplete.then(() =>
         this.scanNode_(
           dev().assertElement(opt_lightbox),
           /* lightboxMode */ true
-        );
-      });
+        )
+      );
     }
   }
 
@@ -158,12 +157,19 @@ export class FixedLayer {
 
   /**
    * Must be always called after DOMReady.
+   * @return {boolean}
    */
   setup() {
+    const viewer = Services.viewerForDoc(this.ampdoc);
+    if (!getMode().localDev && !viewer.isEmbedded()) {
+      // FixedLayer is not needed for standalone documents.
+      return false;
+    }
+
     const root = this.ampdoc.getRootNode();
     const stylesheets = root.styleSheets;
     if (!stylesheets) {
-      return;
+      return true;
     }
 
     this.fixedSelectors_.length = 0;
@@ -174,7 +180,7 @@ export class FixedLayer {
       // Rare but may happen if the document is being concurrently disposed.
       if (!stylesheet) {
         dev().error(TAG, 'Aborting setup due to null stylesheet.');
-        return;
+        return true;
       }
       const {disabled, ownerNode} = stylesheet;
       if (
@@ -207,6 +213,8 @@ export class FixedLayer {
           ' slightly different layout.'
       );
     }
+
+    return true;
   }
 
   /**
