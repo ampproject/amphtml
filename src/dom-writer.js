@@ -20,7 +20,7 @@ import {dev, devAssert} from './log';
 
 /**
  * Takes as an input a text stream, parses it and incrementally reconstructs
- * it in the shadow root.
+ * it in the new target root.
  *
  * See https://jakearchibald.com/2016/fun-hacks-faster-content/ for more
  * details.
@@ -33,9 +33,11 @@ export class DomWriter {
   /**
    * Sets the callback that will be called when body has been parsed.
    *
-   * Unlike most of other nodes, `<body>` cannot be simply merged to support
-   * SD polyfill where the use of `<body>` element is not possible. The
-   * callback will be given the parsed document and it must return back
+   * For shadow use case, unlike most of other nodes, `<body>` cannot be simply
+   * merged to support Shadow DOM polyfill where the use of `<body>`
+   * element is not possible.
+   *
+   * The callback will be given the parsed document and it must return back
    * the reconstructed `<body>` node in the target DOM where all children
    * will be streamed into.
    *
@@ -60,7 +62,7 @@ export class DomWriter {
 
 /**
  * Takes as an input a text stream, parses it and incrementally reconstructs
- * it in the shadow root.
+ * it in the given root.
  *
  * See https://jakearchibald.com/2016/fun-hacks-faster-content/ for more
  * details.
