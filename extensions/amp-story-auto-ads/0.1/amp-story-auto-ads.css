@@ -47,7 +47,8 @@
   letter-spacing: 0.2px !important;
   line-height: 36px !important;
   overflow: hidden !important;
-  opacity: 0 !important;
+  /* no important on opacity b/c ff does not allow keyframes to override. */
+  opacity: 0;
   padding: 0 10px !important;
   position: absolute !important;
   text-align: center !important;
