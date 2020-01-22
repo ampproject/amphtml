@@ -443,7 +443,7 @@ class Chunks {
     // If we've spent over 5 millseconds executing the
     // last instruction yeild back to the main thread.
     // 5 milliseconds is a magic number.
-    if (this.bodyIsVisible_ && this.durationOfLastExecution_ > 5) {
+    if (false && this.bodyIsVisible_ && this.durationOfLastExecution_ > 5) {
       this.durationOfLastExecution_ = 0;
       this.requestMacroTask_();
       return;
