@@ -354,7 +354,6 @@ export class AmpList extends AMP.BaseElement {
   isAmpStateSrc_(src) {
     return (
       isExperimentOn(this.win, 'amp-list-init-from-state') &&
-      typeof src === 'string' &&
       startsWith(src, AMP_STATE_URI_SCHEME)
     );
   }
@@ -368,7 +367,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   getAmpStateJson_(src) {
-    const ampStatePath = src.substring(AMP_STATE_URI_SCHEME.length);
+    const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
     return Services.bindForDocOrNull(this.element).then(bind => {
       userAssert(
         bind,
