@@ -146,10 +146,11 @@ export class Expander {
       const args = [];
 
       while (urlIndex < url.length && matchIndex <= matches.length) {
+        const trimmedBuilder = builder.trim();
         if (match && urlIndex === match.start) {
           // Collect any chars that may be prefixing the macro, if we are in
           // a nested context trim the args.
-          if (builder.trim().length) {
+          if (trimmedBuilder) {
             results.push(numOfPendingCalls ? trimStart(builder) : builder);
           }
 
@@ -198,8 +199,8 @@ export class Expander {
           if (!ignoringChars) {
             ignoringChars = true;
             // Collect any chars that may exist before backticks, eg FOO(a`b`)
-            if (builder.trim().length) {
-              results.push(builder.trim());
+            if (trimmedBuilder) {
+              results.push(trimmedBuilder);
             }
           } else {
             ignoringChars = false;
@@ -216,10 +217,10 @@ export class Expander {
           !ignoringChars
         ) {
           // Commas tell us to create a new argument when in nested context and
-          // We push any string built so far, create a new array for the next
+          // we push any string built so far, create a new array for the next
           // argument, and reset our string builder.
-          if (builder.length) {
-            results.push(builder.trim());
+          if (trimmedBuilder) {
+            results.push(trimmedBuilder);
           }
           args.push(results);
           results = [];
@@ -242,8 +243,8 @@ export class Expander {
           urlIndex++;
           numOfPendingCalls--;
           const binding = stack.pop();
-          if (builder.trim().length) {
-            results.push(builder.trim());
+          if (trimmedBuilder) {
+            results.push(trimmedBuilder);
           }
           args.push(results);
           const value = this.evaluateBinding_(binding, /* opt_args */ args);
