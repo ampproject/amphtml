@@ -84,6 +84,11 @@ export class ConsentUI {
       config['uiConfig'] &&
       config['uiConfig']['overlay'] === true;
 
+    /** @private {string} */
+    this.consentTitle_ =
+      (config['uiConfig'] && config['uiConfig']['consentTitle']) ||
+      'amp-consent iframe';
+
     /** @private {boolean} */
     this.restrictFullscreenOn_ = isExperimentOn(
       baseInstance.win,
@@ -207,6 +212,12 @@ export class ConsentUI {
           this.maybeShowOverlay_();
 
           this.showIframe_();
+
+          if (this.restrictFullscreenOn_) {
+            // NEED TO INSTANTIATE SR BUTTON
+            this.srButton_ = this.createSrButton_();
+            this.baseInstance_.element.appendChild(this.srButton_);
+          }
 
           if (!this.isPostPrompt_ && !this.restrictFullscreenOn_) {
             this.ui_./*OK*/ focus();
@@ -550,6 +561,27 @@ export class ConsentUI {
     this.ui_.removeAttribute('name');
     toggle(dev().assertElement(this.placeholder_), false);
     removeElement(dev().assertElement(this.ui_));
+  }
+
+  /**
+   * Appends an alertdialog role div to the base
+   * instance, with a button inside. EDIT THIS!!!!!!!!
+   * @return {!Element}
+   */
+  createSrButton_() {
+    const alertDialog = this.win_.document.createElement('div');
+    alertDialog.setAttribute('role', 'alertdialog');
+
+    const button = this.win_.document.createElement('div');
+
+    // Text to be read by SR
+    button.innerHTML = this.consentTitle_;
+    button.onClick = () => {
+      this.ui_./*OK*/ focus();
+    };
+
+    alertDialog.appendChild(button);
+    return alertDialog;
   }
 
   /**
