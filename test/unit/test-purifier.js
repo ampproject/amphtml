@@ -521,6 +521,7 @@ describe
       it('should whitelist table related elements and anchor tags', () => {
         const html =
           '<table class="valid-class">' +
+          '<colgroup><col><col></colgroup>' +
           '<caption>caption</caption>' +
           '<thead><tr><th colspan="2">header</th></tr></thead>' +
           '<tbody><tr><td>' +
