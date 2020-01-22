@@ -134,6 +134,21 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /**
+   * @override
+   */
+  onLayoutMeasure() {
+    super.onLayoutMeasure();
+    const {width, height} = this.getLayoutBox();
+    if (width === 0 && height === 0) {
+      user().warn(
+        TAG,
+        'Skipped initializing amp-script due to zero width and height.',
+        this.element
+      );
+    }
+  }
+
+  /**
    * @param {!AmpScriptService} service
    * @visibleForTesting
    */

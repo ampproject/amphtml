@@ -23,6 +23,7 @@ import {
 } from '../../amp-script';
 import {FakeWindow} from '../../../../../testing/fake-dom';
 import {Services} from '../../../../../src/services';
+import {user} from '../../../../../src/log';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
   let element;
@@ -91,6 +92,19 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     service.checkSha384.withArgs('alert(1)').resolves();
     await script.layoutCallback();
     expect(service.checkSha384).to.be.called;
+  });
+
+  it('should warn if there is zero width/height', () => {
+    const warnStub = env.sandbox.stub(user(), 'warn');
+    env.sandbox.stub(script, 'getLayoutBox').returns({height: 0, width: 0});
+    script.onLayoutMeasure();
+
+    expect(warnStub).calledWith(
+      'amp-script',
+      'Skipped initializing amp-script due to zero width and height.',
+      script.element
+    );
+    expect(warnStub).to.have.callCount(1);
   });
 
   it('should fail on invalid sha384(author_js) for cross-origin src', () => {
