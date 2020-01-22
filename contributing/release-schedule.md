@@ -29,7 +29,7 @@ The **stable** release channel is built with the _production_ configuration and 
 
 The **lts** release channel provides a previous **stable** build for one-month intervals. On the second Monday of each month, the current **stable** release is promoted to **lts**. This channel is not recommended for all AMP publishers. It is provided so that publishers who wish to perform a QA cycle on their website less frequently may do so by opting specific web pages into the **lts** channel (see the [**lts** readme](https://github.com/ampproject/amphtml/blob/master/contributing/lts-release.md)).
 
-In the event that the second Monday of the month falls on a holiday, the promotion will be performed the following day (ie. Tuesday) instead.
+In the event that the second Monday of the month falls on a holiday, the promotion will be performed after the end of the release freeze.
 
 Important: Publishers using the **lts** release channel should not use newly introduced features. Because of the longer cycle, the **lts** release may be as much as seven weeks behind the `HEAD` of [`ampproject/amphtml`](https://github.com/ampproject/amphtml). See the section on [determining if your change is in a release](#Determining-if-your-change-is-in-a-release) to validate if a change will be ready with your chosen release cycle.
 
