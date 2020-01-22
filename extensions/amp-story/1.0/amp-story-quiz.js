@@ -424,11 +424,25 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     }
 
     // now perform truncations, preserving order, ties, and adding to 100
-    const total = percentages.reduce(
+    let total = percentages.reduce(
       (currentTotal, currentValue) =>
         (currentTotal += Math.round(currentValue)),
       0
     );
+
+    // Special case: ties with remainder 0.5 cause total to rise above 100
+    if (total > 100) {
+      percentages = percentages.map(percentage =>
+        (percentage - Math.trunc(percentage)).toFixed(2) === '0.50'
+          ? Math.trunc(percentage).toFixed(2)
+          : percentage
+      );
+      total = percentages.reduce(
+        (currentTotal, currentValue) =>
+          (currentTotal += Math.round(currentValue)),
+        0
+      );
+    }
 
     if (total === 100) {
       return percentages.map(percentage => Math.round(percentage));
@@ -443,7 +457,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
           remainder: (percentage - Math.trunc(percentage)).toFixed(2),
         };
       });
-      preserveOriginal.sort((left, right) => right.remainder - left.remainder);
+      preserveOriginal.sort(
+        (left, right) =>
+          // Break remainder ties using the higher value
+          right.remainder - left.remainder || right.value - left.value
+      );
       const finalPercentages = [];
 
       while (remainder > 0 && preserveOriginal.length !== 0) {
