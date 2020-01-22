@@ -254,6 +254,8 @@ AmpConfigType.prototype.runtime;
 AmpConfigType.prototype.test;
 /* @public {string|undefined} */
 AmpConfigType.prototype.spt;
+/* @public {boolean|undefined} */
+AmpConfigType.prototype.esm;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;

@@ -26,6 +26,7 @@ export function getModeObject(opt_win) {
   return {
     localDev: getMode(opt_win).localDev,
     development: getMode(opt_win).development,
+    esm: getMode(opt_win).esm,
     filter: getMode(opt_win).filter,
     minified: getMode(opt_win).minified,
     lite: getMode(opt_win).lite,
