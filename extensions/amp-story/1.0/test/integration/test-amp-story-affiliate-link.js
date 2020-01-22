@@ -77,7 +77,7 @@ t.run('amp-story-affiliate link', () => {
         expect(RequestBank.withdraw()).to.throw;
       });
 
-      it.skip('should send analytics event on external click', async () => {
+      it('should send analytics event on external click', async () => {
         browser.click('#blink-1');
         browser.click('#blink-1');
         const req = await RequestBank.withdraw();
