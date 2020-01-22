@@ -958,6 +958,9 @@ export function install(win, ctor) {
       const {Reflect} = win;
 
       // "Construct" ctor using ES5 idioms
+      // I'm not sure why, but Closure will complain at the
+      // `Function.call.call()` below unless we cast to a Function instance
+      // here.
       const instance = /** @type {!Function} */ (Object.create(ctor.prototype));
 
       // This will throw an error unless we're in a transpiled environemnt.
