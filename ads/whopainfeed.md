@@ -1,5 +1,5 @@
 <!---
-Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration, please contact Whopa Team.\
+For details on the configuration, please contact Whopa Team support@whopa.net \
 These configurations are relevant for both `<amp-ad />` and `<amp-embed />`.
 
 ### Required parameters

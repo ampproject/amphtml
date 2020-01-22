@@ -1108,7 +1108,6 @@ const adConfig = jsonConfiguration({
 
   'whopainfeed': {
     prefetch: 'https://widget.infeed.com.ar/widget/widget-amp.js',
-    renderStartImplemented: true,
   },
 
   'widespace': {},
