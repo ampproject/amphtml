@@ -61,7 +61,7 @@
     "dev-null": "0.1.1",
     "doctrine": "3.0.0",
     "envify": "4.1.0",
-    "escodegen": "1.12.1",
+    "escodegen": "1.13.0",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.9.0",
     "eslint-plugin-chai-expect": "2.1.0",
