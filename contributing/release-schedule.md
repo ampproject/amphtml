@@ -103,7 +103,7 @@ If a one week release freeze is announced for Week N:
 - The previous week's release build remains in **experimental**/**beta** for an extra week, i.e. the release cut in Week N-1 is not pushed to **stable** in Week N as would normally be the case. Instead, it will be pushed to **stable** in Week N+1.
 - A new release build is _not_ made in the freeze week (Week N).
 - The normal schedule will resume in Week N+1, i.e. **experimental**/**beta** are cut in Week N+1 and promoted to **stable** in Week N+2.
-- The previous week's **stable** release, ie. the **stable** promoted during Week N-1, is promoted to **lts** on Monday of Week N+1
+- If the **stable** release promoted during Week N-1 was originally scheduled to be promoted to **lts** during Week N, it will now be promoted to **lts** on the Monday of Week N+1.
 
 A release freeze may happen due to:
 
