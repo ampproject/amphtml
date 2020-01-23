@@ -50,12 +50,12 @@ And in the request url the token would be of the format `${eventId}` (follows ca
 
 When the same `var` is defined in multiple locations, the value is picked in the order remote config > element level data attributes > triggers > top level > platform. Thus, if the remote config defined `clientId` as `12332312` in the example above, the values of various vars will be as follows:
 
-| var          | Value                               | Defined by       |
-| ------------ | ----------------------------------- | ---------------- |
-| canonicalUrl | http://example.com/path/to/the/page | Platform         |
-| title        | My homepage                         | Trigger          |
-| account      | ABC123                              | Top level config |
-| clientId     | 12332312                            | Remote config    |
+| var          | Value                                  | Defined by       |
+| ------------ | -------------------------------------- | ---------------- |
+| canonicalUrl | `https://example.com/path/to/the/page` | Platform         |
+| title        | My homepage                            | Trigger          |
+| account      | ABC123                                 | Top level config |
+| clientId     | 12332312                               | Remote config    |
 
 ## Variables
 

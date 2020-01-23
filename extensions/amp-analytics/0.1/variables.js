@@ -270,17 +270,27 @@ export class VariableService {
       let value = options.getVar(name);
 
       if (typeof value == 'string') {
-        value = this.expandTemplate(
+        value = this.expandValue_(
           value,
-          new ExpansionOptions(
-            options.vars,
-            options.iterations - 1,
-            true /* noEncode */
-          ),
+          options,
           element,
           opt_bindings,
           opt_whitelist
         );
+      } else if (isArray(value)) {
+        // Treat each value as a template and expand
+        for (let i = 0; i < value.length; i++) {
+          value[i] =
+            typeof value[i] == 'string'
+              ? this.expandValue_(
+                  value[i],
+                  options,
+                  element,
+                  opt_bindings,
+                  opt_whitelist
+                )
+              : value[i];
+        }
       }
 
       const bindings = opt_bindings || this.getMacros(element);
@@ -308,6 +318,28 @@ export class VariableService {
           return value;
         });
     });
+  }
+
+  /**
+   * @param {string} value
+   * @param {!ExpansionOptions} options
+   * @param {!Element} element amp-analytics element.
+   * @param {!JsonObject=} opt_bindings
+   * @param {!Object=} opt_whitelist
+   * @return {Promise<string>}
+   */
+  expandValue_(value, options, element, opt_bindings, opt_whitelist) {
+    return this.expandTemplate(
+      value,
+      new ExpansionOptions(
+        options.vars,
+        options.iterations - 1,
+        true /* noEncode */
+      ),
+      element,
+      opt_bindings,
+      opt_whitelist
+    );
   }
 
   /**
