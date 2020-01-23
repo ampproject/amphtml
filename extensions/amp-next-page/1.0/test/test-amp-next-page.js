@@ -412,7 +412,7 @@ describes.realWin(
 
         await service.hidePreviousPages_(
           0 /** index */,
-          0 /** forgetPageCountForTesting */
+          0 /** pausePageCountForTesting */
         );
 
         // Internally changes the state to paused
@@ -452,7 +452,7 @@ describes.realWin(
         service.scrollDirection_ = Direction.UP;
         await service.hidePreviousPages_(
           0 /** index */,
-          0 /** forgetPageCountForTesting */
+          0 /** pausePageCountForTesting */
         );
         expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
         expect(service.pages_[2].visibilityState_).to.equal(
@@ -460,9 +460,9 @@ describes.realWin(
         );
 
         service.scrollDirection_ = Direction.DOWN;
-        await service.resumeForgottenPages_(
+        await service.resumePausedPages_(
           1 /** index */,
-          0 /** forgetPageCountForTesting */
+          0 /** pausePageCountForTesting */
         );
 
         // Replaces the inserted placeholder with the page's content

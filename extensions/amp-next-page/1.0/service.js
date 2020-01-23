@@ -45,7 +45,7 @@ import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
 const TAG = 'amp-next-page';
 const PRERENDER_VIEWPORT_COUNT = 3;
 const NEAR_BOTTOM_VIEWPORT_COUNT = 1;
-const FORGET_PAGE_COUNT = 5;
+const PAUSE_PAGE_COUNT = 5;
 
 const NEXT_PAGE_CLASS = 'i-amphtml-next-page';
 const DOC_CLASS = 'i-amphtml-next-page-document';
@@ -226,7 +226,7 @@ export class NextPageService {
           page.setVisibility(VisibilityState.VISIBLE);
         }
         this.hidePreviousPages_(index);
-        this.resumeForgottenPages_(index);
+        this.resumePausedPages_(index);
       } else if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
         if (page.isVisible()) {
           page.setVisibility(VisibilityState.HIDDEN);
@@ -252,19 +252,19 @@ export class NextPageService {
   /**
    * Makes sure that all pages preceding the current page are
    * marked hidden if they are out of the viewport and additionally
-   * paused/forgotten if they are too far from the current page
+   * paused if they are too far from the current page
    * @param {number} index index of the page to start at
-   * @param {number=} forgetPageCountForTesting
+   * @param {number=} pausePageCountForTesting
    * @return {!Promise}
    * @private
    */
-  hidePreviousPages_(index, forgetPageCountForTesting) {
+  hidePreviousPages_(index, pausePageCountForTesting) {
     // The distance (in pages) to the currently visible page after which
     // we start unloading pages from memory
-    const forgetPageCount =
-      forgetPageCountForTesting === undefined
-        ? FORGET_PAGE_COUNT
-        : forgetPageCountForTesting;
+    const pausePageCount =
+      pausePageCountForTesting === undefined
+        ? PAUSE_PAGE_COUNT
+        : pausePageCountForTesting;
 
     const scrollingDown = this.scrollDirection_ === Direction.DOWN;
     // Hide the host (first) page if needed
@@ -292,7 +292,7 @@ export class NextPageService {
             page.setVisibility(VisibilityState.HIDDEN);
           }
           // Pause those that are too far away
-          if (away >= forgetPageCount) {
+          if (away >= pausePageCount) {
             return page.pause();
           }
         })
@@ -301,24 +301,27 @@ export class NextPageService {
 
   /**
    * Makes sure that all pages that are a few pages away from the
-   * currently visible page are re-inserted (if forgotten) and
+   * currently visible page are re-inserted (if paused) and
    * ready to become visible soon
    * @param {number} index index of the page to start at
-   * @param {number=} forgetPageCountForTesting
+   * @param {number=} pausePageCountForTesting
    * @private
    */
-  resumeForgottenPages_(index, forgetPageCountForTesting) {
+  resumePausedPages_(index, pausePageCountForTesting) {
     // The distance (in pages) to the currently visible page after which
     // we start unloading pages from memory
-    const forgetPageCount =
-      forgetPageCountForTesting === undefined
-        ? FORGET_PAGE_COUNT
-        : forgetPageCountForTesting;
+    const pausePageCount =
+      pausePageCountForTesting === undefined
+        ? PAUSE_PAGE_COUNT
+        : pausePageCountForTesting;
 
     // Get all the pages that should be resumed
     const nearViewportPages = this.pages_
       .slice(1) // Ignore host page
-      .slice(index - forgetPageCount - 1, index + forgetPageCount + 1)
+      .slice(
+        Math.max(0, index - pausePageCount - 1),
+        Math.min(this.pages_.length, index + pausePageCount + 1)
+      )
       .filter(page => page.isPaused());
 
     nearViewportPages.forEach(page => page.resume());
@@ -654,7 +657,6 @@ export class NextPageService {
           // we use initialUrl since the url can get updated if
           // the page issues a redirect
           if (this.pages_.some(p => p.initialUrl == page.url)) {
-            user().warn(TAG, 'Recommendation already queued');
             return;
           }
           // Queue the page for fetching
