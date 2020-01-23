@@ -16,13 +16,8 @@
 
 import * as WorkerDOM from '@ampproject/worker-dom/dist/amp/main.mjs';
 import {CSS} from '../../../build/amp-script-0.1.css';
-import {
-  DomPurifyDef,
-  createPurifier,
-  getAllowedTags,
-  validateAttributeChange,
-} from '../../../src/purifier';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {Purifier} from '../../../src/purifier/purifier';
 import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
@@ -45,11 +40,6 @@ const TAG = 'amp-script';
  * @const {number}
  */
 const MAX_TOTAL_SCRIPT_SIZE = 150000;
-
-/**
- * Size-contained elements up to 300px are allowed to mutate freely.
- */
-const MAX_FREE_MUTATION_HEIGHT = 300;
 
 /**
  * See src/transfer/Phase.ts in worker-dom.
@@ -119,10 +109,9 @@ export class AmpScript extends AMP.BaseElement {
      */
     const htmlEl = this.element.ownerDocument.documentElement;
     this.development_ =
-      this.element.hasAttribute('development') ||
-      (htmlEl.hasAttribute('data-ampdevmode') &&
-        closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
-          htmlEl);
+      htmlEl.hasAttribute('data-ampdevmode') &&
+      closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
+        htmlEl;
 
     if (this.development_) {
       user().warn(
@@ -150,6 +139,14 @@ export class AmpScript extends AMP.BaseElement {
    */
   setService(service) {
     this.service_ = service;
+  }
+
+  /**
+   * @return {?UserActivationTracker}
+   * @visibleForTesting
+   */
+  getUserActivation() {
+    return this.userActivation_;
   }
 
   /** @override */
@@ -202,7 +199,7 @@ export class AmpScript extends AMP.BaseElement {
         this.userActivation_.expandLongTask(promise);
         // TODO(dvoytenko): consider additional "progress" UI.
       },
-      sanitizer: new SanitizerImpl(this.win, this.element, sandboxTokens),
+      sanitizer: new SanitizerImpl(this, sandboxTokens),
       // Callbacks.
       onCreateWorker: data => {
         dev().info(TAG, 'Create worker:', data);
@@ -347,6 +344,22 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /**
+   * Returns true if mutations should be allowed based on container attributes.
+   * @return {boolean}
+   */
+  isMutationAllowedByFixedSize() {
+    return isLayoutSizeDefined(this.getLayout());
+  }
+
+  /**
+   * Returns true if mutations should be allowed based on recent user gesture.
+   * @return {boolean}
+   */
+  isMutationAllowedByUserGesture() {
+    return this.userActivation_.isActive();
+  }
+
+  /**
    * @param {function()} flush
    * @param {number} phase
    * @private
@@ -360,11 +373,8 @@ export class AmpScript extends AMP.BaseElement {
     const allowMutation =
       // Hydration is always allowed.
       phase != Phase.MUTATING ||
-      // Mutation depends on the gesture state and long tasks.
-      this.userActivation_.isActive() ||
-      // If the element is size-contained and small enough.
-      (isLayoutSizeDefined(this.getLayout()) &&
-        this.getLayoutBox().height <= MAX_FREE_MUTATION_HEIGHT);
+      this.isMutationAllowedByFixedSize() ||
+      this.isMutationAllowedByUserGesture();
 
     if (allowMutation) {
       this.vsync_.mutate(flush);
@@ -476,22 +486,38 @@ const FORM_ELEMENTS = [
  */
 export class SanitizerImpl {
   /**
-   * @param {!Window} win
-   * @param {!Element} element
+   * @param {!AmpScript} ampScript
    * @param {!Array<string>} sandboxTokens
    */
-  constructor(win, element, sandboxTokens) {
+  constructor(ampScript, sandboxTokens) {
     /** @private @const {!Window} */
-    this.win_ = win;
+    this.win_ = ampScript.win;
 
     /** @private @const {!Element} */
-    this.element_ = element;
+    this.element_ = ampScript.element;
 
-    /** @private @const {!DomPurifyDef} */
-    this.purifier_ = createPurifier(win.document, dict({'IN_PLACE': true}));
+    /** @private @const {!Purifier} */
+    this.purifier_ = new Purifier(
+      ampScript.win.document,
+      dict({'IN_PLACE': true}),
+      rewriteAttributeValue
+    );
 
     /** @private @const {!Object<string, boolean>} */
-    this.allowedTags_ = getAllowedTags();
+    this.allowedTags_ = this.purifier_.getAllowedTags();
+
+    /**
+     * @private
+     * @return {boolean}
+     */
+    this.allowFullEval_ = () => ampScript.isMutationAllowedByUserGesture();
+
+    /**
+     * @private
+     * @return {boolean}
+     */
+    this.shouldConstrainEval_ = () =>
+      !this.allowFullEval_() && ampScript.isMutationAllowedByFixedSize();
 
     // TODO(choumx): Support opt-in for variable substitutions.
     // For now, only allow built-in AMP components except amp-pixel.
@@ -541,7 +567,7 @@ export class SanitizerImpl {
     // that the tag itself is valid. E.g. a[href] is ok, but base[href] is not.
     if (this.allowedTags_[tag]) {
       const attr = attribute.toLowerCase();
-      if (validateAttributeChange(this.purifier_, node, attr, value)) {
+      if (this.purifier_.validateAttributeChange(node, attr, value)) {
         if (value == null) {
           node.removeAttribute(attr);
         } else {
@@ -591,7 +617,7 @@ export class SanitizerImpl {
 
     // worker-dom's supported properties and corresponding attribute name
     // differences are minor, e.g. acceptCharset vs. accept-charset.
-    if (validateAttributeChange(this.purifier_, node, prop, value)) {
+    if (this.purifier_.validateAttributeChange(node, prop, value)) {
       node[property] = value;
       return true;
     }
@@ -640,7 +666,23 @@ export class SanitizerImpl {
             dev().error(TAG, 'Invalid AMP.setState() argument: %s', value);
           });
           if (state) {
-            bind.setState(state, /* skipEval */ true, /* skipAmpState */ false);
+            // Only evaluate updates in case of recent user interaction or a small fixed layout.
+            const fullEval = this.allowFullEval_();
+            const constrain = this.shouldConstrainEval_()
+              ? [this.element_]
+              : undefined;
+
+            if (!fullEval && !constrain) {
+              user().warn(
+                TAG,
+                'AMP.setState only updated page state and did not reevaluate bindings due to lack of recent user interaction.'
+              );
+            }
+            bind.setState(state, {
+              skipEval: !fullEval && !constrain,
+              skipAmpState: false,
+              constrain,
+            });
           }
         }
       });

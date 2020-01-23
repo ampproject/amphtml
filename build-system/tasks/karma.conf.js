@@ -36,14 +36,11 @@ const SAUCE_TIMEOUT_CONFIG = {
   idleTimeout: 10 * 60,
 };
 
-const BABELIFY_CONFIG = Object.assign(
-  {},
-  BABELIFY_GLOBAL_TRANSFORM,
-  BABELIFY_PLUGINS,
-  {
-    sourceMapsAbsolute: true,
-  }
-);
+const BABELIFY_CONFIG = {
+  ...BABELIFY_GLOBAL_TRANSFORM,
+  ...BABELIFY_PLUGINS,
+  sourceMapsAbsolute: true,
+};
 
 const preprocessors = ['browserify'];
 
@@ -169,109 +166,87 @@ module.exports = {
     // SauceLabs configurations.
     // New configurations can be created here:
     // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
-    SL_Chrome: Object.assign(
-      {
-        base: 'SauceLabs',
-        browserName: 'chrome',
-        platform: 'Windows 10',
-        version: 'latest',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
-    SL_Chrome_Beta: Object.assign(
-      {
-        base: 'SauceLabs',
-        browserName: 'chrome',
-        platform: 'Windows 10',
-        version: 'beta',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
-    SL_Chrome_Android_7: Object.assign(
-      {
-        base: 'SauceLabs',
-        appiumVersion: '1.8.1',
-        deviceName: 'Android GoogleAPI Emulator',
-        browserName: 'Chrome',
-        platformName: 'Android',
-        platformVersion: '7.1',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
-    SL_iOS_12: Object.assign(
-      {
-        base: 'SauceLabs',
-        appiumVersion: '1.9.1',
-        deviceName: 'iPhone X Simulator',
-        browserName: 'Safari',
-        platformName: 'iOS',
-        platformVersion: '12.0',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
-    SL_iOS_11: Object.assign(
-      {
-        base: 'SauceLabs',
-        appiumVersion: '1.9.1',
-        deviceName: 'iPhone X Simulator',
-        browserName: 'Safari',
-        platformName: 'iOS',
-        platformVersion: '11.3',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
-    SL_Firefox: Object.assign(
-      {
-        base: 'SauceLabs',
-        browserName: 'firefox',
-        platform: 'Windows 10',
-        version: 'latest',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
-    SL_Firefox_Beta: Object.assign(
-      {
-        base: 'SauceLabs',
-        browserName: 'firefox',
-        platform: 'Windows 10',
-        version: 'beta',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
-    SL_Safari_12: Object.assign(
-      {
-        base: 'SauceLabs',
-        browserName: 'safari',
-        platform: 'macOS 10.13',
-        version: '12.1',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
-    SL_Safari_11: Object.assign(
-      {
-        base: 'SauceLabs',
-        browserName: 'safari',
-        platform: 'macOS 10.13',
-        version: '11.1',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
-    SL_Edge: Object.assign(
-      {
-        base: 'SauceLabs',
-        browserName: 'MicrosoftEdge',
-        platform: 'Windows 10',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
-    SL_IE: Object.assign(
-      {
-        base: 'SauceLabs',
-        browserName: 'internet explorer',
-        platform: 'Windows 10',
-      },
-      SAUCE_TIMEOUT_CONFIG
-    ),
+    SL_Chrome: {
+      base: 'SauceLabs',
+      browserName: 'chrome',
+      platform: 'Windows 10',
+      version: 'latest',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_Chrome_Beta: {
+      base: 'SauceLabs',
+      browserName: 'chrome',
+      platform: 'Windows 10',
+      version: 'beta',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_Chrome_Android_7: {
+      base: 'SauceLabs',
+      appiumVersion: '1.8.1',
+      deviceName: 'Android GoogleAPI Emulator',
+      browserName: 'Chrome',
+      platformName: 'Android',
+      platformVersion: '7.1',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_iOS_12: {
+      base: 'SauceLabs',
+      appiumVersion: '1.9.1',
+      deviceName: 'iPhone X Simulator',
+      browserName: 'Safari',
+      platformName: 'iOS',
+      platformVersion: '12.0',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_iOS_11: {
+      base: 'SauceLabs',
+      appiumVersion: '1.9.1',
+      deviceName: 'iPhone X Simulator',
+      browserName: 'Safari',
+      platformName: 'iOS',
+      platformVersion: '11.3',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_Firefox: {
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      platform: 'Windows 10',
+      version: 'latest',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_Firefox_Beta: {
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      platform: 'Windows 10',
+      version: 'beta',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_Safari_12: {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'macOS 10.13',
+      version: '12.1',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_Safari_11: {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'macOS 10.13',
+      version: '11.1',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_Edge: {
+      base: 'SauceLabs',
+      browserName: 'MicrosoftEdge',
+      platform: 'Windows 10',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
+    SL_IE: {
+      base: 'SauceLabs',
+      browserName: 'internet explorer',
+      platform: 'Windows 10',
+      ...SAUCE_TIMEOUT_CONFIG,
+    },
   },
 
   sauceLabs: {

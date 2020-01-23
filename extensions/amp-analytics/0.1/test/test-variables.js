@@ -142,17 +142,25 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     it('expands array vars', () => {
       check(
         '${array}',
-        'xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,%24%7Bfoo%7D',
+        '123,xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,bar,',
         {
           'foo': 'bar',
           'array': [
+            123,
             'xy&x', // special chars should be encoded
             'MACRO(abc,def)', // do not encode macro
             'MACRO(abc,def)&123', // this is not a macro
-            '${foo}', // vars in array is not expanded
+            '${foo}', // vars in array should be expanded
+            '${bar}', // undefined vars should be empty
           ],
         }
       );
+    });
+
+    it('handles array with no vars', () => {
+      check('${array}', 'foo,bar', {
+        'array': ['foo', 'bar'],
+      });
     });
 
     it('handles empty var name', () => {

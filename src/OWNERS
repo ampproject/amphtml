@@ -10,5 +10,13 @@
       pattern: '{iframe-video,mediasession-helper,video-*}.js',
       owners: [{name: 'ampproject/wg-ui-and-a11y'}],
     },
+    {
+      pattern: '{cid-*,*-cid-*,*-cid}.js',
+      owners: [{name: 'ampproject/wg-analytics'}],
+    },
+    {
+      pattern: 'amp-story-embed.js',
+      owners: [{name: 'newmuis'}, {name: 'gmajoulet'}, {name: 'enriqe'}],
+    },
   ],
 }

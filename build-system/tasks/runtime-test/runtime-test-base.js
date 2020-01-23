@@ -242,7 +242,7 @@ class RuntimeTestConfig {
       const plugins = [instanbulPlugin].concat(this.babelifyConfig.plugins);
 
       this.browserify.transform = [
-        ['babelify', Object.assign({}, this.babelifyConfig, {plugins})],
+        ['babelify', {...this.babelifyConfig, plugins}],
       ];
     }
   }

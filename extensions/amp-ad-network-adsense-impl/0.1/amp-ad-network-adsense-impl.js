@@ -214,25 +214,23 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   divertExperiments() {
     const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ (Object.assign(
-      {
-        [FORMAT_EXP]: {
-          isTrafficEligible: () =>
-            !this.responsiveState_ &&
-            Number(this.element.getAttribute('width')) > 0 &&
-            Number(this.element.getAttribute('height')) > 0,
-          branches: ['21062003', '21062004'],
-        },
-        [[FIE_CSS_CLEANUP_EXP.branch]]: {
-          isTrafficEligible: () => true,
-          branches: [
-            [FIE_CSS_CLEANUP_EXP.control],
-            [FIE_CSS_CLEANUP_EXP.experiment],
-          ],
-        },
+        !../../../src/experiments.ExperimentInfo>} */ ({
+      [FORMAT_EXP]: {
+        isTrafficEligible: () =>
+          !this.responsiveState_ &&
+          Number(this.element.getAttribute('width')) > 0 &&
+          Number(this.element.getAttribute('height')) > 0,
+        branches: ['21062003', '21062004'],
       },
-      AMPDOC_FIE_EXPERIMENT_INFO_MAP
-    ));
+      [[FIE_CSS_CLEANUP_EXP.branch]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [FIE_CSS_CLEANUP_EXP.control],
+          [FIE_CSS_CLEANUP_EXP.experiment],
+        ],
+      },
+      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
+    });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
       addExperimentIdToElement(setExps[expName], this.element)
@@ -323,6 +321,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
       'host': this.element.getAttribute('data-ad-host'),
+      'h_ch': this.element.getAttribute('data-ad-host-channel'),
       'hl': this.element.getAttribute('data-language'),
       'to': this.element.getAttribute('data-tag-origin'),
       'pv': sharedStateParams.pv,
@@ -367,14 +366,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this,
         ADSENSE_BASE_URL,
         startTime,
-        Object.assign(
-          {
-            'adsid': identity.token || null,
-            'jar': identity.jar || null,
-            'pucrd': identity.pucrd || null,
-          },
-          parameters
-        ),
+        {
+          'adsid': identity.token || null,
+          'jar': identity.jar || null,
+          'pucrd': identity.pucrd || null,
+          ...parameters,
+        },
         experimentIds
       );
     });
@@ -567,7 +564,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           event['source'] == this.iframe.contentWindow
         ) {
           this.renderStarted();
-          this.iframe.setAttribute('visible', '');
+          setStyles(this.iframe, {'visibility': ''});
           this.win.removeEventListener('message', stickyMsgListener);
         }
       };

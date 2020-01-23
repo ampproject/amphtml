@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
-import {MultidocManager} from '../../../src/runtime';
+import {MultidocManager} from '../../../src/multidoc-manager';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -76,8 +76,8 @@ export class NextPageService {
     /** @private {?Element} */
     this.separator_ = null;
 
-    /** @private {?../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = null;
+    /** @private {?../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = null;
 
     /** @private {?MultidocManager} */
     this.multidocManager_ = null;
@@ -154,7 +154,7 @@ export class NextPageService {
 
     this.navigation_ = Services.navigationForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
-    this.resources_ = Services.resourcesForDoc(ampDoc);
+    this.mutator_ = Services.mutatorForDoc(ampDoc);
     this.multidocManager_ = new MultidocManager(
       win,
       Services.ampdocServiceFor(win),
@@ -242,6 +242,16 @@ export class NextPageService {
   }
 
   /**
+   * Creates an invisible element used to measure the position of the documents
+   * @return {!Element}
+   */
+  createMeasurer_() {
+    const measurer = this.win_.document.createElement('div');
+    measurer.classList.add('i-amphtml-next-page-measurer');
+    return measurer;
+  }
+
+  /**
    * Creates a default hairline separator element to go between two documents.
    * @return {!Element}
    */
@@ -262,6 +272,9 @@ export class NextPageService {
 
       const container = this.win_.document.createElement('div');
 
+      const measurer = this.createMeasurer_();
+      container.appendChild(measurer);
+
       const separator = this.separator_.cloneNode(true);
       separator.removeAttribute('separator');
       container.appendChild(separator);
@@ -276,7 +289,7 @@ export class NextPageService {
       const page = this.nextArticle_;
       this.appendPageHandler_(container).then(() => {
         this.positionObserver_.observe(
-          separator,
+          measurer,
           PositionObserverFidelity.LOW,
           position => this.positionUpdate_(page, position)
         );
@@ -327,7 +340,7 @@ export class NextPageService {
                 this.positionObserver_.unobserve(articleLinks);
                 documentRef.recUnit.isObserving = true;
               }
-              this.resources_.mutateElement(container, () => {
+              this.mutator_.mutateElement(container, () => {
                 try {
                   documentRef.amp = this.attachShadowDoc_(shadowRoot, doc);
 

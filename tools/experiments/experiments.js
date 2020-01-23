@@ -63,21 +63,21 @@ const AMP_CANARY_COOKIE = {
 
 /** @const {!Array<!ExperimentDef>} */
 const CHANNELS = [
-  // Canary (Dev Channel)
+  // Experimental Channel
   {
     id: CANARY_EXPERIMENT_ID,
-    name: 'AMP Dev Channel (more info)',
+    name: 'AMP Experimental Channel (more info)',
     spec:
       'https://github.com/ampproject/amphtml/blob/master/' +
-      'contributing/release-schedule.md#amp-dev-channel',
+      'contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
-  // Release Candidate (RC Channel)
+  // Beta Channel
   {
     id: RC_EXPERIMENT_ID,
-    name: 'AMP RC Channel (more info)',
+    name: 'AMP Beta Channel (more info)',
     spec:
       'https://github.com/ampproject/amphtml/blob/master/' +
-      'contributing/release-schedule.md#amp-release-candidate-rc-channel',
+      'contributing/release-schedule.md#amp-experimental-and-beta-channels',
   },
 ];
 
@@ -91,7 +91,7 @@ if (getMode().localDev) {
 }
 
 /**
- * Builds the expriments tbale.
+ * Builds the expriments table.
  */
 function build() {
   const {host} = window.location;

@@ -96,7 +96,7 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
 
   it('initializeListeners_ should listen to clicks on rootNode', () => {
     const domStub = env.sandbox.stub(
-      localSubscriptionPlatform.rootNode_,
+      localSubscriptionPlatform.rootNode_.body,
       'addEventListener'
     );
 
@@ -115,9 +115,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   });
 
   it('pingbackReturnsAllEntitlements should "pingbackAllEntitlements" config value', () => {
-    const testConfig = Object.assign({}, serviceConfig.services[0], {
+    const testConfig = {
+      ...serviceConfig.services[0],
       'pingbackAllEntitlements': true,
-    });
+    };
     const testLocalPlatform = localSubscriptionPlatformFactory(
       ampdoc,
       testConfig,

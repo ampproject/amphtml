@@ -16,10 +16,9 @@
 'use strict';
 
 const babelify = require('babelify');
-const BBPromise = require('bluebird');
 const browserify = require('browserify');
 const depCheckConfig = require('../test-configs/dep-check-config');
-const fs = BBPromise.promisifyAll(require('fs-extra'));
+const fs = require('fs-extra');
 const gulp = require('gulp');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
@@ -164,7 +163,7 @@ const rules = depCheckConfig.rules.map(config => new Rule(config));
  */
 function getSrcs() {
   return fs
-    .readdirAsync('extensions')
+    .readdir('extensions')
     .then(dirItems => {
       // Look for extension entry points
       return flatten(
@@ -199,7 +198,7 @@ function getSrcs() {
  */
 function getGraph(entryModule) {
   let resolve;
-  const promise = new BBPromise(r => {
+  const promise = new Promise(r => {
     resolve = r;
   });
   const module = Object.create(null);
@@ -211,10 +210,7 @@ function getGraph(entryModule) {
   const bundler = browserify(entryModule, {
     debug: true,
     fast: true,
-  }).transform(
-    babelify,
-    Object.assign({}, BABELIFY_GLOBAL_TRANSFORM, {compact: false})
-  );
+  }).transform(babelify, {...BABELIFY_GLOBAL_TRANSFORM, compact: false});
 
   bundler.pipeline.get('deps').push(
     through.obj(function(row, enc, next) {
@@ -312,7 +308,7 @@ async function depCheck() {
       // This check is for extension folders that actually dont have
       // an extension entry point module yet.
       entryPoints = entryPoints.filter(x => fs.existsSync(x));
-      return BBPromise.all(entryPoints.map(getGraph));
+      return Promise.all(entryPoints.map(getGraph));
     })
     .then(flattenGraph)
     .then(runRules)

@@ -109,11 +109,13 @@ function declareExtension(
   const defaultOptions = {hasCss: false};
   const versions = Array.isArray(version) ? version : [version];
   versions.forEach(v => {
-    extensionsObject[`${name}-${v}`] = Object.assign(
-      {name, version: v, latestVersion},
-      defaultOptions,
-      options
-    );
+    extensionsObject[`${name}-${v}`] = {
+      name,
+      version: v,
+      latestVersion,
+      ...defaultOptions,
+      ...options,
+    };
     if (includeLatest && v == latestVersion) {
       extensionsObject[`${name}-latest`] = extensionsObject[`${name}-${v}`];
     }
@@ -202,6 +204,10 @@ function parseExtensionFlags(preBuild = false) {
   }
 
   const buildOrPreBuild = preBuild ? 'pre-build' : 'build';
+  const coreRuntimeOnlyMessage =
+    green('⤷ Use ') +
+    cyan('--core_runtime_only ') +
+    green('to build just the core runtime.');
   const noExtensionsMessage =
     green('⤷ Use ') +
     cyan('--noextensions ') +
@@ -221,7 +227,9 @@ function parseExtensionFlags(preBuild = false) {
     cyan('foo.amp.html') +
     green('.');
 
-  if (preBuild) {
+  if (argv.core_runtime_only) {
+    log(green('Building just the core runtime.'));
+  } else if (preBuild) {
     log(
       green('Pre-building extension(s):'),
       cyan(getExtensionsToBuild(preBuild).join(', '))
@@ -240,6 +248,7 @@ function parseExtensionFlags(preBuild = false) {
     } else {
       log(green('Building all AMP extensions.'));
     }
+    log(coreRuntimeOnlyMessage);
     log(noExtensionsMessage);
     log(extensionsMessage);
     log(inaboxSetMessage);
@@ -334,7 +343,7 @@ async function buildExtensions(options) {
  */
 async function doBuildExtension(extensions, extension, options) {
   const e = extensions[extension];
-  let o = Object.assign({}, options);
+  let o = {...options};
   o = Object.assign(o, e);
   await buildExtension(
     e.name,
@@ -392,7 +401,7 @@ async function buildExtension(
         version,
         latestVersion,
         hasCss,
-        Object.assign({}, options, {continueOnError: true})
+        {...options, continueOnError: true}
       );
       if (options.onWatchBuild) {
         options.onWatchBuild(bundleComplete);
@@ -407,13 +416,11 @@ async function buildExtension(
       return;
     }
   }
-  if (argv.single_pass) {
-    return;
-  } else {
-    await buildExtensionJs(path, name, version, latestVersion, options);
-  }
   if (name === 'amp-analytics') {
     await vendorConfigs(options);
+  }
+  if (!argv.single_pass) {
+    await buildExtensionJs(path, name, version, latestVersion, options);
   }
 }
 
