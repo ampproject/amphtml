@@ -385,36 +385,37 @@ export class NextPageService {
    * Create a container element for the document and insert it into
    * the amp-next-page element
    * @param {!Page} page
-   * @return {!Element}
+   * @return {!Promise<!Element>}
    */
   createDocumentContainerForPage(page) {
     const container = this.win_.document.createElement('div');
     container.classList.add(DOC_CONTAINER_CLASS);
+    this.element_.insertBefore(container, this.moreBox_);
 
     // Insert the separator
     const separatorInstance = this.separator_.cloneNode(true);
     container.appendChild(separatorInstance);
-    this.maybeRenderSeparatorTemplate_(separatorInstance, page);
+    // TODO(wassgha): If async/wait was allowed, this would look a lot nicer!
+    return this.maybeRenderSeparatorTemplate_(separatorInstance, page).then(
+      () => {
+        // Insert the document
+        const shadowRoot = this.win_.document.createElement('div');
+        shadowRoot.classList.add(SHADOW_ROOT_CLASS);
+        container.appendChild(shadowRoot);
 
-    // Insert the document
-    const shadowRoot = this.win_.document.createElement('div');
-    shadowRoot.classList.add(SHADOW_ROOT_CLASS);
-    container.appendChild(shadowRoot);
+        // Observe this page's visibility
+        this.visibilityObserver_.observe(
+          shadowRoot /** element */,
+          container /** parent */,
+          position => {
+            page.relativePos = position;
+            this.updateVisibility();
+          }
+        );
 
-    // Insert the container
-    this.element_.insertBefore(container, this.moreBox_);
-
-    // Observe this page's visibility
-    this.visibilityObserver_.observe(
-      shadowRoot /** element */,
-      container /** parent */,
-      position => {
-        page.relativePos = position;
-        this.updateVisibility();
+        return container;
       }
     );
-
-    return container;
   }
 
   /**
@@ -722,11 +723,17 @@ export class NextPageService {
         'be inside a <script> tag with type="application/json"'
     );
 
-    const pages = tryParseJson(scriptElement.textContent, error => {
+    const parsed = tryParseJson(scriptElement.textContent, error => {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
-    return user().assertArray(pages, `${TAG} page list should be an array`);
+    const pages = user().assertArray(
+      parsed,
+      `${TAG} page list should be an array`
+    );
+
+    removeElement(scriptElement);
+    return pages;
   }
 
   /**
