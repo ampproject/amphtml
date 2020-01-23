@@ -7,27 +7,22 @@
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software'
+ * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS-IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {loadScript, validateData} from '../3p/3p';
 
-.i-amphtml-next-page-document {
-  overflow: hidden;
-}
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function byplay(global, data) {
+  validateData(data, ['vastUrl']);
 
-.i-amphtml-next-page-document:not(.amp-next-page-document-visible)
-  [i-amphtml-fixedid] {
-  display: none;
-}
+  global.BYPLAY_VAST_URL = data['vastUrl'];
 
-.i-amphtml-next-page-document.amp-next-page-document-visible {
-  opacity: 1;
-  overflow: visible;
-}
-
-.i-amphtml-next-page-placeholder {
-  background: #eee;
+  loadScript(global, 'https://cdn.byplay.net/amp-byplay-v2.js');
 }
