@@ -151,6 +151,23 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    // Layouts that use sizers (responsive, fluid) require the worker-dom
+    // subtree to be wrapped in a "fill content" container. This is because
+    // these layouts do _not_ constrain the size of the amp-script element
+    // via inline styles (they use sizerElement). However, this breaks
+    // "container" layout so only do it selectively.
+    let container;
+    if (this.element.sizerElement) {
+      container = this.win.document.createElement('div');
+      this.applyFillContent(container, true);
+      // Reparent all real children to the container.
+      const realChildren = this.getRealChildren();
+      for (let i = 0; i < realChildren.length; i++) {
+        container.appendChild(realChildren[i]);
+      }
+      this.element.appendChild(container);
+    }
+
     this.userActivation_ = new UserActivationTracker(this.element);
 
     // The displayed name of the combined script in dev tools.
@@ -213,11 +230,13 @@ export class AmpScript extends AMP.BaseElement {
     };
 
     // Create worker and hydrate.
-    WorkerDOM.upgrade(this.element, workerAndAuthorScripts, config).then(
-      workerDom => {
-        this.workerDom_ = workerDom;
-      }
-    );
+    WorkerDOM.upgrade(
+      container || this.element,
+      workerAndAuthorScripts,
+      config
+    ).then(workerDom => {
+      this.workerDom_ = workerDom;
+    });
     return workerAndAuthorScripts;
   }
 

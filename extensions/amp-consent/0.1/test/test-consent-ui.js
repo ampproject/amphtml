@@ -319,14 +319,14 @@ describes.realWin(
           );
         });
 
-        it('should not expand if iframe is not in focus', function*() {
+        it('should not expand if iframe is not in focus', async () => {
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
 
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
-          yield macroTask();
+          await macroTask();
 
           // not currently fullscreen
           expect(consentUI.isFullscreen_).to.be.false;
@@ -353,14 +353,14 @@ describes.realWin(
           ).to.be.false;
         });
 
-        it('should expand if iframe is in focus', function*() {
+        it('should expand if iframe is in focus', async () => {
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
 
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
-          yield macroTask();
+          await macroTask();
 
           // not currently fullscreen
           expect(consentUI.isFullscreen_).to.be.false;
