@@ -27,17 +27,6 @@ export class AmpStoryEmbedManager {
   constructor(win) {
     /** @private {!Window} */
     this.win_ = win;
-
-    /** @private {?AmpStoryEmbed} */
-    this.currentEmbed_ = null;
-  }
-
-  /**
-   * @public
-   * @return {!AmpStoryEmbed}
-   */
-  getEmbed() {
-    return this.currentEmbed_;
   }
 
   /**
@@ -46,24 +35,24 @@ export class AmpStoryEmbedManager {
    * @private
    */
   layoutEmbed_(embedImpl) {
-    if (IntersectionObserver && this.win_ === this.win_.parent) {
-      const intersectingCallback = entries => {
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) {
-            return;
-          }
-          embedImpl.layoutCallback();
-        });
-      };
-
-      const observer = new IntersectionObserver(intersectingCallback, {
-        rootMargin: '100%',
-      });
-      observer.observe(embedImpl.getElement());
+    if (!IntersectionObserver || this.win_ !== this.win_.parent) {
+      this.layoutFallback_(embedImpl);
       return;
     }
 
-    this.layoutFallback_(embedImpl);
+    const intersectingCallback = entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+        embedImpl.layoutCallback();
+      });
+    };
+
+    const observer = new IntersectionObserver(intersectingCallback, {
+      rootMargin: '100%',
+    });
+    observer.observe(embedImpl.getElement());
   }
 
   /**
@@ -75,6 +64,7 @@ export class AmpStoryEmbedManager {
   layoutFallback_(embedImpl) {
     let tick = true;
 
+    // TODO(Enriqe): pause embeds when scrolling away from viewport.
     this.win_.addEventListener('scroll', () => {
       if (!tick) {
         return;
@@ -115,9 +105,9 @@ export class AmpStoryEmbedManager {
     const embeds = doc.getElementsByTagName('amp-story-embed');
     for (let i = 0; i < embeds.length; i++) {
       const embedEl = embeds[i];
-      this.currentEmbed_ = new AmpStoryEmbed(this.win_, embedEl);
-      this.currentEmbed_.buildCallback();
-      this.layoutEmbed_(this.currentEmbed_);
+      const embed = new AmpStoryEmbed(this.win_, embedEl);
+      embed.buildCallback();
+      this.layoutEmbed_(embed);
     }
   }
 }

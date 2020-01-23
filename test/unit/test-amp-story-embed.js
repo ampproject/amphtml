@@ -40,18 +40,15 @@ describes.realWin('AmpStoryEmbed', {amp: false}, env => {
 
   it('should build an iframe for each story', () => {
     manager.loadEmbeds();
-    const storyEmbed = manager.getEmbed();
-    const shadowRoot = storyEmbed.getRoot();
 
-    expect(shadowRoot.children.length).to.equal(1);
+    expect(embedEl.shadowRoot.querySelector('iframe')).to.exist;
   });
 
   it('should correctly append params at the end of the story url', () => {
     manager.loadEmbeds();
-    const storyEmbed = manager.getEmbed();
-    const shadowRoot = storyEmbed.getRoot();
+    const storyIframe = embedEl.shadowRoot.querySelector('iframe');
 
-    expect(shadowRoot.firstElementChild.getAttribute('src')).to.equals(
+    expect(storyIframe.getAttribute('src')).to.equals(
       url + '?amp_js_v=0.1#visibilityState=inactive&origin=about%3Asrcdoc'
     );
   });
@@ -61,10 +58,9 @@ describes.realWin('AmpStoryEmbed', {amp: false}, env => {
     embedEl.firstElementChild.setAttribute('href', url);
 
     manager.loadEmbeds();
-    const storyEmbed = manager.getEmbed();
-    const shadowRoot = storyEmbed.getRoot();
+    const storyIframe = embedEl.shadowRoot.querySelector('iframe');
 
-    expect(shadowRoot.firstElementChild.getAttribute('src')).to.equals(
+    expect(storyIframe.getAttribute('src')).to.equals(
       url + '&amp_js_v=0.1#visibilityState=inactive&origin=about%3Asrcdoc'
     );
   });

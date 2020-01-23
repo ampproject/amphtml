@@ -93,14 +93,6 @@ export class AmpStoryEmbed {
     return this.element_;
   }
 
-  /**
-   * @visibleForTesting
-   * @return {!Element}
-   */
-  getRoot() {
-    return this.rootEl_;
-  }
-
   /** @public */
   buildCallback() {
     this.stories_ = toArray(this.element_.querySelectorAll('a'));
