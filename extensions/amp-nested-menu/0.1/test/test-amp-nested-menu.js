@@ -20,6 +20,8 @@ import {Keys} from '../../../../src/utils/key-codes';
 import {htmlFor} from '../../../../src/static-template';
 import {tryFocus} from '../../../../src/dom';
 
+const ANIMATION_TIMEOUT = 600;
+
 describes.realWin(
   'amp-nested-menu component',
   {
@@ -98,13 +100,19 @@ describes.realWin(
       const submenuEl3 = doc.getElementById('submenu-3');
       expect(menuEl.hasAttribute('child-open')).to.be.false;
       expect(submenuEl1.hasAttribute('open')).to.be.false;
+      expect(openEl1.getAttribute('aria-expanded')).to.be.equal('false');
       const clickEvent = new Event('click', {bubbles: true});
       openEl1.dispatchEvent(clickEvent);
+      clock.tick(ANIMATION_TIMEOUT);
       expect(menuEl.hasAttribute('child-open')).to.be.true;
       expect(submenuEl1.hasAttribute('open')).to.be.true;
       expect(submenuEl1.hasAttribute('child-open')).to.be.false;
       expect(submenuEl3.hasAttribute('open')).to.be.false;
+      expect(openEl1.getAttribute('aria-expanded')).to.be.equal('true');
+      expect(openEl3.getAttribute('aria-expanded')).to.be.equal('false');
       openEl3.dispatchEvent(clickEvent);
+      clock.tick(ANIMATION_TIMEOUT);
+      expect(openEl3.getAttribute('aria-expanded')).to.be.equal('true');
       expect(submenuEl1.hasAttribute('child-open')).to.be.true;
       expect(submenuEl3.hasAttribute('open')).to.be.true;
     });
@@ -115,15 +123,25 @@ describes.realWin(
       const submenuEl1 = doc.getElementById('submenu-1');
       const closeEl3 = doc.getElementById('close-3');
       const submenuEl3 = doc.getElementById('submenu-3');
+      const openEl3 = doc.getElementById('open-3');
+      const openEl1 = doc.getElementById('open-1');
       menuEl.implementation_.open_(submenuEl1);
+      clock.tick(ANIMATION_TIMEOUT);
       menuEl.implementation_.open_(submenuEl3);
+      clock.tick(ANIMATION_TIMEOUT);
+      expect(openEl1.getAttribute('aria-expanded')).to.be.equal('true');
+      expect(openEl3.getAttribute('aria-expanded')).to.be.equal('true');
       expect(menuEl.hasAttribute('child-open')).to.be.true;
       expect(submenuEl1.hasAttribute('open')).to.be.true;
       const clickEvent = new Event('click', {bubbles: true});
       closeEl3.dispatchEvent(clickEvent);
+      clock.tick(ANIMATION_TIMEOUT);
+      expect(openEl3.getAttribute('aria-expanded')).to.be.equal('false');
       expect(submenuEl1.hasAttribute('child-open')).to.be.false;
       expect(submenuEl3.hasAttribute('open')).to.be.false;
       closeEl1.dispatchEvent(clickEvent);
+      clock.tick(ANIMATION_TIMEOUT);
+      expect(openEl1.getAttribute('aria-expanded')).to.be.equal('false');
       expect(menuEl.hasAttribute('child-open')).to.be.false;
       expect(submenuEl1.hasAttribute('open')).to.be.false;
     });
@@ -249,10 +267,10 @@ describes.realWin(
       const closeEl = doc.getElementById('close-1');
       const submenuEl = doc.getElementById('submenu-1');
       menuEl.implementation_.open_(submenuEl);
-      clock.tick(600);
+      clock.tick(ANIMATION_TIMEOUT);
       expect(doc.activeElement).to.equal(closeEl);
       menuEl.implementation_.close_(submenuEl);
-      clock.tick(600);
+      clock.tick(ANIMATION_TIMEOUT);
       expect(doc.activeElement).to.equal(openEl);
     });
   }
