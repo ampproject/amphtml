@@ -94,17 +94,35 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     expect(service.checkSha384).to.be.called;
   });
 
-  it('should warn if there is zero width/height', () => {
-    const warnStub = env.sandbox.stub(user(), 'warn');
-    env.sandbox.stub(script, 'getLayoutBox').returns({height: 0, width: 0});
-    script.onLayoutMeasure();
+  describe('Initialization skipped warning due to zero height/width', () => {
+    it('should not warn when there is positive width/height', () => {
+      const warnStub = env.sandbox.stub(user(), 'warn');
+      env.sandbox.stub(script, 'getLayoutBox').returns({height: 1, width: 1});
+      script.onLayoutMeasure();
+      expect(warnStub).to.have.callCount(0);
+    });
 
-    expect(warnStub).calledWith(
-      'amp-script',
-      'Skipped initializing amp-script due to zero width and height.',
-      script.element
-    );
-    expect(warnStub).to.have.callCount(1);
+    it('should warn if there is zero width/height', () => {
+      const warnStub = env.sandbox.stub(user(), 'warn');
+      env.sandbox.stub(script, 'getLayoutBox').returns({height: 0, width: 0});
+      script.onLayoutMeasure();
+
+      expect(warnStub).calledWith(
+        'amp-script',
+        'Skipped initializing amp-script due to zero width and height.',
+        script.element
+      );
+      expect(warnStub).to.have.callCount(1);
+    });
+
+    it('should only warn if layoutCallback hasnt happened', () => {
+      const warnStub = env.sandbox.stub(user(), 'warn');
+      allowConsoleError(() => {
+        script.layoutCallback();
+      });
+      script.onLayoutMeasure();
+      expect(warnStub).to.have.callCount(0);
+    });
   });
 
   it('should fail on invalid sha384(author_js) for cross-origin src', () => {

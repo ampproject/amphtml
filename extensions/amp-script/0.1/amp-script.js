@@ -84,6 +84,9 @@ export class AmpScript extends AMP.BaseElement {
     /** @private {string} */
     this.debugId_ = 'amp-script[unknown].js';
 
+    /** @private {boolean} */
+    this.layoutCallbackHappened_ = false;
+
     /**
      * If true, most production constraints are disabled including script size,
      * script hash sum for local scripts, etc. Default is false.
@@ -138,6 +141,10 @@ export class AmpScript extends AMP.BaseElement {
    */
   onLayoutMeasure() {
     super.onLayoutMeasure();
+    if (this.layoutCallbackHappened_) {
+      return;
+    }
+
     const {width, height} = this.getLayoutBox();
     if (width === 0 && height === 0) {
       user().warn(
@@ -166,6 +173,8 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    this.layoutCallbackHappened_ = true;
+
     // Layouts that use sizers (responsive, fluid) require the worker-dom
     // subtree to be wrapped in a "fill content" container. This is because
     // these layouts do _not_ constrain the size of the amp-script element
