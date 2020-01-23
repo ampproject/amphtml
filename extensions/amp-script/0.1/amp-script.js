@@ -139,8 +139,8 @@ export class AmpScript extends AMP.BaseElement {
   /**
    * @override
    */
-  onLayoutMeasure() {
-    super.onLayoutMeasure();
+  onMeasureChanged() {
+    super.onMeasureChanged();
     if (this.layoutCompleted_) {
       return;
     }
