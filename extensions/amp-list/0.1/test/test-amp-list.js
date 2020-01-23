@@ -809,7 +809,7 @@ describes.repeated(
               );
             });
 
-            it('"amp-state:" uri should skip rendering and emit an error', async () => {
+            it('"amp-state:" uri should skip rendering and emit an error', () => {
               toggleExperiment(win, 'amp-list-init-from-state', true);
 
               const ampStateEl = doc.createElement('amp-state');
@@ -822,9 +822,9 @@ describes.repeated(
 
               listMock.expects('scheduleRender_').never();
 
-              allowConsoleError(async () => {
-                await list.layoutCallback();
-              });
+              const errorMsg = /cannot be used in SSR mode/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
             });
 
             it('Bound [src] should skip rendering and emit an error', async () => {
@@ -1241,11 +1241,9 @@ describes.repeated(
             });
 
             it('should throw an error if used without the experiment enabled', async () => {
-              const errorMsg = 'Invalid value: amp-state:okapis';
+              const errorMsg = /Invalid value: amp-state:okapis/;
               expectAsyncConsoleError(errorMsg);
-              expect(list.layoutCallback()).to.eventually.rejectedWith(
-                errorMsg
-              );
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
             });
 
             it('should log an error if amp-bind was not included', async () => {
@@ -1258,9 +1256,10 @@ describes.repeated(
               ampStateJson.setAttribute('type', 'application/json');
               ampStateEl.appendChild(ampStateJson);
               doc.body.appendChild(ampStateEl);
-              expect(list.layoutCallback()).to.eventually.throw(
-                'require amp-bind to be installed'
-              );
+
+              const errorMsg = /bind to be installed/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
             });
 
             it('should render a list using local data', async () => {

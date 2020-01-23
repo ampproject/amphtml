@@ -364,7 +364,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Returns json pointed at by an amp-state protocol src. For example,
+   * Render an amp-list that has an "amp-state:" uri. For example,
    * src="amp-state:json.path".
    *
    * @param {string} src
@@ -372,30 +372,22 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   renderAmpStateJson_(src) {
-    const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
     return Services.bindForDocOrNull(this.element)
       .then(bind => {
-        userAssert(
-          bind,
-          '"amp-state:" URLs require amp-bind to be installed.',
-          this.element
-        );
+        userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
         userAssert(
           !this.ssrTemplateHelper_.isEnabled(),
-          "'amp-list': 'amp-state' URIs cannot be used in SSR mode."
+          '[amp-list]: "amp-state" URIs cannot be used in SSR mode.'
         );
 
+        const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
         return bind.getState(ampStatePath);
       })
       .then(json => {
-        if (typeof json === 'undefined') {
-          user().warn(
-            TAG,
-            `No data was found at provided uri: ${elementSrc}`,
-            this.element
-          );
-          return;
-        }
+        userAssert(
+          typeof json !== 'undefined',
+          `[amp-list] No data was found at provided uri: ${src}`
+        );
 
         const array = /** @type {!Array} */ (isArray(json) ? json : [json]);
         return this.scheduleRender_(array, /* append */ false);
@@ -421,8 +413,7 @@ export class AmpList extends AMP.BaseElement {
       this.element.setAttribute('src', '');
       userAssert(
         !this.ssrTemplateHelper_.isEnabled(),
-        TAG,
-        '"[src]" may not be bound in SSR mode.'
+        '[amp-list] "[src]" may not be bound in SSR mode.'
       );
 
       const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
