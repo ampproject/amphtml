@@ -784,7 +784,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         Services.viewportForDoc(this.getAmpDoc()).getScrollHeight(),
       BKG_STATE: () => (this.getAmpDoc().isVisible() ? 'visible' : 'hidden'),
       CANONICAL_URL: () =>
-        Services.documentInfoForDoc(this.element).canonicalUrl
+        Services.documentInfoForDoc(this.element).canonicalUrl,
     };
   }
 
