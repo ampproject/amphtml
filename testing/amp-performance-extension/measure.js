@@ -18,18 +18,11 @@
 let cumulativeLayoutShift, largestContentfulPaint, longTasks, measureStarted;
 
 function renderMeasurement(container, label, count) {
-  const line = document.createElement('div');
-  line.classList.add('i-amphtml-performance-line');
-  const labelSpan = document.createElement('div');
-  labelSpan.classList.add('i-amphtml-performance-label');
-  labelSpan./* OK */ innerText = label;
-  const countSpan = document.createElement('div');
-  countSpan.classList.add('i-amphtml-performance-count');
-  countSpan./* OK */ innerText = count.toFixed(4);
-  line.appendChild(labelSpan);
-  line.appendChild(countSpan);
-  container.appendChild(line);
-  return countSpan;
+  container./*OK*/ innerHTML += `<div class='i-amphtml-performance-line'>
+    <div class="i-amphtml-performance-label">${label}</div>
+    <div class="i-amphtml-performance-count">${count.toFixed(4)}</div>
+  </div>`;
+  return container.lastElementChild.lastElementChild;
 }
 
 function addStyleString(root, str) {
