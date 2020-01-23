@@ -85,7 +85,7 @@ export class AmpScript extends AMP.BaseElement {
     this.debugId_ = 'amp-script[unknown].js';
 
     /** @private {boolean} */
-    this.layoutCallbackHappened_ = false;
+    this.layoutCompleted_ = false;
 
     /**
      * If true, most production constraints are disabled including script size,
@@ -141,7 +141,7 @@ export class AmpScript extends AMP.BaseElement {
    */
   onLayoutMeasure() {
     super.onLayoutMeasure();
-    if (this.layoutCallbackHappened_) {
+    if (this.layoutCompleted_) {
       return;
     }
 
@@ -173,7 +173,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.layoutCallbackHappened_ = true;
+    this.layoutCompleted_ = true;
 
     // Layouts that use sizers (responsive, fluid) require the worker-dom
     // subtree to be wrapped in a "fill content" container. This is because
