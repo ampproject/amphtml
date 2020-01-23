@@ -35,7 +35,7 @@ export class AmpStoryEmbedManager {
    * @private
    */
   layoutEmbed_(embedImpl) {
-    if (!IntersectionObserver || this.win_ !== this.win_.parent) {
+    if (!this.win_.IntersectionObserver || this.win_ !== this.win_.parent) {
       this.layoutFallback_(embedImpl);
       return;
     }
