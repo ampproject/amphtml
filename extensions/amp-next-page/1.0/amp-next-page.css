@@ -27,3 +27,7 @@
   opacity: 1;
   overflow: visible;
 }
+
+.i-amphtml-next-page-placeholder {
+  background: #eee;
+}

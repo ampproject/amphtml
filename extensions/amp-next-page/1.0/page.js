@@ -16,6 +16,7 @@
 
 import {ViewportRelativePos} from './visibility-observer';
 import {VisibilityState} from '../../../src/visibility-state';
+import {devAssert} from '../../../src/log';
 
 /** @enum {number} */
 export const PageState = {
@@ -24,6 +25,7 @@ export const PageState = {
   LOADED: 2,
   FAILED: 3,
   INSERTED: 4,
+  PAUSED: 5,
 };
 
 const VISIBLE_DOC_CLASS = 'amp-next-page-document-visible';
@@ -40,11 +42,17 @@ export class Page {
     this.title_ = meta.title;
     /** @private {string} */
     this.url_ = meta.url;
+    /** @private {string} */
+    this.initialUrl_ = meta.url;
     /** @private @const {string} */
     this.image_ = meta.image;
 
     /** @private {?../../../src/runtime.ShadowDoc} */
     this.shadowDoc_ = null;
+    /** @private {?Element} */
+    this.container_ = null;
+    /** @private {?Document} */
+    this.cachedContent_ = null;
     /** @private {!PageState} */
     this.state_ = PageState.QUEUED;
     /** @private {!VisibilityState} */
@@ -66,6 +74,11 @@ export class Page {
   }
 
   /** @return {string} */
+  get initialUrl() {
+    return this.initialUrl_;
+  }
+
+  /** @return {string} */
   get image() {
     return this.image_;
   }
@@ -80,12 +93,22 @@ export class Page {
     return this.relativePos_;
   }
 
-  /** @return {!Document|undefined} */
+  /** @return {!Document|!ShadowRoot|undefined} */
   get document() {
     if (!this.shadowDoc_) {
       return;
     }
-    return /** @type {!Document} */ (this.shadowDoc_.ampdoc.getRootNode());
+    return this.shadowDoc_.ampdoc.getRootNode();
+  }
+
+  /** @return {?Element} */
+  get container() {
+    return this.container_;
+  }
+
+  /** @return {?../../../src/runtime.ShadowDoc} */
+  get shadowDoc() {
+    return this.shadowDoc_;
   }
 
   /** @param {!ViewportRelativePos} position */
@@ -98,6 +121,13 @@ export class Page {
    */
   isVisible() {
     return this.visibilityState_ === VisibilityState.VISIBLE;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isPaused() {
+    return this.state_ === PageState.PAUSED;
   }
 
   /**
@@ -115,6 +145,12 @@ export class Page {
     if (visibilityState == this.visibilityState_) {
       return;
     }
+
+    //Reload the page if necessary
+    if (this.isPaused() && visibilityState === VisibilityState.VISIBLE) {
+      this.resume();
+    }
+
     // Update visibility internally and at the shadow doc level
     this.visibilityState_ = visibilityState;
     if (this.shadowDoc_) {
@@ -124,10 +160,36 @@ export class Page {
         .classList.toggle(VISIBLE_DOC_CLASS, this.isVisible());
     }
 
-    // Switch the title and url of the page to reflect this page
     if (this.isVisible()) {
+      // Switch the title and url of the page to reflect this page
       this.manager_.setTitlePage(this);
     }
+  }
+
+  /**
+   * Creates a placeholder in place of the original page and unloads
+   * the shadow root from memory
+   * @return {!Promise}
+   */
+  pause() {
+    if (!this.shadowDoc_) {
+      return Promise.resolve();
+    }
+    return this.shadowDoc_.close().then(() => {
+      this.manager_.closeDocument(this /** page */).then(() => {
+        this.shadowDoc_ = null;
+        this.visibilityState_ = VisibilityState.HIDDEN;
+        this.state_ = PageState.PAUSED;
+      });
+    });
+  }
+
+  /**
+   * Removes the placeholder and re-renders the page after its shadow
+   * root has been removed
+   */
+  resume() {
+    this.attach_(devAssert(this.cachedContent_));
   }
 
   /**
@@ -168,19 +230,41 @@ export class Page {
       .fetchPageDocument(this)
       .then(content => {
         this.state_ = PageState.LOADED;
-
-        const shadowDoc = this.manager_.appendAndObservePage(this, content);
-        if (shadowDoc) {
-          this.shadowDoc_ = shadowDoc;
-          this.manager_.setLastFetchedPage(this);
-          this.state_ = PageState.INSERTED;
-        } else {
-          this.state_ = PageState.FAILED;
-        }
+        this.container_ = this.manager_.createDocumentContainerForPage(
+          this /** page */
+        );
+        // TODO(wassgha): To further optimize, this should ideally
+        // be parsed from the service worker instead of stored in memory
+        this.cachedContent_ = content;
+        this.attach_(content);
       })
       .catch(() => {
         this.state_ = PageState.FAILED;
+        // TOOD(wassgha): Silently skips this page, should we re-try or show an error state?
+        this.manager_.setLastFetchedPage(this);
       });
+  }
+
+  /**
+   * Inserts the fetched (or cached) HTML as the document's content
+   * @param {!Document} content
+   */
+  attach_(content) {
+    const shadowDoc = this.manager_.attachDocumentToPage(
+      this /** page */,
+      content,
+      this.isPaused() /** force */
+    );
+
+    if (shadowDoc) {
+      this.shadowDoc_ = shadowDoc;
+      if (!this.isPaused()) {
+        this.manager_.setLastFetchedPage(this);
+      }
+      this.state_ = PageState.INSERTED;
+    } else {
+      this.state_ = PageState.FAILED;
+    }
   }
 }
 

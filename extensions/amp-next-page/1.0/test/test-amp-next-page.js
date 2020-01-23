@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import '../amp-next-page';
+import {Direction} from '../service';
 import {PageState} from '../page';
 import {Services} from '../../../../src/services';
 import {ViewportRelativePos} from '../visibility-observer';
@@ -23,6 +24,30 @@ import {toggleExperiment} from '../../../../src/experiments';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>
     <div style="height:1000px"></div>
+    <footer>Footer</footer>`;
+const MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS = `<header>Header</header>
+    <div style="height:1000px"></div>
+    <amp-next-page>
+        <script type="application/json">
+        [
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "Title 3",
+            "url": "./document3"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "Title 4",
+            "url": "./document4"
+          },
+          {
+            "image": "/examples/img/hero@1x.jpg",
+            "title": "Title 2",
+            "url": "./document2"
+          }
+        ]
+      </script>
+    </amp-next-page>
     <footer>Footer</footer>`;
 const VALID_CONFIG = [
   {
@@ -326,6 +351,131 @@ describes.realWin(
 
         expect(service.pages_[1].document.getElementById('analytics1')).to.be
           .null;
+      });
+    });
+
+    describe('infinite loading', () => {
+      let element;
+      let service;
+
+      beforeEach(async () => {
+        element = await getAMPNextPage({
+          inlineConfig: VALID_CONFIG,
+        });
+
+        await element.build();
+        await element.layoutCallback();
+
+        service = Services.nextPageServiceForDoc(doc);
+      });
+
+      afterEach(async () => {
+        element.parentNode.removeChild(element);
+      });
+
+      it('recursively parses pages and avoids loops', async () => {
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
+        expect(service.pages_.length).to.equal(3);
+
+        env.fetchMock.get(/\/document1/, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
+        await service.maybeFetchNext();
+
+        // Adds the two documents coming from Document 1's recommendations
+        expect(service.pages_.length).to.equal(5);
+        expect(service.pages_.some(page => page.title == 'Title 3')).to.be.true;
+        expect(service.pages_.some(page => page.title == 'Title 4')).to.be.true;
+        // Avoids loops (ignores previously inserted page)
+        expect(
+          service.pages_.filter(page => page.title == 'Title 2').length
+        ).to.equal(1);
+      });
+
+      it('unloads pages and replaces them with a placeholder', async () => {
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+        const secondPagePauseSpy = env.sandbox.spy(service.pages_[2], 'pause');
+
+        env.fetchMock.get(/\/document1/, MOCK_NEXT_PAGE);
+        env.fetchMock.get(/\/document2/, MOCK_NEXT_PAGE);
+        await service.maybeFetchNext();
+        await service.maybeFetchNext();
+
+        const {container} = service.pages_[2];
+        expect(container).to.be.ok;
+        expect(container.querySelector('.i-amphtml-next-page-placeholder')).to
+          .not.be.ok;
+        expect(container.querySelector('.i-amphtml-next-page-shadow-root')).to
+          .be.ok;
+
+        service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
+        service.scrollDirection_ = Direction.UP;
+
+        await service.hidePreviousPages_(
+          0 /** index */,
+          0 /** pausePageCountForTesting */
+        );
+
+        // Internally changes the state to paused
+        expect(secondPagePauseSpy).to.be.calledOnce;
+        expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
+        expect(service.pages_[2].visibilityState_).to.equal(
+          VisibilityState.HIDDEN
+        );
+
+        // Replaces the inserted shadow doc with a placeholder of equal height
+        expect(container.querySelector('.i-amphtml-next-page-placeholder')).to
+          .be.ok;
+        expect(container.querySelector('.i-amphtml-next-page-shadow-root')).to
+          .not.be.ok;
+        expect(
+          win.getComputedStyle(
+            container.querySelector('.i-amphtml-next-page-placeholder')
+          ).height
+        ).to.equal('1036px');
+      });
+
+      it('reloads pages and removes the placeholder', async () => {
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+        const secondPageResumeSpy = env.sandbox.spy(
+          service.pages_[2],
+          'resume'
+        );
+
+        env.fetchMock.get(/\/document1/, MOCK_NEXT_PAGE);
+        env.fetchMock.get(/\/document2/, MOCK_NEXT_PAGE);
+        await service.maybeFetchNext();
+        await service.maybeFetchNext();
+
+        const {container} = service.pages_[2];
+        expect(container).to.be.ok;
+        service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
+        service.scrollDirection_ = Direction.UP;
+        await service.hidePreviousPages_(
+          0 /** index */,
+          0 /** pausePageCountForTesting */
+        );
+        expect(service.pages_[2].state_).to.equal(PageState.PAUSED);
+        expect(service.pages_[2].visibilityState_).to.equal(
+          VisibilityState.HIDDEN
+        );
+
+        service.scrollDirection_ = Direction.DOWN;
+        await service.resumePausedPages_(
+          1 /** index */,
+          0 /** pausePageCountForTesting */
+        );
+
+        // Replaces the inserted placeholder with the page's content
+        expect(secondPageResumeSpy).to.be.calledOnce;
+        expect(container.querySelector('.i-amphtml-next-page-placeholder')).to
+          .not.be.ok;
+        expect(container.querySelector('.i-amphtml-next-page-shadow-root')).to
+          .be.ok;
+        expect(
+          win.getComputedStyle(
+            container.querySelector('.i-amphtml-next-page-shadow-root')
+          ).height
+        ).to.equal('1036px');
       });
     });
 
