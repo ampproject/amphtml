@@ -59,4 +59,3 @@ Oblivki impl uses the same tags as `<amp-ad>`.
     <td>Unique block key</td>
   </tr>
 </table>
-
