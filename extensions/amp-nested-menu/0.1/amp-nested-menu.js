@@ -100,7 +100,7 @@ export class AmpNestedMenu extends AMP.BaseElement {
         submenuBtn.setAttribute('tabindex', 0);
       }
       submenuBtn.setAttribute('role', 'button');
-      // Initialize aria-expanded for a11y
+      // Adds aria-expanded to the submenu open button if present
       if (submenuBtn.hasAttribute('amp-nested-submenu-open')) {
         submenuBtn.setAttribute('aria-expanded', 'false');
       }
