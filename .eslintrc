@@ -230,6 +230,20 @@
         "process": false,
         "require": false
       }
+    },
+    {
+      "files": ["**/*.extern.js"],
+      "rules": {
+        "no-var": 0,
+        "no-undef": 0,
+        "no-unused-vars": 0,
+        "prefer-const": 0,
+        "require-jsdoc": 0,
+        "jsdoc/check-tag-names": 0,
+        "local/closure-type-primitives": 0,
+        "local/no-duplicate-name-typedef": 0,
+        "google-camelcase/google-camelcase": 0
+      }
     }
   ]
 }
