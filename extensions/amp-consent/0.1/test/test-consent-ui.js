@@ -17,6 +17,7 @@
 import {CONSENT_ITEM_STATE, constructConsentInfo} from '../consent-info';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
 import {Services} from '../../../../src/services';
+import {dev} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {elementByTag} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
@@ -319,14 +320,15 @@ describes.realWin(
           );
         });
 
-        it('should not expand if iframe is not in focus', function*() {
+        it('should not expand if iframe is not in focus', async () => {
+          const errorSpy = env.sandbox.spy(dev(), 'warn');
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
 
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
-          yield macroTask();
+          await macroTask();
 
           // not currently fullscreen
           expect(consentUI.isFullscreen_).to.be.false;
@@ -351,16 +353,21 @@ describes.realWin(
               consentUiClasses.iframeFullscreen
             )
           ).to.be.false;
+          expect(errorSpy).to.be.calledOnce;
+          expect(errorSpy.args[0][1]).to.match(
+            /iframe could not enter fullscren/
+          );
         });
 
-        it('should expand if iframe is in focus', function*() {
+        it('should expand if iframe is in focus', async () => {
+          const errorSpy = env.sandbox.spy(dev(), 'warn');
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
 
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
-          yield macroTask();
+          await macroTask();
 
           // not currently fullscreen
           expect(consentUI.isFullscreen_).to.be.false;
@@ -389,6 +396,7 @@ describes.realWin(
               consentUiClasses.iframeFullscreen
             )
           ).to.be.true;
+          expect(errorSpy).to.not.be.called;
         });
       });
     });

@@ -682,7 +682,7 @@ export class ConsentUI {
         (this.restrictFullscreenOn_ &&
           this.document_.activeElement !== this.ui_)
       ) {
-        // TODO (@torch2424) Send response back if enter fullscreen was succesful
+        dev().warn(TAG, 'iframe could not enter fullscren');
         return;
       }
 
