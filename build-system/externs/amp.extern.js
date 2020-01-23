@@ -535,6 +535,7 @@ Activity.prototype.getIncrementalEngagedTime = function(name, reset) {};
 AccessService.prototype.getAccessReaderId = function() {};
 AccessService.prototype.getAuthdataField = function(field) {};
 // Same for amp-analytics
+
 /**
  * The "get CID" parameters.
  * - createCookieIfNotPresent: Whether CID is allowed to create a cookie when.
@@ -542,6 +543,7 @@ AccessService.prototype.getAuthdataField = function(field) {};
  * @typedef {{
  *   scope: string,
  *   createCookieIfNotPresent: (boolean|undefined),
+ *   cookieName: (string|undefined),
  * }}
  */
 var GetCidDef;
