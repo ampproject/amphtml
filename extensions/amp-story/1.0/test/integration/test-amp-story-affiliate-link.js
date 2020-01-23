@@ -31,11 +31,11 @@ t.run('amp-story-affiliate link', () => {
       body: `
       <amp-story standalone>
         <amp-story-page id="page-1">
-          <amp-story-grid-layer template="vertical">            
+          <amp-story-grid-layer template="vertical">
             <h1>Third Page</h1>
             <a id="blink-1" href="https://amp.dev" role="link" target="_blank" affiliate-link-icon="shopping-cart">
               amp.devamp.devamp.devamp.devamp.devamp.dev
-            </a>      
+            </a>
           </amp-story-grid-layer>
         </amp-story-page>
       </amp-story>
@@ -77,7 +77,7 @@ t.run('amp-story-affiliate link', () => {
         expect(RequestBank.withdraw()).to.throw;
       });
 
-      it('should send analytics event on external click', async () => {
+      it.skip('should send analytics event on external click', async () => {
         browser.click('#blink-1');
         browser.click('#blink-1');
         const req = await RequestBank.withdraw();
