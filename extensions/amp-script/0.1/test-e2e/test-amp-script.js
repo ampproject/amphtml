@@ -17,7 +17,8 @@
 describes.endtoend(
   'amp-script e2e',
   {
-    testUrl: 'http://localhost:8000/test/manual/amp-script/test1.amp.html',
+    testUrl:
+      'http://localhost:8000/test/fixtures/e2e/amp-script/basic.amp.html',
     initialRect: {width: 600, height: 600},
     environments: ['single'],
     browsers: ['chrome', 'safari'],
@@ -50,6 +51,27 @@ describes.endtoend(
       // Output.
       const h1 = await controller.findElement('h1');
       await expect(controller.getElementText(h1)).to.equal('Hello World!');
+    });
+
+    // In layout=responsive|fluid, amp-script creates a fill-content container
+    // div and reparents children to it. This ensures that the element sizing
+    // is respected.
+    it('should respect aspect ratio in layout=responsive', async () => {
+      const element = await controller.findElement(
+        'amp-script[layout="responsive"]'
+      );
+      await expect(controller.getElementAttribute(element, 'class')).to.contain(
+        'i-amphtml-layout'
+      );
+
+      const width = await controller.getElementAttribute(element, 'width');
+      const height = await controller.getElementAttribute(element, 'height');
+      const targetRatio = Number(width) / Number(height);
+
+      const rect = await controller.getElementRect(element);
+      const realRatio = rect.width / rect.height;
+
+      await expect(realRatio).to.equal(targetRatio);
     });
   }
 );
