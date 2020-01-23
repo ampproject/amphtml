@@ -937,9 +937,9 @@ export function copyProperties(obj, prototype) {
  * done.
  *
  * @param {!Window} win
- * @param {!Function=} opt_ctor
+ * @param {!Function} ctor
  */
-export function install(win, opt_ctor) {
+export function install(win, ctor) {
   // Don't install in no-DOM environments e.g. worker.
   const shouldInstall = win.document;
   const hasCE = hasCustomElements(win);
@@ -950,7 +950,7 @@ export function install(win, opt_ctor) {
   let install = true;
   let installWrapper = false;
 
-  if (opt_ctor && hasCE) {
+  if (ctor && hasCE) {
     // If ctor is constructable without new, it's a function. That means it was
     // compiled down, and we need to do the minimal polyfill because all you
     // cannot extend HTMLElement without native classes.
@@ -958,15 +958,16 @@ export function install(win, opt_ctor) {
       const {Reflect} = win;
 
       // "Construct" ctor using ES5 idioms
-      const instance = /** @type {!Function} */ (Object.create(
-        opt_ctor.prototype
-      ));
+      // I'm not sure why, but Closure will complain at the
+      // `Function.call.call()` below unless we cast to a Function instance
+      // here.
+      const instance = /** @type {!Function} */ (Object.create(ctor.prototype));
 
       // This will throw an error unless we're in a transpiled environemnt.
       // Native classes must be called as `new Ctor`, not `Ctor.call(instance)`.
       // We use `Function.call.call` because Closure is too smart for regular
       // `Ctor.call`.
-      Function.call.call(opt_ctor, instance);
+      Function.call.call(ctor, instance);
 
       // If that didn't throw, we're transpiled.
       // Let's find out if we can wrap HTMLElement and avoid a full patch.
