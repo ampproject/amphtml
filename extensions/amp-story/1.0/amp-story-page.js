@@ -496,6 +496,8 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   onMeasureChanged() {
+    // Only measures from the first story page, that always gets built because
+    // of the prerendering optimizations in place.
     if (!this.isFirstPage_) {
       return;
     }
