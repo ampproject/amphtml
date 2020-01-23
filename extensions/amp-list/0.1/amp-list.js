@@ -264,6 +264,11 @@ export class AmpList extends AMP.BaseElement {
       this.initializeLoadMoreElements_();
     }
 
+    const src = this.element.getAttribute('src');
+    if (this.isAmpStateSrc_(src)) {
+      return this.renderAmpStateJson_(src);
+    }
+
     return this.fetchList_();
   }
 
@@ -363,19 +368,43 @@ export class AmpList extends AMP.BaseElement {
    * src="amp-state:json.path".
    *
    * @param {string} src
-   * @return {Promise<*>}
+   * @return {Promise<void>}
    * @private
    */
-  getAmpStateJson_(src) {
+  renderAmpStateJson_(src) {
     const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-    return Services.bindForDocOrNull(this.element).then(bind => {
-      userAssert(
-        bind,
-        '"amp-state:" URLs require amp-bind to be installed.',
-        this.element
-      );
-      return bind.getState(ampStatePath);
-    });
+    return Services.bindForDocOrNull(this.element)
+      .then(bind => {
+        userAssert(
+          bind,
+          '"amp-state:" URLs require amp-bind to be installed.',
+          this.element
+        );
+        userAssert(
+          !this.ssrTemplateHelper_.isEnabled(),
+          "'amp-list': 'amp-state' URIs cannot be used in SSR mode."
+        );
+
+        return bind.getState(ampStatePath);
+      })
+      .then(json => {
+        if (typeof json === 'undefined') {
+          user().warn(
+            TAG,
+            `No data was found at provided uri: ${elementSrc}`,
+            this.element
+          );
+          return;
+        }
+
+        const array = /** @type {!Array} */ (isArray(json) ? json : [json]);
+        return this.scheduleRender_(array, /* append */ false);
+      })
+      .catch(error => {
+        this.triggerFetchErrorEvent_(error);
+        this.showFallback_();
+        throw error;
+      });
   }
 
   /** @override */
@@ -390,6 +419,12 @@ export class AmpList extends AMP.BaseElement {
     const renderLocalData = data => {
       // Remove the 'src' now that local data is used to render the list.
       this.element.setAttribute('src', '');
+      userAssert(
+        !this.ssrTemplateHelper_.isEnabled(),
+        TAG,
+        '"[src]" may not be bound in SSR mode.'
+      );
+
       const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
       this.resetIfNecessary_(/* isFetch */ false);
       return this.scheduleRender_(array, /* append */ false);
@@ -404,10 +439,6 @@ export class AmpList extends AMP.BaseElement {
           promise = this.fetchList_();
         }
       } else if (typeof src === 'object') {
-        if (this.ssrTemplateHelper_.isEnabled()) {
-          user().error(TAG, '"[src]" may not be bound in SSR mode.');
-          return Promise.resolve();
-        }
         promise = renderLocalData(/** @type {!Object} */ (src));
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
@@ -590,25 +621,7 @@ export class AmpList extends AMP.BaseElement {
     }
 
     let fetch;
-    if (this.isAmpStateSrc_(elementSrc)) {
-      if (this.ssrTemplateHelper_.isEnabled()) {
-        user().error(TAG, '"amp-state" URIs cannot be used in SSR mode.');
-        return Promise.resolve();
-      }
-
-      fetch = this.getAmpStateJson_(elementSrc).then(json => {
-        if (typeof json === 'undefined') {
-          user().warn(
-            TAG,
-            `No data was found at provided uri: ${elementSrc}`,
-            this.element
-          );
-          return;
-        }
-        const array = /** @type {!Array} */ (isArray(json) ? json : [json]);
-        return this.scheduleRender_(array, /* append */ false);
-      });
-    } else if (this.ssrTemplateHelper_.isEnabled()) {
+    if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
       fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
