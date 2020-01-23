@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import '../amp-next-page';
+import * as lolex from 'lolex';
 import {Services} from '../../../../src/services';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {macroTask} from '../../../../testing/yield';
@@ -29,32 +30,52 @@ describes.realWin('amp-next-page visibility observer', {amp: 1}, env => {
     viewport = Services.viewportForDoc(ampdoc);
     top = 0;
     visibilityObserver = new VisibilityObserver(ampdoc);
-    env.sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
-      return Promise.resolve(layoutRectLtwh(0, top, 0, 0));
-    });
+    env.sandbox
+      .stub(
+        visibilityObserver.getPositionObserver().viewport_,
+        'getClientRectAsync'
+      )
+      .callsFake(() => {
+        return Promise.resolve(layoutRectLtwh(2, top, 20, 10));
+      });
+    env.sandbox
+      .stub(visibilityObserver.getPositionObserver().vsync_, 'measure')
+      .callsFake(callback => {
+        win.setTimeout(callback, 1);
+      });
   });
 
   async function getElement(height = 200) {
     const element = doc.createElement('div');
+    setStyle(element, 'height', height + 'px');
 
     // Ensure element is off screen when it renders.
-    setStyle(element, 'marginTop', '1000px');
+    const elementSibling = doc.createElement('div');
+    setStyle(elementSibling, 'height', '1000px');
+    doc.body.appendChild(elementSibling);
 
-    setStyle(element, 'height', height + 'px');
     doc.body.appendChild(element);
     return Promise.resolve(element);
   }
 
+  async function scroll(pixels = 0) {
+    if (pixels) {
+      top += pixels;
+      win.dispatchEvent(new Event('scroll'));
+    }
+    visibilityObserver.getPositionObserver().updateAllEntries();
+    await macroTask();
+  }
+
   afterEach(() => {
-    visibilityObserver.unobserveAll();
+    // visibilityObserver.unobserveAll();
   });
 
   describe('visibility observer', async () => {
     it('initializes correctly', async () => {
       const element = await getElement(200 /** height */);
-      const spy = env.sandbox.spy();
-      visibilityObserver.observe(element, spy);
-      await new Promise(resolve => setTimeout(resolve, 0));
+      visibilityObserver.observe(element, () => {});
+      await scroll();
       expect(
         doc.body.querySelector('.i-amphtml-visibilty-observer-top-sentinel')
       ).to.be.ok;
@@ -67,77 +88,66 @@ describes.realWin('amp-next-page visibility observer', {amp: 1}, env => {
       const element = await getElement(200 /** height */);
       const spy = env.sandbox.spy();
       visibilityObserver.observe(element, spy);
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.not.be.called;
-      top += 200;
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.be.calledWith(ViewportRelativePos.OUTSIDE_VIEWPORT);
+      await scroll();
+      spy.should.not.have.been.called;
+      spy.resetHistory();
+      await scroll(200);
+      spy.should.have.been.calledWith(ViewportRelativePos.OUTSIDE_VIEWPORT);
     });
 
     it("should not issue update if position doesn't change", async () => {
       const element = await getElement(200 /** height */);
       const spy = env.sandbox.spy();
       visibilityObserver.observe(element, spy);
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.not.be.called;
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.not.be.called;
+      await scroll();
+      spy.should.not.have.been.called;
+      spy.resetHistory();
+      await scroll();
+      spy.should.not.have.been.called;
     });
 
     it('should issue update if element is entering viewport', async () => {
       const element = await getElement(200 /** height */);
       const spy = env.sandbox.spy();
       visibilityObserver.observe(element, spy);
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.not.be.called;
-      top += 1100;
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.be.calledWith(ViewportRelativePos.LEAVING_VIEWPORT);
+      await scroll();
+      spy.should.not.have.been.called;
+      spy.resetHistory();
+      await scroll(1100);
+      spy.should.have.been.calledWith(ViewportRelativePos.LEAVING_VIEWPORT);
     });
 
     it('should issue update if element is within viewport (small element)', async () => {
       const element = await getElement(200 /** height */);
       const spy = env.sandbox.spy();
       visibilityObserver.observe(element, spy);
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.not.be.called;
-      top += 1400;
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.be.calledWith(ViewportRelativePos.INSIDE_VIEWPORT);
+      await scroll();
+      spy.should.not.have.been.called;
+      spy.resetHistory();
+      await scroll(1400);
+      spy.should.have.been.calledWith(ViewportRelativePos.INSIDE_VIEWPORT);
     });
 
     it('should issue update if element is within viewport (large element)', async () => {
       const element = await getElement(1000 /** height */);
       const spy = env.sandbox.spy();
       visibilityObserver.observe(element, spy);
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.not.be.called;
-      top += 1400;
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.be.calledWith(ViewportRelativePos.OUTSIDE_VIEWPORT);
+      await scroll();
+      spy.should.not.have.been.called;
+      spy.resetHistory();
+      await scroll(1400);
+      spy.should.have.been.calledWith(ViewportRelativePos.CONTAINS_VIEWPORT);
     });
 
     it('should issue update if element is leaving viewport', async () => {
       const element = await getElement(200 /** height */);
       const spy = env.sandbox.spy();
       visibilityObserver.observe(element, spy);
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.not.be.called;
-      top += 1500;
-      win.dispatchEvent(new Event('scroll'));
-      await macroTask();
-      expect(spy).to.be.calledWith(ViewportRelativePos.LEAVING_VIEWPORT);
+      await scroll();
+      spy.should.not.have.been.called;
+      spy.resetHistory();
+      await scroll(1500);
+      spy.should.have.been.calledWith(ViewportRelativePos.LEAVING_VIEWPORT);
     });
   });
 });

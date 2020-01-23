@@ -25,6 +25,7 @@ import {
 import {RelativePositions} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
 import {devAssert} from '../../../src/log';
+import {findIndex} from '../../../src/utils/array';
 import {insertAfterOrAtStart} from '../../../src/dom';
 
 /** @enum {number} */
@@ -51,6 +52,11 @@ export class VisibilityObserverEntry {
     this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
     /** @private {!Element} */
     this.element_ = element;
+  }
+
+  /** @return {!Element} */
+  get element() {
+    return this.element_;
   }
 
   /**
@@ -173,7 +179,11 @@ export default class VisibilityObserver {
    * @param {function(!ViewportRelativePos)} callback
    */
   observe(element, callback) {
-    let entry = this.entries_.find(entry => entry.element == element);
+    const entryIndex = findIndex(
+      this.entries_,
+      entry => entry.element == element
+    );
+    let entry = this.entries_[entryIndex];
     if (!entry) {
       entry = new VisibilityObserverEntry(this, element);
     }
@@ -185,7 +195,11 @@ export default class VisibilityObserver {
    * @param {!Element} element
    */
   unobserve(element) {
-    const entry = this.entries_.find(entry => entry.element == element);
+    const entryIndex = findIndex(
+      this.entries_,
+      entry => entry.element == element
+    );
+    const entry = this.entries_[entryIndex];
     if (!entry) {
       return;
     }

@@ -230,7 +230,7 @@ export class NextPageService {
       .filter(page => page.isVisible())
       .forEach(page =>
         this.toggleHiddenAndReplaceableElements(
-          /** @type {!Document} */ (dev().assertElement(page.document))
+          /** @type {!Document|!ShadowRoot} */ (devAssert(page.document))
         )
       );
   }
@@ -376,7 +376,7 @@ export class NextPageService {
   /**
    * Hides or shows elements based on the `amp-next-page-hide` and
    * `amp-next-page-replace` attributes
-   * @param {!Document} doc Document to attach.
+   * @param {!Document|!ShadowRoot} doc Document to attach.
    * @param {boolean=} isVisible Whether this page is visible or not
    */
   toggleHiddenAndReplaceableElements(doc, isVisible = true) {

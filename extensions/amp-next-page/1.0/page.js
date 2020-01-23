@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  ViewportRelativePos, // eslint-disable-line no-unused-vars
-} from './visibility-observer';
+import {ViewportRelativePos} from './visibility-observer';
 import {VisibilityState} from '../../../src/visibility-state';
 
 /** @enum {number} */
