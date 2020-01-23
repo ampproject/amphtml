@@ -524,9 +524,9 @@ export class AmpStoryPage extends AMP.BaseElement {
             'style',
             `--story-page-vh: ${px(state.vh)};` +
               `--story-page-vw: ${px(state.vw)};` +
-              `--story-page-50vw: ${px(state.fiftyVw)};` +
               `--story-page-vmin: ${px(state.vmin)};` +
-              `--story-page-vmax: ${px(state.vmax)};`
+              `--story-page-vmax: ${px(state.vmax)};` +
+              `--i-amphtml-story-page-50vw: ${px(state.fiftyVw)};`
           );
         },
       },
