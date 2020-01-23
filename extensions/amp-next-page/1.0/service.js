@@ -368,7 +368,7 @@ export class NextPageService {
     // TODO(wassgha): Parse for more pages to queue
 
     // TODO(wassgha): Allow amp-analytics after bug bash
-    toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
+    const analytics = toArray(doc.querySelectorAll('amp-analytics'));
     // Make sure all hidden elements are initially invisible
     this.toggleHiddenAndReplaceableElements(doc, false /** isVisible */);
   }
