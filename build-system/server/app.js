@@ -900,7 +900,11 @@ app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
 app.get(
-  ['/examples/*.html', '/test/manual/*.html', '/test/fixtures/e2e/*/*.html'],
+  [
+    '/examples/(**/)?*.html',
+    '/test/manual/(**/)?*.html',
+    '/test/fixtures/e2e/(**/)?*.html',
+  ],
   (req, res, next) => {
     const filePath = req.path;
     const mode = SERVE_MODE;
@@ -975,7 +979,7 @@ app.get(
 
         // Extract amp-consent for the given 'type' specified in URL query.
         if (
-          req.path.indexOf('/examples/cmp-vendors.amp.html') == 0 &&
+          req.path.indexOf('/examples/amp-consent/cmp-vendors.amp.html') == 0 &&
           req.query.type
         ) {
           const consent = file.match(

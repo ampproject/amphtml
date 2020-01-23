@@ -538,7 +538,7 @@ export class NextPageService {
   /**
    * Hides or shows elements based on the `amp-next-page-hide` and
    * `amp-next-page-replace` attributes
-   * @param {!Document|!ShadowRoot} doc Document of interest
+   * @param {!Document|!ShadowRoot} doc Document to attach.
    * @param {boolean=} isVisible Whether this page is visible or not
    */
   toggleHiddenAndReplaceableElements(doc, isVisible = true) {
