@@ -377,20 +377,27 @@ export function applyStaticLayout(element) {
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
   userAssert(
     inputLayout !== undefined,
-    'Invalid "layout" value: %s',
-    layoutAttr
+    'Invalid "layout" value: %s, %s',
+    layoutAttr,
+    element
   );
   /** @const {string|null|undefined} */
   const inputWidth =
     widthAttr && widthAttr != 'auto' ? parseLength(widthAttr) : widthAttr;
-  userAssert(inputWidth !== undefined, 'Invalid "width" value: %s', widthAttr);
+  userAssert(
+    inputWidth !== undefined,
+    'Invalid "width" value: %s, %s',
+    widthAttr,
+    element
+  );
   /** @const {string|null|undefined} */
   const inputHeight =
     heightAttr && heightAttr != 'fluid' ? parseLength(heightAttr) : heightAttr;
   userAssert(
     inputHeight !== undefined,
-    'Invalid "height" value: %s',
-    heightAttr
+    'Invalid "height" value: %s, %s',
+    heightAttr,
+    element
   );
 
   // Effective layout attributes. These are effectively constants.
@@ -465,9 +472,10 @@ export function applyStaticLayout(element) {
   if (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
     userAssert(
       getLengthUnits(width) == getLengthUnits(height),
-      'Length units should be the same for "width" and "height": %s, %s',
+      'Length units should be the same for "width" and "height": %s, %s, %s',
       widthAttr,
-      heightAttr
+      heightAttr,
+      element
     );
   } else {
     userAssert(
