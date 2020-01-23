@@ -85,6 +85,12 @@ export class ConsentUI {
       config['uiConfig']['overlay'] === true;
 
     /** @private {boolean} */
+    this.restrictFullscreenOn_ = isExperimentOn(
+      baseInstance.win,
+      'amp-consent-restrict-fullscreen'
+    );
+
+    /** @private {boolean} */
     this.scrollEnabled_ = true;
 
     /** @private {?Element} */
@@ -202,7 +208,7 @@ export class ConsentUI {
 
           this.showIframe_();
 
-          if (!this.isPostPrompt_) {
+          if (!this.isPostPrompt_ && !this.restrictFullscreenOn_) {
             this.ui_./*OK*/ focus();
           }
         });
