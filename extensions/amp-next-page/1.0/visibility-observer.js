@@ -25,6 +25,8 @@ import {
 import {RelativePositions} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
 import {devAssert} from '../../../src/log';
+import {findIndex} from '../../../src/utils/array';
+import {insertAfterOrAtStart} from '../../../src/dom';
 
 /** @enum {number} */
 export const ViewportRelativePos = {
@@ -37,8 +39,9 @@ export const ViewportRelativePos = {
 export class VisibilityObserverEntry {
   /**
    * @param {!VisibilityObserver} observer
+   * @param {!Element} element
    */
-  constructor(observer) {
+  constructor(observer, element) {
     /** @private {!VisibilityObserver} */
     this.observer_ = observer;
     /** @private {?RelativePositions} */
@@ -47,19 +50,26 @@ export class VisibilityObserverEntry {
     this.bottomSentinelPosition_ = null;
     /** @private {!ViewportRelativePos} */
     this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
+    /** @private {!Element} */
+    this.element_ = element;
+  }
+
+  /** @return {!Element} */
+  get element() {
+    return this.element_;
   }
 
   /**
-   * @param {!Element} element
-   * @param {!Element} parent
    * @param {function(!ViewportRelativePos)} callback
    */
-  observe(element, parent, callback) {
-    const top = element.ownerDocument.createElement('div');
-    const bottom = element.ownerDocument.createElement('div');
+  observe(callback) {
+    const top = this.element_.ownerDocument.createElement('div');
+    top.classList.add('i-amphtml-visibilty-observer-top-sentinel');
+    const bottom = this.element_.ownerDocument.createElement('div');
+    bottom.classList.add('i-amphtml-visibilty-observer-bottom-sentinel');
 
-    parent.insertBefore(top, element);
-    parent.insertBefore(bottom, element.nextSibling);
+    this.element_.parentElement.insertBefore(top, this.element_);
+    insertAfterOrAtStart(this.element_.parentElement, bottom, this.element_);
 
     this.observer_
       .getPositionObserver()
@@ -71,6 +81,11 @@ export class VisibilityObserverEntry {
       .observe(bottom, PositionObserverFidelity.LOW, position =>
         this.bottomSentinelPositionChanged(position, callback)
       );
+  }
+
+  /** */
+  unobserve() {
+    this.observer_.getPositionObserver().unobserve(this.element_);
   }
 
   /**
@@ -161,13 +176,40 @@ export default class VisibilityObserver {
 
   /**
    * @param {!Element} element
-   * @param {!Element} parent
    * @param {function(!ViewportRelativePos)} callback
    */
-  observe(element, parent, callback) {
-    const entry = new VisibilityObserverEntry(this);
+  observe(element, callback) {
+    const entryIndex = findIndex(
+      this.entries_,
+      entry => entry.element == element
+    );
+    let entry = this.entries_[entryIndex];
+    if (!entry) {
+      entry = new VisibilityObserverEntry(this, element);
+    }
     this.entries_.push(entry);
-    entry.observe(element, parent, callback);
+    entry.observe(callback);
+  }
+
+  /**
+   * @param {!Element} element
+   */
+  unobserve(element) {
+    const entryIndex = findIndex(
+      this.entries_,
+      entry => entry.element == element
+    );
+    const entry = this.entries_[entryIndex];
+    if (!entry) {
+      return;
+    }
+    entry.unobserve();
+  }
+
+  /**
+   */
+  unobserveAll() {
+    this.entries_.forEach(entry => entry.unobserve());
   }
 
   /**
