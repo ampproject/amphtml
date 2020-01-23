@@ -304,8 +304,7 @@ describes.realWin(
           toggleExperiment(win, 'amp-consent-restrict-fullscreen', false);
         });
 
-        it('should not change document.activeElement', () => {
-          const {activeElement} = doc;
+        it('should focus on the SR alert button', () => {
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
@@ -314,9 +313,68 @@ describes.realWin(
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
 
-          return whenCalled(showIframeSpy).then(() =>
-            expect(activeElement).to.equal(doc.activeElement)
+          return whenCalled(showIframeSpy).then(() => {
+            const srButton = consentUI.srAlert_.children[0];
+            expect(doc.activeElement).to.equal(srButton);
+          });
+        });
+
+        it('should append (and hide) the SR button and have default title', function*() {
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          yield macroTask();
+
+          // Get the last child of the amp-consent element
+          const lastChild = consentUI.baseInstance_.element.children[4];
+          expect(lastChild).to.equal(consentUI.srAlert_);
+          expect(lastChild.hasAttribute('hidden')).to.be.false;
+          expect(lastChild.children[0].innerText).to.equal(
+            consentUI.consentTitle_
           );
+
+          consentUI.hide();
+          yield macroTask();
+          expect(lastChild.hasAttribute('hidden')).to.be.true;
+        });
+
+        it('should have configurable title', function*() {
+          const newTitle = 'New Consent Policy Title';
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+            'uiConfig': {
+              'consentTitle': newTitle,
+            },
+          });
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          yield macroTask();
+
+          // Get the last child of the amp-consent element
+          const button =
+            consentUI.baseInstance_.element.children[4].children[0];
+          expect(button.innerText).to.equal(newTitle);
+        });
+
+        it('should shift focus when button is clicked', function*() {
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          yield macroTask();
+
+          const button =
+            consentUI.baseInstance_.element.children[4].children[0];
+          const iframe = consentUI.ui_;
+          expect(doc.activeElement).to.equal(button);
+          button.onClick();
+          expect(doc.activeElement).to.equal(iframe);
         });
       });
     });

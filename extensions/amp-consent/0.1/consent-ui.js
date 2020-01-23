@@ -102,6 +102,9 @@ export class ConsentUI {
     this.maskElement_ = null;
 
     /** @private {?Element} */
+    this.srAlert_ = null;
+
+    /** @private {?Element} */
     this.elementWithFocusBeforeShowing_ = null;
 
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
@@ -211,13 +214,9 @@ export class ConsentUI {
 
           this.maybeShowOverlay_();
 
-          this.showIframe_();
+          this.showSrAlert_();
 
-          if (this.restrictFullscreenOn_) {
-            // NEED TO INSTANTIATE SR BUTTON
-            this.srButton_ = this.createSrButton_();
-            this.baseInstance_.element.appendChild(this.srButton_);
-          }
+          this.showIframe_();
 
           if (!this.isPostPrompt_ && !this.restrictFullscreenOn_) {
             this.ui_./*OK*/ focus();
@@ -286,6 +285,8 @@ export class ConsentUI {
 
       // Hide the overlay
       this.maybeHideOverlay_();
+      //Hide the SR alert
+      this.maybeHideSrAlert_();
       // Enable the scroll, in case we were fullscreen with no overlay
       this.enableScroll_();
       // Reset any animation styles set by style attribute
@@ -564,24 +565,38 @@ export class ConsentUI {
   }
 
   /**
-   * Appends an alertdialog role div to the base
-   * instance, with a button inside. EDIT THIS!!!!!!!!
-   * @return {!Element}
+   * Creates alertdialog role div with a button inside
+   * that has the consent title text and onClick will
+   * focus on the consent prompt ui
    */
-  createSrButton_() {
-    const alertDialog = this.win_.document.createElement('div');
-    alertDialog.setAttribute('role', 'alertdialog');
+  showSrAlert_() {
+    if (this.restrictFullscreenOn_) {
+      const alertDialog = this.document_.createElement('div');
+      const button = this.document_.createElement('button');
 
-    const button = this.win_.document.createElement('div');
+      alertDialog.setAttribute('role', 'alertdialog');
 
-    // Text to be read by SR
-    button.innerHTML = this.consentTitle_;
-    button.onClick = () => {
-      this.ui_./*OK*/ focus();
-    };
+      // Text to be read by SR
+      button.innerHTML = this.consentTitle_;
+      button.onClick = () => {
+        this.ui_./*OK*/ focus();
+      };
 
-    alertDialog.appendChild(button);
-    return alertDialog;
+      alertDialog.appendChild(button);
+      this.baseInstance_.element.appendChild(alertDialog);
+      button./*OK*/ focus();
+
+      this.srAlert_ = alertDialog;
+    }
+  }
+
+  /**
+   * Hide the SR alert if it exists.
+   */
+  maybeHideSrAlert_() {
+    if (this.srAlert_) {
+      toggle(this.srAlert_, false);
+    }
   }
 
   /**
