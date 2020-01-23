@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "amp-validator-webui",
   "version": "0.1.0",
   "description": "Web UI for Validator for AMP HTML (www.ampproject.org)",

@@ -1,18 +1,18 @@
 # Output directories
-node_modules
 build/**
-dist/**
 dist.3p/**
 dist.tools/**
+dist/**
 firebase/**
+node_modules
 out/**
 test/coverage/**
 
 # Code directories
 **/*.extern.js
-build-system/tasks/visual-diff/snippets/*.js
 build-system/babel-plugins/**/fixtures/**/*.js
 build-system/server/app-index/test/*.js
+build-system/tasks/visual-diff/snippets/*.js
 examples/**
 extensions/amp-a4a/0.1/test/testdata/**
 src/purifier/noop.js

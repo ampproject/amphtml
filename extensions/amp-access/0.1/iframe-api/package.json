@@ -11,8 +11,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ampproject/amphtml/tree/master/extensions/amp-access/0.1/iframe-api/"
+    "url": "https://github.com/ampproject/amphtml.git",
+    "directory": "extensions/amp-access/0.1/iframe-api"
   },
+  "homepage": "https://github.com/ampproject/amphtml/tree/master/extensions/amp-access/0.1/iframe-api",
   "devDependencies": {
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.6.1",
