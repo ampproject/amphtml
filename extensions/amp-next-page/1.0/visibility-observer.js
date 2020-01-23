@@ -56,7 +56,9 @@ export class VisibilityObserverEntry {
    */
   observe(element, parent, callback) {
     const top = element.ownerDocument.createElement('div');
+    top.classList.add('i-amphtml-next-page-document-top-sentinel');
     const bottom = element.ownerDocument.createElement('div');
+    bottom.classList.add('i-amphtml-next-page-document-bottom-sentinel');
 
     parent.insertBefore(top, element);
     parent.insertBefore(bottom, element.nextSibling);
