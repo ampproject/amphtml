@@ -144,6 +144,7 @@ export class GoogleSubscriptionsPlatform {
       isFromUserAction: false,
       additionalParameters: null,
     });
+    this.runtime_.analytics().setUrl(ampdoc.getUrl());
     resolver();
 
     this.runtime_.setOnLoginRequest(request => {

@@ -37,6 +37,7 @@ import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-fac
 import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
+const AMP_URL = 'myAMPurl.amp';
 
 describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let ampdoc;
@@ -61,6 +62,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     element = env.win.document.createElement('script');
     element.id = 'amp-subscriptions';
     env.win.document.head.appendChild(element);
+    env.sandbox.stub(ampdoc, 'getUrl').callsFake(() => AMP_URL);
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
@@ -137,6 +139,11 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   function callback(stub) {
     return stub.args[0][0];
   }
+
+  it('should set the current URL in analytics', () => {
+    const swgAnalytics = platform.runtime_.analytics();
+    expect(swgAnalytics.getContext().getUrl()).to.equal(AMP_URL);
+  });
 
   it('should reset runtime on platform reset', () => {
     expect(methods.reset).to.not.be.called;
