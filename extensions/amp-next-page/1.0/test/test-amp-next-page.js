@@ -184,6 +184,146 @@ describes.realWin(
       });
     });
 
+    describe('remote config', () => {
+      it('errors when no config specified', async () => {
+        const error =
+          'amp-next-page should contain a <script> child or a URL specified in [src]';
+        const element = await getAMPNextPage({});
+        await allowConsoleError(() =>
+          element.build().catch(err => {
+            expect(err.message).to.include(error);
+          })
+        );
+      });
+
+      it('builds with valid remote config (without inline config)', async () => {
+        const element = await getAMPNextPage({
+          src: 'https://example.com/config.json',
+        });
+
+        await element.build();
+        await element.layoutCallback();
+      });
+
+      it('fetches remote config when specified in src', async () => {
+        const element = await getAMPNextPage({
+          src: 'https://example.com/config.json',
+        });
+
+        const config = {
+          pages: [
+            {
+              image: '/examples/img/hero@1x.jpg',
+              title: 'Remote config',
+              url: '/document1',
+            },
+          ],
+        };
+
+        const fetchJsonStub = env.sandbox
+          .stub(Services.batchedXhrFor(win), 'fetchJson')
+          .resolves({
+            ok: true,
+            json() {
+              return Promise.resolve(config);
+            },
+          });
+        const service = Services.nextPageServiceForDoc(doc);
+
+        await element.build();
+        await element.layoutCallback();
+
+        expect(
+          fetchJsonStub.calledWithExactly('https://example.com/config.json', {})
+        ).to.be.true;
+
+        await service.readyPromise_;
+        // Page 1
+        expect(service.pages_[1].title).to.equal('Remote config');
+        expect(service.pages_[1].url).to.include('/document1');
+        expect(service.pages_[1].image).to.equal('/examples/img/hero@1x.jpg');
+      });
+
+      it('errors on invalid remote config (ampUrl instead of url)', async () => {
+        const element = await getAMPNextPage({
+          src: 'https://example.com/config.json',
+        });
+        const config = {
+          pages: [
+            {
+              image: '/examples/img/hero@1x.jpg',
+              title: 'Remote config',
+              ampUrl: '/document1',
+            },
+          ],
+        };
+
+        env.sandbox.stub(Services.batchedXhrFor(win), 'fetchJson').resolves({
+          ok: true,
+          json() {
+            return Promise.resolve(config);
+          },
+        });
+
+        await allowConsoleError(() =>
+          element.build().catch(err => {
+            expect(err.message).to.include('page url must be a string');
+          })
+        );
+      });
+
+      it('recursively fetches config from next url when out of suggestions', async () => {
+        const element = await getAMPNextPage({
+          src: 'https://example.com/config.json',
+        });
+
+        const config = {
+          pages: [
+            {
+              image: '/examples/img/hero@1x.jpg',
+              title: 'Remote config',
+              url: '/document1',
+            },
+          ],
+          next: 'https://example.com/config.json?page=2',
+        };
+
+        const fetchJsonStub = env.sandbox
+          .stub(Services.batchedXhrFor(win), 'fetchJson')
+          .resolves({
+            ok: true,
+            json() {
+              return Promise.resolve(config);
+            },
+          });
+        const service = Services.nextPageServiceForDoc(doc);
+
+        await element.build();
+        await element.layoutCallback();
+
+        expect(
+          fetchJsonStub.calledWithExactly('https://example.com/config.json', {})
+        ).to.be.true;
+
+        await service.readyPromise_;
+        expect(service.nextSrc_).to.equal(
+          'https://example.com/config.json?page=2'
+        );
+
+        // env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+        env.fetchMock.get(/\/document1/, MOCK_NEXT_PAGE);
+        await service.maybeFetchNext(true);
+        await service.maybeFetchNext(true);
+
+        expect(
+          fetchJsonStub.calledWithExactly(
+            'https://example.com/config.json?page=2',
+            {}
+          )
+        ).to.be.true;
+      });
+    });
+
     describe('basic functionality', () => {
       let element;
       let service;
@@ -477,10 +617,6 @@ describes.realWin(
           ).height
         ).to.equal('1036px');
       });
-    });
-
-    describe('remote config', () => {
-      // TODO (wassgha): Implement once remote config is implemented
     });
   }
 );

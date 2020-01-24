@@ -223,11 +223,18 @@ export class NextPageService {
       return Promise.resolve();
     }
 
+    const pageCount = this.pages_.length;
     const nextPage = this.pages_[this.getPageIndex_(this.lastFetchedPage_) + 1];
     if (!nextPage) {
       return this.getRemotePages_()
         .then(pages => this.queuePages_(pages))
-        .then(() => this.maybeFetchNext(true /** force */));
+        .then(() => {
+          if (this.pages_.length <= pageCount) {
+            // Remote server did not return any new pages
+            return Promise.resolve();
+          }
+          return this.maybeFetchNext(true /** force */);
+        });
     }
     return nextPage.fetch();
   }
@@ -678,9 +685,11 @@ export class NextPageService {
       .then(pages => {
         if (pages.length === 0) {
           user().warn(TAG, 'could not find recommendations');
+          return Promise.resolve();
         } else {
-          this.readyResolver_();
-          return this.queuePages_(pages);
+          return this.queuePages_(pages).then(() => {
+            this.readyResolver_();
+          });
         }
       });
   }
@@ -754,12 +763,15 @@ export class NextPageService {
     if (!this.nextSrc_) {
       return Promise.resolve([]);
     }
-    return batchFetchJsonFor(this.getAmpDoc(), this.getElement_(), {
+    return batchFetchJsonFor(this.ampdoc_, this.getElement_(), {
       urlReplacement: UrlReplacementPolicy.ALL,
       xssiPrefix: this.getElement_().getAttribute('xssi-prefix') || undefined,
     })
       .then(result => {
         this.nextSrc_ = result.next || null;
+        if (this.nextSrc_) {
+          this.getElement_().setAttribute('src', this.nextSrc_);
+        }
         return result.pages || [];
       })
       .catch(error =>
