@@ -66,6 +66,16 @@ const AMP_OPT_IN_COOKIE = {
   BETA: 'beta',
 };
 
+/**
+ * Legacy values for __Host-AMP_OPT_IN cookie.
+ * TODO(#25205): remove this once the CDN stops supporting these values.
+ */
+const _LEGACY_AMP_OPT_IN_COOKIE = {
+  DISABLED: '0',
+  EXPERIMENTAL: '1',
+  BETA: '2',
+};
+
 /** @const {!Array<!ExperimentDef>} */
 const CHANNELS = [
   // Experimental Channel
@@ -270,19 +280,24 @@ function updateExperimentRow(experiment) {
 function isExperimentOn_(id) {
   switch (id) {
     case EXPERIMENTAL_CHANNEL_ID:
-      return getCookie(window, 'AMP_CANARY') == AMP_OPT_IN_COOKIE.EXPERIMENTAL;
+      return [
+        AMP_OPT_IN_COOKIE.EXPERIMENTAL,
+        _LEGACY_AMP_OPT_IN_COOKIE.EXPERIMENTAL,
+      ].includes(optInCookieValue);
     case BETA_CHANNEL_ID:
-      return getCookie(window, 'AMP_CANARY') == AMP_OPT_IN_COOKIE.BETA;
+      return [AMP_OPT_IN_COOKIE.BETA, _LEGACY_AMP_OPT_IN_COOKIE.BETA].includes(
+        optInCookieValue
+      );
     case RTV_CHANNEL_ID:
-      return RTV_PATTERN.test(getCookie(window, 'AMP_CANARY'));
+      return RTV_PATTERN.test(optInCookieValue);
     default:
       return isExperimentOn(window, /*OK*/ id);
   }
 }
 
 /**
- * Opts in to / out of the "canary" or "rc" runtime types by setting the
- * AMP_CANARY cookie.
+ * Opts in to / out of the "beta" or "experimental" runtime types by setting the
+ * __Host-AMP_OPT_IN cookie.
  * @param {string} cookieState One of the AMP_OPT_IN_COOKIE enum values, or a
  *   15-digit RTV.
  */
