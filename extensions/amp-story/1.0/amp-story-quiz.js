@@ -30,6 +30,7 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
 import {htmlFor} from '../../../src/static-template';
+import {setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @const {!Array<string>} */
@@ -375,8 +376,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
     selectedOption.classList.add('i-amphtml-story-quiz-option-selected');
 
-    if (!this.responseData_) {
-      this.quizEl_.classList.add('i-amphtml-story-quiz-no-data');
+    if (this.responseData_) {
+      this.quizEl_.classList.add('i-amphtml-story-quiz-has-data');
     }
   }
 
@@ -392,10 +393,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       this.quizEl_.querySelectorAll('.i-amphtml-story-quiz-option')
     );
 
-    // TODO: PREPROCCESS PERCENTAGES
     const percentages = this.preprocessPercentages_(options.length);
 
-    // update percentage text
+    // Update percentage text boxes.
     this.responseData_['responses'].forEach(response => {
       options[response['reactionValue']].querySelector(
         '.i-amphtml-story-quiz-percentage-text'
@@ -403,6 +403,16 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     });
 
     // update percentage CSS vars
+    // TODO: USE SET ATTRIBUTE!
+    this.quizEl_.setAttribute(
+      'style',
+      `
+      --option-1-percentage: ${percentages[0]}%;
+      --option-2-percentage: ${percentages[1]}%;
+      --option-3-percentage: ${percentages[2]}%;
+      --option-4-percentage: ${percentages[3]}%;
+    `
+    );
   }
 
   /**
@@ -433,7 +443,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     if (total > 100) {
       percentages = percentages.map(percentage =>
         (percentage - Math.trunc(percentage)).toFixed(2) === '0.50'
-          ? Math.trunc(percentage).toFixed(2)
+          ? (Math.trunc(percentage) + 0.49).toFixed(2)
           : percentage
       );
       total = percentages.reduce(
