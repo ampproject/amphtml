@@ -30,7 +30,6 @@ import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
 import {htmlFor} from '../../../src/static-template';
-import {setStyles} from '../../../src/style';
 import {toArray} from '../../../src/types';
 
 /** @const {!Array<string>} */
@@ -393,17 +392,17 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       this.quizEl_.querySelectorAll('.i-amphtml-story-quiz-option')
     );
 
-    const percentages = this.preprocessPercentages_(options.length);
+    const percentages = this.preprocessPercentages_(
+      this.responseData_,
+      options.length
+    );
 
-    // Update percentage text boxes.
     this.responseData_['responses'].forEach(response => {
       options[response['reactionValue']].querySelector(
         '.i-amphtml-story-quiz-percentage-text'
       ).textContent = `${percentages[response['reactionValue']]}%`;
     });
 
-    // update percentage CSS vars
-    // TODO: USE SET ATTRIBUTE!
     this.quizEl_.setAttribute(
       'style',
       `
@@ -416,20 +415,21 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   }
 
   /**
-   * Preprocess the percentages for display
+   * Preprocess the percentages for display.
    *
+   * @param {ReactionResponseType} responseData
    * @param {number} numOptions
    * @return {Array<number>}
    * @private
    */
-  preprocessPercentages_(numOptions) {
-    const totalResponseCount = this.responseData_['totalResponseCount'];
+  preprocessPercentages_(responseData, numOptions) {
+    const totalResponseCount = responseData['totalResponseCount'];
     let percentages = new Array(numOptions).fill(0);
 
-    for (let i = 0; i < this.responseData_['responses'].length; i++) {
+    for (let i = 0; i < responseData['responses'].length; i++) {
       percentages[i] = (
         100 *
-        (this.responseData_['responses'][i]['totalCount'] / totalResponseCount)
+        (responseData['responses'][i]['totalCount'] / totalResponseCount)
       ).toFixed(2);
     }
 
@@ -469,7 +469,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       });
       preserveOriginal.sort(
         (left, right) =>
-          // Break remainder ties using the higher value
+          // Break remainder ties using the higher value.
           right.remainder - left.remainder || right.value - left.value
       );
       const finalPercentages = [];
