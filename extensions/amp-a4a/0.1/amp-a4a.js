@@ -566,6 +566,7 @@ export class AmpA4A extends AMP.BaseElement {
       (slotRect.height == 0 || slotRect.width == 0);
     if (
       fixedSizeZeroHeightOrWidth ||
+      this.element.hasAttribute('hidden') ||
       this.element.classList.contains('i-amphtml-hidden-by-media-query')
     ) {
       dev().fine(
