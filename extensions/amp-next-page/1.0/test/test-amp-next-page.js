@@ -19,7 +19,6 @@ import {PageState} from '../page';
 import {Services} from '../../../../src/services';
 import {ViewportRelativePos} from '../visibility-observer';
 import {VisibilityState} from '../../../../src/visibility-state';
-import {htmlFor} from '../../../../src/static-template';
 import {setStyle} from '../../../../src/style';
 import {toggleExperiment} from '../../../../src/experiments';
 
@@ -69,10 +68,6 @@ describes.realWin(
     amp: {
       extensions: ['amp-next-page:1.0'],
     },
-    'with script[type=text/plain][template=amp-mustache]': {
-      templateType: 'script',
-    },
-    'with template[type=amp-mustache]': {templateType: 'template'},
   },
   env => {
     let win, doc, ampdoc;
@@ -106,10 +101,6 @@ describes.realWin(
         element.appendChild(configElement);
       }
 
-      if (options.separator) {
-        element.appendChild(options.separator);
-      }
-
       if (options.src) {
         element.setAttribute('src', options.src);
       }
@@ -117,26 +108,6 @@ describes.realWin(
       doc.body.appendChild(element);
 
       return element;
-    }
-
-    async function fetchDocuments(
-      service,
-      result = MOCK_NEXT_PAGE,
-      urlOrNumber = 1
-    ) {
-      const numPages = typeof urlOrNumber === 'string' ? 1 : urlOrNumber;
-      // Set up the mock request
-      if (typeof urlOrNumber === 'string') {
-        env.fetchMock.get(new RegExp(urlOrNumber, 'g'), result);
-      } else {
-        for (let i = 1; i <= numPages; i++) {
-          env.fetchMock.get(new RegExp(`/document${i}`, 'g'), result);
-        }
-      }
-      // Ask the next page service to fetch the documents
-      for (let i = 1; i <= numPages; i++) {
-        await service.maybeFetchNext();
-      }
     }
 
     afterEach(() => {
@@ -226,7 +197,6 @@ describes.realWin(
         await element.layoutCallback();
 
         service = Services.nextPageServiceForDoc(doc);
-        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
       });
 
       afterEach(async () => {
@@ -263,10 +233,12 @@ describes.realWin(
       });
 
       it('fetches the next document on scroll', async () => {
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
         const firstPageFetchSpy = env.sandbox.spy(service.pages_[1], 'fetch');
         const secondPageFetchSpy = env.sandbox.spy(service.pages_[2], 'fetch');
 
-        await fetchDocuments(service);
+        env.fetchMock.get(/\/document1/, MOCK_NEXT_PAGE);
+        await service.maybeFetchNext();
 
         expect(firstPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[1].state_).to.equal(PageState.INSERTED);
@@ -282,10 +254,14 @@ describes.realWin(
       });
 
       it('fetches the second document on scroll', async () => {
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
         const firstPageFetchSpy = env.sandbox.spy(service.pages_[1], 'fetch');
         const secondPageFetchSpy = env.sandbox.spy(service.pages_[2], 'fetch');
 
-        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+        env.fetchMock.get(/\/document1/, MOCK_NEXT_PAGE);
+        env.fetchMock.get(/\/document2/, MOCK_NEXT_PAGE);
+        await service.maybeFetchNext();
+        await service.maybeFetchNext();
 
         expect(firstPageFetchSpy).to.be.calledOnce;
         expect(service.pages_[1].state_).to.equal(PageState.INSERTED);
@@ -310,6 +286,7 @@ describes.realWin(
           redirectUrl: 'https://othersite.com/article',
           body: MOCK_NEXT_PAGE,
         });
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
 
         await service.maybeFetchNext();
 
@@ -320,10 +297,13 @@ describes.realWin(
       });
 
       it('adds the hidden class to elements that should be hidden', async () => {
-        await fetchDocuments(
-          service,
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
+        env.fetchMock.get(
+          /\/document1/,
           `${MOCK_NEXT_PAGE} <div next-page-hide id="hidden" />`
         );
+        await service.maybeFetchNext();
 
         expect(
           service.pages_[1].document.getElementById('hidden')
@@ -331,18 +311,20 @@ describes.realWin(
       });
 
       it('replaces elements with their most recent instance', async () => {
-        await fetchDocuments(
-          service,
-          `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="1" />`,
-          '/document1'
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
+        env.fetchMock.get(
+          /\/document1/,
+          `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="1" />`
         );
+        await service.maybeFetchNext();
         service.pages_[1].setVisibility(VisibilityState.VISIBLE);
 
-        await fetchDocuments(
-          service,
-          `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="2" />`,
-          '/document2'
+        env.fetchMock.get(
+          /\/document2/,
+          `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="2" />`
         );
+        await service.maybeFetchNext();
         service.pages_[1].relativePos = ViewportRelativePos.INSIDE_VIEWPORT;
         service.updateVisibility();
         service.pages_[1].relativePos = ViewportRelativePos.OUTSIDE_VIEWPORT;
@@ -359,10 +341,14 @@ describes.realWin(
       });
 
       it('removes amp-analytics tags from child documents', async () => {
-        await fetchDocuments(
-          service,
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
+        env.fetchMock.get(
+          /\/document1/,
           `${MOCK_NEXT_PAGE} <amp-analytics id="analytics1"></amp-analytics>`
         );
+        await service.maybeFetchNext();
+
         expect(service.pages_[1].document.getElementById('analytics1')).to.be
           .null;
       });
@@ -381,7 +367,6 @@ describes.realWin(
         await element.layoutCallback();
 
         service = Services.nextPageServiceForDoc(doc);
-        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
       });
 
       afterEach(async () => {
@@ -389,9 +374,12 @@ describes.realWin(
       });
 
       it('recursively parses pages and avoids loops', async () => {
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
         expect(service.pages_.length).to.equal(3);
 
-        await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
+        env.fetchMock.get(/\/document1/, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
+        await service.maybeFetchNext();
 
         // Adds the two documents coming from Document 1's recommendations
         expect(service.pages_.length).to.equal(5);
@@ -404,9 +392,13 @@ describes.realWin(
       });
 
       it('unloads pages and replaces them with a placeholder', async () => {
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
         const secondPagePauseSpy = env.sandbox.spy(service.pages_[2], 'pause');
 
-        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+        env.fetchMock.get(/\/document1/, MOCK_NEXT_PAGE);
+        env.fetchMock.get(/\/document2/, MOCK_NEXT_PAGE);
+        await service.maybeFetchNext();
+        await service.maybeFetchNext();
 
         const {container} = service.pages_[2];
         expect(container).to.be.ok;
@@ -443,12 +435,16 @@ describes.realWin(
       });
 
       it('reloads pages and removes the placeholder', async () => {
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
         const secondPageResumeSpy = env.sandbox.spy(
           service.pages_[2],
           'resume'
         );
 
-        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
+        env.fetchMock.get(/\/document1/, MOCK_NEXT_PAGE);
+        env.fetchMock.get(/\/document2/, MOCK_NEXT_PAGE);
+        await service.maybeFetchNext();
+        await service.maybeFetchNext();
 
         const {container} = service.pages_[2];
         expect(container).to.be.ok;
@@ -480,146 +476,6 @@ describes.realWin(
             container.querySelector('.i-amphtml-next-page-shadow-root')
           ).height
         ).to.equal('1036px');
-      });
-    });
-
-    describe('default separators', () => {
-      let element;
-      let service;
-
-      beforeEach(async () => {
-        element = await getAMPNextPage({
-          inlineConfig: VALID_CONFIG,
-        });
-
-        await element.build();
-        await element.layoutCallback();
-
-        service = Services.nextPageServiceForDoc(doc);
-        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
-      });
-
-      afterEach(async () => {
-        element.parentNode.removeChild(element);
-      });
-
-      it('adds a default separator to for the host page', async () => {
-        await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
-
-        expect(service.pages_[1].container.firstElementChild).to.have.class(
-          'amp-next-page-default-separator'
-        );
-      });
-
-      it('adds a default separator between embedded pages', async () => {
-        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
-
-        expect(service.pages_[2].container.firstElementChild).to.have.class(
-          'amp-next-page-default-separator'
-        );
-      });
-    });
-
-    describe('custom and templated separators', () => {
-      let element;
-      let service;
-
-      afterEach(async () => {
-        element.parentNode.removeChild(element);
-      });
-
-      it('renders a custom separator correctly', async () => {
-        const separator = doc.createElement('div');
-        separator.setAttribute('separator', '');
-        separator.innerText = 'Custom separator';
-
-        element = await getAMPNextPage({
-          inlineConfig: VALID_CONFIG,
-          separator,
-        });
-
-        await element.build();
-        await element.layoutCallback();
-
-        service = Services.nextPageServiceForDoc(doc);
-        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
-        await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
-
-        expect(
-          service.pages_[1].container.firstElementChild.innerText
-        ).to.equal('Custom separator');
-        expect(
-          service.pages_[2].container.firstElementChild.innerText
-        ).to.equal('Custom separator');
-      });
-
-      it('correctly renders a templated separator', async () => {
-        const html = htmlFor(doc);
-        const separator = html`
-          <div separator>
-            <template type="amp-mustache">
-              <div class="separator-content">
-                <span class="title">{{title}}</span>
-                <span class="url">{{url}}</span>
-                <span class="image">{{image}}</span>
-              </div>
-            </template>
-          </div>
-        `;
-
-        element = await getAMPNextPage({
-          inlineConfig: VALID_CONFIG,
-          separator,
-        });
-
-        await element.build();
-        await element.layoutCallback();
-
-        service = Services.nextPageServiceForDoc(doc);
-        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
-        const templateRenderStub = env.sandbox
-          .stub(service.templates_, 'findAndRenderTemplate')
-          .onFirstCall()
-          .resolves(
-            html`
-              <span>Rendered 1</span>
-            `
-          )
-          .onSecondCall()
-          .resolves(
-            html`
-              <span>Rendered 2</span>
-            `
-          );
-
-        await fetchDocuments(service, MOCK_NEXT_PAGE, '1');
-        expect(templateRenderStub).to.have.been.calledWith(
-          env.sandbox.match.any,
-          {
-            title: 'Title 1',
-            url: '',
-            image: '/examples/img/hero@1x.jpg',
-          }
-        );
-        await fetchDocuments(service, MOCK_NEXT_PAGE, '2');
-        expect(templateRenderStub).to.have.been.calledWith(
-          env.sandbox.match.any,
-          {
-            title: 'Title 2',
-            url: '',
-            image: '/examples/img/hero@1x.jpg',
-          }
-        );
-
-        const template1 = service.pages_[1].container.querySelector(
-          '[separator]'
-        );
-        const template2 = service.pages_[2].container.querySelector(
-          '[separator]'
-        );
-
-        expect(template1.innerText).to.equal('Rendered 1');
-        expect(template2.innerText).to.equal('Rendered 2');
       });
     });
 

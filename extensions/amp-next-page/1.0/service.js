@@ -23,13 +23,11 @@ import {
   childElementByAttr,
   childElementsByTag,
   isJsonScriptTag,
-  removeChildren,
   removeElement,
   scopedQuerySelector,
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {htmlFor} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
@@ -78,9 +76,6 @@ export class NextPageService {
      * @const {!../../../src/service/mutator-interface.MutatorInterface}
      */
     this.mutator_ = Services.mutatorForDoc(ampdoc);
-
-    /** @private @const {!../../../src/service/template-impl.Templates} */
-    this.templates_ = Services.templatesFor(this.win_);
 
     /** @private {?Element} */
     this.separator_ = null;
@@ -385,37 +380,33 @@ export class NextPageService {
    * Create a container element for the document and insert it into
    * the amp-next-page element
    * @param {!Page} page
-   * @return {!Promise<!Element>}
+   * @return {!Element}
    */
   createDocumentContainerForPage(page) {
     const container = this.win_.document.createElement('div');
     container.classList.add(DOC_CONTAINER_CLASS);
-    this.element_.insertBefore(container, this.moreBox_);
+
+    const shadowRoot = this.win_.document.createElement('div');
+    shadowRoot.classList.add(SHADOW_ROOT_CLASS);
+    container.appendChild(shadowRoot);
 
     // Insert the separator
-    const separatorInstance = this.separator_.cloneNode(true);
-    container.appendChild(separatorInstance);
-    // TODO(wassgha): If async/wait was allowed, this would look a lot nicer!
-    return this.maybeRenderSeparatorTemplate_(separatorInstance, page).then(
-      () => {
-        // Insert the document
-        const shadowRoot = this.win_.document.createElement('div');
-        shadowRoot.classList.add(SHADOW_ROOT_CLASS);
-        container.appendChild(shadowRoot);
+    container.appendChild(this.separator_.cloneNode(true));
 
-        // Observe this page's visibility
-        this.visibilityObserver_.observe(
-          shadowRoot /** element */,
-          container /** parent */,
-          position => {
-            page.relativePos = position;
-            this.updateVisibility();
-          }
-        );
+    // Insert the container
+    this.element_.insertBefore(container, this.moreBox_);
 
-        return container;
+    // Observe this page's visibility
+    this.visibilityObserver_.observe(
+      shadowRoot /** element */,
+      container /** parent */,
+      position => {
+        page.relativePos = position;
+        this.updateVisibility();
       }
     );
+
+    return container;
   }
 
   /**
@@ -540,6 +531,7 @@ export class NextPageService {
       removeElement(el);
     });
 
+    // Mark document as hidden initially
     doc.body.classList.add(HIDDEN_DOC_CLASS);
 
     // Make sure all hidden elements are initially invisible
@@ -548,7 +540,7 @@ export class NextPageService {
 
   /**
    * Hides or shows elements based on the `next-page-hide` and
-   * `next-page-replace` attributes
+   * `amp-next-page-replace` attributes	   * `next-page-replace` attributes
    * @param {!Document|!ShadowRoot} doc Document of interest
    * @param {boolean=} isVisible Whether this page is visible or not
    */
@@ -723,17 +715,11 @@ export class NextPageService {
         'be inside a <script> tag with type="application/json"'
     );
 
-    const parsed = tryParseJson(scriptElement.textContent, error => {
+    const pages = tryParseJson(scriptElement.textContent, error => {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
-    const pages = user().assertArray(
-      parsed,
-      `${TAG} page list should be an array`
-    );
-
-    removeElement(scriptElement);
-    return pages;
+    return user().assertArray(pages, `${TAG} page list should be an array`);
   }
 
   /**
@@ -745,6 +731,7 @@ export class NextPageService {
    */
   getSeparatorElement_(element) {
     const providedSeparator = childElementByAttr(element, 'separator');
+    // TODO(wassgha): Use templates (amp-mustache) to render the separator
     if (providedSeparator) {
       removeElement(providedSeparator);
     }
@@ -756,42 +743,9 @@ export class NextPageService {
    * @private
    */
   buildDefaultSeparator_() {
-    const html = htmlFor(this.getHostNextPageElement_());
-    return html`
-      <div
-        class="amp-next-page-default-separator"
-        aria-label="Next article separator"
-      >
-        Next article
-      </div>
-    `;
-  }
-
-  /**
-   * Renders the template inside the separator element using
-   * data from the current article (if a template is present)
-   *
-   * @param {!Element} separator
-   * @param {!Page} page
-   * @return {!Promise}
-   */
-  maybeRenderSeparatorTemplate_(separator, page) {
-    if (!this.templates_.hasTemplate(separator)) {
-      return Promise.resolve();
-    }
-    const data = /** @type {!JsonObject} */ ({
-      title: page.title,
-      url: page.url,
-      image: page.image,
-    });
-    return this.templates_
-      .findAndRenderTemplate(separator, data)
-      .then(rendered => {
-        return this.mutator_.mutateElement(separator, () => {
-          removeChildren(dev().assertElement(separator));
-          separator.appendChild(rendered);
-        });
-      });
+    const separator = this.win_.document.createElement('div');
+    separator.classList.add('amp-next-page-default-separator');
+    return separator;
   }
 
   /**

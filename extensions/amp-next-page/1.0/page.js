@@ -193,7 +193,7 @@ export class Page {
    * root has been removed
    */
   resume() {
-    this.attach_();
+    this.attach_(devAssert(this.cachedContent_));
   }
 
   /**
@@ -234,14 +234,13 @@ export class Page {
       .fetchPageDocument(this)
       .then(content => {
         this.state_ = PageState.LOADED;
-        this.cachedContent_ = content;
-        return this.manager_.createDocumentContainerForPage(this /** page */);
-      })
-      .then(container => {
-        this.container_ = container;
+        this.container_ = this.manager_.createDocumentContainerForPage(
+          this /** page */
+        );
         // TODO(wassgha): To further optimize, this should ideally
         // be parsed from the service worker instead of stored in memory
-        this.attach_();
+        this.cachedContent_ = content;
+        this.attach_(content);
       })
       .catch(() => {
         this.state_ = PageState.FAILED;
@@ -252,9 +251,9 @@ export class Page {
 
   /**
    * Inserts the fetched (or cached) HTML as the document's content
-   * @param {!Document=} content
+   * @param {!Document} content
    */
-  attach_(content = devAssert(this.cachedContent_)) {
+  attach_(content) {
     const shadowDoc = this.manager_.attachDocumentToPage(
       this /** page */,
       content,
