@@ -218,13 +218,14 @@ h3.i-amphtml-story-quiz-prompt {
 }
 
 .i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option::before {
-    left: -100% !important;
+    left: -101% !important;
     width: 100% !important;
     height: 100% !important;
     border-radius: 0px !important;
     background: #ECEDEF !important;
     color: #ECEDEF !important;
     transition: transform 1s !important;
+    border: solid 2px !important;
 }
 
 .i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option {
