@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as storyUtils from '../utils';
 import {Action} from '../amp-story-store-service';
 import {AmpStoryBookend} from '../bookend/amp-story-bookend';
 import {AmpStoryRequestService} from '../amp-story-request-service';
@@ -135,6 +136,12 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
 
     requestService = new AmpStoryRequestService(win, storyElem);
     env.sandbox.stub(Services, 'storyRequestService').returns(requestService);
+
+    env.sandbox.stub(storyUtils, 'getDocLocation').returns({
+      pathname: '/amp-stories/example/path/',
+      origin: 'https://www.testorigin.com',
+      href: 'https://www.testorigin.com/amp-stories/example/path/',
+    });
 
     const localizationService = new LocalizationService(win);
     registerServiceBuilder(win, 'localization', () => localizationService);
@@ -411,7 +418,9 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     );
     expect(
       analyticsVariables.get()[AnalyticsVariable.BOOKEND_TARGET_HREF]
-    ).to.equal('http://localhost:9876/google.com');
+    ).to.equal(
+      'https://www.testorigin.com/amp-stories/example/path/google.com'
+    );
     expect(
       analyticsVariables.get()[AnalyticsVariable.BOOKEND_COMPONENT_TYPE]
     ).to.equal('cta-link');
@@ -1073,6 +1082,62 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     expect(config.components.length).to.equal(0);
   });
 
+  it('should resolve article relative url for origin url when served from the cache', async () => {
+    const component = {
+      url: './other-article.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example article',
+      image: '../../assets/01-iconic-american-destinations.jpg',
+    };
+
+    storyUtils.getDocLocation.restore();
+    const fakeDoc = {
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
+      location: {
+        pathname:
+          '/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+        origin: 'https://www-nationalgeographic-com.cdn.ampproject.org',
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+
+    const article = new ArticleComponent();
+    const el = article.buildElement(component, fakeDoc, {position: 0});
+    expect(el.href).to.equal(
+      'https://www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/other-article.html'
+    );
+  });
+
+  it('should respect specified absolute URL', async () => {
+    const component = {
+      url: 'https://www.anothersite.com/article.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example article',
+      image: '../../assets/01-iconic-american-destinations.jpg',
+    };
+
+    storyUtils.getDocLocation.restore();
+    const fakeDoc = {
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
+      location: {
+        pathname:
+          '/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+        origin: 'https://www-nationalgeographic-com.cdn.ampproject.org',
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+
+    const article = new ArticleComponent();
+    const el = article.buildElement(component, fakeDoc, {position: 0});
+    expect(el.href).to.equal('https://www.anothersite.com/article.html');
+  });
+
   it('should rewrite article thumbnail image url for cached version', async () => {
     const component = {
       url: 'http://example.com/article.html',
@@ -1118,6 +1183,89 @@ describes.realWin('amp-story-bookend', {amp: true}, env => {
     const el = landscape.buildElement(component, fakeDoc, {position: 0});
     expect(el.querySelector('img').src).to.equal(
       'https://www-nationalgeographic-com.cdn.ampproject.org/i/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/assets/01-iconic-american-destinations.jpg'
+    );
+  });
+
+  it('should resolve absolute url correctly', async () => {
+    const component = {
+      url: '//othersite.com/other-article.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example landscape article',
+      image: '../../assets/01-iconic-american-destinations.jpg',
+    };
+
+    storyUtils.getDocLocation.restore();
+    const fakeDoc = {
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
+      location: {
+        pathname: '/amp-stories/travel/10-iconic-places-to-photograph/',
+        origin: 'https://www.nationalgeographic.com',
+        href:
+          'https://www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const landscape = new LandscapeComponent();
+
+    const el = landscape.buildElement(component, fakeDoc, {position: 0});
+    expect(el.href).to.equal('https://othersite.com/other-article.html');
+  });
+
+  it('should resolve relative url for landscape component', async () => {
+    const component = {
+      url: './other-article.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example landscape article',
+      image: '../../assets/01-iconic-american-destinations.jpg',
+    };
+
+    storyUtils.getDocLocation.restore();
+    const fakeDoc = {
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
+      location: {
+        pathname: '/amp-stories/travel/10-iconic-places-to-photograph/',
+        origin: 'https://www.nationalgeographic.com',
+        href:
+          'https://www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const landscape = new LandscapeComponent();
+
+    const el = landscape.buildElement(component, fakeDoc, {position: 0});
+    expect(el.href).to.equal(
+      'https://www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/other-article.html'
+    );
+  });
+
+  it('should resolve relative url for landscape component in cache', async () => {
+    const component = {
+      url: './other-article.html',
+      domainName: 'example.com',
+      type: 'small',
+      title: 'This is an example landscape article',
+      image: '../../assets/01-iconic-american-destinations.jpg',
+    };
+
+    storyUtils.getDocLocation.restore();
+    const fakeDoc = {
+      createElement: doc.createElement.bind(doc),
+      body: doc.body,
+      location: {
+        pathname:
+          '/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+        origin: 'https://www-nationalgeographic-com.cdn.ampproject.org',
+        href:
+          'https://www-nationalgeographic-com.cdn.ampproject.org/c/s/www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/',
+      },
+    };
+    const landscape = new LandscapeComponent();
+
+    const el = landscape.buildElement(component, fakeDoc, {position: 0});
+    expect(el.href).to.equal(
+      'https://www.nationalgeographic.com/amp-stories/travel/10-iconic-places-to-photograph/other-article.html'
     );
   });
 

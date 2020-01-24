@@ -252,6 +252,15 @@ export function resolveImgSrc(doc, url) {
   return urlSrc;
 }
 
+/**
+ * Wrapper for testing purposes.
+ * @param {!Document} doc
+ * @return {!Location}
+ */
+export function getDocLocation(doc) {
+  return doc.location;
+}
+
 /** @enum {string} */
 export const HistoryState = {
   ATTACHMENT_PAGE_ID: 'ampStoryAttachmentPageId',

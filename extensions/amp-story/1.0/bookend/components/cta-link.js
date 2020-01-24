@@ -21,10 +21,11 @@ import {
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
+import {getDocLocation, userAssertValidProtocol} from '../../utils';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
 import {userAssert} from '../../../../../src/log';
-import {userAssertValidProtocol} from '../../utils';
 
 /**
  * @typedef {{
@@ -101,7 +102,13 @@ export class CtaLinkComponent {
     `;
     ctaLinksData['links'].forEach(currentLink => {
       const el = linkSeed.cloneNode(/* deep */ true);
-      addAttributesToElement(el, dict({'href': currentLink['url']}));
+      const loc = getDocLocation(doc);
+      addAttributesToElement(
+        el,
+        dict({
+          'href': resolveRelativeUrl(currentLink['url'], getSourceUrl(loc)),
+        })
+      );
 
       if (currentLink['amphtml'] === true) {
         addAttributesToElement(el, dict({'rel': 'amphtml'}));

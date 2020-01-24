@@ -22,10 +22,12 @@ import {
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {
+  getDocLocation,
   getSourceOriginForElement,
   resolveImgSrc,
   userAssertValidProtocol,
 } from '../../utils';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -111,7 +113,14 @@ export class PortraitComponent {
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
-    addAttributesToElement(el, dict({'href': portraitData.url}));
+    const loc = getDocLocation(doc);
+    addAttributesToElement(
+      el,
+      dict({
+        'href': resolveRelativeUrl(portraitData.url, getSourceUrl(loc)),
+      })
+    );
+
     el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
       position: data.position,
       type: BOOKEND_COMPONENT_TYPES.PORTRAIT,
