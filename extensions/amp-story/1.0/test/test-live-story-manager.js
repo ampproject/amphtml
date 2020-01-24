@@ -85,6 +85,7 @@ describes.realWin(
 
     it('should build a dynamic live-list', async () => {
       createPages(ampStory.element, 2, ['cover', 'page-1']);
+      ampStory.buildCallback();
       liveStoryManager = new LiveStoryManager(ampStory);
       liveStoryManager.build();
 
@@ -96,6 +97,7 @@ describes.realWin(
 
     it('live-list id should equal story id + dymanic-list combo', async () => {
       createPages(ampStory.element, 2, ['cover', 'page-1']);
+      ampStory.buildCallback();
       liveStoryManager = new LiveStoryManager(ampStory);
       liveStoryManager.build();
 
@@ -109,6 +111,7 @@ describes.realWin(
 
     it('should throw if no story id is set', () => {
       createPages(ampStory.element, 2, ['cover', 'page-1']);
+      ampStory.buildCallback();
       liveStoryManager = new LiveStoryManager(ampStory);
       ampStory.element.removeAttribute('id');
 
@@ -123,6 +126,7 @@ describes.realWin(
 
     it('should append new page from server to client in update', async () => {
       createPages(ampStory.element, 2, ['cover', 'page-1']);
+      ampStory.buildCallback();
       expect(ampStory.element.children.length).to.equal(2);
       liveStoryManager = new LiveStoryManager(ampStory);
       liveStoryManager.build();
