@@ -138,6 +138,11 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     return stub.args[0][0];
   }
 
+  it('should set the current URL in analytics', () => {
+    const swgAnalytics = platform.runtime_.analytics();
+    expect(swgAnalytics.getContext().getUrl()).to.equal('about:srcdoc');
+  });
+
   it('should reset runtime on platform reset', () => {
     expect(methods.reset).to.not.be.called;
     platform.reset();
