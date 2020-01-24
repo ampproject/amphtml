@@ -522,6 +522,9 @@ export class AmpStoryPage extends AMP.BaseElement {
           state.vmax = Math.max(state.vh, state.vw);
         },
         mutate: state => {
+          if (state.vh === 0 && state.vw === 0) {
+            return;
+          }
           this.win.document.documentElement.setAttribute(
             'style',
             `--story-page-vh: ${px(state.vh)};` +
