@@ -344,7 +344,7 @@ export class AmpScript extends AMP.BaseElement {
           const contentType = response.headers.get('Content-Type');
           if (
             !contentType ||
-            !startsWith(contentType, 'application/javascript')
+            !(startsWith(contentType, 'application/javascript') || startsWith(contentType, 'text/javascript'))
           ) {
             user().error(
               TAG,
