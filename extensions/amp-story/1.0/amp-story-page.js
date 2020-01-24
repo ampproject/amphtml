@@ -75,7 +75,7 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isMediaDisplayed, setTextBackgroundColor} from './utils';
-import {toggle} from '../../../src/style';
+import {px, toggle} from '../../../src/style';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -233,6 +233,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       100
     );
 
+    /** @private {boolean}  */
+    this.isFirstPage_ = false;
+
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
@@ -269,9 +272,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!function(*)} */
     this.mediaPoolRejectFn_ = deferred.reject;
-
-    /** @private {boolean}  */
-    this.prerenderAllowed_ = false;
 
     /** @private {!PageState} */
     this.state_ = PageState.NOT_ACTIVE;
@@ -317,10 +317,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   firstAttachedCallback() {
     // Only prerender the first story page.
-    this.prerenderAllowed_ = matches(
-      this.element,
-      'amp-story-page:first-of-type'
-    );
+    this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
   }
 
   /** @override */
@@ -497,6 +494,51 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
+  /** @override */
+  onMeasureChanged() {
+    // Only measures from the first story page, that always gets built because
+    // of the prerendering optimizations in place.
+    if (!this.isFirstPage_) {
+      return;
+    }
+
+    return this.getVsync().runPromise(
+      {
+        measure: state => {
+          const uiState = this.storeService_.get(StateProperty.UI_STATE);
+          // The desktop panels UI uses CSS scale. Retrieving clientHeight/Width
+          // ensures we are getting the raw size, ignoring the scale.
+          const {width, height} =
+            uiState === UIType.DESKTOP_PANELS
+              ? {
+                  height: this.element./*OK*/ clientHeight,
+                  width: this.element./*OK*/ clientWidth,
+                }
+              : this.getLayoutBox();
+          state.vh = height / 100;
+          state.vw = width / 100;
+          state.fiftyVw = Math.round(width / 2);
+          state.vmin = Math.min(state.vh, state.vw);
+          state.vmax = Math.max(state.vh, state.vw);
+        },
+        mutate: state => {
+          if (state.vh === 0 && state.vw === 0) {
+            return;
+          }
+          this.win.document.documentElement.setAttribute(
+            'style',
+            `--story-page-vh: ${px(state.vh)};` +
+              `--story-page-vw: ${px(state.vw)};` +
+              `--story-page-vmin: ${px(state.vmin)};` +
+              `--story-page-vmax: ${px(state.vmax)};` +
+              `--i-amphtml-story-page-50vw: ${px(state.fiftyVw)};`
+          );
+        },
+      },
+      {}
+    );
+  }
+
   /**
    * @private
    */
@@ -651,7 +693,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return this.prerenderAllowed_;
+    return this.isFirstPage_;
   }
 
   /**

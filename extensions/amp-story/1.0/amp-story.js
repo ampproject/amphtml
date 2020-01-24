@@ -94,7 +94,6 @@ import {
 } from '../../../src/dom';
 import {
   computedStyle,
-  px,
   resetStyles,
   setImportantStyles,
   toggle,
@@ -610,40 +609,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @private
-   */
-  updateViewportSizeStyles_() {
-    const pageEl =
-      (this.activePage_ && this.activePage_.element) ||
-      this.element.querySelector('amp-story-page');
-
-    if (!pageEl || !this.isStandalone_()) {
-      return;
-    }
-
-    return this.vsync_.runPromise(
-      {
-        measure: state => {
-          state.vh = pageEl./*OK*/ clientHeight / 100;
-          state.vw = pageEl./*OK*/ clientWidth / 100;
-          state.vmin = Math.min(state.vh, state.vw);
-          state.vmax = Math.max(state.vh, state.vw);
-        },
-        mutate: state => {
-          this.win.document.documentElement.setAttribute(
-            'style',
-            `--story-page-vh: ${px(state.vh)};` +
-              `--story-page-vw: ${px(state.vw)};` +
-              `--story-page-vmin: ${px(state.vmin)};` +
-              `--story-page-vmax: ${px(state.vmax)};`
-          );
-        },
-      },
-      {}
-    );
-  }
-
-  /**
    * Builds the system layer DOM.
    * @param {string} initialPageId
    * @private
@@ -1023,7 +988,6 @@ export class AmpStory extends AMP.BaseElement {
         }
       })
       .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
-      .then(() => this.updateViewportSizeStyles_())
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
           this.win,
@@ -1059,10 +1023,7 @@ export class AmpStory extends AMP.BaseElement {
     // visible.
     if (!this.getAmpDoc().hasBeenVisible()) {
       return whenUpgradedToCustomElement(firstPageEl).then(() => {
-        return Promise.all([
-          firstPageEl.whenBuilt(),
-          this.updateViewportSizeStyles_(),
-        ]);
+        return firstPageEl.whenBuilt();
       });
     }
 
@@ -1740,8 +1701,6 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
-    this.updateViewportSizeStyles_();
-
     const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
