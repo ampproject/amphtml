@@ -190,6 +190,20 @@ setTimeout(() => {
   parent.postMessage(readyObject, '*');
 }, 2000);
 
+// Send fullscreen every 2.5 seconds
+setInterval(() => {
+
+  // Our ready object
+  const readyObject = {
+    type: 'consent-ui',
+    action: 'enter-fullscreen'
+  };
+
+  console.log('diy-consent: Sending Fullscreen Message!', readyObject);
+
+  parent.postMessage(readyObject, '*');
+}, 2500);
+
 function registerClickConsentMessage(querySelector, type, action, info, timeout) {
   document.querySelector(querySelector).onclick = function () {
     // parent.postMessage("message to be sent", "http://the-website-that-will-receive-the-msg.com")
