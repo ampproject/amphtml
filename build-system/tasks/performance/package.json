@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "gulp-performance",
+  "version": "0.1.0",
+  "description": "Dev dependencies used by `gulp performance`",
+  "devDependencies": {
+    "puppeteer": "2.0.0"
+  }
+}

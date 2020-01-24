@@ -169,7 +169,7 @@ function eslintRulesChanged() {
  * @return {!Array<string>}
  */
 function getFilesToLint(files) {
-  const filesToLint = globby.sync(files);
+  const filesToLint = globby.sync(files, {gitignore: true});
   if (!isTravisBuild()) {
     log(colors.green('INFO: ') + 'Running lint on the following files:');
     filesToLint.forEach(file => {

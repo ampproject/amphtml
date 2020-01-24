@@ -154,6 +154,19 @@ function maybeInitializeExtensions(
 }
 
 /**
+ * Set the extensions to build from example documents
+ * (for internal use by `gulp performance`)
+ *
+ * @param {Array<string>} examples Path to example documents
+ */
+function setExtensionsToBuildFromDocuments(examples) {
+  extensionsToBuild = dedupe([
+    ...DEFAULT_EXTENSION_SET,
+    ...getExtensionsFromArg(examples.join(',')),
+  ]);
+}
+
+/**
  * Process the command line arguments --noextensions, --extensions, and
  * --extensions_from and return a list of the referenced extensions.
  *
@@ -537,4 +550,5 @@ module.exports = {
   getExtensionsToBuild,
   maybeInitializeExtensions,
   parseExtensionFlags,
+  setExtensionsToBuildFromDocuments,
 };
