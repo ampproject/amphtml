@@ -423,13 +423,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * @private
    */
   preprocessPercentages_(responseData, numOptions) {
-    const totalResponseCount = responseData['totalResponseCount'];
     let percentages = new Array(numOptions).fill(0);
 
     for (let i = 0; i < responseData['responses'].length; i++) {
       percentages[i] = (
         100 *
-        (responseData['responses'][i]['totalCount'] / totalResponseCount)
+        (responseData['responses'][i]['totalCount'] /
+          responseData['totalResponseCount'])
       ).toFixed(2);
     }
 
@@ -446,6 +446,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
           ? (Math.trunc(percentage) + 0.49).toFixed(2)
           : percentage
       );
+
       total = percentages.reduce(
         (currentTotal, currentValue) =>
           (currentTotal += Math.round(currentValue)),
@@ -472,8 +473,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
           // Break remainder ties using the higher value.
           right.remainder - left.remainder || right.value - left.value
       );
-      const finalPercentages = [];
 
+      const finalPercentages = [];
       while (remainder > 0 && preserveOriginal.length !== 0) {
         const highestRemainderObj = preserveOriginal[0];
 
@@ -484,20 +485,16 @@ export class AmpStoryQuiz extends AMP.BaseElement {
           percentageObj => percentageObj.value !== highestRemainderObj.value
         );
 
+        const toRoundUp =
+          ties.length <= remainder && highestRemainderObj.remainder !== '0.00';
+
         ties.forEach(percentageObj => {
           finalPercentages[percentageObj.originalIndex] =
-            Math.trunc(percentageObj.value) +
-            (ties.length <= remainder &&
-            highestRemainderObj.remainder !== '0.00'
-              ? 1
-              : 0);
+            Math.trunc(percentageObj.value) + (toRoundUp ? 1 : 0);
         });
 
         // Update the remainder given additions to the percentages.
-        remainder -=
-          ties.length <= remainder && highestRemainderObj.remainder !== '0.00'
-            ? ties.length
-            : 0;
+        remainder -= toRoundUp ? ties.length : 0;
       }
 
       preserveOriginal.forEach(percentageObj => {

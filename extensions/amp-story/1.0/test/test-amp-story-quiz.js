@@ -93,7 +93,7 @@ const getMockReactionData = () => {
 };
 
 /**
- * Generates a response give a number of counts
+ * Generates a response given an array of counts.
  *
  * @param {Array<number>} responseCounts
  */
@@ -300,7 +300,7 @@ describes.realWin(
       );
     });
 
-    it('should preprocess percentages preserving ties, order, and adding to 100', () => {
+    it('should preprocess percentages preserving ties, order, and adding to 100 (in most cases)', () => {
       const responseData1 = getMockReactionData()['data'];
 
       const percentages1 = ampStoryQuiz.preprocessPercentages_(
