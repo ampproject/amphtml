@@ -120,7 +120,7 @@ export class NextPageService {
     /** @private {boolean} */
     this.hasDeepParsing_ = false;
 
-    /** @private {string} */
+    /** @private {?string} */
     this.nextSrc_ = null;
 
     /** @private {?function()} */
@@ -747,7 +747,7 @@ export class NextPageService {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
-    return /** @type {Array<!./page.PageMeta>} */ (user().assertArray(
+    return /** @type {!Array<!./page.PageMeta>} */ (user().assertArray(
       pages,
       `${TAG} page list should be an array`
     ));
@@ -768,11 +768,11 @@ export class NextPageService {
       xssiPrefix: this.getElement_().getAttribute('xssi-prefix') || undefined,
     })
       .then(result => {
-        this.nextSrc_ = result.next || null;
+        this.nextSrc_ = result['next'] || null;
         if (this.nextSrc_) {
           this.getElement_().setAttribute('src', this.nextSrc_);
         }
-        return result.pages || [];
+        return result['pages'] || [];
       })
       .catch(error =>
         user().error(TAG, 'error fetching page list from remote server', error)

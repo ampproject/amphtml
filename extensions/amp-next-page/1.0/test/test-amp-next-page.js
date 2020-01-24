@@ -297,6 +297,7 @@ describes.realWin(
             },
           });
         const service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
 
         await element.build();
         await element.layoutCallback();
@@ -312,8 +313,8 @@ describes.realWin(
 
         // env.sandbox.stub(service, 'getViewportsAway_').returns(2);
         env.fetchMock.get(/\/document1/, MOCK_NEXT_PAGE);
-        await service.maybeFetchNext(true);
-        await service.maybeFetchNext(true);
+        await service.maybeFetchNext();
+        await service.maybeFetchNext();
 
         expect(
           fetchJsonStub.calledWithExactly(
