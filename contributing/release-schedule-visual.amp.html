@@ -32,7 +32,26 @@
         grid-template-rows: auto 150px auto auto 150px 150px 150px auto auto 150px;
         transition: all .2s ease-in-out;
       }
+      @-webkit-keyframes background-flash {
+        0% {
+          background-color: inherit;
+        }
+        25% {
+          background-color: #ffff00;
+        }
+        75% {
+          background-color: #ffff00;
+        }
+        100% {
+          background-color: inherit;
+        }
+      }
+      [data-direction="top"] .top,
+      [data-direction="bottom"] .bottom {
+        animation: background-flash .5s linear;
+      }
       [data-direction="top"] .bottom,
+      [data-direction="initialized"] .bottom,
       [data-direction="bottom"] .top {
         display: none;
       }
@@ -88,6 +107,7 @@
         overflow: hidden;
         transition: all .4s ease-in-out;
       }
+      [data-direction="initialized"] .ellipsis-top,
       [data-direction="top"] .ellipsis-top,
       [data-direction="bottom"] .ellipsis-bottom {
         height: 0;
@@ -176,7 +196,7 @@
   </head>
   <body>
     <amp-script layout="intrinsic" width="1050" height="0" script="calendar-script">
-      <div id="calendar" data-direction="top">
+      <div id="calendar" data-direction="initialized">
         <div class="box header">Week</div>
         <div class="box header day-sunday">Sunday</div>
         <div class="box header day-monday">Monday</div>
