@@ -676,8 +676,13 @@ export class ConsentUI {
     }
 
     if (data['action'] === 'enter-fullscreen') {
-      // TODO (@torch2424) Send response back if enter fullscreen was succesful
-      if (!this.isIframeVisible_) {
+      // Do nothing if iframe not visible or it's not the active element.
+      if (
+        !this.isIframeVisible_ ||
+        (this.restrictFullscreenOn_ &&
+          this.document_.activeElement !== this.ui_)
+      ) {
+        // TODO (@torch2424) Send response back if enter fullscreen was succesful
         return;
       }
 
