@@ -316,8 +316,6 @@ function setAmpCanaryCookie_(cookieState) {
     validUntil = Date.now() + COOKIE_MAX_AGE_MS;
   }
   const cookieOptions = {
-    // Set explicit domain, so the cookie gets sent to sub domains.
-    domain: location.hostname,
     allowOnProxyOrigin: true,
     // Make sure the cookie is available for the script loads coming from
     // other domains. Chrome's default of LAX would otherwise prevent it
@@ -325,11 +323,18 @@ function setAmpCanaryCookie_(cookieState) {
     sameSite: SameSite.NONE,
     secure: true,
   };
+  setCookie(
+    window,
+    '__Host-AMP_OPT_IN',
+    cookieState,
+    validUntil,
+    cookieOptions
+  );
   // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
   // cookie.
-  ['__Host-AMP_OPT_IN', 'AMP_CANARY'].forEach(cookieName => {
-    setCookie(window, cookieName, cookieState, validUntil, cookieOptions);
-  });
+  // Set explicit domain, so the cookie gets sent to sub domains.
+  cookieOptions.domain = location.hostname;
+  setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
   // Reflect default experiment state.
   self.location.reload();
 }
