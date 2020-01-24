@@ -523,7 +523,7 @@ export class ViewportBindingInabox {
     return Services.resourcesPromiseForDoc(
       this.win.document.documentElement
     ).then(() => {
-      this.unobserveFunction_ = this.unobserveFunction ||
+      this.unobserveFunction_ = this.unobserveFunction_ ||
       this.topWindowPositionObserver_.observe(
         // If the window is the top window (not sitting in an iframe) then
         // frameElement doesn't exist. In that case we observe the scrolling
