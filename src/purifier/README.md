@@ -31,10 +31,13 @@ import Mustache from 'mustache';
 import {Purifier} from '@ampproject/purifier';
 
 const purifier = new Purifier(document);
-Mustache..setUnescapedSanitizer(value =>
-  purifier.purifyTagsForTripleMustache(value)
-);
+const _unescapedValue = Mustache.Writer.prototype.unescapedValue;
+Mustache.Writer.prototype.unescapedValue = function(token, context) {
+  const result = _unescapedValue(token, context);
+  return purifier.purifyTagsForTripleMustache(result);
+};
 const html = Mustache.render(template, data);
+
 const body = purifier.purifyHtml(html);
 for (const child of body.children) {
   targetElement.appendChild(child);

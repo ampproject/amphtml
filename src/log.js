@@ -67,7 +67,6 @@ export function isUserErrorEmbed(message) {
 
 /**
  * @enum {number}
- * @private Visible for testing only.
  */
 export const LogLevel = {
   OFF: 0,
@@ -750,12 +749,12 @@ const logs = self.__AMP_LOG;
  * Eventually holds a constructor for Log objects. Lazily initialized, so we
  * can avoid ever referencing the real constructor except in JS binaries
  * that actually want to include the implementation.
- * @type {?Function}
+ * @type {?typeof Log}
  */
 let logConstructor = null;
 
 /**
- * Initializes log contructor.
+ * Initializes log constructor.
  */
 export function initLogConstructor() {
   logConstructor = Log;
@@ -772,7 +771,7 @@ export function initLogConstructor() {
 }
 
 /**
- * Resets log contructor for testing.
+ * Resets log constructor for testing.
  */
 export function resetLogConstructorForTesting() {
   logConstructor = null;
