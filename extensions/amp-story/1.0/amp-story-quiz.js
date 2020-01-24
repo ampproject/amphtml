@@ -388,7 +388,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       return;
     }
 
-    const options = Array.from(
+    const options = toArray(
       this.quizEl_.querySelectorAll('.i-amphtml-story-quiz-option')
     );
 
@@ -438,8 +438,8 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     // Special case: ties with remainder 0.5 cause total to rise above 100.
     if (total > 100) {
       percentages = percentages.map(percentage =>
-        (percentage - Math.trunc(percentage)).toFixed(2) === '0.50'
-          ? (Math.trunc(percentage) + 0.49).toFixed(2)
+        (percentage - Math.floor(percentage)).toFixed(2) === '0.50'
+          ? (Math.floor(percentage) + 0.49).toFixed(2)
           : percentage
       );
 
@@ -461,7 +461,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
         return {
           originalIndex: index,
           value: percentage,
-          remainder: (percentage - Math.trunc(percentage)).toFixed(2),
+          remainder: (percentage - Math.floor(percentage)).toFixed(2),
         };
       });
       preserveOriginal.sort(
@@ -486,7 +486,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
         ties.forEach(percentageObj => {
           finalPercentages[percentageObj.originalIndex] =
-            Math.trunc(percentageObj.value) + (toRoundUp ? 1 : 0);
+            Math.floor(percentageObj.value) + (toRoundUp ? 1 : 0);
         });
 
         // Update the remainder given additions to the percentages.
@@ -494,7 +494,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       }
 
       preserveOriginal.forEach(percentageObj => {
-        finalPercentages[percentageObj.originalIndex] = Math.trunc(
+        finalPercentages[percentageObj.originalIndex] = Math.floor(
           percentageObj.value
         );
       });
