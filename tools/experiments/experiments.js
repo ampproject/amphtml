@@ -60,10 +60,10 @@ const RTV_CHANNEL_ID = 'rtv-channel';
 /**
  * The different states of the AMP_CANARY cookie.
  */
-const AMP_CANARY_COOKIE = {
-  DISABLED: '0',
-  CANARY: '1',
-  RC: '2',
+const AMP_OPT_IN_COOKIE = {
+  DISABLED: '',
+  EXPERIMENTAL: 'experimental',
+  BETA: 'beta',
 };
 
 /** @const {!Array<!ExperimentDef>} */
@@ -154,7 +154,7 @@ function build() {
     if (!rtvInput.value) {
       showConfirmation_(
         'Do you really want to opt out of RTV?',
-        setAmpCanaryCookie_.bind(null, AMP_CANARY_COOKIE.DISABLED)
+        setAmpCanaryCookie_.bind(null, AMP_OPT_IN_COOKIE.DISABLED)
       );
     } else if (RTV_PATTERN.test(rtvInput.value)) {
       showConfirmation_(
@@ -270,9 +270,9 @@ function updateExperimentRow(experiment) {
 function isExperimentOn_(id) {
   switch (id) {
     case EXPERIMENTAL_CHANNEL_ID:
-      return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.CANARY;
+      return getCookie(window, 'AMP_CANARY') == AMP_OPT_IN_COOKIE.EXPERIMENTAL;
     case BETA_CHANNEL_ID:
-      return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.RC;
+      return getCookie(window, 'AMP_CANARY') == AMP_OPT_IN_COOKIE.BETA;
     case RTV_CHANNEL_ID:
       return RTV_PATTERN.test(getCookie(window, 'AMP_CANARY'));
     default:
@@ -283,14 +283,14 @@ function isExperimentOn_(id) {
 /**
  * Opts in to / out of the "canary" or "rc" runtime types by setting the
  * AMP_CANARY cookie.
- * @param {string} cookieState One of AMP_CANARY_COOKIE.{DISABLED|CANARY|RC} or
- *   a 15-digit RTV.
+ * @param {string} cookieState One of the AMP_OPT_IN_COOKIE enum values, or a
+ *   15-digit RTV.
  */
 function setAmpCanaryCookie_(cookieState) {
   let validUntil = 0;
   if (RTV_PATTERN.test(cookieState)) {
     validUntil = Date.now() + RTV_COOKIE_MAX_AGE_MS;
-  } else if (cookieState != AMP_CANARY_COOKIE.DISABLED) {
+  } else if (cookieState != AMP_OPT_IN_COOKIE.DISABLED) {
     validUntil = Date.now() + COOKIE_MAX_AGE_MS;
   }
   const cookieOptions = {
@@ -325,11 +325,11 @@ function toggleExperiment_(id, name, opt_on) {
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == EXPERIMENTAL_CHANNEL_ID) {
       setAmpCanaryCookie_(
-        on ? AMP_CANARY_COOKIE.CANARY : AMP_CANARY_COOKIE.DISABLED
+        on ? AMP_OPT_IN_COOKIE.EXPERIMENTAL : AMP_OPT_IN_COOKIE.DISABLED
       );
     } else if (id == BETA_CHANNEL_ID) {
       setAmpCanaryCookie_(
-        on ? AMP_CANARY_COOKIE.RC : AMP_CANARY_COOKIE.DISABLED
+        on ? AMP_OPT_IN_COOKIE.BETA : AMP_OPT_IN_COOKIE.DISABLED
       );
     } else {
       toggleExperiment(window, id, on);
@@ -366,10 +366,10 @@ function showConfirmation_(message, callback) {
 }
 
 /**
- * Loads the AMP_CONFIG objects from whatever the v0.js is that the
- * user has (depends on whether they opted into canary or RC), so that
- * experiment state can reflect the default activated experiments.
- * @return {*} TODO(#23582): Specify return type
+ * Loads the AMP_CONFIG objects from whatever the v0.js is that the user has
+ * (depends on whether they opted into beta/experimental), so that experiment
+ * state can reflect the default activated experiments.
+ * @return {Promise<JSON>} the active AMP_CONFIG, parsed as a JSON object
  */
 function getAmpConfig() {
   const deferred = new Deferred();
