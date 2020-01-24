@@ -133,9 +133,13 @@ class InaboxViewportImpl {
     /** @private @const {!Observable<!../service/viewport/viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    this.binding_.connect();
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
+
+    /** @private {boolean} */
+    this.visible_ = false;
+    this.ampdoc.onVisibilityChanged(this.updateVisibility_.bind(this));
+    this.updateVisibility_();
 
     // Top-level mode classes.
     const docElement = win.document.documentElement;
@@ -388,6 +392,24 @@ class InaboxViewportImpl {
       height: newSize.height,
     });
   }
+
+  /** @private */
+  updateVisibility_() {
+    const visible = this.ampdoc.isVisible();
+    if (visible != this.visible_) {
+      this.visible_ = visible;
+      if (visible) {
+        this.binding_.connect();
+        if (this.size_) {
+          // If the size has already been intialized, check it again in case
+          // the size has changed between `disconnect` and `connect`.
+          this.resize_();
+        }
+      } else {
+        this.binding_.disconnect();
+      }
+    }
+  }
 }
 
 /**
@@ -467,13 +489,6 @@ export class ViewportBindingInabox {
     /** @private {?UnlistenDef} */
     this.unobserveFunction_ = null;
 
-    const unloadListener = this.win.addEventListener('unload', () => {
-      if (this.unobserveFunction_) {
-        this.unobserveFunction_();
-        this.unobserveFunction_ = null;
-        this.win.removeEventListener('unload', unloadListener);
-      }
-    });
     dev().fine(TAG, 'initialized inabox viewport');
   }
 
@@ -505,13 +520,11 @@ export class ViewportBindingInabox {
     // registered (since it's registered after the inabox services so it won't
     // be available immediately).
     // TODO(lannka): Investigate why this is the case.
-    if (this.unobserveFunction_) {
-      return Promise.resolve();
-    }
     return Services.resourcesPromiseForDoc(
       this.win.document.documentElement
     ).then(() => {
-      this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
+      this.unobserveFunction_ = this.unobserveFunction ||
+      this.topWindowPositionObserver_.observe(
         // If the window is the top window (not sitting in an iframe) then
         // frameElement doesn't exist. In that case we observe the scrolling
         // element.
