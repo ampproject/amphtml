@@ -540,8 +540,8 @@ export class NextPageService {
 
   /**
    * Hides or shows elements based on the `next-page-hide` and
-   * `amp-next-page-replace` attributes	   * `next-page-replace` attributes
-   * @param {!Document|!ShadowRoot} doc Document of interest
+   * `next-page-replace` attributes
+   * @param {!Document|!ShadowRoot} doc Document to attach.
    * @param {boolean=} isVisible Whether this page is visible or not
    */
   toggleHiddenAndReplaceableElements(doc, isVisible = true) {
