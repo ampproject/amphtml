@@ -61,6 +61,8 @@ window.parent.postMessage(
 
 Action `'enter-fullscreen'` requests the AMP runtime to expand the iframe to fullscreen.
 
+**Note:** amp-consent will only allow the iframe enter fullscreen once it detects user-interaction with the iframe (e.g. clicking on the iframe). A dev error will be produced if amp-consent is unable to fulfill the fullscreen request.
+
 #### Informing Consent response
 
 Iframes can send a `consent-response` message to the parent AMP page to inform the user [actions](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/amp-consent.md#prompt-actions) along with additional consent information.
