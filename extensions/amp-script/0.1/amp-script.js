@@ -379,7 +379,9 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /**
-   * @param {function(boolean)} flush
+   * @param {function(boolean)} flush If `flush(false)` is invoked, mutations
+   *   that cause user-visible changes (e.g. DOM changes) will be dropped
+   *   (changes like event listener registration will be kept).
    * @param {number} phase
    * @private
    */
