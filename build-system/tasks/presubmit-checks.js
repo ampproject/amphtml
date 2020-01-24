@@ -1138,6 +1138,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
+      'build-system/tasks/performance/helpers.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
