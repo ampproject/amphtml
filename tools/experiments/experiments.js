@@ -58,7 +58,7 @@ const BETA_CHANNEL_ID = 'beta-channel';
 const RTV_CHANNEL_ID = 'rtv-channel';
 
 /**
- * The different states of the AMP_CANARY cookie.
+ * The different states of the __Host-AMP_OPT_IN cookie.
  */
 const AMP_OPT_IN_COOKIE = {
   DISABLED: '',
@@ -175,7 +175,10 @@ function build() {
   });
 
   if (isExperimentOn_(RTV_CHANNEL_ID)) {
-    rtvInput.value = getCookie(window, 'AMP_CANARY');
+    // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
+    // cookie.
+    rtvInput.value =
+      getCookie(window, '__Host-AMP_OPT_IN') || getCookie(window, 'AMP_CANARY');
     rtvInput.dispatchEvent(new Event('input'));
     document.getElementById('rtv-details').open = true;
   }
@@ -278,6 +281,10 @@ function updateExperimentRow(experiment) {
  * @return {boolean}
  */
 function isExperimentOn_(id) {
+  // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
+  // cookie.
+  const optInCookieValue =
+    getCookie(window, '__Host-AMP_OPT_IN') || getCookie(window, 'AMP_CANARY');
   switch (id) {
     case EXPERIMENTAL_CHANNEL_ID:
       return [
@@ -318,7 +325,11 @@ function setAmpCanaryCookie_(cookieState) {
     sameSite: SameSite.NONE,
     secure: true,
   };
-  setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
+  // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
+  // cookie.
+  ['__Host-AMP_OPT_IN', 'AMP_CANARY'].forEach(cookieName => {
+    setCookie(window, cookieName, cookieState, validUntil, cookieOptions);
+  });
   // Reflect default experiment state.
   self.location.reload();
 }
@@ -396,7 +407,7 @@ function getAmpConfig() {
   xhr.addEventListener('error', () => {
     reject(new Error(xhr.statusText));
   });
-  // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
+  // Cache bust, so we immediately reflect cookie changes.
   xhr.open('GET', '/v0.js?' + Math.random(), true);
   xhr.send(null);
   return promise
