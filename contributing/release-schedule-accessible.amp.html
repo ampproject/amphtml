@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en" ⚡>
+  <head>
+    <meta charset="utf-8">
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    <script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js"></script>
+    <title>AMP release schedule explainer (accessible)</title>
+    <link rel="canonical" href="release-schedule-explainer.amp.html">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fira+Mono|Noto+Sans|Poppins">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+    <style amp-custom>
+      body {
+        color: #000000;
+        font-family: "Noto Sans", sans-serif;
+        padding: 1em;
+      }
+      .header {
+        color: #005af0;
+        font-family: "Poppins", sans-serif;
+        font-weight: bold;
+      }
+      code {
+        font-family: "Fira Mono", monospace;
+        font-weight: medium;
+      }
+    </style>
+  </head>
+  <body>
+    <p>For a detailed description of the various release channels, see <a href="https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md">release-schedule.md</a>.</p>
+
+    <amp-state id="codeToChannels">
+      <script type="application/json">
+        {
+          "Sunday": {
+            "nightly": "the following day",
+            "opt-in": "Tuesday the following week",
+            "beta": "Wednesday the following week",
+            "stable": "Tuesday two weeks later",
+            "lts": "the 2nd Monday the following month"
+          },
+          "Monday": {
+            "nightly": "the following day",
+            "opt-in": "Tuesday the following week",
+            "beta": "Wednesday the following week",
+            "stable": "Tuesday two weeks later",
+            "lts": "the 2nd Monday the following month"
+          },
+          "Tuesday": {
+            "nightly": "the following day",
+            "opt-in": "Tuesday the following week",
+            "beta": "Wednesday the following week",
+            "stable": "Tuesday two weeks later",
+            "lts": "the 2nd Monday the following month"
+          },
+          "Wednesday": {
+            "nightly": "the following day",
+            "opt-in": "Tuesday the following week",
+            "beta": "Wednesday the following week",
+            "stable": "Tuesday two weeks later",
+            "lts": "the 2nd Monday the following month"
+          },
+          "Thursday": {
+            "nightly": "the following day",
+            "opt-in": "Tuesday the following week",
+            "beta": "Wednesday the following week",
+            "stable": "Tuesday two weeks later",
+            "lts": "the 2nd Monday the following month"
+          },
+          "Friday": {
+            "nightly": "Monday the following week",
+            "opt-in": "Tuesday two weeks later",
+            "beta": "Wednesday two weeks later",
+            "stable": "Tuesday three weeks later",
+            "lts": "the 2nd Monday the following month"
+          },
+          "Saturday": {
+            "nightly": "Monday the following week",
+            "opt-in": "Tuesday two weeks later",
+            "beta": "Wednesday two weeks later",
+            "stable": "Tuesday three weeks later",
+            "lts": "the 2nd Monday the following month"
+          }
+        }
+      </script>
+    </amp-state>
+    <amp-state id="channelToCode">
+      <script type="application/json">
+        {
+          "Sunday": {
+            "lts": "last Thursday of the previous month",
+            "stable": "Thursday three weeks prior",
+            "opt-in-beta": "Thursday two weeks prior",
+            "nightly": "Thursday the week before"
+          },
+          "Monday": {
+            "lts": "last Thursday of the previous month",
+            "stable": "Thursday three weeks prior",
+            "opt-in-beta": "Thursday two weeks prior",
+            "nightly": "the day before"
+          },
+          "Tuesday": {
+            "lts": "last Thursday of the previous month",
+            "stable": "Thursday three weeks prior",
+            "beta": "Thursday two weeks prior",
+            "opt-in": "Thursday the week before",
+            "nightly": "the day before"
+          },
+          "Wednesday": {
+            "lts": "last Thursday of the previous month",
+            "stable": "Thursday two weeks prior",
+            "opt-in-beta": "Thursday the week before",
+            "nightly": "the day before"
+          },
+          "Thursday": {
+            "lts": "last Thursday of the previous month",
+            "stable": "Thursday two weeks prior",
+            "opt-in-beta": "Thursday the week before",
+            "nightly": "the day before"
+          },
+          "Friday": {
+            "lts": "last Thursday of the previous month",
+            "stable": "Thursday two weeks prior",
+            "opt-in-beta": "Thursday the week before",
+            "nightly": "the day before"
+          },
+          "Saturday": {
+            "lts": "last Thursday of the previous month",
+            "stable": "Thursday two weeks prior",
+            "opt-in-beta": "Thursday the week before",
+            "nightly": "Thursday two days prior"
+          }
+        }
+      </script>
+    </amp-state>
+
+    <div>
+      <label for="codeToChannelsSelect">
+        Code merged on
+        <select id="codeToChannelsSelect" on="change:AMP.setState({code: event.value})">
+          <option value=""></option>
+          <option value="Sunday">Sunday</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+        </select>
+        will be available on:
+      </label>
+      <ul hidden [hidden]="!code">
+        <li>the <code>nightly</code> channel on <span [text]="codeToChannels[code]['nightly']"></span>,</li>
+        <li>the <code>opt-in</code> channel on <span [text]="codeToChannels[code]['opt-in']"></span>,</li>
+        <li>the <code>beta</code> and <code>experimental</code> channels on <span [text]="codeToChannels[code]['beta']"></span>,</li>
+        <li>the <code>stable</code> channel on <span [text]="codeToChannels[code]['stable']"></span>,</li>
+        <li>and the <code>lts</code> channel on <span [text]="codeToChannels[code]['lts']"></span>.</li>
+      </ul>
+    </div>
+
+    <div>
+      <label for="channelToCodeSelect">
+        Select a day to learn when the code was merged to have arrive on each channel
+        <select id="channelToCodeSelect" on="change:AMP.setState({channel: event.value})">
+          <option value=""></option>
+          <option value="Sunday">Sunday</option>
+          <option value="Monday">Monday</option>
+          <option value="Tuesday">Tuesday</option>
+          <option value="Wednesday">Wednesday</option>
+          <option value="Thursday">Thursday</option>
+          <option value="Friday">Friday</option>
+          <option value="Saturday">Saturday</option>
+        </select>
+      </label>
+      <ul hidden [hidden]="!channel">
+        <li>code for the <code>nightly</code> channel was merged on <span [text]="channelToCode[channel]['nightly']"></span>,</li>
+        <li [hidden]="!channelToCode[channel]['opt-in']">code for the <code>opt-in</code> channel was merged on <span [text]="channelToCode[channel]['opt-in']"></span>,</li>
+        <li [hidden]="!channelToCode[channel]['beta']">code for the <code>beta</code> and <code>experimental</code> channel was merged on <span [text]="channelToCode[channel]['beta']"></span>,</li>
+        <li [hidden]="!channelToCode[channel]['opt-in-beta']">code for the <code>opt-in</code>, <code>beta</code>, and <code>experimental</code> channels was merged on <span [text]="channelToCode[channel]['opt-in-beta']"></span>,</li>
+        <li>code for the <code>stable</code> channel was merged on <span [text]="channelToCode[channel]['stable']"></span>,</li>
+        <li>and code for the <code>lts</code> channel was merged on <span [text]="channelToCode[channel]['lts']"></span>.</li>
+      </ul>
+    </div>
+  </body>
+</html>
