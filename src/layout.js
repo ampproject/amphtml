@@ -375,15 +375,30 @@ export function applyStaticLayout(element) {
 
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
-  userAssert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  userAssert(
+    inputLayout !== undefined,
+    'Invalid "layout" value: %s, %s',
+    layoutAttr,
+    element
+  );
   /** @const {string|null|undefined} */
   const inputWidth =
     widthAttr && widthAttr != 'auto' ? parseLength(widthAttr) : widthAttr;
-  userAssert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  userAssert(
+    inputWidth !== undefined,
+    'Invalid "width" value: %s, %s',
+    widthAttr,
+    element
+  );
   /** @const {string|null|undefined} */
   const inputHeight =
     heightAttr && heightAttr != 'fluid' ? parseLength(heightAttr) : heightAttr;
-  userAssert(inputHeight !== undefined, 'Invalid height value: %s', heightAttr);
+  userAssert(
+    inputHeight !== undefined,
+    'Invalid "height" value: %s, %s',
+    heightAttr,
+    element
+  );
 
   // Effective layout attributes. These are effectively constants.
   let width;
@@ -433,14 +448,13 @@ export function applyStaticLayout(element) {
     layout == Layout.RESPONSIVE ||
     layout == Layout.INTRINSIC
   ) {
-    userAssert(height, 'Expected height to be available: %s', heightAttr);
+    userAssert(height, 'The "height" attribute is missing: %s', element);
   }
   if (layout == Layout.FIXED_HEIGHT) {
     userAssert(
       !width || width == 'auto',
-      'Expected width to be either absent or equal "auto" ' +
-        'for fixed-height layout: %s',
-      widthAttr
+      'The "width" attribute must be missing or "auto": %s',
+      element
     );
   }
   if (
@@ -450,22 +464,24 @@ export function applyStaticLayout(element) {
   ) {
     userAssert(
       width && width != 'auto',
-      'Expected width to be available and not equal to "auto": %s',
-      widthAttr
+      'The "width" attribute must be present and not "auto": %s',
+      element
     );
   }
 
   if (layout == Layout.RESPONSIVE || layout == Layout.INTRINSIC) {
     userAssert(
       getLengthUnits(width) == getLengthUnits(height),
-      'Length units should be the same for width and height: %s, %s',
+      'Length units should be the same for "width" and "height": %s, %s, %s',
       widthAttr,
-      heightAttr
+      heightAttr,
+      element
     );
   } else {
     userAssert(
       heightsAttr === null,
-      'Unexpected "heights" attribute for none-responsive layout'
+      '"heights" attribute must be missing: %s',
+      element
     );
   }
 
