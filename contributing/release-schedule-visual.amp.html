@@ -29,12 +29,8 @@
         gap: 10px;
         grid-template-columns: 5em repeat(7, 7.5em);
         grid-auto-flow: dense;
-      }
-      #calendar[data-direction="top"] {
-        grid-template-rows: auto 150px auto 150px 150px 150px auto auto 150px;
-      }
-      #calendar[data-direction="bottom"] {
-        grid-template-rows: auto 150px auto auto 150px 150px 150px auto 150px;
+        grid-template-rows: auto 150px auto auto 150px 150px 150px auto auto 150px;
+        transition: all .2s ease-in-out;
       }
       [data-direction="top"] .bottom,
       [data-direction="bottom"] .top {
@@ -46,20 +42,41 @@
         padding: 1em;
         text-align: center;
       }
-      .header {
-        grid-row: 1 / 2;
-      }
       .instructions {
         background-image: linear-gradient(225deg, #00dcc0 0%, #1db395 75%);
         border-radius: .5em;
         grid-column: 1 / 9;
         padding: .5em;
       }
+      .header {
+        grid-row: 1 / 2;
+      }
+      .week-1 {
+        grid-row: 2 / 3;
+      }
       .week-1-instructions {
         grid-row: 3 / 4;
       }
-      .week-5-instructions {
+      .ellipsis-top {
+        grid-row: 4 / 5;
+      }
+      .week-2 {
+        grid-row: 5 / 6;
+      }
+      .week-3 {
+        grid-row: 6 / 7;
+      }
+      .week-4 {
+        grid-row: 7 / 8;
+      }
+      .ellipsis-bottom {
         grid-row: 8 / 9;
+      }
+      .week-5-instructions {
+        grid-row: 9 / 10;
+      }
+      .week-5 {
+        grid-row: 10 / 11;
       }
       .sidebar {
         font-size: small;
@@ -67,12 +84,15 @@
       }
       .ellipsis {
         font-size: x-small;
+        height: 1em;
+        overflow: hidden;
+        transition: all .4s ease-in-out;
       }
-      [data-direction="top"] .ellipsis {
-        grid-row: 7 / 8;
-      }
-      [data-direction="bottom"] .ellipsis {
-        grid-row: 4 / 5;
+      [data-direction="top"] .ellipsis-top,
+      [data-direction="bottom"] .ellipsis-bottom {
+        height: 0;
+        opacity: 0;
+        padding: 0;
       }
       .header,
       .sidebar,
@@ -120,12 +140,7 @@
         #calendar {
           gap: 5px;
           grid-template-columns: 4em repeat(7, 1fr);
-        }
-        #calendar[data-direction="top"] {
-          grid-template-rows: auto 100px auto 100px 100px 100px auto auto 100px;
-        }
-        #calendar[data-direction="bottom"] {
-          grid-template-rows: auto 100px auto auto 100px 100px 100px auto 100px;
+          grid-template-rows: auto 100px auto auto 100px 100px 100px auto auto 100px;
         }
         .box {
           font-size: x-small;
@@ -135,12 +150,7 @@
       @media (max-width: 757px) {
         #calendar {
           gap: 2px;
-        }
-        #calendar[data-direction="top"] {
-          grid-template-rows: auto 75px auto 75px 75px 75px auto auto 75px;
-        }
-        #calendar[data-direction="bottom"] {
-          grid-template-rows: auto 75px auto auto 75px 75px 75px auto 75px;
+          grid-template-rows: auto 75px auto auto 75px 75px 75px auto auto 75px;
         }
         .box {
           font-size: xx-small;
@@ -200,15 +210,25 @@
           <span class="bottom">N</span>
         </div>
 
-        <div class="box sidebar ellipsis">⋮</div>
+        <div class="box sidebar ellipsis ellipsis-top">⋮</div>
 
-        <div class="box ellipsis">⋮</div>
-        <div class="box ellipsis">⋮</div>
-        <div class="box ellipsis">⋮</div>
-        <div class="box ellipsis">⋮</div>
-        <div class="box ellipsis">⋮</div>
-        <div class="box ellipsis">⋮</div>
-        <div class="box ellipsis">⋮</div>
+        <div class="box ellipsis ellipsis-top">⋮</div>
+        <div class="box ellipsis ellipsis-top">⋮</div>
+        <div class="box ellipsis ellipsis-top">⋮</div>
+        <div class="box ellipsis ellipsis-top">⋮</div>
+        <div class="box ellipsis ellipsis-top">⋮</div>
+        <div class="box ellipsis ellipsis-top">⋮</div>
+        <div class="box ellipsis ellipsis-top">⋮</div>
+
+        <div class="box sidebar ellipsis ellipsis-bottom">⋮</div>
+
+        <div class="box ellipsis ellipsis-bottom">⋮</div>
+        <div class="box ellipsis ellipsis-bottom">⋮</div>
+        <div class="box ellipsis ellipsis-bottom">⋮</div>
+        <div class="box ellipsis ellipsis-bottom">⋮</div>
+        <div class="box ellipsis ellipsis-bottom">⋮</div>
+        <div class="box ellipsis ellipsis-bottom">⋮</div>
+        <div class="box ellipsis ellipsis-bottom">⋮</div>
 
         <div class="box content week-1 day-sunday" data-week="1" data-day="sunday"></div>
         <div class="box content week-1 day-monday" data-week="1" data-day="monday"></div>
