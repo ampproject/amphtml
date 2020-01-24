@@ -30,10 +30,19 @@ export const PageState = {
 
 const VISIBLE_DOC_CLASS = 'amp-next-page-document-visible';
 
+/**
+ * @typedef {{
+ *   url: string,
+ *   image: string,
+ *   title: string,
+ * }}
+ */
+export let PageMeta;
+
 export class Page {
   /**
    * @param {!./service.NextPageService} manager
-   * @param {{ url: string, title: string, image: string }} meta
+   * @param {!PageMeta} meta
    */
   constructor(manager, meta) {
     /** @private @const {!./service.NextPageService} */

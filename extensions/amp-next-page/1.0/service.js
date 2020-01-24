@@ -18,6 +18,10 @@ import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {Services} from '../../../src/services';
+import {
+  UrlReplacementPolicy,
+  batchFetchJsonFor,
+} from '../../../src/batched-json';
 import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElementByAttr,
@@ -112,6 +116,20 @@ export class NextPageService {
 
     /** @private {!Object<string, !Element>} */
     this.replaceableElements_ = {};
+
+    /** @private {boolean} */
+    this.hasDeepParsing_ = false;
+
+    /** @private {string} */
+    this.nextSrc_ = null;
+
+    /** @private {?function()} */
+    this.readyResolver_ = null;
+
+    /** @private @const {!Promise} */
+    this.readyPromise_ = new Promise(resolve => {
+      this.readyResolver_ = resolve;
+    });
   }
 
   /**
@@ -161,9 +179,12 @@ export class NextPageService {
       this.setLastFetchedPage(this.hostPage_);
     }
 
-    this.parseAndQueuePages_();
+    this.nextSrc_ = this.getElement_().getAttribute('src');
+    this.hasDeepParsing_ =
+      this.getElement_().hasAttribute('deep-parsing') || !this.nextSrc_;
+    this.initializePageQueue_();
 
-    this.getHostNextPageElement_().classList.add(NEXT_PAGE_CLASS);
+    this.getElement_().classList.add(NEXT_PAGE_CLASS);
 
     this.viewport_.onScroll(() => this.updateScroll_());
     this.viewport_.onResize(() => this.updateScroll_());
@@ -174,7 +195,7 @@ export class NextPageService {
    * @return {!AmpElement}
    * @private
    */
-  getHostNextPageElement_() {
+  getElement_() {
     return dev().assertElement(this.element_);
   }
 
@@ -183,7 +204,9 @@ export class NextPageService {
    */
   updateScroll_() {
     this.updateScrollDirection_();
-    this.maybeFetchNext();
+    this.readyPromise_.then(() => {
+      this.maybeFetchNext();
+    });
   }
 
   /**
@@ -202,7 +225,9 @@ export class NextPageService {
 
     const nextPage = this.pages_[this.getPageIndex_(this.lastFetchedPage_) + 1];
     if (!nextPage) {
-      return Promise.resolve();
+      return this.getRemotePages_()
+        .then(pages => this.queuePages_(pages))
+        .then(() => this.maybeFetchNext(true /** force */));
     }
     return nextPage.fetch();
   }
@@ -527,7 +552,10 @@ export class NextPageService {
 
     // Parse for more pages and queue them
     toArray(doc.querySelectorAll('amp-next-page')).forEach(el => {
-      this.parseAndQueuePages_(el);
+      if (this.hasDeepParsing_) {
+        const pages = this.getInlinePages_(el);
+        this.queuePages_(pages);
+      }
       removeElement(el);
     });
 
@@ -634,72 +662,66 @@ export class NextPageService {
 
   /**
    * Parses the amp-next-page element for inline or remote list of pages and
-   * add them to the queue
-   * @param {!Element=} element the container of the amp-next-page extension
+   * adds them to the queue
    * @private
+   * @return {!Promise}
    */
-  parseAndQueuePages_(element = this.getHostNextPageElement_()) {
-    this.parsePages_(element).then(pages => {
-      pages.forEach(page => {
-        try {
-          validatePage(page, this.ampdoc_.getUrl());
-          // Prevent loops by checking if the page already exists
-          // we use initialUrl since the url can get updated if
-          // the page issues a redirect
-          if (this.pages_.some(p => p.initialUrl == page.url)) {
-            return;
-          }
-          // Queue the page for fetching
-          this.pages_.push(
-            new Page(this, {
-              url: page.url,
-              title: page.title,
-              image: page.image,
-            })
-          );
-        } catch (e) {
-          user().error(TAG, 'Failed to queue page', e);
-        }
-      });
-      // To be safe, if the pages were parsed after the user
-      // finished scrolling
-      this.maybeFetchNext();
-    });
-  }
-
-  /**
-   * @param {!Element} element the container of the amp-next-page extension
-   * @return {!Promise<Array>} List of pages to fetch
-   * @private
-   */
-  parsePages_(element) {
-    const inlinePages = this.getInlinePages_(element);
-    const src = element.getAttribute('src');
+  initializePageQueue_() {
+    const inlinePages = this.getInlinePages_(this.getElement_());
     userAssert(
-      inlinePages || src,
+      inlinePages || this.nextSrc_,
       '%s should contain a <script> child or a URL specified in [src]',
       TAG
     );
+    return this.getRemotePages_()
+      .then(remotePages => [].concat(remotePages, inlinePages))
+      .then(pages => {
+        if (pages.length === 0) {
+          user().warn(TAG, 'could not find recommendations');
+        } else {
+          this.readyResolver_();
+          return this.queuePages_(pages);
+        }
+      });
+  }
 
-    if (src) {
-      // TODO(wassgha): Implement loading pages from a URL
-      return Promise.resolve([]);
-    }
-
-    // TODO(wassgha): Implement recursively loading pages from subsequent documents
-    return Promise.resolve(inlinePages);
+  /**
+   * Add the provided page metadata into the queue of
+   * pages to fetch
+   * @param {!Array<!./page.PageMeta>} pages
+   * @return {!Promise}
+   */
+  queuePages_(pages) {
+    pages.forEach(meta => {
+      try {
+        validatePage(meta, this.ampdoc_.getUrl());
+        // Prevent loops by checking if the page already exists
+        // we use initialUrl since the url can get updated if
+        // the page issues a redirect
+        if (this.pages_.some(page => page.initialUrl == meta.url)) {
+          return;
+        }
+        // Queue the page for fetching
+        this.pages_.push(new Page(this, meta));
+      } catch (e) {
+        user().error(TAG, 'Failed to queue page', e);
+      }
+    });
+    // To be safe, if the pages were parsed after the user
+    // finished scrolling
+    return this.maybeFetchNext();
   }
 
   /**
    * Reads the inline next pages from the element.
    * @param {!Element} element the container of the amp-next-page extension
-   * @return {?Array} JSON object, or null if no inline pages specified.
+   * @return {!Array<!./page.PageMeta>} JSON object, or null if no inline pages specified.
    * @private
    */
   getInlinePages_(element) {
     const scriptElements = childElementsByTag(element, 'SCRIPT');
     if (!scriptElements.length) {
-      return null;
+      return [];
     }
     userAssert(
       scriptElements.length === 1,
@@ -716,7 +738,33 @@ export class NextPageService {
       user().error(TAG, 'failed to parse inline page list', error);
     });
 
-    return user().assertArray(pages, `${TAG} page list should be an array`);
+    return /** @type {Array<!./page.PageMeta>} */ (user().assertArray(
+      pages,
+      `${TAG} page list should be an array`
+    ));
+  }
+
+  /**
+   * Gets the next batch of page recommendations from the server (initially
+   * specified by the [src] attribute then obtained as a next pointer)
+   * @return {!Promise<!Array<!./page.PageMeta>>} JSON object, or null if no inline pages specified.
+   * @private
+   */
+  getRemotePages_() {
+    if (!this.nextSrc_) {
+      return Promise.resolve([]);
+    }
+    return batchFetchJsonFor(this.getAmpDoc(), this.getElement_(), {
+      urlReplacement: UrlReplacementPolicy.ALL,
+      xssiPrefix: this.getElement_().getAttribute('xssi-prefix') || undefined,
+    })
+      .then(result => {
+        this.nextSrc_ = result.next || null;
+        return result.pages || [];
+      })
+      .catch(error =>
+        user().error(TAG, 'error fetching page list from remote server', error)
+      );
   }
 
   /**
