@@ -392,10 +392,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       this.quizEl_.querySelectorAll('.i-amphtml-story-quiz-option')
     );
 
-    const percentages = this.preprocessPercentages_(
-      this.responseData_,
-      options.length
-    );
+    const percentages = this.preprocessPercentages_(this.responseData_);
 
     this.responseData_['responses'].forEach(response => {
       options[response['reactionValue']].querySelector(
@@ -418,12 +415,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    * Preprocess the percentages for display.
    *
    * @param {ReactionResponseType} responseData
-   * @param {number} numOptions
    * @return {Array<number>}
    * @private
    */
-  preprocessPercentages_(responseData, numOptions) {
-    let percentages = new Array(numOptions).fill(0);
+  preprocessPercentages_(responseData) {
+    let percentages = [];
 
     for (let i = 0; i < responseData['responses'].length; i++) {
       percentages[i] = (

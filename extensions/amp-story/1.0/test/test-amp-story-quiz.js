@@ -303,34 +303,22 @@ describes.realWin(
     it('should preprocess percentages preserving ties, order, and adding to 100 (in most cases)', () => {
       const responseData1 = getMockReactionData()['data'];
 
-      const percentages1 = ampStoryQuiz.preprocessPercentages_(
-        responseData1,
-        4
-      );
+      const percentages1 = ampStoryQuiz.preprocessPercentages_(responseData1);
 
       expect(percentages1).to.deep.equal([30, 30, 30, 10]);
 
       const responseData2 = generateResponseDataFor([3, 3, 3]);
-      const percentages2 = ampStoryQuiz.preprocessPercentages_(
-        responseData2,
-        3
-      );
+      const percentages2 = ampStoryQuiz.preprocessPercentages_(responseData2);
 
       expect(percentages2).to.deep.equal([33, 33, 33]);
 
       const responseData3 = generateResponseDataFor([255, 255, 245, 245]);
-      const percentages3 = ampStoryQuiz.preprocessPercentages_(
-        responseData3,
-        4
-      );
+      const percentages3 = ampStoryQuiz.preprocessPercentages_(responseData3);
 
       expect(percentages3).to.deep.equal([26, 26, 24, 24]);
 
       const responseData4 = generateResponseDataFor([335, 335, 330]);
-      const percentages4 = ampStoryQuiz.preprocessPercentages_(
-        responseData4,
-        3
-      );
+      const percentages4 = ampStoryQuiz.preprocessPercentages_(responseData4);
 
       expect(percentages4).to.deep.equal([33, 33, 33]);
     });
