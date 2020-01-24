@@ -241,6 +241,11 @@ export class Performance {
     whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPerformanceObserver_();
     this.registerFirstInputDelayPolyfillListener_();
+
+    this.tick(
+      'timeOrigin',
+      win.performance.timeOrigin || win.performance.timing.navigationStart
+    );
   }
 
   /**
