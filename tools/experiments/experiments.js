@@ -61,7 +61,7 @@ const RTV_CHANNEL_ID = 'rtv-channel';
  * The different states of the __Host-AMP_OPT_IN cookie.
  */
 const AMP_OPT_IN_COOKIE = {
-  DISABLED: '',
+  DISABLED: '0',
   EXPERIMENTAL: 'experimental',
   BETA: 'beta',
 };
