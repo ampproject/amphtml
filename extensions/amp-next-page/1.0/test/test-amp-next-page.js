@@ -124,8 +124,6 @@ describes.realWin(
       result = MOCK_NEXT_PAGE,
       urlOrNumber = 1
     ) {
-      const viewportsAwayStub = env.sandbox.stub(service, 'getViewportsAway_');
-      viewportsAwayStub.returns(2);
       const numPages = typeof urlOrNumber === 'string' ? 1 : urlOrNumber;
       // Set up the mock request
       if (typeof urlOrNumber === 'string') {
@@ -139,7 +137,6 @@ describes.realWin(
       for (let i = 1; i <= numPages; i++) {
         await service.maybeFetchNext();
       }
-      viewportsAwayStub.restore();
     }
 
     afterEach(() => {
@@ -229,6 +226,7 @@ describes.realWin(
         await element.layoutCallback();
 
         service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
       });
 
       afterEach(async () => {
@@ -312,7 +310,6 @@ describes.realWin(
           redirectUrl: 'https://othersite.com/article',
           body: MOCK_NEXT_PAGE,
         });
-        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
 
         await service.maybeFetchNext();
 
@@ -384,6 +381,7 @@ describes.realWin(
         await element.layoutCallback();
 
         service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
       });
 
       afterEach(async () => {
@@ -498,6 +496,7 @@ describes.realWin(
         await element.layoutCallback();
 
         service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
       });
 
       afterEach(async () => {
@@ -543,6 +542,7 @@ describes.realWin(
         await element.layoutCallback();
 
         service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
         await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
 
         expect(
@@ -576,6 +576,7 @@ describes.realWin(
         await element.layoutCallback();
 
         service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
         const templateRenderStub = env.sandbox
           .stub(service.templates_, 'findAndRenderTemplate')
           .onFirstCall()
