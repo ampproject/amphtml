@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {Services} from './services';
-import {childElementsByTag, iterateCursor, removeElement} from './dom';
-import {dev, devAssert} from './log';
+import {Services} from '../services';
+import {childElementsByTag, iterateCursor, removeElement} from '../dom';
+import {dev, devAssert} from '../log';
 
 /**
  * Takes as an input a text stream, parses it and incrementally reconstructs
