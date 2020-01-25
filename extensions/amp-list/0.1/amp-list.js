@@ -844,7 +844,7 @@ export class AmpList extends AMP.BaseElement {
     if (!binding) {
       user().warn(
         TAG,
-        'Using binding="refresh" is recommended for performance.'
+        'Missing "binding" attribute. Using binding="refresh" is recommended for performance.'
       );
     }
 
