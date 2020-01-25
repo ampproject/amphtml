@@ -15,6 +15,7 @@
  */
 
 import {Deferred} from '../utils/promise';
+import {InaboxMutator} from './inabox-mutator';
 import {Observable} from '../observable';
 import {Pass} from '../pass';
 import {READY_SCAN_SIGNAL} from '../service/resources-interface';
@@ -55,6 +56,9 @@ export class InaboxResources {
 
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
+
+    /** @const @private {!InaboxMutator} */
+    this.mutator_ = new InaboxMutator(ampdoc, this);
 
     const input = Services.inputFor(this.win);
     input.setupInputModeClasses(ampdoc);
@@ -126,12 +130,6 @@ export class InaboxResources {
   }
 
   /** @override */
-  updateOrEnqueueMutateTask(unusedResource, unusedNewRequest) {}
-
-  /** @override */
-  schedulePassVsync() {}
-
-  /** @override */
   onNextPass(callback) {
     this.passObservable_.add(callback);
   }
@@ -145,10 +143,55 @@ export class InaboxResources {
   }
 
   /** @override */
-  setRelayoutTop(unusedRelayoutTop) {}
+  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
+    this.mutator_./*OK*/ changeSize(
+      element,
+      newHeight,
+      newWidth,
+      opt_callback,
+      opt_newMargins
+    );
+  }
 
   /** @override */
-  maybeHeightChanged() {}
+  attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
+    return this.mutator_.attemptChangeSize(
+      element,
+      newHeight,
+      newWidth,
+      opt_newMargins
+    );
+  }
+
+  /** @override */
+  expandElement(element) {
+    this.mutator_.expandElement(element);
+  }
+
+  /** @override */
+  attemptCollapse(element) {
+    return this.mutator_.attemptCollapse(element);
+  }
+
+  /** @override */
+  collapseElement(element) {
+    this.mutator_.collapseElement(element);
+  }
+
+  /** @override */
+  measureElement(measurer) {
+    return this.mutator_.measureElement(measurer);
+  }
+
+  /** @override */
+  mutateElement(element, mutator) {
+    return this.mutator_.mutateElement(element, mutator);
+  }
+
+  /** @override */
+  measureMutateElement(element, measurer, mutator) {
+    return this.mutator_.measureMutateElement(element, measurer, mutator);
+  }
 
   /**
    * @return {!Promise} when first pass executed.
