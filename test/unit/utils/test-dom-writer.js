@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DomWriterBulk, DomWriterStreamer} from '../../src/dom-writer';
+import {DomWriterBulk, DomWriterStreamer} from '../../../src/utils/dom-writer';
 
 describes.fakeWin('DomWriterStreamer', {amp: true}, env => {
   describe
