@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {DomWriterBulk, DomWriterStreamer} from './dom-writer';
+import {DomWriterBulk, DomWriterStreamer} from './utils/dom-writer';
 import {Services} from './services';
 import {ShadowCSS} from '../third_party/webcomponentsjs/ShadowCSS';
 import {
@@ -351,7 +351,7 @@ function calcShadowDomStreamingSupported(win) {
 /**
  * Creates the Shadow DOM writer available on this platform.
  * @param {!Window} win
- * @return {!DomWriter}
+ * @return {!./utils/dom-writer.DomWriter}
  */
 export function createShadowDomWriter(win) {
   if (isShadowDomStreamingSupported(win)) {

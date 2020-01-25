@@ -15,7 +15,7 @@
  */
 
 import {AmpDocShadow} from '../../src/service/ampdoc-impl';
-import {DomWriterBulk, DomWriterStreamer} from '../../src/dom-writer';
+import {DomWriterBulk, DomWriterStreamer} from '../../src/utils/dom-writer';
 import {
   ShadowDomVersion,
   setShadowCssSupportedForTesting,
