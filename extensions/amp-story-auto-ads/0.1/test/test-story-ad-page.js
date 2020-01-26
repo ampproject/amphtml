@@ -16,6 +16,11 @@
 
 import * as dom from '../../../../src/dom';
 import * as service from '../../../../src/service';
+import {
+  Action,
+  UIType,
+  getStoreService,
+} from '../../../amp-story/1.0/amp-story-store-service';
 import {ButtonTextFitter} from '../story-ad-button-text-fitter';
 import {CommonSignals} from '../../../../src/common-signals';
 import {StoryAdAnalytics} from '../story-ad-analytics';
@@ -42,6 +47,7 @@ describes.realWin('story-ad-page', {amp: true}, env => {
   let doc;
   let storyAutoAdsEl;
   let storyAdPage;
+  let storeService;
 
   beforeEach(() => {
     win = env.win;
@@ -49,12 +55,14 @@ describes.realWin('story-ad-page', {amp: true}, env => {
     storyAutoAdsEl = doc.createElement('amp-story-auto-ads');
     doc.body.appendChild(storyAutoAdsEl);
     storyAutoAdsEl.getAmpDoc = () => env.ampdoc;
+    storeService = getStoreService(win);
     storyAdPage = new StoryAdPage(
       storyAutoAdsEl.getAmpDoc(),
       baseConfig,
       1, // index
       new StoryAdLocalization(win),
-      new ButtonTextFitter(env.ampdoc)
+      new ButtonTextFitter(env.ampdoc),
+      storeService
     );
   });
 
@@ -371,6 +379,32 @@ describes.realWin('story-ad-page', {amp: true}, env => {
         'https://www.google.com',
         '_blank'
       );
+    });
+
+    it('propagates fullbleed state to attribution icon', async () => {
+      storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_FULLBLEED);
+
+      const iframe = doc.createElement('iframe');
+      ampAdElement.appendChild(iframe);
+      iframe.contentDocument.write(`
+          <head>
+            <meta name="amp4ads-vars-cta-type" content="SHOP">
+            <meta name="amp4ads-vars-cta-url" content="https://www.example.com">
+            <meta name="amp4ads-vars-attribution-icon" content="https://googleads.g.doubleclick.net/pagead/images/mtad/ad_choices_blue.png">
+            <meta name="amp4ads-vars-attribution-url" content="https://www.google.com">
+          </head>
+          <body></body>`);
+      await ampAdElement.signals().signal(CommonSignals.INI_LOAD);
+      await storyAdPage.maybeCreateCta();
+
+      const attribution = doc.querySelector('.i-amphtml-story-ad-attribution');
+      expect(attribution).to.have.class('i-amphtml-story-ad-fullbleed');
+
+      storeService.dispatch(Action.TOGGLE_UI, UIType.MOBILE);
+      expect(attribution).not.to.have.class('i-amphtml-story-ad-fullbleed');
+
+      storeService.dispatch(Action.TOGGLE_UI, UIType.DESKTOP_FULLBLEED);
+      expect(attribution).to.have.class('i-amphtml-story-ad-fullbleed');
     });
 
     it('does not create attribution when missing icon', async () => {

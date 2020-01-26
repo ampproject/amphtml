@@ -294,6 +294,103 @@ describes.realWin(
           })
         );
       });
+
+      describe('fullscreen user interaction experiment', () => {
+        beforeEach(() => {
+          toggleExperiment(win, 'amp-consent-restrict-fullscreen', true);
+        });
+
+        afterEach(() => {
+          toggleExperiment(win, 'amp-consent-restrict-fullscreen', false);
+        });
+
+        it('should not change document.activeElement', () => {
+          const {activeElement} = doc;
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+          const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+
+          return whenCalled(showIframeSpy).then(() =>
+            expect(activeElement).to.equal(doc.activeElement)
+          );
+        });
+
+        it('should not expand if iframe is not in focus', async () => {
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          await macroTask();
+
+          // not currently fullscreen
+          expect(consentUI.isFullscreen_).to.be.false;
+          expect(
+            consentUI.parent_.classList.contains(
+              consentUiClasses.iframeFullscreen
+            )
+          ).to.be.false;
+
+          // Send expand
+          consentUI.handleIframeMessages_({
+            source: consentUI.ui_.contentWindow,
+            data: {
+              type: 'consent-ui',
+              action: 'enter-fullscreen',
+            },
+          });
+
+          expect(consentUI.isFullscreen_).to.be.false;
+          expect(
+            consentUI.parent_.classList.contains(
+              consentUiClasses.iframeFullscreen
+            )
+          ).to.be.false;
+        });
+
+        it('should expand if iframe is in focus', async () => {
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          await macroTask();
+
+          // not currently fullscreen
+          expect(consentUI.isFullscreen_).to.be.false;
+          expect(
+            consentUI.parent_.classList.contains(
+              consentUiClasses.iframeFullscreen
+            )
+          ).to.be.false;
+
+          // focus on iframe
+          consentUI.ui_.focus();
+          expect(doc.activeElement).to.equal(consentUI.ui_);
+
+          // Send expand
+          consentUI.handleIframeMessages_({
+            source: consentUI.ui_.contentWindow,
+            data: {
+              type: 'consent-ui',
+              action: 'enter-fullscreen',
+            },
+          });
+
+          expect(consentUI.isFullscreen_).to.be.true;
+          expect(
+            consentUI.parent_.classList.contains(
+              consentUiClasses.iframeFullscreen
+            )
+          ).to.be.true;
+        });
+      });
     });
 
     describe('overlay', () => {

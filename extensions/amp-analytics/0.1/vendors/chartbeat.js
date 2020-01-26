@@ -30,8 +30,9 @@ const CHARTBEAT_CONFIG = jsonLiteral({
       'g2=${zone}&' +
       'g3=${sponsorName}&' +
       'g4=${contentType}&' +
-      'c=120&' +
+      'c=${totalTime}&' +
       'x=${scrollTop}&' +
+      'm=${maxScrollDepth}&' +
       'y=${scrollHeight}&' +
       'o=${scrollWidth}&' +
       'w=${viewportHeight}&' +
@@ -46,6 +47,7 @@ const CHARTBEAT_CONFIG = jsonLiteral({
       'i=${title}&' +
       'T=${timestamp}&' +
       'tz=${timezone}&' +
+      'sn=${requestCount}&' +
       'C=2',
     'baseSuffix': '&_',
     'interval': '${host}${basePrefix}${baseSuffix}',
