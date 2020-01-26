@@ -677,10 +677,10 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
   buildIdentityParams() {
     return this.identityToken
       ? {
-        adsid: this.identityToken.token || null,
-        jar: this.identityToken.jar || null,
-        pucrd: this.identityToken.pucrd || null,
-      }
+          adsid: this.identityToken.token || null,
+          jar: this.identityToken.jar || null,
+          pucrd: this.identityToken.pucrd || null,
+        }
       : {};
   }
 
@@ -761,14 +761,14 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       REFERRER: opt_timeout => this.getReferrer_(opt_timeout),
       TGT: () =>
         JSON.stringify(
-          (tryParseJson(this.element.getAttribute('json')) || {})['targeting'],
+          (tryParseJson(this.element.getAttribute('json')) || {})['targeting']
         ),
       ADCID: opt_timeout =>
         getOrCreateAdCid(
           this.getAmpDoc(),
           'AMP_ECID_GOOGLE',
           '_ga',
-          parseInt(opt_timeout, 10),
+          parseInt(opt_timeout, 10)
         ),
       ATTR: name => {
         if (!whitelist[name.toLowerCase()]) {
