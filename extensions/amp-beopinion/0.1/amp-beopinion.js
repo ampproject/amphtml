@@ -23,14 +23,6 @@ import {listenFor} from '../../../src/iframe-helper';
 const TAG = 'amp-beopinion';
 
 class AmpBeOpinion extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {?HTMLIFrameElement} */
-    this.iframe_ = null;
-  }
-
   /**
    * @param {boolean=} opt_onLayout
    * @override
@@ -97,7 +89,6 @@ class AmpBeOpinion extends AMP.BaseElement {
       /* opt_is3P */ true
     );
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 
