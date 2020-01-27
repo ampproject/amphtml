@@ -24,6 +24,8 @@ limitations under the License.
 
 # amp-brightcove
 
+An `amp-brightcove` component displays the Brightcove Player as used in Brightcove's [Video Cloud](https://www.brightcove.com/en/online-video-platform) or [Brightcove Player](https://www.brightcove.com/en/player).
+
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.

@@ -25,6 +25,8 @@ limitations under the License.
 
 # amp-ad-exit
 
+Provides configurable behavior for ad exits for [AMPHTML ads](https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads).
+
 ## Overview
 
 The `amp-ad-exit` element is configured with a JSON child script element and

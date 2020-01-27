@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Adds several dynamic CSS class names onto the HTML element.
+  text: Adds several dynamic CSS class names onto the <body> element.
 ---
 
 <!---

@@ -24,6 +24,8 @@ limitations under the License.
 
 # amp-delight-player
 
+The `amp-delight-player` element displays a cloud-hosted [Delight Player](https://delight-vr.com/).
+
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.

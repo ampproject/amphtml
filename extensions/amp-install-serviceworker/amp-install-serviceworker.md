@@ -25,6 +25,8 @@ limitations under the License.
 
 # amp-install-serviceworker
 
+Installs a [ServiceWorker](https://developers.google.com/web/fundamentals/primers/service-worker/) for the current page.
+
 ## Behavior
 
 Registers the service worker given by the `src` attribute if the AMP document is loaded from the same origin as the given service worker URL. If the `data-iframe-src` is set, loads that URL as an iframe when the AMP document is served from an AMP cache. This allows ServiceWorker installation from the AMP cache, so that the service worker is installed by the time users visit the origin site.

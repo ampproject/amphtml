@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Provides a calendar widget to select dates.
+  text: Provides a widget to select dates. The date picker can render as an overlay relative to input fields, or as a static calendar widget.
 ---
 
 <!---

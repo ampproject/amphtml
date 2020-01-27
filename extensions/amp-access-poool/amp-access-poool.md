@@ -24,6 +24,11 @@ limitations under the License.
 
 # amp-access-poool
 
+Displays a Poool paywall
+
+See [poool.tech](https://poool.tech) and [demo.poool.tech](https://demo.poool.tech) for more details. `amp-access-poool` is based on, and requires,
+[AMP Access](https://amp.dev/documentation/components/amp-access).
+
 ## Behavior
 
 The `amp-access-poool` component, based on `amp-access`, loads and shows a paywall using your `bundleID` from Poool's Dashboard configuration.
