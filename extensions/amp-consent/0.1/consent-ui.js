@@ -85,10 +85,20 @@ export class ConsentUI {
       config['uiConfig']['overlay'] === true;
 
     /** @private {string} */
-    this.consentTitle_ = 'User Consent Prompt';
+    this.consentTitle_ =
+      (config['captions'] && config['captions']['consentTitle']) ||
+      'User Consent Prompt';
 
     /** @private {string} */
-    this.buttonTitle_ = 'Focus prompt';
+    this.buttonTitle_ =
+      (config['captions'] && config['captions']['buttonTitle']) ||
+      'Focus prompt';
+
+    /** @private {boolean} */
+    this.restrictFullscreenOn_ = isExperimentOn(
+      baseInstance.win,
+      'amp-consent-restrict-fullscreen'
+    );
 
     /** @private {boolean} */
     this.restrictFullscreenOn_ = isExperimentOn(
@@ -184,7 +194,6 @@ export class ConsentUI {
       this.ui_ = this.createPromptIframeFromSrc_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
-      this.setCaptions_(config['captions']);
     }
   }
 
@@ -438,31 +447,6 @@ export class ConsentUI {
 
     placeholder.appendChild(loadingSpinner);
     return placeholder;
-  }
-
-  /**
-   * Sets consentTitle_ and buttonTitle_ and warns
-   * if they're too long.
-   * @param {!JsonObject} captionConfig
-   */
-  setCaptions_(captionConfig) {
-    const configConsentTitle = captionConfig && captionConfig['consentTitle'];
-    const configButtonTitle = captionConfig && captionConfig['buttonTitle'];
-
-    if (configConsentTitle) {
-      if (configConsentTitle.length > 50) {
-        dev().warn(TAG, 'Invalid consentTitle length.');
-      } else {
-        this.consentTitle_ = configConsentTitle;
-      }
-    }
-    if (configButtonTitle) {
-      if (configButtonTitle.length > 50) {
-        dev().warn(TAG, 'Invalid buttonTitle length.');
-      } else {
-        this.buttonTitle_ = configButtonTitle;
-      }
-    }
   }
 
   /**
@@ -752,8 +736,13 @@ export class ConsentUI {
     }
 
     if (data['action'] === 'enter-fullscreen') {
-      // TODO (@torch2424) Send response back if enter fullscreen was succesful
-      if (!this.isIframeVisible_) {
+      // Do nothing if iframe not visible or it's not the active element.
+      if (
+        !this.isIframeVisible_ ||
+        (this.restrictFullscreenOn_ &&
+          this.document_.activeElement !== this.ui_)
+      ) {
+        // TODO (@torch2424) Send response back if enter fullscreen was succesful
         return;
       }
 
