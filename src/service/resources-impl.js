@@ -626,9 +626,9 @@ export class ResourcesImpl {
           const r = Resource.forElement(ampElements[i]);
           devAssert(
             typeof r !== 'undefined',
-            'AMP Element is missing an associated resource. Element: %s, Mode: %s',
+            'AMP Element is missing an associated resource. Element: %s, Runtime: %s',
             ampElements[i],
-            getMode()
+            getMode().runtime
           );
           r.requestMeasure();
         }
