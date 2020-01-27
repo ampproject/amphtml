@@ -143,10 +143,9 @@ class InaboxViewportImpl {
 
     // Workaround for Safari not firing visibilityChange when the page is
     // unloaded (https://bugs.webkit.org/show_bug.cgi?id=151234).
-    const unloadListener = win.addEventListener('pagehide', () => {
-      this.binding_.disconnect();
-      win.removeEventListener('pagehide', unloadListener);
-    });
+    /** @private @const {function()} */
+    this.boundDispose_ = this.dispose.bind(this);
+    win.addEventListener('pagehide', this.boundDispose_);
 
     // Top-level mode classes.
     const docElement = win.document.documentElement;
@@ -160,6 +159,7 @@ class InaboxViewportImpl {
   /** @override */
   dispose() {
     this.binding_.disconnect();
+    this.ampdoc.win.removeEventListener('pagehide', this.boundDispose_);
   }
 
   /** @override */
@@ -407,11 +407,9 @@ class InaboxViewportImpl {
       this.visible_ = visible;
       if (visible) {
         this.binding_.connect();
-        if (this.size_) {
-          // If the size has already been intialized, check it again in case
-          // the size has changed between `disconnect` and `connect`.
-          this.resize_();
-        }
+        // Check the size again in case it has changed between `disconnect` and
+        // `connect`.
+        this.resize_();
       } else {
         this.binding_.disconnect();
       }
