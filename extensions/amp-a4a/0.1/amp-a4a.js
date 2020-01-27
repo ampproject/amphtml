@@ -567,6 +567,7 @@ export class AmpA4A extends AMP.BaseElement {
     if (
       fixedSizeZeroHeightOrWidth ||
       this.element.hasAttribute('hidden') ||
+      // TODO(levitzky): May need additional checks for other display:hidden cases.
       this.element.classList.contains('i-amphtml-hidden-by-media-query')
     ) {
       dev().fine(
