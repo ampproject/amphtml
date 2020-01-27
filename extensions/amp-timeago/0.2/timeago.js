@@ -25,11 +25,10 @@ import { createElement } from 'preact';
 export function Timeago(props) {
   let content;
   if (props['cutoff']) {
-    const cutoff = parseInt(props['cutoff'], 10);
     const elDate = new Date(props['datetime']);
     const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
-    if (secondsAgo > cutoff) {
+    if (secondsAgo > props['cutoff']) {
       content = props['init'];
     } else {
       content = timeago(props['datetime'], props['locale']);
