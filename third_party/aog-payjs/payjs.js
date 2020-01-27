@@ -1876,34 +1876,7 @@ class PaymentsWebActivityDelegate {
 
 
 
-/**
- * An object-literal namespace
- */
-google.payments = {};
-google.payments.api = {};
 
-/**
- * The client for interacting with the Google Pay APIs.
- * @constructor
- * @see https://developers.google.com/pay/api/web/client-reference.
- */
-google.payments.api.PaymentsClient = function(paymentOptions, opt_useIframe) {};
-
-/**
- * @see https://developers.google.com/pay/api/web/client-reference#isReadyToPay
- */
-google.payments.api.PaymentsClient.prototype.isReadyToPay = function() {};
-
-/**
- * @see https://developers.google.com/pay/api/web/client-reference#loadPaymentData
- */
-google.payments.api.PaymentsClient.prototype.loadPaymentData = function() {};
-
-/**
- * @see https://developers.google.com/pay/api/web/client-reference#prefetchPaymentData
- */
-google.payments.api.PaymentsClient.prototype.prefetchPaymentData =
-    function() {};
 
 
 /**
@@ -2065,7 +2038,7 @@ function validatePaymentDataRequest(paymentDataRequest) {
  * @param {?SwgParameters} swgParameters
  * @return {?string} errorMessage if the request is invalid.
  */
-validatePaymentDataRequestForSwg(swgParameters) {
+function validatePaymentDataRequestForSwg(swgParameters) {
   if (!swgParameters) {
     return 'Swg parameters must be provided';
   }
