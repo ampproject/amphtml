@@ -85,9 +85,10 @@ export class ConsentUI {
       config['uiConfig']['overlay'] === true;
 
     /** @private {string} */
-    this.consentTitle_ =
-      (config['uiConfig'] && config['uiConfig']['consentTitle']) ||
-      'amp-consent iframe';
+    this.consentTitle_ = 'User Consent Prompt';
+
+    /** @private {string} */
+    this.buttonTitle_ = 'Focus prompt';
 
     /** @private {boolean} */
     this.restrictFullscreenOn_ = isExperimentOn(
@@ -183,6 +184,7 @@ export class ConsentUI {
       this.ui_ = this.createPromptIframeFromSrc_(promptUISrc);
       this.placeholder_ = this.createPlaceholder_();
       this.clientConfig_ = config['clientConfig'] || null;
+      this.setCaptions_(config['captions']);
     }
   }
 
@@ -439,6 +441,31 @@ export class ConsentUI {
   }
 
   /**
+   * Sets consentTitle_ and buttonTitle_ and warns
+   * if they're too long.
+   * @param {!JsonObject} captionConfig
+   */
+  setCaptions_(captionConfig) {
+    const configConsentTitle = captionConfig && captionConfig['consentTitle'];
+    const configButtonTitle = captionConfig && captionConfig['buttonTitle'];
+
+    if (configConsentTitle) {
+      if (configConsentTitle.length > 50) {
+        dev().warn(TAG, 'Invalid consentTitle length.');
+      } else {
+        this.consentTitle_ = configConsentTitle;
+      }
+    }
+    if (configButtonTitle) {
+      if (configButtonTitle.length > 50) {
+        dev().warn(TAG, 'Invalid buttonTitle length.');
+      } else {
+        this.buttonTitle_ = configButtonTitle;
+      }
+    }
+  }
+
+  /**
    * Get the client information that needs to be passed to cmp iframe
    * @param {boolean} isActionPromptTrigger
    * @return {!Promise<JsonObject>}
@@ -573,15 +600,17 @@ export class ConsentUI {
     if (this.restrictFullscreenOn_) {
       const alertDialog = this.document_.createElement('div');
       const button = this.document_.createElement('button');
+      const titleDiv = this.document_.createElement('div');
 
       alertDialog.setAttribute('role', 'alertdialog');
 
-      // Text to be read by SR
-      button.innerHTML = this.consentTitle_;
+      titleDiv.textContent = this.consentTitle_;
+      button.textContent = this.buttonTitle_;
       button.onClick = () => {
         this.ui_./*OK*/ focus();
       };
 
+      alertDialog.appendChild(titleDiv);
       alertDialog.appendChild(button);
       this.baseInstance_.element.appendChild(alertDialog);
       button./*OK*/ focus();
