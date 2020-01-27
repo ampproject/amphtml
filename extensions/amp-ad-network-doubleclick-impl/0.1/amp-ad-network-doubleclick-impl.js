@@ -777,7 +777,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return this.element.getAttribute(name);
         }
       },
-      EL_TOP: () => this.element.getPageLayoutBox().top,
+      ELEMENT_TOP: () => this.element.getPageLayoutBox().top,
       SCROLL_TOP: () =>
         Services.viewportForDoc(this.getAmpDoc()).getScrollTop(),
       PAGE_HEIGHT: () =>
