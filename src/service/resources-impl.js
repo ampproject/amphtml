@@ -28,6 +28,7 @@ import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
+import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
