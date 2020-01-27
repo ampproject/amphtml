@@ -264,11 +264,6 @@ export class AmpList extends AMP.BaseElement {
       this.initializeLoadMoreElements_();
     }
 
-    const src = this.element.getAttribute('src');
-    if (this.isAmpStateSrc_(src)) {
-      return this.renderAmpStateJson_(src);
-    }
-
     return this.fetchList_();
   }
 
@@ -364,14 +359,14 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Render an amp-list that has an "amp-state:" uri. For example,
+   * Gets the json an amp-list that has an "amp-state:" uri. For example,
    * src="amp-state:json.path".
    *
    * @param {string} src
-   * @return {Promise<void>}
+   * @return {Promise<!JsonObject>}
    * @private
    */
-  renderAmpStateJson_(src) {
+  getAmpStateJson_(src) {
     return Services.bindForDocOrNull(this.element)
       .then(bind => {
         userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
@@ -388,14 +383,7 @@ export class AmpList extends AMP.BaseElement {
           typeof json !== 'undefined',
           `[amp-list] No data was found at provided uri: ${src}`
         );
-
-        const array = /** @type {!Array} */ (isArray(json) ? json : [json]);
-        return this.scheduleRender_(array, /* append */ false);
-      })
-      .catch(error => {
-        this.triggerFetchErrorEvent_(error);
-        this.showFallback_();
-        throw error;
+        return json;
       });
   }
 
@@ -615,7 +603,10 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
+      fetch = this.isAmpStateSrc_(elementSrc)
+        ? this.getAmpStateJson_(elementSrc)
+        : this.prepareAndSendFetch_(opt_refresh);
+      fetch = fetch.then(data => {
         // Bail if the src has changed while resolving the xhr request.
         if (elementSrc !== this.element.getAttribute('src')) {
           return;

@@ -1264,7 +1264,7 @@ describes.repeated(
 
             it('should render a list using local data', async () => {
               toggleExperiment(win, experimentName, true);
-              bind.getState = () => [1, 2, 3];
+              bind.getState = () => ({items: [1, 2, 3]});
 
               const ampStateEl = doc.createElement('amp-state');
               ampStateEl.setAttribute('id', 'okapis');
@@ -1275,8 +1275,10 @@ describes.repeated(
 
               listMock
                 .expects('scheduleRender_')
-                .withExactArgs([1, 2, 3], /*append*/ false)
+                .withExactArgs([1, 2, 3], /*append*/ false, {items: [1, 2, 3]})
+                .returns(Promise.resolve())
                 .once();
+
               await list.layoutCallback();
             });
           });
