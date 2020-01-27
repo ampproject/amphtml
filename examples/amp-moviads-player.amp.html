@@ -1,0 +1,121 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>amp-moviads-player example</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <style amp-custom>
+    amp-moviads-player {
+      color: red;
+    }
+  </style>
+  <script async custom-element="amp-moviads-player" src="https://cdn.ampproject.org/v0/amp-moviads-player-0.1.js"></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+<body>
+
+<script>
+    var mapConfig = {
+        // movieSrcs: ['https://storage1.platform.moviads.pl/224/f/z/7/b/fz7bzymy23_480p.mp4',
+        //     'https://storage1.platform.moviads.pl/224/f/z/7/c/fz7c0oclop_480p.mp4',
+        //     'https://storage1.platform.moviads.pl/224/f/z/7/c/fz7c2lpnjb_480p.mp4',
+        // ],
+        movieContenerId: 'uniq123',
+        movieSrc: 'https://www.videvo.net/videvo_files/converted/2014_02/videos/Clock_Face_2Videvo.mov17947.mp4',
+        moviePosterSrc: 'https://img.platform.moviads.pl/9/4/c/c/img_94ccf9798646c9a17dfd8a12f7f7e602_640_360_0_0_0_0_ffffff__fe4a5.jpg',
+        responsive: true,
+        playerIdConf: 'test',
+        masterDomain: 'https://player1.platform.moviads.pl/',
+        watermark: null,
+        maxWidth: '640px',
+        maxHeight: '320px',
+        UA: 'UA-70993821-1',
+        lang: 'pl',
+        autoplay: true,
+        scrollOnlyDownPlayer: false,
+        volume: 1,
+        volumeOnOver: 0.2,
+        uniqueContentId: 'Radiozet.pl',
+        hideWhenNoAd: false,
+        hideWhenEnd: false,
+        scrollPlayer: true,
+        debug: false,
+        adBlockInfo: 'Test adblock Test adblock Test adblock Test adblock Test adblock Test adblock Test adblock',
+        functionAfterEnded: 'test',
+        videoWall: [
+            {
+                title: "„Obgryzaj, znajduj, wygrywaj” w loterii promującej Ptasie Mleczko od Wedla",
+                poster: "http://tv.wirtualnemedia.pl/movie/11716y7f9cc0c18d0354d74a23cc93ce7482a4.jpg",
+                uri: 'http://tv.wirtualnemedia.pl/film/obgryzaj-znajduj-wygrywaj-w-loterii-promujacej-ptasie-mleczko-od-wedla'
+            },
+            {
+                title: "Zebra zamiast zajączka w wielkanocnej reklamie Czekotubki od Wedla",
+                poster: "http://tv.wirtualnemedia.pl/movie/11487y6a6b921bfe931951e59678eaf9e16739.jpg",
+                uri: 'http://tv.wirtualnemedia.pl/film/zebra-zamiast-zajaczka-w-wielkanocnej-reklamie-czekotubki-od-wedla'
+            },
+            {
+                title: "Zebra i dziecko ze strażnikiem miejskim w bożonarodzeniowym spocie Wedla",
+                poster: "http://tv.wirtualnemedia.pl/movie/11189y231a696f82f6396b5b24c31343c1d9ea.jpg",
+                uri: 'http://tv.wirtualnemedia.pl/film/zebra-i-dziecko-ze-straznikiem-miejskim-w-bozonarodzeniowym-spocie-wedla'
+            },
+            {
+                title: "Czekolada Cookie Wedel - w spocie chłopiec na zebrze odwiedza nauczycielkę",
+                poster: "http://tv.wirtualnemedia.pl/movie/11005y4b447b4d8df80eeadc09d89a1f4627b0.jpg",
+                uri: 'http://tv.wirtualnemedia.pl/film/czekolada-cookie-wedel-w-spocie-chlopiec-na-zebrze-odwiedza-nauczycielke'
+            },
+            {
+                title: "Chłopiec na gadającej zebrze w reklamie Wedla",
+                poster: "http://tv.wirtualnemedia.pl/movie/10798y188278b9fe259dec1b1652d21d61fa02.jpg",
+                uri: 'http://tv.wirtualnemedia.pl/film/chlopiec-na-gadajacej-zebrze-w-reklamie-wedla'
+            },
+            {
+                title: "Jogurt Fantasia z czekoladą Wedel - reklama",
+                poster: "http://tv.wirtualnemedia.pl/movie/10431yc0b2b4614ecc29e5a5101d5fd1b493f9.jpg",
+                uri: 'http://tv.wirtualnemedia.pl/film/jogurt-fantasia-z-czekolada-wedel-reklama'
+            },
+            {
+                title: "Impreza u Wargorra w urodzinowej kampanii batonów Pawełek",
+                poster: "http://tv.wirtualnemedia.pl/movie/10415y36cba8833a8c1f55bba182f8ab5f3009.jpg",
+                uri: 'http://tv.wirtualnemedia.pl/film/impreza-u-wargorra-w-urodzinowej-kampanii-batonow-pawelek'
+            },
+            {
+                title: "Wedlanoc w wielkanocnej reklamie słodyczy Wedel",
+                poster: "http://tv.wirtualnemedia.pl/movie/10288y2a277682900aea116f4c1947339444f0.jpg",
+                uri: 'http://tv.wirtualnemedia.pl/film/wedlanoc-w-wielkanocnej-reklamie-slodyczy-wedel'
+            },
+        ]
+    }
+
+
+    var ua = navigator.userAgent.toLowerCase();
+
+    function test(){
+        alert('test');
+    }
+
+</script>
+
+<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
+<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
+<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
+<div style="max-width: 640px">
+  <!--  <amp-ima-player id="myVideo" height="1" width="2" layout="responsive" responsive></amp-ima-player>-->
+
+  <amp-moviads-player id="myVideo" data-conf="mapConfig" height="1" width="2" layout="responsive" responsive></amp-moviads-player>
+
+</div>
+<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
+<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
+<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
+<h3>Actions</h3>
+<button on="tap:myVideo.play">Play</button>
+<button on="tap:myVideo.pause">Pause</button>
+<button on="tap:myVideo.mute">Mute</button>
+<button on="tap:myVideo.unmute">Unmute</button>
+<button on="tap:myVideo.fullscreen">Fullscreen</button>
+
+<div class="spacer"></div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+.amp-ima-player-watermark {z-index: 1;position: absolute;bottom: 25px;right: 15px;}
+.amp-ima-player-movie-ads{z-index: 1;position: absolute;top: 0px;left: 5px;background-color:#000;opacity: 0.5;width:100%}
+.amp-ima-player-fixed{display: block;position: fixed !important;width: 280px;height: 160px;bottom: 0;right: 0}
+.amp-ima-player-recommended{position: absolute;top: 0;justify-content: center;width: 100%;height:100%;background: #000;height:100%}
+.amp-ima-player-recommended div{width: 33.333333%;height: 50%;float: left;position: relative;}
+.amp-ima-player-recommended img{width:100%;height:100%}
+.amp-ima-player-recommended div.title{position:absolute;bottom:0;color: #fff;font-family: Verdana,monospace;padding: 5px;font-size: 14px;bottom: 0;height: 45%;width: 100%;position: absolute;background-color: #000;opacity: .7;box-sizing: border-box;}
+.amp-ima-player-recommended div.title a{text-decoration:none;color:#fff}
+.amp-ima-payer-adblock{background-color:#000;}
+.amp-ima-payer-p-adblock{display: block !important;color: #fff;position: absolute;top: 30%;text-align: center;width:98%}
+.amp-ima-player-fixed{position:fixed;bottom:0;right:0;width:auto !important;height:160px!important;min-height:auto !important;min-width:auto !important;top:auto !important; left:auto !important}
+#ima-ad-container{position:initial !important; color:#d40000}#amp-close{position:fixed;right:0;bottom:160px;color:#d40000;display:none}
+#amp-close{cursor:pointer}
+
+@media only screen and (max-width: 600px) {
+  .amp-ima-player-recommended div.title {font-size:10px}
+  .amp-ima-player-recommended{
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+  }
+  .amp-ima-player-recommended div {
+    width: 48.333333%;
+    line-height: 10px;
+  }
+}
+
+
