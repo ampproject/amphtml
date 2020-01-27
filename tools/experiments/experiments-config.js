@@ -62,6 +62,12 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'amp-consent-restrict-fullscreen',
+    name: 'AMP consent restrict fullscreen API before user interaction',
+    spec: 'https://github.com/ampproject/amphtml/issues/26432',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
+  },
+  {
     id: 'amp-consent-geo-override',
     name: 'AMP consent modified to support CCPA',
     spec:

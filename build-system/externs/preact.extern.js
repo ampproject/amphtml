@@ -17,22 +17,22 @@
 /** @externs */
 
 /** @const */
-var Preact = {}
+var Preact = {};
 
 /**
  * @typedef {function(!JsonObject):Preact.Renderable}
  */
-Preact.FunctionalComponent
+Preact.FunctionalComponent;
 
 /**
  * @interface
  */
-Preact.VNode = function() {}
+Preact.VNode = function() {};
 
 /**
  * @interface
  */
-Preact.Context = function() {}
+Preact.Context = function() {};
 
 /**
  * @param {!JsonObject} props
