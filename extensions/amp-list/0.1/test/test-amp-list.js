@@ -554,6 +554,7 @@ describes.repeated(
               img.setAttribute('src', src);
               // The ignore attribute is normally set by amp-mustache.
               img.setAttribute('i-amphtml-ignore', '');
+              img.setAttribute('layout', 'fixed');
               return img;
             }
 
