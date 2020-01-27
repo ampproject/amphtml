@@ -18,7 +18,6 @@ import {Services} from '../../../src/services';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
 
 /** @const */
 const TAG = 'amp-beopinion';
@@ -104,15 +103,6 @@ class AmpBeOpinion extends AMP.BaseElement {
 
   /** @override */
   unlayoutOnPause() {
-    return true;
-  }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.iframe_) {
-      removeElement(this.iframe_);
-      this.iframe_ = null;
-    }
     return true;
   }
 }
