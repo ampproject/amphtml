@@ -22,7 +22,6 @@ import {
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {
-  getDocLocation,
   getSourceOriginForElement,
   resolveImgSrc,
   userAssertValidProtocol,
@@ -98,9 +97,9 @@ export class LandscapeComponent {
   }
 
   /** @override */
-  buildElement(landscapeData, doc, data) {
+  buildElement(landscapeData, win, data) {
     landscapeData = /** @type {LandscapeComponentDef} */ (landscapeData);
-    const html = htmlFor(doc);
+    const html = htmlFor(win.document);
     const el = html`
         <a class="i-amphtml-story-bookend-landscape
             i-amphtml-story-bookend-component" target="_top">
@@ -114,11 +113,13 @@ export class LandscapeComponent {
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
-    const loc = getDocLocation(doc);
     addAttributesToElement(
       el,
       dict({
-        'href': resolveRelativeUrl(landscapeData.url, getSourceUrl(loc)),
+        'href': resolveRelativeUrl(
+          landscapeData.url,
+          getSourceUrl(win.location)
+        ),
       })
     );
 
@@ -144,7 +145,7 @@ export class LandscapeComponent {
 
     addAttributesToElement(
       image,
-      dict({'src': resolveImgSrc(doc, landscapeData.image)})
+      dict({'src': resolveImgSrc(win, landscapeData.image)})
     );
 
     meta.textContent = landscapeData.domainName;

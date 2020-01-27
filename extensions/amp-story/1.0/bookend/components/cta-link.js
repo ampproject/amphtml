@@ -21,11 +21,11 @@ import {
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getDocLocation, userAssertValidProtocol} from '../../utils';
 import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {isArray} from '../../../../../src/types';
 import {userAssert} from '../../../../../src/log';
+import {userAssertValidProtocol} from '../../utils';
 
 /**
  * @typedef {{
@@ -86,8 +86,8 @@ export class CtaLinkComponent {
   }
 
   /** @override */
-  buildElement(ctaLinksData, doc, data) {
-    const html = htmlFor(doc);
+  buildElement(ctaLinksData, win, data) {
+    const html = htmlFor(win.document);
     const container = html`
       <div
         class="i-amphtml-story-bookend-cta-link-wrapper
@@ -102,11 +102,13 @@ export class CtaLinkComponent {
     `;
     ctaLinksData['links'].forEach(currentLink => {
       const el = linkSeed.cloneNode(/* deep */ true);
-      const loc = getDocLocation(doc);
       addAttributesToElement(
         el,
         dict({
-          'href': resolveRelativeUrl(currentLink['url'], getSourceUrl(loc)),
+          'href': resolveRelativeUrl(
+            currentLink['url'],
+            getSourceUrl(win.location)
+          ),
         })
       );
 

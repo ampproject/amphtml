@@ -22,7 +22,6 @@ import {
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {
-  getDocLocation,
   getSourceOriginForElement,
   resolveImgSrc,
   userAssertValidProtocol,
@@ -92,8 +91,8 @@ export class ArticleComponent {
   }
 
   /** @override */
-  buildElement(articleData, doc, data) {
-    const html = htmlFor(doc);
+  buildElement(articleData, win, data) {
+    const html = htmlFor(win.document);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const el = html`
       <a
@@ -109,11 +108,11 @@ export class ArticleComponent {
         </div>
       </a>
     `;
-    const loc = getDocLocation(doc);
+
     addAttributesToElement(
       el,
       dict({
-        'href': resolveRelativeUrl(articleData.url, getSourceUrl(loc)),
+        'href': resolveRelativeUrl(articleData.url, getSourceUrl(win.location)),
       })
     );
 
@@ -137,7 +136,7 @@ export class ArticleComponent {
 
       addAttributesToElement(
         image,
-        dict({'src': resolveImgSrc(doc, articleData.image)})
+        dict({'src': resolveImgSrc(win, articleData.image)})
       );
 
       el.appendChild(imgEl);

@@ -22,7 +22,6 @@ import {
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {
-  getDocLocation,
   getSourceOriginForElement,
   resolveImgSrc,
   userAssertValidProtocol,
@@ -98,9 +97,9 @@ export class PortraitComponent {
   }
 
   /** @override */
-  buildElement(portraitData, doc, data) {
+  buildElement(portraitData, win, data) {
     portraitData = /** @type {PortraitComponentDef} */ (portraitData);
-    const html = htmlFor(doc);
+    const html = htmlFor(win.document);
     const el = html`
         <a class="i-amphtml-story-bookend-portrait i-amphtml-story-bookend-component" target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
@@ -113,11 +112,13 @@ export class PortraitComponent {
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
-    const loc = getDocLocation(doc);
     addAttributesToElement(
       el,
       dict({
-        'href': resolveRelativeUrl(portraitData.url, getSourceUrl(loc)),
+        'href': resolveRelativeUrl(
+          portraitData.url,
+          getSourceUrl(win.location)
+        ),
       })
     );
 
@@ -142,7 +143,7 @@ export class PortraitComponent {
 
     addAttributesToElement(
       image,
-      dict({'src': resolveImgSrc(doc, portraitData.image)})
+      dict({'src': resolveImgSrc(win, portraitData.image)})
     );
 
     meta.textContent = portraitData.domainName;
