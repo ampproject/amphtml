@@ -141,6 +141,13 @@ class InaboxViewportImpl {
     this.ampdoc.onVisibilityChanged(this.updateVisibility_.bind(this));
     this.updateVisibility_();
 
+    // Workaround for Safari not firing visibilityChange when the page is
+    // unloaded (https://bugs.webkit.org/show_bug.cgi?id=151234).
+    const unloadListener = win.addEventListener('pagehide', () => {
+      this.binding_.disconnect();
+      win.removeEventListener('pagehide', unloadListener);
+    });
+
     // Top-level mode classes.
     const docElement = win.document.documentElement;
     docElement.classList.add('i-amphtml-singledoc');
@@ -523,17 +530,18 @@ export class ViewportBindingInabox {
     return Services.resourcesPromiseForDoc(
       this.win.document.documentElement
     ).then(() => {
-      this.unobserveFunction_ = this.unobserveFunction_ ||
-      this.topWindowPositionObserver_.observe(
-        // If the window is the top window (not sitting in an iframe) then
-        // frameElement doesn't exist. In that case we observe the scrolling
-        // element.
-        /** @type {!HTMLIFrameElement|!HTMLElement} */
-        (this.win.frameElement || this.getScrollingElement()),
-        data => {
-          this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
-        }
-      );
+      this.unobserveFunction_ =
+        this.unobserveFunction_ ||
+        this.topWindowPositionObserver_.observe(
+          // If the window is the top window (not sitting in an iframe) then
+          // frameElement doesn't exist. In that case we observe the scrolling
+          // element.
+          /** @type {!HTMLIFrameElement|!HTMLElement} */
+          (this.win.frameElement || this.getScrollingElement()),
+          data => {
+            this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
+          }
+        );
     });
   }
 
