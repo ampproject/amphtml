@@ -154,6 +154,7 @@ descendant_tag_list {
   tag: "OL"
   tag: "OPTION"
   tag: "P"
+  tag: "PATH"
   tag: "SECTION"
   tag: "SPAN"
   tag: "STRIKE"
