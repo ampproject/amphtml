@@ -644,7 +644,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
 - Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
-- Marfeel : [Website](https://www.marfeel.com/) - [Documentation](/extensions/amp-consent/cmps/marfeel.md)
+- Marfeel : [Website](https://www.marfeel.com/) - [Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/cmps/marfeel.md)
 - SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/cmps/sourcepoint.md)
 
 - Your Integrated platform here!
