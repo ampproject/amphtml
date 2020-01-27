@@ -251,13 +251,24 @@ describes.realWin('performance', {amp: true}, env => {
             expect(perf.isMessagingReady_).to.be.true;
             const msrCalls = viewerSendMessageStub.withArgs(
               'tick',
-              env.sandbox.match(arg => arg.label == 'msr')
+              env.sandbox.match(arg => arg.label === 'msr')
             );
             expect(msrCalls).to.be.calledOnce;
             expect(msrCalls.args[0][1]).to.be.jsonEqual({
               label: 'msr',
               delta: 1,
             });
+
+            const timeOriginCall = viewerSendMessageStub.withArgs(
+              'tick',
+              env.sandbox.match(arg => arg.label === 'timeOrigin')
+            );
+            expect(timeOriginCall).to.be.calledOnce;
+            expect(timeOriginCall).calledWithMatch('tick', {
+              label: 'timeOrigin',
+              delta: env.sandbox.match.number,
+            });
+
             expect(flushSpy).to.have.callCount(5);
             expect(perf.events_.length).to.equal(0);
           });
@@ -650,16 +661,16 @@ describes.realWin('performance', {amp: true}, env => {
         () => {
           clock.tick(100);
           whenFirstVisibleResolve();
-          expect(tickSpy).to.have.callCount(3);
+          expect(tickSpy).to.have.callCount(4);
           return ampdoc.whenFirstVisible().then(() => {
             clock.tick(400);
-            expect(tickSpy).to.have.callCount(4);
+            expect(tickSpy).to.have.callCount(5);
             whenViewportLayoutCompleteResolve();
             return perf.whenViewportLayoutComplete_().then(() => {
-              expect(tickSpy).to.have.callCount(4);
+              expect(tickSpy).to.have.callCount(5);
               expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
               return whenFirstVisiblePromise.then(() => {
-                expect(tickSpy).to.have.callCount(5);
+                expect(tickSpy).to.have.callCount(6);
                 expect(tickSpy.withArgs('pc')).to.be.calledOnce;
                 expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
               });

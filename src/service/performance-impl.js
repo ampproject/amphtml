@@ -241,11 +241,6 @@ export class Performance {
     whenDocumentComplete(win.document).then(() => this.onload_());
     this.registerPerformanceObserver_();
     this.registerFirstInputDelayPolyfillListener_();
-
-    this.tick(
-      'timeOrigin',
-      win.performance.timeOrigin || win.performance.timing.navigationStart
-    );
   }
 
   /**
@@ -306,6 +301,13 @@ export class Performance {
       .then(() => {
         // Tick the "messaging ready" signal.
         this.tickDelta('msr', this.win.Date.now() - this.initTime_);
+
+        // Tick timeOrigin so that epoch time can be calculated by consumers.
+        this.tickDelta(
+          'timeOrigin',
+          this.win.performance.timeOrigin ||
+            this.win.performance.timing.navigationStart
+        );
 
         return this.maybeAddStoryExperimentId_();
       })
