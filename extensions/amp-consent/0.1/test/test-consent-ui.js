@@ -319,7 +319,23 @@ describes.realWin(
           });
         });
 
-        it('should append (and hide) the SR alert and have default titles', async () => {
+        it('should style SR dialog correctly', () => {
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+          const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+
+          return whenCalled(showIframeSpy).then(() => {
+            expect(consentUI.srAlert_.style.cssText).to.equal(
+              'overflow: hidden; position: absolute; height: 1px; width: 1px;'
+            );
+          });
+        });
+
+        it('should append, hide, & not show the SR alert and have default titles', async () => {
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
@@ -340,6 +356,11 @@ describes.realWin(
           consentUI.hide();
           await macroTask();
           expect(lastChild.hasAttribute('hidden')).to.be.true;
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          await macroTask();
+          expect(consentUI.srAlert_.hasAttribute('hidden')).to.be.true;
         });
 
         it('should have configurable titles', async () => {
@@ -376,7 +397,7 @@ describes.realWin(
             consentUI.baseInstance_.element.children[4].children[1];
           const iframe = consentUI.ui_;
           expect(doc.activeElement).to.equal(button);
-          button.onClick();
+          button.click();
           expect(doc.activeElement).to.equal(iframe);
         });
 
@@ -427,7 +448,7 @@ describes.realWin(
             consentUI.baseInstance_.element.children[4].children[1];
           const iframe = consentUI.ui_;
           expect(doc.activeElement).to.equal(button);
-          button.onClick();
+          button.click();
           expect(doc.activeElement).to.equal(iframe);
           await macroTask();
 

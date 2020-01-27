@@ -225,7 +225,7 @@ export class ConsentUI {
 
           this.maybeShowOverlay_();
 
-          this.showSrAlert_();
+          this.maybeShowSrAlert_();
 
           this.showIframe_();
 
@@ -576,12 +576,17 @@ export class ConsentUI {
   }
 
   /**
-   * Creates alertdialog role div with a button inside
-   * that has the consent title text and onClick will
-   * focus on the consent prompt ui
+   * If this is the first time viewing the iframe, create
+   * an 'invisible' alert dialog with a title and a button.
+   * Clicking on the button will transfer focus to the iframe.
    */
-  showSrAlert_() {
+  maybeShowSrAlert_() {
     if (this.restrictFullscreenOn_) {
+      // If this is not the first time seen, don't show it
+      if (this.srAlert_) {
+        return;
+      }
+
       const alertDialog = this.document_.createElement('div');
       const button = this.document_.createElement('button');
       const titleDiv = this.document_.createElement('div');
@@ -590,12 +595,21 @@ export class ConsentUI {
 
       titleDiv.textContent = this.consentTitle_;
       button.textContent = this.buttonTitle_;
-      button.onClick = () => {
+      button.onclick = () => {
         this.ui_./*OK*/ focus();
       };
 
       alertDialog.appendChild(titleDiv);
       alertDialog.appendChild(button);
+
+      // Style to be visiblly hidden, but not hidden from the SR
+      setStyles(alertDialog, {
+        overflow: 'hidden',
+        position: 'absolute',
+        height: '1px',
+        width: '1px',
+      });
+
       this.baseInstance_.element.appendChild(alertDialog);
       button./*OK*/ focus();
 
