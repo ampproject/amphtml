@@ -304,8 +304,8 @@ function isExperimentOn_(id) {
 }
 
 /**
- * Opts in to / out of the "beta" or "experimental" runtime types by setting the
- * __Host-AMP_OPT_IN cookie.
+ * Opts in to / out of the "beta" or "experimental" channels or a specific RTV
+ * or by setting the __Host-AMP_OPT_IN cookie.
  * @param {string} cookieState One of the AMP_OPT_IN_COOKIE enum values, or a
  *   15-digit RTV.
  */
@@ -399,8 +399,8 @@ function showConfirmation_(message, callback) {
 
 /**
  * Loads the AMP_CONFIG objects from whatever the v0.js is that the user has
- * (depends on whether they opted into beta/experimental), so that experiment
- * state can reflect the default activated experiments.
+ * (depends on whether they opted into beta, experimental, or a specific RTV) so
+ * that experiment state can reflect the default activated experiments.
  * @return {Promise<JSON>} the active AMP_CONFIG, parsed as a JSON object
  */
 function getAmpConfig() {
