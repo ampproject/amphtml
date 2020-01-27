@@ -66,6 +66,7 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
 
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
 .i-amphtml-story-desktop-panels .prev-container > .i-amphtml-story-page-sentinel,
+[dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[active] + amp-story-page:not([i-amphtml-desktop-position]):not([distance]), /** Position n+1 page on load, before attributes are set. */
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
 [dir=rtl] .i-amphtml-story-desktop-panels .next-container > .i-amphtml-story-page-sentinel {
   transform: perspective(1px) scale(0.9) translateX(calc(-3 * var(--i-amphtml-story-page-50vw, 50%) - 64px)) translateY(0%) !important;
@@ -79,6 +80,7 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   opacity: 1 !important;
 }
 
+.i-amphtml-story-desktop-panels amp-story-page[active] + amp-story-page:not([i-amphtml-desktop-position]):not([distance]), /** Position n+1 page on load, before attributes are set. */
 .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="1"],
 .i-amphtml-story-desktop-panels .next-container > .i-amphtml-story-page-sentinel,
 [dir=rtl] .i-amphtml-story-desktop-panels amp-story-page[i-amphtml-desktop-position="-1"],
