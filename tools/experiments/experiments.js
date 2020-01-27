@@ -64,6 +64,7 @@ const AMP_OPT_IN_COOKIE = {
   DISABLED: '0',
   EXPERIMENTAL: 'experimental',
   BETA: 'beta',
+  // NIGHTLY: 'nightly',  // TODO(#25616): add when CDN supports nightly builds.
 };
 
 /**
