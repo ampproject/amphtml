@@ -164,12 +164,12 @@ function build() {
     if (!rtvInput.value) {
       showConfirmation_(
         'Do you really want to opt out of RTV?',
-        setAmpCanaryCookie_.bind(null, AMP_OPT_IN_COOKIE.DISABLED)
+        setAmpOptInCookie_.bind(null, AMP_OPT_IN_COOKIE.DISABLED)
       );
     } else if (RTV_PATTERN.test(rtvInput.value)) {
       showConfirmation_(
         `Do you really want to opt in to RTV ${rtvInput.value}?`,
-        setAmpCanaryCookie_.bind(null, rtvInput.value)
+        setAmpOptInCookie_.bind(null, rtvInput.value)
       );
     }
   });
@@ -308,7 +308,7 @@ function isExperimentOn_(id) {
  * @param {string} cookieState One of the AMP_OPT_IN_COOKIE enum values, or a
  *   15-digit RTV.
  */
-function setAmpCanaryCookie_(cookieState) {
+function setAmpOptInCookie_(cookieState) {
   let validUntil = 0;
   if (RTV_PATTERN.test(cookieState)) {
     validUntil = Date.now() + RTV_COOKIE_MAX_AGE_MS;
@@ -355,11 +355,11 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == EXPERIMENTAL_CHANNEL_ID) {
-      setAmpCanaryCookie_(
+      setAmpOptInCookie_(
         on ? AMP_OPT_IN_COOKIE.EXPERIMENTAL : AMP_OPT_IN_COOKIE.DISABLED
       );
     } else if (id == BETA_CHANNEL_ID) {
-      setAmpCanaryCookie_(
+      setAmpOptInCookie_(
         on ? AMP_OPT_IN_COOKIE.BETA : AMP_OPT_IN_COOKIE.DISABLED
       );
     } else {
