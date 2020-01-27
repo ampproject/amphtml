@@ -624,12 +624,13 @@ export class ResourcesImpl {
         const ampElements = element.getElementsByClassName('i-amphtml-element');
         for (let i = 0; i < ampElements.length; i++) {
           const r = Resource.forElement(ampElements[i]);
-          devAssert(
-            typeof r !== 'undefined',
-            'AMP Element is missing an associated resource. Element: %s, Runtime: %s',
-            ampElements[i],
-            getMode().runtime
-          );
+          if (typeof r === 'undefined') {
+            dev().error(
+              'AMP Element is missing an associated resource. Element: %s, Runtime: %s',
+              ampElements[i],
+              getMode().runtime
+            );
+          }
           r.requestMeasure();
         }
         if (relayoutTop != -1) {
