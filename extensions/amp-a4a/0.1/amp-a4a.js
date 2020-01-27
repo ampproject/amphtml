@@ -561,9 +561,14 @@ export class AmpA4A extends AMP.BaseElement {
    */
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
-    if (
+    const fixedSizeZeroHeightOrWidth =
       this.getLayout() != Layout.FLUID &&
-      (slotRect.height == 0 || slotRect.width == 0)
+      (slotRect.height == 0 || slotRect.width == 0);
+    if (
+      fixedSizeZeroHeightOrWidth ||
+      this.element.hasAttribute('hidden') ||
+      // TODO(levitzky): May need additional checks for other display:hidden cases.
+      this.element.classList.contains('i-amphtml-hidden-by-media-query')
     ) {
       dev().fine(
         TAG,
