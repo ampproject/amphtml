@@ -160,6 +160,7 @@ descendant_tag_list {
   tag: "STRONG"
   tag: "SUB"
   tag: "SUP"
+  tag: "SVG"
   tag: "TABLE"
   tag: "TBODY"
   tag: "TD"
