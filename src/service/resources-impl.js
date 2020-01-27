@@ -26,8 +26,9 @@ import {VisibilityState} from '../visibility-state';
 import {areMarginsChanged, expandLayoutRect} from '../layout-rect';
 import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
-import {dev, devAssert} from '../log';
+import {dev, devAssert, userAssert} from '../log';
 import {dict} from '../utils/object';
+import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
@@ -624,6 +625,12 @@ export class ResourcesImpl {
         const ampElements = element.getElementsByClassName('i-amphtml-element');
         for (let i = 0; i < ampElements.length; i++) {
           const r = Resource.forElement(ampElements[i]);
+          userAssert(
+            typeof r !== 'undefined',
+            'AMP Element is missing an associated resource. Element: %s, Mode: %s',
+            ampElements[i],
+            getMode()
+          );
           r.requestMeasure();
         }
         if (relayoutTop != -1) {
