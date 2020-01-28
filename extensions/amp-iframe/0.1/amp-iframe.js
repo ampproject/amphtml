@@ -514,16 +514,16 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
 
-    // The format of the message takes the form of `pym${id}xPYMx${type}xPYMx${message}`.
+    // The format of the message takes the form of `pymxPYMx${id}xPYMx${type}xPYMx${message}`.
     // The id is unnecessary for integration with amp-iframe; the possible types include
     // 'height', 'width', 'parentPositionInfo', 'navigateTo', and  'scrollToChildPos'.
     // Only the 'height' and 'width' messages are currently supported.
     // See <https://github.com/nprapps/pym.js/blob/57feb68/src/pym.js#L85-L102>
-    const args = data.split(/xPYMx/).splice(2);
-    if ('height' === args[0]) {
-      this.updateSize_(parseInt(args[1], 10), undefined);
-    } else if ('width' === args[0]) {
-      this.updateSize_(undefined, parseInt(args[1], 10));
+    const args = data.split(/xPYMx/);
+    if ('height' === args[2]) {
+      this.updateSize_(parseInt(args[3], 10), undefined);
+    } else if ('width' === args[2]) {
+      this.updateSize_(undefined, parseInt(args[3], 10));
     } else {
       user().warn(TAG_, `Unsupported Pym.js message: ${data}`);
     }
