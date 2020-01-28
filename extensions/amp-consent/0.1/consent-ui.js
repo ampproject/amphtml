@@ -24,6 +24,7 @@ import {
   insertAfterOrAtStart,
   isAmpElement,
   removeElement,
+  tryFocus,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {getConsentStateValue} from './consent-info';
@@ -48,6 +49,7 @@ export const consentUiClasses = {
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
   enableBorder: 'i-amphtml-consent-ui-enable-border',
+  screenReaderOnly: 'i-amphtml-consent-alertdialog',
 };
 
 export class ConsentUI {
@@ -93,12 +95,6 @@ export class ConsentUI {
     this.buttonTitle_ =
       (config['captions'] && config['captions']['buttonTitle']) ||
       'Focus prompt';
-
-    /** @private {boolean} */
-    this.restrictFullscreenOn_ = isExperimentOn(
-      baseInstance.win,
-      'amp-consent-restrict-fullscreen'
-    );
 
     /** @private {boolean} */
     this.restrictFullscreenOn_ = isExperimentOn(
@@ -596,22 +592,19 @@ export class ConsentUI {
       titleDiv.textContent = this.consentTitle_;
       button.textContent = this.buttonTitle_;
       button.onclick = () => {
-        this.ui_./*OK*/ focus();
+        this.ui_ = dev().assertElement(this.ui_);
+        tryFocus(this.ui_);
       };
 
       alertDialog.appendChild(titleDiv);
       alertDialog.appendChild(button);
 
       // Style to be visiblly hidden, but not hidden from the SR
-      setStyles(alertDialog, {
-        overflow: 'hidden',
-        position: 'absolute',
-        height: '1px',
-        width: '1px',
-      });
+      const {classList} = alertDialog;
+      classList.add(consentUiClasses.screenReaderOnly);
 
       this.baseInstance_.element.appendChild(alertDialog);
-      button./*OK*/ focus();
+      tryFocus(button);
 
       this.srAlert_ = alertDialog;
     }

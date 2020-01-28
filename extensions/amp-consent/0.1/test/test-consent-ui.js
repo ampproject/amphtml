@@ -329,8 +329,8 @@ describes.realWin(
           consentUI.iframeReady_.resolve();
 
           return whenCalled(showIframeSpy).then(() => {
-            expect(consentUI.srAlert_.style.cssText).to.equal(
-              'overflow: hidden; position: absolute; height: 1px; width: 1px;'
+            expect(consentUI.srAlert_.classList[0]).to.equal(
+              'i-amphtml-consent-alertdialog'
             );
           });
         });
