@@ -245,14 +245,13 @@ function installBrowserAssertions(_networkLogger) {
 
 function installBrowserWrappers(chai, utils) {
   const {Assertion} = chai;
-  const should = chai.should(); // eslint-disable-line no-unused-vars
 
   // Assert that a request with a testUrl was sent
   // Example usage: await expect(testUrl).to.have.been.sent;
   utils.addProperty(Assertion.prototype, 'sent', function() {
-    const assertAnySentRequests = function(url) {
-      const promise = networkLogger.getSentRequests(url);
-      return promise.should.eventually.not.have.length(0);
+    const assertAnySentRequests = async function(url) {
+      const requests = await networkLogger.getSentRequests(url);
+      return requests.length > 0;
     };
 
     this.assert(
@@ -261,17 +260,19 @@ function installBrowserWrappers(chai, utils) {
       'expected #{this} to have been sent'
     );
   });
+  Assertion.overwriteProperty('sent', overwriteAlwaysUseSuper(utils));
 
   // Assert that a request was sent n number of times
   // Example usage: await expect(testUrl).to.have.sentCount(n);
   utils.addMethod(Assertion.prototype, 'sentCount', function(count) {
-    const assertSentCount = function(url, count) {
-      const promise = networkLogger.getSentRequests(url);
-      return promise.should.eventually.have.length(count);
+    const assertSentCount = async function(url, count) {
+      const requests = await networkLogger.getSentRequests(url);
+      return requests.length == count;
     };
 
     this.assert(assertSentCount(this._obj, count));
   });
+  Assertion.overwriteMethod('sentCount', overwriteAlwaysUseSuper(utils));
 }
 
 module.exports = {
