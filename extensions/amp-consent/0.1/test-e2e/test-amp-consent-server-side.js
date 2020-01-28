@@ -81,7 +81,7 @@ describes.endtoend(
 
       // Check the analytics request consentState
       await expect(
-        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=insufficient'
+        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=esther'
       ).to.have.been.sent;
     });
   }
