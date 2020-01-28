@@ -26,6 +26,7 @@ import {
   resolveImgSrc,
   userAssertValidProtocol,
 } from '../../utils';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -90,8 +91,8 @@ export class ArticleComponent {
   }
 
   /** @override */
-  buildElement(articleData, doc, data) {
-    const html = htmlFor(doc);
+  buildElement(articleData, win, data) {
+    const html = htmlFor(win.document);
     //TODO(#14657, #14658): Binaries resulting from htmlFor are bloated.
     const el = html`
       <a
@@ -107,7 +108,14 @@ export class ArticleComponent {
         </div>
       </a>
     `;
-    addAttributesToElement(el, dict({'href': articleData.url}));
+
+    addAttributesToElement(
+      el,
+      dict({
+        'href': resolveRelativeUrl(articleData.url, getSourceUrl(win.location)),
+      })
+    );
+
     el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
       position: data.position,
       type: BOOKEND_COMPONENT_TYPES.SMALL,
@@ -128,7 +136,7 @@ export class ArticleComponent {
 
       addAttributesToElement(
         image,
-        dict({'src': resolveImgSrc(doc, articleData.image)})
+        dict({'src': resolveImgSrc(win, articleData.image)})
       );
 
       el.appendChild(imgEl);
