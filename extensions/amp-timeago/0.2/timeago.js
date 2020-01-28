@@ -23,18 +23,28 @@ import { createElement } from 'preact';
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
-  let content;
-  if (props['cutoff']) {
-    const elDate = new Date(props['datetime']);
+  const timestamp = getFuzzyTimestampValue(props['datetime'], props['locale'], props['init'], props['cutoff']);
+  useResourcesNotify();
+  return createElement('time', {datetime: props['datetime']}, timestamp);
+}
+
+/**
+ * @param {string} datetime 
+ * @param {string} locale 
+ * @param {string} init 
+ * @param {number} opt_cutoff= 
+ */
+function getFuzzyTimestampValue(datetime, locale, init, opt_cutoff) {
+  if (!opt_cutoff) {
+    return timeago(datetime, locale);
+  }
+  const elDate = new Date(datetime);
     const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
-    if (secondsAgo > props['cutoff']) {
-      content = props['init'];
-    } else {
-      content = timeago(props['datetime'], props['locale']);
+  if (secondsAgo > opt_cutoff) {
+    return init;
     }
-  } else {
-    content = timeago(props['datetime'], props['locale']);
+  return timeago(datetime, locale);
   }
   
   useResourcesNotify();
