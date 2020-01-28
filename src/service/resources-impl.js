@@ -627,6 +627,7 @@ export class ResourcesImpl {
           const r = Resource.forElement(ampElements[i]);
           if (typeof r === 'undefined') {
             dev().error(
+              TAG_,
               'AMP Element is missing an associated resource. Element: %s, Runtime: %s',
               ampElements[i],
               getMode().runtime
