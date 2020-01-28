@@ -205,18 +205,15 @@ export class NextPageService {
    */
   updateVisibility() {
     this.pages_.forEach((page, index) => {
-      if (
-        page.relativePos === ViewportRelativePos.INSIDE_VIEWPORT ||
-        page.relativePos === ViewportRelativePos.CONTAINS_VIEWPORT
-      ) {
+      if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
+        if (page.isVisible()) {
+          page.setVisibility(VisibilityState.HIDDEN);
+        }
+      } else {
         if (!page.isVisible()) {
           page.setVisibility(VisibilityState.VISIBLE);
         }
         this.hidePreviousPages(index);
-      } else if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
-        if (page.isVisible()) {
-          page.setVisibility(VisibilityState.HIDDEN);
-        }
       }
     });
 
@@ -251,7 +248,6 @@ export class NextPageService {
     previousPages
       .filter(page => {
         const shouldHide =
-          page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
           page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT ||
           page === this.hostPage_;
         return shouldHide && page.isVisible();
