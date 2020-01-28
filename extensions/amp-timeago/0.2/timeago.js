@@ -16,6 +16,7 @@
 
 import {createElement} from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
+import {useIntersect} from './use-intersect';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
@@ -23,6 +24,7 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
+  const ref = useIntersect();
   const timestamp = getFuzzyTimestampValue(
     props['datetime'],
     props['locale'],
@@ -30,7 +32,7 @@ export function Timeago(props) {
     props['cutoff']
   );
   useResourcesNotify();
-  return createElement('time', {datetime: props['datetime']}, timestamp);
+  return createElement('time', {datetime: props['datetime'], ref}, timestamp);
 }
 
 /**

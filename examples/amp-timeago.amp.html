@@ -13,6 +13,11 @@
       font-size: 16px;
       line-height: 20px;
     }
+    .scroll {
+      height: 40px;
+      overflow: scroll;
+      border: 1px solid black;
+    }
   </style>
   <script>	
   (self.AMP = self.AMP || []).push(function(AMP) {	
@@ -33,7 +38,10 @@
     </script>
   </amp-state>
   <h1>Basic example</h1>
-  <amp-timeago class="time" layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" locale="en">Saturday 11 April 2018 00.37</amp-timeago>
+  <div class="scroll">
+    <p>Scroll up and down for updated times</p>
+    <amp-timeago class="time" layout="fixed" width="160" height="20" datetime="2020-01-28T20:52:41+00:00" locale="en">Saturday 11 April 2018 00.37</amp-timeago>
+  </div>
   <h1>amp-bind example</h1>
   <amp-timeago class="time" layout="fixed" width="160" height="20" datetime="2018-04-11T00:37:33.809Z" [datetime]="myState.datetime" [title]="myState.title" locale="en">Saturday 11 April 2018 00.37</amp-timeago>
   <button on="tap:AMP.setState({myState: {datetime: '2018-09-01T00:00:00.000Z', title: 'Saturday 1 September 2018 00.00'}})">Set to 1st September 2018</button>
