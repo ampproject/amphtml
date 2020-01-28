@@ -44,10 +44,7 @@ function temedyaAds(global, data) {
   f.onload = function() {
     window.context.renderStart();
   };
+  
   f.src = 'https://vidyome-com.cdn.vidyome.com/vidyome/builds/widgets.js';
-  const url = window.top.location.search.substring(1);
-  if (url && url.indexOf('hb=true') !== -1) {
-    f.src = f.src + '&hb=true';
-  }
   global.document.body.appendChild(f);
 }
