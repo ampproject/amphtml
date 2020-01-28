@@ -305,7 +305,7 @@ function isExperimentOn_(id) {
 
 /**
  * Opts in to / out of the "beta" or "experimental" channels or a specific RTV
- * or by setting the __Host-AMP_OPT_IN cookie.
+ * by setting the __Host-AMP_OPT_IN cookie.
  * @param {string} cookieState One of the AMP_OPT_IN_COOKIE enum values, or a
  *   15-digit RTV.
  */
