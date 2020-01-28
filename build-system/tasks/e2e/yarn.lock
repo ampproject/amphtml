@@ -13,6 +13,11 @@
     pirates "^4.0.0"
     source-map-support "^0.5.16"
 
+"@testim/chrome-version@^1.0.3":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.0.6.tgz#e56c1a7f463ee6ceab363b69b642681efcedb809"
+  integrity sha512-sudmtuzBC6MduzAZe3dzc8Ehhtr0Wk/nDjCDBOWsZ5noSLBsdUED+NLuq2eUHHDb5B0FqXwTitAzoLoVZNQUeg==
+
 "@types/events@*":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@types/events/-/events-3.0.0.tgz#2862f3f58a9a7f7c3e78d79f130dd4d71c25c2a7"
@@ -163,11 +168,12 @@ chownr@^1.0.1:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-1.1.1.tgz#54726b8b8fff4df053c42187e801fb4412df1494"
   integrity sha512-j38EvO5+LHX84jlo6h4UzmOwi0UgW61WRyPtJz4qaadK5eY3BTS5TY/S1Stc3Uk2lIM6TPevAlULiEJwie860g==
 
-chromedriver@79.0.0:
-  version "79.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-79.0.0.tgz#1660ac29924dfcd847911025593d6b6746aeea35"
-  integrity sha512-DO29C7ntJfzu6q1vuoWwCON8E9x5xzopt7Q41A7Dr7hBKcdNpGw1l9DTt9b+l1qviOWiJLGsD+jHw21ptEHubA==
+chromedriver@79.0.2:
+  version "79.0.2"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-79.0.2.tgz#abcd7f95203e70eef28bb26696281c6f0cc3c1ea"
+  integrity sha512-jwgmcTb4UI2cqDAyJBJlGJ/Y6kRVO1VQ3sBw73fFz0TEqKSZfl61ToM53g+G8m5AWVa4ESFkSXEUfQtFZZ6QTA==
   dependencies:
+    "@testim/chrome-version" "^1.0.3"
     del "^4.1.1"
     extract-zip "^1.6.7"
     mkdirp "^0.5.1"
