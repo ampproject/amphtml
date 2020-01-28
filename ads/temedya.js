@@ -16,11 +16,20 @@
 
 import {validateData} from '../3p/3p';
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 export function temedya(global, data) {
   validateData(data, ['keyId']);
+
   temedyaAds(global, data);
 }
 
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
 function temedyaAds(global, data) {
   const f = global.document.createElement('script');
   f.setAttribute('title', data.title);
@@ -31,11 +40,9 @@ function temedyaAds(global, data) {
   f.setAttribute('paid-item', data.paidItem);
   f.setAttribute('organic-item', data.organicItem);
   f.setAttribute('theme', data.theme);
-
   f.onload = function() {
     window.context.renderStart();
   };
-
   f.src = 'https://vidyome-com.cdn.vidyome.com/vidyome/builds/widgets.js';
   global.document.body.appendChild(f);
 }
