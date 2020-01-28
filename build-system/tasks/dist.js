@@ -277,7 +277,7 @@ async function generateFileListing() {
   const filesOut = `${distDir}/files.txt`;
   fs.writeFileSync(filesOut, '');
   const files = (await walk(distDir)).map(f => f.replace(`${distDir}/`, ''));
-  fs.writeFileSync(filesOut, files.join('\n'));
+  fs.writeFileSync(filesOut, files.join('\n') + '\n');
   endBuildStep('Generated', filesOut, startTime);
 }
 
