@@ -18,14 +18,20 @@
   overflow: hidden;
 }
 
-.i-amphtml-next-page-document:not(.amp-next-page-document-visible)
-  [i-amphtml-fixedid] {
+.i-amphtml-next-page-document:not(.amp-next-page-visible) [i-amphtml-fixedid] {
   display: none;
 }
 
-.i-amphtml-next-page-document.amp-next-page-document-visible {
+.i-amphtml-next-page-document.amp-next-page-visible {
   opacity: 1;
   overflow: visible;
+}
+
+/** Fixes collapsing margins when switching between the visible and hidden states */
+.i-amphtml-next-page-document:before,
+.i-amphtml-next-page-document:after {
+  content: ' ';
+  display: table;
 }
 
 .i-amphtml-next-page-placeholder {
