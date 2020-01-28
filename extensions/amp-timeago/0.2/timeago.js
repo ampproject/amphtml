@@ -14,39 +14,41 @@
  * limitations under the License.
  */
 
-import {useResourcesNotify} from '../../../src/preact/utils';
+import {createElement} from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
-import { createElement } from 'preact';
+import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
  * @param {!JsonObject} props
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
-  const timestamp = getFuzzyTimestampValue(props['datetime'], props['locale'], props['init'], props['cutoff']);
+  const timestamp = getFuzzyTimestampValue(
+    props['datetime'],
+    props['locale'],
+    props['init'],
+    props['cutoff']
+  );
   useResourcesNotify();
   return createElement('time', {datetime: props['datetime']}, timestamp);
 }
 
 /**
- * @param {string} datetime 
- * @param {string} locale 
- * @param {string} init 
- * @param {number} opt_cutoff= 
+ * @param {string} datetime
+ * @param {string} locale
+ * @param {string} init
+ * @param {number=} opt_cutoff
+ * @return {string}
  */
 function getFuzzyTimestampValue(datetime, locale, init, opt_cutoff) {
   if (!opt_cutoff) {
     return timeago(datetime, locale);
   }
   const elDate = new Date(datetime);
-    const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
+  const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
   if (secondsAgo > opt_cutoff) {
     return init;
-    }
-  return timeago(datetime, locale);
   }
-  
-  useResourcesNotify();
-  return createElement('time', {datetime: props['datetime']}, content);
+  return timeago(datetime, locale);
 }
