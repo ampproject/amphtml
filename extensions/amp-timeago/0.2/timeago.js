@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createElement} from '../../../src/preact';
+import {createElement, useRef} from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {useIntersect} from './use-intersect';
 import {useResourcesNotify} from '../../../src/preact/utils';
@@ -24,7 +24,18 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
-  const ref = useIntersect();
+  const ref = useRef(null);
+  const entries = useIntersect(ref);
+  const last =
+    entries.length > 0 ? entries[entries.length - 1] : {isIntersecting: false};
+  const {isIntersecting} = last;
+  const style = {
+    transition: 'background-color 2s ease',
+  };
+  console.log(isIntersecting);
+  if (isIntersecting) {
+    style.backgroundColor = 'red';
+  }
   const timestamp = getFuzzyTimestampValue(
     props['datetime'],
     props['locale'],
@@ -32,7 +43,11 @@ export function Timeago(props) {
     props['cutoff']
   );
   useResourcesNotify();
-  return createElement('time', {datetime: props['datetime'], ref}, timestamp);
+  return createElement(
+    'time',
+    {datetime: props['datetime'], ref, style},
+    timestamp
+  );
 }
 
 /**

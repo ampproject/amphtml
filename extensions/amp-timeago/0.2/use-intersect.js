@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import {useEffect, useRef, useState} from '../../../src/preact';
+import {useLayoutEffect} from 'preact/hooks/src';
+import {useRef, useState} from '../../../src/preact';
 
 /**
- * @return {function}
+ * @param {object} ref
+ * @return {?Array<IntersectionObserverEntry>}
  */
-export function useIntersect() {
-  const {1: setEntry} = useState({});
-  const {0: node, 1: setNode} = useState(null);
-  const observer = useRef(
-    new window.IntersectionObserver(entries => {
-      setEntry(entries);
-    })
-  );
+export function useIntersect(ref) {
+  const {0: entries, 1: set} = useState([]);
+  const observerRef = useRef(null);
+  if (observerRef.current === null) {
+    observerRef.current = new IntersectionObserver(set);
+  }
 
-  useEffect(() => {
-    const {current: currentObserver} = observer;
-    currentObserver.disconnect();
+  useLayoutEffect(() => {
+    const {current: node} = ref;
+    const {current: observer} = observerRef;
+    observer.disconnect();
     if (node) {
-      currentObserver.observe(node);
+      observer.observe(node);
     }
-    return () => currentObserver.disconnect();
-  }, [node]);
-
-  return setNode;
+    return () => observer.disconnect();
+  }, [ref.current]);
+  return entries;
 }
