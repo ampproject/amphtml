@@ -49,6 +49,8 @@ const COMMON_GLOBS = [
   'node_modules/web-activities/activity-ports.js',
   'node_modules/@ampproject/animations/package.json',
   'node_modules/@ampproject/animations/dist/animations.mjs',
+  'node_modules/@ampproject/viewer-messaging/package.json',
+  'node_modules/@ampproject/viewer-messaging/messaging.js',
   'node_modules/@ampproject/worker-dom/package.json',
   'node_modules/@ampproject/worker-dom/dist/amp/main.mjs',
   'node_modules/preact/package.json',
