@@ -682,13 +682,44 @@ export class ConsentUI {
         (this.restrictFullscreenOn_ &&
           this.document_.activeElement !== this.ui_)
       ) {
-        dev().warn(TAG, 'iframe could not enter fullscren');
+        const error = 'iframe could not enter fullscren';
+        dev().warn(TAG, error);
+        this.sendIframeMessage_('reject-fullscreen', error);
         return;
       }
+      this.sendIframeMessage_('accept-fullscreen', 'Entering fullscreen');
 
       this.baseInstance_.mutateElement(() => {
         this.enterFullscreen_();
       });
+    }
+  }
+
+  /**
+   * Send message to iframe. Silently die if
+   * iframe does not have content window.
+   *
+   *  * Enter Fullscreen
+   * {
+   *   type: 'consent-ui',
+   *   action: 'accept-fullscreen',
+   *   message: 'Entering fullscreen';
+   * }
+   * @param {string} action
+   * @param {string} message
+   */
+  sendIframeMessage_(action, message) {
+    const iframeWindow = this.ui_.contentWindow;
+    if (iframeWindow) {
+      // No sensitive information sent, so safe to use '*'
+      iframeWindow./*OK*/ postMessage(
+        /** @type {!JsonObject} */ ({
+          type: 'amp-consent',
+          action,
+          message,
+        }),
+        '*'
+      );
     }
   }
 }

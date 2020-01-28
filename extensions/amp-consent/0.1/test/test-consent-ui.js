@@ -321,7 +321,6 @@ describes.realWin(
         });
 
         it('should not expand if iframe is not in focus', async () => {
-          const errorSpy = env.sandbox.spy(dev(), 'warn');
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
@@ -339,13 +338,7 @@ describes.realWin(
           ).to.be.false;
 
           // Send expand
-          consentUI.handleIframeMessages_({
-            source: consentUI.ui_.contentWindow,
-            data: {
-              type: 'consent-ui',
-              action: 'enter-fullscreen',
-            },
-          });
+          sendIframeMessage(consentUI, 'enter-fullscreen');
 
           expect(consentUI.isFullscreen_).to.be.false;
           expect(
@@ -353,14 +346,9 @@ describes.realWin(
               consentUiClasses.iframeFullscreen
             )
           ).to.be.false;
-          expect(errorSpy).to.be.calledOnce;
-          expect(errorSpy.args[0][1]).to.match(
-            /iframe could not enter fullscren/
-          );
         });
 
         it('should expand if iframe is in focus', async () => {
-          const errorSpy = env.sandbox.spy(dev(), 'warn');
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
@@ -381,14 +369,7 @@ describes.realWin(
           consentUI.ui_.focus();
           expect(doc.activeElement).to.equal(consentUI.ui_);
 
-          // Send expand
-          consentUI.handleIframeMessages_({
-            source: consentUI.ui_.contentWindow,
-            data: {
-              type: 'consent-ui',
-              action: 'enter-fullscreen',
-            },
-          });
+          sendIframeMessage(consentUI, 'enter-fullscreen');
 
           expect(consentUI.isFullscreen_).to.be.true;
           expect(
@@ -396,7 +377,60 @@ describes.realWin(
               consentUiClasses.iframeFullscreen
             )
           ).to.be.true;
-          expect(errorSpy).to.not.be.called;
+        });
+
+        it('should show error and send messages back to iframe', async () => {
+          const errorSpy = env.sandbox.spy(dev(), 'warn');
+          const windowMock = window.sandbox.mock({
+            postMessage: () => {},
+          });
+
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          await macroTask();
+
+          // Unsuccessful fullscreen event
+          sendIframeMessage(consentUI, 'enter-fullscreen');
+
+          expect(errorSpy).to.be.calledOnce;
+          expect(errorSpy.args[0][1]).to.match(
+            /iframe could not enter fullscren/
+          );
+          windowMock
+            .expects('postMessage')
+            .withExactArgs(
+              {
+                type: 'consent-ui',
+                action: 'reject-fullscreen',
+                message: 'iframe could not enter fullscren',
+              },
+              '*'
+            )
+            .once();
+
+          // focus on iframe
+          consentUI.ui_.focus();
+
+          // Successful fullscreen event
+          sendIframeMessage(consentUI, 'enter-fullscreen');
+
+          // Error not called another time
+          expect(errorSpy).to.be.calledOnce;
+          windowMock
+            .expects('postMessage')
+            .withExactArgs(
+              {
+                type: 'consent-ui',
+                action: 'accept-fullscreen',
+                message: 'Entering fullscreen',
+              },
+              '*'
+            )
+            .once();
         });
       });
     });
@@ -461,16 +495,7 @@ describes.realWin(
         return getReadyIframeCmpConsentUi().then(consentUI => {
           const handleReadyStub = env.sandbox.stub(consentUI, 'handleReady_');
 
-          consentUI.ui_ = {
-            contentWindow: 'mock-src',
-          };
-          consentUI.handleIframeMessages_({
-            source: 'mock-src',
-            data: {
-              type: 'consent-ui',
-              action: 'ready',
-            },
-          });
+          sendIframeMessage(consentUI, 'ready');
 
           expect(handleReadyStub).to.be.calledOnce;
         });
@@ -480,11 +505,8 @@ describes.realWin(
         return getReadyIframeCmpConsentUi().then(consentUI => {
           expect(consentUI.initialHeight_).to.be.equal('30vh');
 
-          consentUI.ui_ = {
-            contentWindow: 'mock-src',
-          };
           consentUI.handleIframeMessages_({
-            source: 'mock-src',
+            source: consentUI.ui_.contentWindow,
             data: {
               type: 'consent-ui',
               action: 'ready',
@@ -501,11 +523,8 @@ describes.realWin(
           expect(consentUI.initialHeight_).to.be.equal('30vh');
 
           return allowConsoleError(() => {
-            consentUI.ui_ = {
-              contentWindow: 'mock-src',
-            };
             consentUI.handleIframeMessages_({
-              source: 'mock-src',
+              source: consentUI.ui_.contentWindow,
               data: {
                 type: 'consent-ui',
                 action: 'ready',
@@ -522,11 +541,8 @@ describes.realWin(
         return getReadyIframeCmpConsentUi().then(consentUI => {
           expect(consentUI.enableBorder_).to.be.equal(true);
 
-          consentUI.ui_ = {
-            contentWindow: 'mock-src',
-          };
           consentUI.handleIframeMessages_({
-            source: 'mock-src',
+            source: consentUI.ui_.contentWindow,
             data: {
               type: 'consent-ui',
               action: 'ready',
@@ -547,16 +563,7 @@ describes.realWin(
             'enterFullscreen_'
           );
 
-          consentUI.ui_ = {
-            contentWindow: 'mock-src',
-          };
-          consentUI.handleIframeMessages_({
-            source: 'mock-src',
-            data: {
-              type: 'consent-ui',
-              action: 'enter-fullscreen',
-            },
-          });
+          sendIframeMessage(consentUI, 'enter-fullscreen');
 
           expect(enterFullscreenStub).to.be.calledOnce;
         });
@@ -572,17 +579,8 @@ describes.realWin(
               'enterFullscreen_'
             );
 
-            consentUI.ui_ = {
-              contentWindow: 'mock-src',
-            };
             consentUI.isIframeVisible_ = false;
-            consentUI.handleIframeMessages_({
-              source: 'mock-src',
-              data: {
-                type: 'consent-ui',
-                action: 'enter-fullscreen',
-              },
-            });
+            sendIframeMessage(consentUI, 'enter-fullscreen');
 
             expect(enterFullscreenStub).to.not.be.called;
           });
@@ -650,5 +648,20 @@ describes.realWin(
         }
       );
     });
+
+    /**\
+     * @param {!ConsentUI} consentUI
+     * @param {string} source
+     * @param {string} action
+     */
+    function sendIframeMessage(consentUI, action) {
+      consentUI.handleIframeMessages_({
+        source: consentUI.ui_.contentWindow,
+        data: {
+          type: 'consent-ui',
+          action,
+        },
+      });
+    }
   }
 );

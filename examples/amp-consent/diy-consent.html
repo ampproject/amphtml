@@ -140,6 +140,21 @@ if (window && window.name) {
   }
 }
 
+
+window.addEventListener('message', (event) => {
+  const data = event.data;
+  if (data.action === 'reject-fullscreen') {
+    console.log('Could not complete fullscreen request.');
+  }
+  else if (data.action === 'accept-fullscreen') {
+    console.log('iframe went into fullscreen');
+  }
+  else {
+    console.log('Unparseable actions:', data.action);
+  }
+});
+
+
 // Add event listener for focus for a11y
 window.addEventListener('focus', () => {
   const headerElement = document.querySelector('h1');
