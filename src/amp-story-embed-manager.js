@@ -15,6 +15,7 @@
  */
 
 import {AmpStoryEmbed} from './amp-story-embed';
+import {throttle} from './utils/rate-limit';
 
 /** @const {string} */
 const SCROLL_THROTTLE_MS = 500;
@@ -62,22 +63,15 @@ export class AmpStoryEmbedManager {
    * @private
    */
   layoutFallback_(embedImpl) {
-    let tick = true;
-
     // TODO(Enriqe): pause embeds when scrolling away from viewport.
-    this.win_.addEventListener('scroll', () => {
-      if (!tick) {
-        return;
-      }
-
-      setTimeout(() => {
-        tick = true;
-
-        this.layoutIfVisible_(embedImpl);
-      }, SCROLL_THROTTLE_MS);
-
-      tick = false;
-    });
+    this.win_.addEventListener(
+      'scroll',
+      throttle(
+        this.win_,
+        this.layoutIfVisible_.bind(this, embedImpl),
+        SCROLL_THROTTLE_MS
+      )
+    );
 
     // Calls it once it in case scroll event never fires.
     this.layoutIfVisible_(embedImpl);
