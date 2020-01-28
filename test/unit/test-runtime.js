@@ -1625,7 +1625,7 @@ describes.realWin(
 
         it('should ignore unknown script', () => {
           expectAsyncConsoleError(
-            '[runtime] - unknown script:  [object HTMLScriptElement] ' +
+            '[multidoc-manager] - unknown script:  [object HTMLScriptElement] ' +
               'https://cdn.ampproject.org/other.js'
           );
 
@@ -1711,7 +1711,7 @@ describes.realWin(
 
         it('should ignore inline script if javascript', () => {
           expectAsyncConsoleError(
-            '[runtime] - unallowed inline javascript:  ' +
+            '[multidoc-manager] - unallowed inline javascript:  ' +
               '[object HTMLScriptElement]',
             2
           );
