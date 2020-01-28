@@ -938,7 +938,7 @@ For example, if your `amp-state` element makes an XHR to an endpoint, while the 
 
 The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
-[tip type="important]
+[tip type="important"]
 The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
 [/tip]
 

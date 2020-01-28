@@ -322,7 +322,7 @@ describes.realWin(
       it('adds the hidden class to elements that should be hidden', async () => {
         await fetchDocuments(
           service,
-          `${MOCK_NEXT_PAGE} <div amp-next-page-hide id="hidden" />`
+          `${MOCK_NEXT_PAGE} <div next-page-hide id="hidden" />`
         );
 
         expect(
@@ -333,14 +333,14 @@ describes.realWin(
       it('replaces elements with their most recent instance', async () => {
         await fetchDocuments(
           service,
-          `${MOCK_NEXT_PAGE} <div amp-next-page-replace="replace-me" instance="1" />`,
+          `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="1" />`,
           '/document1'
         );
         service.pages_[1].setVisibility(VisibilityState.VISIBLE);
 
         await fetchDocuments(
           service,
-          `${MOCK_NEXT_PAGE} <div amp-next-page-replace="replace-me" instance="2" />`,
+          `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="2" />`,
           '/document2'
         );
         service.pages_[1].relativePos = ViewportRelativePos.INSIDE_VIEWPORT;
