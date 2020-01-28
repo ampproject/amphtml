@@ -301,7 +301,7 @@ describes.realWin(
 
         env.fetchMock.get(
           /\/document1/,
-          `${MOCK_NEXT_PAGE} <div amp-next-page-hide id="hidden" />`
+          `${MOCK_NEXT_PAGE} <div next-page-hide id="hidden" />`
         );
         await service.maybeFetchNext();
 
@@ -315,14 +315,14 @@ describes.realWin(
 
         env.fetchMock.get(
           /\/document1/,
-          `${MOCK_NEXT_PAGE} <div amp-next-page-replace="replace-me" instance="1" />`
+          `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="1" />`
         );
         await service.maybeFetchNext();
         service.pages_[1].setVisibility(VisibilityState.VISIBLE);
 
         env.fetchMock.get(
           /\/document2/,
-          `${MOCK_NEXT_PAGE} <div amp-next-page-replace="replace-me" instance="2" />`
+          `${MOCK_NEXT_PAGE} <div next-page-replace="replace-me" instance="2" />`
         );
         await service.maybeFetchNext();
         service.pages_[1].relativePos = ViewportRelativePos.INSIDE_VIEWPORT;
