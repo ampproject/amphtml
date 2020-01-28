@@ -40,12 +40,7 @@ function temedyaAds(global, data) {
   f.setAttribute('paid-item', data.paidItem);
   f.setAttribute('organic-item', data.organicItem);
   f.setAttribute('theme', data.theme);
-  f.setAttribute('width', data.width);
-  f.setAttribute('height', data.height);
-  setStyles(f, {
-    border: '0 none transparent',
-    position: 'relative',
-  });
+
   f.onload = function() {
     window.context.renderStart();
   };
