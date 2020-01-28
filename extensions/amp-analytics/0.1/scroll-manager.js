@@ -16,6 +16,7 @@
 
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 
 /**
  * @typedef {{
@@ -25,6 +26,8 @@ import {Services} from '../../../src/services';
  *   height: number,
  *   scrollHeight: number,
  *   scrollWidth: number,
+ *   initialScrollHeight: number,
+ *   initialScrollWidth: number,
  * }}
  */
 export let ScrollEventDef;
@@ -48,6 +51,12 @@ export class ScrollManager {
 
     /** @private {!Observable<!./scroll-manager.ScrollEventDef>} */
     this.scrollObservable_ = new Observable();
+
+    /** @private {?number} */
+    this.initialScrollWidth_ = null;
+
+    /** @private {?number} */
+    this.initialScrollHeight_ = null;
   }
 
   /**
@@ -76,14 +85,28 @@ export class ScrollManager {
   addScrollHandler(handler) {
     // Trigger an event to fire events that might have already happened.
     const size = this.viewport_.getSize();
+    // Cache the scroll height/width for use with `ignoreResizes`
+    if (
+      this.initialScrollWidth_ === null ||
+      this.initialScrollHeight_ === null
+    ) {
+      this.initialScrollWidth_ = dev().assertNumber(
+        this.viewport_.getScrollWidth()
+      );
+      this.initialScrollHeight_ = dev().assertNumber(
+        this.viewport_.getScrollHeight()
+      );
+    }
     /** {./scroll-manager.ScrollEventDef} */
     const scrollEvent = {
       top: this.viewport_.getScrollTop(),
       left: this.viewport_.getScrollLeft(),
       width: size.width,
       height: size.height,
-      scrollWidth: this.viewport_.getScrollWidth(),
-      scrollHeight: this.viewport_.getScrollHeight(),
+      scrollWidth: this.initialScrollWidth_,
+      scrollHeight: this.initialScrollHeight_,
+      initialScrollWidth: this.initialScrollWidth_,
+      initialScrollHeight: this.initialScrollHeight_,
     };
     handler(scrollEvent);
 
@@ -107,6 +130,8 @@ export class ScrollManager {
       height: e.height,
       scrollWidth: this.viewport_.getScrollWidth(),
       scrollHeight: this.viewport_.getScrollHeight(),
+      initialScrollWidth: this.initialScrollWidth_,
+      initialScrollHeight: this.initialScrollHeight_,
     };
     // Fire all of our children scroll observables
     this.scrollObservable_.fire(scrollEvent);

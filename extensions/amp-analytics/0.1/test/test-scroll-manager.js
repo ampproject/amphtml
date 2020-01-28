@@ -104,6 +104,8 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     // Scroll Down
     fakeViewport.getScrollTop.returns(500);
     fakeViewport.getScrollLeft.returns(500);
+    fakeViewport.getScrollHeight.returns(700);
+    fakeViewport.getScrollWidth.returns(800);
     scrollManager.onScroll_({top: 500, left: 500, height: 250, width: 250});
 
     const expectedScrollEvent = {
@@ -111,8 +113,10 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
       left: 500,
       height: 250,
       width: 250,
-      scrollWidth: 500,
-      scrollHeight: 500,
+      scrollWidth: 700,
+      scrollHeight: 800,
+      initialScrollWidth: 500,
+      initialScrollHeight: 500,
     };
 
     function matcher(expected) {
