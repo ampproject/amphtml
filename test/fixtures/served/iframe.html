@@ -53,10 +53,10 @@ window.addEventListener('message', function(event) {
             type: 'send-embed-state',
           }, '*');
     } else if (event.data.type === 'requestPymjsHeight') {
-      var msg = [ 'pym', 'height', event.data.height ].join( 'xPYMx' );
+      var msg = [ 'pym', 'example', 'height', event.data.height ].join( 'xPYMx' );
       getAmpWindow(sentinel)./*OK*/postMessage( msg, '*');
     } else if (event.data.type === 'requestPymjsWidth') {
-      var msg = [ 'pym', 'width', event.data.height ].join( 'xPYMx' );
+      var msg = [ 'pym', 'example', 'width', event.data.height ].join( 'xPYMx' );
       getAmpWindow(sentinel)./*OK*/postMessage( msg, '*');
     }
   }
