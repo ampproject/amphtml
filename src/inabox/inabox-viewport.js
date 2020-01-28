@@ -143,6 +143,7 @@ class InaboxViewportImpl {
 
     // Workaround for Safari not firing visibilityChange when the page is
     // unloaded (https://bugs.webkit.org/show_bug.cgi?id=151234).
+    // TODO(zombifier): Remove this when ampdoc can handle this event.
     /** @private @const {function()} */
     this.boundDispose_ = this.dispose.bind(this);
     win.addEventListener('pagehide', this.boundDispose_);
