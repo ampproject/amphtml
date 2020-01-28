@@ -197,6 +197,7 @@ function overwriteAlwaysUseSuper(utils) {
 
           // Run the code that checks the condition.
           _super.apply(this, arguments);
+
           clearLastExpectError();
           // Let waitForValue know we are done.
           return true;
