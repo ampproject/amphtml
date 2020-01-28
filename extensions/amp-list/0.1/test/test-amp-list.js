@@ -20,6 +20,10 @@ import {AmpEvents} from '../../../../src/amp-events';
 import {AmpList} from '../amp-list';
 import {Deferred} from '../../../../src/utils/promise';
 import {Services} from '../../../../src/services';
+import {
+  resetExperimentTogglesForTesting,
+  toggleExperiment,
+} from '../../../../src/experiments';
 
 describes.repeated(
   'amp-list',
@@ -804,6 +808,31 @@ describes.repeated(
                 attrs
               );
             });
+
+            it('"amp-state:" uri should skip rendering and emit an error', () => {
+              toggleExperiment(win, 'amp-list-init-from-state', true);
+
+              const ampStateEl = doc.createElement('amp-state');
+              ampStateEl.setAttribute('id', 'okapis');
+              const ampStateJson = doc.createElement('script');
+              ampStateJson.setAttribute('type', 'application/json');
+              ampStateEl.appendChild(ampStateJson);
+              doc.body.appendChild(ampStateEl);
+              list.element.setAttribute('src', 'amp-state:okapis');
+
+              listMock.expects('scheduleRender_').never();
+
+              const errorMsg = /cannot be used in SSR mode/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
+            });
+
+            it('Bound [src] should skip rendering and emit an error', async () => {
+              listMock.expects('scheduleRender_').never();
+              allowConsoleError(async () => {
+                await list.mutatedAttributesCallback({src: {}});
+              });
+            });
           });
 
           // TODO(aghassemi, #12476): Make this test work with sinon 4.0.
@@ -868,6 +897,7 @@ describes.repeated(
               signals: () => {
                 return {get: unusedName => false};
               },
+              getState: () => ({}),
             };
             setBindService(bind);
           });
@@ -887,11 +917,11 @@ describes.repeated(
 
           // Unlike [src] mutations with URLs, local data mutations should
           // always render immediately.
-          it('should render if [src] mutates with data (before layout)', () => {
+          it('should render if [src] mutates with data (before layout)', async () => {
             listMock.expects('scheduleRender_').once();
 
             element.setAttribute('src', 'https://new.com/list.json');
-            list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});
+            await list.mutatedAttributesCallback({'src': [{title: 'Title1'}]});
             // `src` attribute should still be set to empty string.
             expect(element.getAttribute('src')).to.equal('');
           });
@@ -1196,6 +1226,60 @@ describes.repeated(
               expectFetchAndRender(DEFAULT_FETCHED_DATA, output);
               await list.layoutCallback();
               expect(bind.rescan).to.not.have.been.called;
+            });
+          });
+
+          describe('Using amp-state: protocol', () => {
+            const experimentName = 'amp-list-init-from-state';
+
+            beforeEach(() => {
+              resetExperimentTogglesForTesting(win);
+              element = createAmpListElement();
+              element.setAttribute('src', 'amp-state:okapis');
+              element.toggleLoading = () => {};
+              list = createAmpList(element);
+            });
+
+            it('should throw an error if used without the experiment enabled', async () => {
+              const errorMsg = /Invalid value: amp-state:okapis/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
+            it('should log an error if amp-bind was not included', async () => {
+              toggleExperiment(win, experimentName, true);
+              Services.bindForDocOrNull.returns(Promise.resolve(null));
+
+              const ampStateEl = doc.createElement('amp-state');
+              ampStateEl.setAttribute('id', 'okapis');
+              const ampStateJson = doc.createElement('script');
+              ampStateJson.setAttribute('type', 'application/json');
+              ampStateEl.appendChild(ampStateJson);
+              doc.body.appendChild(ampStateEl);
+
+              const errorMsg = /bind to be installed/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).eventually.rejectedWith(errorMsg);
+            });
+
+            it('should render a list using local data', async () => {
+              toggleExperiment(win, experimentName, true);
+              bind.getState = () => ({items: [1, 2, 3]});
+
+              const ampStateEl = doc.createElement('amp-state');
+              ampStateEl.setAttribute('id', 'okapis');
+              const ampStateJson = doc.createElement('script');
+              ampStateJson.setAttribute('type', 'application/json');
+              ampStateEl.appendChild(ampStateJson);
+              doc.body.appendChild(ampStateEl);
+
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs([1, 2, 3], /*append*/ false, {items: [1, 2, 3]})
+                .returns(Promise.resolve())
+                .once();
+
+              await list.layoutCallback();
             });
           });
         }); // with amp-bind

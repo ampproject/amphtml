@@ -60,6 +60,7 @@ import {
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 import {isArray, toArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
@@ -70,6 +71,9 @@ const TAG = 'amp-list';
 /** @const {string} */
 const TABBABLE_ELEMENTS_QUERY =
   'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"]), audio[controls], video[controls], [contenteditable]:not([contenteditable="false"])';
+
+// Technically the ':' is not considered part of the scheme, but it is useful to include.
+const AMP_STATE_URI_SCHEME = 'amp-state:';
 
 /**
  * @typedef {{
@@ -340,6 +344,49 @@ export class AmpList extends AMP.BaseElement {
     );
   }
 
+  /**
+   * Returns true if element's src points to amp-state.
+   *
+   * @param {string} src
+   * @return {boolean}
+   * @private
+   */
+  isAmpStateSrc_(src) {
+    return (
+      isExperimentOn(this.win, 'amp-list-init-from-state') &&
+      startsWith(src, AMP_STATE_URI_SCHEME)
+    );
+  }
+
+  /**
+   * Gets the json an amp-list that has an "amp-state:" uri. For example,
+   * src="amp-state:json.path".
+   *
+   * @param {string} src
+   * @return {Promise<!JsonObject>}
+   * @private
+   */
+  getAmpStateJson_(src) {
+    return Services.bindForDocOrNull(this.element)
+      .then(bind => {
+        userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
+        userAssert(
+          !this.ssrTemplateHelper_.isEnabled(),
+          '[amp-list]: "amp-state" URIs cannot be used in SSR mode.'
+        );
+
+        const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
+        return bind.getState(ampStatePath);
+      })
+      .then(json => {
+        userAssert(
+          typeof json !== 'undefined',
+          `[amp-list] No data was found at provided uri: ${src}`
+        );
+        return json;
+      });
+  }
+
   /** @override */
   mutatedAttributesCallback(mutations) {
     dev().info(TAG, 'mutate:', this.element, mutations);
@@ -352,6 +399,11 @@ export class AmpList extends AMP.BaseElement {
     const renderLocalData = data => {
       // Remove the 'src' now that local data is used to render the list.
       this.element.setAttribute('src', '');
+      userAssert(
+        !this.ssrTemplateHelper_.isEnabled(),
+        '[amp-list] "[src]" may not be bound in SSR mode.'
+      );
+
       const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
       this.resetIfNecessary_(/* isFetch */ false);
       return this.scheduleRender_(array, /* append */ false);
@@ -546,11 +598,15 @@ export class AmpList extends AMP.BaseElement {
     if (!elementSrc) {
       return Promise.resolve();
     }
+
     let fetch;
     if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
+      fetch = this.isAmpStateSrc_(elementSrc)
+        ? this.getAmpStateJson_(elementSrc)
+        : this.prepareAndSendFetch_(opt_refresh);
+      fetch = fetch.then(data => {
         // Bail if the src has changed while resolving the xhr request.
         if (elementSrc !== this.element.getAttribute('src')) {
           return;
