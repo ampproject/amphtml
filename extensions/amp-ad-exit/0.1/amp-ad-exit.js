@@ -59,6 +59,12 @@ export class AmpAdExit extends AMP.BaseElement {
     this.targets_ = {};
 
     /**
+     * Maps indirect target name to an actual target name.
+     * @private @const {!Object<string, string>}
+     */
+    this.indirectTargets_ = {};
+
+    /**
      * Filters to apply to every target.
      * @private @const {!Array<!./filters/filter.Filter>}
      */
@@ -73,6 +79,8 @@ export class AmpAdExit extends AMP.BaseElement {
     this.userFilters_ = {};
 
     this.registerAction('exit', this.exit.bind(this));
+    this.registerAction('setIndirectTarget', this.setIndirectTarget.bind(this));
+    this.registerAction('exitIndirect', this.exitIndirect.bind(this));
 
     /** @private @const {!Object<string, !Object<string, string>>} */
     this.vendorResponses_ = {};
@@ -135,6 +143,34 @@ export class AmpAdExit extends AMP.BaseElement {
           : '_blank';
       openWindowDialog(this.win, finalUrl, clickTarget);
     }
+  }
+
+  /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  setIndirectTarget(invocation) {
+    const {args} = invocation;
+    const pointToTarget = this.targets_[args['pointTo']];
+    userAssert(pointToTarget, `Exit target not found: '${args['pointTo']}'`);
+    this.indirectTargets_[args['name']] = args['pointTo'];
+  }
+
+  /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  exitIndirect(invocation) {
+    const {args} = invocation;
+    let pointToTarget = this.indirectTargets_[args['target']];
+    if (!pointToTarget) {
+      pointToTarget = args['defaultTarget'];
+    }
+    userAssert(
+      pointToTarget,
+      `Indirect target not found, target:'${args['target']}', defaultTarget:'${args['defaultTarget']}'`
+    );
+    args['target'] = pointToTarget;
+    delete args['defaultTarget'];
+    this.exit(invocation);
   }
 
   /**
