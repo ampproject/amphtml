@@ -16,7 +16,7 @@
   <script async custom-template="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
 </head>
 <body>
-  <amp-script id=remote layout=container src="./test1.js">
+  <amp-script id=remote layout=container src="./basic.js">
     <div class="root">
       <button id="simple">Simple</button>
       <button id="tail">Tail</button>
@@ -28,5 +28,9 @@
   <script type=text/plain target=amp-script id="foo">
     document.body.textContent = 'Hello World!';
   </script>
+
+  <amp-script id=responsive script=foo layout=responsive width=300 height=50>
+    <p style="height: 1000px">Some very long content</p>
+  </amp-script>
 </body>
 </html>

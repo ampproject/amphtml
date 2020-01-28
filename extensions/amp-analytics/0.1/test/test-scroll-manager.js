@@ -113,10 +113,10 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
       left: 500,
       height: 250,
       width: 250,
-      scrollWidth: 700,
-      scrollHeight: 800,
-      initialScrollWidth: 500,
+      scrollHeight: 700,
+      scrollWidth: 800,
       initialScrollHeight: 500,
+      initialScrollWidth: 500,
     };
 
     function matcher(expected) {
