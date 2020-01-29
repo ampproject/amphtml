@@ -21,6 +21,8 @@ import {
   verifyPromptsHidden,
 } from './common';
 
+import sleep from 'sleep-promise';
+
 describes.endtoend(
   'amp-consent',
   {
@@ -43,6 +45,7 @@ describes.endtoend(
       const nextGeoUrl = currentUrl.replace('mx', 'ca');
 
       // Check the analytics request consentState
+      await sleep(3000);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=insufficient'
       ).to.have.been.sent;
@@ -87,6 +90,7 @@ describes.endtoend(
       });
 
       // Check the analytics request consentState
+      await sleep(3000);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=sufficient'
       ).to.have.been.sent;
