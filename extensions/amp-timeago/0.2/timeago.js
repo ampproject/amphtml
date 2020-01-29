@@ -25,12 +25,7 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  */
 export function Timeago(props) {
   const {0: timestamp, 1: setTimestamp} = useState(
-    getFuzzyTimestampValue(
-      props['datetime'],
-      props['locale'],
-      props['init'],
-      props['cutoff']
-    )
+    getFuzzyTimestampValue(props)
   );
   const ref = useRef(null);
   const entries = useIntersect(ref);
@@ -38,34 +33,25 @@ export function Timeago(props) {
     entries.length > 0 ? entries[entries.length - 1] : {isIntersecting: false};
   const {isIntersecting} = last;
   if (isIntersecting) {
-    setTimestamp(
-      getFuzzyTimestampValue(
-        props['datetime'],
-        props['locale'],
-        props['init'],
-        props['cutoff']
-      )
-    );
+    setTimestamp(getFuzzyTimestampValue(props));
   }
   useResourcesNotify();
   return createElement('time', {datetime: props['datetime'], ref}, timestamp);
 }
 
 /**
- * @param {string} datetime
- * @param {string} locale
- * @param {string} init
- * @param {number=} opt_cutoff
+ * @param {!JsonObject} props
  * @return {string}
  */
-function getFuzzyTimestampValue(datetime, locale, init, opt_cutoff) {
-  if (!opt_cutoff) {
+function getFuzzyTimestampValue(props) {
+  const {datetime, locale, init, cutoff} = props;
+  if (!cutoff) {
     return timeago(datetime, locale);
   }
   const elDate = new Date(datetime);
   const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
-  if (secondsAgo > opt_cutoff) {
+  if (secondsAgo > cutoff) {
     return init;
   }
   return timeago(datetime, locale);
