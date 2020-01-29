@@ -335,7 +335,7 @@ describes.realWin(
           });
         });
 
-        it('should append, hide, & not show the SR alert and have default titles', async () => {
+        it('should append, remove, & not show the SR alert and have default titles', async () => {
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
@@ -344,7 +344,7 @@ describes.realWin(
           consentUI.iframeReady_.resolve();
           await macroTask();
 
-          // Get the last child of the amp-consent element
+          // iframe, placeholder, div, div, srAlert
           const lastChild = consentUI.baseInstance_.element.children[4];
           expect(lastChild).to.equal(consentUI.srAlert_);
           expect(lastChild.hasAttribute('hidden')).to.be.false;
@@ -355,22 +355,28 @@ describes.realWin(
 
           consentUI.hide();
           await macroTask();
-          expect(lastChild.hasAttribute('hidden')).to.be.true;
+          // SR alert removed from DOM
+          expect(consentUI.srAlert_).to.be.undefined;
+          expect(consentUI.srAlertShown_).to.be.true;
+          // placeholder, div, div
+          expect(consentUI.baseInstance_.element.children.length).to.equal(3);
 
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
           await macroTask();
-          expect(consentUI.srAlert_.hasAttribute('hidden')).to.be.true;
+          expect(consentUI.srAlertShown_).to.be.true;
+          // iframe, placeholder, div, div
+          expect(consentUI.baseInstance_.element.children.length).to.equal(4);
         });
 
-        it('should have configurable titles', async () => {
-          const newTitle = 'New Consent Policy Title';
-          const newButtonTitle = 'New Button Title';
+        it('should have configurable captions', async () => {
+          const newConsentPromptCaption = 'New Consent Policy Title';
+          const newButtonActionCaption = 'New Button Action Caption';
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
             'captions': {
-              'consentTitle': newTitle,
-              'buttonTitle': newButtonTitle,
+              'consentPromptCaption': newConsentPromptCaption,
+              'buttonActionCaption': newButtonActionCaption,
             },
           });
 
@@ -380,8 +386,10 @@ describes.realWin(
 
           // Get the last child of the amp-consent element
           const dialog = consentUI.baseInstance_.element.children[4];
-          expect(dialog.children[0].innerText).to.equal(newTitle);
-          expect(dialog.children[1].innerText).to.equal(newButtonTitle);
+          expect(dialog.children[0].innerText).to.equal(
+            newConsentPromptCaption
+          );
+          expect(dialog.children[1].innerText).to.equal(newButtonActionCaption);
         });
 
         it('should focus on iframe when button is clicked', function*() {

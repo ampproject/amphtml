@@ -38,6 +38,8 @@ const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const DEFAULT_INITIAL_HEIGHT = '30vh';
 const DEFAULT_ENABLE_BORDER = true;
+const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
+const BUTTON_ACTION_CAPTION = 'Focus prompt';
 
 // Classes for consent UI
 export const consentUiClasses = {
@@ -87,14 +89,17 @@ export class ConsentUI {
       config['uiConfig']['overlay'] === true;
 
     /** @private {string} */
-    this.consentTitle_ =
-      (config['captions'] && config['captions']['consentTitle']) ||
-      'User Consent Prompt';
+    this.consentPromptCaption_ =
+      (config['captions'] && config['captions']['consentPromptCaption']) ||
+      CONSENT_PROMPT_CAPTION;
 
     /** @private {string} */
-    this.buttonTitle_ =
-      (config['captions'] && config['captions']['buttonTitle']) ||
-      'Focus prompt';
+    this.buttonActionCaption_ =
+      (config['captions'] && config['captions']['buttonActionCaption']) ||
+      BUTTON_ACTION_CAPTION;
+
+    /** @private {boolean} */
+    this.srAlertShown_ = false;
 
     /** @private {boolean} */
     this.restrictFullscreenOn_ = isExperimentOn(
@@ -221,6 +226,8 @@ export class ConsentUI {
 
           this.maybeShowOverlay_();
 
+          // Create and append SR alert for the when iframe
+          // initially loads.
           this.maybeShowSrAlert_();
 
           this.showIframe_();
@@ -292,8 +299,8 @@ export class ConsentUI {
 
       // Hide the overlay
       this.maybeHideOverlay_();
-      //Hide the SR alert
-      this.maybeHideSrAlert_();
+      // Remove the SR alert from DOM
+      this.maybeRemoveSrAlert_();
       // Enable the scroll, in case we were fullscreen with no overlay
       this.enableScroll_();
       // Reset any animation styles set by style attribute
@@ -578,8 +585,8 @@ export class ConsentUI {
    */
   maybeShowSrAlert_() {
     if (this.restrictFullscreenOn_) {
-      // If this is not the first time seen, don't show it
-      if (this.srAlert_) {
+      // If the SR alert has been shown, don't show it again
+      if (this.srAlertShown_) {
         return;
       }
 
@@ -589,8 +596,8 @@ export class ConsentUI {
 
       alertDialog.setAttribute('role', 'alertdialog');
 
-      titleDiv.textContent = this.consentTitle_;
-      button.textContent = this.buttonTitle_;
+      titleDiv.textContent = this.consentPromptCaption_;
+      button.textContent = this.buttonActionCaption_;
       button.onclick = () => {
         this.ui_ = dev().assertElement(this.ui_);
         tryFocus(this.ui_);
@@ -606,16 +613,22 @@ export class ConsentUI {
       this.baseInstance_.element.appendChild(alertDialog);
       tryFocus(button);
 
+      // SR alert was shown when consent prompt loaded for
+      // the first time. Don't show it again
+      this.srAlertShown_ = true;
+
+      // Keep reference of the SR alert to remove later
       this.srAlert_ = alertDialog;
     }
   }
 
   /**
-   * Hide the SR alert if it exists.
+   * Remove the SR alert from the DOM once it has been shown once
    */
-  maybeHideSrAlert_() {
+  maybeRemoveSrAlert_() {
     if (this.srAlert_) {
-      toggle(this.srAlert_, false);
+      removeElement(this.srAlert_);
+      delete this.srAlert_;
     }
   }
 
