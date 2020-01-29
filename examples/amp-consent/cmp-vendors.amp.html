@@ -33,7 +33,7 @@
 
     .filterBar form * {
       margin-left: 10px;
-      margin-right 10px;
+      margin-right: 10px;
     }
 
     .filterBar .clearLocalStorage {
@@ -96,6 +96,7 @@
           <!-- This should be in alphabetical order. _ping_ should be the first -->
           <option>_ping_</option>
           <option>didomi</option>
+          <option>sirdata</option>
           <option>Marfeel</option>
           <option>SourcePoint</option>
         </select>
@@ -165,6 +166,27 @@
         </amp-consent>
         <!-- End didomi example -->
 
+      <!-- sirdata example -->
+      <amp-consent id="consent" layout="nodisplay" type="sirdata">
+        <script type="application/json">
+          {
+            "postPromptUI": "promptConsentUI",
+            "clientConfig": {
+              "cmp": {
+                "theme": {
+                  "noConsentButton": "refuse"
+                }
+              }
+            }
+          }
+        </script>
+        <div id="promptConsentUI">
+          Post Prompt UI
+          <button on="tap:consent.prompt(consent=sirdata)" role="button">Privacy settings</button>
+        </div>
+      </amp-consent>
+      <!-- End sirdata example -->
+      
       <!-- Marfeel example -->
       <amp-consent id='marfeelConsent' layout='nodisplay' type='Marfeel'>
         <script type="application/json">
