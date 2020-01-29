@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {AmpStoryEmbed} from './amp-story-embed';
+import {AmpStoryPlayer} from './amp-story-player';
 import {throttle} from './utils/rate-limit';
 
 /** @const {string} */
 const SCROLL_THROTTLE_MS = 500;
 
-export class AmpStoryEmbedManager {
+export class AmpStoryPlayerManager {
   /**
    * @param {!Window} win
    * @constructor
@@ -31,13 +31,13 @@ export class AmpStoryEmbedManager {
   }
 
   /**
-   * Calls layoutCallback on the embed when it is close to the viewport.
-   * @param {!AmpStoryEmbed} embedImpl
+   * Calls layoutCallback on the player when it is close to the viewport.
+   * @param {!AmpStoryPlayer} playerImpl
    * @private
    */
-  layoutEmbed_(embedImpl) {
+  layoutPlayer_(playerImpl) {
     if (!this.win_.IntersectionObserver || this.win_ !== this.win_.parent) {
-      this.layoutFallback_(embedImpl);
+      this.layoutFallback_(playerImpl);
       return;
     }
 
@@ -46,62 +46,63 @@ export class AmpStoryEmbedManager {
         if (!entry.isIntersecting) {
           return;
         }
-        embedImpl.layoutCallback();
+        playerImpl.layoutCallback();
       });
     };
 
     const observer = new IntersectionObserver(intersectingCallback, {
       rootMargin: '100%',
     });
-    observer.observe(embedImpl.getElement());
+    observer.observe(playerImpl.getElement());
   }
 
   /**
    * Fallback for when IntersectionObserver is not supported. Calls
-   * layoutCallback on the embed when it is close to the viewport.
-   * @param {!AmpStoryEmbed} embedImpl
+   * layoutCallback on the player when it is close to the viewport.
+   * @param {!AmpStoryPlayer} playerImpl
    * @private
    */
-  layoutFallback_(embedImpl) {
-    // TODO(Enriqe): pause embeds when scrolling away from viewport.
+  layoutFallback_(playerImpl) {
+    // TODO(Enriqe): pause players when scrolling away from viewport.
     this.win_.addEventListener(
       'scroll',
       throttle(
         this.win_,
-        this.layoutIfVisible_.bind(this, embedImpl),
+        this.layoutIfVisible_.bind(this, playerImpl),
         SCROLL_THROTTLE_MS
       )
     );
 
     // Calls it once it in case scroll event never fires.
-    this.layoutIfVisible_(embedImpl);
+    this.layoutIfVisible_(playerImpl);
   }
 
   /**
-   * Checks if embed is close to the viewport and calls layoutCallback when it
+   * Checks if player is close to the viewport and calls layoutCallback when it
    * is.
-   * @param {!AmpStoryEmbed} embedImpl
+   * @param {!AmpStoryPlayer} playerImpl
    * @private
    */
-  layoutIfVisible_(embedImpl) {
-    const embedTop = embedImpl.getElement()./*OK*/ getBoundingClientRect().top;
-    if (this.win_./*OK*/ innerHeight * 2 > embedTop) {
-      embedImpl.layoutCallback();
+  layoutIfVisible_(playerImpl) {
+    const playerTop = playerImpl.getElement()./*OK*/ getBoundingClientRect()
+      .top;
+    if (this.win_./*OK*/ innerHeight * 2 > playerTop) {
+      playerImpl.layoutCallback();
     }
   }
 
   /**
-   * Builds and layouts the embeds when appropiate.
+   * Builds and layouts the players when appropiate.
    * @public
    */
-  loadEmbeds() {
+  loadPlayers() {
     const doc = this.win_.document;
-    const embeds = doc.getElementsByTagName('amp-story-embed');
-    for (let i = 0; i < embeds.length; i++) {
-      const embedEl = embeds[i];
-      const embed = new AmpStoryEmbed(this.win_, embedEl);
-      embed.buildCallback();
-      this.layoutEmbed_(embed);
+    const players = doc.getElementsByTagName('amp-story-player');
+    for (let i = 0; i < players.length; i++) {
+      const playerEl = players[i];
+      const player = new AmpStoryPlayer(this.win_, playerEl);
+      player.buildCallback();
+      this.layoutPlayer_(player);
     }
   }
 }

@@ -14,39 +14,39 @@
  * limitations under the License.
  */
 
-import {AmpStoryEmbedManager} from '../../src/amp-story-embed-manager';
+import {AmpStoryPlayerManager} from '../../src/amp-story-player-manager';
 
-describes.realWin('AmpStoryEmbed', {amp: false}, env => {
+describes.realWin('AmpStoryPlayer', {amp: false}, env => {
   let win;
-  let embedEl;
+  let playerEl;
   let url;
   let manager;
 
-  function buildStoryEmbed() {
-    embedEl = win.document.createElement('amp-story-embed');
+  function buildStoryPlayer() {
+    playerEl = win.document.createElement('amp-story-player');
     const storyAnchor = win.document.createElement('a');
     url =
       'https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/';
     storyAnchor.setAttribute('href', url);
-    embedEl.appendChild(storyAnchor);
-    win.document.body.appendChild(embedEl);
-    manager = new AmpStoryEmbedManager(win);
+    playerEl.appendChild(storyAnchor);
+    win.document.body.appendChild(playerEl);
+    manager = new AmpStoryPlayerManager(win);
   }
 
   beforeEach(() => {
     win = env.win;
-    buildStoryEmbed();
+    buildStoryPlayer();
   });
 
   it('should build an iframe for each story', () => {
-    manager.loadEmbeds();
+    manager.loadPlayers();
 
-    expect(embedEl.shadowRoot.querySelector('iframe')).to.exist;
+    expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
   });
 
   it('should correctly append params at the end of the story url', () => {
-    manager.loadEmbeds();
-    const storyIframe = embedEl.shadowRoot.querySelector('iframe');
+    manager.loadPlayers();
+    const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
       url + '?amp_js_v=0.1#visibilityState=inactive&origin=about%3Asrcdoc'
@@ -55,10 +55,10 @@ describes.realWin('AmpStoryEmbed', {amp: false}, env => {
 
   it('should correctly append params at the end of a story url with existing params', () => {
     url += '?testParam=true#myhash=hashValue';
-    embedEl.firstElementChild.setAttribute('href', url);
+    playerEl.firstElementChild.setAttribute('href', url);
 
-    manager.loadEmbeds();
-    const storyIframe = embedEl.shadowRoot.querySelector('iframe');
+    manager.loadPlayers();
+    const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
     expect(storyIframe.getAttribute('src')).to.equals(
       url + '&amp_js_v=0.1#visibilityState=inactive&origin=about%3Asrcdoc'
