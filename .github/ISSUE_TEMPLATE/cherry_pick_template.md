@@ -8,13 +8,6 @@ assignees: ''
 
 ---
 
----
-name: Cherry-pick template
-about: Used to request a cherry-pick. See go.amp.dev/cherry-picks
-title: "\U0001F338 Cherry-pick request for #<ISSUE_NUMBER> into #<RELEASE_ISSUE> (Pending)"
-labels: 'Type: Release'
----
-
 <!--
 MUST: Replace *everything* in angle brackets in the title AND body of this issue.
 MUST: Update issue labels to indicate which channels the cherry-pick is going into.
