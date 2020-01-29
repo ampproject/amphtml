@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-/** @const */
-const TAG = 'amp-beopinion';
+import {AmpBeOp} from './beop-shared.js';
 
-import {AmpBeOp} from '../../amp-beop/0.1/beop-shared.js';
+/** @const */
+const TAG = 'amp-beop';
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpBeOp);

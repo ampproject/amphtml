@@ -34,12 +34,12 @@ function AmpAdUIHandler$$module$extensions$amp_ad$0_1$amp_ad_ui() {}
 
 // Under 3p folder
 
-// beopinion.js
+// beop.js
 data.account;
 data.content;
 data.name;
 //data['my-content'];
-window.BeOpinionSDK;
+window.BeOpSDK;
 
 // facebook.js
 data.embedAs;

@@ -45,7 +45,7 @@ import {startsWith} from '../src/string.js';
 import {urls} from '../src/config';
 
 // 3P - please keep in alphabetic order
-import {beopinion} from './beopinion';
+import {beop} from './beop';
 import {bodymovinanimation} from './bodymovinanimation';
 import {embedly} from './embedly';
 import {facebook} from './facebook';
@@ -390,7 +390,8 @@ register('appvador', appvador);
 register('atomx', atomx);
 register('baidu', baidu);
 register('beaverads', beaverads);
-register('beopinion', beopinion);
+register('beop', beop);
+register('beopinion', beop);
 register('bidtellect', bidtellect);
 register('blade', blade);
 register('bodymovinanimation', bodymovinanimation);

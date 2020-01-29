@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import '../amp-beopinion';
-import {beopinion} from '../../../../3p/beopinion';
+import '../amp-beop';
+import {beop} from '../../../../3p/beop';
 
 describes.realWin(
-  'amp-beopinion',
+  'amp-beop',
   {
     amp: {
-      extensions: ['amp-beopinion'],
+      extensions: ['amp-beop'],
       canonicalUrl: 'https://foo.bar/baz',
     },
   },
@@ -35,22 +35,22 @@ describes.realWin(
       doc = win.document;
     });
 
-    function getAmpBeOpinion(accountId) {
-      const ampBeOpinion = doc.createElement('amp-beopinion');
-      ampBeOpinion.setAttribute('data-account', accountId);
-      ampBeOpinion.setAttribute('data-content', contentId);
-      ampBeOpinion.setAttribute('width', '111');
-      ampBeOpinion.setAttribute('height', '222');
-      doc.body.appendChild(ampBeOpinion);
-      return ampBeOpinion
+    function getAmpBeOp(accountId) {
+      const ampBeOp = doc.createElement('amp-beop');
+      ampBeOp.setAttribute('data-account', accountId);
+      ampBeOp.setAttribute('data-content', contentId);
+      ampBeOp.setAttribute('width', '111');
+      ampBeOp.setAttribute('height', '222');
+      doc.body.appendChild(ampBeOp);
+      return ampBeOp
         .build()
-        .then(() => ampBeOpinion.layoutCallback())
-        .then(() => ampBeOpinion);
+        .then(() => ampBeOp.layoutCallback())
+        .then(() => ampBeOp);
     }
 
-    it('renders iframe in amp-beopinion', () => {
-      return getAmpBeOpinion(accountId).then(ampBeOpinion => {
-        const iframe = ampBeOpinion.firstChild;
+    it('renders iframe in amp-beop', () => {
+      return getAmpBeOp(accountId).then(ampBeOp => {
+        const iframe = ampBeOp.firstChild;
         expect(iframe).to.not.be.null;
         expect(iframe.tagName).to.equal('IFRAME');
         expect(iframe.getAttribute('width')).to.equal('111');
@@ -64,16 +64,16 @@ describes.realWin(
       doc.body.appendChild(div);
       win.context = {
         canonicalUrl: 'https://foo.bar/baz',
-        tagName: 'AMP-BEOPINION',
+        tagName: 'AMP-BEOP',
       };
 
-      beopinion(win, {
+      beop(win, {
         account: accountId,
         content: contentId,
         width: 111,
         height: 222,
       });
-      const content = doc.body.querySelector('.BeOpinionWidget');
+      const content = doc.body.querySelector('.BeOpWidget');
       expect(content).not.to.be.undefined;
     });
   }
