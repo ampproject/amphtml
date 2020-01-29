@@ -41,6 +41,12 @@ CMP_CONFIG['didomi'] = {
   'promptUISrc': 'https://sdk-amp.privacy-center.org/loader.html',
 };
 
+CMP_CONFIG['sirdata'] = {
+  'consentInstanceId': 'sirdata',
+  'checkConsentHref': 'https://sddan.mgr.consensu.org/api/v1/public/amp/check',
+  'promptUISrc': 'https://ui.sddan.mgr.consensu.org/amp.html',
+};
+
 CMP_CONFIG['Marfeel'] = {
   'consentInstanceId': 'Marfeel',
   'checkConsentHref': 'https://live.mrf.io/cmp/consents/amp',
