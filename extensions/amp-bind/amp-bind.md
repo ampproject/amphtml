@@ -340,11 +340,25 @@ If the first button is clicked again, nothing will change. The **state variables
 
 When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property.
 
+[example preview="inline" playground="true" imports="amp-bind"]
 ```html
 <!-- The "change" event of this <input> element contains
      a "value" variable that can be referenced via "event.value". -->
-<input type="range" on="change:AMP.setState({myRangeValue: event.value})" />
+<select on="change:AMP.setState({ option: event.value })">
+  <option value="0">No selection</option>
+  <option value="1">Option 1</option>
+  <option value="2">Option 2</option>
+</select>
+<div hidden
+  [hidden]="option != 1">
+  Option 1
+</div>
+<div hidden
+  [hidden]="option != 2">
+  Option 2
+</div>
 ```
+[/example]
 
 ##### Updating nested variables 
 
