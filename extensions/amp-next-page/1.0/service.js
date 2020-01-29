@@ -641,7 +641,10 @@ export class NextPageService {
         doc.close();
         return doc;
       })
-      .catch(e => user().error(TAG, 'failed to fetch %s', page.url, e));
+      .catch(e => {
+        user().error(TAG, 'failed to fetch %s', page.url, e);
+        throw e;
+      });
   }
 
   /**

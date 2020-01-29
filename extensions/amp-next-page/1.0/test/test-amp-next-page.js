@@ -89,7 +89,7 @@ describes.realWin(
       win.document.title = 'Host page';
     });
 
-    async function getAmpNextPage(options) {
+    async function getAmpNextPage(options, waitForLayout = true) {
       options = options || {};
 
       const element = doc.createElement('amp-next-page');
@@ -115,6 +115,11 @@ describes.realWin(
       }
 
       doc.body.appendChild(element);
+
+      if (waitForLayout) {
+        await element.build();
+        await element.layoutCallback();
+      }
 
       return element;
     }
@@ -145,18 +150,45 @@ describes.realWin(
 
     describe('inline config', () => {
       it('builds with valid inline config', async () => {
-        const element = await getAmpNextPage({
+        await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
         });
-
-        await element.build();
-        await element.layoutCallback();
       });
 
       it('errors on invalid inline config (object instead of array)', async () => {
-        const element = await getAmpNextPage({
-          inlineConfig: {
-            pages: [
+        const element = await getAmpNextPage(
+          {
+            inlineConfig: {
+              pages: [
+                {
+                  'image': '/examples/img/hero@1x.jpg',
+                  'title': 'Title 1',
+                  'ampUrl': '/document1',
+                },
+                {
+                  'image': '/examples/img/hero@1x.jpg',
+                  'title': 'Title 2',
+                  'ampUrl': '/document2',
+                },
+              ],
+            },
+          },
+          false /** waitForLayout */
+        );
+
+        await allowConsoleError(() =>
+          element.build().catch(err => {
+            expect(err.message).to.include(
+              'amp-next-page page list should be an array'
+            );
+          })
+        );
+      });
+
+      it('errors on invalid inline config (ampUrl instead of url)', async () => {
+        const element = await getAmpNextPage(
+          {
+            inlineConfig: [
               {
                 'image': '/examples/img/hero@1x.jpg',
                 'title': 'Title 1',
@@ -169,47 +201,14 @@ describes.realWin(
               },
             ],
           },
-        });
-
-        await allowConsoleError(() =>
-          element.build().catch(err => {
-            expect(err.message).to.include(
-              'amp-next-page page list should be an array'
-            );
-          })
+          false /** waitForLayout */
         );
-      });
-
-      it('errors on invalid inline config (ampUrl instead of url)', async () => {
-        const element = await getAmpNextPage({
-          inlineConfig: [
-            {
-              'image': '/examples/img/hero@1x.jpg',
-              'title': 'Title 1',
-              'ampUrl': '/document1',
-            },
-            {
-              'image': '/examples/img/hero@1x.jpg',
-              'title': 'Title 2',
-              'ampUrl': '/document2',
-            },
-          ],
-        });
 
         await allowConsoleError(() =>
           element.build().catch(err => {
             expect(err.message).to.include('page url must be a string');
           })
         );
-      });
-
-      it('builds with valid inline config', async () => {
-        const element = await getAmpNextPage({
-          inlineConfig: VALID_CONFIG,
-        });
-
-        await element.build();
-        await element.layoutCallback();
       });
     });
 
@@ -221,9 +220,6 @@ describes.realWin(
         element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
         });
-
-        await element.build();
-        await element.layoutCallback();
 
         service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
@@ -377,9 +373,6 @@ describes.realWin(
           inlineConfig: VALID_CONFIG,
         });
 
-        await element.build();
-        await element.layoutCallback();
-
         service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
       });
@@ -492,9 +485,6 @@ describes.realWin(
           inlineConfig: VALID_CONFIG,
         });
 
-        await element.build();
-        await element.layoutCallback();
-
         service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
       });
@@ -523,23 +513,27 @@ describes.realWin(
     describe('custom and templated separators', () => {
       let element;
       let service;
+      let html;
+
+      beforeEach(() => {
+        html = htmlFor(doc);
+      });
 
       afterEach(async () => {
         element.parentNode.removeChild(element);
       });
 
       it('renders a custom separator correctly', async () => {
-        const separator = doc.createElement('div');
-        separator.setAttribute('separator', '');
-        separator.innerText = 'Custom separator';
+        const separator = html`
+          <div separator>
+            Custom separator
+          </div>
+        `;
 
         element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
           separator,
         });
-
-        await element.build();
-        await element.layoutCallback();
 
         service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
@@ -554,7 +548,6 @@ describes.realWin(
       });
 
       it('correctly renders a templated separator', async () => {
-        const html = htmlFor(doc);
         const separator = html`
           <div separator>
             <template type="amp-mustache">
@@ -571,9 +564,6 @@ describes.realWin(
           inlineConfig: VALID_CONFIG,
           separator,
         });
-
-        await element.build();
-        await element.layoutCallback();
 
         service = Services.nextPageServiceForDoc(doc);
         env.sandbox.stub(service, 'getViewportsAway_').returns(2);
