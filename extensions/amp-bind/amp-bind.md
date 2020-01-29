@@ -413,18 +413,22 @@ In general, nested objects will be merged up to a maximum depth of 10. All varia
 
 #### Modifying history with `AMP.pushState()`
 
-The [`AMP.pushState()`](../../spec/amp-actions-and-events.md#amp) action is similar to `AMP.setState()` except it also pushes a new entry
-onto the browser history stack. Popping this history entry (e.g. by navigating back) restores
-the previous value of variables set by `AMP.pushState()`.
+`AMP.pushState()` writes state changes to the history. Navigating back, will restore the previous state. To test this, increase the count in the example below and use your browser's back button to decrease the count.
 
-For example:
+
+[example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-<button on="tap:AMP.pushState({foo: '123'})">Set 'foo' to 123</button>
+<amp-state id="count">
+  <script type="application/json">
+    1
+  </script>
+</amp-state>
+<div>Item <span [text]="count">1</span></div>
+<button on="tap:AMP.pushState({ count: count + 1 })">Increase count</button>
 ```
 
-- Tapping the button will set variable `foo` to 123 and push a new history entry.
-- Navigating back will restore `foo` to its previous value, "bar" (equivalent to calling `AMP.setState({foo: 'bar'})`.
+[/example]
 
 ### Expressions
 
