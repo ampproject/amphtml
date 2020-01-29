@@ -449,7 +449,7 @@ amp-accordion > section {
 }
 
 /* Collapse content by default. */
-amp-accordion.amp-notbuilt > section > :last-child {
+amp-accordion > section > :last-child {
   display: none !important;
 }
 
