@@ -1170,6 +1170,13 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },
+  {
+    // DO NOT SUBMIT: Example for PR.
+    name: 'amp-generic-video-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
 ];
 
 /**

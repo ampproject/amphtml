@@ -13,10 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {defineVideoPlayerElement} from '../../../src/video/declarative';
+import GenericIframeVideoPlayer from './generic';
 
-const TAG = 'amp-video-iframe';
-
-AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(defineVideoPlayerElement({TAG}));
-});
+/**
+ * @param {!./generic.VideoPlayerElementDef=} config
+ * @return {typeof AMP.BaseElement}
+ */
+export const defineVideoPlayerElement = config => element => {
+  const impl = new GenericIframeVideoPlayer(element);
+  impl.vendorComponentConfig = config;
+  return impl;
+};

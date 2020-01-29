@@ -15,8 +15,15 @@
  */
 import {defineVideoPlayerElement} from '../../../src/video/declarative';
 
-const TAG = 'amp-video-iframe';
+// DO NOT SUBMIT: Example for PR.
+
+const TAG = 'amp-generic-video-player';
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(defineVideoPlayerElement({TAG}));
+  AMP.registerElement(
+    defineVideoPlayerElement({
+      TAG,
+      src: '/examples/amp-video-iframe/frame.html',
+    })
+  );
 });

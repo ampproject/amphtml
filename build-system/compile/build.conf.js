@@ -20,10 +20,17 @@ const localPlugin = name =>
   require.resolve(`../babel-plugins/babel-plugin-${name}`);
 
 const defaultPlugins = [
+  [
+    localPlugin('transform-inline-decl-extensions'),
+    {
+      baseClassFile: 'src/video/generic',
+      componentClassCtor: 'defineVideoPlayerElement',
+    },
+  ],
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
   [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
-  localPlugin('transform-parenthesize-expression'),
   localPlugin('is_minified-constant-transformer'),
+  localPlugin('transform-parenthesize-expression'),
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
