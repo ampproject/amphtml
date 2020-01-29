@@ -27,9 +27,9 @@ const TAG = 'amp-social-share';
 class AmpSocialShare extends PreactBaseElement {
   /** @override */
   init() {
-    this.context_['collapse'] = () => toggle(this.element, false);
     const host = this.element;
-    const dataParams = getDataParamsFromAttributes(this.element);
+    const dataParams = getDataParamsFromAttributes(host);
+    this.context_['collapse'] = () => toggle(host, false);
     return {host, dataParams};
   }
 
@@ -55,6 +55,7 @@ AmpSocialShare.props = {
   'dataShareEndpoint': {attr: 'data-share-endpoint'},
   'dataTarget': {attr: 'data-target'},
   'style': {attr: 'style'},
+  'tabindex': {attr: 'tabindex'},
 };
 
 AMP.extension(TAG, '0.2', AMP => {
