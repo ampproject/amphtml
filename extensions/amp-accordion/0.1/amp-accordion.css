@@ -38,3 +38,7 @@ amp-accordion > section:not([expanded]) > :last-child {
   padding: 0;
   opacity: 0;
 }
+
+amp-accordion > section:not([expanded]) > :last-child:not([rendersubtree]) {
+  display: none !important;
+}
