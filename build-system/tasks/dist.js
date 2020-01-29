@@ -104,7 +104,10 @@ async function dist() {
   // own processing). Executed after `compileCss` and `compileJison` so their
   // results can be copied too.
   if (!argv.single_pass) {
-    transferSrcsToTempDir({isForTesting: argv.fortesting});
+    transferSrcsToTempDir({
+      isForTesting: argv.fortesting,
+      isEsmBuild: argv.esm,
+    });
   }
 
   await copyCss();
