@@ -2,7 +2,8 @@
 name: Cherry-pick template
 about: Used to request a cherry-pick. See go.amp.dev/cherry-picks
 title: "\U0001F338 Cherry-pick request for #<ISSUE_NUMBER> into #<RELEASE_ISSUE> (Pending)"
-labels: 'Cherry Pick: Beta, Cherry Pick: Experimental, Cherry Pick: Stable, Type:
+labels:
+  'Cherry Pick: Beta, Cherry Pick: Experimental, Cherry Pick: LTS, Cherry Pick: Stable, Type:
   Release'
 assignees: ''
 ---
@@ -20,9 +21,9 @@ If you have any questions see the [cherry-pick documentation](https://github.com
 TIP: Cherry-picks into Stable most likely require a cherry-pick into Beta / Experimental too. Otherwise, your fix will be lost when Beta is promoted.
 -->
 
-|       Issue       |       PR       |   Stable?    | Beta / Experimental? | [Release issue](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) |
-| :---------------: | :------------: | :----------: | :------------------: | :-----------------------------------------------------------------------------: |
-| #<_ISSUE_NUMBER_> | #<_PR_NUMBER_> | **<YES/NO>** |     **<YES/NO>**     |                               #<_RELEASE_ISSUE_>                                |
+|       Issue       |       PR       | Beta / Experimental? |   Stable?    |     LTS?     | [Release issue](https://github.com/ampproject/amphtml/labels/Type%3A%20Release) |
+| :---------------: | :------------: | :------------------: | :----------: | :----------: | ------------------------------------------------------------------------------- |
+| #<_ISSUE_NUMBER_> | #<_PR_NUMBER_> |     **<YES/NO>**     | **<YES/NO>** | **<YES/NO>** | #<_RELEASE_ISSUE_>                                                              |
 
 ## Why does this issue meet the [cherry-pick criteria](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#cherry-pick-criteria)?
 
@@ -37,6 +38,14 @@ CONDITION: Cherry-picking into Stable but _not_ Beta / Experimental. Otherwise, 
 -->
 
 ## Why is a Beta / Experimental cherry-pick not needed?
+
+<_YOUR_REASONS_>
+
+<!--
+CONDITION: Cherry-picking into LTS. Otherwise, delete.
+-->
+
+## Why is an LTS cherry-pick needed?
 
 <_YOUR_REASONS_>
 
