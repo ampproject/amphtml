@@ -454,9 +454,11 @@ export class AmpScriptService {
     this.sources_ = [];
 
     // Query the meta tag once per document.
-    const allowedHashes = ampdoc
-      .getHeadNode()
-      .querySelector('meta[name="amp-script-src"]');
+    // Note: <meta> tags are only valid in <head> elements, so regardless of
+    // the specific type of ampdoc, the top document head must be referenced.
+    // For example, there is no <head> element in an AmpDocShadow instance.
+    const headNode = dev().assertElement(ampdoc.win.document.head);
+    const allowedHashes = headNode.querySelector('meta[name="amp-script-src"]');
     if (allowedHashes && allowedHashes.hasAttribute('content')) {
       const content = allowedHashes.getAttribute('content');
       this.sources_ = content

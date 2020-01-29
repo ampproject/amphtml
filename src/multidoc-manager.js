@@ -17,7 +17,7 @@
 import {CommonSignals} from './common-signals';
 import {Services} from './services';
 import {VisibilityState} from './visibility-state';
-import {childElementsByTag, isConnectedNode} from './dom';
+import {childElementsByTag, isConnectedNode, removeElement} from './dom';
 import {
   createShadowDomWriter,
   createShadowRoot,
@@ -27,7 +27,7 @@ import {dev, user} from './log';
 import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
-import {isArray, isObject} from './types';
+import {isArray, isObject, toArray} from './types';
 import {parseUrlDeprecated} from './url';
 import {setStyle} from './style';
 
@@ -358,6 +358,12 @@ export class MultidocManager {
               // Ignore.
             } else if (name == 'viewport') {
               // Ignore.
+            } else if (name == 'amp-script-src') {
+              // Import amp-script hashes
+              const el = this.win.document.createElement('meta');
+              el.setAttribute('name', 'amp-script-src');
+              el.setAttribute('content', n.getAttribute('content') || '');
+              this.win.document.head.appendChild(el);
             } else {
               // TODO(dvoytenko): copy other meta tags.
               dev().warn(TAG, 'meta ignored: ', n);
@@ -469,6 +475,19 @@ export class MultidocManager {
   }
 
   /**
+   * Remove elements from PWA appshell head inserted by attachShadowDoc_
+   */
+  cleanShellHead_() {
+    if (this.win.document && this.win.document.head) {
+      // Remove amp-script hashes
+      const ampScriptSrcMetas = toArray(
+        this.win.document.head.querySelectorAll('meta[name="amp-script-src"]')
+      );
+      ampScriptSrcMetas.forEach(meta => removeElement(meta));
+    }
+  }
+
+  /**
    * @param {*} data
    * @param {!ShadowRoot} sender
    * @private
@@ -504,6 +523,7 @@ export class MultidocManager {
     const {ampdoc} = amp;
     ampdoc.overrideVisibilityState(VisibilityState.INACTIVE);
     disposeServicesForDoc(ampdoc);
+    this.cleanShellHead_();
 
     // There is a race between the visibility state change finishing and
     // resources.onNextPass firing, but this is intentional. closeShadowRoot_
