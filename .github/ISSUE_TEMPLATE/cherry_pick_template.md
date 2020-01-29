@@ -5,7 +5,6 @@ title: "\U0001F338 Cherry-pick request for #<ISSUE_NUMBER> into #<RELEASE_ISSUE>
 labels: 'Cherry Pick: Beta, Cherry Pick: Experimental, Cherry Pick: Stable, Type:
   Release'
 assignees: ''
-
 ---
 
 <!--
