@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryEmbedManager} from './amp-story-embed-manager';
+import {AmpStoryPlayerManager} from './amp-story-player-manager';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {
   addParamsToUrl,
@@ -29,23 +29,23 @@ import {toArray} from './types';
 
 /** @enum {string} */
 const LoadStateClass = {
-  LOADING: 'i-amphtml-story-embed-loading',
-  LOADED: 'i-amphtml-story-embed-loaded',
-  ERROR: 'i-amphtml-story-embed-error',
+  LOADING: 'i-amphtml-story-player-loading',
+  LOADED: 'i-amphtml-story-player-loaded',
+  ERROR: 'i-amphtml-story-player-error',
 };
 
 /** @const {string} */
 const CSS = `
   :host { all: initial; display: block; border-radius: 0 !important; width: 405px; height: 720px; overflow: auto; }
-  .story-embed-iframe { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
+  .story-player-iframe { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
   main { display: flex; flex-direction: row; height: 100%; }
-  .i-amphtml-story-embed-loaded iframe { opacity: 1; }`;
+  .i-amphtml-story-player-loaded iframe { opacity: 1; }`;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
-export class AmpStoryEmbed {
+export class AmpStoryPlayer {
   /**
    * @param {!Window} win
    * @param {!Element} element
@@ -128,7 +128,7 @@ export class AmpStoryEmbed {
       'backgroundImage',
       story.getAttribute('data-poster-portrait-src')
     );
-    iframeEl.classList.add('story-embed-iframe');
+    iframeEl.classList.add('story-player-iframe');
     this.iframes_.push(iframeEl);
 
     this.initializeLoadingListeners_(iframeEl);
@@ -258,6 +258,6 @@ export class AmpStoryEmbed {
 }
 
 self.onload = () => {
-  const manager = new AmpStoryEmbedManager(self);
-  manager.loadEmbeds();
+  const manager = new AmpStoryPlayerManager(self);
+  manager.loadPlayers();
 };
