@@ -45,6 +45,7 @@ describes.endtoend(
       const nextGeoUrl = currentUrl.replace('mx', 'ca');
 
       // Check the analytics request consentState
+      await sleep(3000);
       await expect(
         'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=insufficient'
       ).to.have.been.sent;
