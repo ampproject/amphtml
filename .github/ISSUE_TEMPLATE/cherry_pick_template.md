@@ -3,7 +3,7 @@ name: Cherry-pick request
 about: Used to request a cherry-pick. See go.amp.dev/cherry-picks
 title: "\U0001F338 Cherry-pick request for #<ISSUE_NUMBER> into #<RELEASE_ISSUE> (Pending)"
 labels:
-  'Cherry Pick: Beta, Cherry Pick: Experimental, Cherry Pick: LTS, Cherry Pick: Stable, Type:
+  'Cherry-pick: Beta, Cherry-pick: Experimental, Cherry-pick: LTS, Cherry-pick: Stable, Type:
   Release'
 assignees: ''
 ---
