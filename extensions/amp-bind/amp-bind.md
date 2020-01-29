@@ -248,23 +248,28 @@ Using `[class]="theFood[currentMeal].style"` as an example of expression syntax 
 
 Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or **state**.
 
+#### Size
+
+An `<amp-state>` element's JSON data has a maximum size of 100KB.
+
 #### Defining and initializing state with `amp-state`
 
-Before user interaction, there is no state set on the document. The `<amp-state>` component contains different **states** and their **state variables**. A **state** is set after a user interacts with an element with an event that points to the "AMP.setState()" action with a valid argument.
+Expressions are not evaluates on page load, but you may define an initial state. The `<amp-state>` component contains different **states** and their **state variables**. While this defines a **states**, it will not reflect on the page until after a user interacts.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-<amp-state id="myState">
+  <amp-state id="myState">
   <script type="application/json">
   {
     "foo": "bar"
   }
   </script>
 </amp-state>
-<p [text]="myState.foo">There is no state set.</p>
-<button on="tap:AMP.setState({})">Set to the value of foo.</button>
+<p [text]="myState.foo"></p>
+<button on="tap:AMP.setState({})">See value of initialized state</button>
 ```
+
 [/example]
 
 Use [expressions](#expressions) to reference **state variables**. If the JSON data is not nested in the `<amp-state>` component, reference the states via dot syntax. In the above example, `myState.foo` evaluates to "bar".
@@ -277,35 +282,61 @@ An `<amp-state>` element can also specify a CORS URL instead of a child JSON scr
 </amp-state>
 ```
 
-#### Size
-
-An `<amp-state>` element's child JSON has a maximum size of 100KB.
-
 
 #### Refreshing state data
 
 The `refresh` action refetches data from data point the `src` attribute points to. It ignores the browser cache.
 
+[example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-<amp-state id="myState" ...></amp-state>
-<!-- Clicking the button will refresh and refetch the json in amp-state. -->
-<button on="tap:myState.refresh"></button>
+<amp-state id="currentTime"
+  src="/documentation/examples/api/time"></amp-state>
+<button on="tap:currentTime.refresh">
+  Refresh
+</button>
+<div [text]="currentTime.time"></div>
 ```
 
-#### Updating state with `AMP.setState()`
+[/example]
 
-The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. For example, when the below button is pressed, `AMP.setState()` will [deep-merge](#deep-merge-with-ampsetstate) the object literal with the state.
+ A common need for `refresh` is working with live content that needs to be updated, such as a live sports score.
+
+#### Updating state variables with `AMP.setState()`
+
+The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. This means you can update the value of a defined state variable. 
+
+[example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-<!-- Like JavaScript, you can reference existing
+  <amp-state id="myState">
+    <script type="application/json">
+      {
+        "foo": "bar",
+        "baz": "hello"
+      }
+    </script>
+  </amp-state>
+  <p [text]="myState.foo"></p>
+  <p [text]="myState.baz"></p>
+  <button on="tap:AMP.setState({})">See value of set state</button>
+  <!-- Like JavaScript, you can reference existing
      variables in the values of the  object literal. -->
-<button
-  on="tap:AMP.setState({foo: 'bar', baz: myAmpState.someVariable})"
-></button>
+  <button on="tap:AMP.setState({myState:{baz: myState.foo}})"
+          >Set value of baz to value of foo</button>
+  <button on="tap:AMP.setState({myState:{baz: 'world'}})"
+        >Set value of baz to "world"</button>        
 ```
 
-In general, nested objects will be merged up to a maximum depth of 10. All variables, including those introduced by `amp-state`, can be overidden.
+[/example]
+
+In the example above, the `AMP.setState({})` action on the first button evaluates the `[text]` binding expression. It then inserts the defined state variables value into the `<p>` tag. Both `<p>` tags display "bar". 
+
+When the clicking the second button, with `AMP.setState({myState:{baz: myState.foo}})` action defined, it [deep-merges](#deep-merge-with-ampsetstate) the "baz" **state variable** value to the same as the "foo" **state variable** value.
+
+**State variable** values can be changed to values not defined in the initial state. When clicking the third button, with `"tap:AMP.setState({myState:{baz: 'world'}})"` action defined, it deep merges the "baz" **state variable** value to "world"
+
+If the first button is clicked again, nothing will change. The **state variables** revert back to the defined JSON in `<amp-state>` on page refresh. 
 
 When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property.
 
@@ -314,6 +345,57 @@ When triggered by certain events, `AMP.setState()` also can access event-related
      a "value" variable that can be referenced via "event.value". -->
 <input type="range" on="change:AMP.setState({myRangeValue: event.value})" />
 ```
+
+##### Updating nested variables 
+
+In general, nested objects will be merged up to a maximum depth of 10. All variables, including those introduced by `amp-state`, can be overidden.
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+  <amp-state id="myState">
+    <script type="application/json">
+      {
+        "foo": "bar",
+        "first": {
+            "a": "nested once",
+            "ab": {
+            	"b": "nested twice",
+            	"bc":{
+                	"c": "nested three times",
+                    "cd": {
+                    	"d": "nested four times",
+                        "de": {
+                        	"e": "nested five times",
+                            "ef": {
+                            	"f": "nested six times",
+                                "fg": {
+                                	"g": "nested seven times",
+                                    "gh": {
+                                    	"h": "nested nine times",
+                                        "hi": {
+                                        	"i": "nested ten times"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+      }
+    </script>
+  </amp-state>
+  <p [text]="myState.foo"></p>
+  <p [text]="myState.first.ab.bc.cd.de.ef.fg.gh.hi.i"></p>
+   <button on="tap:AMP.setState({})">See value of set state</button>
+  <button on="tap:AMP.setState({ myState: {first: {ab: {bc: {cd: {de: {ef: {fg: {gh: {hi: {i:'this is as far as you should merge nested values'} } } } } } } } } } })"
+          >Merge 10th nested object</button>  
+```
+
+[/example]
+
 
 #### Modifying history with `AMP.pushState()`
 
