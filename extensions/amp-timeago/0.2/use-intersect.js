@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {useLayoutEffect} from 'preact/hooks/src';
-import {useRef, useState} from '../../../src/preact';
+import {useLayoutEffect, useRef, useState} from '../../../src/preact';
 
 /**
  * @param {object} ref
