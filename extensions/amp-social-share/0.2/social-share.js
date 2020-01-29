@@ -17,9 +17,10 @@
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
 import {addParamsToUrl, parseQueryString} from '../../../src/url';
-import {createElement, useState} from '../../../src/preact';
+import {createElement, useContext, useState} from '../../../src/preact';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getAmpContext} from '../../../src/preact/context';
 import {getSocialConfig} from './amp-social-share-config';
 import {openWindowDialog} from '../../../src/dom';
 import {useResourcesNotify} from '../../../src/preact/utils';
@@ -144,10 +145,11 @@ function getTypeConfigOrUndefined(type, viewer, platform) {
     !/\s/.test(type),
     'Space characters are not allowed in the type property. %s'
   );
+  const {'collapse': collapse} = useContext(getAmpContext());
   if (type === 'system') {
     // // Hide/ignore system component if navigator.share unavailable
     if (!systemShareSupported(viewer, platform)) {
-      return;
+      return collapse();
     }
   } else {
     // Hide/ignore non-system component if system share wants to be unique
@@ -157,13 +159,13 @@ function getTypeConfigOrUndefined(type, viewer, platform) {
         'amp-social-share[type=system][data-mode=replace]'
       ).length;
     if (systemOnly) {
-      return;
+      return collapse();
     }
   }
   const typeConfig = getSocialConfig(type) || dict();
   if (typeConfig['obsolete']) {
     user().warn(`Skipping obsolete share button ${type}`);
-    return;
+    return collapse();
   }
   return typeConfig;
 }

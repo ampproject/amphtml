@@ -20,16 +20,6 @@
  * See https://github.com/ampproject/amphtml/issues/4277 for more details.
  */
 
-amp-social-share:empty {
-  display: none;
-}
-
-/**
- * Note: Attribute selectors were used initially here but we switched to using
- * class-based selector to style each type because of a bug on iOS Safari 8.
- * See https://github.com/ampproject/amphtml/issues/4277 for more details.
- */
-
 /* Twitter Styling */
 .amp-social-share-twitter {
   background-color: #1da1f2;

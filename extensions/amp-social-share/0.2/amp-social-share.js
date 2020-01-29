@@ -18,6 +18,7 @@ import {PreactBaseElement} from '../../../src/preact/base-element';
 import {SocialShare} from './social-share';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
+import {toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
 /** @const {string} */
@@ -26,6 +27,7 @@ const TAG = 'amp-social-share';
 class AmpSocialShare extends PreactBaseElement {
   /** @override */
   init() {
+    this.context_['collapse'] = () => toggle(this.element, false);
     const host = this.element;
     const dataParams = getDataParamsFromAttributes(this.element);
     return {host, dataParams};
