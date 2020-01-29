@@ -792,7 +792,10 @@ describes.realWin(
         allowConsoleError(() => {
           pointTo('not-a-real-target');
         });
-      } catch (expected) {}
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
     });
 
     it('should exit to the pointed-to target and work with custom URL variables', () => {
