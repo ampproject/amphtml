@@ -89,7 +89,7 @@ describes.realWin(
       win.document.title = 'Host page';
     });
 
-    async function getAMPNextPage(options) {
+    async function getAmpNextPage(options) {
       options = options || {};
 
       const element = doc.createElement('amp-next-page');
@@ -145,7 +145,7 @@ describes.realWin(
 
     describe('inline config', () => {
       it('builds with valid inline config', async () => {
-        const element = await getAMPNextPage({
+        const element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
         });
 
@@ -154,7 +154,7 @@ describes.realWin(
       });
 
       it('errors on invalid inline config (object instead of array)', async () => {
-        const element = await getAMPNextPage({
+        const element = await getAmpNextPage({
           inlineConfig: {
             pages: [
               {
@@ -181,7 +181,7 @@ describes.realWin(
       });
 
       it('errors on invalid inline config (ampUrl instead of url)', async () => {
-        const element = await getAMPNextPage({
+        const element = await getAmpNextPage({
           inlineConfig: [
             {
               'image': '/examples/img/hero@1x.jpg',
@@ -204,7 +204,7 @@ describes.realWin(
       });
 
       it('builds with valid inline config', async () => {
-        const element = await getAMPNextPage({
+        const element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
         });
 
@@ -218,7 +218,7 @@ describes.realWin(
       let service;
 
       beforeEach(async () => {
-        element = await getAMPNextPage({
+        element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
         });
 
@@ -373,7 +373,7 @@ describes.realWin(
       let service;
 
       beforeEach(async () => {
-        element = await getAMPNextPage({
+        element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
         });
 
@@ -488,7 +488,7 @@ describes.realWin(
       let service;
 
       beforeEach(async () => {
-        element = await getAMPNextPage({
+        element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
         });
 
@@ -533,7 +533,7 @@ describes.realWin(
         separator.setAttribute('separator', '');
         separator.innerText = 'Custom separator';
 
-        element = await getAMPNextPage({
+        element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
           separator,
         });
@@ -567,7 +567,7 @@ describes.realWin(
           </div>
         `;
 
-        element = await getAMPNextPage({
+        element = await getAmpNextPage({
           inlineConfig: VALID_CONFIG,
           separator,
         });

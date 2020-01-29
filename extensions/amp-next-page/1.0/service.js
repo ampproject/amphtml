@@ -390,32 +390,32 @@ export class NextPageService {
   createDocumentContainerForPage(page) {
     const container = this.win_.document.createElement('div');
     container.classList.add(DOC_CONTAINER_CLASS);
-    this.element_.insertBefore(container, this.moreBox_);
+    this.element_.insertBefore(container, dev().assertElement(this.moreBox_));
 
     // Insert the separator
     const separatorInstance = this.separator_.cloneNode(true);
     container.appendChild(separatorInstance);
-    // TODO(wassgha): If async/wait was allowed, this would look a lot nicer!
-    return this.maybeRenderSeparatorTemplate_(separatorInstance, page).then(
-      () => {
-        // Insert the document
-        const shadowRoot = this.win_.document.createElement('div');
-        shadowRoot.classList.add(SHADOW_ROOT_CLASS);
-        container.appendChild(shadowRoot);
+    const separatorRenderPromise = this.maybeRenderSeparatorTemplate_(
+      separatorInstance,
+      page
+    );
 
-        // Observe this page's visibility
-        this.visibilityObserver_.observe(
-          shadowRoot /** element */,
-          container /** parent */,
-          position => {
-            page.relativePos = position;
-            this.updateVisibility();
-          }
-        );
+    // Insert the document
+    const shadowRoot = this.win_.document.createElement('div');
+    shadowRoot.classList.add(SHADOW_ROOT_CLASS);
+    container.appendChild(shadowRoot);
 
-        return container;
+    // Observe this page's visibility
+    this.visibilityObserver_.observe(
+      shadowRoot /** element */,
+      container /** parent */,
+      position => {
+        page.relativePos = position;
+        this.updateVisibility();
       }
     );
+
+    return separatorRenderPromise.then(() => container);
   }
 
   /**

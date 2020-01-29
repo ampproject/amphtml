@@ -53,7 +53,7 @@ export class Page {
     /** @private {?Element} */
     this.container_ = null;
     /** @private {?Document} */
-    this.cachedContent_ = null;
+    this.content_ = null;
     /** @private {!PageState} */
     this.state_ = PageState.QUEUED;
     /** @private {!VisibilityState} */
@@ -234,7 +234,7 @@ export class Page {
       .fetchPageDocument(this)
       .then(content => {
         this.state_ = PageState.LOADED;
-        this.cachedContent_ = content;
+        this.content_ = content;
         return this.manager_.createDocumentContainerForPage(this /** page */);
       })
       .then(container => {
@@ -252,12 +252,11 @@ export class Page {
 
   /**
    * Inserts the fetched (or cached) HTML as the document's content
-   * @param {!Document=} content
    */
-  attach_(content = devAssert(this.cachedContent_)) {
+  attach_() {
     const shadowDoc = this.manager_.attachDocumentToPage(
       this /** page */,
-      content,
+      /** @type {!Document} */ (devAssert(this.content_)),
       this.isPaused() /** force */
     );
 
