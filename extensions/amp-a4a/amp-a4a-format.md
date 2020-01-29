@@ -262,6 +262,7 @@ AMPHTML ad creative. Extensions or builtin tags not explicitly listed are prohib
 - [amp-mustache](https://amp.dev/documentation/components/amp-mustache)
 - [amp-pixel](https://amp.dev/documentation/components/amp-pixel)
 - [amp-position-observer](https://amp.dev/documentation/components/amp-position-observer)
+- [amp-selector](https://amp.dev/documentation/components/amp-selector)
 - [amp-social-share](https://amp.dev/documentation/components/amp-social-share)
 - [amp-video](https://amp.dev/documentation/components/amp-video)
 
