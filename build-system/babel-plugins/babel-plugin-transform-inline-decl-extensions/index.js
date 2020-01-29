@@ -13,22 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const fs = require('fs-extra');
-const fsPath = require('path');
+const fs = require('fs');
+const {basename} = require('path');
 const {parse} = require('@babel/parser');
 
 const toUpperCase = (_, c) => c.toUpperCase();
 const dashToCamelCase = name => name.replace(/-([a-z])/g, toUpperCase);
 const capitalize = name => name.replace(/^([a-z])/g, toUpperCase);
 
-const thisKeywordPropName = 'vendorComponentConfig';
+const classAliasFromFilename = filename =>
+  capitalize(dashToCamelCase(basename(filename).replace(/\.js$/, '')));
+
+const rootRelative = name => require.resolve(`../../../${name}`);
 
 module.exports = function({types: t}) {
-  function aliasDefaultClass(file, name) {
-    const {program} = parse(
-      fs.readFileSync(require.resolve(file)).toString('utf-8'),
-      {sourceType: 'module'}
-    );
+  function cloneDefaultClass(file, alias) {
+    const code = fs.readFileSync(file).toString();
+    const {program} = parse(code, {sourceType: 'module'});
 
     let baseClass;
     let insideExportDefault = false;
@@ -49,10 +50,10 @@ module.exports = function({types: t}) {
       throw new Error(`No default class exported from ${file}`);
     }
 
-    const baseClassName = baseClass.id ? baseClass.id.name : null;
+    const {name = `VendorComponent`} = baseClass.id || {};
 
     return t.classExpression(
-      t.identifier(baseClassName ? `${baseClassName}_${name}` : name),
+      t.identifier(`${name}_${alias}`),
       t.cloneNode(baseClass.superClass),
       t.cloneNode(baseClass.body)
     );
@@ -61,68 +62,48 @@ module.exports = function({types: t}) {
   return {
     name: 'transform-inline-decl-extensions',
     visitor: {
-      CallExpression(path, state) {
+      CallExpression(path, {file, opts}) {
         if (
-          !t.isIdentifier(path.node.callee, {
-            name: state.opts.componentClassCtor,
-          })
+          !t.isIdentifier(path.node.callee, {name: opts.componentClassCtor})
         ) {
           return;
         }
 
-        const [componentConfigNode] = path.node.arguments;
-        const tag = fsPath
-          .basename(state.file.opts.filename)
-          .replace(/\.js$/, '');
-
-        const extensionBlock = path.findParent(p => t.isProgram(p.parent));
-
-        const componentClass = aliasDefaultClass(
-          // Relative to this file's root.
-          `../../../${state.opts.baseClassFile}`,
-          capitalize(dashToCamelCase(tag))
+        const componentClass = cloneDefaultClass(
+          rootRelative(opts.baseClassFile),
+          classAliasFromFilename(file.opts.filename)
         );
 
-        extensionBlock.insertBefore(componentClass);
+        const extensionCall = path.findParent(p => t.isProgram(p.parent));
+        extensionCall.insertBefore(componentClass);
 
-        // Flatten `config` props into a key-value map.
-        const componentConfig = {};
-        if (t.isObjectExpression(componentConfigNode)) {
-          for (const prop of componentConfigNode.properties) {
-            componentConfig[prop.key.name] = t.cloneNode(prop.value);
+        const [componentConfig] = path.node.arguments;
+        const componentConfigByKey = {};
+        if (t.isObjectExpression(componentConfig)) {
+          for (const {key, value} of componentConfig.properties) {
+            componentConfigByKey[key.name] = value;
           }
         }
 
-        // Replace references to `this.vendorComponentConfig` props with their
-        // static values from `config`.
-        extensionBlock.parentPath.traverse({
-          MemberExpression(path) {
+        // Inline static config into config property refs.
+        extensionCall.parentPath.traverse({
+          MemberExpression({node, parent, parentPath}) {
             if (
-              !t.isIdentifier(path.node.property, {name: thisKeywordPropName})
+              !t.isIdentifier(node.property, {name: 'vendorComponentConfig'}) ||
+              !t.isThisExpression(node.object) ||
+              !t.isMemberExpression(parent)
             ) {
               return;
             }
-            if (!t.isThisExpression(path.node.object)) {
+            if (t.isAssignmentExpression(parentPath.parent, {left: parent})) {
+              parentPath.parentPath.remove();
               return;
             }
-            if (!t.isMemberExpression(path.parent)) {
-              return;
-            }
-            // Remove assignment expressions where the property is the
-            // asignee's identifier.
-            if (
-              t.isAssignmentExpression(path.parentPath.parent) &&
-              path.parentPath.parent.left == path.parent
-            ) {
-              path.parentPath.parentPath.remove();
-              return;
-            }
-            const {name} = path.parent.property;
-            path.parentPath.replaceWith(
-              componentConfig[name] !== undefined
-                ? componentConfig[name]
-                : t.nullLiteral()
-            );
+            const knownValue = componentConfigByKey[parent.property.name];
+            const usableValue = knownValue
+              ? t.cloneNode(knownValue)
+              : t.nullLiteral();
+            parentPath.replaceWith(usableValue);
           },
         });
 

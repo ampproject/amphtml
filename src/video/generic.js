@@ -280,8 +280,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
       this.vendorComponentConfig.src || element.getAttribute('src'),
 
       // amp-video-iframe currently doesn't support this (maybe it should):
-      getDataParamsFromAttributes(element),
-      element
+      getDataParamsFromAttributes(element)
     );
   }
 
