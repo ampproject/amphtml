@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-import {createElement, useRef, useState} from '../../../src/preact';
+import {createElement, useRef} from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {useIntersect} from '../../../src/preact/use-intersect';
-import {useResourcesNotify} from '../../../src/preact/utils';
+import {useRerenderer, useResourcesNotify} from '../../../src/preact/utils';
 
 /**
  * @param {!JsonObject} props
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
-  const {0: timestamp, 1: setTimestamp} = useState(
-    getFuzzyTimestampValue(props)
-  );
+  const timestamp = getFuzzyTimestampValue(props);
   const ref = useRef(null);
   const entries = useIntersect(ref);
   const last =
     entries.length > 0 ? entries[entries.length - 1] : {isIntersecting: false};
   const {isIntersecting} = last;
   if (isIntersecting) {
-    setTimestamp(getFuzzyTimestampValue(props));
+    useRerenderer();
   }
   useResourcesNotify();
   return createElement('time', {datetime: props['datetime'], ref}, timestamp);
