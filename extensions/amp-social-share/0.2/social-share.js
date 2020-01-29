@@ -132,8 +132,10 @@ export function SocialShare(props) {
     role: 'button',
     tabindex: props['tabindex'] || '0',
   };
+
+  const render = props['render'];
   useResourcesNotify();
-  return createElement('div', attrs);
+  return render(null, props['children'], createElement('div', attrs));
 }
 
 /**

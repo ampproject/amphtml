@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-social-share-0.2.css';
+import {Fragment, createElement} from '../../../src/preact';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {SocialShare} from './social-share';
 import {getDataParamsFromAttributes} from '../../../src/dom';
@@ -27,10 +28,24 @@ const TAG = 'amp-social-share';
 class AmpSocialShare extends PreactBaseElement {
   /** @override */
   init() {
+    let rendered;
     const host = this.element;
     const dataParams = getDataParamsFromAttributes(host);
+    const render = (_, ...children) => {
+      // We only render once in AMP mode, but React mode may rerender
+      // serveral times.
+      if (rendered) {
+        return children;
+      }
+      rendered = true;
+      return createElement(Fragment, null, children);
+    };
     this.context_['collapse'] = () => toggle(host, false);
-    return {host, dataParams};
+    return {
+      host,
+      dataParams,
+      render,
+    };
   }
 
   /** @override */
