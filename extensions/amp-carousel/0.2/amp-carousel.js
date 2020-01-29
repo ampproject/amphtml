@@ -38,6 +38,8 @@ const CarouselType = {
   SLIDES: 'slides',
 };
 
+const TAG = 'amp-carousel';
+
 class AmpCarousel extends AMP.BaseElement {
   /**
    * @private
@@ -47,9 +49,17 @@ class AmpCarousel extends AMP.BaseElement {
       'goToSlide',
       actionInvocation => {
         const {args, trust} = actionInvocation;
-        this.carousel_.goToSlide(args['index'] || 0, {
-          actionSource: this.getActionSource_(trust),
-        });
+        const slide = Number(args['index'] || 0);
+        if (isNaN(slide)) {
+          this.user().error(
+            TAG,
+            `Invalid slide index for goToSlide action: "${args['index']}"`
+          );
+        } else {
+          this.carousel_.goToSlide(slide, {
+            actionSource: this.getActionSource_(trust),
+          });
+        }
       },
       ActionTrust.LOW
     );
