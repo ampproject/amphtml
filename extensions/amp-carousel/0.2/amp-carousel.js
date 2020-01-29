@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -38,8 +38,6 @@ const CarouselType = {
   SLIDES: 'slides',
 };
 
-const TAG = 'amp-carousel';
-
 class AmpCarousel extends AMP.BaseElement {
   /**
    * @private
@@ -50,16 +48,15 @@ class AmpCarousel extends AMP.BaseElement {
       actionInvocation => {
         const {args, trust} = actionInvocation;
         const slide = Number(args['index'] || 0);
-        if (isNaN(slide)) {
-          this.user().error(
-            TAG,
-            `Invalid slide index for goToSlide action: "${args['index']}"`
-          );
-        } else {
-          this.carousel_.goToSlide(slide, {
-            actionSource: this.getActionSource_(trust),
-          });
-        }
+        userAssert(
+          !isNaN(slide),
+          'Unexpected slide index for goToSlide action: %s. %s',
+          args['index'],
+          this.element
+        );
+        this.carousel_.goToSlide(slide, {
+          actionSource: this.getActionSource_(trust),
+        });
       },
       ActionTrust.LOW
     );
