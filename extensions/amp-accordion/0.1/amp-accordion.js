@@ -45,7 +45,8 @@ const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
 
 const isDisplayLockingEnabledForAccordion = once(win => {
   return (
-    isExperimentOn(win, 'amp-accordion') && 'renderSubtree' in Element.prototype
+    isExperimentOn(win, 'amp-accordion-display-locking') &&
+    'renderSubtree' in Element.prototype
   );
 });
 
@@ -390,7 +391,7 @@ class AmpAccordion extends AMP.BaseElement {
     if (!isDisplayLockingEnabledForAccordion(this.win) || !element) {
       return;
     }
-    element.renderSubtree = value;
+    element['renderSubtree'] = value;
   }
 
   /**
