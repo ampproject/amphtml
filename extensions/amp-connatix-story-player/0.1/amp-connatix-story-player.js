@@ -109,20 +109,20 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
       element
     );
 
-     // Orientation is mandatory
-     this.orientation_ = userAssert(
+    // Orientation is mandatory
+    this.orientation_ = userAssert(
       element.getAttribute('data-orientation'),
       'The data-orientation attribute is required for <amp-connatix-story-player> %s',
-       element
+      element
     );
     userAssert(
       this.orientation_.toLowerCase() === 'landscape' ||
-      this.orientation_.toLowerCase() === 'portrait',
+        this.orientation_.toLowerCase() === 'portrait',
       'Wrong orientation value. Possible orientation values: portrait or landscape'
     );
 
     userAssert(
-      this.layout_=== Layout.RESPONSIVE,
+      this.layout_ === Layout.RESPONSIVE,
       'Only responsive layout is supported'
     );
 
