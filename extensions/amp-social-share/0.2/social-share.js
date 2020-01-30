@@ -101,14 +101,6 @@ export function SocialShare(props) {
     }
   }
 
-  /**
-   * Handle clicks on the element.
-   * @private
-   */
-  function handleClick() {
-    handleActivation();
-  }
-
   /** @private */
   function handleActivation() {
     userAssert(href && target, 'Clicked before href is set.');
@@ -125,7 +117,7 @@ export function SocialShare(props) {
   }
 
   const attrs = {
-    onClick: handleClick,
+    onClick: handleActivation,
     onKeydown: handleKeyPress,
     className: `amp-social-share-${props['type']}`,
     style: socialShareStyle + props['style'],
