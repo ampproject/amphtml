@@ -139,6 +139,19 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
+    const {requiredAttributes} = this.vendorComponentConfig;
+    if (requiredAttributes) {
+      requiredAttributes.forEach(attribute => {
+        userAssert(
+          element.getAttribute(attribute),
+          '<%s> requires the %s attribute %s',
+          this.vendorComponentConfig.TAG,
+          attribute,
+          element
+        );
+      });
+    }
+
     // TODO(alanorozco): On integration tests, `getLayoutBox` will return a
     // cached default value, which makes this assertion fail. Move to
     // `describes.integration` to see if that fixes it.
@@ -146,7 +159,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
       'i-amphtml-integration-test'
     );
 
-    this.user().assert(
+    userAssert(
       isIntegrationTest || !looksLikeTrackingIframe(element),
       `<${this.vendorComponentConfig.TAG}> does not allow tracking iframes. ` +
         'Please use amp-analytics instead.'
@@ -212,12 +225,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
     const poster = html`
       <amp-img layout="fill" placeholder></amp-img>
     `;
-
-    poster.setAttribute(
-      'src',
-      this.user().assertString(element.getAttribute('poster'))
-    );
-
+    poster.setAttribute('src', element.getAttribute('poster'));
     return poster;
   }
 
@@ -253,9 +261,10 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
     const src = urlService.assertHttpsUrl(this.buildSrcUrl_(), element);
 
     if (urlService.getSourceOrigin(src) === urlService.getWinOrigin(this.win)) {
-      this.user().warn(
-        this.vendorComponentConfig.TAG,
-        `Origins of document inside ${this.vendorComponentConfig.TAG} and ` +
+      const {TAG} = this.vendorComponentConfig;
+      user().warn(
+        TAG,
+        `Origins of document inside ${TAG} and ` +
           'the host are the same, which allows for same-origin behavior. ' +
           "However in the AMP cache, origins won't match. Please ensure you " +
           'do not rely on any same-origin privileges.',
@@ -273,14 +282,21 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
   buildSrcUrl_() {
     const {element} = this;
 
-    // TODO: assert for requiredAttributes.
-    // TODO: append legacySrcQueryAttributes.
+    // amp-video-iframe currently doesn't support data-param-* (maybe it should)
+    const params = getDataParamsFromAttributes(element);
+
+    const {legacySrcQueryAttributes} = this.vendorComponentConfig;
+    if (legacySrcQueryAttributes) {
+      legacySrcQueryAttributes.forEach(attribute => {
+        if (element.hasAttribute(attribute)) {
+          params[attribute] = element.getAttribute(attribute);
+        }
+      });
+    }
 
     return addParamsToUrl(
       this.vendorComponentConfig.src || element.getAttribute('src'),
-
-      // amp-video-iframe currently doesn't support this (maybe it should):
-      getDataParamsFromAttributes(element)
+      params
     );
   }
 
@@ -368,7 +384,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
    * @param {!Object<string, string>=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
-    user().assertString(eventType, '`eventType` missing in analytics event');
+    userAssertString(eventType, '`eventType` missing in analytics event');
 
     userAssert(
       getAnalyticsEventTypePrefixRegex().test(eventType),
@@ -481,7 +497,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
   /** @override */
   preimplementsMediaSessionAPI() {
     return !!(
-      !!this.vendorComponentConfig.preimplementsMediaSessionAPI ||
+      this.vendorComponentConfig.preimplementsMediaSessionAPI ||
       this.element.hasAttribute('implements-media-session')
     );
   }
@@ -548,9 +564,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    this.user().error(
-      this.vendorComponentConfig.TAG,
-      '`seekTo` not supported.'
-    );
+    const {TAG} = this.vendorComponentConfig;
+    user().error(TAG, '`seekTo` not supported.');
   }
 }

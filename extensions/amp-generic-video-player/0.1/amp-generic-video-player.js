@@ -25,6 +25,7 @@ AMP.extension(TAG, '0.1', AMP => {
     defineVideoPlayerElement({
       TAG,
       src: '/examples/amp-video-iframe/frame.html',
+      legacySrcQueryAttributes: ['vid'],
     })
   );
 });

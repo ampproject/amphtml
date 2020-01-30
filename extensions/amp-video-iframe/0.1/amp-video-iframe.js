@@ -18,5 +18,8 @@ import {defineVideoPlayerElement} from '../../../src/video/declarative';
 const TAG = 'amp-video-iframe';
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, defineVideoPlayerElement({TAG}));
+  AMP.registerElement(
+    TAG,
+    defineVideoPlayerElement({TAG, requiredAttributes: ['poster']})
+  );
 });

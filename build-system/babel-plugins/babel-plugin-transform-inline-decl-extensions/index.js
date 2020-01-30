@@ -24,46 +24,56 @@ const dashToCamelCase = name => name.replace(/-([a-z])/g, toUpperCase);
 const capitalize = name => name.replace(/^([a-z])/g, toUpperCase);
 
 module.exports = function({types: t}) {
+  const sliceProps = (obj, keys) =>
+    t.objectExpression(
+      keys.map(key =>
+        t.objectProperty(
+          t.identifier(key),
+          // Default to null to let minifier collapse recursively.
+          obj[key] ? t.cloneNode(obj[key]) : t.nullLiteral()
+        )
+      )
+    );
+
   const exporterConfigInlineVisitor = {
-    MemberExpression({node, parent, parentPath}, {configPropsByKey}) {
+    MemberExpression(path, {configProps}) {
       if (
-        !t.isThisExpression(node.object) ||
-        !t.isIdentifier(node.property, {name: 'vendorComponentConfig'}) ||
-        !t.isMemberExpression(parent)
+        !t.isThisExpression(path.node.object) ||
+        !t.isIdentifier(path.node.property, {name: 'vendorComponentConfig'})
       ) {
-        // TODO(alanorozco): Remove leftover initializer when at left part of
-        // assignment ancestor.
         return;
       }
 
-      const key = parent.property.name;
+      const {parent} = path;
 
-      // Default to `null` to let minifier collapse recursively.
-      const value = configPropsByKey[key]
-        ? t.cloneNode(configPropsByKey[key])
-        : t.nullLiteral();
+      // Direct reference (this.vendorComponentConfig.foo)
+      if (t.isMemberExpression(parent)) {
+        path.parentPath.replaceWith(
+          t.memberExpression(
+            sliceProps(configProps, [parent.property.name]),
+            t.identifier(parent.property.name)
+          )
+        );
+        return;
+      }
 
-      parentPath.replaceWith(
-        // This depends on minifying inline access to `{key: value}.key` prop
-        // slices into `value`. Chained access gets a bloated slice object but
-        // its accessor is still correctly minified into its deeply nested value.
-        t.memberExpression(
-          t.objectExpression([t.objectProperty(t.identifier(key), value)]),
-          t.identifier(key)
-        )
-      );
+      // Desctructuring (const {foo} = this.vendorComponentConfig)
+      if (t.isVariableDeclarator(parent) && t.isObjectPattern(parent.id)) {
+        const props = parent.id.properties.map(({key}) => key.name);
+        path.replaceWith(sliceProps(configProps, props));
+      }
     },
   };
 
   const exporterDefaultVisitor = {
-    ExportDefaultDeclaration(path, {componentAlias, configPropsByKey}) {
+    ExportDefaultDeclaration(path, {componentAlias, configProps}) {
       if (!t.isClassDeclaration(path.node.declaration)) {
         return;
       }
 
       path
         .get('declaration')
-        .traverse(exporterConfigInlineVisitor, {configPropsByKey});
+        .traverse(exporterConfigInlineVisitor, {configProps});
 
       path.node.declaration.id = t.identifier(componentAlias);
       path.replaceWith(path.node.declaration);
@@ -123,20 +133,17 @@ module.exports = function({types: t}) {
 
         // TODO(alanorozco): This breaks sourcemaps.
         program.unshiftContainer('body', exporter.program.body);
+
         const [configNode] = path.node.arguments;
-        const configPropsByKey = {};
+        const configProps = {};
 
         if (t.isObjectExpression(configNode)) {
           for (const {key, value} of configNode.properties) {
-            configPropsByKey[key.name] = value;
+            configProps[key.name] = value;
           }
         }
 
-        program.traverse(exporterDefaultVisitor, {
-          componentAlias,
-          configPropsByKey,
-        });
-
+        program.traverse(exporterDefaultVisitor, {componentAlias, configProps});
         path.replaceWith(t.identifier(componentAlias));
       },
     },
