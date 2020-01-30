@@ -16,7 +16,7 @@
 import GenericIframeVideoPlayer from './generic';
 
 /**
- * @param {!./generic.VideoPlayerElementDef=} config
+ * @param {./generic.VideoPlayerElementDef} config
  * @return {typeof AMP.BaseElement}
  */
 export const defineVideoPlayerElement = config => element => {

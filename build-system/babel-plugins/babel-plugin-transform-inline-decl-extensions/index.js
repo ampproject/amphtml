@@ -23,52 +23,30 @@ const toUpperCase = (_match, character) => character.toUpperCase();
 const dashToCamelCase = name => name.replace(/-([a-z])/g, toUpperCase);
 const capitalize = name => name.replace(/^([a-z])/g, toUpperCase);
 
-const parsed = {};
-
 module.exports = function({types: t}) {
-  function cachedParse(sourceFilename) {
-    if (parsed[sourceFilename]) {
-      return parsed[sourceFilename];
-    }
-
-    const ast = parse(fs.readFileSync(sourceFilename).toString(), {
-      sourceFilename,
-      sourceType: 'module',
-    });
-
-    return (parsed[sourceFilename] = ast);
-  }
-
   const exporterConfigInlineVisitor = {
     MemberExpression({node, parent, parentPath}, {configPropsByKey}) {
       if (
         !t.isThisExpression(node.object) ||
-        !t.isIdentifier(node.property, {name: 'vendorComponentConfig'})
+        !t.isIdentifier(node.property, {name: 'vendorComponentConfig'}) ||
+        !t.isMemberExpression(parent)
       ) {
-        return;
-      }
-
-      if (t.isAssignmentExpression(parent, {left: node})) {
-        // TODO(alanorozco): Lint to restrict recursive property assignment.
-        parentPath.remove();
-        return;
-      }
-
-      if (!t.isMemberExpression(parent)) {
+        // TODO(alanorozco): Remove leftover initializer when at left part of
+        // assignment ancestor.
         return;
       }
 
       const key = parent.property.name;
 
-      // Default unset members to `null` to let minifier collapse recursively.
+      // Default to `null` to let minifier collapse recursively.
       const value = configPropsByKey[key]
         ? t.cloneNode(configPropsByKey[key])
         : t.nullLiteral();
 
-      // Access of recursive members (`this.prop.foo`) inlined one level
-      // deep, this depends on minifier to inline from `{foo: 'bar'}.foo` into
-      // 'bar'.
       parentPath.replaceWith(
+        // This depends on minifying inline access to `{key: value}.key` prop
+        // slices into `value`. Chained access gets a bloated slice object but
+        // its accessor is still correctly minified into its deeply nested value.
         t.memberExpression(
           t.objectExpression([t.objectProperty(t.identifier(key), value)]),
           t.identifier(key)
@@ -114,24 +92,37 @@ module.exports = function({types: t}) {
           opts.exportedDefaultClassFrom
         );
 
-        const relativeImportPath = fsPath.relative(
+        const importPath = fsPath.relative(
           fsPath.dirname(file.opts.filename),
           fsPath.dirname(exporterFilename)
         );
 
-        const exporter = t.cloneNode(cachedParse(exporterFilename));
+        const exporter = parse(fs.readFileSync(exporterFilename).toString(), {
+          sourceFilename: exporterFilename,
+          sourceType: 'module',
+        });
 
         for (const node of exporter.program.body) {
           if (t.isImportDeclaration(node)) {
             node.source = t.StringLiteral(
-              fsPath.join(relativeImportPath, node.source.value)
+              fsPath.join(importPath, node.source.value)
             );
           }
         }
 
+        for (let i = 0; i < exporter.comments.length; i++) {
+          const comment = exporter.comments[i];
+          if (comment.type !== 'CommentBlock') {
+            continue;
+          }
+          comment.value = comment.value.replace(
+            /\.+\/[\/\.a-z0-9_-]+/gi,
+            relative => fsPath.join(importPath, relative)
+          );
+        }
+
         // TODO(alanorozco): This breaks sourcemaps.
         program.unshiftContainer('body', exporter.program.body);
-
         const [configNode] = path.node.arguments;
         const configPropsByKey = {};
 

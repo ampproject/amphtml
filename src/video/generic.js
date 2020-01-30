@@ -47,11 +47,11 @@ import {once} from '../utils/function';
 /**
  * @typedef {{
  *   TAG: string,
- *   src: string,
- *   requiredAttributes: Array<string>,
- *   legacySrcQueryAttributes: undefined|Array<string>,
- *   preimplementsMediaSessionAPI: undefined|boolean,
- *   preimplementsRotateToFullscreen: undefined|boolean,
+ *   src: (undefined|string),
+ *   requiredAttributes: (undefined|Array<string>),
+ *   legacySrcQueryAttributes: (undefined|Array<string>),
+ *   preimplementsMediaSessionAPI: (undefined|boolean),
+ *   preimplementsRotateToFullscreen: (undefined|boolean),
  * }}
  */
 export let VideoPlayerElementDef;
@@ -108,7 +108,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
     super(element);
 
     /** @public {?VideoPlayerElementDef} */
-    this.vendorComponentConfig = {};
+    this.vendorComponentConfig = null;
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -250,7 +250,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
     const {element} = this;
     const urlService = Services.urlForDoc(element);
 
-    const src = urlService.assertHttpsUrl(this.buildSrcUrl_());
+    const src = urlService.assertHttpsUrl(this.buildSrcUrl_(), element);
 
     if (urlService.getSourceOrigin(src) === urlService.getWinOrigin(this.win)) {
       this.user().warn(
