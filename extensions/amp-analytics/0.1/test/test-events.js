@@ -198,8 +198,9 @@ describes.realWin('Events', {amp: 1}, env => {
           .returns({top: 0, left: 0, height: 200, width: 200}),
         'getScrollTop': env.sandbox.stub().returns(0),
         'getScrollLeft': env.sandbox.stub().returns(0),
-        'getScrollHeight': env.sandbox.stub().returns(500),
-        'getScrollWidth': env.sandbox.stub().returns(500),
+        'getLayoutRect': env.sandbox
+          .stub()
+          .returns({width: 500, height: 500, top: 0, left: 0}),
         'onChanged': env.sandbox.stub(),
       };
       scrollManager = tracker.root_.getScrollManager();
@@ -329,7 +330,12 @@ describes.realWin('Events', {amp: 1}, env => {
 
       // Scroll Down
       fakeViewport.getScrollTop.returns(500);
-      fakeViewport.getScrollHeight.returns(1000);
+      fakeViewport.getLayoutRect.returns({
+        width: 500,
+        height: 1000,
+        top: 0,
+        left: 0,
+      });
       tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
 
       expect(fn1).to.have.callCount(2);

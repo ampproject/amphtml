@@ -408,6 +408,10 @@ We've introduced the `load-more` attributes with options `manual` and `auto` to 
 
 For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html) and [test/manual/amp-list/infinite-scroll-2.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html).
 
+[tip type="important"]
+**Important** When using `<amp-list>` infinite scroll in conjunction with `<amp-analytics>` scroll triggers, it is recommended to make use of the `ignoreResize` property of `<amp-analytics>` to get an accurate measurements of the scroll position that ignores the hight changes caused by `<amp-list>`.
+[/tip]
+
 ### Attributes
 
 #### load-more (mandatory)
