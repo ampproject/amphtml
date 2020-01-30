@@ -40,6 +40,8 @@ data.content;
 data.name;
 //data['my-content'];
 window.BeOpSDK;
+window.BeOpSDK.init;
+window.BeOpSDK.watch;
 
 // facebook.js
 data.embedAs;
