@@ -655,7 +655,7 @@ Static functions are not namespaced, e.g. use `keys(Object)` instead of `Object.
 
 #### Defining macros with `amp-bind-macro`
 
-`amp-bind` expression fragments can be reused by defining an `amp-bind-macro`. The `amp-bind-macro` element allows you to define an expression that takes zero or more arguments and references the current state. A macro can be invoked like a function by referencing its `id` attribute value from anywhere in your doc.
+Reuse `amp-bind` expression fragments by defining an `amp-bind-macro`. The `amp-bind-macro` element allows an expression that takes zero or more arguments and references the current state. Invoke `amp-bind-macros` like a function, referencing the `id` attribute value from anywhere in the document. 
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
