@@ -15,7 +15,7 @@
  */
 import {defineVideoPlayerElement} from '../../../src/video/declarative';
 
-// DO NOT SUBMIT: Example for PR.
+// Example for PR.
 
 const TAG = 'amp-vendor-video-player';
 
