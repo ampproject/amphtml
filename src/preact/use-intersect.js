@@ -28,6 +28,9 @@ export function useIntersect(ref) {
   }
 
   useLayoutEffect(() => {
+    // This must be done in the callback for two reasons:
+    // (1) ref.current changes between the call to useIntersect and this call
+    // (2) any updates to ref should trigger the callback to be rerun
     const {current: node} = ref;
     const {current: observer} = observerRef;
     observer.disconnect();
