@@ -687,11 +687,98 @@ A macro can also call other macros <i>defined before itself</i>. A macro cannot 
 
 ### Bindings
 
-A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). An alternative, XML-compatible syntax can also be used in the form of `data-amp-bind-property`.
+A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). Use the alternative,[XML-compatible](#xml-compatibility) syntax if developing in XML.
 
-When the **state** changes, expressions are re-evaluated and the bound elements' properties are updated with the new expression results.
+When the **state** changes, expressions tied to that state are evaluated. The element properties **bound** to the **state** are updated with the new expression results.
+
+#### XML compatibility 
+
+If developing with XML, use the alternative `data-amp-bind-property` syntax. The  `[` and `]` characters in attribute names is invalid XML, making the `[property]` syntax unavailable. 
+
+Replace the `property` field with the name of the property you would like to define in  `data-amp-bind-property`.
+
+For example, `[text]="myState.foo"` would become `data-amp-bind-text="myState.foo"`. 
+
+#### Binding types 
 
 `amp-bind` supports data bindings on five types of element state:
+
+[**Node.textContent**](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent)
+
+Bind `Node.textContent` using the `[text]` attribute. The `[text]` attribute is supported on most text elements. 
+
+```html
+<p [text]="'Hello ' + myState.foo">Hello World<p>
+```
+
+[**CSS classes**]("https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class")
+
+Bind an element's `class` using the `[class]` attribute. A `[class]` expression must result in a space-delimited string. Meaning, if you are binding multiple classes, use a space between names. A comma or dash will be evaluated as the class name.
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+<style amp-custom>
+  .background-green {
+    background: green;
+  }
+  .background-red {
+    background: red;
+  }
+  .border-red {
+    border-color: red;
+    border-width: 5px;
+    border-style: solid;
+  }
+</style>
+<div class="background-red" [class]="myClass">Hello World</div>
+<!-- This button adds both classes -->
+<button on="tap:AMP.setState({ myClass: 'background-green border-red' })">Change class works</button>
+<!-- This expression evaluates to class="background-green,border-red" -->
+<button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">Change class broken</button>
+```
+
+[/example]
+
+[**the `hidden` attribute**](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden)
+
+Hide and reveal and element using the `[hidden]` attribute. A `[hidden]` expression should be a boolean expression.
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+  <p [hidden]="hiddenState">Hello there!</p>
+  <button on="tap:AMP.setState({hiddenState: true})">Hide</button>
+  <button on="tap:AMP.setState({hiddenState: false})">Show</button>
+```
+
+[/example]
+
+**Size of [AMP components](https://www.ampproject.org/docs/reference/components)**
+
+Change the `width` and `height` using the `[width]` and `[height]` attributes. 
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+  <amp-img src="https://unsplash.it/400/200" width="200" [width]="myImageDimension.width" height="100" [height]="myImageDimension.height">
+  </amp-img>
+  <button on="tap:AMP.setState({
+              myImageDimension: {
+              width: 400,
+              height: 200
+              }
+              })">
+    Change size
+  </button>
+```
+
+[/example]
+
+**Accessibility states and properties**
+
+Use to dynamically update information available to assistive technologies, such as screen readers. All `[aria-*]` and `[data-*]` are bindable. See the [full list here](https://www.w3.org/WAI/PF/aria-1.1/states_and_properties).
+
 
 <table>
   <tr>
@@ -737,6 +824,9 @@ Notes on bindings:
 - All attribute bindings are sanitized for unsafe values (e.g., `javascript:`).
 - Boolean expression results toggle boolean attributes. For example: `<amp-video [controls]="expr"...>`. When `expr` evaluates to `true`, the `<amp-video>` element has the `controls` attribute. When `expr` evaluates to `false`, the `controls` attribute is removed.
 - Bracket characters `[` and `]` in attribute names can be problematic when writing XML (e.g. XHTML, JSX) or writing attributes via DOM APIs. In these cases, use the alternative syntax `data-amp-bind-x="foo"` instead of `[x]="foo"`.
+
+
+
 
 #### Element-specific attributes
 
@@ -1069,6 +1159,41 @@ Use `[defaultText]` to update initial text, and `[text]` to update current text.
 
 [/filter] <!-- formats="email" -->
 
+## Attributes
+
+[filter formats="websites, stories, ads"]
+
+### src
+
+The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+
+[tip type="important"]
+The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
+[/tip]
+
+### credentials (optional)
+
+Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
+
+- Supported values: `omit`, `include`
+- Default: `omit`
+
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### Invalid AMP email attributes
+
+The AMP for Email spec disallows the use of the following attributes on the AMP email format.
+
+- `[src]`
+- `src`
+- `credentials`
+- `overridable`
+
+[/filter] <!-- formats="email" -->
+
 ## Debugging
 
 [filter formats="websites, stories, ads"]
@@ -1190,40 +1315,6 @@ For example, if your `amp-state` element makes an XHR to an endpoint, while the 
 
 [/filter] <!-- formats="websites, stories, ads" -->
 
-#### Attributes
-
-[filter formats="websites, stories, ads"]
-
-##### src
-
-The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
-
-[tip type="important"]
-The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
-[/tip]
-
-##### credentials (optional)
-
-Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
-
-- Supported values: `omit`, `include`
-- Default: `omit`
-
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
-[/filter] <!-- formats="websites, stories, ads" -->
-
-[filter formats="email"]
-
-##### Invalid AMP email attributes
-
-The AMP for Email spec disallows the use of the following attributes on the AMP email format.
-
-- `[src]`
-- `src`
-- `credentials`
-- `overridable`
-
-[/filter] <!-- formats="email" -->
 
 ### Deep-merge with `AMP.setState()`
 
