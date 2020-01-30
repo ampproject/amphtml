@@ -176,8 +176,8 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     this.win.addEventListener('resize', e =>
       this.sendCommand_({
         eventName: 'cnx_viewport_resize',
-        viewportWidth: e.target.innerWidth,
-        viewportHeight: e.target.innerHeight,
+        viewportWidth: this.getViewport().getWidth(),
+        viewportHeight: this.getViewport().getHeight(),
       })
     );
     // Return a load promise for the frame so the runtime knows when the
