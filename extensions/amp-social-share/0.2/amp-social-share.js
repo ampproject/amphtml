@@ -66,11 +66,11 @@ AmpSocialShare.passthrough = true;
 
 /** @override */
 AmpSocialShare.props = {
-  'type': {attr: 'type'},
-  'dataShareEndpoint': {attr: 'data-share-endpoint'},
-  'dataTarget': {attr: 'data-target'},
+  'shareEndpoint': {attr: 'data-share-endpoint'},
   'style': {attr: 'style'},
-  'tabindex': {attr: 'tabindex'},
+  'tabIndex': {attr: 'tabindex'},
+  'target': {attr: 'data-target'},
+  'type': {attr: 'type'},
 };
 
 AMP.extension(TAG, '0.2', AMP => {
