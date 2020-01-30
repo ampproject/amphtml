@@ -254,6 +254,7 @@ import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
+import {temedya} from '../ads/temedya';
 import {torimochi} from '../ads/torimochi';
 import {tracdelight} from '../ads/tracdelight';
 import {triplelift} from '../ads/triplelift';
@@ -327,6 +328,7 @@ const AMP_EMBED_ALLOWED = {
   strossle: true,
   svknative: true,
   taboola: true,
+  temedya: true,
   yahoonativeads: true,
   zen: true,
   zergnet: true,
@@ -543,6 +545,7 @@ register('swoop', swoop);
 register('taboola', taboola);
 register('tcsemotion', tcsemotion);
 register('teads', teads);
+register('temedya', temedya);
 register('torimochi', torimochi);
 register('tracdelight', tracdelight);
 register('triplelift', triplelift);
