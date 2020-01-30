@@ -1049,6 +1049,10 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
+  'temedya': {
+    renderStartImplemented: true,
+  },
+  
   'torimochi': {
     renderStartImplemented: true,
   },
