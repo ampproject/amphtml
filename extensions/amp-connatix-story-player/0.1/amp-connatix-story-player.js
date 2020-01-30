@@ -173,7 +173,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
-    this.win.addEventListener('resize', e =>
+    this.win.addEventListener('resize', () =>
       this.sendCommand_({
         eventName: 'cnx_viewport_resize',
         viewportWidth: this.getViewport().getWidth(),
