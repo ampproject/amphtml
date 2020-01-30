@@ -35,6 +35,12 @@ const pc = process;
 const autocompleteEmailData = require('./autocomplete-test-data');
 const runVideoTestBench = require('./app-video-testbench');
 const {
+  getRequest,
+  runVariableSubstitution,
+  saveRequest,
+  saveVariables,
+} = require('./variable-substitution-tester');
+const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
 } = require('./recaptcha-router');
@@ -754,6 +760,14 @@ app.use('/impression-proxy/', (req, res) => {
 
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
+
+app.get('/run-variable-substitution', runVariableSubstitution);
+
+app.get('/save-request', saveRequest);
+
+app.get('/save-variables', saveVariables);
+
+app.get('/get-request', getRequest);
 
 let forcePromptOnNext = false;
 app.post('/get-consent-v1/', (req, res) => {
