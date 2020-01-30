@@ -141,7 +141,7 @@ export class AmpMustache extends BaseTemplate {
     // const div = body.firstElementChild;
     // return this.unwrap(div);
     const body = document.createElement('div');
-    body.innerHTML = html;
+    body./* OK */ innerHTML = html;
     // console.log({html, div: body.firstElementChild});
     return this.unwrap(body.firstElementChild);
   }
