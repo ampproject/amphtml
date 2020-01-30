@@ -72,8 +72,6 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
     width="480" height="270"></amp-youtube>
 <figcaption>Watch this video for an introduction to amp-bind.</figcaption></figure>
 
-In the following example, tapping the button changes the `<p>` element's text from "Hello World" to "Hello amp-bind".
-
 `amp-bind` has three main concepts:
 
 1. [State](#state): A document-scope, mutable JSON state. State variables update in response to user actions. `amp-bind` does not evaluate expressions on page load. Visual elements should have their default "state" defined and not rely `amp-bind` for initial render.
@@ -87,7 +85,7 @@ In the following example, tapping the button changes the `<p>` element's text fr
 ```html
 <p [text]="'Hello ' + foo">Hello World</p>
 
-<button on="tap:AMP.setState({foo: 'Interactivity'})">Say "Hello amp-bind"</button>
+<button on="tap:AMP.setState({foo: 'Interactivity'})">Say "Hello Interactivity"</button>
 ```
 
 [/example]
@@ -158,19 +156,21 @@ In the example above:
   - The second `<p>` element has "I want cupcakes." defined within the tags.
   - The `<amp-img>` `src` points to a url.
 - Changeable elements have **bindings** that point to **expressions**.
-  - The `[class]` attribute on the `<div>` is bound to the **theFood[currentMeal].style** expression. 
-  - The `[text]` attribute on the second `<p>` is bound to the `'I want to eat ' + currentMeal + '.'` expression. 
-  - The `[src]` attribute is bound to the `theFood[currentMeal].imageUrl` expression. 
+  - The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**. 
+  - The `[text]` attribute on the second `<p>` is bound to the `'I want to eat ' + currentMeal + '.'` **expression**. 
+  - The `[src]` attribute is bound to the `theFood[currentMeal].imageUrl` **expression**. 
 
 If a user clicks the "Set to sushi" button:
+
 - The `tap` event trigger the `AMP.setState` action.
 - The setState action turns `currentMeal` into a state and sets it to `sushi`.
-- AMP evaluates **bindings** with expressions that contain the state `currentMeal`. 
+- AMP evaluates **bindings** with **expressions** that contain the state `currentMeal`. 
   - `[class]="theFood[currentMeal].style"` updates `class` to `redBorder`.
   - `[text]="'I want to eat ' + currentMeal + '.'"` updates the inner text of the second `<p>` element to "I want to eat sushi". 
-  - [src]="theFood[currentMeal].imageUrl" updates the `src` of `<amp-img>` to `https://amp.dev/static/samples/img/image3.jpg`
+  - `[src]="theFood[currentMeal].imageUrl` updates the `src` of `<amp-img>` to `https://amp.dev/static/samples/img/image3.jpg`
 
-Using `[class]="theFood[currentMeal].style"` as an example of expression syntax evaluation:
+Using `[class]="theFood[currentMeal].style"` as an example of **expression** syntax evaluation:
+
 - `[class]` is the property to update
 - `theFood` is the id of the `<amp-state>` component. 
 - `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`. 
@@ -226,17 +226,19 @@ Using `[class]="theFood[currentMeal].style"` as an example of expression syntax 
  - The second `<p>` element has "I want cupcakes." defined within the tags.
  - The `<amp-img>` `src` points to a url.
 - Changeable elements have **bindings** that point to **expressions**.
- - The `[class]` attribute on the `<div>` is bound to the **theFood[currentMeal].style** expression. 
- - The `[text]` attribute on the second `<p>` is bound to the `"theFood[currentMeal].text"` expression. 
+ - The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**. 
+ - The `[text]` attribute on the second `<p>` is bound to the `theFood[currentMeal].text` **expression**. 
 
 If a user clicks the "Set to sushi" button:
+
 - The `tap` event trigger the `AMP.setState` action.
 - The setState action turns `currentMeal` into a state and sets it to `sushi`.
-- AMP evaluates **bindings** with expressions that contain the state `currentMeal`. 
- - `[class]="theFood[currentMeal].style"` updates `class` to `redBorder`.
- - `"theFood[currentMeal].text"` updates the inner text of the second `<p>` element to "Actually, I want to eat sushi.". 
+- AMP evaluates **bindings** with **expressions** that contain the state `currentMeal`. 
+ - `[class]="theFood[currentMeal].style` updates `class` to `redBorder`.
+ - `theFood[currentMeal].text` updates the inner text of the second `<p>` element to "Actually, I want to eat sushi.". 
 
-Using `[class]="theFood[currentMeal].style"` as an example of expression syntax evaluation:
+Using `[class]="theFood[currentMeal].style"` as an example of **expression** syntax evaluation:
+
 - `[class]` is the property to update
 - `theFood` is the id of the `<amp-state>` component. 
 - `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`. 
@@ -330,15 +332,19 @@ The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges a
 
 [/example]
 
-In the example above, the `AMP.setState({})` action on the first button evaluates the `[text]` binding expression. It then inserts the defined state variables value into the `<p>` tag. Both `<p>` tags display "bar". 
+In the example above, triggering the `AMP.setState({})` action on the first button evaluates the `[text]` binding expression. It then inserts the defined **state variable's** value into the `<p>` tag.
 
-When the clicking the second button, with `AMP.setState({myState:{baz: myState.foo}})` action defined, it [deep-merges](#deep-merge-with-ampsetstate) the "baz" **state variable** value to the same as the "foo" **state variable** value.
+When the clicking the second button, with `AMP.setState({myState:{baz: myState.foo}})` action defined, it [deep-merges](#deep-merge-with-ampsetstate) the "baz" **state variable** value to the same as the "foo" **state variable** value. Both `<p>` tags display "bar". 
 
-**State variable** values can be changed to values not defined in the initial state. When clicking the third button, with `"tap:AMP.setState({myState:{baz: 'world'}})"` action defined, it deep merges the "baz" **state variable** value to "world"
+**State variable** values can update to values not defined in the initial state. When clicking the third button, with `"tap:AMP.setState({myState:{baz: 'world'}})"` action defined, it deep merges the "baz" **state variable** value, overriding it to "world".
 
-If the first button is clicked again, nothing will change. The **state variables** revert back to the defined JSON in `<amp-state>` on page refresh. 
+Clicking the first button after the other two sets the current state. Nothing will change. 
 
-When triggered by certain events, `AMP.setState()` also can access event-related data on the `event` property.
+The **state variables** reverts back to the defined JSON in `<amp-state>` on page refresh. 
+
+##### Event triggering and data
+
+When triggered by certain events, `AMP.setState()` can access event-related data on the `event` property.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 ```html
@@ -362,7 +368,7 @@ When triggered by certain events, `AMP.setState()` also can access event-related
 
 ##### Updating nested variables 
 
-In general, nested objects will be merged up to a maximum depth of 10. All variables, including those introduced by `amp-state`, can be overidden.
+Nested objects are generally merged to a maximum depth of 10. All variables, including those defined in `<amp-state>`, can be overidden.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -430,144 +436,222 @@ In general, nested objects will be merged up to a maximum depth of 10. All varia
 
 [/example]
 
+Using `AMP.pushState()` sets the current state to the most recent pushed state.
+
 ### Expressions
 
-Expressions are similar to JavaScript with some important differences.
+`amp-bind` uses JavaScript-like expressions that can reference the state.
 
 #### Differences from JavaScript
 
 - Expressions may only access the containing document's [state](#state).
 - Expressions **do not** have access to `window` or `document`. `global` references the top-level state.
-- Only [white-listed functions](#white-listed-functions) and operators may be used. Custom functions, classes and loops are disallowed. Arrow functions are allowed as function parameters e.g. `[1, 2, 3].map(x => x + 1)`.
+- Only `amp-bind` [allowed-listed functions](#allowed-listed functions) and operators are usable. are usable. Use of arrow functions are allowed as function parameters, e.g. `[1, 2, 3].map(x => x + 1)`.
+  - Custom functions, classes and loops are disallowed.
 - Undefined variables and array-index-out-of-bounds return `null` instead of `undefined` or throwing errors.
 - A single expression is currently capped at 50 operands for performance. Please [contact us](https://github.com/ampproject/amphtml/issues/new) if this is insufficient for your use case.
 
-The full expression grammar and implementation can be found in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
-
-#### Examples
-
 The following are all valid expressions:
 
-```javascript
-1 + '1'; // 11
-1 + +'1'; // 2
-!0; // true
-null || 'default'; // 'default'
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+  <p [text]="myState.foo"></p>
+  <!-- 1 + '1'; // 11 -->
+  <button on="tap:AMP.setState({myState: {foo: 1 + '1'}})">foo: 1 + "1"</button>
+  <!-- 1 + +'1'; // 2 -->
+  <button on="tap:AMP.setState({myState: {foo: 1 + + '1'}})">foo: 1 + + "1"</button>
+  <!-- !0; // true -->
+  <button on="tap:AMP.setState({myState: {foo: !0}})">foo: !0</button>
+  <!-- null || 'default'; // 'default' -->
+  <button on="tap:AMP.setState({myState: {foo: null || 'default'}})">null || "default"</button>
+  <!-- [1, 2, 3].map(x => x + 1); // 2,3,4 -->
+  <button on="tap:AMP.setState({myState: {foo: [1, 2, 3].map(x => x + 1)}})">[1, 2, 3].map(x => x + 1)</button>
 ```
 
-#### White-listed functions
+[/example]
 
-<table>
-  <tr>
-    <th>Object type </th>
-    <th>Function(s)</th>
-    <th>Example</th>
-  </tr>
-  <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods"><code>Array</code></a><sup>1</sup></td>
-    <td class="col-thirty">
-      <code>concat</code><br>
-      <code>filter</code><br>
-      <code>includes</code><br>
-      <code>indexOf</code><br>
-      <code>join</code><br>
-      <code>lastIndexOf</code><br>
-      <code>map</code><br>
-      <code>reduce</code><br>
-      <code>slice</code><br>
-      <code>some</code><br>
-      <code>sort</code> (not-in-place)<br>
-      <code>splice</code> (not-in-place)<br>
-    </td>
-    <td>
-      <pre>// Returns [1, 2, 3].
-[3, 2, 1].sort()</pre>
-      <pre>// Returns [1, 3, 5].
-[1, 2, 3].map((x, i) => x + i)</pre>
-      <pre>// Returns 6.
-[1, 2, 3].reduce((x, y) => x + y)</pre>
-    </td>
-  </tr>
-  <tr>
-   <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#Methods"><code>Number</code></a></td>
-    <td>
-      <code>toExponential</code><br>
-      <code>toFixed</code><br>
-      <code>toPrecision</code><br>
-      <code>toString</code>
-    <td>
-      <pre>// Returns 3.
-(3.14).toFixed()</pre>
-      <pre>// Returns '3.14'.
-(3.14).toString()</pre>
-    </td>
-  </tr>
-  <tr>
-   <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods"><code>String</code></a></td>
-    <td>
-      <code>charAt</code><br>
-      <code>charCodeAt</code><br>
-      <code>concat</code><br>
-      <code>indexOf</code><br>
-      <code>lastIndexOf</code><br>
-      <code>replace</code><br>
-      <code>slice</code><br>
-      <code>split</code><br>
-      <code>substr</code><br>
-      <code>substring</code><br>
-      <code>toLowerCase</code><br>
-      <code>toUpperCase</code></td>
-    <td>
-      <pre>// Returns 'abcdef'.
-'abc'.concat('def')</pre>
-    </td>
-  </tr>
-  <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math"><code>Math</code></a><sup>2</sup></td>
-    <td>
-      <code>abs</code><br>
-      <code>ceil</code><br>
-      <code>floor</code><br>
-      <code>max</code><br>
-      <code>min</code><br>
-      <code>pow</code><br>
-      <code>random</code><br>
-      <code>round</code><br>
-      <code>sign</code></td>
-    <td>
-      <pre>// Returns 1.
-abs(-1)</pre>
-    </td>
-  </tr>
-  <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object"><code>Object</code></a><sup>2</sup></td>
-    <td>
-      <code>keys</code><br>
-      <code>values</code>
-    <td>
-      <pre>// Returns ['a', 'b'].
-keys({a: 1, b: 2})</pre>
-      <pre>// Returns [1, 2].
-values({a: 1, b: 2}</pre>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects"><code>Global</code></a><sup>2</sup>
-    </td>
-    <td>
-      <code>encodeURI</code><br>
-      <code>encodeURIComponent</code>
-    </td>
-    <td>
-      <pre>// Returns 'Hello%20world'.
-encodeURIComponent('Hello world')</pre>
-    </td>
-  </tr>
-</table>
+Find the full expression grammar and implementation in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
 
-<sup>1</sup>Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`. Also, `sort()` and `splice()` return modified copies instead of operating in-place.<br>
-<sup>2</sup>Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`.
+
+
+#### Allowed-listed functions
+
+##### [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods)
+
+Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`. `sort()` and `splice()` return modified copies instead of operating in-place.
+
+- [concat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat)
+- [filter](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter)
+- [includes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes)
+- [indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/indexOf)
+- [join](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/join)
+- [lastIndexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/lastIndexOf)
+- [map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map)
+- [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
+- [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice)
+- [some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
+- [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort) (not-in-place)
+- [splice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) (not-in-place)
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+ <amp-state id="myArrayState">
+    <script type="application/json">
+      {
+        "foo": [1, 2, 3],
+        "bar": ["hello", "world", "bar", "baz"],
+        "baz": "Hello world, welcome to amp-bind"
+      }
+    </script>
+  </amp-state>
+  <p [text]="'concat: ' + myArrayState.foo.concat()">concat: 1, 2, 3</p>
+  <p [text]="'filter: ' + myArrayState.bar.filter(word => word.length > 3)">filter: words with less than three letter</p>
+  <p [text]="'includes: ' + myArrayState.bar.includes('hello' || 'world')">includes: "hello" or "world"</p>
+  <p [text]="'indexOf: ' + myArrayState.bar.indexOf('world')">indexOf: "world"</p>
+  <p [text]="'join: ' + myArrayState.bar.join('-')">join: all words with a dash</p>
+  <p [text]="'lastIndexOf: ' + myArrayState.baz.lastIndexOf('amp-bind')">lastIndexOf: "amp-bind"</p>
+  <p [text]="'map: ' + myArrayState.foo.map((x, i) => x + i)">map: add each number to previous number</p>
+  <p [text]="'reduce: ' + myArrayState.foo.reduce((x, i) => x + i)">reduce: add all numbers in array together</p>
+  <p [text]="'slice: ' + myArrayState.bar.slice(1,3)">slice: return words at index 1 and 3</p>
+  <p [text]="'some: ' + myArrayState.foo.some(x => x < 2)">some: some numbers are less than 2</p>
+  <p [text]="'sort: ' + myArrayState.bar.sort()">sort: place words in alphabetical order</p>
+  <p [text]="'splice: ' + myArrayState.bar.splice(2, 0, 'amp-bind')">splice: place "amp-bind" at index 2</p>
+  <button on="tap:AMP.setState({})">Evaluate</button>
+```
+
+[/example]
+
+##### [`Number`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#Methods)
+
+- [toExponential](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toExponential)
+- [toFixed](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed)
+- [toPrecision](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toPrecision)
+- [toString](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toString)
+
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+  <p [text]="'toExponential: ' + (100).toExponential(5)">toExponential: 100 to the exponent of 5</p>
+  <p [text]="'toFixed: ' + (1.99).toFixed(1)">toFixed: 1.99 rounded and fixed to first decimal</p>
+  <p [text]="'toPrecision: ' + (1.234567).toPrecision(3)">toPrecision: 1.234567 returned as a string to the third digit</p>
+  <p [text]="'toString ' + (3.14).toString()">toString: 3.14 returned as a string</p>
+  <button on="tap:AMP.setState({})">Evaluate</button>
+```
+
+[/example]
+
+##### [`String`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods)
+
+- [charAt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charAt)
+- [charCodeAt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt)
+- [concat](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/concat)
+- [indexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/indexOf)
+- [lastIndexOf](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/indexOf)
+- [replace](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace)
+- [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/slice)
+- [split](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split)
+- [substr](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/substr)
+- [toLowerCase](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/toLowerCase)
+- [toUpperCase](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/toUpperCase)
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+ <amp-state id="myStringState">
+    <script type="application/json">
+      {
+        "foo": "Hello world",
+        "bar": ", welcome to amp-bind"
+      }
+    </script>
+  </amp-state>
+  <p [text]="'charAt: ' + myStringState.foo.charAt(6)">charAt: The character at index 6</p>
+  <p [text]="'charCodeAt: ' + myStringState.foo.charCodeAt(6)">charCodeAt: The UTF-16 code unit of the character at index 6</p>
+  <p [text]="'concat: ' + myStringState.foo.concat(myState.bar)">concat: Combine foo and bar</p>
+  <p [text]="'lastIndexOf: ' + myStringState.foo.lastIndexOf('w')">lastIndexOf: The index of "w"</p>
+  <p [text]="'replace: ' + myStringState.foo.replace('world', 'amp-bind')">replace: Replace "world" with "amp-bind"</p>
+  <p [text]="'slice: ' + myStringState.foo.slice(5)">slice: Extract the first 5 characters</p>
+  <p [text]="'split: ' + myStringState.foo.split(' ')">split: Split words at space and return as array</p>
+  <p [text]="'toLowerCase: ' + myStringState.foo.toLowerCase()">toLowerCase: Make all letters lower case</p>
+  <p [text]="'toUpperCase: ' + myStringState.foo.toUpperCase()">toUpperCase: Make all letters upper case</p>
+  <button on="tap:AMP.setState({})">Evaluate</button>
+```
+
+[/example]
+
+##### [`Math`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math)
+
+Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`
+
+- [abs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/abs)
+- [ceil](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/ceil)
+- [floor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor)
+- [max](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/max)
+- [min](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/min)
+- [pow](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/pow)
+- [random](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random)
+- [round](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round)
+- [sign](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/sign)
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+  <p [text]="'abs: ' + abs(5 - 9)">abs: absolute number of 5 - 9</p>
+  <p [text]="'ceil: ' + ceil(1.01)">abs: round 1.01 up to the next largest whole number</p>
+  <p [text]="'floor: ' + floor(1.99)">floor: round 1.99 down to a whole number</p>
+  <p [text]="'max: ' + max(100, 4, 98)">max: return largest number</p>
+  <p [text]="'min: ' + min(100, 4, 98)">min: return smalled number</p>
+  <p [text]="'pow: ' + pow(5, 3)">pow: return 5 to the power of 3</p>
+  <p [text]="'random: ' + random()">random: return a number greater than 0 and less than 1</p>
+  <p [text]="'round: ' + round(1.51)">round: round 1.51</p>
+  <p [text]="'sign: ' + sign(-9)">sign: evaluate if positive or negative</p>
+  <button on="tap:AMP.setState({})">Evaluate</button>
+```
+
+[/example]
+
+##### [`Object`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)
+
+Static functions are not namespaced, e.g. use `keys(Object)` instead of `Object.abs(Object)`
+
+- [keys](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys)
+- [values](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/values)
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+ <amp-state id="myObjectState">
+    <script type="application/json">
+      {
+        "hello": "world",
+        "foo": "bar"
+      }
+    </script>
+  </amp-state>
+  <p [text]="'keys: ' + keys(myObjectState)">keys: myObjectState JSON object keys</p>
+  <p [text]="'values: ' + values(myObjectState)">values: myObjectState JSON object values</p>
+  <button on="tap:AMP.setState({})">Evaluate</button>
+```
+
+[/example]
+
+##### [`Global`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects)
+
+- [encodeURI](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI)
+- [encodeURIComponent](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent)
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+  <p [text]="'encodeURI: ' + encodeURI('https://amp.dev/😉')">encodeURI: Encode a URI and ignore protocol prefix</p>
+  <p [text]="'encodeURIComponent: ' + encodeURIComponent('https://amp.dev/😉')">encodeURIComponent: Encode a URI</p>
+  <button on="tap:AMP.setState({})">Evaluate</button>
+```
+
+[/example]
 
 #### Defining macros with `amp-bind-macro`
 
@@ -1114,7 +1198,7 @@ For example, if your `amp-state` element makes an XHR to an endpoint, while the 
 
 The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
-[tip type="important]
+[tip type="important"]
 The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
 [/tip]
 
