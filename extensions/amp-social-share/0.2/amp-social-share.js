@@ -115,6 +115,10 @@ class AmpSocialShare extends PreactBaseElement {
   }
 
   /**
+   * Sets 'href' and 'target' in the AmpContext based on AMP-specific conditions.
+   * These needs to be passed to the context as opposed to as properties in `init()`
+   * because their values are resolved asynchronously.
+   *
    * @private
    * @param {dict} typeConfig
    * @param {!../../../src/service/platform-impl.Platform} platform
