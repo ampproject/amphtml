@@ -28,7 +28,7 @@ describes.realWin('performance', {amp: true}, env => {
   let clock;
   let win;
   let ampdoc;
-  let timeOrigin = 100;
+  const timeOrigin = 100;
 
   beforeEach(() => {
     win = env.win;
@@ -108,18 +108,15 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_.length).to.equal(50);
     });
 
-    it(
-      'should add default absolute start time on the ' + 'queued tick event',
-      () => {
-        clock.tick(150);
-        perf.tick('start0');
+    it('should add default absolute start time on the queued tick event', () => {
+      clock.tick(150);
+      perf.tick('start0');
 
-        expect(perf.events_[0]).to.be.jsonEqual({
-          label: 'start0',
-          value: timeOrigin + 150,
-        });
-      }
-    );
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'start0',
+        value: timeOrigin + 150,
+      });
+    });
 
     it('should drop events in the head of the queue', () => {
       const tickTime = 100;
