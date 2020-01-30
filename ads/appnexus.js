@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData, writeScript} from '../3p/3p';
 import {setStyles} from '../src/style';
 
@@ -97,8 +98,9 @@ function appnexusAst(global, data) {
     });
   }
 
-  const div = global.document.createElement('div');
-  div.setAttribute('id', data.target);
+  const div = createElementWithAttributes(global.document, 'div', {
+    'id': data.target,
+  });
   const divContainer = global.document.getElementById('c');
   if (divContainer) {
     divContainer.appendChild(div);

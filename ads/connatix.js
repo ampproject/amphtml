@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement} from '../src/dom';
 import {hasOwn} from '../src/utils/object.js';
 import {tryParseJson} from '../src/json.js';
 import {validateData} from '../3p/3p';
@@ -27,7 +28,7 @@ export function connatix(global, data) {
 
   // Because 3p's loadScript does not allow for data attributes,
   // we will write the JS tag ourselves.
-  const script = global.document.createElement('script');
+  const script = createElement(global.document, 'script');
   const cnxData = Object.assign(Object(tryParseJson(data['connatix'])));
   global.cnxAmpAd = true;
   for (const key in cnxData) {

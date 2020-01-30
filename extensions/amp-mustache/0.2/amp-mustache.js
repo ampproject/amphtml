@@ -137,9 +137,13 @@ export class AmpMustache extends BaseTemplate {
    * @private
    */
   purifyAndSetHtml_(html) {
-    const body = this.purifier_.purifyHtml(`<div>${html}</div>`);
-    const div = body.firstElementChild;
-    return this.unwrap(div);
+    // const body = this.purifier_.purifyHtml(`<div>${html}</div>`);
+    // const div = body.firstElementChild;
+    // return this.unwrap(div);
+    const body = document.createElement('div');
+    body.innerHTML = html;
+    // console.log({html, div: body.firstElementChild});
+    return this.unwrap(body.firstElementChild);
   }
 }
 

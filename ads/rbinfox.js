@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData, validateSrcPrefix} from '../3p/3p';
 
 const jsnPrefix = 'https://rb.infox.sg/';
@@ -32,13 +34,14 @@ export function rbinfox(global, data) {
 }
 
 /**
- * @param {!Window} global
+ * @param {!Document} document
  * @param {string} renderTo
  */
-function createContainer(global, renderTo) {
-  const d = global.document.createElement('div');
-  d.id = renderTo;
-  global.document.getElementById('c').appendChild(d);
+function createContainer(document, renderTo) {
+  const d = createElementWithAttributes(document, 'div', {
+    'id': renderTo,
+  });
+  document.getElementById('c').appendChild(d);
 }
 
 /**
@@ -61,7 +64,7 @@ function addToQueue(global, src) {
   global[ctx].push(() => {
     const renderTo = 'infox_' + blockId;
     // Create container
-    createContainer(global, renderTo);
+    createContainer(global.document, renderTo);
     global['INFOX' + blockId].renderTo(renderTo);
   });
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 import {parseUrlDeprecated} from '../src/url';
 
@@ -37,8 +38,9 @@ export function kixer(global, data) {
   let viewed = false;
   let viewTimer = null;
 
-  const d = global.document.createElement('div');
-  d.id = '__kx_ad_' + data.adslot;
+  const d = createElementWithAttributes(global.document, 'div', {
+    'id': '__kx_ad_' + data.adslot,
+  });
   global.document.getElementById('c').appendChild(d);
 
   const kxload = function() {

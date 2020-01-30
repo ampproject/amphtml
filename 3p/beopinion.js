@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript} from './3p';
 import {setStyles} from '../src/style';
 
@@ -35,9 +36,10 @@ function getBeOpinion(global) {
 function addCanonicalLinkTag(global) {
   const {canonicalUrl} = global.context;
   if (canonicalUrl) {
-    const link = global.document.createElement('link');
-    link.setAttribute('rel', 'canonical');
-    link.setAttribute('href', canonicalUrl);
+    const link = createElementWithAttributes(global.document, 'link', {
+      'rel': 'canonical',
+      'href': canonicalUrl,
+    });
     global.document.head.appendChild(link);
   }
 }
@@ -52,8 +54,9 @@ function createContainer(global, data) {
   addCanonicalLinkTag(global);
 
   // create div
-  const container = global.document.createElement('container');
-  container.className = 'BeOpinionWidget';
+  const container = createElementWithAttributes(global.document, 'container', {
+    'class': 'BeOpinionWidget',
+  });
 
   // get content id
   if (data['content'] !== null) {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData, validateSrcPrefix} from '../3p/3p';
 
 const jsnPrefix = 'https://api.rnet.plus/';
@@ -35,8 +36,9 @@ export function rnetplus(global, data) {
  * @param {string} renderTo
  */
 function createContainer(global, renderTo) {
-  const d = global.document.createElement('div');
-  d.id = renderTo;
+  const d = createElementWithAttributes(global.document, 'div', {
+    'id': renderTo,
+  });
   global.document.getElementById('c').appendChild(d);
 }
 

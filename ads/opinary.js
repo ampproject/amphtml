@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -24,12 +25,13 @@ export function opinary(global, data) {
   validateData(data, ['client']);
 
   // create div for automatic poll placement
-  const div = global.document.createElement('div');
-  div.setAttribute('id', 'opinary-automation-placeholder');
-
+  const div = createElementWithAttributes(global.document, 'div', {
+    'id': 'opinary-automation-placeholder',
+  });
   // create div for internal event system AMP awknowledgement
-  const div2 = global.document.createElement('div');
-  div2.setAttribute('id', 'opinaryAMP');
+  const div2 = createElementWithAttributes(global.document, 'div', {
+    'id': 'opinaryAMP',
+  });
 
   // append divs to page
   global.document
@@ -37,10 +39,11 @@ export function opinary(global, data) {
     .appendChild(div)
     .appendChild(div2);
 
-  if (!document.querySelector("link[rel='canonical']")) {
-    const link = document.createElement('link');
-    link.rel = 'canonical';
-    link.href = global.context.canonicalUrl;
+  if (!global.document.querySelector("link[rel='canonical']")) {
+    const link = createElementWithAttributes(global.document, 'link', {
+      'rel': 'canonical',
+      'href': global.context.canonicalUrl,
+    });
     global.document.head.appendChild(link);
   }
 

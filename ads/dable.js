@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -36,14 +37,11 @@ export function dable(global, data) {
   global.dable('setURL', global.window.context.sourceUrl);
   global.dable('setRef', global.window.context.referrer);
 
-  const slot = global.document.createElement('div');
-  slot.id = '_dbl_' + Math.floor(Math.random() * 100000);
-  slot.setAttribute('data-widget_id', data['widgetId']);
-
-  const divContainer = global.document.getElementById('c');
-  if (divContainer) {
-    divContainer.appendChild(slot);
-  }
+  const slot = createElementWithAttributes(global.document, 'div', {
+    'id': '_dbl_' + Math.floor(Math.random() * 100000),
+    'data-widget_id': data['widgetId'],
+  });
+  global.document.getElementById('c').appendChild(slot);
 
   const itemId = data['itemId'] || '';
   const opts = {};

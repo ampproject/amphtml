@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript} from '../3p/3p';
 
 /* global sklikProvider: false */
@@ -26,9 +27,10 @@ export function sklik(global, data) {
   loadScript(global, 'https://c.imedia.cz/js/amp.js', () => {
     const parentId = 'sklik_parent';
 
-    const parentElement = document.createElement('div');
-    parentElement.id = parentId;
-    window.document.body.appendChild(parentElement);
+    const parentElement = createElementWithAttributes(global.document, 'div', {
+      'id': parentId,
+    });
+    global.document.body.appendChild(parentElement);
 
     data.elm = parentId;
     data.url = global.context.canonicalUrl;

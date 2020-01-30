@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement} from '../src/dom';
 import {hasOwn} from '../src/utils/object';
 import {startsWith} from '../src/string';
 import {validateData} from '../3p/3p';
@@ -26,14 +27,14 @@ export function spotx(global, data) {
   // ensure we have valid channel id
   validateData(data, ['spotx_channel_id', 'width', 'height']);
 
-  // Because 3p's loadScript does not allow for data attributes,
-  // we will write the JS tag ourselves.
-  const script = global.document.createElement('script');
-
   data['spotx_content_width'] = data.spotx_content_width || data.width;
   data['spotx_content_height'] = data.spotx_content_height || data.height;
   data['spotx_content_page_url'] =
     global.context.location.href || global.context.sourceUrl;
+
+  // Because 3p's loadScript does not allow for data attributes,
+  // we will write the JS tag ourselves.
+  const script = createElement(global.document, 'script');
 
   // Add data-* attribute for each data value passed in.
   for (const key in data) {

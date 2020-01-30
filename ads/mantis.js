@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -32,8 +33,9 @@ export function mantisDisplay(global, data) {
     },
   ]);
 
-  const d = global.document.createElement('div');
-  d.setAttribute('data-mantis-zone', data['zone']);
+  const d = createElementWithAttributes(global.document, 'div', {
+    'data-mantis-zone': data['zone'],
+  });
   global.document.getElementById('c').appendChild(d);
 
   loadScript(global, 'https://assets.mantisadnetwork.com/mantodea.min.js');
@@ -57,8 +59,9 @@ export function mantisRecommend(global, data) {
     },
   ]);
 
-  const d = global.document.createElement('div');
-  d.setAttribute('id', 'recommended');
+  const d = createElementWithAttributes(global.document, 'div', {
+    'id': 'recommended',
+  });
   global.document.getElementById('c').appendChild(d);
 
   loadScript(global, 'https://assets.mantisadnetwork.com/recommend.min.js');

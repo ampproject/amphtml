@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -28,8 +29,9 @@ export function baidu(global, data) {
     Math.random()
       .toString(36)
       .slice(2);
-  const container = global.document.createElement('div');
-  container.id = id;
+  const container = createElementWithAttributes(global.document, 'div', {
+    'id': container.id,
+  });
   global.document.getElementById('c').appendChild(container);
 
   global.slotbydup = global.slotbydup || [];

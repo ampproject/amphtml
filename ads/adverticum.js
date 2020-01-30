@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {setStyle} from '../src/style';
 import {validateData, writeScript} from '../3p/3p';
+
 /**
  * @param {!Window} global
  * @param {!Object} data
@@ -23,20 +25,20 @@ import {validateData, writeScript} from '../3p/3p';
 export function adverticum(global, data) {
   validateData(data, ['goa3zone'], ['costumetargetstring']);
   const zoneid = 'zone' + data['goa3zone'];
-  const d = global.document.createElement('div');
-
-  d.id = zoneid;
-  d.classList.add('goAdverticum');
+  const d = createElementWithAttributes(global.document, 'div', {
+    'id': zoneid,
+    'class': 'goAdverticum',
+  });
 
   document.getElementById('c').appendChild(d);
   if (data['costumetargetstring']) {
-    const s = global.document.createTextNode(data['costumetargetstring']);
-    const v = global.document.createElement('var');
-    v.setAttribute('id', 'cT');
-    v.setAttribute('class', 'customtarget');
+    const v = createElementWithAttributes(global.document, 'var', {
+      'id': 'cT',
+      'class': 'customtarget',
+    });
     setStyle(v, 'display', 'none');
-    v.appendChild(s);
-    document.getElementById(zoneid).appendChild(v);
+    v.data = data['costumetargetstring'];
+    document.getElementById(d).appendChild(v);
   }
   writeScript(global, '//ad.adverticum.net/g3.js');
 }

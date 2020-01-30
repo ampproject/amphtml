@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {parseUrlDeprecated} from '../src/url';
 import {validateData, writeScript} from '../3p/3p';
 
@@ -29,9 +30,10 @@ export function contentad(global, data) {
   global.url = data.url;
 
   /* Create div for ad to target */
-  const cadDiv = window.document.createElement('div');
-  cadDiv.id = 'contentad' + global.wid;
-  window.document.body.appendChild(cadDiv);
+  const cadDiv = createElementWithAttributes(global.document, 'div', {
+    id: 'contentad' + global.wid,
+  });
+  global.document.body.appendChild(cadDiv);
 
   /* Pass Source URL */
   let {sourceUrl} = window.context;
@@ -41,18 +43,11 @@ export function contentad(global, data) {
   }
 
   /* Build API URL */
-  const cadApi =
-    'https://api.content-ad.net/Scripts/widget2.aspx' +
-    '?id=' +
-    encodeURIComponent(global.id) +
-    '&d=' +
-    encodeURIComponent(global.d) +
-    '&wid=' +
-    global.wid +
-    '&url=' +
-    encodeURIComponent(sourceUrl) +
-    '&cb=' +
-    Date.now();
+  const cadApi = `https://api.content-ad.net/Scripts/widget2.aspx?id=${encodeURIComponent(
+    global.id
+  )}&d=${encodeURIComponent(global.d)}&wid=${
+    global.wid
+  }&url=${encodeURIComponent(sourceUrl)}&cb=${Date.now()}`;
 
   /* Call Content.ad Widget */
   writeScript(global, cadApi);

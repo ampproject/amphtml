@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement} from '../src/dom';
 import {dict} from '../src/utils/object';
 import {getData} from '../src/event-helper';
 import {loadScript} from './3p';
@@ -73,7 +74,7 @@ function parseMessage(event) {
 export function bodymovinanimation(global) {
   const dataReceived = parseJson(global.name)['attributes']._context;
   const dataLoop = dataReceived['loop'];
-  const animatingContainer = global.document.createElement('div');
+  const animatingContainer = createElement(global.document, 'div');
   setStyles(animatingContainer, {
     width: '100%',
     height: '100%',

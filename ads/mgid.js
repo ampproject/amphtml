@@ -14,7 +14,18 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
+
+/**
+ * Returns path for provided js filename
+ * @param {string} publisher js filename
+ * @return {string} Path to provided filename.
+ */
+function getResourceFilePath(publisher) {
+  const publisherStr = publisher.replace(/[^A-z0-9]/g, '');
+  return `${publisherStr[0]}/${publisherStr[1]}`;
+}
 
 /**
  * @param {!Window} global
@@ -23,26 +34,16 @@ import {loadScript, validateData} from '../3p/3p';
 export function mgid(global, data) {
   validateData(data, ['publisher', 'widget', 'container'], ['url']);
 
-  const scriptRoot = document.createElement('div');
-  scriptRoot.id = data.container;
+  const scriptRoot = createElementWithAttributes(global.document, 'div', {
+    'id': data.container,
+  });
+  global.document.body.appendChild(scriptRoot);
 
-  document.body.appendChild(scriptRoot);
-
-  /**
-   * Returns path for provided js filename
-   * @param {string} publisher js filename
-   * @return {string} Path to provided filename.
-   */
-  function getResourceFilePath(publisher) {
-    const publisherStr = publisher.replace(/[^A-z0-9]/g, '');
-    return `${publisherStr[0]}/${publisherStr[1]}`;
-  }
-
-  const url =
-    `https://jsc.mgid.com/${getResourceFilePath(data.publisher)}/` +
-    `${encodeURIComponent(data.publisher)}.` +
-    `${encodeURIComponent(data.widget)}.js?t=` +
-    Math.floor(Date.now() / 36e5);
+  const url = `https://jsc.mgid.com/${getResourceFilePath(
+    data.publisher
+  )}/${encodeURIComponent(data.publisher)}.${encodeURIComponent(
+    data.widget
+  )}.js?t=${Math.floor(Date.now() / 36e5)}`;
 
   window.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {

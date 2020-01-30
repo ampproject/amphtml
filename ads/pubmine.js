@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 const pubmineOptional = ['section', 'pt', 'ht'],
@@ -38,13 +39,13 @@ function initMasterFrame(data, global) {
 
 /**
  * @param {string} slotId
- * @param {!Window} global
+ * @param {!Document} document
  */
-function createSlot(slotId, global) {
-  const containerEl = global.document.getElementById('c');
-  const adSlot = global.document.createElement('div');
-  adSlot.setAttribute('id', slotId);
-  containerEl.appendChild(adSlot);
+function createSlot(slotId, document) {
+  const adSlot = createElementWithAttributes(document, 'div', {
+    'id': slotId,
+  });
+  global.document.getElementById('c').appendChild(adSlot);
 }
 
 /**
@@ -65,7 +66,7 @@ export function pubmine(global, data) {
 
   const slotId = `atatags-${sectionId}`;
 
-  createSlot(slotId, global);
+  createSlot(slotId, global.document);
   const {isMaster} = global.context;
   if (isMaster) {
     initMasterFrame(data, global);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData, writeScript} from '../3p/3p';
 import {parseJson} from '../src/json';
@@ -131,8 +132,9 @@ function loadRecTag(global, data, publisherUrl) {
   if (data['recomtype'] === 'sync') {
     writeScript(global, url);
   } else if (data['recomtype'] === 'async') {
-    const d = global.document.createElement('div');
-    d.setAttribute('id', data['divid']);
+    const d = createElementWithAttributes(global.document, 'div', {
+      'id': data['divid'],
+    });
     global.document.getElementById('c').appendChild(d);
     loadScript(global, url);
   }

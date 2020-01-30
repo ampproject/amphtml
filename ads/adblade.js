@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {validateData, writeScript} from '../3p/3p';
 
 const adbladeFields = ['width', 'height', 'cid'];
@@ -29,23 +30,25 @@ function addAdiantUnit(hostname, global, data) {
   validateData(data, adbladeFields, []);
 
   // create a data element so our script knows what to do
-  const ins = global.document.createElement('ins');
-  ins.setAttribute('class', 'adbladeads');
-  ins.setAttribute('data-width', data.width);
-  ins.setAttribute('data-height', data.height);
-  ins.setAttribute('data-cid', data.cid);
-  ins.setAttribute('data-host', hostname);
-  ins.setAttribute('data-protocol', 'https');
-  ins.setAttribute('data-tag-type', 1);
-  global.document.getElementById('c').appendChild(ins);
+  const ins = createElementWithAttributes(global.document, 'ins', {
+    'class': 'adbladeads',
+    'data-width': data.width,
+    'data-height': data.height,
+    'data-cid': data.cid,
+    'data-host': hostname,
+    'data-protocol': 'https',
+    'data-tag-type': 1,
+  });
+  const parent = global.document.getElementById('c');
 
-  ins.parentNode.addEventListener(
+  parent.appendChild(ins);
+  parent.addEventListener(
     'eventAdbladeRenderStart',
     global.context.renderStart()
   );
 
   // run our JavaScript code to display the ad unit
-  writeScript(global, 'https://' + hostname + '/js/ads/async/show.js');
+  writeScript(global, `https://${hostname}/js/ads/async/show.js`);
 }
 
 /**

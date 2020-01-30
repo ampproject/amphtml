@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript} from './3p';
 
 /**
@@ -31,9 +32,14 @@ function getContainerScript(global, scriptSource) {
  * @return {!Element} blockquote
  */
 function getPostContainer(global) {
-  const blockquote = global.document.createElement('blockquote');
-  blockquote.classList.add('reddit-card');
-  blockquote.setAttribute('data-card-created', Math.floor(Date.now() / 1000));
+  const blockquote = createElementWithAttributes(
+    global.document,
+    'blockquote',
+    {
+      'class': 'reddit-card',
+      'data-card-created': String(Math.floor(Date.now() / 1000)),
+    }
+  );
   return blockquote;
 }
 
@@ -43,15 +49,16 @@ function getPostContainer(global) {
  * @return {!Element} div
  */
 function getCommentContainer(global, data) {
-  const div = global.document.createElement('div');
-  div.classList.add('reddit-embed');
-  div.setAttribute('data-embed-media', 'www.redditmedia.com');
-  // 'uuid' and 'created' are provided by the embed script, but don't seem
-  // to actually be needed. Account for them, but let them default to undefined.
-  div.setAttribute('data-embed-uuid', data.uuid);
-  div.setAttribute('data-embed-created', data.embedcreated);
-  div.setAttribute('data-embed-parent', data.embedparent || 'false');
-  div.setAttribute('data-embed-live', data.embedlive || 'false');
+  const div = createElementWithAttributes(global.document, 'div', {
+    'class': 'reddit-embed',
+    'data-embed-media': 'www.redditmedia.com',
+    // 'uuid' and 'created' are provided by the embed script, but don't seem
+    // to actually be needed. Account for them, but let them default to undefined.
+    'data-embed-uuid': data.uuid,
+    'data-embed-created': data.embedcreated,
+    'data-embed-parent': data.embedparent || 'false',
+    'data-embed-live': data.embedlive || 'false',
+  });
 
   return div;
 }
@@ -75,18 +82,19 @@ export function reddit(global, data) {
     scriptSource = 'https://www.redditstatic.com/comment-embed.js';
   }
 
-  const link = global.document.createElement('a');
-  link.href = data.src;
+  const link = createElementWithAttributes(global.document, 'a', {
+    'href': data.src,
+  });
 
   container.appendChild(link);
   global.document.getElementById('c').appendChild(container);
 
   getContainerScript(global, scriptSource);
 
-  global.addEventListener('resize', event => {
+  global.addEventListener('resize', event =>
     global.context.updateDimensions(
       event.target.outerWidth,
       event.target.outerHeight
-    );
-  });
+    )
+  );
 }

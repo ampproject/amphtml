@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 import {setStyles} from '../src/style';
 
@@ -56,14 +57,15 @@ export function gumgum(global, data) {
 
   if (slotId) {
     // Slot Ad
-    const ins = global.document.createElement('div');
+    const ins = createElementWithAttributes(global.document, 'div', {
+      'data-gg-slot': slotId,
+      'pl': 2,
+    });
     setStyles(ins, {
       display: 'block',
       width: '100%',
       height: '100%',
     });
-    ins.setAttribute('data-gg-slot', slotId);
-    ins.setAttribute('pl', 2);
     dom.appendChild(ins);
     // Events
     ggevents.push({

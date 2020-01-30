@@ -21,6 +21,7 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
+import {createElementWithAttributes} from '../src/dom';
 import {devAssert, rethrowAsync, userAssert} from '../src/log';
 import {hasOwn, map} from '../src/utils/object';
 import {isArray} from '../src/types';
@@ -98,8 +99,9 @@ export function writeScript(win, url, opt_cb) {
  */
 export function loadScript(win, url, opt_cb, opt_errorCb) {
   /** @const {!Element} */
-  const s = win.document.createElement('script');
-  s.src = url;
+  const s = createElementWithAttributes(win.document, 'script', {
+    'src': url,
+  });
   if (opt_cb) {
     s.onload = opt_cb;
   }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -59,8 +60,9 @@ export function relap(global, data) {
       window.context.noContentAvailable();
     };
 
-    const anchorEl = global.document.createElement('div');
-    anchorEl.id = data['anchorid'];
+    const anchorEl = createElementWithAttributes(global.document, 'div', {
+      'id': data['anchorid'],
+    });
     global.document.getElementById('c').appendChild(anchorEl);
 
     const url = `https://relap.io/api/v6/head.js?token=${encodeURIComponent(

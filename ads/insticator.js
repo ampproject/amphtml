@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement} from '../src/dom';
 import {validateData} from '../3p/3p';
 
 /**
@@ -30,7 +31,7 @@ export function insticator(global, data) {
     .appendChild(createTemplate(data['embedId']));
 
   // create ads and embed
-  createAdsAndEmbed(data['siteId'], data['embedId']);
+  createAdsAndEmbed(global.document, data['siteId'], data['embedId']);
 }
 
 /**
@@ -39,7 +40,7 @@ export function insticator(global, data) {
  * @return {Element} HTML template
  */
 function createTemplate(embedId) {
-  const template = document.createElement('template');
+  const template = createElement(document, 'template');
   template./*OK*/ innerHTML = `
     <div id="insticator-container">
       <div id="div-insticator-ad-1"></div>
@@ -52,13 +53,13 @@ function createTemplate(embedId) {
 
 /**
  * Generates Ads and Embed
+ * @param {!Document} document document to modify.
  * @param {string} siteId Used to grab the ads file
  * @param {string} embedId Used to grab the unique embed requested
  */
-function createAdsAndEmbed(siteId, embedId) {
+function createAdsAndEmbed(document, siteId, embedId) {
   // helper vars
   const a = window;
-  const c = document;
   const s = 'script';
   const u = `//d3lcz8vpax4lo2.cloudfront.net/ads-code/${siteId}.js`; // vars from preconnect urls and data attributes on amp-embed tag
 
@@ -83,10 +84,10 @@ function createAdsAndEmbed(siteId, embedId) {
     });
 
   // load ads code
-  const b = c.createElement(s);
+  const b = createElement(document, s);
   b.src = u;
   b.async = !0;
-  const d = c.getElementsByTagName(s)[0];
+  const d = document.getElementsByTagName(s)[0];
   d.parentNode.insertBefore(b, d);
 
   // execute functions of insticator object on the window (load ads and embed)

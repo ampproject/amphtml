@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -35,10 +36,7 @@ export function amoad(global, data) {
   }
   global.amoadOption = {ampData: data};
 
-  const d = global.document.createElement('div');
-  Object.keys(attrs).forEach(k => {
-    d.setAttribute(k, attrs[k]);
-  });
+  const d = createElementWithAttributes(global.document, 'div', attrs);
   global.document.getElementById('c').appendChild(d);
 
   loadScript(global, script);

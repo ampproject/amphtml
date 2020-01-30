@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 import {startsWith} from '../src/string';
 
@@ -52,10 +53,11 @@ export function adunity(global, data) {
   );
 
   //prepare tag structure
-  const tag = doc.createElement('div');
-  tag.classList.add('au-tag');
-  tag.setAttribute('data-au-width', data['width']);
-  tag.setAttribute('data-au-height', data['height']);
+  const tag = createElementWithAttributes(doc, 'div', {
+    'class': 'au-tag',
+    'data-au-width': data['width'],
+    'data-au-height': data['height'],
+  });
 
   if (data != null) {
     for (const key in data) {

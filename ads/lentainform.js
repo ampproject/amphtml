@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -23,19 +24,17 @@ import {loadScript, validateData} from '../3p/3p';
 export function lentainform(global, data) {
   validateData(data, ['publisher', 'widget', 'container'], ['url']);
 
-  const scriptRoot = document.createElement('div');
-  scriptRoot.id = data.container;
-
-  document.body.appendChild(scriptRoot);
+  const scriptRoot = createElementWithAttributes(global.document, 'div', {
+    'id': data.container,
+  });
+  global.document.body.appendChild(scriptRoot);
 
   const publisherStr = data.publisher.replace(/[^A-z0-9]/g, '');
-
-  const url =
-    `https://jsc.lentainform.com/${encodeURIComponent(publisherStr[0])}/` +
-    `${encodeURIComponent(publisherStr[1])}/` +
-    `${encodeURIComponent(data.publisher)}.` +
-    `${encodeURIComponent(data.widget)}.js?t=` +
-    Math.floor(Date.now() / 36e5);
+  const url = `https://jsc.lentainform.com/${encodeURIComponent(
+    publisherStr[0]
+  )}/${encodeURIComponent(publisherStr[1])}/${encodeURIComponent(
+    data.publisher
+  )}.${encodeURIComponent(data.widget)}.js?t=${Math.floor(Date.now() / 36e5)}`;
 
   global.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {

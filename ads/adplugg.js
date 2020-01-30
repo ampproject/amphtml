@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {hasOwn} from '../src/utils/object';
 import {loadScript, validateData} from '../3p/3p';
 
@@ -33,17 +34,15 @@ export function adplugg(global, data) {
     ['zone'] //optional
   );
 
-  // Get the amp wrapper element.
-  const ampwrapper = global.document.getElementById('c');
-
   // Build and append the ad tag.
-  const adTag = global.document.createElement('div');
-  adTag.setAttribute('class', 'adplugg-tag');
-  adTag.setAttribute('data-adplugg-access-code', data['accessCode']);
+  const adTag = createElementWithAttributes(global.document, 'div', {
+    'class': 'adplugg-tag',
+    'data-adplugg-access-code': data['accessCode'],
+  });
   if (data['zone']) {
     adTag.setAttribute('data-adplugg-zone', data['zone']);
   }
-  ampwrapper.appendChild(adTag);
+  global.document.getElementById('c').appendChild(adTag);
 
   // Get a handle on the AdPlugg SDK.
   global.AdPlugg = global.AdPlugg || [];

@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData, validateSrcPrefix} from '../3p/3p';
 
 const jsnPrefix = 'https://jsn.24smi.net/';
+
+/**
+ * @param {!Document} document
+ * @param {string} src
+ */
+function createContainer(document, src) {
+  const parts = src.split('/');
+  const blockId = parts[parts.length - 1].split('.')[0];
+
+  const d = createElementWithAttributes(document, 'div', {
+    'id': `smi_teaser_${blockId}`,
+  });
+  document.getElementById('c').appendChild(d);
+}
 
 /**
  * @param {!Window} global
@@ -27,25 +42,6 @@ export function _24smi(global, data) {
   const {src} = data;
   validateSrcPrefix(jsnPrefix, src);
 
-  createContainer(global, getBlockId(src));
+  createContainer(global.document, src);
   loadScript(global, src);
-}
-
-/**
- * @param {!Window} global
- * @param {string} blockId
- */
-function createContainer(global, blockId) {
-  const d = global.document.createElement('div');
-  d.id = `smi_teaser_${blockId}`;
-  global.document.getElementById('c').appendChild(d);
-}
-
-/**
- * @param {string} src
- * @return {string}
- */
-function getBlockId(src) {
-  const parts = src.split('/');
-  return parts[parts.length - 1].split('.')[0];
 }

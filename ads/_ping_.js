@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement} from '../src/dom';
 import {dev, devAssert, userAssert} from '../src/log';
 import {validateData} from '../3p/3p';
 
@@ -49,7 +50,7 @@ export function _ping_(global, data) {
     global.context.noContentAvailable();
   }
   if (data.valid && data.valid == 'true') {
-    const img = document.createElement('img');
+    const img = createElement(document, 'img');
     if (data.url) {
       img.setAttribute('src', data.url);
       img.setAttribute('width', data.width);

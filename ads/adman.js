@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {validateData} from '../3p/3p';
 
 /**
@@ -23,13 +24,13 @@ import {validateData} from '../3p/3p';
 export function adman(global, data) {
   validateData(data, ['ws', 'host', 's'], []);
 
-  const script = global.document.createElement('script');
-  script.setAttribute('data-ws', data.ws);
-  script.setAttribute('data-h', data.host);
-  script.setAttribute('data-s', data.s);
-  script.setAttribute('data-tech', 'amp');
-
-  script.src = 'https://static.adman.gr/adman.js';
+  const script = createElementWithAttributes(global.document, 'script', {
+    'data-ws': data.ws,
+    'data-h': data.host,
+    'data-s': data.s,
+    'data-tech': 'amp',
+    'src': 'https://static.adman.gr/adman.js',
+  });
 
   global.document.body.appendChild(script);
 }

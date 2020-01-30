@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement} from '../src/dom';
 import {doubleclick} from '../ads/google/doubleclick';
 import {loadScript, validateData, writeScript} from '../3p/3p';
 import {startsWith} from '../src/string';
@@ -87,7 +88,7 @@ export function openx(global, data) {
       global.OX_cmds = [
         () => {
           const oxRequest = OX();
-          const oxAnchor = global.document.createElement('div');
+          const oxAnchor = createElement(global.document, 'div');
           global.document.body.appendChild(oxAnchor);
           /*eslint "google-camelcase/google-camelcase": 0*/
           OX._requestArgs['bc'] = 'amp';

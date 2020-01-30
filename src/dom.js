@@ -156,7 +156,7 @@ export function insertAfterOrAtStart(root, element, after) {
 /**
  * Add attributes to an element.
  * @param {!Element} element
- * @param {!JsonObject<string, string>} attributes
+ * @param {!JsonObject<string, string | number | boolean>} attributes
  * @return {!Element} created element
  */
 export function addAttributesToElement(element, attributes) {
@@ -167,14 +167,24 @@ export function addAttributesToElement(element, attributes) {
 }
 
 /**
+ * Create a new element on document with specified tagName.
+ * @param {!Document} doc
+ * @param {string} tagName
+ * @return {!Element} created element
+ */
+export function createElement(doc, tagName) {
+  return doc.createElement(tagName);
+}
+
+/**
  * Create a new element on document with specified tagName and attributes.
  * @param {!Document} doc
  * @param {string} tagName
- * @param {!JsonObject<string, string>} attributes
+ * @param {!JsonObject<string, string | number | boolean>} attributes
  * @return {!Element} created element
  */
 export function createElementWithAttributes(doc, tagName, attributes) {
-  const element = doc.createElement(tagName);
+  const element = createElement(doc, tagName);
   return addAttributesToElement(element, attributes);
 }
 

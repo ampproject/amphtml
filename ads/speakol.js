@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -31,9 +32,10 @@ export function speakol(global, data) {
     widget_id: `wi-${data['widgetid']}`,
     element: `wi-${data['widgetid']}`,
   });
-  const d = global.document.createElement('div');
-  d.classList.add('speakol-widget');
-  d.id = 'wi-' + data['widgetid'];
+  const d = createElementWithAttributes(global.document, 'div', {
+    'class': 'speakol-widget',
+    id: 'wi-' + data['widgetid'],
+  });
 
   global.document.getElementById('c').appendChild(d);
 

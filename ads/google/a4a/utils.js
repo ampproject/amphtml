@@ -18,6 +18,7 @@ import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {DomFingerprint} from '../../../src/utils/dom-fingerprint';
 import {Services} from '../../../src/services';
 import {buildUrl} from './shared/url-builder';
+import {createElement, whenUpgradedToCustomElement} from '../../../src/dom';
 import {dev, devAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -32,7 +33,6 @@ import {getOrCreateAdCid} from '../../../src/ad-cid';
 import {getTimingDataSync} from '../../../src/service/variable-source';
 import {internalRuntimeVersion} from '../../../src/internal-version';
 import {parseJson} from '../../../src/json';
-import {whenUpgradedToCustomElement} from '../../../src/dom';
 
 /** @type {string}  */
 const AMP_ANALYTICS_HEADER = 'X-AmpAnalytics';
@@ -1012,7 +1012,7 @@ function getBrowserCapabilitiesBitmap(win) {
   if (win.SVGElement && doc.createElementNS) {
     browserCapabilities |= Capability.SVG_SUPPORTED;
   }
-  const iframeEl = doc.createElement('iframe');
+  const iframeEl = createElement(doc, 'iframe');
   if (iframeEl.sandbox && iframeEl.sandbox.supports) {
     if (iframeEl.sandbox.supports('allow-top-navigation-by-user-activation')) {
       browserCapabilities |=

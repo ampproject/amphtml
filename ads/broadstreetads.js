@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -26,14 +27,13 @@ export function broadstreetads(global, data) {
     ['network', 'zone', 'width', 'height'],
     ['keywords', 'place']
   );
-
   data.place = data.place || 0;
-
-  const placeholderID = 'placement_' + data.zone + '_' + data.place;
+  const placeholderID = `placement_${data.zone}_${data.place}`;
 
   // placeholder div
-  const d = global.document.createElement('div');
-  d.setAttribute('id', placeholderID);
+  const d = createElementWithAttributes(global.document, 'div', {
+    'id': placeholderID,
+  });
   global.document.getElementById('c').appendChild(d);
 
   global.broadstreet = global.broadstreet || {};

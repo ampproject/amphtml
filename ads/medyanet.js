@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {setStyles} from '../src/style';
 import {validateData} from '../3p/3p';
 
@@ -36,15 +37,16 @@ export function medyanet(global, data) {
  * @param {!Object} data
  */
 function medyanetAds(global, data) {
-  const f = global.document.createElement('iframe');
-  f.setAttribute('id', 'adframe');
-  f.setAttribute('width', data.width);
-  f.setAttribute('height', data.height);
-  f.setAttribute('frameborder', '0');
-  f.setAttribute('marginheight', '0');
-  f.setAttribute('marginwidth', '0');
-  f.setAttribute('allowfullscreen', 'true');
-  f.setAttribute('scrolling', 'no');
+  const f = createElementWithAttributes(global.document, 'iframe', {
+    'id': 'adframe',
+    'width': data.width,
+    'height': data.height,
+    'frameborder': '0',
+    'marginheight': '0',
+    'marginwidth': '0',
+    'allowfullscreen': 'true',
+    'scrolling': 'no',
+  });
   setStyles(f, {
     border: '0 none transparent',
     position: 'relative',

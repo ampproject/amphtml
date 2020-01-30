@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement, createElementWithAttributes} from '../src/dom';
 import {parseUrlDeprecated} from '../src/url';
 import {setStyles} from '../src/style';
 import {validateData} from '../3p/3p';
@@ -43,13 +44,14 @@ export function cedato(global, data) {
     data.domain || parseUrlDeprecated(global.context.sourceUrl).origin;
 
   /* Create div for ad to target */
-  const playerDiv = global.document.createElement('div');
-  playerDiv.id = 'video' + data.id + cb;
+  const playerDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'video' + data.id + cb,
+  });
   setStyles(playerDiv, {
     width: '100%',
     height: '100%',
   });
-  const playerScript = global.document.createElement('script');
+  const playerScript = createElement(global.document, 'script');
   const servingDomain = data.servingDomain
     ? encodeURIComponent(data.servingDomain)
     : 'algovid.com';

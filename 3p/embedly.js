@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {hasOwn} from '../src/utils/object';
 import {loadScript} from './3p';
 import {setStyle} from '../src/style';
@@ -76,10 +77,10 @@ function getEmbedly(global, callback) {
  * @param {!Object} data
  */
 export function embedly(global, data) {
-  const card = global.document.createElement('a');
-
-  card.href = data.url;
-  card.classList.add(CARD_CSS_CLASS);
+  const card = createElementWithAttributes(global.document, 'a', {
+    'href': data.url,
+    'class': CARD_CSS_CLASS,
+  });
 
   // Add whitelisted data attributes and values to card
   // when these are provided by component.

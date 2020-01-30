@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement, createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -24,7 +25,7 @@ export function capirs(global, data) {
   validateData(data, ['begunAutoPad', 'begunBlockId']);
 
   if (data['customCss']) {
-    const style = global.document.createElement('style');
+    const style = createElement(global.document, 'style');
 
     if (style.styleSheet) {
       style.styleSheet.cssText = data['customCss'];
@@ -38,11 +39,10 @@ export function capirs(global, data) {
   global['begun_callbacks'] = {
     lib: {
       init: () => {
-        const block = global.document.createElement('div');
-        block.id = 'x-' + Math.round(Math.random() * 1e8).toString(36);
-
+        const block = createElementWithAttributes(global.document, 'div', {
+          'id': 'x-' + Math.round(Math.random() * 1e8).toString(36),
+        });
         global.document.getElementById('c').appendChild(block);
-
         global['Adf']['banner']['ssp'](block.id, data['params'], {
           'begun-auto-pad': data['begunAutoPad'],
           'begun-block-id': data['begunBlockId'],

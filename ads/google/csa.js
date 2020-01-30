@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {createElement, createElementWithAttributes} from '../../src/dom';
 import {getStyle, setStyle, setStyles} from '../../src/style';
 import {loadScript, validateData} from '../../3p/3p';
 import {tryParseJson} from '../../src/json.js';
@@ -46,7 +48,8 @@ export const AD_TYPE = {
  */
 export function csa(global, data) {
   // Get parent width in case we want to override
-  const width = global.document.body./*OK*/ clientWidth;
+  const {document} = global;
+  const width = document.body./*OK*/ clientWidth;
 
   validateData(
     data,
@@ -61,10 +64,11 @@ export function csa(global, data) {
   );
 
   // Add the ad container to the document
-  const containerDiv = global.document.createElement('div');
   const containerId = 'csacontainer';
-  containerDiv.id = containerId;
-  global.document.getElementById('c').appendChild(containerDiv);
+  const containerDiv = createElementWithAttributes(document, 'div', {
+    'id': containerId,
+  });
+  document.getElementById('c').appendChild(containerDiv);
 
   const pageOptions = {source: 'amp', referer: global.context.referrer};
   const adblockOptions = {container: containerId};
@@ -321,25 +325,26 @@ function createOverflow(global, container, height) {
  * @return {!Element}
  */
 function getOverflowElement(global) {
-  const overflow = global.document.createElement('div');
-  overflow.id = 'overflow';
+  const overflow = createElementWithAttributes(global.document, 'div', {
+    'id': 'overflow',
+  });
   setStyles(overflow, {
     position: 'absolute',
     height: overflowHeight + 'px',
     width: '100%',
   });
-  overflow.appendChild(getOverflowLine(global));
-  overflow.appendChild(getOverflowChevron(global));
+  overflow.appendChild(getOverflowLine(global.document));
+  overflow.appendChild(getOverflowChevron(global.document));
   return overflow;
 }
 
 /**
  * Helper function to create a line element for the overflow element
- * @param {!Window} global The window object of the iframe
+ * @param {!Document} document The document object of the iframe
  * @return {!Element}
  */
-function getOverflowLine(global) {
-  const line = global.document.createElement('div');
+function getOverflowLine(document) {
+  const line = createElement(document, 'div');
   setStyles(line, {
     background: 'rgba(0,0,0,.16)',
     height: '1px',
@@ -349,17 +354,17 @@ function getOverflowLine(global) {
 
 /**
  * Helper function to create a chevron element for the overflow element
- * @param {!Window} global The window object of the iframe
+ * @param {!Document} document The document object of the iframe
  * @return {!Element}
  */
-function getOverflowChevron(global) {
+function getOverflowChevron(document) {
   const svg =
     '<svg xmlns="http://www.w3.org/2000/svg" width="36px" ' +
     'height="36px" viewBox="0 0 48 48" fill="#757575"><path d="M14.83' +
     ' 16.42L24 25.59l9.17-9.17L36 19.25l-12 12-12-12z"/>' +
     '<path d="M0-.75h48v48H0z" fill="none"/> </svg>';
 
-  const chevron = global.document.createElement('div');
+  const chevron = createElement(document, 'div');
   setStyles(chevron, {
     width: '36px',
     height: '36px',

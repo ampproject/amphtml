@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -24,12 +25,13 @@ export function sortable(global, data) {
   validateData(data, ['site', 'name'], ['responsive']);
 
   const slot = global.document.getElementById('c');
-  const ad = global.document.createElement('div');
   const size =
     data.responsive === 'true' ? 'auto' : data.width + 'x' + data.height;
-  ad.className = 'ad-tag';
-  ad.setAttribute('data-ad-name', data.name);
-  ad.setAttribute('data-ad-size', size);
+  const ad = createElementWithAttributes(global.document, 'div', {
+    'class': 'ad-tag',
+    'data-ad-name': data.name,
+    'data-ad-size': size,
+  });
   slot.appendChild(ad);
   loadScript(
     global,

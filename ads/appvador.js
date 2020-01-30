@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement, createElementWithAttributes} from '../src/dom';
 import {validateData, writeScript} from '../3p/3p';
 
 /**
@@ -24,8 +25,9 @@ export function appvador(global, data) {
   validateData(data, ['id'], ['options', 'jsType', 'customScriptSrc']);
 
   const container = global.document.getElementById('c');
-  const apvDiv = global.document.createElement('div');
-  apvDiv.setAttribute('id', 'apvad-' + data.id);
+  const apvDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'apvad-' + data.id,
+  });
   container.appendChild(apvDiv);
 
   const scriptUrl = data.customScriptSrc
@@ -43,7 +45,7 @@ export function appvador(global, data) {
     '}).load();';
 
   const cb = function() {
-    const apvLoadScript = global.document.createElement('script');
+    const apvLoadScript = createElement(global.document, 'script');
     apvLoadScript.text = apvScript;
     container.appendChild(apvLoadScript);
   };

@@ -14,7 +14,22 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
+
+/**
+ * @param {!Document} document
+ * @param {!Object} data
+ */
+function createContainer(document, data) {
+  const d = createElementWithAttributes(document, 'div', {
+    'data-owo-type': data['owoType'],
+    'data-owo-code': data['owoCode'],
+    'data-owo-mode': data['owoMode'],
+  });
+
+  document.getElementById('c').appendChild(d);
+}
 
 /**
  * @param {!Window} global
@@ -23,18 +38,6 @@ import {loadScript, validateData} from '../3p/3p';
 export function _1wo(global, data) {
   validateData(data, ['src', 'owoType', 'owoCode', 'owoMode']);
   const {src} = data;
-  createContainer(global, data);
+  createContainer(global.document, data);
   loadScript(global, src);
-}
-
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-function createContainer(global, data) {
-  const d = global.document.createElement('div');
-  d.setAttribute('data-owo-type', data['owoType']);
-  d.setAttribute('data-owo-code', data['owoCode']);
-  d.setAttribute('data-owo-mode', data['owoMode']);
-  global.document.getElementById('c').appendChild(d);
 }

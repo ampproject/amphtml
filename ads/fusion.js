@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {validateData, writeScript} from '../3p/3p';
 
 /**
@@ -45,8 +46,9 @@ export function fusion(global, data) {
   );
 
   const container = global.document.getElementById('c');
-  const ad = global.document.createElement('div');
-  ad.setAttribute('data-fusion-space', data.space);
+  const ad = createElementWithAttributes(global.document, 'div', {
+    'data-fusion-space': data.space,
+  });
   container.appendChild(ad);
   const parameters = queryParametersToObject(data.parameters);
 

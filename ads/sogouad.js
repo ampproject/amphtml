@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -23,7 +24,7 @@ import {loadScript, validateData} from '../3p/3p';
 export function sogouad(global, data) {
   validateData(data, ['slot', 'w', 'h'], ['responsive']);
   const slot = global.document.getElementById('c');
-  const ad = global.document.createElement('div');
+  const ad = createElement(global.document, 'div');
   const sogouUn = 'sogou_un';
   global[sogouUn] = window[sogouUn] || [];
   if (data.w === '100%') {

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-// TODO(malteubl) Move somewhere else since this is not an ad.
-
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript} from './3p';
 import {setStyles} from '../src/style';
 import {startsWith} from '../src/string';
@@ -50,8 +49,9 @@ function getTwttr(global, cb) {
  * @param {!Object} data
  */
 export function twitter(global, data) {
-  const tweet = global.document.createElement('div');
-  tweet.id = 'tweet';
+  const tweet = createElementWithAttributes(global.document, 'div', {
+    'id': 'tweet',
+  });
   setStyles(tweet, {
     width: '100%',
     display: 'flex',

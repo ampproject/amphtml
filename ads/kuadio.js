@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -35,10 +36,11 @@ export function kuadio(global, data) {
     fastParse: data.fastParse !== 'false',
   };
 
-  const e = global.document.createElement('div');
-  e.className = '_pvmax_recommend';
-  e.setAttribute('data-widget-id', data.widgetId);
-  e.setAttribute('data-ref', data.ref || global.context.canonicalUrl);
+  const e = createElementWithAttributes(global.document, 'div', {
+    'class': '_pvmax_recommend',
+    'data-widget-id': data.widgetId,
+    'data-ref': data.ref || global.context.canonicalUrl,
+  });
   global.document.getElementById('c').appendChild(e);
 
   loadScript(global, 'https://api.pvmax.net/v1.0/pvmax.js');

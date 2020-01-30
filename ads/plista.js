@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -35,8 +36,9 @@ export function plista(global, data) {
       'countrycode',
     ]
   );
-  const div = global.document.createElement('div');
-  div.setAttribute('data-display', 'plista_widget_' + data.widgetname);
+  const div = createElementWithAttributes(global.document, 'div', {
+    'data-display': 'plista_widget_' + data.widgetname,
+  });
   // container with id "c" is provided by amphtml
   global.document.getElementById('c').appendChild(div);
   window.PLISTA = {

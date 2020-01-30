@@ -14,7 +14,36 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
+
+/**
+ * @param {!Document} document
+ */
+function createOneadSlot(document) {
+  const slot = createElementWithAttributes(document, 'div', {
+    'id': 'onead-amp',
+  });
+  document.getElementById('c').appendChild(slot);
+}
+
+/**
+ * @param {!Window} global
+ */
+function createAdUnit(global) {
+  global.ONEAD_AMP.isAMP = true;
+  const src = 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js';
+  const jsLoadCb = () => {
+    global.Guoshi.queryAd.amp.setup({
+      playMode: global.ONEAD_AMP.playMode,
+      uid: global.ONEAD_AMP.uid,
+      pid: global.ONEAD_AMP.pid,
+      host: global.ONEAD_AMP.host,
+    });
+  };
+
+  loadScript(global, src, jsLoadCb);
+}
 
 /**
  * @param {!Window} global
@@ -33,31 +62,6 @@ export function onead(global, data) {
     pid: data.pid,
     host: data.host,
   };
-  createOneadSlot(global);
+  createOneadSlot(global.document);
   createAdUnit(global);
-}
-/**
- * @param {!Window} win
- */
-function createOneadSlot(win) {
-  const slot = document.createElement('div');
-  slot.id = 'onead-amp';
-  win.document.getElementById('c').appendChild(slot);
-}
-/**
- * @param {!Window} win
- */
-function createAdUnit(win) {
-  win.ONEAD_AMP.isAMP = true;
-  const src = 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js';
-  const jsLoadCb = () => {
-    win.Guoshi.queryAd.amp.setup({
-      playMode: win.ONEAD_AMP.playMode,
-      uid: win.ONEAD_AMP.uid,
-      pid: win.ONEAD_AMP.pid,
-      host: win.ONEAD_AMP.host,
-    });
-  };
-
-  loadScript(win, src, jsLoadCb);
 }

@@ -16,6 +16,7 @@
 
 import {CONSENT_POLICY_STATE} from '../src/consent-state';
 import {computeInMasterFrame, validateData, writeScript} from '../3p/3p';
+import {createElementWithAttributes} from '../src/dom';
 import {parseJson} from '../src/json';
 
 /**
@@ -130,12 +131,10 @@ function runSync(global, cb) {
  * @param {!Object} data
  */
 function appendPlacement(mode, global, data) {
-  const doc = global.document;
-  const placement = doc.createElement('div');
-  placement.id = data['aoId'];
-
-  const dom = doc.getElementById('c');
-  dom.appendChild(placement);
+  const placement = createElementWithAttributes(global.document, 'div', {
+    'id': data['aoId'],
+  });
+  global.document.getElementById('c').appendChild(placement);
 
   const config = {
     id: data['aoId'],
@@ -288,12 +287,10 @@ class AdoBuffer {
  * @param {!Window} global
  */
 function executeSlave(slaveId, config, global) {
-  const doc = global.document;
-  const placement = doc.createElement('div');
-  placement['id'] = slaveId;
-
-  const dom = doc.getElementById('c');
-  dom.appendChild(placement);
+  const placement = createElementWithAttributes(global.document, 'div', {
+    'id': slaveId,
+  });
+  global.document.getElementById('c').appendChild(placement);
 
   if (global['ado']) {
     if (!config || config['isEmpty']) {

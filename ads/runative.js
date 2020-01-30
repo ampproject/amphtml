@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement, createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 import {parseJson} from '../src/json';
 
@@ -79,9 +80,9 @@ function getInitData(data) {
  * @return {?Node}
  */
 function getAdContainer(global) {
-  const container = global.document.createElement('div');
-
-  container['id'] = adContainerId;
+  const container = createElementWithAttributes(global.document, 'div', {
+    'id': adContainerId,
+  });
 
   return container;
 }
@@ -92,7 +93,7 @@ function getAdContainer(global) {
  * @return {?Node}
  */
 function getInitAdScript(global, data) {
-  const scriptElement = global.document.createElement('script');
+  const scriptElement = createElement(global.document, 'script');
   const initData = getInitData(data);
   const initScript = global.document.createTextNode(
     `NativeAd(${JSON.stringify(initData)});`

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {dashToUnderline} from '../src/string';
 import {dict} from '../src/utils/object';
 import {loadScript} from './3p';
@@ -49,9 +50,10 @@ function getFacebookSdk(global, cb, locale) {
  * @return {!Element} div
  */
 function createContainer(global, classNameSuffix, href) {
-  const container = global.document.createElement('div');
-  container.className = 'fb-' + classNameSuffix;
-  container.setAttribute('data-href', href);
+  const container = createElementWithAttributes(global.document, 'div', {
+    'class': 'fb-' + classNameSuffix,
+    'data-href': href,
+  });
   return container;
 }
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 import {setStyles} from '../src/style';
 
@@ -25,10 +26,11 @@ export function mytarget(global, data) {
   validateData(data, ['adSlot'], ['adQuery']);
 
   // Create ad tag placeholder
-  const container = global.document.createElement('ins');
+  const container = createElementWithAttributes(global.document, 'ins', {
+    'class': 'mrg-tag',
+    'data-ad-slot': data['adSlot'],
+  });
 
-  container.setAttribute('class', 'mrg-tag');
-  container.setAttribute('data-ad-slot', data['adSlot']);
   if (data['adQuery']) {
     container.setAttribute('data-ad-query', data['adQuery']);
   }

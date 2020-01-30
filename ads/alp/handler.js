@@ -21,7 +21,11 @@ import {
   parseQueryString,
   parseUrlDeprecated,
 } from '../../src/url';
-import {closest, openWindowDialog} from '../../src/dom';
+import {
+  closest,
+  createElementWithAttributes,
+  openWindowDialog,
+} from '../../src/dom';
 import {dev} from '../../src/log';
 import {dict} from '../../src/utils/object';
 import {startsWith} from '../../src/string';
@@ -183,10 +187,11 @@ export function warmupStatic(win) {
   // preconnects.
   new win.Image().src = `${urls.cdn}/preconnect.gif`;
   // Preload the primary AMP JS that is render blocking.
-  const linkRel = /*OK*/ document.createElement('link');
-  linkRel.rel = 'preload';
-  linkRel.setAttribute('as', 'script');
-  linkRel.href = `${urls.cdn}/v0.js`;
+  const linkRel = createElementWithAttributes(/*OK*/ document, 'link', {
+    'href': `${urls.cdn}/v0.js`,
+    'as': 'script',
+    'rel': 'preload',
+  });
   getHeadOrFallback(win.document).appendChild(linkRel);
 }
 
@@ -204,13 +209,16 @@ export function warmupDynamic(e) {
   // Preloading with empty as and newly specced value `fetch` meaning the same
   // thing. `document` would be the right value, but this is not yet supported
   // in browsers.
-  const linkRel0 = /*OK*/ document.createElement('link');
-  linkRel0.rel = 'preload';
-  linkRel0.href = link.eventualUrl;
-  const linkRel1 = /*OK*/ document.createElement('link');
-  linkRel1.rel = 'preload';
-  linkRel1.as = 'fetch';
-  linkRel1.href = link.eventualUrl;
+  const linkRel0 = createElementWithAttributes(/*OK*/ document, 'link', {
+    'rel': 'preload',
+    'href': link.eventualUrl,
+  });
+  const linkRel1 = createElementWithAttributes(/*OK*/ document, 'link', {
+    'rel': 'preload',
+    'as': 'fetch',
+    'href': link.eventualUrl,
+  });
+
   const head = getHeadOrFallback(e.target.ownerDocument);
   head.appendChild(linkRel0);
   head.appendChild(linkRel1);

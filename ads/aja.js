@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElement} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 
 /**
@@ -26,7 +27,7 @@ export function aja(global, data) {
   const {document} = global;
   const asi = data['asi'];
 
-  const d = document.createElement('div');
+  const d = createElement(document, 'div');
   d.dataset['ajaAd'] = '';
   d.dataset['ajaAsi'] = asi;
   document.getElementById('c').appendChild(d);

@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import {createElementWithAttributes} from '../src/dom';
 import {setStyle} from '../src/style';
 import {userAssert} from '../src/log';
 import {writeScript} from './3p';
@@ -52,8 +54,9 @@ export function mathml(global, data) {
       // Dimensions are given by the parent frame.
       delete data.width;
       delete data.height;
-      const div = document.createElement('div');
-      div.setAttribute('id', 'mathmlformula');
+      const div = createElementWithAttributes(document, 'div', {
+        'id': 'mathmlformula',
+      });
       div.textContent = data.formula;
       setStyle(div, 'visibility', 'hidden');
       global.document.body.appendChild(div);
@@ -65,8 +68,9 @@ export function mathml(global, data) {
         // Remove built in mathjax margins.
         let display = document.getElementsByClassName('MJXc-display');
         if (!display[0]) {
-          const span = document.createElement('span');
-          span.setAttribute('class', 'mjx-chtml MJXc-display');
+          const span = createElementWithAttributes(document, 'span', {
+            'class': 'mjx-chtml MJXc-display',
+          });
           span.appendChild(rendered);
           div.appendChild(span);
           display = document.getElementsByClassName('MJXc-display');

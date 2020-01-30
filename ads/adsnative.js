@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {validateData, writeScript} from '../3p/3p';
 
 /**
@@ -55,10 +56,10 @@ export function adsnative(global, data) {
   };
 
   // drop ad placeholder div
-  const ad = global.document.createElement('div');
-  const ampwrapper = global.document.getElementById('c');
-  ad.id = global._AdsNativeOpts.nativeAdElementId;
-  ampwrapper.appendChild(ad);
+  const ad = createElementWithAttributes(global.document, 'div', {
+    'id': global._AdsNativeOpts.nativeAdElementId,
+  });
+  global.document.getElementById('c').appendChild(ad);
 
   // load renderjs
   writeScript(global, 'https://static.adsnative.com/static/js/render.v1.js');

@@ -16,6 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout, isLayoutSizeDefined} from '../src/layout';
+import {createElement} from '../src/dom';
 import {registerElement} from '../src/service/custom-element-registry';
 
 class AmpLayout extends BaseElement {
@@ -29,11 +30,9 @@ class AmpLayout extends BaseElement {
     if (this.getLayout() == Layout.CONTAINER) {
       return;
     }
-    const container = this.win.document.createElement('div');
+    const container = createElement(this.win.document, 'div');
     this.applyFillContent(container);
-    this.getRealChildNodes().forEach(child => {
-      container.appendChild(child);
-    });
+    this.getRealChildNodes().forEach(child => container.appendChild(child));
     this.element.appendChild(container);
   }
 

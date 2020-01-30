@@ -17,6 +17,7 @@
 import {CONSENT_POLICY_STATE} from '../../src/consent-state';
 import {ImaPlayerData} from './ima-player-data';
 import {camelCaseToTitleCase, px, setStyle, setStyles} from '../../src/style';
+import {createElement, createElementWithAttributes} from '../../src/dom';
 import {getData} from '../../src/event-helper';
 import {isObject} from '../../src/types';
 import {loadScript} from '../../3p/3p';
@@ -39,23 +40,17 @@ const PlayerStates = {
  */
 /*eslint-disable*/
 const icons = {
-  'play':
-    `<path d="M8 5v14l11-7z"></path>
+  'play': `<path d="M8 5v14l11-7z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'pause':
-    `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+  'pause': `<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'fullscreen':
-    `<path d="M0 0h24v24H0z" fill="none"/>
+  'fullscreen': `<path d="M0 0h24v24H0z" fill="none"/>
      <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>`,
-  'mute':
-    `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>
+  'mute': `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'volume_max':
-    `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
+  'volume_max': `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path>
      <path d="M0 0h24v24H0z" fill="none"></path>`,
-  'seek':
-  `<circle cx="12" cy="12" r="12" />`
+  'seek': `<circle cx="12" cy="12" r="12" />`,
 };
 
 /*eslint-enable */
@@ -231,15 +226,19 @@ export function imaVideo(global, data) {
   adLabel = data.adLabel || 'Ad (%s of %s)';
 
   // Wraps *everything*.
-  wrapperDiv = global.document.createElement('div');
-  wrapperDiv.id = 'ima-wrapper';
-  setStyle(wrapperDiv, 'width', px(videoWidth));
-  setStyle(wrapperDiv, 'height', px(videoHeight));
-  setStyle(wrapperDiv, 'background-color', 'black');
+  wrapperDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'ima-wrapper',
+  });
+  setStyles(wrapperDiv, {
+    'width': px(videoWidth),
+    'height': px(videoHeight),
+    'background-color': 'black',
+  });
 
   // Wraps the big play button we show before video start.
-  bigPlayDiv = global.document.createElement('div');
-  bigPlayDiv.id = 'ima-big-play';
+  bigPlayDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'ima-big-play',
+  });
   setStyles(bigPlayDiv, {
     'position': 'relative',
     'width': px(videoWidth),
@@ -260,8 +259,9 @@ export function imaVideo(global, data) {
   bigPlayDiv.appendChild(playButtonDiv);
 
   // Video controls.
-  controlsDiv = global.document.createElement('div');
-  controlsDiv.id = 'ima-controls';
+  controlsDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'ima-controls',
+  });
   setStyles(controlsDiv, {
     'position': 'absolute',
     'bottom': '0px',
@@ -284,8 +284,9 @@ export function imaVideo(global, data) {
   controlsVisible = false;
 
   // Ad progress
-  countdownWrapperDiv = global.document.createElement('div');
-  countdownWrapperDiv.id = 'ima-countdown';
+  countdownWrapperDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'ima-countdown',
+  });
   setStyles(countdownWrapperDiv, {
     'align-items': 'center',
     'box-sizing': 'border-box',
@@ -298,7 +299,7 @@ export function imaVideo(global, data) {
     'text-shadow': '0px 0px 10px black',
     'white-space': 'nowrap',
   });
-  countdownDiv = global.document.createElement('div');
+  countdownDiv = createElement(global.document, 'div');
   countdownWrapperDiv.appendChild(countdownDiv);
   controlsDiv.appendChild(countdownWrapperDiv);
   // Play button
@@ -313,8 +314,9 @@ export function imaVideo(global, data) {
   });
   controlsDiv.appendChild(playPauseDiv);
   // Current time and duration.
-  timeDiv = global.document.createElement('div');
-  timeDiv.id = 'ima-time';
+  timeDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'ima-time',
+  });
   setStyles(timeDiv, {
     'margin-right': '20px',
     'text-align': 'center',
@@ -325,16 +327,18 @@ export function imaVideo(global, data) {
   timeDiv.appendChild(timeNode);
   controlsDiv.appendChild(timeDiv);
   // Progress bar.
-  progressBarWrapperDiv = global.document.createElement('div');
-  progressBarWrapperDiv.id = 'ima-progress-wrapper';
+  progressBarWrapperDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'ima-progress-wrapper',
+  });
   setStyles(progressBarWrapperDiv, {
     'height': '30px',
     'flex-grow': '1',
     'position': 'relative',
     'margin-right': '20px',
   });
-  progressLine = global.document.createElement('div');
-  progressLine.id = 'progress-line';
+  progressLine = createElementWithAttributes(global.document, 'div', {
+    'id': 'progress-line',
+  });
   setStyles(progressLine, {
     'background-color': 'rgb(255, 255, 255)',
     'height': '2px',
@@ -342,16 +346,18 @@ export function imaVideo(global, data) {
     'width': '0%',
     'float': 'left',
   });
-  totalTimeLine = global.document.createElement('div');
-  totalTimeLine.id = 'total-time-line';
+  totalTimeLine = createElementWithAttributes(global.document, 'div', {
+    'id': 'total-time-line',
+  });
   setStyles(totalTimeLine, {
     'background-color': 'rgba(255, 255, 255, 0.45)',
     'height': '2px',
     'width': '100%',
     'margin-top': '14px',
   });
-  progressMarkerDiv = global.document.createElement('div');
-  progressMarkerDiv.id = 'ima-progress-marker';
+  progressMarkerDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'ima-progress-marker',
+  });
   setStyles(progressMarkerDiv, {
     'height': '14px',
     'width': '14px',
@@ -396,8 +402,9 @@ export function imaVideo(global, data) {
   controlsDiv.appendChild(fullscreenDiv);
 
   // Ad container.
-  adContainerDiv = global.document.createElement('div');
-  adContainerDiv.id = 'ima-ad-container';
+  adContainerDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'ima-ad-container',
+  });
   setStyles(adContainerDiv, {
     'position': 'absolute',
     'top': '0px',
@@ -407,8 +414,9 @@ export function imaVideo(global, data) {
   });
 
   // Wraps our content video.
-  contentDiv = global.document.createElement('div');
-  contentDiv.id = 'ima-content';
+  contentDiv = createElementWithAttributes(global.document, 'div', {
+    'id': 'ima-content',
+  });
   setStyles(contentDiv, {
     'position': 'absolute',
     'top': '0px',
@@ -417,32 +425,33 @@ export function imaVideo(global, data) {
     'height': '100%',
   });
   // The video player
-  videoPlayer = global.document.createElement('video');
-  videoPlayer.id = 'ima-content-player';
+  videoPlayer = createElementWithAttributes(global.document, 'video', {
+    'id': 'ima-content-player',
+    'poster': data.poster,
+    'playsinline': true,
+    'controlsList': 'nodownload nofullscreen noremoteplayback',
+  });
   setStyles(videoPlayer, {
     'width': '100%',
     'height': '100%',
     'background-color': 'black',
   });
-  videoPlayer.setAttribute('poster', data.poster);
   if (data['crossorigin'] != null) {
     videoPlayer.setAttribute('crossorigin', data['crossorigin']);
   }
-  videoPlayer.setAttribute('playsinline', true);
-  videoPlayer.setAttribute(
-    'controlsList',
-    'nodownload nofullscreen noremoteplayback'
-  );
   if (data.src) {
-    const sourceElement = document.createElement('source');
-    sourceElement.setAttribute('src', data.src);
+    const sourceElement = createElementWithAttributes(
+      global.document,
+      'source',
+      {
+        'src': data.src,
+      }
+    );
     videoPlayer.appendChild(sourceElement);
   }
   if (data.childElements) {
     const children = JSON.parse(data.childElements);
-    children.forEach(child => {
-      videoPlayer.appendChild(htmlToElement(child));
-    });
+    children.forEach(child => videoPlayer.appendChild(htmlToElement(child)));
   }
   if (data.imaSettings) {
     imaSettings = tryParseJson(data.imaSettings);
@@ -658,7 +667,7 @@ function onImaLoadFail() {
  * @return {!Element}
  */
 function htmlToElement(html) {
-  const template = document.createElement('template');
+  const template = createElement(document, 'template');
   template./*OK*/ innerHTML = html;
   return template.content.firstChild;
 }

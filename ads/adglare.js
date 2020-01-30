@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {validateData, writeScript} from '../3p/3p';
 
 /**
@@ -23,20 +24,16 @@ import {validateData, writeScript} from '../3p/3p';
 export function adglare(global, data) {
   validateData(data, ['host', 'zid'], ['keywords']);
 
-  const adglareSpan = global.document.createElement('span');
-  adglareSpan.id = 'zone' + data.zid;
-  global.document.getElementById('c').appendChild(adglareSpan);
+  const span = createElementWithAttributes(global.document, 'span', {
+    'id': 'zone' + data.zid,
+  });
+  global.document.getElementById('c').appendChild(span);
 
-  let url =
-    'https://' +
-    data.host +
-    '.engine.adglare.net/?' +
-    data.zid +
-    '&ampad&rnd=' +
-    Date.now() +
-    Math.random();
+  let url = `https://${data.host}.engine.adglare.net/?${
+    data.zid
+  }&ampad&rnd=${Date.now() + Math.random()}`;
   if (data.keywords) {
-    url = url + '&keywords=' + data.keywords;
+    url += '&keywords=' + data.keywords;
   }
 
   writeScript(global, url);

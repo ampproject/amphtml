@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {createElementWithAttributes} from '../src/dom';
 import {loadScript, validateData} from '../3p/3p';
 import {tryParseJson} from '../src/json';
 
@@ -39,7 +40,7 @@ export function blade(global, data) {
   macros.height = data.height;
 
   const containerId = `player-${data['blade_api_key']}-${data['blade_player_id']}`;
-  createContainer(containerId);
+  createContainer(global.document, containerId);
 
   const bladeConfig = `_bladeConfig-${containerId}`;
   global[bladeConfig] = {
@@ -78,11 +79,13 @@ export function blade(global, data) {
 }
 
 /**
+ * @param {!Document} document
  * @param {string} elemId
  */
-function createContainer(elemId) {
-  const d = global.document.createElement('div');
-  d.id = elemId;
-  d.classList.add('blade');
-  global.document.getElementById('c').appendChild(d);
+function createContainer(document, elemId) {
+  const d = createElementWithAttributes(document, 'div', {
+    'id': elemId,
+    'class': 'blade',
+  });
+  document.getElementById('c').appendChild(d);
 }

@@ -15,6 +15,7 @@
  */
 
 import {computeInMasterFrame, loadScript, validateData} from '../3p/3p';
+import {createElementWithAttributes} from '../src/dom';
 
 /**
  * @param {!Window} global
@@ -26,8 +27,9 @@ export function imedia(global, data) {
   const mW = context.isMaster ? global : context.master;
 
   // create parent element
-  const parentElement = document.createElement('div');
-  parentElement.id = data.id;
+  const parentElement = createElementWithAttributes(global.document, 'div', {
+    'id': data.id,
+  });
   global.document.getElementById('c').appendChild(parentElement);
 
   // array of all ad elements and matching contexts through all iframes
