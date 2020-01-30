@@ -30,7 +30,7 @@ export function baidu(global, data) {
       .toString(36)
       .slice(2);
   const container = createElementWithAttributes(global.document, 'div', {
-    'id': container.id,
+    'id': id,
   });
   global.document.getElementById('c').appendChild(container);
 

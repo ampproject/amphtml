@@ -102,6 +102,8 @@ exports.rules = [
     filesMatching: '3p/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
+      // Not intended to merge
+      '3p/**->src/dom.js',
       '3p/**->src/utils/function.js',
       '3p/**->src/utils/object.js',
       '3p/**->src/log.js',
@@ -135,6 +137,8 @@ exports.rules = [
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
+      // Not intended to merge yet.
+      'ads/**->src/dom.js',
       'ads/**->src/utils/base64.js',
       'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/utils/object.js',
@@ -154,7 +158,6 @@ exports.rules = [
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/consent.js',
       'ads/google/a4a/**->src/consent-state.js',
-      'ads/google/a4a/**->src/dom.js',
       'ads/google/a4a/**->src/experiments.js',
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
