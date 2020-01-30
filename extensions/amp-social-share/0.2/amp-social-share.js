@@ -28,16 +28,9 @@ const TAG = 'amp-social-share';
 class AmpSocialShare extends PreactBaseElement {
   /** @override */
   init() {
-    let rendered;
     const host = this.element;
     const dataParams = getDataParamsFromAttributes(host);
     const render = (_, ...children) => {
-      // We only render once in AMP mode, but React mode may rerender
-      // serveral times.
-      if (rendered) {
-        return children;
-      }
-      rendered = true;
       return createElement(Fragment, null, children);
     };
     this.context_['collapse'] = () => toggle(host, false);
