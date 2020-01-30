@@ -21,6 +21,7 @@ const TAG = 'amp-generic-video-player';
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(
+    TAG,
     defineVideoPlayerElement({
       TAG,
       src: '/examples/amp-video-iframe/frame.html',

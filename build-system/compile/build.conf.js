@@ -23,8 +23,8 @@ const defaultPlugins = [
   [
     localPlugin('transform-inline-decl-extensions'),
     {
-      baseClassFile: 'src/video/generic',
-      componentClassCtor: 'defineVideoPlayerElement',
+      ctor: 'defineVideoPlayerElement',
+      exportedDefaultClassFrom: 'src/video/generic',
     },
   ],
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.

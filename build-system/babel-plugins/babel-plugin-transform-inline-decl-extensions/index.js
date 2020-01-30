@@ -14,100 +14,139 @@
  * limitations under the License.
  */
 const fs = require('fs');
-const {basename} = require('path');
+const fsPath = require('path');
 const {parse} = require('@babel/parser');
 
-const toUpperCase = (_, c) => c.toUpperCase();
+const rootRelativeResolve = filename => require.resolve(`../../../${filename}`);
+
+const toUpperCase = (_match, character) => character.toUpperCase();
 const dashToCamelCase = name => name.replace(/-([a-z])/g, toUpperCase);
 const capitalize = name => name.replace(/^([a-z])/g, toUpperCase);
 
-const classAliasFromFilename = filename =>
-  capitalize(dashToCamelCase(basename(filename).replace(/\.js$/, '')));
-
-const rootRelative = name => require.resolve(`../../../${name}`);
+const parsed = {};
 
 module.exports = function({types: t}) {
-  function cloneDefaultClass(file, alias) {
-    const code = fs.readFileSync(file).toString();
-    const {program} = parse(code, {sourceType: 'module'});
-
-    let baseClass;
-    let insideExportDefault = false;
-
-    t.traverseFast(program, node => {
-      if (baseClass) {
-        return;
-      }
-      if (insideExportDefault && t.isClassDeclaration(node)) {
-        baseClass = node;
-      }
-      if (t.isExportDefaultDeclaration(node)) {
-        insideExportDefault = true;
-      }
-    });
-
-    if (!baseClass) {
-      throw new Error(`No default class exported from ${file}`);
+  function cachedParse(sourceFilename) {
+    if (parsed[sourceFilename]) {
+      return parsed[sourceFilename];
     }
 
-    const {name = `VendorComponent`} = baseClass.id || {};
+    const ast = parse(fs.readFileSync(sourceFilename).toString(), {
+      sourceFilename,
+      sourceType: 'module',
+    });
 
-    return t.classExpression(
-      t.identifier(`${name}_${alias}`),
-      t.cloneNode(baseClass.superClass),
-      t.cloneNode(baseClass.body)
-    );
+    return (parsed[sourceFilename] = ast);
   }
+
+  const exporterConfigInlineVisitor = {
+    MemberExpression({node, parent, parentPath}, {configPropsByKey}) {
+      if (
+        !t.isThisExpression(node.object) ||
+        !t.isIdentifier(node.property, {name: 'vendorComponentConfig'})
+      ) {
+        return;
+      }
+
+      if (t.isAssignmentExpression(parent, {left: node})) {
+        // TODO(alanorozco): Lint to restrict recursive property assignment.
+        parentPath.remove();
+        return;
+      }
+
+      if (!t.isMemberExpression(parent)) {
+        return;
+      }
+
+      const key = parent.property.name;
+
+      // Default unset members to `null` to let minifier collapse recursively.
+      const value = configPropsByKey[key]
+        ? t.cloneNode(configPropsByKey[key])
+        : t.nullLiteral();
+
+      // Access of recursive members (`this.prop.foo`) inlined one level
+      // deep, this depends on minifier to inline from `{foo: 'bar'}.foo` into
+      // 'bar'.
+      parentPath.replaceWith(
+        t.memberExpression(
+          t.objectExpression([t.objectProperty(t.identifier(key), value)]),
+          t.identifier(key)
+        )
+      );
+    },
+  };
+
+  const exporterDefaultVisitor = {
+    ExportDefaultDeclaration(path, {componentAlias, configPropsByKey}) {
+      if (!t.isClassDeclaration(path.node.declaration)) {
+        return;
+      }
+
+      path
+        .get('declaration')
+        .traverse(exporterConfigInlineVisitor, {configPropsByKey});
+
+      path.node.declaration.id = t.identifier(componentAlias);
+      path.replaceWith(path.node.declaration);
+    },
+  };
 
   return {
     name: 'transform-inline-decl-extensions',
     visitor: {
       CallExpression(path, {file, opts}) {
-        if (
-          !t.isIdentifier(path.node.callee, {name: opts.componentClassCtor})
-        ) {
+        if (!t.isIdentifier(path.node.callee, {name: opts.ctor})) {
           return;
         }
 
-        const componentClass = cloneDefaultClass(
-          rootRelative(opts.baseClassFile),
-          classAliasFromFilename(file.opts.filename)
+        const program = path.findParent(p => t.isProgram(p));
+
+        for (const name of Object.keys(program.scope.bindings)) {
+          program.scope.rename(name, `__${name}`);
+        }
+
+        const componentAlias = capitalize(
+          dashToCamelCase(fsPath.basename(file.opts.filename, '.js'))
         );
 
-        const extensionCall = path.findParent(p => t.isProgram(p.parent));
-        extensionCall.insertBefore(componentClass);
+        const exporterFilename = rootRelativeResolve(
+          opts.exportedDefaultClassFrom
+        );
 
-        const [componentConfig] = path.node.arguments;
-        const componentConfigByKey = {};
-        if (t.isObjectExpression(componentConfig)) {
-          for (const {key, value} of componentConfig.properties) {
-            componentConfigByKey[key.name] = value;
+        const relativeImportPath = fsPath.relative(
+          fsPath.dirname(file.opts.filename),
+          fsPath.dirname(exporterFilename)
+        );
+
+        const exporter = t.cloneNode(cachedParse(exporterFilename));
+
+        for (const node of exporter.program.body) {
+          if (t.isImportDeclaration(node)) {
+            node.source = t.StringLiteral(
+              fsPath.join(relativeImportPath, node.source.value)
+            );
           }
         }
 
-        // Inline static config into config property refs.
-        extensionCall.parentPath.traverse({
-          MemberExpression({node, parent, parentPath}) {
-            if (
-              !t.isIdentifier(node.property, {name: 'vendorComponentConfig'}) ||
-              !t.isThisExpression(node.object) ||
-              !t.isMemberExpression(parent)
-            ) {
-              return;
-            }
-            if (t.isAssignmentExpression(parentPath.parent, {left: parent})) {
-              parentPath.parentPath.remove();
-              return;
-            }
-            const knownValue = componentConfigByKey[parent.property.name];
-            const usableValue = knownValue
-              ? t.cloneNode(knownValue)
-              : t.nullLiteral();
-            parentPath.replaceWith(usableValue);
-          },
+        // TODO(alanorozco): This breaks sourcemaps.
+        program.unshiftContainer('body', exporter.program.body);
+
+        const [configNode] = path.node.arguments;
+        const configPropsByKey = {};
+
+        if (t.isObjectExpression(configNode)) {
+          for (const {key, value} of configNode.properties) {
+            configPropsByKey[key.name] = value;
+          }
+        }
+
+        program.traverse(exporterDefaultVisitor, {
+          componentAlias,
+          configPropsByKey,
         });
 
-        path.replaceWith(t.identifier(componentClass.id.name));
+        path.replaceWith(t.identifier(componentAlias));
       },
     },
   };
