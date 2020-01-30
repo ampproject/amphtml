@@ -27,10 +27,6 @@ import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
-import {
-  installOriginExperimentsForDoc,
-  originExperimentsForDoc,
-} from '../../../src/service/origin-experiments-impl';
 import {isExperimentOn} from '../../../src/experiments';
 import {
   numeric,
@@ -47,18 +43,10 @@ const EXPAND_CURVE_ = bezierCurve(0.47, 0, 0.745, 0.715);
 const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
 
 const isDisplayLockingEnabledForAccordion = win => {
-  if (!('renderSubtree' in Element.prototype)) {
-    return Promise.resolve(false);
-  }
-  if (isExperimentOn(win, 'amp-accordion-display-locking')) {
-    return Promise.resolve(true);
-  }
-  installOriginExperimentsForDoc(this.getAmpDoc());
-  return originExperimentsForDoc(this.element)
-    .getExperiments()
-    .then(trials => {
-      return trials && trials.includes('amp-accordion-display-locking');
-    });
+  return (
+    isExperimentOn(win, 'amp-accordion-display-locking') &&
+    'renderSubtree' in Element.prototype
+  );
 };
 
 class AmpAccordion extends AMP.BaseElement {
