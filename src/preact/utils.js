@@ -51,7 +51,7 @@ export function useResourcesNotify() {
     if (notify) {
       notify();
     }
-  });
+  }, []);
 }
 
 /**
