@@ -17,13 +17,14 @@ import {defineVideoPlayerElement} from '../../../src/video/declarative';
 
 // DO NOT SUBMIT: Example for PR.
 
-const TAG = 'amp-generic-video-player';
+const TAG = 'amp-vendor-video-player';
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(
     TAG,
     defineVideoPlayerElement({
       TAG,
+      // This would be a URL like https://my-video.vendor/amp
       src: '/examples/amp-video-iframe/frame.html',
       legacySrcQueryAttributes: ['vid'],
     })

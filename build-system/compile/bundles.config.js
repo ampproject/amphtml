@@ -1172,7 +1172,7 @@ exports.extensionBundles = [
   },
   {
     // DO NOT SUBMIT: Example for PR.
-    name: 'amp-generic-video-player',
+    name: 'amp-vendor-video-player',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.MEDIA,
