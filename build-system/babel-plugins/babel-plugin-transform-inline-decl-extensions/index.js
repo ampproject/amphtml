@@ -24,16 +24,8 @@ const dashToCamelCase = name => name.replace(/-([a-z])/g, toUpperCase);
 const capitalize = name => name.replace(/^([a-z])/g, toUpperCase);
 
 module.exports = function({types: t}) {
-  const sliceProps = (obj, keys) =>
-    t.objectExpression(
-      keys.map(key =>
-        t.objectProperty(
-          t.identifier(key),
-          // Default to null to let minifier collapse recursively.
-          obj[key] ? t.cloneNode(obj[key]) : t.nullLiteral()
-        )
-      )
-    );
+  const propValueOrNull = (obj, key) =>
+    obj[key] ? t.cloneNode(obj[key]) : t.nullLiteral();
 
   const exporterConfigInlineVisitor = {
     MemberExpression(path, {configProps}) {
@@ -49,18 +41,20 @@ module.exports = function({types: t}) {
       // Direct reference (this.vendorComponentConfig.foo)
       if (t.isMemberExpression(parent)) {
         path.parentPath.replaceWith(
-          t.memberExpression(
-            sliceProps(configProps, [parent.property.name]),
-            t.identifier(parent.property.name)
-          )
+          propValueOrNull(configProps, parent.property.name)
         );
         return;
       }
 
       // Desctructuring (const {foo} = this.vendorComponentConfig)
       if (t.isVariableDeclarator(parent) && t.isObjectPattern(parent.id)) {
-        const props = parent.id.properties.map(({key}) => key.name);
-        path.replaceWith(sliceProps(configProps, props));
+        const sliceProps = parent.id.properties.map(({key}) =>
+          t.objectProperty(
+            t.identifier(key.name),
+            propValueOrNull(configProps, key.name)
+          )
+        );
+        path.replaceWith(t.objectExpression(sliceProps));
       }
     },
   };

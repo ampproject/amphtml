@@ -384,7 +384,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
    * @param {!Object<string, string>=} vars
    */
   dispatchCustomAnalyticsEvent_(eventType, vars = {}) {
-    userAssertString(eventType, '`eventType` missing in analytics event');
+    user().assertString(eventType, '`eventType` missing in analytics event');
 
     userAssert(
       getAnalyticsEventTypePrefixRegex().test(eventType),
