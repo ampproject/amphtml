@@ -473,6 +473,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [SVK-Native](../../ads/svknative.md)
 - [Strossle](../../ads/strossle.md)
 - [Taboola](../../ads/taboola.md)
+- [Whopa InFeed](../../ads/whopainfeed.md)
 - [Yahoo Native Ads](../../ads/yahoonativeads.md)
 - [Zen](../../ads/zen.md)
 - [ZergNet](../../ads/zergnet.md)
