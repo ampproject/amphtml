@@ -29,15 +29,13 @@ class AmpSocialShare extends PreactBaseElement {
   /** @override */
   init() {
     const host = this.element;
-    const dataParams = getDataParamsFromAttributes(host);
-    const render = (_, ...children) => {
-      return createElement(Fragment, null, children);
-    };
     this.context_['collapse'] = () => toggle(host, false);
     return {
-      host,
-      dataParams,
-      render,
+      'host': host,
+      'dataParams': getDataParamsFromAttributes(host),
+      'render': (_, ...children) => {
+        return createElement(Fragment, null, children);
+      },
     };
   }
 
