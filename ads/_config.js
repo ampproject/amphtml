@@ -1050,7 +1050,7 @@ const adConfig = jsonConfiguration({
   },
 
   'temedya': {},
-  
+
   'torimochi': {
     renderStartImplemented: true,
   },
