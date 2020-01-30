@@ -338,7 +338,7 @@ describes.realWin('performance', {amp: true}, env => {
 
         it('should calculate after visible', () => {
           perf.coreServicesAvailable();
-          firstVisibleTime = 105;
+          firstVisibleTime = timeOrigin + 5;
 
           clock.tick(10);
           perf.tickSinceVisible('test');
@@ -349,7 +349,7 @@ describes.realWin('performance', {amp: true}, env => {
 
         it('should be zero after visible but for earlier event', () => {
           perf.coreServicesAvailable();
-          firstVisibleTime = 105;
+          firstVisibleTime = timeOrigin + 5;
 
           // An earlier event, since event time (4) is less than visible time (5).
           clock.tick(4);
