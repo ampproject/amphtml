@@ -182,8 +182,10 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (mutations['src']) {
-      this.updateSrc_();
+    if (!this.vendorComponentConfig.src) {
+      if (mutations['src']) {
+        this.updateSrc_();
+      }
     }
   }
 
