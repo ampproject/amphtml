@@ -94,7 +94,7 @@ class AmpSocialShare extends PreactBaseElement {
     }
     const typeConfig = getSocialConfig(type) || dict();
     if (typeConfig['obsolete']) {
-      user().warn(`Skipping obsolete share button ${type}`);
+      user().warn(TAG, `Skipping obsolete share button ${type}`);
       return;
     }
     return typeConfig;
