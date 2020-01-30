@@ -409,6 +409,8 @@ exports.rules = [
         'src/service/origin-experiments-impl.js',
       'extensions/amp-script/0.1/amp-script.js->' +
         'src/service/origin-experiments-impl.js',
+      'extensions/amp-accordion/0.1/amp-accordion.js->' +
+        'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
         'src/service/action-impl.js',
