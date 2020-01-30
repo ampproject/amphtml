@@ -24,7 +24,38 @@ const dashToCamelCase = name => name.replace(/-([a-z])/g, toUpperCase);
 const capitalize = name => name.replace(/^([a-z])/g, toUpperCase);
 
 module.exports = function({types: t}) {
-  const propValueOrNull = (obj, key) =>
+  function cloneExporter(sourceFilename, relImportPath) {
+    const exporter = parse(fs.readFileSync(sourceFilename).toString(), {
+      sourceFilename,
+      sourceType: 'module',
+    });
+    replaceImportPaths(exporter.program, relImportPath);
+    naiveReplaceJsdocTypePaths(exporter.comments, relImportPath);
+    return exporter;
+  }
+
+  function replaceImportPaths(program, relImportPath) {
+    for (const node of program.body) {
+      if (t.isImportDeclaration(node) && node.source.value.startsWith('.')) {
+        node.source.value = fsPath.join(relImportPath, node.source.value);
+      }
+    }
+  }
+
+  const relativePathInCommentRe = /\.+\/[\/\.a-z0-9_-]+/gi;
+  function naiveReplaceJsdocTypePaths(comments, relImportPath) {
+    for (let i = 0; i < comments.length; i++) {
+      const comment = comments[i];
+      if (comment.type == 'CommentBlock') {
+        comment.value = comment.value.replace(
+          relativePathInCommentRe,
+          relative => fsPath.join(relImportPath, relative)
+        );
+      }
+    }
+  }
+
+  const propValueOrNullLiteral = (obj, key) =>
     obj[key] ? t.cloneNode(obj[key]) : t.nullLiteral();
 
   const exporterConfigInlineVisitor = {
@@ -41,7 +72,7 @@ module.exports = function({types: t}) {
       // Direct reference (this.vendorComponentConfig.foo)
       if (t.isMemberExpression(parent)) {
         path.parentPath.replaceWith(
-          propValueOrNull(configProps, parent.property.name)
+          propValueOrNullLiteral(configProps, parent.property.name)
         );
         return;
       }
@@ -51,7 +82,7 @@ module.exports = function({types: t}) {
         const sliceProps = parent.id.properties.map(({key}) =>
           t.objectProperty(
             t.identifier(key.name),
-            propValueOrNull(configProps, key.name)
+            propValueOrNullLiteral(configProps, key.name)
           )
         );
         path.replaceWith(t.objectExpression(sliceProps));
@@ -70,6 +101,8 @@ module.exports = function({types: t}) {
         .traverse(exporterConfigInlineVisitor, {configProps});
 
       path.node.declaration.id = t.identifier(componentAlias);
+
+      // Un-export
       path.replaceWith(path.node.declaration);
     },
   };
@@ -92,38 +125,17 @@ module.exports = function({types: t}) {
           dashToCamelCase(fsPath.basename(file.opts.filename, '.js'))
         );
 
+        // TODO(alanorozco): Infer from import rather than using options
         const exporterFilename = rootRelativeResolve(
           opts.exportedDefaultClassFrom
         );
 
-        const importPath = fsPath.relative(
+        const relImportPath = fsPath.relative(
           fsPath.dirname(file.opts.filename),
           fsPath.dirname(exporterFilename)
         );
 
-        const exporter = parse(fs.readFileSync(exporterFilename).toString(), {
-          sourceFilename: exporterFilename,
-          sourceType: 'module',
-        });
-
-        for (const node of exporter.program.body) {
-          if (t.isImportDeclaration(node)) {
-            node.source = t.StringLiteral(
-              fsPath.join(importPath, node.source.value)
-            );
-          }
-        }
-
-        for (let i = 0; i < exporter.comments.length; i++) {
-          const comment = exporter.comments[i];
-          if (comment.type !== 'CommentBlock') {
-            continue;
-          }
-          comment.value = comment.value.replace(
-            /\.+\/[\/\.a-z0-9_-]+/gi,
-            relative => fsPath.join(importPath, relative)
-          );
-        }
+        const exporter = cloneExporter(exporterFilename, relImportPath);
 
         // TODO(alanorozco): This breaks sourcemaps.
         program.unshiftContainer('body', exporter.program.body);
