@@ -149,7 +149,7 @@ class AmpSocialShare extends PreactBaseElement {
     }
 
     urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(result => {
-      const href = result;
+      let href = result;
       // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
       const {protocol} = Services.urlForDoc(this.element).parse(href);
       const isMailTo = protocol === 'mailto:';
