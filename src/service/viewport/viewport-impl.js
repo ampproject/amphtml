@@ -228,6 +228,10 @@ export class ViewportImpl {
           // the size has changed between `disconnect` and `connect`.
           this.resize_();
         }
+        if (this.scrollTop_) {
+          this./*OK*/ scrollTop_ = null;
+          this.getScrollTop();
+        }
       } else {
         this.binding_.disconnect();
       }
