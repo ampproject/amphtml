@@ -25,7 +25,7 @@ TIP: Cherry-picks into Stable most likely require a cherry-pick into Beta / Expe
 | :---------------: | :------------: | :------------------: | :----------: | :----------: | ------------------------------------------------------------------------------- |
 | #<_ISSUE_NUMBER_> | #<_PR_NUMBER_> |     **<YES/NO>**     | **<YES/NO>** | **<YES/NO>** | #<_RELEASE_ISSUE_>                                                              |
 
-## Why does this issue meet the [cherry-pick criteria](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md#cherry-pick-criteria)?
+## Why does this issue meet the [cherry-pick criteria](https://github.com/ampproject/amphtml/blob/master/contributing/contributing-code.md#Cherry-picks)?
 
 <!--
 TIP: Be specific.
