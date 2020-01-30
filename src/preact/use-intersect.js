@@ -41,3 +41,14 @@ export function useIntersect(ref) {
   }, [ref.current]);
   return entries;
 }
+
+/**
+ * @param {object} ref
+ * @return {?Array<IntersectionObserverEntry>}
+ */
+export function useInView(ref) {
+  const entries = useIntersect(ref);
+  const last =
+    entries.length > 0 ? entries[entries.length - 1] : {isIntersecting: false};
+  return last.isIntersecting;
+}
