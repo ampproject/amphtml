@@ -130,19 +130,38 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
           })
         )
         .then(() =>
-          check('${foo}&${bar(3,4)}', 'FOO(1,2)&BAR(3,4)', {
+          check('${foo}', 'true', {
+            'foo': '$EQUALS($SUBSTR(zyxabc,3),abc)',
+          })
+        )
+        .then(() =>
+          // No macros in the arglist (3,4), QUERY_PARAM works
+          check('${foo}&${bar(3,4)}', 'FOO(1,2)&4', {
             'foo': 'FOO(1,2)',
-            'bar': 'BAR',
+            'bar': 'QUERY_PARAM',
+          })
+        )
+        .then(() =>
+          // Macros in the arglist, so getNameArgs returns
+          // an undefined variable/macro bar(5, QUERY_PARAM(6,7))
+          check('${foo}&${bar(5,QUERY_PARAM(6,7))}', 'FOO(3,4)&', {
+            'foo': 'FOO(3,4)',
+            'bar': 'QUERY_PARAM',
           })
         )
         .then(() =>
           // See comment about getNameArgs above.
-          check('${all}', 'AAA(1%2C2)%26BBB(3%2C4)%26CCC(5%2C6)%26DDD(7,8)', {
-            'a': 'AAA',
-            'b': 'BBB',
+          check('${all}', '2%264', {
+            'a': 'QUERY_PARAM',
+            'b': 'QUERY_PARAM(3,4)',
+            'all': '${a(1,2)}&${b}',
+          })
+        )
+        .then(() =>
+          check('${all}&${c}&${d}', 'CCC(5%2C6)%26DDD(7,8)&CCC(5,6)&DDD(7,8)', {
             'c': 'CCC(5,6)',
             'd': 'DDD(7,8)',
-            'all': '${a(1,2)}&${b(3,4)}&${c}&${d}',
+            'all': '${c}&${d}',
           })
         )
         .then(() =>

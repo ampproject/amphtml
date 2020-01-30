@@ -171,6 +171,21 @@ describe('asyncStringReplace', () => {
     return expect(result).to.eventually.equal('the quick red fox');
   });
 
+  it('should use replacer with special pattern', async () => {
+    await expect(
+      asyncStringReplace('the quick brown fox', /brown/, '$$')
+    ).to.eventually.equal('the quick $ fox');
+    await expect(
+      asyncStringReplace('the quick brown fox', /brown/, 'purple $& grey')
+    ).to.eventually.equal('the quick purple brown grey fox');
+    await expect(
+      asyncStringReplace('the quick brown fox', /brown/, "sweet $'")
+    ).to.eventually.equal('the quick sweet  fox fox');
+    await expect(
+      asyncStringReplace('the quick brown fox', /brown/, '$`empathetic')
+    ).to.eventually.equal('the quick the quick empathetic fox');
+  });
+
   it('should replace with sync function as callback', () => {
     const result = asyncStringReplace(
       'the quick brown fox',
