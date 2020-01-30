@@ -295,7 +295,7 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       endBuildStep('Minified', name, timeInfo.startTime);
     })
     .then(() => {
-      if (!argv.no_amp_config && MINIFIED_TARGETS.includes(minifiedName)) {
+      if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
         return applyAmpConfig(
           `${destDir}/${minifiedName}`,
           /* localDev */ !!argv.fortesting
@@ -303,7 +303,7 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       }
     })
     .then(() => {
-      if (argv.no_amp_config || !options.singlePassCompilation) {
+      if (argv.noconfig || !options.singlePassCompilation) {
         return;
       }
       return Promise.all(
