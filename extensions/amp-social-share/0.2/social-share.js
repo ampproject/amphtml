@@ -151,9 +151,9 @@ function getTypeConfigOrUndefined(type, viewer, platform) {
     // system share wants to be unique
     const systemOnly =
       systemShareSupported(viewer, platform) &&
-      !!window.document.querySelectorAll(
+      !!window.document.querySelector(
         'amp-social-share[type=system][data-mode=replace]'
-      ).length;
+      );
     if (systemOnly) {
       return;
     }
