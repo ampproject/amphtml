@@ -300,23 +300,58 @@ describes.realWin(
       );
     });
 
-    it('should preprocess percentages preserving ties, order, and adding to 100 (in most cases)', () => {
+    it('should handle the percentage pipeline', async () => {
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockReactionData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateStandardQuizContent(win, ampStoryQuiz.element);
+      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const quizElement = ampStoryQuiz.getQuizElement();
+      const quizOptions = quizElement.querySelectorAll(
+        '.i-amphtml-story-quiz-option'
+      );
+
+      const percentageOption0 = quizOptions[0].querySelector(
+        '.i-amphtml-story-quiz-percentage-text'
+      );
+
+      expect(percentageOption0.textContent).to.equal('30%');
+
+      const percentageOption3 = quizOptions[3].querySelector(
+        '.i-amphtml-story-quiz-percentage-text'
+      );
+
+      expect(percentageOption3.textContent).to.equal('10%');
+    });
+
+    it('should preprocess percentages properly', () => {
       const responseData1 = getMockReactionData()['data'];
 
       const percentages1 = ampStoryQuiz.preprocessPercentages_(responseData1);
 
       expect(percentages1).to.deep.equal([30, 30, 30, 10]);
+    });
 
+    it('should preprocess percentages preserving ties', () => {
       const responseData2 = generateResponseDataFor([3, 3, 3]);
       const percentages2 = ampStoryQuiz.preprocessPercentages_(responseData2);
 
       expect(percentages2).to.deep.equal([33, 33, 33]);
+    });
 
+    it('should preprocess percentages preserving order', () => {
       const responseData3 = generateResponseDataFor([255, 255, 245, 245]);
       const percentages3 = ampStoryQuiz.preprocessPercentages_(responseData3);
 
       expect(percentages3).to.deep.equal([26, 26, 24, 24]);
+    });
 
+    it('should preprocess percentages handling rounding edge cases', () => {
       const responseData4 = generateResponseDataFor([335, 335, 330]);
       const percentages4 = ampStoryQuiz.preprocessPercentages_(responseData4);
 

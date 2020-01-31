@@ -77,6 +77,8 @@ h3.i-amphtml-story-quiz-prompt {
 .i-amphtml-story-quiz-option {
     position: relative !important;
     display: flex !important;
+    box-sizing: border-box;
+    height: 58px !important;
     justify-items: start !important;
     align-items: center !important;
     border-radius: 30px !important;
@@ -89,6 +91,10 @@ h3.i-amphtml-story-quiz-prompt {
     line-height: 20px !important;
     overflow: hidden !important;
     z-index: 0 !important;
+}
+
+[dir=rtl] .i-amphtml-story-quiz-option {
+    padding: 8px 8px 8px 16px !important;
 }
 
 /* Truncate option text and add an ellipsis after 2 lines. */
@@ -135,6 +141,13 @@ h3.i-amphtml-story-quiz-prompt {
     margin-left: auto !important;
     color: #AAAAAA !important;
     visibility: hidden !important;
+}
+
+[dir=rtl ] .i-amphtml-story-quiz-percentage-text {
+    padding-left: 0px !important;
+    padding-right: 10px !important;
+    margin-right: auto !important;
+    margin-left: 0px !important;
 }
 
 .i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-percentage-text {
@@ -218,6 +231,23 @@ h3.i-amphtml-story-quiz-prompt {
     transform: translateX(var(--option-4-percentage)) !important;
 }
 
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option:nth-of-type(1)::before {
+    transform: translateX(calc(-1 * var(--option-1-percentage))) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option:nth-of-type(2)::before {
+    transform: translateX(calc(-1 * var(--option-2-percentage))) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option:nth-of-type(3)::before {
+    transform: translateX(calc(-1 * var(--option-3-percentage))) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option:nth-of-type(4)::before {
+    transform: translateX(calc(-1 * var(--option-4-percentage))) !important;
+}
+
 .i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option::before {
     left: -101% !important;
     width: 100% !important;
@@ -229,20 +259,29 @@ h3.i-amphtml-story-quiz-prompt {
     border: solid 2px !important;
 }
 
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option::before {
+    left: 101% !important;
+}
+
 .i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option {
     background: var(--correct-color) !important;
     border: none !important;
-    /* Ups the padding by one to account for the border which must be removed
-     * to allow the shading to reach the edge of the box */
-    padding: 9px 17px 9px 9px !important;
 }
 
 .i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected:not([correct]).i-amphtml-story-quiz-option {
     background: var(--incorrect-color) !important;
     border: none !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected.i-amphtml-story-quiz-option {
     /* Ups the padding by one to account for the border which must be removed
      * to allow the shading to reach the edge of the box */
-    padding: 9px 17px 9px 9px !important;
+     padding: 9px 17px 9px 9px !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option-selected.i-amphtml-story-quiz-option {
+    /* Switches the extra padding to the left from the right, since the answer choice and the percentage switch */
+    padding: 9px 9px 9px 17px !important;
 }
 
 .i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option::before {

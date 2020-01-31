@@ -284,7 +284,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     // Add text container for percentage display
     const percentageText = document.createElement('span');
     percentageText.classList.add('i-amphtml-story-quiz-percentage-text');
-    percentageText.textContent = '0%';
     convertedOption.appendChild(percentageText);
 
     if (option.hasAttribute('correct')) {
@@ -395,6 +394,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     const percentages = this.preprocessPercentages_(this.responseData_);
 
     this.responseData_['responses'].forEach(response => {
+      // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
       options[response['reactionValue']].querySelector(
         '.i-amphtml-story-quiz-percentage-text'
       ).textContent = `${percentages[response['reactionValue']]}%`;
@@ -452,55 +452,55 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     if (total === 100) {
       return percentages.map(percentage => Math.round(percentage));
-    } else {
-      // Truncate all and round up those with the highest remainders,
-      // preserving order and ties and adding to 100 (if possible given ties and ordering).
-      let remainder = 100 - total;
+    }
 
-      let preserveOriginal = percentages.map((percentage, index) => {
-        return {
-          originalIndex: index,
-          value: percentage,
-          remainder: (percentage - Math.floor(percentage)).toFixed(2),
-        };
-      });
-      preserveOriginal.sort(
-        (left, right) =>
-          // Break remainder ties using the higher value.
-          right.remainder - left.remainder || right.value - left.value
+    // Truncate all and round up those with the highest remainders,
+    // preserving order and ties and adding to 100 (if possible given ties and ordering).
+    let remainder = 100 - total;
+
+    let preserveOriginal = percentages.map((percentage, index) => {
+      return {
+        originalIndex: index,
+        value: percentage,
+        remainder: (percentage - Math.floor(percentage)).toFixed(2),
+      };
+    });
+    preserveOriginal.sort(
+      (left, right) =>
+        // Break remainder ties using the higher value.
+        right.remainder - left.remainder || right.value - left.value
+    );
+
+    const finalPercentages = [];
+    while (remainder > 0 && preserveOriginal.length !== 0) {
+      const highestRemainderObj = preserveOriginal[0];
+
+      const ties = preserveOriginal.filter(
+        percentageObj => percentageObj.value === highestRemainderObj.value
+      );
+      preserveOriginal = preserveOriginal.filter(
+        percentageObj => percentageObj.value !== highestRemainderObj.value
       );
 
-      const finalPercentages = [];
-      while (remainder > 0 && preserveOriginal.length !== 0) {
-        const highestRemainderObj = preserveOriginal[0];
+      const toRoundUp =
+        ties.length <= remainder && highestRemainderObj.remainder !== '0.00';
 
-        const ties = preserveOriginal.filter(
-          percentageObj => percentageObj.value === highestRemainderObj.value
-        );
-        preserveOriginal = preserveOriginal.filter(
-          percentageObj => percentageObj.value !== highestRemainderObj.value
-        );
-
-        const toRoundUp =
-          ties.length <= remainder && highestRemainderObj.remainder !== '0.00';
-
-        ties.forEach(percentageObj => {
-          finalPercentages[percentageObj.originalIndex] =
-            Math.floor(percentageObj.value) + (toRoundUp ? 1 : 0);
-        });
-
-        // Update the remainder given additions to the percentages.
-        remainder -= toRoundUp ? ties.length : 0;
-      }
-
-      preserveOriginal.forEach(percentageObj => {
-        finalPercentages[percentageObj.originalIndex] = Math.floor(
-          percentageObj.value
-        );
+      ties.forEach(percentageObj => {
+        finalPercentages[percentageObj.originalIndex] =
+          Math.floor(percentageObj.value) + (toRoundUp ? 1 : 0);
       });
 
-      percentages = finalPercentages;
+      // Update the remainder given additions to the percentages.
+      remainder -= toRoundUp ? ties.length : 0;
     }
+
+    preserveOriginal.forEach(percentageObj => {
+      finalPercentages[percentageObj.originalIndex] = Math.floor(
+        percentageObj.value
+      );
+    });
+
+    percentages = finalPercentages;
 
     return percentages;
   }
@@ -670,6 +670,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     if (selectedOptionKey === undefined) {
       dev().error(TAG, `The user-selected reaction could not be found`);
+      return;
     }
 
     const options = this.quizEl_.querySelectorAll(
