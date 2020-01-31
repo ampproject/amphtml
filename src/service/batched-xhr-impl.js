@@ -16,8 +16,8 @@
 
 import {Xhr} from './xhr-impl';
 import {getService, registerServiceBuilder} from '../service';
+import {getWinOrigin, removeFragment, resolveRelativeUrl} from '../url';
 import {map} from '../utils/object';
-import {resolveRelativeUrl, removeFragment, getWinOrigin} from '../url';
 
 /**
  * A wrapper around the Xhr service which batches the result of GET requests
