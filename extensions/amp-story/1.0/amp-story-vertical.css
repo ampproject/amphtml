@@ -69,6 +69,6 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
   display: block !important;
   font-size: 0.8rem !important;
   padding: 32px !important;
-  width: 100% !important;
+  width: auto !important;
   z-index: 9999999 !important;
 }

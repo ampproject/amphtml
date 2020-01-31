@@ -635,7 +635,7 @@ export class AmpStoryBookend extends DraggableDrawer {
       .then(localizationService => {
         const bookendEls = BookendComponent.buildElements(
           components,
-          this.win.document,
+          this.win,
           localizationService
         );
         const container = dev().assertElement(

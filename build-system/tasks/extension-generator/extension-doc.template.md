@@ -61,8 +61,6 @@ limitations under the License.
   formats, include and filter multiple content blocks and code samples.
 -->
 
-[/example][/filter]
-
 ## Usage
 
 One to three paragraph explaining the component usage. List important functionality. Explain why developers care about it.
@@ -97,6 +95,8 @@ Below is an example for ads.
   I am a hello world inline executable code sample for ads!
 </${name}>
 ```
+
+[/example][/filter]
 
 ### Behavior users should be aware of (optional)
 

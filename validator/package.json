@@ -2,9 +2,6 @@
   "name": "amp-validator",
   "version": "0.1.0",
   "description": "Validator for AMP HTML (amp.dev)",
-  "engines": {
-    "node": "^12.0.0"
-  },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
   "repository": {
@@ -15,8 +12,8 @@
     "preinstall": "node ../build-system/common/check-package-manager.js"
   },
   "devDependencies": {
-    "google-closure-compiler": "20191111.0.0",
-    "google-closure-library": "20191111.0.0",
+    "google-closure-compiler": "20200112.0.0",
+    "google-closure-library": "20200112.0.0",
     "jasmine": "3.5.0"
   },
   "resolutions": {

@@ -54,6 +54,7 @@ import {AmpStoryPage, NavigationDirection, PageState} from './amp-story-page';
 import {AmpStoryPageAttachment} from './amp-story-page-attachment';
 import {AmpStoryQuiz} from './amp-story-quiz';
 import {AmpStoryRenderService} from './amp-story-render-service';
+import {AmpStoryViewerMessagingHandler} from './amp-story-viewer-messaging-handler';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-1.0.css';
 import {CommonSignals} from '../../../src/common-signals';
@@ -76,10 +77,7 @@ import {MediaPool, MediaType} from './media-pool';
 import {PaginationButtons} from './pagination-buttons';
 import {Services} from '../../../src/services';
 import {ShareMenu} from './amp-story-share-menu';
-import {
-  SwipeXYRecognizer,
-  SwipeYRecognizer,
-} from '../../../src/gesture-recognizers';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {SystemLayer} from './amp-story-system-layer';
 import {UnsupportedBrowserLayer} from './amp-story-unsupported-browser-layer';
 import {ViewportWarningLayer} from './amp-story-viewport-warning-layer';
@@ -96,7 +94,6 @@ import {
 } from '../../../src/dom';
 import {
   computedStyle,
-  px,
   resetStyles,
   setImportantStyles,
   toggle,
@@ -335,6 +332,11 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
     this.viewer_ = Services.viewerForDoc(this.element);
+
+    /** @private @const {?AmpStoryViewerMessagingHandler} */
+    this.viewerMessagingHandler_ = this.viewer_.isEmbedded()
+      ? new AmpStoryViewerMessagingHandler(this.win, this.viewer_)
+      : null;
 
     /**
      * Store the current paused state, to make sure the story does not play on
@@ -607,40 +609,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @private
-   */
-  updateViewportSizeStyles_() {
-    const pageEl =
-      (this.activePage_ && this.activePage_.element) ||
-      this.element.querySelector('amp-story-page');
-
-    if (!pageEl || !this.isStandalone_()) {
-      return;
-    }
-
-    return this.vsync_.runPromise(
-      {
-        measure: state => {
-          state.vh = pageEl./*OK*/ clientHeight / 100;
-          state.vw = pageEl./*OK*/ clientWidth / 100;
-          state.vmin = Math.min(state.vh, state.vw);
-          state.vmax = Math.max(state.vh, state.vw);
-        },
-        mutate: state => {
-          this.win.document.documentElement.setAttribute(
-            'style',
-            `--story-page-vh: ${px(state.vh)};` +
-              `--story-page-vw: ${px(state.vw)};` +
-              `--story-page-vmin: ${px(state.vmin)};` +
-              `--story-page-vmax: ${px(state.vmax)};`
-          );
-        },
-      },
-      {}
-    );
-  }
-
-  /**
    * Builds the system layer DOM.
    * @param {string} initialPageId
    * @private
@@ -832,23 +800,31 @@ export class AmpStory extends AMP.BaseElement {
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
     this.installGestureRecognizers_();
 
+    // TODO(gmajoulet): migrate this to amp-story-viewer-messaging-handler once
+    // there is a way to navigate to pages that does not involve using private
+    // amp-story methods.
     this.viewer_.onMessage('selectPage', data => this.onSelectPage_(data));
+
+    if (this.viewerMessagingHandler_) {
+      this.viewerMessagingHandler_.startListening();
+    }
   }
 
   /** @private */
   installGestureRecognizers_() {
+    // If the story is within a viewer that enabled the swipe capability, this
+    // disables the navigation education overlay to enable:
+    //   - horizontal swipe events to the next story
+    //   - vertical swipe events to close the viewer, or open a page attachment
+    if (this.viewer_.hasCapability('swipe')) {
+      return;
+    }
+
     const {element} = this;
     const gestures = Gestures.get(element, /* shouldNotPreventDefault */ true);
 
-    // If the story is within a viewer that enabled the swipe capability, this
-    // disables the navigation education overlay on the X axis to enable the
-    // swipe to the next story feature.
-    const swipeRecognizer = this.viewer_.hasCapability('swipe')
-      ? SwipeYRecognizer
-      : SwipeXYRecognizer;
-
     // Shows "tap to navigate" hint when swiping.
-    gestures.onGesture(swipeRecognizer, gesture => {
+    gestures.onGesture(SwipeXYRecognizer, gesture => {
       const {deltaX, deltaY} = gesture.data;
       const embedComponent = /** @type {InteractiveComponentDef} */ (this.storeService_.get(
         StateProperty.INTERACTIVE_COMPONENT_STATE
@@ -1012,7 +988,6 @@ export class AmpStory extends AMP.BaseElement {
         }
       })
       .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
-      .then(() => this.updateViewportSizeStyles_())
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
           this.win,
@@ -1048,10 +1023,7 @@ export class AmpStory extends AMP.BaseElement {
     // visible.
     if (!this.getAmpDoc().hasBeenVisible()) {
       return whenUpgradedToCustomElement(firstPageEl).then(() => {
-        return Promise.all([
-          firstPageEl.whenBuilt(),
-          this.updateViewportSizeStyles_(),
-        ]);
+        return firstPageEl.whenBuilt();
       });
     }
 
@@ -1323,8 +1295,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onNoNextPage_() {
-    if (this.viewer_.hasCapability('swipe')) {
-      this.viewer_./*OK*/ sendMessage('selectDocument', dict({'next': true}));
+    if (this.viewer_.hasCapability('swipe') && this.viewerMessagingHandler_) {
+      this.viewerMessagingHandler_.send('selectDocument', dict({'next': true}));
       return;
     }
 
@@ -1352,8 +1324,8 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   onNoPreviousPage_() {
-    if (this.viewer_.hasCapability('swipe')) {
-      this.viewer_./*OK*/ sendMessage(
+    if (this.viewer_.hasCapability('swipe') && this.viewerMessagingHandler_) {
+      this.viewerMessagingHandler_.send(
         'selectDocument',
         dict({'previous': true})
       );
@@ -1729,8 +1701,6 @@ export class AmpStory extends AMP.BaseElement {
    * @visibleForTesting
    */
   onResize() {
-    this.updateViewportSizeStyles_();
-
     const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
