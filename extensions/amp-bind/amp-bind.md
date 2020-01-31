@@ -28,7 +28,6 @@ limitations under the License.
 
 [TOC]
 
-
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
@@ -62,7 +61,7 @@ limitations under the License.
 
 ## Usage
 
-The `amp-bind` component enables custom stateful interactivity on AMP pages. 
+The `amp-bind` component enables custom stateful interactivity on AMP pages.
 
 For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely `amp-bind` for initial render.
 
@@ -76,8 +75,8 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 `amp-bind` has three main concepts:
 
 1. [State](#state): A document-scope, mutable JSON state. State variables update in response to user actions. `amp-bind` does not evaluate expressions on page load. Visual elements should have their default "state" defined and not rely `amp-bind` for initial render.
-2. [Expressions](#expressions): JavaScript-like expressions that can reference the **state**. 
-3. [Bindings](#bindings): Special attributes that link an element's property to an **expression**. A property is bound by wrapping it inside brackets, in the form of `[property]`. 
+2. [Expressions](#expressions): JavaScript-like expressions that can reference the **state**.
+3. [Bindings](#bindings): Special attributes that link an element's property to an **expression**. A property is bound by wrapping it inside brackets, in the form of `[property]`.
 
 ### Basic example
 
@@ -86,24 +85,26 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 ```html
 <p [text]="'Hello ' + foo">Hello World</p>
 
-<button on="tap:AMP.setState({foo: 'Interactivity'})">Say "Hello Interactivity"</button>
+<button on="tap:AMP.setState({foo: 'Interactivity'})">
+  Say "Hello Interactivity"
+</button>
 ```
 
 [/example]
 
 In the example above:
 
-- The **state** begins as empty. 
-- It has a single **binding** to `[text]`, the text content of a node, on the `<p>` element. 
-- The `[text]` value contains the **expression**,  `'Hello ' + foo`. 
-  - This expression concatenates the string 'Hello ' and the value of the **state variable** foo. 
-- When the user taps/clicks the button, it triggers the `tap` event. 
+- The **state** begins as empty.
+- It has a single **binding** to `[text]`, the text content of a node, on the `<p>` element.
+- The `[text]` value contains the **expression**, `'Hello ' + foo`.
+  - This expression concatenates the string 'Hello ' and the value of the **state variable** foo.
+- When the user taps/clicks the button, it triggers the `tap` event.
 - The `tap` event invokes the `AMP.setState()` method.
-- The `AMP.setState()` methods sets the `foo` **state variable** to the value of  `Interactivity`. 
-- The sate is no longer empty, so the pages updates the bound property to its state. 
+- The `AMP.setState()` methods sets the `foo` **state variable** to the value of `Interactivity`.
+- The sate is no longer empty, so the pages updates the bound property to its state.
 
 [tip type="note"]
-  Calling `AMP.setState()` in some examples may set or change states of other examples on page. Refresh this page to see examples before `AMP.setState()`.
+Calling `AMP.setState()` in some examples may set or change states of other examples on page. Refresh this page to see examples before `AMP.setState()`.
 [/tip]
 
 ### A slightly more complex example
@@ -155,37 +156,35 @@ In the example above:
 
 In the example above:
 
-- The `<amp-state>` component holds the complex nested JSON data. It has an `id` of "theFood" to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the  **state** is empty.
-- The page loads with visual defaults. 
+- The `<amp-state>` component holds the complex nested JSON data. It has an `id` of "theFood" to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the **state** is empty.
+- The page loads with visual defaults.
   - The `<div>` element has `class="greenBorder"` defined.
   - The second `<p>` element has "I want cupcakes." defined within the tags.
   - The `<amp-img>` `src` points to a url.
 - Changeable elements have **bindings** that point to **expressions**.
-  - The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**. 
-  - The `[text]` attribute on the second `<p>` is bound to the `'I want to eat ' + currentMeal + '.'` **expression**. 
-  - The `[src]` attribute is bound to the `theFood[currentMeal].imageUrl` **expression**. 
+  - The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**.
+  - The `[text]` attribute on the second `<p>` is bound to the `'I want to eat ' + currentMeal + '.'` **expression**.
+  - The `[src]` attribute is bound to the `theFood[currentMeal].imageUrl` **expression**.
 
 If a user clicks the "Set to sushi" button:
 
 - The `tap` event trigger the `AMP.setState` action.
 - The setState action turns `currentMeal` into a state and sets it to `sushi`.
-- AMP evaluates **bindings** with **expressions** that contain the state `currentMeal`. 
+- AMP evaluates **bindings** with **expressions** that contain the state `currentMeal`.
   - `[class]="theFood[currentMeal].style"` updates `class` to `redBorder`.
-  - `[text]="'I want to eat ' + currentMeal + '.'"` updates the inner text of the second `<p>` element to "I want to eat sushi". 
+  - `[text]="'I want to eat ' + currentMeal + '.'"` updates the inner text of the second `<p>` element to "I want to eat sushi".
   - `[src]="theFood[currentMeal].imageUrl` updates the `src` of `<amp-img>` to `https://amp.dev/static/samples/img/image3.jpg`
 
 Using `[class]="theFood[currentMeal].style"` as an example of **expression** syntax evaluation:
 
 - `[class]` is the property to update
-- `theFood` is the id of the `<amp-state>` component. 
-- `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`. 
-- `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value. 
-
+- `theFood` is the id of the `<amp-state>` component.
+- `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`.
+- `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value.
 
 [/filter] <!-- formats="websites, stories, ads" -->
 
 [filter formats="email"]
-
 
 [example preview="top-frame" playground="true" imports="amp-bind"]
 
@@ -224,28 +223,28 @@ Using `[class]="theFood[currentMeal].style"` as an example of **expression** syn
 
 [/example]
 
-- The `<amp-state>` component holds the complex nested JSON data. It has an `id` of "theFood" to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on email load, the  **state** is empty.
-- The page loads with visual defaults. 
- - The `<div>` element has `class="greenBorder"` defined.
- - The second `<p>` element has "I want cupcakes." defined within the tags.
- - The `<amp-img>` `src` points to a url.
+- The `<amp-state>` component holds the complex nested JSON data. It has an `id` of "theFood" to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on email load, the **state** is empty.
+- The page loads with visual defaults.
+- The `<div>` element has `class="greenBorder"` defined.
+- The second `<p>` element has "I want cupcakes." defined within the tags.
+- The `<amp-img>` `src` points to a url.
 - Changeable elements have **bindings** that point to **expressions**.
- - The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**. 
- - The `[text]` attribute on the second `<p>` is bound to the `theFood[currentMeal].text` **expression**. 
+- The `[class]` attribute on the `<div>` is bound to the `theFood[currentMeal].style` **expression**.
+- The `[text]` attribute on the second `<p>` is bound to the `theFood[currentMeal].text` **expression**.
 
 If a user clicks the "Set to sushi" button:
 
 - The `tap` event trigger the `AMP.setState` action.
 - The setState action turns `currentMeal` into a state and sets it to `sushi`.
-- AMP evaluates **bindings** with **expressions** that contain the state `currentMeal`. 
- - `[class]="theFood[currentMeal].style` updates `class` to `redBorder`.
- - `theFood[currentMeal].text` updates the inner text of the second `<p>` element to "Actually, I want to eat sushi.". 
+- AMP evaluates **bindings** with **expressions** that contain the state `currentMeal`.
+- `[class]="theFood[currentMeal].style` updates `class` to `redBorder`.
+- `theFood[currentMeal].text` updates the inner text of the second `<p>` element to "Actually, I want to eat sushi.".
 
 Using `[class]="theFood[currentMeal].style"` as an example of **expression** syntax evaluation:
 
 - `[class]` is the property to update
-- `theFood` is the id of the `<amp-state>` component. 
-- `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`. 
+- `theFood` is the id of the `<amp-state>` component.
+- `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`.
 - `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value.
 
 [/filter] <!-- formats="email" -->
@@ -333,11 +332,11 @@ Expressions are not evaluates on page load, but you may define an initial state.
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <amp-state id="myDefinedState">
+<amp-state id="myDefinedState">
   <script type="application/json">
-  {
-    "foo": "bar"
-  }
+    {
+      "foo": "bar"
+    }
   </script>
 </amp-state>
 <p [text]="myDefinedState.foo"></p>
@@ -351,54 +350,56 @@ Use [expressions](#expressions) to reference **state variables**. If the JSON da
 An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [`<amp-state>` specification](#amp-state-specification) for details.
 
 ```html
-<amp-state id="myRemoteState"
-  src="/static/samples/json/websites.json">
+<amp-state id="myRemoteState" src="/static/samples/json/websites.json">
 </amp-state>
 ```
 
 ### Updating state variables with `AMP.setState()`
 
-The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. This means you can update the value of a defined state variable. 
+The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. This means you can update the value of a defined state variable.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <amp-state id="myUpdateState">
-    <script type="application/json">
-      {
-        "foo": "bar",
-        "baz": "hello"
-      }
-    </script>
-  </amp-state>
-  <p [text]="myUpdateState.foo"></p>
-  <p [text]="myUpdateState.baz"></p>
-  <button on="tap:AMP.setState({})">See value of set state</button>
-  <!-- Like JavaScript, you can reference existing
+<amp-state id="myUpdateState">
+  <script type="application/json">
+    {
+      "foo": "bar",
+      "baz": "hello"
+    }
+  </script>
+</amp-state>
+<p [text]="myUpdateState.foo"></p>
+<p [text]="myUpdateState.baz"></p>
+<button on="tap:AMP.setState({})">See value of set state</button>
+<!-- Like JavaScript, you can reference existing
      variables in the values of the  object literal. -->
-  <button on="tap:AMP.setState({myUpdateState:{baz: myUpdateState.foo}})"
-          >Set value of baz to value of foo</button>
-  <button on="tap:AMP.setState({myUpdateState:{baz: 'world'}})"
-        >Set value of baz to "world"</button>        
+<button on="tap:AMP.setState({myUpdateState:{baz: myUpdateState.foo}})">
+  Set value of baz to value of foo
+</button>
+<button on="tap:AMP.setState({myUpdateState:{baz: 'world'}})">
+  Set value of baz to "world"
+</button>
 ```
 
 [/example]
 
 In the example above, triggering the `AMP.setState({})` action on the first button evaluates the `[text]` binding expression. It then inserts the defined **state variable's** value into the `<p>` tag.
 
-When the clicking the second button, with `AMP.setState({myState:{baz: myState.foo}})` action defined, it [deep-merges](#deep-merge-with-ampsetstate) the "baz" **state variable** value to the same as the "foo" **state variable** value. Both `<p>` tags display "bar". 
+When the clicking the second button, with `AMP.setState({myState:{baz: myState.foo}})` action defined, it [deep-merges](#deep-merge-with-ampsetstate) the "baz" **state variable** value to the same as the "foo" **state variable** value. Both `<p>` tags display "bar".
 
 **State variable** values can update to values not defined in the initial state. When clicking the third button, with `"tap:AMP.setState({myState:{baz: 'world'}})"` action defined, it deep merges the "baz" **state variable** value, overriding it to "world".
 
-Clicking the first button after the other two sets the current state. Nothing will change. 
+Clicking the first button after the other two sets the current state. Nothing will change.
 
-The **state variables** reverts back to the defined JSON in `<amp-state>` on page refresh. 
+The **state variables** reverts back to the defined JSON in `<amp-state>` on page refresh.
 
 ##### Event triggering and data
 
 When triggered by certain events, `AMP.setState()` can access event-related data on the `event` property.
 
 [example preview="inline" playground="true" imports="amp-bind"]
+
 ```html
 <!-- The "change" event of this <input> element contains
      a "value" variable that can be referenced via "event.value". -->
@@ -407,63 +408,65 @@ When triggered by certain events, `AMP.setState()` can access event-related data
   <option value="1">Option 1</option>
   <option value="2">Option 2</option>
 </select>
-<div hidden
-  [hidden]="option != 1">
+<div hidden [hidden]="option != 1">
   Option 1
 </div>
-<div hidden
-  [hidden]="option != 2">
+<div hidden [hidden]="option != 2">
   Option 2
 </div>
 ```
+
 [/example]
 
-#### Updating nested variables 
+#### Updating nested variables
 
 Nested objects are generally merged to a maximum depth of 10. All variables, including those defined in `<amp-state>`, can be overidden.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <amp-state id="myState">
-    <script type="application/json">
-      {
-        "foo": "bar",
-        "first": {
-            "a": "nested once",
-            "ab": {
-            	"b": "nested twice",
-            	"bc":{
-                	"c": "nested three times",
-                    "cd": {
-                    	"d": "nested four times",
-                        "de": {
-                        	"e": "nested five times",
-                            "ef": {
-                            	"f": "nested six times",
-                                "fg": {
-                                	"g": "nested seven times",
-                                    "gh": {
-                                    	"h": "nested nine times",
-                                        "hi": {
-                                        	"i": "nested ten times"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+<amp-state id="myState">
+  <script type="application/json">
+    {
+      "foo": "bar",
+      "first": {
+          "a": "nested once",
+          "ab": {
+          	"b": "nested twice",
+          	"bc":{
+              	"c": "nested three times",
+                  "cd": {
+                  	"d": "nested four times",
+                      "de": {
+                      	"e": "nested five times",
+                          "ef": {
+                          	"f": "nested six times",
+                              "fg": {
+                              	"g": "nested seven times",
+                                  "gh": {
+                                  	"h": "nested nine times",
+                                      "hi": {
+                                      	"i": "nested ten times"
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+          }
       }
-    </script>
-  </amp-state>
-  <p [text]="myState.foo"></p>
-  <p [text]="myState.first.ab.bc.cd.de.ef.fg.gh.hi.i"></p>
-   <button on="tap:AMP.setState({})">See value of set state</button>
-  <button on="tap:AMP.setState({ myState: {first: {ab: {bc: {cd: {de: {ef: {fg: {gh: {hi: {i:'this is as far as you should merge nested values'} } } } } } } } } } })"
-          >Merge 10th nested object</button>  
+    }
+  </script>
+</amp-state>
+<p [text]="myState.foo"></p>
+<p [text]="myState.first.ab.bc.cd.de.ef.fg.gh.hi.i"></p>
+<button on="tap:AMP.setState({})">See value of set state</button>
+<button
+  on="tap:AMP.setState({ myState: {first: {ab: {bc: {cd: {de: {ef: {fg: {gh: {hi: {i:'this is as far as you should merge nested values'} } } } } } } } } } })"
+>
+  Merge 10th nested object
+</button>
 ```
 
 [/example]
@@ -490,32 +493,32 @@ Calling `AMP.setState()` deep-merges the provided object literal with the curren
 <p [text]="employee.name">Name</p>
 <p [text]="employee.age">Age</p>
 <p [text]="employee.vehicle">Vehicle</p>
-  <!-- Pressing this button changes state to: -->
+<!-- Pressing this button changes state to: -->
 <button
-        on="tap:AMP.setState({
+  on="tap:AMP.setState({
               employee: {
                 name: 'John Smith',
                 age: 47,
                 vehicle: 'Car'
               }
             })"
-        >
+>
   Set employee to John Smith
 </button>
 <!-- Pressing this button recursively merges the object literal argument,  -->
 <!-- `{employee: {age: 64}}`, into the existing state. -->
-  
+
 <button
-        on="tap:AMP.setState({
+  on="tap:AMP.setState({
               employee: {
                 age: 64
               }
             })"
-        >
+>
   Set employee age to 64
 </button>
-  <!-- The value updates from 47 to 64 at employee.age.  -->
-  <!-- No other values change. -->
+<!-- The value updates from 47 to 64 at employee.age.  -->
+<!-- No other values change. -->
 ```
 
 [/example]
@@ -527,8 +530,7 @@ The `refresh` action refetches data from data point the `src` attribute points t
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-<amp-state id="currentTime"
-  src="/documentation/examples/api/time"></amp-state>
+<amp-state id="currentTime" src="/documentation/examples/api/time"></amp-state>
 <button on="tap:currentTime.refresh">
   Refresh
 </button>
@@ -542,7 +544,6 @@ A common need for `refresh` is working with live content that needs to be update
 ### Modifying history with `AMP.pushState()`
 
 `AMP.pushState()` writes state changes to the history. Navigating back, will restore the previous state. To test this, increase the count in the example below and use your browser's back button to decrease the count.
-
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -578,24 +579,32 @@ The following are all valid expressions:
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <p [text]="myExpressionsState.foo"></p>
-  <!-- 1 + '1'; // 11 -->
-  <button on="tap:AMP.setState({myExpressionsState: {foo: 1 + '1'}})">foo: 1 + "1"</button>
-  <!-- 1 + +'1'; // 2 -->
-  <button on="tap:AMP.setState({myExpressionsState: {foo: 1 + + '1'}})">foo: 1 + + "1"</button>
-  <!-- !0; // true -->
-  <button on="tap:AMP.setState({myExpressionsState: {foo: !0}})">foo: !0</button>
-  <!-- null || 'default'; // 'default' -->
-  <button on="tap:AMP.setState({myExpressionsState: {foo: null || 'default'}})">null || "default"</button>
-  <!-- [1, 2, 3].map(x => x + 1); // 2,3,4 -->
-  <button on="tap:AMP.setState({myExpressionsState: {foo: [1, 2, 3].map(x => x + 1)}})">[1, 2, 3].map(x => x + 1)</button>
+<p [text]="myExpressionsState.foo"></p>
+<!-- 1 + '1'; // 11 -->
+<button on="tap:AMP.setState({myExpressionsState: {foo: 1 + '1'}})">
+  foo: 1 + "1"
+</button>
+<!-- 1 + +'1'; // 2 -->
+<button on="tap:AMP.setState({myExpressionsState: {foo: 1 + + '1'}})">
+  foo: 1 + + "1"
+</button>
+<!-- !0; // true -->
+<button on="tap:AMP.setState({myExpressionsState: {foo: !0}})">foo: !0</button>
+<!-- null || 'default'; // 'default' -->
+<button on="tap:AMP.setState({myExpressionsState: {foo: null || 'default'}})">
+  null || "default"
+</button>
+<!-- [1, 2, 3].map(x => x + 1); // 2,3,4 -->
+<button
+  on="tap:AMP.setState({myExpressionsState: {foo: [1, 2, 3].map(x => x + 1)}})"
+>
+  [1, 2, 3].map(x => x + 1)
+</button>
 ```
 
 [/example]
 
 Find the full expression grammar and implementation in [bind-expr-impl.jison](./0.1/bind-expr-impl.jison) and [bind-expression.js](./0.1/bind-expression.js).
-
-
 
 ### Allowed-listed functions
 
@@ -619,28 +628,48 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
- <amp-state id="myArrayState">
-    <script type="application/json">
-      {
-        "foo": [1, 2, 3],
-        "bar": ["hello", "world", "bar", "baz"],
-        "baz": "Hello world, welcome to amp-bind"
-      }
-    </script>
-  </amp-state>
-  <p [text]="'concat: ' + myArrayState.foo.concat()">concat: 1, 2, 3</p>
-  <p [text]="'filter: ' + myArrayState.bar.filter(word => word.length > 3)">filter: words with less than three letter</p>
-  <p [text]="'includes: ' + myArrayState.bar.includes('hello' || 'world')">includes: "hello" or "world"</p>
-  <p [text]="'indexOf: ' + myArrayState.bar.indexOf('world')">indexOf: "world"</p>
-  <p [text]="'join: ' + myArrayState.bar.join('-')">join: all words with a dash</p>
-  <p [text]="'lastIndexOf: ' + myArrayState.baz.lastIndexOf('amp-bind')">lastIndexOf: "amp-bind"</p>
-  <p [text]="'map: ' + myArrayState.foo.map((x, i) => x + i)">map: add each number to previous number</p>
-  <p [text]="'reduce: ' + myArrayState.foo.reduce((x, i) => x + i)">reduce: add all numbers in array together</p>
-  <p [text]="'slice: ' + myArrayState.bar.slice(1,3)">slice: return words at index 1 and 3</p>
-  <p [text]="'some: ' + myArrayState.foo.some(x => x < 2)">some: some numbers are less than 2</p>
-  <p [text]="'sort: ' + myArrayState.bar.sort()">sort: place words in alphabetical order</p>
-  <p [text]="'splice: ' + myArrayState.bar.splice(2, 0, 'amp-bind')">splice: place "amp-bind" at index 2</p>
-  <button on="tap:AMP.setState({})">Evaluate</button>
+<amp-state id="myArrayState">
+  <script type="application/json">
+    {
+      "foo": [1, 2, 3],
+      "bar": ["hello", "world", "bar", "baz"],
+      "baz": "Hello world, welcome to amp-bind"
+    }
+  </script>
+</amp-state>
+<p [text]="'concat: ' + myArrayState.foo.concat()">concat: 1, 2, 3</p>
+<p [text]="'filter: ' + myArrayState.bar.filter(word => word.length > 3)">
+  filter: words with less than three letter
+</p>
+<p [text]="'includes: ' + myArrayState.bar.includes('hello' || 'world')">
+  includes: "hello" or "world"
+</p>
+<p [text]="'indexOf: ' + myArrayState.bar.indexOf('world')">indexOf: "world"</p>
+<p [text]="'join: ' + myArrayState.bar.join('-')">
+  join: all words with a dash
+</p>
+<p [text]="'lastIndexOf: ' + myArrayState.baz.lastIndexOf('amp-bind')">
+  lastIndexOf: "amp-bind"
+</p>
+<p [text]="'map: ' + myArrayState.foo.map((x, i) => x + i)">
+  map: add each number to previous number
+</p>
+<p [text]="'reduce: ' + myArrayState.foo.reduce((x, i) => x + i)">
+  reduce: add all numbers in array together
+</p>
+<p [text]="'slice: ' + myArrayState.bar.slice(1,3)">
+  slice: return words at index 1 and 3
+</p>
+<p [text]="'some: ' + myArrayState.foo.some(x => x < 2)">
+  some: some numbers are less than 2
+</p>
+<p [text]="'sort: ' + myArrayState.bar.sort()">
+  sort: place words in alphabetical order
+</p>
+<p [text]="'splice: ' + myArrayState.bar.splice(2, 0, 'amp-bind')">
+  splice: place "amp-bind" at index 2
+</p>
+<button on="tap:AMP.setState({})">Evaluate</button>
 ```
 
 [/example]
@@ -652,15 +681,22 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
 - [toPrecision](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toPrecision)
 - [toString](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toString)
 
-
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <p [text]="'toExponential: ' + (100).toExponential(5)">toExponential: 100 to the exponent of 5</p>
-  <p [text]="'toFixed: ' + (1.99).toFixed(1)">toFixed: 1.99 rounded and fixed to first decimal</p>
-  <p [text]="'toPrecision: ' + (1.234567).toPrecision(3)">toPrecision: 1.234567 returned as a string to the third digit</p>
-  <p [text]="'toString ' + (3.14).toString()">toString: 3.14 returned as a string</p>
-  <button on="tap:AMP.setState({})">Evaluate</button>
+<p [text]="'toExponential: ' + (100).toExponential(5)">
+  toExponential: 100 to the exponent of 5
+</p>
+<p [text]="'toFixed: ' + (1.99).toFixed(1)">
+  toFixed: 1.99 rounded and fixed to first decimal
+</p>
+<p [text]="'toPrecision: ' + (1.234567).toPrecision(3)">
+  toPrecision: 1.234567 returned as a string to the third digit
+</p>
+<p [text]="'toString ' + (3.14).toString()">
+  toString: 3.14 returned as a string
+</p>
+<button on="tap:AMP.setState({})">Evaluate</button>
 ```
 
 [/example]
@@ -682,24 +718,42 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
- <amp-state id="myStringState">
-    <script type="application/json">
-      {
-        "foo": "Hello world",
-        "bar": ", welcome to amp-bind"
-      }
-    </script>
-  </amp-state>
-  <p [text]="'charAt: ' + myStringState.foo.charAt(6)">charAt: The character at index 6</p>
-  <p [text]="'charCodeAt: ' + myStringState.foo.charCodeAt(6)">charCodeAt: The UTF-16 code unit of the character at index 6</p>
-  <p [text]="'concat: ' + myStringState.foo.concat(myState.bar)">concat: Combine foo and bar</p>
-  <p [text]="'lastIndexOf: ' + myStringState.foo.lastIndexOf('w')">lastIndexOf: The index of "w"</p>
-  <p [text]="'replace: ' + myStringState.foo.replace('world', 'amp-bind')">replace: Replace "world" with "amp-bind"</p>
-  <p [text]="'slice: ' + myStringState.foo.slice(5)">slice: Extract the first 5 characters</p>
-  <p [text]="'split: ' + myStringState.foo.split(' ')">split: Split words at space and return as array</p>
-  <p [text]="'toLowerCase: ' + myStringState.foo.toLowerCase()">toLowerCase: Make all letters lower case</p>
-  <p [text]="'toUpperCase: ' + myStringState.foo.toUpperCase()">toUpperCase: Make all letters upper case</p>
-  <button on="tap:AMP.setState({})">Evaluate</button>
+<amp-state id="myStringState">
+  <script type="application/json">
+    {
+      "foo": "Hello world",
+      "bar": ", welcome to amp-bind"
+    }
+  </script>
+</amp-state>
+<p [text]="'charAt: ' + myStringState.foo.charAt(6)">
+  charAt: The character at index 6
+</p>
+<p [text]="'charCodeAt: ' + myStringState.foo.charCodeAt(6)">
+  charCodeAt: The UTF-16 code unit of the character at index 6
+</p>
+<p [text]="'concat: ' + myStringState.foo.concat(myState.bar)">
+  concat: Combine foo and bar
+</p>
+<p [text]="'lastIndexOf: ' + myStringState.foo.lastIndexOf('w')">
+  lastIndexOf: The index of "w"
+</p>
+<p [text]="'replace: ' + myStringState.foo.replace('world', 'amp-bind')">
+  replace: Replace "world" with "amp-bind"
+</p>
+<p [text]="'slice: ' + myStringState.foo.slice(5)">
+  slice: Extract the first 5 characters
+</p>
+<p [text]="'split: ' + myStringState.foo.split(' ')">
+  split: Split words at space and return as array
+</p>
+<p [text]="'toLowerCase: ' + myStringState.foo.toLowerCase()">
+  toLowerCase: Make all letters lower case
+</p>
+<p [text]="'toUpperCase: ' + myStringState.foo.toUpperCase()">
+  toUpperCase: Make all letters upper case
+</p>
+<button on="tap:AMP.setState({})">Evaluate</button>
 ```
 
 [/example]
@@ -721,16 +775,20 @@ Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <p [text]="'abs: ' + abs(5 - 9)">abs: absolute number of 5 - 9</p>
-  <p [text]="'ceil: ' + ceil(1.01)">abs: round 1.01 up to the next largest whole number</p>
-  <p [text]="'floor: ' + floor(1.99)">floor: round 1.99 down to a whole number</p>
-  <p [text]="'max: ' + max(100, 4, 98)">max: return largest number</p>
-  <p [text]="'min: ' + min(100, 4, 98)">min: return smalled number</p>
-  <p [text]="'pow: ' + pow(5, 3)">pow: return 5 to the power of 3</p>
-  <p [text]="'random: ' + random()">random: return a number greater than 0 and less than 1</p>
-  <p [text]="'round: ' + round(1.51)">round: round 1.51</p>
-  <p [text]="'sign: ' + sign(-9)">sign: evaluate if positive or negative</p>
-  <button on="tap:AMP.setState({})">Evaluate</button>
+<p [text]="'abs: ' + abs(5 - 9)">abs: absolute number of 5 - 9</p>
+<p [text]="'ceil: ' + ceil(1.01)">
+  abs: round 1.01 up to the next largest whole number
+</p>
+<p [text]="'floor: ' + floor(1.99)">floor: round 1.99 down to a whole number</p>
+<p [text]="'max: ' + max(100, 4, 98)">max: return largest number</p>
+<p [text]="'min: ' + min(100, 4, 98)">min: return smalled number</p>
+<p [text]="'pow: ' + pow(5, 3)">pow: return 5 to the power of 3</p>
+<p [text]="'random: ' + random()">
+  random: return a number greater than 0 and less than 1
+</p>
+<p [text]="'round: ' + round(1.51)">round: round 1.51</p>
+<p [text]="'sign: ' + sign(-9)">sign: evaluate if positive or negative</p>
+<button on="tap:AMP.setState({})">Evaluate</button>
 ```
 
 [/example]
@@ -745,17 +803,21 @@ Static functions are not namespaced, e.g. use `keys(Object)` instead of `Object.
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
- <amp-state id="myObjectState">
-    <script type="application/json">
-      {
-        "hello": "world",
-        "foo": "bar"
-      }
-    </script>
-  </amp-state>
-  <p [text]="'keys: ' + keys(myObjectState)">keys: myObjectState JSON object keys</p>
-  <p [text]="'values: ' + values(myObjectState)">values: myObjectState JSON object values</p>
-  <button on="tap:AMP.setState({})">Evaluate</button>
+<amp-state id="myObjectState">
+  <script type="application/json">
+    {
+      "hello": "world",
+      "foo": "bar"
+    }
+  </script>
+</amp-state>
+<p [text]="'keys: ' + keys(myObjectState)">
+  keys: myObjectState JSON object keys
+</p>
+<p [text]="'values: ' + values(myObjectState)">
+  values: myObjectState JSON object values
+</p>
+<button on="tap:AMP.setState({})">Evaluate</button>
 ```
 
 [/example]
@@ -768,9 +830,13 @@ Static functions are not namespaced, e.g. use `keys(Object)` instead of `Object.
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <p [text]="'encodeURI: ' + encodeURI('https://amp.dev/😉')">encodeURI: Encode a URI and ignore protocol prefix</p>
-  <p [text]="'encodeURIComponent: ' + encodeURIComponent('https://amp.dev/😉')">encodeURIComponent: Encode a URI</p>
-  <button on="tap:AMP.setState({})">Evaluate</button>
+<p [text]="'encodeURI: ' + encodeURI('https://amp.dev/😉')">
+  encodeURI: Encode a URI and ignore protocol prefix
+</p>
+<p [text]="'encodeURIComponent: ' + encodeURIComponent('https://amp.dev/😉')">
+  encodeURIComponent: Encode a URI
+</p>
+<button on="tap:AMP.setState({})">Evaluate</button>
 ```
 
 [/example]
@@ -894,7 +960,7 @@ key:
 
 ### Defining macros with `amp-bind-macro`
 
-Reuse `amp-bind` expression fragments by defining an `amp-bind-macro`. The `amp-bind-macro` element allows an expression that takes zero or more arguments and references the current state. Invoke `amp-bind-macros` like a function, referencing the `id` attribute value from anywhere in the document. 
+Reuse `amp-bind` expression fragments by defining an `amp-bind-macro`. The `amp-bind-macro` element allows an expression that takes zero or more arguments and references the current state. Invoke `amp-bind-macros` like a function, referencing the `id` attribute value from anywhere in the document.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -935,47 +1001,54 @@ Boolean expression results toggle boolean attributes. For example: `<amp-video [
 [example preview="inline" playground="true" imports="amp-bind, amp-video"]
 
 ```html
-  <amp-video [controls]="controls"
-             width="640"
-             height="360"
-             layout="responsive"
-             poster="/static/inline-examples/images/kitten-playing.png">
-    <source src="/static/inline-examples/videos/kitten-playing.webm"
-            type="video/webm" />
-    <source src="/static/inline-examples/videos/kitten-playing.mp4"
-            type="video/mp4" />
-    <div fallback>
-      <p>This browser does not support the video element.</p>
-    </div>
-  </amp-video>
-  <button on="tap:AMP.setState({ controls: true })">
-    Controls
-  </button>
-  <button on="tap:AMP.setState({ controls: false })">
-    No Controls
-  </button>
+<amp-video
+  [controls]="controls"
+  width="640"
+  height="360"
+  layout="responsive"
+  poster="/static/inline-examples/images/kitten-playing.png"
+>
+  <source
+    src="/static/inline-examples/videos/kitten-playing.webm"
+    type="video/webm"
+  />
+  <source
+    src="/static/inline-examples/videos/kitten-playing.mp4"
+    type="video/mp4"
+  />
+  <div fallback>
+    <p>This browser does not support the video element.</p>
+  </div>
+</amp-video>
+<button on="tap:AMP.setState({ controls: true })">
+  Controls
+</button>
+<button on="tap:AMP.setState({ controls: false })">
+  No Controls
+</button>
 ```
 
 [/example]
 
-### XML compatibility 
+### XML compatibility
 
-If developing with XML, use the alternative `data-amp-bind-property` syntax. The  `[` and `]` characters in attribute names is invalid XML, making the `[property]` syntax unavailable. 
+If developing with XML, use the alternative `data-amp-bind-property` syntax. The `[` and `]` characters in attribute names is invalid XML, making the `[property]` syntax unavailable.
 
-Replace the `property` field with the name of the property you would like to define in  `data-amp-bind-property`.
+Replace the `property` field with the name of the property you would like to define in `data-amp-bind-property`.
 
-For example, `[text]="myState.foo"` would become `data-amp-bind-text="myState.foo"`. 
+For example, `[text]="myState.foo"` would become `data-amp-bind-text="myState.foo"`.
 
-### Binding types 
+### Binding types
 
 `amp-bind` supports data bindings on five types of element state.
 
 [**Node.textContent**](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent)
 
-Bind `Node.textContent` using the `[text]` attribute. The `[text]` attribute is supported on most text elements. 
+Bind `Node.textContent` using the `[text]` attribute. The `[text]` attribute is supported on most text elements.
 
 ```html
-<p [text]="'Hello ' + myState.foo">Hello World<p>
+<p [text]="'Hello ' + myState.foo">Hello World</p>
+<p></p>
 ```
 
 [**CSS classes**]("https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class")
@@ -1000,9 +1073,13 @@ Bind an element's `class` using the `[class]` attribute. A `[class]` expression 
 </style>
 <div class="background-red" [class]="myClass">Hello World</div>
 <!-- This button adds both classes -->
-<button on="tap:AMP.setState({ myClass: 'background-green border-red' })">Working: Change Class</button>
+<button on="tap:AMP.setState({ myClass: 'background-green border-red' })">
+  Working: Change Class
+</button>
 <!-- This expression evaluates to class="background-green,border-red" -->
-<button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">Broken: Change Class</button>
+<button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">
+  Broken: Change Class
+</button>
 ```
 
 [/example]
@@ -1014,30 +1091,38 @@ Hide and reveal and element using the `[hidden]` attribute. A `[hidden]` express
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <p [hidden]="hiddenState">Hello there!</p>
-  <button on="tap:AMP.setState({hiddenState: true})">Hide</button>
-  <button on="tap:AMP.setState({hiddenState: false})">Show</button>
+<p [hidden]="hiddenState">Hello there!</p>
+<button on="tap:AMP.setState({hiddenState: true})">Hide</button>
+<button on="tap:AMP.setState({hiddenState: false})">Show</button>
 ```
 
 [/example]
 
 **Size of [AMP components](https://www.ampproject.org/docs/reference/components)**
 
-Change the `width` and `height` using the `[width]` and `[height]` attributes. 
+Change the `width` and `height` using the `[width]` and `[height]` attributes.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <amp-img src="https://unsplash.it/400/200" width="200" [width]="myImageDimension.width" height="100" [height]="myImageDimension.height">
-  </amp-img>
-  <button on="tap:AMP.setState({
+<amp-img
+  src="https://unsplash.it/400/200"
+  width="200"
+  [width]="myImageDimension.width"
+  height="100"
+  [height]="myImageDimension.height"
+>
+</amp-img>
+<button
+  on="tap:AMP.setState({
               myImageDimension: {
               width: 400,
               height: 200
               }
-              })">
-    Change size
-  </button>
+              })"
+>
+  Change size
+</button>
 ```
 
 [/example]
@@ -1048,8 +1133,7 @@ Use to dynamically update information available to assistive technologies, such 
 
 **AMP Component specific and HTML attributes**
 
-Some AMP components and HTML elements have specific bindable attributes. They are listed below. 
-
+Some AMP components and HTML elements have specific bindable attributes. They are listed below.
 
 ### AMP component specific attributes
 
@@ -1398,7 +1482,6 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 - `overridable`
 
 [/filter] <!-- formats="email" -->
-
 
 ## Debugging
 
