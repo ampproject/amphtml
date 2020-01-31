@@ -17,7 +17,7 @@
 import {Xhr} from './xhr-impl';
 import {getService, registerServiceBuilder} from '../service';
 import {map} from '../utils/object';
-import {removeFragment} from '../url';
+import {resolveRelativeUrl, removeFragment, getWinOrigin} from '../url';
 
 /**
  * A wrapper around the Xhr service which batches the result of GET requests
@@ -83,7 +83,8 @@ export class BatchedXhr extends Xhr {
    * @private
    */
   getMapKey_(input, responseType) {
-    return removeFragment(input) + responseType;
+    const absoluteUrl = resolveRelativeUrl(input, getWinOrigin(this.win));
+    return removeFragment(absoluteUrl) + responseType;
   }
 }
 

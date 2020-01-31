@@ -16,6 +16,7 @@
 
 import {Services} from '../../src/services';
 import {batchedXhrServiceForTesting} from '../../src/service/batched-xhr-impl';
+import {getWinOrigin} from '../../src/url';
 
 describes.sandboxed('BatchedXhr', {}, env => {
   beforeEach(() => {
@@ -50,6 +51,15 @@ describes.sandboxed('BatchedXhr', {}, env => {
         expect(results[1]).to.equal(TEST_RESPONSE);
         expect(results[2]).to.equal(TEST_RESPONSE);
       });
+    });
+
+    it('should fetch once for a relative and absolute URL that point to the same location.', async () => {
+      await Promise.all([
+        xhr.fetch(`${getWinOrigin(env.win)}/get?k=v1`),
+        xhr.fetch('/get?k=v1'),
+      ]);
+
+      expect(fetchStub).to.be.calledOnce;
     });
 
     it(
