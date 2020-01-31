@@ -54,7 +54,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
    * @param {Object} command
    */
   sendCommand_(command) {
-    let message = command;
+    let message = JSON.stringify(command);
 
     if (command.eventName === 'pause') {
       message = 'pause';
