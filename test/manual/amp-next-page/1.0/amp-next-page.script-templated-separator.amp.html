@@ -293,21 +293,16 @@
             "image": "/examples/img/hero@1x.jpg",
             "title": "Page 3",
             "url": "./articles/article-long.html"
-          },
-          {
-            "image": "/examples/img/hero@1x.jpg",
-            "title": "Page 4",
-            "url": "./amp-next-page.amp.html"
           }
         ]
       </script>
       <div separator class="amp-next-page-default-separator">
-        <template type="amp-mustache">
+        <script type="text/plain" template="amp-mustache">
           <div class="separator-content">
             <amp-img src={{image}} layout="fixed" height="16" width="16"></amp-img>
             <span>Next article: {{title}}</span>
           </div>
-        </template>
+        </script>
       </div>
       <div more-box>
           Here are a few more articles ...

@@ -27,6 +27,25 @@
   overflow: visible;
 }
 
+.amp-next-page-default-separator {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  width: 160px;
+  height: 38px;
+  margin: auto;
+  border-radius: 32px;
+  box-shadow: 0px 6px 17px 0px rgba(0, 0, 0, 0.09);
+  background: black;
+  color: white;
+}
+
 /** Fixes collapsing margins when switching between the visible and hidden states */
 .i-amphtml-next-page-document:before,
 .i-amphtml-next-page-document:after {
