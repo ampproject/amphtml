@@ -26,7 +26,7 @@ CMP used through AppConsent platform in order to handle and enforce user consent
     {
       "postPromptUI": "postPromptUI",
       "clientConfig": {
-        "id": ""
+        "id": "1/10/v5eCA1JV4"
       }
     }
   </script>
