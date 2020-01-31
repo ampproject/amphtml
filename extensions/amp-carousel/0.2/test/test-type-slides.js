@@ -264,6 +264,49 @@ describes.realWin(
           ActionTrust.LOW
         );
       });
+
+      it('should allow string-valued index', async () => {
+        const carousel = await getCarousel({loop: false});
+        const impl = carousel.implementation_;
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
+
+        impl.executeAction({
+          method: 'goToSlide',
+          args: {index: '1'},
+          trust: ActionTrust.LOW,
+          satisfiesTrust: () => true,
+        });
+        await afterIndexUpdate(carousel);
+
+        expect(triggerSpy).to.have.been.calledWith(
+          carousel,
+          'slideChange',
+          /* CustomEvent */ env.sandbox.match.has('detail', {index: 1}),
+          ActionTrust.LOW
+        );
+      });
+
+      it('should cause error with invalid index', async () => {
+        const carousel = await getCarousel({loop: false});
+        const impl = carousel.implementation_;
+        const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
+
+        try {
+          allowConsoleError(() => {
+            impl.executeAction({
+              method: 'goToSlide',
+              args: {index: 'one'},
+              trust: ActionTrust.LOW,
+              satisfiesTrust: () => true,
+            });
+          });
+          await afterIndexUpdate(carousel);
+        } catch (expected) {
+          expect(triggerSpy).to.not.have.been.called;
+          return;
+        }
+        expect.fail();
+      });
     });
 
     describe('layout direction', () => {
