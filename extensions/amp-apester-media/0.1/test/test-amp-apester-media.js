@@ -15,6 +15,7 @@
  */
 import '../amp-apester-media';
 import {Services} from '../../../../src/services';
+import {createElementWithAttributes} from '../../../../src/dom';
 
 describes.realWin(
   'amp-apester-media',
@@ -26,8 +27,7 @@ describes.realWin(
   env => {
     let win, doc;
     let xhrMock;
-    let changeSizeSpy;
-    let attemptChangeSizeSpy;
+    let mutatorForDoc;
 
     beforeEach(() => {
       win = env.win;
@@ -40,164 +40,147 @@ describes.realWin(
       }
     });
 
-    function getApester(attributes, opt_responsive) {
-      const media = doc.createElement('amp-apester-media');
-      const regularResponse = {
-        status: 200,
-        message: 'ok',
-        payload: {
-          interactionId: '5aaa70c79aaf0c5443078d31',
-          data: {
-            size: {width: '600', height: '404'},
-          },
-          layout: {
-            id: '557d52c059081084b94845c3',
-            name: 'multi poll two',
-            directive: 'multi-poll-two',
-          },
-          language: 'en',
-        },
+    function spyMutatorForDoc() {
+      mutatorForDoc = {
+        attemptChangeSize: env.sandbox.spy(),
+        changeSize: env.sandbox.spy(),
       };
-      const playlistResponse = {
-        status: 200,
-        message: 'ok',
-        payload: [
-          {
-            interactionId: '5aaa70c79aaf0c5443078d31',
-            data: {
-              size: {width: '600', height: '404'},
-            },
-            layout: {
-              id: '557d52c059081084b94845c3',
-              name: 'multi poll two',
-              directive: 'multi-poll-two',
-            },
-            language: 'en',
-          },
-        ],
-      };
-      const currentResopnse =
-        attributes && attributes['data-apester-channel-token']
-          ? playlistResponse
-          : regularResponse;
 
-      changeSizeSpy = env.sandbox.spy(media.implementation_, 'changeHeight');
-      attemptChangeSizeSpy = env.sandbox.spy(
-        media.implementation_,
-        'attemptChangeHeight'
-      );
+      env.sandbox.stub(Services, 'mutatorForDoc').returns(mutatorForDoc);
+    }
+
+    async function getApester(attributes, opt_responsive) {
+      const media = createElementWithAttributes(doc, 'amp-apester-media', {
+        width: 600,
+        height: 390,
+        ...attributes,
+      });
+
+      const item = {
+        interactionId: '5aaa70c79aaf0c5443078d31',
+        data: {
+          size: {width: '600', height: '404'},
+        },
+        layout: {
+          id: '557d52c059081084b94845c3',
+          name: 'multi poll two',
+          directive: 'multi-poll-two',
+        },
+        language: 'en',
+      };
+
+      const payload =
+        attributes && attributes['data-apester-channel-token']
+          ? [item] // as playlist
+          : item;
+
+      const json = () =>
+        Promise.resolve({
+          payload,
+          status: 200,
+          message: 'ok',
+        });
+
       xhrMock = env.sandbox.mock(Services.xhrFor(win));
+
       if (attributes) {
-        xhrMock.expects('fetchJson').returns(
-          Promise.resolve({
-            status: 200,
-            json() {
-              return Promise.resolve(currentResopnse);
-            },
-          })
-        );
+        xhrMock
+          .expects('fetchJson')
+          .returns(Promise.resolve({status: 200, json}));
       } else {
         xhrMock.expects('fetchJson').never();
       }
-      for (const key in attributes) {
-        media.setAttribute(key, attributes[key]);
-      }
-      media.setAttribute('width', '600');
-      media.setAttribute('height', '390');
-      //todo test width?
-      if (opt_responsive) {
-        media.setAttribute('layout', 'responsive');
-      }
+
       doc.body.appendChild(media);
-      return media
-        .build()
-        .then(() => {
-          return media.layoutCallback();
-        })
-        .then(() => media);
+
+      await media.build();
+      await media.layoutCallback();
+
+      return media;
     }
 
-    it('renders', () => {
-      return getApester({
-        'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
-      }).then(ape => {
-        const iframe = ape.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.src).not.to.be.null;
-        const placeholder = ape.querySelector('div[placeholder]');
-        expect(placeholder).to.not.be.null;
-        expect(placeholder.getAttribute('aria-label')).to.equal(
-          'Loading Apester Media'
-        );
-        const url = new URL(iframe.src);
-        const qs = new URLSearchParams(url.searchParams);
-        expect(url.hostname).to.equal('renderer.apester.com');
-        expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
-        expect(qs.get('sdk')).to.equal('amp');
-        expect(qs.get('type')).to.equal('editorial');
-        expect(changeSizeSpy).to.be.calledOnce;
-        expect(changeSizeSpy.args[0][0]).to.equal('404');
-      });
+    beforeEach(() => {
+      spyMutatorForDoc();
     });
-    it('propagates aria label to placeholder image', () => {
-      return getApester({
+
+    it('renders', async () => {
+      const ape = await getApester({
+        'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
+      });
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).not.to.be.null;
+      const placeholder = ape.querySelector('div[placeholder]');
+      expect(placeholder).to.not.be.null;
+      expect(placeholder.getAttribute('aria-label')).to.equal(
+        'Loading Apester Media'
+      );
+      const url = new URL(iframe.src);
+      const qs = new URLSearchParams(url.searchParams);
+      expect(url.hostname).to.equal('renderer.apester.com');
+      expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
+      expect(qs.get('sdk')).to.equal('amp');
+      expect(qs.get('type')).to.equal('editorial');
+      expect(mutatorForDoc.changeSize).to.be.calledOnce;
+      expect(mutatorForDoc.changeSize.args[0][0]).to.equal('404');
+    });
+
+    it('propagates aria label to placeholder image', async () => {
+      const ape = await getApester({
         'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
         'aria-label': 'scintilating video',
-      }).then(ape => {
-        const placeholder = ape.querySelector('div[placeholder]');
-        expect(placeholder).to.not.be.null;
-        expect(placeholder.getAttribute('aria-label')).to.equal(
-          'Loading - scintilating video'
-        );
       });
+      const placeholder = ape.querySelector('div[placeholder]');
+      expect(placeholder).to.not.be.null;
+      expect(placeholder.getAttribute('aria-label')).to.equal(
+        'Loading - scintilating video'
+      );
     });
-    it('render playlist', () => {
-      return getApester({
+
+    it('render playlist', async () => {
+      const ape = getApester({
         'data-apester-channel-token': '57a36e1e96cd505a7f01ed12',
-      }).then(ape => {
-        const iframe = ape.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.src).not.to.be.null;
-        const url = new URL(iframe.src);
-        const qs = new URLSearchParams(url.searchParams);
-        expect(url.hostname).to.equal('renderer.apester.com');
-        expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
-        expect(qs.get('sdk')).to.equal('amp');
-        expect(qs.get('type')).to.equal('playlist');
-        expect(attemptChangeSizeSpy).to.be.calledOnce;
-        expect(attemptChangeSizeSpy.args[0][0]).to.equal('404');
       });
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).not.to.be.null;
+      const url = new URL(iframe.src);
+      const qs = new URLSearchParams(url.searchParams);
+      expect(url.hostname).to.equal('renderer.apester.com');
+      expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
+      expect(qs.get('sdk')).to.equal('amp');
+      expect(qs.get('type')).to.equal('playlist');
+      expect(mutatorForDoc.attemptChangeSize).to.be.calledOnce;
+      expect(mutatorForDoc.attemptChangeSize.args[0][0]).to.equal('404');
     });
 
     //todo responsive layout isn't fully supported yet, just a stub
-    it('renders responsively', () => {
-      return getApester(
+    it('renders responsively', async () => {
+      const ape = await getApester(
         {
           'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
           width: '500',
         },
         true
-      ).then(ape => {
-        const iframe = ape.querySelector('iframe');
-        expect(iframe.className).to.match(/i-amphtml-fill-content/);
-      });
+      );
+      const iframe = ape.querySelector('iframe');
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
 
-    it('removes iframe after unlayoutCallback', () => {
-      return getApester({
+    it('removes iframe after unlayoutCallback', async () => {
+      const ape = await getApester({
         'data-apester-media-id': '5aaa70c79aaf0c5443078d31',
-      }).then(ape => {
-        const iframe = ape.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        expect(iframe.src).not.to.be.null;
-        const url = new URL(iframe.src);
-        expect(url.hostname).to.equal('renderer.apester.com');
-        expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
-        const tag = ape.implementation_;
-        tag.unlayoutCallback();
-        expect(ape.querySelector('iframe')).to.be.null;
-        expect(tag.iframe_).to.be.null;
       });
+      const iframe = ape.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).not.to.be.null;
+      const url = new URL(iframe.src);
+      expect(url.hostname).to.equal('renderer.apester.com');
+      expect(url.pathname).to.equal('/interaction/5aaa70c79aaf0c5443078d31');
+      const tag = ape.implementation_;
+      tag.unlayoutCallback();
+      expect(ape.querySelector('iframe')).to.be.null;
+      expect(tag.iframe_).to.be.null;
     });
 
     it('requires media-id or channel-token', () => {

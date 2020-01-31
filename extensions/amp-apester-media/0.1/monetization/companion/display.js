@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import {Services} from '../../../../../src/services';
 import {createElementWithAttributes} from '../../../../../src/dom';
 import {getValueForExpr} from '../../../../../src/json';
 const ALLOWED_AD_PROVIDER = 'gdt';
@@ -84,6 +84,6 @@ function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
   );
   ampAd.classList.add('amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
-  apesterElement.getResources().attemptChangeSize(ampAd, maxHeight);
+  Services.mutatorForDoc(apesterElement).attemptChangeSize(ampAd, maxHeight);
   return ampAd;
 }

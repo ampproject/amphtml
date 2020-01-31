@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import {Services} from '../../../../../src/services';
-const ALLOWED_AD_PROVIDER = 'sr';
 import {createElementWithAttributes} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
 import {getValueForExpr} from '../../../../../src/json';
+
+const ALLOWED_AD_PROVIDER = 'sr';
 
 /**
  * @param {!JsonObject} media
@@ -112,7 +112,10 @@ function addCompanionSrElement(videoTag, position, macros, apesterElement) {
     position === 'below' ? apesterElement.nextSibling : apesterElement;
   apesterElement.parentNode.insertBefore(ampBladeAd, relativeElement);
 
-  apesterElement.getResources().attemptChangeSize(ampBladeAd, size.height);
+  Services.mutatorForDoc(apesterElement).attemptChangeSize(
+    ampBladeAd,
+    size.height
+  );
 }
 
 /**
