@@ -38,6 +38,5 @@
   "pump-early-frame": 1,
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
-  "use-responsive-ads-for-responsive-sizing-in-auto-ads": 0.05,
   "version-locking": 1
 }
