@@ -286,9 +286,6 @@ exports.rules = [
       // amp-smartlinks depends on amp-skimlinks/link-rewriter
       'extensions/amp-smartlinks/0.1/amp-smartlinks.js->extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js',
       'extensions/amp-smartlinks/0.1/linkmate.js->extensions/amp-skimlinks/0.1/link-rewriter/two-steps-response.js',
-
-      // used to share code between tags after rebranding
-      'extensions/amp-beopinion/0.1/amp-beopinion.js->extensions/amp-beop/0.1/beop-shared.js',
     ],
   },
   {
