@@ -62,6 +62,12 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
+    id: 'amp-consent-restrict-fullscreen',
+    name: 'AMP consent restrict fullscreen API before user interaction',
+    spec: 'https://github.com/ampproject/amphtml/issues/26432',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
+  },
+  {
     id: 'amp-consent-geo-override',
     name: 'AMP consent modified to support CCPA',
     spec:
@@ -107,6 +113,11 @@ export const EXPERIMENTS = [
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
+    id: 'amp-list-init-from-state',
+    name: 'Allows amp-list to initialize off of amp-state',
+    spec: 'https://github.com/ampproject/amphtml/issues/26009',
   },
   {
     id: 'amp-playbuzz',
@@ -299,12 +310,6 @@ export const EXPERIMENTS = [
     name: 'Fix inconsistent responsive height selection.',
     spec: 'https://github.com/ampproject/amphtml/issues/24166',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
-  },
-  {
-    id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
-    name: 'Use amp-ad responsive to make amp auto ads responsive.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24168',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
   {
     id: 'layoutbox-invalidate-on-scroll',
