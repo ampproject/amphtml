@@ -32,7 +32,7 @@ Google Ad Manager's RTC implementation has made many macros available for RTC ur
 - **ELEMENT_POS** - Offset of the element from document's top
 - **SCROLL_TOP** - Number of pixels that the user scrolled from the document's top
 - **PAGE_HEIGHT** - Height of the amp-doc
-- **BKG_STATE** - The current visibility state of the amp-doc
+- **BKG_STATE** - Current visibility state of the amp-doc
 - **ADCID** - adClientId
 - **TGT** - Just the targeting piece of data-json
 - **CANONICAL_URL** - The canonical URL of the page
