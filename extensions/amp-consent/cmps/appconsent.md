@@ -41,8 +41,8 @@ CMP used through AppConsent platform in order to handle and enforce user consent
 
 ## Configuration
 
-| Attribute       |  Type  | Mandatory | Description                                             |
-| --------------- | :----: | :-------: | ------------------------------------------------------- |
-| id              | String |    yes    | AppConsent Notice identifier, provided upon registering |
+| Attribute |  Type  | Mandatory | Description                                             |
+| --------- | :----: | :-------: | ------------------------------------------------------- |
+| id        | String |    yes    | AppConsent Notice identifier, provided upon registering |
 
 Please contact [AppConsent](https://appconsent.io/en) for further details regarding the configuration of this CMP.
