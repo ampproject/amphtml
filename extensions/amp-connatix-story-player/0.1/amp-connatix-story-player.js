@@ -51,7 +51,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
    * is embedded. Used for giving external commands to the player
    * (play/pause etc)
    * @private
-   * @param {object} command
+   * @param {Object} command
    */
   sendCommand_(command) {
     let message = command;
