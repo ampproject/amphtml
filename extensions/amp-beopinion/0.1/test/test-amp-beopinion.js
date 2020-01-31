@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import '../amp-beop';
+import '../amp-beopinion';
 import {beop} from '../../../../3p/beop';
 
 describes.realWin(
