@@ -691,6 +691,34 @@ A **binding** is a special attribute of the form `[property]` that links an elem
 
 When the **state** changes, expressions tied to that state are evaluated. The element properties **bound** to the **state** are updated with the new expression results.
 
+Boolean expression results toggle boolean attributes. For example: `<amp-video [controls]="expr"...>`. When `expr` evaluates to `true`, the `<amp-video>` element has the `controls` attribute. When `expr` evaluates to `false`, the `controls` attribute is removed.
+
+[example preview="inline" playground="true" imports="amp-bind, amp-video"]
+
+```html
+  <amp-video [controls]="controls"
+             width="640"
+             height="360"
+             layout="responsive"
+             poster="/static/inline-examples/images/kitten-playing.png">
+    <source src="/static/inline-examples/videos/kitten-playing.webm"
+            type="video/webm" />
+    <source src="/static/inline-examples/videos/kitten-playing.mp4"
+            type="video/mp4" />
+    <div fallback>
+      <p>This browser does not support the video element.</p>
+    </div>
+  </amp-video>
+  <button on="tap:AMP.setState({ controls: true })">
+    Controls
+  </button>
+  <button on="tap:AMP.setState({ controls: false })">
+    No Controls
+  </button>
+```
+
+[/example]
+
 #### XML compatibility 
 
 If developing with XML, use the alternative `data-amp-bind-property` syntax. The  `[` and `]` characters in attribute names is invalid XML, making the `[property]` syntax unavailable. 
@@ -701,7 +729,7 @@ For example, `[text]="myState.foo"` would become `data-amp-bind-text="myState.fo
 
 #### Binding types 
 
-`amp-bind` supports data bindings on five types of element state:
+`amp-bind` supports data bindings on five types of element state.
 
 [**Node.textContent**](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent)
 
@@ -779,62 +807,16 @@ Change the `width` and `height` using the `[width]` and `[height]` attributes.
 
 Use to dynamically update information available to assistive technologies, such as screen readers. All `[aria-*]` and `[data-*]` are bindable. See the [full list here](https://www.w3.org/WAI/PF/aria-1.1/states_and_properties).
 
+**AMP Component specific and HTML attributes**
 
-<table>
-  <tr>
-    <th>Type</th>
-    <th>Attribute(s)</th>
-    <th>Details</th>
-  </tr>
-  <tr>
-    <td class="col-thirty"><a href="https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent"><code>Node.textContent</code></a></td>
-    <td class="col-thirty"><code>[text]</code></td>
-    <td>Supported on most text elements.</td>
-  </tr>
-  <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class">CSS classes</a></td>
-    <td><code>[class]</code></td>
-    <td>Expression result must be a space-delimited string.</td>
-  </tr>
-  <tr>
-    <td><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/hidden">The <code>hidden</code> attribute</a></td>
-    <td><code>[hidden]</code></td>
-    <td>Should be a boolean expression.</td>
-  </tr>
-  <tr>
-    <td>Size of <a href="https://www.ampproject.org/docs/reference/components">AMP elements</a></td>
-    <td><code>[width]</code><br><code>[height]</code></td>
-    <td>Changes the width and/or height of the AMP element.</td>
-  </tr>
-  <tr>
-    <td>Accessibility states and properties</td>
-    <td><code>[aria-hidden]</code><br><code>[aria-label]</code><br>etc.</td>
-    <td>Used for dynamically updating information available to assistive technologies like screen readers.</td>
-  </tr>
-  <tr>
-    <td>Element-specific attributes</td>
-    <td><a href="#element-specific-attributes">Various</a></td>
-    <td></td>
-  </tr>
-</table>
-
-Notes on bindings:
-
-- For security reasons, binding to `innerHTML` is disallowed.
-- All attribute bindings are sanitized for unsafe values (e.g., `javascript:`).
-- Boolean expression results toggle boolean attributes. For example: `<amp-video [controls]="expr"...>`. When `expr` evaluates to `true`, the `<amp-video>` element has the `controls` attribute. When `expr` evaluates to `false`, the `controls` attribute is removed.
-- Bracket characters `[` and `]` in attribute names can be problematic when writing XML (e.g. XHTML, JSX) or writing attributes via DOM APIs. In these cases, use the alternative syntax `data-amp-bind-x="foo"` instead of `[x]="foo"`.
+Some AMP components and HTML elements have specific bindable attributes. They are listed below. 
 
 
-
-
-#### Element-specific attributes
-
-Binding to the following components and attributes are allowed:
+#### AMP component specific attributes
 
 [filter formats="websites"]
 
-##### `<amp-brightcove>`
+**`<amp-brightcove>`**
 
 - `[data-account]`
 - `[data-embed]`
@@ -844,7 +826,7 @@ Binding to the following components and attributes are allowed:
 - `[data-video-id]` Changes the displayed Brightcove video.
   [/filter] <!-- formats="websites" -->
 
-##### `<amp-carousel type=slides>`
+**`<amp-carousel type=slides>`**
 
 - `[slide]` Changes the currently displayed slide index.
 
@@ -852,24 +834,24 @@ Binding to the following components and attributes are allowed:
 
 [filter formats="websites"]
 
-##### `<amp-date-picker>`
+**`<amp-date-picker>`**
 
 - `[min]` Sets the earliest selectable date
 - `[max]` Sets the latest selectable date
 
-##### `<amp-google-document-embed>`
+**`<amp-google-document-embed>`**
 
 - `[src]` Displays the document at the updated URL.
 - `[title]` Changes the document's title.
 
-##### `<amp-iframe>`
+**`<amp-iframe>`**
 
 - `[src]` Changes the iframe's source URL.
 
 [/filter] <!-- formats="websites" -->
 [filter formats="websites, ads"]
 
-##### `<amp-img>`
+**`<amp-img>`**
 
 - `[alt]`
 - `[attribution]`
@@ -880,13 +862,13 @@ Bind to `[srcset]` instead of `[src]` to support responsive images. See correspo
 [/filter] <!-- formats="websites, ads" -->
 [filter formats="email"]
 
-##### `<amp-img>`
+**`<amp-img>`**
 
 - `[alt]`
 - `[attribution]`
   [/filter] <!-- formats="email" -->
 
-##### `<amp-lightbox>`
+**`<amp-lightbox>`**
 
 - `[open]` Toggles display of the lightbox.
 
@@ -896,7 +878,7 @@ Use `on="lightboxClose: AMP.setState(...)"` to update variables when the lightbo
 
 [filter formats="websites, stories"]
 
-##### `<amp-list>`
+**`<amp-list>`**
 
 - `[src]`
 
@@ -905,7 +887,7 @@ If the expression is a string, it fetches and renders JSON from the string URL. 
 
 [filter formats="websites, email"]
 
-##### `<amp-selector>`
+**`<amp-selector>`**
 
 - `[selected]` Changes the currently selected children element(s) identified by their `option` attribute values. Supports a comma-separated list of values for multiple selection. [See an example](https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/?format=email#linking-carousels-with-amp-bind).
 - `[disabled]`
@@ -918,7 +900,7 @@ If the expression is a string, it fetches and renders JSON from the string URL. 
 
 [filter formats="websites, stories, ads"]
 
-##### `<amp-state>`
+**`<amp-state>`**
 
 - `[src]`
 
@@ -927,7 +909,7 @@ Fetches JSON from the new URL and merges it into the existing state. The followi
 
 [filter formats="websites, stories"]
 
-##### `<amp-twitter>`
+**`<amp-twitter>`**
 
 - `[data-tweetid]` Changes the displayed Tweet.
 
@@ -935,7 +917,7 @@ Fetches JSON from the new URL and merges it into the existing state. The followi
 
 [filter formats="websites, stories, ads"]
 
-##### `<amp-video>`
+**`<amp-video>`**
 
 - `[alt]`
 - `[attribution]`
@@ -950,7 +932,7 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 
 [filter formats="websites, ads"]
 
-##### `<amp-youtube>`
+**`<amp-youtube>`**
 
 - `[data-videoid]` Changes the displayed YouTube video.
 
@@ -958,11 +940,13 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 
 [filter formats="websites, stories, ads"]
 
-##### `<a>`
+#### HTML attributes
+
+**`<a>`**
 
 - `[href]` Changes the link.
 
-##### `<button>`
+**`<button>`**
 
 - `[disabled]`
 - `[type]`
@@ -972,7 +956,7 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 
 [filter formats="email"]
 
-##### `<button>`
+**`<button>`**
 
 - `[disabled]`
 - `[value]`
@@ -981,17 +965,17 @@ See corresponding [button attributes](https://developer.mozilla.org/en-US/docs/W
 
 [/filter] <!-- formats="email" -->
 
-##### `<details>`
+**`<details>`**
 
 - `[open]`
 
 See corresponding [details attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/details#Attributes).
 
-##### `<fieldset>`
+**`<fieldset>`**
 
 - `[disabled]` Enables or disables the fieldset.
 
-##### `<image>`
+**`<image>`**
 
 - `[xlink:href]`
 
@@ -999,7 +983,7 @@ See corresponding [image attributes](https://developer.mozilla.org/en-US/docs/We
 
 [filter formats="websites, stories, ads"]
 
-##### `<input>`
+**`<input>`**
 
 - `[accept]`
 - `[accessKey]`
@@ -1029,7 +1013,7 @@ See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/We
 
 [filter formats="email"]
 
-##### `<input>`
+**`<input>`**
 
 - `[autocomplete]`
 - `[disabled]`
@@ -1051,7 +1035,7 @@ See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/We
 
 [/filter] <!-- formats="email" -->
 
-##### `<option>`
+**`<option>`**
 
 - `[disabled]`
 - `[label]`
@@ -1060,20 +1044,20 @@ See corresponding [input attributes](https://developer.mozilla.org/en-US/docs/We
 
 See corresponding [option attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/option#Attributes).
 
-##### `<optgroup>`
+**`<optgroup>`**
 
 - `[disabled]`
 - `[label]`
 
 See corresponding [optgroup attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/optgroup#Attributes).
 
-##### `<section>`
+**`<section>`**
 
 - `[data-expand]` Changes the expansion of a `section` in an [`amp-accordion`](../amp-accordion/amp-accordion.md).
 
 [filter formats="websites, stories, ads"]
 
-##### `<select>`
+**`<select>`**
 
 - `[autofocus]`
 - `[disabled]`
@@ -1087,7 +1071,7 @@ See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/W
 
 [filter formats="email"]
 
-##### `<select>`
+**`<select>`**
 
 - `[disabled]`
 - `[multiple]`
@@ -1098,14 +1082,14 @@ See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/W
 
 [/filter] <!-- formats="email" -->
 
-##### `<source>`
+**`<source>`**
 
 - `[src]`
 - `[type]`
 
 See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/source#Attributes).
 
-##### `<track>`
+**`<track>`**
 
 - [label]
 - [src]
@@ -1115,7 +1099,7 @@ See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/We
 
 [filter formats="websites, stories, ads"]
 
-##### `<textarea>`
+**`<textarea>`**
 
 - `[autocomplete]`
 - `[autofocus]`
@@ -1140,7 +1124,7 @@ Use `[defaultText]` to update initial text, and `[text]` to update current text.
 
 [filter formats="email"]
 
-##### `<textarea>`
+**`<textarea>`**
 
 - `[autocomplete]`
 - `[cols]`
@@ -1159,11 +1143,17 @@ Use `[defaultText]` to update initial text, and `[text]` to update current text.
 
 [/filter] <!-- formats="email" -->
 
+#### Disallowed bindings
+
+For security reasons, binding to `innerHTML` is disallowed.
+
+All attribute bindings are sanitized for unsafe values (e.g., `javascript:`).
+
 ## Attributes
 
 [filter formats="websites, stories, ads"]
 
-### src
+### `src` (optional)
 
 The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
@@ -1171,7 +1161,7 @@ The URL of the remote endpoint that will return the JSON that will update this `
 The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
 [/tip]
 
-### credentials (optional)
+### `credentials` (optional)
 
 Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
 
@@ -1183,7 +1173,7 @@ To send credentials, pass the value of `include`. If this value is set, the resp
 
 [filter formats="email"]
 
-##### Invalid AMP email attributes
+### Invalid AMP email attributes
 
 The AMP for Email spec disallows the use of the following attributes on the AMP email format.
 
@@ -1194,14 +1184,15 @@ The AMP for Email spec disallows the use of the following attributes on the AMP 
 
 [/filter] <!-- formats="email" -->
 
+
 ## Debugging
 
 [filter formats="websites, stories, ads"]
-Test in development mode, byt adding the URL fragment `#development=1` to highlight warnings and errors during development and to access special debugging functions.
+Test in development mode. Enter development by adding the fragment `#development=1` to the end of the URL. This highlights warnings and errors in the browser console during development and grants access to special debugging functions.
 [/filter] <!-- formats="websites, stories, ads" -->
 
 [filter formats="email"]
-Test in development mode by saving the email as an HTML file. Test in the browser by adding the URL fragment `#development=1` to highlight warnings and errors during development and to access special debugging functions.
+Test in development mode by saving the email as an HTML file. Test in the browser by adding the fragment `#development=1` to the end of the URL. This highlights warnings and errors in the browser console during development and grants access to special debugging functions.
 [/filter] <!-- formats="email" -->
 
 ### Warnings
