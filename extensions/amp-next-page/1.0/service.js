@@ -15,7 +15,7 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-1.0.css';
-import {HostPage, Page, PageState} from './page';
+import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {Services} from '../../../src/services';
 import {VisibilityState} from '../../../src/visibility-state';
@@ -419,7 +419,7 @@ export class NextPageService {
    */
   attachDocumentToPage(page, content, force = false) {
     // If the user already scrolled to the bottom, prevent rendering
-    if (this.getViewportsAway_() <= NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
+    if (this.getViewportsAway_() < NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
       // TODO(wassgha): Append a "load next article" button?
       return null;
     }
@@ -531,20 +531,23 @@ export class NextPageService {
       removeElement(el);
     });
 
+    // Mark document as hidden initially
+    doc.body.classList.add(HIDDEN_DOC_CLASS);
+
     // Make sure all hidden elements are initially invisible
     this.toggleHiddenAndReplaceableElements(doc, false /** isVisible */);
   }
 
   /**
-   * Hides or shows elements based on the `amp-next-page-hide` and
-   * `amp-next-page-replace` attributes
+   * Hides or shows elements based on the `next-page-hide` and
+   * `next-page-replace` attributes
    * @param {!Document|!ShadowRoot} doc Document to attach.
    * @param {boolean=} isVisible Whether this page is visible or not
    */
   toggleHiddenAndReplaceableElements(doc, isVisible = true) {
-    // Hide elements that have [amp-next-page-hide] on child documents
+    // Hide elements that have [next-page-hide] on child documents
     if (doc !== this.hostPage_.document) {
-      toArray(doc.querySelectorAll('[amp-next-page-hide]')).forEach(element =>
+      toArray(doc.querySelectorAll('[next-page-hide]')).forEach(element =>
         toggle(element, false /** opt_display */)
       );
     }
@@ -554,14 +557,14 @@ export class NextPageService {
       return;
     }
 
-    // Replace elements that have [amp-next-page-replace]
+    // Replace elements that have [next-page-replace]
     toArray(
-      doc.querySelectorAll('*:not(amp-next-page) [amp-next-page-replace]')
+      doc.querySelectorAll('*:not(amp-next-page) [next-page-replace]')
     ).forEach(element => {
-      let uniqueId = element.getAttribute('amp-next-page-replace');
+      let uniqueId = element.getAttribute('next-page-replace');
       if (!uniqueId) {
         uniqueId = String(Date.now() + Math.floor(Math.random() * 100));
-        element.setAttribute('amp-next-page-replace', uniqueId);
+        element.setAttribute('next-page-replace', uniqueId);
       }
 
       if (
@@ -727,10 +730,7 @@ export class NextPageService {
    * @private
    */
   getSeparatorElement_(element) {
-    const providedSeparator = childElementByAttr(
-      element,
-      'amp-next-page-separator'
-    );
+    const providedSeparator = childElementByAttr(element, 'separator');
     // TODO(wassgha): Use templates (amp-mustache) to render the separator
     if (providedSeparator) {
       removeElement(providedSeparator);
@@ -744,7 +744,7 @@ export class NextPageService {
    */
   buildDefaultSeparator_() {
     const separator = this.win_.document.createElement('div');
-    separator.classList.add('amp-next-page-separator');
+    separator.classList.add('amp-next-page-default-separator');
     return separator;
   }
 
@@ -754,10 +754,7 @@ export class NextPageService {
    * @private
    */
   getMoreBoxElement_(element) {
-    const providedMoreBox = childElementByAttr(
-      element,
-      'amp-next-page-more-box'
-    );
+    const providedMoreBox = childElementByAttr(element, 'more-box');
     // TODO(wassgha): Use templates (amp-mustache) to render the more box
     if (providedMoreBox) {
       removeElement(providedMoreBox);
@@ -772,7 +769,7 @@ export class NextPageService {
   buildDefaultMoreBox_() {
     // TODO(wassgha): Better default more box
     const moreBox = this.win_.document.createElement('div');
-    moreBox.classList.add('amp-next-page-more-box');
+    moreBox.classList.add('amp-next-page-default-more-box');
     return moreBox;
   }
 }
