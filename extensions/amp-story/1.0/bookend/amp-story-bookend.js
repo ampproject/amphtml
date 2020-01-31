@@ -382,6 +382,10 @@ export class AmpStoryBookend extends DraggableDrawer {
       HistoryState.BOOKEND_ACTIVE
     );
     isActive ? this.open(shouldAnimate) : this.closeInternal_();
+    this.analyticsService_.triggerEvent(
+      isActive ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.element
+    );
     setHistoryState(this.win, HistoryState.BOOKEND_ACTIVE, isActive);
   }
 
@@ -631,7 +635,7 @@ export class AmpStoryBookend extends DraggableDrawer {
       .then(localizationService => {
         const bookendEls = BookendComponent.buildElements(
           components,
-          this.win.document,
+          this.win,
           localizationService
         );
         const container = dev().assertElement(

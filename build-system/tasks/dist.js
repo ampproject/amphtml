@@ -15,7 +15,6 @@
  */
 
 const colors = require('ansi-colors');
-const conf = require('../compile/build.conf');
 const file = require('gulp-file');
 const fs = require('fs-extra');
 const gulp = require('gulp');
@@ -23,6 +22,7 @@ const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
+  compileCoreRuntime,
   compileJs,
   endBuildStep,
   hostname,
@@ -30,6 +30,7 @@ const {
   printConfigHelp,
   printNobuildHelp,
   toPromise,
+  transferSrcsToTempDir,
 } = require('./helpers');
 const {
   createCtrlcHandler,
@@ -43,7 +44,6 @@ const {
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
-const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {buildExtensions, parseExtensionFlags} = require('./extension-helpers');
 const {cleanupBuildDir} = require('../compile/compile');
 const {compileCss, cssEntryPoints} = require('./css');
@@ -55,44 +55,12 @@ const {VERSION} = require('../compile/internal-version');
 const {green, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
 
-const babel = require('@babel/core');
-const globby = require('globby');
-
 const WEB_PUSH_PUBLISHER_FILES = [
   'amp-web-push-helper-frame',
   'amp-web-push-permission-dialog',
 ];
 
 const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
-
-function transferSrcsToTempDir() {
-  log(
-    'Performing multi-pass',
-    colors.cyan('babel'),
-    'transforms in',
-    colors.cyan(SRC_TEMP_DIR)
-  );
-  const files = globby.sync(BABEL_SRC_GLOBS);
-  files.forEach(file => {
-    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
-      fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
-      return;
-    }
-
-    const {code} = babel.transformFileSync(file, {
-      plugins: conf.plugins({
-        isEsmBuild: argv.esm,
-        isForTesting: argv.fortesting,
-      }),
-      retainLines: true,
-      compact: false,
-    });
-    const name = `${SRC_TEMP_DIR}/${file}`;
-    fs.outputFileSync(name, code);
-    process.stdout.write('.');
-  });
-  console.log('\n');
-}
 
 /**
  * Prints a useful help message prior to the gulp dist task
@@ -136,7 +104,10 @@ async function dist() {
   // own processing). Executed after `compileCss` and `compileJison` so their
   // results can be copied too.
   if (!argv.single_pass) {
-    transferSrcsToTempDir();
+    transferSrcsToTempDir({
+      isForTesting: argv.fortesting,
+      isEsmBuild: argv.esm,
+    });
   }
 
   await copyCss();
@@ -145,11 +116,15 @@ async function dist() {
 
   // Steps that use closure compiler. Small ones before large (parallel) ones.
   await startNailgunServer(distNailgunPort, /* detached */ false);
-  await buildExperiments({minify: true, watch: false});
-  await buildLoginDone('0.1', {minify: true, watch: false});
-  await buildWebPushPublisherFiles({minify: true, watch: false});
-  await compileAllMinifiedJs();
-  await buildExtensions({minify: true, watch: false});
+  if (argv.core_runtime_only) {
+    await compileCoreRuntime(/* watch */ false, /* minify */ true);
+  } else {
+    await buildExperiments({minify: true, watch: false});
+    await buildLoginDone('0.1', {minify: true, watch: false});
+    await buildWebPushPublisherFiles({minify: true, watch: false});
+    await compileAllMinifiedJs();
+    await buildExtensions({minify: true, watch: false});
+  }
   await stopNailgunServer(distNailgunPort);
 
   if (argv.esm) {
@@ -160,9 +135,10 @@ async function dist() {
     ]);
   }
 
-  await formatExtractedMessages();
-  await generateFileListing();
-
+  if (!argv.core_runtime_only) {
+    await formatExtractedMessages();
+    await generateFileListing();
+  }
   return exitCtrlcHandler(handlerProcess);
 }
 
@@ -304,7 +280,7 @@ async function generateFileListing() {
   const filesOut = `${distDir}/files.txt`;
   fs.writeFileSync(filesOut, '');
   const files = (await walk(distDir)).map(f => f.replace(`${distDir}/`, ''));
-  fs.writeFileSync(filesOut, files.join('\n'));
+  fs.writeFileSync(filesOut, files.join('\n') + '\n');
   endBuildStep('Generated', filesOut, startTime);
 }
 
@@ -467,6 +443,7 @@ dist.flags = {
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
+  core_runtime_only: '  Builds only the core runtime.',
   single_pass_dest:
     '  The directory closure compiler will write out to ' +
     'with --single_pass mode. The default directory is `dist`',

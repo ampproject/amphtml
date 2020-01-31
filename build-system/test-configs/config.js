@@ -130,6 +130,7 @@ const presubmitGlobs = [
   '!build/polyfills/*.js',
   '!third_party/**/*.*',
   '!validator/chromeextension/*.*',
+  '!src/purifier/node_modules/**/*.*',
   // Files in this testdata dir are machine-generated and are not part
   // of the AMP runtime, so shouldn't be checked.
   '!extensions/amp-a4a/*/test/testdata/*.js',

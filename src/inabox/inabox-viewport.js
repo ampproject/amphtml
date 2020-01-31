@@ -24,6 +24,7 @@ import {dev, devAssert} from '../log';
 import {getFrameOverlayManager} from '../../ads/inabox/frame-overlay-manager.js';
 import {getPositionObserver} from '../../ads/inabox/position-observer';
 import {iframeMessagingClientFor} from './inabox-iframe-messaging-client';
+import {isExperimentOn} from '../experiments';
 import {isIframed} from '../dom';
 import {
   layoutRectFromDomRect,
@@ -132,9 +133,20 @@ class InaboxViewportImpl {
     /** @private @const {!Observable<!../service/viewport/viewport-interface.ViewportResizedEventDef>} */
     this.resizeObservable_ = new Observable();
 
-    this.binding_.connect();
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
+
+    /** @private {boolean} */
+    this.visible_ = false;
+    this.ampdoc.onVisibilityChanged(this.updateVisibility_.bind(this));
+    this.updateVisibility_();
+
+    // Workaround for Safari not firing visibilityChange when the page is
+    // unloaded (https://bugs.webkit.org/show_bug.cgi?id=151234).
+    // TODO(zombifier): Remove this when ampdoc can handle this event.
+    /** @private @const {function()} */
+    this.boundDispose_ = this.dispose.bind(this);
+    win.addEventListener('pagehide', this.boundDispose_);
 
     // Top-level mode classes.
     const docElement = win.document.documentElement;
@@ -148,6 +160,7 @@ class InaboxViewportImpl {
   /** @override */
   dispose() {
     this.binding_.disconnect();
+    this.ampdoc.win.removeEventListener('pagehide', this.boundDispose_);
   }
 
   /** @override */
@@ -387,6 +400,22 @@ class InaboxViewportImpl {
       height: newSize.height,
     });
   }
+
+  /** @private */
+  updateVisibility_() {
+    const visible = this.ampdoc.isVisible();
+    if (visible != this.visible_) {
+      this.visible_ = visible;
+      if (visible) {
+        this.binding_.connect();
+        // Check the size again in case it has changed between `disconnect` and
+        // `connect`.
+        this.resize_();
+      } else {
+        this.binding_.disconnect();
+      }
+    }
+  }
 }
 
 /**
@@ -449,7 +478,9 @@ export class ViewportBindingInabox {
     );
 
     /** @private @const {boolean} */
-    this.isFriendlyIframed_ = canInspectWindow(this.win.top);
+    this.isFriendlyIframed_ =
+      isExperimentOn(this.win, 'inabox-viewport-friendly') &&
+      canInspectWindow(this.win.top);
 
     /** @private {?../../ads/inabox/position-observer.PositionObserver} */
     this.topWindowPositionObserver_ = this.isFriendlyIframed_
@@ -495,22 +526,21 @@ export class ViewportBindingInabox {
     // registered (since it's registered after the inabox services so it won't
     // be available immediately).
     // TODO(lannka): Investigate why this is the case.
-    if (this.unobserveFunction_) {
-      return Promise.resolve();
-    }
     return Services.resourcesPromiseForDoc(
       this.win.document.documentElement
     ).then(() => {
-      this.unobserveFunction_ = this.topWindowPositionObserver_.observe(
-        // If the window is the top window (not sitting in an iframe) then
-        // frameElement doesn't exist. In that case we observe the scrolling
-        // element.
-        /** @type {!HTMLIFrameElement|!HTMLElement} */
-        (this.win.frameElement || this.getScrollingElement()),
-        data => {
-          this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
-        }
-      );
+      this.unobserveFunction_ =
+        this.unobserveFunction_ ||
+        this.topWindowPositionObserver_.observe(
+          // If the window is the top window (not sitting in an iframe) then
+          // frameElement doesn't exist. In that case we observe the scrolling
+          // element.
+          /** @type {!HTMLIFrameElement|!HTMLElement} */
+          (this.win.frameElement || this.getScrollingElement()),
+          data => {
+            this.updateLayoutRects_(data['viewportRect'], data['targetRect']);
+          }
+        );
     });
   }
 

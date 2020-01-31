@@ -16,6 +16,10 @@
 
 import {AmpStoryQuiz} from '../amp-story-quiz';
 import {AmpStoryStoreService} from '../amp-story-store-service';
+import {AnalyticsVariable, getVariableService} from '../variable-service';
+import {Services} from '../../../../src/services';
+import {getAnalyticsService} from '../story-analytics';
+import {getRequestService} from '../amp-story-request-service';
 import {registerServiceBuilder} from '../../../../src/service';
 
 /**
@@ -39,7 +43,7 @@ const populateQuiz = (win, quizElement, numPrompts = 1, numOptions = 4) => {
     quizElement.appendChild(option.cloneNode());
   }
 
-  quizElement.setAttribute('id', 'quizId');
+  quizElement.setAttribute('id', 'TEST_quizId');
 };
 
 /**
@@ -52,6 +56,43 @@ const populateStandardQuizContent = (win, quizElement) => {
   populateQuiz(win, quizElement);
 };
 
+/**
+ * Returns mock reaction data
+ *
+ * @return {Object}
+ * @private
+ */
+const getMockReactionData = () => {
+  return {
+    data: {
+      totalResponseCount: 10,
+      hasUserResponded: true,
+      responses: [
+        {
+          reactionValue: 0,
+          totalCount: 3,
+          selectedByUser: true,
+        },
+        {
+          reactionValue: 1,
+          totalCount: 3,
+          selectedByUser: false,
+        },
+        {
+          reactionValue: 2,
+          totalCount: 3,
+          selectedByUser: false,
+        },
+        {
+          reactionValue: 3,
+          totalCount: 1,
+          selectedByUser: false,
+        },
+      ],
+    },
+  };
+};
+
 describes.realWin(
   'amp-story-quiz',
   {
@@ -61,11 +102,23 @@ describes.realWin(
     let win;
     let ampStoryQuiz;
     let storyEl;
+    let analytics;
+    let analyticsVars;
+    let requestService;
 
     beforeEach(() => {
       win = env.win;
+
+      env.sandbox
+        .stub(Services, 'cidForDoc')
+        .resolves({get: () => Promise.resolve('cid')});
+
       const ampStoryQuizEl = win.document.createElement('amp-story-quiz');
       ampStoryQuizEl.getResources = () => win.__AMP_SERVICES.resources.obj;
+
+      analyticsVars = getVariableService(win);
+      analytics = getAnalyticsService(win, win.document.body);
+      requestService = getRequestService(win, ampStoryQuizEl);
 
       const storeService = new AmpStoryStoreService(win);
       registerServiceBuilder(win, 'story-store', () => storeService);
@@ -83,17 +136,15 @@ describes.realWin(
       env.sandbox.stub(ampStoryQuiz, 'mutateElement').callsFake(fn => fn());
     });
 
-    it('should take the html and reformat it', async () => {
+    it('should take the html and reformat it', () => {
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
-      await ampStoryQuiz.layoutCallback();
       expect(ampStoryQuiz.getQuizElement().children.length).to.equal(2);
     });
 
-    it('should structure the content in the quiz element', async () => {
+    it('should structure the content in the quiz element', () => {
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
-      await ampStoryQuiz.layoutCallback();
 
       const quizContent = ampStoryQuiz.getQuizElement().children;
       expect(quizContent[0]).to.have.class(
@@ -140,12 +191,16 @@ describes.realWin(
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
+
       const quizElement = ampStoryQuiz.getQuizElement();
       const quizOption = quizElement.querySelector(
         '.i-amphtml-story-quiz-option'
       );
 
       quizOption.click();
+
+      // Microtask tick
+      await Promise.resolve();
 
       expect(quizElement).to.have.class('i-amphtml-story-quiz-post-selection');
       expect(quizOption).to.have.class('i-amphtml-story-quiz-option-selected');
@@ -155,6 +210,7 @@ describes.realWin(
       populateStandardQuizContent(win, ampStoryQuiz.element);
       ampStoryQuiz.buildCallback();
       await ampStoryQuiz.layoutCallback();
+
       const quizElement = ampStoryQuiz.getQuizElement();
       const quizOptions = quizElement.querySelectorAll(
         '.i-amphtml-story-quiz-option'
@@ -163,10 +219,61 @@ describes.realWin(
       quizOptions[0].click();
       quizOptions[1].click();
 
+      // Microtask tick
+      await Promise.resolve();
+
       expect(quizOptions[0]).to.have.class(
         'i-amphtml-story-quiz-option-selected'
       );
       expect(quizOptions[1]).to.not.have.class(
+        'i-amphtml-story-quiz-option-selected'
+      );
+    });
+
+    it('should trigger an analytics event with the right variables on selection', async () => {
+      const trigger = env.sandbox.stub(analytics, 'triggerEvent');
+      populateStandardQuizContent(win, ampStoryQuiz.element);
+      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const option = ampStoryQuiz
+        .getQuizElement()
+        .querySelector('.i-amphtml-story-quiz-option');
+
+      option.click();
+
+      // Microtask tick
+      await Promise.resolve();
+
+      expect(trigger).to.have.been.calledWith('story-reaction');
+
+      const variables = analyticsVars.get();
+      expect(variables[AnalyticsVariable.STORY_REACTION_ID]).to.equal(
+        'TEST_quizId'
+      );
+      expect(variables[AnalyticsVariable.STORY_REACTION_RESPONSE]).to.equal(0);
+      expect(variables[AnalyticsVariable.STORY_REACTION_TYPE]).to.equal(0);
+    });
+
+    it('should update the quiz when the user has already reacted', async () => {
+      // Fill the response to the requestService with mock reaction data
+      env.sandbox
+        .stub(requestService, 'executeRequest')
+        .resolves(getMockReactionData());
+
+      ampStoryQuiz.element.setAttribute('endpoint', 'http://localhost:8000');
+
+      populateStandardQuizContent(win, ampStoryQuiz.element);
+      ampStoryQuiz.buildCallback();
+      await ampStoryQuiz.layoutCallback();
+
+      const quizElement = ampStoryQuiz.getQuizElement();
+      const quizOptions = quizElement.querySelectorAll(
+        '.i-amphtml-story-quiz-option'
+      );
+
+      expect(quizElement).to.have.class('i-amphtml-story-quiz-post-selection');
+      expect(quizOptions[0]).to.have.class(
         'i-amphtml-story-quiz-option-selected'
       );
     });

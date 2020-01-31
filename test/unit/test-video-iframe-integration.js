@@ -119,21 +119,12 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
     });
 
     describe('#postEvent', () => {
-      it('should reject invalid events', () => {
-        const integration = new AmpVideoIntegration();
-        const invalidEvents = 'tacos al pastor'.split(' ');
-        for (let i = 0; i < invalidEvents.length; i++) {
-          const event = invalidEvents[i];
-          expect(() => integration.postEvent(event)).to.throw(/Invalid event/);
-        }
-      });
-
-      it('should post valid events', () => {
+      it('should post any event', () => {
         const integration = new AmpVideoIntegration();
 
         const postToParent = env.sandbox.stub(integration, 'postToParent_');
 
-        const validEvents = [
+        const events = [
           'canplay',
           'load',
           'playing',
@@ -141,10 +132,13 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
           'ended',
           'muted',
           'unmuted',
+          'tacos',
+          'al',
+          'pastor',
         ];
 
-        for (let i = 0; i < validEvents.length; i++) {
-          const event = validEvents[i];
+        for (let i = 0; i < events.length; i++) {
+          const event = events[i];
           integration.postEvent(event);
           expect(postToParent.withArgs(env.sandbox.match({event}))).to.have.been
             .calledOnce;

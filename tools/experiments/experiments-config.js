@@ -62,10 +62,10 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-mega-menu',
-    name: 'AMP extension for a mega menu with expandable items',
-    spec: 'https://github.com/ampproject/amphtml/issues/24814',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
+    id: 'amp-consent-restrict-fullscreen',
+    name: 'AMP consent restrict fullscreen API before user interaction',
+    spec: 'https://github.com/ampproject/amphtml/issues/26432',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
   },
   {
     id: 'amp-consent-geo-override',
@@ -73,11 +73,6 @@ export const EXPERIMENTS = [
     spec:
       'https://github.com/ampproject/amphtml/blob/lannka-consent-design/extensions/amp-consent/amp-consent.md',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25623',
-  },
-  {
-    id: 'amp-nested-menu',
-    name: 'AMP extension for a nested drilldown menu',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25343',
   },
   {
     id: 'amp-sidebar-v2',
@@ -118,6 +113,11 @@ export const EXPERIMENTS = [
     id: 'amp-lightbox-a4a-proto',
     name: 'Allows the new lightbox experience to be used in A4A (prototype).',
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
+  },
+  {
+    id: 'amp-list-init-from-state',
+    name: 'Allows amp-list to initialize off of amp-state',
+    spec: 'https://github.com/ampproject/amphtml/issues/26009',
   },
   {
     id: 'amp-playbuzz',
@@ -209,6 +209,12 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
+    id: 'amp-next-page-v2',
+    name: 'Document-level (true) infinite scroll experience',
+    spec: 'https://github.com/ampproject/amphtml/issues/25500',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25634',
+  },
+  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
@@ -254,6 +260,14 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/18897',
   },
   {
+    id: 'inabox-viewport-friendly',
+    name:
+      'Inabox viewport measures the host window directly if ' +
+      'within friendly iframe',
+    spec: 'https://github.com/ampproject/amphtml/issues/19869',
+    cleanupIssue: 'TODO',
+  },
+  {
     id: 'fie-css-cleanup',
     name:
       'Experiment to prevent regression after a major CSS clean up' +
@@ -278,13 +292,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'N/A',
   },
   {
-    id: 'macro-after-long-task',
-    name:
-      'If applicable, convert remaining micro tasks to the next macro ' +
-      ' tasks if a previous micro task execution took too long',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
-  },
-  {
     id: 'pausable-iframe',
     name: 'Use iframe freezing instead of recreating iframes.',
     spec: 'https://github.com/ampproject/amphtml/issues/24110',
@@ -303,18 +310,6 @@ export const EXPERIMENTS = [
     name: 'Fix inconsistent responsive height selection.',
     spec: 'https://github.com/ampproject/amphtml/issues/24166',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
-  },
-  {
-    id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
-    name: 'Use amp-ad responsive to make amp auto ads responsive.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24168',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
-  },
-  {
-    id: 'remove-viewer-query-params-on-navigate',
-    name: 'Removes query params from viewer iframe on navigation.',
-    spec: 'https://github.com/ampproject/amphtml/issues/25179',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
   },
   {
     id: 'layoutbox-invalidate-on-scroll',

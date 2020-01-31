@@ -177,6 +177,9 @@ const adConfig = jsonConfiguration({
     clientIdScope: 'amp_ecid_adensor',
     renderStartImplemented: true,
   },
+
+  'adservsolutions': {},
+
   'adsloom': {
     clientIdScope: 'AMP_ECID_ADSLOOM',
   },
@@ -332,6 +335,8 @@ const adConfig = jsonConfiguration({
   'broadstreetads': {
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
   },
+
+  'byplay': {},
 
   'caajainfeed': {
     prefetch: ['https://cdn.amanad.adtdp.com/sdk/ajaamp.js'],
@@ -718,6 +723,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
   },
 
+  'nativery': {
+    preconnect: 'https://cdn.nativery.com',
+  },
+
   'nativo': {
     prefetch: 'https://s.ntv.io/serve/load.js',
   },
@@ -992,6 +1001,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'ssp': {
+    prefetch: 'https://ssp.imedia.cz/static/js/ssp.js',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
@@ -1074,6 +1089,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'vdoai': {
+    prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
+    renderStartImplemented: true,
+  },
+
   'videointelligence': {
     preconnect: 'https://s.vi-serve.com',
     renderStartImplemented: true,
@@ -1104,6 +1124,10 @@ const adConfig = jsonConfiguration({
       'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
       'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
     ],
+  },
+
+  'whopainfeed': {
+    prefetch: 'https://widget.infeed.com.ar/widget/widget-amp.js',
   },
 
   'widespace': {},
@@ -1198,6 +1222,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
     renderStartImplemented: true,
   },
+
+  'sulvo': {},
 });
 
 export {adConfig};

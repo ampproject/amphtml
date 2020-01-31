@@ -23,6 +23,7 @@ import {
 } from '../../amp-script';
 import {FakeWindow} from '../../../../../testing/fake-dom';
 import {Services} from '../../../../../src/services';
+import {user} from '../../../../../src/log';
 
 describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
   let element;
@@ -93,6 +94,37 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     expect(service.checkSha384).to.be.called;
   });
 
+  describe('Initialization skipped warning due to zero height/width', () => {
+    it('should not warn when there is positive width/height', () => {
+      const warnStub = env.sandbox.stub(user(), 'warn');
+      env.sandbox.stub(script, 'getLayoutBox').returns({height: 1, width: 1});
+      script.onMeasureChanged();
+      expect(warnStub).to.have.callCount(0);
+    });
+
+    it('should warn if there is zero width/height', () => {
+      const warnStub = env.sandbox.stub(user(), 'warn');
+      env.sandbox.stub(script, 'getLayoutBox').returns({height: 0, width: 0});
+      script.onMeasureChanged();
+
+      expect(warnStub).calledWith(
+        'amp-script',
+        'Skipped initializing amp-script due to zero width and height.',
+        script.element
+      );
+      expect(warnStub).to.have.callCount(1);
+    });
+
+    it('should only warn if layoutCallback hasnt happened', () => {
+      const warnStub = env.sandbox.stub(user(), 'warn');
+      allowConsoleError(() => {
+        script.layoutCallback();
+      });
+      script.onMeasureChanged();
+      expect(warnStub).to.have.callCount(0);
+    });
+  });
+
   it('should fail on invalid sha384(author_js) for cross-origin src', () => {
     env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
     element.setAttribute('src', 'https://bar.example/bar.js');
@@ -155,13 +187,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     it('should not be in dev mode by default', () => {
       script.buildCallback();
       expect(script.development_).false;
-    });
-
-    it('development tag present should put it in dev mode', () => {
-      element.setAttribute('development', true);
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).true;
     });
 
     it('data-ampdevmode on just the element should not enable dev mode', () => {
@@ -248,13 +273,25 @@ describes.fakeWin('AmpScriptService', {amp: {runtimeOn: false}}, env => {
 
 describe('SanitizerImpl', () => {
   let el;
-  let s;
   let win;
+  let s;
+  let getSanitizer;
 
   beforeEach(() => {
     win = new FakeWindow();
-    s = new SanitizerImpl(win, /* element */ null, []);
     el = win.document.createElement('div');
+
+    getSanitizer = ({byUserGesture, byFixedSize}) =>
+      new SanitizerImpl(
+        {
+          win,
+          element: el,
+          isMutationAllowedByFixedSize: () => byFixedSize,
+          isMutationAllowedByUserGesture: () => byUserGesture,
+        },
+        []
+      );
+    s = getSanitizer({byUserGesture: false, byFixedSize: false});
   });
 
   describe('setAttribute', () => {
@@ -318,7 +355,15 @@ describe('SanitizerImpl', () => {
     });
 
     it('should allow changes to form elements if sandbox=allow-forms', () => {
-      s = new SanitizerImpl(win, /* element */ null, ['allow-forms']);
+      s = new SanitizerImpl(
+        {
+          win,
+          element: null,
+          isMutationAllowedByUserGesture: () => {},
+          isMutationAllowedbyFixedSize: () => {},
+        },
+        ['allow-forms']
+      );
 
       const form = win.document.createElement('form');
       s.setAttribute(form, 'action-xhr', 'https://example.com/post');
@@ -430,14 +475,15 @@ describe('SanitizerImpl', () => {
 
     beforeEach(() => {
       bind = {
-        getStateValue: () => {},
-        setState: () => {},
+        getStateValue: window.sandbox.stub(),
+        setState: window.sandbox.stub(),
+        constrain: window.sandbox.stub(),
       };
       window.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
-    it('AMP.setState(json)', async () => {
-      window.sandbox.spy(bind, 'setState');
+    it('AMP.setState(json), without user interaction', async () => {
+      s = getSanitizer({byUserGesture: false, byFixedSize: false});
 
       await s.setStorage(
         StorageLocation.AMP_STATE,
@@ -446,12 +492,45 @@ describe('SanitizerImpl', () => {
       );
 
       expect(bind.setState).to.be.calledOnce;
-      expect(bind.setState).to.be.calledWithExactly({foo: 'bar'}, true, false);
+      expect(bind.setState).to.be.calledWithExactly(
+        {foo: 'bar'},
+        {skipEval: true, constrain: undefined, skipAmpState: false}
+      );
+    });
+
+    it('AMP.setState(json), with user interaction', async () => {
+      s = getSanitizer({byUserGesture: true, byFixedSize: false});
+
+      await s.setStorage(
+        StorageLocation.AMP_STATE,
+        /* key */ null,
+        '{"foo":"bar"}'
+      );
+
+      expect(bind.setState).to.be.calledOnce;
+      expect(bind.setState).to.be.calledWithExactly(
+        {foo: 'bar'},
+        {skipEval: false, constrain: undefined, skipAmpState: false}
+      );
+    });
+
+    it('AMP.setState(json), fixed size and no user interaction', async () => {
+      s = getSanitizer({byGesture: false, byFixedSize: true});
+
+      await s.setStorage(
+        StorageLocation.AMP_STATE,
+        /* key */ null,
+        '{"foo":"bar"}'
+      );
+
+      expect(bind.setState).to.be.calledOnce;
+      expect(bind.setState).to.be.calledWithExactly(
+        {foo: 'bar'},
+        {skipEval: false, constrain: [s.element_], skipAmpState: false}
+      );
     });
 
     it('AMP.setState(not_json)', async () => {
-      window.sandbox.spy(bind, 'setState');
-
       await s.setStorage(
         StorageLocation.AMP_STATE,
         /* key */ null,
@@ -462,7 +541,7 @@ describe('SanitizerImpl', () => {
     });
 
     it('AMP.getState(string)', async () => {
-      window.sandbox.stub(bind, 'getStateValue').returns('bar');
+      bind.getStateValue.returns('bar');
 
       const state = await s.getStorage(StorageLocation.AMP_STATE, 'foo');
       expect(state).to.equal('bar');
@@ -472,7 +551,7 @@ describe('SanitizerImpl', () => {
     });
 
     it('AMP.getState()', async () => {
-      window.sandbox.stub(bind, 'getStateValue').returns({foo: 'bar'});
+      bind.getStateValue.returns({foo: 'bar'});
 
       const state = await s.getStorage(StorageLocation.AMP_STATE, '');
       expect(state).to.deep.equal({foo: 'bar'});

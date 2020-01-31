@@ -40,6 +40,8 @@ describe('amp-ad-xorigin-iframe-handler', () => {
     ampdoc = ampdocService.getSingleDoc();
     const adElement = document.createElement('container-element');
     adElement.getAmpDoc = () => ampdoc;
+    adElement.togglePlaceholder = () => {};
+    adElement.toggleFallback = () => {};
     adElement.isBuilt = () => {
       return true;
     };

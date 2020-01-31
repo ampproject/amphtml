@@ -157,15 +157,12 @@ export class AmpSidebar extends AMP.BaseElement {
       element.setAttribute('side', this.side_);
     }
 
-    // TODO(#25343): remove this check when cleaning up experiment post launch.
-    if (isExperimentOn(this.win, 'amp-nested-menu')) {
+    this.maybeBuildNestedMenu_();
+    // Nested menu may not be present during buildCallback if it is rendered
+    // dynamically with amp-list, in which case listen for dom update.
+    element.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.maybeBuildNestedMenu_();
-      // Nested menu may not be present during buildCallback if it is rendered
-      // dynamically with amp-list, in which case listen for dom update.
-      element.addEventListener(AmpEvents.DOM_UPDATE, () => {
-        this.maybeBuildNestedMenu_();
-      });
-    }
+    });
 
     // Get the toolbar attribute from the child navs.
     const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));
@@ -548,7 +545,8 @@ export class AmpSidebar extends AMP.BaseElement {
       /* shouldNotPreventDefault */ false,
       /* shouldStopPropagation */ true
     );
-    gestures.onGesture(SwipeXRecognizer, ({data}) => {
+    gestures.onGesture(SwipeXRecognizer, e => {
+      const {data} = e;
       this.handleSwipe_(data);
     });
   }

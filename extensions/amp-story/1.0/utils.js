@@ -152,7 +152,8 @@ export function getRGBFromCssColorValue(cssValue) {
  * @param  {!Object<string, number>} rgb  ie: {r: 0, g: 0, b: 0}
  * @return {string} '#fff' or '#000'
  */
-export function getTextColorForRGB({r, g, b}) {
+export function getTextColorForRGB(rgb) {
+  const {r, g, b} = rgb;
   // Calculates the relative luminance L.
   // https://www.w3.org/TR/2008/REC-WCAG20-20081211/#relativeluminancedef
   const getLinearRGBValue = x => {
@@ -237,13 +238,13 @@ export function getSourceOriginForElement(element, url) {
 
 /**
  * Resolves an image url and optimizes it if served from the cache.
- * @param {!Document} doc
+ * @param {!Window} win
  * @param {string} url
  * @return {string}
  */
-export function resolveImgSrc(doc, url) {
-  let urlSrc = resolveRelativeUrl(url, doc.location);
-  if (isProxyOrigin(doc.location.href)) {
+export function resolveImgSrc(win, url) {
+  let urlSrc = resolveRelativeUrl(url, win.location);
+  if (isProxyOrigin(win.location.href)) {
     // TODO(Enriqe): add extra params for resized image, for example:
     // (/ii/w${width}/s)
     urlSrc = urlSrc.replace('/c/s/', '/i/s/');
@@ -268,9 +269,10 @@ export const HistoryState = {
 export function setHistoryState(win, stateName, value) {
   const {history} = win;
   const state = getState(history) || {};
-  const newHistory = Object.assign({}, /** @type {!Object} */ (state), {
+  const newHistory = {
+    ...state,
     [stateName]: value,
-  });
+  };
 
   history.replaceState(newHistory, '');
 }

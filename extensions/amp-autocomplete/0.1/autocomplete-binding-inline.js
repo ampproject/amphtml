@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
 import {ownProperty} from '../../../src/utils/object';
 import {tryFocus} from '../../../src/dom';
 import {userAssert} from '../../../src/log';
@@ -25,7 +24,7 @@ const TAG = 'amp-autocomplete';
  * Inline implementation of autocomplete. This supports autocompleting
  * multiple input values as part of a larger freeform input element.
  * @implements {./autocomplete-binding-def.AutocompleteBindingDef}
- * @private
+ * @package
  */
 export class AutocompleteBindingInline {
   /**
@@ -33,17 +32,10 @@ export class AutocompleteBindingInline {
    * For use when "inline_" is true.
    * @param {!AMP.BaseElement} ampElement
    */
-  constructor({element, win}) {
+  constructor(ampElement) {
+    const {element} = ampElement;
     /** @private {!Element} */
     this.element_ = element;
-    this.win_ = win;
-
-    userAssert(
-      isExperimentOn(this.win_, 'amp-autocomplete'),
-      'Experiment %s is not turned on for "inline" attr. %s',
-      TAG,
-      this.element_
-    );
 
     /** @private {string} */
     this.trigger_ = this.element_.getAttribute('inline');

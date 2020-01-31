@@ -191,7 +191,7 @@ describe('amp-a4a', () => {
    */
   function buildCreativeString(opt_additionalInfo) {
     const baseTestDoc = testFragments.minimalDocOneStyle;
-    const offsets = Object.assign({}, opt_additionalInfo || {});
+    const offsets = {...(opt_additionalInfo || {})};
     offsets.ampRuntimeUtf16CharOffsets = [
       baseTestDoc.indexOf('<style amp4ads-boilerplate'),
       baseTestDoc.lastIndexOf('</script>') + '</script>'.length,
@@ -1400,6 +1400,48 @@ describe('amp-a4a', () => {
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.ok;
     });
+    it('does not initialize promise chain when hidden by media query', async () => {
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
+      fetchMock.getOnce(
+        TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+        () => adResponse,
+        {name: 'ad'}
+      );
+      const {doc} = fixture;
+      const rect = layoutRectLtwh(0, 0, 200, 200);
+      const a4aElement = createA4aElement(doc, rect);
+      a4aElement.classList.add('i-amphtml-hidden-by-media-query');
+      const a4a = new MockA4AImpl(a4aElement);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      expect(a4a.adPromise_).to.not.be.ok;
+      // test without media query
+      a4aElement.classList.remove('i-amphtml-hidden-by-media-query');
+      a4a.onLayoutMeasure();
+      expect(a4a.adPromise_).to.be.ok;
+    });
+    it('does not initialize promise chain when has attribute "hidden"', async () => {
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
+      fetchMock.getOnce(
+        TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+        () => adResponse,
+        {name: 'ad'}
+      );
+      const {doc} = fixture;
+      const rect = layoutRectLtwh(0, 0, 200, 200);
+      const a4aElement = createA4aElement(doc, rect);
+      a4aElement.setAttribute('hidden', '');
+      const a4a = new MockA4AImpl(a4aElement);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      expect(a4a.adPromise_).to.not.be.ok;
+      // test without media query
+      a4aElement.removeAttribute('hidden');
+      a4a.onLayoutMeasure();
+      expect(a4a.adPromise_).to.be.ok;
+    });
 
     /**
      * @param {boolean} isValidCreative
@@ -1875,12 +1917,10 @@ describe('amp-a4a', () => {
         '<script type=application/json amp-ad-metadata>'
       );
       const actual = a4a.getAmpAdMetadata(creative);
-      const expected = Object.assign(
-        {
-          minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        },
-        metaData
-      );
+      const expected = {
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+        ...metaData,
+      };
       expect(actual).to.deep.equal(expected);
     });
     it('should return null if metadata opening tag is (truly) wrong', () => {
@@ -1920,24 +1960,20 @@ describe('amp-a4a', () => {
     it('should not include amp images if not an array', () => {
       metaData.images = 'https://foo.com';
       const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
-      const expected = Object.assign(
-        {
-          minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        },
-        metaData
-      );
+      const expected = {
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+        ...metaData,
+      };
       delete expected.images;
       expect(actual).to.deep.equal(expected);
     });
     it('should tolerate missing images', () => {
       delete metaData.images;
       const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
-      const expected = Object.assign(
-        {
-          minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        },
-        metaData
-      );
+      const expected = {
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+        ...metaData,
+      };
       delete expected.images;
       expect(actual).to.deep.equal(expected);
     });
@@ -1962,12 +1998,10 @@ describe('amp-a4a', () => {
       metaData.ctaType = '0';
       a4a.isSinglePageStoryAd = true;
       const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
-      const expected = Object.assign(
-        {
-          minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        },
-        metaData
-      );
+      const expected = {
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+        ...metaData,
+      };
       delete expected.ctaType;
       expect(actual).to.deep.equal(expected);
       expect(a4a.element.dataset.varsCtatype).to.equal('0');
@@ -1978,12 +2012,10 @@ describe('amp-a4a', () => {
       metaData.ctaUrl = 'http://foo.com';
       a4a.isSinglePageStoryAd = true;
       const actual = a4a.getAmpAdMetadata(buildCreativeString(metaData));
-      const expected = Object.assign(
-        {
-          minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
-        },
-        metaData
-      );
+      const expected = {
+        minifiedCreative: testFragments.minimalDocOneStyleSrcDoc,
+        ...metaData,
+      };
       delete expected.ctaType;
       delete expected.ctaUrl;
       expect(actual).to.deep.equal(expected);

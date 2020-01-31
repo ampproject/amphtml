@@ -561,6 +561,14 @@ export class FriendlyIframeEmbed {
   }
 
   /**
+   * @return {!./service/mutator-interface.MutatorInterface}
+   * @private
+   */
+  getMutator_() {
+    return Services.mutatorForDoc(this.iframe);
+  }
+
+  /**
    * Runs a measure/mutate cycle ensuring that the iframe change is propagated
    * to the resource manager.
    * @param {{measure: (function()|undefined), mutate: function()}} task
@@ -568,7 +576,7 @@ export class FriendlyIframeEmbed {
    * @private
    */
   measureMutate_(task) {
-    return this.getResources_().measureMutateElement(
+    return this.getMutator_().measureMutateElement(
       this.iframe,
       task.measure || null,
       task.mutate
@@ -858,10 +866,7 @@ function installPolyfillsInChildWindow(parentWin, childWin) {
   installDOMTokenList(childWin);
   // The anonymous class parameter allows us to detect native classes vs
   // transpiled classes.
-  installCustomElements(
-    childWin,
-    NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined
-  );
+  installCustomElements(childWin, class {});
 }
 
 /**

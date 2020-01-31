@@ -45,7 +45,6 @@ import {WindowInterface} from '../window-interface';
 import {getTrackImpressionPromise} from '../impression.js';
 import {hasOwn} from '../utils/object';
 import {internalRuntimeVersion} from '../internal-version';
-import {tryResolve} from '../utils/promise';
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
@@ -262,12 +261,6 @@ export class GlobalVariableSource extends VariableSource {
       return this.getFragmentParamData_(param, defaultValue);
     });
 
-    // Returns the first item in the ancestorOrigins array, if available.
-    this.setAsync(
-      'ANCESTOR_ORIGIN',
-      this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN')
-    );
-
     /**
      * Stores client ids that were generated during this page view
      * indexed by scope.
@@ -349,7 +342,7 @@ export class GlobalVariableSource extends VariableSource {
           const variant = variants[/** @type {string} */ (experiment)];
           userAssert(
             variant !== undefined,
-            'The value passed to VARIANT() is not a valid experiment name:' +
+            'The value passed to VARIANT() is not a valid experiment in <amp-experiment>:' +
               experiment
           );
           // When no variant assigned, use reserved keyword 'none'.
@@ -643,36 +636,21 @@ export class GlobalVariableSource extends VariableSource {
         .then(details => (details ? details[property] : ''));
     });
 
-    this.setAsync(
-      'STORY_PAGE_INDEX',
-      this.getStoryValue_('pageIndex', 'STORY_PAGE_INDEX')
-    );
-
-    this.setAsync(
-      'STORY_PAGE_ID',
-      this.getStoryValue_('pageId', 'STORY_PAGE_ID')
-    );
-
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getFirstContentfulPaint()
-      );
+      return Services.performanceFor(win).getFirstContentfulPaint();
     });
 
     this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getFirstViewportReady()
-      );
+      return Services.performanceFor(win).getFirstViewportReady();
     });
 
     this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return tryResolve(() =>
-        Services.performanceFor(win).getMakeBodyVisible()
-      );
+      return Services.performanceFor(win).getMakeBodyVisible();
     });
 
     this.setAsync('AMP_STATE', key => {
       // This is safe since AMP_STATE is not an A4A whitelisted variable.
+      dev().expectedError(TAG, 'AMP_STATE will be moved to amp-analytics');
       const root = this.ampdoc.getRootNode();
       const element =
         /** @type {!Element|!ShadowRoot} */ (root.documentElement || root);
@@ -843,50 +821,6 @@ export class GlobalVariableSource extends VariableSource {
         expr
       );
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
-    });
-  }
-
-  /**
-   * Resolves the value via amp-story's service.
-   * @param {string} property
-   * @param {string} name
-   * @return {!AsyncResolverDef}
-   * @private
-   */
-  getStoryValue_(property, name) {
-    return () => {
-      const service = Services.storyVariableServiceForOrNull(this.ampdoc.win);
-      return service.then(storyVariables => {
-        userAssert(
-          storyVariables,
-          'To use variable %s amp-story should be configured',
-          name
-        );
-        return storyVariables[property];
-      });
-    };
-  }
-
-  /**
-   * Resolves the value via amp-viewer-integration's service.
-   * @param {string} property
-   * @param {string} name
-   * @return {!AsyncResolverDef}
-   * @private
-   */
-  getViewerIntegrationValue_(property, name) {
-    return /** @type {!AsyncResolverDef} */ ((param, defaultValue = '') => {
-      const service = Services.viewerIntegrationVariableServiceForOrNull(
-        this.ampdoc.win
-      );
-      return service.then(viewerIntegrationVariables => {
-        userAssert(
-          viewerIntegrationVariables,
-          'To use variable %s amp-viewer-integration must be installed',
-          name
-        );
-        return viewerIntegrationVariables[property](param, defaultValue);
-      });
     });
   }
 }
