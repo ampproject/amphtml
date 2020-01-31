@@ -51,13 +51,18 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
    * is embedded. Used for giving external commands to the player
    * (play/pause etc)
    * @private
-   * @param {string} command
+   * @param {object} command
    */
   sendCommand_(command) {
+    let message = command;
+
+    if (command.eventName === 'pause') {
+      message = 'pause';
+    }
     if (this.iframe_ && this.iframe_.contentWindow) {
       // Send message to the player
       this.iframe_.contentWindow./*OK*/ postMessage(
-        command,
+        message,
         this.iframeDomain_
       );
     }
@@ -122,7 +127,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     );
 
     userAssert(
-      this.layout_ === Layout.RESPONSIVE,
+      element.getAttribute('layout') === Layout.RESPONSIVE,
       'Only responsive layout is supported'
     );
 
@@ -173,8 +178,9 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     element.appendChild(iframe);
     this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
 
-    this.win.addEventListener('resize', () =>
-      this.sendCommand_({
+    this.win.addEventListener(
+      'resize',
+      this.sendCommand_.bind(this, {
         eventName: 'cnx_viewport_resize',
         viewportWidth: this.getViewport().getWidth(),
         viewportHeight: this.getViewport().getHeight(),
@@ -187,7 +193,9 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
 
   /** @override */
   pauseCallback() {
-    this.sendCommand_('pause');
+    this.sendCommand_({
+      eventName: 'pause',
+    });
   }
 
   /** @override */
