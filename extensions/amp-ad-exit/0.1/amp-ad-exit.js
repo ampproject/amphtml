@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {FilterType} from './filters/filter';
 import {HostServices} from '../../../src/inabox/host-services';
 import {
@@ -79,7 +80,11 @@ export class AmpAdExit extends AMP.BaseElement {
     this.userFilters_ = {};
 
     this.registerAction('exit', this.exit.bind(this));
-    this.registerAction('setIndirectTarget', this.setIndirectTarget.bind(this));
+    this.registerAction(
+      'setIndirectTarget',
+      this.setIndirectTarget.bind(this),
+      ActionTrust.LOW
+    );
     this.registerAction('exitIndirect', this.exitIndirect.bind(this));
 
     /** @private @const {!Object<string, !Object<string, string>>} */
