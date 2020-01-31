@@ -1170,6 +1170,12 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },
+  {
+    name: 'amp-trinity-tts-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
 ];
 
 /**
