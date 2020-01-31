@@ -28,6 +28,7 @@ limitations under the License.
 
 [TOC]
 
+
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
@@ -101,6 +102,10 @@ In the example above:
 - The `AMP.setState()` methods sets the `foo` **state variable** to the value of  `Interactivity`. 
 - The sate is no longer empty, so the pages updates the bound property to its state. 
 
+[tip type="note"]
+  Calling `AMP.setState()` in some examples may set or change states of other examples on page. Refresh this page to see examples before `AMP.setState()`.
+[/tip]
+
 ### A slightly more complex example
 
 [filter formats="websites, stories, ads"]
@@ -141,9 +146,9 @@ In the example above:
   src="https://amp.dev/static/samples/img/image2.jpg"
   [src]="theFood[currentMeal].imageUrl">
   </amp-img>
+  <button on="tap:AMP.setState({currentMeal: 'sushi'})">Set to sushi</button>
+  <button on="tap:AMP.setState({currentMeal: 'cupcakes'})">Set to cupcakes</button>
 </div>
-<button on="tap:AMP.setState({currentMeal: 'sushi'})">Set to sushi</button>
-<button on="tap:AMP.setState({currentMeal: 'cupcakes'})">Set to cupcakes</button>
 ```
 
 [/example]
@@ -212,10 +217,9 @@ Using `[class]="theFood[currentMeal].style"` as an example of **expression** syn
 <div class="greenBorder" [class]="theFood[currentMeal].style">
   <p>Each food has a different border color.</p>
   <p [text]="theFood[currentMeal].text">I want to eat cupcakes.</p>
+  <button on="tap:AMP.setState({currentMeal: 'sushi'})">Set to sushi</button>
+  <button on="tap:AMP.setState({currentMeal: 'cupcakes'})">Set to cupcakes</button>
 </div>
-
-<button on="tap:AMP.setState({currentMeal: 'sushi'})">Set to sushi</button>
-<button on="tap:AMP.setState({currentMeal: 'cupcakes'})">Set to cupcakes</button>
 ```
 
 [/example]
@@ -246,29 +250,97 @@ Using `[class]="theFood[currentMeal].style"` as an example of **expression** syn
 
 [/filter] <!-- formats="email" -->
 
-### State
+### `<amp-state>` specification
+
+[filter formats="websites, stories, ads"]
+An `amp-state` element may contain either a child `<script>` element **OR** a `src` attribute containing a CORS URL to a remote JSON endpoint, but not both.
+
+```html
+<amp-state id="myLocalState">
+  <script type="application/json">
+    {
+      "foo": "bar"
+    }
+  </script>
+</amp-state>
+
+<amp-state id="myRemoteState" src="https://data.com/articles.json"> </amp-state>
+```
+
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+An `amp-state` element must contain a child `<script>` element.
+
+```html
+<amp-state id="myLocalState">
+  <script type="application/json">
+    {
+      "foo": "bar"
+    }
+  </script>
+</amp-state>
+```
+
+[/filter] <!-- formats="email" -->
+
+[filter formats="websites, stories, ads"]
+
+#### Attributes
+
+[filter formats="websites, stories, ads"]
+
+##### `src` (optional)
+
+The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+
+[tip type="important"]
+The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
+[/tip]
+
+##### `credentials` (optional)
+
+Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
+
+- Supported values: `omit`, `include`
+- Default: `omit`
+
+To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+#### XHR batching
+
+AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.
+
+For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
+
+[/filter] <!-- formats="websites, stories, ads" -->
+
+## State
 
 Each AMP document that uses `amp-bind` has document-scope mutable JSON data, or **state**.
 
-#### Size
+### Size
 
 An `<amp-state>` element's JSON data has a maximum size of 100KB.
 
-#### Defining and initializing state with `amp-state`
+### Defining and initializing state with `<amp-state>`
 
 Expressions are not evaluates on page load, but you may define an initial state. The `<amp-state>` component contains different **states** and their **state variables**. While this defines a **states**, it will not reflect on the page until after a user interacts.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <amp-state id="myState">
+  <amp-state id="myDefinedState">
   <script type="application/json">
   {
     "foo": "bar"
   }
   </script>
 </amp-state>
-<p [text]="myState.foo"></p>
+<p [text]="myDefinedState.foo"></p>
 <button on="tap:AMP.setState({})">See value of initialized state</button>
 ```
 
@@ -276,7 +348,7 @@ Expressions are not evaluates on page load, but you may define an initial state.
 
 Use [expressions](#expressions) to reference **state variables**. If the JSON data is not nested in the `<amp-state>` component, reference the states via dot syntax. In the above example, `myState.foo` evaluates to "bar".
 
-An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [Appendix](#amp-state-specification) for details.
+An `<amp-state>` element can also specify a CORS URL instead of a child JSON script. See the [`<amp-state>` specification](#amp-state-specification) for details.
 
 ```html
 <amp-state id="myRemoteState"
@@ -284,34 +356,14 @@ An `<amp-state>` element can also specify a CORS URL instead of a child JSON scr
 </amp-state>
 ```
 
-
-#### Refreshing state data
-
-The `refresh` action refetches data from data point the `src` attribute points to. It ignores the browser cache.
-
-[example preview="inline" playground="true" imports="amp-bind"]
-
-```html
-<amp-state id="currentTime"
-  src="/documentation/examples/api/time"></amp-state>
-<button on="tap:currentTime.refresh">
-  Refresh
-</button>
-<div [text]="currentTime.time"></div>
-```
-
-[/example]
-
- A common need for `refresh` is working with live content that needs to be updated, such as a live sports score.
-
-#### Updating state variables with `AMP.setState()`
+### Updating state variables with `AMP.setState()`
 
 The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges an object literal into the state. This means you can update the value of a defined state variable. 
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <amp-state id="myState">
+  <amp-state id="myUpdateState">
     <script type="application/json">
       {
         "foo": "bar",
@@ -319,14 +371,14 @@ The [`AMP.setState()`](../../spec/amp-actions-and-events.md#amp) action merges a
       }
     </script>
   </amp-state>
-  <p [text]="myState.foo"></p>
-  <p [text]="myState.baz"></p>
+  <p [text]="myUpdateState.foo"></p>
+  <p [text]="myUpdateState.baz"></p>
   <button on="tap:AMP.setState({})">See value of set state</button>
   <!-- Like JavaScript, you can reference existing
      variables in the values of the  object literal. -->
-  <button on="tap:AMP.setState({myState:{baz: myState.foo}})"
+  <button on="tap:AMP.setState({myUpdateState:{baz: myUpdateState.foo}})"
           >Set value of baz to value of foo</button>
-  <button on="tap:AMP.setState({myState:{baz: 'world'}})"
+  <button on="tap:AMP.setState({myUpdateState:{baz: 'world'}})"
         >Set value of baz to "world"</button>        
 ```
 
@@ -366,7 +418,7 @@ When triggered by certain events, `AMP.setState()` can access event-related data
 ```
 [/example]
 
-##### Updating nested variables 
+#### Updating nested variables 
 
 Nested objects are generally merged to a maximum depth of 10. All variables, including those defined in `<amp-state>`, can be overidden.
 
@@ -416,8 +468,78 @@ Nested objects are generally merged to a maximum depth of 10. All variables, inc
 
 [/example]
 
+#### Circular references
 
-#### Modifying history with `AMP.pushState()`
+`AMP.setState(object)` throws an error if `object` contains a circular reference.
+
+#### Removing a variable
+
+Remove an existing state variable by setting its value to `null` in `AMP.setState()`.
+
+```html
+<button on="tap:AMP.setState({removeMe: null})"></button>
+```
+
+#### Deep-merge with `AMP.setState()`
+
+Calling `AMP.setState()` deep-merges the provided object literal with the current state. `amp-bind` writes all literals to the state directly, except for nested objects, which are recursively merged. Primitives and arrays are in the state are always overwritten by variables of the same name in the object literal.
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+<p [text]="employee.name">Name</p>
+<p [text]="employee.age">Age</p>
+<p [text]="employee.vehicle">Vehicle</p>
+  <!-- Pressing this button changes state to: -->
+<button
+        on="tap:AMP.setState({
+              employee: {
+                name: 'John Smith',
+                age: 47,
+                vehicle: 'Car'
+              }
+            })"
+        >
+  Set employee to John Smith
+</button>
+<!-- Pressing this button recursively merges the object literal argument,  -->
+<!-- `{employee: {age: 64}}`, into the existing state. -->
+  
+<button
+        on="tap:AMP.setState({
+              employee: {
+                age: 64
+              }
+            })"
+        >
+  Set employee age to 64
+</button>
+  <!-- The value updates from 47 to 64 at employee.age.  -->
+  <!-- No other values change. -->
+```
+
+[/example]
+
+### Refreshing state data
+
+The `refresh` action refetches data from data point the `src` attribute points to. It ignores the browser cache.
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+<amp-state id="currentTime"
+  src="/documentation/examples/api/time"></amp-state>
+<button on="tap:currentTime.refresh">
+  Refresh
+</button>
+<div [text]="currentTime.time"></div>
+```
+
+[/example]
+
+A common need for `refresh` is working with live content that needs to be updated, such as a live sports score.
+
+### Modifying history with `AMP.pushState()`
 
 `AMP.pushState()` writes state changes to the history. Navigating back, will restore the previous state. To test this, increase the count in the example below and use your browser's back button to decrease the count.
 
@@ -438,11 +560,11 @@ Nested objects are generally merged to a maximum depth of 10. All variables, inc
 
 Using `AMP.pushState()` sets the current state to the most recent pushed state.
 
-### Expressions
+## Expressions
 
 `amp-bind` uses JavaScript-like expressions that can reference the state.
 
-#### Differences from JavaScript
+### Differences from JavaScript
 
 - Expressions may only access the containing document's [state](#state).
 - Expressions **do not** have access to `window` or `document`. `global` references the top-level state.
@@ -456,17 +578,17 @@ The following are all valid expressions:
 [example preview="inline" playground="true" imports="amp-bind"]
 
 ```html
-  <p [text]="myState.foo"></p>
+  <p [text]="myExpressionsState.foo"></p>
   <!-- 1 + '1'; // 11 -->
-  <button on="tap:AMP.setState({myState: {foo: 1 + '1'}})">foo: 1 + "1"</button>
+  <button on="tap:AMP.setState({myExpressionsState: {foo: 1 + '1'}})">foo: 1 + "1"</button>
   <!-- 1 + +'1'; // 2 -->
-  <button on="tap:AMP.setState({myState: {foo: 1 + + '1'}})">foo: 1 + + "1"</button>
+  <button on="tap:AMP.setState({myExpressionsState: {foo: 1 + + '1'}})">foo: 1 + + "1"</button>
   <!-- !0; // true -->
-  <button on="tap:AMP.setState({myState: {foo: !0}})">foo: !0</button>
+  <button on="tap:AMP.setState({myExpressionsState: {foo: !0}})">foo: !0</button>
   <!-- null || 'default'; // 'default' -->
-  <button on="tap:AMP.setState({myState: {foo: null || 'default'}})">null || "default"</button>
+  <button on="tap:AMP.setState({myExpressionsState: {foo: null || 'default'}})">null || "default"</button>
   <!-- [1, 2, 3].map(x => x + 1); // 2,3,4 -->
-  <button on="tap:AMP.setState({myState: {foo: [1, 2, 3].map(x => x + 1)}})">[1, 2, 3].map(x => x + 1)</button>
+  <button on="tap:AMP.setState({myExpressionsState: {foo: [1, 2, 3].map(x => x + 1)}})">[1, 2, 3].map(x => x + 1)</button>
 ```
 
 [/example]
@@ -475,9 +597,9 @@ Find the full expression grammar and implementation in [bind-expr-impl.jison](./
 
 
 
-#### Allowed-listed functions
+### Allowed-listed functions
 
-##### [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods)
+#### [`Array`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#Methods)
 
 Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` instead of `(x) => x + 1`. `sort()` and `splice()` return modified copies instead of operating in-place.
 
@@ -523,7 +645,7 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
 
 [/example]
 
-##### [`Number`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#Methods)
+#### [`Number`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#Methods)
 
 - [toExponential](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toExponential)
 - [toFixed](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toFixed)
@@ -543,7 +665,7 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
 
 [/example]
 
-##### [`String`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods)
+#### [`String`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String#Methods)
 
 - [charAt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charAt)
 - [charCodeAt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/charCodeAt)
@@ -582,7 +704,7 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
 
 [/example]
 
-##### [`Math`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math)
+#### [`Math`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math)
 
 Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)`
 
@@ -613,7 +735,7 @@ Static functions are not namespaced, e.g. use `abs(-1)` instead of `Math.abs(-1)
 
 [/example]
 
-##### [`Object`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)
+#### [`Object`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)
 
 Static functions are not namespaced, e.g. use `keys(Object)` instead of `Object.abs(Object)`
 
@@ -638,7 +760,7 @@ Static functions are not namespaced, e.g. use `keys(Object)` instead of `Object.
 
 [/example]
 
-##### [`Global`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects)
+#### [`Global`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects)
 
 - [encodeURI](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI)
 - [encodeURIComponent](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent)
@@ -653,7 +775,124 @@ Static functions are not namespaced, e.g. use `keys(Object)` instead of `Object.
 
 [/example]
 
-#### Defining macros with `amp-bind-macro`
+#### Expression grammar
+
+The BNF-like grammar for `amp-bind` expressions:
+
+```text
+expr:
+    operation
+  | invocation
+  | member_access
+  | '(' expr ')'
+  | variable
+  | literal
+  ;
+
+operation:
+    '!' expr
+  | '-' expr %prec UMINUS
+  | '+' expr %prec UPLUS
+  |  expr '+' expr
+  | expr '-' expr
+  | expr '*' expr
+  | expr '/' expr
+  | expr '%' expr
+  | expr '&&' expr
+  | expr '||' expr
+  | expr '<=' expr
+  | expr '<' expr
+  | expr '>=' expr
+  | expr '>' expr
+  | expr '!=' expr
+  | expr '==' expr
+  | expr '?' expr ':' expr
+  ;
+
+invocation:
+    NAME args
+  | expr '.' NAME args
+  | expr '.' NAME '(' arrow_function ')'
+  | expr '.' NAME '(' arrow_function ',' expr ')'
+  ;
+
+arrow_function:
+    '(' ')' '=>' expr
+  | NAME '=>' expr
+  | '(' params ')' '=>' expr
+  ;
+
+params:
+    NAME ',' NAME
+  | params ',' NAME
+  ;
+
+args:
+    '(' ')'
+  | '(' array ')'
+  ;
+
+member_access:
+    expr member
+  ;
+
+member:
+    '.' NAME
+  | '[' expr ']'
+  ;
+
+variable:
+    NAME
+  ;
+
+literal:
+    primitive
+  | object_literal
+  | array_literal
+  ;
+
+primitive:
+    STRING
+  | NUMBER
+  | TRUE
+  | FALSE
+  | NULL
+  ;
+
+array_literal:
+    '[' ']'
+  | '[' array ']'
+  | '[' array ',' ']'
+  ;
+
+array:
+    expr
+  | array ',' expr
+  ;
+
+object_literal:
+    '{' '}'
+  | '{' object '}'
+  | '{' object ',' '}'
+  ;
+
+object:
+    key_value
+  | object ',' key_value
+  ;
+
+key_value:
+  key ':' expr
+  ;
+
+key:
+    NAME
+  | primitive
+  | '[' expr ']'
+  ;
+```
+
+### Defining macros with `amp-bind-macro`
 
 Reuse `amp-bind` expression fragments by defining an `amp-bind-macro`. The `amp-bind-macro` element allows an expression that takes zero or more arguments and references the current state. Invoke `amp-bind-macros` like a function, referencing the `id` attribute value from anywhere in the document. 
 
@@ -685,7 +924,7 @@ Reuse `amp-bind` expression fragments by defining an `amp-bind-macro`. The `amp-
 
 A macro can also call other macros <i>defined before itself</i>. A macro cannot call itself recursively.
 
-### Bindings
+## Bindings
 
 A **binding** is a special attribute of the form `[property]` that links an element's property to an [expression](#expressions). Use the alternative,[XML-compatible](#xml-compatibility) syntax if developing in XML.
 
@@ -719,7 +958,7 @@ Boolean expression results toggle boolean attributes. For example: `<amp-video [
 
 [/example]
 
-#### XML compatibility 
+### XML compatibility 
 
 If developing with XML, use the alternative `data-amp-bind-property` syntax. The  `[` and `]` characters in attribute names is invalid XML, making the `[property]` syntax unavailable. 
 
@@ -727,7 +966,7 @@ Replace the `property` field with the name of the property you would like to def
 
 For example, `[text]="myState.foo"` would become `data-amp-bind-text="myState.foo"`. 
 
-#### Binding types 
+### Binding types 
 
 `amp-bind` supports data bindings on five types of element state.
 
@@ -761,9 +1000,9 @@ Bind an element's `class` using the `[class]` attribute. A `[class]` expression 
 </style>
 <div class="background-red" [class]="myClass">Hello World</div>
 <!-- This button adds both classes -->
-<button on="tap:AMP.setState({ myClass: 'background-green border-red' })">Change class works</button>
+<button on="tap:AMP.setState({ myClass: 'background-green border-red' })">Working: Change Class</button>
 <!-- This expression evaluates to class="background-green,border-red" -->
-<button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">Change class broken</button>
+<button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">Broken: Change Class</button>
 ```
 
 [/example]
@@ -812,7 +1051,7 @@ Use to dynamically update information available to assistive technologies, such 
 Some AMP components and HTML elements have specific bindable attributes. They are listed below. 
 
 
-#### AMP component specific attributes
+### AMP component specific attributes
 
 [filter formats="websites"]
 
@@ -940,7 +1179,7 @@ See corresponding [`amp-video` attributes](../amp-video/amp-video.md#attributes)
 
 [filter formats="websites, stories, ads"]
 
-#### HTML attributes
+### HTML attributes
 
 **`<a>`**
 
@@ -1143,35 +1382,11 @@ Use `[defaultText]` to update initial text, and `[text]` to update current text.
 
 [/filter] <!-- formats="email" -->
 
-#### Disallowed bindings
+### Disallowed bindings
 
 For security reasons, binding to `innerHTML` is disallowed.
 
 All attribute bindings are sanitized for unsafe values (e.g., `javascript:`).
-
-## Attributes
-
-[filter formats="websites, stories, ads"]
-
-### `src` (optional)
-
-The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
-
-[tip type="important"]
-The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
-[/tip]
-
-### `credentials` (optional)
-
-Defines a `credentials` option as specified by the [Fetch API](https://fetch.spec.whatwg.org/).
-
-- Supported values: `omit`, `include`
-- Default: `omit`
-
-To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
-[/filter] <!-- formats="websites, stories, ads" -->
-
-[filter formats="email"]
 
 ### Invalid AMP email attributes
 
@@ -1221,7 +1436,7 @@ In development mode, `amp-bind` will also issue a warning when dereferencing und
 
 ### Errors
 
-There are several types of runtime errors that may be encountered when working with `amp-bind`.
+Below outlines the types of errors that may arise when working with `amp-bind`.
 
 <table>
   <tr>
@@ -1259,242 +1474,3 @@ There are several types of runtime errors that may be encountered when working w
 ### Debugging State
 
 Use `AMP.printState()` to print the current state to the console.
-
-## Appendix
-
-### `<amp-state>` specification
-
-[filter formats="websites, stories, ads"]
-An `amp-state` element may contain either a child `<script>` element **OR** a `src` attribute containing a CORS URL to a remote JSON endpoint, but not both.
-
-```html
-<amp-state id="myLocalState">
-  <script type="application/json">
-    {
-      "foo": "bar"
-    }
-  </script>
-</amp-state>
-
-<amp-state id="myRemoteState" src="https://data.com/articles.json"> </amp-state>
-```
-
-[/filter] <!-- formats="websites, stories, ads" -->
-
-[filter formats="email"]
-An `amp-state` element must contain a child `<script>` element.
-
-```html
-<amp-state id="myLocalState">
-  <script type="application/json">
-    {
-      "foo": "bar"
-    }
-  </script>
-</amp-state>
-```
-
-[/filter] <!-- formats="email" -->
-
-[filter formats="websites, stories, ads"]
-
-#### XHR batching
-
-AMP batches XMLHttpRequests (XHRs) to JSON endpoints, that is, you can use a single JSON data request as a data source for multiple consumers (e.g., multiple `amp-state` elements) on an AMP page.
-
-For example, if your `amp-state` element makes an XHR to an endpoint, while the XHR is in flight, all subsequent XHRs to the same endpoint won't trigger and will instead return the results from the first XHR.
-
-[/filter] <!-- formats="websites, stories, ads" -->
-
-
-### Deep-merge with `AMP.setState()`
-
-When `AMP.setState()` is called `amp-bind` deep-merges the provided object literal with the current state. All variables from the object literal are written to the state directly except for nested objects, which are recursively merged. Primitives and arrays are in the state are always overwritten by variables of the same name in the object literal.
-
-Consider the following example:
-
-```javascript
-// State is empty.
-{
-}
-```
-
-```html
-<button
-  on="tap:AMP.setState({
-  employee: {
-    name: 'John Smith',
-    age: 47,
-    vehicle: 'Car'
-  }
-})"
->
-  Set employee to John Smith
-</button>
-<button
-  on="tap:AMP.setState({
-  employee: {
-    age: 64
-  }
-})"
->
-  Set employee age to 64
-</button>
-```
-
-When the first button is pressed, the state changes to:
-
-```javascript
-{
-  employee: {
-    name: 'John Smith',
-    age: 47,
-    vehicle: 'Car',
-  }
-}
-```
-
-When the second button is pressed, `amp-bind` will recursively merge the object literal argument, `{employee: {age: 64}}`, into the existing state.
-
-```javascript
-{
-  employee: {
-    name: 'John Smith',
-    age: 64,
-    vehicle: 'Car',
-  }
-}
-```
-
-`employee.age` has been updated, however `employee.name` and `employee.vehicle` keys have not changed.
-
-#### Circular references
-
-`AMP.setState(object)` will throw a runtime error if `object` contains a circular reference.
-
-#### Removing a variable
-
-Remove an existing state variable by setting its value to `null` in `AMP.setState()`.
-
-For example:
-
-```html
-<button on="tap:AMP.setState({removeMe: null})"></button>
-```
-
-### Expression grammar
-
-The BNF-like grammar for `amp-bind` expressions:
-
-```text
-expr:
-    operation
-  | invocation
-  | member_access
-  | '(' expr ')'
-  | variable
-  | literal
-  ;
-
-operation:
-    '!' expr
-  | '-' expr %prec UMINUS
-  | '+' expr %prec UPLUS
-  |  expr '+' expr
-  | expr '-' expr
-  | expr '*' expr
-  | expr '/' expr
-  | expr '%' expr
-  | expr '&&' expr
-  | expr '||' expr
-  | expr '<=' expr
-  | expr '<' expr
-  | expr '>=' expr
-  | expr '>' expr
-  | expr '!=' expr
-  | expr '==' expr
-  | expr '?' expr ':' expr
-  ;
-
-invocation:
-    NAME args
-  | expr '.' NAME args
-  | expr '.' NAME '(' arrow_function ')'
-  | expr '.' NAME '(' arrow_function ',' expr ')'
-  ;
-
-arrow_function:
-    '(' ')' '=>' expr
-  | NAME '=>' expr
-  | '(' params ')' '=>' expr
-  ;
-
-params:
-    NAME ',' NAME
-  | params ',' NAME
-  ;
-
-args:
-    '(' ')'
-  | '(' array ')'
-  ;
-
-member_access:
-    expr member
-  ;
-
-member:
-    '.' NAME
-  | '[' expr ']'
-  ;
-
-variable:
-    NAME
-  ;
-
-literal:
-    primitive
-  | object_literal
-  | array_literal
-  ;
-
-primitive:
-    STRING
-  | NUMBER
-  | TRUE
-  | FALSE
-  | NULL
-  ;
-
-array_literal:
-    '[' ']'
-  | '[' array ']'
-  | '[' array ',' ']'
-  ;
-
-array:
-    expr
-  | array ',' expr
-  ;
-
-object_literal:
-    '{' '}'
-  | '{' object '}'
-  | '{' object ',' '}'
-  ;
-
-object:
-    key_value
-  | object ',' key_value
-  ;
-
-key_value:
-  key ':' expr
-  ;
-
-key:
-    NAME
-  | primitive
-  | '[' expr ']'
-  ;
-```
