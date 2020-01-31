@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -47,7 +47,14 @@ class AmpCarousel extends AMP.BaseElement {
       'goToSlide',
       actionInvocation => {
         const {args, trust} = actionInvocation;
-        this.carousel_.goToSlide(args['index'] || 0, {
+        const slide = Number(args['index'] || 0);
+        userAssert(
+          !isNaN(slide),
+          'Unexpected slide index for goToSlide action: %s. %s',
+          args['index'],
+          this.element
+        );
+        this.carousel_.goToSlide(slide, {
           actionSource: this.getActionSource_(trust),
         });
       },
