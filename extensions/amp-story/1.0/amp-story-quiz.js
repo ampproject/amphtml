@@ -435,12 +435,13 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       0
     );
 
-    // Special case: ties with remainder 0.5 cause total to rise above 100.
+    // Special case: divide remainders by three if they break 100,
+    // 3 is the maximum above 100 the remainders can add.
     if (total > 100) {
       percentages = percentages.map(percentage =>
-        (percentage - Math.floor(percentage)).toFixed(2) === '0.50'
-          ? (Math.floor(percentage) + 0.49).toFixed(2)
-          : percentage
+        (percentage - (2 * (percentage - Math.floor(percentage))) / 3).toFixed(
+          2
+        )
       );
 
       total = percentages.reduce(
@@ -523,7 +524,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       if (this.responseData_) {
         this.responseData_['totalResponseCount']++;
         this.responseData_['responses'].forEach(response => {
-          if (response['reactionValue'] === optionEl.optionIndex_) {
+          if (Number(response['reactionValue']) === optionEl.optionIndex_) {
             response['totalCount']++;
           }
         });
