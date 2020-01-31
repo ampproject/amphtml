@@ -28,12 +28,12 @@ import {getMode} from '../../../src/mode';
 export const CMP_CONFIG = {};
 
 if (getMode().test || getMode().localDev) {
-  CMP_CONFIG['_ping_'] = {
-    'consentInstanceId': '_ping_',
-    'checkConsentHref': '/get-consent-v1',
-    'promptUISrc': '/examples/amp-consent/diy-consent.html',
-  };
 }
+CMP_CONFIG['_ping_'] = {
+  'consentInstanceId': '_ping_',
+  'checkConsentHref': '/get-consent-v1',
+  'promptUISrc': '/examples/amp-consent/diy-consent.html',
+};
 
 CMP_CONFIG['didomi'] = {
   'consentInstanceId': 'didomi',

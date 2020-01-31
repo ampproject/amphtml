@@ -199,10 +199,8 @@ setInterval(() => {
     action: 'enter-fullscreen'
   };
 
-  console.log('diy-consent: Sending Fullscreen Message!', readyObject);
-
   parent.postMessage(readyObject, '*');
-}, 2500);
+}, 500);
 
 function registerClickConsentMessage(querySelector, type, action, info, timeout) {
   document.querySelector(querySelector).onclick = function () {
