@@ -719,7 +719,7 @@ export class Performance {
     let storedVal;
 
     // Absolute value case (not delta).
-    if (typeof opt_delta === 'undefined' || opt_delta === null) {
+    if (opt_delta == undefined) {
       // Marking only makes sense for non-deltas.
       this.mark(label);
       const now = this.win.Date.now();
