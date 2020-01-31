@@ -362,9 +362,9 @@
     <div class="brand-logo">PublisherLogo</div>
   </footer>
   <script>
-    setTimeout(() => {
+    (self.AMP = self.AMP || []).push(function(AMP) {
       AMP.toggleExperiment('amp-consent-restrict-fullscreen', true);
-    }, 500);
+    });
   </script>
 </body>
 

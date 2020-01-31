@@ -351,7 +351,7 @@ describes.realWin(
           expect(lastChild.children[0].innerText).to.equal(
             'User Consent Prompt'
           );
-          expect(lastChild.children[1].innerText).to.equal('Focus prompt');
+          expect(lastChild.children[1].innerText).to.equal('Focus Prompt');
 
           consentUI.hide();
           await macroTask();

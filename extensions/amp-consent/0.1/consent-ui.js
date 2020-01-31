@@ -39,7 +39,7 @@ const CONSENT_STATE_MANAGER = 'consentStateManager';
 const DEFAULT_INITIAL_HEIGHT = '30vh';
 const DEFAULT_ENABLE_BORDER = true;
 const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
-const BUTTON_ACTION_CAPTION = 'Focus prompt';
+const BUTTON_ACTION_CAPTION = 'Focus Prompt';
 
 // Classes for consent UI
 export const consentUiClasses = {
@@ -51,7 +51,7 @@ export const consentUiClasses = {
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
   enableBorder: 'i-amphtml-consent-ui-enable-border',
-  screenReaderOnly: 'i-amphtml-consent-alertdialog',
+  screenReaderDialog: 'i-amphtml-consent-alertdialog',
 };
 
 export class ConsentUI {
@@ -599,8 +599,7 @@ export class ConsentUI {
       titleDiv.textContent = this.consentPromptCaption_;
       button.textContent = this.buttonActionCaption_;
       button.onclick = () => {
-        this.ui_ = dev().assertElement(this.ui_);
-        tryFocus(this.ui_);
+        tryFocus(dev().assertElement(this.ui_));
       };
 
       alertDialog.appendChild(titleDiv);
@@ -608,7 +607,7 @@ export class ConsentUI {
 
       // Style to be visiblly hidden, but not hidden from the SR
       const {classList} = alertDialog;
-      classList.add(consentUiClasses.screenReaderOnly);
+      classList.add(consentUiClasses.screenReaderDialog);
 
       this.baseInstance_.element.appendChild(alertDialog);
       tryFocus(button);
