@@ -81,7 +81,7 @@ Retain all the considerations below that are applicable to your issue. If a cons
 
 - #### Accessibility Considerations
 <!--
-Enter a short snippet for the accessibility considerations of the design. If none apply, enter n/a including a short sentence if not obvious. If you need assistance, reach out to the UI and Accessibility WG for assistance. https://github.com/ampproject/wg-ui-and-a11y
+Enter a short snippet for the accessibility considerations of this design. If none apply, enter N/A along with a short explanation. If you need assistance, reach out to the UI and Accessibility WG: https://github.com/ampproject/wg-ui-and-a11y
 -->
 - #### Performance Considerations
 <!--
