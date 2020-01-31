@@ -90,6 +90,7 @@ amp-consent.amp-hidden {
   position: absolute;
   height: 1px;
   width: 1px;
+  left: -1;
 }
 
 .i-amphtml-consent-ui-fill {
