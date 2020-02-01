@@ -372,10 +372,10 @@ export class MultidocManager {
                 this.win.document.head.appendChild(el);
               }
               const content = (
-                (el.getAttribute('content') || '').trim() +
+                (el.getAttribute('content') || '') +
                 ' ' +
-                (n.getAttribute('content') || '').trim()
-              ).replace(/\s+/, ' ');
+                (n.getAttribute('content') || '')
+              ).trim();
               el.setAttribute('content', content.trim());
             } else {
               // TODO(dvoytenko): copy other meta tags.
