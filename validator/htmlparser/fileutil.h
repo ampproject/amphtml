@@ -27,6 +27,8 @@
 
 namespace htmlparser {
 
+using LineCallback = std::function<void(std::string_view, int)>;
+
 struct FileReadOptions {
   struct LineTransforms {
     // No transformations.
@@ -85,10 +87,10 @@ class FileUtil {
   // 2) Reads line by line to provided callback.
   static bool ReadFileLines(const FileReadOptions& options,
                             std::string_view filepath,
-                            std::function<void(std::string_view)> callback);
+                            LineCallback callback);
   static bool ReadFileLines(const FileReadOptions& options,
                             std::istream& fd,
-                            std::function<void(std::string_view)> callback);
+                            LineCallback callback);
 
 
   // 3) Lookup of single row of key/value multi-line data (separated by a marker

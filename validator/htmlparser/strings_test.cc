@@ -22,6 +22,18 @@
 
 using namespace std::string_literals;
 
+TEST(StringsTest, SplitStringAtTest) {
+  auto columns = htmlparser::Strings::SplitStringAt("a|b|c", '|');
+  EXPECT_EQ(columns.size(), 3);
+  EXPECT_EQ(columns.at(0), "a");
+  EXPECT_EQ(columns.at(1), "b");
+  EXPECT_EQ(columns.at(2), "c");
+
+  columns = htmlparser::Strings::SplitStringAt("a", '|');
+  EXPECT_EQ(columns.size(), 1);
+  EXPECT_EQ(columns.at(0), "a");
+}
+
 TEST(StringsTest, LowerUpperTest) {
   // Unicode.
   std::string name = "AMALTASsSŚŚSŚ";
