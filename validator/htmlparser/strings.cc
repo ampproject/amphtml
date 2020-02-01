@@ -554,6 +554,26 @@ bool Strings::EqualFold(std::string_view l, std::string_view r) {
   return l.empty() && r.empty();
 }
 
+std::vector<std::string> Strings::SplitStringAt(
+      std::string_view s, char delimiter) {
+  std::vector<std::string> columns;
+  size_t first = 0;
+
+  while (first < s.size()) {
+    const auto second = s.find_first_of(delimiter, first);
+
+    if (first != second)
+      columns.emplace_back(std::string(s.substr(first, second-first)));
+
+    if (second == std::string_view::npos)
+      break;
+
+    first = second + 1;
+  }
+
+  return columns;
+}
+
 namespace {
 
 // Reads an entity like "&lt;" from b[src:] and writes the corresponding "<"

@@ -231,6 +231,10 @@ class Strings {
   static bool StartsWith(std::string_view s, std::string_view prefix);
   static bool EndsWith(std::string_view s, std::string_view suffix);
 
+  // Splits a string at delimiter and returns the columns.
+  static std::vector<std::string> SplitStringAt(
+      std::string_view s, char delimiter);
+
  private:
   // No instance of this class.
   Strings() = default;
