@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-3d-gltf
 
-Displays GL Transmission Format (gITF) 3D models.
+Displays a GL Transmission Format (gITF) 3D models.
 
 <table>
   <tr>
