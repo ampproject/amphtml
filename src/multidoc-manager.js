@@ -25,6 +25,7 @@ import {
 } from './shadow-embed';
 import {dev, user} from './log';
 import {disposeServicesForDoc, getServicePromiseOrNullForDoc} from './service';
+import {escapeCssSelectorIdent} from './css';
 import {getMode} from './mode';
 import {installStylesForDoc} from './style-installer';
 import {isArray, isObject, toArray} from './types';
@@ -359,11 +360,23 @@ export class MultidocManager {
             } else if (name == 'viewport') {
               // Ignore.
             } else if (name == 'amp-script-src') {
-              // Import amp-script hashes
-              const el = this.win.document.createElement('meta');
-              el.setAttribute('name', 'amp-script-src');
-              el.setAttribute('content', n.getAttribute('content') || '');
-              this.win.document.head.appendChild(el);
+              // Import amp-script hashes, concatenating content attributes into
+              // a single <meta name="amp-script-src"> tag in the event of
+              // multiple ampdocs.
+              let el = this.win.document.querySelector(
+                `meta[name="${escapeCssSelectorIdent(name)}"]`
+              );
+              if (!el) {
+                el = this.win.document.createElement('meta');
+                el.setAttribute('name', name);
+                this.win.document.head.appendChild(el);
+              }
+              const content = (
+                (el.getAttribute('content') || '').trim() +
+                ' ' +
+                (n.getAttribute('content') || '').trim()
+              ).replace(/\s+/, ' ');
+              el.setAttribute('content', content.trim());
             } else {
               // TODO(dvoytenko): copy other meta tags.
               dev().warn(TAG, 'meta ignored: ', n);
