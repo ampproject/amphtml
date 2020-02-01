@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,11 +59,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     if (command.eventName === 'pause') {
       message = 'pause';
     } else if (command.eventName === 'cnx_viewport_resize') {
-      message = JSON.stringify({
-        'eventName': command.eventName,
-        'viewportWidth': command.viewportWidth,
-        'viewportHeight': command.viewportHeight,
-      });
+      message = `{"eventName": "${command.eventName}", "viewportWidth": ${command.viewportWidth}, "viewportHeight": ${command.viewportHeight}}`;
     }
     if (this.iframe_ && this.iframe_.contentWindow) {
       // Send message to the player
