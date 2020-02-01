@@ -17,6 +17,7 @@
 import {AmpGeo} from '../amp-geo';
 import {GEO_IN_GROUP} from '../amp-geo-in-group';
 import {Services} from '../../../../src/services';
+import {urls} from '../../../../src/config';
 import {user} from '../../../../src/log';
 import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
@@ -63,6 +64,7 @@ describes.realWin(
     let geo;
     let el;
     let userErrorStub;
+    let xhr;
 
     beforeEach(() => {
       userErrorStub = env.sandbox.stub(user(), 'error');
@@ -77,6 +79,10 @@ describes.realWin(
       vsync.schedule_ = () => {
         vsync.runScheduledTasks_();
       };
+      xhr = {
+        fetchJson: env.sandbox.stub(),
+      };
+      env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
       geo = new AmpGeo(el);
     });
@@ -95,6 +101,16 @@ describes.realWin(
     function expectBodyHasClass(klasses, expected) {
       for (const k in klasses) {
         expect(doc.body.classList.contains(klasses[k])).to.equal(expected);
+      }
+    }
+
+    function stubFetchJson(json, success) {
+      if (success) {
+        xhr.fetchJson.resolves({
+          json: () => Promise.resolve(JSON.parse(json)),
+        });
+      } else {
+        xhr.fetchJson.rejects({status: 404});
       }
     }
 
@@ -383,6 +399,46 @@ describes.realWin(
       return Services.geoForDocOrNull(el).then(geo => {
         expect(geo.ISOCountry).to.equal('unknown');
         expectBodyHasClass(['amp-geo-error'], true);
+      });
+    });
+
+    it('should recognize country if API has valid schema', () => {
+      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(urls, 'geoApi').value('/geoapi');
+      stubFetchJson('{"country": "ca", "other": "ok"}', true);
+      addConfigElement('script');
+
+      geo.buildCallback();
+      return Services.geoForDocOrNull(el).then(geo => {
+        expect(userErrorStub).to.not.be.called;
+        expect(geo.ISOCountry).to.equal('ca');
+        expect(geo.isInCountryGroup('nafta')).to.equal(GEO_IN_GROUP.IN);
+      });
+    });
+
+    it('should not recognize country if API has invalid schema', () => {
+      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(urls, 'geoApi').value('/geoapi');
+      stubFetchJson('{"country": "abc"}', true);
+      addConfigElement('script');
+
+      geo.buildCallback();
+      return Services.geoForDocOrNull(el).then(geo => {
+        expect(userErrorStub).to.be.called;
+        expect(geo.ISOCountry).to.equal('unknown');
+      });
+    });
+
+    it('should not recognize country if API unreachable', () => {
+      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(urls, 'geoApi').value('/geoapi');
+      stubFetchJson(null, false);
+      addConfigElement('script');
+
+      geo.buildCallback();
+      return Services.geoForDocOrNull(el).then(geo => {
+        expect(userErrorStub).to.be.called;
+        expect(geo.ISOCountry).to.equal('unknown');
       });
     });
 
