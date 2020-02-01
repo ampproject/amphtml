@@ -27,15 +27,14 @@ const IBEATANALYTICS_CONFIG = jsonLiteral({
       '&at=${incrementalEngagedTime}' +
       '&tt=${totalTime}' +
       '&pid=${pageViewId64}' +
-      '&domain:${domain}'+
-      '&ct:${contentType}'+
-      '&pubt:${articledt}'+ 
-      '&au:${author}'+
-      '&ag:${channel}'+
-      '&aid:${articleId}'+
-      '&cat:${cat}'+
+      '&d:${d}'+
+      '&ct:${ct}'+
+      '&pt:${pt}'+ 
+      '&au:${au}'+
+      '&ag:${ag}'+
+      '&aid:${aid}'+
       '&cn:${canonicalUrl}'+
-      '&ctIds:${catIds}',
+      '&ctIds:${ctIds}',
   },
   'triggers': {
     'trackInterval': {
