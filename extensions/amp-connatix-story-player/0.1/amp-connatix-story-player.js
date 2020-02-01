@@ -54,7 +54,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
    * @param {Object} command
    */
   sendCommand_(command) {
-    let message = JSON.stringify(command);
+    let message = command;
 
     if (command.eventName === 'pause') {
       message = 'pause';
@@ -181,9 +181,9 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     this.win.addEventListener(
       'resize',
       this.sendCommand_.bind(this, {
-        eventName: 'cnx_viewport_resize',
-        viewportWidth: this.getViewport().getWidth(),
-        viewportHeight: this.getViewport().getHeight(),
+        'eventName': 'cnx_viewport_resize',
+        'viewportWidth': this.getViewport().getWidth(),
+        'viewportHeight': this.getViewport().getHeight(),
       })
     );
     // Return a load promise for the frame so the runtime knows when the
@@ -194,7 +194,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
   /** @override */
   pauseCallback() {
     this.sendCommand_({
-      eventName: 'pause',
+      'eventName': 'pause',
     });
   }
 
