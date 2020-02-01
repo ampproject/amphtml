@@ -363,7 +363,7 @@ export class MultidocManager {
               // Import amp-script hashes, concatenating content attributes into
               // a single <meta name="amp-script-src"> tag in the event of
               // multiple ampdocs.
-              let el = this.win.document.querySelector(
+              let el = this.win.document.head.querySelector(
                 `meta[name="${escapeCssSelectorIdent(name)}"]`
               );
               if (!el) {
