@@ -64,7 +64,7 @@ export class AmpConnatixStoryPlayer extends AMP.BaseElement {
     if (this.iframe_ && this.iframe_.contentWindow) {
       // Send message to the player
       this.iframe_.contentWindow./*OK*/ postMessage(
-        message,
+        message.toString(),
         this.iframeDomain_
       );
     }
