@@ -376,7 +376,7 @@ export class MultidocManager {
                 ' ' +
                 (n.getAttribute('content') || '')
               ).trim();
-              el.setAttribute('content', content.trim());
+              el.setAttribute('content', content);
             } else {
               // TODO(dvoytenko): copy other meta tags.
               dev().warn(TAG, 'meta ignored: ', n);
