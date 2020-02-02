@@ -62,7 +62,7 @@ describes.realWin(
       return getConnatixStoryPlayer(attributes, {
         'width': '4',
         'height': '5',
-        'orientation': 'portrait',
+        'data-orientation': 'portrait',
         'layout': 'responsive',
       });
     }
@@ -83,7 +83,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://cds.connatix.com/p/plugins/connatix.playspace.embed.html?playerId=f721b0d8-7a79-42b6-b637-fa4e86138ed9'
+        'https://cds.connatix.com/p/plugins/connatix.playspace.embed.html?playerId=f721b0d8-7a79-42b6-b637-fa4e86138ed9&orientation=landscape'
       );
       expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
@@ -97,7 +97,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://cds.connatix.com/p/plugins/connatix.playspace.embed.html?playerId=f721b0d8-7a79-42b6-b637-fa4e86138ed9&storyId=08d79e80-c4bb-e51a-4116-616225d51db2'
+        'https://cds.connatix.com/p/plugins/connatix.playspace.embed.html?playerId=f721b0d8-7a79-42b6-b637-fa4e86138ed9&storyId=08d79e80-c4bb-e51a-4116-616225d51db2&orientation=portrait'
       );
     });
 
