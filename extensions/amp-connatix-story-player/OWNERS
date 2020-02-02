@@ -6,7 +6,8 @@
     {
       owners: [
         {name: 'rares-mihai-preda'},
-        {name: 'wassgha'}
+        {name: 'wassgha'},
+        {name: 'alanorozco'},
         {name: 'ampproject/wg-caching'},
       ],
     },
