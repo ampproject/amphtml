@@ -47,9 +47,10 @@ function send(topic, type, events) {
  * @param {Array} events
  * */
 export function sendEngagement(events) {
-  const allEvents = events.map(event =>
-    Object.assign({}, event, {et: EventType.ENGAGEMENT})
-  );
+  const allEvents = events.map(event => ({
+    ...event,
+    et: EventType.ENGAGEMENT,
+  }));
   send(EventTopic.AMP, EventType.ENGAGEMENT, allEvents);
 }
 
@@ -67,7 +68,7 @@ export function sendPublisherAdViewed(ad) {
  * */
 export function sendPublisherAdFound(ads) {
   const publisherAdsFound = ads.map(ad => {
-    return Object.assign({}, getPublisherAdFoundEvent(ad), {});
+    return {...getPublisherAdFoundEvent(ad)};
   });
   send(EventTopic.AMP, EventType.PUBLISHER_AD_FOUND, publisherAdsFound);
   return publisherAdsFound;
@@ -78,9 +79,10 @@ export function sendPublisherAdFound(ads) {
  * @return {Object}
  * */
 function getPublisherAdFoundEvent(ad) {
-  return Object.assign({}, ad, {
+  return {
+    ...ad,
     et: EventType.PUBLISHER_AD_FOUND,
-  });
+  };
 }
 
 /**
@@ -88,8 +90,9 @@ function getPublisherAdFoundEvent(ad) {
  * @return {Object}
  * */
 function getPublisherAdViewedEvent(ad) {
-  return Object.assign({}, ad, {
+  return {
+    ...ad,
     et: EventType.PUBLISHER_AD_VIEWED,
     amp: 'amp',
-  });
+  };
 }

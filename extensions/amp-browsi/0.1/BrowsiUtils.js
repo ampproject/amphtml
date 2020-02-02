@@ -62,19 +62,16 @@ export class BrowsiUtils {
   static buildAdData(ad, ampdoc, additionalObj) {
     const viewportService = Services.viewportForDoc(ampdoc);
     return viewportService.getClientRectAsync(ad).then(rect => {
-      return Object.assign(
-        {},
-        {
-          adUnit: ad.getAttribute('data-slot'),
-          adType: ad.getAttribute('type'),
-          adWidth: ad.getAttribute('width'),
-          adHeight: ad.getAttribute('height'),
-          adCWidth: rect.width,
-          adCHeight: rect.height,
-          adClasses: ad.getAttribute('class'),
-        },
-        additionalObj
-      );
+      return {
+        adUnit: ad.getAttribute('data-slot'),
+        adType: ad.getAttribute('type'),
+        adWidth: ad.getAttribute('width'),
+        adHeight: ad.getAttribute('height'),
+        adCWidth: rect.width,
+        adCHeight: rect.height,
+        adClasses: ad.getAttribute('class'),
+        ...additionalObj,
+      };
     });
   }
 }

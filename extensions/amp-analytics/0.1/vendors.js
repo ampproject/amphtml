@@ -198,7 +198,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'baiduanalytics': includeJsonLiteral(BAIDUANALYTICS_CONFIG),
       'bg': includeJsonLiteral(BG_CONFIG),
       'browsi': includeJsonLiteral(BROWSI_CONFIG),
-        'burt': includeJsonLiteral(BURT_CONFIG),
+      'burt': includeJsonLiteral(BURT_CONFIG),
       'byside': includeJsonLiteral(BYSIDE_CONFIG),
       'captainmetrics': includeJsonLiteral(CAPTAINMETRICS_CONFIG),
       'chartbeat': includeJsonLiteral(CHARTBEAT_CONFIG),
