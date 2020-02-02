@@ -6,9 +6,10 @@
     {
       owners: [
         {name: 'rares-mihai-preda'},
+        {name: 'alanorozco', requestReviews: true},
         {name: 'wassgha'},
-        {name: 'alanorozco'},
         {name: 'ampproject/wg-caching'},
+        {name: 'ampproject/wg-ui-and-a11y'},
       ],
     },
   ],
