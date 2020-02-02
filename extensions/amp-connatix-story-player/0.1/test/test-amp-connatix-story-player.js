@@ -67,8 +67,16 @@ describes.realWin(
       });
     }
 
+    function getConnatixStoryPlayerNoOrientation(attributes) {
+      return getConnatixStoryPlayer(attributes, {
+        'width': '4',
+        'height': '5',
+        'layout': 'responsive',
+      });
+    }
+
     it('renders', async () => {
-      const cnx = await getConnatixStoryPlayer({
+      const cnx = await getConnatixStoryPlayerLandscape({
         'data-player-id': '3014c9e7-d40e-4790-b305-9b8c614537b9',
       });
       const iframe = cnx.querySelector('iframe');
@@ -81,7 +89,7 @@ describes.realWin(
     });
 
     it('renders with a storyId', async () => {
-      const cnx = await getConnatixStoryPlayer({
+      const cnx = await getConnatixStoryPlayerPortrait({
         'data-player-id': '3014c9e7-d40e-4790-b305-9b8c614537b9',
         'data-story-id': '08d79e80-c4bb-e51a-4116-616225d51db2',
       });
@@ -95,7 +103,7 @@ describes.realWin(
 
     it('fails if no playerId is specified', () => {
       return allowConsoleError(() => {
-        return getConnatixStoryPlayer({
+        return getConnatixStoryPlayerLandscape({
           'data-story-id': '08d79e80-c4bb-e51a-4116-616225d51db2',
         }).should.eventually.be.rejectedWith(
           /The data-player-id attribute is required for/
@@ -103,8 +111,19 @@ describes.realWin(
       });
     });
 
+    it('fails if no orientation is specified', () => {
+      return allowConsoleError(() => {
+        return getConnatixStoryPlayerNoOrientation({
+          'data-player-id': '3014c9e7-d40e-4790-b305-9b8c614537b9',
+          'data-story-id': '08d79e80-c4bb-e51a-4116-616225d51db2',
+        }).should.eventually.be.rejectedWith(
+          /The data-orientation attribute is required for/
+        );
+      });
+    });
+
     it('removes iframe after unlayoutCallback', async () => {
-      const cnx = await getConnatixStoryPlayer({
+      const cnx = await getConnatixStoryPlayerPortrait({
         'data-player-id': '3014c9e7-d40e-4790-b305-9b8c614537b9',
       });
       const iframe = cnx.querySelector('iframe');

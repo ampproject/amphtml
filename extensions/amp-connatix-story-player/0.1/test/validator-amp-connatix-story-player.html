@@ -15,6 +15,28 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <amp-connatix-story-player layout="responsive" width="150" height="80"></amp-connatix-story-player>
+  <!-- Invalid: missing required data-player-id attribute -->
+  <amp-connatix-story-player 
+    data-orientation="landscape"
+    layout="responsive"
+    width="16"
+    height="12">
+  </amp-connatix-story-player>
+  <!-- Invalid: missing required data-orientation attribute -->
+  <amp-connatix-story-player
+    data-player-id="3014c9e7-d40e-4790-b305-9b8c614537b9"
+    data-orientation="landscape"
+    layout="responsive"
+    width="16"
+    height="12">
+  </amp-connatix-story-player>
+  <!-- Valid -->
+  <amp-connatix-story-player 
+    data-player-id="3014c9e7-d40e-4790-b305-9b8c614537b9"
+    data-orientation="landscape"
+    layout="responsive"
+    width="16"
+    height="12">
+  </amp-connatix-story-player>
 </body>
 </html>
