@@ -53,7 +53,7 @@ describes.realWin(
       return getConnatixStoryPlayer(attributes, {
         'width': '16',
         'height': '12',
-        'orientation': 'landscape',
+        'data-orientation': 'landscape',
         'layout': 'responsive',
       });
     }
