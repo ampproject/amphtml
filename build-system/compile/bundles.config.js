@@ -470,6 +470,12 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
+    name: 'amp-connatix-story-player',
+    version: '0.1',
+    latestVersion: '0.1',
+    type: TYPES.MEDIA,
+  },
+  {
     name: 'amp-crypto-polyfill',
     version: '0.1',
     latestVersion: '0.1',
