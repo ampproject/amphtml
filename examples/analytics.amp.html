@@ -20,38 +20,190 @@
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 </head>
 <body>
 <p>Scroll down to see content</p>
-<amp-ad width="320" height="50"
-        type="doubleclick"
-        data-slot="/4119129/mobile_ad_banner"
-        rtc-config='{"vendors":
-            {"browsi":
-              {"site-key": "demo_site"},
-              {"pub-key": "demo_publisher"}
-            },
-          "timeoutMillis": 500
-        }'>
-</amp-ad>
 <div id="container">
 Container for analytics tags. Positioned far away from top to make sure that doesn't matter.
 
-  <!-- Browsi prediction tracking -->
-  <amp-analytics type="browsi" id="browsi">
-    <script type="application/json">
-      {
-        "vars": {
-          "pubKey": "demo-pub",
-          "siteKey": "demo-site"
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "endpoint": "/analytics/no-referrer"
+      },
+      "triggers": {
+        "pageview": {
+          "on": "visible",
+          "request": "endpoint"
         }
+      },
+      "transport": {
+        "referrerPolicy": "no-referrer"
       }
-    </script>
-  </amp-analytics>
+    }
+  </script>
+</amp-analytics>
+<amp-analytics id="analytics1">
+<script type="application/json">
+{
+  "transport": {"beacon": true, "xhrpost": false},
+  "requests": {
+    "endpoint": "/analytics",
+    "base": "${endpoint}/${type}?path=${canonicalPath}",
+    "event": "${base}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}",
+    "visibility": "${base}&a=${maxContinuousVisibleTime}&b=${totalVisibleTime}&c=${firstSeenTime}&d=${lastSeenTime}&e=${firstVisibleTime}&f=${lastVisibleTime}&g=${minVisiblePercentage}&h=${maxVisiblePercentage}&i=${elementX}&j=${elementY}&k=${elementWidth}&l=${elementHeight}&m=${totalTime}&n=${loadTimeVisibility}&o=${backgroundedAtStart}&p=${backgrounded}&subTitle=${subTitle}",
+    "timer": "${base}&backgroundState=${backgroundState}&timerStart=${timerStart}&duration=${timerDuration}",
+    "video": "${base}&type=${type}&currentTime=${currentTime}&f=${fullscreen}&a=${autoplay}"
+  },
+  "vars": {
+    "title": "Example Request"
+  },
+  "extraUrlParams": {
+    "param1": "${random}",
+    "platform": "AMP"
+  },
+  "extraUrlParamsReplaceMap": {
+    "param": "p"
+  },
+  "triggers": {
+    "pageview": {
+      "on": "visible",
+      "request": "base",
+      "vars": {
+        "type": "pageLoad"
+      },
+      "extraUrlParams": {
+        "param1": "Another value"
+      }
+    },
+    "visibility": {
+      "on": "visible",
+      "request": "visibility",
+      "selector": "#anim-id",
+      "visibilitySpec": {
+        "visiblePercentageMin": 20,
+        "visiblePercentageMax": 80,
+        "totalTimeMin": 5000,
+        "continuousTimeMin": 2000,
+        "waitFor": "ini-load"
+      },
+      "vars": {
+        "type": "visible"
+      }
+    },
+    "hidden": {
+      "on": "hidden",
+      "request": "visibility",
+      "visibilitySpec": {
+        "selector": "#anim-id",
+        "visiblePercentageMin": 20,
+        "visiblePercentageMax": 1000,
+        "continuousTimeMax": 5000
+      },
+      "vars": {
+        "type": "hidden"
+      }
+    },
+    "scrollPings": {
+      "on": "scroll",
+      "request": "event",
+      "scrollSpec": {
+        "verticalBoundaries" : [1, 50, 90],
+        "horizontalBoundaries": [100]
+      },
+      "vars": {
+        "type": "scroll"
+      }
+    },
+    "clickPings": {
+      "on": "click",
+      "selector": "${img}",
+      "request": ["endpoint", "base"],
+      "vars": {
+        "type": "click",
+        "img": "#anim-id, #container"
+      }
+    },
+    "timer": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 5,
+        "maxTimerLength": 20
+      },
+      "request": "timer",
+      "vars": {
+        "type": "timer"
+      }
+    },
+    "videoPlays": {
+      "on": "video-play",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "exclude-autoplay": true
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-play"
+      }
+    },
+    "videoPauses": {
+      "on": "video-pause",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "exclude-autoplay": false
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-pause"
+      }
+    },
+    "videoSession": {
+      "on": "video-session",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "end-session-when-invisible": true,
+        "exclude-autoplay": false
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-session"
+      }
+    },
+    "videoSecondsPlayed": {
+      "on": "video-seconds-played",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "end-session-when-invisible": false,
+        "exclude-autoplay": false,
+        "interval": 3
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-seconds-played"
+      }
+    },
+    "videoEnded": {
+      "on": "video-ended",
+      "selector": "#myVideo",
+      "videoSpec": {
+        "end-session-when-invisible": true,
+        "exclude-autoplay": false
+      },
+      "request": "video",
+      "vars": {
+        "type": "video-ended"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+
+<amp-analytics id="analytics3" config="./analytics.config.json"></amp-analytics>
 
 <div class="logo"></div>
 <h1 id="top">AMP Analytics</h1>
@@ -127,20 +279,40 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
 </p>
-  <amp-ad id="myAd1" width="300" height="250"
-          type="doubleclick"
-          data-slot="/57778053/Browsi_Demo_high"
-          rtc-config='{"vendors": {"browsi": {"PUB_KEY": "pub-k"}, {"SITE_KEY": "site-k"}}, "timeoutMillis": 500}'>
-    <!--          rtc-config='{"vendors": {"fakeVendor": {"SLOT_ID": "1"}}, "urls": ["https://localhost:4443/posts?slot_id=1&consent_state=CONSENT_STATE&consent_string=CONSENT_STRING"], "timeoutMillis": 500}'>-->
-  </amp-ad>
 <amp-anim src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464-hp.gif" id="anim-id" width="665" height="220" layout="responsive">
   <amp-img placeholder src="https://www.google.com/logos/doodles/2016/2016-doodle-fruit-games-day-14-5645577527230464.2-scta.png" width="665" height="220" layout="responsive"></amp-img>
-
-  <amp-ad width="414" height="457"
-          type="doubleclick"
-          layout="fixed"
-          data-slot="/57778053/Browsi_Demo_high">
-  </amp-ad>
+  <amp-analytics id="nestedAnalytics">
+    <script type="application/json">
+    {
+      "transport": {"beacon": true, "xhrpost": false},
+      "requests": {
+        "visibility": "/analytics/${type}?RANDOM"
+      },
+      "triggers": {
+        "visibilityScope": {
+          "on": "visible",
+          "request": "visibility",
+          "visibilitySpec": {
+            "selector": "amp-img",
+            "selectionMethod": "scope",
+            "visiblePercentageMin": 10
+          },
+          "vars": { "type": "visible-scope" }
+        },
+        "visibilityClosest": {
+          "on": "visible",
+          "request": "visibility",
+          "visibilitySpec": {
+            "selector": "amp-anim",
+            "selectionMethod": "closest",
+            "visiblePercentageMin": 20
+          },
+          "vars": { "type": "visible-closest" }
+        }
+      }
+    }
+    </script>
+  </amp-analytics>
 </amp-anim>
 </div>
 </body>

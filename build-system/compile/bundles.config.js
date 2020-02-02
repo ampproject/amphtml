@@ -431,12 +431,6 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
-    name: 'amp-browsi',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MISC,
-  },
-  {
     name: 'amp-byside-content',
     version: '0.1',
     latestVersion: '0.1',
