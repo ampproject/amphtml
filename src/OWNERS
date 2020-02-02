@@ -14,5 +14,9 @@
       pattern: '{cid-*,*-cid-*,*-cid}.js',
       owners: [{name: 'ampproject/wg-analytics'}],
     },
+    {
+      pattern: '{amp-story-player,amp-story-player-manager}.js',
+      owners: [{name: 'newmuis'}, {name: 'gmajoulet'}, {name: 'enriqe'}],
+    },
   ],
 }
