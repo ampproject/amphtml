@@ -102,13 +102,13 @@ function maybeAddAmpFragment(src) {
 }
 
 /** @implements {../video-interface.VideoInterface} */
-export default class GenericIframeVideoPlayer extends AMP.BaseElement {
+export class IframeVideoElement extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
 
-    /** @public {?VideoPlayerElementDef} */
-    this.vendorComponentConfig = null;
+    /** @private @const {!VideoPlayerElementDef}  */
+    this.vendorComponentConfig_ = devAssert(element.vendorComponentConfig);
 
     /** @private {?Element} */
     this.iframe_ = null;
@@ -138,14 +138,14 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {element} = this;
+    const {TAG, requiredAttributes} = this.vendorComponentConfig_;
 
-    const {requiredAttributes} = this.vendorComponentConfig;
     if (requiredAttributes) {
       requiredAttributes.forEach(attribute => {
         userAssert(
           element.getAttribute(attribute),
           '<%s> requires the %s attribute %s',
-          this.vendorComponentConfig.TAG,
+          TAG,
           attribute,
           element
         );
@@ -161,7 +161,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
 
     userAssert(
       isIntegrationTest || !looksLikeTrackingIframe(element),
-      `<${this.vendorComponentConfig.TAG}> does not allow tracking iframes. ` +
+      `<${TAG}> does not allow tracking iframes. ` +
         'Please use amp-analytics instead.'
     );
 
@@ -182,9 +182,24 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (!this.vendorComponentConfig.src) {
-      if (mutations['src']) {
+    for (const attr in mutations) {
+      if (!this.vendorComponentConfig_.src && attr == 'src') {
         this.updateSrc_();
+        return;
+      }
+
+      if (attr.startsWith('data-param-')) {
+        this.updateSrc_();
+        return;
+      }
+
+      const {legacySrcQueryAttributes} = this.vendorComponentConfig_;
+      if (
+        legacySrcQueryAttributes &&
+        legacySrcQueryAttributes.indexOf(attr) > -1
+      ) {
+        this.updateSrc_();
+        return;
       }
     }
   }
@@ -257,13 +272,29 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
    * @private
    */
   getSrc_() {
+    const {TAG, legacySrcQueryAttributes} = this.vendorComponentConfig_;
     const {element} = this;
+
+    // amp-video-iframe currently doesn't support data-param-* (maybe it should)
+    const params = getDataParamsFromAttributes(element);
+
+    if (legacySrcQueryAttributes) {
+      legacySrcQueryAttributes.forEach(attribute => {
+        if (element.hasAttribute(attribute)) {
+          params[attribute] = element.getAttribute(attribute);
+        }
+      });
+    }
+
+    const src = maybeAddAmpFragment(
+      addParamsToUrl(
+        this.vendorComponentConfig_.src || element.getAttribute('src'),
+        params
+      )
+    );
+
     const urlService = Services.urlForDoc(element);
-
-    const src = urlService.assertHttpsUrl(this.buildSrcUrl_(), element);
-
     if (urlService.getSourceOrigin(src) === urlService.getWinOrigin(this.win)) {
-      const {TAG} = this.vendorComponentConfig;
       user().warn(
         TAG,
         `Origins of document inside ${TAG} and ` +
@@ -274,32 +305,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
       );
     }
 
-    return maybeAddAmpFragment(src);
-  }
-
-  /**
-   * @return {string}
-   * @private
-   */
-  buildSrcUrl_() {
-    const {element} = this;
-
-    // amp-video-iframe currently doesn't support data-param-* (maybe it should)
-    const params = getDataParamsFromAttributes(element);
-
-    const {legacySrcQueryAttributes} = this.vendorComponentConfig;
-    if (legacySrcQueryAttributes) {
-      legacySrcQueryAttributes.forEach(attribute => {
-        if (element.hasAttribute(attribute)) {
-          params[attribute] = element.getAttribute(attribute);
-        }
-      });
-    }
-
-    return addParamsToUrl(
-      this.vendorComponentConfig.src || element.getAttribute('src'),
-      params
-    );
+    return src;
   }
 
   /**
@@ -499,7 +505,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
   /** @override */
   preimplementsMediaSessionAPI() {
     return !!(
-      this.vendorComponentConfig.preimplementsMediaSessionAPI ||
+      this.vendorComponentConfig_.preimplementsMediaSessionAPI ||
       this.element.hasAttribute('implements-media-session')
     );
   }
@@ -507,7 +513,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
   /** @override */
   preimplementsAutoFullscreen() {
     return !!(
-      this.vendorComponentConfig.preimplementsAutoFullscreen ||
+      this.vendorComponentConfig_.preimplementsAutoFullscreen ||
       this.element.hasAttribute('implements-rotate-to-fullscreen')
     );
   }
@@ -566,7 +572,7 @@ export default class GenericIframeVideoPlayer extends AMP.BaseElement {
 
   /** @override */
   seekTo(unusedTimeSeconds) {
-    const {TAG} = this.vendorComponentConfig;
+    const {TAG} = this.vendorComponentConfig_;
     user().error(TAG, '`seekTo` not supported.');
   }
 }

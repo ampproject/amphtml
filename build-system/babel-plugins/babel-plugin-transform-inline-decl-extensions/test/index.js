@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {IframeVideoElement} from '../../../src/video/generic';
-import {useVendorComponentConfig} from '../../../src/vendor-element';
 
-const TAG = 'amp-video-iframe';
+const runner = require('@babel/helper-plugin-test-runner').default;
 
-AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(
-    TAG,
-    useVendorComponentConfig(IframeVideoElement, {
-      TAG,
-      requiredAttributes: ['src', 'poster'],
-    })
-  );
-});
+runner(__dirname);

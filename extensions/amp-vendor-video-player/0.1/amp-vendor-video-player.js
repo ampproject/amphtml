@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {defineVideoPlayerElement} from '../../../src/video/declarative';
+import {IframeVideoElement} from '../../../src/video/generic';
+import {useVendorComponentConfig} from '../../../src/vendor-element';
 
 // Example for PR.
 
@@ -22,7 +23,7 @@ const TAG = 'amp-vendor-video-player';
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(
     TAG,
-    defineVideoPlayerElement({
+    useVendorComponentConfig(IframeVideoElement, {
       TAG,
       // This would be a URL like https://my-video.vendor/amp
       src: '/examples/amp-video-iframe/frame.html',

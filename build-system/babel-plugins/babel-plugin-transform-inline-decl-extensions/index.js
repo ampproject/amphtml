@@ -17,12 +17,6 @@ const fs = require('fs');
 const fsPath = require('path');
 const {parse} = require('@babel/parser');
 
-const rootRelativeResolve = filename => require.resolve(`../../../${filename}`);
-
-const toUpperCase = (_match, character) => character.toUpperCase();
-const dashToCamelCase = name => name.replace(/-([a-z])/g, toUpperCase);
-const capitalize = name => name.replace(/^([a-z])/g, toUpperCase);
-
 module.exports = function({types: t}) {
   function cloneExporter(sourceFilename, relImportPath) {
     const exporter = parse(fs.readFileSync(sourceFilename).toString(), {
@@ -37,7 +31,7 @@ module.exports = function({types: t}) {
   function replaceImportPaths(program, relImportPath) {
     for (const node of program.body) {
       if (t.isImportDeclaration(node) && node.source.value.startsWith('.')) {
-        node.source.value = fsPath.join(relImportPath, node.source.value);
+        node.source.value = resetRelativePath(relImportPath, node.source.value);
       }
     }
   }
@@ -49,108 +43,207 @@ module.exports = function({types: t}) {
       if (comment.type == 'CommentBlock') {
         comment.value = comment.value.replace(
           relativePathInCommentRe,
-          relative => fsPath.join(relImportPath, relative)
+          path => resetRelativePath(relImportPath, path)
         );
       }
     }
   }
 
-  const propValueOrNullLiteral = (obj, key) =>
-    obj[key] ? t.cloneNode(obj[key]) : t.nullLiteral();
+  const resetRelativePath = (relative, path) =>
+    fsPath.join(relative, path).replace(/^[^.]/, './$&');
+
+  const propValueNode = (propValues, key) =>
+    propValues[key] || t.identifier('undefined');
+
+  const propValueNodeOr = (obj, key, defaultValue) =>
+    t.conditionalExpression(
+      t.binaryExpression(
+        '===',
+        t.identifier('undefined'),
+        propValueNode(obj, key)
+      ),
+      defaultValue,
+      propValueNode(obj, key)
+    );
+
+  function unjsdoc({leadingComments}) {
+    if (!leadingComments) {
+      return;
+    }
+    for (let i = 0; i < leadingComments.length; i++) {
+      const comment = leadingComments[i];
+      comment.value = comment.value.replace(/^\*/, ' [removed]');
+    }
+  }
 
   const exporterConfigInlineVisitor = {
-    MemberExpression(path, {configProps}) {
+    MemberExpression(path, {propValues, replacedMember}) {
       if (
         !t.isThisExpression(path.node.object) ||
-        !t.isIdentifier(path.node.property, {name: 'vendorComponentConfig'})
+        !t.isIdentifier(path.node.property, {name: replacedMember})
       ) {
         return;
       }
 
-      const {parent} = path;
+      const assignment = path.find(
+        ({parent, parentKey, parentPath}) =>
+          parentKey == 'left' &&
+          t.isAssignmentExpression(parent) &&
+          t.isExpressionStatement(parentPath.parent)
+      );
 
-      // Direct reference (this.vendorComponentConfig.foo)
-      if (t.isMemberExpression(parent)) {
-        path.parentPath.replaceWith(
-          propValueOrNullLiteral(configProps, parent.property.name)
-        );
+      if (assignment) {
+        unjsdoc(assignment.parentPath.parent);
+        assignment.parentPath.parentPath.remove();
         return;
       }
 
-      // Desctructuring (const {foo} = this.vendorComponentConfig)
-      if (t.isVariableDeclarator(parent) && t.isObjectPattern(parent.id)) {
-        const sliceProps = parent.id.properties.map(({key}) =>
-          t.objectProperty(
-            t.identifier(key.name),
-            propValueOrNullLiteral(configProps, key.name)
-          )
+      if (t.isMemberExpression(path.parent)) {
+        const key = path.parent.property.name;
+        path.parentPath.replaceWith(propValueNode(propValues, key));
+        return;
+      }
+
+      if (
+        t.isVariableDeclarator(path.parent) &&
+        t.isObjectPattern(path.parent.id) &&
+        t.isVariableDeclaration(path.parentPath.parent)
+      ) {
+        const properties = path.parentPath.get('id').get('properties');
+        path.parentPath.replaceWithMultiple(
+          properties.map(path => {
+            const {key, value} = path.node;
+            return t.isAssignmentPattern(value)
+              ? t.variableDeclarator(
+                  value.left,
+                  propValueNodeOr(propValues, key.name, value.right)
+                )
+              : t.variableDeclarator(
+                  value,
+                  propValueNode(propValues, key.name)
+                );
+          })
         );
-        path.replaceWith(t.objectExpression(sliceProps));
       }
     },
   };
 
-  const exporterDefaultVisitor = {
-    ExportDefaultDeclaration(path, {componentAlias, configProps}) {
-      if (!t.isClassDeclaration(path.node.declaration)) {
-        return;
+  const inlinedClassVisitor = {
+    ClassDeclaration(path, opts) {
+      if (path.node.id.name == opts.className) {
+        path.traverse(exporterConfigInlineVisitor, opts);
       }
-
-      path
-        .get('declaration')
-        .traverse(exporterConfigInlineVisitor, {configProps});
-
-      path.node.declaration.id = t.identifier(componentAlias);
-
-      // Un-export
-      path.replaceWith(path.node.declaration);
     },
   };
+
+  function getImportPath(nodes, name) {
+    for (let i = 0; i < nodes.length; i++) {
+      const node = nodes[i];
+      if (
+        t.isImportDeclaration(node) &&
+        node.specifiers.find(({imported}) => t.isIdentifier(imported, {name}))
+      ) {
+        return node.source.value;
+      }
+    }
+  }
 
   return {
     name: 'transform-inline-decl-extensions',
     visitor: {
-      CallExpression(path, {file, opts}) {
-        if (!t.isIdentifier(path.node.callee, {name: opts.ctor})) {
+      CallExpression(path, {file}) {
+        if (
+          !t.isIdentifier(path.node.callee, {name: 'useVendorComponentConfig'})
+        ) {
           return;
         }
 
-        const program = path.findParent(p => t.isProgram(p));
+        const [classId, propsObj] = path.get('arguments');
 
-        for (const name of Object.keys(program.scope.bindings)) {
-          program.scope.rename(name, `__${name}`);
+        if (!t.isIdentifier(classId)) {
+          return;
         }
 
-        const componentAlias = capitalize(
-          dashToCamelCase(fsPath.basename(file.opts.filename, '.js'))
-        );
+        const className = classId.node.name;
 
-        // TODO(alanorozco): Infer from import rather than using options
-        const exporterFilename = rootRelativeResolve(
-          opts.exportedDefaultClassFrom
-        );
+        const program = path.findParent(p => t.isProgram(p));
+        const importPath = getImportPath(program.node.body, className);
 
-        const relImportPath = fsPath.relative(
-          fsPath.dirname(file.opts.filename),
-          fsPath.dirname(exporterFilename)
+        if (!importPath) {
+          return;
+        }
+
+        const currentDirname = fsPath.dirname(file.opts.filename);
+        const exporterFilename = require.resolve(
+          fsPath.join(currentDirname, importPath)
         );
+        const exporterDirname = fsPath.dirname(exporterFilename);
+
+        const relImportPath = fsPath.relative(currentDirname, exporterDirname);
 
         const exporter = cloneExporter(exporterFilename, relImportPath);
 
-        // TODO(alanorozco): This breaks sourcemaps.
-        program.unshiftContainer('body', exporter.program.body);
-
-        const [configNode] = path.node.arguments;
-        const configProps = {};
-
-        if (t.isObjectExpression(configNode)) {
-          for (const {key, value} of configNode.properties) {
-            configProps[key.name] = value;
-          }
+        for (const name in program.scope.bindings) {
+          program.scope.rename(name, program.scope.generateUid(name));
         }
 
-        program.traverse(exporterDefaultVisitor, {componentAlias, configProps});
-        path.replaceWith(t.identifier(componentAlias));
+        const replacedMember = 'vendorComponentConfig_';
+
+        const properties = propsObj.get('properties');
+
+        const propValues = {};
+        const hoistedDecls = [];
+
+        for (let i = 0; i < properties.length; i++) {
+          const path = properties[i];
+          const {key, value} = path.node;
+          const {name} = key;
+
+          if (t.isMemberExpression(value)) {
+            throw path.buildCodeFrameError(
+              `${replacedMember} properties must not be assigned to members. ` +
+                'Set necessary values to program-level constants.'
+            );
+          }
+
+          if (t.isIdentifier(value)) {
+            const binding = path.scope.getBinding(value.name);
+            if (!binding || !t.isProgram(binding.scope.block)) {
+              throw path.buildCodeFrameError(
+                `ids used in ${replacedMember} must be defined as ` +
+                  'program-level constants.'
+              );
+            }
+            propValues[name] = value;
+            continue;
+          }
+
+          const id = program.scope.generateUidIdentifier(
+            `${replacedMember}_${name}`
+          );
+
+          propValues[name] = id;
+
+          hoistedDecls.push(t.variableDeclarator(id, value));
+        }
+
+        // TODO(alanorozco): sourcemaps
+        program.unshiftContainer('body', exporter.program.body);
+
+        if (hoistedDecls.length > 0) {
+          program.unshiftContainer(
+            'body',
+            t.variableDeclaration('const', hoistedDecls)
+          );
+        }
+
+        program.traverse(inlinedClassVisitor, {
+          className,
+          replacedMember,
+          propValues,
+        });
+
+        path.replaceWith(t.identifier(className));
       },
     },
   };
