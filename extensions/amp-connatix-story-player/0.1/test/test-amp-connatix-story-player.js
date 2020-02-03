@@ -97,7 +97,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://cds.connatix.com/p/plugins/connatix.playspace.embed.html?playerId=3014c9e7-d40e-4790-b305-9b8c614537b9&storyId=08d79e80-c4bb-e51a-4116-616225d51db2&orientation=portrait'
+        'https://cds.connatix.com/p/plugins/connatix.playspace.embed.html?playerId=3014c9e7-d40e-4790-b305-9b8c614537b9&orientation=portrait&storyId=08d79e80-c4bb-e51a-4116-616225d51db2'
       );
     });
 
