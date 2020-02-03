@@ -43,11 +43,8 @@ export class ScrollManager {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
-    this.ampdoc_ = ampdoc;
-
     /** @const @private {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
-    this.viewport_ = Services.viewportForDoc(this.ampdoc_);
+    this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private {!UnlistenDef|null} */
     this.viewportOnChangedUnlistener_ = null;
@@ -61,7 +58,7 @@ export class ScrollManager {
     /** @private {?number} */
     this.initialScrollHeight_ = null;
 
-    const root = this.ampdoc_.getRootNode();
+    const root = ampdoc.getRootNode();
     /** @const @private {!Element} */
     this.root_ = dev().assertElement(
       root.host || root.documentElement || root.body || root
@@ -95,7 +92,7 @@ export class ScrollManager {
     // Trigger an event to fire events that might have already happened.
     const size = this.viewport_.getSize();
     const layoutRect = this.viewport_.getLayoutRect(this.root_);
-    // Cache the scroll height/width for use with `ignoreResizes`
+    // Cache the scroll height/width for use with `ignoreResize`
     if (
       this.initialScrollWidth_ === null ||
       this.initialScrollHeight_ === null

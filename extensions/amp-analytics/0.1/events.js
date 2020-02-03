@@ -604,7 +604,7 @@ export class ScrollEventTracker extends EventTracker {
     const boundsH = this.normalizeBoundaries_(
       config['scrollSpec']['horizontalBoundaries']
     );
-    const ignoreResize = config['scrollSpec']['ignoreResize'] === 'true';
+    const ignoreResize = !!config['scrollSpec']['ignoreResize'];
 
     this.boundScrollHandler_ = this.scrollHandler_.bind(
       this,
