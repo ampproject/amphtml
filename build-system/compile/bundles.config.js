@@ -1170,13 +1170,6 @@ exports.extensionBundles = [
     latestVersion: '0.1',
     type: TYPES.MEDIA,
   },
-  {
-    // Example for PR.
-    name: 'amp-vendor-video-player',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.MEDIA,
-  },
 ];
 
 /**
