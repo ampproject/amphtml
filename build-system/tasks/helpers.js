@@ -295,16 +295,21 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       endBuildStep('Minified', name, timeInfo.startTime);
     })
     .then(() => {
-      if (argv.fortesting && MINIFIED_TARGETS.includes(minifiedName)) {
-        return enableLocalTesting(`${destDir}/${minifiedName}`);
+      if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
+        return applyAmpConfig(
+          `${destDir}/${minifiedName}`,
+          /* localDev */ !!argv.fortesting
+        );
       }
     })
     .then(() => {
-      if (!argv.fortesting || !options.singlePassCompilation) {
+      if (argv.noconfig || !options.singlePassCompilation) {
         return;
       }
       return Promise.all(
-        altMainBundles.map(({name}) => enableLocalTesting(`dist/${name}.js`))
+        altMainBundles.map(({name}) =>
+          applyAmpConfig(`dist/${name}.js`, /* localDev */ !!argv.fortesting)
+        )
       );
     });
 }
@@ -443,7 +448,10 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       })
       .then(() => {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
-          return enableLocalTesting(`${destDir}/${destFilename}`);
+          return applyAmpConfig(
+            `${destDir}/${destFilename}`,
+            /* localDev */ true
+          );
         }
       });
   }
@@ -555,12 +563,14 @@ function printNobuildHelp() {
 }
 
 /**
- * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
- * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
+ * fortesting mode. Called by "gulp build" and "gulp dist" while building
+ * various runtime files.
  * @param {string} targetFile File to which the config is to be written.
+ * @param {boolean} localDev Whether or not to enable local development.
  * @return {!Promise}
  */
-async function enableLocalTesting(targetFile) {
+async function applyAmpConfig(targetFile, localDev) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
@@ -570,7 +580,7 @@ async function enableLocalTesting(targetFile) {
       config,
       targetFile,
       baseConfigFile,
-      /* opt_localDev */ true,
+      /* opt_localDev */ localDev,
       /* opt_localBranch */ true,
       /* opt_branch */ false,
       /* opt_fortesting */ !!argv.fortesting
@@ -696,6 +706,7 @@ function transferSrcsToTempDir(options = {}) {
 }
 
 module.exports = {
+  applyAmpConfig,
   BABELIFY_GLOBAL_TRANSFORM,
   BABELIFY_PLUGINS,
   bootstrapThirdPartyFrames,
@@ -706,7 +717,6 @@ module.exports = {
   compileTs,
   devDependencies,
   doBuildJs,
-  enableLocalTesting,
   endBuildStep,
   hostname,
   mkdirSync,
