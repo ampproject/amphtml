@@ -395,6 +395,27 @@ describes.fakeWin('Viewport', {}, env => {
     expect(binding.disconnect).to.be.calledOnce;
   });
 
+  it('should update scroll position when visibility changes', () => {
+    binding = new ViewportBindingDef();
+    binding.getScrollTop = (() => {
+      const generator = (function*() {
+        yield 25;
+        return 100;
+      })();
+      return () => generator.next().value;
+    })();
+    viewport = new ViewportImpl(ampdoc, binding, viewer);
+
+    // Force scrollTop to be measured
+    viewport.getScrollTop();
+    expect(viewport./*OK*/ scrollTop_).to.equal(25);
+    // Toggle visibility state
+    changeVisibilityState('prerender');
+    changeVisibilityState('visible');
+    // Expect scrollTop to be remeasured
+    expect(viewport./*OK*/ scrollTop_).to.equal(100);
+  });
+
   it('should resize only after size has been initialed', () => {
     onVisibilityHandlers.length = 0;
     changeVisibilityState('visible');
