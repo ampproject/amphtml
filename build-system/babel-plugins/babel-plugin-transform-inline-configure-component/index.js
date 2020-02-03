@@ -17,14 +17,17 @@ const fs = require('fs');
 const fsPath = require('path');
 const {transformSync} = require('@babel/core');
 
-/** @fileoverview
+/**
+ * @fileoverview
  * Finds `configureComponent(Ctor, {foo: 'bar'})` calls and:
  *
  * 1. Inlines imported `Ctor` in current scope.
- * 2. Replaces `this.staticComponentConfig_.foo` accesses to their value
- *    as defined in config object `{foo: 'bar'}`.
- * 3. Replaces `configureComponent(...)` call with identifier for inlined,
- *    static Ctor.
+ *
+ * 2. Replaces `this.staticComponentConfig_.foo` accesses to their value as
+ *    defined in config object `{foo: 'bar'}`.
+ *
+ * 3. Replaces `configureComponent(...)` call with identifier for inlined, static
+ *    `Ctor`.
  */
 
 /**
