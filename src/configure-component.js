@@ -35,7 +35,7 @@ export function useComponentConfig(instance) {
     element.staticComponentConfigSingleUse,
     'Element does not have a .staticComponentConfigSingleUse property. ' +
       'Either its implementation was not defined using configureComponent(), ' +
-      "or the element's config has already been used. %s",
+      'or its configuration object has already been read. %s',
     element
   );
   delete element.staticConfigSingleUse;
