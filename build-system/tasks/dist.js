@@ -426,7 +426,8 @@ module.exports = {
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-dist.description = 'Build production binaries';
+dist.description =
+  'Compiles AMP production binaries and applies AMP_CONFIG to runtime files';
 dist.flags = {
   pseudo_names:
     '  Compiles with readable names. ' +
@@ -435,6 +436,7 @@ dist.flags = {
     '  Outputs compiled code with whitespace. ' +
     'Great for debugging production code.',
   fortesting: '  Compiles production binaries for local testing',
+  noconfig: '  Compiles production binaries without applying AMP_CONFIG',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   single_pass: "Compile AMP's primary JS bundles in a single invocation",
   extensions: '  Builds only the listed extensions.',
