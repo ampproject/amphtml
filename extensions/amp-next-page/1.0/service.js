@@ -88,7 +88,7 @@ export class NextPageService {
     this.moreBox_ = null;
 
     /** @private {?AmpElement} element */
-    this.element_ = null;
+    this.host_ = null;
 
     /** @private {?VisibilityObserver} */
     this.visibilityObserver_ = null;
@@ -142,7 +142,7 @@ export class NextPageService {
   /**
    * Builds the next-page service by fetching the required elements
    * and the initial list of pages and installing scoll listeners
-   * @param {!AmpElement} element
+   * @param {!AmpElement} element <amp-next-page> element on the host page
    */
   build(element) {
     // Prevent multiple amp-next-page on the same document
@@ -150,7 +150,8 @@ export class NextPageService {
       return;
     }
 
-    this.element_ = element;
+    // Save the <amp-next-page> from the host page
+    this.host_ = element;
 
     // Get the separator and more box (and remove the provided elements in the process)
     this.separator_ = this.getSeparatorElement_(element);
@@ -172,19 +173,19 @@ export class NextPageService {
     this.visibilityObserver_ = new VisibilityObserver(this.ampdoc_);
 
     // Have the suggestion box be always visible
-    this.element_.appendChild(this.moreBox_);
+    this.host_.appendChild(this.moreBox_);
 
     if (!this.pages_) {
       this.pages_ = [this.hostPage_];
       this.setLastFetchedPage(this.hostPage_);
     }
 
-    this.nextSrc_ = this.getElement_().getAttribute('src');
+    this.nextSrc_ = this.getHost_().getAttribute('src');
     this.hasDeepParsing_ =
-      this.getElement_().hasAttribute('deep-parsing') || !this.nextSrc_;
+      this.getHost_().hasAttribute('deep-parsing') || !this.nextSrc_;
     this.initializePageQueue_();
 
-    this.getElement_().classList.add(NEXT_PAGE_CLASS);
+    this.getHost_().classList.add(NEXT_PAGE_CLASS);
 
     this.viewport_.onScroll(() => this.updateScroll_());
     this.viewport_.onResize(() => this.updateScroll_());
@@ -195,8 +196,8 @@ export class NextPageService {
    * @return {!AmpElement}
    * @private
    */
-  getElement_() {
-    return dev().assertElement(this.element_);
+  getHost_() {
+    return dev().assertElement(this.host_);
   }
 
   /**
@@ -226,15 +227,19 @@ export class NextPageService {
     const pageCount = this.pages_.length;
     const nextPage = this.pages_[this.getPageIndex_(this.lastFetchedPage_) + 1];
     if (!nextPage) {
-      return this.getRemotePages_()
-        .then(pages => this.queuePages_(pages))
-        .then(() => {
-          if (this.pages_.length <= pageCount) {
-            // Remote server did not return any new pages
-            return Promise.resolve();
-          }
-          return this.maybeFetchNext(true /** force */);
-        });
+      return (
+        this.getRemotePages_()
+          .then(pages => this.queuePages_(pages))
+          // Queuing pages can result in no new pages (in case the server
+          // returned an empty array or the suggestions already exist in the queue)
+          .then(() => {
+            if (this.pages_.length <= pageCount) {
+              // Remote server did not return any new pages
+              return Promise.resolve();
+            }
+            return this.maybeFetchNext(true /** force */);
+          })
+      );
     }
     return nextPage.fetch();
   }
@@ -426,7 +431,7 @@ export class NextPageService {
     container.appendChild(this.separator_.cloneNode(true));
 
     // Insert the container
-    this.element_.insertBefore(container, this.moreBox_);
+    this.host_.insertBefore(container, this.moreBox_);
 
     // Observe this page's visibility
     this.visibilityObserver_.observe(
@@ -677,23 +682,22 @@ export class NextPageService {
    * @return {!Promise}
    */
   initializePageQueue_() {
-    const inlinePages = this.getInlinePages_(this.getElement_());
+    const inlinePages = this.getInlinePages_(this.getHost_());
     userAssert(
       inlinePages || this.nextSrc_,
       '%s should contain a <script> child or a URL specified in [src]',
       TAG
     );
     return this.getRemotePages_()
-      .then(remotePages => [].concat(remotePages, inlinePages))
+      .then(remotePages => [].concat(inlinePages, remotePages))
       .then(pages => {
         if (pages.length === 0) {
-          user().warn(TAG, 'could not find recommendations');
+          user().warn(TAG, 'Could not find recommendations');
           return Promise.resolve();
-        } else {
-          return this.queuePages_(pages).then(() => {
-            this.readyResolver_();
-          });
         }
+        return this.queuePages_(pages).then(() => {
+          this.readyResolver_();
+        });
       });
   }
 
@@ -704,6 +708,10 @@ export class NextPageService {
    * @return {!Promise}
    */
   queuePages_(pages) {
+    if (!pages.length) {
+      return Promise.resolve();
+    }
+    // Queue the given pages
     pages.forEach(meta => {
       try {
         validatePage(meta, this.ampdoc_.getUrl());
@@ -727,7 +735,7 @@ export class NextPageService {
   /**
    * Reads the inline next pages from the element.
    * @param {!Element} element the container of the amp-next-page extension
-   * @return {!Array<!./page.PageMeta>} JSON object, or null if no inline pages specified.
+   * @return {!Array<!./page.PageMeta>} JSON object
    * @private
    */
   getInlinePages_(element) {
@@ -752,28 +760,28 @@ export class NextPageService {
 
     return /** @type {!Array<!./page.PageMeta>} */ (user().assertArray(
       pages,
-      `${TAG} page list should be an array`
+      `${TAG} Page list expected an array, found: ${typeof pages}`
     ));
   }
 
   /**
-   * Gets the next batch of page recommendations from the server (initially
+   * Fetches the next batch of page recommendations from the server (initially
    * specified by the [src] attribute then obtained as a next pointer)
-   * @return {!Promise<!Array<!./page.PageMeta>>} JSON object, or null if no inline pages specified.
+   * @return {!Promise<!Array<!./page.PageMeta>>} Page information promise
    * @private
    */
   getRemotePages_() {
     if (!this.nextSrc_) {
       return Promise.resolve([]);
     }
-    return batchFetchJsonFor(this.ampdoc_, this.getElement_(), {
+    return batchFetchJsonFor(this.ampdoc_, this.getHost_(), {
       urlReplacement: UrlReplacementPolicy.ALL,
-      xssiPrefix: this.getElement_().getAttribute('xssi-prefix') || undefined,
+      xssiPrefix: this.getHost_().getAttribute('xssi-prefix') || undefined,
     })
       .then(result => {
         this.nextSrc_ = result['next'] || null;
         if (this.nextSrc_) {
-          this.getElement_().setAttribute('src', this.nextSrc_);
+          this.getHost_().setAttribute('src', this.nextSrc_);
         }
         return result['pages'] || [];
       })

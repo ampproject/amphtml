@@ -145,7 +145,7 @@ describes.realWin(
         await allowConsoleError(() =>
           element.build().catch(err => {
             expect(err.message).to.include(
-              'amp-next-page page list should be an array'
+              'amp-next-page Page list expected an array'
             );
           })
         );
