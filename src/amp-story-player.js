@@ -94,7 +94,7 @@ export class AmpStoryPlayer {
 
     this.initializeShadowRoot_();
 
-    // TODO(Enriqe): Build all child iframes.
+    // TODO(#26308): Build all child iframes.
     this.buildIframe_(this.stories_[0]);
   }
 
@@ -129,7 +129,7 @@ export class AmpStoryPlayer {
     this.initializeLoadingListeners_(iframeEl);
     this.rootEl_.appendChild(iframeEl);
 
-    // TODO(Enriqe): enable messaging when multiple documents are supported.
+    // TODO(#26308): enable messaging when multiple documents are supported.
     return;
 
     this.initializeHandshake_(story, iframeEl).then(
@@ -141,7 +141,7 @@ export class AmpStoryPlayer {
 
         this.messagingFor_[iframeIdx] = messaging;
 
-        // TODO(Enriqe): Appropiately set visibility to stories.
+        // TODO(#26308): Appropiately set visibility to stories.
         this.displayStory_(iframeIdx);
       },
       err => {
@@ -194,7 +194,7 @@ export class AmpStoryPlayer {
       return;
     }
 
-    // TODO(Enriqe): Layout all child iframes.
+    // TODO(#26308): Layout all child iframes.
     this.layoutIframe_(this.stories_[0], this.iframes_[0]);
 
     this.isLaidOut_ = true;
@@ -206,7 +206,7 @@ export class AmpStoryPlayer {
    * @private
    */
   layoutIframe_(story, iframe) {
-    // TODO(Enriqe): enable messaging when multiple documents are supported.
+    // TODO(#26308): enable messaging when multiple documents are supported.
     // const {href} = this.getEncodedLocation_(story.href);
 
     iframe.setAttribute('src', story.href);
