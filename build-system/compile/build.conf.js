@@ -20,11 +20,11 @@ const localPlugin = name =>
   require.resolve(`../babel-plugins/babel-plugin-${name}`);
 
 const defaultPlugins = [
+  localPlugin('transform-inline-decl-extensions'),
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
   [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
-  localPlugin('is_minified-constant-transformer'),
-  localPlugin('transform-inline-decl-extensions'),
   localPlugin('transform-parenthesize-expression'),
+  localPlugin('is_minified-constant-transformer'),
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
