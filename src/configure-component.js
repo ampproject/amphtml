@@ -17,11 +17,11 @@ import {devAssert} from './log';
 
 /**
  * @param {typeof AMP.BaseElement} klass
- * @param {!Object<string, *>} config
+ * @param {!Object} config
  * @return {typeof AMP.BaseElement}
  */
 export const configureComponent = (klass, config) => element => {
-  element.replacedInlinedStaticConfig = config;
+  element.staticComponentConfigSingleUse = config;
   return new klass(element);
 };
 
@@ -29,10 +29,15 @@ export const configureComponent = (klass, config) => element => {
  * @param {!AMP.BaseElement} instance
  * @return {!Object}
  */
-export const useComponentConfig = instance =>
-  devAssert(
-    instance.element.replacedInlinedStaticConfig,
-    'Element does not have a .staticComponentConfig property. ' +
-      'Its implementation expects to be defined using configureComponent() %s',
-    instance.element
+export function useComponentConfig(instance) {
+  const {element} = instance;
+  const config = devAssert(
+    element.staticComponentConfigSingleUse,
+    'Element does not have a .staticComponentConfigSingleUse property. ' +
+      'Either its implementation was not defined using configureComponent(), ' +
+      "or the element's config has already been used. %s",
+    element
   );
+  delete element.staticConfigSingleUse;
+  return config;
+}
