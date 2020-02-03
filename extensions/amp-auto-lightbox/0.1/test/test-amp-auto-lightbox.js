@@ -544,6 +544,21 @@ describes.realWin(
     });
 
     describe('runCandidates', () => {
+      it('ignores amp-img load signal after being unlaid out', async () => {
+        const img = html`
+          <amp-img src="bla.png" layout="flex-item"></amp-img>
+        `;
+
+        const signals = new Signals();
+        img.signals = () => signals;
+
+        signals.signal(CommonSignals.UNLOAD);
+        signals.signal(CommonSignals.LOAD_END);
+
+        const elected = await Promise.all(runCandidates(env.ampdoc, [img]));
+        expect(elected[0]).to.be.undefined;
+      });
+
       it('filters out candidates that fail to load', async () => {
         const shouldNotLoad = mockLoadedSignal(
           html`

@@ -399,6 +399,11 @@ export function apply(ampdoc, element) {
 export function runCandidates(ampdoc, candidates) {
   return candidates.map(candidate =>
     whenLoaded(candidate).then(() => {
+      // <amp-img> will change the img's src inline data on unlayout and remove
+      // it from DOM, but a LOAD_END event would still be triggered afterwards.
+      if (candidate.signals().get(CommonSignals.UNLOAD)) {
+        return;
+      }
       if (!Criteria.meetsAll(candidate)) {
         return;
       }
