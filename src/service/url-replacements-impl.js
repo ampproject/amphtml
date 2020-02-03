@@ -650,7 +650,6 @@ export class GlobalVariableSource extends VariableSource {
 
     this.setAsync('AMP_STATE', key => {
       // This is safe since AMP_STATE is not an A4A whitelisted variable.
-      dev().expectedError(TAG, 'AMP_STATE will be moved to amp-analytics');
       const root = this.ampdoc.getRootNode();
       const element =
         /** @type {!Element|!ShadowRoot} */ (root.documentElement || root);
