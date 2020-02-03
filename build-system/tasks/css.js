@@ -57,7 +57,7 @@ const cssEntryPoints = [
   {
     path: 'amp-story-player.css',
     outJs: 'amp-story-player.css.js',
-    outCss: 'amp-story-player-styles.css',
+    outCss: 'amp-story-player-v0.css',
   },
 ];
 
