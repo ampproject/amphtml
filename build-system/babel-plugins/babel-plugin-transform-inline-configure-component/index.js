@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,20 @@ const fs = require('fs');
 const fsPath = require('path');
 const {transformSync} = require('@babel/core');
 
+/** @fileoverview
+ * Finds `configureComponent(Ctor, {foo: 'bar'})` calls and:
+ *
+ * 1. Inlines imported `Ctor` in current scope.
+ * 2. Replaces `this.staticComponentConfig_.foo` accesses to their value
+ *    as defined in config object `{foo: 'bar'}`.
+ * 3. Replaces `configureComponent(...)` call with identifier for inlined,
+ *    static Ctor.
+ */
+
+/**
+ * Sub-plugin that transforms inlined file that exports wrapped ctor.
+ * @return {Object}
+ */
 function transformRedefineInline({types: t}) {
   const resetRelativePath = (relative, path) =>
     fsPath.join(relative, path).replace(/^[^.]/, './$&');
@@ -102,6 +116,12 @@ function transformRedefineInline({types: t}) {
   };
 }
 
+/**
+ * Transforms using transformRedefineInline sub-plugin.
+ * @param {string} sourceFilename
+ * @param {Object} opts
+ * @return {Object}
+ */
 const redefineInline = (sourceFilename, opts) =>
   transformSync(fs.readFileSync(sourceFilename).toString(), {
     configFile: false,
@@ -112,6 +132,10 @@ const redefineInline = (sourceFilename, opts) =>
     plugins: [[transformRedefineInline, opts]],
   });
 
+/**
+ * Replaces `configureComponent()` wrapping calls.
+ * @return {Object}
+ */
 module.exports = function({types: t}) {
   function getImportPath(nodes, name) {
     for (let i = 0; i < nodes.length; i++) {
