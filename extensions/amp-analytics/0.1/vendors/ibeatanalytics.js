@@ -20,7 +20,7 @@ const IBEATANALYTICS_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://ibeat.indiatimes.com',
     'track':
-      '${host}/ping-amp?url=${AMPDOC_URL}' +
+      '${host}/ping-amp?url=${ampdocUrl}' +
       '&sid=${clientId(_iibeat_session)}' +
       '&ua=${userAgent}' +
       '&ref=${documentReferrer}' +

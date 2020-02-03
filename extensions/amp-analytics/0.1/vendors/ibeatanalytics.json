@@ -1,7 +1,7 @@
 {
   "requests": {
     "host": "https://ibeat.indiatimes.com",
-    "track": "${host}/ping-amp?url=${AMPDOC_URL}&sid=${clientId(_iibeat_session)}&ua=${userAgent}&ref=${documentReferrer}&at=${incrementalEngagedTime}&tt=${totalTime}&pid=${pageViewId64}&d=${d}&ct=${ct}&pt=${pt}&au=${au}&ag=${ag}&aid=${aid}&cn=${canonicalUrl}&ctIds=${ctIds}"
+    "track": "${host}/ping-amp?url=${ampdocUrl}&sid=${clientId(_iibeat_session)}&ua=${userAgent}&ref=${documentReferrer}&at=${incrementalEngagedTime}&tt=${totalTime}&pid=${pageViewId64}&d=${d}&ct=${ct}&pt=${pt}&au=${au}&ag=${ag}&aid=${aid}&cn=${canonicalUrl}&ctIds=${ctIds}"
   },
   "triggers": {
     "trackInterval": {
