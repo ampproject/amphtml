@@ -22,18 +22,11 @@ import {
 const BaseElementMock = element => ({element});
 
 describe('configureComponent', () => {
-  it('passes element to ctor', () => {
-    const wrapped = configureComponent(BaseElementMock, {});
-    const element = {};
-    const instance = new wrapped(element);
-    expect(instance.element).to.equal(element);
-  });
-
-  it('uses original implementation', () => {
-    const Foo = () => ({isFoo: true});
-    const wrapped = configureComponent(Foo, {});
-    const instance = new wrapped({});
-    expect(instance.isFoo).to.be.true;
+  it('uses implementation', () => {
+    const wrapped = configureComponent(foo => ({foo}), {});
+    const foo = {};
+    const instance = new wrapped(foo);
+    expect(instance.foo).to.equal(foo);
   });
 });
 
