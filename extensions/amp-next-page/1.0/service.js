@@ -736,7 +736,7 @@ export class NextPageService {
         // Queue the page for fetching
         this.pages_.push(new Page(this, meta));
       } catch (e) {
-        user().error(TAG, 'Failed to queue page', e);
+        user().error(TAG, 'Failed to queue page due to error:', e);
       }
     });
     // To be safe, if the pages were parsed after the user

@@ -155,28 +155,34 @@ describes.realWin(
         });
       });
 
-      it('errors on invalid inline config (object instead of array)', () => {
-        expectAsyncConsoleError(
-          /amp-next-page Page list expected an array, found: undefined: \[object Object\]​​​/,
-          1
-        );
-
-        getAmpNextPage({
-          inlineConfig: {
-            pages: [
-              {
-                'image': '/examples/img/hero@1x.jpg',
-                'title': 'Title 1',
-                'ampUrl': '/document1',
-              },
-              {
-                'image': '/examples/img/hero@1x.jpg',
-                'title': 'Title 2',
-                'ampUrl': '/document2',
-              },
-            ],
+      it('errors on invalid inline config (object instead of array)', async () => {
+        const element = await getAmpNextPage(
+          {
+            inlineConfig: {
+              pages: [
+                {
+                  'image': '/examples/img/hero@1x.jpg',
+                  'title': 'Title 1',
+                  'ampUrl': '/document1',
+                },
+                {
+                  'image': '/examples/img/hero@1x.jpg',
+                  'title': 'Title 2',
+                  'ampUrl': '/document2',
+                },
+              ],
+            },
           },
-        });
+          false /** waitForLayout */
+        );
+        await allowConsoleError(() =>
+          element.build().catch(err => {
+            expect(err.message).to.include(
+              'amp-next-page Page list expected an array, found: undefined: [object Object]'
+            );
+            element.parentNode.removeChild(element);
+          })
+        );
       });
 
       it('errors on invalid inline config (ampUrl instead of url)', () => {
@@ -201,19 +207,93 @@ describes.realWin(
 
     describe('remote config', () => {
       it('errors when no config specified', async () => {
-        expectAsyncConsoleError(
-          /amp-next-page should contain a <script> child or a URL specified in \[src\]/,
-          1
-        );
-
         const element = await getAmpNextPage({});
-        element.parentNode.removeChild(element);
+
+        await allowConsoleError(() =>
+          element.build().catch(err => {
+            expect(err.message).to.include(
+              'amp-next-page should contain a <script> child or a URL specified in [src]'
+            );
+            element.parentNode.removeChild(element);
+          })
+        );
       });
 
       it('builds with valid remote config (without inline config)', async () => {
         const element = await getAmpNextPage({
           src: 'https://example.com/config.json',
         });
+        element.parentNode.removeChild(element);
+      });
+
+      it('fetches remote config when specified in src', async () => {
+        const element = await getAmpNextPage(
+          {
+            src: 'https://example.com/config.json',
+          },
+          false /** waitForLayout */
+        );
+
+        const config = {
+          pages: [
+            {
+              image: '/examples/img/hero@1x.jpg',
+              title: 'Remote config',
+              url: '/document1',
+            },
+          ],
+        };
+
+        const fetchJsonStub = env.sandbox
+          .stub(Services.batchedXhrFor(win), 'fetchJson')
+          .resolves({
+            ok: true,
+            json() {
+              return Promise.resolve(config);
+            },
+          });
+        const service = Services.nextPageServiceForDoc(doc);
+
+        await element.build();
+        await element.layoutCallback();
+
+        expect(
+          fetchJsonStub.calledWithExactly('https://example.com/config.json', {})
+        ).to.be.true;
+
+        await service.readyPromise_;
+        // Page 1
+        expect(service.pages_[1].title).to.equal('Remote config');
+        expect(service.pages_[1].url).to.include('/document1');
+        expect(service.pages_[1].image).to.equal('/examples/img/hero@1x.jpg');
+
+        element.parentNode.removeChild(element);
+      });
+
+      it('errors on invalid remote config (ampUrl instead of url)', async () => {
+        expectAsyncConsoleError(/page url must be a string/, 1);
+
+        const config = {
+          pages: [
+            {
+              image: '/examples/img/hero@1x.jpg',
+              title: 'Remote config',
+              ampUrl: '/document1',
+            },
+          ],
+        };
+
+        env.sandbox.stub(Services.batchedXhrFor(win), 'fetchJson').resolves({
+          ok: true,
+          json() {
+            return Promise.resolve(config);
+          },
+        });
+
+        const element = await getAmpNextPage({
+          src: 'https://example.com/config.json',
+        });
+
         element.parentNode.removeChild(element);
       });
     });
