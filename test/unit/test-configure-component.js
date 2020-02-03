@@ -21,8 +21,24 @@ import {
 
 const BaseElementMock = element => ({element});
 
+describe('configureComponent', () => {
+  it('passes element to ctor', () => {
+    const wrapped = configureComponent(BaseElementMock, {});
+    const element = {};
+    const instance = new wrapped(element);
+    expect(instance.element).to.equal(element);
+  });
+
+  it('uses original implementation', () => {
+    const Foo = () => ({isFoo: true});
+    const wrapped = configureComponent(Foo, {});
+    const instance = new wrapped({});
+    expect(instance.isFoo).to.be.true;
+  });
+});
+
 describe('useComponentConfig', () => {
-  it('returns config object when wrapped with configureComponent()', () => {
+  it('returns config when implementation is wrapped', () => {
     const config = {foo: 'bar'};
     const wrapped = configureComponent(BaseElementMock, config);
     const instance = new wrapped({});
@@ -38,7 +54,7 @@ describe('useComponentConfig', () => {
     });
   });
 
-  it('fails when not wrapped with configureComponent()', () => {
+  it('fails when implementation is unwrapped', () => {
     allowConsoleError(() => {
       const instance = new BaseElementMock({});
       expect(() => useComponentConfig(instance)).to.throw();
