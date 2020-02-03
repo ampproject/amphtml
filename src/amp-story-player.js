@@ -36,7 +36,7 @@ const LoadStateClass = {
 
 /** @const {string} */
 const CSS = `
-  :host { all: initial; display: block; border-radius: 0 !important; width: 405px; height: 720px; overflow: auto; }
+  :host { all: initial; display: block; border-radius: 0 !important; width: 360px; height: 600px; overflow: auto; }
   .story-player-iframe { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
   main { display: flex; flex-direction: row; height: 100%; }
   .i-amphtml-story-player-loaded iframe { opacity: 1; }`;
