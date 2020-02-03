@@ -264,10 +264,11 @@ export class NextPageService {
         }
         this.hidePreviousPages_(index);
         this.resumePausedPages_(index);
-      } else if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
-        if (page.isVisible()) {
-          page.setVisibility(VisibilityState.HIDDEN);
-        }
+      } else if (
+        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT &&
+        page.isVisible()
+      ) {
+        page.setVisibility(VisibilityState.HIDDEN);
       }
     });
 
@@ -772,7 +773,7 @@ export class NextPageService {
 
     const pages = /** @type {!Array<!./page.PageMeta>} */ (user().assertArray(
       parsed,
-      `${TAG} Page list expected an array, found: ${typeof pages}`
+      `${TAG} Page list expected an array, found: ${typeof parsed}`
     ));
 
     removeElement(scriptElement);

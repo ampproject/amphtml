@@ -178,7 +178,7 @@ describes.realWin(
         await allowConsoleError(() =>
           element.build().catch(err => {
             expect(err.message).to.include(
-              'amp-next-page Page list expected an array, found: undefined: [object Object]'
+              'amp-next-page Page list expected an array, found: object: [object Object]'
             );
             element.parentNode.removeChild(element);
           })
