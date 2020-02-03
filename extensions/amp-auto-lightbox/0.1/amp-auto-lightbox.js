@@ -359,20 +359,20 @@ function generateLightboxUid() {
  * @visibleForTesting
  */
 export function apply(ampdoc, element) {
-  return Services.mutatorForDoc(ampdoc)
-    .mutateElement(element, () => {
-      element.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
-    })
-    .then(() => {
-      Services.extensionsFor(ampdoc.win).installExtensionForDoc(
-        ampdoc,
-        REQUIRED_EXTENSION
-      );
+  const mutator = Services.mutatorForDoc(ampdoc);
+  const mutatePromise = mutator.mutateElement(element, () => {
+    element.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
+  });
+  return mutatePromise.then(() => {
+    Services.extensionsFor(ampdoc.win).installExtensionForDoc(
+      ampdoc,
+      REQUIRED_EXTENSION
+    );
 
-      element.dispatchCustomEvent(AutoLightboxEvents.NEWLY_SET);
+    element.dispatchCustomEvent(AutoLightboxEvents.NEWLY_SET);
 
-      return element;
-    });
+    return element;
+  });
 }
 
 /**
