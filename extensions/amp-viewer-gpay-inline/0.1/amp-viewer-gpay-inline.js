@@ -18,6 +18,7 @@ import {
   AmpPaymentGoogleIntegration,
 } from '../../../src/service/payments/amp-payment-google';
 import {CSS} from '../../../build/amp-viewer-gpay-inline-0.1.css';
+import {Layout} from '../../../src/layout';
 import {getServiceForDoc} from '../../../src/service';
 
 /** @const {string} */

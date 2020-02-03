@@ -15,6 +15,7 @@
  */
 
 import {AmpPaymentGoogleIntegration} from '../../../src/service/payments/amp-payment-google';
+import {Layout} from '../../../src/layout';
 import {getServiceForDoc} from '../../../src/service';
 
 /** @const {string} */
@@ -30,7 +31,7 @@ class AmpViewerGpayButton extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(unusedLayout) {
+  isLayoutSupported(layout) {
     return layout == Layout.RESPONSIVE;
   }
 
