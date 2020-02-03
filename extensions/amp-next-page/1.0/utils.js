@@ -41,7 +41,7 @@ export function validateUrl(url, hostUrl) {
 }
 
 /**
- * @param {*} page
+ * @param {!./page.PageMeta} page
  * @param {string} hostUrl
  */
 export function validatePage(page, hostUrl) {
