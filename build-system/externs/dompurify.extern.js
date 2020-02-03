@@ -16,7 +16,6 @@
 
 /** @externs */
 
-
 /** @constructor */
 var DomPurifyConfig = function() {};
 
