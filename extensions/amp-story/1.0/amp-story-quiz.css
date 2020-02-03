@@ -77,8 +77,6 @@ h3.i-amphtml-story-quiz-prompt {
 .i-amphtml-story-quiz-option {
     position: relative !important;
     display: flex !important;
-    box-sizing: border-box;
-    height: 58px !important;
     justify-items: start !important;
     align-items: center !important;
     border-radius: 30px !important;
