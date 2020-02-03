@@ -38,6 +38,6 @@ export function useComponentConfig(instance) {
       'or its configuration object has already been read. %s',
     element
   );
-  delete element.staticConfigSingleUse;
+  delete element.staticComponentConfigSingleUse;
   return config;
 }

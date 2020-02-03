@@ -25,14 +25,23 @@ describe('useComponentConfig', () => {
   it('returns config object when wrapped with configureComponent()', () => {
     const config = {foo: 'bar'};
     const wrapped = configureComponent(BaseElementMock, config);
-    expect(useComponentConfig(new wrapped({}))).to.equal(config);
+    const instance = new wrapped({});
+    expect(useComponentConfig(instance)).to.equal(config);
+  });
+
+  it('fails when used twice', () => {
+    allowConsoleError(() => {
+      const wrapped = configureComponent(BaseElementMock, {});
+      const instance = new wrapped({});
+      useComponentConfig(instance);
+      expect(() => useComponentConfig(instance)).to.throw();
+    });
   });
 
   it('fails when not wrapped with configureComponent()', () => {
     allowConsoleError(() => {
-      expect(() => useComponentConfig(new BaseElementMock({}))).to.throw(
-        /configureComponent/
-      );
+      const instance = new BaseElementMock({});
+      expect(() => useComponentConfig(instance)).to.throw();
     });
   });
 });
