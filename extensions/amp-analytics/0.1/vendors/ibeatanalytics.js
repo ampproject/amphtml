@@ -29,7 +29,7 @@ const IBEATANALYTICS_CONFIG = jsonLiteral({
       '&pid=${pageViewId64}' +
       '&d=${d}' +
       '&ct=${ct}' +
-      '&pt=${pt}' + 
+      '&pt=${pt}' +
       '&au=${au}' +
       '&ag=${ag}' +
       '&aid=${aid}' +
@@ -46,11 +46,11 @@ const IBEATANALYTICS_CONFIG = jsonLiteral({
       'request': 'track',
     },
   },
- 'transport': {
-   'beacon': false,
-   'xhrpost': false,
-   'image': true,
- },
+  'transport': {
+    'beacon': false,
+    'xhrpost': false,
+    'image': true,
+  },
 });
 
 export {IBEATANALYTICS_CONFIG};
