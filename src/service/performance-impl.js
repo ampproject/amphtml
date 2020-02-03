@@ -715,7 +715,7 @@ export class Performance {
    *     this directly.
    */
   tick(label, opt_delta) {
-    let data;
+    const data = dict({'label': label});
     let storedVal;
 
     // Absolute value case (not delta).
@@ -723,11 +723,10 @@ export class Performance {
       // Marking only makes sense for non-deltas.
       this.mark(label);
       const now = this.win.Date.now();
-      data = dict({'label': label, 'value': now});
+      data['value'] = now;
       storedVal = now - this.initTime_;
     } else {
-      data = dict({'label': label, 'delta': Math.max(opt_delta, 0)});
-      storedVal = Math.max(opt_delta, 0);
+      data['delta'] = storedVal = Math.max(opt_delta, 0);
     }
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
