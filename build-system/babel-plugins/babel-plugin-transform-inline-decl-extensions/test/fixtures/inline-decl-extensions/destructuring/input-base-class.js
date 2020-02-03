@@ -1,6 +1,6 @@
 export class Destructuring {
   method() {
-    const {a, b: bRenamed, c} = this.vendorComponentConfig_;
+    const {a, b: bRenamed, c} = this.staticComponentConfig_;
   }
   withDefaultValues() {
     const {
@@ -8,10 +8,14 @@ export class Destructuring {
       b: renamedBbbb = 'default value for b',
       c = 'default value for c',
       d = 'default value for d',
-      e: renamedE =  'default value for e',
-    } = this.vendorComponentConfig_;
+      e: renamedE = 'default value for e',
+    } = this.staticComponentConfig_;
   }
   unset() {
-    const {a, thisPropIsUnset, thisPropIsUnsetToo} = this.vendorComponentConfig_;
+    const {
+      a,
+      thisPropIsUnset,
+      thisPropIsUnsetToo,
+    } = this.staticComponentConfig_;
   }
 }

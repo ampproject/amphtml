@@ -13,12 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {devAssert} from './log';
+
 /**
  * @param {typeof AMP.BaseElement} klass
- * @param {VideoPlayerElementDef} config
+ * @param {!Object<string, *>} config
  * @return {typeof AMP.BaseElement}
  */
-export const useVendorComponentConfig = (klass, config) => element => {
-  element.vendorComponentConfig = config;
+export const configureComponent = (klass, config) => element => {
+  element.replacedInlinedStaticConfig = config;
   return new klass(element);
 };
+
+/**
+ * @param {!AMP.BaseElement} instance
+ * @return {!Object}
+ */
+export const useComponentConfig = instance =>
+  devAssert(
+    instance.element.replacedInlinedStaticConfig,
+    'Element does not have a .staticComponentConfig property. ' +
+      'Its implementation expects to be defined using configureComponent() %s',
+    instance.element
+  );
