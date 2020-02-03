@@ -31,10 +31,19 @@ export const PageState = {
 export const VISIBLE_DOC_CLASS = 'amp-next-page-visible';
 export const HIDDEN_DOC_CLASS = 'amp-next-page-hidden';
 
+/**
+ * @typedef {{
+ *   url: string,
+ *   image: string,
+ *   title: string,
+ * }}
+ */
+export let PageMeta;
+
 export class Page {
   /**
    * @param {!./service.NextPageService} manager
-   * @param {{ url: string, title: string, image: string }} meta
+   * @param {!PageMeta} meta
    */
   constructor(manager, meta) {
     /** @private @const {!./service.NextPageService} */
