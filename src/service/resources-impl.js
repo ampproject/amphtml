@@ -28,6 +28,7 @@ import {closest, hasNextNodeInDocumentOrder} from '../dom';
 import {computedStyle} from '../style';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
+import {getMode} from '../mode';
 import {getSourceUrl} from '../url';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
 import {isBlockedByConsent, reportError} from '../error';
@@ -624,6 +625,14 @@ export class ResourcesImpl {
         const ampElements = element.getElementsByClassName('i-amphtml-element');
         for (let i = 0; i < ampElements.length; i++) {
           const r = Resource.forElement(ampElements[i]);
+          if (typeof r === 'undefined') {
+            dev().error(
+              TAG_,
+              'AMP Element is missing an associated resource. Element: %s, Runtime: %s',
+              ampElements[i],
+              getMode().runtime
+            );
+          }
           r.requestMeasure();
         }
         if (relayoutTop != -1) {
