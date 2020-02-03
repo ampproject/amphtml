@@ -28,7 +28,8 @@ export const PageState = {
   PAUSED: 5,
 };
 
-const VISIBLE_DOC_CLASS = 'amp-next-page-document-visible';
+export const VISIBLE_DOC_CLASS = 'amp-next-page-visible';
+export const HIDDEN_DOC_CLASS = 'amp-next-page-hidden';
 
 export class Page {
   /**
@@ -52,7 +53,7 @@ export class Page {
     /** @private {?Element} */
     this.container_ = null;
     /** @private {?Document} */
-    this.cachedContent_ = null;
+    this.content_ = null;
     /** @private {!PageState} */
     this.state_ = PageState.QUEUED;
     /** @private {!VisibilityState} */
@@ -158,6 +159,9 @@ export class Page {
       this.shadowDoc_.ampdoc
         .getBody()
         .classList.toggle(VISIBLE_DOC_CLASS, this.isVisible());
+      this.shadowDoc_.ampdoc
+        .getBody()
+        .classList.toggle(HIDDEN_DOC_CLASS, !this.isVisible());
     }
 
     if (this.isVisible()) {
@@ -189,7 +193,7 @@ export class Page {
    * root has been removed
    */
   resume() {
-    this.attach_(devAssert(this.cachedContent_));
+    this.attach_();
   }
 
   /**
@@ -230,13 +234,14 @@ export class Page {
       .fetchPageDocument(this)
       .then(content => {
         this.state_ = PageState.LOADED;
-        this.container_ = this.manager_.createDocumentContainerForPage(
-          this /** page */
-        );
+        this.content_ = content;
+        return this.manager_.createDocumentContainerForPage(this /** page */);
+      })
+      .then(container => {
+        this.container_ = container;
         // TODO(wassgha): To further optimize, this should ideally
         // be parsed from the service worker instead of stored in memory
-        this.cachedContent_ = content;
-        this.attach_(content);
+        this.attach_();
       })
       .catch(() => {
         this.state_ = PageState.FAILED;
@@ -247,12 +252,11 @@ export class Page {
 
   /**
    * Inserts the fetched (or cached) HTML as the document's content
-   * @param {!Document} content
    */
-  attach_(content) {
+  attach_() {
     const shadowDoc = this.manager_.attachDocumentToPage(
       this /** page */,
-      content,
+      /** @type {!Document} */ (devAssert(this.content_)),
       this.isPaused() /** force */
     );
 

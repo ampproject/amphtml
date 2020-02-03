@@ -60,8 +60,8 @@ export class HeadingComponent {
   }
 
   /** @override */
-  buildElement(headingData, doc, data) {
-    const html = htmlFor(doc);
+  buildElement(headingData, win, data) {
+    const html = htmlFor(win.document);
     const template = html`
       <h3
         class="i-amphtml-story-bookend-component

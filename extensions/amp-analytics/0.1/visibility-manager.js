@@ -468,6 +468,7 @@ export class VisibilityManager {
       // Optionally, element-level state.
       let layoutBox;
       if (opt_element) {
+        state['elementId'] = opt_element.id;
         state['opacity'] = getMinOpacity(opt_element);
         const resource = this.resources_.getResourceForElementOptional(
           opt_element
