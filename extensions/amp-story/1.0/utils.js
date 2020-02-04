@@ -28,7 +28,6 @@ import {
 } from '../../../src/url';
 import {getState} from '../../../src/history';
 import {setStyle} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
 import {user, userAssert} from '../../../src/log';
 
 /**
@@ -273,7 +272,8 @@ export function setHistoryState(win, stateName, value) {
     ...state,
     [stateName]: value,
   };
-  throttle(win, () => history.replaceState(newHistory, ''), 1000)();
+
+  history.replaceState(newHistory, '');
 }
 
 /**

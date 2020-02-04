@@ -99,7 +99,7 @@ import {
   toggle,
 } from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
-import {debounce} from '../../../src/utils/rate-limit';
+import {debounce, throttle} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
@@ -109,7 +109,6 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
-import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
@@ -344,6 +343,15 @@ export class AmpStory extends AMP.BaseElement {
      * @private {boolean}
      */
     this.pausedStateToRestore_ = false;
+
+    /** @private {function()} */
+    this.setNavigationHistoryThrottle_ = throttle(
+      this.win,
+      navigationPath => {
+        setHistoryState(this.win, HistoryState.NAVIGATION_PATH, navigationPath);
+      },
+      1000
+    );
 
     /** @private {?Element} */
     this.sidebar_ = null;
@@ -786,11 +794,7 @@ export class AmpStory extends AMP.BaseElement {
       if (endsWith(href, '#')) {
         href = href.slice(0, -1);
       }
-      this.win.history.replaceState(
-        (this.win.history && getState(this.win.history)) || {} /** data */,
-        this.win.document.title /** title */,
-        href /** URL */
-      );
+      setHistoryState(this.win, this.win.document.title, href);
     });
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
@@ -1064,18 +1068,17 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
+    const maybePageId = parseQueryString(this.win.location.hash)['page'];
+    if (maybePageId && this.isActualPage_(maybePageId)) {
+      return maybePageId;
+    }
+
     const pages =
       /**  @type {!Array} */ (getHistoryState(
         this.win,
         HistoryState.NAVIGATION_PATH
       ) || []);
     const historyPage = lastItem(pages);
-
-    const maybePageId = parseQueryString(this.win.location.hash)['page'];
-    if (maybePageId && this.isActualPage_(maybePageId)) {
-      return maybePageId;
-    }
-
     if (historyPage && this.isActualPage_(historyPage)) {
       return historyPage;
     }
@@ -1545,7 +1548,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, navigationPath);
-    setHistoryState(this.win, HistoryState.NAVIGATION_PATH, navigationPath);
+    this.setNavigationHistoryThrottle_(navigationPath);
   }
 
   /**
