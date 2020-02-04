@@ -52,7 +52,7 @@ describes.sandboxed('BatchedXhr', {}, env => {
       });
     });
 
-    it.only('should fetch once for a relative and absolute URL that point to the same location.', async () => {
+    it('should fetch once for a relative and absolute URL that point to the same location.', async () => {
       const originUrl = 'https://testwebsite.com';
       const cdnUrl =
         'https://testwebsite-com.cdn.ampproject.org/v/s/testwebsite.com/hello-world';
