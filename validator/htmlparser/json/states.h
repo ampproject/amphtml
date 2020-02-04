@@ -110,7 +110,7 @@ constexpr std::array<int, 127> kTokenIndexes {
     44, 44, 44, 42 /* { */, 44, 43 /* } */,
     44, };
 
-constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
+constexpr std::array<std::array<uint32_t, 46>, 34> kParseStates {{
     // $
     // Code: 0
     {0x0 /* TAB */, 0x0 /* LF */, 0x0 /* FF */, 0x0 /*   */,
@@ -124,7 +124,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0x500 /* f */,
      0xff /* l */, 0x900 /* n */, 0xff /* r */, 0xff /* s */,
      0x1b00 /* t */, 0xff /* u */, 0x1400 /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // ARRAY_END
     // Code: 1
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -138,7 +138,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0x40 /* .* */},
+     0x40 /* \u */, 0x40 /* .* */},
     // ARRAY_FIRST_ITEM
     // Code: 2
     {0x200 /* TAB */, 0x200 /* LF */, 0x200 /* FF */, 0x200 /*   */,
@@ -152,7 +152,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0x40580 /* f */,
      0xff /* l */, 0x40980 /* n */, 0xff /* r */, 0xff /* s */,
      0x41b80 /* t */, 0xff /* u */, 0x41480 /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // ARRAY_NEXT_ITEM
     // Code: 3
     {0x300 /* TAB */, 0x300 /* LF */, 0x300 /* FF */, 0x300 /*   */,
@@ -166,7 +166,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0x40580 /* f */,
      0xff /* l */, 0x40980 /* n */, 0xff /* r */, 0xff /* s */,
      0x41b80 /* t */, 0xff /* u */, 0x41480 /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // ARRAY_SEPARATOR
     // Code: 4
     {0x400 /* TAB */, 0x400 /* LF */, 0x400 /* FF */, 0x400 /*   */,
@@ -180,7 +180,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // FALSE_1
     // Code: 5
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -194,7 +194,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // FALSE_2
     // Code: 6
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -208,7 +208,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0x700 /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // FALSE_3
     // Code: 7
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -222,7 +222,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0x800 /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // FALSE_4
     // Code: 8
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -236,7 +236,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0x40 /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NULL_1
     // Code: 9
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -250,7 +250,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xa00 /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NULL_2
     // Code: 10
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -264,7 +264,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xb00 /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NULL_3
     // Code: 11
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -278,7 +278,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0x40 /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NUMBER
     // Code: 12
     {0x40 /* TAB */, 0x40 /* LF */, 0x40 /* FF */, 0x40 /*   */,
@@ -292,7 +292,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0x40 /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NUMBER_AFTER_E_DIGIT_NOTATION
     // Code: 13
     {0x40 /* TAB */, 0x40 /* LF */, 0x40 /* FF */, 0x40 /*   */,
@@ -306,7 +306,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0x40 /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NUMBER_AFTER_E_NOTATION
     // Code: 14
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -320,7 +320,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NUMBER_AFTER_HYPHEN
     // Code: 15
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -334,7 +334,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NUMBER_AFTER_PERIOD
     // Code: 16
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -348,7 +348,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NUMBER_AFTER_PERIOD_DIGIT
     // Code: 17
     {0x40 /* TAB */, 0x40 /* LF */, 0x40 /* FF */, 0x40 /*   */,
@@ -362,7 +362,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xe00 /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0x40 /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NUMBER_AFTER_PLUS_MINUS_AFTER_E_NOTATION
     // Code: 18
     {0x40 /* TAB */, 0x40 /* LF */, 0x40 /* FF */, 0x40 /*   */,
@@ -376,7 +376,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0x40 /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // NUMBER_AFTER_ZERO
     // Code: 19
     {0x40 /* TAB */, 0x40 /* LF */, 0x40 /* FF */, 0x40 /*   */,
@@ -390,7 +390,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xe00 /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0x40 /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // OBJECT
     // Code: 20
     {0x1400 /* TAB */, 0x1400 /* LF */, 0x1400 /* FF */, 0x1400 /*   */,
@@ -404,7 +404,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0x1500 /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // OBJECT_END
     // Code: 21
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -418,7 +418,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0x40 /* .* */},
+     0x40 /* \u */, 0x40 /* .* */},
     // OBJECT_KEY
     // Code: 22
     {0x1600 /* TAB */, 0x1600 /* LF */, 0x1600 /* FF */, 0x1600 /*   */,
@@ -432,7 +432,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // OBJECT_SEPARATOR
     // Code: 23
     {0x1700 /* TAB */, 0x1700 /* LF */, 0x1700 /* FF */, 0x1700 /*   */,
@@ -446,7 +446,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0x1500 /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // OBJECT_VALUE
     // Code: 24
     {0x1800 /* TAB */, 0x1800 /* LF */, 0x1800 /* FF */, 0x1800 /*   */,
@@ -460,7 +460,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0x170580 /* f */,
      0xff /* l */, 0x170980 /* n */, 0xff /* r */, 0xff /* s */,
      0x171b80 /* t */, 0xff /* u */, 0x171480 /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // STRING
     // Code: 25
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -474,7 +474,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0x1900 /* .* */},
+     0x1900 /* \u */, 0x1900 /* .* */},
     // STRING_ESCAPE
     // Code: 26
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -488,7 +488,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0x1900 /* f */,
      0xff /* l */, 0x1900 /* n */, 0x1900 /* r */, 0xff /* s */,
      0x1900 /* t */, 0x1e00 /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // TRUE_1
     // Code: 27
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -502,7 +502,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0x1c00 /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // TRUE_2
     // Code: 28
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -516,7 +516,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0xff /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0x1d00 /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // TRUE_3
     // Code: 29
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -530,7 +530,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0xff /* c */, 0xff /* d */, 0x40 /* e */, 0xff /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // UNICODE_HEX_CHAR_FIRST
     // Code: 30
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -544,7 +544,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0x2000 /* c */, 0x2000 /* d */, 0x2000 /* e */, 0x2000 /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // UNICODE_HEX_CHAR_LAST
     // Code: 31
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -558,7 +558,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0x1900 /* c */, 0x1900 /* d */, 0x1900 /* e */, 0x1900 /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // UNICODE_HEX_CHAR_SECOND
     // Code: 32
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -572,7 +572,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0x2100 /* c */, 0x2100 /* d */, 0x2100 /* e */, 0x2100 /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
     // UNICODE_HEX_CHAR_THIRD
     // Code: 33
     {0xff /* TAB */, 0xff /* LF */, 0xff /* FF */, 0xff /*   */,
@@ -586,7 +586,7 @@ constexpr std::array<std::array<uint32_t, 45>, 34> kParseStates {{
      0x1f00 /* c */, 0x1f00 /* d */, 0x1f00 /* e */, 0x1f00 /* f */,
      0xff /* l */, 0xff /* n */, 0xff /* r */, 0xff /* s */,
      0xff /* t */, 0xff /* u */, 0xff /* { */, 0xff /* } */,
-     0xff /* .* */},
+     0xff /* \u */, 0xff /* .* */},
 }};
 
 
@@ -615,13 +615,16 @@ inline static bool HasPopBit(uint32_t code) {
   return ((code & 0x40) >> 6) == 1;
 }
 
+// TODO(amaltas): In follow up change modify the signature to accept a unicode
+// character, that is char32_t and based on the charset for this state return
+// the code from second last or last column accordingly.
 inline static uint32_t CodeForToken(char c, uint8_t state) {
   int c_int = static_cast<int>(c);
   if (c_int > 127) {
     return kParseStates[state][44];
   }
   int index = kTokenIndexes[c_int];
-  if (index == -1) index = 44;
+  if (index == -1) index = 45;
   return kParseStates[state][index];
 }
 

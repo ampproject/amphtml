@@ -50,9 +50,16 @@
 
 namespace htmlparser::grammar {
 
+struct Input {
+  // If true, the any char is matched except the input char.
+  bool exclude = false;
+  // The set of characters to match.
+  std::set<char> charset;
+};
+
 struct Rule {
   std::string state;
-  std::vector<char> input;
+  Input input;
   std::vector<std::string> transition;
 };
 
@@ -84,10 +91,10 @@ class TableBuilder  {
   // next 8 bits contains shift state code.
   // next 8 bits contains callback code.
   //
-  // 0b11111111  11111111   11111111   11           111111
-  // ----------  --------   --------   --           ------
-  //     |           |         |       |              |
-  // Callback  shift code  state  Push|Pop bits  Reserved.
+  // 0b11111111  11111111   11111111   11         111111
+  // ----------  --------   --------   --         ------
+  //     |           |         |       |            |
+  // Callback   shift code   state  Push|Pop bits  Reserved.
   //
   std::optional<uint32_t> ComputeState(uint8_t row, Rule r);
   bool ParseGrammarFile();
@@ -103,7 +110,7 @@ class TableBuilder  {
   std::string grammar_file_path_;
   OutputFileOptions header_options_;
   std::map<std::string, uint8_t> state_codes_;
-  std::set<char> charset_;
+  std::set<uint8_t> charset_;
   uint8_t state_code_counter_ = 0;
 };
 

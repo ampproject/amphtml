@@ -39,7 +39,7 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
     for (auto& t : r.transition) {
       transition_states.insert(t);
     }
-    for (char c : r.input) {
+    for (char c : r.input.charset) {
       charset_.insert(c);
     }
   }
@@ -93,6 +93,7 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
 
   std::array<int, 127> charindexes = {-1};
   for (int i = 0; i < 127; i++) {
+    // Default to match rest of the chars column (last column).
     charindexes[i] = charset_.size();
   }
 
@@ -105,18 +106,24 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
 
   std::map<uint8_t, std::vector<uint32_t>> table;
 
+  bool has_non_ascii_char_def = charset_.find(0x80) != charset_.end();
+
   for (auto& s : declared_states) {
     uint8_t code = state_code_counter_;
     state_code_counter_ += 1;
     state_codes_.insert({s, code});
 
-
     for (int i = 0; i < charset_.size(); i++) {
-      table[code].push_back(255);
+      table[code].push_back(0xff);
+    }
+
+    if (!has_non_ascii_char_def) {
+      // For non-ascii chars.
+      table[code].push_back(0xff);
     }
 
     // For all characters.
-    table[code].push_back(255);
+    table[code].push_back(0xff);
   }
 
   for (auto& r : raw_rules_) {
@@ -124,11 +131,24 @@ bool TableBuilder::ParseRulesAndGenerateTable() {
     auto value = ComputeState(code, r);
     if (!value.has_value()) return false;
 
-    if (r.input.empty()) {
+    if (r.input.charset.empty()) {
       table[code][charset_.size()] = value.value();
+      table[code][charset_.size() + 1] = value.value();
     } else {
-      for (int c : r.input) {
-          table[code][charindexes[c]] = value.value();
+      if (r.input.exclude) {
+        if (!has_non_ascii_char_def) {
+          table[code][charset_.size()] = value.value();
+        }
+        // Allows rest of the chars.
+        table[code][charset_.size() + 1] = value.value();
+      } else {
+        for (int c : r.input.charset) {
+          if (c == 0x80) {
+            table[code][charset_.size() - 1] = value.value();
+          } else {
+            table[code][charindexes[c]] = value.value();
+          }
+        }
       }
     }
   }
@@ -196,7 +216,6 @@ inline static bool HasPopBit(uint32_t code);
 
 )";
 
-
   fd << "constexpr std::array<int, 127> kTokenIndexes {\n    ";
   for (int i = 0; i < tokenindexes.size(); i++) {
     fd << tokenindexes[i];
@@ -207,6 +226,9 @@ inline static bool HasPopBit(uint32_t code);
     fd << (i > 0 && ((i + 1) % 6 == 0) ? ",\n    " : ", ");
   }
   fd << "};\n\n";
+
+  if (charset_.find(0x80) == charset_.end())
+    charset_.insert(0x80);
 
   fd << "constexpr std::array<std::array<uint32_t, " << charset_.size() + 1
      << ">, "
@@ -256,13 +278,16 @@ inline static bool HasPopBit(uint32_t code) {
   return ((code & 0x40) >> 6) == 1;
 }
 
+// TODO(amaltas): In follow up change modify the signature to accept a unicode
+// character, that is char32_t and based on the charset for this state return
+// the code from second last or last column accordingly.
 inline static uint32_t CodeForToken(char c, uint8_t state) {
   int c_int = static_cast<int>(c);
   if (c_int > 127) {
 )";
 
   fd << "    return kParseStates[state][";
-  fd << std::dec << charset_.size() << "];\n";
+  fd << std::dec << charset_.size() - 1 << "];\n";
   fd << "  }\n";
   fd << "  int index = kTokenIndexes[c_int];\n";
   fd << "  if (index == -1) index = " << std::dec << charset_.size() << ";\n";
@@ -329,6 +354,7 @@ std::optional<uint32_t> TableBuilder::ComputeState(uint8_t row, Rule r) {
 bool TableBuilder::ParseGrammarFile() {
   htmlparser::FileReadOptions options;
   options.ignore_comments = true;
+  options.comments_char = '#';
   options.white_space_transform =
       htmlparser::FileReadOptions::LineTransforms::StripWhitespace();
   bool valid_rule = true;
@@ -336,7 +362,6 @@ bool TableBuilder::ParseGrammarFile() {
       options,
       grammar_file_path_,
       [&](std::string_view line, int line_number) {
-        if (line.empty() || line[0] == '#') return;
         auto rule = ReadRule(line, line_number);
         if (!rule.has_value()) {
           valid_rule = false;
@@ -361,7 +386,6 @@ void TableBuilder::RemoveLeadingWhitespace(std::string_view* line) const {
 std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
                                            int line_no) const {
   std::stringbuf buf;
-
   int line_size = line.size();
   while (line.data()) {
     char c = line.front();
@@ -375,8 +399,16 @@ std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
 
   std::string state = buf.str();
 
-  std::vector<char> input;
+  bool exclude = false;
+  std::vector<uint8_t> input;
   char c = line.front();
+
+  if (c == '^' && line.at(1) == '"') {
+    exclude = true;
+    line.remove_prefix(1);
+    c = line.front();
+  }
+
   if (c == '\'') {
     line.remove_prefix(1);
     c = line.front();
@@ -431,6 +463,64 @@ std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
             line.remove_prefix(1);
             continue;
           }
+
+          // Special escaped identifier for declaring non-ascii character types.
+          //
+          // "abcdef\u" declares group of characters a,b,c,d,e,f and any non
+          // ascii character.
+          //
+          // State tables last two columns are rest of the chars columns.
+          //  - Second last column contains code for non-ascii characters.
+          //  - Last column contains code for all (including non-ascii
+          //  characters).
+          //  If last column state is to accept any character, second last
+          //  column's value is ignored.
+          //
+          //  For example:
+          //  MY_RULE "0123456789\u" MY_OBJECT_START;
+          //  MY_RULE .* MY_OBJECT_START;
+          //
+          //  The second declaration overrides the first declaration and have
+          //  same meaning, it just widens the character range for the rule.
+          //  All the characters ascii and non-ascii will be accepted by this
+          //  rule.
+          //
+          //  The exclusion marker works differently.
+          //
+          //  For example:
+          //  MY_RULE ^"0123456789" MY_OBJECT_START;
+          //  MY_RULE .* MY_OBJECT_START;
+          //
+          //  The second rule doesn't override the previous exclusion chars. So
+          //  MY_RULE will transition to MY_OBJECT_START for any characters
+          //  except 0, 1, 2, 3, 4, 5, 6, 7, 8 and 9.
+          case 'u': {
+            input.pop_back();
+            input.push_back(0x80);
+            previous_char = 'u';
+            line.remove_prefix(1);
+            continue;
+          }
+        }
+      }
+
+      // Checks if period is part of range specifier.
+      if (c == '.' && previous_char != 0 && line.size() > 3) {
+        if (line.at(1) == '.') {
+          char range_end = line.at(2);
+          if (range_end < previous_char) {
+            std::cerr << "Invalid range : " << previous_char << ".."
+                      << range_end << "\n";
+            return std::nullopt;
+          }
+
+          for (int i = previous_char; i <= range_end; i++) {
+            input.push_back(i);
+          }
+
+          line.remove_prefix(3);  /* .. and char */
+          previous_char = 0;
+          continue;
         }
       }
 
@@ -507,7 +597,10 @@ std::optional<Rule> TableBuilder::ReadRule(std::string_view line,
     return std::nullopt;
   }
 
-  return Rule{.state = state, .input = input, .transition = transition_states};
+  return Rule{.state = state,
+              .input = {.exclude = exclude,
+                        .charset{input.begin(), input.end()}},
+              .transition = transition_states};
 }
 
 std::optional<uint32_t> TableBuilder::ComputeStateBits(
@@ -536,6 +629,8 @@ std::string PrintChar(char c) {
       return "BKSPC";
     case '\n':
       return "LF";
+    case 0x80:
+      return "\\u";
     default: {
       if (static_cast<int>(c) > 126) {
         return ".*";
