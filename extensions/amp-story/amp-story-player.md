@@ -67,6 +67,14 @@ The `amp-story-player` allows you to embed and play your favorite stories in you
 
 The `amp-story-player` allows you to embed and play your favorite stories in your own website.
 
+### Features
+
+- Improved experience over time (AKA the "Software as a Service" paradigm)
+- Prerendering (coming soon!)
+- Prefetching and caching resources (coming soon!)
+- Customizable embed UI / chrome (coming soon!)
+- Swipe/tap to next/previous (coming soon!)
+
 ### Boilerplate
 
 The following markup is a decent starting point or boilerplate. Copy this and save it to a file with a `.html` extension.
@@ -89,27 +97,19 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
     <h1>This is a NON-AMP page that embeds a story below:</h1>
     <amp-story-player style="width: 360px; height: 600px;">
       <a
-        href="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/"
-        style="--story-player-poster: url('https://www-washingtonpost-com.cdn.ampproject.org/i/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-new-york-city/img/promo3x4.jpg');"
+        href="https://example.com/story.html"
+        style="--story-player-poster: url('https://example.com/img/promo3x4.jpg');"
       >
-        <span class="title"
-          >A local’s guide to what to eat and do in New York City</span
-        >
+        <span>A description for my story.</span>
       </a>
     </amp-story-player>
   </body>
 </html>
 ```
 
-### Features
-
-- Improved experience over time (AKA the "Software as a Service" paradigm)
-- Prerendering (coming soon!)
-- Prefetching and caching resources (coming soon!)
-- Customizable embed UI / chrome (coming soon!)
-- Swipe/tap to next/previous (coming soon!)
-
 ### API
+
+## `<amp-story-player>`
 
 The high-level API for the player looks like the following:
 
@@ -122,9 +122,15 @@ The high-level API for the player looks like the following:
 </amp-story-player>
 ```
 
-To provide a better experience for the user while the story is being loaded, you can provide some text inside the anchor tags.
+The inline width and height ensures that the player will not cause any jumps in your website while the script is being loaded. Feel free to modify the values, but we recommend mantaining a 3:5 aspect ratio.
 
-You can also provide an image to work as a placeholder while the story is being loaded. Just add a `--story-player-poster` CSS variable as an inline style of the first anchor tag with its corresponding url:
+## `Children of <amp-story-player>`
+
+The `<amp-story-player>` component contains one or more `<a>` tags, each of which represent a story. Use the `href` attribute to point to a particular story.
+
+To provide a better experience for the user while the story is being loaded, as well as allowing search engines to crawl the embedded stories, you can provide some text inside the anchor tags.
+
+You can also provide an image to work as a placeholder while the story is being loaded. Just add a `--story-player-poster` CSS variable as an inline style of the first anchor tag with its corresponding image URL:
 
 ```html
 <amp-story-player style="width: 360px; height: 600px;">
