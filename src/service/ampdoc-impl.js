@@ -941,11 +941,7 @@ export class AmpDocShadow extends AmpDoc {
     return this.meta_[name] !== undefined ? this.meta_[name] : null;
   }
 
-  /**
-   * Stores the value of an ampdoc's meta tag content for a given name.
-   * @param {string} name
-   * @param {string} content
-   */
+  /** @override */
   setMetaByName(name, content) {
     if (!name) {
       throw new Error('Attempted to store invalid meta name/content pair');
