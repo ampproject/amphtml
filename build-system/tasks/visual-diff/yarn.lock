@@ -173,10 +173,10 @@
     retry-axios "^1.0.1"
     winston "^3.0.0"
 
-"@percy/puppeteer@1.0.8":
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/@percy/puppeteer/-/puppeteer-1.0.8.tgz#9ce4359f885e446bea12bfaa99e746ff38755b03"
-  integrity sha512-YTR5scNNANchsP4iUurXYHVaBg3XPJBMmnfgHwJD9/SnSMjPvSEr7uN4cPGKH78rWibl/js8FFggedkK5+7fQA==
+"@percy/puppeteer@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@percy/puppeteer/-/puppeteer-1.1.0.tgz#3b055cd4931865f131b3b525be5971ec4a7c8012"
+  integrity sha512-ndQDSC4UYE0WrK+6e14xpuz4FktSG2FwiQJ7n68QVm4TcgetdeXkgcAn1xtwvDbLpEcMyzcQEPBJMOMNf7Nfdg==
   dependencies:
     "@percy/agent" "~0"
 
