@@ -22,6 +22,10 @@
     --incorrect-color: #F34E4E !important;
     --incorrect-color-shaded: #cc4141 !important;
     --accent-color: #005AF0;
+    --option-1-percentage: 0%;
+    --option-2-percentage: 0%;
+    --option-3-percentage: 0%;
+    --option-4-percentage: 0%;
     font-family: 'Poppins-bold', sans-serif !important;
     background: var(--accent-color) !important;
     border-radius: 32px !important;
@@ -83,6 +87,12 @@ h3.i-amphtml-story-quiz-prompt {
     border: solid 1px #DADCE0 !important;
     font-size: 16px !important;
     line-height: 20px !important;
+    overflow: hidden !important;
+    z-index: 0 !important;
+}
+
+[dir=rtl] .i-amphtml-story-quiz-option {
+    padding: 8px 8px 8px 16px !important;
 }
 
 /* Truncate option text and add an ellipsis after 2 lines. */
@@ -121,6 +131,29 @@ h3.i-amphtml-story-quiz-prompt {
 [dir=rtl ] .i-amphtml-story-quiz-answer-choice {
     margin-left: 16px !important;
     margin-right: 0px !important;
+}
+
+.i-amphtml-story-quiz-percentage-text {
+    display: flex !important;
+    padding-left: 10px !important;
+    margin-left: auto !important;
+    color: #AAAAAA !important;
+    visibility: hidden !important;
+}
+
+[dir=rtl ] .i-amphtml-story-quiz-percentage-text {
+    padding-left: 0px !important;
+    padding-right: 10px !important;
+    margin-right: auto !important;
+    margin-left: 0px !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-percentage-text {
+    visibility: visible !important;
+}
+
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected > .i-amphtml-story-quiz-percentage-text {
+    color: white !important;
 }
 
 .i-amphtml-story-quiz-post-selection :not([correct]) > .i-amphtml-story-quiz-answer-choice {
@@ -170,14 +203,93 @@ h3.i-amphtml-story-quiz-prompt {
     line-height: 20px !important;
 }
 
-.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option::before {
+.i-amphtml-story-quiz-post-selection:not(.i-amphtml-story-quiz-has-data) .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option::before {
     animation: option-select-correct forwards 150ms cubic-bezier(0.0, 0.0, 0.2, 1) !important;
     border: solid 1px !important;
 }
 
-.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected:not([correct]).i-amphtml-story-quiz-option::before {
+.i-amphtml-story-quiz-post-selection:not(.i-amphtml-story-quiz-has-data) .i-amphtml-story-quiz-option-selected:not([correct]).i-amphtml-story-quiz-option::before {
     animation: option-select-incorrect forwards 150ms cubic-bezier(0.0, 0.0, 0.2, 1) !important;
     border: solid 1px !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option:nth-of-type(1)::before {
+    transform: translateX(var(--option-1-percentage)) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option:nth-of-type(2)::before {
+    transform: translateX(var(--option-2-percentage)) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option:nth-of-type(3)::before {
+    transform: translateX(var(--option-3-percentage)) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option:nth-of-type(4)::before {
+    transform: translateX(var(--option-4-percentage)) !important;
+}
+
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option:nth-of-type(1)::before {
+    transform: translateX(calc(-1 * var(--option-1-percentage))) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option:nth-of-type(2)::before {
+    transform: translateX(calc(-1 * var(--option-2-percentage))) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option:nth-of-type(3)::before {
+    transform: translateX(calc(-1 * var(--option-3-percentage))) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option:nth-of-type(4)::before {
+    transform: translateX(calc(-1 * var(--option-4-percentage))) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option::before {
+    left: -101% !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0px !important;
+    background: #ECEDEF !important;
+    color: #ECEDEF !important;
+    transition: transform 1s !important;
+    border: solid 2px !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option::before {
+    left: 101% !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option {
+    background: var(--correct-color) !important;
+    border: none !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected:not([correct]).i-amphtml-story-quiz-option {
+    background: var(--incorrect-color) !important;
+    border: none !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected.i-amphtml-story-quiz-option {
+    /* Ups the padding by one to account for the border which must be removed
+     * to allow the shading to reach the edge of the box */
+     padding: 9px 17px 9px 9px !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option-selected.i-amphtml-story-quiz-option {
+    /* Switches the extra padding to the left from the right, since the answer choice and the percentage switch */
+    padding: 9px 9px 9px 17px !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option::before {
+    background: var(--correct-color-shaded) !important;
+    color: var(--correct-color-shaded) !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected:not([correct]).i-amphtml-story-quiz-option::before {
+    background: var(--incorrect-color-shaded) !important;
+    color: var(--incorrect-color-shaded) !important;
 }
 
 /**
