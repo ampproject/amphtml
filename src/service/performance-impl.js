@@ -514,7 +514,7 @@ export class Performance {
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime =
-          docVisibleTime >= 0
+          docVisibleTime > -1
             ? this.win.performance.now() - docVisibleTime
             : //  Prerender was complete before visibility.
               0;
