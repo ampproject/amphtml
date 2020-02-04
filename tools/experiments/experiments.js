@@ -58,12 +58,23 @@ const BETA_CHANNEL_ID = 'beta-channel';
 const RTV_CHANNEL_ID = 'rtv-channel';
 
 /**
- * The different states of the AMP_CANARY cookie.
+ * The different states of the __Host-AMP_OPT_IN cookie.
  */
-const AMP_CANARY_COOKIE = {
+const AMP_OPT_IN_COOKIE = {
   DISABLED: '0',
-  CANARY: '1',
-  RC: '2',
+  EXPERIMENTAL: 'experimental',
+  BETA: 'beta',
+  // NIGHTLY: 'nightly',  // TODO(#25616): add when CDN supports nightly builds.
+};
+
+/**
+ * Legacy values for __Host-AMP_OPT_IN cookie.
+ * TODO(#25205): remove this once the CDN stops supporting these values.
+ */
+const _LEGACY_AMP_OPT_IN_COOKIE = {
+  DISABLED: '0',
+  EXPERIMENTAL: '1',
+  BETA: '2',
 };
 
 /** @const {!Array<!ExperimentDef>} */
@@ -154,18 +165,21 @@ function build() {
     if (!rtvInput.value) {
       showConfirmation_(
         'Do you really want to opt out of RTV?',
-        setAmpCanaryCookie_.bind(null, AMP_CANARY_COOKIE.DISABLED)
+        setAmpOptInCookie_.bind(null, AMP_OPT_IN_COOKIE.DISABLED)
       );
     } else if (RTV_PATTERN.test(rtvInput.value)) {
       showConfirmation_(
         `Do you really want to opt in to RTV ${rtvInput.value}?`,
-        setAmpCanaryCookie_.bind(null, rtvInput.value)
+        setAmpOptInCookie_.bind(null, rtvInput.value)
       );
     }
   });
 
   if (isExperimentOn_(RTV_CHANNEL_ID)) {
-    rtvInput.value = getCookie(window, 'AMP_CANARY');
+    // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
+    // cookie.
+    rtvInput.value =
+      getCookie(window, '__Host-AMP_OPT_IN') || getCookie(window, 'AMP_CANARY');
     rtvInput.dispatchEvent(new Event('input'));
     document.getElementById('rtv-details').open = true;
   }
@@ -268,34 +282,41 @@ function updateExperimentRow(experiment) {
  * @return {boolean}
  */
 function isExperimentOn_(id) {
+  // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
+  // cookie.
+  const optInCookieValue =
+    getCookie(window, '__Host-AMP_OPT_IN') || getCookie(window, 'AMP_CANARY');
   switch (id) {
     case EXPERIMENTAL_CHANNEL_ID:
-      return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.CANARY;
+      return [
+        AMP_OPT_IN_COOKIE.EXPERIMENTAL,
+        _LEGACY_AMP_OPT_IN_COOKIE.EXPERIMENTAL,
+      ].includes(optInCookieValue);
     case BETA_CHANNEL_ID:
-      return getCookie(window, 'AMP_CANARY') == AMP_CANARY_COOKIE.RC;
+      return [AMP_OPT_IN_COOKIE.BETA, _LEGACY_AMP_OPT_IN_COOKIE.BETA].includes(
+        optInCookieValue
+      );
     case RTV_CHANNEL_ID:
-      return RTV_PATTERN.test(getCookie(window, 'AMP_CANARY'));
+      return RTV_PATTERN.test(optInCookieValue);
     default:
       return isExperimentOn(window, /*OK*/ id);
   }
 }
 
 /**
- * Opts in to / out of the "canary" or "rc" runtime types by setting the
- * AMP_CANARY cookie.
- * @param {string} cookieState One of AMP_CANARY_COOKIE.{DISABLED|CANARY|RC} or
- *   a 15-digit RTV.
+ * Opts in to / out of the "beta" or "experimental" channels or a specific RTV
+ * by setting the __Host-AMP_OPT_IN cookie.
+ * @param {string} cookieState One of the AMP_OPT_IN_COOKIE enum values, or a
+ *   15-digit RTV.
  */
-function setAmpCanaryCookie_(cookieState) {
+function setAmpOptInCookie_(cookieState) {
   let validUntil = 0;
   if (RTV_PATTERN.test(cookieState)) {
     validUntil = Date.now() + RTV_COOKIE_MAX_AGE_MS;
-  } else if (cookieState != AMP_CANARY_COOKIE.DISABLED) {
+  } else if (cookieState != AMP_OPT_IN_COOKIE.DISABLED) {
     validUntil = Date.now() + COOKIE_MAX_AGE_MS;
   }
   const cookieOptions = {
-    // Set explicit domain, so the cookie gets sent to sub domains.
-    domain: location.hostname,
     allowOnProxyOrigin: true,
     // Make sure the cookie is available for the script loads coming from
     // other domains. Chrome's default of LAX would otherwise prevent it
@@ -303,6 +324,17 @@ function setAmpCanaryCookie_(cookieState) {
     sameSite: SameSite.NONE,
     secure: true,
   };
+  setCookie(
+    window,
+    '__Host-AMP_OPT_IN',
+    cookieState,
+    validUntil,
+    cookieOptions
+  );
+  // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
+  // cookie.
+  // Set explicit domain, so the cookie gets sent to sub domains.
+  cookieOptions.domain = location.hostname;
   setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
   // Reflect default experiment state.
   self.location.reload();
@@ -324,12 +356,12 @@ function toggleExperiment_(id, name, opt_on) {
 
   showConfirmation_(`${confirmMessage}: "${name}"`, () => {
     if (id == EXPERIMENTAL_CHANNEL_ID) {
-      setAmpCanaryCookie_(
-        on ? AMP_CANARY_COOKIE.CANARY : AMP_CANARY_COOKIE.DISABLED
+      setAmpOptInCookie_(
+        on ? AMP_OPT_IN_COOKIE.EXPERIMENTAL : AMP_OPT_IN_COOKIE.DISABLED
       );
     } else if (id == BETA_CHANNEL_ID) {
-      setAmpCanaryCookie_(
-        on ? AMP_CANARY_COOKIE.RC : AMP_CANARY_COOKIE.DISABLED
+      setAmpOptInCookie_(
+        on ? AMP_OPT_IN_COOKIE.BETA : AMP_OPT_IN_COOKIE.DISABLED
       );
     } else {
       toggleExperiment(window, id, on);
@@ -366,10 +398,10 @@ function showConfirmation_(message, callback) {
 }
 
 /**
- * Loads the AMP_CONFIG objects from whatever the v0.js is that the
- * user has (depends on whether they opted into canary or RC), so that
- * experiment state can reflect the default activated experiments.
- * @return {*} TODO(#23582): Specify return type
+ * Loads the AMP_CONFIG objects from whatever the v0.js is that the user has
+ * (depends on whether they opted into beta, experimental, or a specific RTV) so
+ * that experiment state can reflect the default activated experiments.
+ * @return {Promise<JSON>} the active AMP_CONFIG, parsed as a JSON object
  */
 function getAmpConfig() {
   const deferred = new Deferred();
@@ -381,7 +413,7 @@ function getAmpConfig() {
   xhr.addEventListener('error', () => {
     reject(new Error(xhr.statusText));
   });
-  // Cache bust, so we immediately reflect AMP_CANARY cookie changes.
+  // Cache bust, so we immediately reflect cookie changes.
   xhr.open('GET', '/v0.js?' + Math.random(), true);
   xhr.send(null);
   return promise

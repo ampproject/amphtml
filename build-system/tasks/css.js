@@ -54,6 +54,11 @@ const cssEntryPoints = [
     // than the JS file to avoid loading CSS as JS
     outCss: 'video-autoplay-out.css',
   },
+  {
+    path: 'amp-story-player.css',
+    outJs: 'amp-story-player.css.js',
+    outCss: 'amp-story-player-v0.css',
+  },
 ];
 
 /**

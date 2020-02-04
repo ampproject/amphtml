@@ -28,6 +28,7 @@ describes.realWin('performance', {amp: true}, env => {
   let clock;
   let win;
   let ampdoc;
+  const timeOrigin = 100;
 
   beforeEach(() => {
     win = env.win;
@@ -35,6 +36,8 @@ describes.realWin('performance', {amp: true}, env => {
     clock = lolex.install({
       target: win,
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
+      // set initial Date.now to 100, so that we can differentiate between time relative to epoch and relative to process start (value vs. delta).
+      now: timeOrigin,
     });
     installPlatformService(env.win);
     installPerformanceService(env.win);
@@ -105,19 +108,15 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_.length).to.equal(50);
     });
 
-    it(
-      'should add default optional relative start time on the ' +
-        'queued tick event',
-      () => {
-        clock.tick(150);
-        perf.tick('start0');
+    it('should add default absolute start time on the queued tick event', () => {
+      clock.tick(150);
+      perf.tick('start0');
 
-        expect(perf.events_[0]).to.be.jsonEqual({
-          label: 'start0',
-          value: 150,
-        });
-      }
-    );
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'start0',
+        value: timeOrigin + 150,
+      });
+    });
 
     it('should drop events in the head of the queue', () => {
       const tickTime = 100;
@@ -132,7 +131,7 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_.length).to.equal(50);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        value: tickTime,
+        value: timeOrigin + tickTime,
       });
 
       clock.tick(1);
@@ -140,11 +139,11 @@ describes.realWin('performance', {amp: true}, env => {
 
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start1',
-        value: tickTime,
+        value: timeOrigin + tickTime,
       });
       expect(perf.events_[49]).to.be.jsonEqual({
         label: 'start50',
-        value: tickTime + 1,
+        value: timeOrigin + tickTime + 1,
       });
     });
   });
@@ -251,13 +250,24 @@ describes.realWin('performance', {amp: true}, env => {
             expect(perf.isMessagingReady_).to.be.true;
             const msrCalls = viewerSendMessageStub.withArgs(
               'tick',
-              env.sandbox.match(arg => arg.label == 'msr')
+              env.sandbox.match(arg => arg.label === 'msr')
             );
             expect(msrCalls).to.be.calledOnce;
             expect(msrCalls.args[0][1]).to.be.jsonEqual({
               label: 'msr',
               delta: 1,
             });
+
+            const timeOriginCall = viewerSendMessageStub.withArgs(
+              'tick',
+              env.sandbox.match(arg => arg.label === 'timeOrigin')
+            );
+            expect(timeOriginCall).to.be.calledOnce;
+            expect(timeOriginCall).calledWithMatch('tick', {
+              label: 'timeOrigin',
+              delta: env.sandbox.match.number,
+            });
+
             expect(flushSpy).to.have.callCount(5);
             expect(perf.events_.length).to.equal(0);
           });
@@ -328,7 +338,7 @@ describes.realWin('performance', {amp: true}, env => {
 
         it('should calculate after visible', () => {
           perf.coreServicesAvailable();
-          firstVisibleTime = 5;
+          firstVisibleTime = timeOrigin + 5;
 
           clock.tick(10);
           perf.tickSinceVisible('test');
@@ -339,7 +349,7 @@ describes.realWin('performance', {amp: true}, env => {
 
         it('should be zero after visible but for earlier event', () => {
           perf.coreServicesAvailable();
-          firstVisibleTime = 5;
+          firstVisibleTime = timeOrigin + 5;
 
           // An earlier event, since event time (4) is less than visible time (5).
           clock.tick(4);
@@ -428,13 +438,13 @@ describes.realWin('performance', {amp: true}, env => {
               viewerSendMessageStub.withArgs('tick').getCall(0).args[1]
             ).to.be.jsonEqual({
               label: 'start0',
-              value: 0,
+              value: timeOrigin,
             });
             expect(
               viewerSendMessageStub.withArgs('tick').getCall(1).args[1]
             ).to.be.jsonEqual({
               label: 'start1',
-              value: 1,
+              value: timeOrigin + 1,
             });
             expect(
               viewerSendMessageStub.withArgs('tick').getCall(4).args[1]
@@ -469,7 +479,7 @@ describes.realWin('performance', {amp: true}, env => {
               ).args[0][1]
             ).to.be.jsonEqual({
               label: 'start0',
-              value: 100,
+              value: timeOrigin + 100,
             });
             expect(
               viewerSendMessageStub.withArgs(
@@ -650,16 +660,16 @@ describes.realWin('performance', {amp: true}, env => {
         () => {
           clock.tick(100);
           whenFirstVisibleResolve();
-          expect(tickSpy).to.have.callCount(3);
+          expect(tickSpy).to.have.callCount(4);
           return ampdoc.whenFirstVisible().then(() => {
             clock.tick(400);
-            expect(tickSpy).to.have.callCount(4);
+            expect(tickSpy).to.have.callCount(5);
             whenViewportLayoutCompleteResolve();
             return perf.whenViewportLayoutComplete_().then(() => {
-              expect(tickSpy).to.have.callCount(4);
+              expect(tickSpy).to.have.callCount(5);
               expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
               return whenFirstVisiblePromise.then(() => {
-                expect(tickSpy).to.have.callCount(5);
+                expect(tickSpy).to.have.callCount(6);
                 expect(tickSpy.withArgs('pc')).to.be.calledOnce;
                 expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
               });
