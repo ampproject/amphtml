@@ -583,7 +583,7 @@ describes.realWin(
         await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
 
         expect(service.pages_[1].container.firstElementChild).to.have.class(
-          'amp-next-page-default-separator'
+          'amp-next-page-separator'
         );
       });
 
@@ -591,7 +591,7 @@ describes.realWin(
         await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
 
         expect(service.pages_[2].container.firstElementChild).to.have.class(
-          'amp-next-page-default-separator'
+          'amp-next-page-separator'
         );
       });
     });

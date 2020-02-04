@@ -27,25 +27,6 @@
   overflow: visible;
 }
 
-.amp-next-page-default-separator {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  font-family: 'Roboto', Helvetica, Arial, sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  width: 160px;
-  height: 38px;
-  margin: auto;
-  border-radius: 32px;
-  box-shadow: 0px 6px 17px 0px rgba(0, 0, 0, 0.09);
-  background: black;
-  color: white;
-}
-
 /** Fixes collapsing margins when switching between the visible and hidden states */
 .i-amphtml-next-page-document:before,
 .i-amphtml-next-page-document:after {
@@ -55,4 +36,80 @@
 
 .i-amphtml-next-page-placeholder {
   background: #eee;
+}
+
+/** Default separator styles */
+.amp-next-page-separator {
+  position: relative;
+  display: block;
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  width: 172px;
+  height: 38px;
+  margin: auto;
+  border-radius: 32px;
+  box-shadow: 0px 6px 17px 0px rgba(0, 0, 0, 0.09);
+  background: black;
+  color: white;
+}
+
+.amp-next-page-separator-content {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding-right: 8px;
+  padding-left: 8px;
+  height: 100%;
+}
+
+.amp-next-page-separator-img {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 8px;
+}
+
+.amp-next-page-separator-title {
+  margin-left: 8px;
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/** Default footer styles */
+.amp-next-page-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+}
+
+.amp-next-page-footer-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.amp-next-page-footer-article {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  display: block;
+  overflow: auto;
+  padding: 10px 0;
+  text-decoration: none;
+}
+
+.amp-next-page-footer-image {
+  width: 72px;
+  height: 72px;
+  float: left;
+  margin: 0 10px;
+  background-size: cover;
+  background-position: center;
+}
+
+.amp-next-page-footer-title {
+  position: relative;
+  margin: 5px 30px 5px 0;
+  color: #3c4043;
+  font-size: 17px;
 }
