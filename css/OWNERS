@@ -10,5 +10,9 @@
         {name: 'camelburrito', requestReviews: false},
       ],
     },
+    {
+      pattern: '{amp-story-*}.css',
+      owners: [{name: 'newmuis'}, {name: 'gmajoulet'}, {name: 'enriqe'}],
+    },
   ],
 }
