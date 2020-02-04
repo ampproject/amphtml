@@ -11,7 +11,7 @@
       ],
     },
     {
-      pattern: '{amp-story-player,amp-story-player-iframe}.css',
+      pattern: '{amp-story-*}.css',
       owners: [{name: 'newmuis'}, {name: 'gmajoulet'}, {name: 'enriqe'}],
     },
   ],
