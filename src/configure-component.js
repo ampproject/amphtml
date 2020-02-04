@@ -21,7 +21,7 @@ import {devAssert} from './log';
  * @return {typeof AMP.BaseElement}
  */
 export const configureComponent = (klass, config) => element => {
-  element.staticComponentConfigSingleUse = config;
+  element.STATIC_CONFIG_ = config;
   return new klass(element);
 };
 
@@ -29,15 +29,10 @@ export const configureComponent = (klass, config) => element => {
  * @param {!AMP.BaseElement} instance
  * @return {!Object}
  */
-export function useComponentConfig(instance) {
-  const {element} = instance;
-  const config = devAssert(
-    element.staticComponentConfigSingleUse,
-    'Element does not have a .staticComponentConfigSingleUse property. ' +
-      'Either its implementation was not defined using configureComponent(), ' +
-      'or its configuration object has already been read. %s',
-    element
+export const useComponentConfig = instance =>
+  devAssert(
+    instance.element.STATIC_CONFIG_,
+    'Element does not have a .STATIC_CONFIG_ property. ' +
+      'Its implementation expects to be wrapped with configureComponent().',
+    instance.element
   );
-  delete element.staticComponentConfigSingleUse;
-  return config;
-}

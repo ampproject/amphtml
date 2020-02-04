@@ -1,8 +1,8 @@
 class DirectAccess {
   setProps() {
-    _staticComponentConfig__foo;
-    somethingSomething(_staticComponentConfig__bar);
-    tacos(_staticComponentConfig__nestedObject.baz);
+    _foo;
+    somethingSomething(_bar);
+    tacos(_nestedObject.baz);
   }
 
   unsetProps() {
@@ -15,9 +15,9 @@ class DirectAccess {
 
 }
 
-const _staticComponentConfig__foo = 'value for foo',
-      _staticComponentConfig__bar = 'value for bar',
-      _staticComponentConfig__nestedObject = {
+const _foo = 'value for foo',
+      _bar = 'value for bar',
+      _nestedObject = {
   foo: 'foo'
 };
 import { DirectAccess as _DirectAccess } from './input-base-class';

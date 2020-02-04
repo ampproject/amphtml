@@ -1,15 +1,15 @@
 export class DirectAccess {
   setProps() {
-    this.staticComponentConfig_.foo;
-    somethingSomething(this.staticComponentConfig_.bar);
-    tacos(this.staticComponentConfig_.nestedObject.baz);
+    this.STATIC_CONFIG_.foo;
+    somethingSomething(this.STATIC_CONFIG_.bar);
+    tacos(this.STATIC_CONFIG_.nestedObject.baz);
   }
 
   unsetProps() {
-    return this.staticComponentConfig_.thisPropIsUnset;
+    return this.STATIC_CONFIG_.thisPropIsUnset;
   }
 
   propsSetToIds() {
-    return this.staticComponentConfig_.scopedId;
+    return this.STATIC_CONFIG_.scopedId;
   }
 }

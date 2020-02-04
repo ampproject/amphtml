@@ -28,23 +28,12 @@ describe('configureComponent', () => {
     const instance = new wrapped(foo);
     expect(instance.foo).to.equal(foo);
   });
-});
 
-describe('useComponentConfig', () => {
   it('returns config when implementation is wrapped', () => {
     const config = {foo: 'bar'};
     const wrapped = configureComponent(BaseElementMock, config);
     const instance = new wrapped({});
     expect(useComponentConfig(instance)).to.equal(config);
-  });
-
-  it('fails when used twice', () => {
-    allowConsoleError(() => {
-      const wrapped = configureComponent(BaseElementMock, {});
-      const instance = new wrapped({});
-      useComponentConfig(instance);
-      expect(() => useComponentConfig(instance)).to.throw();
-    });
   });
 
   it('fails when implementation is unwrapped', () => {

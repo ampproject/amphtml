@@ -23,7 +23,7 @@ const {transformSync} = require('@babel/core');
  *
  * 1. Inlines imported `Ctor` in current scope.
  *
- * 2. Replaces `this.staticComponentConfig_.foo` accesses to their value as
+ * 2. Replaces `*.STATIC_CONFIG_.foo` accesses to their value as
  *    defined in config object `{foo: 'bar'}`.
  *
  * 3. Replaces `configureComponent(...)` call with identifier for inlined, static
@@ -72,10 +72,8 @@ function transformRedefineInline({types: t}) {
         }
       },
       MemberExpression(path, {opts}) {
-        if (
-          !t.isThisExpression(path.node.object) ||
-          !t.isIdentifier(path.node.property, {name: opts.replacedMember})
-        ) {
+        // Handle x.y.{...}.$replacedMember prop accesses
+        if (!t.isIdentifier(path.node.property, {name: opts.replacedMember})) {
           return;
         }
 
@@ -188,7 +186,7 @@ module.exports = function({types: t}) {
         const importedDirname = fsPath.dirname(importedFilename);
         const relImportPath = fsPath.relative(currentDirname, importedDirname);
 
-        const replacedMember = 'staticComponentConfig_';
+        const replacedMember = 'STATIC_CONFIG_';
 
         const properties = propsObj.get('properties');
 
@@ -219,12 +217,8 @@ module.exports = function({types: t}) {
             continue;
           }
 
-          const id = program.scope.generateUidIdentifier(
-            `${replacedMember}_${name}`
-          );
-
+          const id = program.scope.generateUidIdentifier(name);
           propValues[name] = id;
-
           hoistedDecls.push(t.variableDeclarator(id, value));
         }
 

@@ -1,9 +1,9 @@
 export class RemoveAssignment {
   method() {
     /** @private {something} */
-    this.staticComponentConfig_ = {};
+    this.STATIC_CONFIG_ = {};
 
     /** @private {something} */
-    this.staticComponentConfig_.whatever = 'foo';
+    this.STATIC_CONFIG_.whatever = 'foo';
   }
 }
