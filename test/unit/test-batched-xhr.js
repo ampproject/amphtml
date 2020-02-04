@@ -16,7 +16,6 @@
 
 import {Services} from '../../src/services';
 import {batchedXhrServiceForTesting} from '../../src/service/batched-xhr-impl';
-import {getSourceOrigin} from '../../src/url';
 
 describes.sandboxed('BatchedXhr', {}, env => {
   beforeEach(() => {
@@ -54,9 +53,10 @@ describes.sandboxed('BatchedXhr', {}, env => {
     });
 
     it.only('should fetch once for a relative and absolute URL that point to the same location.', async () => {
-      const originUrl = "https://testwebsite.com";
-      const cdnUrl = "https://testwebsite-com.cdn.ampproject.org/v/s/testwebsite.com/hello-world"
-      env.win.location.href = cdnUrl; 
+      const originUrl = 'https://testwebsite.com';
+      const cdnUrl =
+        'https://testwebsite-com.cdn.ampproject.org/v/s/testwebsite.com/hello-world';
+      env.win.location.href = cdnUrl;
 
       await Promise.all([
         xhr.fetch(`${originUrl}/get?k=v1`),

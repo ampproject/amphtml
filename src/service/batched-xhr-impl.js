@@ -83,7 +83,10 @@ export class BatchedXhr extends Xhr {
    * @private
    */
   getMapKey_(input, responseType) {
-    const absoluteUrl = resolveRelativeUrl(input, getSourceOrigin(this.win.location));
+    const absoluteUrl = resolveRelativeUrl(
+      input,
+      getSourceOrigin(this.win.location)
+    );
     return removeFragment(absoluteUrl) + responseType;
   }
 }
