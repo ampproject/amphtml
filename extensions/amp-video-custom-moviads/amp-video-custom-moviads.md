@@ -22,7 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# amp-moviads-player
+# amp-video-custom-moviads
 
 Embeds a video player for instream video ads that are integrated with
 the
@@ -33,7 +33,7 @@ the
 <table>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-moviads-player" src="https://cdn.ampproject.org/v0/amp-moviads-player-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-video-custom-moviads" src="https://cdn.ampproject.org/v0/amp-video-custom-moviads-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
@@ -41,13 +41,13 @@ the
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-moviads-player/">amp-moviads-player example</a>.</td></td>
+    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-video-custom-moviads/">amp-video-custom-moviads example</a>.</td></td>
   </tr>
 </table>
 
 ## Overview
 
-You can use the `amp-moviads-player` component to embed an [IMA SDK](https://developers.google.com/interactive-media-ads/docs/sdks/html5/) enabled video player.
+You can use the `amp-video-custom-moviads` component to embed an [IMA SDK](https://developers.google.com/interactive-media-ads/docs/sdks/html5/) enabled video player.
 
 The component requires an ad tag, provided in `data-tag`, which is a URL to a
 VAST-compliant ad response (for examples, see
@@ -56,7 +56,7 @@ VAST-compliant ad response (for examples, see
 The component HTML accepts the following types of HTML nodes as children:
 
 - `source` tags for content video, used in the same way as the standard `video` tag.
-- `track` tags for subtitles, in the same way as the standard `video` tag. If the track is hosted on a different origin than the document, you must add the `data-crossorigin` attribute to the `<amp-moviads-player>` tag.
+- `track` tags for subtitles, in the same way as the standard `video` tag. If the track is hosted on a different origin than the document, you must add the `data-crossorigin` attribute to the `<amp-video-custom-moviads>` tag.
 - a `script` tag of type `application/json` used to provide [ImaSdkSettings](https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/apis#ima.ImaSdkSettings). Provide the property-translation of the setters in the linked documentation (e.g. to call `setNumRedirects(4)`, provide `{"numRedirects": 4}`).
 
 ## Example
@@ -141,7 +141,7 @@ The component HTML accepts the following types of HTML nodes as children:
 </script>
 
 <div style="max-width: 640px">
-  <amp-moviads-player data-conf="mapConfig" height="1" width="2" layout="responsive" responsive></amp-moviads-player>
+  <amp-video-custom-moviads data-conf="mapConfig" height="1" width="2" layout="responsive" responsive></amp-video-custom-moviads>
 </div>
 ```
 
@@ -226,4 +226,4 @@ The component HTML accepts the following types of HTML nodes as children:
 
 ## Validation
 
-See [amp-moviads-player](https://github.com/ampproject/amphtml/blob/master/extensions/amp-moviads-player/validator-amp-moviads-player.protoascii) in the AMP validator specification.
+See [amp-video-custom-moviads](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-custom-moviads/validator-amp-video-custom-moviads.protoascii) in the AMP validator specification.

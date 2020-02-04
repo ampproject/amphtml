@@ -1,5 +1,5 @@
 .amp-ima-player-watermark {z-index: 1;position: absolute;bottom: 25px;right: 15px;}
-.amp-ima-player-movie-ads{z-index: 1;position: absolute;top: 0px;left: 5px;background-color:#000;opacity: 0.5;width:100%}
+.amp-ima-player-movie-ads{z-index: 1;position: absolute;top: 0px;background-color:#000;opacity: 0.5;width:100%}
 .amp-ima-player-fixed{display: block;position: fixed !important;width: 280px;height: 160px;bottom: 0;right: 0}
 .amp-ima-player-recommended{position: absolute;top: 0;justify-content: center;width: 100%;height:100%;background: #000;height:100%}
 .amp-ima-player-recommended div{width: 33.333333%;height: 50%;float: left;position: relative;}
