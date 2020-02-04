@@ -319,7 +319,10 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       }
       return Promise.all(
         altMainBundles.map(({name}) =>
-          applyAmpConfig(maybeToEsmName(`dist/${name}.js`), /* localDev */ !!argv.fortesting)
+          applyAmpConfig(
+            maybeToEsmName(`dist/${name}.js`),
+            /* localDev */ !!argv.fortesting
+          )
         )
       );
     });
