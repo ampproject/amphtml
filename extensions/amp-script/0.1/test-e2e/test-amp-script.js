@@ -44,12 +44,10 @@ describes.endtoend(
         'i-amphtml-hydrated'
       );
 
-      // Click.
-      const button = await controller.findElement('button#simple');
+      const button = await controller.findElement('#remote button');
       controller.click(button);
 
-      // Output.
-      const h1 = await controller.findElement('h1');
+      const h1 = await controller.findElement('#remote h1');
       await expect(controller.getElementText(h1)).to.equal('Hello World!');
     });
 
@@ -72,6 +70,28 @@ describes.endtoend(
       const realRatio = rect.width / rect.height;
 
       await expect(realRatio).to.equal(targetRatio);
+    });
+
+    // In layout=container, amp-script requires mutations to be backed by
+    // user gestures. This ensures that this requirement is also enforced
+    // on load AKA "hydration".
+    it('should not mutate on load in layout=container', async () => {
+      const element = await controller.findElement('amp-script#mutate');
+      await expect(controller.getElementAttribute(element, 'class')).to.contain(
+        'i-amphtml-hydrated'
+      );
+
+      // `document.body.textContent = lipsum;` should be disallowed.
+      await expect(controller.getElementText(element)).to.contain(
+        'Append some very long text'
+      );
+
+      // However, gesture-backed (e.g. click) mutations are OK.
+      const button = await controller.findElement('#mutate button');
+      controller.click(button);
+
+      const h1 = await controller.findElement('#mutate h1');
+      await expect(controller.getElementText(h1)).to.contain('Lorem Ipsum');
     });
   }
 );
