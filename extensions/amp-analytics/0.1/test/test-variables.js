@@ -135,19 +135,24 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
           })
         )
         .then(() =>
-          // No macros in the arglist (3,4), QUERY_PARAM works
+          // No macros in the arglist (after expansion),
+          // so QUERY_PARAM(3,4) works when sent to urlReplacements
           check('${foo}&${bar(3,4)}', 'FOO(1,2)&4', {
             'foo': 'FOO(1,2)',
             'bar': 'QUERY_PARAM',
           })
         )
         .then(() =>
-          // Macros in the arglist, so getNameArgs returns
-          // an undefined variable/macro bar(5, QUERY_PARAM(6,7))
-          check('${foo}&${bar(5,QUERY_PARAM(6,7))}', 'FOO(3,4)&', {
-            'foo': 'FOO(3,4)',
-            'bar': 'QUERY_PARAM',
-          })
+          // Macros in the arglist (after expansion), and
+          // getNameArgs doesn't handle them
+          check(
+            '${foo}&${bar(x,TITLE)}&${bar(5,QUERY_PARAM(6,7))}',
+            'FOO(3,4)&&',
+            {
+              'foo': 'FOO(3,4)',
+              'bar': 'QUERY_PARAM',
+            }
+          )
         )
         .then(() =>
           // See comment about getNameArgs above.

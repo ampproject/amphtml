@@ -62,9 +62,30 @@ When the same `var` is defined in multiple locations, the value is picked in the
 For a list of variables supported in `amp-analytics`, see [Variable Substitutions](../../spec/amp-var-substitutions.md). These variables may be substituted as well as nested within each other. For example, a variable that is substituted to
 
 ```javascript
-QUERY_PARAM(foo,QUERY_PARAM(bar,default))
+{
+  "request": {
+    "base": "example.com/${nested}${nested2}"
+  },
+  "vars": {
+    "nested": "QUERY_PARAM(foo,QUERY_PARAM(bar,default))",
+    "nested2": "abc"
+  }
+}
 ```
 
 will resolve to `default` if `foo` and `bar` are not parameters.
 
-Nested variables are recursively found, then resolved if they're a [platform variable](../../spec/amp-var-substitutions.md#page-and-content), and then finally encoded. Therefore, if the nested variable is not a platform variable, it will be encoded.
+One known caveat is when substituting a variable for a macro (not including its argument list), where the argument list contains macro:
+
+```javascript
+{
+  "request": {
+    "base": "example.com/${a(1,2)}${a(RANDOM,$NOT(true))}"
+  },
+  "vars": {
+    "a": "QUERY_PARAM"
+  }
+}
+```
+
+This will result in the first QUERY_PARAM working as intended but the second QUERY_PARAM will not get parsed corretly due to the macros within.
