@@ -52,6 +52,20 @@ describes.sandboxed('BatchedXhr', {}, env => {
       });
     });
 
+    it('should fetch once for a relative and absolute URL that point to the same location.', async () => {
+      const originUrl = 'https://testwebsite.com';
+      const cdnUrl =
+        'https://testwebsite-com.cdn.ampproject.org/v/s/testwebsite.com/hello-world';
+      env.win.location.href = cdnUrl;
+
+      await Promise.all([
+        xhr.fetch(`${originUrl}/get?k=v1`),
+        xhr.fetch('/get?k=v1'),
+      ]);
+
+      expect(fetchStub).to.be.calledOnce;
+    });
+
     it(
       'should separately cache generic fetches with identical URLs' +
         'but different "Accept" headers',
