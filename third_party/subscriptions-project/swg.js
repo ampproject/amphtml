@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.91 */
+/** Version: 0.1.22.92 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5459,7 +5459,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.91',
+    '_client': 'SwG 0.1.22.92',
   });
 }
 
@@ -6573,7 +6573,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.91',
+        '_client': 'SwG 0.1.22.92',
         'supportsEventManager': true,
       },
       args || {}
@@ -7404,7 +7404,7 @@ class AnalyticsService {
     // These values should all be available during page load.
     context.setTransactionId(getUuid());
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.91');
+    context.setClientVersion('SwG 0.1.22.92');
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
@@ -11523,8 +11523,7 @@ class Logger {
       if (!isObject(userEvent.data)) {
         throw new Error('Event data must be an Object(' + userEvent.data + ')');
       } else {
-        data = {};
-        Object.assign(data, userEvent.data);
+        data = Object.assign({}, data, userEvent.data);
       }
     }
 
