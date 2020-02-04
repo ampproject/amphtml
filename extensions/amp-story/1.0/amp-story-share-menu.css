@@ -72,6 +72,10 @@
   display: none !important;
 }
 
+.i-amphtml-story-share-menu .i-amphtml-story-share-item {
+  height: 72px !important;
+}
+
 [desktop].i-amphtml-story-share-menu {
   display: flex !important;
   align-items: center !important;
@@ -108,7 +112,8 @@
   text-align: center !important;
 }
 
-[desktop] .i-amphtml-story-share-item {
+[desktop].i-amphtml-story-share-menu .i-amphtml-story-share-item {
   padding: 0 !important;
+  height: 66px !important;
   margin: 12px !important;
 }
