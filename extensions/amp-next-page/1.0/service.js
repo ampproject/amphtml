@@ -905,7 +905,7 @@ export class NextPageService {
     }
 
     // Otherwise this is a default separator
-    dev().assert(this.hasDefaultSeparator_);
+    devAssert(this.hasDefaultSeparator_);
 
     const content = this.doc_.createElement('div');
     content.classList.add('amp-next-page-separator-content');
@@ -994,7 +994,7 @@ export class NextPageService {
     }
 
     // Otherwise this is a default footer
-    dev().assert(this.hasDefaultFooter_);
+    devAssert(this.hasDefaultFooter_);
 
     const content = this.doc_.createElement('div');
     content.classList.add('amp-next-page-footer-content');
