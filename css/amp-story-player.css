@@ -29,6 +29,10 @@ amp-story-player a:first-of-type {
   display: block;
 }
 
+amp-story-player a:not(:first-of-type) {
+  visibility: hidden;
+}
+
 amp-story-player::after {
   content: " ";
   position: absolute;
