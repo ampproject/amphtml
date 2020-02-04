@@ -44,7 +44,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
     expect(playerEl.shadowRoot.querySelector('iframe')).to.exist;
   });
 
-  it('should correctly append params at the end of the story url', () => {
+  // TODO(#26308): unskip when messaging is enabled.
+  it.skip('should correctly append params at the end of the story url', () => {
     manager.loadPlayers();
     const storyIframe = playerEl.shadowRoot.querySelector('iframe');
 
@@ -53,7 +54,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
     );
   });
 
-  it('should correctly append params at the end of a story url with existing params', () => {
+  // TODO(#26308): unskip when messaging is enabled.
+  it.skip('should correctly append params at the end of a story url with existing params', () => {
     url += '?testParam=true#myhash=hashValue';
     playerEl.firstElementChild.setAttribute('href', url);
 
