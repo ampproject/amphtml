@@ -24,7 +24,7 @@ import {calculateExtensionScriptUrl} from '../../../src/service/extension-locati
 import {cancellation} from '../../../src/error';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
-import {dict} from '../../../src/utils/object';
+import {dict, map} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
@@ -402,7 +402,9 @@ export class AmpScript extends AMP.BaseElement {
   }
 
   /**
-   * @param {function()} flush
+   * @param {function(boolean)} flush If `flush(false)` is invoked, mutations
+   *   that cause user-visible changes (e.g. DOM changes) will be dropped
+   *   (changes like event listener registration will be kept).
    * @param {number} phase
    * @private
    */
@@ -413,27 +415,62 @@ export class AmpScript extends AMP.BaseElement {
       );
     }
     const allowMutation =
-      // Hydration is always allowed.
-      phase != Phase.MUTATING ||
       this.isMutationAllowedByFixedSize() ||
       this.isMutationAllowedByUserGesture();
 
-    if (allowMutation) {
-      this.vsync_.mutate(flush);
-      return;
+    this.vsync_.mutate(() => {
+      const disallowedTypes = flush(allowMutation);
+      // Count the number of mutations dropped by type.
+      const errors = map();
+      disallowedTypes.forEach(type => {
+        errors[type] = errors[type] + 1 || 1;
+      });
+      // Emit an error message for each mutation type, including count.
+      Object.keys(errors).forEach(type => {
+        const count = errors[type];
+        user().error(
+          TAG,
+          'Dropped %sx "%s" mutation(s); user gesture is required with [layout=container].',
+          count,
+          this.mutationTypeToString_(type)
+        );
+      });
+    });
+
+    // TODO(amphtml): flush(false) already filters all user-visible mutations,
+    // so we could just remove this code block for gentler failure mode.
+    if (!allowMutation && phase == Phase.MUTATING) {
+      this.workerDom_.terminate();
+
+      this.element.classList.remove('i-amphtml-hydrated');
+      this.element.classList.add('i-amphtml-broken');
+
+      user().error(
+        TAG,
+        '%s was terminated due to illegal mutation.',
+        this.debugId_
+      );
     }
+  }
 
-    // Otherwise, terminate the worker.
-    this.workerDom_.terminate();
-
-    this.element.classList.remove('i-amphtml-hydrated');
-    this.element.classList.add('i-amphtml-broken');
-
-    user().error(
-      TAG,
-      '%s was terminated due to illegal mutation.',
-      this.debugId_
-    );
+  /**
+   * @param {string} type
+   * @return {string}
+   */
+  mutationTypeToString_(type) {
+    // Matches TransferrableMutationType in worker-dom#src/transfer/TransferrableMutation.ts.
+    switch (type) {
+      case '0':
+        return 'ATTRIBUTES';
+      case '1':
+        return 'CHARACTER_DATA';
+      case '2':
+        return 'CHILD_LIST';
+      case '3':
+        return 'PROPERTIES';
+      default:
+        return 'OTHER';
+    }
   }
 }
 
