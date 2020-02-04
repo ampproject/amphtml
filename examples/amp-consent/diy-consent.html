@@ -143,14 +143,14 @@ if (window && window.name) {
 
 window.addEventListener('message', (event) => {
   const data = event.data;
-  if (data.action === 'reject-fullscreen') {
-    console.log('Could not complete fullscreen request.');
+  if (data.type === 'Error') {
+    console.log('Could not complete fullscreen request:', data.message);
   }
-  else if (data.action === 'accept-fullscreen') {
-    console.log('iframe went into fullscreen');
+  else if (data.type === 'Success') {
+    console.log('Fullscreen command successfuly sent:', data.message);
   }
   else {
-    console.log('Unparseable actions:', data.action);
+    console.log('Unexpected message type:', data.type);
   }
 });
 

@@ -397,16 +397,13 @@ describes.realWin(
           sendIframeMessage(consentUI, 'enter-fullscreen');
 
           expect(errorSpy).to.be.calledOnce;
-          expect(errorSpy.args[0][1]).to.match(
-            /iframe could not enter fullscren/
-          );
+          expect(errorSpy.args[0][1]).to.match(/Could not enter fullscreen/);
           windowMock
             .expects('postMessage')
             .withExactArgs(
               {
-                type: 'consent-ui',
-                action: 'reject-fullscreen',
-                message: 'iframe could not enter fullscren',
+                type: 'Error',
+                message: 'Could not enter fullscreen',
               },
               '*'
             )
@@ -424,8 +421,7 @@ describes.realWin(
             .expects('postMessage')
             .withExactArgs(
               {
-                type: 'consent-ui',
-                action: 'accept-fullscreen',
+                type: 'Success',
                 message: 'Entering fullscreen',
               },
               '*'

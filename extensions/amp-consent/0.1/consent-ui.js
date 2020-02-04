@@ -682,12 +682,12 @@ export class ConsentUI {
         (this.restrictFullscreenOn_ &&
           this.document_.activeElement !== this.ui_)
       ) {
-        const error = 'iframe could not enter fullscren';
+        const error = 'Could not enter fullscreen';
         dev().warn(TAG, error);
-        this.sendIframeMessage_('reject-fullscreen', error);
+        this.sendIframeMessage_('Error', error);
         return;
       }
-      this.sendIframeMessage_('accept-fullscreen', 'Entering fullscreen');
+      this.sendIframeMessage_('Success', 'Entering fullscreen');
 
       this.baseInstance_.mutateElement(() => {
         this.enterFullscreen_();
@@ -696,26 +696,25 @@ export class ConsentUI {
   }
 
   /**
-   * Send message to iframe. Silently die if
-   * iframe does not have content window.
+   * Send messages to iframe (for error logging).
+   * Silently die if iframe does not have content
+   * window.
    *
-   *  * Enter Fullscreen
+   * Example message:
    * {
-   *   type: 'consent-ui',
-   *   action: 'accept-fullscreen',
-   *   message: 'Entering fullscreen';
+   *   type: 'type',
+   *   message: 'message',
    * }
-   * @param {string} action
+   * @param {string} type
    * @param {string} message
    */
-  sendIframeMessage_(action, message) {
+  sendIframeMessage_(type, message) {
     const iframeWindow = this.ui_.contentWindow;
     if (iframeWindow) {
       // No sensitive information sent, so safe to use '*'
       iframeWindow./*OK*/ postMessage(
         /** @type {!JsonObject} */ ({
-          type: 'amp-consent',
-          action,
+          type,
           message,
         }),
         '*'
