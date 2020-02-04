@@ -185,7 +185,6 @@ import {microad} from '../ads/microad';
 import {miximedia} from '../ads/miximedia';
 import {mixpo} from '../ads/mixpo';
 import {monetizer101} from '../ads/monetizer101';
-import {moviAdsPlayer} from '../ads/moviadsPlayer';
 import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
@@ -581,7 +580,6 @@ register('zen', zen);
 register('zergnet', zergnet);
 register('zucks', zucks);
 register('speakol', speakol);
-register('ima-moviads-player', moviAdsPlayer);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

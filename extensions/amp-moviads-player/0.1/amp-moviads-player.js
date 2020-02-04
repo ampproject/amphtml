@@ -16,12 +16,9 @@
 
 import {CSS} from '../../../build/amp-moviads-player-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
-import {ImaPlayerData} from './ima-player-data';
+import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
-import {
-  VideoEvents,
-  changeMinVisibilityRatioForAutoplay,
-} from './moviads-interface';
+import {VideoEvents} from '../../../src/video-interface';
 import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
 import {
@@ -36,7 +33,6 @@ import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 import {isEnumValue, isObject, toArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {px, setStyle, setStyles} from '../../../src/style';
 
 /** @const */
 const EXPERIMENT = 'amp-moviads-player';
@@ -91,12 +87,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     /** @private {boolean} */
     this.showLogoMovie_ = false;
 
-    /** @private {boolean} */
-    this.isClickUnmute_ = false;
-
-    /** @private {boolean} */
-    this.isAmpCloseClick_ = false;
-
     /**
      * Maps events to their unlisteners.
      * @private {!Object<string, function()>}
@@ -126,15 +116,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
 
     /** @private {?boolean} */
     this.adblockDetected_ = false;
-
-    /** @private {?integer} */
-    this.playerResizeWidth_ = null;
-
-    /** @private {?integer} */
-    this.playerResizeHeight_ = null;
-
-    /** @private {boolean} */
-    this.closeActive_ = false;
   }
 
   /** @override */
@@ -161,8 +142,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     script.onload = function() {
       if (typeof mapLocalConfig !== 'undefined') {
         _this.configLocal_ = mapLocalConfig;
-        _this.ampImaPlayerDebug(mapLocalConfig);
-        _this.ampImaPlayerDebug('Load config.js');
       }
       if (_this.configLocal_.keyPrivate !== _this.config_.playerIdConf) {
         return;
@@ -170,11 +149,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       _this.element.setAttribute('data-tag', _this.configLocal_.vastUrl);
       _this.viewport_ = _this.getViewport();
       _this.mapExternalConfig();
-      let viewabilityProc = 0.5;
-      if (_this.configLocal_.viewabilityProc !== undefined) {
-        viewabilityProc = _this.configLocal_.viewabilityProc;
-      }
-      changeMinVisibilityRatioForAutoplay(viewabilityProc);
       if (_this.element.getAttribute('data-delay-ad-request') === 'true') {
         _this.unlisteners_['onFirstScroll'] = _this.viewport_.onScroll(() => {
           _this.sendCommand_('onFirstScroll');
@@ -287,7 +261,7 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       const iframe = getIframe(
         win,
         element,
-        'ima-moviads-player',
+        'ima-video',
         {initialConsentState},
         {allowFullscreen: true}
       );
@@ -392,49 +366,35 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     const videoEvent = eventData['event'];
 
     if (videoEvent === VideoEvents.AD_START) {
-      this.sendCommand_('debug', this.config_.debug);
-      this.ampImaPlayerDebug('AD_START');
       this.sendCommand_('gaParams', {
         UA: this.gaUserUA_,
         name: this.gaUser_,
         id: this.config_.movieContenerId,
       });
-      this.setCssPublisher();
+
       this.isAdStart_ = true;
       this.eventGA('AD_START', this.gaUser_, this.gaUserUA_);
       this.eventGA('AD_START', this.gaMoviads_, this.gaMoviadsUA_);
     }
     if (videoEvent === VideoEvents.UNMUTED) {
-      this.ampImaPlayerDebug('UNMUTED');
-      this.isClickUnmute_ = true;
-      this.setVolume(this.config_.volume);
       this.eventGA('UNMUTED', this.gaUser_, this.gaUserUA_);
     }
     if (videoEvent === VideoEvents.MUTED) {
-      this.ampImaPlayerDebug('MUTED');
       this.eventGA('MUTED', this.gaUser_, this.gaUserUA_);
     }
 
     if (videoEvent === VideoEvents.PLAYING) {
-      this.ampImaPlayerDebug('PLAYING VIDEO');
       if (document.getElementById('amp-ima-player-recommended') !== null) {
         document.getElementById('amp-ima-player-recommended').remove();
       }
     }
 
-    if (videoEvent === VideoEvents.PAUSE) {
-      this.ampImaPlayerDebug('PAUSE VIDEO');
-    }
-
     if (videoEvent === VideoEvents.PLAYING && this.isAdStart_ === false) {
       this.showLogoMovie_ = true;
-      this.ampImaPlayerDebug('AD_EMPTY');
-      this.setCssPublisher();
       this.eventGA('AD_EMPTY', this.gaUser_, this.gaUserUA_);
       this.hideWhenNoAd();
     }
     if (videoEvent === VideoEvents.AD_END) {
-      this.ampImaPlayerDebug('AD_END');
       this.showLogoMovie_ = true;
       this.eventGA('AD_END', this.gaUser_, this.gaUserUA_);
       this.eventGA('AD_END', this.gaMoviads_, this.gaMoviadsUA_);
@@ -443,7 +403,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       this.eventGA('ENDED', this.gaUser_, this.gaUserUA_);
       this.LoadRecommendedVideo();
       this.hideWhenEnd();
-      this.ampImaPlayerDebug('ENDED');
       this.functionAfterEnded();
       this.config_.functionAfterEnded = null;
     }
@@ -461,7 +420,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       return;
     }
     if (videoEvent == 'fullscreenchange') {
-      this.ampImaPlayerDebug('FULLSCREEN MODE');
       this.resizeContainerPlayer();
       this.isFullscreen_ = !!eventData['isFullscreen'];
       return;
@@ -501,9 +459,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   /** @override */
   unmute() {
     this.sendCommand_('unMute');
-    this.isClickUnmute_ = true;
-    this.ampImaPlayerDebug('unMute');
-    this.setVolume(this.config_.volume);
   }
 
   /** @override */
@@ -567,12 +522,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  setVolume(vol) {
-    this.sendCommand_('volume', vol);
-    this.ampImaPlayerDebug('change Volume:' + vol);
-  }
-
-  /** @override */
   mapConfig() {
     const mapConfIndex = {
       'movieContenerId': null,
@@ -613,12 +562,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
         this.config_[key] = mapConfIndex[key];
       }
     });
-    if (location.search.split('moviDebug=')[1]) {
-      this.config_.debug = true;
-    }
-    if (this.config_.fixedOnMobile === false && this.isMobile() === true) {
-      this.config_.scrollPlayer = false;
-    }
 
     if (
       this.configMap_['UA'] !== undefined &&
@@ -627,7 +570,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       this.gaUserUA_ = this.configMap_['UA'];
     }
     this.setRandMovieSrc();
-    this.ampImaPlayerDebug(this.config_);
   }
 
   /** @override */
@@ -654,7 +596,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     ) {
       this.gaMoviadsUA_ = this.configLocal_['UA'];
     }
-    this.ampImaPlayerDebug(this.config_);
   }
 
   /** @override */
@@ -666,22 +607,12 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     } else {
       this.config_['dataSrc'] = this.config_.movieSrc;
     }
-    this.ampImaPlayerDebug('Load MovieSrc');
-  }
-
-  /** @override */
-  setCssPublisher() {
-    if (this.config_.cssPuiblisher) {
-      this.sendCommand_('cssPublisher', this.config_.cssPuiblisher);
-      this.ampImaPlayerDebug('Load CSS');
-    }
   }
 
   /** @override */
   hideWhenEnd() {
     if (this.config_.hideWhenEnd === true) {
       this.element.remove();
-      this.ampImaPlayerDebug('run hideWhenEnd');
     }
   }
 
@@ -689,13 +620,11 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   hideWhenNoAd() {
     if (this.config_.hideWhenNoAd === true) {
       this.element.remove();
-      this.ampImaPlayerDebug('run hideWhenNoAd');
     }
   }
 
   /** @override */
   resizeContainerPlayer() {
-    this.ampImaPlayerDebug('resizeContainerPlayer');
     if (
       (this.element.parentElement &&
         parseInt(this.config_.maxHeight, 10) >
@@ -724,19 +653,11 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       img.src = this.config_.watermark;
       img.className = 'amp-ima-player-watermark';
       this.element.appendChild(img);
-      this.ampImaPlayerDebug('create watermark');
     }
   }
 
   /** @override */
   loadMethod() {
-    const ampDivClose = document.createElement('a');
-    const ampDivTextClose = document.createTextNode(
-      this.config_.langText.close
-    );
-    ampDivClose.id = 'amp-close';
-    ampDivClose.appendChild(ampDivTextClose);
-    this.element.appendChild(ampDivClose);
 
     this.embedWatermark();
     this.layoutLoad();
@@ -762,70 +683,11 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     }
 
     this.element.addEventListener('mouseout', function() {
-      if (_this.isClickUnmute_) {
-        _this.setVolume(_this.config_.volumeOnOver);
-      }
       _this.embedLogoMovieAds(false);
     });
 
     this.element.addEventListener('mouseover', function() {
-      if (_this.isClickUnmute_) {
-        _this.setVolume(_this.config_.volume);
-      }
       _this.embedLogoMovieAds(true);
-    });
-
-    document.getElementById('amp-close').addEventListener('click', function() {
-      if (_this.closeActive_) {
-        _this.isAmpCloseClick_ = true;
-        _this.element
-          .getElementsByTagName('iframe')[0]
-          .classList.remove('amp-ima-player-fixed');
-        setStyles(ampDivClose, {'display': 'none'});
-      }
-    });
-
-    document.addEventListener('scroll', function() {
-      _this.isScrollDown();
-      if (
-        _this.isInViewport() === false &&
-        _this.element
-          .getElementsByTagName('iframe')[0]
-          .classList.contains('amp-ima-player-fixed') === false &&
-        _this.config_.scrollPlayer === true &&
-        _this.isAmpCloseClick_ === false
-      ) {
-        if (
-          (_this.config_.scrollOnlyDownPlayer === true &&
-          _this.config_.isYDown === true) || (_this.config_.scrollPlayer === true && _this.config_.scrollOnlyDownPlayer === false)
-        ) {
-          _this.setPlayerResize();
-          _this.timeClosePlayer();
-          _this.sendCommand_('imaAdContainerStyle', 'fixed');
-          _this.element
-            .getElementsByTagName('iframe')[0]
-            .classList.add('amp-ima-player-fixed');
-          setStyles(ampDivClose, {'display': 'block'});
-          _this.sendCommand_('resize', {'width': 300, 'height': 162});
-
-          setStyle(_this.element, 'width', px(300));
-          setStyle(_this.element, 'height', px(162));
-          _this.play();
-        }
-      } else if (_this.isInViewport() === true) {
-        setStyle(_this.element, 'width', px(_this.playerResizeWidth_));
-        setStyle(_this.element, 'height', px(_this.playerResizeHeight_));
-        _this.sendCommand_('resize', {
-          'width': _this.playerResizeWidth_,
-          'height': _this.playerResizeHeight_,
-        });
-        _this.sendCommand_('imaAdContainerStyle', 'none');
-        _this.element
-          .getElementsByTagName('iframe')[0]
-          .classList.remove('amp-ima-player-fixed');
-        setStyles(ampDivClose, {'display': 'none'});
-      }
-      _this.resizeContainerPlayer();
     });
   }
 
@@ -835,7 +697,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     div.className = 'amp-ima-player-recommended';
     div.id = 'amp-ima-player-recommended';
     if (this.config_.videoWall !== null) {
-      this.ampImaPlayerDebug('create recommended box');
       this.config_.videoWall.forEach(function(entry) {
         const divContainer = document.createElement('div');
         const ahref = document.createElement('a');
@@ -857,13 +718,7 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       this.element.appendChild(div);
     }
   }
-  /** @override */
-  setPlayerResize() {
-    if (this.playerResizeHeight_ === null) {
-      this.playerResizeHeight_ = this.element.getBoundingClientRect().height;
-      this.playerResizeWidth_ = this.element.getBoundingClientRect().width;
-    }
-  }
+
   /** @override */
   initGA(ua, name) {
     (function(i, s, o, g, r, a, m) {
@@ -899,14 +754,12 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
           'event',
           'Videos',
           event,
-          this.config_['movieContenerId'],
+          this.config_.movieContenerId,
           {
             nonInteraction: true,
           }
         );
       }
-    } else {
-      this.ampImaPlayerDebug('GA not allowed');
     }
   }
 
@@ -920,7 +773,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       typeof window[this.config_.functionAfterEnded] === 'function'
     ) {
       window[this.config_.functionAfterEnded]();
-      this.ampImaPlayerDebug('load functionAfterEnded');
     }
   }
 
@@ -959,7 +811,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       const node = document.createTextNode(this.config_.adBlockInfo);
       para.appendChild(node);
       this.element.appendChild(para);
-      this.ampImaPlayerDebug('Load adBlock method');
     }
   }
 
@@ -999,32 +850,7 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       (bounds.top <= viewport.bottom && bounds.top >= viewport.top)
     );
   }
-  /** @override */
-  timeClosePlayer() {
-    const _this = this;
-    setTimeout(function() {
-      _this.closeActive_ = true;
-    }, 1000 * _this.config_.timeToSaveCloseChoice);
-  }
 
-  /** @override */
-  isMobile() {
-    let check = false;
-    (function(a) {
-      if (
-        /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(
-          a
-        ) ||
-        /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
-          a.substr(0, 4)
-        )
-      ) {
-        check = true;
-      }
-    })(navigator.userAgent || navigator.vendor || window.opera);
-
-    return check;
-  }
   /** @override */
   embedLogoMovieAds(param) {
     const _this = this;
@@ -1046,7 +872,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       embedLogoMovieAdsA.appendChild(embedLogoMovieAdsImg);
       embedLogoMovieAds.appendChild(embedLogoMovieAdsA);
       this.element.appendChild(embedLogoMovieAds);
-      this.ampImaPlayerDebug('create logo MovieAds');
 
       document
         .getElementById('amp-ima-player-movie-ads')
@@ -1061,31 +886,8 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
       document.getElementById('amp-ima-player-movie-ads').remove();
     }
   }
-
-  /** @override */
-  isScrollDown() {
-    const percentVisible = 0.5;
-    const elemBottom = this.element.getBoundingClientRect().bottom;
-    const elemHeight = this.element.getBoundingClientRect().height;
-    const overhang = elemHeight * (1 - percentVisible);
-    if (elemBottom + overhang < this.element.getBoundingClientRect().height) {
-      this.ampImaPlayerDebug('down SCROLL');
-      this.config_.isYDown = true;
-    } else {
-      this.ampImaPlayerDebug('up SCROLL');
-      this.config_.isYDown = false;
-    }
-  }
-
-  /** @override */
-  ampImaPlayerDebug(info) {
-    if (this.config_.debug) {
-      console.log(info);
-    }
-  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {
   AMP.registerElement(TAG, AmpMoviadsPlayer, CSS);
 });
-
