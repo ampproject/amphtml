@@ -22,8 +22,6 @@ import {
   parseUrlWithA,
   removeFragment,
 } from './url';
-// Source for this constant is css/amp-story-player-iframe.css
-import {cssText} from '../build/amp-story-player-iframe.css';
 import {dict} from './utils/object';
 import {findIndex} from './utils/array';
 import {setStyle} from './style';
@@ -35,6 +33,13 @@ const LoadStateClass = {
   LOADED: 'i-amphtml-story-player-loaded',
   ERROR: 'i-amphtml-story-player-error',
 };
+
+/** @const {string} */
+const CSS = `
+  :host { all: initial; display: block; border-radius: 0 !important; width: 360px; height: 600px; overflow: auto; }
+  .story-player-iframe { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
+  main { display: flex; flex-direction: row; height: 100%; }
+  .i-amphtml-story-player-loaded iframe { opacity: 1; }`;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -107,7 +112,7 @@ export class AmpStoryPlayer {
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
-    styleEl.textContent = cssText;
+    styleEl.textContent = CSS;
     shadowRoot.appendChild(styleEl);
     shadowRoot.appendChild(this.rootEl_);
   }

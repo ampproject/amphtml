@@ -10,9 +10,5 @@
         {name: 'camelburrito', requestReviews: false},
       ],
     },
-    {
-      pattern: '{amp-story-player,amp-story-player-iframe}.css',
-      owners: [{name: 'newmuis'}, {name: 'gmajoulet'}, {name: 'enriqe'}],
-    },
   ],
 }

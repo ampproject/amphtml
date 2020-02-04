@@ -59,11 +59,6 @@ const cssEntryPoints = [
     outJs: 'amp-story-player.css.js',
     outCss: 'amp-story-player-v0.css',
   },
-  {
-    path: 'amp-story-player-iframe.css',
-    outJs: 'amp-story-player-iframe.css.js',
-    outCss: 'amp-story-player-iframe-v0.css',
-  },
 ];
 
 /**
