@@ -129,11 +129,11 @@ async function dist() {
   await stopNailgunServer(distNailgunPort);
 
   if (argv.esm) {
-    await Promise.all([
-      createModuleCompatibleES5Bundle('v0.mjs'),
-      createModuleCompatibleES5Bundle('amp4ads-v0.mjs'),
-      createModuleCompatibleES5Bundle('shadow-v0.mjs'),
-    ]);
+    await createModuleCompatibleES5Bundle('v0.mjs');
+    if (!argv.core_runtime_only) {
+      await createModuleCompatibleES5Bundle('amp4ads-v0.mjs');
+      await createModuleCompatibleES5Bundle('shadow-v0.mjs');
+    }
   }
 
   if (!argv.core_runtime_only) {
