@@ -61,9 +61,6 @@ export class Performance {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private @const {number} */
-    this.initTime_ = this.win.Date.now();
-
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
 
@@ -233,7 +230,7 @@ export class Performance {
     return channelPromise
       .then(() => {
         // Tick the "messaging ready" signal.
-        this.tickDelta('msr', this.win.Date.now() - this.initTime_);
+        this.tickDelta('msr', this.win.performance.now());
 
         // Tick timeOrigin so that epoch time can be calculated by consumers.
         this.tickDelta(
@@ -464,7 +461,7 @@ export class Performance {
    * method does nothing if it is available.
    */
   tickLegacyFirstPaintTime_() {
-    // Detect deprecated first pain time API
+    // Detect deprecated first paint time API
     // https://bugs.chromium.org/p/chromium/issues/detail?id=621512
     // We'll use this until something better is available.
     if (
@@ -504,12 +501,12 @@ export class Performance {
    */
   measureUserPerceivedVisualCompletenessTime_() {
     const didStartInPrerender = !this.ampdoc_.hasBeenVisible();
-    let docVisibleTime = didStartInPrerender ? -1 : this.initTime_;
 
     // This will only be relevant if the ampdoc is in prerender mode.
     // (hasn't been visible yet, ever at this point)
+    let docVisibleTime = -1;
     this.ampdoc_.whenFirstVisible().then(() => {
-      docVisibleTime = this.win.Date.now();
+      docVisibleTime = this.win.performance.now();
       // Mark this first visible instance in the browser timeline.
       this.mark('visible');
     });
@@ -517,8 +514,8 @@ export class Performance {
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
         const userPerceivedVisualCompletenesssTime =
-          docVisibleTime > -1
-            ? this.win.Date.now() - docVisibleTime
+          docVisibleTime >= 0
+            ? this.win.performance.now() - docVisibleTime
             : //  Prerender was complete before visibility.
               0;
         this.ampdoc_.whenFirstVisible().then(() => {
@@ -538,7 +535,7 @@ export class Performance {
         this.tick('pc');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
-        this.prerenderComplete_(this.win.Date.now() - docVisibleTime);
+        this.prerenderComplete_(this.win.performance.now());
       }
       this.flush();
     });
@@ -575,17 +572,16 @@ export class Performance {
    */
   tick(label, opt_delta) {
     const data = dict({'label': label});
-    let storedVal;
+    let delta;
 
     // Absolute value case (not delta).
     if (opt_delta == undefined) {
       // Marking only makes sense for non-deltas.
       this.mark(label);
-      const now = this.win.Date.now();
-      data['value'] = now;
-      storedVal = now - this.initTime_;
+      data['value'] = this.win.Date.now();
+      delta = this.win.performance.now();
     } else {
-      data['delta'] = storedVal = Math.max(opt_delta, 0);
+      data['delta'] = delta = Math.max(opt_delta, 0);
     }
 
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
@@ -596,13 +592,13 @@ export class Performance {
 
     switch (label) {
       case 'fcp':
-        this.fcpDeferred_.resolve(storedVal);
+        this.fcpDeferred_.resolve(delta);
         break;
       case 'pc':
-        this.fvrDeferred_.resolve(storedVal);
+        this.fvrDeferred_.resolve(delta);
         break;
       case 'mbv':
-        this.mbvDeferred_.resolve(storedVal);
+        this.mbvDeferred_.resolve(delta);
         break;
     }
   }
