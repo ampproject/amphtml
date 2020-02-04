@@ -1064,7 +1064,11 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
-    const pages = getHistoryState(this.win, HistoryState.NAVIGATION_PATH) || [];
+    const pages =
+      /**  @type {!Array} */ (getHistoryState(
+        this.win,
+        HistoryState.NAVIGATION_PATH
+      ) || []);
     const historyPage = lastItem(pages);
 
     const maybePageId = parseQueryString(this.win.location.hash)['page'];
