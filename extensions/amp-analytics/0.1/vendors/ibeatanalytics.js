@@ -46,11 +46,6 @@ const IBEATANALYTICS_CONFIG = jsonLiteral({
       'request': 'track',
     },
   },
-  'transport': {
-    'beacon': false,
-    'xhrpost': false,
-    'image': true,
-  },
 });
 
 export {IBEATANALYTICS_CONFIG};
