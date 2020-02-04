@@ -106,15 +106,6 @@ class AmpBeOpinion extends AMP.BaseElement {
   unlayoutOnPause() {
     return true;
   }
-
-  /** @override */
-  unlayoutCallback() {
-    if (this.iframe_) {
-      removeElement(this.iframe_);
-      this.iframe_ = null;
-    }
-    return true;
-  }
 }
 
 AMP.extension(TAG, '0.1', AMP => {

@@ -76,17 +76,5 @@ describes.realWin(
       const content = doc.body.querySelector('.BeOpinionWidget');
       expect(content).not.to.be.undefined;
     });
-
-    it('removes iframe after unlayoutCallback', () => {
-      return getAmpBeOpinion(accountId).then(ampBeOpinion => {
-        const iframe = ampBeOpinion.querySelector('iframe');
-        expect(iframe).to.not.be.null;
-        const obj = ampBeOpinion.implementation_;
-        obj.unlayoutCallback();
-        expect(ampBeOpinion.querySelector('iframe')).to.be.null;
-        expect(obj.iframe_).to.be.null;
-        expect(obj.unlayoutOnPause()).to.be.true;
-      });
-    });
   }
 );
