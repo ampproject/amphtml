@@ -26,6 +26,13 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
+import {addParamsToUrl} from '../../../src/url';
+import {
+  createElementWithAttributes,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -33,9 +40,7 @@ import {
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isFullscreenElement, removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 
@@ -191,17 +196,18 @@ class AmpVideoIframe extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const {element} = this;
-    const html = htmlFor(element);
-    const poster = html`
-      <amp-img layout="fill" placeholder></amp-img>
-    `;
-
-    poster.setAttribute(
-      'src',
-      this.user().assertString(element.getAttribute('poster'))
+    const src = this.addDataParamsToUrl_(
+      user().assertString(element.getAttribute('poster'))
     );
-
-    return poster;
+    return createElementWithAttributes(
+      element.ownerDocument,
+      'amp-img',
+      dict({
+        'src': src,
+        'layout': 'fill',
+        'placeholder': '',
+      })
+    );
   }
 
   /** @override */
@@ -229,7 +235,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   getSrc_() {
     const {element} = this;
     const urlService = Services.urlForDoc(element);
-    const src = urlService.assertHttpsUrl(element.getAttribute('src'), element);
+    const src = this.addDataParamsToUrl_(element.getAttribute('src'));
 
     if (urlService.getSourceOrigin(src) === urlService.getWinOrigin(this.win)) {
       this.user().warn(
@@ -243,6 +249,14 @@ class AmpVideoIframe extends AMP.BaseElement {
     }
 
     return maybeAddAmpFragment(src);
+  }
+
+  /**
+   * @param {string} url
+   * @return {string}
+   */
+  addDataParamsToUrl_(url) {
+    return addParamsToUrl(url, getDataParamsFromAttributes(this.element));
   }
 
   /**
