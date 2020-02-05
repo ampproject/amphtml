@@ -109,6 +109,7 @@ import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
 import {getMode} from '../../../src/mode';
+import {getState} from '../../../src/history';
 import {isExperimentOn} from '../../../src/experiments';
 import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
@@ -785,7 +786,11 @@ export class AmpStory extends AMP.BaseElement {
       if (endsWith(href, '#')) {
         href = href.slice(0, -1);
       }
-      setHistoryState(this.win, this.win.document.title, href);
+      this.win.history.replaceState(
+        (this.win.history && getState(this.win.history)) || {} /** data */,
+        this.win.document.title /** title */,
+        href /** URL */
+      );
     });
 
     this.getViewport().onResize(debounce(this.win, () => this.onResize(), 300));
