@@ -311,7 +311,6 @@ describes.sandboxed('shadow-embed', {}, () => {
     let isFirefox;
 
     beforeEach(() => {
-      setShadowDomStreamingSupportedForTesting(undefined);
       createHTMLDocumentSpy = window.sandbox.spy();
       isFirefox = false;
       const platform = {
@@ -336,6 +335,10 @@ describes.sandboxed('shadow-embed', {}, () => {
           'vsync': {obj: {}},
         },
       };
+    });
+
+    afterEach(() => {
+      setShadowDomStreamingSupportedForTesting(undefined);
     });
 
     it('should resolve to streamer', () => {
