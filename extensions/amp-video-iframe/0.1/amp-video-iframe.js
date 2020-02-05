@@ -254,6 +254,7 @@ class AmpVideoIframe extends AMP.BaseElement {
   /**
    * @param {string} url
    * @return {string}
+   * @private
    */
   addDataParamsToUrl_(url) {
     return addParamsToUrl(url, getDataParamsFromAttributes(this.element));
