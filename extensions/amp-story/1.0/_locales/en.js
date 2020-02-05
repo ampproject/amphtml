@@ -137,6 +137,26 @@ const strings = {
     string: 'Play video',
     description: 'Label for a button to play the video visible on the page.',
   },
+  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_A]: {
+    string: 'A',
+    description:
+      'Text for the first answer choice from a multiple choice quiz (e.g. A in A/B/C/D)',
+  },
+  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_B]: {
+    string: 'B',
+    description:
+      'Text for the second answer choice from a multiple choice quiz (e.g. B in A/B/C/D)',
+  },
+  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_C]: {
+    string: 'C',
+    description:
+      'Text for the third answer choice from a multiple choice quiz (e.g. C in A/B/C/D)',
+  },
+  [LocalizedStringId.AMP_STORY_QUIZ_ANSWER_CHOICE_D]: {
+    string: 'D',
+    description:
+      'Text for the fourth answer choice from a multiple choice quiz (e.g. D in A/B/C/D)',
+  },
   [LocalizedStringId.AMP_STORY_SHARE_BUTTON_LABEL]: {
     string: 'Share story',
     description:
