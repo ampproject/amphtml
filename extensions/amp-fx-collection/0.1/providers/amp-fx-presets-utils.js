@@ -75,20 +75,13 @@ export function resolvePercentageToNumber(val) {
  */
 export function installStyles(element, fxType) {
   switch (fxType) {
-    case FxType.PARALLAX:
-      return {
-        'will-change': 'transform',
-      };
     case FxType.FADE_IN:
-      return {
-        'will-change': 'opacity',
-        'opacity': 0,
-      };
     case FxType.FADE_IN_SCROLL:
       return {
         'will-change': 'opacity',
         'opacity': 0,
       };
+    case FxType.PARALLAX:
     case FxType.FLY_IN_BOTTOM:
     case FxType.FLY_IN_TOP:
     case FxType.FLY_IN_LEFT:

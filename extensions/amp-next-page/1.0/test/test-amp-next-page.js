@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 import '../amp-next-page';
-import {Direction} from '../service';
 import {PageState} from '../page';
+import {ScrollDirection, ViewportRelativePos} from '../visibility-observer';
 import {Services} from '../../../../src/services';
-import {ViewportRelativePos} from '../visibility-observer';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {htmlFor} from '../../../../src/static-template';
 import {setStyle} from '../../../../src/style';
@@ -495,7 +494,7 @@ describes.realWin(
           .be.ok;
 
         service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
-        service.scrollDirection_ = Direction.UP;
+        service.scrollDirection_ = ScrollDirection.UP;
 
         await service.hidePreviousPages_(
           0 /** index */,
@@ -532,7 +531,7 @@ describes.realWin(
         const {container} = service.pages_[2];
         expect(container).to.be.ok;
         service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
-        service.scrollDirection_ = Direction.UP;
+        service.scrollDirection_ = ScrollDirection.UP;
         await service.hidePreviousPages_(
           0 /** index */,
           0 /** pausePageCountForTesting */
@@ -542,7 +541,7 @@ describes.realWin(
           VisibilityState.HIDDEN
         );
 
-        service.scrollDirection_ = Direction.DOWN;
+        service.scrollDirection_ = ScrollDirection.DOWN;
         await service.resumePausedPages_(
           1 /** index */,
           0 /** pausePageCountForTesting */

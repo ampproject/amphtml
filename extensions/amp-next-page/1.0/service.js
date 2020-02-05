@@ -31,7 +31,9 @@ import {
   removeChildren,
   removeElement,
   scopedQuerySelector,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {clamp} from '../../../src/utils/math';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
@@ -41,7 +43,9 @@ import {
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
-import {setStyles, toggle} from '../../../src/style';
+import {resetStyles, setStyle, setStyles, toggle} from '../../../src/style';
+import {throttle} from '../../../src/utils/rate-limit';
+
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {validatePage, validateUrl} from './utils';
@@ -58,8 +62,12 @@ const DOC_CONTAINER_CLASS = 'i-amphtml-next-page-document-container';
 const SHADOW_ROOT_CLASS = 'i-amphtml-next-page-shadow-root';
 const PLACEHOLDER_CLASS = 'i-amphtml-next-page-placeholder';
 
-/** @enum */
-export const Direction = {UP: 1, DOWN: -1};
+/** @enum {string} */
+export const Transition = {
+  NONE: 'none',
+  FADE_IN: 'fade-in',
+  FADE_IN_SCROLL: 'fade-in-scroll',
+};
 
 export class NextPageService {
   /**
@@ -120,12 +128,6 @@ export class NextPageService {
     /** @private {?Page} */
     this.lastFetchedPage_ = null;
 
-    /** @private {!Direction} */
-    this.scrollDirection_ = Direction.DOWN;
-
-    /** @private {number} */
-    this.lastScrollTop_ = 0;
-
     /** @private {?Page} */
     this.hostPage_ = null;
 
@@ -134,6 +136,9 @@ export class NextPageService {
 
     /** @private {boolean} */
     this.hasDeepParsing_ = false;
+
+    /** @private {!Transition} */
+    this.transition_ = Transition.NONE;
 
     /** @private {?string} */
     this.nextSrc_ = null;
@@ -198,13 +203,25 @@ export class NextPageService {
     this.nextSrc_ = this.getHost_().getAttribute('src');
     this.hasDeepParsing_ =
       this.getHost_().hasAttribute('deep-parsing') || !this.nextSrc_;
+    const transition = this.getHost_().getAttribute('transition');
+    if (transition) {
+      userAssert(Object.values(Transition).includes(transition));
+      this.transition_ = /** @type {Transition} */ (transition);
+    }
+
     this.initializePageQueue_();
 
     this.getHost_().classList.add(NEXT_PAGE_CLASS);
 
-    this.viewport_.onScroll(() => this.updateScroll_());
-    this.viewport_.onResize(() => this.updateScroll_());
-    this.updateScroll_();
+    const updateHostVisibilityThrottled = throttle(
+      this.win_,
+      this.updateHostVisibility_.bind(this),
+      200
+    );
+
+    this.viewport_.onScroll(updateHostVisibilityThrottled.bind(this));
+    this.viewport_.onResize(updateHostVisibilityThrottled.bind(this));
+    this.updateHostVisibility_();
   }
 
   /**
@@ -218,10 +235,43 @@ export class NextPageService {
   /**
    * @private
    */
-  updateScroll_() {
-    this.updateScrollDirection_();
+  updateHostVisibility_() {
     this.readyPromise_.then(() => {
       this.maybeFetchNext();
+
+      let vh,
+        scroll,
+        height = 0;
+      this.mutator_.measureMutateElement(
+        this.host_,
+        () => {
+          // Measure the position of the host page (edge case)
+          vh = this.viewport_.getHeight();
+          scroll = this.viewport_.getScrollTop();
+          // Document height is the same as the distance from the top
+          // to the <amp-next-page> element
+          const {top} = this.host_.getLayoutBox();
+          height = top;
+        },
+        () => {
+          let relativePos;
+          if (scroll < height - vh) {
+            relativePos = ViewportRelativePos.CONTAINS_VIEWPORT;
+          } else if (scroll < height && height <= vh && scroll <= 0) {
+            relativePos = ViewportRelativePos.INSIDE_VIEWPORT;
+          } else if (scroll < height) {
+            relativePos = this.visibilityObserver_.isScrollingDown()
+              ? ViewportRelativePos.LEAVING_VIEWPORT
+              : ViewportRelativePos.ENTERING_VIEWPORT;
+          } else {
+            relativePos = ViewportRelativePos.OUTSIDE_VIEWPORT;
+          }
+
+          this.hostPage_.relativePos = relativePos;
+          this.hostPage_.visiblePercent = clamp((height - scroll) / vh, 0, 1);
+          this.updateVisibility();
+        }
+      );
     });
   }
 
@@ -276,7 +326,9 @@ export class NextPageService {
     this.pages_.forEach((page, index) => {
       if (
         page.relativePos === ViewportRelativePos.INSIDE_VIEWPORT ||
-        page.relativePos === ViewportRelativePos.CONTAINS_VIEWPORT
+        page.relativePos === ViewportRelativePos.CONTAINS_VIEWPORT ||
+        page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
+        page.relativePos === ViewportRelativePos.ENTERING_VIEWPORT
       ) {
         if (!page.isVisible()) {
           page.setVisibility(VisibilityState.VISIBLE);
@@ -304,6 +356,34 @@ export class NextPageService {
           /** @type {!Document|!ShadowRoot} */ (devAssert(page.document))
         )
       );
+
+    // Handle transitions between pages
+    if (this.transition_ === Transition.FADE_IN_SCROLL) {
+      this.pages_.forEach(page => {
+        const pageContents =
+          page === this.hostPage_
+            ? this.hostPage_.hostPageContents
+            : [page.container];
+        if (page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT) {
+          pageContents.forEach(element => {
+            this.mutator_.mutateElement(element, () => {
+              setStyle(element, 'opacity', page.visiblePercent);
+            });
+          });
+
+          // Set opacity to visiblePercent
+          // Show other pages
+        } else if (page.isVisible()) {
+          pageContents.forEach(element => {
+            this.mutator_.mutateElement(element, () => {
+              resetStyles(element, ['opacity']);
+            });
+          });
+          // Set other pages that are LEAVING_VIEWPORT opacity to visiblePercent
+          // Show this page
+        }
+      });
+    }
   }
 
   /**
@@ -323,26 +403,25 @@ export class NextPageService {
         ? PAUSE_PAGE_COUNT
         : pausePageCountForTesting;
 
-    const scrollingDown = this.scrollDirection_ === Direction.DOWN;
     // Hide the host (first) page if needed
-    if (scrollingDown && this.hostPage_.isVisible()) {
+    if (
+      this.visibilityObserver_.isScrollingDown() &&
+      this.hostPage_.isVisible()
+    ) {
       this.hostPage_.setVisibility(VisibilityState.HIDDEN);
     }
 
     // Get all the pages that the user scrolled past (or didn't see yet)
-    const previousPages = scrollingDown
+    const previousPages = this.visibilityObserver_.isScrollingDown()
       ? this.pages_.slice(1, index).reverse()
       : this.pages_.slice(index + 1);
 
     // Find the ones that should be hidden (no longer inside the viewport)
     return Promise.all(
       previousPages
-        .filter(page => {
-          const shouldHide =
-            page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
-            page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT;
-          return shouldHide;
-        })
+        .filter(
+          page => page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT
+        )
         .map((page, away) => {
           // Hide all pages that are in the viewport
           if (page.isVisible()) {
@@ -436,7 +515,13 @@ export class NextPageService {
       },
       PageState.INSERTED /** initState */,
       VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_ /** initDoc */
+      this.doc_ /** doc */,
+      toArray(
+        scopedQuerySelectorAll(
+          dev().assertElement(doc.body),
+          '> *:not(amp-next-page)'
+        )
+      ) /** hostPageContents */
     );
   }
 
@@ -460,11 +545,21 @@ export class NextPageService {
     this.visibilityObserver_.observe(
       shadowRoot /** element */,
       container /** parent */,
-      position => {
+      (position, visiblePercent) => {
         page.relativePos = position;
+        page.visiblePercent = visiblePercent;
         this.updateVisibility();
       }
     );
+
+    // Set-up transitions
+    if (this.transition_ === Transition.FADE_IN_SCROLL) {
+      setStyles(container, {
+        'opacity': 1,
+        'will-change': 'opacity',
+        'transition': 'opacity 0.1s',
+      });
+    }
 
     return container;
   }
@@ -660,16 +755,6 @@ export class NextPageService {
         this.viewport_.getHeight()) /
         this.viewport_.getHeight()
     );
-  }
-
-  /**
-   * @private
-   */
-  updateScrollDirection_() {
-    const scrollTop = this.viewport_.getScrollTop();
-    this.scrollDirection_ =
-      scrollTop > this.lastScrollTop_ ? Direction.DOWN : Direction.UP;
-    this.lastScrollTop_ = scrollTop;
   }
 
   /**
