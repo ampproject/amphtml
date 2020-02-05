@@ -104,7 +104,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
-    /** @const {!Array<string>} */
+    /** @private {!Array<string>} */
     this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
 
     /** @private {?Promise<!../../../src/service/cid-impl.CidDef>} */
