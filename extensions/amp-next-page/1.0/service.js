@@ -193,7 +193,7 @@ export class NextPageService {
     }
 
     // Have the footer be always visible
-    insertAfterOrAtStart(this.host_, this.footer_);
+    insertAfterOrAtStart(this.host_, this.footer_, null /** after */);
 
     this.nextSrc_ = this.getHost_().getAttribute('src');
     this.hasDeepParsing_ =
@@ -431,7 +431,7 @@ export class NextPageService {
       this,
       {
         url,
-        title,
+        title: title || '',
         image,
       },
       PageState.INSERTED /** initState */,
@@ -531,7 +531,7 @@ export class NextPageService {
 
       // Insert the separator
       const separatorInstance = this.separator_.cloneNode(true);
-      insertAfterOrAtStart(container, separatorInstance);
+      insertAfterOrAtStart(container, separatorInstance, null /** after */);
       const separatorPromise = this.maybeRenderSeparatorTemplate_(
         separatorInstance,
         page
@@ -912,12 +912,12 @@ export class NextPageService {
 
     const image = this.doc_.createElement('img');
     image.classList.add('amp-next-page-separator-img');
-    image.src = data.image;
+    image.src = data['image'];
     content.appendChild(image);
 
     const title = this.doc_.createElement('span');
     title.classList.add('amp-next-page-separator-title');
-    title.textContent = `Next article: ${data.title}`;
+    title.textContent = `Next article: ${data['title']}`;
     content.appendChild(title);
 
     return Promise.resolve(content);
@@ -958,15 +958,17 @@ export class NextPageService {
    * @return {!Promise}
    */
   maybeRenderFooterTemplate_() {
-    if (!this.hasDefaultFooter_ && !this.templates_.hasTemplate(this.footer_)) {
+    const footer = dev().assertElement(this.footer_);
+
+    if (!this.hasDefaultFooter_ && !this.templates_.hasTemplate(footer)) {
       return Promise.resolve();
     }
 
     // Re-render templated footer (if needed)
-    return this.getFooterContent_(this.footer_).then(rendered => {
-      return this.mutator_.mutateElement(this.footer_, () => {
-        removeChildren(dev().assertElement(this.footer_));
-        this.footer_.appendChild(rendered);
+    return this.getFooterContent_(footer).then(rendered => {
+      return this.mutator_.mutateElement(footer, () => {
+        removeChildren(dev().assertElement(footer));
+        footer.appendChild(rendered);
       });
     });
   }
@@ -999,7 +1001,7 @@ export class NextPageService {
     const content = this.doc_.createElement('div');
     content.classList.add('amp-next-page-footer-content');
 
-    data.pages.forEach(page => {
+    data['pages'].forEach(page => {
       const article = this.doc_.createElement('a');
       article.href = page.url;
       article.classList.add('amp-next-page-footer-article');
