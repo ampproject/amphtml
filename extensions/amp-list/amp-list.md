@@ -70,15 +70,12 @@ In the following example, we retrieve JSON data that contains URLs and titles, a
   width="auto"
   height="100"
   layout="fixed-height"
-  src="{{server_for_email}}/static/inline-examples/data/amp-list-urls.json"
->
-  <template type="amp-mustache"
-    >{% raw %}
+  src="{{server_for_email}}/static/inline-examples/data/amp-list-urls.json">
+  <template type="amp-mustache">{% raw %}
     <div class="url-entry">
       <a href="{{url}}">{{title}}</a>
     </div>
-    {% endraw %}</template
-  >
+  {% endraw %}</template>
 </amp-list>
 ```
 
@@ -153,16 +150,13 @@ In the following example, we display a list of images and titles. Because the `<
   width="auto"
   height="140"
   layout="fixed-height"
-  src="{{server_for_email}}/static/inline-examples/data/amp-list-data.json"
->
-  <template type="amp-mustache"
-    >{% raw %}
+  src="{{server_for_email}}/static/inline-examples/data/amp-list-data.json">
+  <template type="amp-mustache">{% raw %}
     <div class="image-entry">
       <amp-img src="{{imageUrl}}" width="100" height="75"></amp-img>
       <span class="image-title">{{title}}</span>
     </div>
-    {% endraw %}</template
-  >
+  {% endraw %}</template>
   <div overflow class="list-overflow" style="background-color:red;">
     See more
   </div>
@@ -228,8 +222,7 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
   width="396"
   height="80"
   layout="responsive"
-  src="/test/manual/amp-list-data.json?RANDOM"
->
+  src="/test/manual/amp-list-data.json?RANDOM">
   <template type="amp-mustache">
     {{title}}
   </template>
@@ -269,8 +262,7 @@ Here's an example that specifies including credentials to display personalized c
 ```html
 <amp-list
   credentials="include"
-  src="<%host%>/json/product.json?clientId=CLIENT_ID(myCookieId)"
->
+  src="<%host%>/json/product.json?clientId=CLIENT_ID(myCookieId)">
   <template type="amp-mustache">
     Your personal offer: ${{price}}
   </template>
@@ -398,8 +390,7 @@ We've introduced the `load-more` attributes with options `manual` and `auto` to 
   load-more="auto"
   src="https://my.rest.endpoint/"
   width="100"
-  height="200"
->
+  height="200">
   <template type="amp-mustache">
     // ...
   </template>
@@ -437,8 +428,7 @@ An `<amp-list-load-more>` element with the `load-more-button` attribute, which s
   load-more="manual"
   src="https://www.load.more.example.com/"
   width="400"
-  height="800"
->
+  height="800">
   ...
   <amp-list-load-more load-more-button>
     <button>See More</button> /* My custom see more button */
@@ -455,8 +445,7 @@ It can be templated via `amp-mustache`.
   load-more="auto"
   width="100"
   height="500"
-  src="https://www.load.more.example.com/"
->
+  src="https://www.load.more.example.com/">
   ...
   <amp-list-load-more load-more-button>
     <template type="amp-mustache">
@@ -478,8 +467,7 @@ This element is a loader that will be displayed if the user reaches the end of t
   load-more="auto"
   src="https://www.load.more.example.com/"
   width="400"
-  height="800"
->
+  height="800">
   ...
   <amp-list-load-more load-more-loading>
     <svg>...</svg> /* My custom loader */
@@ -496,8 +484,7 @@ A `<amp-list-load-more>` element containing the `load-more-failed` attribute tha
   load-more="auto"
   src="https://www.load.more.example.com/"
   width="200"
-  height="500"
->
+  height="500">
   ...
   <amp-list-load-more load-more-failed>
     <button>Unable to Load More</button>
@@ -512,8 +499,7 @@ In the above example, the entire `load-more-failed` element is clickable. Howeve
   load-more="auto"
   src="https://www.load.more.example.com/"
   width="200"
-  height="500"
->
+  height="500">
   ...
   <amp-list-load-more load-more-failed>
     <div>
@@ -533,8 +519,7 @@ This element is not provided by default, but if a `<amp-list-load-more>` element
   load-more="auto"
   src="https://www.load.more.example.com/"
   width="200"
-  height="500"
->
+  height="500">
   ...
   <amp-list-load-more load-more-end>
     Congratulations! You've reached the end. /* Custom load-end element */
