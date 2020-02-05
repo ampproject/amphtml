@@ -198,8 +198,9 @@ describes.realWin('Events', {amp: 1}, env => {
           .returns({top: 0, left: 0, height: 200, width: 200}),
         'getScrollTop': env.sandbox.stub().returns(0),
         'getScrollLeft': env.sandbox.stub().returns(0),
-        'getScrollHeight': env.sandbox.stub().returns(500),
-        'getScrollWidth': env.sandbox.stub().returns(500),
+        'getLayoutRect': env.sandbox
+          .stub()
+          .returns({width: 500, height: 500, top: 0, left: 0}),
         'onChanged': env.sandbox.stub(),
       };
       scrollManager = tracker.root_.getScrollManager();
@@ -285,6 +286,65 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(fn2.getCall(0).calledWithMatch(env.sandbox.match(matcher(90)))).to
         .be.true;
       expect(fn2.getCall(1).calledWithMatch(env.sandbox.match(matcher(90)))).to
+        .be.true;
+    });
+
+    it('ignores resize changes if needed', () => {
+      const fn1 = env.sandbox.stub();
+      const fn2 = env.sandbox.stub();
+      tracker.add(
+        undefined,
+        AnalyticsEventType.SCROLL,
+        {
+          'on': AnalyticsEventType.SCROLL,
+          'scrollSpec': {
+            'verticalBoundaries': [0, 50, 100],
+          },
+        },
+        fn1
+      );
+      tracker.add(
+        undefined,
+        AnalyticsEventType.SCROLL,
+        {
+          'on': AnalyticsEventType.SCROLL,
+          'scrollSpec': {
+            'verticalBoundaries': [0, 50, 100],
+            'ignoreResize': true,
+          },
+        },
+        fn2
+      );
+
+      function matcher(expected) {
+        return actual => {
+          return actual.vars.verticalScrollBoundary === String(expected);
+        };
+      }
+      expect(fn1).to.have.callCount(1);
+      expect(fn1.getCall(0).calledWithMatch(env.sandbox.match(matcher(0)))).to
+        .be.true;
+      expect(fn2).to.have.callCount(1);
+      expect(fn2.getCall(0).calledWithMatch(env.sandbox.match(matcher(0)))).to
+        .be.true;
+
+      // Scroll Down
+      fakeViewport.getScrollTop.returns(500);
+      fakeViewport.getLayoutRect.returns({
+        width: 500,
+        height: 1000,
+        top: 0,
+        left: 0,
+      });
+      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
+
+      expect(fn1).to.have.callCount(2);
+      expect(fn1.getCall(1).calledWithMatch(env.sandbox.match(matcher(50)))).to
+        .be.true;
+      expect(fn2).to.have.callCount(3);
+      expect(fn2.getCall(1).calledWithMatch(env.sandbox.match(matcher(50)))).to
+        .be.true;
+      expect(fn2.getCall(2).calledWithMatch(env.sandbox.match(matcher(100)))).to
         .be.true;
     });
 

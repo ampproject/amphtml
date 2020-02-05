@@ -16,6 +16,7 @@
 
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {dev} from '../../../src/log';
 
 /**
  * @typedef {{
@@ -25,6 +26,8 @@ import {Services} from '../../../src/services';
  *   height: number,
  *   scrollHeight: number,
  *   scrollWidth: number,
+ *   initialScrollHeight: number,
+ *   initialScrollWidth: number,
  * }}
  */
 export let ScrollEventDef;
@@ -48,6 +51,18 @@ export class ScrollManager {
 
     /** @private {!Observable<!./scroll-manager.ScrollEventDef>} */
     this.scrollObservable_ = new Observable();
+
+    /** @private {?number} */
+    this.initialScrollWidth_ = null;
+
+    /** @private {?number} */
+    this.initialScrollHeight_ = null;
+
+    const root = ampdoc.getRootNode();
+    /** @const @private {!Element} */
+    this.root_ = dev().assertElement(
+      root.host || root.documentElement || root.body || root
+    );
   }
 
   /**
@@ -76,14 +91,26 @@ export class ScrollManager {
   addScrollHandler(handler) {
     // Trigger an event to fire events that might have already happened.
     const size = this.viewport_.getSize();
+    const layoutRect = this.viewport_.getLayoutRect(this.root_);
+    // Cache the scroll height/width for use with `ignoreResize`
+    if (
+      this.initialScrollWidth_ === null ||
+      this.initialScrollHeight_ === null
+    ) {
+      this.initialScrollWidth_ = layoutRect.width;
+      this.initialScrollHeight_ = layoutRect.height;
+    }
+
     /** {./scroll-manager.ScrollEventDef} */
     const scrollEvent = {
-      top: this.viewport_.getScrollTop(),
-      left: this.viewport_.getScrollLeft(),
+      top: this.viewport_.getScrollTop() - layoutRect.top,
+      left: this.viewport_.getScrollLeft() - layoutRect.left,
       width: size.width,
       height: size.height,
-      scrollWidth: this.viewport_.getScrollWidth(),
-      scrollHeight: this.viewport_.getScrollHeight(),
+      scrollWidth: this.initialScrollWidth_,
+      scrollHeight: this.initialScrollHeight_,
+      initialScrollWidth: this.initialScrollWidth_,
+      initialScrollHeight: this.initialScrollHeight_,
     };
     handler(scrollEvent);
 
@@ -99,14 +126,19 @@ export class ScrollManager {
    * @private
    */
   onScroll_(e) {
+    // Handle offsets for shadow docs
+    const layoutRect = this.viewport_.getLayoutRect(this.root_);
+
     /** {./scroll-manager.ScrollEventDef} */
     const scrollEvent = {
-      top: e.top,
-      left: e.left,
+      top: e.top - layoutRect.top,
+      left: e.left - layoutRect.left,
       width: e.width,
       height: e.height,
-      scrollWidth: this.viewport_.getScrollWidth(),
-      scrollHeight: this.viewport_.getScrollHeight(),
+      scrollWidth: layoutRect.width,
+      scrollHeight: layoutRect.height,
+      initialScrollWidth: dev().assertNumber(this.initialScrollWidth_),
+      initialScrollHeight: dev().assertNumber(this.initialScrollHeight_),
     };
     // Fire all of our children scroll observables
     this.scrollObservable_.fire(scrollEvent);

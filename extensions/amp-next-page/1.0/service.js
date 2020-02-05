@@ -420,10 +420,11 @@ export class NextPageService {
     return Promise.all(
       previousPages
         .filter(
+          // Pages that are outside of the viewport should be hidden
           page => page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT
         )
         .map((page, away) => {
-          // Hide all pages that are in the viewport
+          // Hide all pages whose visibility state have changed to hidden
           if (page.isVisible()) {
             page.setVisibility(VisibilityState.HIDDEN);
           }
@@ -518,7 +519,7 @@ export class NextPageService {
       this.doc_ /** doc */,
       toArray(
         scopedQuerySelectorAll(
-          dev().assertElement(doc.body),
+          dev().assertElement(this.doc_.body),
           '> *:not(amp-next-page)'
         )
       ) /** hostPageContents */
@@ -685,9 +686,6 @@ export class NextPageService {
    * @param {!Document} doc Document to attach.
    */
   sanitizeDoc(doc) {
-    // TODO(wassgha): Allow amp-analytics after bug bash
-    toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
-
     // Parse for more pages and queue them
     toArray(doc.querySelectorAll('amp-next-page')).forEach(el => {
       if (this.hasDeepParsing_) {

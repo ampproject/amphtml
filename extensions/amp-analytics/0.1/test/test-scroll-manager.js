@@ -54,8 +54,9 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
         .returns({top: 0, left: 0, height: 200, width: 200}),
       'getScrollTop': env.sandbox.stub().returns(0),
       'getScrollLeft': env.sandbox.stub().returns(0),
-      'getScrollHeight': env.sandbox.stub().returns(500),
-      'getScrollWidth': env.sandbox.stub().returns(500),
+      'getLayoutRect': env.sandbox
+        .stub()
+        .returns({width: 500, height: 500, top: 0, left: 0}),
       'onChanged': () => {
         return env.sandbox.stub();
       },
@@ -104,6 +105,12 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     // Scroll Down
     fakeViewport.getScrollTop.returns(500);
     fakeViewport.getScrollLeft.returns(500);
+    fakeViewport.getLayoutRect.returns({
+      width: 800,
+      height: 700,
+      top: 0,
+      left: 0,
+    });
     scrollManager.onScroll_({top: 500, left: 500, height: 250, width: 250});
 
     const expectedScrollEvent = {
@@ -111,8 +118,10 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
       left: 500,
       height: 250,
       width: 250,
-      scrollWidth: 500,
-      scrollHeight: 500,
+      scrollWidth: 800,
+      scrollHeight: 700,
+      initialScrollHeight: 500,
+      initialScrollWidth: 500,
     };
 
     function matcher(expected) {
