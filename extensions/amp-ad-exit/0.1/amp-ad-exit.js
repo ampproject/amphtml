@@ -60,10 +60,10 @@ export class AmpAdExit extends AMP.BaseElement {
     this.targets_ = {};
 
     /**
-     * Maps indirect target name to an actual target name.
+     * Maps variable target name to an actual target name.
      * @private @const {!Object<string, string>}
      */
-    this.indirectTargets_ = {};
+    this.variableTargets_ = {};
 
     /**
      * Filters to apply to every target.
@@ -81,11 +81,10 @@ export class AmpAdExit extends AMP.BaseElement {
 
     this.registerAction('exit', this.exit.bind(this));
     this.registerAction(
-      'setIndirectTarget',
-      this.setIndirectTarget.bind(this),
+      'setVariable',
+      this.setVariable.bind(this),
       ActionTrust.LOW
     );
-    this.registerAction('exitIndirect', this.exitIndirect.bind(this));
 
     /** @private @const {!Object<string, !Object<string, string>>} */
     this.vendorResponses_ = {};
@@ -106,8 +105,26 @@ export class AmpAdExit extends AMP.BaseElement {
   exit(invocation) {
     const {args} = invocation;
     let {event} = invocation;
-    const target = this.targets_[args['target']];
-    userAssert(target, `Exit target not found: '${args['target']}'`);
+    let target;
+    if ('variable' in args) {
+      userAssert(
+        !('target' in args),
+        `Only one of 'target' and 'variable' should be specified`
+      );
+      let pointToTargetName = this.variableTargets_[args['variable']];
+      if (!pointToTargetName) {
+        pointToTargetName = args['default'];
+      }
+      target = this.targets_[pointToTargetName];
+      userAssert(
+        target,
+        `Variable target not found, variable:'${args['variable']}', default:'${args['default']}'`
+      );
+      delete args['default'];
+    } else {
+      target = this.targets_[args['target']];
+      userAssert(target, `Exit target not found: '${args['target']}'`);
+    }
     userAssert(event, 'Unexpected null event');
     event = /** @type {!../../../src/service/action-impl.ActionEventDef} */ (event);
 
@@ -153,29 +170,11 @@ export class AmpAdExit extends AMP.BaseElement {
   /**
    * @param {!../../../src/service/action-impl.ActionInvocation} invocation
    */
-  setIndirectTarget(invocation) {
+  setVariable(invocation) {
     const {args} = invocation;
-    const pointToTarget = this.targets_[args['pointTo']];
-    userAssert(pointToTarget, `Exit target not found: '${args['pointTo']}'`);
-    this.indirectTargets_[args['name']] = args['pointTo'];
-  }
-
-  /**
-   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
-   */
-  exitIndirect(invocation) {
-    const {args} = invocation;
-    let pointToTarget = this.indirectTargets_[args['target']];
-    if (!pointToTarget) {
-      pointToTarget = args['defaultTarget'];
-    }
-    userAssert(
-      pointToTarget,
-      `Indirect target not found, target:'${args['target']}', defaultTarget:'${args['defaultTarget']}'`
-    );
-    args['target'] = pointToTarget;
-    delete args['defaultTarget'];
-    this.exit(invocation);
+    const pointToTarget = this.targets_[args['target']];
+    userAssert(pointToTarget, `Exit target not found: '${args['target']}'`);
+    this.variableTargets_[args['name']] = args['target'];
   }
 
   /**

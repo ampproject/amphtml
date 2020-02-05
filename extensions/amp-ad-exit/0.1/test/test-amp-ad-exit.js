@@ -177,16 +177,16 @@ describes.realWin(
 
     function pointTo(target) {
       element.implementation_.executeAction({
-        method: 'setIndirectTarget',
-        args: {name: 'indirect', pointTo: target},
+        method: 'setVariable',
+        args: {name: 'indirect', target},
         satisfiesTrust: () => true,
       });
     }
 
     function exitIndirect() {
       element.implementation_.executeAction({
-        method: 'exitIndirect',
-        args: {target: 'indirect', defaultTarget: 'simple'},
+        method: 'exit',
+        args: {variable: 'indirect', default: 'simple'},
         event: makeClickEvent(1001),
         satisfiesTrust: () => true,
       });
@@ -775,7 +775,7 @@ describes.realWin(
       );
     });
 
-    it('should exit to the default target if indirect target was not set', () => {
+    it('should exit to the default target if varible target was never set', () => {
       const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
@@ -787,10 +787,46 @@ describes.realWin(
       );
     });
 
-    it('should cause error when indirect target was pointed to an invalid target', () => {
+    it('should cause error when variable target was pointed to an invalid target', () => {
       try {
         allowConsoleError(() => {
           pointTo('not-a-real-target');
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when exiting to an invalid variable target', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {variable: 'not-a-real-target', default: 'not-a-real-target'},
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when both "target" and "variable" are provided in arguments', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {
+              target: 'customVars',
+              variable: 'indirect',
+              default: 'simple',
+            },
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
         });
       } catch (expected) {
         return;
@@ -819,9 +855,9 @@ describes.realWin(
 
       pointTo('customVars');
       element.implementation_.executeAction({
-        method: 'exitIndirect',
+        method: 'exit',
         args: {
-          target: 'indirect',
+          variable: 'indirect',
           _foo: 'foo',
           _bar: 'bar',
           _numVar: 0,

@@ -84,7 +84,7 @@
   </script>
 </amp-ad-exit>
 <div class="ad">
-  <h1 on="tap:exit-api.exitIndirect(target='current', defaultTarget='target1')" role="button" tabindex="1">amp-ad-exit e2e test</h1>
+  <h1 on="tap:exit-api.exit(variable='current', default='target1')" role="button" tabindex="1">amp-ad-exit e2e test</h1>
   <div class="product" id="product1" on="tap:exit-api.exit(target='border_protected_target1', _elem='Product 1')" role="button" tabindex="1">
     <p>product 1</p>
   </div>
@@ -96,7 +96,7 @@
   <button id="prev-btn" role="button" tabindex="1" on="tap:exit-selector.selectUp">Previous product</button>
   <button id="next-btn" role="button" tabindex="1" on="tap:exit-selector.selectDown">Next product</button>
   <amp-selector id="exit-selector"
-      on="select:exit-api.setIndirectTarget(name='current', pointTo=event.targetOption)">
+      on="select:exit-api.setVariable(name='current', target=event.targetOption)">
     <option option="target1" selected>product 1</option>
     <option option="target2">product 2</option>
   </amp-selector>

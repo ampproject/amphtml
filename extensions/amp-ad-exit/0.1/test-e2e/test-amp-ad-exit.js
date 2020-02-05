@@ -97,7 +97,7 @@ describes.endtoend(
       ).to.have.sentCount(1);
     });
 
-    it('indirect target "current" should point to product1 by default', async () => {
+    it('variable target "current" should point to product1 by default', async () => {
       const headline = await controller.findElement('h1');
       await setTime(Number.MAX_VALUE);
       await controller.click(headline);
@@ -111,7 +111,7 @@ describes.endtoend(
       );
     });
 
-    it('should open product2 after setting indirect target', async () => {
+    it('should open product2 after setting varible target', async () => {
       const headline = await controller.findElement('h1');
       const nextButton = await controller.findElement('#next-btn');
       await setTime(Number.MAX_VALUE);

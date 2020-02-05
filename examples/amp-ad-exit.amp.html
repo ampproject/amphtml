@@ -134,11 +134,11 @@ amp-carousel .content {
     <div class="content" role="link" tabindex="1" on="tap:exit-api.exit(target='target2', _elem='slide2')">product 2</div>
   </amp-carousel>
   <button id="cta" role="button" tabindex="1"
-      on="tap:exit-api.exitIndirect(target='current', defaultTarget='target1', _elem='cta')">
+      on="tap:exit-api.exit(variable='current', default='target1', _elem='cta')">
     Buy
     <span>
       <amp-selector id="exit-selector"
-          on="select:exit-api.setIndirectTarget(name='current', pointTo=event.targetOption)">
+          on="select:exit-api.setVariable(name='current', target=event.targetOption)">
         <option option="target1" selected>product 1</option>
         <option option="target2">product 2</option>
       </amp-selector>
