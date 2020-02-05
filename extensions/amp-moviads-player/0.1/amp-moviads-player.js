@@ -124,9 +124,9 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
     if (typeof mapConfig !== 'undefined') {
       this.configMap_ = mapConfig;
     }
-    if (this.element.getAttribute('data-conf')) {
+    if (this.element.getAttribute('data-video-custom-conf')) {
       this.config_ = new Function(
-        'return (' + this.element.getAttribute('data-conf') + ')'
+        'return (' + this.element.getAttribute('data-video-custom-conf') + ')'
       )();
     }
     this.mapConfig();

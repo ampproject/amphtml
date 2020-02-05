@@ -17,11 +17,11 @@
 <body>
 
 <script>
-    var mapConfig = {
-        // movieSrcs: ['https://storage1.platform.moviads.pl/224/f/z/7/b/fz7bzymy23_480p.mp4',
-        //     'https://storage1.platform.moviads.pl/224/f/z/7/c/fz7c0oclop_480p.mp4',
-        //     'https://storage1.platform.moviads.pl/224/f/z/7/c/fz7c2lpnjb_480p.mp4',
-        // ],
+    var videoCustomConf = {
+        movieSrcs: ['https://storage1.platform.moviads.pl/224/f/z/7/b/fz7bzymy23_480p.mp4',
+            'https://storage1.platform.moviads.pl/224/f/z/7/c/fz7c0oclop_480p.mp4',
+            'https://storage1.platform.moviads.pl/224/f/z/7/c/fz7c2lpnjb_480p.mp4',
+        ],
         movieContenerId: 'uniq123',
         movieSrc: 'https://www.videvo.net/videvo_files/converted/2014_02/videos/Clock_Face_2Videvo.mov17947.mp4',
         moviePosterSrc: 'https://img.platform.moviads.pl/9/4/c/c/img_94ccf9798646c9a17dfd8a12f7f7e602_640_360_0_0_0_0_ffffff__fe4a5.jpg',
@@ -34,16 +34,12 @@
         UA: 'UA-70993821-1',
         lang: 'pl',
         autoplay: true,
-        scrollOnlyDownPlayer: false,
         volume: 1,
-        volumeOnOver: 0.2,
-        uniqueContentId: 'Radiozet.pl',
+        uniqueContentId: 'cont123',
         hideWhenNoAd: false,
         hideWhenEnd: false,
-        scrollPlayer: true,
-        debug: false,
         adBlockInfo: 'Test adblock Test adblock Test adblock Test adblock Test adblock Test adblock Test adblock',
-        functionAfterEnded: 'test',
+        functionAfterEnded: null,
         videoWall: [
             {
                 title: "„Obgryzaj, znajduj, wygrywaj” w loterii promującej Ptasie Mleczko od Wedla",
@@ -88,33 +84,11 @@
         ]
     }
 
-
-    var ua = navigator.userAgent.toLowerCase();
-
-    function test(){
-        alert('test');
-    }
-
 </script>
 
-<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
-<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
-<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
 <div style="max-width: 640px">
-  <!--  <amp-ima-player id="myVideo" height="1" width="2" layout="responsive" responsive></amp-ima-player>-->
-
-  <amp-moviads-player id="myVideo" data-conf="mapConfig" height="1" width="2" layout="responsive" responsive></amp-moviads-player>
-
+  <amp-moviads-player data-video-custom-conf="videoCustomConf" height="1" width="2" layout="responsive" responsive></amp-moviads-player>
 </div>
-<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
-<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
-<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111<br>111
-<h3>Actions</h3>
-<button on="tap:myVideo.play">Play</button>
-<button on="tap:myVideo.pause">Pause</button>
-<button on="tap:myVideo.mute">Mute</button>
-<button on="tap:myVideo.unmute">Unmute</button>
-<button on="tap:myVideo.fullscreen">Fullscreen</button>
 
 <div class="spacer"></div>
 </body>

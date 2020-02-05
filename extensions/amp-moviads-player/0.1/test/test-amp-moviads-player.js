@@ -15,7 +15,7 @@
  */
 
 import '../amp-moviads-player';
-import * as imaVideoObj from '../../../../ads/moviadsPlayer';
+import * as imaVideoObj from '../../../../ads/google/imaVideo';
 import {CONSENT_POLICY_STATE} from '../../../../src/consent-state';
 import {Services} from '../../../../src/services';
 
@@ -60,7 +60,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -75,7 +75,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -90,7 +90,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -184,7 +184,7 @@ describes.realWin(
         if (label) {
           defaults = Object.assign(defaults, {adLabel: label});
         }
-        imaVideoObj.moviAdsPlayer(win, defaults);
+        imaVideoObj.imaVideo(win, defaults);
         const {controlsDiv} = imaVideoObj.getPropertiesForTesting();
         const countdownDiv = controlsDiv.querySelector('#ima-countdown > div');
         imaVideoObj.setAdsManagerForTesting({
@@ -202,7 +202,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -235,7 +235,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -256,7 +256,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -277,7 +277,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -338,7 +338,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -401,7 +401,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -421,7 +421,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -444,7 +444,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -479,7 +479,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -532,7 +532,7 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -590,7 +590,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -618,7 +618,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -645,7 +645,7 @@ describes.realWin(
       const div = doc.createElement('div');
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -701,7 +701,7 @@ describes.realWin(
         src: srcUrl,
         tag: adTagUrl,
       };
-      imaVideoObj.moviAdsPlayer(win, videoDefaults);
+      imaVideoObj.imaVideo(win, videoDefaults);
 
       const ad = {
         skippable: {getSkipTimeOffset: () => 30},
@@ -753,7 +753,7 @@ describes.realWin(
         div.setAttribute('id', 'c');
         doc.body.appendChild(div);
 
-        imaVideoObj.moviAdsPlayer(win, {
+        imaVideoObj.imaVideo(win, {
           width: 640,
           height: 360,
           src: srcUrl,
@@ -784,7 +784,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -809,7 +809,7 @@ describes.realWin(
         div.setAttribute('id', 'c');
         doc.body.appendChild(div);
 
-        imaVideoObj.moviAdsPlayer(win, {
+        imaVideoObj.imaVideo(win, {
           width: 640,
           height: 360,
           src: srcUrl,
@@ -838,7 +838,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -882,7 +882,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -910,7 +910,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -929,7 +929,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -952,7 +952,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -974,7 +974,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1002,7 +1002,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1029,7 +1029,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1056,7 +1056,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1083,7 +1083,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1115,7 +1115,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1138,7 +1138,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1162,7 +1162,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1186,7 +1186,7 @@ describes.realWin(
           div.setAttribute('id', 'c');
           doc.body.appendChild(div);
 
-          imaVideoObj.moviAdsPlayer(win, {
+          imaVideoObj.imaVideo(win, {
             width: 640,
             height: 360,
             src: srcUrl,
@@ -1224,69 +1224,69 @@ describes.realWin(
         }
       );
 
-      // it(`throttles ${hoverEvent} (hover) for showing controls`, async function() {
-      //   const div = doc.createElement('div');
-      //   div.setAttribute('id', 'c');
-      //   doc.body.appendChild(div);
-      //
-      //   imaVideoObj.moviAdsPlayer(win, {
-      //     width: 640,
-      //     height: 360,
-      //     src: srcUrl,
-      //     tag: adTagUrl,
-      //   });
-      //
-      //   imaVideoObj.hideControls();
-      //   expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
-      //     .false;
-      //   expect(
-      //     imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-      //   ).to.eql('none');
-      //
-      //   const interactEvent = new Event(hoverEvent);
-      //   const videoPlayerElement = imaVideoObj.getPropertiesForTesting()
-      //     .videoPlayer;
-      //
-      //   imaVideoObj.setPlayerStateForTesting(
-      //     imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING
-      //   );
-      //   imaVideoObj.addHoverEventToElement(
-      //     videoPlayerElement,
-      //     imaVideoObj.getShowControlsThrottledForTesting()
-      //   );
-      //   videoPlayerElement.dispatchEvent(interactEvent);
-      //
-      //   expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
-      //     .true;
-      //   expect(
-      //     imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-      //   ).to.eql('flex');
-      //
-      //   imaVideoObj.hideControls();
-      //   expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
-      //     .false;
-      //   expect(
-      //     imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-      //   ).to.eql('none');
-      //
-      //   await timer.promise(100);
-      //   videoPlayerElement.dispatchEvent(interactEvent);
-      //
-      //   expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
-      //     .false;
-      //   expect(
-      //     imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-      //   ).to.eql('none');
-      //
-      //   await timer.promise(950);
-      //   videoPlayerElement.dispatchEvent(interactEvent);
-      //
-      //   expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
-      //     .true;
-      //   expect(
-      //     imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
-      //   ).to.eql('flex');
-      // });
+      it(`throttles ${hoverEvent} (hover) for showing controls`, async function() {
+        const div = doc.createElement('div');
+        div.setAttribute('id', 'c');
+        doc.body.appendChild(div);
+
+        imaVideoObj.imaVideo(win, {
+          width: 640,
+          height: 360,
+          src: srcUrl,
+          tag: adTagUrl,
+        });
+
+        imaVideoObj.hideControls();
+        expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+          .false;
+        expect(
+          imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+        ).to.eql('none');
+
+        const interactEvent = new Event(hoverEvent);
+        const videoPlayerElement = imaVideoObj.getPropertiesForTesting()
+          .videoPlayer;
+
+        imaVideoObj.setPlayerStateForTesting(
+          imaVideoObj.getPropertiesForTesting().PlayerStates.PLAYING
+        );
+        imaVideoObj.addHoverEventToElement(
+          videoPlayerElement,
+          imaVideoObj.getShowControlsThrottledForTesting()
+        );
+        videoPlayerElement.dispatchEvent(interactEvent);
+
+        expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+          .true;
+        expect(
+          imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+        ).to.eql('flex');
+
+        imaVideoObj.hideControls();
+        expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+          .false;
+        expect(
+          imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+        ).to.eql('none');
+
+        await timer.promise(100);
+        videoPlayerElement.dispatchEvent(interactEvent);
+
+        expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+          .false;
+        expect(
+          imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+        ).to.eql('none');
+
+        await timer.promise(950);
+        videoPlayerElement.dispatchEvent(interactEvent);
+
+        expect(imaVideoObj.getPropertiesForTesting().controlsVisible).to.be
+          .true;
+        expect(
+          imaVideoObj.getPropertiesForTesting().controlsDiv.style.display
+        ).to.eql('flex');
+      });
     });
 
     it('suppresses IMA load with unknown consent', () => {
@@ -1295,7 +1295,7 @@ describes.realWin(
       doc.body.appendChild(div);
 
       win.context.initialConsentState = CONSENT_POLICY_STATE.UNKNOWN;
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1314,7 +1314,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1335,7 +1335,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1359,7 +1359,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,
@@ -1383,7 +1383,7 @@ describes.realWin(
       div.setAttribute('id', 'c');
       doc.body.appendChild(div);
 
-      imaVideoObj.moviAdsPlayer(win, {
+      imaVideoObj.imaVideo(win, {
         width: 640,
         height: 360,
         src: srcUrl,

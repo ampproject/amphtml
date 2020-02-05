@@ -36,7 +36,7 @@
 </head>
 <body>
 <script>
-    var mapConfig = {
+    var videoCustomConf = {
         movieSrcs: ['https://storage1.platform.moviads.pl/224/f/z/7/b/fz7bzymy23_480p.mp4',
             'https://storage1.platform.moviads.pl/224/f/z/7/c/fz7c0oclop_480p.mp4',
             'https://storage1.platform.moviads.pl/224/f/z/7/c/fz7c2lpnjb_480p.mp4',
@@ -53,16 +53,13 @@
         UA: 'UA-70993821-1',
         lang: 'pl',
         autoplay: true,
-        scrollOnlyDownPlayer: false,
         volume: 1,
-        volumeOnOver: 0.2,
-        uniqueContentId: 'Radiozet.pl',
+        uniqueContentId: 'conf123',
         hideWhenNoAd: false,
         hideWhenEnd: false,
         scrollPlayer: true,
-        debug: false,
         adBlockInfo: 'Test adblock',
-        functionAfterEnded: 'test',
+        functionAfterEnded: null,
         videoWall: [
             {
                 title: "„Obgryzaj, znajduj, wygrywaj” w loterii promującej Ptasie Mleczko od Wedla",
@@ -107,14 +104,10 @@
         ]
     }
 
-    function test(){
-        console.log('load test method');
-    }
-
 </script>
 
 <div style="max-width: 640px">
-  <amp-moviads-player data-conf="mapConfig" height="1" width="2" layout="responsive" responsive></amp-moviads-player>
+  <amp-moviads-player data-video-custom-conf="videoCustomConf" height="1" width="2" layout="responsive" responsive></amp-moviads-player>
 </div>
 </body>
 </html>
