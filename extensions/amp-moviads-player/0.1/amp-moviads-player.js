@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-video-custom-moviads-0.1.css';
+import {CSS} from '../../../build/amp-moviads-player-0.1.css';
 import {Deferred} from '../../../src/utils/promise';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
@@ -35,15 +35,15 @@ import {isEnumValue, isObject, toArray} from '../../../src/types';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const */
-const EXPERIMENT = 'amp-video-custom-moviads';
+const EXPERIMENT = 'amp-moviads-player';
 
 /** @const */
-const TAG = 'amp-video-custom-moviads';
+const TAG = 'amp-moviads-player';
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
  */
-class AmpVideoCustomMoviads extends AMP.BaseElement {
+class AmpMoviadsPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
     super(element);
@@ -889,5 +889,5 @@ class AmpVideoCustomMoviads extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.registerElement(TAG, AmpVideoCustomMoviads, CSS);
+  AMP.registerElement(TAG, AmpMoviadsPlayer, CSS);
 });

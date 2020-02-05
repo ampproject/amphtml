@@ -3,19 +3,19 @@ PASS
 |  <html ⚡>
 |  <head>
 |    <meta charset="utf-8">
-|    <title>amp-video-custom-moviads example</title>
+|    <title>amp-moviads-player example</title>
 |    <link rel="canonical" href="amps.html">
 |    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <style amp-custom>
-|      amp-video-custom-moviads {
+|      amp-moviads-player {
 |        color: red;
 |      }
 |    </style>
-|    <script async custom-element="amp-video-custom-moviads" src="https://cdn.ampproject.org/v0/amp-video-custom-moviads-0.1.js"></script>
+|    <script async custom-element="amp-moviads-player" src="https://cdn.ampproject.org/v0/amp-moviads-player-0.1.js"></script>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|    <amp-video-custom-moviads layout="responsive" width="150" height="80"></amp-video-custom-moviads>
+|    <amp-moviads-player layout="responsive" width="150" height="80"></amp-moviads-player>
 |  </body>
 |  </html>

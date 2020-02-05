@@ -14,22 +14,22 @@
 # limitations under the license.
 #
 
-tags: {  # amp-video-custom-moviads
+tags: {  # amp-moviads-player
   html_format: AMP
   tag_name: "SCRIPT"
   extension_spec: {
-    name: "amp-video-custom-moviads"
+    name: "amp-moviads-player"
     version: "0.1"
     version: "latest"
   }
   attr_lists: "common-extension-attrs"
 }
-tags: {  # <amp-video-custom-moviads>
+tags: {  # <amp-moviads-player>
   html_format: AMP
-  tag_name: "amp-video-custom-moviads"
-  requires_extension: "amp-video-custom-moviads"
+  tag_name: "AMP-MOVIADS-PLAYER"
+  requires_extension: "amp-moviads-player"
   attr_lists: "extended-amp-global"
-  spec_url: "https://amp.dev/documentation/components/amp-video-custom-moviads"
+  spec_url: "https://amp.dev/documentation/components/amp-moviads-player"
   amp_layout: {
     supported_layouts: RESPONSIVE
   }

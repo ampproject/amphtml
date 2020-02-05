@@ -1171,7 +1171,7 @@ exports.extensionBundles = [
     type: TYPES.MEDIA,
   },
   {
-    name: 'amp-video-custom-moviads',
+    name: 'amp-moviads-player',
     version: '0.1',
     latestVersion: '0.1',
     options: {hasCss: true},
