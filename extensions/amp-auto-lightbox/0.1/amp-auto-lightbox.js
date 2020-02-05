@@ -212,7 +212,7 @@ export function meetsSizingCriteria(
  * @return {!Promise}
  */
 function markAsVisited(candidate) {
-  return Mutation.mutate(candidate, () => {
+  return Services.mutatorForDoc(candidate).mutateElement(candidate, () => {
     candidate.setAttribute(VISITED_ATTR, '');
   });
 }
@@ -306,24 +306,6 @@ export class DocMetaAnnotations {
 }
 
 /**
- * Wrapper for an element-implementation-mutate sequence for readability and
- * mocking in tests.
- * @visibleForTesting
- */
-export class Mutation {
-  /**
-   * @param {!Element} ampEl
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
-  static mutate(ampEl, mutator) {
-    return whenUpgradedToCustomElement(ampEl).then(ampEl =>
-      ampEl.getResources().mutateElement(ampEl, mutator)
-    );
-  }
-}
-
-/**
  * Determines whether a document uses `amp-lightbox-gallery` explicitly by
  * including the extension and explicitly lightboxing at least one element.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
@@ -377,9 +359,11 @@ function generateLightboxUid() {
  * @visibleForTesting
  */
 export function apply(ampdoc, element) {
-  return Mutation.mutate(element, () => {
+  const mutator = Services.mutatorForDoc(ampdoc);
+  const mutatePromise = mutator.mutateElement(element, () => {
     element.setAttribute(LIGHTBOXABLE_ATTR, generateLightboxUid());
-  }).then(() => {
+  });
+  return mutatePromise.then(() => {
     Services.extensionsFor(ampdoc.win).installExtensionForDoc(
       ampdoc,
       REQUIRED_EXTENSION
