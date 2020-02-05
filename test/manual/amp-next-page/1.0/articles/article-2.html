@@ -27,11 +27,6 @@
       line-height: 24px;
     }
 
-    /* In the shadow-doc mode, the parent shell already has header and nav. */
-    .amp-shadow header {
-      display: none;
-    }
-
     .lightbox {
       background: #222;
     }
@@ -328,65 +323,12 @@
   <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
   <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
   <script async custom-element="amp-app-banner" src="https://cdn.ampproject.org/v0/amp-app-banner-0.1.js" data-amp-report-test="amp-app-banner.js"></script>
-  <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-1.0.js"></script>
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
-  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-  <script>
-    (self.AMP=self.AMP||[]).push(function(AMP){
-        AMP.toggleExperiment('amp-next-page-v2', true);
-    });
-  </script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <meta name="apple-itunes-app" content="app-id=828256236, app-argument=medium://p/cb7f223fad86">
   <link rel="manifest" href="medium-manifest.json">
 </head>
 <body>
-  <amp-analytics>
-    <script type="application/json">
-    {
-      "requests": {
-        "scroll": "https://host-page/${eventId}/${eventLabel}/${account}",
-        "pageview": "https://host-page/${canonicalUrl}/${title}/${account}",
-        "imageview": "https://host-page/image-view/?initialScrollDepth=${initialScrollDepth}&maxScrollDepth=${maxScrollDepth}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&firstVisibleTime=${firstVisibleTime}"
-      },
-      "vars": {
-        "account": "ABC123"
-      },
-      "triggers": {
-        "scrollPings": {
-          "on": "scroll",
-          "request": "scroll",
-          "scrollSpec": {
-            "verticalBoundaries": [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-            "horizontalBoundaries": [90],
-            "ignoreResize": true
-          },
-          "vars": {
-            "eventId": "scroll",
-            "eventLabel": "${verticalScrollBoundary}"
-          }
-        },
-        "trackPageview": {
-          "on": "visible",
-          "request": "pageview",
-          "vars": {
-            "eventCategory": "${canonicalUrl}",
-            "eventAction": "view"
-          }
-        },
-        "image_viewed": {
-          "on": "visible",
-          "request": ["imageview"],
-          "selector": "#target1",
-          "visibilitySpec": {
-            "visiblePercentageMin": "0",
-            "repeat": true
-          }
-        }  
-      }
-    }
-    </script>
-  </amp-analytics>
   <amp-sidebar id="sidebar" layout="nodisplay">
     <nav>
       <ul>
@@ -419,7 +361,7 @@
     </div>
   </amp-app-banner>
 
-  <header id="top-bar">
+  <header id="top-bar" next-page-hide>
     <button on="tap:sidebar.toggle" class="menu" title="Toggle Sidebar" >
       ☰
     </button>
@@ -431,7 +373,7 @@
   <main role="main">
     <article>
       <header id="article-desc">
-        <h1 itemprop="headline">Lorem Ipsum Dolor Set Amet</h1>
+        <h1 itemprop="headline">Dolor Set Amet</h1>
         <div class="header-author">
           <amp-img src="https://picsum.photos/16" id="author-avatar" placeholder
             height="16" width="16">
@@ -487,36 +429,9 @@
             Nullam in libero nisi.
           </p>
 
-          <div class="ad-container">
-            <amp-ad width=300 height=250
-                type="a9"
-                data-aax_size="300x250"
-                data-aax_pubname="abc123"
-                data-aax_src="302">
-            </amp-ad>
-          </div>
-
-          <p>
-            Sed pharetra semper fringilla. Nulla fringilla, neque eget
-            varius suscipit, mi turpis congue odio, quis dignissim nisi
-            nulla at erat. Duis non nibh vel erat vehicula hendrerit eget
-            vel velit. Donec congue augue magna, nec eleifend dui porttitor
-            sed. Cras orci quam, dignissim nec elementum ac, bibendum et purus.
-            Ut elementum mi eget felis ultrices tempus. Maecenas nec sodales
-            ex. Phasellus ultrices, purus non egestas ullamcorper, felis
-            lorem ultrices nibh, in tristique mauris justo sed ante.
-            Nunc commodo purus feugiat metus bibendum consequat. Duis
-            finibus urna ut ligula auctor, sed vehicula ex aliquam.
-            Sed sed augue auctor, porta turpis ultrices, cursus diam.
-            In venenatis aliquet porta. Sed volutpat fermentum quam,
-            ac molestie nulla porttitor ac. Donec porta risus ut enim
-            pellentesque, id placerat elit ornare.
-          </p>
-
           <figure>
             <amp-video
               autoplay
-              id="target-1"
               src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
               poster="https://peach.blender.org/wp-content/uploads/bbb-splash.png"
               artwork="img/bigbuckbunny.jpg"
@@ -649,48 +564,5 @@
       </div>
     </article>
   </main>
-  <!-- amp-next-page configuration -->
-  <amp-next-page transition="fade-in-scroll">
-    <script type="application/json">
-      [
-        {
-          "image": "https://picsum.photos/64",
-          "title": "Excepteur sint occaecat cupidatat non",
-          "url": "./articles/article-1.html"
-        },
-        {
-          "image": "https://picsum.photos/64",
-          "title": "Dolor Set Amet",
-          "url": "./articles/article-2.html"
-        },
-        {
-          "image": "https://picsum.photos/64",
-          "title": "Consectetur Adipiscing Elit Sed Do",
-          "url": "./articles/article-3.html"
-        },
-        {
-          "image": "https://picsum.photos/64",
-          "title": "Page 4",
-          "url": "./amp-next-page.amp.html"
-        }
-      ]
-    </script>
-    <!-- Custom Separator & Footer Elements
-      <div separator class="my-custom-separator">
-        <template type="amp-mustache">
-          <div class="my-custom-separator-content">
-            <amp-img src={{image}} layout="fixed" height="16" width="16"></amp-img>
-            <span>Next article: {{title}}</span>
-          </div>
-        </template>
-      </div>
-      <div footer class="my-custom-footer">
-          Here are a few more articles ...
-      </div>
-    -->
-    <footer>
-      <div class="brand-logo">PublisherLogo</div>
-    </footer>
-  </amp-next-page>
 </body>
 </html>

@@ -558,7 +558,7 @@ export class NextPageService {
       setStyles(container, {
         'opacity': 1,
         'will-change': 'opacity',
-        'transition': 'opacity 0.1s',
+        'transition': 'opacity 0.3s',
       });
     }
 
