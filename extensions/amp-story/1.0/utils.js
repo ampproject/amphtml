@@ -28,18 +28,10 @@ import {
 } from '../../../src/url';
 import {getState} from '../../../src/history';
 import {setStyle} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
 import {user, userAssert} from '../../../src/log';
 
-/** @const {function(*, *)} */
-const throttleReplace = throttle(
-  window,
-  (history, newHistory) => history.replaceState(newHistory, ''),
-  400
-);
-
 /** @type {*} */
-let historyStateBuffer = getState(window.history);
+let historyStateBuffer = null;
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -275,17 +267,17 @@ export const HistoryState = {
  * @param {!Window} win
  * @param {string} stateName
  * @param {string|boolean|Array<string>|null} value
+ * @param {function(*, *)} throttledReplaceState Throttled replaceState.
  */
-export function setHistoryState(win, stateName, value) {
+export function setHistoryState(win, stateName, value, throttledReplaceState) {
   const {history} = win;
   const state = getState(history) || {};
-  const newHistory = {
+  historyStateBuffer = {
     ...state,
     [stateName]: value,
   };
 
-  historyStateBuffer = newHistory;
-  throttleReplace(history, historyStateBuffer);
+  throttledReplaceState(win.history, historyStateBuffer);
 }
 
 /**
@@ -297,7 +289,9 @@ export function setHistoryState(win, stateName, value) {
 export function getHistoryState(win, stateName) {
   const {history} = win;
   if (history && getState(history)) {
-    return historyStateBuffer[stateName];
+    return historyStateBuffer
+      ? historyStateBuffer[stateName]
+      : getState(history)[stateName];
   }
   return null;
 }

@@ -93,7 +93,15 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, env => {
     });
 
     it('should return the PAGE_ATTACHMENT_STATE', async () => {
-      setHistoryState(env.win, HistoryState.ATTACHMENT_PAGE_ID, 'SOME_ID');
+      const fakeThrottle = (history, newHistory) => {
+        history.replaceState(newHistory);
+      };
+      setHistoryState(
+        env.win,
+        HistoryState.ATTACHMENT_PAGE_ID,
+        'SOME_ID',
+        fakeThrottle
+      );
       const response = await fakeViewerService.receiveMessage(
         'getDocumentState',
         {state: 'PAGE_ATTACHMENT_STATE'}
@@ -102,7 +110,12 @@ describes.fakeWin('amp-story-viewer-messaging-handler', {}, env => {
         state: 'PAGE_ATTACHMENT_STATE',
         value: true,
       });
-      setHistoryState(env.win, HistoryState.ATTACHMENT_PAGE_ID, null);
+      setHistoryState(
+        env.win,
+        HistoryState.ATTACHMENT_PAGE_ID,
+        null,
+        fakeThrottle
+      );
     });
 
     it('should return the STORY_PROGRESS', async () => {
