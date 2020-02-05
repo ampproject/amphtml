@@ -88,7 +88,8 @@ const UNMINIFIED_TARGETS = [
  * Note: keep this list in sync with release script. Contact @ampproject/wg-infra
  * for details.
  */
-const MINIFIED_TARGETS = ['alp.js', 'amp4ads-v0.js', 'shadow-v0.js', 'v0.js'];
+const MINIFIED_TARGETS = ['alp.js', 'amp4ads-v0.js', 'shadow-v0.js', 'v0.js']
+    .map(maybeToEsmName);
 
 /**
  * Settings for the global Babelify transform while compiling unminified code
