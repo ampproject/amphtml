@@ -210,7 +210,7 @@ class AmpVideoIframe extends AMP.BaseElement {
       element
     );
     return createElementWithAttributes(
-      element.ownerDocument,
+      dev().assert(element.ownerDocument),
       'amp-img',
       dict({
         'src': src,
