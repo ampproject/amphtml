@@ -6,6 +6,6 @@
   "devDependencies": {
     "@percy/agent": "0.21.0",
     "@percy/puppeteer": "1.1.0",
-    "puppeteer": "2.1.0"
+    "puppeteer": "2.1.1"
   }
 }
