@@ -82,6 +82,15 @@ const getAnalyticsEventTypePrefixRegex = once(
 );
 
 /**
+ * @param {string} url
+ * @param {!Element} element
+ * @return {string}
+ * @private
+ */
+const addDataParamsToUrl = (url, element) =>
+  addParamsToUrl(url, getDataParamsFromAttributes(element));
+
+/**
  * @param {string} src
  * @return {string}
  */
@@ -196,8 +205,9 @@ class AmpVideoIframe extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const {element} = this;
-    const src = this.addDataParamsToUrl_(
-      user().assertString(element.getAttribute('poster'))
+    const src = addDataParamsToUrl(
+      user().assertString(element.getAttribute('poster')),
+      element
     );
     return createElementWithAttributes(
       element.ownerDocument,
@@ -235,10 +245,10 @@ class AmpVideoIframe extends AMP.BaseElement {
   getSrc_() {
     const {element} = this;
     const urlService = Services.urlForDoc(element);
-    const src = this.addDataParamsToUrl_(element.getAttribute('src'));
+    const src = element.getAttribute('src');
 
     if (urlService.getSourceOrigin(src) === urlService.getWinOrigin(this.win)) {
-      this.user().warn(
+      user().warn(
         TAG,
         'Origins of document inside amp-video-iframe and the host are the ' +
           'same, which allows for same-origin behavior. However in AMP ' +
@@ -248,16 +258,7 @@ class AmpVideoIframe extends AMP.BaseElement {
       );
     }
 
-    return maybeAddAmpFragment(src);
-  }
-
-  /**
-   * @param {string} url
-   * @return {string}
-   * @private
-   */
-  addDataParamsToUrl_(url) {
-    return addParamsToUrl(url, getDataParamsFromAttributes(this.element));
+    return maybeAddAmpFragment(addDataParamsToUrl(src, element));
   }
 
   /**
