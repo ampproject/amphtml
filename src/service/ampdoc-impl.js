@@ -24,7 +24,7 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
 import {dev, devAssert} from '../log';
-import {findIndex} from '../utils/array';
+import {escapeCssSelectorIdent} from '../css';
 import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
@@ -32,7 +32,6 @@ import {isInAmpdocFieExperiment} from '../ampdoc-fie';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
 import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
-import {toArray} from '../types';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -421,18 +420,31 @@ export class AmpDoc {
 
   /**
    * Returns the value of an ampdoc's meta tag content for a given name, or
-   * `null` if the meta tag does not exist. To be implemented by subclasses.
-   * @param {string} unusedName
+   * `null` if the meta tag does not exist.
+   * @param {string} name
    * @return {?string}
    */
-  getMetaByName(unusedName) {
-    return /** @type {?} */ (devAssert(null, 'not implemented'));
+  getMetaByName(name) {
+    if (!name) {
+      return null;
+    }
+
+    const el = dev()
+      .assertElement(this.win.document.head)
+      .querySelector(`meta[name="${escapeCssSelectorIdent(name)}"]`);
+
+    return el ? el.getAttribute('content') || '' : null;
   }
 
   /**
-   * Stores the value of an ampdoc's meta tag content for a given name.
+   * Stores the value of an ampdoc's meta tag content for a given name. To be
+   * implemented by subclasses.
    * @param {string} unusedName
    * @param {string} unusedContent
+   *
+   * Avoid using this method in components. It is only meant to be used by the
+   * runtime for AmpDoc subclasses where <meta> elements do not exist and name/
+   * content pairs must be stored in this.meta_.
    */
   setMetaByName(unusedName, unusedContent) {
     devAssert(null, 'not implemented');
@@ -780,49 +792,6 @@ export class AmpDocSingle extends AmpDoc {
   whenReady() {
     return this.readyPromise_;
   }
-
-  /** @override */
-  getMetaByName(name) {
-    if (!name) {
-      return null;
-    }
-
-    // 4.2.5.1 Standard metadata names
-    //   Names are case-insensitive, and must be compared in an ASCII case-
-    //   insensitive manner.
-    // https://html.spec.whatwg.org/multipage/semantics.html#standard-metadata-names
-    //
-    // Rules about case sensitivity and multiple meta tags with the same name
-    // are not as strict for non-standard metadata names. Adopt the conventions
-    // used by PHP get_meta_tags():
-    //   1. Special characters in the value of the name property are substituted
-    //      with '_', the rest is converted to lower case.
-    //   2. If two meta tags have the same name, only the last one is returned.
-    // https://www.php.net/manual/en/function.get-meta-tags.php
-    //
-    // Proper unicode support if browser can handle it
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicode
-    const lowerName = name.toLowerCase();
-    const metaEls = toArray(
-      dev()
-        .assertElement(this.win.document.head)
-        .querySelectorAll(`meta[name]`)
-    );
-    const metaElIndex = findIndex(metaEls, el => {
-      const mName = el.getAttribute('name');
-      let sanitizedName;
-      try {
-        sanitizedName = mName.replace(/[^\x00-\x7F]/gu, '_').toLowerCase();
-      } catch (ex) {
-        sanitizedName = mName.replace(/[^\x00-\x7F]/g, '_').toLowerCase();
-      }
-      return sanitizedName === lowerName;
-    });
-
-    return metaElIndex >= 0
-      ? metaEls[metaElIndex].getAttribute('content') || ''
-      : null;
-  }
 }
 
 /**
@@ -937,39 +906,18 @@ export class AmpDocShadow extends AmpDoc {
 
   /** @override */
   getMetaByName(name) {
-    name = name.toLowerCase();
     return this.meta_[name] !== undefined ? this.meta_[name] : null;
   }
 
   /** @override */
   setMetaByName(name, content) {
     if (!name) {
-      throw new Error('Attempted to store invalid meta name/content pair');
+      throw dev().createError(
+        'Attempted to store invalid meta name/content pair'
+      );
     }
 
-    // 4.2.5.1 Standard metadata names
-    //   Names are case-insensitive, and must be compared in an ASCII case-
-    //   insensitive manner.
-    // https://html.spec.whatwg.org/multipage/semantics.html#standard-metadata-names
-    //
-    // Rules about case sensitivity and multiple meta tags with the same name
-    // are not as strict for non-standard metadata names. Adopt the conventions
-    // used by PHP get_meta_tags():
-    //   1. Special characters in the value of the name property are substituted
-    //      with '_', the rest is converted to lower case.
-    //   2. If two meta tags have the same name, only the last one is returned.
-    // https://www.php.net/manual/en/function.get-meta-tags.php
-    //
-    // Proper unicode support if browser can handle it
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/unicode
-    let sanitizedName;
-    try {
-      sanitizedName = name.replace(/[^\x00-\x7F]/gu, '_').toLowerCase();
-    } catch (ex) {
-      sanitizedName = name.replace(/[^\x00-\x7F]/g, '_').toLowerCase();
-    }
-
-    this.meta_[sanitizedName] = content;
+    this.meta_[name] = content;
   }
 }
 

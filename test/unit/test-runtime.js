@@ -1346,14 +1346,12 @@ describes.realWin(
       });
 
       it('should import meta content', () => {
-        const name = 'abc';
-        const content = '123';
         const metaEl = win.document.createElement('meta');
-        metaEl.setAttribute('name', name);
-        metaEl.setAttribute('content', content);
+        metaEl.setAttribute('name', 'abc');
+        metaEl.setAttribute('content', '123');
         importDoc.head.appendChild(metaEl);
         const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
-        expect(amp.ampdoc.getMetaByName(name)).to.equal(content);
+        expect(amp.ampdoc.getMetaByName('abc')).to.equal('123');
       });
 
       it('should start as visible by default', () => {
