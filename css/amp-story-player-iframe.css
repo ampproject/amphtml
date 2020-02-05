@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-import {validateData, writeScript} from '../3p/3p';
+:host {
+  all: initial;
+  display: block;
+  border-radius: 0 !important;
+  width: 360px;
+  height: 600px;
+  overflow: auto;
+}
 
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-export function yahoo(global, data) {
-  validateData(data, ['sid', 'site', 'sa']);
-  global.yadData = data;
-  writeScript(global, 'https://s.yimg.com/aaq/ampad/display.js');
+.story-player-iframe {
+  height: 100%;
+  width: 100%;
+  flex: 0 0 100%;
+  border: 0;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+main {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.i-amphtml-story-player-loaded iframe {
+  opacity: 1;
 }
