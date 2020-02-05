@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const fs = require('fs');
+const fs = require('fs-extra');
 const fsPath = require('path');
-const {transformSync} = require('@babel/core');
+const tempy = require('tempy');
+const {addNamed} = require('@babel/helper-module-imports');
+const {transformFileSync, transformSync} = require('@babel/core');
 
 /**
  * @fileoverview
@@ -65,6 +67,15 @@ function transformRedefineInline({types: t}) {
       ExportDefaultDeclaration: unexport,
       ExportNamedDeclaration: unexport,
       ExportAllDeclaration: unexport,
+      Program(path, {opts}) {
+        if (!opts.hoistedDecls || !opts.hoistedDecls.length) {
+          return;
+        }
+        path.unshiftContainer(
+          'body',
+          t.variableDeclaration('const', opts.hoistedDecls)
+        );
+      },
       ImportDeclaration(path, {opts}) {
         const {source} = path.node;
         if (source.value.startsWith('.')) {
@@ -128,13 +139,13 @@ const redefineInline = (sourceFilename, opts) =>
     configFile: false,
     code: false,
     ast: true,
-    sourceMaps: true,
     sourceType: 'module',
     plugins: [[transformRedefineInline, opts]],
   });
 
 /**
  * Replaces `configureComponent()` wrapping calls.
+ *
  * @return {Object}
  */
 module.exports = function({types: t}) {
@@ -191,7 +202,6 @@ module.exports = function({types: t}) {
         const properties = propsObj.get('properties');
 
         const propValues = {};
-        const hoistedDecls = [];
 
         for (let i = 0; i < properties.length; i++) {
           const path = properties[i];
@@ -218,15 +228,8 @@ module.exports = function({types: t}) {
           }
 
           const id = program.scope.generateUidIdentifier(name);
+          program.scope.push({id, init: value, kind: 'const'});
           propValues[name] = id;
-          hoistedDecls.push(t.variableDeclarator(id, value));
-        }
-
-        if (hoistedDecls.length) {
-          program.unshiftContainer(
-            'body',
-            t.variableDeclaration('const', hoistedDecls)
-          );
         }
 
         // TODO(alanorozco): sourcemaps
