@@ -21,7 +21,6 @@
     --correct-color-shaded: #2D8E42 !important;
     --incorrect-color: #F34E4E !important;
     --incorrect-color-shaded: #cc4141 !important;
-    --accent-color: #005AF0;
     --option-1-percentage: 0%;
     --option-2-percentage: 0%;
     --option-3-percentage: 0%;
@@ -31,11 +30,13 @@
     border-radius: 32px !important;
 }
 
+/* TODO: remove bg on no-prompt attribute here */
+
 .i-amphtml-story-quiz-prompt-container {
     display: flex !important;
     justify-items: center !important;
     padding: 20px !important;
-    color: white !important;
+    color: var(--prompt-text-color) !important;
 }
 
 .i-amphtml-story-quiz-prompt {
@@ -69,8 +70,8 @@ h3.i-amphtml-story-quiz-prompt {
 .i-amphtml-story-quiz-option-container {
     display: flex !important;
     flex-direction: column;
-    background-color: white !important;
-    border-radius: 30px !important;
+    background-color: var(--theme-background) !important;
+    border-radius: var(--chip-radius) !important;
     padding: 8px 8px 0px 8px !important;
 }
 
@@ -79,12 +80,15 @@ h3.i-amphtml-story-quiz-prompt {
     display: flex !important;
     justify-items: start !important;
     align-items: center !important;
-    border-radius: 30px !important;
+    border-radius: var(--chip-radius) !important;
     padding: 8px 16px 8px 8px !important;
     background-color: transparent !important;
     margin-bottom: 8px !important;
-    color: #5F6368 !important;
-    border: solid 1px #DADCE0 !important;
+    color: var(--option-text-color) !important;
+    border: solid 1px var(--theme-border) !important;
+    box-shadow: var(--chip-shadow) !important;
+    -webkit-box-shadow: var(--chip-shadow) !important;
+    -moz-box-shadow: var(--chip-shadow) !important;
     font-size: 16px !important;
     line-height: 20px !important;
     overflow: hidden !important;
@@ -167,12 +171,13 @@ h3.i-amphtml-story-quiz-prompt {
 .i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected > .i-amphtml-story-quiz-answer-choice {
     border: solid 2px white !important;
     animation: answer-choice-bounce forwards 600ms linear;
+    background-color: white !important;
 }
 
 /** TODO(jackbsteinberg): Use a more a11y-friendly approach than font-size: 0px; */
 
 .i-amphtml-story-quiz-post-selection [correct] > .i-amphtml-story-quiz-answer-choice {
-    background-color: white !important;
+    background-color: var(--theme-background);
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%235BBA74'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: center !important;
@@ -180,7 +185,7 @@ h3.i-amphtml-story-quiz-prompt {
 }
 
 .i-amphtml-story-quiz-post-selection :not([correct]) > .i-amphtml-story-quiz-answer-choice {
-    background-color: white !important;
+    background-color: var(--theme-background);
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%23F34E4E'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: center !important;
@@ -198,9 +203,10 @@ h3.i-amphtml-story-quiz-prompt {
     left: -1px !important;
     width: 100% !important;
     height: 100% !important;
-    border-radius: 32px !important;
+    border-radius: var(--chip-radius) !important;
     font-size: 16px !important;
     line-height: 20px !important;
+    filter: brightness(0.94) !important;
 }
 
 .i-amphtml-story-quiz-post-selection:not(.i-amphtml-story-quiz-has-data) .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option::before {
@@ -251,8 +257,8 @@ h3.i-amphtml-story-quiz-prompt {
     width: 100% !important;
     height: 100% !important;
     border-radius: 0px !important;
-    background: #ECEDEF !important;
-    color: #ECEDEF !important;
+    background: var(--theme-shading) !important;
+    color: var(--theme-shading) !important;
     transition: transform 1s !important;
     border: solid 2px !important;
 }
