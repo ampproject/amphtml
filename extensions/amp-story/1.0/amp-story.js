@@ -99,7 +99,7 @@ import {
   toggle,
 } from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
-import {debounce, throttle} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
@@ -343,15 +343,6 @@ export class AmpStory extends AMP.BaseElement {
      * @private {boolean}
      */
     this.pausedStateToRestore_ = false;
-
-    /** @private {function()} */
-    this.setNavigationHistoryThrottle_ = throttle(
-      this.win,
-      navigationPath => {
-        setHistoryState(this.win, HistoryState.NAVIGATION_PATH, navigationPath);
-      },
-      1000
-    );
 
     /** @private {?Element} */
     this.sidebar_ = null;
@@ -1548,7 +1539,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, navigationPath);
-    this.setNavigationHistoryThrottle_(navigationPath);
+    setHistoryState(this.win, HistoryState.NAVIGATION_PATH, navigationPath);
   }
 
   /**
