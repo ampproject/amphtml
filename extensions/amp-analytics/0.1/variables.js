@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../../../src/services';
+import {asyncStringReplace} from '../../../src/string';
 import {base64UrlEncodeFromString} from '../../../src/utils/base64';
 import {cookieReader} from './cookie-reader';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
@@ -27,7 +28,6 @@ import {
 } from '../../../src/service';
 import {isArray, isFiniteNumber} from '../../../src/types';
 import {linkerReaderServiceFor} from './linker-reader';
-import {tryResolve} from '../../../src/utils/promise';
 
 /** @const {string} */
 const TAG = 'amp-analytics/variables';
@@ -206,8 +206,6 @@ export class VariableService {
       '$EQUALS',
       (firstValue, secValue) => firstValue === secValue
     );
-    // TODO(ccordry): Make sure this stays a window level service when this
-    // VariableService is migrated to document level.
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
@@ -237,22 +235,17 @@ export class VariableService {
   }
 
   /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {!Promise<string>} The expanded string
+   * Converts templates from ${} format to MACRO() and resolves any platform
+   * level macros when encountered.
+   * @param {string} template The template to expand.
+   * @param {!ExpansionOptions} options configuration to use for expansion.
+   * @param {!Element} element amp-analytics element.
+   * @param {!JsonObject=} opt_bindings
+   * @param {!Object=} opt_whitelist
+   * @return {!Promise<string>} The expanded string.
    */
-  expandTemplate(template, options) {
-    return tryResolve(this.expandTemplateSync.bind(this, template, options));
-  }
-
-  /**
-   * @param {string} template The template to expand
-   * @param {!ExpansionOptions} options configuration to use for expansion
-   * @return {string} The expanded string
-   * @visibleForTesting
-   */
-  expandTemplateSync(template, options) {
-    return template.replace(/\${([^}]*)}/g, (match, key) => {
+  expandTemplate(template, options, element, opt_bindings, opt_whitelist) {
+    return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
       if (options.iterations < 0) {
         user().error(
           TAG,
@@ -277,40 +270,75 @@ export class VariableService {
       let value = options.getVar(name);
 
       if (typeof value == 'string') {
-        value = this.expandValue_(value, options);
+        value = this.expandValue_(
+          value,
+          options,
+          element,
+          opt_bindings,
+          opt_whitelist
+        );
       } else if (isArray(value)) {
         // Treat each value as a template and expand
         for (let i = 0; i < value.length; i++) {
           value[i] =
             typeof value[i] == 'string'
-              ? this.expandValue_(value[i], options)
+              ? this.expandValue_(
+                  value[i],
+                  options,
+                  element,
+                  opt_bindings,
+                  opt_whitelist
+                )
               : value[i];
         }
       }
 
-      if (!options.noEncode) {
-        value = encodeVars(/** @type {string|?Array<string>} */ (value));
-      }
-      if (value) {
-        value += argList;
-      }
-      return value;
+      const bindings = opt_bindings || this.getMacros(element);
+      const urlReplacements = Services.urlReplacementsForDoc(element);
+
+      return Promise.resolve(value)
+        .then(value => {
+          if (isArray(value)) {
+            return Promise.all(
+              value.map(item =>
+                urlReplacements.expandStringAsync(item, bindings, opt_whitelist)
+              )
+            );
+          }
+          return urlReplacements.expandStringAsync(
+            value + argList,
+            bindings,
+            opt_whitelist
+          );
+        })
+        .then(value => {
+          if (!options.noEncode) {
+            value = encodeVars(/** @type {string|?Array<string>} */ (value));
+          }
+          return value;
+        });
     });
   }
 
   /**
    * @param {string} value
    * @param {!ExpansionOptions} options
-   * @return {string}
+   * @param {!Element} element amp-analytics element.
+   * @param {!JsonObject=} opt_bindings
+   * @param {!Object=} opt_whitelist
+   * @return {Promise<string>}
    */
-  expandValue_(value, options) {
-    return this.expandTemplateSync(
+  expandValue_(value, options, element, opt_bindings, opt_whitelist) {
+    return this.expandTemplate(
       value,
       new ExpansionOptions(
         options.vars,
         options.iterations - 1,
         true /* noEncode */
-      )
+      ),
+      element,
+      opt_bindings,
+      opt_whitelist
     );
   }
 
