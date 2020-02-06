@@ -430,31 +430,31 @@ Nested objects are generally merged to a maximum depth of 10. All variables, inc
     {
       "foo": "bar",
       "first": {
-          "a": "nested once",
-          "ab": {
-          	"b": "nested twice",
-          	"bc":{
-              	"c": "nested three times",
-                  "cd": {
-                  	"d": "nested four times",
-                      "de": {
-                      	"e": "nested five times",
-                          "ef": {
-                          	"f": "nested six times",
-                              "fg": {
-                              	"g": "nested seven times",
-                                  "gh": {
-                                  	"h": "nested nine times",
-                                      "hi": {
-                                      	"i": "nested ten times"
-                                      }
-                                  }
-                              }
-                          }
+        "a": "nested once",
+        "ab": {
+          "b": "nested twice",
+          "bc":{
+            "c": "nested three times",
+            "cd": {
+              "d": "nested four times",
+              "de": {
+                "e": "nested five times",
+                "ef": {
+                  "f": "nested six times",
+                  "fg": {
+                    "g": "nested seven times",
+                    "gh": {
+                      "h": "nested nine times",
+                      "hi": {
+                        "i": "nested ten times"
                       }
+                    }
                   }
+                }
               }
+            }
           }
+        }
       }
     }
   </script>
@@ -1508,7 +1508,7 @@ In development mode, `amp-bind` will also issue a warning when dereferencing und
 ```html
 <amp-state id="myAmpState">
   <script type="application/json">
-    { "foo": 123 }
+    {"foo": 123}
   </script>
 </amp-state>
 
