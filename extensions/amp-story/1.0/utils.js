@@ -28,18 +28,7 @@ import {
 } from '../../../src/url';
 import {getState} from '../../../src/history';
 import {setStyle} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
 import {user, userAssert} from '../../../src/log';
-
-/** @const {function(*, *)} */
-const throttleReplace = throttle(
-  window,
-  (history, newHistory) => history.replaceState(newHistory, ''),
-  400
-);
-
-/** @type {*} */
-let historyStateBuffer = getState(window.history);
 
 /**
  * Returns millis as number if given a string(e.g. 1s, 200ms etc)
@@ -279,12 +268,12 @@ export const HistoryState = {
 export function setHistoryState(win, stateName, value) {
   const {history} = win;
   const state = getState(history) || {};
-  historyStateBuffer = {
+  const newHistory = {
     ...state,
     [stateName]: value,
   };
 
-  throttleReplace(history, historyStateBuffer);
+  history.replaceState(newHistory, '');
 }
 
 /**
@@ -296,7 +285,7 @@ export function setHistoryState(win, stateName, value) {
 export function getHistoryState(win, stateName) {
   const {history} = win;
   if (history && getState(history)) {
-    return historyStateBuffer[stateName];
+    return getState(history)[stateName];
   }
   return null;
 }
