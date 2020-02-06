@@ -18,6 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
+const gap = require('gulp-append-prepend');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
@@ -35,7 +36,6 @@ const {isTravisBuild} = require('../common/travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
-const gap = require('gulp-append-prepend');
 
 const isProdBuild = !!argv.type;
 const queue = [];
@@ -399,7 +399,12 @@ function compile(
         )
         .on('error', reject)
         .pipe(sourcemaps.write('.'))
-        //.pipe(gulpIf(options.esmPassCompilation, gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)))
+        .pipe(
+          gulpIf(
+            options.esmPassCompilation,
+            gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
+          )
+        )
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);
     }
