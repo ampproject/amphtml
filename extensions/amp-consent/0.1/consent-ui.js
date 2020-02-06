@@ -24,6 +24,7 @@ import {
   insertAfterOrAtStart,
   isAmpElement,
   removeElement,
+  tryFocus,
   whenUpgradedToCustomElement,
 } from '../../../src/dom';
 import {getConsentStateValue} from './consent-info';
@@ -37,6 +38,8 @@ const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const DEFAULT_INITIAL_HEIGHT = '30vh';
 const DEFAULT_ENABLE_BORDER = true;
+const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
+const BUTTON_ACTION_CAPTION = 'Focus Prompt';
 
 // Classes for consent UI
 export const consentUiClasses = {
@@ -48,6 +51,7 @@ export const consentUiClasses = {
   placeholder: 'i-amphtml-consent-ui-placeholder',
   mask: 'i-amphtml-consent-ui-mask',
   enableBorder: 'i-amphtml-consent-ui-enable-border',
+  screenReaderDialog: 'i-amphtml-consent-alertdialog',
 };
 
 export class ConsentUI {
@@ -84,6 +88,19 @@ export class ConsentUI {
       config['uiConfig'] &&
       config['uiConfig']['overlay'] === true;
 
+    /** @private {string} */
+    this.consentPromptCaption_ =
+      (config['captions'] && config['captions']['consentPromptCaption']) ||
+      CONSENT_PROMPT_CAPTION;
+
+    /** @private {string} */
+    this.buttonActionCaption_ =
+      (config['captions'] && config['captions']['buttonActionCaption']) ||
+      BUTTON_ACTION_CAPTION;
+
+    /** @private {boolean} */
+    this.srAlertShown_ = false;
+
     /** @private {boolean} */
     this.restrictFullscreenOn_ = isExperimentOn(
       baseInstance.win,
@@ -95,6 +112,9 @@ export class ConsentUI {
 
     /** @private {?Element} */
     this.maskElement_ = null;
+
+    /** @private {?Element} */
+    this.srAlert_ = null;
 
     /** @private {?Element} */
     this.elementWithFocusBeforeShowing_ = null;
@@ -206,6 +226,10 @@ export class ConsentUI {
 
           this.maybeShowOverlay_();
 
+          // Create and append SR alert for the when iframe
+          // initially loads.
+          this.maybeShowSrAlert_();
+
           this.showIframe_();
 
           if (!this.isPostPrompt_ && !this.restrictFullscreenOn_) {
@@ -275,6 +299,8 @@ export class ConsentUI {
 
       // Hide the overlay
       this.maybeHideOverlay_();
+      // Remove the SR alert from DOM
+      this.maybeRemoveSrAlert_();
       // Enable the scroll, in case we were fullscreen with no overlay
       this.enableScroll_();
       // Reset any animation styles set by style attribute
@@ -550,6 +576,59 @@ export class ConsentUI {
     this.ui_.removeAttribute('name');
     toggle(dev().assertElement(this.placeholder_), false);
     removeElement(dev().assertElement(this.ui_));
+  }
+
+  /**
+   * If this is the first time viewing the iframe, create
+   * an 'invisible' alert dialog with a title and a button.
+   * Clicking on the button will transfer focus to the iframe.
+   */
+  maybeShowSrAlert_() {
+    if (this.restrictFullscreenOn_) {
+      // If the SR alert has been shown, don't show it again
+      if (this.srAlertShown_) {
+        return;
+      }
+
+      const alertDialog = this.document_.createElement('div');
+      const button = this.document_.createElement('button');
+      const titleDiv = this.document_.createElement('div');
+
+      alertDialog.setAttribute('role', 'alertdialog');
+
+      titleDiv.textContent = this.consentPromptCaption_;
+      button.textContent = this.buttonActionCaption_;
+      button.onclick = () => {
+        tryFocus(dev().assertElement(this.ui_));
+      };
+
+      alertDialog.appendChild(titleDiv);
+      alertDialog.appendChild(button);
+
+      // Style to be visiblly hidden, but not hidden from the SR
+      const {classList} = alertDialog;
+      classList.add(consentUiClasses.screenReaderDialog);
+
+      this.baseInstance_.element.appendChild(alertDialog);
+      tryFocus(button);
+
+      // SR alert was shown when consent prompt loaded for
+      // the first time. Don't show it again
+      this.srAlertShown_ = true;
+
+      // Keep reference of the SR alert to remove later
+      this.srAlert_ = alertDialog;
+    }
+  }
+
+  /**
+   * Remove the SR alert from the DOM once it has been shown once
+   */
+  maybeRemoveSrAlert_() {
+    if (this.srAlert_) {
+      removeElement(this.srAlert_);
+      delete this.srAlert_;
+    }
   }
 
   /**
