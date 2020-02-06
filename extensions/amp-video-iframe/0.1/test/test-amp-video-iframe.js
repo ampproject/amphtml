@@ -19,9 +19,9 @@ import {Services} from '../../../../src/services';
 import {VideoEvents} from '../../../../src/video-interface';
 import {
   addAttributesToElement,
+  createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {tryParseJson} from '../../../../src/json';
 
@@ -73,13 +73,11 @@ describes.realWin(
             height: size[1],
           };
 
-    function createVideoIframe({size, src} = {}) {
-      const html = htmlFor(doc);
-      const el = html`
-        <amp-video-iframe poster="foo.png"></amp-video-iframe>
-      `;
-      el.setAttribute('src', src || getIframeSrc());
-      addAttributesToElement(el, layoutConfigAttrs(size));
+    function createVideoIframe(attrs = {}, opt_size) {
+      const el = createElementWithAttributes(doc, 'amp-video-iframe', attrs);
+      const {src = getIframeSrc(), poster = 'foo.png'} = attrs;
+      addAttributesToElement(el, {src, poster});
+      addAttributesToElement(el, layoutConfigAttrs(opt_size));
       doc.body.appendChild(el);
       return el;
     }
@@ -116,6 +114,16 @@ describes.realWin(
     }
 
     describe('#layoutCallback', () => {
+      it('uses data-param-* in src', async () => {
+        const element = createVideoIframe({
+          'data-param-vid': 'my_vid',
+          'data-param-foo-bar': 'foo bar',
+        });
+        await layoutAndLoad(element);
+        const {src} = element.querySelector('iframe');
+        expect(src).to.match(/\?vid=my_vid&fooBar=foo%20bar#.*$/);
+      });
+
       it('sets metadata in iframe name', async () => {
         const metadata = {
           canonicalUrl: 'foo.html',
@@ -170,7 +178,7 @@ describes.realWin(
         ];
 
         trackingSizes.forEach(size => {
-          const {implementation_} = createVideoIframe({size});
+          const {implementation_} = createVideoIframe({}, size);
           allowConsoleError(() => {
             expect(() => implementation_.buildCallback()).to.throw();
           });
@@ -180,16 +188,23 @@ describes.realWin(
 
     describe('#createPlaceholderCallback', () => {
       it('creates an amp-img with the poster as src', () => {
-        const videoIframe = createVideoIframe();
-
-        const placeholder = videoIframe.implementation_.createPlaceholderCallback();
-
+        const poster = 'foo.bar';
+        const placeholder = createVideoIframe({poster}).createPlaceholder();
         expect(placeholder).to.have.attribute('placeholder');
         expect(placeholder.tagName.toLowerCase()).to.equal('amp-img');
         expect(placeholder.getAttribute('layout')).to.equal('fill');
-        expect(placeholder.getAttribute('src')).to.equal(
-          videoIframe.getAttribute('poster')
-        );
+        expect(placeholder.getAttribute('src')).to.equal(poster);
+      });
+
+      it("uses data-param-* in the poster's src", () => {
+        expect(
+          createVideoIframe({
+            'data-param-my-poster-param': 'my param',
+            'data-param-another': 'value',
+          })
+            .createPlaceholder()
+            .getAttribute('src')
+        ).to.match(/\?myPosterParam=my%20param&another=value$/);
       });
     });
 
