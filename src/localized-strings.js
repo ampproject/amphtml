@@ -24,7 +24,7 @@ import {parseJson} from './json';
  *   - NOT be reused; to deprecate an ID, comment it out and prefix its key with
  *     the string "DEPRECATED_"
  *
- * Next ID: 71
+ * Next ID: 75
  *
  * @const @enum {string}
  */
@@ -50,6 +50,10 @@ export const LocalizedStringId = {
   AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL: '35',
   AMP_STORY_PAGE_ERROR_VIDEO: '65',
   AMP_STORY_PAGE_PLAY_VIDEO: '34',
+  AMP_STORY_QUIZ_ANSWER_CHOICE_A: '71',
+  AMP_STORY_QUIZ_ANSWER_CHOICE_B: '72',
+  AMP_STORY_QUIZ_ANSWER_CHOICE_C: '73',
+  AMP_STORY_QUIZ_ANSWER_CHOICE_D: '74',
   AMP_STORY_SHARE_BUTTON_LABEL: '69',
   AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT: '4',
   AMP_STORY_SHARING_CLIPBOARD_SUCCESS_TEXT: '5',
