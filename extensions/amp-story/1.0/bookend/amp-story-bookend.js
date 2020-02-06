@@ -45,7 +45,6 @@ import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
-import {throttle} from '../../../../src/utils/rate-limit';
 import {toggle} from '../../../../src/style';
 
 // TODO(#14591): Clean when bookend API v0.1 is deprecated.
@@ -221,15 +220,6 @@ export class AmpStoryBookend extends DraggableDrawer {
 
     /** @const @private {!../variable-service.AmpStoryVariableService} */
     this.variableService_ = getVariableService(this.win);
-
-    /** @private @type {function(*, *)} */
-    this.throttleReplaceState_ = throttle(
-      this.win,
-      (history, newHistory) => {
-        history.replaceState(newHistory, '');
-      },
-      400
-    );
   }
 
   /**
@@ -396,12 +386,7 @@ export class AmpStoryBookend extends DraggableDrawer {
       isActive ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
       this.element
     );
-    setHistoryState(
-      this.win,
-      HistoryState.BOOKEND_ACTIVE,
-      isActive,
-      this.throttleReplaceState_
-    );
+    setHistoryState(this.win, HistoryState.BOOKEND_ACTIVE, isActive);
   }
 
   /**

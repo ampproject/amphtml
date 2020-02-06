@@ -99,7 +99,7 @@ import {
   toggle,
 } from '../../../src/style';
 import {createPseudoLocale} from '../../../src/localized-strings';
-import {debounce, throttle} from '../../../src/utils/rate-limit';
+import {debounce} from '../../../src/utils/rate-limit';
 import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
@@ -326,15 +326,6 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/timer-impl.Timer} */
     this.timer_ = Services.timerFor(this.win);
-
-    /** @private @type {function(*, *)} */
-    this.throttleReplaceState_ = throttle(
-      this.win,
-      (history, newHistory) => {
-        history.replaceState(newHistory, '');
-      },
-      400
-    );
 
     /** @private @const {!../../../src/service/platform-impl.Platform} */
     this.platform_ = Services.platformFor(this.win);
@@ -1553,12 +1544,7 @@ export class AmpStory extends AMP.BaseElement {
     }
 
     this.storeService_.dispatch(Action.SET_NAVIGATION_PATH, navigationPath);
-    setHistoryState(
-      this.win,
-      HistoryState.NAVIGATION_PATH,
-      navigationPath,
-      this.throttleReplaceState_
-    );
+    setHistoryState(this.win, HistoryState.NAVIGATION_PATH, navigationPath);
   }
 
   /**

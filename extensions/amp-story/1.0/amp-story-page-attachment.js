@@ -22,7 +22,6 @@ import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {dev} from '../../../src/log';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
-import {throttle} from '../../../src/utils/rate-limit';
 import {toggle} from '../../../src/style';
 
 /** @const {string} */
@@ -49,15 +48,6 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     /** @type {!../../../src/service/history-impl.History} */
     this.historyService_ = Services.historyForDoc(this.element);
-
-    /** @private @type {function(*, *)} */
-    this.throttleReplaceState_ = throttle(
-      this.win,
-      (history, newHistory) => {
-        history.replaceState(newHistory, '');
-      },
-      400
-    );
   }
 
   /**
@@ -193,12 +183,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     this.storeService_.dispatch(Action.TOGGLE_SYSTEM_UI_IS_VISIBLE, true);
 
-    setHistoryState(
-      this.win,
-      HistoryState.ATTACHMENT_PAGE_ID,
-      null,
-      this.throttleReplaceState_
-    );
+    setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
 
     this.analyticsService_.triggerEvent(
       StoryAnalyticsEvent.CLOSE,
