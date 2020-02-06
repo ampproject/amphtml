@@ -21,6 +21,7 @@ import {
 } from './story-analytics';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {CSS} from '../../../build/amp-story-quiz-1.0.css';
+import {LocalizedStringId} from '../../../src/localized-strings';
 import {Services} from '../../../src/services';
 import {StateProperty, getStoreService} from './amp-story-store-service';
 import {addParamsToUrl, assertAbsoluteHttpOrHttpsUrl} from '../../../src/url';
@@ -31,9 +32,6 @@ import {dict} from '../../../src/utils/object';
 import {getRequestService} from './amp-story-request-service';
 import {htmlFor} from '../../../src/static-template';
 import {toArray} from '../../../src/types';
-
-/** @const {!Array<string>} */
-const answerChoiceOptions = ['A', 'B', 'C', 'D'];
 
 /** @const {string} */
 const TAG = 'amp-story-quiz';
@@ -106,6 +104,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win, element);
 
+    /** @private {!Array<string>} */
+    this.answerChoiceOptions_ = ['A', 'B', 'C', 'D'];
+
     /** @private {?Promise<!../../../src/service/cid-impl.CidDef>} */
     this.clientIdService_ = Services.cidForDoc(this.element);
 
@@ -114,6 +115,9 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.hasUserSelection_ = false;
+
+    /** @private {!../../../src/service/localization.LocalizationService} */
+    this.localizationService_ = Services.localizationService(this.win);
 
     /** @private {?Element} */
     this.quizEl_ = null;
@@ -250,6 +254,12 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       .querySelector('.i-amphtml-story-quiz-prompt-container')
       .appendChild(prompt);
 
+    // Localize the answer choice options
+    this.answerChoiceOptions_ = this.answerChoiceOptions_.map(choice => {
+      return this.localizationService_.getLocalizedString(
+        LocalizedStringId[`AMP_STORY_QUIZ_ANSWER_CHOICE_${choice}`]
+      );
+    });
     options.forEach((option, index) => this.configureOption_(option, index));
 
     if (this.element.children.length !== 0) {
@@ -272,7 +282,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     // Fill in the answer choice and set the option ID
     convertedOption.querySelector(
       '.i-amphtml-story-quiz-answer-choice'
-    ).textContent = answerChoiceOptions[index];
+    ).textContent = this.answerChoiceOptions_[index];
     convertedOption.optionIndex_ = index;
 
     // Extract and structure the option information
@@ -535,8 +545,10 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       dev().error(
         TAG,
         `Quiz #${this.element.getAttribute('id')} does not have option ${
-          answerChoiceOptions[selectedOptionKey]
-        }, but user selected option ${answerChoiceOptions[selectedOptionKey]}`
+          this.answerChoiceOptions_[selectedOptionKey]
+        }, but user selected option ${
+          this.answerChoiceOptions_[selectedOptionKey]
+        }`
       );
       return;
     }
