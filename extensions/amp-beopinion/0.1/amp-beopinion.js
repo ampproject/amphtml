@@ -24,14 +24,6 @@ import {removeElement} from '../../../src/dom';
 const TAG = 'amp-beopinion';
 
 class AmpBeOpinion extends AMP.BaseElement {
-  /** @param {!AmpElement} element */
-  constructor(element) {
-    super(element);
-
-    /** @private {?HTMLIFrameElement} */
-    this.iframe_ = null;
-  }
-
   /**
    * @param {boolean=} opt_onLayout
    * @override
@@ -62,12 +54,6 @@ class AmpBeOpinion extends AMP.BaseElement {
   /** @override */
   firstLayoutCompleted() {
     // Do not hide the placeholder.
-  }
-
-  /** @override */
-  buildCallback() {
-    // Get attributes, assertions of values, assign instance variables.
-    // Build lightweight DOM and append to this.element.
   }
 
   /** @override */
