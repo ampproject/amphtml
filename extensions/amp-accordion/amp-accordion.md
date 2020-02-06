@@ -312,7 +312,7 @@ amp-accordion {
 `amp-accordion` automatically ads the following [ARIA attributes](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA):
 
 - [`aria-controls`](https://www.w3.org/TR/wai-aria-1.1/#aria-controls): applied to the header element of each `amp-accordion` section.
-- ['aria-expanded' (state)](https://www.w3.org/TR/wai-aria-1.1/#aria-expanded): applied to the header element of each `amp-accordion` section.
+- [`aria-expanded` (state)](https://www.w3.org/TR/wai-aria-1.1/#aria-expanded): applied to the header element of each `amp-accordion` section.
 
 ## Validation
 
