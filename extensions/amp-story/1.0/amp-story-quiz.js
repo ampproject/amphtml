@@ -281,6 +281,11 @@ export class AmpStoryQuiz extends AMP.BaseElement {
     optionText.textContent = option.textContent;
     convertedOption.appendChild(optionText);
 
+    // Add text container for percentage display
+    const percentageText = document.createElement('span');
+    percentageText.classList.add('i-amphtml-story-quiz-percentage-text');
+    convertedOption.appendChild(percentageText);
+
     if (option.hasAttribute('correct')) {
       convertedOption.setAttribute('correct', 'correct');
     }
@@ -368,6 +373,137 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   updateQuizToPostSelectionState_(selectedOption) {
     this.quizEl_.classList.add('i-amphtml-story-quiz-post-selection');
     selectedOption.classList.add('i-amphtml-story-quiz-option-selected');
+
+    if (this.responseData_) {
+      this.quizEl_.classList.add('i-amphtml-story-quiz-has-data');
+    }
+  }
+
+  /**
+   * @private
+   */
+  updateOptionPercentages_() {
+    if (!this.responseData_) {
+      return;
+    }
+
+    const options = toArray(
+      this.quizEl_.querySelectorAll('.i-amphtml-story-quiz-option')
+    );
+
+    const percentages = this.preprocessPercentages_(this.responseData_);
+
+    this.responseData_['responses'].forEach(response => {
+      // TODO(jackbsteinberg): Add i18n support for various ways of displaying percentages.
+      options[response['reactionValue']].querySelector(
+        '.i-amphtml-story-quiz-percentage-text'
+      ).textContent = `${percentages[response['reactionValue']]}%`;
+    });
+
+    this.quizEl_.setAttribute(
+      'style',
+      `
+      --option-1-percentage: ${percentages[0]}%;
+      --option-2-percentage: ${percentages[1]}%;
+      --option-3-percentage: ${percentages[2]}%;
+      --option-4-percentage: ${percentages[3]}%;
+    `
+    );
+  }
+
+  /**
+   * Preprocess the percentages for display.
+   *
+   * @param {ReactionResponseType} responseData
+   * @return {Array<number>}
+   * @private
+   */
+  preprocessPercentages_(responseData) {
+    let percentages = [];
+
+    for (let i = 0; i < responseData['responses'].length; i++) {
+      percentages[i] = (
+        100 *
+        (responseData['responses'][i]['totalCount'] /
+          responseData['totalResponseCount'])
+      ).toFixed(2);
+    }
+
+    let total = percentages.reduce(
+      (currentTotal, currentValue) =>
+        (currentTotal += Math.round(currentValue)),
+      0
+    );
+
+    // Special case: divide remainders by three if they break 100,
+    // 3 is the maximum above 100 the remainders can add.
+    if (total > 100) {
+      percentages = percentages.map(percentage =>
+        (percentage - (2 * (percentage - Math.floor(percentage))) / 3).toFixed(
+          2
+        )
+      );
+
+      total = percentages.reduce(
+        (currentTotal, currentValue) =>
+          (currentTotal += Math.round(currentValue)),
+        0
+      );
+    }
+
+    if (total === 100) {
+      return percentages.map(percentage => Math.round(percentage));
+    }
+
+    // Truncate all and round up those with the highest remainders,
+    // preserving order and ties and adding to 100 (if possible given ties and ordering).
+    let remainder = 100 - total;
+
+    let preserveOriginal = percentages.map((percentage, index) => {
+      return {
+        originalIndex: index,
+        value: percentage,
+        remainder: (percentage - Math.floor(percentage)).toFixed(2),
+      };
+    });
+    preserveOriginal.sort(
+      (left, right) =>
+        // Break remainder ties using the higher value.
+        right.remainder - left.remainder || right.value - left.value
+    );
+
+    const finalPercentages = [];
+    while (remainder > 0 && preserveOriginal.length !== 0) {
+      const highestRemainderObj = preserveOriginal[0];
+
+      const ties = preserveOriginal.filter(
+        percentageObj => percentageObj.value === highestRemainderObj.value
+      );
+      preserveOriginal = preserveOriginal.filter(
+        percentageObj => percentageObj.value !== highestRemainderObj.value
+      );
+
+      const toRoundUp =
+        ties.length <= remainder && highestRemainderObj.remainder !== '0.00';
+
+      ties.forEach(percentageObj => {
+        finalPercentages[percentageObj.originalIndex] =
+          Math.floor(percentageObj.value) + (toRoundUp ? 1 : 0);
+      });
+
+      // Update the remainder given additions to the percentages.
+      remainder -= toRoundUp ? ties.length : 0;
+    }
+
+    preserveOriginal.forEach(percentageObj => {
+      finalPercentages[percentageObj.originalIndex] = Math.floor(
+        percentageObj.value
+      );
+    });
+
+    percentages = finalPercentages;
+
+    return percentages;
   }
 
   /**
@@ -385,7 +521,17 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       this.triggerAnalytics_(optionEl);
       this.hasUserSelection_ = true;
 
+      if (this.responseData_) {
+        this.responseData_['totalResponseCount']++;
+        this.responseData_['responses'].forEach(response => {
+          if (Number(response['reactionValue']) === optionEl.optionIndex_) {
+            response['totalCount']++;
+          }
+        });
+      }
+
       this.mutateElement(() => {
+        this.updateOptionPercentages_();
         this.updateQuizToPostSelectionState_(optionEl);
       });
 
@@ -517,7 +663,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
    */
   updateQuizOnDataRetrieval_() {
     let selectedOptionKey;
-    this.responseData_.responses.forEach(response => {
+    this.responseData_['responses'].forEach(response => {
       if (response.selectedByUser) {
         selectedOptionKey = response.reactionValue;
       }
@@ -525,6 +671,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
 
     if (selectedOptionKey === undefined) {
       dev().error(TAG, `The user-selected reaction could not be found`);
+      return;
     }
 
     const options = this.quizEl_.querySelectorAll(
@@ -541,7 +688,20 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       return;
     }
 
+    if (this.responseData_['responses'].length > options.length) {
+      dev().error(
+        TAG,
+        `Quiz #${this.element.getAttribute('id')} has ${
+          options.length
+        } options, but response returned ${
+          this.responseData_['responses'].length
+        } options`
+      );
+      return;
+    }
+
     this.mutateElement(() => {
+      this.updateOptionPercentages_();
       this.updateQuizToPostSelectionState_(options[selectedOptionKey]);
     });
   }

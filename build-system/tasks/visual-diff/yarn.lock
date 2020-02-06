@@ -118,10 +118,10 @@
   resolved "https://registry.yarnpkg.com/@oclif/screen/-/screen-1.0.4.tgz#b740f68609dfae8aa71c3a6cab15d816407ba493"
   integrity sha512-60CHpq+eqnTxLZQ4PGHYNwUX572hgpMHGPtTWMjdTMsAvlm69lZV/4ly6O3sAYkomo4NggGcomrDpBe34rxUqw==
 
-"@percy/agent@0.20.12":
-  version "0.20.12"
-  resolved "https://registry.yarnpkg.com/@percy/agent/-/agent-0.20.12.tgz#3d470e6883e54643a7caeefbcf86f9c7d589fc0c"
-  integrity sha512-dTIsTXIjUFhEAxeMPrnIrt19X5jjoZoyXc7Sw4lmBII9SJRaQJeXUTPKvuXRB242mbN/d4mgSp+tx/HowVAXfA==
+"@percy/agent@0.21.0":
+  version "0.21.0"
+  resolved "https://registry.yarnpkg.com/@percy/agent/-/agent-0.21.0.tgz#319b0fcbfe5a9ff86a39c6fdf692f3cc5a4faac0"
+  integrity sha512-gcWqIJCF+1HKN3jSY0zqf9EOc2Vwxb0VUL6ratwbMce7msGPSge60sOaWs43/gfpT5JSAec9FUKRx0wO/rEY2g==
   dependencies:
     "@oclif/command" "1.5.19"
     "@oclif/config" "^1"
@@ -173,10 +173,10 @@
     retry-axios "^1.0.1"
     winston "^3.0.0"
 
-"@percy/puppeteer@1.0.8":
-  version "1.0.8"
-  resolved "https://registry.yarnpkg.com/@percy/puppeteer/-/puppeteer-1.0.8.tgz#9ce4359f885e446bea12bfaa99e746ff38755b03"
-  integrity sha512-YTR5scNNANchsP4iUurXYHVaBg3XPJBMmnfgHwJD9/SnSMjPvSEr7uN4cPGKH78rWibl/js8FFggedkK5+7fQA==
+"@percy/puppeteer@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@percy/puppeteer/-/puppeteer-1.1.0.tgz#3b055cd4931865f131b3b525be5971ec4a7c8012"
+  integrity sha512-ndQDSC4UYE0WrK+6e14xpuz4FktSG2FwiQJ7n68QVm4TcgetdeXkgcAn1xtwvDbLpEcMyzcQEPBJMOMNf7Nfdg==
   dependencies:
     "@percy/agent" "~0"
 
@@ -1606,10 +1606,10 @@ punycode@^2.1.0:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-puppeteer@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-2.1.0.tgz#c10cabc5525f57c6766eed4f3006b6e10afcafc1"
-  integrity sha512-PC4oKMtwAElo8YtS/cYnk2/dew/3TonsGKKzjpFLWwkhBCteFsOZCVOXTt2QlP6w53mH0YsJE+fPLPzOW+DCug==
+puppeteer@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-2.1.1.tgz#ccde47c2a688f131883b50f2d697bd25189da27e"
+  integrity sha512-LWzaDVQkk1EPiuYeTOj+CZRIjda4k2s5w4MK4xoH2+kgWV/SDlkYHmxatDdtYrciHUKSXTsGgPgPP8ILVdBsxg==
   dependencies:
     "@types/mime-types" "^2.1.0"
     debug "^4.1.0"

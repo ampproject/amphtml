@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryEmbedManager} from './amp-story-embed-manager';
+import {AmpStoryPlayerManager} from './amp-story-player-manager';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {
   addParamsToUrl,
@@ -23,29 +23,24 @@ import {
   removeFragment,
 } from './url';
 import {dict} from './utils/object';
+// Source for this constant is css/amp-story-player-iframe.css
+import {cssText} from '../build/amp-story-player-iframe.css';
 import {findIndex} from './utils/array';
 import {setStyle} from './style';
 import {toArray} from './types';
 
 /** @enum {string} */
 const LoadStateClass = {
-  LOADING: 'i-amphtml-story-embed-loading',
-  LOADED: 'i-amphtml-story-embed-loaded',
-  ERROR: 'i-amphtml-story-embed-error',
+  LOADING: 'i-amphtml-story-player-loading',
+  LOADED: 'i-amphtml-story-player-loaded',
+  ERROR: 'i-amphtml-story-player-error',
 };
-
-/** @const {string} */
-const CSS = `
-  :host { all: initial; display: block; border-radius: 0 !important; width: 405px; height: 720px; overflow: auto; }
-  .story-embed-iframe { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
-  main { display: flex; flex-direction: row; height: 100%; }
-  .i-amphtml-story-embed-loaded iframe { opacity: 1; }`;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
-export class AmpStoryEmbed {
+export class AmpStoryPlayer {
   /**
    * @param {!Window} win
    * @param {!Element} element
@@ -99,7 +94,7 @@ export class AmpStoryEmbed {
 
     this.initializeShadowRoot_();
 
-    // TODO(Enriqe): Build all child iframes.
+    // TODO(#26308): Build all child iframes.
     this.buildIframe_(this.stories_[0]);
   }
 
@@ -112,7 +107,7 @@ export class AmpStoryEmbed {
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
-    styleEl.textContent = CSS;
+    styleEl.textContent = cssText;
     shadowRoot.appendChild(styleEl);
     shadowRoot.appendChild(this.rootEl_);
   }
@@ -128,11 +123,14 @@ export class AmpStoryEmbed {
       'backgroundImage',
       story.getAttribute('data-poster-portrait-src')
     );
-    iframeEl.classList.add('story-embed-iframe');
+    iframeEl.classList.add('story-player-iframe');
     this.iframes_.push(iframeEl);
 
     this.initializeLoadingListeners_(iframeEl);
     this.rootEl_.appendChild(iframeEl);
+
+    // TODO(#26308): enable messaging when multiple documents are supported.
+    return;
 
     this.initializeHandshake_(story, iframeEl).then(
       messaging => {
@@ -143,7 +141,7 @@ export class AmpStoryEmbed {
 
         this.messagingFor_[iframeIdx] = messaging;
 
-        // TODO(Enriqe): Appropiately set visibility to stories.
+        // TODO(#26308): Appropiately set visibility to stories.
         this.displayStory_(iframeIdx);
       },
       err => {
@@ -196,7 +194,7 @@ export class AmpStoryEmbed {
       return;
     }
 
-    // TODO(Enriqe): Layout all child iframes.
+    // TODO(#26308): Layout all child iframes.
     this.layoutIframe_(this.stories_[0], this.iframes_[0]);
 
     this.isLaidOut_ = true;
@@ -208,9 +206,10 @@ export class AmpStoryEmbed {
    * @private
    */
   layoutIframe_(story, iframe) {
-    const {href} = this.getEncodedLocation_(story.href);
+    // TODO(#26308): enable messaging when multiple documents are supported.
+    // const {href} = this.getEncodedLocation_(story.href);
 
-    iframe.setAttribute('src', href);
+    iframe.setAttribute('src', story.href);
   }
 
   /**
@@ -258,6 +257,6 @@ export class AmpStoryEmbed {
 }
 
 self.onload = () => {
-  const manager = new AmpStoryEmbedManager(self);
-  manager.loadEmbeds();
+  const manager = new AmpStoryPlayerManager(self);
+  manager.loadPlayers();
 };

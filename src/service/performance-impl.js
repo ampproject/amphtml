@@ -715,30 +715,26 @@ export class Performance {
    *     this directly.
    */
   tick(label, opt_delta) {
-    const value = opt_delta == undefined ? this.win.Date.now() : undefined;
+    const data = dict({'label': label});
+    let storedVal;
 
-    const data = dict({
-      'label': label,
-      'value': value,
-      // Delta can negative, but will always be changed to 0.
-      'delta': opt_delta != null ? Math.max(opt_delta, 0) : undefined,
-    });
+    // Absolute value case (not delta).
+    if (opt_delta == undefined) {
+      // Marking only makes sense for non-deltas.
+      this.mark(label);
+      const now = this.win.Date.now();
+      data['value'] = now;
+      storedVal = now - this.initTime_;
+    } else {
+      data['delta'] = storedVal = Math.max(opt_delta, 0);
+    }
+
     if (this.isMessagingReady_ && this.isPerformanceTrackingOn_) {
       this.viewer_.sendMessage('tick', data);
     } else {
       this.queueTick_(data);
     }
-    // Mark the event on the browser timeline, but only if there was
-    // no delta (in which case it would not make sense).
-    if (arguments.length == 1) {
-      this.mark(label);
-    }
 
-    // Store certain page visibility metrics to be exposed as analytics
-    // variables.
-    const storedVal = Math.round(
-      opt_delta != null ? Math.max(opt_delta, 0) : value - this.initTime_
-    );
     switch (label) {
       case 'fcp':
         this.fcpDeferred_.resolve(storedVal);
