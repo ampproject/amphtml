@@ -7,15 +7,15 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.2.0.tgz#82b6b68b6fe0eacbcc95d3f0a82ddf19a0e2b316"
   integrity sha512-CiMdKK9eMa6eqhqZc9bq86nPdgbALY+E8rKgUPR7wf2wGUNTm/jtFZQ7fn4sj/oggn0wvadBokabErtl1m1KSw==
 
-"@ampproject/worker-dom@0.24.0":
-  version "0.24.0"
-  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.24.0.tgz#9c26183e73550e2d08fa4e6d26dbf8c504b2401e"
-  integrity sha512-dvIaalyiboxZDOeliq1Msqn3I0hMybz7wdIiEafahf6Q/nRoK2PxTE3Xz+WyeJe4zi8CCMnSNxbmjjIHhG/+rw==
-
 "@ampproject/viewer-messaging@1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@ampproject/viewer-messaging/-/viewer-messaging-1.1.0.tgz#404f92c5754bac61014ed2272dd5e87174b9af84"
   integrity sha512-SoR1dGl2Pl8eJlyGCU/9Gz/orOggmW/13wUh7NnuGvDYqLdlhnRBzvEGqEAlq/fQKel9ZM6RNtu85Jw8WC3K2Q==
+
+"@ampproject/worker-dom@0.24.0":
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/worker-dom/-/worker-dom-0.24.0.tgz#9c26183e73550e2d08fa4e6d26dbf8c504b2401e"
+  integrity sha512-dvIaalyiboxZDOeliq1Msqn3I0hMybz7wdIiEafahf6Q/nRoK2PxTE3Xz+WyeJe4zi8CCMnSNxbmjjIHhG/+rw==
 
 "@ava/babel-plugin-throws-helper@^4.0.0":
   version "4.0.0"
@@ -5838,10 +5838,10 @@ escape-string-regexp@^2.0.0:
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-2.0.0.tgz#a30304e99daa32e23b2fd20f51babd07cffca344"
   integrity sha512-UpzcLCXolUWcNu5HtVMHYdXJjArjsF9C0aNnquZYY4uW/Vu0miy5YoWvbV345HauVvcAUnpRuhMMcqTcGOY2+w==
 
-escodegen@1.13.0:
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/escodegen/-/escodegen-1.13.0.tgz#c7adf9bd3f3cc675bb752f202f79a720189cab29"
-  integrity sha512-eYk2dCkxR07DsHA/X2hRBj0CFAZeri/LyDMc0C8JT1Hqi6JnVpMhJ7XFITbb0+yZS3lVkaPL2oCkZ3AVmeVbMw==
+escodegen@1.14.1:
+  version "1.14.1"
+  resolved "https://registry.yarnpkg.com/escodegen/-/escodegen-1.14.1.tgz#ba01d0c8278b5e95a9a45350142026659027a457"
+  integrity sha512-Bmt7NcRySdIfNPfU2ZoXDrrXsG9ZjvDxcAlMfDUgRBjLOWTuIACXPBFJH7Z+cLb40JeQco5toikyc9t9P8E9SQ==
   dependencies:
     esprima "^4.0.1"
     estraverse "^4.2.0"
