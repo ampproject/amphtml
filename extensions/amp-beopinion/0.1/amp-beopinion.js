@@ -18,7 +18,6 @@ import {Services} from '../../../src/services';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
-import {removeElement} from '../../../src/dom';
 
 /** @const */
 const TAG = 'amp-beopinion';
