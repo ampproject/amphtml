@@ -164,10 +164,16 @@ By hosting a generic [integration document](#integration) that can reference vid
 
 ```html
 <!--
-  data-param-* attributes are added to src and poster, so this would use the src
-  https://vendor.example/amp-video-iframe
-    ?videoid=MY_VIDEO_ID
-    &channelid=MY_CHANNEL_ID
+  data-param-* attributes are added to src and poster, so this would use the
+  following composed urls:
+
+  src: https://vendor.example/amp-video-iframe
+      ?videoid=MY_VIDEO_ID
+      &channelid=MY_CHANNEL_ID
+
+  poster: https://vendor.example/poster.jpg
+      ?videoid=MY_VIDEO_ID
+      &channelid=MY_CHANNEL_ID
 -->
 <amp-video-iframe
   layout="responsive"
