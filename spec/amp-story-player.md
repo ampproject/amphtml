@@ -25,12 +25,10 @@ limitations under the License.
 
 # <a name="`amp-story-player`"></a> `amp-story-player`
 
-The `amp-story-player` allows you to embed and play your favorite stories in your own website.
-
 <figure class="centered-fig">
-  <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-player.gif">
+  <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif">
     <noscript>
-    <img alt="amp-story-player example" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-player.gif" />
+    <img alt="amp-story-player example" src="https://github.com/ampproject/spec/img/amp-story-player.gif" />
   </noscript>
   </amp-anim>
 </figure>
@@ -38,7 +36,7 @@ The `amp-story-player` allows you to embed and play your favorite stories in you
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>An easy way to embed stories in your own website.</td>
+    <td>An easy way to embed and play stories in a website.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Scripts</strong></td>
@@ -57,27 +55,13 @@ The `amp-story-player` allows you to embed and play your favorite stories in you
 
 [TOC]
 
-## Version notes
+## AMP story player usage
 
-| Version | Description      |
-| ------- | ---------------- |
-| 1.0     | Current version. |
+Use `amp-story-player` to embed and play stories within a webpage.
 
-## AMP story player
+### Embed in a non-AMP page
 
-The `amp-story-player` allows you to embed and play your favorite stories in your own website.
-
-### Features
-
-- Improved experience over time (AKA the "Software as a Service" paradigm)
-- Prerendering (coming soon!)
-- Prefetching and caching resources (coming soon!)
-- Customizable embed UI / chrome (coming soon!)
-- Swipe/tap to next/previous (coming soon!)
-
-### Boilerplate
-
-The following markup is a decent starting point or boilerplate. Copy this and save it to a file with a `.html` extension.
+The following example demonstrates a basic embed of <amp-story-player> in a non-AMP webpage.
 
 ```html
 <!DOCTYPE html>
@@ -107,10 +91,6 @@ The following markup is a decent starting point or boilerplate. Copy this and sa
 </html>
 ```
 
-### API
-
-## `<amp-story-player>`
-
 The high-level API for the player looks like the following:
 
 ```html
@@ -122,15 +102,41 @@ The high-level API for the player looks like the following:
 </amp-story-player>
 ```
 
-The inline width and height ensures that the player will not cause any jumps in your website while the script is being loaded. Feel free to modify the values, but we recommend mantaining a 3:5 aspect ratio.
+### Attributes
 
-## `Children of <amp-story-player>`
+The inline width and height ensures that the player will not cause any jumps in your website while the script is being loaded. Feel free to modify the values, but we recommend maintaining a 3:5 aspect ratio.
+
+<table>
+  <tr>
+    <td width="40%"><strong>width [recommended]</strong></td>
+    <td>Width of the player in pixels.</td>
+  </tr>
+  <tr>
+    <td width="50%"><strong>height [recommended]</strong></td>
+    <td>Height of the player in pixels.</td>
+  </tr>
+</table>
+
+## Specify embedded story
 
 The `<amp-story-player>` component contains one or more `<a>` tags, each of which represent a story. Use the `href` attribute to point to a particular story.
 
 To provide a better experience for the user while the story is being loaded, as well as allowing search engines to crawl the embedded stories, you can provide some text inside the anchor tags.
 
 You can also provide an image to work as a placeholder while the story is being loaded. Just add a `--story-player-poster` CSS variable as an inline style of the first anchor tag with its corresponding image URL:
+
+### Attributes
+
+<table>
+  <tr>
+    <td width="40%"><strong>href</strong></td>
+    <td>URL pointing to the story.</td>
+  </tr>
+  <tr>
+    <td width="50%"><strong>style="--story-player-poster: url('...');" [recommended]</strong></td>
+    <td>URL pointing to the poster image of the story.</td>
+  </tr>
+</table>
 
 ```html
 <amp-story-player style="width: 360px; height: 600px;">
