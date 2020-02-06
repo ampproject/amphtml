@@ -121,6 +121,14 @@ describes.sandboxed('AmpDocService', {}, () => {
       expect(service.getAmpDoc(div)).to.equal(service.getSingleDoc());
     });
 
+    it('should return meta content values', () => {
+      const meta = document.createElement('meta');
+      meta.setAttribute('name', 'abc');
+      meta.setAttribute('content', '123');
+      document.head.appendChild(meta);
+      expect(service.getAmpDoc(meta).getMetaByName('abc')).to.equal('123');
+    });
+
     // For example, <amp-next-page> creates shadow documents in single-doc
     // mode.
     describe('shadow documents', () => {
