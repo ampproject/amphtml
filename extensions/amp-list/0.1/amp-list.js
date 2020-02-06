@@ -52,7 +52,11 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {getSourceOrigin} from '../../../src/url';
-import {getValueForExpr} from '../../../src/json';
+import {
+  getValueForExpr,
+  hasChildJsonConfig,
+  getChildJsonConfig,
+} from '../../../src/json';
 import {
   getViewerAuthTokenIfAvailable,
   setupAMPCors,
@@ -71,9 +75,6 @@ const TAG = 'amp-list';
 /** @const {string} */
 const TABBABLE_ELEMENTS_QUERY =
   'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"]), audio[controls], video[controls], [contenteditable]:not([contenteditable="false"])';
-
-// Technically the ':' is not considered part of the scheme, but it is useful to include.
-const AMP_STATE_URI_SCHEME = 'amp-state:';
 
 /**
  * @typedef {{
@@ -129,6 +130,12 @@ export class AmpList extends AMP.BaseElement {
      * @private {boolean}
      */
     this.layoutCompleted_ = false;
+
+    /**
+     * Has the initialization json been used yet?
+     * @private {boolean}
+     */
+    this.initialJsonUsed = false;
 
     /**
      * The `src` attribute's initial value.
@@ -345,46 +352,20 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Returns true if element's src points to amp-state.
+   * Gets optionally provided initialization json to use for initial render.
    *
-   * @param {string} src
-   * @return {boolean}
+   * @return {null|Promise<?JsonObject>}
    * @private
    */
-  isAmpStateSrc_(src) {
-    return (
-      isExperimentOn(this.win, 'amp-list-init-from-state') &&
-      startsWith(src, AMP_STATE_URI_SCHEME)
-    );
-  }
-
-  /**
-   * Gets the json an amp-list that has an "amp-state:" uri. For example,
-   * src="amp-state:json.path".
-   *
-   * @param {string} src
-   * @return {Promise<!JsonObject>}
-   * @private
-   */
-  getAmpStateJson_(src) {
-    return Services.bindForDocOrNull(this.element)
-      .then(bind => {
-        userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
-        userAssert(
-          !this.ssrTemplateHelper_.isEnabled(),
-          '[amp-list]: "amp-state" URIs cannot be used in SSR mode.'
-        );
-
-        const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-        return bind.getState(ampStatePath);
-      })
-      .then(json => {
-        userAssert(
-          typeof json !== 'undefined',
-          `[amp-list] No data was found at provided uri: ${src}`
-        );
-        return json;
-      });
+  getInitialJson() {
+    if (!isExperimentOn(this.win, 'amp-list-init-from-state')) {
+      return null;
+    }
+    if (this.initialJsonUsed || !hasChildJsonConfig(this.element)) {
+      return null;
+    }
+    this.initialJsonUsed = true;
+    return Promise.resolve(getChildJsonConfig(this.element));
   }
 
   /** @override */
@@ -603,9 +584,7 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      fetch = this.isAmpStateSrc_(elementSrc)
-        ? this.getAmpStateJson_(elementSrc)
-        : this.prepareAndSendFetch_(opt_refresh);
+      fetch = this.getInitialJson() || this.prepareAndSendFetch_(opt_refresh);
       fetch = fetch.then(data => {
         // Bail if the src has changed while resolving the xhr request.
         if (elementSrc !== this.element.getAttribute('src')) {

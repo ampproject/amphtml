@@ -133,6 +133,16 @@ export function tryParseJson(json, opt_onFailed) {
 }
 
 /**
+ * Helper method that returns whether the element has one child json <script> tag.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function hasChildJsonConfig(element) {
+  const scripts = childElementsByTag(element, 'script');
+  return scripts.length === 1 && isJsonScriptTag(scripts[0]);
+}
+
+/**
  * Helper method to get the json config from an element <script> tag
  * @param {!Element} element
  * @return {?JsonObject}
