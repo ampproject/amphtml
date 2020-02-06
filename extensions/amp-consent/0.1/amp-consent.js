@@ -43,6 +43,7 @@ import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
+import {responseXssiJson} from '../../../src/utils/xhr-utils';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -634,7 +635,7 @@ export class AmpConsent extends AMP.BaseElement {
           return xhrService
             .fetchJson(resolvedHref, init)
             .then(res =>
-              xhrService.xssiJson(res, this.consentConfig_['xssiPrefix'])
+              responseXssiJson(res, this.consentConfig_['xssiPrefix'])
             );
         });
       });

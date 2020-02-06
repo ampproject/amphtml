@@ -17,6 +17,7 @@
 import {Services} from './services';
 import {assertHttpsUrl} from './url';
 import {getValueForExpr} from './json';
+import {responseXssiJson} from './utils/xhr-utils';
 import {user} from './log';
 
 /**
@@ -73,7 +74,7 @@ export function batchFetchJsonFor(
       }
       return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
     })
-    .then(res => Services.xhrFor(ampdoc.win).xssiJson(res, xssiPrefix))
+    .then(res => responseXssiJson(res, xssiPrefix))
     .then(data => {
       if (data == null) {
         throw new Error('Response is undefined.');

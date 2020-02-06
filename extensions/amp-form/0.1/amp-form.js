@@ -62,6 +62,7 @@ import {getFormValidator, isCheckValiditySupported} from './form-validators';
 import {getMode} from '../../../src/mode';
 import {
   getViewerAuthTokenIfAvailable,
+  responseXssiJson,
   setupAMPCors,
   setupInit,
   setupInput,
@@ -967,8 +968,7 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmitSuccess_(response, incomingTrust) {
-    return this.xhr_
-      .xssiJson(response, this.getXssiPrefix())
+    return responseXssiJson(response, this.getXssiPrefix())
       .then(
         json =>
           this.handleSubmitSuccess_(

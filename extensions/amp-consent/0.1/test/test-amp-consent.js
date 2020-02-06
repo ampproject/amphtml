@@ -81,7 +81,6 @@ describes.realWin(
             },
           });
         },
-        xssiJson: xhrServiceForTesting(win).xssiJson,
       };
 
       storageMock = {

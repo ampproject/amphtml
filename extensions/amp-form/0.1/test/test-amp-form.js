@@ -1458,7 +1458,6 @@ describes.repeated(
 
           env.sandbox.stub(Services, 'xhrFor').returns({
             fetch: () => Promise.resolve({json: () => Promise.resolve()}),
-            xssiJson: () => Promise.resolve({}),
           });
 
           const ampForm = await getAmpForm(form);

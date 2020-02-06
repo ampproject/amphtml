@@ -15,7 +15,7 @@
  */
 
 import {Services} from '../services';
-import {devAssert, user, userAssert} from '../log';
+import {dev, devAssert, user, userAssert} from '../log';
 import {dict, map} from './object';
 import {fromIterator} from './array';
 import {
@@ -29,6 +29,8 @@ import {getMode} from '../mode';
 import {isArray, isObject} from '../types';
 import {isExperimentOn} from '../experiments';
 import {isFormDataWrapper} from '../form-data-wrapper';
+import {parseJson} from '../json';
+import {startsWith} from '../string';
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -418,4 +420,37 @@ export function getViewerAuthTokenIfAvailable(element) {
   }
   // If crossorigin attribute is missing, always resolve with undefined.
   return Promise.resolve(undefined);
+}
+
+/**
+ * A subsitute for the standard response.json(), which may optionally strip a
+ * prefix before calling JSON.parse().
+ *
+ * @param {!Response} res fetch response to convert to json.
+ * @param {string|undefined} prefix to strip away.
+ * @return {Promise<*>}
+ */
+export function responseXssiJson(res, prefix) {
+  if (!prefix) {
+    return res.json();
+  }
+  return res
+    .text()
+    .then(text => parseJson(responseXssiJsonStripPrefix_(text, prefix)));
+}
+
+/**
+ * @param {string} text
+ * @param {string} prefix
+ * @return {string}
+ */
+function responseXssiJsonStripPrefix_(text, prefix) {
+  if (!startsWith(text, dev().assertString(prefix))) {
+    user().warn(
+      'XHR',
+      `Failed to strip missing prefix "${prefix}" in fetch response.`
+    );
+    return text;
+  }
+  return text.slice(prefix.length);
 }
