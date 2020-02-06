@@ -23,12 +23,10 @@ import {
   setupInput,
   setupJsonFetchInit,
 } from '../utils/xhr-utils';
-import {dev, user} from '../log';
 import {getCorsUrl, parseUrlDeprecated} from '../url';
 import {getService, registerServiceBuilder} from '../service';
 import {isFormDataWrapper} from '../form-data-wrapper';
-import {parseJson} from '../json';
-import {startsWith} from '../string';
+import {user} from '../log';
 
 /**
  * A service that polyfills Fetch API for use within AMP.
