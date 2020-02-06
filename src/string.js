@@ -174,6 +174,38 @@ export function trimStart(str) {
 }
 
 /**
+ * Wrapper around String.replace that handles asynchronous resolution.
+ * @param {string} str
+ * @param {RegExp} regex
+ * @param {Function|string} replacer
+ * @return {!Promise<string>}
+ */
+export function asyncStringReplace(str, regex, replacer) {
+  if (typeof replacer === 'string') {
+    return Promise.resolve(str.replace(regex, replacer));
+  }
+  const stringBuilder = [];
+  let lastIndex = 0;
+
+  str.replace(regex, function(match) {
+    // String.prototype.replace will pass 3 to n number of arguments to the
+    // callback function based on how many capture groups the regex may or may
+    // not contain. We know that the match will always be first, and the
+    // index will always be second to last.
+    const matchIndex = arguments[arguments.length - 2];
+    stringBuilder.push(str.slice(lastIndex, matchIndex));
+    lastIndex = matchIndex + match.length;
+
+    // Store the promise in it's eventual string position.
+    const replacementPromise = replacer.apply(null, arguments);
+    stringBuilder.push(replacementPromise);
+  });
+  stringBuilder.push(str.slice(lastIndex));
+
+  return Promise.all(stringBuilder).then(resolved => resolved.join(''));
+}
+
+/**
  * Pads the beginning of a string with a substring to a target length.
  * @param {string} s
  * @param {number} targetLength

@@ -50,13 +50,42 @@ And in the request url the token would be of the format `${eventId}` (follows ca
 
 When the same `var` is defined in multiple locations, the value is picked in the order remote config > element level data attributes > triggers > top level > platform. Thus, if the remote config defined `clientId` as `12332312` in the example above, the values of various vars will be as follows:
 
-| var          | Value                               | Defined by       |
-| ------------ | ----------------------------------- | ---------------- |
-| canonicalUrl | http://example.com/path/to/the/page | Platform         |
-| title        | My homepage                         | Trigger          |
-| account      | ABC123                              | Top level config |
-| clientId     | 12332312                            | Remote config    |
+| var          | Value                                  | Defined by       |
+| ------------ | -------------------------------------- | ---------------- |
+| canonicalUrl | `https://example.com/path/to/the/page` | Platform         |
+| title        | My homepage                            | Trigger          |
+| account      | ABC123                                 | Top level config |
+| clientId     | 12332312                               | Remote config    |
 
 ## Variables
 
-For a list of variables supported in `amp-analytics`, see [Variable Substitutions](../../spec/amp-var-substitutions.md).
+For a list of variables supported in `amp-analytics`, see [Variable Substitutions](../../spec/amp-var-substitutions.md). These variables may be substituted as well as nested within each other. For example, a variable that is substituted to
+
+```javascript
+{
+  "request": {
+    "base": "example.com/${nested}${nested2}"
+  },
+  "vars": {
+    "nested": "QUERY_PARAM(foo,QUERY_PARAM(bar,default))",
+    "nested2": "abc"
+  }
+}
+```
+
+will resolve to `default` if `foo` and `bar` are not parameters.
+
+One known caveat is when substituting a variable for a macro (not including its argument list), where the argument list contains macro:
+
+```javascript
+{
+  "request": {
+    "base": "example.com/${a(1,2)}${a(RANDOM,$NOT(true))}"
+  },
+  "vars": {
+    "a": "QUERY_PARAM"
+  }
+}
+```
+
+This will result in the first QUERY_PARAM working as intended but the second QUERY_PARAM will not get parsed corretly due to the macros within.

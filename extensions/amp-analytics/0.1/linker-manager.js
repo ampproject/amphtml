@@ -208,7 +208,7 @@ export class LinkerManager {
   expandTemplateWithUrlParams_(template, expansionOptions) {
     const bindings = this.variableService_.getMacros(this.element_);
     return this.variableService_
-      .expandTemplate(template, expansionOptions)
+      .expandTemplate(template, expansionOptions, this.element_)
       .then(expanded => {
         const urlReplacements = Services.urlReplacementsForDoc(this.element_);
         return urlReplacements.expandUrlAsync(expanded, bindings);
