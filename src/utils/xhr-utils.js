@@ -427,7 +427,7 @@ export function getViewerAuthTokenIfAvailable(element) {
  * prefix before calling JSON.parse().
  *
  * @param {!Response} res fetch response to convert to json.
- * @param {string|undefined} prefix to strip away.
+ * @param {string=} prefix to strip away.
  * @return {Promise<*>}
  */
 export function responseXssiJson(res, prefix) {
@@ -436,7 +436,9 @@ export function responseXssiJson(res, prefix) {
   }
   return res
     .text()
-    .then(text => parseJson(responseXssiJsonStripPrefix_(text, prefix)));
+    .then(text =>
+      parseJson(responseXssiJsonStripPrefix_(text, dev().assertString(prefix)))
+    );
 }
 
 /**
@@ -445,7 +447,7 @@ export function responseXssiJson(res, prefix) {
  * @return {string}
  */
 function responseXssiJsonStripPrefix_(text, prefix) {
-  if (!startsWith(text, dev().assertString(prefix))) {
+  if (!startsWith(text, prefix)) {
     user().warn(
       'XHR',
       `Failed to strip missing prefix "${prefix}" in fetch response.`
