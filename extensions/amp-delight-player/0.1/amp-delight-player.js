@@ -251,13 +251,13 @@ class AmpDelightPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(getData(event));
-    if (data === null || data === undefined || data['type'] === undefined) {
+    if (!data || !data['type']) {
       return; // We only process valid JSON.
     }
 
     const {element} = this;
 
-    redispatch(element, data['type'], {
+    const redispatched = redispatch(element, data['type'], {
       [DelightEvent.READY]: VideoEvents.LOAD,
       [DelightEvent.PLAYING]: VideoEvents.PLAYING,
       [DelightEvent.PAUSED]: VideoEvents.PAUSE,
@@ -267,6 +267,10 @@ class AmpDelightPlayer extends AMP.BaseElement {
       [DelightEvent.AD_START]: VideoEvents.AD_START,
       [DelightEvent.AD_END]: VideoEvents.AD_END,
     });
+
+    if (redispatched) {
+      return;
+    }
 
     switch (data['type']) {
       case DelightEvent.PING: {
