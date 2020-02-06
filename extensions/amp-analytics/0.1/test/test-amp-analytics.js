@@ -56,7 +56,7 @@ describes.realWin(
     const jsonMockResponses = {
       '//invalidConfig': '{"transport": {"iframe": "fake.com"}}',
       '//config1': '{"vars": {"title": "remote"}}',
-      'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
+      'https://foo/My%20Test%20Title': '{"vars": {"title": "magic"}}',
       '//config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
       'https://rewriter.com': '{"vars": {"title": "rewritten"}}',
     };
@@ -98,7 +98,7 @@ describes.realWin(
       doc = win.document;
       ampdoc = env.ampdoc;
       configWithCredentials = false;
-      doc.title = 'Test Title';
+      doc.title = 'My Test Title';
       resetServiceForTesting(win, 'xhr');
       jsonRequestConfigs = {};
       registerServiceBuilder(win, 'xhr', function() {
@@ -545,7 +545,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/
+            /https:\/\/example.com\/title=My%20Test%20Title&ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/
           );
         });
       });
@@ -556,7 +556,9 @@ describes.realWin(
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         });
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/Test%20Title');
+          requestVerifier.verifyRequest(
+            'https://example.com/My%20Test%20Title'
+          );
         });
       });
 
@@ -623,7 +625,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/test1=Test%20Title&test2=428'
+            'https://example.com/test1=My%20Test%20Title&test2=428'
           );
         });
       });
@@ -702,7 +704,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar&title=Test%20Title/
+            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar&title=My%20Test%20Title/
           );
         });
       });
@@ -800,7 +802,7 @@ describes.realWin(
         'p:nth-child(2)',
       ].map(selectorExpansionTest);
 
-      it('does not expands selector with platform variable', () => {
+      it('expands selector with platform variable', () => {
         const tracker = ins.root_.getTracker('click', ClickEventTracker);
         const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag({
@@ -810,7 +812,7 @@ describes.realWin(
         return waitForNoSendRequest(analytics).then(() => {
           expect(addStub).to.be.calledOnce;
           const config = addStub.args[0][2];
-          expect(config['selector']).to.equal('TITLE');
+          expect(config['selector']).to.equal('My Test Title');
         });
       });
     });
