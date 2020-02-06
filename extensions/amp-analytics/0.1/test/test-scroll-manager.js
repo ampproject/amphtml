@@ -25,6 +25,23 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
   let scrollManager;
   let fakeViewport;
 
+  function matcher(expected) {
+    return actual => {
+      // Returns true if all of the object keys have the same value
+      return !Object.keys(actual).some(key => {
+        return actual[key] !== expected[key];
+      });
+    };
+  }
+
+  function expectNthCallToMatch(fn, callIndex, expected) {
+    expect(
+      fn
+        .getCall(callIndex)
+        .calledWithMatch(env.sandbox.match(matcher(expected)))
+    ).to.be.true;
+  }
+
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
@@ -93,11 +110,13 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     }
   );
 
-  it('fires on scroll', () => {
+  it('fires on scroll', async () => {
     const fn1 = env.sandbox.stub();
     const fn2 = env.sandbox.stub();
     scrollManager.addScrollHandler(fn1);
     scrollManager.addScrollHandler(fn2);
+
+    await scrollManager.measureRootElement_(true);
 
     expect(fn1).to.have.callCount(1);
     expect(fn2).to.have.callCount(1);
@@ -111,7 +130,12 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
       top: 0,
       left: 0,
     });
-    scrollManager.onScroll_({top: 500, left: 500, height: 250, width: 250});
+    await scrollManager.onScroll_({
+      top: 500,
+      left: 500,
+      height: 250,
+      width: 250,
+    });
 
     const expectedScrollEvent = {
       top: 500,
@@ -124,35 +148,64 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
       initialScrollWidth: 500,
     };
 
-    function matcher(expected) {
-      return actual => {
-        // Returns true if all of the object keys have the same value
-        return !Object.keys(actual).some(key => {
-          return actual[key] !== expected[key];
-        });
-      };
-    }
-
     expect(fn1).to.have.callCount(2);
-    expect(
-      fn1
-        .getCall(1)
-        .calledWithMatch(env.sandbox.match(matcher(expectedScrollEvent)))
-    ).to.be.true;
+    expectNthCallToMatch(fn1, 1, expectedScrollEvent);
 
     expect(fn2).to.have.callCount(2);
-    expect(
-      fn2
-        .getCall(1)
-        .calledWithMatch(env.sandbox.match(matcher(expectedScrollEvent)))
-    ).to.be.true;
+    expectNthCallToMatch(fn2, 1, expectedScrollEvent);
   });
 
-  it('can remove specifc handlers', () => {
+  it('fires on scroll inside an embedded doc', async () => {
     const fn1 = env.sandbox.stub();
     const fn2 = env.sandbox.stub();
     scrollManager.addScrollHandler(fn1);
     scrollManager.addScrollHandler(fn2);
+
+    await scrollManager.measureRootElement_(true);
+
+    expect(fn1).to.have.callCount(1);
+    expect(fn2).to.have.callCount(1);
+
+    // Scroll Down
+    fakeViewport.getScrollTop.returns(500);
+    fakeViewport.getScrollLeft.returns(500);
+    fakeViewport.getLayoutRect.returns({
+      width: 800,
+      height: 700,
+      top: 200,
+      left: 50,
+    });
+    await scrollManager.onScroll_({
+      top: 500,
+      left: 500,
+      height: 250,
+      width: 250,
+    });
+
+    const expectedScrollEvent = {
+      top: 300,
+      left: 450,
+      height: 250,
+      width: 250,
+      scrollWidth: 800,
+      scrollHeight: 700,
+      initialScrollHeight: 500,
+      initialScrollWidth: 500,
+    };
+
+    expect(fn1).to.have.callCount(2);
+    expectNthCallToMatch(fn1, 1, expectedScrollEvent);
+
+    expect(fn2).to.have.callCount(2);
+    expectNthCallToMatch(fn2, 1, expectedScrollEvent);
+  });
+
+  it('can remove specifc handlers', async () => {
+    const fn1 = env.sandbox.stub();
+    const fn2 = env.sandbox.stub();
+    scrollManager.addScrollHandler(fn1);
+    scrollManager.addScrollHandler(fn2);
+    await scrollManager.measureRootElement_(true);
 
     expect(fn1).to.have.callCount(1);
     expect(fn2).to.have.callCount(1);
@@ -162,7 +215,12 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     // Scroll Down
     fakeViewport.getScrollTop.returns(500);
     fakeViewport.getScrollLeft.returns(500);
-    scrollManager.onScroll_({top: 500, left: 500, height: 250, width: 250});
+    await scrollManager.onScroll_({
+      top: 500,
+      left: 500,
+      height: 250,
+      width: 250,
+    });
 
     expect(fn1).to.have.callCount(2);
     expect(fn2).to.have.callCount(1);

@@ -16,7 +16,7 @@
 
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
-import {dev} from '../../../src/log';
+import {dev, devAssert} from '../../../src/log';
 
 /**
  * @typedef {{
@@ -43,8 +43,14 @@ export class ScrollManager {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
+    /** @const @private {!../../../src/service/ampdoc-impl.AmpDoc} */
+    this.ampdoc_ = ampdoc;
+
     /** @const @private {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
+
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /** @private {!UnlistenDef|null} */
     this.viewportOnChangedUnlistener_ = null;
@@ -52,17 +58,11 @@ export class ScrollManager {
     /** @private {!Observable<!./scroll-manager.ScrollEventDef>} */
     this.scrollObservable_ = new Observable();
 
-    /** @private {?number} */
-    this.initialScrollWidth_ = null;
-
-    /** @private {?number} */
-    this.initialScrollHeight_ = null;
-
-    const root = ampdoc.getRootNode();
     /** @const @private {!Element} */
-    this.root_ = dev().assertElement(
-      root.host || root.documentElement || root.body || root
-    );
+    this.root_ = this.getRootElement_();
+
+    /** @const @private {../../../src/layout-rect.LayoutRectDef} */
+    this.initialRootLayoutRect_ = null;
   }
 
   /**
@@ -91,28 +91,28 @@ export class ScrollManager {
   addScrollHandler(handler) {
     // Trigger an event to fire events that might have already happened.
     const size = this.viewport_.getSize();
-    const layoutRect = this.viewport_.getLayoutRect(this.root_);
-    // Cache the scroll height/width for use with `ignoreResize`
-    if (
-      this.initialScrollWidth_ === null ||
-      this.initialScrollHeight_ === null
-    ) {
-      this.initialScrollWidth_ = layoutRect.width;
-      this.initialScrollHeight_ = layoutRect.height;
-    }
 
-    /** {./scroll-manager.ScrollEventDef} */
-    const scrollEvent = {
-      top: this.viewport_.getScrollTop() - layoutRect.top,
-      left: this.viewport_.getScrollLeft() - layoutRect.left,
-      width: size.width,
-      height: size.height,
-      scrollWidth: this.initialScrollWidth_,
-      scrollHeight: this.initialScrollHeight_,
-      initialScrollWidth: this.initialScrollWidth_,
-      initialScrollHeight: this.initialScrollHeight_,
-    };
-    handler(scrollEvent);
+    this.measureRootElement_(true /** initial */).then(layoutRect => {
+      const {
+        top,
+        left,
+        width,
+        height,
+      } = (this.initialRootLayoutRect_ = layoutRect);
+
+      /** {./scroll-manager.ScrollEventDef} */
+      const scrollEvent = {
+        top: this.viewport_.getScrollTop() - top,
+        left: this.viewport_.getScrollLeft() - left,
+        width: size.width,
+        height: size.height,
+        scrollWidth: width,
+        scrollHeight: height,
+        initialScrollWidth: width,
+        initialScrollHeight: height,
+      };
+      handler(scrollEvent);
+    });
 
     if (this.scrollObservable_.getHandlerCount() === 0) {
       this.addViewportOnChangedListener_();
@@ -123,25 +123,33 @@ export class ScrollManager {
 
   /**
    * @param {!../../../src/service/viewport/viewport-interface.ViewportChangedEventDef} e
+   * @return {!Promise}
    * @private
    */
   onScroll_(e) {
-    // Handle offsets for shadow docs
-    const layoutRect = this.viewport_.getLayoutRect(this.root_);
+    return this.measureRootElement_(true /** initial */).then(() => {
+      devAssert(this.initialRootLayoutRect_);
+      const {
+        width: initialWidth,
+        height: initialHeight,
+      } = this.initialRootLayoutRect_;
 
-    /** {./scroll-manager.ScrollEventDef} */
-    const scrollEvent = {
-      top: e.top - layoutRect.top,
-      left: e.left - layoutRect.left,
-      width: e.width,
-      height: e.height,
-      scrollWidth: layoutRect.width,
-      scrollHeight: layoutRect.height,
-      initialScrollWidth: dev().assertNumber(this.initialScrollWidth_),
-      initialScrollHeight: dev().assertNumber(this.initialScrollHeight_),
-    };
-    // Fire all of our children scroll observables
-    this.scrollObservable_.fire(scrollEvent);
+      return this.measureRootElement_().then(layoutRect => {
+        /** {./scroll-manager.ScrollEventDef} */
+        const scrollEvent = {
+          top: e.top - layoutRect.top,
+          left: e.left - layoutRect.left,
+          width: e.width,
+          height: e.height,
+          scrollWidth: layoutRect.width,
+          scrollHeight: layoutRect.height,
+          initialScrollWidth: initialWidth,
+          initialScrollHeight: initialHeight,
+        };
+        // Fire all of our children scroll observables
+        this.scrollObservable_.fire(scrollEvent);
+      });
+    });
   }
 
   /**
@@ -163,5 +171,35 @@ export class ScrollManager {
     this.viewportOnChangedUnlistener_ = this.viewport_.onChanged(
       this.onScroll_.bind(this)
     );
+  }
+
+  /** @return {!Element} */
+  getRootElement_() {
+    const root = this.ampdoc_.getRootNode();
+    return dev().assertElement(
+      // In the case of a shadow doc, its host will be used as
+      // a refrence point, otherwise use the same implementation
+      // as in `analytics-root.js`
+      root.host || root.documentElement || root.body || root
+    );
+  }
+
+  /**
+   * Gets the layout rectangle of the root element
+   * @param {cached=} initial
+   * @return {!Promise<!../../../src/layout-rect.LayoutRectDef>}
+   */
+  measureRootElement_(initial = false) {
+    if (initial && this.initialRootLayoutRect_) {
+      return Promise.resolve(this.initialRootLayoutRect_);
+    }
+
+    return this.mutator_.measureElement(() => {
+      const layoutRect = this.viewport_.getLayoutRect(this.root_);
+      if (!this.initialRootLayoutRect_) {
+        this.initialRootLayoutRect_ = layoutRect;
+      }
+      return layoutRect;
+    });
   }
 }
