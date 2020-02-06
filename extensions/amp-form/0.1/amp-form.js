@@ -261,8 +261,9 @@ export class AmpForm {
 
   /**
    * @return {string|undefined} the value of the form's xssi-prefix attribute.
+   * @private
    */
-  getXssiPrefix() {
+  getXssiPrefix_() {
     return this.form_.getAttribute('xssi-prefix');
   }
 
@@ -968,7 +969,7 @@ export class AmpForm {
    * @private
    */
   handleXhrSubmitSuccess_(response, incomingTrust) {
-    return responseXssiJson(response, this.getXssiPrefix())
+    return responseXssiJson(response, this.getXssiPrefix_())
       .then(
         json =>
           this.handleSubmitSuccess_(
@@ -1017,9 +1018,9 @@ export class AmpForm {
     let promise;
     if (e && e.response) {
       const error = /** @type {!Error} */ (e);
-      promise = this.xhr_
-        .xssiJson(error.response, this.getXssiPrefix())
-        .catch(() => null);
+      promise = responseXssiJson(error.response, this.getXssiPrefix_()).catch(
+        () => null
+      );
     } else {
       promise = Promise.resolve(null);
     }
