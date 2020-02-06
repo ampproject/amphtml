@@ -145,7 +145,9 @@ Where `data` matches the [entitlements response](https://github.com/subscription
           }
         },
         {
-          "serviceId": "subscribe.google.com"
+          "serviceId": "subscribe.google.com",
+          "hasAssociatedAccountUrl": "https://...",
+          "createOrUpdateAccountUrl": "https://...",
         }
       ]
     }

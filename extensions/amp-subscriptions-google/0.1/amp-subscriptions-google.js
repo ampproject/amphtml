@@ -36,12 +36,13 @@ import {
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
+import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {parseUrlDeprecated} from '../../../src/url';
 import {startsWith} from '../../../src/string';
-import {userAssert} from '../../../src/log';
+import {devAssert, userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
@@ -72,6 +73,7 @@ export class GoogleSubscriptionsPlatformService {
   constructor(ampdoc) {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
+    console.log(ampdoc);
   }
 
   /**
@@ -112,6 +114,15 @@ export class GoogleSubscriptionsPlatform {
     this.subscriptionAnalytics_.registerEventListener(
       this.handleAnalyticsEvent_.bind(this)
     );
+
+    /** @private @const {!UrlBuilder} */
+    this.urlBuilder_ = new UrlBuilder(
+      ampdoc,
+      this.serviceAdapter_.getReaderId('local')
+    );
+
+    /** @const @private {!../../../src/service/xhr-impl.Xhr} */
+    this.xhr_ = Services.xhrFor(ampdoc.win);
 
     // Map AMP experiments prefixed with 'swg-' to SwG experiments.
     const ampExperimentsForSwg = Object.keys(experimentToggles(ampdoc.win))
@@ -463,18 +474,92 @@ export class GoogleSubscriptionsPlatform {
    * @return {boolean}
    */
   isPingbackEnabled() {
-    return false;
+    // Only enable pingback if useful deferred account creation.
+    return (this.serviceConfig_["hasAssociatedAccountUrl"] &&
+            this.serviceConfig_["createOrUpdateAccountUrl"]);
   }
 
   /** @override */
   pingbackReturnsAllEntitlements() {
-    return false;
+    return true;
+  }
+
+  /** @return {!Promise<{found: boolean}>} */
+  hasAssociatedUserAccount_(selectedEntitlement) {
+    const hasAssociatedAccountUrl = /** @type {string} */ (devAssert(
+      this.serviceConfig_["hasAssociatedAccountUrl"] ,
+      'hasAssociatedAccountUrl is null'
+    ));
+
+    const promise = this.urlBuilder_.buildUrl(
+      hasAssociatedAccountUrl,
+      /* useAuthData */ true
+    );
+    return promise.then(url => {
+      return this.xhr_.fetchJson(url, {
+        method: 'POST',
+        credentials: 'include',
+        body: this.serviceAdapter_.stringifyForPingback(selectedEntitlement),
+      });
+    });
   }
 
   /**
-   * Performs the pingback to the subscription platform
-   */
-  pingback() {}
+   * @param {!DeferredAccountCreationResponse} deferredAccountResponse
+   * @return {!Promise<{}>}
+   * */
+  createOrUpdateAccount_(deferredAccountResponse) {
+    const createOrUpdateAccountUrl = /** @type {string} */ (devAssert(
+      this.serviceConfig_["createOrUpdateAccountUrl"] ,
+      'createOrUpdateAccountUrl is null'
+    ));
+
+    const promise = this.urlBuilder_.buildUrl(
+      createOrUpdateAccountUrl,
+      /* useAuthData */ true
+    );
+    console.log('DeferredAccountCreationResponse')
+    return promise.then(url => {
+      return this.xhr_.fetchJson(url, {
+        method: 'POST',
+        credentials: 'include',
+        body: this.serviceAdapter_.stringifyForPingback({
+          entitlements: deferredAccountResponse.entitlements,
+          userData: deferredAccountResponse.userData,
+          purchaseDataList: deferredAccountResponse.purchaseDataList,
+        }),
+      });
+    });
+  }
+
+  /**
+   * @override
+   * @param {?./entitlement.Entitlement} entitlements
+   * @return {!Promise|undefined}*/
+  pingback(entitlements) {
+    if (!this.isPingbackEnabled()) {
+      return;
+    }
+    return this.hasAssociatedUserAccount_(entitlements).then(async result => {
+      console.log(`result ${result.json()}`)
+      const {found} = await result.json();
+      console.log(`found ${found}`)
+      if (found) {
+        this.runtime_.completeDeferredAccountCreation({
+          entitlements
+        }).then(response => {
+          console.log(`response ${response}`);
+          this.createOrUpdateAccount_(response).then(() => {
+            console.log(`response ${response.complete}`);
+            response.complete().then(() => {
+              console.log("completed")
+              // mark flow as completed
+            })
+          })
+        })
+      }
+    });
+  }
 
   /** @override */
   getSupportedScoreFactor(factorName) {

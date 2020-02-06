@@ -20,7 +20,6 @@ import {Services} from '../../../src/services';
 import {addParamToUrl, assertHttpsUrl} from '../../../src/url';
 import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {isArray} from '../../../src/types';
 
 /**
  * Implments the remotel local subscriptions platform which uses
@@ -83,23 +82,6 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
     return !!this.pingbackUrl_;
   }
 
-  /**
-   * Format data for pingback
-   * @param {./entitlement.Entitlement|Array<./entitlement.Entitlement>} entitlements
-   * @return {string}
-   * @private
-   */
-  stringifyPingbackData_(entitlements) {
-    if (isArray(entitlements)) {
-      const entitlementArray = [];
-      entitlements.forEach(ent => {
-        entitlementArray.push(ent.jsonForPingback());
-      });
-      return JSON.stringify(entitlementArray);
-    }
-    return JSON.stringify(entitlements.jsonForPingback());
-  }
-
   /** @override */
   pingback(selectedEntitlement) {
     if (!this.isPingbackEnabled) {
@@ -122,7 +104,7 @@ export class LocalSubscriptionRemotePlatform extends LocalSubscriptionBasePlatfo
         headers: dict({
           'Content-Type': 'text/plain',
         }),
-        body: this.stringifyPingbackData_(selectedEntitlement),
+        body: this.serviceAdapter_.stringifyForPingback(selectedEntitlement),
       });
     });
   }
