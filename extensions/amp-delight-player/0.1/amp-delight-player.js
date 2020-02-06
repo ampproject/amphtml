@@ -23,6 +23,7 @@ import {
   originMatches,
   redispatch,
 } from '../../../src/iframe-video';
+import {dict} from '../../../src/utils/object';
 import {getData, listen, listenOncePromise} from '../../../src/event-helper';
 import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
@@ -33,6 +34,9 @@ import {userAssert} from '../../../src/log';
 
 /** @const */
 const TAG = 'amp-delight-player';
+
+/** @private @const */
+const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @const @enum {string} */
 const DelightEvent = {
@@ -57,6 +61,7 @@ const DelightEvent = {
   ENABLE_INTERFACE: 'x-dl8-to-iframe-enable-interface',
   DISABLE_INTERFACE: 'x-dl8-to-iframe-disable-interface',
   SEEK: 'x-dl8-to-iframe-seek',
+  CUSTOM_TICK: 'x-dl8-to-parent-amp-custom-tick',
 
   PING: 'x-dl8-ping',
   PONG: 'x-dl8-pong',
@@ -320,7 +325,26 @@ class AmpDelightPlayer extends AMP.BaseElement {
         this.isFullscreen_ = false;
         break;
       }
+      case DelightEvent.CUSTOM_TICK: {
+        const payload = data['payload'];
+        this.dispatchCustomAnalyticsEvent_(payload.type, payload);
+        break;
+      }
     }
+  }
+
+  /**
+   * @param {string} eventType The eventType must be prefixed with video-custom- to prevent naming collisions with other analytics event types.
+   * @param {!Object<string, string>=} vars
+   */
+  dispatchCustomAnalyticsEvent_(eventType, vars) {
+    this.element.dispatchCustomEvent(
+      VideoEvents.CUSTOM_TICK,
+      dict({
+        'eventType': ANALYTICS_EVENT_TYPE_PREFIX + eventType,
+        'vars': vars,
+      })
+    );
   }
 
   /**

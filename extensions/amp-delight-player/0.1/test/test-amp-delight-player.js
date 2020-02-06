@@ -149,6 +149,20 @@ describes.realWin(
               payload: {},
             });
             return p;
+          })
+          .then(async () => {
+            const p = listenOncePromise(delight, VideoEvents.CUSTOM_TICK);
+            fakePostMessage(delight, {
+              type: 'x-dl8-to-parent-amp-custom-tick',
+              payload: {
+                type: 'delight-test-event',
+                testVar: 42,
+              },
+            });
+            const {data} = await p;
+            expect(data.eventType).to.equal('video-custom-delight-test-event');
+            expect(data.vars.testVar).to.equal(42);
+            return p;
           });
       });
     });
