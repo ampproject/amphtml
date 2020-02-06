@@ -15,6 +15,7 @@
  */
 
 import * as consent from '../../../../src/consent';
+import * as lolex from 'lolex';
 import * as utils from '../utils';
 import {
   Action,
@@ -57,6 +58,7 @@ describes.realWin(
     let isEmbedded = false;
     let story;
     let replaceStateStub;
+    let clock;
 
     /**
      * @param {number} count
@@ -108,6 +110,10 @@ describes.realWin(
       win = env.win;
       ampdoc = env.ampdoc;
 
+      clock = lolex.install({
+        toFake: ['Date', 'setTimeout', 'clearTimeout'],
+      });
+
       replaceStateStub = env.sandbox.stub(win.history, 'replaceState');
       // Required by the bookend code.
       win.document.title = 'Story';
@@ -138,6 +144,8 @@ describes.realWin(
     });
 
     afterEach(() => {
+      clock.runAll();
+      clock.uninstall();
       element.remove();
     });
 
