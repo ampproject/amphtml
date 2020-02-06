@@ -50,13 +50,13 @@ import {
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {getMode} from '../../../src/mode';
-import {getSourceOrigin} from '../../../src/url';
 import {
+  getChildJsonConfig,
   getValueForExpr,
   hasChildJsonConfig,
-  getChildJsonConfig,
 } from '../../../src/json';
+import {getMode} from '../../../src/mode';
+import {getSourceOrigin} from '../../../src/url';
 import {
   getViewerAuthTokenIfAvailable,
   setupAMPCors,
@@ -135,7 +135,7 @@ export class AmpList extends AMP.BaseElement {
      * Has the initialization json been used yet?
      * @private {boolean}
      */
-    this.initialJsonUsed = false;
+    this.initialJsonUsed_ = false;
 
     /**
      * The `src` attribute's initial value.
@@ -357,14 +357,14 @@ export class AmpList extends AMP.BaseElement {
    * @return {null|Promise<?JsonObject>}
    * @private
    */
-  getInitialJson() {
+  getInitialJson_() {
     if (!isExperimentOn(this.win, 'amp-list-init-from-state')) {
       return null;
     }
-    if (this.initialJsonUsed || !hasChildJsonConfig(this.element)) {
+    if (this.initialJsonUsed_ || !hasChildJsonConfig(this.element)) {
       return null;
     }
-    this.initialJsonUsed = true;
+    this.initialJsonUsed_ = true;
     return Promise.resolve(getChildJsonConfig(this.element));
   }
 
@@ -584,7 +584,7 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      fetch = this.getInitialJson() || this.prepareAndSendFetch_(opt_refresh);
+      fetch = this.getInitialJson_() || this.prepareAndSendFetch_(opt_refresh);
       fetch = fetch.then(data => {
         // Bail if the src has changed while resolving the xhr request.
         if (elementSrc !== this.element.getAttribute('src')) {
