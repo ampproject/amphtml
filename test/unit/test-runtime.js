@@ -1345,25 +1345,6 @@ describes.realWin(
         ).to.not.exist;
       });
 
-      it('should import and cleanup amp-script-src meta content', () => {
-        const metaEl = win.document.createElement('meta');
-        metaEl.setAttribute('name', 'amp-script-src');
-        metaEl.setAttribute('content', 'sha384-abc');
-        importDoc.head.appendChild(metaEl);
-        const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
-        expect(win.document.head.querySelector('meta[name="amp-script-src"]'))
-          .to.exist;
-        expect(
-          win.document.head
-            .querySelector('meta[name="amp-script-src"]')
-            .getAttribute('content')
-        ).to.equal('sha384-abc');
-        amp.close().then(() => {
-          expect(win.document.head.querySelector('meta[name="amp-script-src"]'))
-            .to.not.exist;
-        });
-      });
-
       it('should start as visible by default', () => {
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
         expect(ampdoc.getVisibilityState()).to.equal('visible');
