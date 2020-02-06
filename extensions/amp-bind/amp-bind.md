@@ -433,7 +433,7 @@ Nested objects are generally merged to a maximum depth of 10. All variables, inc
         "a": "nested once",
         "ab": {
           "b": "nested twice",
-          "bc":{
+          "bc": {
             "c": "nested three times",
             "cd": {
               "d": "nested four times",
