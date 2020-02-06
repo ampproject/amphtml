@@ -105,26 +105,26 @@ export class AmpAdExit extends AMP.BaseElement {
   exit(invocation) {
     const {args} = invocation;
     let {event} = invocation;
-    let target;
+    userAssert(
+      'variable' in args != 'target' in args,
+      `One and only one of 'target' and 'variable' must be specified`
+    );
+    let targetName;
     if ('variable' in args) {
-      userAssert(
-        !('target' in args),
-        `Only one of 'target' and 'variable' should be specified`
-      );
-      let pointToTargetName = this.variableTargets_[args['variable']];
-      if (!pointToTargetName) {
-        pointToTargetName = args['default'];
+      targetName = this.variableTargets_[args['variable']];
+      if (!targetName) {
+        targetName = args['default'];
       }
-      target = this.targets_[pointToTargetName];
       userAssert(
-        target,
+        targetName,
         `Variable target not found, variable:'${args['variable']}', default:'${args['default']}'`
       );
       delete args['default'];
     } else {
-      target = this.targets_[args['target']];
-      userAssert(target, `Exit target not found: '${args['target']}'`);
+      targetName = args['target'];
     }
+    const target = this.targets_[targetName];
+    userAssert(target, `Exit target not found: '${targetName}'`);
     userAssert(event, 'Unexpected null event');
     event = /** @type {!../../../src/service/action-impl.ActionEventDef} */ (event);
 

@@ -775,7 +775,7 @@ describes.realWin(
       );
     });
 
-    it('should exit to the default target if varible target was never set', () => {
+    it('should exit to the default target if varible target is never set', () => {
       const open = env.sandbox.stub(win, 'open').callsFake(() => {
         return {name: 'fakeWin'};
       });
@@ -785,6 +785,24 @@ describes.realWin(
         EXIT_CONFIG.targets.simple.finalUrl,
         '_blank'
       );
+    });
+
+    it('should cause error when variable target is never set and default value is not provided', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {
+              variable: 'indirect',
+            },
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
     });
 
     it('should cause error when variable target was pointed to an invalid target', () => {
@@ -804,6 +822,22 @@ describes.realWin(
           element.implementation_.executeAction({
             method: 'exit',
             args: {variable: 'not-a-real-target', default: 'not-a-real-target'},
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when neither "target" nor "variable" is provided in arguments', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {},
             event: makeClickEvent(1001),
             satisfiesTrust: () => true,
           });
