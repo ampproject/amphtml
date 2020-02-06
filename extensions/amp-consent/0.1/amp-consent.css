@@ -85,6 +85,15 @@ amp-consent.amp-hidden {
   animation: 1000ms amp-consent-ui-placeholder-spin linear infinite;
 }
 
+.i-amphtml-consent-alertdialog {
+  overflow: hidden;
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  left: -10000px;
+  top: auto;
+}
+
 .i-amphtml-consent-ui-fill {
   position: absolute;
   top: 0;

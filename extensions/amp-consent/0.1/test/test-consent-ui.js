@@ -304,8 +304,7 @@ describes.realWin(
           toggleExperiment(win, 'amp-consent-restrict-fullscreen', false);
         });
 
-        it('should not change document.activeElement', () => {
-          const {activeElement} = doc;
+        it('should focus on the SR alert button', () => {
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
           });
@@ -314,9 +313,100 @@ describes.realWin(
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
 
-          return whenCalled(showIframeSpy).then(() =>
-            expect(activeElement).to.equal(doc.activeElement)
+          return whenCalled(showIframeSpy).then(() => {
+            const srButton = consentUI.srAlert_.children[1];
+            expect(doc.activeElement).to.equal(srButton);
+          });
+        });
+
+        it('should style SR dialog correctly', () => {
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+          const showIframeSpy = env.sandbox.spy(consentUI, 'showIframe_');
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+
+          return whenCalled(showIframeSpy).then(() => {
+            expect(consentUI.srAlert_.classList[0]).to.equal(
+              'i-amphtml-consent-alertdialog'
+            );
+          });
+        });
+
+        it('should append, remove, & not show the SR alert and have default titles', async () => {
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          await macroTask();
+
+          // iframe, placeholder, div, div, srAlert
+          const lastChild = consentUI.baseInstance_.element.children[4];
+          expect(lastChild).to.equal(consentUI.srAlert_);
+          expect(lastChild.hasAttribute('hidden')).to.be.false;
+          expect(lastChild.children[0].innerText).to.equal(
+            'User Consent Prompt'
           );
+          expect(lastChild.children[1].innerText).to.equal('Focus Prompt');
+
+          consentUI.hide();
+          await macroTask();
+          // SR alert removed from DOM
+          expect(consentUI.srAlert_).to.be.undefined;
+          expect(consentUI.srAlertShown_).to.be.true;
+          // placeholder, div, div
+          expect(consentUI.baseInstance_.element.children.length).to.equal(3);
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          await macroTask();
+          expect(consentUI.srAlertShown_).to.be.true;
+          // iframe, placeholder, div, div
+          expect(consentUI.baseInstance_.element.children.length).to.equal(4);
+        });
+
+        it('should have configurable captions', async () => {
+          const newConsentPromptCaption = 'New Consent Policy Title';
+          const newButtonActionCaption = 'New Button Action Caption';
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+            'captions': {
+              'consentPromptCaption': newConsentPromptCaption,
+              'buttonActionCaption': newButtonActionCaption,
+            },
+          });
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          await macroTask();
+
+          // Get the last child of the amp-consent element
+          const dialog = consentUI.baseInstance_.element.children[4];
+          expect(dialog.children[0].innerText).to.equal(
+            newConsentPromptCaption
+          );
+          expect(dialog.children[1].innerText).to.equal(newButtonActionCaption);
+        });
+
+        it('should focus on iframe when button is clicked', function*() {
+          consentUI = new ConsentUI(mockInstance, {
+            'promptUISrc': 'https//promptUISrc',
+          });
+
+          consentUI.show(false);
+          consentUI.iframeReady_.resolve();
+          yield macroTask();
+
+          const button =
+            consentUI.baseInstance_.element.children[4].children[1];
+          const iframe = consentUI.ui_;
+          expect(doc.activeElement).to.equal(button);
+          button.click();
+          expect(doc.activeElement).to.equal(iframe);
         });
 
         it('should not expand if iframe is not in focus', async () => {
@@ -360,6 +450,14 @@ describes.realWin(
 
           consentUI.show(false);
           consentUI.iframeReady_.resolve();
+          await macroTask();
+
+          const button =
+            consentUI.baseInstance_.element.children[4].children[1];
+          const iframe = consentUI.ui_;
+          expect(doc.activeElement).to.equal(button);
+          button.click();
+          expect(doc.activeElement).to.equal(iframe);
           await macroTask();
 
           // not currently fullscreen
