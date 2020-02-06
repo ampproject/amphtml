@@ -25,21 +25,9 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
   let scrollManager;
   let fakeViewport;
 
-  function matcher(expected) {
-    return actual => {
-      // Returns true if all of the object keys have the same value
-      return !Object.keys(actual).some(key => {
-        return actual[key] !== expected[key];
-      });
-    };
-  }
-
   function expectNthCallToMatch(fn, callIndex, expected) {
-    expect(
-      fn
-        .getCall(callIndex)
-        .calledWithMatch(env.sandbox.match(matcher(expected)))
-    ).to.be.true;
+    expect(fn.getCall(callIndex).calledWithMatch(env.sandbox.match(expected)))
+      .to.be.true;
   }
 
   beforeEach(() => {
@@ -63,7 +51,7 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     other.className = 'other';
     body.appendChild(other);
 
-    scrollManager = new ScrollManager(ampdoc);
+    scrollManager = new ScrollManager(ampdoc, root.getRoot());
     root.scrollManager_ = scrollManager;
     fakeViewport = {
       'getSize': env.sandbox
@@ -144,8 +132,7 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
       width: 250,
       scrollWidth: 800,
       scrollHeight: 700,
-      initialScrollHeight: 500,
-      initialScrollWidth: 500,
+      initialSize: {scrollHeight: 500, scrollWidth: 500},
     };
 
     expect(fn1).to.have.callCount(2);
@@ -189,8 +176,7 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
       width: 250,
       scrollWidth: 800,
       scrollHeight: 700,
-      initialScrollHeight: 500,
-      initialScrollWidth: 500,
+      initialSize: {scrollHeight: 500, scrollWidth: 500},
     };
 
     expect(fn1).to.have.callCount(2);

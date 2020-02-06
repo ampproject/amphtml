@@ -317,7 +317,7 @@ describes.realWin('Events', {amp: 1}, env => {
           'on': AnalyticsEventType.SCROLL,
           'scrollSpec': {
             'verticalBoundaries': [0, 50, 100],
-            'ignoreResize': true,
+            'useInitialPageSize': true,
           },
         },
         fn2
