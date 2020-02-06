@@ -1351,6 +1351,7 @@ describes.realWin(
         metaEl.setAttribute('content', '123');
         importDoc.head.appendChild(metaEl);
         const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+        
         expect(amp.ampdoc.getMetaByName('abc')).to.equal('123');
       });
 
