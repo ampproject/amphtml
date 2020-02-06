@@ -1051,7 +1051,7 @@ Bind `Node.textContent` using the `[text]` attribute. The `[text]` attribute is 
 <p></p>
 ```
 
-[**CSS classes**]("https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class")
+**CSS classes**
 
 Bind an element's `class` using the `[class]` attribute. A `[class]` expression must result in a space-delimited string. Meaning, if you are binding multiple classes, use a space between names. A comma or dash will be evaluated as the class name.
 
