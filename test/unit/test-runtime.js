@@ -1345,6 +1345,15 @@ describes.realWin(
         ).to.not.exist;
       });
 
+      it('should import meta content', () => {
+        const metaEl = win.document.createElement('meta');
+        metaEl.setAttribute('name', 'abc');
+        metaEl.setAttribute('content', '123');
+        importDoc.head.appendChild(metaEl);
+        const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+        expect(amp.ampdoc.getMetaByName('abc')).to.equal('123');
+      });
+
       it('should start as visible by default', () => {
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
         expect(ampdoc.getVisibilityState()).to.equal('visible');
