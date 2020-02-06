@@ -258,7 +258,6 @@ class AmpDelightPlayer extends AMP.BaseElement {
     const {element} = this;
 
     const redispatched = redispatch(element, data['type'], {
-      [DelightEvent.READY]: VideoEvents.LOAD,
       [DelightEvent.PLAYING]: VideoEvents.PLAYING,
       [DelightEvent.PAUSED]: VideoEvents.PAUSE,
       [DelightEvent.ENDED]: VideoEvents.ENDED,
@@ -290,6 +289,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
         break;
       }
       case DelightEvent.READY: {
+        element.dispatchCustomEvent(VideoEvents.LOAD);
         this.playerReadyResolver_(this.iframe_);
         break;
       }
