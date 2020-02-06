@@ -254,6 +254,8 @@ AmpConfigType.prototype.runtime;
 AmpConfigType.prototype.test;
 /* @public {string|undefined} */
 AmpConfigType.prototype.spt;
+/* @public {boolean|undefined} */
+AmpConfigType.prototype.esm;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;
@@ -533,6 +535,7 @@ Activity.prototype.getIncrementalEngagedTime = function(name, reset) {};
 AccessService.prototype.getAccessReaderId = function() {};
 AccessService.prototype.getAuthdataField = function(field) {};
 // Same for amp-analytics
+
 /**
  * The "get CID" parameters.
  * - createCookieIfNotPresent: Whether CID is allowed to create a cookie when.
@@ -540,6 +543,7 @@ AccessService.prototype.getAuthdataField = function(field) {};
  * @typedef {{
  *   scope: string,
  *   createCookieIfNotPresent: (boolean|undefined),
+ *   cookieName: (string|undefined),
  * }}
  */
 var GetCidDef;
@@ -715,7 +719,11 @@ let BindRescanOptionsDef;
 
 /**
  * Options bag used in Bind.setState().
- * @typedef {{skipEval: (boolean|undefined), skipAmpState: (boolean|undefined)}}
+ * @typedef {{
+ *    skipEval: (boolean|undefined),
+ *    skipAmpState: (boolean|undefined),
+ *    constrain: (Array<!Element>|undefined),
+ * }}
  */
 let BindSetStateOptionsDef;
 

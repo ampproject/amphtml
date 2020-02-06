@@ -336,6 +336,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
   },
 
+  'byplay': {},
+
   'caajainfeed': {
     prefetch: ['https://cdn.amanad.adtdp.com/sdk/ajaamp.js'],
     preconnect: ['https://ad.amanad.adtdp.com'],
@@ -1122,6 +1124,10 @@ const adConfig = jsonConfiguration({
       'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
       'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
     ],
+  },
+
+  'whopainfeed': {
+    prefetch: 'https://widget.infeed.com.ar/widget/widget-amp.js',
   },
 
   'widespace': {},

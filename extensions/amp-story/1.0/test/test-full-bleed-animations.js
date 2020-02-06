@@ -105,6 +105,7 @@ describes.realWin(
     ) {
       const img = win.document.createElement('amp-img');
       img.setAttribute('animate-in', animationName);
+      img.setAttribute('layout', 'fill');
 
       const gridLayer = win.document.createElement('amp-story-grid-layer');
       opt_gridLayerTempalate = opt_gridLayerTempalate.length
@@ -121,6 +122,7 @@ describes.realWin(
         ' attached as a child of a grid layer with fill template.',
       () => {
         createPages(ampStory.element, 2, ['cover', 'page-1']);
+        ampStory.buildCallback();
         return ampStory
           .layoutCallback()
           .then(() => {
@@ -152,6 +154,7 @@ describes.realWin(
         'template other than `fill`.',
       () => {
         createPages(ampStory.element, 2, ['cover', 'page-1']);
+        ampStory.buildCallback();
         return ampStory
           .layoutCallback()
           .then(() => {
@@ -182,6 +185,7 @@ describes.realWin(
         'animation is used.',
       () => {
         createPages(ampStory.element, 2, ['cover', 'page-1']);
+        ampStory.buildCallback();
         return ampStory
           .layoutCallback()
           .then(() => {

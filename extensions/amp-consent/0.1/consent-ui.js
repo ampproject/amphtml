@@ -85,6 +85,12 @@ export class ConsentUI {
       config['uiConfig']['overlay'] === true;
 
     /** @private {boolean} */
+    this.restrictFullscreenOn_ = isExperimentOn(
+      baseInstance.win,
+      'amp-consent-restrict-fullscreen'
+    );
+
+    /** @private {boolean} */
     this.scrollEnabled_ = true;
 
     /** @private {?Element} */
@@ -202,7 +208,7 @@ export class ConsentUI {
 
           this.showIframe_();
 
-          if (!this.isPostPrompt_) {
+          if (!this.isPostPrompt_ && !this.restrictFullscreenOn_) {
             this.ui_./*OK*/ focus();
           }
         });
@@ -670,8 +676,13 @@ export class ConsentUI {
     }
 
     if (data['action'] === 'enter-fullscreen') {
-      // TODO (@torch2424) Send response back if enter fullscreen was succesful
-      if (!this.isIframeVisible_) {
+      // Do nothing if iframe not visible or it's not the active element.
+      if (
+        !this.isIframeVisible_ ||
+        (this.restrictFullscreenOn_ &&
+          this.document_.activeElement !== this.ui_)
+      ) {
+        // TODO (@torch2424) Send response back if enter fullscreen was succesful
         return;
       }
 
