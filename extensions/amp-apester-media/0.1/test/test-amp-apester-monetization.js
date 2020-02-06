@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../../src/services';
 import {handleCompanionAds} from '../monetization/index';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {
@@ -23,7 +24,6 @@ import {
 describes.realWin('amp-apester-media-monetization', {}, env => {
   let win, doc;
   let baseElement;
-  let resources;
   let docInfo;
   const queryAmpAdBladeSelector = myDoc =>
     myDoc.querySelector('amp-ad[type=blade]');
@@ -36,11 +36,10 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
 
     baseElement = doc.createElement('amp-apester-media');
 
-    resources = {
+    const mutator = {
       attemptChangeSize: () => env.sandbox.stub(),
     };
-
-    baseElement.getResources = () => resources;
+    env.sandbox.stub(Services, 'mutatorForDoc').returns(mutator);
 
     doc.body.appendChild(baseElement);
     docInfo = {
