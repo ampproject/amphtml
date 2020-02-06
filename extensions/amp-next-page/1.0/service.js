@@ -33,7 +33,7 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
-import {clamp} from '../../../src/utils/math';
+import {clamp, mapRange} from '../../../src/utils/math';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor} from '../../../src/static-template';
@@ -173,6 +173,16 @@ export class NextPageService {
     // Save the <amp-next-page> from the host page
     this.host_ = element;
 
+    // Parse attributes
+    this.nextSrc_ = this.getHost_().getAttribute('src');
+    this.hasDeepParsing_ =
+      this.getHost_().hasAttribute('deep-parsing') || !this.nextSrc_;
+    const transition = this.getHost_().getAttribute('transition');
+    if (transition) {
+      userAssert(Object.values(Transition).includes(transition));
+      this.transition_ = /** @type {Transition} */ (transition);
+    }
+
     // Get the separator and more box (and remove the provided elements in the process)
     this.separator_ = this.getSeparatorElement_(element);
     this.footer_ = this.getFooterElement_(element);
@@ -199,15 +209,6 @@ export class NextPageService {
 
     // Have the footer be always visible
     insertAfterOrAtStart(this.host_, this.footer_);
-
-    this.nextSrc_ = this.getHost_().getAttribute('src');
-    this.hasDeepParsing_ =
-      this.getHost_().hasAttribute('deep-parsing') || !this.nextSrc_;
-    const transition = this.getHost_().getAttribute('transition');
-    if (transition) {
-      userAssert(Object.values(Transition).includes(transition));
-      this.transition_ = /** @type {Transition} */ (transition);
-    }
 
     this.initializePageQueue_();
 
@@ -367,13 +368,17 @@ export class NextPageService {
         if (page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT) {
           pageContents.forEach(element => {
             this.mutator_.mutateElement(element, () => {
-              setStyle(element, 'opacity', page.visiblePercent);
+              setStyle(
+                element,
+                'opacity',
+                mapRange(page.visiblePercent, 0.05, 0.5, 0, 1)
+              );
             });
           });
 
           // Set opacity to visiblePercent
           // Show other pages
-        } else if (page.isVisible()) {
+        } else if (page.isVisible() && page.visiblePercent < 1) {
           pageContents.forEach(element => {
             this.mutator_.mutateElement(element, () => {
               resetStyles(element, ['opacity']);
@@ -507,7 +512,17 @@ export class NextPageService {
       parseOgImage(this.doc_) ||
       parseFavicon(this.doc_) ||
       '';
-    return new HostPage(
+
+    // Any element that is outside of the <amp-next-page> element
+    // is considered part of the host article
+    const hostPageContents = toArray(
+      scopedQuerySelectorAll(
+        dev().assertElement(this.doc_.body),
+        '> *:not(amp-next-page)'
+      )
+    );
+
+    const hostPage = new HostPage(
       this,
       {
         url,
@@ -516,14 +531,24 @@ export class NextPageService {
       },
       PageState.INSERTED /** initState */,
       VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_ /** doc */,
-      toArray(
-        scopedQuerySelectorAll(
-          dev().assertElement(this.doc_.body),
-          '> *:not(amp-next-page)'
-        )
-      ) /** hostPageContents */
+      this.doc_,
+      hostPageContents
     );
+
+    // Set-up transitions
+    if (this.transition_ === Transition.FADE_IN_SCROLL) {
+      hostPage.hostPageContents.forEach(element => {
+        this.mutator_.mutateElement(element, () => {
+          setStyles(element, {
+            'opacity': 1,
+            'will-change': 'opacity',
+            'transition': 'opacity 0.3s',
+          });
+        });
+      });
+    }
+
+    return hostPage;
   }
 
   /**

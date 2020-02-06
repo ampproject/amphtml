@@ -35,6 +35,9 @@ export const ViewportRelativePos = {
   CONTAINS_VIEWPORT: 'contains',
 };
 
+/** @const {number} */
+const SCROLL_DIRECTION_THRESHOLD = 20;
+
 /** @enum {number} */
 export const ScrollDirection = {UP: 1, DOWN: -1};
 
@@ -234,6 +237,12 @@ export default class VisibilityObserver {
     this.mutator_.measureElement(() => {
       this.viewportHeight_ = this.viewport_.getHeight();
       const scrollTop = this.viewport_.getScrollTop();
+      // Throttle
+      if (
+        Math.abs(scrollTop - this.lastScrollTop_) < SCROLL_DIRECTION_THRESHOLD
+      ) {
+        return;
+      }
       const scrollDirection =
         scrollTop > this.lastScrollTop_
           ? ScrollDirection.DOWN
