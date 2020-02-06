@@ -182,7 +182,7 @@ export class Page {
       return Promise.resolve();
     }
     return this.shadowDoc_.close().then(() => {
-      this.manager_.closeDocument(this /** page */).then(() => {
+      return this.manager_.closeDocument(this /** page */).then(() => {
         this.shadowDoc_ = null;
         this.visibilityState_ = VisibilityState.HIDDEN;
         this.state_ = PageState.PAUSED;
@@ -193,9 +193,10 @@ export class Page {
   /**
    * Removes the placeholder and re-renders the page after its shadow
    * root has been removed
+   * @return {!Promise}
    */
   resume() {
-    this.attach_();
+    return this.attach_();
   }
 
   /**
