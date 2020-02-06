@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
+const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
 const colors = require('ansi-colors');
-const conf = require('../build.conf');
+const conf = require('../compile/build.conf');
 const del = require('del');
 const file = require('gulp-file');
 const fs = require('fs-extra');
+const globby = require('globby');
 const gulp = require('gulp');
+const gulpIf = require('gulp-if');
 const gulpWatch = require('gulp-watch');
+const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
@@ -31,14 +35,17 @@ const rename = require('gulp-rename');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const watchify = require('watchify');
-const wrappers = require('../compile-wrappers');
-const {altMainBundles, jsBundles} = require('../../bundles.config');
+const wrappers = require('../compile/compile-wrappers');
+const {
+  VERSION: internalRuntimeVersion,
+} = require('../compile/internal-version');
+const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
+const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {closureCompile} = require('../compile/compile');
-const {isTravisBuild} = require('../travis');
-const {thirdPartyFrames} = require('../config');
-const {transpileTs} = require('../typescript');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const {isTravisBuild} = require('../common/travis');
+const {thirdPartyFrames} = require('../test-configs/config');
+const {transpileTs} = require('../compile/typescript');
 
 const {green, red, cyan} = colors;
 const argv = require('minimist')(process.argv.slice(2));
@@ -70,24 +77,18 @@ const EXTENSION_BUNDLE_MAP = {
  * List of unminified targets to which AMP_CONFIG should be written
  */
 const UNMINIFIED_TARGETS = [
-  'amp.js',
-  'amp-esm.js',
-  'amp-shadow.js',
-  'amp-inabox.js',
   'alp.max.js',
-  'integration.js',
+  'amp-inabox.js',
+  'amp-shadow.js',
+  'amp.js',
 ];
 
 /**
  * List of minified targets to which AMP_CONFIG should be written
+ * Note: keep this list in sync with release script. Contact @ampproject/wg-infra
+ * for details.
  */
-const MINIFIED_TARGETS = [
-  'v0.js',
-  'shadow-v0.js',
-  'amp4ads-v0.js',
-  'alp.js',
-  'f.js',
-];
+const MINIFIED_TARGETS = ['alp.js', 'amp4ads-v0.js', 'shadow-v0.js', 'v0.js'];
 
 /**
  * Settings for the global Babelify transform while compiling unminified code
@@ -112,9 +113,7 @@ const hostname3p = argv.hostname3p || '3p.ampproject.net';
  * @return {!Promise}
  */
 function compileAllMinifiedJs() {
-  if (isTravisBuild()) {
-    log('Minifying multi-pass JS with', cyan('closure-compiler'));
-  }
+  log('Minifying multi-pass JS with', cyan('closure-compiler') + '...');
   return compileAllJs(/* watch */ false, /* minify */ true);
 }
 
@@ -124,9 +123,7 @@ function compileAllMinifiedJs() {
  * @return {!Promise}
  */
 function compileAllUnminifiedJs(watch) {
-  if (isTravisBuild()) {
-    log('Compiling JS with', cyan('browserify'));
-  }
+  log('Compiling JS with', cyan('browserify') + '...');
   return compileAllJs(/* watch */ watch);
 }
 
@@ -143,7 +140,7 @@ function doBuildJs(jsBundles, name, extraOptions) {
       target.srcDir,
       target.srcFilename,
       extraOptions.minify ? target.minifiedDestDir : target.destDir,
-      Object.assign({}, target.options, extraOptions)
+      {...target.options, ...extraOptions}
     );
   } else {
     return Promise.reject(red('Error:'), 'Could not find', cyan(name));
@@ -180,23 +177,33 @@ async function bootstrapThirdPartyFrames(watch, minify) {
 }
 
 /**
+ * Compile and optionally minify the core runtime.
+ * @param {boolean} watch
+ * @param {boolean} minify
+ * @return {!Promise}
+ */
+async function compileCoreRuntime(watch, minify) {
+  await doBuildJs(jsBundles, 'amp.js', {
+    watch,
+    minify,
+    wrapper: wrappers.mainBinary,
+    singlePassCompilation: argv.single_pass,
+    esmPassCompilation: argv.esm,
+    includeOnlyESMLevelPolyfills: argv.esm,
+  });
+}
+
+/**
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  * @param {boolean} watch
  * @param {boolean} minify
  * @return {!Promise}
  */
-function compileAllJs(watch, minify) {
-  return Promise.all([
+async function compileAllJs(watch, minify) {
+  const startTime = Date.now();
+  await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
-    doBuildJs(jsBundles, 'amp.js', {
-      watch,
-      minify,
-      wrapper: wrappers.mainBinary,
-      singlePassCompilation: argv.single_pass,
-      esmPassCompilation: argv.esm,
-      includeOnlyESMLevelPolyfills: argv.esm,
-    }),
     doBuildJs(jsBundles, 'alp.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'examiner.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'ww.max.js', {watch, minify}),
@@ -206,11 +213,17 @@ function compileAllJs(watch, minify) {
     doBuildJs(jsBundles, 'recaptcha.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-viewer-host.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'video-iframe-integration.js', {watch, minify}),
-    doBuildJs(jsBundles, 'amp-story-embed.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-story-player.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-inabox-host.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-shadow.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-inabox.js', {watch, minify}),
   ]);
+  await compileCoreRuntime(watch, minify);
+  endBuildStep(
+    minify ? 'Minified' : 'Compiled',
+    'all runtime JS files',
+    startTime
+  );
 }
 
 /**
@@ -253,10 +266,10 @@ function appendToCompiledFile(srcFilename, destFilePath) {
  * @return {!Promise}
  */
 function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
-  const startTime = Date.now();
+  const timeInfo = {};
   const entryPoint = path.join(srcDir, srcFilename);
   const {minifiedName} = options;
-  return closureCompile(entryPoint, destDir, minifiedName, options)
+  return closureCompile(entryPoint, destDir, minifiedName, options, timeInfo)
     .then(function() {
       const destPath = path.join(destDir, minifiedName);
       appendToCompiledFile(srcFilename, destPath);
@@ -279,19 +292,24 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         });
         name += ', and all extensions';
       }
-      endBuildStep('Minified', name, startTime);
+      endBuildStep('Minified', name, timeInfo.startTime);
     })
     .then(() => {
-      if (argv.fortesting && MINIFIED_TARGETS.includes(minifiedName)) {
-        return enableLocalTesting(`${destDir}/${minifiedName}`);
+      if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
+        return applyAmpConfig(
+          `${destDir}/${minifiedName}`,
+          /* localDev */ !!argv.fortesting
+        );
       }
     })
     .then(() => {
-      if (!argv.fortesting || !options.singlePassCompilation) {
+      if (argv.noconfig || !options.singlePassCompilation) {
         return;
       }
       return Promise.all(
-        altMainBundles.map(({name}) => enableLocalTesting(`dist/${name}.js`))
+        altMainBundles.map(({name}) =>
+          applyAmpConfig(`dist/${name}.js`, /* localDev */ !!argv.fortesting)
+        )
       );
     });
 }
@@ -364,21 +382,14 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
   const devWrapper = wrapper.replace('<%= contents %>', '$1');
 
   // TODO: @jonathantyng remove browserifyOptions #22757
-  const browserifyOptions = Object.assign(
-    {},
-    {
-      entries: entryPoint,
-      debug: true,
-      fast: true,
-    },
-    options.browserifyOptions
-  );
+  const browserifyOptions = {
+    entries: entryPoint,
+    debug: true,
+    fast: true,
+    ...options.browserifyOptions,
+  };
 
-  const babelifyOptions = Object.assign(
-    {},
-    BABELIFY_GLOBAL_TRANSFORM,
-    BABELIFY_PLUGINS
-  );
+  const babelifyOptions = {...BABELIFY_GLOBAL_TRANSFORM, ...BABELIFY_PLUGINS};
 
   let bundler = browserify(browserifyOptions).transform(
     babelify,
@@ -410,6 +421,7 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
         )
         .pipe(source(srcFilename))
         .pipe(buffer())
+        .pipe(gulpIf(argv.coverage, istanbul()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(
           regexpSourcemaps(
@@ -436,12 +448,10 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       })
       .then(() => {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
-          return enableLocalTesting(`${destDir}/${destFilename}`);
-        }
-      })
-      .then(() => {
-        if (isTravisBuild()) {
-          process.stdout.write('.');
+          return applyAmpConfig(
+            `${destDir}/${destFilename}`,
+            /* localDev */ true
+          );
         }
       });
   }
@@ -494,17 +504,18 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 function endBuildStep(stepName, targetName, startTime) {
   const endTime = Date.now();
   const executionTime = new Date(endTime - startTime);
+  const mins = executionTime.getMinutes();
   const secs = executionTime.getSeconds();
   const ms = ('000' + executionTime.getMilliseconds().toString()).slice(-3);
   let timeString = '(';
-  if (secs === 0) {
+  if (mins > 0) {
+    timeString += mins + ' m ' + secs + '.' + ms + ' s)';
+  } else if (secs === 0) {
     timeString += ms + ' ms)';
   } else {
     timeString += secs + '.' + ms + ' s)';
   }
-  if (!isTravisBuild()) {
-    log(stepName, cyan(targetName), green(timeString));
-  }
+  log(stepName, cyan(targetName), green(timeString));
 }
 
 /**
@@ -512,14 +523,14 @@ function endBuildStep(stepName, targetName, startTime) {
  * @param {string} command Command being run.
  */
 function printConfigHelp(command) {
+  log(
+    green('Building version'),
+    cyan(internalRuntimeVersion),
+    green('of the runtime with the'),
+    cyan(argv.config === 'canary' ? 'canary' : 'prod'),
+    green('AMP config.')
+  );
   if (!isTravisBuild()) {
-    log(
-      green('Building version'),
-      cyan(internalRuntimeVersion),
-      green('of the runtime for local testing with the'),
-      cyan(argv.config === 'canary' ? 'canary' : 'prod'),
-      green('AMP config.')
-    );
     log(
       green('⤷ Use'),
       cyan('--config={canary|prod}'),
@@ -534,32 +545,32 @@ function printConfigHelp(command) {
  * Prints a message that could help speed up local development.
  */
 function printNobuildHelp() {
-  if (!isTravisBuild()) {
-    for (const task of NOBUILD_HELP_TASKS) {
-      // eslint-disable-line local/no-for-of-statement
-      if (argv._.includes(task)) {
-        log(
-          green('To skip building during future'),
-          cyan(task),
-          green('runs, use'),
-          cyan('--nobuild'),
-          green('with your'),
-          cyan(`gulp ${task}`),
-          green('command.')
-        );
-        return;
-      }
+  for (const task of NOBUILD_HELP_TASKS) {
+    // eslint-disable-line local/no-for-of-statement
+    if (argv._.includes(task)) {
+      log(
+        green('To skip building during future'),
+        cyan(task),
+        green('runs, use'),
+        cyan('--nobuild'),
+        green('with your'),
+        cyan(`gulp ${task}`),
+        green('command.')
+      );
+      return;
     }
   }
 }
 
 /**
- * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
- * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
+ * fortesting mode. Called by "gulp build" and "gulp dist" while building
+ * various runtime files.
  * @param {string} targetFile File to which the config is to be written.
+ * @param {boolean} localDev Whether or not to enable local development.
  * @return {!Promise}
  */
-async function enableLocalTesting(targetFile) {
+async function applyAmpConfig(targetFile, localDev) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
@@ -569,7 +580,7 @@ async function enableLocalTesting(targetFile) {
       config,
       targetFile,
       baseConfigFile,
-      /* opt_localDev */ true,
+      /* opt_localDev */ localDev,
       /* opt_localBranch */ true,
       /* opt_branch */ false,
       /* opt_fortesting */ !!argv.fortesting
@@ -660,21 +671,57 @@ function toPromise(readable) {
   });
 }
 
+/**
+ * @param {{isEsmBuild: boolean|undefined, isCheckTypes: boolean|undefined, isFortesting: boolean|undefined, isSinglePass: boolean|undefined}=} options
+ */
+function transferSrcsToTempDir(options = {}) {
+  log(
+    'Performing pre-closure',
+    colors.cyan('babel'),
+    'transforms in',
+    colors.cyan(SRC_TEMP_DIR)
+  );
+  const files = globby.sync(BABEL_SRC_GLOBS);
+  files.forEach(file => {
+    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
+      fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
+      return;
+    }
+
+    const {code} = babel.transformFileSync(file, {
+      plugins: conf.plugins({
+        isEsmBuild: options.isEsmBuild,
+        isSinglePass: options.isSinglePass,
+        isForTesting: options.isForTesting,
+        isChecktypes: options.isChecktypes,
+      }),
+      retainLines: true,
+      compact: false,
+    });
+    const name = `${SRC_TEMP_DIR}/${file}`;
+    fs.outputFileSync(name, code);
+    process.stdout.write('.');
+  });
+  console.log('\n');
+}
+
 module.exports = {
+  applyAmpConfig,
   BABELIFY_GLOBAL_TRANSFORM,
   BABELIFY_PLUGINS,
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
   compileAllUnminifiedJs,
+  compileCoreRuntime,
   compileJs,
   compileTs,
   devDependencies,
   doBuildJs,
-  enableLocalTesting,
   endBuildStep,
   hostname,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
   toPromise,
+  transferSrcsToTempDir,
 };

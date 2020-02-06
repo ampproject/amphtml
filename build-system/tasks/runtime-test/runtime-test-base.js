@@ -19,12 +19,19 @@ const argv = require('minimist')(process.argv.slice(2));
 const babelify = require('babelify');
 const karmaConfig = require('../karma.conf');
 const log = require('fancy-log');
-const testConfig = require('../../config');
+const testConfig = require('../../test-configs/config');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../../common/ctrlcHandler');
+const {
+  createKarmaServer,
+  getAdTypes,
+  runTestInSauceLabs,
+} = require('./helpers');
 const {app} = require('../../server/test-server');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../../ctrlcHandler');
-const {createKarmaServer, getAdTypes, runTestInBatches} = require('./helpers');
 const {green, yellow, cyan, red} = require('ansi-colors');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('.././report-test-status');
 const {startServer, stopServer} = require('../serve');
 const {unitTestsToRun} = require('./helpers-unit');
@@ -47,9 +54,10 @@ function updateBrowsers(config) {
         browsers: [
           'SL_Chrome',
           'SL_Firefox',
-          'SL_Edge_17',
+          'SL_Edge',
           'SL_Safari_12',
-          'SL_IE_11',
+          'SL_Safari_11',
+          'SL_IE',
           // TODO(amp-infra): Evaluate and add more platforms here.
           //'SL_Chrome_Android_7',
           //'SL_iOS_11',
@@ -205,8 +213,6 @@ class RuntimeTestConfig {
       mochaTimeout: this.client.mocha.timeout,
       propertiesObfuscated: !!argv.single_pass,
       testServerPort: this.client.testServerPort,
-      testOnIe:
-        this.browsers.includes('IE') || this.browsers.includes('SL_IE_11'),
     };
 
     if (argv.coverage && this.testType != 'a4a') {
@@ -236,7 +242,7 @@ class RuntimeTestConfig {
       const plugins = [instanbulPlugin].concat(this.babelifyConfig.plugins);
 
       this.browserify.transform = [
-        ['babelify', Object.assign({}, this.babelifyConfig, {plugins})],
+        ['babelify', {...this.babelifyConfig, plugins}],
       ];
     }
   }
@@ -254,11 +260,6 @@ class RuntimeTestRunner {
   }
 
   async setup() {
-    // Run tests against compiled code when explicitly specified via --compiled,
-    // or when the minified runtime is automatically built.
-    process.env.SERVE_MODE =
-      argv.compiled || !argv.nobuild ? 'compiled' : 'default';
-
     await this.maybeBuild();
     await startServer({
       name: 'AMP Test Server',
@@ -275,7 +276,7 @@ class RuntimeTestRunner {
     reportTestStarted();
 
     if (argv.saucelabs) {
-      this.exitCode = await runTestInBatches(this.config);
+      this.exitCode = await runTestInSauceLabs(this.config);
     } else {
       this.exitCode = await createKarmaServer(this.config);
     }

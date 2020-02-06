@@ -232,6 +232,7 @@ describe('BindExpression', () => {
       expect(evaluate('"abc".indexOf("b")')).to.equal(1);
       expect(evaluate('"aaa".lastIndexOf("a")')).to.equal(2);
       expect(evaluate('"abc".slice(0, 2)')).to.equal('ab');
+      expect(evaluate('"abc".replace("bc", "xy")')).to.equal('axy');
       expect(evaluate('"a-b-c".split("-")')).to.deep.equal(['a', 'b', 'c']);
       expect(evaluate('"abc".substr(1)')).to.equal('bc');
       expect(evaluate('"abc".substring(0, 2)')).to.equal('ab');
@@ -251,9 +252,6 @@ describe('BindExpression', () => {
       }).to.throw(Error, unsupportedFunctionError);
       expect(() => {
         evaluate('"abc".repeat(2)');
-      }).to.throw(Error, unsupportedFunctionError);
-      expect(() => {
-        evaluate('"abc".replace("bc", "xy")');
       }).to.throw(Error, unsupportedFunctionError);
       expect(() => {
         evaluate('"abc".search()');
@@ -449,6 +447,7 @@ describe('BindExpression', () => {
       expect(evaluate('max(0, 1)')).to.equal(1);
       expect(evaluate('min(0, 1)')).to.equal(0);
       expect(evaluate('round(0.6)')).to.equal(1);
+      expect(evaluate('pow(2, 2)')).to.equal(4);
       expect(evaluate('sqrt(4)')).to.equal(2);
       expect(evaluate('log(20.2)')).to.equal(3.005682604407159);
       const r = evaluate('random()');
@@ -466,7 +465,7 @@ describe('BindExpression', () => {
         evaluate('sin(0.5)');
       }).to.throw(unsupportedFunctionError);
       expect(() => {
-        evaluate('pow(3, 2)');
+        evaluate('trunc(13.37)');
       }).to.throw(unsupportedFunctionError);
 
       // Don't support calling functions with `Math.` prefix.

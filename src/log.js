@@ -51,6 +51,14 @@ export function isUserErrorMessage(message) {
 
 /**
  * @param {string} message
+ * @return {string} The new message without USER_ERROR_SENTINEL
+ */
+export function stripUserError(message) {
+  return message.replace(USER_ERROR_SENTINEL, '');
+}
+
+/**
+ * @param {string} message
  * @return {boolean} Whether this message was a a user error from an iframe embed.
  */
 export function isUserErrorEmbed(message) {
@@ -59,7 +67,6 @@ export function isUserErrorEmbed(message) {
 
 /**
  * @enum {number}
- * @private Visible for testing only.
  */
 export const LogLevel = {
   OFF: 0,
@@ -107,7 +114,7 @@ const messageUrlRtv = () => `01${internalRuntimeVersion()}`;
  */
 const externalMessageUrl = (id, interpolatedParts) =>
   interpolatedParts.reduce(
-    (prefix, arg) => `${prefix}&s[]=${encodeURIComponent(toString(arg))}`,
+    (prefix, arg) => `${prefix}&s[]=${messageArgToEncodedComponent(arg)}`,
     `https://log.amp.dev/?v=${messageUrlRtv()}&id=${encodeURIComponent(id)}`
   );
 
@@ -118,6 +125,13 @@ const externalMessageUrl = (id, interpolatedParts) =>
  */
 const externalMessagesSimpleTableUrl = () =>
   `${urls.cdn}/rtv/${messageUrlRtv()}/log-messages.simple.json`;
+
+/**
+ * @param {*} arg
+ * @return {string}
+ */
+const messageArgToEncodedComponent = arg =>
+  encodeURIComponent(String(elementStringOrPassthru(arg)));
 
 /**
  * Logging class. Use of sentinel string instead of a boolean to check user/dev
@@ -410,7 +424,7 @@ export class Log {
         }
         messageArray.push(val);
         pushIfNonEmpty(messageArray, nextConstant.trim());
-        formatted += toString(val) + nextConstant;
+        formatted += stringOrElementString(val) + nextConstant;
       }
       const e = new Error(formatted);
       e.fromAssert = true;
@@ -629,12 +643,19 @@ export class Log {
  * @param {string|!Element} val
  * @return {string}
  */
-function toString(val) {
+const stringOrElementString = val =>
+  /** @type {string} */ (elementStringOrPassthru(val));
+
+/**
+ * @param {*} val
+ * @return {*}
+ */
+function elementStringOrPassthru(val) {
   // Do check equivalent to `val instanceof Element` without cross-window bug
   if (val && val.nodeType == 1) {
     return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
   }
-  return /** @type {string} */ (val);
+  return val;
 }
 
 /**
@@ -728,12 +749,12 @@ const logs = self.__AMP_LOG;
  * Eventually holds a constructor for Log objects. Lazily initialized, so we
  * can avoid ever referencing the real constructor except in JS binaries
  * that actually want to include the implementation.
- * @type {?Function}
+ * @type {?typeof Log}
  */
 let logConstructor = null;
 
 /**
- * Initializes log contructor.
+ * Initializes log constructor.
  */
 export function initLogConstructor() {
   logConstructor = Log;
@@ -750,7 +771,7 @@ export function initLogConstructor() {
 }
 
 /**
- * Resets log contructor for testing.
+ * Resets log constructor for testing.
  */
 export function resetLogConstructorForTesting() {
   logConstructor = null;

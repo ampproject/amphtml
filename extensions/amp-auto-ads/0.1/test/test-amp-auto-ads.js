@@ -16,9 +16,32 @@
 
 import '../../../amp-ad/0.1/amp-ad';
 import '../amp-auto-ads';
+import {BaseElement} from '../../../../src/base-element';
 import {Services} from '../../../../src/services';
+import {getA4ARegistry} from '../../../../ads/_a4a-config';
 import {toggleExperiment} from '../../../../src/experiments';
 import {waitForChild} from '../../../../src/dom';
+
+class FakeA4A extends BaseElement {
+  isLayoutSupported(unusedLayout) {
+    return true;
+  }
+
+  buildCallback() {
+    super.buildCallback();
+    // Simulate what amp-ad would do.
+    if (this.element.getAttribute('data-auto-format') == 'rspv') {
+      return this.attemptChangeSize(
+        /* height= */ 267,
+        this.getViewport().getSize().width
+      )
+        .then(() => {
+          this.element.classList.remove('i-amphtml-layout-awaiting-size');
+        })
+        .catch(() => {});
+    }
+  }
+}
 
 describes.realWin(
   'amp-auto-ads',
@@ -33,7 +56,6 @@ describes.realWin(
 
     let win;
     let doc;
-    let sandbox;
     let container;
     let anchor1;
     let anchor2;
@@ -46,7 +68,8 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      sandbox = env.sandbox;
+      const a4aRegistry = getA4ARegistry();
+      a4aRegistry['_ping_'] = () => true;
 
       toggleExperiment(win, 'amp-auto-ads', true);
 
@@ -61,11 +84,11 @@ describes.realWin(
       }
 
       const extensions = Services.extensionsFor(win);
-      sandbox
+      env.sandbox
         .stub(extensions, 'loadElementClass')
-        .callsFake(() => Promise.resolve(() => {}));
+        .returns(Promise.resolve(el => new FakeA4A(el)));
 
-      const viewportMock = sandbox.mock(Services.viewportForDoc(doc));
+      const viewportMock = env.sandbox.mock(Services.viewportForDoc(doc));
       viewportMock
         .expects('getSize')
         .returns({width: 320, height: 500})
@@ -87,7 +110,7 @@ describes.realWin(
       container.appendChild(anchor2);
 
       const spacer2 = doc.createElement('div');
-      spacer2.style.height = '499px';
+      spacer2.style.height = '490px';
       container.appendChild(spacer2);
 
       anchor3 = doc.createElement('div');
@@ -144,10 +167,9 @@ describes.realWin(
           },
         });
       };
-      sandbox.spy(xhr, 'fetchJson');
+      env.sandbox.spy(xhr, 'fetchJson');
 
-      const viewer = Services.viewerForDoc(env.ampdoc);
-      whenVisible = sandbox.stub(viewer, 'whenFirstVisible');
+      whenVisible = env.sandbox.stub(env.ampdoc, 'whenFirstVisible');
       whenVisible.returns(Promise.resolve());
     });
 
@@ -332,6 +354,53 @@ describes.realWin(
       });
     });
 
+    it('should still run ad strategies even when noConfigReason present.', () => {
+      configObj['optInStatus'].push(OPT_IN_STATUS_ANCHOR_ADS);
+      configObj.stickyAdAttributes = {
+        'data-no-fill': 'true',
+      };
+      configObj['noConfigReason'] = 'a reason';
+
+      return getAmpAutoAds().then(() => {
+        const bannerAdsPromise = new Promise(resolve => {
+          waitForChild(
+            anchor4,
+            parent => {
+              return parent.childNodes.length > 0;
+            },
+            () => {
+              expect(anchor1.childNodes).to.have.lengthOf(1);
+              expect(anchor2.childNodes).to.have.lengthOf(1);
+              expect(anchor3.childNodes).to.have.lengthOf(0);
+              expect(anchor4.childNodes).to.have.lengthOf(1);
+              verifyAdElement(anchor1.childNodes[0]);
+              verifyAdElement(anchor2.childNodes[0]);
+              verifyAdElement(anchor4.childNodes[0]);
+              expect(anchor4.childNodes[0].hasAttribute('data-no-fill')).to.to
+                .be.false;
+              resolve();
+            }
+          );
+        });
+
+        const anchorAdPromise = new Promise(resolve => {
+          waitForChild(
+            env.win.document.body,
+            parent => {
+              return parent.firstChild.tagName == 'AMP-STICKY-AD';
+            },
+            () => {
+              const stickyAd = env.win.document.body.firstChild;
+              const ampAd = stickyAd.firstChild;
+              expect(ampAd.getAttribute('data-no-fill')).to.equal('true');
+              resolve();
+            }
+          );
+        });
+        return Promise.all([bannerAdsPromise, anchorAdPromise]);
+      });
+    });
+
     describe('Anchor Ad', () => {
       it('should not insert anchor ad if not opted in', () => {
         return getAmpAutoAds().then(() => {
@@ -405,16 +474,35 @@ describes.realWin(
         });
       });
 
-      it('should insert anchor anchor ad with provided anchor ad attributes.', () => {
-        configObj = {
-          optInStatus: [2],
-        };
+      it('should insert three ads with base attribute and anchor anchor ad with provided anchor ad attributes.', () => {
+        configObj['optInStatus'].push(OPT_IN_STATUS_ANCHOR_ADS);
         configObj.stickyAdAttributes = {
           'data-no-fill': 'true',
         };
 
         return getAmpAutoAds().then(() => {
-          return new Promise(resolve => {
+          const bannerAdsPromise = new Promise(resolve => {
+            waitForChild(
+              anchor4,
+              parent => {
+                return parent.childNodes.length > 0;
+              },
+              () => {
+                expect(anchor1.childNodes).to.have.lengthOf(1);
+                expect(anchor2.childNodes).to.have.lengthOf(1);
+                expect(anchor3.childNodes).to.have.lengthOf(0);
+                expect(anchor4.childNodes).to.have.lengthOf(1);
+                verifyAdElement(anchor1.childNodes[0]);
+                verifyAdElement(anchor2.childNodes[0]);
+                verifyAdElement(anchor4.childNodes[0]);
+                expect(anchor4.childNodes[0].hasAttribute('data-no-fill')).to.be
+                  .false;
+                resolve();
+              }
+            );
+          });
+
+          const anchorAdPromise = new Promise(resolve => {
             waitForChild(
               env.win.document.body,
               parent => {
@@ -428,6 +516,7 @@ describes.realWin(
               }
             );
           });
+          return Promise.all([bannerAdsPromise, anchorAdPromise]);
         });
       });
     });
@@ -458,7 +547,7 @@ describes.realWin(
 
       it('should insert 4 ads when using the config ad constraints', () => {
         configObj.adConstraints = {
-          initialMinSpacing: '499px',
+          initialMinSpacing: '99px',
           maxAdCount: 8,
         };
 

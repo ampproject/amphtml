@@ -28,6 +28,7 @@ import {
 import {Gestures} from '../../../src/gesture';
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {WindowInterface} from '../../../src/window-interface';
 import {bezierCurve} from '../../../src/curve';
 import {boundValue, clamp, distance, magnitude} from '../../../src/utils/math';
 import {continueMotion} from '../../../src/motion';
@@ -336,7 +337,10 @@ export class ImageViewer {
     }
     this.maxSeenScale_ = Math.max(this.maxSeenScale_, this.scale_);
     const width = this.imageBox_.width * this.maxSeenScale_;
-    const src = this.srcset_.select(width, this.lightbox_.getDpr());
+    const src = this.srcset_.select(
+      width,
+      WindowInterface.getDevicePixelRatio()
+    );
     if (src == this.image_.getAttribute('src')) {
       return Promise.resolve();
     }

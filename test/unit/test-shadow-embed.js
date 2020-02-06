@@ -311,8 +311,7 @@ describes.sandboxed('shadow-embed', {}, () => {
     let isFirefox;
 
     beforeEach(() => {
-      setShadowDomStreamingSupportedForTesting(undefined);
-      createHTMLDocumentSpy = sandbox.spy();
+      createHTMLDocumentSpy = window.sandbox.spy();
       isFirefox = false;
       const platform = {
         isFirefox: () => isFirefox,
@@ -336,6 +335,10 @@ describes.sandboxed('shadow-embed', {}, () => {
           'vsync': {obj: {}},
         },
       };
+    });
+
+    afterEach(() => {
+      setShadowDomStreamingSupportedForTesting(undefined);
     });
 
     it('should resolve to streamer', () => {
@@ -374,8 +377,8 @@ describes.sandboxed('shadow-embed', {}, () => {
         beforeEach(() => {
           win = env.win;
           writer = new ShadowDomWriterStreamer(win);
-          onBodySpy = sandbox.spy();
-          onBodyChunkSpy = sandbox.spy();
+          onBodySpy = env.sandbox.spy();
+          onBodyChunkSpy = env.sandbox.spy();
           onBodyPromise = new Promise(resolve => {
             writer.onBody(parsedDoc => {
               resolve(parsedDoc.body);
@@ -503,8 +506,8 @@ describes.sandboxed('shadow-embed', {}, () => {
     beforeEach(() => {
       win = env.win;
       writer = new ShadowDomWriterBulk(win);
-      onBodySpy = sandbox.spy();
-      onBodyChunkSpy = sandbox.spy();
+      onBodySpy = env.sandbox.spy();
+      onBodyChunkSpy = env.sandbox.spy();
       onBodyPromise = new Promise(resolve => {
         writer.onBody(parsedDoc => {
           resolve(parsedDoc.body);

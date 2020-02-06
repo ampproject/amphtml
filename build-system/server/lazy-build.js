@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const log = require('fancy-log');
 const {
   doBuildExtension,
   maybeInitializeExtensions,
   getExtensionsToBuild,
 } = require('../tasks/extension-helpers');
-const {cyan, green} = require('ansi-colors');
 const {doBuildJs} = require('../tasks/helpers');
-const {jsBundles} = require('../../bundles.config');
+const {jsBundles} = require('../compile/bundles.config');
 
 const extensionBundles = {};
 maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
@@ -76,10 +74,10 @@ async function build(bundles, bundle, buildFunc) {
  * @param {!Object} res
  * @param {function()} next
  */
-exports.lazyBuildExtensions = async function(req, res, next) {
+async function lazyBuildExtensions(req, res, next) {
   const matcher = /\/dist\/v0\/([^\/]*)\.max\.js/;
   await lazyBuild(req.url, matcher, extensionBundles, doBuildExtension, next);
-};
+}
 
 /**
  * Lazy builds a non-extension JS file when requested.
@@ -87,31 +85,35 @@ exports.lazyBuildExtensions = async function(req, res, next) {
  * @param {!Object} res
  * @param {function()} next
  */
-exports.lazyBuildJs = async function(req, res, next) {
+async function lazyBuildJs(req, res, next) {
   const matcher = /\/.*\/([^\/]*\.js)/;
   await lazyBuild(req.url, matcher, jsBundles, doBuildJs, next);
-};
+}
 
 /**
- * Pre-builds the core runtime and returns immediately so that the user can
- * start using the webserver.
+ * Pre-builds the core runtime and the JS files that it loads.
  */
-exports.preBuildCoreRuntime = function() {
-  build(jsBundles, 'amp.js', doBuildJs);
-};
+async function preBuildRuntimeFiles() {
+  await build(jsBundles, 'amp.js', doBuildJs);
+  await build(jsBundles, 'ww.max.js', doBuildJs);
+}
 
 /**
- * Pre-builds some extensions (requested via command line flags) and returns
- * immediately so that the user can start using the webserver.
- * @param {!Object} argv
+ * Pre-builds default extensions and ones requested via command line flags.
  */
-exports.preBuildSomeExtensions = function(argv) {
-  const extensions = getExtensionsToBuild(argv);
-  log(green('Pre-building extensions:'), cyan(extensions.join(', ')));
+async function preBuildExtensions() {
+  const extensions = getExtensionsToBuild();
   for (const extensionBundle in extensionBundles) {
     const extension = extensionBundles[extensionBundle].name;
     if (extensions.includes(extension) && !extensionBundle.endsWith('latest')) {
-      build(extensionBundles, extensionBundle, doBuildExtension);
+      await build(extensionBundles, extensionBundle, doBuildExtension);
     }
   }
+}
+
+module.exports = {
+  lazyBuildExtensions,
+  lazyBuildJs,
+  preBuildExtensions,
+  preBuildRuntimeFiles,
 };

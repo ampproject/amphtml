@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-unused-vars */
-
 // TODO(powerivq)
 // Resource.setOwner, Resource.getOwner should be moved here.
 // ResourceState.NOT_BUILT might not be needed here.
+import {OwnersInterface} from './owners-interface';
 import {Resource, ResourceState} from './resource';
 import {Services} from '../services';
 import {devAssert} from '../log';
@@ -36,98 +35,15 @@ function elements(elements) {
 }
 
 /**
- * @interface
- */
-export class OwnersDef {
-  /**
-   * Assigns an owner for the specified element. This means that the resources
-   * within this element will be managed by the owner and not Resources manager.
-   * @param {!Element} element
-   * @param {!AmpElement} owner
-   * @package
-   */
-  setOwner(element, owner) {}
-
-  /**
-   * Schedules preload for the specified sub-elements that are children of the
-   * parent element. The parent element may choose to send this signal either
-   * because it's an owner (see {@link setOwner}) or because it wants the
-   * preloads to be done sooner. In either case, both parent's and children's
-   * priority is observed when scheduling this work.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  schedulePreload(parentElement, subElements) {}
-
-  /**
-   * Schedules layout for the specified sub-elements that are children of the
-   * parent element. The parent element may choose to send this signal either
-   * because it's an owner (see {@link setOwner}) or because it wants the
-   * layouts to be done sooner. In either case, both parent's and children's
-   * priority is observed when scheduling this work.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  scheduleLayout(parentElement, subElements) {}
-
-  /**
-   * Invokes `unload` on the elements' resource which in turn will invoke
-   * the `documentBecameInactive` callback on the custom element.
-   * Resources that call `schedulePause` must also call `scheduleResume`.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  schedulePause(parentElement, subElements) {}
-
-  /**
-   * Invokes `resume` on the elements' resource which in turn will invoke
-   * `resumeCallback` only on paused custom elements.
-   * Resources that call `schedulePause` must also call `scheduleResume`.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  scheduleResume(parentElement, subElements) {}
-
-  /**
-   * Schedules unlayout for specified sub-elements that are children of the
-   * parent element. The parent element can choose to send this signal when
-   * it want to unload resources for its children.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   */
-  scheduleUnlayout(parentElement, subElements) {}
-
-  /**
-   * A parent resource, especially in when it's an owner (see {@link setOwner}),
-   * may request the Resources manager to update children's inViewport state.
-   * A child's inViewport state is a logical AND between inLocalViewport
-   * specified here and parent's own inViewport state.
-   * @param {!Element} parentElement
-   * @param {!Element|!Array<!Element>} subElements
-   * @param {boolean} inLocalViewport
-   */
-  updateInViewport(parentElement, subElements, inLocalViewport) {}
-
-  /**
-   * Requires the layout of the specified element or top-level sub-elements
-   * within.
-   * @param {!Element} element
-   * @param {number=} opt_parentPriority
-   * @return {!Promise}
-   */
-  requireLayout(element, opt_parentPriority) {}
-}
-
-/**
- * @implements {OwnersDef}
+ * @implements {OwnersInterface}
  * @visibleForTesting
  */
-export class Owners {
+export class OwnersImpl {
   /**
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    */
   constructor(ampdoc) {
-    /** @const @private {!./resources-impl.ResourcesDef} */
+    /** @const @private {!./resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(ampdoc);
   }
 
@@ -341,5 +257,5 @@ export class Owners {
  * @param {!./ampdoc-impl.AmpDoc} ampdoc
  */
 export function installOwnersServiceForDoc(ampdoc) {
-  registerServiceBuilderForDoc(ampdoc, 'owners', Owners);
+  registerServiceBuilderForDoc(ampdoc, 'owners', OwnersImpl);
 }

@@ -15,51 +15,34 @@
  */
 'use strict';
 
-const argv = require('minimist')(process.argv.slice(2));
 const connect = require('gulp-connect');
-const deglob = require('globs-to-files');
+const globby = require('globby');
 const header = require('connect-header');
 const log = require('fancy-log');
+const minimist = require('minimist');
 const morgan = require('morgan');
 const watch = require('gulp-watch');
 const {
   lazyBuildExtensions,
   lazyBuildJs,
-  preBuildCoreRuntime,
-  preBuildSomeExtensions,
+  preBuildRuntimeFiles,
+  preBuildExtensions,
 } = require('../server/lazy-build');
-const {createCtrlcHandler} = require('../ctrlcHandler');
+const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
-const {isRtvMode} = require('../server/app-utils');
+const {logServeMode, setServeMode} = require('../server/app-utils');
 
-// Used for logging during server start / stop.
-let url = '';
+const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
-const serverFiles = deglob.sync(['build-system/server/**']);
+// Used for logging.
+let url = null;
+let quiet = !!argv.quiet;
 
-/**
- * Determines the server's mode based on command line arguments.
- */
-function setServeMode() {
-  if (argv.compiled) {
-    process.env.SERVE_MODE = 'compiled';
-    log(green('Serving'), cyan('minified JS'));
-  } else if (argv.cdn) {
-    process.env.SERVE_MODE = 'cdn';
-    log(green('Serving'), cyan('current prod JS'));
-  } else if (argv.rtv_serve_mode) {
-    const rtv = argv.rtv_serve_mode;
-    if (isRtvMode(rtv)) {
-      process.env.SERVE_MODE = rtv;
-      log(green('Serving'), cyan(`RTV ${rtv} JS`));
-    } else {
-      throw new Error(`Invalid rtv_serve_mode: ${rtv}`);
-    }
-  } else {
-    process.env.SERVE_MODE = 'default';
-    log(green('Serving'), cyan('unminified JS'));
-  }
-}
+// Used for live reload.
+const serverFiles = globby.sync(['build-system/server/**']);
+
+// Used to enable / disable lazy building.
+let lazyBuild = false;
 
 /**
  * Returns a list of middleware handler functions to use while serving
@@ -67,13 +50,13 @@ function setServeMode() {
  */
 function getMiddleware() {
   const middleware = [require('../server/app')]; // Lazy-required to enable live-reload
-  if (!argv.quiet) {
+  if (!quiet) {
     middleware.push(morgan('dev'));
   }
   if (argv.cache) {
     middleware.push(header({'cache-control': 'max-age=600'}));
   }
-  if (argv.lazy_build) {
+  if (lazyBuild) {
     middleware.push(lazyBuildExtensions);
     middleware.push(lazyBuildJs);
   }
@@ -82,30 +65,44 @@ function getMiddleware() {
 
 /**
  * Launches a server and waits for it to fully start up
- * @param {?Object} extraOptions
+ *
+ * @param {?Object} connectOptions
+ * @param {?Object} serverOptions
+ * @param {?Object} modeOptions
  */
-async function startServer(extraOptions = {}) {
+async function startServer(
+  connectOptions = {},
+  serverOptions = {},
+  modeOptions = {}
+) {
+  if (serverOptions.lazyBuild) {
+    lazyBuild = serverOptions.lazyBuild;
+  }
+  if (serverOptions.quiet) {
+    quiet = serverOptions.quiet;
+  }
+
   let started;
   const startedPromise = new Promise(resolve => {
     started = resolve;
   });
-  const options = Object.assign(
-    {
-      name: 'AMP Dev Server',
-      root: process.cwd(),
-      host: argv.host || 'localhost',
-      port: argv.port || 8000,
-      https: argv.https,
-      preferHttp1: true,
-      silent: true,
-      middleware: getMiddleware,
-    },
-    extraOptions
-  );
+  setServeMode(modeOptions);
+  const options = {
+    name: 'AMP Dev Server',
+    root: process.cwd(),
+    host: argv.host || 'localhost',
+    port: argv.port || 8000,
+    https: argv.https,
+    preferHttp1: true,
+    silent: true,
+    middleware: getMiddleware,
+    ...connectOptions,
+  };
   connect.server(options, started);
   await startedPromise;
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
+  logServeMode();
 }
 
 /**
@@ -122,8 +119,11 @@ function resetServerFiles() {
  * Stops the currently running server
  */
 function stopServer() {
-  connect.serverClose();
-  log(green('Stopped server at'), cyan(url));
+  if (url) {
+    connect.serverClose();
+    log(green('Stopped server at'), cyan(url));
+    url = null;
+  }
 }
 
 /**
@@ -136,30 +136,36 @@ function restartServer() {
 }
 
 /**
- * Initiates pre-build steps requested via command line args.
+ * Performs pre-build steps requested via command line args.
  */
-function initiatePreBuildSteps() {
-  if (argv.lazy_build) {
-    preBuildCoreRuntime();
-    if (argv.extensions || argv.extensions_from) {
-      preBuildSomeExtensions(argv);
-    }
-  }
+async function performPreBuildSteps() {
+  await preBuildRuntimeFiles();
+  await preBuildExtensions();
+}
+
+/**
+ * Entry point of the `gulp serve` task.
+ */
+async function serve() {
+  await doServe();
 }
 
 /**
  * Starts a webserver at the repository root to serve built files.
+ * @param {boolean=} lazyBuild
  */
-async function serve() {
+async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
-  setServeMode();
   watch(serverFiles, restartServer);
-  await startServer();
-  initiatePreBuildSteps();
+  await startServer({}, {lazyBuild}, {});
+  if (lazyBuild) {
+    await performPreBuildSteps();
+  }
 }
 
 module.exports = {
   serve,
+  doServe,
   startServer,
   stopServer,
 };
@@ -172,4 +178,7 @@ serve.flags = {
   'quiet': "  Run in quiet mode and don't log HTTP requests",
   'cache': '  Make local resources cacheable by the browser',
   'no_caching_extensions': '  Disable caching for extensions',
+  'compiled': '  Serve minified JS',
+  'cdn': '  Serve current prod JS',
+  'rtv': '  Serve JS from the RTV provided',
 };

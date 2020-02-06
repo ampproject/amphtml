@@ -25,12 +25,11 @@ describes.realWin('amp-pixel', {amp: true}, env => {
 
   beforeEach(() => {
     win = env.win;
-    const viewer = win.__AMP_SERVICES.viewer.obj;
     whenFirstVisiblePromise = new Promise(resolve => {
       whenFirstVisibleResolver = resolve;
     });
-    sandbox
-      .stub(viewer, 'whenFirstVisible')
+    env.sandbox
+      .stub(env.ampdoc, 'whenFirstVisible')
       .callsFake(() => whenFirstVisiblePromise);
     createPixel('https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
   });
@@ -121,7 +120,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
   });
 
   it('should replace URL parameters', () => {
-    sandbox.stub(Math, 'random').callsFake(() => 111);
+    env.sandbox.stub(Math, 'random').callsFake(() => 111);
     const url = 'https://pubads.g.doubleclick.net/activity;r=RANDOM';
     return trigger(url).then(img => {
       expect(img.src).to.equal(
@@ -164,21 +163,19 @@ describes.realWin(
       }
     }
 
-    let win, parentWin;
+    let win;
     let whenFirstVisiblePromise, whenFirstVisibleResolver;
     let pixel;
     let implementation;
 
     beforeEach(() => {
       win = env.win;
-      parentWin = env.parentWin;
 
-      const viewer = parentWin.__AMP_SERVICES.viewer.obj;
       whenFirstVisiblePromise = new Promise(resolve => {
         whenFirstVisibleResolver = resolve;
       });
-      sandbox
-        .stub(viewer, 'whenFirstVisible')
+      env.sandbox
+        .stub(env.ampdoc, 'whenFirstVisible')
         .callsFake(() => whenFirstVisiblePromise);
 
       installUrlReplacementsForEmbed(env.ampdoc, win, new TestVariableSource());

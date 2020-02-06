@@ -68,7 +68,11 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://player.ooyala.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://player.ooyala.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -109,7 +113,7 @@ class AmpOoyalaPlayer extends AMP.BaseElement {
     const playerVersion = el.getAttribute('data-playerversion') || '';
     if (playerVersion.toLowerCase() == 'v4') {
       src =
-        'https://player.ooyala.com/static/v4/sandbox/amp_iframe/' +
+        'https://player.ooyala.com/static/v4/production/latest/' +
         'skin-plugin/amp_iframe.html?pcode=' +
         encodeURIComponent(this.pCode_);
       const configUrl = el.getAttribute('data-config');

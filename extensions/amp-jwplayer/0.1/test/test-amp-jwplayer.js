@@ -87,13 +87,12 @@ describes.realWin(
         'data-playlist-id': '482jsTAr',
         'data-player-id': 'sDZEo0ea',
         'data-content-search': '__CONTEXTUAL__',
-        'data-content-contextual': true,
       });
       const iframe = jw.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=title_tag&contextual=true'
+        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=title_tag'
       );
     });
     it('renders with a playlist and all parameters', async () => {
@@ -101,45 +100,15 @@ describes.realWin(
         'data-playlist-id': '482jsTAr',
         'data-player-id': 'sDZEo0ea',
         'data-content-search': 'dog',
-        'data-content-contextual': true,
-        'data-content-recency': '9D',
         'data-content-backfill': true,
       });
       const iframe = jw.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
-        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&contextual=true&recency=9D&backfill=true'
+        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?search=dog&backfill=true'
       );
     });
-    it('renders with a playlist and contextual, backfill parameters', async () => {
-      const jw = await getjwplayer({
-        'data-playlist-id': '482jsTAr',
-        'data-player-id': 'sDZEo0ea',
-        'data-content-contextual': true,
-        'data-content-backfill': true,
-      });
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?contextual=true&backfill=true'
-      );
-    });
-    it('renders with a playlist and contextual parameter', async () => {
-      const jw = await getjwplayer({
-        'data-playlist-id': '482jsTAr',
-        'data-player-id': 'sDZEo0ea',
-        'data-content-contextual': true,
-      });
-      const iframe = jw.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-        'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html?contextual=true'
-      );
-    });
-
     it('fails if no media is specified', () => {
       return allowConsoleError(() => {
         return getjwplayer({

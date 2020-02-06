@@ -15,6 +15,7 @@
  */
 
 import {ArticleComponent} from './components/article';
+import {BOOKEND_COMPONENT_TYPES} from './components/bookend-component-interface';
 import {CtaLinkComponent} from './components/cta-link';
 import {HeadingComponent} from './components/heading';
 import {LandscapeComponent} from './components/landscape';
@@ -81,17 +82,17 @@ function setBuilderInstance(type, ctor) {
  */
 function componentBuilderInstanceFor(type) {
   switch (type) {
-    case 'small':
+    case BOOKEND_COMPONENT_TYPES.SMALL:
       return setBuilderInstance(type, ArticleComponent);
-    case 'cta-link':
+    case BOOKEND_COMPONENT_TYPES.CTA_LINK:
       return setBuilderInstance(type, CtaLinkComponent);
-    case 'heading':
+    case BOOKEND_COMPONENT_TYPES.HEADING:
       return setBuilderInstance(type, HeadingComponent);
-    case 'landscape':
+    case BOOKEND_COMPONENT_TYPES.LANDSCAPE:
       return setBuilderInstance(type, LandscapeComponent);
-    case 'portrait':
+    case BOOKEND_COMPONENT_TYPES.PORTRAIT:
       return setBuilderInstance(type, PortraitComponent);
-    case 'textbox':
+    case BOOKEND_COMPONENT_TYPES.TEXTBOX:
       return setBuilderInstance(type, TextBoxComponent);
     default:
       return null;
@@ -151,21 +152,23 @@ export class BookendComponent {
    * Builds the bookend components elements by choosing the appropriate builder
    * class and appending the elements to the container.
    * @param {!Array<BookendComponentDef>} components
-   * @param {!Document} doc
+   * @param {!Window} win
    * @param {?../../../../src/service/localization.LocalizationService} localizationService
    * @return {!DocumentFragment}
    */
-  static buildElements(components, doc, localizationService) {
-    const fragment = doc.createDocumentFragment();
+  static buildElements(components, win, localizationService) {
+    const fragment = win.document.createDocumentFragment();
 
     components = prependTitle(components, localizationService);
-
-    components.forEach(component => {
+    components.forEach((component, index) => {
       const {type} = component;
       if (type && componentBuilderInstanceFor(type)) {
-        fragment.appendChild(
-          componentBuilderInstanceFor(type).buildElement(component, doc)
+        const el = componentBuilderInstanceFor(type).buildElement(
+          component,
+          win,
+          {position: index}
         );
+        fragment.appendChild(el);
       }
     });
     return fragment;

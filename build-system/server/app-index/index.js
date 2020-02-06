@@ -17,18 +17,16 @@
 
 const api = require('./api/api');
 const basepathMappings = require('./basepath-mappings');
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
 const path = require('path');
 const {
   getListing,
   isMainPageFromUrl,
   formatBasepath,
 } = require('./util/listing');
+const {getServeMode} = require('../app-utils');
 const {join} = require('path');
 const {renderTemplate} = require('./template');
-
-const pc = process;
 
 // Sitting on /build-system/server/app-index, so we go back thrice for the repo root.
 const root = path.join(__dirname, '../../../');
@@ -44,14 +42,14 @@ async function serveIndex({url}, res, next) {
     return next();
   }
 
-  const css = (await fs.readFileAsync(mainCssFile)).toString();
+  const css = fs.readFileSync(mainCssFile).toString();
 
   const renderedHtml = renderTemplate({
     fileSet,
     selectModePrefix: '/',
     isMainPage: isMainPageFromUrl(url),
     basepath: formatBasepath(mappedPath),
-    serveMode: pc.env.SERVE_MODE || 'default',
+    serveMode: getServeMode(),
     css,
   });
 

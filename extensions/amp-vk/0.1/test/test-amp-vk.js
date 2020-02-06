@@ -70,7 +70,7 @@ describes.realWin(
     }
 
     it('requires data-embedtype', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['embedtype'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -93,7 +93,7 @@ describes.realWin(
     // Post tests
 
     it('post::requires data-hash', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['hash'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -103,7 +103,7 @@ describes.realWin(
     });
 
     it('post::requires data-owner-id', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['owner-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -113,7 +113,7 @@ describes.realWin(
     });
 
     it('post::requires data-post-id', () => {
-      const params = Object.assign({}, POST_PARAMS);
+      const params = {...POST_PARAMS};
       delete params['post-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -144,7 +144,7 @@ describes.realWin(
         vkPost.ownerDocument.location.href.replace(/#.*$/, '')
       );
       impl.onLayoutMeasure();
-      const startWidth = impl.getLayoutWidth();
+      const startWidth = vkPost.getLayoutWidth();
       const correctIFrameSrc = `https://vk.com/widget_post.php?app=0&width=100%25&_ver=1&owner_id=1&post_id=45616&hash=Yc8_Z9pnpg8aKMZbVcD-jK45eAk&amp=1&startWidth=${startWidth}&url=${url}&referrer=${referrer}&title=AMP%20Post`;
       expect(iframe).to.not.be.null;
       const timeArgPosition = iframe.src.lastIndexOf('&');
@@ -155,7 +155,7 @@ describes.realWin(
     // Poll tests
 
     it('poll::requires data-api-id', () => {
-      const params = Object.assign({}, POLL_PARAMS);
+      const params = {...POLL_PARAMS};
       delete params['api-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -165,7 +165,7 @@ describes.realWin(
     });
 
     it('poll::requires data-poll-id', () => {
-      const params = Object.assign({}, POLL_PARAMS);
+      const params = {...POLL_PARAMS};
       delete params['poll-id'];
       return allowConsoleError(() => {
         return createAmpVkElement(params).should.eventually.be.rejectedWith(
@@ -205,7 +205,7 @@ describes.realWin(
       const vkPoll = await createAmpVkElement(POLL_PARAMS);
       const impl = vkPoll.implementation_;
       const iframe = vkPoll.querySelector('iframe');
-      const changeHeight = sandbox.spy(impl, 'changeHeight');
+      const changeHeight = env.sandbox.spy(impl, 'changeHeight');
       const fakeHeight = 555;
       expect(iframe).to.not.be.null;
       generatePostMessage(vkPoll, iframe, fakeHeight);

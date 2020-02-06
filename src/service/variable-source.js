@@ -154,7 +154,6 @@ export function getTimingDataSync(win, startEvent, endEvent) {
  * @param {!Window} win
  * @param {string} attribute
  * @return {ResolverReturnDef}
- * @private
  */
 export function getNavigationData(win, attribute) {
   const navigationInfo = win['performance'] && win['performance']['navigation'];
@@ -279,7 +278,7 @@ export class VariableSource {
     if (!this.initialized_) {
       this.initialize_();
     }
-    const all = Object.assign({}, this.replacements_, opt_bindings);
+    const all = {...this.replacements_, ...opt_bindings};
     return this.buildExpr_(Object.keys(all), opt_whiteList);
   }
 

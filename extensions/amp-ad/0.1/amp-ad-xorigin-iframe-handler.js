@@ -78,9 +78,6 @@ export class AmpAdXOriginIframeHandler {
     /** @private {!Array<!Function>} functions to unregister listeners */
     this.unlisteners_ = [];
 
-    /** @private @const {!../../../src/service/viewer-interface.ViewerInterface} */
-    this.viewer_ = Services.viewerForDoc(this.baseInstance_.getAmpDoc());
-
     /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(this.baseInstance_.getAmpDoc());
 
@@ -183,7 +180,7 @@ export class AmpAdXOriginIframeHandler {
     );
 
     this.unlisteners_.push(
-      this.viewer_.onVisibilityChanged(() => {
+      this.baseInstance_.getAmpDoc().onVisibilityChanged(() => {
         this.sendEmbedInfo_(this.baseInstance_.isInViewport());
       })
     );
@@ -288,11 +285,18 @@ export class AmpAdXOriginIframeHandler {
       setStyle(this.iframe, 'visibility', 'hidden');
     }
 
-    Promise.race([
-      renderStartPromise,
-      iframeLoadPromise,
-      timer.promise(VISIBILITY_TIMEOUT),
-    ]).then(() => {
+    // If A4A where creative is responsible for triggering render start (e.g
+    // no fill for sticky ad case), only trigger if renderStart listener promise
+    // explicitly fired (though we do not expect this to occur for A4A).
+    const triggerRenderStartPromise =
+      opt_isA4A && opt_letCreativeTriggerRenderStart
+        ? renderStartPromise
+        : Promise.race([
+            renderStartPromise,
+            iframeLoadPromise,
+            timer.promise(VISIBILITY_TIMEOUT),
+          ]);
+    triggerRenderStartPromise.then(() => {
       // Common signal RENDER_START invoked at toggle visibility time
       // Note: 'render-start' msg and common signal RENDER_START are different
       // 'render-start' msg is a way for implemented Ad to display ad earlier
@@ -493,7 +497,7 @@ export class AmpAdXOriginIframeHandler {
       'embed-state',
       dict({
         'inViewport': inViewport,
-        'pageHidden': !this.viewer_.isVisible(),
+        'pageHidden': !this.baseInstance_.getAmpDoc().isVisible(),
       })
     );
   }

@@ -21,7 +21,6 @@ import {parseQueryString_} from './url-parse-query-string';
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
- *   filter: (string|undefined),
  *   minified: boolean,
  *   lite: boolean,
  *   test: boolean,
@@ -30,7 +29,8 @@ import {parseQueryString_} from './url-parse-query-string';
  *   rtvVersion: string,
  *   runtime: (null|string|undefined),
  *   a4aId: (null|string|undefined),
- *   singlePassType: (string|undefined)
+ *   singlePassType: (string|undefined),
+ *   esm: (boolean|undefined)
  * }}
  */
 export let ModeDef;
@@ -74,14 +74,13 @@ function getMode_(win) {
   const localDevEnabled = !!AMP_CONFIG.localDev;
   const runningTests =
     !!AMP_CONFIG.test || (IS_DEV && !!(win.__AMP_TEST || win.__karma__));
-  const runningTestsOnIe = win.__karma__ && win.__karma__.config.amp.testOnIe;
   const isLocalDev = IS_DEV && (localDevEnabled || runningTests);
   const hashQuery = parseQueryString_(
     // location.originalHash is set by the viewer when it removes the fragment
     // from the URL.
     win.location.originalHash || win.location.hash
   );
-  const singlePassType = AMP_CONFIG.spt;
+  const {spt: singlePassType, esm} = AMP_CONFIG;
 
   const searchQuery = parseQueryString_(win.location.search);
 
@@ -105,19 +104,14 @@ function getMode_(win) {
       ) >= 0 || win.AMP_DEV_MODE
     ),
     examiner: hashQuery['development'] == '2',
-    // Allows filtering validation errors by error category. For the
-    // available categories, see ErrorCategory in validator/validator.proto.
-    filter: hashQuery['filter'],
+    esm,
     // amp-geo override
     geoOverride: hashQuery['amp-geo'],
-    // amp-user-location override
-    userLocationOverride: hashQuery['amp-user-location'],
     minified: IS_MINIFIED,
     // Whether document is in an amp-lite viewer. It signal that the user
     // would prefer to use less bandwidth.
     lite: searchQuery['amp_lite'] != undefined,
     test: runningTests,
-    testIe: runningTestsOnIe,
     log: hashQuery['log'],
     version: internalRuntimeVersion(),
     rtvVersion,

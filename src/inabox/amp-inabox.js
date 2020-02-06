@@ -22,8 +22,8 @@ import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {adopt} from '../runtime';
+import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
-import {deactivateChunking, startupChunk} from '../chunk';
 import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
 import {getA4AId, registerIniLoadListener} from './utils';
@@ -36,13 +36,13 @@ import {
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installPerformanceService} from '../service/performance-impl';
+import {installPlatformService} from '../service/platform-impl';
 import {
   installStylesForDoc,
   makeBodyVisible,
   makeBodyVisibleRecovery,
 } from '../style-installer';
 import {internalRuntimeVersion} from '../internal-version';
-import {isExperimentOn} from '../experiments';
 import {maybeValidate} from '../validator-integration';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
@@ -60,10 +60,6 @@ try {
   // Should happen first.
   installErrorReporting(self); // Also calls makeBodyVisibleRecovery on errors.
 
-  if (isExperimentOn(self, 'inabox-no-chunking')) {
-    deactivateChunking();
-  }
-
   // Declare that this runtime will support a single root doc. Should happen
   // as early as possible.
   installDocService(self, /* isSingleDoc */ true);
@@ -73,9 +69,11 @@ try {
   makeBodyVisibleRecovery(self.document);
   throw e;
 }
+allowLongTasksInChunking();
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
+  installPlatformService(self);
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);

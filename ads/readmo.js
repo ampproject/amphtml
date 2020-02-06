@@ -21,24 +21,24 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function readmo(global, data) {
-  validateData(data, ['section'], ['module', 'infinite']);
+  validateData(
+    data,
+    ['section', 'url'],
+    ['module', 'sponsoredByLabel', 'infinite', 'title']
+  );
+
+  const {section, module, sponsoredByLabel, infinite, title, url} = data;
+
+  global.publisherUrl = url;
 
   (global.readmo = global.readmo || []).push({
-    section: data.section,
-    module: data.module,
-    infinite: data.infinite,
+    section,
+    module,
+    infinite,
+    title,
+    sponsoredByLabel,
     container: '#c',
     amp: true,
-  });
-
-  global.context.observeIntersection(function(entries) {
-    entries.forEach(function(entry) {
-      if (global.Readmo) {
-        global.Readmo.onViewChange({
-          rects: entry,
-        });
-      }
-    });
   });
 
   loadScript(global, 'https://s.yimg.com/dy/ads/readmo.js', () =>

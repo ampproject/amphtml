@@ -81,25 +81,20 @@ export class AmpState extends AMP.BaseElement {
       this.fetchAndUpdate_(/* isInit */ true);
     }
 
-    this.registerAction(
-      'refresh',
-      () => {
-        userAssert(
-          this.element.hasAttribute('src'),
-          'Can\'t refresh <amp-state> without "src" attribute.'
-        );
-        this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
-      },
-      ActionTrust.HIGH
-    );
+    this.registerAction('refresh', () => {
+      userAssert(
+        this.element.hasAttribute('src'),
+        'Can\'t refresh <amp-state> without "src" attribute.'
+      );
+      this.fetchAndUpdate_(/* isInit */ false, /* opt_refresh */ true);
+    });
   }
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    const viewer = Services.viewerForDoc(this.element);
-    if (!viewer.hasBeenVisible()) {
+    if (!this.getAmpDoc().hasBeenVisible()) {
       const TAG = this.getName_();
-      dev().error(TAG, 'Viewer must be visible before mutation.');
+      dev().error(TAG, 'ampdoc must be visible before mutation.');
       return;
     }
     // "src" attribute may be missing if mutated with a non-primitive.
@@ -166,14 +161,11 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   fetch_(ampdoc, policy, opt_refresh, token = undefined) {
-    return batchFetchJsonFor(
-      ampdoc,
-      this.element,
-      /* opt_expr */ undefined,
-      policy,
-      opt_refresh,
-      token
-    );
+    return batchFetchJsonFor(ampdoc, this.element, {
+      urlReplacement: policy,
+      refresh: opt_refresh,
+      token,
+    });
   }
 
   /**
@@ -220,8 +212,7 @@ export class AmpState extends AMP.BaseElement {
    */
   fetchAndUpdate_(isInit, opt_refresh) {
     // Don't fetch in prerender mode.
-    const viewer = Services.viewerForDoc(this.element);
-    return viewer
+    return this.getAmpDoc()
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
       .then(json => this.updateState_(json, isInit));
@@ -245,7 +236,7 @@ export class AmpState extends AMP.BaseElement {
       // As a rule, initialization should skip evaluation.
       // If we're not initializing then this must be a mutation, so we must
       // skip <amp-state> evaluation to prevent update cycles.
-      bind.setState(state, /* skipEval */ isInit, /* skipAmpState */ !isInit);
+      bind.setState(state, {skipEval: isInit, skipAmpState: !isInit});
     });
   }
 

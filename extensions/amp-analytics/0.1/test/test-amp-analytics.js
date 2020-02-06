@@ -43,7 +43,7 @@ describes.realWin(
     },
   },
   function(env) {
-    let win, doc, sandbox;
+    let win, doc;
     let configWithCredentials;
     let uidService;
     let crypto;
@@ -96,7 +96,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      sandbox = env.sandbox;
       ampdoc = env.ampdoc;
       configWithCredentials = false;
       doc.title = 'Test Title';
@@ -131,7 +130,7 @@ describes.realWin(
       ins = instrumentationServiceForDocForTesting(ampdoc);
       installUserNotificationManagerForTesting(ampdoc);
 
-      const wi = mockWindowInterface(sandbox);
+      const wi = mockWindowInterface(env.sandbox);
       requestVerifier = new ImagePixelVerifier(wi);
       return Services.userNotificationManagerForDoc(doc.head).then(manager => {
         uidService = manager;
@@ -221,8 +220,8 @@ describes.realWin(
         const el = doc.createElement('amp-analytics');
         el.setAttribute('trigger', 'immediate');
         el.textContent = config;
-        const whenFirstVisibleStub = sandbox
-          .stub(viewer, 'whenFirstVisible')
+        const whenFirstVisibleStub = env.sandbox
+          .stub(ampdoc, 'whenFirstVisible')
           .callsFake(() => new Promise(function() {}));
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
@@ -447,7 +446,7 @@ describes.realWin(
         });
         return waitForNoSendRequest(analytics).then(() => {
           expect(analytics.analyticsGroup_).to.be.ok;
-          const disposeStub = sandbox.stub(
+          const disposeStub = env.sandbox.stub(
             analytics.analyticsGroup_,
             'dispose'
           );
@@ -534,6 +533,9 @@ describes.realWin(
       });
 
       it('expands platform vars', () => {
+        env.sandbox
+          .stub(viewer, 'getReferrerUrl')
+          .returns('http://fake.example/?foo=bar');
         const analytics = getAnalyticsTag({
           'requests': {
             'pageview':
@@ -543,7 +545,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html/
+            /https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/
           );
         });
       });
@@ -596,7 +598,7 @@ describes.realWin(
           el1.dataset.varsTest = 'foo';
           analyticsGroup.root_.getRootElement().appendChild(el1);
 
-          const handlerSpy = sandbox.spy();
+          const handlerSpy = env.sandbox.spy();
           analyticsGroup.addTrigger(
             {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
             handlerSpy
@@ -679,6 +681,9 @@ describes.realWin(
       });
 
       it('expands url-replacements vars', () => {
+        env.sandbox
+          .stub(viewer, 'getReferrerUrl')
+          .returns('http://fake.example/?foo=bar');
         const analytics = getAnalyticsTag({
           'requests': {
             'pageview':
@@ -697,7 +702,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html&title=Test%20Title/
+            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar&title=Test%20Title/
           );
         });
       });
@@ -720,7 +725,7 @@ describes.realWin(
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
         );
-        sandbox
+        env.sandbox
           .stub(urlReplacements.getVariableSource(), 'get')
           .callsFake(function(name) {
             return {
@@ -741,7 +746,7 @@ describes.realWin(
     describe('expand selector', () => {
       it('expands selector with config variable', () => {
         const tracker = ins.root_.getTracker('click', ClickEventTracker);
-        const addStub = sandbox.stub(tracker, 'add');
+        const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag({
           requests: {foo: 'https://example.com/bar'},
           triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
@@ -757,7 +762,7 @@ describes.realWin(
       function selectorExpansionTest(selector) {
         it('expand selector value: ' + selector, () => {
           const tracker = ins.root_.getTracker('click', ClickEventTracker);
-          const addStub = sandbox.stub(tracker, 'add');
+          const addStub = env.sandbox.stub(tracker, 'add');
           const analytics = getAnalyticsTag({
             requests: {foo: 'https://example.com/bar'},
             triggers: [
@@ -797,7 +802,7 @@ describes.realWin(
 
       it('does not expands selector with platform variable', () => {
         const tracker = ins.root_.getTracker('click', ClickEventTracker);
-        const addStub = sandbox.stub(tracker, 'add');
+        const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag({
           requests: {foo: 'https://example.com/bar'},
           triggers: [{on: 'click', selector: '${title}', request: 'foo'}],
@@ -812,7 +817,7 @@ describes.realWin(
 
     describe('optout by function', () => {
       beforeEach(() => {
-        sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').returns(
+        env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').returns(
           Promise.resolve({
             'requests': {
               'foo': {
@@ -865,7 +870,7 @@ describes.realWin(
 
     describe('optout by id', () => {
       beforeEach(() => {
-        sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').returns(
+        env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').returns(
           Promise.resolve({
             'requests': {
               'foo': {
@@ -1000,7 +1005,7 @@ describes.realWin(
       it('allows a request through', () => {
         const analytics = getAnalyticsTag(getConfig(1));
 
-        sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.005));
+        env.sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.005));
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest('/test1=1');
         });
@@ -1014,11 +1019,11 @@ describes.realWin(
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
         );
-        sandbox.stub(urlReplacements.getVariableSource(), 'get').returns({
+        env.sandbox.stub(urlReplacements.getVariableSource(), 'get').returns({
           async: 0,
           sync: 0,
         });
-        sandbox
+        env.sandbox
           .stub(crypto, 'uniform')
           .withArgs('0')
           .returns(Promise.resolve(0.005));
@@ -1030,7 +1035,7 @@ describes.realWin(
       it('does not allow a request through', () => {
         const analytics = getAnalyticsTag(getConfig(1));
 
-        sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.1));
+        env.sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.1));
         return waitForNoSendRequest(analytics);
       });
 
@@ -1143,7 +1148,7 @@ describes.realWin(
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
         );
-        sandbox
+        env.sandbox
           .stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
         return waitForSendRequest(analytics).then(() => {
@@ -1183,7 +1188,9 @@ describes.realWin(
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
         );
-        sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
+        env.sandbox
+          .stub(urlReplacements.getVariableSource(), 'get')
+          .returns(null);
 
         return waitForNoSendRequest(analytics);
       });
@@ -1199,7 +1206,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: 0});
 
@@ -1218,7 +1225,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: false});
 
@@ -1237,7 +1244,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: null});
 
@@ -1256,7 +1263,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: NaN});
 
@@ -1275,7 +1282,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: undefined});
 
@@ -1305,7 +1312,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: 1});
           return waitForSendRequest(analytics).then(() => {
@@ -1345,7 +1352,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns(null);
 
@@ -1367,7 +1374,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns(null);
 
@@ -1387,7 +1394,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns('page');
 
@@ -1408,7 +1415,7 @@ describes.realWin(
           }
         );
 
-        sandbox.stub(uidService, 'get').callsFake(id => {
+        env.sandbox.stub(uidService, 'get').callsFake(id => {
           expect(id).to.equal('amp-user-notification1');
           return Promise.resolve();
         });
@@ -1429,7 +1436,7 @@ describes.realWin(
           }
         );
 
-        sandbox.stub(uidService, 'get').callsFake(id => {
+        env.sandbox.stub(uidService, 'get').callsFake(id => {
           expect(id).to.equal('amp-user-notification1');
           return Promise.reject();
         });
@@ -1457,12 +1464,12 @@ describes.realWin(
             }
           );
 
-          sandbox.stub(uidService, 'get').callsFake(id => {
+          env.sandbox.stub(uidService, 'get').callsFake(id => {
             expect(id).to.equal('amp-user-notification1');
             return Promise.reject();
           });
 
-          sandbox.stub(viewer, 'isVisible').returns(false);
+          env.sandbox.stub(ampdoc, 'isVisible').returns(false);
           analytics.layoutCallback();
           analytics.resumeCallback();
           analytics.unlayoutCallback();
@@ -1485,7 +1492,7 @@ describes.realWin(
         expectAsyncConsoleError(clickTrackerNotSupportedError);
         // Right now we only whitelist VISIBLE & HIDDEN
         const tracker = ins.root_.getTracker('click', ClickEventTracker);
-        const addStub = sandbox.stub(tracker, 'add');
+        const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag(
           {
             requests: {foo: 'https://example.com/bar'},
@@ -1503,7 +1510,7 @@ describes.realWin(
 
       it('replace selector and selectionMethod when in scope', () => {
         const tracker = ins.root_.getTracker('visible', VisibilityTracker);
-        const addStub = sandbox.stub(tracker, 'add');
+        const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag(
           {
             requests: {foo: 'https://example.com/bar'},
@@ -1677,11 +1684,11 @@ describes.realWin(
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
         );
-        sandbox.stub(urlReplacements.getVariableSource(), 'get').returns({
+        env.sandbox.stub(urlReplacements.getVariableSource(), 'get').returns({
           async: 0,
           sync: 0,
         });
-        sandbox
+        env.sandbox
           .stub(crypto, 'uniform')
           .withArgs('0')
           .returns(Promise.resolve(0.005))
@@ -1708,9 +1715,9 @@ describes.realWin(
         expectAsyncConsoleError(noTriggersError);
         expectAsyncConsoleError(noRequestStringsError);
 
-        sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').resolves({});
+        env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').resolves({});
 
-        const linkerStub = sandbox.stub(LinkerManager.prototype, 'init');
+        const linkerStub = env.sandbox.stub(LinkerManager.prototype, 'init');
 
         analytics.buildCallback();
         return analytics.layoutCallback().then(() => {
@@ -1740,13 +1747,13 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
 
-        sandbox
+        env.sandbox
           .stub(AnalyticsConfig.prototype, 'loadConfig')
           .returns(Promise.resolve(sampleconfig));
 
         analytics.buildCallback();
         analytics.preconnectCallback();
-        const initSpy = sandbox.spy(
+        const initSpy = env.sandbox.spy(
           Transport.prototype,
           'maybeInitIframeTransport'
         );
@@ -1756,7 +1763,7 @@ describes.realWin(
       });
     });
 
-    describe('parentPostMessage in inabox case', () => {
+    describe('parentPostMessage', () => {
       let postMessageSpy;
 
       function waitForParentPostMessage(opt_max) {
@@ -1790,7 +1797,18 @@ describes.realWin(
           'requests': {'foo': 'https://example.com/bar'},
           'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
         });
-        postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+        postMessageSpy = env.sandbox.spy(analytics.win.parent, 'postMessage');
+        return waitForNoSendRequest(analytics).then(() => {
+          return waitForParentPostMessage();
+        });
+      });
+
+      it('does send a hit when parentPostMessage is provided for FIE', function() {
+        const analytics = getAnalyticsTag({
+          'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
+        });
+        analytics.element.classList.add('i-amphtml-fie');
+        postMessageSpy = env.sandbox.spy(analytics.win.parent, 'postMessage');
         return waitForNoSendRequest(analytics).then(() => {
           return waitForParentPostMessage();
         });
@@ -1806,7 +1824,7 @@ describes.realWin(
             },
           ],
         });
-        postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+        postMessageSpy = env.sandbox.spy(analytics.win.parent, 'postMessage');
         return waitForNoSendRequest(analytics).then(() => {
           return waitForNoParentPostMessage();
         });
@@ -1819,7 +1837,7 @@ describes.realWin(
           'requests': {'foo': 'https://example.com/bar'},
           'triggers': [{'on': 'visible'}],
         });
-        postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+        postMessageSpy = env.sandbox.spy(analytics.win.parent, 'postMessage');
         return waitForNoSendRequest(analytics).then(() => {
           return waitForNoParentPostMessage();
         });
@@ -1837,7 +1855,7 @@ describes.realWin(
             },
           ],
         });
-        postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+        postMessageSpy = env.sandbox.spy(analytics.win.parent, 'postMessage');
         return waitForSendRequest(analytics).then(() => {
           return waitForParentPostMessage(analytics);
         });

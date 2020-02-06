@@ -15,10 +15,10 @@
  */
 
 import {Action, StateProperty} from './amp-story-store-service';
-import {AnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {HistoryState, setHistoryState} from './utils';
 import {Services} from '../../../src/services';
+import {StoryAnalyticsEvent, getAnalyticsService} from './story-analytics';
 import {dev} from '../../../src/log';
 import {getState} from '../../../src/history';
 import {htmlFor} from '../../../src/static-template';
@@ -140,14 +140,18 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
     const currentHistoryState = /** @type {!Object} */ (getState(
       this.win.history
     ));
-    const historyState = Object.assign({}, currentHistoryState, {
+    const historyState = {
+      ...currentHistoryState,
       [HistoryState.ATTACHMENT_PAGE_ID]: this.storeService_.get(
         StateProperty.CURRENT_PAGE_ID
       ),
-    });
+    };
 
     this.historyService_.push(() => this.closeInternal_(), historyState);
-    this.analyticsService_.triggerEvent(AnalyticsEvent.PAGE_ATTACHMENT_ENTER);
+    this.analyticsService_.triggerEvent(StoryAnalyticsEvent.OPEN, this.element);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_ENTER
+    );
   }
 
   /**
@@ -181,6 +185,12 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
 
     setHistoryState(this.win, HistoryState.ATTACHMENT_PAGE_ID, null);
 
-    this.analyticsService_.triggerEvent(AnalyticsEvent.PAGE_ATTACHMENT_EXIT);
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.CLOSE,
+      this.element
+    );
+    this.analyticsService_.triggerEvent(
+      StoryAnalyticsEvent.PAGE_ATTACHMENT_EXIT
+    );
   }
 }

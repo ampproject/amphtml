@@ -142,17 +142,25 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     it('expands array vars', () => {
       check(
         '${array}',
-        'xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,%24%7Bfoo%7D',
+        '123,xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,bar,',
         {
           'foo': 'bar',
           'array': [
+            123,
             'xy&x', // special chars should be encoded
             'MACRO(abc,def)', // do not encode macro
             'MACRO(abc,def)&123', // this is not a macro
-            '${foo}', // vars in array is not expanded
+            '${foo}', // vars in array should be expanded
+            '${bar}', // undefined vars should be empty
           ],
         }
       );
+    });
+
+    it('handles array with no vars', () => {
+      check('${array}', 'foo,bar', {
+        'array': ['foo', 'bar'],
+      });
     });
 
     it('handles empty var name', () => {
@@ -191,11 +199,9 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     let doc;
     let win;
     let urlReplacementService;
-    let sandbox;
     let analyticsElement;
 
     beforeEach(() => {
-      sandbox = env.sandbox;
       win = env.win;
       doc = win.document;
       installLinkerReaderService(win);
@@ -217,7 +223,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     }
 
     it('handles consecutive macros in inner arguments', () => {
-      sandbox.useFakeTimers(123456789);
+      env.sandbox.useFakeTimers(123456789);
       win.location.href = 'https://example.com/?test=yes';
       return check(
         '$IF(QUERY_PARAM(test), 1.$SUBSTR(TIMESTAMP, 0, 10)QUERY_PARAM(test), ``)',
@@ -226,7 +232,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('handles consecutive macros w/o parens in inner arguments', () => {
-      sandbox.useFakeTimers(123456789);
+      env.sandbox.useFakeTimers(123456789);
       win.location.href = 'https://example.com/?test=yes';
       return check('$IF(QUERY_PARAM(test), 1.TIMESTAMP, ``)', '1.123456789');
     });
@@ -237,7 +243,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       }));
 
     it('should not trim right of string before macro', () => {
-      sandbox.useFakeTimers(123456789);
+      env.sandbox.useFakeTimers(123456789);
       win.location.href = 'https://example.com/?test=yes';
       return check(
         '$IF(QUERY_PARAM(test), foo TIMESTAMP, ``)',
@@ -360,7 +366,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('replaces LINKER_PARAM', () => {
       const linkerReader = linkerReaderServiceFor(win);
-      const linkerReaderStub = sandbox.stub(linkerReader, 'get');
+      const linkerReaderStub = env.sandbox.stub(linkerReader, 'get');
       linkerReaderStub.withArgs('gl', 'cid').returns('a1b2c3');
       linkerReaderStub.withArgs('gl', 'gclid').returns(123);
       return check(

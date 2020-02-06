@@ -137,9 +137,18 @@ export class NativeWebAnimationRunner extends AnimationRunner {
     this.setPlayState_(WebAnimationPlayState.RUNNING);
     this.runningCount_ = 0;
     this.players_.forEach(player => {
+      /**
+       * TODO(gharbiw):
+       * The playState on Safari and Edge sometimes gets stuck on
+       * the PENDING state (particularly when the animation's visibility
+       * gets toggled) so we add an exception to play even if the state
+       * is PENDING. Need to investigate why this happens, fix it and
+       * remove the exception below.
+       */
       if (
         oldRunnerPlayState != WebAnimationPlayState.PAUSED ||
-        player.playState == WebAnimationPlayState.PAUSED
+        player.playState == WebAnimationPlayState.PAUSED ||
+        player.playState == WebAnimationPlayState.PENDING
       ) {
         player.play();
         this.runningCount_++;

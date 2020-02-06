@@ -14,6 +14,62 @@
  * limitations under the License.
  */
 
+const log = require('fancy-log');
+const minimist = require('minimist');
+const {cyan, green} = require('ansi-colors');
+
+let serveMode = 'default';
+
+/**
+ * Returns a string representation of the server's mode.
+ * @return {string}
+ */
+function getServeMode() {
+  return serveMode;
+}
+
+/**
+ * Sets the server's mode. Uses command line arguments by default, but can be
+ * overridden by passing in a modeOptions object.
+ * @param {!Object} modeOptions
+ */
+function setServeMode(modeOptions) {
+  if (Object.keys(modeOptions).length == 0) {
+    modeOptions = minimist(process.argv.slice(2), {string: ['rtv']});
+  }
+
+  if (modeOptions.compiled) {
+    serveMode = 'compiled';
+  } else if (modeOptions.cdn) {
+    serveMode = 'cdn';
+  } else if (modeOptions.rtv) {
+    const {rtv} = modeOptions;
+    if (isRtvMode(rtv)) {
+      serveMode = rtv;
+    } else {
+      const err = new Error(`Invalid rtv: ${rtv}. (Must be 15 digits long.)`);
+      err.showStack = false;
+      throw err;
+    }
+  }
+}
+
+/**
+ * Logs the server's mode.
+ */
+function logServeMode() {
+  const serveMode = getServeMode();
+  if (serveMode == 'compiled') {
+    log(green('Serving'), cyan('minified'), green('JS'));
+  } else if (serveMode == 'cdn') {
+    log(green('Serving'), cyan('current prod'), green('JS'));
+  } else if (isRtvMode(serveMode)) {
+    log(green('Serving JS from RTV'), cyan(serveMode));
+  } else {
+    log(green('Serving'), cyan('unminified'), green('JS'));
+  }
+}
+
 /**
  * @param {string} serveMode
  * @return {boolean}
@@ -117,4 +173,10 @@ const replaceUrls = (mode, file, hostName, inabox, storyV1) => {
   return file;
 };
 
-module.exports = {replaceUrls, isRtvMode};
+module.exports = {
+  getServeMode,
+  isRtvMode,
+  logServeMode,
+  replaceUrls,
+  setServeMode,
+};

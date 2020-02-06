@@ -55,7 +55,6 @@ describe
         },
       },
       env => {
-        let sandbox;
         let videoManager;
         let klass;
         let video;
@@ -69,7 +68,7 @@ describe
         });
 
         it('should register common actions', () => {
-          const spy = sandbox.spy(impl, 'registerAction');
+          const spy = env.sandbox.spy(impl, 'registerAction');
           videoManager.register(impl);
 
           expect(spy).to.have.been.calledWith('play');
@@ -93,7 +92,7 @@ describe
           videoManager.register(impl);
 
           const entry = videoManager.getEntryForVideo_(impl);
-          sandbox.stub(entry, 'userInteracted').returns(true);
+          env.sandbox.stub(entry, 'userInteracted').returns(true);
           entry.isVisible_ = true;
           entry.loaded_ = true;
 
@@ -108,10 +107,7 @@ describe
           video.setAttribute('autoplay', '');
           videoManager.register(impl);
 
-          const visibilityStub = sandbox.stub(
-            Services.viewerForDoc(env.ampdoc),
-            'isVisible'
-          );
+          const visibilityStub = env.sandbox.stub(env.ampdoc, 'isVisible');
           visibilityStub.onFirstCall().returns(true);
 
           const entry = videoManager.getEntryForVideo_(impl);
@@ -133,15 +129,12 @@ describe
             video.setAttribute('autoplay', '');
             videoManager.register(impl);
 
-            const visibilityStub = sandbox.stub(
-              Services.viewerForDoc(env.ampdoc),
-              'isVisible'
-            );
+            const visibilityStub = env.sandbox.stub(env.ampdoc, 'isVisible');
             visibilityStub.onFirstCall().returns(true);
 
             const entry = videoManager.getEntryForVideo_(impl);
 
-            const supportsAutoplayStub = sandbox.stub(
+            const supportsAutoplayStub = env.sandbox.stub(
               entry,
               'supportsAutoplay_'
             );
@@ -174,7 +167,7 @@ describe
           impl.play();
 
           const entry = videoManager.getEntryForVideo_(impl);
-          sandbox.stub(entry, 'userInteracted').returns(true);
+          env.sandbox.stub(entry, 'userInteracted').returns(true);
           entry.isVisible_ = false;
 
           impl.pause();
@@ -220,10 +213,7 @@ describe
 
           videoManager.register(impl);
 
-          const visibilityStub = sandbox.stub(
-            Services.viewerForDoc(env.ampdoc),
-            'isVisible'
-          );
+          const visibilityStub = env.sandbox.stub(env.ampdoc, 'isVisible');
           visibilityStub.onFirstCall().returns(true);
 
           const entry = videoManager.getEntryForVideo_(impl);
@@ -265,17 +255,12 @@ describe
         });
 
         beforeEach(() => {
-          sandbox = sinon.sandbox;
           klass = createFakeVideoPlayerClass(env.win);
           video = env.createAmpElement('amp-test-fake-videoplayer', klass);
           env.win.document.body.appendChild(video);
           impl = video.implementation_;
           installVideoManagerForDoc(env.ampdoc);
           videoManager = Services.videoManagerForDoc(env.ampdoc);
-        });
-
-        afterEach(() => {
-          sandbox.restore();
         });
       }
     );
@@ -286,21 +271,14 @@ describe
   .ifChrome()
   .run('Autoplay support', () => {
     const supportsAutoplay = VideoUtils.isAutoplaySupported; // for line length
-
-    let sandbox;
-
     let win;
     let video;
-
     let isLite;
-
     let createElementSpy;
     let setAttributeSpy;
     let playStub;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-
       video = {
         setAttribute() {},
         style: {
@@ -329,17 +307,15 @@ describe
 
       isLite = false;
 
-      createElementSpy = sandbox.spy(doc, 'createElement');
-      setAttributeSpy = sandbox.spy(video, 'setAttribute');
-      playStub = sandbox.stub(video, 'play');
+      createElementSpy = window.sandbox.spy(doc, 'createElement');
+      setAttributeSpy = window.sandbox.spy(video, 'setAttribute');
+      playStub = window.sandbox.stub(video, 'play');
 
       VideoUtils.resetIsAutoplaySupported();
     });
 
     afterEach(() => {
       VideoUtils.resetIsAutoplaySupported();
-
-      sandbox.restore();
     });
 
     it('should create an invisible test video element', () => {

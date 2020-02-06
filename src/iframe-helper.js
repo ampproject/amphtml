@@ -529,7 +529,12 @@ export function looksLikeTrackingIframe(element) {
 
 // Most common ad sizes
 // Array of [width, height] pairs.
-const adSizes = [[300, 250], [320, 50], [300, 50], [320, 100]];
+const adSizes = [
+  [300, 250],
+  [320, 50],
+  [300, 50],
+  [320, 100],
+];
 
 /**
  * Guess whether this element might be an ad.
@@ -560,7 +565,6 @@ export function isAdLike(element) {
 /**
  * @param {!Element} iframe
  * @return {!Element}
- * @private
  */
 export function disableScrollingOnIframe(iframe) {
   addAttributesToElement(iframe, dict({'scrolling': 'no'}));
@@ -578,7 +582,6 @@ export function disableScrollingOnIframe(iframe) {
  * from the perspective of the current window.
  * @param {!Window} win
  * @return {boolean}
- * @private
  */
 export function canInspectWindow(win) {
   // TODO: this is not reliable.  The compiler assumes that property reads are

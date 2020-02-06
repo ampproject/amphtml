@@ -104,7 +104,6 @@ tags: {  # <amp-story>
     child_tag_name_oneof: "AMP-GEO"
     child_tag_name_oneof: "AMP-PIXEL"
     child_tag_name_oneof: "AMP-SIDEBAR"
-    child_tag_name_oneof: "AMP-STORY-ACCESS"
     child_tag_name_oneof: "AMP-STORY-AUTO-ADS"
     child_tag_name_oneof: "AMP-STORY-BOOKEND"
     child_tag_name_oneof: "AMP-STORY-PAGE"
@@ -124,6 +123,7 @@ tags: {  # <amp-story-page>
       protocol: "https"
     }
   }
+  attrs: { name: "next-page-no-ad" }
   attr_lists: "mandatory-id-attr"
   child_tags: {
     child_tag_name_oneof: "AMP-ANALYTICS"
@@ -342,18 +342,6 @@ tags: {
   }
   spec_url: "https://amp.dev/documentation/components/amp-story"
 }
-tags: {  # <amp-story-access>
-  html_format: AMP
-  tag_name: "AMP-STORY-ACCESS"
-  requires_extension: "amp-access"
-  mandatory_parent: "AMP-STORY"
-  attrs: {
-    name: "type"
-    value: "blocking"
-    value: "notification"
-  }
-  attr_lists: "extended-amp-global"
-}
 tags: {  # <amp-story-bookend>
   html_format: AMP
   tag_name: "AMP-STORY-BOOKEND"
@@ -441,6 +429,29 @@ tags: {  # <amp-story-cta-layer>
   reference_points: {
     tag_spec_name: "AMP-STORY-CTA-LAYER animate-in"
   }
+}
+tags: {  # amp-experiment (json)
+  html_format: AMP
+  html_format: ACTIONS
+  tag_name: "SCRIPT"
+  spec_name: "amp-experiment story extension .json script"
+  mandatory_parent: "AMP-EXPERIMENT"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_casei: "application/json"
+    dispatch_key: NAME_VALUE_PARENT_DISPATCH
+  }
+  attr_lists: "nonce-attr"
+  cdata: {
+    max_bytes: 15000
+    max_bytes_spec_url: "https://amp.dev/documentation/components/amp-experiment#configuration"
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://amp.dev/documentation/components/amp-experiment"
 }
 tags: {
   html_format: AMP
@@ -581,6 +592,7 @@ descendant_tag_list: {
   tag: "SMALL"
   tag: "SOLIDCOLOR"
   tag: "SPAN"
+  tag: "STOP"
   tag: "STRONG"
   tag: "SUB"
   tag: "SUP"
@@ -613,7 +625,6 @@ descendant_tag_list: {
   tag: "AMP-EXPERIMENT"
   tag: "AMP-FIT-TEXT"
   tag: "AMP-FONT"
-  tag: "AMP-GFYCAT"
   tag: "AMP-GIST"
   tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-IMG"
@@ -704,11 +715,13 @@ descendant_tag_list: {
   tag: "RUBY"
   tag: "S"
   tag: "SAMP"
+  tag: "SCRIPT"
   tag: "SECTION"
   tag: "SMALL"
   tag: "SOLIDCOLOR"
   tag: "SOURCE"
   tag: "SPAN"
+  tag: "STOP"
   tag: "STRONG"
   tag: "SUB"
   tag: "SUP"
@@ -784,11 +797,8 @@ descendant_tag_list {
   tag: "AMP-FX-COLLECTION"
   tag: "AMP-FX-FLYING-CARPET"
   tag: "AMP-GFYCAT"
-  tag: "AMP-GFYCAT"
-  tag: "AMP-GIST"
   tag: "AMP-GIST"
   tag: "AMP-GOOGLE-DOCUMENT-EMBED"
-  tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-GOOGLE-VRVIEW-IMAGE"
   tag: "AMP-HULU"
   tag: "AMP-IMA-VIDEO"
@@ -800,8 +810,6 @@ descendant_tag_list {
   tag: "AMP-JWPLAYER"
   tag: "AMP-KALTURA-PLAYER"
   tag: "AMP-LIST"
-  tag: "AMP-LIST"
-  tag: "AMP-LIVE-LIST"
   tag: "AMP-LIVE-LIST"
   tag: "AMP-MATHML"
   tag: "AMP-MEGAPHONE"
@@ -914,6 +922,7 @@ descendant_tag_list {
   tag: "SOLIDCOLOR"
   tag: "SOURCE"
   tag: "SPAN"
+  tag: "STOP"
   tag: "STRONG"
   tag: "SUB"
   tag: "SUP"

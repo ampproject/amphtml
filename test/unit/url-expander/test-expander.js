@@ -160,7 +160,6 @@ describes.realWin(
         ASYNC: Promise.resolve('hello'),
         ASYNCFN: arg => Promise.resolve(arg),
         BROKEN: () => undefined,
-        ANCESTOR_ORIGIN: () => Promise.resolve('https://www.google.com@foo'),
         TITLE: 'hello world ',
       };
 
@@ -255,6 +254,16 @@ describes.realWin(
           input: 'title=TRIM(TITLE)',
           output: 'title=hello%20world',
         },
+        {
+          description: 'should handle backticks inside args',
+          input: 'CONCAT(he`llo`, world)',
+          output: 'hello-world',
+        },
+        {
+          description: 'should handle backticks inside args w/ macros',
+          input: 'TRIM(CANONICAL_URL` `CANONICAL_URL)',
+          output: 'www.google.com%20www.google.com',
+        },
       ];
 
       describe('called asyncronously', () => {
@@ -278,27 +287,10 @@ describes.realWin(
             ).to.eventually.equal(expected);
           });
 
-          it('throws on bad input with back ticks', () => {
-            const url = 'CONCAT(bad`hello`, world)';
-            allowConsoleError(() => {
-              expect(() => {
-                new Expander(variableSource, mockBindings).expand(url);
-              }).to.throw(/bad/);
-            });
-          });
-
           it('should handle tokens with parenthesis next to each other', () => {
             const url =
               'http://www.google.com/?test=RANDOMCLIENT_ID(__ga)UPPERCASE(foo)';
             const expected = 'http://www.google.com/?test=123456amp-GA12345FOO';
-            return expect(
-              new Expander(variableSource, mockBindings).expand(url)
-            ).to.eventually.equal(expected);
-          });
-
-          it('should not encode NOENCODE_WHITELIST', () => {
-            const url = 'ANCESTOR_ORIGIN';
-            const expected = 'https://www.google.com@foo';
             return expect(
               new Expander(variableSource, mockBindings).expand(url)
             ).to.eventually.equal(expected);
@@ -322,20 +314,6 @@ describes.realWin(
         });
 
         describe('unique cases', () => {
-          it('throws on bad input with back ticks', () => {
-            const url = 'CONCAT(bad`hello`, world)';
-            allowConsoleError(() => {
-              expect(() => {
-                new Expander(
-                  variableSource,
-                  mockBindings,
-                  /* opt_collectVars */ undefined,
-                  /* opt_sync */ true
-                ).expand(url);
-              }).to.throw(/bad/);
-            });
-          });
-
           // Console errors allowed for these tests because anytime an async
           // function is called with the sync flag we user.error()
           it('should resolve promise to empty string', () => {
