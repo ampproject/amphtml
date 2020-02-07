@@ -235,13 +235,20 @@ class Strings {
   static std::vector<std::string> SplitStringAt(
       std::string_view s, char delimiter);
 
+  // Splits the string at any utf8 or ascii whitespace and returns the columns.
+  // The returned values are the views of original string argument passed to
+  // this method. If the original string goes out of scope after this method is
+  // called, the contents of the columns is undefined.
+  static std::vector<std::string_view> SplitStrAtUtf8Whitespace(
+      std::string_view s);
+
   // Determines if a character at current position is a whitespace char.
   // Returns the number of bytes from current character that are part of the
   // whitespace. For multichar whitespace like ideographic space \u3000 it
   // returns 3 as ideographic space has 3 codepoints.
   //
   // Returns 0, if the character at current position is not a whitespace.
-  static int IsWhiteSpaceChar(std::string_view s, int position = 0);
+  static int IsUtf8WhiteSpaceChar(std::string_view s, int position = 0);
 
  private:
   // No instance of this class.

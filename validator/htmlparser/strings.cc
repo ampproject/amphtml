@@ -561,7 +561,7 @@ std::vector<std::string> Strings::SplitStringAt(
   size_t first = 0;
 
   while (first < s.size()) {
-    const auto second = s.find_first_of(delimiter, first);
+    auto second = s.find_first_of(delimiter, first);
 
     if (first != second)
       columns.emplace_back(std::string(s.substr(first, second-first)));
@@ -575,7 +575,28 @@ std::vector<std::string> Strings::SplitStringAt(
   return columns;
 }
 
-int Strings::IsWhiteSpaceChar(std::string_view s, int position) {
+std::vector<std::string_view> Strings::SplitStrAtUtf8Whitespace(
+    std::string_view s) {
+  std::vector<std::string_view> columns;
+  int start = 0;
+  int end = 0;
+  while (end < s.size()) {
+    auto num_ws = IsUtf8WhiteSpaceChar(s, end);
+    if (num_ws > 0) {
+      if (start < end) {
+        columns.emplace_back(s.substr(start, end - start));
+      }
+      start = end + num_ws;
+      end = start;
+    } else {
+      end++;
+    }
+  }
+  columns.emplace_back(s.substr(start, s.size()));
+  return columns;
+}
+
+int Strings::IsUtf8WhiteSpaceChar(std::string_view s, int position) {
   int i = position;
   int state = 0;
   while (i < s.size()) {
