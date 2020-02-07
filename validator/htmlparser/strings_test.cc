@@ -34,6 +34,93 @@ TEST(StringsTest, SplitStringAtTest) {
   EXPECT_EQ(columns.at(0), "a");
 }
 
+TEST(StringsTest, IsWhiteSpaceCharTest) {
+  EXPECT_EQ(0, htmlparser::Strings::IsWhiteSpaceChar("abcd"));
+  EXPECT_EQ(0, htmlparser::Strings::IsWhiteSpaceChar("foo bar"));
+  EXPECT_EQ(0, htmlparser::Strings::IsWhiteSpaceChar("f bar"));
+  EXPECT_EQ(1, htmlparser::Strings::IsWhiteSpaceChar(" abcd"));
+  EXPECT_EQ(1, htmlparser::Strings::IsWhiteSpaceChar("\nabcd"));
+  EXPECT_EQ(1, htmlparser::Strings::IsWhiteSpaceChar("\tabcd"));
+  EXPECT_EQ(1, htmlparser::Strings::IsWhiteSpaceChar("\rabcd"));
+  EXPECT_EQ(1, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\x20', 'a'})));
+  EXPECT_EQ(2, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xc2', '\x85', 'a', 'b', 'c'})));
+  EXPECT_EQ(2, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xc2', '\xa0', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe1', '\x9a', '\x80', 'a', 'b', 'c'})));
+
+  // 0x2000 to 0x200a
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x80', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x81', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x82', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x83', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x84', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x85', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x86', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x87', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x88', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x89', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\x8a', 'a', 'b', 'c'})));
+
+  // 0x2028
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\xa8', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar("\u2028abc"));
+
+  // 0x2029
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\xa9', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar( "\u2029abc"));
+
+  // 0x202f
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe2', '\x80', '\xaf', 'a', 'b', 'c'})));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar( "\u202Fabc"));
+
+  // 0x205f
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string{'\xe2', '\x81', '\x9f', 'a', 'b', 'c'}));
+
+  // 0x3000
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string{'\xe3', '\x80', '\x80', 'a', 'b', 'c'}));
+
+  // Invalid second byte.
+  EXPECT_EQ(0, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xc2', '\x86', 'a', 'b', 'c'})));
+  // Invalid first byte.
+  EXPECT_EQ(0, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xc3', '\x85', 'a', 'b', 'c'})));
+
+  // Invalid second byte.
+  EXPECT_EQ(0, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'\xe1', '\x9b', '\x80', 'a', 'b', 'c'})));
+
+  // Invalid third byte.
+  EXPECT_EQ(0, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string{'\xe3', '\x80', '\x9c', 'a', 'b', 'c'}));
+
+  // A few position argument cases.
+  EXPECT_EQ(1, htmlparser::Strings::IsWhiteSpaceChar("foo bar", 3));
+  EXPECT_EQ(1, htmlparser::Strings::IsWhiteSpaceChar("f bar", 1));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar(
+      std::string({'a', 'b', 'c', '\xe2', '\x80', '\x80', 'a', 'b', 'c'}, 3)));
+  EXPECT_EQ(3, htmlparser::Strings::IsWhiteSpaceChar("foo\u202Fbar", 3));
+}
+
 TEST(StringsTest, LowerUpperTest) {
   // Unicode.
   std::string name = "AMALTASsSŚŚSŚ";

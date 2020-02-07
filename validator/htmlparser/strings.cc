@@ -26,6 +26,7 @@
 #include "casetable.h"
 #include "entity.h"
 #include "error.h"
+#include "whitespacetable.h"
 
 namespace htmlparser {
 
@@ -572,6 +573,25 @@ std::vector<std::string> Strings::SplitStringAt(
   }
 
   return columns;
+}
+
+int Strings::IsWhiteSpaceChar(std::string_view s, int position) {
+  int i = position;
+  int state = 0;
+  while (i < s.size()) {
+    uint8_t c = s.at(i++);
+    state = kWhitespaceTable[state][c];
+
+    if (state == 0) {
+      return 0;
+    }
+
+    if (state == 1) {
+      return i - position;
+    }
+  }
+
+  return 0;
 }
 
 namespace {
