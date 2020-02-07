@@ -219,7 +219,8 @@ class FileUtil {
       std::function<void(T)> callback,
       std::function<T (std::string_view)> post_processing) {
     std::stringbuf data_buffer;
-    auto result = ReadFileLines(options, filepath, [&](std::string_view line) {
+    auto result = ReadFileLines(options, filepath, [&](std::string_view line,
+                                                       int line_number) {
       if (marker.compare(line) == 0) {
         callback(post_processing(data_buffer.str()));
         data_buffer.str("");
@@ -241,7 +242,8 @@ class FileUtil {
       std::function<void(T)> callback,
       std::function<T (std::string_view)> post_processing) {
     std::stringbuf data_buffer;
-    auto result = ReadFileLines(options, fd, [&](std::string_view line) {
+    auto result = ReadFileLines(options, fd, [&](std::string_view line,
+                                                 int line_number) {
       if (marker.compare(line) == 0) {
         callback(post_processing(data_buffer.str()));
         data_buffer.str("");
