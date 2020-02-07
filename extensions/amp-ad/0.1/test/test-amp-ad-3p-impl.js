@@ -226,7 +226,7 @@ describes.realWin(
         });
       });
 
-      it('should use custom path', () => {
+      it.skip('should use custom path', () => {
         const remoteUrl = 'https://example.com/boot/remote.html';
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
