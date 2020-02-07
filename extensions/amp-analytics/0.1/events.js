@@ -635,7 +635,7 @@ export class ScrollEventTracker extends EventTracker {
       boundsV,
       ((e.top + e.height) * 100) /
         (useInitialPageSize
-          ? e.initialSize.scrollHeight
+          ? e.initialSize./*OK*/ scrollHeight
           : e./*OK*/ scrollHeight),
       VAR_V_SCROLL_BOUNDARY,
       listener
@@ -643,7 +643,9 @@ export class ScrollEventTracker extends EventTracker {
     this.triggerScrollEvents_(
       boundsH,
       ((e.left + e.width) * 100) /
-        (useInitialPageSize ? e.initialSize.scrollWidth : e./*OK*/ scrollWidth),
+        (useInitialPageSize
+          ? e.initialSize./*OK*/ scrollWidth
+          : e./*OK*/ scrollWidth),
       VAR_H_SCROLL_BOUNDARY,
       listener
     );
