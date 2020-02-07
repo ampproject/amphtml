@@ -912,6 +912,34 @@ describes.repeated(
 
               await list.layoutCallback();
             });
+
+            it('should perform a real fetch for the second render', async () => {
+              toggleExperiment(win, experimentName, true);
+
+              const childJson = win.document.createElement('script');
+              childJson.type = 'application/json';
+              childJson.innerText = '{"items": [1,2,3]}';
+              element.appendChild(childJson);
+              doc.body.appendChild(element);
+
+              listMock
+                .expects('fetch_')
+                .returns(Promise.resolve({items: [4, 5, 6]}))
+                .once();
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs([1, 2, 3], /*append*/ false, {items: [1, 2, 3]})
+                .returns(Promise.resolve())
+                .once();
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs([4, 5, 6], /*append*/ false, {items: [4, 5, 6]})
+                .returns(Promise.resolve())
+                .once();
+
+              await list.layoutCallback();
+              await list.layoutCallback();
+            });
           });
         }); // without amp-bind
 
