@@ -58,7 +58,7 @@ function saveVariables(req, res) {
         <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">   
     </head> 
     <body>
-    <p>Variables:</p>
+    <h3>Variables:</h3>
     ${variables ? JSON.stringify(variables, null, 2) : 'N/A'}
     </body>
     </html>`);
@@ -85,12 +85,14 @@ function runVariableSubstitution(req, res) {
       <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     </head> 
     <body>
-    <p>Current Request: ${
-      testParameters
-        ? 'http://ads.localhost:8000/save-request?' + testParameters
-        : 'N/A'
-    }</p>
     
+    <h3>'<amp-analytics>' request: </h3>
+      ${
+        testParameters
+          ? 'http://ads.localhost:8000/save-request?' + testParameters
+          : 'N/A'
+      }
+
     <amp-analytics>
       <script type="application/json">
         {
@@ -137,7 +139,7 @@ function getRequest(req, res) {
       <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">   
     </head> 
     <body>
-    <p>Results</p>
+    <h3>Results</h3>
       Variables: ${JSON.stringify(variableSubstitution, null, 2)}
     <br>
       Request: ${url}
