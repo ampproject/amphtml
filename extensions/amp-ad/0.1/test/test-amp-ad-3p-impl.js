@@ -227,7 +227,7 @@ describes.realWin(
       });
 
       it('should use custom path', () => {
-        const remoteUrl = 'https://example.com/boot/remote.html';
+        const remoteUrl = 'https://testsrc/boot/remote.html';
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', remoteUrl);
@@ -245,7 +245,7 @@ describes.realWin(
       it('should use default path if custom disabled', () => {
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/boot/remote.html');
+        meta.setAttribute('content', 'https://testsrc/boot/remote.html');
         win.document.head.appendChild(meta);
         ad3p.config.remoteHTMLDisabled = true;
         ad3p.onLayoutMeasure();
@@ -346,7 +346,7 @@ describes.realWin(
       });
 
       it('should use remote html path for preload', () => {
-        const remoteUrl = 'https://example.com/boot/remote.html';
+        const remoteUrl = 'https://testsrc/boot/remote.html';
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', remoteUrl);
@@ -365,7 +365,7 @@ describes.realWin(
       it('should not use remote html path for preload if disabled', () => {
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/boot/remote.html');
+        meta.setAttribute('content', 'https://testsrc/boot/remote.html');
         win.document.head.appendChild(meta);
         ad3p.config.remoteHTMLDisabled = true;
         ad3p.buildCallback();
