@@ -36,7 +36,7 @@
   height: 100px;
   left: 0;
   width: 100%;
-  border-top: 1px solid transparent; /* gray2 */
+  border-top: 1px solid transparent;
   border-bottom: 1px solid transparent;
 }
 @media (min-width: 600px) {
@@ -46,6 +46,6 @@
     left: auto;
     right: 16px;
     width: 475px;
-    border: 1px solid transparent; /* gray2 */
+    border: 1px solid transparent;
   }
 }
