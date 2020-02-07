@@ -79,7 +79,6 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     return script.layoutCallback().should.be.rejected;
   });
 
-
   it('should work with "text/javascript" content-type for same-origin src', () => {
     env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
     element.setAttribute('src', 'https://foo.example/foo.txt');
