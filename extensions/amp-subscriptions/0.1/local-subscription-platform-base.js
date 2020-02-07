@@ -126,7 +126,7 @@ export class LocalSubscriptionBasePlatform {
     // If the root node has a `body` property, listen to events on that too,
     // to fix an iOS shadow DOM bug (https://github.com/ampproject/amphtml/issues/25754).
     if (this.rootNode_.body) {
-      this.rootNode_.addEventListener(
+      this.rootNode_.body.addEventListener(
         'click',
         handleClickAndStopEventPropagation
       );
