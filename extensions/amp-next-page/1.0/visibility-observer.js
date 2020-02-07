@@ -28,11 +28,11 @@ import {throttle} from '../../../src/utils/rate-limit';
 
 /** @enum {number} */
 export const ViewportRelativePos = {
-  INSIDE_VIEWPORT: 'inside',
-  OUTSIDE_VIEWPORT: 'outside',
-  LEAVING_VIEWPORT: 'leaving',
-  ENTERING_VIEWPORT: 'entering',
-  CONTAINS_VIEWPORT: 'contains',
+  INSIDE_VIEWPORT: 1,
+  OUTSIDE_VIEWPORT: 2,
+  LEAVING_VIEWPORT: 3,
+  ENTERING_VIEWPORT: 4,
+  CONTAINS_VIEWPORT: 5,
 };
 
 /** @const {number} */
@@ -191,7 +191,7 @@ export default class VisibilityObserver {
     /** @private {!ScrollDirection} */
     this.scrollDirection_ = ScrollDirection.DOWN;
 
-    /** @private {!ScrollDirection} */
+    /** @private {?ScrollDirection} */
     this.lastScrollDirection_ = null;
 
     /**
@@ -237,16 +237,13 @@ export default class VisibilityObserver {
     this.mutator_.measureElement(() => {
       this.viewportHeight_ = this.viewport_.getHeight();
       const scrollTop = this.viewport_.getScrollTop();
+      const delta = scrollTop - this.lastScrollTop_;
       // Throttle
-      if (
-        Math.abs(scrollTop - this.lastScrollTop_) < SCROLL_DIRECTION_THRESHOLD
-      ) {
+      if (Math.abs(delta) < SCROLL_DIRECTION_THRESHOLD) {
         return;
       }
       const scrollDirection =
-        scrollTop > this.lastScrollTop_
-          ? ScrollDirection.DOWN
-          : ScrollDirection.UP;
+        delta > 0 ? ScrollDirection.DOWN : ScrollDirection.UP;
       if (this.lastScrollDirection_ !== scrollDirection) {
         this.entries_.forEach(entry => entry.updateRelativePos());
       }
@@ -264,7 +261,7 @@ export default class VisibilityObserver {
   }
 
   /**
-   * @return {boolean}
+   * @return {boolean}s
    */
   isScrollingDown() {
     return this.scrollDirection_ === ScrollDirection.DOWN;

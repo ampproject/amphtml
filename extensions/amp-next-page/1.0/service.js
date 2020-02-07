@@ -244,7 +244,7 @@ export class NextPageService {
         scroll,
         height = 0;
       this.mutator_.measureMutateElement(
-        this.host_,
+        this.getHost_(),
         () => {
           // Measure the position of the host page (edge case)
           vh = this.viewport_.getHeight();
@@ -326,21 +326,16 @@ export class NextPageService {
   updateVisibility() {
     this.pages_.forEach((page, index) => {
       if (
-        page.relativePos === ViewportRelativePos.INSIDE_VIEWPORT ||
-        page.relativePos === ViewportRelativePos.CONTAINS_VIEWPORT ||
-        page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
-        page.relativePos === ViewportRelativePos.ENTERING_VIEWPORT
+        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT &&
+        page.isVisible()
       ) {
+        page.setVisibility(VisibilityState.HIDDEN);
+      } else {
         if (!page.isVisible()) {
           page.setVisibility(VisibilityState.VISIBLE);
         }
         this.hidePreviousPages_(index);
         this.resumePausedPages_(index);
-      } else if (
-        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT &&
-        page.isVisible()
-      ) {
-        page.setVisibility(VisibilityState.HIDDEN);
       }
     });
 
@@ -363,7 +358,7 @@ export class NextPageService {
       this.pages_.forEach(page => {
         const pageContents =
           page === this.hostPage_
-            ? this.hostPage_.hostPageContents
+            ? /** @type {!HostPage} */ (this.hostPage_).hostPageContents
             : [page.container];
         if (page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT) {
           pageContents.forEach(element => {
@@ -375,17 +370,12 @@ export class NextPageService {
               );
             });
           });
-
-          // Set opacity to visiblePercent
-          // Show other pages
-        } else if (page.isVisible() && page.visiblePercent < 1) {
+        } else if (page.isVisible()) {
           pageContents.forEach(element => {
             this.mutator_.mutateElement(element, () => {
               resetStyles(element, ['opacity']);
             });
           });
-          // Set other pages that are LEAVING_VIEWPORT opacity to visiblePercent
-          // Show this page
         }
       });
     }
@@ -503,7 +493,7 @@ export class NextPageService {
 
   /**
    * Creates the initial (host) page based on the window's metadata
-   * @return {!Page}
+   * @return {!HostPage}
    */
   createHostPage() {
     const {title, location} = this.doc_;
@@ -523,22 +513,9 @@ export class NextPageService {
       )
     );
 
-    const hostPage = new HostPage(
-      this,
-      {
-        url,
-        title: title || '',
-        image,
-      },
-      PageState.INSERTED /** initState */,
-      VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_,
-      hostPageContents
-    );
-
     // Set-up transitions
     if (this.transition_ === Transition.FADE_IN_SCROLL) {
-      hostPage.hostPageContents.forEach(element => {
+      hostPageContents.forEach(element => {
         this.mutator_.mutateElement(element, () => {
           setStyles(element, {
             'opacity': 1,
@@ -549,7 +526,18 @@ export class NextPageService {
       });
     }
 
-    return hostPage;
+    return /** @type {!HostPage} */ (new HostPage(
+      this,
+      {
+        url,
+        title: title || '',
+        image,
+      },
+      PageState.INSERTED /** initState */,
+      VisibilityState.VISIBLE /** initVisibility */,
+      this.doc_ /** doc */,
+      hostPageContents
+    ));
   }
 
   /**
