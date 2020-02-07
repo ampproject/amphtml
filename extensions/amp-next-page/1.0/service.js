@@ -339,7 +339,7 @@ export class NextPageService {
       this.pages_.forEach(page => {
         const pageContents =
           page === this.hostPage_
-            ? this.hostPage_.hostPageContents
+            ? /** @type {!HostPage} */ (this.hostPage_).hostPageContents
             : [page.container];
         if (page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT) {
           pageContents.forEach(element => {
@@ -491,7 +491,20 @@ export class NextPageService {
       )
     );
 
-    const hostPage = /** @type {HostPage} */ (new HostPage(
+    // Set-up transitions
+    if (this.transition_ === Transition.FADE_IN_SCROLL) {
+      hostPageContents.forEach(element => {
+        this.mutator_.mutateElement(element, () => {
+          setStyles(element, {
+            'opacity': 1,
+            'will-change': 'opacity',
+            'transition': 'opacity 0.3s',
+          });
+        });
+      });
+    }
+
+    return /** @type {!HostPage} */ (new HostPage(
       this,
       {
         url,
@@ -503,21 +516,6 @@ export class NextPageService {
       doc /** doc */,
       hostPageContents
     ));
-
-    // Set-up transitions
-    if (this.transition_ === Transition.FADE_IN_SCROLL) {
-      hostPage.hostPageContents.forEach(element => {
-        this.mutator_.mutateElement(element, () => {
-          setStyles(element, {
-            'opacity': 1,
-            'will-change': 'opacity',
-            'transition': 'opacity 0.3s',
-          });
-        });
-      });
-    }
-
-    return hostPage;
   }
 
   /**
