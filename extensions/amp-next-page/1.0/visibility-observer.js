@@ -28,12 +28,15 @@ import {throttle} from '../../../src/utils/rate-limit';
 
 /** @enum {number} */
 export const ViewportRelativePos = {
-  INSIDE_VIEWPORT: 'inside',
-  OUTSIDE_VIEWPORT: 'outside',
-  LEAVING_VIEWPORT: 'leaving',
-  ENTERING_VIEWPORT: 'entering',
-  CONTAINS_VIEWPORT: 'contains',
+  INSIDE_VIEWPORT: 1,
+  OUTSIDE_VIEWPORT: 2,
+  LEAVING_VIEWPORT: 3,
+  ENTERING_VIEWPORT: 4,
+  CONTAINS_VIEWPORT: 5,
 };
+
+/** @const {number} */
+const SCROLL_DIRECTION_THRESHOLD = 20;
 
 /** @enum {number} */
 export const ScrollDirection = {UP: 1, DOWN: -1};
@@ -234,10 +237,13 @@ export default class VisibilityObserver {
     this.mutator_.measureElement(() => {
       this.viewportHeight_ = this.viewport_.getHeight();
       const scrollTop = this.viewport_.getScrollTop();
+      const delta = scrollTop - this.lastScrollTop_;
+      // Throttle
+      if (Math.abs(delta) < SCROLL_DIRECTION_THRESHOLD) {
+        return;
+      }
       const scrollDirection =
-        scrollTop > this.lastScrollTop_
-          ? ScrollDirection.DOWN
-          : ScrollDirection.UP;
+        delta > 0 ? ScrollDirection.DOWN : ScrollDirection.UP;
       if (this.lastScrollDirection_ !== scrollDirection) {
         this.entries_.forEach(entry => entry.updateRelativePos());
       }
