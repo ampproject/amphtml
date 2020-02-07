@@ -604,13 +604,13 @@ export class ScrollEventTracker extends EventTracker {
     const boundsH = this.normalizeBoundaries_(
       config['scrollSpec']['horizontalBoundaries']
     );
-    const ignoreResize = !!config['scrollSpec']['ignoreResize'];
+    const useInitialPageSize = !!config['scrollSpec']['useInitialPageSize'];
 
     this.boundScrollHandler_ = this.scrollHandler_.bind(
       this,
-      boundsV,
       boundsH,
-      ignoreResize,
+      boundsV,
+      useInitialPageSize,
       listener
     );
 
@@ -621,27 +621,31 @@ export class ScrollEventTracker extends EventTracker {
 
   /**
    * Function to handle scroll events from the Scroll manager
-   * @param {!Object<number,boolean>} boundsV
    * @param {!Object<number,boolean>} boundsH
-   * @param {boolean} ignoreResize
+   * @param {!Object<number,boolean>} boundsV
+   * @param {boolean} useInitialPageSize
    * @param {function(!AnalyticsEvent)} listener
    * @param {!Object} e
    * @private
    */
-  scrollHandler_(boundsV, boundsH, ignoreResize, listener, e) {
+  scrollHandler_(boundsH, boundsV, useInitialPageSize, listener, e) {
     // Calculates percentage scrolled by adding screen height/width to
     // top/left and dividing by the total scroll height/width.
     this.triggerScrollEvents_(
       boundsV,
       ((e.top + e.height) * 100) /
-        (ignoreResize ? e.initialScrollHeight : e./*OK*/ scrollHeight),
+        (useInitialPageSize
+          ? e.initialSize./*OK*/ scrollHeight
+          : e./*OK*/ scrollHeight),
       VAR_V_SCROLL_BOUNDARY,
       listener
     );
     this.triggerScrollEvents_(
       boundsH,
       ((e.left + e.width) * 100) /
-        (ignoreResize ? e.initialScrollWidth : e./*OK*/ scrollWidth),
+        (useInitialPageSize
+          ? e.initialSize./*OK*/ scrollWidth
+          : e./*OK*/ scrollWidth),
       VAR_H_SCROLL_BOUNDARY,
       listener
     );

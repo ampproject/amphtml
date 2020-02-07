@@ -690,7 +690,13 @@ In addition to the variables provided as part of triggers you can also specify a
 
 Use the scroll trigger (`"on": "scroll"`) to fire a request under certain conditions when the page is scrolled. This trigger provides [special vars](./analytics-vars.md#interaction) that indicate the boundaries that triggered a request to be sent. Use `scrollSpec` to control when this will fire:
 
-- `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width. To keep the page performant, the scroll boundaries are rounded to the nearest multiple of `5`. Additionally `scrollSpec` takes an `ignoreResize` property which, if set to `true` calculates the scroll position based on the initial height/width of the page and ignores its resized height. This is especially helpful for use with infinitely scrolling experiences such as `<amp-next-page>` and `<amp-list>`.
+- `scrollSpec` This object can contain `useInitialPageSize`, `verticalBoundaries` and `horizontalBoundaries`. At least one of the last two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. To keep the page performant, the scroll boundaries are rounded to the nearest multiple of `5`. If set to true, `useInitialPageSize` calculates the scroll position based on the initial height/width of the page and ignores its resized height.
+
+  {% call callout('Note', type='note') %}
+  When using `<amp-analytics>` with infinitely scrolling experiences such as `<amp-next-page>` and `<amp-list>`, you might find it helpful to use `useInitialPageSize` in order to have scroll triggers report on the initial height of the pages (before `<amp-next-page>` or `<amp-list>` elements get added).
+  {% endcall %}
+
+For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width.
 
 ```json
 "triggers": {
