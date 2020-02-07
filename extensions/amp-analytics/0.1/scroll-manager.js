@@ -125,7 +125,7 @@ export class ScrollManager {
    * @private
    */
   onScroll_(e) {
-    const firstMeasure = this.initialLayoutRect_ === null;
+    const firstMeasure = this.initialRootLayoutRect_ === null;
     return this.getInitRootElementRect_().then(initialRootLayoutRect => {
       const {
         height: initialScrollHeight,
