@@ -283,9 +283,7 @@ describes.sandboxed('AmpDocService', {}, () => {
       });
     });
 
-    // TODO(dvoytenko, #11827): Make this test work on Safari.
-    // TODO(kevinkimball): reenable this test after removing createShadowRoot.
-    it.skip('should navigate via host', () => {
+    it('should navigate via host', () => {
       if (!shadowRoot) {
         return;
       }
@@ -296,7 +294,16 @@ describes.sandboxed('AmpDocService', {}, () => {
 
       const content2 = document.createElement('span');
       const host2 = document.createElement('div');
-      const shadowRoot2 = host2.createShadowRoot();
+
+      let shadowRoot2;
+      if (isShadowDomSupported()) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+          shadowRoot2 = host2.attachShadow({mode: 'open'});
+        } else {
+          shadowRoot2 = host2.createShadowRoot();
+        }
+      }
+
       shadowRoot2.appendChild(content2);
       shadowRoot.appendChild(host2);
       expect(content2.parentNode).to.equal(shadowRoot2);
@@ -404,9 +411,7 @@ describes.sandboxed('AmpDocService', {}, () => {
       });
     });
 
-    // TODO(dvoytenko, #11827): Make this test work on Safari.
-    // TODO(kevinkimball): reenable this test after removing createShadowRoot.
-    it.skip('should navigate via host', () => {
+    it('should navigate via host', () => {
       if (!shadowRoot) {
         return;
       }
@@ -417,7 +422,16 @@ describes.sandboxed('AmpDocService', {}, () => {
 
       const content2 = document.createElement('span');
       const host2 = document.createElement('div');
-      const shadowRoot2 = host2.createShadowRoot();
+
+      let shadowRoot2;
+      if (isShadowDomSupported()) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+          shadowRoot2 = host2.attachShadow({mode: 'open'});
+        } else {
+          shadowRoot2 = host2.createShadowRoot();
+        }
+      }
+
       shadowRoot2.appendChild(content2);
       shadowRoot.appendChild(host2);
       expect(content2.parentNode).to.equal(shadowRoot2);
