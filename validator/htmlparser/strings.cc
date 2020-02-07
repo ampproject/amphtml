@@ -285,6 +285,9 @@ void Strings::Escape(std::string_view s, std::stringbuf* escaped) {
 
     std::string esc = "";
     switch (c) {
+      case '"':
+        esc = "&#34;";
+        break;
       case '&':
         esc = "&amp;";
         break;
@@ -298,9 +301,6 @@ void Strings::Escape(std::string_view s, std::stringbuf* escaped) {
         break;
       case '>':
         esc = "&gt;";
-        break;
-      case '\r':
-        esc = "&#13;";
         break;
       default:
         continue;
