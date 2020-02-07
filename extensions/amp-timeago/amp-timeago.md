@@ -46,12 +46,11 @@ limitations under the License.
 
 [TOC]
 
-## Behavior
+## Usage
 
 Use the amp-timago component to count up to, or away from, a specified date and time.
 
 The component replaces the text node with a fuzzy timestamp, such as `in 30 years` or `3 hours ago`.
-If using the `cutoff` attribute, and time has past the cutoff, the text node will display the specified date in the `datetime` attribute.
 
 Example:
 
@@ -68,69 +67,68 @@ Example:
 >
 ```
 
-The `amp-timeago` component requires a placeholder in the text node. The calculated timestamp replaces the placeholder once ready. Use the placeholder as a fallback to display to users if `amp-timeago` is unable to process the fuzzy timestamp.
-
 [/example]
+
+The `amp-timeago` component requires a placeholder in the text node. The calculated timestamp replaces the placeholder once ready. Use the placeholder as a fallback to display to users if `amp-timeago` is unable to process the fuzzy timestamp.
 
 ## Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>datetime (required)</strong></td>
-    <td>An ISO datetime. E.g. 2017-03-10T01:00:00Z (UTC) <em>or</em> 2017-03-09T20:00:00-05:00 (specifying timezone offset).</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>locale (optional)</strong></td>
-    <td><p>By default, the local is set to <code>en</code>; however, you can specify one of the following locales:</p>
-<ul>
-  <li>ar (Arabic)</li>
-  <li>be (Belarusian)</li>
-  <li>bg (Bulgarian)</li>
-  <li>ca (Catalan)</li>
-  <li>da (Danish)</li>
-  <li>de (German)</li>
-  <li>el (Greek)</li>
-  <li>en (English)</li>
-  <li>enShort (English - short)</li>
-  <li>es (Spanish)</li>
-  <li>eu (Basque)</li>
-  <li>fi (Finnish)</li>
-  <li>fr (French)</li>
-  <li>he (Hebrew)</li>
-  <li>hu (Hungarian)</li>
-  <li>inBG (Bangla)</li>
-  <li>inHI (Hindi)</li>
-  <li>inID (Malay)</li>
-  <li>it (Italian)</li>
-  <li>ja (Japanese)</li>
-  <li>ko (Korean)</li>
-  <li>ml (Malayalam)</li>
-  <li>nbNO (Norwegian Bokmål)</li>
-  <li>nl (Dutch)</li>
-  <li>nnNO (Norwegian Nynorsk)</li>
-  <li>pl (Polish)</li>
-  <li>ptBR (Portuguese)</li>
-  <li>ro (Romanian)</li>
-  <li>ru (Russian)</li>
-  <li>sv (Swedish)</li>
-  <li>ta (Tamil)</li>
-  <li>th (Thai)</li>
-  <li>tr (Turkish)</li>
-  <li>uk (Ukrainian)</li>
-  <li>vi (Vietnamese)</li>
-  <li>zhCN (Chinese)</li>
-  <li>zhTW (Taiwanese)</li>
-</ul></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>cutoff (optional)</strong></td>
-    <td>Display the original date if time distance is older than cutoff (seconds).</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>common attributes</strong></td>
-    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
-  </tr>
-</table>
+### `datetime`
+
+The required `datetime` attribute sets the date and time. The value must be an [ISO datetime](https://www.w3.org/QA/Tips/iso-date).
+
+- Express time in UTC (Coordinated Universal Time): `2017-03-10T01:00:00Z`
+- Express in local time with a time zone offset: `2017-03-09T20:00:00-05:00`
+
+### `locale` (optional)
+
+The local default is `en`. Add the `locale` attribute and specify one of the following values to chance the local.
+
+- `ar` (Arabic)
+- `be` (Belarusian)
+- `bg` (Bulgarian)
+- `ca` (Catalan)
+- `da` (Danish)
+- `de` (German)
+- `el` (Greek)
+- `en` (English)
+- `enShort` (English - short)
+- `es` (Spanish)
+- `eu` (Basque)
+- `fi` (Finnish)
+- `fr` (French)
+- `he` (Hebrew)
+- `hu` (Hungarian)
+- `inBG` (Bangla)
+- `inHI` (Hindi)
+- `inID` (Malay)
+- `it` (Italian)
+- `ja` (Japanese)
+- `ko` (Korean)
+- `ml` (Malayalam)
+- `nbNO` (Norwegian Bokmål)
+- `nl` (Dutch)
+- `nnNO` (Norwegian Nynorsk)
+- `pl` (Polish)
+- `ptBR` (Portuguese)
+- `ro` (Romanian)
+- `ru` (Russian)
+- `sv` (Swedish)
+- `ta` (Tamil)
+- `th` (Thai)
+- `tr` (Turkish)
+- `uk` (Ukrainian)
+- `vi` (Vietnamese)
+- `zhCN` (Chinese)
+- `zhTW` (Taiwanese)
+
+### `cutoff`
+
+Add the `cutoff` attribute to display the date specified in the `datatime` attribute after passing the specified date in seconds.
+
+### Common attributes
+
+The AMP provided set of [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes) is available to `<amp-timeago>`.
 
 ## Validation
 
