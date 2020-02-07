@@ -1,13 +1,16 @@
 {
   "requests": {
     "host": "https://ibeat.indiatimes.com",
-    "base": "https://ibeat.indiatimes.com/iBeat/pageTrendlogAmp.html",
-    "pageview": "${base}?&h=${h}&d=${h}&url=${url}&k=${key}&ts=${time}&ch=${channel}&sid=${uid}&at=${agentType}&ref=${documentReferrer}&aid=${aid}&loc=1&ct=1&cat=${cat}&scat=${scat}&ac=1&tg=${tags}&ctids=${catIds}&pts=${pagePublishTime}&auth=${author}&pos=${position}&iBeatField=${ibeatFields}&cid=${clientId(MSCSAuthDetails)}"
+    "track": "${host}/ping-amp?url=${ampdocUrl}&sid=${clientId(_iibeat_session)}&ua=${userAgent}&ref=${documentReferrer}&at=${incrementalEngagedTime}&tt=${totalTime}&pid=${pageViewId}&d=${d}&ct=${ct}&pt=${pt}&au=${au}&ag=${ag}&aid=${aid}&cn=${canonicalUrl}&ctIds=${ctIds}"
   },
   "triggers": {
-    "defaultPageview": {
-      "on": "visible",
-      "request": "pageview"
+    "trackInterval": {
+      "on": "timer",
+      "timerSpec": {
+        "interval": 15,
+        "maxTimerLength": 7200
+      },
+      "request": "track"
     }
   }
 }

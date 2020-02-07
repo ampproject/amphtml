@@ -307,21 +307,16 @@ export class NextPageService {
   updateVisibility() {
     this.pages_.forEach((page, index) => {
       if (
-        page.relativePos === ViewportRelativePos.INSIDE_VIEWPORT ||
-        page.relativePos === ViewportRelativePos.CONTAINS_VIEWPORT ||
-        page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
-        page.relativePos === ViewportRelativePos.ENTERING_VIEWPORT
+        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT &&
+        page.isVisible()
       ) {
+        page.setVisibility(VisibilityState.HIDDEN);
+      } else {
         if (!page.isVisible()) {
           page.setVisibility(VisibilityState.VISIBLE);
         }
         this.hidePreviousPages_(index);
         this.resumePausedPages_(index);
-      } else if (
-        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT &&
-        page.isVisible()
-      ) {
-        page.setVisibility(VisibilityState.HIDDEN);
       }
     });
 
