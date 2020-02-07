@@ -49,23 +49,6 @@ const VISIBILITY_CHANGE_EVENT = 'visibilitychange';
 let TickEventDef;
 
 /**
- * Increments the value, else defaults to 0 for the given object key.
- * @param {!Object<string, (string|number|boolean|Array|Object|null)>} obj
- * @param {?string} name
- */
-function incOrDef(obj, name) {
-  if (!name) {
-    return;
-  }
-
-  if (!obj[name]) {
-    obj[name] = 1;
-  } else {
-    obj[name]++;
-  }
-}
-
-/**
  * Performance holds the mechanism to call `tick` to stamp out important
  * events in the lifecycle of the AMP runtime. It can hold a small amount
  * of tick events to forward to the external `tick` function when it is set.
