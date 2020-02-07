@@ -231,9 +231,17 @@ class Strings {
   static bool StartsWith(std::string_view s, std::string_view prefix);
   static bool EndsWith(std::string_view s, std::string_view suffix);
 
-  // Splits a string at delimiter and returns the columns.
+  // Splits a string at delimiter character and returns the columns.
   static std::vector<std::string> SplitStringAt(
       std::string_view s, char delimiter);
+
+  // Determines if a character at current position is a whitespace char.
+  // Returns the number of bytes from current character that are part of the
+  // whitespace. For multichar whitespace like ideographic space \u3000 it
+  // returns 3 as ideographic space has 3 codepoints.
+  //
+  // Returns 0, if the character at current position is not a whitespace.
+  static int IsWhiteSpaceChar(std::string_view s, int position = 0);
 
  private:
   // No instance of this class.
