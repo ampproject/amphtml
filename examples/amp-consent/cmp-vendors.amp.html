@@ -95,6 +95,7 @@
           <option>[Select a vendor]</option>
           <!-- This should be in alphabetical order. _ping_ should be the first -->
           <option>_ping_</option>
+          <option>appconsent</option>
           <option>didomi</option>
           <option>sirdata</option>
           <option>Marfeel</option>
@@ -137,6 +138,23 @@
         </div>
       </amp-consent>
       <!-- End _ping_ example -->
+
+      <!-- appconsent example -->
+      <amp-consent id='ABC' layout='nodisplay' type='appconsent'>
+        <script type="application/json">
+          {
+            "postPromptUI": "postPromptUI",
+            "clientConfig": {
+              "id": "1/10/v5eCA1JV4"
+            }
+          }
+        </script>
+        <div id="postPromptUI">
+          Post Prompt UI
+          <button on="tap:ABC.prompt(consent=appconsent)" role="button">Manage</button>
+        </div>
+      </amp-consent>
+      <!-- End appconsent example -->
 
       <!-- didomi example -->
       <amp-consent id='didomi' layout='nodisplay' type='didomi'>
