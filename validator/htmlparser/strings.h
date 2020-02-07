@@ -57,8 +57,7 @@ class Strings {
     '\'',
     '<',
     '>',
-    '"',
-    '\r'};
+    '"'};
 
   inline static const std::string kNullChar = {'\0'};
 

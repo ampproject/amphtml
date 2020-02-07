@@ -307,6 +307,10 @@ TEST(StringsTest, EscapeUnescapeTest) {
   std::string unescaped("amal<tas>&as");
   EXPECT_EQ(htmlparser::Strings::EscapeString(unescaped),
       "amal&lt;tas&gt;&amp;as");
+
+  std::string unescapedquotes("hello\"world\"");
+  EXPECT_EQ(htmlparser::Strings::EscapeString(unescapedquotes),
+            "hello&#34;world&#34;");
 };
 
 TEST(StringsTest, EncodingTest) {
