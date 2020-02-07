@@ -422,6 +422,7 @@ export class NextPageService {
    * ready to become visible soon
    * @param {number} index index of the page to start at
    * @param {number=} pausePageCountForTesting
+   * @return {!Promise}
    * @private
    */
   resumePausedPages_(index, pausePageCountForTesting) {
@@ -441,7 +442,7 @@ export class NextPageService {
       )
       .filter(page => page.isPaused());
 
-    nearViewportPages.forEach(page => page.resume());
+    return Promise.all(nearViewportPages.map(page => page.resume()));
   }
 
   /**
