@@ -325,4 +325,12 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/24929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
   },
+  {
+    id: 'amp-trinity-tts-player',
+    name: 'Trinity Audio Player component',
+    spec:
+      'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+      'amp-trinity-tts-player/amp-trinity-tts-player.md',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXYYY',
+  },
 ];

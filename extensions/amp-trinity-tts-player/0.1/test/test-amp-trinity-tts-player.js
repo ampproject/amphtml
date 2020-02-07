@@ -15,24 +15,42 @@
  */
 
 import '../amp-trinity-tts-player';
+import {toggleExperiment} from '../../../../src/experiments';
 
-describes.realWin('amp-trinity-tts-player', {
-  amp: {
-    extensions: ['amp-trinity-tts-player'],
+describes.realWin(
+  'amp-trinity-tts-player',
+  {
+    amp: {
+      extensions: ['amp-trinity-tts-player'],
+    },
   },
-}, env => {
+  env => {
+    let win;
+    let element;
 
-  let win;
-  let element;
+    async function renderPlayer() {
+      await element.build();
+      element.layoutCallback();
+    }
 
-  beforeEach(() => {
-    win = env.win;
-    element = win.document.createElement('amp-trinity-tts-player');
-    win.document.body.appendChild(element);
-  });
+    beforeEach(() => {
+      win = env.win;
 
-  it('should have hello world when built', () => {
-    element.build();
-    expect(element.querySelector('div').textContent).to.equal('hello world');
-  });
-});
+      toggleExperiment(win, 'amp-trinity-tts-player', true);
+
+      element = win.document.createElement('amp-trinity-tts-player');
+      element.setAttribute('height', '75');
+      element.setAttribute('campaignId', '200');
+
+      win.document.body.appendChild(element);
+    });
+
+    it('should render iframe', async () => {
+      await renderPlayer();
+
+      expect(element.querySelector('iframe').src).to.equal(
+        'https://trinitymedia.ai/player/trinity-amp'
+      );
+    });
+  }
+);

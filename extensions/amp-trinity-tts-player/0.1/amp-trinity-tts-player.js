@@ -15,10 +15,11 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-trinity-tts-player';
-const URL = 'https://dev-sas.site';
+const URL = 'https://trinitymedia.ai';
 
 export class AmpTrinityTTSPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -28,33 +29,26 @@ export class AmpTrinityTTSPlayer extends AMP.BaseElement {
     /** @private {string} */
     this.campaignId_ = '';
 
-    /** @private {string} */
-    this.selector_ = '';
+    this.isExperimentOn_ = isExperimentOn(this.win, 'amp-trinity-tts-player');
   }
 
   /** @override */
   buildCallback() {
+    userAssert(this.isExperimentOn_, `Experiment ${TAG} is not turned on.`);
+
     this.campaignId_ = userAssert(
       this.element.getAttribute('campaignId'),
       'campaignId attribute must be specified for <%s>',
-      TAG
-    );
-
-    this.selector_ = userAssert(
-      this.element.getAttribute('selector'),
-      'selector attribute must be specified for <%s>',
       TAG
     );
   }
 
   /** @override */
   layoutCallback() {
+    userAssert(this.isExperimentOn_, `Experiment ${TAG} is not turned on.`);
+
     return new Promise(resolve => {
       this.element.setAttribute('layout', 'fixed-height');
-
-      const nodes = this.getWin().document.querySelectorAll(this.selector_);
-
-      const resultReadingText = Array.from(nodes).map(node => node.outerHTML);
 
       const iframe = this.getWin().document.createElement('iframe');
       iframe.setAttribute('hidden', true);
@@ -71,15 +65,16 @@ export class AmpTrinityTTSPlayer extends AMP.BaseElement {
           {
             type: 'init',
             data: {
-              text: resultReadingText,
+              text: this.getWin().document.body.innerHTML,
               campaignId: this.campaignId_,
+              pageURL: this.getWin().location.href,
             },
           },
           '*'
         );
       });
 
-      const src = `${URL}/player/tts-amp-iframe`;
+      const src = `${URL}/player/trinity-amp`;
 
       iframe.setAttribute('frameborder', '0');
       iframe.setAttribute('allowfullscreen', 'true');
@@ -93,7 +88,6 @@ export class AmpTrinityTTSPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.getWin().document.createElement('amp-img');
-    // this.propagateAttributes(['aria-label'], placeholder);
     placeholder.setAttribute('src', `${URL}/player/img/loader.svg`);
     placeholder.setAttribute('height', '75');
     placeholder.setAttribute('layout', 'fixed-height');

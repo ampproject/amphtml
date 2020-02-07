@@ -4,16 +4,8 @@ formats:
   - websites
   - email
 teaser:
-  text: Fill this in with teaser text to improve SEO.
+  text: Displays a cloud-hosted TTS Trinity Audio Player
 ---
-
-<!--
-  All documentation starts with frontmatter. Front matter organizes documentation on amp.dev
-  and improves SEO.
-  * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
-  * List applicable format(s): websites, ads, stories, email
-  * Remove this comment!
--->
 
 <!--
 Copyright 2020 The AMP HTML Authors. All Rights Reserved.
@@ -31,16 +23,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-trinity-tts-player`
+# amp-trinity-tts-player
 
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
+    <td>Displays a cloud-hosted TTS <a href="https://trinityaudio.ai/" target="_blank">Trinity Audio Player</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -48,135 +36,37 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
+    <td>fixed-height</td>
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-trinity-tts-player/">Annotated code example for amp-trinity-tts-player</a></td>
   </tr>
 </table>
 
-<!--
-  If the component is relevant for more than one format and operates differently between these
-  formats, include and filter multiple content blocks and code samples.
--->
 
 ## Usage
 
-One to three paragraph explaining the component usage. List important functionality. Explain why developers care about it.
-
-[filter formats=“websites”]
-
-Below is an example for websites.
-
-[example preview="inline" playground="true" imports="amp-trinity-tts-player"]
+Player height should be set to `75`, for desktop or mobile.
+`campaignId` is required.
 
 ```html
-<amp-trinity-tts-player required-attribute>
-  I am a hello world inline executable code sample for websites!
+<amp-trinity-tts-player
+    height="75"
+    campaignId="XYZ"
+>
 </amp-trinity-tts-player>
 ```
-
-[/example][/filter]
-
-<!--
-  * [Read more about filtering sections](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#filtering-sections)
-  * [Read more about executable code samples](https://amp.dev/documentation/guides-and-tutorials/contribute/contribute-documentation/formatting/?format=websites#preview-code-samples)
- -->
-
-[filter formats=“ads”]
-
-Below is an example for ads.
-
-[example preview=“inline” playground=“true” imports="amp-trinity-tts-player"]
-
-```html
-<amp-trinity-tts-player required-attribute>
-  I am a hello world inline executable code sample for ads!
-</amp-trinity-tts-player>
-```
-
-[/example][/filter]
-
-### Behavior users should be aware of (optional)
-
-What to do if they want behavior. How to work around it.
-
-```html
-<amp-trinity-tts-player required-attribute>
-  Code sample of behavior or behavior workaround.
-</amp-trinity-tts-player>
-```
-
-### Behavior restrictions
-
-What is allowed, what isn't.
 
 ## Attributes
 
-### `attribute-name`
+<table>
+  <tr>
+    <td width="40%"><strong>campaignId</strong></td>
+    <td>Campaign ID. The only required parameter for component. (<strong>Required</strong>)</td>
+  </tr>
+</table>
 
-Description of attribute. Use cases for this attribute.
-
-- `attribute-value-option-one` (default): `attribute-option-one-value` does this to `amp-trinity-tts-player`.
-- `attribute-value-option-two`: `attribute-option-two-value` does this to `amp-trinity-tts-player`.
-
-### `optional-attribute-name` (optional)
-
-Here, I write what `optional-attribute-name` will do to `amp-trinity-tts-player`.
-
-## Actions (optional)
-
-### `action-name`
-
-Description of action. Use cases of `action-name`. Include all the nuances, such as: `amp-trinity-tts-player` needs to be identified with an `id` to work.
-
-## Events (optional)
-
-### `event-name`
-
-Description of event. Use cases of event-name. Include all the nuances, such as: `amp-trinity-tts-player` needs to be identified with an `id` to work.
-
-[example preview=”top-frame” playground=”true”]
-
-```html
-<head>
-  <script
-    custom-element="amp-trinity-tts-player"
-    async
-    src="https://cdn.ampproject.org/v0/amp-trinity-tts-player-latest.js"
-  ></script>
-</head>
-<body>
-  <amp-trinity-tts-player
-    required-attribute
-    on="event-name: my-button.show"
-  >
-    Hello World!
-  </amp-trinity-tts-player>
-  <button id="my-button" hidden>
-    Here I am!
-  </button>
-</body>
-```
-
-[/example]
-
-## Styling (optional)
-
-Explain how to style the element.
-
-## Analytics (optional)
-
-Explain analytics.
-
-```html
-"configuration": {}
-```
-
-## Accessibility (optional)
-
-Accessibility information related to `amp-trinity-tts-player`.
 
 ## Validation
 
