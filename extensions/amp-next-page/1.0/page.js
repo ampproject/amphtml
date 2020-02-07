@@ -265,7 +265,7 @@ export class Page {
         this.container_ = container;
         // TODO(wassgha): To further optimize, this should ideally
         // be parsed from the service worker instead of stored in memory
-        this.attach_();
+        return this.attach_();
       })
       .catch(() => {
         this.state_ = PageState.FAILED;
@@ -276,23 +276,26 @@ export class Page {
 
   /**
    * Inserts the fetched (or cached) HTML as the document's content
+   * @return {!Promise}
    */
   attach_() {
-    const shadowDoc = this.manager_.attachDocumentToPage(
-      this /** page */,
-      /** @type {!Document} */ (devAssert(this.content_)),
-      this.isPaused() /** force */
-    );
-
-    if (shadowDoc) {
-      this.shadowDoc_ = shadowDoc;
-      if (!this.isPaused()) {
-        this.manager_.setLastFetchedPage(this);
-      }
-      this.state_ = PageState.INSERTED;
-    } else {
-      this.state_ = PageState.FAILED;
-    }
+    return this.manager_
+      .attachDocumentToPage(
+        this /** page */,
+        /** @type {!Document} */ (devAssert(this.content_)),
+        this.isPaused() /** force */
+      )
+      .then(shadowDoc => {
+        if (shadowDoc) {
+          this.shadowDoc_ = shadowDoc;
+          if (!this.isPaused()) {
+            this.manager_.setLastFetchedPage(this);
+          }
+          this.state_ = PageState.INSERTED;
+        } else {
+          this.state_ = PageState.FAILED;
+        }
+      });
   }
 }
 

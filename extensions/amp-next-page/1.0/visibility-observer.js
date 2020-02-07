@@ -191,7 +191,7 @@ export default class VisibilityObserver {
     /** @private {!ScrollDirection} */
     this.scrollDirection_ = ScrollDirection.DOWN;
 
-    /** @private {!ScrollDirection} */
+    /** @private {?ScrollDirection} */
     this.lastScrollDirection_ = null;
 
     /**

@@ -234,7 +234,7 @@ export class NextPageService {
         scroll,
         height = 0;
       this.mutator_.measureMutateElement(
-        this.host_,
+        this.getHost_(),
         () => {
           // Measure the position of the host page (edge case)
           vh = this.viewport_.getHeight();
@@ -473,7 +473,7 @@ export class NextPageService {
 
   /**
    * Creates the initial (host) page based on the window's metadata
-   * @return {!Page}
+   * @return {!HostPage}
    */
   createHostPage() {
     const doc = this.win_.document;
@@ -491,7 +491,7 @@ export class NextPageService {
       )
     );
 
-    const hostPage = new HostPage(
+    const hostPage = /** @type {HostPage} */ (new HostPage(
       this,
       {
         url,
@@ -502,7 +502,7 @@ export class NextPageService {
       VisibilityState.VISIBLE /** initVisibility */,
       doc /** doc */,
       hostPageContents
-    );
+    ));
 
     // Set-up transitions
     if (this.transition_ === Transition.FADE_IN_SCROLL) {
