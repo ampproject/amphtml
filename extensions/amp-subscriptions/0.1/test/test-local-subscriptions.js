@@ -96,6 +96,17 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
 
   it('initializeListeners_ should listen to clicks on rootNode', () => {
     const domStub = env.sandbox.stub(
+      localSubscriptionPlatform.rootNode_,
+      'addEventListener'
+    );
+
+    localSubscriptionPlatform.initializeListeners_();
+    expect(domStub).calledOnce;
+    expect(domStub.getCall(0).args[0]).to.be.equals('click');
+  });
+
+  it('initializeListeners_ should listen to clicks on rootNode body', () => {
+    const domStub = env.sandbox.stub(
       localSubscriptionPlatform.rootNode_.body,
       'addEventListener'
     );
