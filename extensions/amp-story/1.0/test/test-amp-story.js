@@ -352,7 +352,7 @@ describes.realWin(
 
       await story.layoutCallback();
       expect(replaceStateStub).to.have.been.calledWith(
-        {ampStoryPageId: firstPageId},
+        {ampStoryNavigationPath: [firstPageId]},
         ''
       );
     });
