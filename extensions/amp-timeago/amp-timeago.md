@@ -46,7 +46,7 @@ limitations under the License.
 
 [TOC]
 
-## Usage 
+## Usage
 
 Use the amp-timago component to count up to, or away from, a specified date and time.
 
@@ -80,10 +80,9 @@ The required `datetime` attribute sets the date and time. The value must be an [
 - Express time in UTC (Coordinated Universal Time): `2017-03-10T01:00:00Z`
 - Express in local time with a time zone offset: `2017-03-09T20:00:00-05:00`
 
-
 ### `locale` (optional)
 
-The local default is `en`. Add the `locale` attribute and specify one of the following values to chance the local. 
+The local default is `en`. Add the `locale` attribute and specify one of the following values to chance the local.
 
 - `ar` (Arabic)
 - `be` (Belarusian)
@@ -125,7 +124,7 @@ The local default is `en`. Add the `locale` attribute and specify one of the fol
 
 ### `cutoff`
 
-Add the `cutoff` attribute to display the date specified in the `datatime` attribute after passing the specified date in seconds. 
+Add the `cutoff` attribute to display the date specified in the `datatime` attribute after passing the specified date in seconds.
 
 ### Common attributes
 
