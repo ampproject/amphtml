@@ -235,7 +235,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     ).callsFake((name, id) => {
       return `${name}-${id}`;
     });
-    win.location = 'https://example.com/?a=123&b=567';
+    win.location = 'https://example.test/?a=123&b=567';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -270,7 +270,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
   });
 
   it('should write cookie under eTLD+1 domain with right exp.', () => {
-    win.location = 'https://www.example.com/?a=123&b=567';
+    win.location = 'https://www.example.test/?a=123&b=567';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -284,14 +284,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=123; path=/; domain=example.com; ' +
+        'aCookie=123; path=/; domain=example.test; ' +
           'expires=Tue, 01 Jan 2019 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with custom expiration (number value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -306,14 +306,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.com; ' +
+        'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 08 Jan 2018 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with custom expiration (string value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -328,14 +328,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.com; ' +
+        'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 08 Jan 2018 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with custom expiration (decimal value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -351,14 +351,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
 
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.com; ' +
+        'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 08 Jan 2018 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with custom expiration (zero value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -373,14 +373,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.com; ' +
+        'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 01 Jan 2018 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with custom expiration (negative value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -395,14 +395,14 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     );
     return cookieWriter.write().then(() => {
       expect(win.document.lastSetCookieRaw).to.equal(
-        'aCookie=testValue; path=/; domain=example.com; ' +
+        'aCookie=testValue; path=/; domain=example.test; ' +
           'expires=Mon, 25 Dec 2017 08:00:00 GMT'
       );
     });
   });
 
   it('should write cookie with default expiration (invalid string value)', () => {
-    win.location = 'https://www.example.com/';
+    win.location = 'https://www.example.test/';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -418,7 +418,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
     return allowConsoleError(() => {
       return cookieWriter.write().then(() => {
         expect(win.document.lastSetCookieRaw).to.equal(
-          'aCookie=testValue; path=/; domain=example.com; ' +
+          'aCookie=testValue; path=/; domain=example.test; ' +
             'expires=Tue, 01 Jan 2019 08:00:00 GMT'
         );
       });
@@ -426,7 +426,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
   });
 
   it('should not write empty cookie', () => {
-    win.location = 'https://www.example.com/?a=123&b=567';
+    win.location = 'https://www.example.test/?a=123&b=567';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,
@@ -445,7 +445,7 @@ describes.fakeWin('amp-analytics.cookie-writer value', {amp: true}, env => {
   });
 
   it('should not write cookie if macro is mal-formatted', () => {
-    win.location = 'https://www.example.com/?a=123&b=567';
+    win.location = 'https://www.example.test/?a=123&b=567';
     const cookieWriter = new CookieWriter(
       win,
       win.document.body,

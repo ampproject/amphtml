@@ -108,18 +108,18 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
 
   describe('#getCalloutParam_', () => {
     it('should convert url to callout param when parseable', () => {
-      const url = 'https://www.example.com/endpoint.php?unincluded';
+      const url = 'https://www.example.test/endpoint.php?unincluded';
       const ard = getCalloutParam_(url);
-      expect(ard).to.equal('www.example.com/endpoint.php');
+      expect(ard).to.equal('www.example.test/endpoint.php');
     });
 
     it('should convert & trunc url when parseable', () => {
       const url =
-        'https://www.example.com/thisIsTooMany' +
+        'https://www.example.test/thisIsTooMany' +
         'Characters1234567891011121314.php';
       const ard = getCalloutParam_(url);
       expect(ard).to.equal(
-        'www.example.com/thisIsTooManyCharacters12345678910'
+        'www.example.test/thisIsTooManyCharacters1234567891'
       );
     });
   });
@@ -976,7 +976,7 @@ describes.realWin('real-time-config-manager', {amp: true}, env => {
       imageStub = env.sandbox.stub(env.win, 'Image').returns(imageMock);
 
       errorType = RTC_ERROR_ENUM.TIMEOUT;
-      errorReportingUrl = 'https://www.example.com?e=ERROR_TYPE&h=HREF';
+      errorReportingUrl = 'https://www.example.test?e=ERROR_TYPE&h=HREF';
       const whitelist = {ERROR_TYPE: true, HREF: true};
       const macros = {
         ERROR_TYPE: errorType,

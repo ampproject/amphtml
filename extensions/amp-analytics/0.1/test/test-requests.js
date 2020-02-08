@@ -65,33 +65,33 @@ describes.realWin('Requests', {amp: 1}, env => {
       });
 
       it('should prepend request origin', function*() {
-        const r = {'baseUrl': '/r1', 'origin': 'http://example.com'};
+        const r = {'baseUrl': '/r1', 'origin': 'http://example.test'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
 
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
-        expect(spy).to.be.calledWith('http://example.com/r1');
+        expect(spy).to.be.calledWith('http://example.test/r1');
       });
 
       it('handle trailing slash in request origin', function*() {
-        const r = {'baseUrl': '/r1', 'origin': 'http://example.com/'};
+        const r = {'baseUrl': '/r1', 'origin': 'http://example.test/'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
 
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
-        expect(spy).to.be.calledWith('http://example.com/r1');
+        expect(spy).to.be.calledWith('http://example.test/r1');
       });
 
       it('handle trailing path in request origin', function*() {
-        const r = {'baseUrl': '/r1', 'origin': 'http://example.com/test'};
+        const r = {'baseUrl': '/r1', 'origin': 'http://example.test/test'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
 
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
-        expect(spy).to.be.calledWith('http://example.com/r1');
+        expect(spy).to.be.calledWith('http://example.test/r1');
       });
 
       it('handle empty requestOrigin', function*() {
@@ -117,20 +117,20 @@ describes.realWin('Requests', {amp: 1}, env => {
       it('handle baseUrl with no leading slash', function*() {
         const r = {
           'baseUrl': 'r1',
-          'origin': 'https://requestorigin.com',
+          'origin': 'https://requestorigin.test',
         };
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
 
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
-        expect(spy).to.be.calledWith('https://requestorigin.comr1');
+        expect(spy).to.be.calledWith('https://requestorigin.testr1');
       });
 
       it('prepend request origin to absolute baseUrl', function*() {
         const r = {
-          'baseUrl': 'https://baseurl.com',
-          'origin': 'https://requestorigin.com',
+          'baseUrl': 'https://baseurl.test',
+          'origin': 'https://requestorigin.test',
         };
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({});
@@ -138,7 +138,7 @@ describes.realWin('Requests', {amp: 1}, env => {
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
         expect(spy).to.be.calledWith(
-          'https://requestorigin.comhttps://baseurl.com'
+          'https://requestorigin.testhttps://baseurl.test'
         );
       });
 
@@ -161,12 +161,12 @@ describes.realWin('Requests', {amp: 1}, env => {
         const r = {'baseUrl': '/r2', 'origin': '${documentReferrer}'};
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({
-          'documentReferrer': 'http://example.com',
+          'documentReferrer': 'http://example.test',
         });
 
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
-        expect(spy).to.be.calledWith('http://example.com/r2');
+        expect(spy).to.be.calledWith('http://example.test/r2');
       });
 
       it('should expand nested request origin', function*() {
@@ -174,12 +174,12 @@ describes.realWin('Requests', {amp: 1}, env => {
         const handler = createRequestHandler(r, spy);
         const expansionOptions = new ExpansionOptions({
           'a': '${b}',
-          'b': 'http://example.com',
+          'b': 'http://example.test',
         });
 
         handler.send({}, {}, expansionOptions, {});
         yield macroTask();
-        expect(spy).to.be.calledWith('http://example.com/r3');
+        expect(spy).to.be.calledWith('http://example.test/r3');
       });
     });
 
