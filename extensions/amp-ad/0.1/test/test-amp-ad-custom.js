@@ -85,14 +85,14 @@ describes.realWin('Amp custom ad', {amp: true}, env => {
     }));
 
     // Single ad with no slot
-    const url1 = 'example.com/ad';
+    const url1 = 'example.test/ad';
     const element1 = getCustomAd(doc, url1);
     const ad1 = new AmpAdCustom(element1);
     ad1.buildCallback();
     ad1.layoutCallback();
 
     // Single ad with no slot
-    const url2 = 'example.com/ad';
+    const url2 = 'example.test/ad';
     const element2 = getCustomAd(doc, url2);
     const ad2 = new AmpAdCustom(element2);
     ad2.buildCallback();

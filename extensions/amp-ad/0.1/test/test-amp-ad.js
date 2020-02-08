@@ -143,7 +143,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
       it('falls back to Delayed Fetch if remote.html is used', () => {
         const meta = doc.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/remote.html');
+        meta.setAttribute('content', 'https://example.test/remote.html');
         doc.head.appendChild(meta);
         a4aRegistry['zort'] = (win, element, useRemoteHtml) => {
           return !useRemoteHtml;
@@ -182,7 +182,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
       it('uses Fast Fetch if remote.html and RTC are used', () => {
         const meta = doc.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/remote.html');
+        meta.setAttribute('content', 'https://example.test/remote.html');
         doc.head.appendChild(meta);
         a4aRegistry['zort'] = function() {
           return true;
@@ -211,7 +211,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
       it('uses Fast Fetch if remote.html is used but disabled', () => {
         const meta = doc.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/remote.html');
+        meta.setAttribute('content', 'https://example.test/remote.html');
         doc.head.appendChild(meta);
         adConfig['zort'] = {remoteHTMLDisabled: true};
         a4aRegistry['zort'] = function() {
