@@ -1886,7 +1886,7 @@ type CdataSpec struct {
 	MaxBytes *int32 `protobuf:"varint,1,opt,name=max_bytes,json=maxBytes,def=-2" json:"max_bytes,omitempty"`
 	// If false, bytes inside URLs are not included in the byte calculation for
 	// max_bytes. This is used for handling signed exchange transformations which
-	// can potentially take the number of bytes over the 50,000 byte limit due
+	// can potentially take the number of bytes over the 75,000 byte limit due
 	// to rewriting URLs to point at an AMP Cache.
 	UrlBytesIncluded *bool `protobuf:"varint,9,opt,name=url_bytes_included,json=urlBytesIncluded,def=1" json:"url_bytes_included,omitempty"`
 	// If provided, a URL which linking to a section / sentence in the
