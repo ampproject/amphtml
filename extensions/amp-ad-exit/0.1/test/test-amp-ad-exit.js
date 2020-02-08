@@ -175,6 +175,23 @@ describes.realWin(
       win.document.body.appendChild(adDiv);
     }
 
+    function pointTo(target) {
+      element.implementation_.executeAction({
+        method: 'setVariable',
+        args: {name: 'indirect', target},
+        satisfiesTrust: () => true,
+      });
+    }
+
+    function exitIndirect() {
+      element.implementation_.executeAction({
+        method: 'exit',
+        args: {variable: 'indirect', default: 'simple'},
+        event: makeClickEvent(1001),
+        satisfiesTrust: () => true,
+      });
+    }
+
     beforeEach(() => {
       clock = env.sandbox.useFakeTimers();
       win = env.win;
@@ -755,6 +772,146 @@ describes.realWin(
       setParentWindow(adFrame.contentWindow, frame.contentWindow);
       expect(new AmpAdExit(ampAdExitElement).getAmpAdResourceId_()).to.equal(
         '12345'
+      );
+    });
+
+    it('should exit to the default target if varible target is never set', () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      exitIndirect();
+      expect(open).to.have.been.calledOnce;
+      expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.simple.finalUrl,
+        '_blank'
+      );
+    });
+
+    it('should cause error when variable target is never set and default value is not provided', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {
+              variable: 'indirect',
+            },
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when variable target was pointed to an invalid target', () => {
+      try {
+        allowConsoleError(() => {
+          pointTo('not-a-real-target');
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when exiting to an invalid variable target', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {variable: 'not-a-real-target', default: 'not-a-real-target'},
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when neither "target" nor "variable" is provided in arguments', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {},
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should cause error when both "target" and "variable" are provided in arguments', () => {
+      try {
+        allowConsoleError(() => {
+          element.implementation_.executeAction({
+            method: 'exit',
+            args: {
+              target: 'customVars',
+              variable: 'indirect',
+              default: 'simple',
+            },
+            event: makeClickEvent(1001),
+            satisfiesTrust: () => true,
+          });
+        });
+      } catch (expected) {
+        return;
+      }
+      expect.fail();
+    });
+
+    it('should exit to the pointed-to target and work with custom URL variables', () => {
+      const open = env.sandbox.stub(win, 'open').callsFake(() => {
+        return {name: 'fakeWin'};
+      });
+      if (!win.navigator) {
+        win.navigator = {sendBeacon: () => false};
+      }
+      const sendBeacon = env.sandbox
+        .stub(win.navigator, 'sendBeacon')
+        .callsFake(() => true);
+
+      pointTo('clickTargetTest');
+      exitIndirect();
+      expect(open).to.have.been.calledOnce;
+      expect(open).to.have.been.calledWith(
+        EXIT_CONFIG.targets.clickTargetTest.finalUrl,
+        '_top'
+      );
+
+      pointTo('customVars');
+      element.implementation_.executeAction({
+        method: 'exit',
+        args: {
+          variable: 'indirect',
+          _foo: 'foo',
+          _bar: 'bar',
+          _numVar: 0,
+          _boolVar: false,
+        },
+        event: makeClickEvent(1001, 101, 102),
+        satisfiesTrust: () => true,
+      });
+      expect(open).to.have.been.calledTwice;
+      expect(open).to.have.been.calledWith(
+        'http://localhost:8000/vars?foo=foo',
+        '_blank'
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?bar=bar',
+        ''
+      );
+      expect(sendBeacon).to.have.been.calledWith(
+        'http://localhost:8000/tracking?numVar=0&boolVar=false',
+        ''
       );
     });
   }
