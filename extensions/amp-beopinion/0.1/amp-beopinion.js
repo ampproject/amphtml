@@ -83,7 +83,6 @@ class AmpBeOpinion extends AMP.BaseElement {
       /* opt_is3P */ true
     );
     this.element.appendChild(iframe);
-    this.iframe_ = iframe;
     return this.loadPromise(iframe);
   }
 
