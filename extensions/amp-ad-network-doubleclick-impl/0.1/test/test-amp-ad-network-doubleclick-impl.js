@@ -1778,6 +1778,7 @@ describes.realWin(
         env.sandbox.stub(AmpA4A.prototype, 'buildCallback').callsFake(() => {});
         env.sandbox.stub(impl, 'getAmpDoc').returns({
           whenFirstVisible: () => new Deferred().promise,
+          getMetaByName: () => null,
         });
       });
       afterEach(() => {
