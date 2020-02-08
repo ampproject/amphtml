@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ActionTrust} from '../../../src/action-constants';
 import {FilterType} from './filters/filter';
 import {HostServices} from '../../../src/inabox/host-services';
 import {
@@ -59,6 +60,12 @@ export class AmpAdExit extends AMP.BaseElement {
     this.targets_ = {};
 
     /**
+     * Maps variable target name to an actual target name.
+     * @private @const {!Object<string, string>}
+     */
+    this.variableTargets_ = {};
+
+    /**
      * Filters to apply to every target.
      * @private @const {!Array<!./filters/filter.Filter>}
      */
@@ -73,6 +80,11 @@ export class AmpAdExit extends AMP.BaseElement {
     this.userFilters_ = {};
 
     this.registerAction('exit', this.exit.bind(this));
+    this.registerAction(
+      'setVariable',
+      this.setVariable.bind(this),
+      ActionTrust.LOW
+    );
 
     /** @private @const {!Object<string, !Object<string, string>>} */
     this.vendorResponses_ = {};
@@ -93,8 +105,26 @@ export class AmpAdExit extends AMP.BaseElement {
   exit(invocation) {
     const {args} = invocation;
     let {event} = invocation;
-    const target = this.targets_[args['target']];
-    userAssert(target, `Exit target not found: '${args['target']}'`);
+    userAssert(
+      'variable' in args != 'target' in args,
+      `One and only one of 'target' and 'variable' must be specified`
+    );
+    let targetName;
+    if ('variable' in args) {
+      targetName = this.variableTargets_[args['variable']];
+      if (!targetName) {
+        targetName = args['default'];
+      }
+      userAssert(
+        targetName,
+        `Variable target not found, variable:'${args['variable']}', default:'${args['default']}'`
+      );
+      delete args['default'];
+    } else {
+      targetName = args['target'];
+    }
+    const target = this.targets_[targetName];
+    userAssert(target, `Exit target not found: '${targetName}'`);
     userAssert(event, 'Unexpected null event');
     event = /** @type {!../../../src/service/action-impl.ActionEventDef} */ (event);
 
@@ -135,6 +165,16 @@ export class AmpAdExit extends AMP.BaseElement {
           : '_blank';
       openWindowDialog(this.win, finalUrl, clickTarget);
     }
+  }
+
+  /**
+   * @param {!../../../src/service/action-impl.ActionInvocation} invocation
+   */
+  setVariable(invocation) {
+    const {args} = invocation;
+    const pointToTarget = this.targets_[args['target']];
+    userAssert(pointToTarget, `Exit target not found: '${args['target']}'`);
+    this.variableTargets_[args['name']] = args['target'];
   }
 
   /**
