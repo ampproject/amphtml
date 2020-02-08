@@ -33,7 +33,7 @@ function createAmpAd(win, attachToAmpdoc = false, ampdoc) {
     type: '_ping_',
     width: 300,
     height: 250,
-    src: 'https://testsrc',
+    src: 'https://src.test',
     'data-valid': 'true',
     'data-width': '6666',
   });
@@ -54,7 +54,7 @@ describes.realWin(
   {
     amp: {
       runtimeOn: false,
-      canonicalUrl: 'https://canonical.url',
+      canonicalUrl: 'https://canonical.test',
     },
     allowExternalResources: true,
   },
@@ -101,10 +101,12 @@ describes.realWin(
           expect(url).to.match(/frame(.max)?.html/);
           const data = JSON.parse(iframe.name).attributes;
           expect(data).to.have.property('type', '_ping_');
-          expect(data).to.have.property('src', 'https://testsrc');
+          expect(data).to.have.property('src', 'https://src.test');
           expect(data).to.have.property('width', 300);
           expect(data).to.have.property('height', 250);
-          expect(data._context.canonicalUrl).to.equal('https://canonical.url/');
+          expect(data._context.canonicalUrl).to.equal(
+            'https://canonical.test/'
+          );
         });
       });
 
@@ -227,7 +229,7 @@ describes.realWin(
       });
 
       it('should use custom path', () => {
-        const remoteUrl = 'https://testsrc/boot/remote.html';
+        const remoteUrl = 'https://src.test/boot/remote.html';
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', remoteUrl);
@@ -245,7 +247,7 @@ describes.realWin(
       it('should use default path if custom disabled', () => {
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://testsrc/boot/remote.html');
+        meta.setAttribute('content', 'https://src.test/boot/remote.html');
         win.document.head.appendChild(meta);
         ad3p.config.remoteHTMLDisabled = true;
         ad3p.onLayoutMeasure();
@@ -340,13 +342,13 @@ describes.realWin(
           );
           expect(preconnects[preconnects.length - 1]).to.have.property(
             'href',
-            'https://testsrc/'
+            'https://src.test/'
           );
         });
       });
 
       it('should use remote html path for preload', () => {
-        const remoteUrl = 'https://testsrc/boot/remote.html';
+        const remoteUrl = 'https://src.test/boot/remote.html';
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
         meta.setAttribute('content', remoteUrl);
@@ -365,7 +367,7 @@ describes.realWin(
       it('should not use remote html path for preload if disabled', () => {
         const meta = win.document.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://testsrc/boot/remote.html');
+        meta.setAttribute('content', 'https://src.test/boot/remote.html');
         win.document.head.appendChild(meta);
         ad3p.config.remoteHTMLDisabled = true;
         ad3p.buildCallback();
