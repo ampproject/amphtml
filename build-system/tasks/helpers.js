@@ -88,7 +88,12 @@ const UNMINIFIED_TARGETS = [
  * Note: keep this list in sync with release script. Contact @ampproject/wg-infra
  * for details.
  */
-const MINIFIED_TARGETS = ['alp.js', 'amp4ads-v0.js', 'shadow-v0.js', 'v0.js'];
+const MINIFIED_TARGETS = [
+  'alp.js',
+  'amp4ads-v0.js',
+  'shadow-v0.js',
+  'v0.js',
+].map(maybeToEsmName);
 
 /**
  * Settings for the global Babelify transform while compiling unminified code
@@ -257,6 +262,14 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   }
 }
 
+function toEsmName(name) {
+  return name.replace(/\.js$/, '.mjs');
+}
+
+function maybeToEsmName(name) {
+  return argv.esm ? toEsmName(name) : name;
+}
+
 /**
  * Minifies a given JavaScript file entry point.
  * @param {string} srcDir
@@ -268,7 +281,7 @@ function appendToCompiledFile(srcFilename, destFilePath) {
 function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const timeInfo = {};
   const entryPoint = path.join(srcDir, srcFilename);
-  const {minifiedName} = options;
+  const minifiedName = maybeToEsmName(options.minifiedName);
   return closureCompile(entryPoint, destDir, minifiedName, options, timeInfo)
     .then(function() {
       const destPath = path.join(destDir, minifiedName);
@@ -278,17 +291,20 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         internalRuntimeVersion
       );
       if (options.latestName) {
-        fs.copySync(destPath, path.join(destDir, options.latestName));
+        fs.copySync(
+          destPath,
+          path.join(destDir, maybeToEsmName(options.latestName))
+        );
       }
     })
     .then(() => {
       let name = minifiedName;
       if (options.latestName) {
-        name += ` → ${options.latestName}`;
+        name += ` → ${maybeToEsmName(options.latestName)}`;
       }
       if (options.singlePassCompilation) {
         altMainBundles.forEach(bundle => {
-          name += `, ${bundle.name}.js`;
+          name += `, ${maybeToEsmName(`${bundle.name}.js`)}`;
         });
         name += ', and all extensions';
       }
@@ -297,7 +313,7 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
     .then(() => {
       if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
         return applyAmpConfig(
-          `${destDir}/${minifiedName}`,
+          maybeToEsmName(`${destDir}/${minifiedName}`),
           /* localDev */ !!argv.fortesting
         );
       }
@@ -308,7 +324,10 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
       }
       return Promise.all(
         altMainBundles.map(({name}) =>
-          applyAmpConfig(`dist/${name}.js`, /* localDev */ !!argv.fortesting)
+          applyAmpConfig(
+            maybeToEsmName(`dist/${name}.js`),
+            /* localDev */ !!argv.fortesting
+          )
         )
       );
     });
@@ -719,6 +738,7 @@ module.exports = {
   doBuildJs,
   endBuildStep,
   hostname,
+  maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
