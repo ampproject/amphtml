@@ -24,10 +24,10 @@ const {
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
-const {compileJs, mkdirSync} = require('./helpers');
 const {endBuildStep} = require('./helpers');
 const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
+const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
 const {vendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
@@ -524,10 +524,12 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
   if (isAliased) {
-    const src = `${name}-${version}${options.minify ? '' : '.max'}.js`;
-    const dest = `${name}-${aliasBundle.aliasedVersion}${
-      options.minify ? '' : '.max'
-    }.js`;
+    const src = maybeToEsmName(
+      `${name}-${version}${options.minify ? '' : '.max'}.js`
+    );
+    const dest = maybeToEsmName(
+      `${name}-${aliasBundle.aliasedVersion}${options.minify ? '' : '.max'}.js`
+    );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
   }
