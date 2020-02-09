@@ -26,6 +26,7 @@ const {
   compileJs,
   endBuildStep,
   hostname,
+  maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
@@ -125,11 +126,11 @@ async function dist() {
   await stopNailgunServer(distNailgunPort);
 
   if (argv.esm) {
-    await Promise.all([
-      createModuleCompatibleES5Bundle('v0.js'),
-      createModuleCompatibleES5Bundle('amp4ads-v0.js'),
-      createModuleCompatibleES5Bundle('shadow-v0.js'),
-    ]);
+    await createModuleCompatibleES5Bundle('v0.mjs');
+    if (!argv.core_runtime_only) {
+      await createModuleCompatibleES5Bundle('amp4ads-v0.mjs');
+      await createModuleCompatibleES5Bundle('shadow-v0.mjs');
+    }
   }
 
   if (!argv.core_runtime_only) {
@@ -154,7 +155,7 @@ function buildExperiments(options) {
       watch: false,
       minify: options.minify || argv.minify,
       includePolyfills: true,
-      minifiedName: 'experiments.js',
+      minifiedName: maybeToEsmName('experiments.js'),
     }
   );
 }
@@ -196,7 +197,7 @@ async function buildWebPushPublisherFiles(options) {
     WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
       const tempBuildDir = `build/all/amp-web-push-${version}/`;
       const builtName = fileName + '.js';
-      const minifiedName = fileName + '.js';
+      const minifiedName = maybeToEsmName(fileName + '.js');
       const p = compileJs('./' + tempBuildDir, builtName, './' + distDir, {
         watch: options.watch,
         includePolyfills: true,
@@ -319,7 +320,7 @@ function postBuildWebPushPublisherFilesVersion() {
   WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
     const basePath = `extensions/amp-web-push/${version}/`;
     WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
-      const minifiedName = fileName + '.js';
+      const minifiedName = maybeToEsmName(fileName + '.js');
       if (!fs.existsSync(distDir + '/' + minifiedName)) {
         throw new Error(`Cannot find ${distDir}/${minifiedName}`);
       }
