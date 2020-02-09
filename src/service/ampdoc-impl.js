@@ -29,9 +29,9 @@ import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {isInAmpdocFieExperiment} from '../ampdoc-fie';
+import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
-import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -416,6 +416,33 @@ export class AmpDoc {
   getParam(name) {
     const v = this.params_[name];
     return v == null ? null : v;
+  }
+
+  /**
+   * Returns map of an ampdoc's meta name value to content value
+   * @return {!Object<string, string>}
+   */
+  getMeta() {
+    const metaMap = map();
+    if (!this.win.document || !this.win.document.head) {
+      return metaMap;
+    }
+
+    const metas = this.win.document.head.querySelectorAll('meta[name]');
+    iterateCursor(metas, meta => {
+      const content = meta.getAttribute('content');
+      const name = meta.getAttribute('name');
+      if (!name || content === null) {
+        return;
+      }
+
+      // Retain only the first meta content value for a given name, consistent
+      // with getMetaByName.
+      if (metaMap[name] === undefined) {
+        metaMap[name] = content;
+      }
+    });
+    return metaMap;
   }
 
   /**
@@ -902,6 +929,15 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   whenReady() {
     return this.readyPromise_;
+  }
+
+  /** @override */
+  getMeta() {
+    const copy = map();
+    for (const k in this.meta_) {
+      copy[k] = this.meta_[k];
+    }
+    return copy;
   }
 
   /** @override */
