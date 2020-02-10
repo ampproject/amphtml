@@ -206,6 +206,8 @@ In the following example, we display a `toolbar` if the window width is less tha
 See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-sidebar/).
 {% endcall %}
 
+[filter formats="stories"]
+
 ## Sidebar for Stories
 
 Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/).
@@ -250,6 +252,8 @@ The following example shows a simple `amp-sidebar` within an `amp-story`.
       ...
   </body>
 ```
+
+[/filter]<!-- formats="stories" -->
 
 ## Attributes
 
@@ -325,6 +329,49 @@ When using `toolbar` feature, `autoscroll` only works if the `<nav toolbar>` ele
 ```
 
 Please see [this example file](https://github.com/ampproject/amphtml/blob/master/examples/amp-sidebar-autoscroll.amp.html) for a working example code.
+
+## Building Nested Menus
+
+`<amp-sidebar>` supports drilldown (nested) menus through a child component named [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md). With `<amp-nested-menu>`, `<amp-sidebar>` can support nesting one or more layers of submenus (and transition between them) as demonstrated by the following example:
+
+[tip type="note"]
+When using `amp-nested-menu`, wrap every menu item in a `li` element to improve accessibility and keyboard support.
+[/tip]
+
+[example playground="true" preview="top-frame" imports="amp-sidebar"]
+
+```html
+<button on="tap:sidebar1">Open Sidebar</button>
+<amp-sidebar id="sidebar1" layout="nodisplay" style="width:300px">
+  <amp-nested-menu layout="fill">
+    <ul>
+      <li>
+        <h4 amp-nested-submenu-open>Open Sub-Menu</h4>
+        <div amp-nested-submenu>
+          <ul>
+            <li>
+              <h4 amp-nested-submenu-close>Go back</h4>
+            </li>
+            <li>
+              <h4 amp-nested-submenu-open>Open Another Sub-Menu</h4>
+              <div amp-nested-submenu>
+                <h4 amp-nested-submenu-close>Go back</h4>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <a href="https://amp.dev/">Link</a>
+      </li>
+    </ul>
+  </amp-nested-menu>
+</amp-sidebar>
+```
+
+[/example]
+
+See [`<amp-nested-menu>`](../../amp-nested-menu/amp-nested-menu.md) for the full documentation on nested menus along with advanced feature such as dynamic content loading.
 
 ## UX considerations
 

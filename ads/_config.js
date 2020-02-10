@@ -336,6 +336,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
   },
 
+  'byplay': {},
+
   'caajainfeed': {
     prefetch: ['https://cdn.amanad.adtdp.com/sdk/ajaamp.js'],
     preconnect: ['https://ad.amanad.adtdp.com'],
@@ -1047,6 +1049,8 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
+  'temedya': {},
+
   'torimochi': {
     renderStartImplemented: true,
   },
@@ -1087,6 +1091,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'vdoai': {
+    prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
+    renderStartImplemented: true,
+  },
+
   'videointelligence': {
     preconnect: 'https://s.vi-serve.com',
     renderStartImplemented: true,
@@ -1119,6 +1128,10 @@ const adConfig = jsonConfiguration({
     ],
   },
 
+  'whopainfeed': {
+    prefetch: 'https://widget.infeed.com.ar/widget/widget-amp.js',
+  },
+
   'widespace': {},
 
   'wisteria': {
@@ -1137,7 +1150,7 @@ const adConfig = jsonConfiguration({
   },
 
   'yahoo': {
-    prefetch: 'https://s.yimg.com/os/ampad/display.js',
+    prefetch: 'https://s.yimg.com/aaq/ampad/display.js',
     preconnect: 'https://us.adserver.yahoo.com',
   },
 

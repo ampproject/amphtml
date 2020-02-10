@@ -2391,6 +2391,86 @@ class ExtensionsContext {
   }
 }
 
+// If any script in the page uses LTS, all scripts must use LTS. This is used to
+// record when a script is seen and validate following script tags.
+/** @enum {string} */
+const ScriptReleaseVersion = {
+  UNKNOWN: 'UNKNOWN',
+  STANDARD: 'STANDARD',
+  LTS: 'LTS',
+};
+
+/**
+ * Gets the name attribute for an extension script tag.
+ * @param {!amp.htmlparser.ParsedHtmlTag} tag
+ * @return {string}
+ */
+function ExtensionScriptNameAttribute(tag) {
+  if (tag.upperName() == 'SCRIPT') {
+    for (const attribute
+             of ['custom-element', 'custom-template', 'host-service']) {
+      if (attribute in tag.attrsByKey()) {
+        return attribute;
+      }
+    }
+  }
+  return '';
+}
+
+/**
+ * Gets the extension name for an extension script tag.
+ * @param {!amp.htmlparser.ParsedHtmlTag} tag
+ * @return {string}
+ */
+function ExtensionScriptName(tag) {
+  const nameAttr = ExtensionScriptNameAttribute(tag);
+  if (nameAttr) {
+    // Extension script names are required to be in lowercase by the validator,
+    // so we don't need to lowercase them here.
+    return tag.attrsByKey()[nameAttr] || '';
+  }
+  return '';
+}
+
+/**
+ * Tests if a tag is an extension script tag.
+ * @param {!amp.htmlparser.ParsedHtmlTag} tag
+ * @return {boolean}
+ */
+function IsExtensionScript(tag) {
+  return !!ExtensionScriptNameAttribute(tag);
+}
+
+/**
+ * Tests if a tag is an async script tag.
+ * @param {!amp.htmlparser.ParsedHtmlTag} tag
+ * @return {boolean}
+ */
+function IsAsyncScriptTag(tag) {
+  return tag.upperName() == 'SCRIPT' && 'async' in tag.attrsByKey() &&
+      'src' in tag.attrsByKey();
+}
+
+/**
+ * Tests if a tag is the AMP runtime script tag.
+ * @param {!amp.htmlparser.ParsedHtmlTag} tag
+ * @return {boolean}
+ */
+function IsAmpRuntimeScript(tag) {
+  const src = tag.attrsByKey()['src'] || '';
+  return IsAsyncScriptTag(tag) && !IsExtensionScript(tag) &&
+      src.startsWith('https://cdn.ampproject.org/') && src.endsWith('/v0.js');
+}
+
+/**
+ * Tests if a URL is for the LTS version of a script.
+ * @param {string} url
+ * @return {boolean}
+ */
+function IsLtsScriptUrl(url) {
+  return url.startsWith('https://cdn.ampproject.org/lts/');
+}
+
 /**
  * The Context keeps track of the line / column that the validator is
  * in, as well as the mandatory tag specs that have already been validated.
@@ -2501,6 +2581,13 @@ class Context {
      * @private
      */
     this.extensions_ = new ExtensionsContext();
+
+    /**
+     * Flag for if the LTS runtime engine is present.
+     * @type {!ScriptReleaseVersion}
+     * @private
+     */
+    this.scriptReleaseVersion_ = ScriptReleaseVersion.UNKNOWN;
   }
 
   /** @return {!ParsedValidatorRules} */
@@ -2618,6 +2705,22 @@ class Context {
   }
 
   /**
+   * Record if this document contains a tag requesting the LTS runtime engine.
+   * @param {!amp.htmlparser.ParsedHtmlTag} parsedTag
+   * @param {!amp.validator.ValidationResult} result
+   * @private
+   */
+  recordScriptReleaseVersionFromTagResult_(parsedTag, result) {
+    if (this.getScriptReleaseVersion() === ScriptReleaseVersion.UNKNOWN &&
+        (IsExtensionScript(parsedTag) || IsAmpRuntimeScript(parsedTag))) {
+      const src = parsedTag.attrsByKey()['src'] || '';
+      this.scriptReleaseVersion_ = IsLtsScriptUrl(src) ?
+          ScriptReleaseVersion.LTS :
+          ScriptReleaseVersion.STANDARD;
+    }
+  }
+
+  /**
    * @param {!amp.validator.ValueSetProvision} provision
    * @return {string} A key for valueSetsProvided_ and valueSetsRequired_.
    * @private
@@ -2642,6 +2745,8 @@ class Context {
     this.recordAttrRequiresExtension_(encounteredTag, tagResult);
     this.updateFromTagResult_(referencePointResult);
     this.updateFromTagResult_(tagResult);
+    this.recordScriptReleaseVersionFromTagResult_(
+        encounteredTag, tagResult.validationResult);
   }
 
   /**
@@ -2880,6 +2985,11 @@ class Context {
   /** @return {!LineCol} */
   getEncounteredBodyLineCol() {
     return /** @type {!LineCol} */ (this.encounteredBodyLineCol_);
+  }
+
+  /** @return {!ScriptReleaseVersion} */
+  getScriptReleaseVersion() {
+    return this.scriptReleaseVersion_;
   }
 }
 
@@ -4240,7 +4350,7 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
     return true;
   } else if (attr.name === 'src') {
     const srcUrlRe =
-        /^https:\/\/cdn\.ampproject\.org\/v0\/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.js$/;
+        /^https:\/\/cdn\.ampproject\.org(?:\/lts)?\/v0\/(amp-[a-z0-9-]*)-([a-z0-9.]*)\.js$/;
     const reResult = srcUrlRe.exec(attr.value);
     // If the src URL matches this regex and the base name of the file matches
     // the extension, look to see if the version matches.
@@ -4267,6 +4377,38 @@ function validateAttributeInExtension(tagSpec, context, attr, result) {
     return true;
   }
   return false;
+}
+
+/**
+ * Validates that LTS is used for either all script sources or none.
+ * @param {!Object} srcAttr
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} result
+ */
+function validateScriptSrcAttr(srcAttr, tagSpec, context, result) {
+  if (context.getScriptReleaseVersion() === ScriptReleaseVersion.UNKNOWN)
+    return;
+
+  const scriptReleaseVersion = IsLtsScriptUrl(srcAttr.value) ?
+      ScriptReleaseVersion.LTS :
+      ScriptReleaseVersion.STANDARD;
+
+  if (context.getScriptReleaseVersion() != scriptReleaseVersion) {
+    const specName = tagSpec.extensionSpec !== null ?
+        tagSpec.extensionSpec.name :
+        tagSpec.specName;
+    context.addError(
+        scriptReleaseVersion == ScriptReleaseVersion.LTS ?
+            amp.validator.ValidationError.Code.LTS_SCRIPT_AFTER_NON_LTS :
+            amp.validator.ValidationError.Code.NON_LTS_SCRIPT_AFTER_LTS,
+        context.getLineCol(),
+        /*params=*/[specName],
+
+        'https://amp.dev/documentation/guides-and-tutorials/learn/spec/' +
+            'amphtml#required-markup',
+        result);
+  }
 }
 
 /**
@@ -4404,11 +4546,21 @@ function validateAttributes(
   const attrsByName = parsedTagSpec.getAttrsByName();
   for (const attr of encounteredTag.attrs()) {
     // For transformed AMP, attributes `class` and `i-amphtml-layout` are
-    // handled within validateSsrLayout.
+    // handled within validateSsrLayout for non-sizer elements.
     if (context.isTransformed() &&
+        encounteredTag.lowerName() !== 'i-amphtml-sizer' &&
         (attr.name === 'class' || attr.name === 'i-amphtml-layout')) {
       continue;
     }
+
+    // If |spec| is the runtime or an extension script, validate that LTS is
+    // either used by all pages or no pages.
+    if (attr.name == 'src' &&
+        (IsExtensionScript(encounteredTag) ||
+         IsAmpRuntimeScript(encounteredTag))) {
+      validateScriptSrcAttr(attr, spec, context, result);
+    }
+
     if (!(attr.name in attrsByName)) {
       // The HTML tag specifies type identifiers which are validated in
       // validateHtmlTag(), so we skip them here.
@@ -5065,11 +5217,14 @@ class ParsedValidatorRules {
      * @private
      */
     this.typeIdentifiers_ = Object.create(null);
-    this.typeIdentifiers_['⚡'] = 0;
+    this.typeIdentifiers_['\u26a1'] = 0;
+    this.typeIdentifiers_['\u26a1\ufe0f'] = 0;
     this.typeIdentifiers_['amp'] = 0;
-    this.typeIdentifiers_['⚡4ads'] = 0;
+    this.typeIdentifiers_['\u26a14ads'] = 0;
+    this.typeIdentifiers_['\u26a1\ufe0f4ads'] = 0;
     this.typeIdentifiers_['amp4ads'] = 0;
-    this.typeIdentifiers_['⚡4email'] = 0;
+    this.typeIdentifiers_['\u26a14email'] = 0;
+    this.typeIdentifiers_['\u26a1\ufe0f4email'] = 0;
     this.typeIdentifiers_['amp4email'] = 0;
     this.typeIdentifiers_['actions'] = 0;
     this.typeIdentifiers_['transformed'] = 0;
@@ -5300,7 +5455,8 @@ class ParsedValidatorRules {
         if (formatIdentifiers.indexOf(attr.name) !== -1) {
           // Only add the type identifier once per representation. That is, both
           // "⚡" and "amp", which represent the same type identifier.
-          const typeIdentifier = attr.name.replace('⚡', 'amp');
+          const typeIdentifier = attr.name.replace('\u26a1\ufe0f', 'amp')
+                                          .replace('\u26a1', 'amp');
           if (validationResult.typeIdentifier.indexOf(typeIdentifier) === -1) {
             validationResult.typeIdentifier.push(typeIdentifier);
             context.recordTypeIdentifier(typeIdentifier);
@@ -5366,22 +5522,26 @@ class ParsedValidatorRules {
     switch (this.htmlFormat_) {
       case 'AMP':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡', 'amp', 'transformed', 'data-ampdevmode'],
+            htmlTag.attrs(), ['\u26a1', '\u26a1\ufe0f',
+                              'amp', 'transformed', 'data-ampdevmode'],
             context, validationResult);
         break;
       case 'AMP4ADS':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡4ads', 'amp4ads', 'data-ampdevmode'], context,
+            htmlTag.attrs(), ['\u26a14ads', '\u26a1\ufe0f4ads',
+                              'amp4ads', 'data-ampdevmode'], context,
             validationResult);
         break;
       case 'AMP4EMAIL':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡4email', 'amp4email', 'data-ampdevmode'],
+            htmlTag.attrs(), ['\u26a14email', '\u26a1\ufe0f4email',
+                              'amp4email', 'data-ampdevmode'],
             context, validationResult);
         break;
       case 'ACTIONS':
         this.validateTypeIdentifiers(
-            htmlTag.attrs(), ['⚡', 'amp', 'actions', 'data-ampdevmode'],
+            htmlTag.attrs(), ['\u26a1', '\u26a1\ufe0f', 'amp',
+                              'actions', 'data-ampdevmode'],
             context,  validationResult);
         if (validationResult.typeIdentifier.indexOf('actions') === -1) {
           context.addError(
@@ -6064,7 +6224,8 @@ amp.validator.ValidationHandler =
    */
       cdata(text) {
         // Validate that JSON can be parsed.
-        if (this.context_.getTagStack().isScriptTypeJsonChild()) {
+        if (!this.context_.getTagStack().hasAncestor('TEMPLATE') &&
+            this.context_.getTagStack().isScriptTypeJsonChild()) {
           try {
             JSON.parse(text);
           } catch (e) {

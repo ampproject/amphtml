@@ -26,6 +26,7 @@ import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {getMode} from './mode';
 import {
   installAmpdocServices,
   installBuiltinElements,
@@ -91,6 +92,7 @@ if (shouldMainBootstrapRun) {
   startupChunk(self.document, function initial() {
     /** @const {!./service/ampdoc-impl.AmpDoc} */
     const ampdoc = ampdocService.getAmpDoc(self.document);
+    installPlatformService(self);
     installPerformanceService(self);
     /** @const {!./service/performance-impl.Performance} */
     const perf = Services.performanceFor(self);
@@ -99,7 +101,9 @@ if (shouldMainBootstrapRun) {
     ) {
       perf.addEnabledExperiment('no-boilerplate');
     }
-    installPlatformService(self);
+    if (getMode().esm) {
+      perf.addEnabledExperiment('esm');
+    }
     fontStylesheetTimeout(self);
     perf.tick('is');
     installStylesForDoc(

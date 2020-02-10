@@ -2453,7 +2453,7 @@ describe('Resources changeSize', () => {
       });
     });
 
-    it(
+    it.skip(
       'should change size if in viewport, but only modifying width and ' +
         'reflow is impossible',
       () => {

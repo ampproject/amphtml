@@ -24,7 +24,6 @@ import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../sr
 import {AdsenseSharedState} from './adsense-shared-state';
 import {AmpA4A} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
-import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
 import {Navigation} from '../../../src/service/navigation';
 import {
   QQID_HEADER,
@@ -214,25 +213,16 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
    */
   divertExperiments() {
     const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ (Object.assign(
-      {
-        [FORMAT_EXP]: {
-          isTrafficEligible: () =>
-            !this.responsiveState_ &&
-            Number(this.element.getAttribute('width')) > 0 &&
-            Number(this.element.getAttribute('height')) > 0,
-          branches: ['21062003', '21062004'],
-        },
-        [[FIE_CSS_CLEANUP_EXP.branch]]: {
-          isTrafficEligible: () => true,
-          branches: [
-            [FIE_CSS_CLEANUP_EXP.control],
-            [FIE_CSS_CLEANUP_EXP.experiment],
-          ],
-        },
+        !../../../src/experiments.ExperimentInfo>} */ ({
+      [FORMAT_EXP]: {
+        isTrafficEligible: () =>
+          !this.responsiveState_ &&
+          Number(this.element.getAttribute('width')) > 0 &&
+          Number(this.element.getAttribute('height')) > 0,
+        branches: ['21062003', '21062004'],
       },
-      AMPDOC_FIE_EXPERIMENT_INFO_MAP
-    ));
+      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
+    });
     const setExps = randomlySelectUnsetExperiments(this.win, experimentInfoMap);
     Object.keys(setExps).forEach(expName =>
       addExperimentIdToElement(setExps[expName], this.element)
@@ -323,6 +313,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
       'bc': global.SVGElement && global.document.createElementNS ? '1' : null,
       'ctypes': this.getCtypes_(),
       'host': this.element.getAttribute('data-ad-host'),
+      'h_ch': this.element.getAttribute('data-ad-host-channel'),
       'hl': this.element.getAttribute('data-language'),
       'to': this.element.getAttribute('data-tag-origin'),
       'pv': sharedStateParams.pv,
@@ -367,14 +358,12 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this,
         ADSENSE_BASE_URL,
         startTime,
-        Object.assign(
-          {
-            'adsid': identity.token || null,
-            'jar': identity.jar || null,
-            'pucrd': identity.pucrd || null,
-          },
-          parameters
-        ),
+        {
+          'adsid': identity.token || null,
+          'jar': identity.jar || null,
+          'pucrd': identity.pucrd || null,
+          ...parameters,
+        },
         experimentIds
       );
     });
@@ -567,7 +556,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
           event['source'] == this.iframe.contentWindow
         ) {
           this.renderStarted();
-          this.iframe.setAttribute('visible', '');
+          setStyles(this.iframe, {'visibility': ''});
           this.win.removeEventListener('message', stickyMsgListener);
         }
       };

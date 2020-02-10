@@ -1,19 +1,5 @@
 {
-  "experimentA": {
-    "name": "ANALYTICS_VENDOR_SPLIT",
-    "environment": "INABOX",
-    "command": "gulp generate-vendor-jsons && gulp dist --defineExperimentConstant=ANALYTICS_VENDOR_SPLIT",
-    "issue": "",
-    "expirationDateUTC": "2019-11-08",
-    "defineExperimentConstant": "ANALYTICS_VENDOR_SPLIT"
-  },
+  "experimentA": {},
   "experimentB": {},
-  "experimentC": {
-    "name": "Native Custom Elements V1",
-    "environment": "AMP",
-    "command": "gulp dist --defineExperimentConstant=NATIVE_CUSTOM_ELEMENTS_V1",
-    "issue": "https://github.com/ampproject/amphtml/issues/17243",
-    "expirationDateUTC": "2020-01-01",
-    "defineExperimentConstant": "NATIVE_CUSTOM_ELEMENTS_V1"
-  }
+  "experimentC": {}
 }

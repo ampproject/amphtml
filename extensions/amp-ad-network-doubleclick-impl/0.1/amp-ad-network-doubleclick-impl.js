@@ -50,7 +50,6 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -132,12 +131,12 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
 };
 
 /** @const {string} */
-const FLEXIBLE_AD_SLOTS_EXP = 'flexAdSlots';
+const ZINDEX_EXP = 'zIndexExp';
 
-/** @const @enum{string} */
-const FLEXIBLE_AD_SLOTS_BRANCHES = {
-  CONTROL: '21063173',
-  EXPERIMENT: '21063174',
+/**@const @enum{string} */
+const ZINDEX_EXP_BRANCHES = {
+  NO_ZINDEX: '21065356',
+  HOLDBACK: '21065357',
 };
 
 /**
@@ -297,14 +296,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      */
     this.shouldSandbox_ = false;
 
-    /** @private {boolean} */
-    this.sendFlexibleAdSlotParams_ = true;
-
     /**
      * Set after the ad request is built.
      * @private {?FlexibleAdSlotDataTypeDef}
      */
     this.flexibleAdSlotData_ = null;
+
+    /**
+     * If true, will add a z-index to flex ad slots upon expansion.
+     * @private {boolean}
+     */
+    this.inZIndexHoldBack_ = false;
   }
 
   /**
@@ -384,44 +386,31 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       }
     }
     const experimentInfoMap = /** @type {!Object<string,
-        !../../../src/experiments.ExperimentInfo>} */ (Object.assign(
-      {
-        // Only select into SRA experiments if SRA not already explicitly
-        // enabled and refresh is not being used by any slot.
-        [DOUBLECLICK_SRA_EXP]: {
-          isTrafficEligible: () =>
-            !forcedExperimentId &&
-            !this.win.document./*OK*/ querySelector(
-              'meta[name=amp-ad-enable-refresh], ' +
-                'amp-ad[type=doubleclick][data-enable-refresh], ' +
-                'meta[name=amp-ad-doubleclick-sra]'
-            ),
-          branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
-            key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
+        !../../../src/experiments.ExperimentInfo>} */ ({
+      [DOUBLECLICK_SRA_EXP]: {
+        isTrafficEligible: () =>
+          !forcedExperimentId &&
+          !this.win.document./*OK*/ querySelector(
+            'meta[name=amp-ad-enable-refresh], ' +
+              'amp-ad[type=doubleclick][data-enable-refresh], ' +
+              'meta[name=amp-ad-doubleclick-sra]'
           ),
-        },
-        [FLEXIBLE_AD_SLOTS_EXP]: {
-          isTrafficEligible: () => true,
-          branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
-        },
-        [[FIE_CSS_CLEANUP_EXP.branch]]: {
-          isTrafficEligible: () => true,
-          branches: [
-            [FIE_CSS_CLEANUP_EXP.control],
-            [FIE_CSS_CLEANUP_EXP.experiment],
-          ],
-        },
+        branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
+          key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
+        ),
       },
-      AMPDOC_FIE_EXPERIMENT_INFO_MAP
-    ));
+      [ZINDEX_EXP]: {
+        isTrafficEligible: () => true,
+        branches: Object.values(ZINDEX_EXP_BRANCHES),
+      },
+      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
+    });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(
       expName => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
-    if (
-      setExps[FLEXIBLE_AD_SLOTS_EXP] == FLEXIBLE_AD_SLOTS_BRANCHES.EXPERIMENT
-    ) {
-      this.sendFlexibleAdSlotParams_ = false;
+    if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
+      this.inZIndexHoldBack_ = true;
     }
   }
 
@@ -544,51 +533,45 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     let msz = null;
     let psz = null;
     let fws = null;
-    if (this.sendFlexibleAdSlotParams_) {
-      this.flexibleAdSlotData_ = getFlexibleAdSlotData(
-        this.win,
-        this.element.parentElement
-      );
-      const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
-      // If slotWidth is -1, that means its width must be determined by its
-      // parent container, and so should have the same value as parentWidth.
-      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
-      psz = `${parentWidth}x-1`;
-      fws = fwSignal ? fwSignal : '0';
-    }
-    return Object.assign(
-      {
-        'iu': this.element.getAttribute('data-slot'),
-        'co':
-          this.jsonTargeting && this.jsonTargeting['cookieOptOut'] ? '1' : null,
-        'adk': this.adKey,
-        'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
-        'output': 'html',
-        'impl': 'ifr',
-        'tfcd': tfcd == undefined ? null : tfcd,
-        'adtest': isInManualExperiment(this.element) ? 'on' : null,
-        'ifi': this.ifi_,
-        'rc': this.refreshCount_ || null,
-        'frc': Number(this.fromResumeCallback) || null,
-        'fluid': this.isFluidRequest_ ? 'height' : null,
-        'fsf': this.forceSafeframe ? '1' : null,
-        // Both msz/psz send a height of -1 because height expansion is
-        // disallowed in AMP.
-        'msz': msz,
-        'psz': psz,
-        'fws': fws,
-        'scp': serializeTargeting(
-          (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
-          (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
-            null,
-          null
-        ),
-        'spsa': this.isSinglePageStoryAd
-          ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
-          : null,
-      },
-      googleBlockParameters(this)
+    this.flexibleAdSlotData_ = getFlexibleAdSlotData(
+      this.win,
+      this.element.parentElement
     );
+    const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
+    // If slotWidth is -1, that means its width must be determined by its
+    // parent container, and so should have the same value as parentWidth.
+    msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
+    psz = `${parentWidth}x-1`;
+    fws = fwSignal ? fwSignal : '0';
+    return {
+      'iu': this.element.getAttribute('data-slot'),
+      'co':
+        this.jsonTargeting && this.jsonTargeting['cookieOptOut'] ? '1' : null,
+      'adk': this.adKey,
+      'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
+      'output': 'html',
+      'impl': 'ifr',
+      'tfcd': tfcd == undefined ? null : tfcd,
+      'adtest': isInManualExperiment(this.element) ? 'on' : null,
+      'ifi': this.ifi_,
+      'rc': this.refreshCount_ || null,
+      'frc': Number(this.fromResumeCallback) || null,
+      'fluid': this.isFluidRequest_ ? 'height' : null,
+      'fsf': this.forceSafeframe ? '1' : null,
+      'msz': msz,
+      'psz': psz,
+      'fws': fws,
+      'scp': serializeTargeting(
+        (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
+        (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
+          null,
+        null
+      ),
+      'spsa': this.isSinglePageStoryAd
+        ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
+        : null,
+      ...googleBlockParameters(this),
+    };
   }
 
   /**
@@ -764,6 +747,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     };
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
+      PAGEVIEWID_64: () =>
+        Services.documentInfoForDoc(this.element).pageViewId64,
       HREF: () => this.win.location.href,
       REFERRER: opt_timeout => this.getReferrer_(opt_timeout),
       TGT: () =>
@@ -784,6 +769,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return this.element.getAttribute(name);
         }
       },
+      ELEMENT_POS: () => this.element.getPageLayoutBox().top,
+      SCROLL_TOP: () =>
+        Services.viewportForDoc(this.getAmpDoc()).getScrollTop(),
+      PAGE_HEIGHT: () =>
+        Services.viewportForDoc(this.getAmpDoc()).getScrollHeight(),
+      BKG_STATE: () => (this.getAmpDoc().isVisible() ? 'visible' : 'hidden'),
       CANONICAL_URL: () =>
         Services.documentInfoForDoc(this.element).canonicalUrl,
     };
@@ -1291,7 +1282,9 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
     const isRtl = isRTL(this.win.document);
     const dirStr = isRtl ? 'Right' : 'Left';
-    const /** !Object<string, string> */ style = {'z-index': '11'};
+    const /** !Object<string, string> */ style = this.inZIndexHoldBack_
+        ? {'z-index': '11'}
+        : {};
     // Compute offset margins if the slot is not centered by default.
     if (parentStyle.textAlign != 'center') {
       const getMarginStr = marginNum => `${Math.round(marginNum)}px`;

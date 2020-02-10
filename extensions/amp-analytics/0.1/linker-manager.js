@@ -173,7 +173,7 @@ export class LinkerManager {
     const location = WindowInterface.getLocation(this.ampdoc_.win);
     const isProxyOrigin = this.urlService_.isProxyOrigin(location);
     linkerNames.forEach(name => {
-      const mergedConfig = Object.assign({}, defaultConfig, config[name]);
+      const mergedConfig = {...defaultConfig, ...config[name]};
 
       if (mergedConfig['enabled'] !== true) {
         user().info(
@@ -208,7 +208,7 @@ export class LinkerManager {
   expandTemplateWithUrlParams_(template, expansionOptions) {
     const bindings = this.variableService_.getMacros(this.element_);
     return this.variableService_
-      .expandTemplate(template, expansionOptions)
+      .expandTemplate(template, expansionOptions, this.element_)
       .then(expanded => {
         const urlReplacements = Services.urlReplacementsForDoc(this.element_);
         return urlReplacements.expandUrlAsync(expanded, bindings);

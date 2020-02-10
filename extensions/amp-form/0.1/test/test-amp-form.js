@@ -31,6 +31,7 @@ import {
 import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
+import {createCustomEvent} from '../../../../src/event-helper';
 import {
   createFormDataWrapper,
   isFormDataWrapper,
@@ -306,17 +307,16 @@ describes.repeated(
                 .returns(template);
 
               const ssr = env.sandbox.stub(ampForm.ssrTemplateHelper_, 'ssr');
+              const response = {
+                init: {status: 200},
+                html: '<div>much success</div>',
+                body: '{"message": "hello"}',
+              };
               ssr
                 .onFirstCall()
-                .resolves({
-                  init: {status: 200},
-                  html: '<div>much success</div>',
-                })
+                .resolves(response)
                 .onSecondCall()
-                .resolves({
-                  init: {status: 200},
-                  html: '<div>much success</div>',
-                });
+                .resolves(response);
 
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
@@ -382,17 +382,16 @@ describes.repeated(
                 .returns(template);
 
               const ssr = env.sandbox.stub(ampForm.ssrTemplateHelper_, 'ssr');
+              const response = {
+                init: {status: 404},
+                html: '<div>much error</div>',
+                body: '{"message": "error"}',
+              };
               ssr
                 .onFirstCall()
-                .resolves({
-                  init: {status: 404},
-                  html: '<div>much error</div>',
-                })
+                .resolves(response)
                 .onSecondCall()
-                .resolves({
-                  init: {status: 404},
-                  html: '<div>much error</div>',
-                });
+                .resolves(response);
 
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
@@ -855,6 +854,29 @@ describes.repeated(
 
               return submitEventPromise;
             });
+          });
+        });
+
+        it('should check validity on FORM_VALUE_CHANGE event', () => {
+          setCheckValiditySupportedForTesting(true);
+          return getAmpForm(getForm()).then(ampForm => {
+            const form = ampForm.form_;
+            const emailInput = createElement('input');
+            emailInput.setAttribute('name', 'email');
+            emailInput.setAttribute('required', '');
+            form.appendChild(emailInput);
+            env.sandbox.spy(form, 'checkValidity');
+            env.sandbox.spy(ampForm.validator_, 'onInput');
+
+            const event = createCustomEvent(
+              env.win,
+              AmpEvents.FORM_VALUE_CHANGE,
+              /* detail */ null,
+              {bubbles: true}
+            );
+            emailInput.dispatchEvent(event);
+            expect(form.checkValidity).to.be.called;
+            expect(ampForm.validator_.onInput).to.be.calledWith(event);
           });
         });
 

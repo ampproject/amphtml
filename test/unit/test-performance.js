@@ -20,6 +20,7 @@ import {Services} from '../../src/services';
 import {VisibilityState} from '../../src/visibility-state';
 import {getMode} from '../../src/mode';
 import {installPerformanceService} from '../../src/service/performance-impl';
+import {installPlatformService} from '../../src/service/platform-impl';
 import {installRuntimeServices} from '../../src/service/core-services';
 
 describes.realWin('performance', {amp: true}, env => {
@@ -27,6 +28,7 @@ describes.realWin('performance', {amp: true}, env => {
   let clock;
   let win;
   let ampdoc;
+  const timeOrigin = 100;
 
   beforeEach(() => {
     win = env.win;
@@ -34,7 +36,10 @@ describes.realWin('performance', {amp: true}, env => {
     clock = lolex.install({
       target: win,
       toFake: ['Date', 'setTimeout', 'clearTimeout'],
+      // set initial Date.now to 100, so that we can differentiate between time relative to epoch and relative to process start (value vs. delta).
+      now: timeOrigin,
     });
+    installPlatformService(env.win);
     installPerformanceService(env.win);
     perf = Services.performanceFor(env.win);
   });
@@ -103,19 +108,15 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_.length).to.equal(50);
     });
 
-    it(
-      'should add default optional relative start time on the ' +
-        'queued tick event',
-      () => {
-        clock.tick(150);
-        perf.tick('start0');
+    it('should add default absolute start time on the queued tick event', () => {
+      clock.tick(150);
+      perf.tick('start0');
 
-        expect(perf.events_[0]).to.be.jsonEqual({
-          label: 'start0',
-          value: 150,
-        });
-      }
-    );
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'start0',
+        value: timeOrigin + 150,
+      });
+    });
 
     it('should drop events in the head of the queue', () => {
       const tickTime = 100;
@@ -130,7 +131,7 @@ describes.realWin('performance', {amp: true}, env => {
       expect(perf.events_.length).to.equal(50);
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        value: tickTime,
+        value: timeOrigin + tickTime,
       });
 
       clock.tick(1);
@@ -138,11 +139,11 @@ describes.realWin('performance', {amp: true}, env => {
 
       expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start1',
-        value: tickTime,
+        value: timeOrigin + tickTime,
       });
       expect(perf.events_[49]).to.be.jsonEqual({
         label: 'start50',
-        value: tickTime + 1,
+        value: timeOrigin + tickTime + 1,
       });
     });
   });
@@ -249,13 +250,24 @@ describes.realWin('performance', {amp: true}, env => {
             expect(perf.isMessagingReady_).to.be.true;
             const msrCalls = viewerSendMessageStub.withArgs(
               'tick',
-              env.sandbox.match(arg => arg.label == 'msr')
+              env.sandbox.match(arg => arg.label === 'msr')
             );
             expect(msrCalls).to.be.calledOnce;
             expect(msrCalls.args[0][1]).to.be.jsonEqual({
               label: 'msr',
               delta: 1,
             });
+
+            const timeOriginCall = viewerSendMessageStub.withArgs(
+              'tick',
+              env.sandbox.match(arg => arg.label === 'timeOrigin')
+            );
+            expect(timeOriginCall).to.be.calledOnce;
+            expect(timeOriginCall).calledWithMatch('tick', {
+              label: 'timeOrigin',
+              delta: env.sandbox.match.number,
+            });
+
             expect(flushSpy).to.have.callCount(5);
             expect(perf.events_.length).to.equal(0);
           });
@@ -326,7 +338,7 @@ describes.realWin('performance', {amp: true}, env => {
 
         it('should calculate after visible', () => {
           perf.coreServicesAvailable();
-          firstVisibleTime = 5;
+          firstVisibleTime = timeOrigin + 5;
 
           clock.tick(10);
           perf.tickSinceVisible('test');
@@ -337,7 +349,7 @@ describes.realWin('performance', {amp: true}, env => {
 
         it('should be zero after visible but for earlier event', () => {
           perf.coreServicesAvailable();
-          firstVisibleTime = 5;
+          firstVisibleTime = timeOrigin + 5;
 
           // An earlier event, since event time (4) is less than visible time (5).
           clock.tick(4);
@@ -426,13 +438,13 @@ describes.realWin('performance', {amp: true}, env => {
               viewerSendMessageStub.withArgs('tick').getCall(0).args[1]
             ).to.be.jsonEqual({
               label: 'start0',
-              value: 0,
+              value: timeOrigin,
             });
             expect(
               viewerSendMessageStub.withArgs('tick').getCall(1).args[1]
             ).to.be.jsonEqual({
               label: 'start1',
-              value: 1,
+              value: timeOrigin + 1,
             });
             expect(
               viewerSendMessageStub.withArgs('tick').getCall(4).args[1]
@@ -467,7 +479,7 @@ describes.realWin('performance', {amp: true}, env => {
               ).args[0][1]
             ).to.be.jsonEqual({
               label: 'start0',
-              value: 100,
+              value: timeOrigin + 100,
             });
             expect(
               viewerSendMessageStub.withArgs(
@@ -648,16 +660,16 @@ describes.realWin('performance', {amp: true}, env => {
         () => {
           clock.tick(100);
           whenFirstVisibleResolve();
-          expect(tickSpy).to.have.callCount(3);
+          expect(tickSpy).to.have.callCount(4);
           return ampdoc.whenFirstVisible().then(() => {
             clock.tick(400);
-            expect(tickSpy).to.have.callCount(4);
+            expect(tickSpy).to.have.callCount(5);
             whenViewportLayoutCompleteResolve();
             return perf.whenViewportLayoutComplete_().then(() => {
-              expect(tickSpy).to.have.callCount(4);
+              expect(tickSpy).to.have.callCount(5);
               expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
               return whenFirstVisiblePromise.then(() => {
-                expect(tickSpy).to.have.callCount(5);
+                expect(tickSpy).to.have.callCount(6);
                 expect(tickSpy.withArgs('pc')).to.be.calledOnce;
                 expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
               });
@@ -748,6 +760,7 @@ describes.realWin('performance with experiment', {amp: true}, env => {
       .withArgs('csi')
       .returns('1');
     env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+    installPlatformService(win);
     installPerformanceService(win);
     perf = Services.performanceFor(win);
   });
@@ -812,6 +825,92 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     triggerCallback(entries) {
       this.callback_(entries, this);
     }
+  }
+
+  let fakeWin;
+  let windowEventListeners;
+  let performanceObserver;
+  let viewerVisibilityState;
+
+  function setupFakesForVisibilityStateManipulation() {
+    // Fake window to fake `document.visibilityState`.
+    // TODO: Consider how we can replace this with the fake window object
+    // offered in fake-dom.js. We can't immediately because
+    // document.visibilityState is a read-only property in that object.
+    fakeWin = {
+      Date: env.win.Date,
+      PerformanceObserver: env.sandbox.stub(),
+      addEventListener: env.sandbox.stub(),
+      removeEventListener: env.win.removeEventListener,
+      dispatchEvent: env.win.dispatchEvent,
+      document: {
+        addEventListener: env.sandbox.stub(),
+        hidden: false,
+        readyState: 'complete',
+        removeEventListener: env.sandbox.stub(),
+        visibilityState: 'visible',
+      },
+      location: env.win.location,
+      navigator: env.win.navigator,
+      performance: {
+        getEntriesByType: env.sandbox.stub(),
+      },
+    };
+
+    // Fake window.addEventListener to fake `visibilitychange` and
+    // `beforeunload` events.
+    windowEventListeners = {};
+    fakeWin.addEventListener.callsFake((eventType, handler) => {
+      if (!windowEventListeners[eventType]) {
+        windowEventListeners[eventType] = [];
+      }
+      windowEventListeners[eventType].push(handler);
+    });
+
+    // Fake the PerformanceObserver implementation so we can send
+    // fake PerformanceEntry objects to listeners.
+    fakeWin.PerformanceObserver.callsFake(callback => {
+      performanceObserver = new PerformanceObserverImpl(callback);
+      return performanceObserver;
+    });
+
+    // Install services on fakeWin so some behaviors can be stubbed.
+    installRuntimeServices(fakeWin);
+
+    const unresolvedPromise = new Promise(() => {});
+    const viewportSize = {width: 0, height: 0};
+    env.sandbox.stub(Services, 'ampdoc').returns({
+      hasBeenVisible: () => {},
+      onVisibilityChanged: () => {},
+      whenFirstVisible: () => unresolvedPromise,
+      getVisibilityState: () => viewerVisibilityState,
+    });
+    env.sandbox.stub(Services, 'viewerForDoc').returns({
+      isEmbedded: () => {},
+      whenMessagingReady: () => {},
+    });
+    env.sandbox.stub(Services, 'resourcesForDoc').returns({
+      getResourcesInRect: () => unresolvedPromise,
+      whenFirstPass: () => Promise.resolve(),
+    });
+    env.sandbox.stub(Services, 'viewportForDoc').returns({
+      getSize: () => viewportSize,
+    });
+  }
+
+  function getPerformance() {
+    installPerformanceService(fakeWin);
+    return Services.performanceFor(fakeWin);
+  }
+
+  function toggleVisibility(win, on) {
+    win.document.visibilityState = on ? 'visible' : 'hidden';
+    fireEvent('visibilitychange');
+  }
+
+  function fireEvent(eventName) {
+    const event = new Event(eventName);
+    (windowEventListeners[eventName] || []).forEach(cb => cb(event));
   }
 
   describe('should forward paint metrics for performance entries', () => {
@@ -911,6 +1010,67 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           delta: 15,
         }
       );
+    });
+  });
+
+  describe('should forward largest-contentful-paint metric for performance entries', () => {
+    beforeEach(() => {
+      setupFakesForVisibilityStateManipulation();
+    });
+    it('after performance service registered', () => {
+      // Fake the Performance API.
+      fakeWin.PerformanceObserver.supportedEntryTypes = [
+        'largest-contentful-paint',
+      ];
+
+      installPerformanceService(fakeWin);
+      const perf = Services.performanceFor(fakeWin);
+      perf.coreServicesAvailable();
+      viewerVisibilityState = VisibilityState.INACTIVE;
+
+      expect(perf.events_.length).to.equal(0);
+
+      // Fake a largest-contentful-paint entry specifying a loadTime,
+      // simulating an image on a different origin without a proper
+      // Timing-Allow-Origin header.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'largest-contentful-paint',
+              loadTime: 10,
+            },
+          ];
+        },
+      });
+
+      // Fake a largest-contentful-paint entry specifying a renderTime,
+      // simulating an image on the same origin or with a proper
+      // Timing-Allow-Origin header.
+      performanceObserver.triggerCallback({
+        getEntries() {
+          return [
+            {
+              entryType: 'largest-contentful-paint',
+              renderTime: 23,
+            },
+          ];
+        },
+      });
+
+      // The document has become hidden, e.g. via the user switching tabs.
+      toggleVisibility(fakeWin, false);
+
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[0]).to.be.jsonEqual({
+        label: 'lcpl',
+        delta: 10,
+      });
+
+      expect(perf.events_[1]).to.be.jsonEqual({
+        label: 'lcpr',
+        delta: 23,
+      });
     });
   });
 
@@ -1064,89 +1224,10 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
   });
 
   describe('forwards layout jank metric', () => {
-    let fakeWin;
-    let windowEventListeners;
-    let performanceObserver;
-    let viewerVisibilityState;
-
     beforeEach(() => {
-      // Fake window to fake `document.visibilityState`.
-      fakeWin = {
-        Date: env.win.Date,
-        PerformanceLayoutJank: true,
-        PerformanceObserver: env.sandbox.stub(),
-        addEventListener: env.sandbox.stub(),
-        removeEventListener: env.win.removeEventListener,
-        dispatchEvent: env.win.dispatchEvent,
-        document: {
-          addEventListener: env.sandbox.stub(),
-          hidden: false,
-          readyState: 'complete',
-          removeEventListener: env.sandbox.stub(),
-          visibilityState: 'visible',
-        },
-        location: env.win.location,
-        performance: {
-          getEntriesByType: env.sandbox.stub(),
-        },
-      };
-
-      // Fake window.addEventListener to fake `visibilitychange` and
-      // `beforeunload` events.
-      windowEventListeners = {};
-      fakeWin.addEventListener.callsFake((eventType, handler) => {
-        if (!windowEventListeners[eventType]) {
-          windowEventListeners[eventType] = [];
-        }
-        windowEventListeners[eventType].push(handler);
-      });
-
-      // Fake the PerformanceObserver implementation so we can send
-      // fake PerformanceEntry objects to listeners.
-      fakeWin.PerformanceObserver.callsFake(callback => {
-        performanceObserver = new PerformanceObserverImpl(callback);
-        return performanceObserver;
-      });
-
-      // Install services on fakeWin so some behaviors can be stubbed.
-      installRuntimeServices(fakeWin);
-
-      const unresolvedPromise = new Promise(() => {});
-      const viewportSize = {width: 0, height: 0};
-      env.sandbox.stub(Services, 'ampdoc').returns({
-        hasBeenVisible: () => {},
-        onVisibilityChanged: () => {},
-        whenFirstVisible: () => unresolvedPromise,
-        getVisibilityState: () => viewerVisibilityState,
-      });
-      env.sandbox.stub(Services, 'viewerForDoc').returns({
-        isEmbedded: () => {},
-        whenMessagingReady: () => {},
-      });
-      env.sandbox.stub(Services, 'resourcesForDoc').returns({
-        getResourcesInRect: () => unresolvedPromise,
-        whenFirstPass: () => Promise.resolve(),
-      });
-      env.sandbox.stub(Services, 'viewportForDoc').returns({
-        getSize: () => viewportSize,
-      });
+      setupFakesForVisibilityStateManipulation();
+      fakeWin.PerformanceLayoutJank = true;
     });
-
-    function getPerformance() {
-      installPerformanceService(fakeWin);
-      return Services.performanceFor(fakeWin);
-    }
-
-    function toggleVisibility(win, on) {
-      win.document.visibilityState = on ? 'visible' : 'hidden';
-      fireEvent('visibilitychange');
-    }
-
-    function fireEvent(eventName) {
-      const event = new Event(eventName);
-      (windowEventListeners[eventName] || []).forEach(cb => cb(event));
-    }
-
     it('for browsers that support the visibilitychange event', () => {
       // Specify an Android Chrome user agent, which supports the
       // visibilitychange event.
@@ -1235,72 +1316,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
   });
 
   describe('forwards cumulative layout shift metric', () => {
-    let fakeWin;
-    let windowEventListeners;
-    let performanceObserver;
-    let viewerVisibilityState;
-
     beforeEach(() => {
-      // Fake window to fake `document.visibilityState` and the
-      // `PeformanceObserver` implementation.
-      fakeWin = {
-        Date: env.win.Date,
-        PerformanceObserver: env.sandbox.stub(),
-        addEventListener: env.sandbox.stub(),
-        removeEventListener: env.win.removeEventListener,
-        dispatchEvent: env.win.dispatchEvent,
-        document: {
-          addEventListener: env.sandbox.stub(),
-          hidden: false,
-          readyState: 'complete',
-          removeEventListener: env.sandbox.stub(),
-          visibilityState: 'visible',
-        },
-        location: env.win.location,
-        performance: {
-          getEntriesByType: env.sandbox.stub(),
-        },
-      };
-
-      // Fake window.addEventListener to fake `visibilitychange` and
-      // `beforeunload` events.
-      windowEventListeners = {};
-      fakeWin.addEventListener.callsFake((eventType, handler) => {
-        if (!windowEventListeners[eventType]) {
-          windowEventListeners[eventType] = [];
-        }
-        windowEventListeners[eventType].push(handler);
-      });
-
-      // Fake the PerformanceObserver implementation so we can send
-      // fake PerformanceEntry objects to listeners.
-      fakeWin.PerformanceObserver.callsFake(callback => {
-        performanceObserver = new PerformanceObserverImpl(callback);
-        return performanceObserver;
-      });
-
-      // Install services on fakeWin so some behaviors can be stubbed.
-      installRuntimeServices(fakeWin);
-
-      const unresolvedPromise = new Promise(() => {});
-      const viewportSize = {width: 0, height: 0};
-      env.sandbox.stub(Services, 'ampdoc').returns({
-        hasBeenVisible: () => {},
-        onVisibilityChanged: () => {},
-        whenFirstVisible: () => unresolvedPromise,
-        getVisibilityState: () => viewerVisibilityState,
-      });
-      env.sandbox.stub(Services, 'viewerForDoc').returns({
-        isEmbedded: () => {},
-        whenMessagingReady: () => {},
-      });
-      env.sandbox.stub(Services, 'resourcesForDoc').returns({
-        getResourcesInRect: () => unresolvedPromise,
-        whenFirstPass: () => Promise.resolve(),
-      });
-      env.sandbox.stub(Services, 'viewportForDoc').returns({
-        getSize: () => viewportSize,
-      });
+      setupFakesForVisibilityStateManipulation();
     });
 
     function getPerformance() {
