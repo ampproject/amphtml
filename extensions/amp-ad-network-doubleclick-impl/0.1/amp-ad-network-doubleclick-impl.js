@@ -50,7 +50,6 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -399,13 +398,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
         branches: Object.keys(DOUBLECLICK_SRA_EXP_BRANCHES).map(
           key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
         ),
-      },
-      [[FIE_CSS_CLEANUP_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_CSS_CLEANUP_EXP.control],
-          [FIE_CSS_CLEANUP_EXP.experiment],
-        ],
       },
       [ZINDEX_EXP]: {
         isTrafficEligible: () => true,
