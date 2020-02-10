@@ -153,7 +153,7 @@ class AmpAccordion extends AMP.BaseElement {
       header.classList.add('i-amphtml-accordion-header');
       header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
-      header.setAttribute('aria-expanded', isExpanded.toString());
+      header.setAttribute('aria-expanded', String(isExpanded));
       this.setRenderSubtreeIfEnabled_(
         content,
         isExpanded ? '' : 'invisible skip-viewport-activation'
