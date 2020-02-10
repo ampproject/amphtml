@@ -898,11 +898,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     });
   }
 
-  function getPerformance() {
-    installPerformanceService(fakeWin);
-    return Services.performanceFor(fakeWin);
-  }
-
   function toggleVisibility(win, on) {
     win.document.visibilityState = on ? 'visible' : 'hidden';
     fireEvent('visibilitychange');
