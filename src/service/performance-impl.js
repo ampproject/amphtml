@@ -312,14 +312,11 @@ export class Performance {
         this.tickDelta('fcp', entry.startTime + entry.duration);
         recordedFirstContentfulPaint = true;
       } else if (
-        (entry.entryType === 'firstInput' ||
-          entry.entryType === 'first-input') &&
+        entry.entryType === 'first-input' &&
         !recordedFirstInputDelay
       ) {
         this.tickDelta('fid', entry.processingStart - entry.startTime);
         recordedFirstInputDelay = true;
-      } else if (entry.entryType === 'layoutShift') {
-        this.aggregateShiftScore_ += entry.value;
       } else if (entry.entryType === 'layout-shift') {
         // Ignore layout shift that occurs within 500ms of user input, as it is
         // likely in response to the user's action.

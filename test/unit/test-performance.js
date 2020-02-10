@@ -992,7 +992,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           return entries;
         },
       };
-      // Fake a triggering of the firstInput event.
+      // Fake a triggering of the first-input event.
       performanceObserver.triggerCallback(list);
       expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0]).to.be.jsonEqual(
@@ -1085,73 +1085,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       );
       PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
     });
-    it('created before performance service registered', () => {
-      // Pretend that the EventTiming API exists.
-      PerformanceObserverConstructorStub.supportedEntryTypes = ['firstInput'];
 
-      const entries = [
-        {
-          cancelable: true,
-          duration: 8,
-          entryType: 'firstInput',
-          name: 'mousedown',
-          processingEnd: 105,
-          processingStart: 103,
-          startTime: 100,
-        },
-      ];
-      const getEntriesByType = env.sandbox.stub();
-      getEntriesByType.withArgs('firstInput').returns(entries);
-      getEntriesByType.returns([]);
-      env.sandbox
-        .stub(env.win.performance, 'getEntriesByType')
-        .callsFake(getEntriesByType);
-
-      installPerformanceService(env.win);
-
-      const perf = Services.performanceFor(env.win);
-
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'fid',
-        delta: 3,
-      });
-    });
-
-    it('created after performance service registered', () => {
-      // Pretend that the EventTiming API exists.
-      PerformanceObserverConstructorStub.supportedEntryTypes = ['firstInput'];
-
-      installPerformanceService(env.win);
-
-      const perf = Services.performanceFor(env.win);
-
-      const entries = [
-        {
-          cancelable: true,
-          duration: 8,
-          entryType: 'firstInput',
-          name: 'mousedown',
-          processingEnd: 105,
-          processingStart: 103,
-          startTime: 100,
-        },
-      ];
-      const list = {
-        getEntries() {
-          return entries;
-        },
-      };
-      // Fake a triggering of the firstInput event.
-      performanceObserver.triggerCallback(list);
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'fid',
-        delta: 3,
-      });
-    });
-
-    it('created before performance service registered for Chrome 77', () => {
+    it('created before performance service registered for Chromium 77', () => {
       // Pretend that the EventTiming API exists.
       PerformanceObserverConstructorStub.supportedEntryTypes = ['first-input'];
 
@@ -1166,7 +1101,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
             {
               cancelable: true,
               duration: 8,
-              entryType: 'firstInput',
+              entryType: 'first-input',
               name: 'mousedown',
               processingEnd: 105,
               processingStart: 103,
