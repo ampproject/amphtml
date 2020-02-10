@@ -14,35 +14,33 @@
  * limitations under the License.
  */
 
-import {validateData} from '../3p/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function temedya(global, data) {
-  validateData(data, ['keyId']);
-
-  temedyaAds(global, data);
-}
-
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-function temedyaAds(global, data) {
-  const f = global.document.createElement('script');
-  f.setAttribute('title', data.title);
-  f.setAttribute('key-id', data.keyId);
-  f.setAttribute('site-id', data.siteId);
-  f.setAttribute('site-url', data.siteUrl);
-  f.setAttribute('type-id', data.typeId);
-  f.setAttribute('paid-item', data.paidItem);
-  f.setAttribute('organic-item', data.organicItem);
-  f.setAttribute('theme', data.theme);
-  f.onload = function() {
-    window.context.renderStart();
+  validateData(data, ['title','keyId','siteId','siteUrl','typeId','paidItem','organicItem','theme']);
+  global._temedya = global._temedya || {
+    title: data['title'],
+    keyId: data['keyId'],
+    siteId: data['siteId'],
+    siteUrl: data['siteUrl'],
+    typeId: data['typeId'],
+    paidItem: data['paidItem'],
+    organicItem: data['organicItem'],
+    theme: data['theme']
   };
-  f.src = 'https://vidyome-com.cdn.vidyome.com/vidyome/builds/widgets.js';
-  global.document.body.appendChild(f);
+  global._temedya.AMPCallbacks = {
+    renderStart: global.context.renderStart,
+    noContentAvailable: global.context.noContentAvailable,
+  };
+  // load the temedya  AMP JS file script asynchronously
+  loadScript(
+    global,
+    'https://vidyome-com.cdn.vidyome.com/vidyome/builds/temedya-amp.js',
+    () => {},
+    global.context.noContentAvailable
+  );
 }
