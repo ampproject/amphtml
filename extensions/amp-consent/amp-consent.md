@@ -289,6 +289,14 @@ AMP will check client cache and server in parallel to find the previous consent 
 
 `xssiPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's response. If the prefix is not present in the response, then this option will have no effect. `xssiPrefix` can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
+#### uiConfig
+
+`uiConfig` provides extra UI and behaviors to `<amp-consent>`. `uiConfig` is an optional JSON object that can contain the key `overlay` which is a boolean. `overlay: true` will add a light black overlay behind the consent prompt to help users focus on the prompt. Additionally, this will stop user interaction with the contents beneath the consent prompt (such as scrolling). `overlay: false` is the default.
+
+#### captions
+
+`captions` provides accessibility features for screen reader users for `<amp-consent>`. `captions` is an optional JSON an object that can contain the keys `consentPromptCaption` and `buttonActionCaption` which are both strings and will have default values 'User Consent Prompt' and 'Focus Prompt'. When an consent prompt in an iframe is loaded, the screen reader will read the `consentPromptCaption` and then the `buttonActionCaption`. The `consentPromptCaption` should act as a title for the consent prompt, while the `buttonActionCaption` should inform the user that they can interact with the iframe.
+
 ## Consent Management
 
 The `<amp-consent>` element supports customizing the consent prompt UI and post-prompt UI, which can be used to manage consent.
