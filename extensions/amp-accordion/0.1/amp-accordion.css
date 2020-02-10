@@ -32,11 +32,11 @@
 
 amp-accordion > section:not([expanded]) > :last-child[rendersubtree] {
   border: none !important;
-  display: flex !important;
   height: 0px !important;
   margin: 0px !important;
   opacity: 0 !important;
   padding: 0 !important;
+  position: absolute !important;
   top: -999999px !important;
   width: 100% !important;
 }
