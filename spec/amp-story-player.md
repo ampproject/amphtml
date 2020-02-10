@@ -93,14 +93,65 @@ The following example demonstrates a basic embed of <amp-story-player> in a non-
 
 The high-level API for the player looks like the following:
 
+[example preview="top-frame" playground="true"]
+
 ```html
-<amp-story-player style="width: 360px; height: 600px;">
-  <a href="https://www.example.com/story1.html"></a>
-  <a href="https://www.example.com/story2.html"></a>
-  <a href="https://www.example.com/story3.html"></a>
-  <a href="https://www.example.com/story4.html"></a>
-</amp-story-player>
+<head>
+  <script
+    async
+    src="https://cdn.ampproject.org/amp-story-player-v0.js"
+  ></script>
+  <link
+    href="https://cdn.ampproject.org/amp-story-player-v0.css"
+    rel="stylesheet"
+    type="text/css"
+  />
+  <style injected>
+    .story-player-iframe {
+      background-size: cover;
+      display: block;
+      position: relative;
+      height: 100%;
+      width: 100%;
+      flex: 0 0 100%;
+    }
+
+    .title {
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0),
+        rgba(0, 0, 0, 1)
+      );
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      color: #fff;
+      font-size: 40px;
+      padding: 88px 32px 32px 32px;
+      line-height: 1.25;
+      text-shadow: 3px 3px #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>This is a NON-AMP page that embeds a story below:</h1>
+  <amp-story-player style="width: 360px; height: 600px;">
+    <a
+      href="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/"
+      data-poster-portrait-src="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/img/promo3x4.jpg"
+      class="story"
+    >
+      <span class="title"
+        >A local’s guide to what to eat and do in Mexico City</span
+      >
+    </a>
+  </amp-story-player>
+</body>
 ```
+
+[/example]
 
 ### Attributes
 
