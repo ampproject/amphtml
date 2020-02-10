@@ -57,6 +57,8 @@ function isSizer(el) {
   return el.tagName == 'I-AMPHTML-SIZER';
 }
 
+const TAG = 'amp-stream-gallery';
+
 /**
  * A gallery of slides, used for things like related products or articles. The
  * main way of using this component is to specify the min and max width for
@@ -652,6 +654,7 @@ class AmpStreamGallery extends AMP.BaseElement {
     // is not aware that the user is touching the carousel.
     if (loop && Services.platformFor(this.win).isIos()) {
       user().warn(
+        TAG,
         'amp-stream-gallery does not support looping on iOS due ' +
           'to https://bugs.webkit.org/show_bug.cgi?id=191218.'
       );
@@ -777,6 +780,6 @@ class AmpStreamGallery extends AMP.BaseElement {
   }
 }
 
-AMP.extension('amp-stream-gallery', '0.1', AMP => {
-  AMP.registerElement('amp-stream-gallery', AmpStreamGallery, CSS);
+AMP.extension(TAG, '0.1', AMP => {
+  AMP.registerElement(TAG, AmpStreamGallery, CSS);
 });
