@@ -565,7 +565,6 @@ export function isAdLike(element) {
 /**
  * @param {!Element} iframe
  * @return {!Element}
- * @private
  */
 export function disableScrollingOnIframe(iframe) {
   addAttributesToElement(iframe, dict({'scrolling': 'no'}));
@@ -583,7 +582,6 @@ export function disableScrollingOnIframe(iframe) {
  * from the perspective of the current window.
  * @param {!Window} win
  * @return {boolean}
- * @private
  */
 export function canInspectWindow(win) {
   // TODO: this is not reliable.  The compiler assumes that property reads are

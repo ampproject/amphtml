@@ -130,6 +130,7 @@ const forbiddenTerms = {
       'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/prettify.js',
+      'src/purifier/noop.js',
       'validator/nodejs/index.js', // NodeJs only.
       'validator/engine/parse-css.js',
       'validator/engine/validator-in-browser.js',
@@ -307,7 +308,7 @@ const forbiddenTerms = {
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-list/0.1/amp-list.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
-      'extensions/amp-next-page/0.2/visibility-observer.js',
+      'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
       'extensions/amp-video-docking/0.1/amp-video-docking.js',
       'src/service/position-observer/position-observer-impl.js',
@@ -358,6 +359,7 @@ const forbiddenTerms = {
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
+      'src/amp-story-player.js',
     ],
   },
   '\\.sendMessage\\(': {
@@ -375,6 +377,7 @@ const forbiddenTerms = {
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'extensions/amp-viewer-integration/0.1/highlight-handler.js',
       'extensions/amp-consent/0.1/consent-ui.js',
+      'extensions/amp-story/1.0/amp-story-viewer-messaging-handler.js',
 
       // iframe-messaging-client.sendMessage
       '3p/iframe-messaging-client.js',
@@ -418,6 +421,7 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
+      'extensions/amp-story/1.0/amp-story-quiz.js',
     ],
   },
   'getBaseCid': {
@@ -1089,6 +1093,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/cookie-writer.js',
       'extensions/amp-analytics/0.1/requests.js',
+      'extensions/amp-analytics/0.1/variables.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
@@ -1127,6 +1132,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
+      'build-system/tasks/performance/helpers.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',
@@ -1173,7 +1179,7 @@ const forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 const requiredTerms = {
-  'Copyright 20(15|16|17|18|19) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
+  'Copyright 20(15|16|17|18|19|20) The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0': dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0': dedicatedCopyrightNoteSources,
 };

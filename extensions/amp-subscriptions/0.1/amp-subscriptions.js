@@ -281,6 +281,7 @@ export class SubscriptionService {
   getEntitlements_(platform) {
     return platform.getEntitlements().then(entitlements => {
       if (
+        entitlements &&
         entitlements.granted &&
         this.cryptoHandler_.isDocumentEncrypted() &&
         !entitlements.decryptedDocumentKey

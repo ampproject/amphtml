@@ -29,7 +29,7 @@ export function readmo(global, data) {
 
   const {section, module, sponsoredByLabel, infinite, title, url} = data;
 
-  window.publisherUrl = url;
+  global.publisherUrl = url;
 
   (global.readmo = global.readmo || []).push({
     section,
@@ -40,21 +40,6 @@ export function readmo(global, data) {
     container: '#c',
     amp: true,
   });
-
-  global.context.observeIntersection(
-    entries => {
-      entries.forEach(entry => {
-        if (global.Readmo) {
-          global.Readmo.onViewChange({
-            intersectionRatio: entry.intersectionRatio,
-          });
-        }
-      });
-    },
-    {
-      threshold: [0, 0.5, 1],
-    }
-  );
 
   loadScript(global, 'https://s.yimg.com/dy/ads/readmo.js', () =>
     global.context.renderStart()

@@ -24,10 +24,10 @@ const {
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
-const {compileJs, mkdirSync} = require('./helpers');
 const {endBuildStep} = require('./helpers');
 const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
+const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
 const {vendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
@@ -154,6 +154,19 @@ function maybeInitializeExtensions(
 }
 
 /**
+ * Set the extensions to build from example documents
+ * (for internal use by `gulp performance`)
+ *
+ * @param {Array<string>} examples Path to example documents
+ */
+function setExtensionsToBuildFromDocuments(examples) {
+  extensionsToBuild = dedupe([
+    ...DEFAULT_EXTENSION_SET,
+    ...getExtensionsFromArg(examples.join(',')),
+  ]);
+}
+
+/**
  * Process the command line arguments --noextensions, --extensions, and
  * --extensions_from and return a list of the referenced extensions.
  *
@@ -204,6 +217,10 @@ function parseExtensionFlags(preBuild = false) {
   }
 
   const buildOrPreBuild = preBuild ? 'pre-build' : 'build';
+  const coreRuntimeOnlyMessage =
+    green('⤷ Use ') +
+    cyan('--core_runtime_only ') +
+    green('to build just the core runtime.');
   const noExtensionsMessage =
     green('⤷ Use ') +
     cyan('--noextensions ') +
@@ -223,7 +240,9 @@ function parseExtensionFlags(preBuild = false) {
     cyan('foo.amp.html') +
     green('.');
 
-  if (preBuild) {
+  if (argv.core_runtime_only) {
+    log(green('Building just the core runtime.'));
+  } else if (preBuild) {
     log(
       green('Pre-building extension(s):'),
       cyan(getExtensionsToBuild(preBuild).join(', '))
@@ -242,6 +261,7 @@ function parseExtensionFlags(preBuild = false) {
     } else {
       log(green('Building all AMP extensions.'));
     }
+    log(coreRuntimeOnlyMessage);
     log(noExtensionsMessage);
     log(extensionsMessage);
     log(inaboxSetMessage);
@@ -504,10 +524,12 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
   if (isAliased) {
-    const src = `${name}-${version}${options.minify ? '' : '.max'}.js`;
-    const dest = `${name}-${aliasBundle.aliasedVersion}${
-      options.minify ? '' : '.max'
-    }.js`;
+    const src = maybeToEsmName(
+      `${name}-${version}${options.minify ? '' : '.max'}.js`
+    );
+    const dest = maybeToEsmName(
+      `${name}-${aliasBundle.aliasedVersion}${options.minify ? '' : '.max'}.js`
+    );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
   }
@@ -530,4 +552,5 @@ module.exports = {
   getExtensionsToBuild,
   maybeInitializeExtensions,
   parseExtensionFlags,
+  setExtensionsToBuildFromDocuments,
 };
