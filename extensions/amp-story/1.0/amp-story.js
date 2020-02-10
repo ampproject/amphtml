@@ -1016,6 +1016,7 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
+        this.initializeStoryPlayer_();
       });
 
     // Story is being prerendered: resolve the layoutCallback when the first
@@ -1288,6 +1289,20 @@ export class AmpStory extends AMP.BaseElement {
       'No active page set when navigating to next page.'
     );
     activePage.next(opt_isAutomaticAdvance);
+  }
+
+  /**
+   * Installs amp-viewer-integration script in case story is inside an
+   * amp-story-player.
+   */
+  initializeStoryPlayer_() {
+    if (this.viewer_.getParam('storyPlayer') !== 'v0') {
+      return;
+    }
+    Services.extensionsFor(this.getAmpDoc().win).installExtensionForDoc(
+      this.getAmpDoc(),
+      'amp-viewer-integration'
+    );
   }
 
   /**
