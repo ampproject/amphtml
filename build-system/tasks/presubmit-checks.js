@@ -224,14 +224,6 @@ const forbiddenTerms = {
       'testing/iframe.js',
     ],
   },
-  'installMutatorServiceForDoc': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/inabox/inabox-services.js',
-      'src/service/core-services.js',
-      'src/service/mutator-impl.js',
-    ],
-  },
   'installPerformanceService': {
     message: privateServiceFactory,
     whitelist: [
@@ -239,14 +231,6 @@ const forbiddenTerms = {
       'src/amp-shadow.js',
       'src/inabox/amp-inabox.js',
       'src/service/performance-impl.js',
-    ],
-  },
-  'installResourcesServiceForDoc': {
-    message: privateServiceFactory,
-    whitelist: [
-      'src/inabox/inabox-services.js',
-      'src/service/core-services.js',
-      'src/service/resources-impl.js',
     ],
   },
   'installStorageServiceForDoc': {
@@ -298,6 +282,15 @@ const forbiddenTerms = {
       'src/service/resources-impl.js',
       'src/service/viewport/viewport-impl.js',
       'src/service/vsync-impl.js',
+    ],
+  },
+  'installResourcesServiceForDoc': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/inabox/inabox-services.js',
+      'src/service/core-services.js',
+      'src/service/resources-impl.js',
+      'src/service/standard-actions-impl.js',
     ],
   },
   'installXhrService': {
@@ -366,6 +359,7 @@ const forbiddenTerms = {
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
+      'src/amp-story-player.js',
     ],
   },
   '\\.sendMessage\\(': {
@@ -427,6 +421,7 @@ const forbiddenTerms = {
       'extensions/amp-experiment/1.0/variant.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'extensions/amp-consent/0.1/consent-state-manager.js',
+      'extensions/amp-story/1.0/amp-story-quiz.js',
     ],
   },
   'getBaseCid': {
@@ -578,7 +573,7 @@ const forbiddenTerms = {
   },
   '\\.schedulePass\\(': {
     message: 'schedulePass is heavy, think twice before using it',
-    whitelist: ['src/service/mutator-impl.js', 'src/service/resources-impl.js'],
+    whitelist: ['src/service/resources-impl.js'],
   },
   '\\.requireLayout\\(': {
     message:
@@ -855,7 +850,6 @@ const forbiddenTerms = {
       'test/unit/test-mode.js',
       'test/unit/test-motion.js',
       'test/unit/test-mustache.js',
-      'test/unit/test-mutator.js',
       'test/unit/test-object.js',
       'test/unit/test-observable.js',
       'test/unit/test-pass.js',
@@ -1099,6 +1093,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/cookie-writer.js',
       'extensions/amp-analytics/0.1/requests.js',
+      'extensions/amp-analytics/0.1/variables.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
@@ -1137,6 +1132,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
+      'build-system/tasks/performance/helpers.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',

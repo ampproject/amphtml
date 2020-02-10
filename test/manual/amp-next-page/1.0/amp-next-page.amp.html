@@ -9,6 +9,7 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-1.0.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script>
       (self.AMP=self.AMP||[]).push(function(AMP){
@@ -18,6 +19,21 @@
     <style amp-custom>
       .content {
         padding: 20px;
+      }
+      .amp-next-page-default-separator {
+        margin-top: 16px;
+        margin-bottom: 16px;
+      }
+      .separator-content {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+      }
+      .separator-content amp-img {
+        display: inline-block;
+        border-radius: 50%;
+        margin-right: 6px;
       }
     </style>
 </head>
@@ -166,7 +182,6 @@
         varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl
         at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
       </p>
-      <a href="#" id="host-halfway"></a>
       <p>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae
         libero porta nulla iaculis viverra. Vestibulum consectetur scelerisque
@@ -259,7 +274,8 @@
         quis metus in mi pharetra tempus. Etiam dapibus tellus vitae blandit
         rhoncus. Fusce commodo risus id sapien ultrices vehicula.
       </p>
-    </div>
+    </div>    
+    <!-- amp-next-page configuration -->
     <amp-next-page>
       <script type="application/json">
         [
@@ -285,10 +301,15 @@
           }
         ]
       </script>
-      <div amp-next-page-separator>
-          Read more
+      <div separator class="amp-next-page-default-separator">
+        <template type="amp-mustache">
+          <div class="separator-content">
+            <amp-img src={{image}} layout="fixed" height="16" width="16"></amp-img>
+            <span>Next article: {{title}}</span>
+          </div>
+        </template>
       </div>
-      <div amp-next-page-more-box>
+      <div more-box>
           Here are a few more articles ...
       </div>  
     </amp-next-page>

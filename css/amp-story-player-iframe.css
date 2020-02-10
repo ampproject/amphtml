@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,30 @@
  * limitations under the License.
  */
 
-document.getElementById('simple').addEventListener('click', () => {
-  const el = document.createElement('h1');
-  el.textContent = 'Hello World!';
-  document.body.appendChild(el);
-});
+:host {
+  all: initial;
+  display: block;
+  border-radius: 0 !important;
+  width: 360px;
+  height: 600px;
+  overflow: auto;
+}
 
-document.getElementById('tail').addEventListener('click', () => {
-  setTimeout(function() {
-    const el = document.createElement('h1');
-    el.textContent = 'Hello World!';
-    document.body.appendChild(el);
-  }, 6000);
-});
+.story-player-iframe {
+  height: 100%;
+  width: 100%;
+  flex: 0 0 100%;
+  border: 0;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+main {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.i-amphtml-story-player-loaded iframe {
+  opacity: 1;
+}

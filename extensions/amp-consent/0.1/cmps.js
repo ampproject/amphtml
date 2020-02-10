@@ -35,10 +35,22 @@ if (getMode().test || getMode().localDev) {
   };
 }
 
+CMP_CONFIG['appconsent'] = {
+  'consentInstanceId': 'appconsent',
+  'checkConsentHref': 'https://collector.appconsent.io/amp/check-consent',
+  'promptUISrc': 'https://cdn.appconsent.io/loader.html',
+};
+
 CMP_CONFIG['didomi'] = {
   'consentInstanceId': 'didomi',
   'checkConsentHref': 'https://api.privacy-center.org/amp/check-consent',
   'promptUISrc': 'https://sdk-amp.privacy-center.org/loader.html',
+};
+
+CMP_CONFIG['sirdata'] = {
+  'consentInstanceId': 'sirdata',
+  'checkConsentHref': 'https://sddan.mgr.consensu.org/api/v1/public/amp/check',
+  'promptUISrc': 'https://ui.sddan.mgr.consensu.org/amp.html',
 };
 
 CMP_CONFIG['Marfeel'] = {

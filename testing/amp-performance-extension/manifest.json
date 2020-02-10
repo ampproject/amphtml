@@ -1,0 +1,32 @@
+{
+  "name": "AMP Performance Measurement",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Measure the performance of AMP pages.",
+  "homepage_url": "https://www.ampproject.org",
+  "icons": {
+    "16": "16x16.png",
+    "48": "48x48.png",
+    "128": "128x128.png"
+  },
+  "browser_action": {
+    "default_icon": {
+      "16": "16x16.png",
+      "48": "48x48.png",
+      "128": "128x128.png"
+    },
+    "default_title": "AMP Performance"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "run_at": "document_start",
+      "js": ["measure.js"]
+    }
+  ],
+  "permissions": ["activeTab", "*://*/*"]
+}
