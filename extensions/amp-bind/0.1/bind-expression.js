@@ -223,6 +223,12 @@ export class BindExpression {
     /** @const {string} */
     this.expressionString = expressionString;
 
+    /** @const {boolean} */
+    this.fnEval = this.expressionString.startsWith('script:');
+    if (this.fnEval) {
+      return;
+    }
+
     /** @private @const {!Object<string, !./bind-macro.BindMacro>} */
     this.macros_ = macros;
 
@@ -250,7 +256,15 @@ export class BindExpression {
    * @return {BindExpressionResultDef}
    */
   evaluate(scope) {
-    return this.eval_(this.ast_, scope);
+    if (!this.fnEval) {
+      return this.eval_(this.ast_, scope);
+    }
+
+    const fn = this.expressionString.slice('script:'.length);
+    if (!self[fn]) {
+      throw new Error(`[bind-script] function could not be found: ${fn}`);
+    }
+    return self[fn]();
   }
 
   /**

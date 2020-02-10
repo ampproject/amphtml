@@ -603,9 +603,16 @@ export class AmpList extends AMP.BaseElement {
     if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      fetch = this.isAmpStateSrc_(elementSrc)
-        ? this.getAmpStateJson_(elementSrc)
-        : this.prepareAndSendFetch_(opt_refresh);
+      if (elementSrc.startsWith('script:')) {
+        fetch = Services.bindForDocOrNull(this.element).then(bind => {
+          userAssert(bind, 'Must have bind installed to use "script:"');
+          return bind.evaluateExpression_(elementSrc, {});
+        });
+      } else {
+        fetch = this.isAmpStateSrc_(elementSrc)
+          ? this.getAmpStateJson_(elementSrc)
+          : this.prepareAndSendFetch_(opt_refresh);
+      }
       fetch = fetch.then(data => {
         // Bail if the src has changed while resolving the xhr request.
         if (elementSrc !== this.element.getAttribute('src')) {

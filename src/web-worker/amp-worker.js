@@ -103,10 +103,16 @@ class AmpWorker {
       })
       .then(res => res.text())
       .then(text => {
+        const authorScript = this.getAuthorBindScript_();
         // Workaround since Worker constructor only accepts same origin URLs.
-        const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
-          type: 'text/javascript',
-        });
+        const blob = new win.Blob(
+          [
+            `${text}\n${authorScript}` /*TODO: make sourceMap work again + '\n//# sourceurl=' + url */,
+          ],
+          {
+            type: 'text/javascript',
+          }
+        );
         const blobUrl = win.URL.createObjectURL(blob);
         this.worker_ = new win.Worker(blobUrl);
         this.worker_.onmessage = this.receiveMessage_.bind(this);
@@ -222,5 +228,31 @@ class AmpWorker {
    */
   fetchPromiseForTesting() {
     return this.fetchPromise_;
+  }
+
+  /**
+   * Gets author script containing set of usable js functions.
+   * They may not alter dom, but can perform io and return data to bind.
+   */
+  getAuthorBindScript_() {
+    const bindScripts = this.win_.document.body.querySelectorAll(
+      'script[target="amp-bind"]'
+    );
+
+    // No bind-script, then don't append any author code.
+    if (!bindScripts.length) {
+      return '';
+    }
+    if (bindScripts.length > 1) {
+      throw new Error(
+        `May only have a single bind-script per document, found: ${bindScripts.length}`
+      );
+    }
+
+    console.log(
+      'Appending author code to the web worker',
+      bindScripts[0].textContent
+    );
+    return bindScripts[0].textContent;
   }
 }
