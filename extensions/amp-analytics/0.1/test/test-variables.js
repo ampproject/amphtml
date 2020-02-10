@@ -112,8 +112,8 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     it('does not handle nested macros using ${} syntax', () => {
       // VariableService.expandTemplate's regex cannot parse nested ${}.
       return check('${a${b}}', '}', {
-        'a': 'TITLE',
-        'b': 'TITLE',
+        'a': 'TIMESTAMP',
+        'b': 'TIMESTAMP',
       });
     });
 
@@ -134,23 +134,30 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
             'foo': '$EQUALS($SUBSTR(zyxabc,3),abc)',
           })
         )
+        .then(() => {
+          env.sandbox.useFakeTimers(123456789);
+
+          // Arguments (3,4) and (5,TIMESTAMP) do not include parenthesis,
+          // so they are parsed and encoded correctly when sent to urlReplacements
+          return check(
+            '${foo}&${bar(3,4)}&${bar(5,TIMESTAMP)}',
+            'FOO(1,2)&4&123456789',
+            {
+              'foo': 'FOO(1,2)',
+              'bar': 'QUERY_PARAM',
+            }
+          );
+        })
         .then(() =>
-          // No macros in the arglist (after expansion),
-          // so QUERY_PARAM(3,4) works when sent to urlReplacements
-          check('${foo}&${bar(3,4)}', 'FOO(1,2)&4', {
-            'foo': 'FOO(1,2)',
-            'bar': 'QUERY_PARAM',
-          })
-        )
-        .then(() =>
-          // Macros in the arglist (after expansion), and
-          // getNameArgs doesn't handle them
+          // Macros that take additonal arugments in the arglist (after expansion),
+          // and getNameArgs doesn't handle them
           check(
-            '${foo}&${bar(x,TITLE)}&${bar(5,QUERY_PARAM(6,7))}',
-            'FOO(3,4)&&',
+            '${foo}&${bar(2,$TOUPPERCASE(lowercase)}&${bar(5,QUERY_PARAM(6,7))}&${baz($NOT(true))}',
+            'FOO(3,4)&(lowercase)(lowercase)&&',
             {
               'foo': 'FOO(3,4)',
               'bar': 'QUERY_PARAM',
+              'baz': '$TOUPPERCASE',
             }
           )
         )
