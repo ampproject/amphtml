@@ -295,7 +295,6 @@ export class Transport {
     xhr.setRequestHeader('Content-Type', 'text/plain');
 
     xhr.onreadystatechange = () => {
-      console.log('state changed');
       if (xhr.readyState == 4) {
         dev().fine(TAG_, 'Sent XHR request', request.url);
       }

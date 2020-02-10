@@ -19,14 +19,11 @@ let variableSubstitution;
 let variables;
 
 function saveVariables(req, res) {
-  console.log(req.query);
   const requestVariables = {};
   // For when a JSON is entered
   if (req.query && Object.keys(req.query).length === 2) {
     const entries = Object.entries(req.query);
     try {
-      console.log('here is the second entry:', entries[1][0]);
-      console.log('here is the type of second entry:', typeof entries[1][0]);
       Object.assign(requestVariables, JSON.parse(entries[1][0]));
     } catch (e) {
       res.send(`<!doctype html>
@@ -73,7 +70,6 @@ function runVariableSubstitution(req, res) {
     })
     .slice(1)
     .join('&');
-  console.log(testParameters);
   res.send(`<!doctype html>
     <html>
     <head>
@@ -123,15 +119,11 @@ function saveRequest(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
   res.setHeader('Access-Control-Allow-Headers', 'text/plain');
-  const obj = {...req.query};
-  console.log(obj);
   variableSubstitution = req.query;
   url = req.originalUrl;
-  console.log('Saved variable subs');
 }
 
 function getRequest(req, res) {
-  console.log(JSON.stringify(variableSubstitution));
   res.send(`<!doctype html>
     <html>
     <head>
