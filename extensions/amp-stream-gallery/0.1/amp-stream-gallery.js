@@ -195,21 +195,24 @@ class AmpStreamGallery extends AMP.BaseElement {
   initializeActions_() {
     this.registerAction(
       'prev',
-      ({trust}) => {
+      invocation => {
+        const {trust} = invocation;
         this.carousel_.prev(this.getActionSource_(trust));
       },
       ActionTrust.LOW
     );
     this.registerAction(
       'next',
-      ({trust}) => {
+      invocation => {
+        const {trust} = invocation;
         this.carousel_.next(this.getActionSource_(trust));
       },
       ActionTrust.LOW
     );
     this.registerAction(
       'goToSlide',
-      ({args, trust}) => {
+      invocation => {
+        const {args, trust} = invocation;
         this.carousel_.goToSlide(args['index'] || -1, {
           actionSource: this.getActionSource_(trust),
         });
