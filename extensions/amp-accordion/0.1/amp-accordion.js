@@ -26,6 +26,7 @@ import {closest, tryFocus} from '../../../src/dom';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
+import {getMode} from '../../../src/mode';
 import {getStyle, setImportantStyles, setStyles} from '../../../src/style';
 import {isExperimentOn} from '../../../src/experiments';
 import {
@@ -45,7 +46,7 @@ const COLLAPSE_CURVE_ = bezierCurve(0.39, 0.575, 0.565, 1);
 const isDisplayLockingEnabledForAccordion = win => {
   return (
     isExperimentOn(win, 'amp-accordion-display-locking') &&
-    'renderSubtree' in Element.prototype
+    ('renderSubtree' in Element.prototype || getMode().test)
   );
 };
 
@@ -172,10 +173,10 @@ class AmpAccordion extends AMP.BaseElement {
       header.addEventListener('keydown', this.keyDownHandler_.bind(this));
 
       if (isDisplayLockingEnabledForAccordion(this.win)) {
-        section.addEventListener('rendersubtreeactivation', event => {
+        content.addEventListener('rendersubtreeactivation', event => {
           // Event occurs on the content element whose parent is the section to open.
-          const section = dev().assertElement(event.target.parentElement);
-          this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
+          const parentSection = dev().assertElement(event.target.parentElement);
+          this.toggle_(parentSection, ActionTrust.LOW, /* force expand */ true);
         });
       }
     });
