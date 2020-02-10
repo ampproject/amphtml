@@ -1128,6 +1128,10 @@ const adConfig = jsonConfiguration({
     ],
   },
 
+  'whopainfeed': {
+    prefetch: 'https://widget.infeed.com.ar/widget/widget-amp.js',
+  },
+
   'widespace': {},
 
   'wisteria': {
@@ -1146,7 +1150,7 @@ const adConfig = jsonConfiguration({
   },
 
   'yahoo': {
-    prefetch: 'https://s.yimg.com/os/ampad/display.js',
+    prefetch: 'https://s.yimg.com/aaq/ampad/display.js',
     preconnect: 'https://us.adserver.yahoo.com',
   },
 

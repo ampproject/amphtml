@@ -474,6 +474,7 @@ See [amp-ad rules](https://github.com/ampproject/amphtml/blob/master/extensions/
 - [Strossle](../../ads/strossle.md)
 - [Taboola](../../ads/taboola.md)
 - [TE Medya](../../ads/temedya.md)
+- [Whopa InFeed](../../ads/whopainfeed.md)
 - [Yahoo Native Ads](../../ads/yahoonativeads.md)
 - [Zen](../../ads/zen.md)
 - [ZergNet](../../ads/zergnet.md)

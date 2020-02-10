@@ -412,11 +412,23 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         env.win.document,
         env.win
       );
+      const docViewport = Services.viewportForDoc(this.getAmpDoc());
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
+      expect(customMacros.PAGEVIEWID_64()).to.equal(docInfo.pageViewId64);
       expect(customMacros.HREF()).to.equal(env.win.location.href);
       expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
+      expect(customMacros.ELEMENT_POS()).to.equal(
+        element.getBoundingClientRect().top + scrollY
+      );
+      expect(customMacros.SCROLL_TOP()).to.equal(docViewport.getScrollTop());
+      expect(customMacros.PAGE_HEIGHT()).to.equal(
+        docViewport.getScrollHeight()
+      );
+      expect(customMacros.BKG_STATE()).to.equal(
+        this.getAmpDoc().isVisible() ? 'visible' : 'hidden'
+      );
       Object.keys(macros).forEach(macro => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
