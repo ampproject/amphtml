@@ -88,34 +88,12 @@ class Bar extends ScrollComponent {
 
 export class ScrollUserBar extends Bar {
   /**
-   * Add a scrollbar placeholder and then load the scrollbar URL in the iframe.
+   * Load the scrollbar URL in the iframe.
    *
    * @override
    * */
   makeIframe_() {
     const frame = Bar.prototype.makeIframe_.call(this);
-    // Add a placeholder element to display while scrollbar iframe loads.
-    const placeholder = this.el(
-      'div',
-      dict({
-        'class': 'amp-access-scroll-bar amp-access-scroll-placeholder',
-      }),
-      [
-        this.el(
-          'img',
-          dict({
-            'src':
-              'https://static.scroll.com/assets/icn-scroll-logo32-9f4ceef399905139bbd26b87bfe94542.svg',
-            'layout': 'fixed',
-            'width': 32,
-            'height': 32,
-          })
-        ),
-      ]
-    );
-
-    this.doc_.getBody().appendChild(placeholder);
-
     // Set iframe to scrollbar URL.
     this.accessSource_
       .buildUrl(
@@ -127,10 +105,6 @@ export class ScrollUserBar extends Bar {
         false
       )
       .then(scrollbarUrl => {
-        frame.onload = () => {
-          // On iframe load, remove placeholder element.
-          this.doc_.getBody().removeChild(placeholder);
-        };
         frame.setAttribute('src', scrollbarUrl);
       });
     return frame;

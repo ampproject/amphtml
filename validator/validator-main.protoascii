@@ -33,7 +33,7 @@ script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/
 
 css_length_spec: {
   html_format: AMP
-  max_bytes: 50000
+  max_bytes: 75000
   max_bytes_per_inline_style: 1000
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
 }
@@ -1058,7 +1058,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     value_casei: "text/css"
   }
   cdata: {
-    max_bytes: 50000
+    max_bytes: 75000
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
     css_spec: {
       at_rule_spec: {
@@ -1176,7 +1176,7 @@ tags: {  # Special custom 'author' spreadsheet for transformed AMP
     value_casei: "text/css"
   }
   cdata: {
-    max_bytes: 50000
+    max_bytes: 75000
     url_bytes_included: false
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
     css_spec: {
@@ -1257,7 +1257,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
     value_casei: "text/css"
   }
   cdata: {
-    max_bytes: 20000  # Smaller than AMP, which is 50,000.
+    max_bytes: 20000  # Smaller than AMP, which is 75,000.
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec#css"
     css_spec: {
       at_rule_spec: {
