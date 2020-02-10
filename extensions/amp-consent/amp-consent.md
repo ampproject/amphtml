@@ -642,10 +642,10 @@ Join in on the discussion where we are discussing [upcoming potential features](
 
 ## Supported Consent Management Platforms
 
-- AppConsent : [Website](https://appconsent.io/en) - [Documentation](https://github.com/ampproject/amphtml/master/extensions/amp-consent/cmps/appconsent.md)
+- AppConsent : [Website](https://appconsent.io/en) - [Documentation](./cmps/appconsent.md)
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
 - Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
-- Marfeel : [Website](https://www.marfeel.com/) - [Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/cmps/marfeel.md)
-- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/cmps/sourcepoint.md)
+- Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
+- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
 
 - Your Integrated platform here!
