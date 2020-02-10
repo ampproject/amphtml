@@ -154,7 +154,7 @@ class AmpAccordion extends AMP.BaseElement {
       header.setAttribute('role', 'button');
       header.setAttribute('aria-controls', contentId);
       header.setAttribute('aria-expanded', isExpanded.toString());
-      this.setRenderSubtreeIfEnabled(
+      this.setRenderSubtreeIfEnabled_(
         content,
         isExpanded ? '' : 'invisible skip-viewport-activation'
       );
@@ -172,11 +172,11 @@ class AmpAccordion extends AMP.BaseElement {
       header.addEventListener('keydown', this.keyDownHandler_.bind(this));
 
       if (!isDisplayLockingEnabledForAccordion(this.win)) {
-      section.addEventListener('rendersubtreeactivation', event => {
-        // Event occurs on the content element whose parent is the section to open.
-        const section = dev().assertElement(event.target.parentElement);
-        this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
-      });
+        section.addEventListener('rendersubtreeactivation', event => {
+          // Event occurs on the content element whose parent is the section to open.
+          const section = dev().assertElement(event.target.parentElement);
+          this.toggle_(section, ActionTrust.HIGH, /* force expand */ true);
+        });
       }
     });
   }
@@ -321,14 +321,14 @@ class AmpAccordion extends AMP.BaseElement {
     if (this.element.hasAttribute('animate')) {
       if (toExpand) {
         header.setAttribute('aria-expanded', 'true');
-        this.setRenderSubtreeIfEnabled(content, '');
+        this.setRenderSubtreeIfEnabled_(content, '');
         this.animateExpand_(section, trust);
         if (this.element.hasAttribute('expand-single-section')) {
           this.sections_.forEach(sectionIter => {
             if (sectionIter != section) {
               this.animateCollapse_(sectionIter, trust);
               sectionIter.children[0].setAttribute('aria-expanded', 'false');
-              this.setRenderSubtreeIfEnabled(
+              this.setRenderSubtreeIfEnabled_(
                 sectionIter.children[1],
                 'invisible skip-viewport-activation'
               );
@@ -337,7 +337,7 @@ class AmpAccordion extends AMP.BaseElement {
         }
       } else {
         header.setAttribute('aria-expanded', 'false');
-        this.setRenderSubtreeIfEnabled(
+        this.setRenderSubtreeIfEnabled_(
           content,
           'invisible skip-viewport-activation'
         );
@@ -349,7 +349,7 @@ class AmpAccordion extends AMP.BaseElement {
         if (toExpand) {
           this.triggerEvent_('expand', section, trust);
           section.setAttribute('expanded', '');
-          this.setRenderSubtreeIfEnabled(content, '');
+          this.setRenderSubtreeIfEnabled_(content, '');
           header.setAttribute('aria-expanded', 'true');
           // if expand-single-section is set, only allow one <section> to be
           // expanded at a time
@@ -361,7 +361,7 @@ class AmpAccordion extends AMP.BaseElement {
                   sectionIter.removeAttribute('expanded');
                 }
                 sectionIter.children[0].setAttribute('aria-expanded', 'false');
-                this.setRenderSubtreeIfEnabled(
+                this.setRenderSubtreeIfEnabled_(
                   sectionIter.children[1],
                   'invisible skip-viewport-activation'
                 );
@@ -372,7 +372,7 @@ class AmpAccordion extends AMP.BaseElement {
           this.triggerEvent_('collapse', section, trust);
           section.removeAttribute('expanded');
           header.setAttribute('aria-expanded', 'false');
-          this.setRenderSubtreeIfEnabled(
+          this.setRenderSubtreeIfEnabled_(
             content,
             'invisible skip-viewport-activation'
           );
@@ -388,8 +388,9 @@ class AmpAccordion extends AMP.BaseElement {
    * on the given element with the given value.
    * @param {Element} element
    * @param {string} value
+   * @private
    */
-  setRenderSubtreeIfEnabled(element, value) {
+  setRenderSubtreeIfEnabled_(element, value) {
     if (!isDisplayLockingEnabledForAccordion(this.win) || !element) {
       return;
     }
