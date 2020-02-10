@@ -45,7 +45,7 @@ const THUMBNAILS_SELECTORS = 'amp-inline-gallery-thumbnails';
  * The selector for the main carousel (i.e. not the one for the thumbnails).
  */
 const CAROUSEL_SELECTOR =
-  ':not(amp-inline-gallery-thumbnails) > amp-base-carousel';
+  '> amp-base-carousel, :not(amp-inline-gallery-thumbnails) > amp-base-carousel';
 
 class AmpInlineGallery extends AMP.BaseElement {
   /** @param {!AmpElement} element */
