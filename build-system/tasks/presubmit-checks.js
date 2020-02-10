@@ -359,6 +359,7 @@ const forbiddenTerms = {
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
+      'src/amp-story-player.js',
     ],
   },
   '\\.sendMessage\\(': {
@@ -1092,6 +1093,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/cookie-writer.js',
       'extensions/amp-analytics/0.1/requests.js',
+      'extensions/amp-analytics/0.1/variables.js',
     ],
   },
   '\\.expandInputValueSync\\(': {

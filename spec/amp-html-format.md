@@ -363,7 +363,7 @@ In the following examples `<property>` needs to be in the white list above.
 
 #### Maximum size
 
-It is a validation error if the author stylesheet or inline styles together are larger than 50,000 bytes.
+It is a validation error if the author stylesheet or inline styles together are larger than 75,000 bytes.
 
 ### Keyframes stylesheet
 

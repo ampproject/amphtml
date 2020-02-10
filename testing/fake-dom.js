@@ -253,6 +253,11 @@ export class FakeWindow {
      * @const
      */
     this.requestAnimationFrame = raf;
+
+    // Styles.
+    this.getComputedStyle = function() {
+      return window.getComputedStyle.apply(window, arguments);
+    };
   }
 
   /** polyfill addEventListener. */

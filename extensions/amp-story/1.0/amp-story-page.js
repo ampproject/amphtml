@@ -1635,14 +1635,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         '.i-amphtml-story-page-open-attachment-label'
       );
 
-      const openAttachmentLabel =
-        attachmentEl.getAttribute('data-cta-text') ||
+      const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+      const openLabel =
+        (openLabelAttr && openLabelAttr.trim()) ||
         Services.localizationService(this.win).getLocalizedString(
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 
       this.mutateElement(() => {
-        textEl.textContent = openAttachmentLabel;
+        textEl.textContent = openLabel;
         this.element.appendChild(this.openAttachmentEl_);
       });
     }
