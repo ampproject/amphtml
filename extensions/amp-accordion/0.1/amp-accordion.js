@@ -171,7 +171,7 @@ class AmpAccordion extends AMP.BaseElement {
       header.addEventListener('click', this.clickHandler_.bind(this));
       header.addEventListener('keydown', this.keyDownHandler_.bind(this));
 
-      if (!isDisplayLockingEnabledForAccordion(this.win)) {
+      if (isDisplayLockingEnabledForAccordion(this.win)) {
         section.addEventListener('rendersubtreeactivation', event => {
           // Event occurs on the content element whose parent is the section to open.
           const section = dev().assertElement(event.target.parentElement);
