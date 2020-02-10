@@ -249,13 +249,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_.setAttribute('aria-autocomplete', 'both');
     this.inputElement_.setAttribute('role', 'combobox');
 
-    userAssert(
-      this.inputElement_.form,
-      '%s should be inside a <form> tag. %s',
-      TAG,
-      this.element
-    );
-    if (this.inputElement_.form.hasAttribute('autocomplete')) {
+    if (
+      this.inputElement_.form &&
+      this.inputElement_.form.hasAttribute('autocomplete')
+    ) {
       this.initialAutocompleteAttr_ = this.inputElement_.form.getAttribute(
         'autocomplete'
       );
@@ -903,16 +900,18 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   toggleResultsHandler_(display) {
-    // Set/reset "autocomplete" attribute on the <form> ancestor.
-    if (display) {
-      this.inputElement_.form.setAttribute('autocomplete', 'off');
-    } else if (this.initialAutocompleteAttr_) {
-      this.inputElement_.form.setAttribute(
-        'autocomplete',
-        this.initialAutocompleteAttr_
-      );
-    } else {
-      this.inputElement_.form.removeAttribute('autocomplete');
+    // Set/reset "autocomplete" attribute on <form> ancestor if present.
+    if (this.inputElement_.form) {
+      if (display) {
+        this.inputElement_.form.setAttribute('autocomplete', 'off');
+      } else if (this.initialAutocompleteAttr_) {
+        this.inputElement_.form.setAttribute(
+          'autocomplete',
+          this.initialAutocompleteAttr_
+        );
+      } else {
+        this.inputElement_.form.removeAttribute('autocomplete');
+      }
     }
 
     // Toggle results.
