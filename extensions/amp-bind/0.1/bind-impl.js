@@ -1787,4 +1787,82 @@ export class Bind {
       this.localWin_.dispatchEvent(event);
     }
   }
+  
+  /* PROTOTYPE START */ 
+  getAuthorScript_(debugId) {
+    const authorUrl = this.element.getAttribute('src');
+    if (authorUrl) {
+      return this.fetchAuthorScript_(authorUrl, debugId);
+    } else {
+      const id = this.element.getAttribute('script');
+      if (id) {
+        const local = this.getAmpDoc().getElementById(id);
+        userAssert(
+          local,
+          '[%s] %s could not find element with #%s.',
+          TAG,
+          debugId,
+          id
+        );
+        const target = local.getAttribute('target');
+        userAssert(
+          target === 'amp-script',
+          '[%s] script#%s must have target="amp-script".',
+          TAG,
+          id
+        );
+        const text = local.textContent;
+        if (this.development_) {
+          return Promise.resolve(text);
+        } else {
+          return this.service_.checkSha384(text, debugId).then(() => text);
+        }
+      }
+    }
+    // No [src] or [script].
+    return null;
+  }
+
+  /**
+   * @param {string} authorUrl
+   * @param {string} debugId An element identifier for error messages.
+   * @return {!Promise<string>}
+   */
+  fetchAuthorScript_(authorUrl, debugId) {
+    return Services.xhrFor(this.win)
+      .fetchText(authorUrl, {ampCors: false})
+      .then(response => {
+        if (response.url && this.sameOrigin_(response.url)) {
+          // Disallow non-JS content type for same-origin scripts.
+          const contentType = response.headers.get('Content-Type');
+          if (
+            !contentType ||
+            !startsWith(contentType, 'application/javascript')
+          ) {
+            user().error(
+              TAG,
+              'Same-origin "src" requires "Content-Type: application/javascript". ' +
+                'Fetched source for %s has "Content-Type: %s". ' +
+                'See https://amp.dev/documentation/components/amp-script/#security-features.',
+              debugId,
+              contentType
+            );
+            // TODO(#24266): user().createError() messages are not extracted and
+            // don't perform string substitution.
+            throw new Error();
+          }
+          return response.text();
+        } else {
+          // For cross-origin, verify hash of script itself (skip in
+          // development mode).
+          if (this.development_) {
+            return response.text();
+          } else {
+            return response.text().then(text => {
+              return this.service_.checkSha384(text, debugId).then(() => text);
+            });
+          }
+        }
+      });
+  }
 }
