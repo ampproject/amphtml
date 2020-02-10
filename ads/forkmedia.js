@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import {loadScript, validateData} from '../3p/3p';
+import {loadScript} from '../3p/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function forkmedia(global, data) {
-  validateData(data, ['product']);
-
   let src = null;
   if (data.product === 'inread') {
     src = 'https://delivery.forkcdn.com/rappio/inread/v1.1/amp/inread.js';
+  } else if (data.product === 'vibe') {
+    src = 'https://vibecdn.forkcdn.com/Inarticle/iav.js';
+  } else {
+    src = 'https://delivery.forkcdn.com/amp/default.js';
   }
 
   if (src) {
