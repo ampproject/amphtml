@@ -30,7 +30,7 @@ export function temedya(global, data) {
     typeId: data.typeId,
     paidItem: data.paidItem,
     organicItem: data.organicItem,
-    theme: data.theme
+    theme: data.theme,
   };
   global._temedya.AMPCallbacks = {
     renderStart: global.context.renderStart,
