@@ -897,6 +897,13 @@ export class AmpList extends AMP.BaseElement {
       return Promise.resolve(elements);
     }
 
+    if (!binding) {
+      user().warn(
+        TAG,
+        'Missing "binding" attribute. Using binding="refresh" is recommended for performance.'
+      );
+    }
+
     /**
      * @param {!../../../extensions/amp-bind/0.1/bind-impl.Bind} bind
      * @return {!Promise<!Array<!Element>>}
