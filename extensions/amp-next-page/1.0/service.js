@@ -34,7 +34,7 @@ import {
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
@@ -92,9 +92,6 @@ export class NextPageService {
 
     /** @private {?Element} */
     this.separator_ = null;
-
-    /** @private {boolean} */
-    this.hasDefaultSeparator_ = false;
 
     /** @private {?Element} */
     this.footer_ = null;
@@ -275,19 +272,16 @@ export class NextPageService {
   updateVisibility() {
     this.pages_.forEach((page, index) => {
       if (
-        page.relativePos === ViewportRelativePos.INSIDE_VIEWPORT ||
-        page.relativePos === ViewportRelativePos.CONTAINS_VIEWPORT
+        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT &&
+        page.isVisible()
       ) {
+        page.setVisibility(VisibilityState.HIDDEN);
+      } else {
         if (!page.isVisible()) {
           page.setVisibility(VisibilityState.VISIBLE);
         }
         this.hidePreviousPages_(index);
         this.resumePausedPages_(index);
-      } else if (
-        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT &&
-        page.isVisible()
-      ) {
-        page.setVisibility(VisibilityState.HIDDEN);
       }
     });
 
@@ -338,13 +332,11 @@ export class NextPageService {
     return Promise.all(
       previousPages
         .filter(page => {
-          const shouldHide =
-            page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT ||
-            page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT;
-          return shouldHide;
+          // Pages that are outside of the viewport should be hidden
+          return page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT;
         })
         .map((page, away) => {
-          // Hide all pages that are in the viewport
+          // Hide all pages whose visibility state have changed to hidden
           if (page.isVisible()) {
             page.setVisibility(VisibilityState.HIDDEN);
           }
@@ -421,7 +413,7 @@ export class NextPageService {
    * @return {!Page}
    */
   createHostPage() {
-    const {title, location} = this.doc_;
+    const {title = '', location} = this.doc_;
     const {href: url} = location;
     const image =
       parseSchemaImage(this.doc_) ||
@@ -432,7 +424,7 @@ export class NextPageService {
       this,
       {
         url,
-        title: title || '',
+        title,
         image,
       },
       PageState.INSERTED /** initState */,
@@ -846,7 +838,6 @@ export class NextPageService {
       return providedSeparator;
     }
     // If no separator is provided, we build a default one
-    this.hasDefaultSeparator_ = true;
     return this.buildDefaultSeparator_();
   }
 
@@ -857,9 +848,10 @@ export class NextPageService {
   buildDefaultSeparator_() {
     const html = htmlFor(this.getHost_());
     return html`
-      <div class="amp-next-page-separator" aria-label="Next article separator">
-        Next article
-      </div>
+      <div
+        class="amp-next-page-separator"
+        aria-label="Next article separator"
+      ></div>
     `;
   }
 
@@ -873,55 +865,24 @@ export class NextPageService {
    * @return {!Promise}
    */
   maybeRenderSeparatorTemplate_(separator, page) {
-    if (!this.hasDefaultSeparator_ && !this.templates_.hasTemplate(separator)) {
+    if (!this.templates_.hasTemplate(separator)) {
       return Promise.resolve();
     }
 
-    // Re-render templated separator (if needed)
-    return this.getSeparatorContent_(separator, page).then(rendered => {
-      return this.mutator_.mutateElement(separator, () => {
-        removeChildren(dev().assertElement(separator));
-        separator.appendChild(rendered);
-      });
-    });
-  }
-
-  /**
-   * Creates the internal separator content based on the
-   * given information about the next page
-   * @param {!Element} separator
-   * @param {!Page} page
-   * @return {!Promise}
-   */
-  getSeparatorContent_(separator, page) {
     const data = /** @type {!JsonObject} */ ({
       title: page.title,
       url: page.url,
       image: page.image,
     });
 
-    // In the case of a templated separator, render the internal template
-    if (this.templates_.hasTemplate(separator)) {
-      return this.templates_.findAndRenderTemplate(separator, data);
-    }
-
-    // Otherwise this is a default separator
-    devAssert(this.hasDefaultSeparator_);
-
-    const content = this.doc_.createElement('div');
-    content.classList.add('amp-next-page-separator-content');
-
-    const image = this.doc_.createElement('img');
-    image.classList.add('amp-next-page-separator-img');
-    image.src = data['image'];
-    content.appendChild(image);
-
-    const title = this.doc_.createElement('span');
-    title.classList.add('amp-next-page-separator-title');
-    title.textContent = `Next article: ${data['title']}`;
-    content.appendChild(title);
-
-    return Promise.resolve(content);
+    return this.templates_
+      .findAndRenderTemplate(separator, data)
+      .then(rendered => {
+        return this.mutator_.mutateElement(separator, () => {
+          removeChildren(dev().assertElement(separator));
+          separator.appendChild(rendered);
+        });
+      });
   }
 
   /**
@@ -999,23 +960,21 @@ export class NextPageService {
     // Otherwise this is a default footer
     devAssert(this.hasDefaultFooter_);
 
+    const html = htmlFor(this.getHost_());
     const content = this.doc_.createElement('div');
     content.classList.add('amp-next-page-footer-content');
 
     data['pages'].forEach(page => {
-      const article = this.doc_.createElement('a');
-      article.href = page.url;
-      article.classList.add('amp-next-page-footer-article');
-
-      const image = this.doc_.createElement('img');
-      image.classList.add('amp-next-page-footer-image');
+      const article = html`
+        <a ref="link" class="amp-next-page-footer-article">
+          <img ref="image" class="amp-next-page-footer-image" />
+          <span ref="title" class="amp-next-page-footer-title"></span>
+        </a>
+      `;
+      const {link, image, title} = htmlRefs(article);
       image.src = page.image;
-      article.appendChild(image);
-
-      const title = this.doc_.createElement('span');
-      title.classList.add('amp-next-page-footer-title');
       title.textContent = page.title;
-      article.appendChild(title);
+      link.href = page.url;
 
       content.appendChild(article);
     });

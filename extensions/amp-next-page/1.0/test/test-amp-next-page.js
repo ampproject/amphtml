@@ -593,11 +593,6 @@ describes.realWin(
         expect(service.pages_[2].container.firstElementChild).to.have.class(
           'amp-next-page-separator'
         );
-        expect(
-          service.pages_[2].container.firstElementChild.querySelector(
-            '.amp-next-page-separator-title'
-          ).textContent
-        ).to.equal('Next article: Title 2');
       });
 
       it('adds a default footer to the host page', async () => {
