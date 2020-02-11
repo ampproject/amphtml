@@ -138,6 +138,10 @@ export class AmpStoryPlayer {
 
         this.messagingFor_[iframeIdx] = messaging;
 
+        messaging.setDefaultHandler(() => {
+          return Promise.resolve('');
+        });
+
         // TODO(#26308): Appropiately set visibility to stories.
         this.displayStory_(iframeIdx);
       },
