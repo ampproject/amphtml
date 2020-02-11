@@ -242,7 +242,7 @@ export class AmpStoryQuiz extends AMP.BaseElement {
         TAG,
         'The first child must be a heading element <h1>, <h2>, or <h3>'
       );
-      promptContainer.remove();
+      this.quizEl_.removeChild(promptContainer);
     } else {
       const prompt = document.createElement(promptInput.tagName);
 
