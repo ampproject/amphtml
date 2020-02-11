@@ -676,7 +676,7 @@ describes.realWin(
             impl.activeElement_ = impl.createElementFromItem_('abc');
             env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
             env.sandbox
-              .stub(impl.binding_, 'shouldPreventFormSubmissionOnEnter')
+              .stub(impl.binding_, 'shouldPreventDefaultOnEnter')
               .returns(true);
             return impl.keyDownHandler_(event);
           })
