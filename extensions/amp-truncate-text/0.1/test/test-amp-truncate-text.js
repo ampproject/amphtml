@@ -54,7 +54,6 @@ describes.realWin(
      */
     function createTests({useShadow}) {
       beforeEach(() => {
-        toggleExperiment(win, 'amp-truncate-text', true);
         if (useShadow) {
           toggleExperiment(win, 'amp-truncate-text-shadow', true);
         }
