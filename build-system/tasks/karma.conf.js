@@ -31,9 +31,9 @@ const COMMON_CHROME_FLAGS = [
 // Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
 // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
 const SAUCE_TIMEOUT_CONFIG = {
-  maxDuration: 10 * 60,
+  maxDuration: 30 * 60,
   commandTimeout: 10 * 60,
-  idleTimeout: 10 * 60,
+  idleTimeout: 30 * 60,
 };
 
 const BABELIFY_CONFIG = {
