@@ -303,12 +303,9 @@ class Cid {
    */
   getOptedInScopes_() {
     const apiKeyMap = {};
-    const optInMeta = this.ampdoc.win.document.head./*OK*/ querySelector(
-      `meta[name=${GOOGLE_CID_API_META_NAME}]`
-    );
-    if (optInMeta && optInMeta.hasAttribute('content')) {
-      const list = optInMeta.getAttribute('content').split(',');
-      list.forEach(item => {
+    const optInMeta = this.ampdoc.getMetaByName(GOOGLE_CID_API_META_NAME);
+    if (optInMeta) {
+      optInMeta.split(',').forEach(item => {
         item = item.trim();
         if (item.indexOf('=') > 0) {
           const pair = item.split('=');
@@ -323,7 +320,7 @@ class Cid {
             user().warn(
               TAG_,
               `Unsupported client for Google CID API: ${clientName}.` +
-                `Please remove or correct ${optInMeta./*OK*/ outerHTML}`
+                `Please remove or correct meta[name="${GOOGLE_CID_API_META_NAME}"]`
             );
           }
         }
