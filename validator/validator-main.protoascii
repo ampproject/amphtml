@@ -5485,7 +5485,8 @@ attr_lists: {
     name: "id"
     mandatory: true
     # When updating this blacklisted_value_regex, also update the entry for
-    # "id" in $GLOBAL_ATTRS and "id" in "amp-script extension local script".
+    # "id" in $GLOBAL_ATTRS, and also validator-amp-script.protoascii and
+    # validator-amp-mustache.protoascii.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
@@ -6517,7 +6518,8 @@ attr_lists: {
   attrs: {
     name: "id"
     # When updating this blacklisted_value_regex, also update for
-    # mandatory-id-attr and validator-amp-mustache.protoascii.
+    # mandatory-id-attr, validator-amp-script.protoascii, and
+    # validator-amp-mustache.protoascii.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
