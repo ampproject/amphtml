@@ -98,7 +98,7 @@ export class NextPageService {
     /** @private {?Element} */
     this.footer_ = null;
 
-    /** @private {function(!Promise)} */
+    /** @private {function():!Promise} */
     this.refreshFooter_ = ASYNC_NOOP;
 
     /** @private {boolean} */
