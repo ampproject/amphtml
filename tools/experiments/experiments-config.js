@@ -311,4 +311,10 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/24929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
   },
+  {
+    id: 'amp-stream-gallery',
+    name: 'Enables component',
+    spec: 'https://github.com/ampproject/amphtml/issues/20595',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
+  },
 ];
