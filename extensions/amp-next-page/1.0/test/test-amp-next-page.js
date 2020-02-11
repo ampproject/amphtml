@@ -562,7 +562,7 @@ describes.realWin(
       });
     });
 
-    describe('default separators', () => {
+    describe('default separators & footers', () => {
       let element;
       let service;
 
@@ -579,11 +579,11 @@ describes.realWin(
         element.parentNode.removeChild(element);
       });
 
-      it('adds a default separator to for the host page', async () => {
+      it('adds a default separator to the host page', async () => {
         await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
 
         expect(service.pages_[1].container.firstElementChild).to.have.class(
-          'amp-next-page-default-separator'
+          'amp-next-page-separator'
         );
       });
 
@@ -591,12 +591,18 @@ describes.realWin(
         await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
 
         expect(service.pages_[2].container.firstElementChild).to.have.class(
-          'amp-next-page-default-separator'
+          'amp-next-page-separator'
         );
+      });
+
+      it('adds a default footer to the host page', async () => {
+        await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
+
+        expect(element.lastElementChild).to.have.class('amp-next-page-footer');
       });
     });
 
-    describe('custom and templated separators', () => {
+    describe('custom and templated separators & footers', () => {
       let element;
       let service;
       let html;
@@ -696,6 +702,57 @@ describes.realWin(
 
         expect(template1.innerText).to.equal('Rendered 1');
         expect(template2.innerText).to.equal('Rendered 2');
+      });
+
+      it('correctly renders a templated footer', async () => {
+        const separator = html`
+          <div footer>
+            <template type="amp-mustache">
+              <div class="footer-content">
+                {{#pages}}
+                <span class="title">{{title}}</span>
+                <span class="url">{{url}}</span>
+                <span class="image">{{image}}</span>
+                {{/pages}}
+              </div>
+            </template>
+          </div>
+        `;
+
+        element = await getAmpNextPage({
+          inlineConfig: VALID_CONFIG,
+          separator,
+        });
+
+        service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(0);
+        const templateRenderStub = env.sandbox
+          .stub(service.templates_, 'findAndRenderTemplate')
+          .resolves(
+            html`
+              <span>Rendered</span>
+            `
+          );
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, '1');
+        expect(templateRenderStub).to.have.been.calledWith(
+          env.sandbox.match.any,
+          {
+            pages: [
+              {
+                title: 'Title 1',
+                url: '',
+                image: '/examples/img/hero@1x.jpg',
+              },
+              {
+                title: 'Title 2',
+                url: 'http://localhost:9876/document2',
+                image: '/examples/img/hero@1x.jpg',
+              },
+            ],
+          }
+        );
+        expect(element.lastElementChild.innerText).to.equal('Rendered');
       });
     });
   }
