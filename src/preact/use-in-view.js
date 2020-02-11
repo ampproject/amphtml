@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-import {useLayoutEffect} from './index';
+import {useEffect, useLayoutEffect, useRef, useState} from './index';
 
 /**
- * @param {object} ref
- * @param {IntersectionObserver} observerRef
- * @param {Array<IntersectionObserverEntry>} entries
- * @return {boolean}
+ * @param {function():(function():undefined|undefined)} effect
+ * @param {!Array<*>=} opt_deps
+ * @return {object} ref
  */
-export function useInViewEffect(ref, observerRef, entries) {
+export function useInViewEffect(effect, opt_deps) {
+  const ref = useRef(null);
+  const {0: entries, 1: set} = useState([]);
+  const observerRef = useRef(null);
+  if (observerRef.current === null) {
+    observerRef.current = new IntersectionObserver(set);
+  }
+
   useLayoutEffect(() => {
     // This must be done in the callback for two reasons:
     // (1) ref.current changes between the call to useIntersect and this call
@@ -37,5 +43,11 @@ export function useInViewEffect(ref, observerRef, entries) {
 
   const last =
     entries.length > 0 ? entries[entries.length - 1] : {isIntersecting: false};
-  return last.isIntersecting;
+  useEffect(() => {
+    if (last.isIntersecting) {
+      effect();
+    }
+  }, [last.isIntersecting].concat(opt_deps));
+
+  return ref;
 }
