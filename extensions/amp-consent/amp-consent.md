@@ -295,7 +295,16 @@ AMP will check client cache and server in parallel to find the previous consent 
 
 #### captions
 
-`captions` provides accessibility features for screen reader users for `<amp-consent>`. `captions` is an optional JSON an object that can contain the keys `consentPromptCaption` and `buttonActionCaption` which are both strings and will have default values 'User Consent Prompt' and 'Focus Prompt'. When an consent prompt in an iframe is loaded, the screen reader will read the `consentPromptCaption` and then the `buttonActionCaption`. The `consentPromptCaption` should act as a title for the consent prompt, while the `buttonActionCaption` should inform the user that they can interact with the iframe.
+`captions` provides accessibility features for screen reader users for `<amp-consent>`. `captions` is an optional JSON an object that can contain the `consentPromptCaption` and `buttonActionCaption` strings. The default values for these fields are 'User Consent Prompt' and 'Focus Prompt' respectivly, but they can be overriden and customized for your use case (such as localization). When a consent prompt in an iframe is loaded, the screen reader will read the `consentPromptCaption` and then the `buttonActionCaption`. The `consentPromptCaption` should act as a title for the consent prompt, while the `buttonActionCaption` should inform the user that they can interact with the iframe.
+
+```json
+{
+  "captions": {
+    "consentPromptCaption": "This is an example user consent prompt",
+    "buttonActionCaption": "Click to interact with the prompt"
+  }
+}
+```
 
 ## Consent Management
 
