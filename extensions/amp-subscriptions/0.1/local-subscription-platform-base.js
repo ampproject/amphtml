@@ -22,6 +22,12 @@ import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
 
 /**
+ * Surrogate property added to click events marking them as handled by the
+ * amp-subscriptions extension.
+ */
+const CLICK_HANDLED_EVENT_PROPERTY = '_AMP_SUBSCRIPTIONS_CLICK_HANDLED';
+
+/**
  * This implements the methods to interact with various subscription platforms.
  *
  * @implements {./subscription-platform.SubscriptionPlatform}
@@ -110,10 +116,10 @@ export class LocalSubscriptionBasePlatform {
    */
   initializeListeners_() {
     const handleClickOncePerEvent = e => {
-      if (e.ampSubscriptionsClickHasBeenHandled) {
+      if (e[CLICK_HANDLED_EVENT_PROPERTY]) {
         return;
       }
-      e.ampSubscriptionsClickHasBeenHandled = true;
+      e[CLICK_HANDLED_EVENT_PROPERTY] = true;
 
       const element = closestAncestorElementBySelector(
         dev().assertElement(e.target),
