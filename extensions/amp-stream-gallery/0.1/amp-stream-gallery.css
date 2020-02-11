@@ -14,30 +14,26 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../3p/3p';
+@import "../../amp-base-carousel/0.1/carousel.css";
+@import "arrows.css";
 
-/**
- * @param {!Window} global
- * @param {!Object} data
- */
-export function forkmedia(global, data) {
-  let src = null;
-  if (data.product === 'inread') {
-    src = 'https://delivery.forkcdn.com/rappio/inread/v1.1/amp/inread.js';
-  } else if (data.product === 'vibe') {
-    src = 'https://vibecdn.forkcdn.com/Inarticle/amp/iav.js';
-  } else {
-    src = 'https://delivery.forkcdn.com/amp/default.js';
-  }
+amp-stream-gallery .i-amphtml-carousel-content {
+  display: flex;
+}
 
-  loadScript(
-    global,
-    src,
-    () => {
-      global.context.renderStart();
-    },
-    () => {
-      global.context.noContentAvailable();
-    }
-  );
+.i-amphtml-stream-gallery-slides {
+  order: 1;
+  flex-grow: 1;
+  min-width: 1px;
+}
+
+[i-amphtml-stream-gallery-extra-space="around"] {
+  justify-content: center;
+}
+
+amp-stream-gallery .i-amphtml-carousel-slotted > .i-amphtml-replaced-content {
+  /*
+   * Apply contain object-fit to all replaced content to avoid distorted ratios.
+   */
+  object-fit: contain;
 }
