@@ -23,7 +23,6 @@ import {AccessSource} from '../amp-access-source';
 import {AccessVendorAdapter} from '../amp-access-vendor';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
 import {installPerformanceService} from '../../../../src/service/performance-impl';
-import {installPlatformService} from '../../../../src/service/platform-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin(
@@ -46,7 +45,6 @@ describes.fakeWin(
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
-      installPlatformService(win);
       installPerformanceService(win);
 
       element = document.createElement('script');
@@ -268,7 +266,6 @@ describes.fakeWin(
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
-      installPlatformService(win);
       installPerformanceService(win);
 
       const config = {
@@ -388,7 +385,6 @@ describes.fakeWin(
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
-      installPlatformService(win);
       installPerformanceService(win);
 
       const config = {

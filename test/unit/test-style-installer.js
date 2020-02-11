@@ -21,7 +21,6 @@ import {Services} from '../../src/services';
 import {createShadowRoot} from '../../src/shadow-embed';
 import {getStyle} from '../../src/style';
 import {installPerformanceService} from '../../src/service/performance-impl';
-import {installPlatformService} from '../../src/service/platform-impl';
 import {isAnimationNone} from '../../testing/test-helper';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 
@@ -37,7 +36,6 @@ describe('Styles', () => {
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
-      installPlatformService(win);
       installPerformanceService(win);
       const perf = Services.performanceFor(win);
       tickSpy = env.sandbox.spy(perf, 'tick');

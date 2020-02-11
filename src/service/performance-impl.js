@@ -91,16 +91,6 @@ export class Performance {
     this.fvrDeferred_ = new Deferred();
     this.mbvDeferred_ = new Deferred();
 
-    // Platform service must be installed before performance serivce is
-    this.platform_ = Services.platformFor(this.win);
-
-    // TODO (micajuineho) change this once all platforms
-    // support PerformancePaintTiming
-    // https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming
-    if (!this.platform_.isChrome() && !this.platform_.isOpera()) {
-      this.fcpDeferred_.resolve(null);
-    }
-
     /**
      * How many times a layout jank metric has been ticked.
      *
@@ -387,6 +377,10 @@ export class Performance {
       // https://bugs.chromium.org/p/chromium/issues/detail?id=725567
       this.win.performance.getEntriesByType('paint').forEach(processEntry);
       entryTypesToObserve.push('paint');
+    } else {
+      // PerformancePaintTiming is not currently supported by all user-agents
+      // https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming
+      this.fcpDeferred_.resolve(null);
     }
 
     if (this.supportsEventTimingAPIv76_) {
