@@ -359,6 +359,7 @@ export class AmpImageSlider extends AMP.BaseElement {
     this.gestures_ = Gestures.get(this.element);
 
     this.gestures_.onGesture(SwipeXRecognizer, e => {
+      console.log(e.data)
       if (e.data.first) {
         // Disable hint reappearance timeout if needed
         this.animateHideHint_();
