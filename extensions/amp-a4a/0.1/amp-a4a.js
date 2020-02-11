@@ -724,10 +724,9 @@ export class AmpA4A extends AMP.BaseElement {
         }
         return adUrl && this.sendXhrRequest(adUrl);
       })
-      // The following block returns either the response (as a
-      // {bytes, headers} object), or null if no response is available /
-      // response is empty.
-      /** @return {?Promise<?{bytes: !ArrayBuffer, headers: !Headers}>} */
+      // The following block returns either the response or throws if no
+      // response is available / response is empty.
+      /** @return {!Promise<!Response>} */
       .then(fetchResponse => {
         checkStillCurrent();
         this.maybeTriggerAnalyticsEvent_('adRequestEnd');
@@ -803,7 +802,7 @@ export class AmpA4A extends AMP.BaseElement {
       });
 
     const validationPromise = this.shouldNotVerifySigning_
-      ? fetchPromise.then(res => this.handleWithoutSigning_(res))
+      ? fetchPromise.then(unusedRes => this.handleWithoutSigning_())
       : fetchPromise.then(res =>
           this.handleSignedResponse_(res, checkStillCurrent)
         );
