@@ -16,7 +16,7 @@
 
 import {createElement, useRef, useState} from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
-import {useInView} from '../../../src/preact/use-intersect';
+import {useInViewEffect} from '../../../src/preact/use-intersect';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
@@ -27,11 +27,18 @@ export function Timeago(props) {
   const {0: timestamp, 1: setTimestamp} = useState(
     getFuzzyTimestampValue(props)
   );
+
   const ref = useRef(null);
-  const inView = useInView(ref);
-  if (inView) {
+  const {0: entries, 1: set} = useState([]);
+  const observer = useRef(null);
+  if (observer.current === null) {
+    observer.current = new IntersectionObserver(set);
+  }
+
+  if (useInViewEffect(ref, observer, entries)) {
     setTimestamp(getFuzzyTimestampValue(props));
   }
+
   useResourcesNotify();
   return createElement('time', {datetime: props['datetime'], ref}, timestamp);
 }

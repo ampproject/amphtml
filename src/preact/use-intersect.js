@@ -14,40 +14,27 @@
  * limitations under the License.
  */
 
-import {useLayoutEffect, useRef, useState} from './index';
+import {useLayoutEffect} from './index';
 
 /**
  * @param {object} ref
- * @return {?Array<IntersectionObserverEntry>}
+ * @param {IntersectionObserver} observerRef
+ * @param {Array<IntersectionObserverEntry>} entries
+ * @return {boolean}
  */
-export function useIntersect(ref) {
-  const {0: entries, 1: set} = useState([]);
-  const observerRef = useRef(null);
-  if (observerRef.current === null) {
-    observerRef.current = new IntersectionObserver(set);
-  }
-
+export function useInViewEffect(ref, observerRef, entries) {
   useLayoutEffect(() => {
     // This must be done in the callback for two reasons:
     // (1) ref.current changes between the call to useIntersect and this call
     // (2) any updates to ref should trigger the callback to be rerun
     const {current: node} = ref;
     const {current: observer} = observerRef;
-    observer.disconnect();
     if (node) {
       observer.observe(node);
     }
     return () => observer.disconnect();
-  }, [ref.current]);
-  return entries;
-}
+  }, [ref.current, observerRef.current]);
 
-/**
- * @param {object} ref
- * @return {?Array<IntersectionObserverEntry>}
- */
-export function useInView(ref) {
-  const entries = useIntersect(ref);
   const last =
     entries.length > 0 ? entries[entries.length - 1] : {isIntersecting: false};
   return last.isIntersecting;
