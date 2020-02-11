@@ -25,7 +25,6 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/' +
       'responsive.amp.html',
-    experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
     //TODO(spaharmi): fails on shadow demo
     environments: ['single', 'viewer-demo'],
