@@ -425,13 +425,13 @@ export class AmpDoc {
    * @return {?string}
    */
   getMetaByName(name) {
-    if (!name) {
+    if (!name || !this.win.document || !this.win.document.head) {
       return null;
     }
 
-    const el = dev()
-      .assertElement(this.win.document.head)
-      .querySelector(`meta[name="${escapeCssSelectorIdent(name)}"]`);
+    const el = this.win.document.head.querySelector(
+      `meta[name="${escapeCssSelectorIdent(name)}"]`
+    );
 
     return el ? el.getAttribute('content') || '' : null;
   }
