@@ -26,7 +26,6 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=de',
-    experiments: ['amp-consent-geo-override'],
     // TODO (micajuineho): Add shadow-demo after #25985 is fixed and viewer-demo when...
     environments: ['single'],
   },
