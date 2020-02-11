@@ -16,7 +16,7 @@
 
 import {createElement, useRef, useState} from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
-import {useInViewEffect} from '../../../src/preact/use-intersect';
+import {useInViewEffect} from '../../../src/preact/use-in-view';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
