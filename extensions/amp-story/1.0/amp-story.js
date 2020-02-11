@@ -1008,11 +1008,11 @@ export class AmpStory extends AMP.BaseElement {
           infoDialog.build();
         }
       });
-    console.log('howhow');
+
     // Do not block the layout callback on the completion of these promises, as
     // that prevents descendents from being laid out (and therefore loaded).
     storyLayoutPromise
-      .then(() => this.whenPagesLoaded_(0))
+      .then(() => this.whenPagesLoaded_(PAGE_LOAD_TIMEOUT_MS))
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
@@ -1115,23 +1115,12 @@ export class AmpStory extends AMP.BaseElement {
     const storyLoadPromise = Promise.all(
       pagesToWaitFor
         .filter(page => !!page)
-        .map(page =>
-          page.element
-            .signals()
-            .whenSignal(CommonSignals.LOAD_END)
-            .then(() =>
-              this.timer_.promise(5000).then(() => {
-                console.log('finished');
-              })
-            )
-        )
+        .map(page => page.element.signals().whenSignal(CommonSignals.LOAD_END))
     );
 
     return this.timer_
-      .timeoutPromise(timeoutMs, storyLoadPromise, 'timeouttt')
-      .catch(err => {
-        console.log({err});
-      });
+      .timeoutPromise(timeoutMs, storyLoadPromise)
+      .catch(() => {});
   }
 
   /** @private */
