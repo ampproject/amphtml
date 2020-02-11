@@ -20,20 +20,16 @@
       .content {
         padding: 20px;
       }
-      .amp-next-page-default-separator {
+      .amp-next-page-separator {
         margin-top: 16px;
         margin-bottom: 16px;
       }
-      .separator-content {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-      }
-      .separator-content amp-img {
-        display: inline-block;
-        border-radius: 50%;
-        margin-right: 6px;
+      .my-footer {
+        padding: 24px;
+        text-align: center;
+        color: #AAAAAA;
+        display: block;
+        font-family: Arial, Helvetica, sans-serif;
       }
     </style>
 </head>
@@ -301,17 +297,22 @@
           }
         ]
       </script>
-      <div separator class="amp-next-page-default-separator">
-        <template type="amp-mustache">
-          <div class="separator-content">
-            <amp-img src={{image}} layout="fixed" height="16" width="16"></amp-img>
-            <span>Next article: {{title}}</span>
-          </div>
-        </template>
-      </div>
-      <div more-box>
-          Here are a few more articles ...
-      </div>  
+      <!-- Custom Separator & Footer Elements
+        <div separator class="my-custom-separator">
+          <template type="amp-mustache">
+            <div class="my-custom-separator-content">
+              <amp-img src={{image}} layout="fixed" height="16" width="16"></amp-img>
+              <span>Next article: {{title}}</span>
+            </div>
+          </template>
+        </div>
+        <div footer class="my-custom-footer">
+            Here are a few more articles ...
+        </div>
+      -->
+      <span class="my-footer">
+        more footer content here
+      </span>
     </amp-next-page>
   </body>
 </html>
