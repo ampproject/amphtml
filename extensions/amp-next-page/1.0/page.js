@@ -260,7 +260,7 @@ export class Page {
         this.is(PageState.PAUSED) /** force */
       )
       .then(shadowDoc => {
-        if (shadowDoc) {
+        if (!shadowDoc) {
           this.state_ = PageState.FAILED;
           return;
         }

@@ -58,7 +58,7 @@ const DOC_CONTAINER_CLASS = 'i-amphtml-next-page-document-container';
 const SHADOW_ROOT_CLASS = 'i-amphtml-next-page-shadow-root';
 const PLACEHOLDER_CLASS = 'i-amphtml-next-page-placeholder';
 
-const ASYNC_NOOP = async () => {};
+const ASYNC_NOOP = () => Promise.resolve();
 
 /** @enum */
 export const Direction = {UP: 1, DOWN: -1};
@@ -100,6 +100,9 @@ export class NextPageService {
 
     /** @private {function(!Promise)} */
     this.refreshFooter_ = ASYNC_NOOP;
+
+    /** @private {boolean} */
+    this.finished_ = false;
 
     /** @private {?AmpElement} element */
     this.host_ = null;
@@ -219,6 +222,9 @@ export class NextPageService {
    */
   updateScroll_() {
     this.updateScrollDirection_();
+    if (this.finished_) {
+      return;
+    }
     this.readyPromise_.then(() => {
       this.maybeFetchNext();
     });
@@ -229,6 +235,8 @@ export class NextPageService {
    * @return {!Promise}
    */
   maybeFetchNext(force = false) {
+    devAssert(!this.finished_);
+
     // If a page is already queued to be fetched, wait for it
     if (this.pages_.some(page => page.is(PageState.FETCHING))) {
       return Promise.resolve();
@@ -259,7 +267,8 @@ export class NextPageService {
         // returned an empty array or the suggestions already exist in the queue)
         .then(() => {
           if (this.pages_.length <= pageCount) {
-            // Remote server did not return any new pages, update the footer
+            // Remote server did not return any new pages, update the footer and lock the state
+            this.finished_ = true;
             return this.refreshFooter_();
           }
           return this.maybeFetchNext(true /** force */);
@@ -740,7 +749,7 @@ export class NextPageService {
    * @return {!Promise}
    */
   queuePages_(pages) {
-    if (!pages.length) {
+    if (!pages.length || this.finished_) {
       return Promise.resolve();
     }
     // Queue the given pages
@@ -956,6 +965,7 @@ export class NextPageService {
    * @return {!Promise}
    */
   refreshDefaultFooter_() {
+    const footer = dev().assertElement(this.footer_);
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
         .filter(page => !page.isLoaded() && !page.is(PageState.FETCHING))
@@ -985,6 +995,9 @@ export class NextPageService {
       content.appendChild(article);
     });
 
-    return Promise.resolve(content);
+    return this.mutator_.mutateElement(footer, () => {
+      removeChildren(dev().assertElement(footer));
+      footer.appendChild(content);
+    });
   }
 }
