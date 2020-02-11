@@ -127,32 +127,36 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
   </style>
 </head>
 <body>
-<amp-state id="theFood">
-  <script type="application/json">
-    {
-      "cupcakes": {
-        "imageUrl": "https://amp.dev/static/samples/img/image2.jpg",
-        "style": "greenBorder"
-      },
-      "sushi": {
-        "imageUrl": "https://amp.dev/static/samples/img/image3.jpg",
-        "style": "redBorder"
+  <amp-state id="theFood">
+    <script type="application/json">
+      {
+        "cupcakes": {
+          "imageUrl": "https://amp.dev/static/samples/img/image2.jpg",
+          "style": "greenBorder"
+        },
+        "sushi": {
+          "imageUrl": "https://amp.dev/static/samples/img/image3.jpg",
+          "style": "redBorder"
+        }
       }
-    }
-  </script>
-</amp-state>
-<div class="greenBorder" [class]="theFood[currentMeal].style">
-  <p>Each food has a different border color.</p>
-  <p [text]="'I want to eat ' + currentMeal + '.'">I want to eat cupcakes.</p>
-  <amp-img
-  width="300"
-  height="200"
-  src="https://amp.dev/static/samples/img/image2.jpg"
-  [src]="theFood[currentMeal].imageUrl">
-  </amp-img>
-  <button on="tap:AMP.setState({currentMeal: 'sushi'})">Set to sushi</button>
-  <button on="tap:AMP.setState({currentMeal: 'cupcakes'})">Set to cupcakes</button>
-</div>
+    </script>
+  </amp-state>
+  <div class="greenBorder" [class]="theFood[currentMeal].style">
+    <p>Each food has a different border color.</p>
+    <p [text]="'I want to eat ' + currentMeal + '.'">I want to eat cupcakes.</p>
+    <amp-img
+      width="300"
+      height="200"
+      src="https://amp.dev/static/samples/img/image2.jpg"
+      [src]="theFood[currentMeal].imageUrl"
+    >
+    </amp-img>
+    <button on="tap:AMP.setState({currentMeal: 'sushi'})">Set to sushi</button>
+    <button on="tap:AMP.setState({currentMeal: 'cupcakes'})">
+      Set to cupcakes
+    </button>
+  </div>
+</body>
 ```
 
 [/example]
@@ -965,7 +969,9 @@ Bind an element's `class` using the `[class]` attribute. A `[class]` expression 
   Working: Change Class
 </button>
 <!-- String arrays also work -->
-<button on="tap:AMP.setState({ myClass: ['background-green'] ,['border-red'] })">
+<button
+  on="tap:AMP.setState({ myClass: ['background-green'] ,['border-red'] })"
+>
   Working string array: Change Class
 </button>
 <!-- This expression evaluates to class="background-green,border-red" -->
