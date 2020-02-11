@@ -1305,6 +1305,7 @@ export class AmpStory extends AMP.BaseElement {
   /**
    * Installs amp-viewer-integration script in case story is inside an
    * amp-story-player.
+   * @private
    */
   initializeStoryPlayer_() {
     if (this.viewer_.getParam('storyPlayer') !== 'v0') {
