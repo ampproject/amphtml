@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createElement, useState} from '../../../src/preact';
+import {createElement, useRef, useState} from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
 import {useInViewEffect} from '../../../src/preact/use-in-view';
 import {useResourcesNotify} from '../../../src/preact/utils';
@@ -27,9 +27,15 @@ export function Timeago(props) {
   const {0: timestamp, 1: setTimestamp} = useState(
     getFuzzyTimestampValue(props)
   );
-  const ref = useInViewEffect(() => {
-    setTimestamp(getFuzzyTimestampValue(props));
-  });
+
+  const ref = useRef(null);
+  useInViewEffect(
+    ref.current,
+    () => {
+      setTimestamp(getFuzzyTimestampValue(props));
+    },
+    [props]
+  );
 
   useResourcesNotify();
   return createElement('time', {datetime: props['datetime'], ref}, timestamp);

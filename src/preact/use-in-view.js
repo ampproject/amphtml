@@ -17,37 +17,32 @@
 import {useEffect, useLayoutEffect, useRef, useState} from './index';
 
 /**
+ * @param {HTMLElement} node
  * @param {function():(function():undefined|undefined)} effect
  * @param {!Array<*>=} opt_deps
  * @return {object} ref
  */
-export function useInViewEffect(effect, opt_deps) {
-  const ref = useRef(null);
-  const {0: entries, 1: set} = useState([]);
+export function useInViewEffect(node, effect, opt_deps) {
+  const {0: isIntersecting, 1: set} = useState(true);
   const observerRef = useRef(null);
   if (observerRef.current === null) {
-    observerRef.current = new IntersectionObserver(set);
+    observerRef.current = new IntersectionObserver(entries => {
+      const last = entries[entries.length - 1];
+      set(last.isIntersecting);
+    });
   }
 
   useLayoutEffect(() => {
-    // This must be done in the callback for two reasons:
-    // (1) ref.current changes between the call to useIntersect and this call
-    // (2) any updates to ref should trigger the callback to be rerun
-    const {current: node} = ref;
     const {current: observer} = observerRef;
     if (node) {
       observer.observe(node);
     }
     return () => observer.disconnect();
-  }, [ref.current, observerRef.current]);
+  }, [node, observerRef.current]);
 
-  const last =
-    entries.length > 0 ? entries[entries.length - 1] : {isIntersecting: false};
   useEffect(() => {
-    if (last.isIntersecting) {
+    if (isIntersecting) {
       effect();
     }
-  }, [last.isIntersecting].concat(opt_deps));
-
-  return ref;
+  }, [node, isIntersecting].concat(opt_deps));
 }
