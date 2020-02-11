@@ -58,6 +58,8 @@ const DOC_CONTAINER_CLASS = 'i-amphtml-next-page-document-container';
 const SHADOW_ROOT_CLASS = 'i-amphtml-next-page-shadow-root';
 const PLACEHOLDER_CLASS = 'i-amphtml-next-page-placeholder';
 
+const ASYNC_NOOP = async () => {};
+
 /** @enum */
 export const Direction = {UP: 1, DOWN: -1};
 
@@ -96,8 +98,8 @@ export class NextPageService {
     /** @private {?Element} */
     this.footer_ = null;
 
-    /** @private {boolean} */
-    this.hasDefaultFooter_ = false;
+    /** @private {function(!Promise)} */
+    this.refreshFooter_ = ASYNC_NOOP;
 
     /** @private {?AmpElement} element */
     this.host_ = null;
@@ -228,7 +230,7 @@ export class NextPageService {
    */
   maybeFetchNext(force = false) {
     // If a page is already queued to be fetched, wait for it
-    if (this.pages_.some(page => page.isFetching())) {
+    if (this.pages_.some(page => page.is(PageState.FETCHING))) {
       return Promise.resolve();
     }
     // If we're still too far from the bottom, early return
@@ -240,11 +242,11 @@ export class NextPageService {
     const nextPage = this.pages_[this.getPageIndex_(this.lastFetchedPage_) + 1];
     if (nextPage) {
       return nextPage.fetch().then(() => {
-        if (nextPage.isFailed()) {
+        if (nextPage.is(PageState.FAILED)) {
           // Silently skip this page and get the footer ready in case
           // this page is the last one
           this.setLastFetchedPage(nextPage);
-          return this.maybeRenderFooterTemplate_();
+          return this.refreshFooter_();
         }
       });
     }
@@ -258,7 +260,7 @@ export class NextPageService {
         .then(() => {
           if (this.pages_.length <= pageCount) {
             // Remote server did not return any new pages, update the footer
-            return this.maybeRenderFooterTemplate_();
+            return this.refreshFooter_();
           }
           return this.maybeFetchNext(true /** force */);
         })
@@ -372,7 +374,7 @@ export class NextPageService {
         Math.max(0, index - pausePageCount - 1),
         Math.min(this.pages_.length, index + pausePageCount + 1)
       )
-      .filter(page => page.isPaused());
+      .filter(page => page.is(PageState.PAUSED));
 
     return Promise.all(nearViewportPages.map(page => page.resume()));
   }
@@ -413,7 +415,7 @@ export class NextPageService {
    * @return {!Page}
    */
   createHostPage() {
-    const {title = '', location} = this.doc_;
+    const {title, location} = this.doc_;
     const {href: url} = location;
     const image =
       parseSchemaImage(this.doc_) ||
@@ -424,7 +426,7 @@ export class NextPageService {
       this,
       {
         url,
-        title,
+        title: title || '',
         image,
       },
       PageState.INSERTED /** initState */,
@@ -487,7 +489,7 @@ export class NextPageService {
     // will need to replace placeholder
     // TODO(wassgha) This wouldn't be needed once we can resume a ShadowDoc
     if (!shadowRoot) {
-      devAssert(page.isPaused());
+      devAssert(page.is(PageState.PAUSED));
       const placeholder = dev().assertElement(
         scopedQuerySelector(
           container,
@@ -544,7 +546,7 @@ export class NextPageService {
    * @return {!Promise}
    */
   closeDocument(page) {
-    if (page.isPaused()) {
+    if (page.is(PageState.PAUSED)) {
       return Promise.resolve();
     }
 
@@ -724,7 +726,7 @@ export class NextPageService {
         }
         return this.queuePages_(pages).then(() => {
           // Render the initial footer template with all pages
-          this.maybeRenderFooterTemplate_();
+          this.refreshFooter_();
           // Mark the page as ready
           this.readyResolver_();
         });
@@ -893,11 +895,14 @@ export class NextPageService {
   getFooterElement_(element) {
     const providedFooter = childElementByAttr(element, 'footer');
     if (providedFooter) {
+      this.refreshFooter_ = this.templates_.hasTemplate(providedFooter)
+        ? () => this.renderFooterTemplate_()
+        : ASYNC_NOOP;
       removeElement(providedFooter);
       return providedFooter;
     }
     // If no footer is provided then we build a default one
-    this.hasDefaultFooter_ = true;
+    this.refreshFooter_ = () => this.refreshDefaultFooter_();
     return this.buildDefaultFooter_();
   }
 
@@ -914,37 +919,17 @@ export class NextPageService {
 
   /**
    * Renders the template inside the footer element using
-   * data from the current articles (if a template is present)
-   * otherwise rehydrates the default footer element
+   * data from the current articles
    *
    * @return {!Promise}
    */
-  maybeRenderFooterTemplate_() {
+  renderFooterTemplate_() {
     const footer = dev().assertElement(this.footer_);
+    devAssert(this.templates_.hasTemplate(footer));
 
-    if (!this.hasDefaultFooter_ && !this.templates_.hasTemplate(footer)) {
-      return Promise.resolve();
-    }
-
-    // Re-render templated footer (if needed)
-    return this.getFooterContent_(footer).then(rendered => {
-      return this.mutator_.mutateElement(footer, () => {
-        removeChildren(dev().assertElement(footer));
-        footer.appendChild(rendered);
-      });
-    });
-  }
-
-  /**
-   * Creates the internal footer content based on the
-   * rest of the queued pages
-   * @param {!Element} footer
-   * @return {!Promise}
-   */
-  getFooterContent_(footer) {
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
-        .filter(page => !page.isLoaded() && !page.isFetching())
+        .filter(page => !page.isLoaded() && !page.is(PageState.FETCHING))
         .map(page => ({
           title: page.title,
           url: page.url,
@@ -952,13 +937,34 @@ export class NextPageService {
         })),
     });
 
-    // In the case of a templated footer, render the internal template
-    if (this.templates_.hasTemplate(footer)) {
-      return this.templates_.findAndRenderTemplate(footer, data);
-    }
+    // Re-render templated footer (if needed)
+    return this.templates_
+      .findAndRenderTemplate(footer, data)
+      .then(rendered => {
+        return this.mutator_.mutateElement(footer, () => {
+          removeChildren(dev().assertElement(footer));
+          footer.appendChild(rendered);
+        });
+      });
+  }
 
-    // Otherwise this is a default footer
-    devAssert(this.hasDefaultFooter_);
+  /**
+   * Renders the template inside the footer element using
+   * data from the current articles (if a template is present)
+   * otherwise rehydrates the default footer element
+   *
+   * @return {!Promise}
+   */
+  refreshDefaultFooter_() {
+    const data = /** @type {!JsonObject} */ ({
+      pages: (this.pages_ || [])
+        .filter(page => !page.isLoaded() && !page.is(PageState.FETCHING))
+        .map(page => ({
+          title: page.title,
+          url: page.url,
+          image: page.image,
+        })),
+    });
 
     const html = htmlFor(this.getHost_());
     const content = this.doc_.createElement('div');
@@ -966,15 +972,15 @@ export class NextPageService {
 
     data['pages'].forEach(page => {
       const article = html`
-        <a ref="link" class="amp-next-page-footer-article">
+        <a class="amp-next-page-footer-article">
           <img ref="image" class="amp-next-page-footer-image" />
           <span ref="title" class="amp-next-page-footer-title"></span>
         </a>
       `;
-      const {link, image, title} = htmlRefs(article);
+      const {image, title} = htmlRefs(article);
       image.src = page.image;
       title.textContent = page.title;
-      link.href = page.url;
+      article.href = page.url;
 
       content.appendChild(article);
     });
