@@ -116,13 +116,17 @@ export class Performance {
      */
     this.aggregateShiftScore_ = 0;
 
+    const supportedEntryTypes =
+      (this.win.PerformanceObserver &&
+        this.win.PerformanceObserver.supportedEntryTypes) ||
+      [];
     /**
      * Whether the user agent supports the Layout Instability API that shipped
      * with Chromium 77.
      *
      * @private {boolean}
      */
-    this.supportsLayoutShift_ = false;
+    this.supportsLayoutShift_ = supportedEntryTypes.includes('layout-shift');
 
     /**
      * Whether the user agent supports the Event Timing API that shipped
@@ -130,28 +134,16 @@ export class Performance {
      *
      * @private {boolean}
      */
-    this.supportsEventTiming_ = false;
+    this.supportsEventTiming_ = supportedEntryTypes.includes('first-input');
 
     /**
      * Whether the user agent supports the Largest Contentful Paint metric.
      *
      * @private {boolean}
      */
-    this.supportsLargestContentfulPaint_ = false;
-
-    const {PerformanceObserver} = this.win;
-    if (PerformanceObserver) {
-      const {supportedEntryTypes} = PerformanceObserver;
-      if (supportedEntryTypes) {
-        this.supportsLayoutShift_ = supportedEntryTypes.includes(
-          'layout-shift'
-        );
-        this.supportsEventTiming_ = supportedEntryTypes.includes('first-input');
-        this.supportsLargestContentfulPaint_ = supportedEntryTypes.includes(
-          'largest-contentful-paint'
-        );
-      }
-    }
+    this.supportsLargestContentfulPaint_ = supportedEntryTypes.includes(
+      'largest-contentful-paint'
+    );
 
     /**
      * The latest reported largest contentful paint time, where the loadTime
