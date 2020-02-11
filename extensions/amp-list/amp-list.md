@@ -72,13 +72,13 @@ In the following example, we retrieve JSON data that contains URLs and titles, a
   layout="fixed-height"
   src="{{server_for_email}}/static/inline-examples/data/amp-list-urls.json"
 >
-  <template type="amp-mustache"
-    >{% raw %}
+  <template type="amp-mustache">
+    {% raw %}
     <div class="url-entry">
       <a href="{{url}}">{{title}}</a>
     </div>
-    {% endraw %}</template
-  >
+    {% endraw %}
+  </template>
 </amp-list>
 ```
 
@@ -155,14 +155,14 @@ In the following example, we display a list of images and titles. Because the `<
   layout="fixed-height"
   src="{{server_for_email}}/static/inline-examples/data/amp-list-data.json"
 >
-  <template type="amp-mustache"
-    >{% raw %}
+  <template type="amp-mustache">
+    {% raw %}
     <div class="image-entry">
       <amp-img src="{{imageUrl}}" width="100" height="75"></amp-img>
       <span class="image-title">{{title}}</span>
     </div>
-    {% endraw %}</template
-  >
+    {% endraw %}
+  </template>
   <div overflow class="list-overflow" style="background-color:red;">
     See more
   </div>
@@ -461,9 +461,7 @@ It can be templated via `amp-mustache`.
   <amp-list-load-more load-more-button>
     <template type="amp-mustache">
       Showing {{#count}} out of {{#total}} items
-      <button>
-        Click here to see more!
-      </button>
+      <button>Click here to see more!</button>
     </template>
   </amp-list-load-more>
 </amp-list>
