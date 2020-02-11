@@ -491,12 +491,9 @@ export class AmpScriptService {
     this.sources_ = [];
 
     // Query the meta tag once per document.
-    const allowedHashes = ampdoc
-      .getHeadNode()
-      .querySelector('meta[name="amp-script-src"]');
-    if (allowedHashes && allowedHashes.hasAttribute('content')) {
-      const content = allowedHashes.getAttribute('content');
-      this.sources_ = content
+    const allowedHashes = ampdoc.getMetaByName('amp-script-src');
+    if (allowedHashes) {
+      this.sources_ = allowedHashes
         .split(' ')
         .map(s => s.trim())
         .filter(s => s.length);
