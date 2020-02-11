@@ -373,6 +373,14 @@ amp-story-grid-layer {
   left: 0 !important;
 }
 
+/**
+ * Prevents amp-video to layout until its element has been swapped by the media
+ * pool. See #26718 for context.
+ */
+amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound {
+  display: none !important;
+}
+
 amp-story-grid-layer > * {
   pointer-events: auto !important;
 }
