@@ -129,15 +129,14 @@ export class AmpStoryPlayer {
     this.initializeLoadingListeners_(iframeEl);
     this.rootEl_.appendChild(iframeEl);
 
-    // TODO(#26308): enable messaging when multiple documents are supported.
-    return;
-
     this.initializeHandshake_(story, iframeEl).then(
       messaging => {
         const iframeIdx = findIndex(
           this.iframes_,
           iframe => iframe === iframeEl
         );
+
+        messaging.setDefaultHandler(() => {});
 
         this.messagingFor_[iframeIdx] = messaging;
 
@@ -206,10 +205,9 @@ export class AmpStoryPlayer {
    * @private
    */
   layoutIframe_(story, iframe) {
-    // TODO(#26308): enable messaging when multiple documents are supported.
-    // const {href} = this.getEncodedLocation_(story.href);
+    const {href} = this.getEncodedLocation_(story.href);
 
-    iframe.setAttribute('src', story.href);
+    iframe.setAttribute('src', href);
   }
 
   /**
@@ -226,6 +224,8 @@ export class AmpStoryPlayer {
       'amp_js_v': '0.1',
       'visibilityState': 'inactive',
       'origin': url.origin,
+      'showStoryUrlInfo': '0',
+      'storyPlayer': 'v0',
     });
 
     const fragmentParam = getFragment(href);
