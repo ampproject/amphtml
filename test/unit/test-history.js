@@ -269,6 +269,20 @@ describes.fakeWin(
       });
     });
 
+    it('should call history.back() if stack is empty and passed true', () => {
+      env.win.history.back = env.sandbox.stub();
+      return history.goBack(true).then(() => {
+        expect(env.win.history.back.called).true;
+      });
+    });
+
+    it('should call history.back() if stack is empty and passed false', () => {
+      env.win.history.back = env.sandbox.stub();
+      return history.goBack(false).then(() => {
+        expect(env.win.history.back.called).false;
+      });
+    });
+
     it('should get fragment', () => {
       bindingMock
         .expects('getFragment')

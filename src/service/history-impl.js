@@ -143,15 +143,20 @@ export class History {
   }
 
   /**
-   * Requests navigation one step back. This request is only satisifed
-   * when the history has at least one step to go back in the context
-   * of this document.
+   * Requests navigation one step back. This first attempts to go back within
+   * the context of this document. If there is no history left, then attempt
+   * the window's history.back.
+   *
+   * @param {boolean=} canPerformWindowBack
    * @return {!Promise}
    */
-  goBack() {
+  goBack(canPerformWindowBack) {
     return this.enque_(() => {
       if (this.stackIndex_ <= 0) {
         // Nothing left to pop.
+        if (canPerformWindowBack) {
+          this.ampdoc_.win.history.back();
+        }
         return Promise.resolve();
       }
       // Pop the current state. The binding will ignore the request if
