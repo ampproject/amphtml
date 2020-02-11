@@ -26,6 +26,7 @@ import {VisibilityState} from '../../../src/visibility-state';
 import {
   childElementByAttr,
   childElementsByTag,
+  insertAfterOrAtStart,
   isJsonScriptTag,
   removeChildren,
   removeElement,
@@ -35,7 +36,7 @@ import {
 import {clamp, mapRange} from '../../../src/utils/math';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {htmlFor} from '../../../src/static-template';
+import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {
   parseFavicon,
@@ -67,6 +68,7 @@ export const Transition = {
   FADE_IN: 'fade-in',
   FADE_IN_SCROLL: 'fade-in-scroll',
 };
+const ASYNC_NOOP = () => Promise.resolve();
 
 export class NextPageService {
   /**
@@ -78,6 +80,9 @@ export class NextPageService {
 
     /** @private @const {!Window} */
     this.win_ = ampdoc.win;
+
+    /** @private @const {!Document} */
+    this.doc_ = this.win_.document;
 
     /**
      * @private
@@ -98,7 +103,13 @@ export class NextPageService {
     this.separator_ = null;
 
     /** @private {?Element} */
-    this.moreBox_ = null;
+    this.footer_ = null;
+
+    /** @private {function():!Promise} */
+    this.refreshFooter_ = ASYNC_NOOP;
+
+    /** @private {boolean} */
+    this.finished_ = false;
 
     /** @private {?AmpElement} element */
     this.host_ = null;
@@ -175,11 +186,13 @@ export class NextPageService {
 
     // Get the separator and more box (and remove the provided elements in the process)
     this.separator_ = this.getSeparatorElement_(element);
-    this.moreBox_ = this.getMoreBoxElement_(element);
+    this.footer_ = this.getFooterElement_(element);
 
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
-    this.toggleHiddenAndReplaceableElements(this.win_.document);
+    this.toggleHiddenAndReplaceableElements(this.doc_);
+    // Have the footer be always visible
+    insertAfterOrAtStart(this.host_, this.footer_, null /** after */);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
@@ -191,9 +204,6 @@ export class NextPageService {
       Services.timerFor(this.win_)
     );
     this.visibilityObserver_ = new VisibilityObserver(this.ampdoc_);
-
-    // Have the suggestion box be always visible
-    this.host_.appendChild(this.moreBox_);
 
     if (!this.pages_) {
       this.pages_ = [this.hostPage_];
@@ -227,6 +237,9 @@ export class NextPageService {
    * @private
    */
   updateHostVisibility_() {
+    if (this.finished_) {
+      return;
+    }
     this.readyPromise_.then(() => {
       this.maybeFetchNext();
 
@@ -271,8 +284,10 @@ export class NextPageService {
    * @return {!Promise}
    */
   maybeFetchNext(force = false) {
+    devAssert(!this.finished_);
+
     // If a page is already queued to be fetched, wait for it
-    if (this.pages_.some(page => page.isFetching())) {
+    if (this.pages_.some(page => page.is(PageState.FETCHING))) {
       return Promise.resolve();
     }
     // If we're still too far from the bottom, early return
@@ -282,22 +297,32 @@ export class NextPageService {
 
     const pageCount = this.pages_.length;
     const nextPage = this.pages_[this.getPageIndex_(this.lastFetchedPage_) + 1];
-    if (!nextPage) {
-      return (
-        this.getRemotePages_()
-          .then(pages => this.queuePages_(pages))
-          // Queuing pages can result in no new pages (in case the server
-          // returned an empty array or the suggestions already exist in the queue)
-          .then(() => {
-            if (this.pages_.length <= pageCount) {
-              // Remote server did not return any new pages
-              return Promise.resolve();
-            }
-            return this.maybeFetchNext(true /** force */);
-          })
-      );
+    if (nextPage) {
+      return nextPage.fetch().then(() => {
+        if (nextPage.is(PageState.FAILED)) {
+          // Silently skip this page and get the footer ready in case
+          // this page is the last one
+          this.setLastFetchedPage(nextPage);
+          return this.refreshFooter_();
+        }
+      });
     }
-    return nextPage.fetch();
+
+    // Attempt to get more pages
+    return (
+      this.getRemotePages_()
+        .then(pages => this.queuePages_(pages))
+        // Queuing pages can result in no new pages (in case the server
+        // returned an empty array or the suggestions already exist in the queue)
+        .then(() => {
+          if (this.pages_.length <= pageCount) {
+            // Remote server did not return any new pages, update the footer and lock the state
+            this.finished_ = true;
+            return this.refreshFooter_();
+          }
+          return this.maybeFetchNext(true /** force */);
+        })
+    );
   }
 
   /**
@@ -395,11 +420,12 @@ export class NextPageService {
     // Find the ones that should be hidden (no longer inside the viewport)
     return Promise.all(
       previousPages
-        .filter(
-          page => page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT
-        )
+        .filter(page => {
+          // Pages that are outside of the viewport should be hidden
+          return page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT;
+        })
         .map((page, away) => {
-          // Hide all pages that are in the viewport
+          // Hide all pages whose visibility state have changed to hidden
           if (page.isVisible()) {
             page.setVisibility(VisibilityState.HIDDEN);
           }
@@ -435,7 +461,7 @@ export class NextPageService {
         Math.max(0, index - pausePageCount - 1),
         Math.min(this.pages_.length, index + pausePageCount + 1)
       )
-      .filter(page => page.isPaused());
+      .filter(page => page.is(PageState.PAUSED));
 
     return Promise.all(nearViewportPages.map(page => page.resume()));
   }
@@ -458,7 +484,7 @@ export class NextPageService {
       return;
     }
     const {title, url} = page;
-    this.win_.document.title = title;
+    this.doc_.title = title;
     this.history_.replace({title, url});
   }
 
@@ -476,17 +502,19 @@ export class NextPageService {
    * @return {!HostPage}
    */
   createHostPage() {
-    const doc = this.win_.document;
-    const {title, location} = doc;
+    const {title, location} = this.doc_;
     const {href: url} = location;
     const image =
-      parseSchemaImage(doc) || parseOgImage(doc) || parseFavicon(doc) || '';
+      parseSchemaImage(this.doc_) ||
+      parseOgImage(this.doc_) ||
+      parseFavicon(this.doc_) ||
+      '';
 
     // Any element that is outside of the <amp-next-page> element
     // is considered part of the host article
     const hostPageContents = toArray(
       scopedQuerySelectorAll(
-        dev().assertElement(doc.body),
+        dev().assertElement(this.doc_.body),
         '> *:not(amp-next-page)'
       )
     );
@@ -508,12 +536,12 @@ export class NextPageService {
       this,
       {
         url,
-        title,
+        title: title || '',
         image,
       },
       PageState.INSERTED /** initState */,
       VisibilityState.VISIBLE /** initVisibility */,
-      doc /** doc */,
+      this.doc_,
       hostPageContents
     ));
   }
@@ -522,23 +550,15 @@ export class NextPageService {
    * Create a container element for the document and insert it into
    * the amp-next-page element
    * @param {!Page} page
-   * @return {!Promise<!Element>}
+   * @return {!Element}
    */
   createDocumentContainerForPage(page) {
-    const container = this.win_.document.createElement('div');
+    const container = this.doc_.createElement('div');
     container.classList.add(DOC_CONTAINER_CLASS);
-    this.host_.insertBefore(container, dev().assertElement(this.moreBox_));
-
-    // Insert the separator
-    const separatorInstance = this.separator_.cloneNode(true);
-    container.appendChild(separatorInstance);
-    const separatorRenderPromise = this.maybeRenderSeparatorTemplate_(
-      separatorInstance,
-      page
-    );
+    this.host_.insertBefore(container, dev().assertElement(this.footer_));
 
     // Insert the document
-    const shadowRoot = this.win_.document.createElement('div');
+    const shadowRoot = this.doc_.createElement('div');
     shadowRoot.classList.add(SHADOW_ROOT_CLASS);
     container.appendChild(shadowRoot);
 
@@ -562,7 +582,7 @@ export class NextPageService {
       });
     }
 
-    return separatorRenderPromise.then(() => container);
+    return container;
   }
 
   /**
@@ -571,13 +591,13 @@ export class NextPageService {
    * @param {!Page} page
    * @param {!Document} content
    * @param {boolean=} force
-   * @return {?../../../src/runtime.ShadowDoc}
+   * @return {!Promise<?../../../src/runtime.ShadowDoc>}
    */
   attachDocumentToPage(page, content, force = false) {
     // If the user already scrolled to the bottom, prevent rendering
     if (this.getViewportsAway_() < NEAR_BOTTOM_VIEWPORT_COUNT && !force) {
       // TODO(wassgha): Append a "load next article" button?
-      return null;
+      return Promise.resolve();
     }
 
     const container = dev().assertElement(page.container);
@@ -590,7 +610,7 @@ export class NextPageService {
     // will need to replace placeholder
     // TODO(wassgha) This wouldn't be needed once we can resume a ShadowDoc
     if (!shadowRoot) {
-      devAssert(page.isPaused());
+      devAssert(page.is(PageState.PAUSED));
       const placeholder = dev().assertElement(
         scopedQuerySelector(
           container,
@@ -599,7 +619,7 @@ export class NextPageService {
         'Paused page does not have a placeholder'
       );
 
-      shadowRoot = this.win_.document.createElement('div');
+      shadowRoot = this.doc_.createElement('div');
       shadowRoot.classList.add(SHADOW_ROOT_CLASS);
 
       container.replaceChild(shadowRoot, placeholder);
@@ -625,10 +645,18 @@ export class NextPageService {
       const body = ampdoc.getBody();
       body.classList.add(DOC_CLASS);
 
-      return amp;
+      // Insert the separator
+      const separatorInstance = this.separator_.cloneNode(true);
+      insertAfterOrAtStart(container, separatorInstance, null /** after */);
+      const separatorPromise = this.maybeRenderSeparatorTemplate_(
+        separatorInstance,
+        page
+      );
+
+      return separatorPromise.then(() => amp);
     } catch (e) {
       dev().error(TAG, 'failed to attach shadow document for page', e);
-      return null;
+      return Promise.resolve();
     }
   }
 
@@ -639,7 +667,7 @@ export class NextPageService {
    * @return {!Promise}
    */
   closeDocument(page) {
-    if (page.isPaused()) {
+    if (page.is(PageState.PAUSED)) {
       return Promise.resolve();
     }
 
@@ -652,7 +680,7 @@ export class NextPageService {
     );
 
     // Create a placeholder that gets displayed when the document becomes inactive
-    const placeholder = this.win_.document.createElement('div');
+    const placeholder = this.doc_.createElement('div');
     placeholder.classList.add(PLACEHOLDER_CLASS);
 
     let docHeight = 0;
@@ -775,7 +803,7 @@ export class NextPageService {
         return response.text();
       })
       .then(html => {
-        const doc = this.win_.document.implementation.createHTMLDocument('');
+        const doc = this.doc_.implementation.createHTMLDocument('');
         doc.open();
         doc.write(html);
         doc.close();
@@ -808,6 +836,9 @@ export class NextPageService {
           return Promise.resolve();
         }
         return this.queuePages_(pages).then(() => {
+          // Render the initial footer template with all pages
+          this.refreshFooter_();
+          // Mark the page as ready
           this.readyResolver_();
         });
       });
@@ -820,7 +851,7 @@ export class NextPageService {
    * @return {!Promise}
    */
   queuePages_(pages) {
-    if (!pages.length) {
+    if (!pages.length || this.finished_) {
       return Promise.resolve();
     }
     // Queue the given pages
@@ -839,6 +870,7 @@ export class NextPageService {
         user().error(TAG, 'Failed to queue page due to error:', e);
       }
     });
+
     // To be safe, if the pages were parsed after the user
     // finished scrolling
     return this.maybeFetchNext();
@@ -916,8 +948,10 @@ export class NextPageService {
     const providedSeparator = childElementByAttr(element, 'separator');
     if (providedSeparator) {
       removeElement(providedSeparator);
+      return providedSeparator;
     }
-    return providedSeparator || this.buildDefaultSeparator_();
+    // If no separator is provided, we build a default one
+    return this.buildDefaultSeparator_();
   }
 
   /**
@@ -928,17 +962,16 @@ export class NextPageService {
     const html = htmlFor(this.getHost_());
     return html`
       <div
-        class="amp-next-page-default-separator"
+        class="amp-next-page-separator"
         aria-label="Next article separator"
-      >
-        Next article
-      </div>
+      ></div>
     `;
   }
 
   /**
    * Renders the template inside the separator element using
    * data from the current article (if a template is present)
+   * otherwise rehydrates the default separator
    *
    * @param {!Element} separator
    * @param {!Page} page
@@ -948,11 +981,13 @@ export class NextPageService {
     if (!this.templates_.hasTemplate(separator)) {
       return Promise.resolve();
     }
+
     const data = /** @type {!JsonObject} */ ({
       title: page.title,
       url: page.url,
       image: page.image,
     });
+
     return this.templates_
       .findAndRenderTemplate(separator, data)
       .then(rendered => {
@@ -968,23 +1003,103 @@ export class NextPageService {
    * @return {!Element}
    * @private
    */
-  getMoreBoxElement_(element) {
-    const providedMoreBox = childElementByAttr(element, 'more-box');
-    // TODO(wassgha): Use templates (amp-mustache) to render the more box
-    if (providedMoreBox) {
-      removeElement(providedMoreBox);
+  getFooterElement_(element) {
+    const providedFooter = childElementByAttr(element, 'footer');
+    if (providedFooter) {
+      this.refreshFooter_ = this.templates_.hasTemplate(providedFooter)
+        ? () => this.renderFooterTemplate_()
+        : ASYNC_NOOP;
+      removeElement(providedFooter);
+      return providedFooter;
     }
-    return providedMoreBox || this.buildDefaultMoreBox_();
+    // If no footer is provided then we build a default one
+    this.refreshFooter_ = () => this.refreshDefaultFooter_();
+    return this.buildDefaultFooter_();
   }
 
   /**
    * @return {!Element}
    * @private
    */
-  buildDefaultMoreBox_() {
-    // TODO(wassgha): Better default more box
-    const moreBox = this.win_.document.createElement('div');
-    moreBox.classList.add('amp-next-page-default-more-box');
-    return moreBox;
+  buildDefaultFooter_() {
+    const html = htmlFor(this.getHost_());
+    return html`
+      <div class="amp-next-page-footer" aria-label="Read more articles"></div>
+    `;
+  }
+
+  /**
+   * Renders the template inside the footer element using
+   * data from the current articles
+   *
+   * @return {!Promise}
+   */
+  renderFooterTemplate_() {
+    const footer = dev().assertElement(this.footer_);
+    devAssert(this.templates_.hasTemplate(footer));
+
+    const data = /** @type {!JsonObject} */ ({
+      pages: (this.pages_ || [])
+        .filter(page => !page.isLoaded() && !page.is(PageState.FETCHING))
+        .map(page => ({
+          title: page.title,
+          url: page.url,
+          image: page.image,
+        })),
+    });
+
+    // Re-render templated footer (if needed)
+    return this.templates_
+      .findAndRenderTemplate(footer, data)
+      .then(rendered => {
+        return this.mutator_.mutateElement(footer, () => {
+          removeChildren(dev().assertElement(footer));
+          footer.appendChild(rendered);
+        });
+      });
+  }
+
+  /**
+   * Renders the template inside the footer element using
+   * data from the current articles (if a template is present)
+   * otherwise rehydrates the default footer element
+   *
+   * @return {!Promise}
+   */
+  refreshDefaultFooter_() {
+    const footer = dev().assertElement(this.footer_);
+    const data = /** @type {!JsonObject} */ ({
+      pages: (this.pages_ || [])
+        .filter(page => !page.isLoaded() && !page.is(PageState.FETCHING))
+        .map(page => ({
+          title: page.title,
+          url: page.url,
+          image: page.image,
+        })),
+    });
+
+    const html = htmlFor(this.getHost_());
+    const content = this.doc_.createElement('div');
+    content.classList.add('amp-next-page-footer-content');
+
+    data['pages'].forEach(page => {
+      const article = html`
+        <a class="amp-next-page-footer-article">
+          <img ref="image" class="amp-next-page-footer-image" />
+          <span ref="title" class="amp-next-page-footer-title"></span>
+        </a>
+      `;
+      const {image, title} = htmlRefs(article);
+      image.src = page.image;
+      title.textContent = page.title;
+      article.href = page.url;
+
+      content.appendChild(article);
+    });
+
+    return this.mutator_.mutateElement(footer, () => {
+      removeChildren(dev().assertElement(footer));
+      footer.appendChild(content);
+    });
   }
 }

@@ -75,12 +75,12 @@ For a list of variables supported in `amp-analytics`, see [Variable Substitution
 
 will resolve to `default` if `foo` and `bar` are not parameters.
 
-One known caveat is when substituting a variable for a macro (not including its argument list), where the argument list contains macro:
+One known caveat is when substituting a variable for a macro (not including its argument list), where the argument list contains macros with arguments:
 
 ```javascript
 {
   "request": {
-    "base": "example.com/${a(1,2)}${a(RANDOM,$NOT(true))}"
+    "base": "example.com/${a(1,TIMEZONE_CODE)}${a(RANDOM,$NOT(true))}"
   },
   "vars": {
     "a": "QUERY_PARAM"
@@ -88,4 +88,6 @@ One known caveat is when substituting a variable for a macro (not including its 
 }
 ```
 
-This will result in the first QUERY_PARAM working as intended but the second QUERY_PARAM will not get parsed corretly due to the macros within.
+This will result in the first QUERY_PARAM working as intended but the second QUERY_PARAM will not get parsed corretly due to the second pair of parenthesis from the macros within.
+
+Similar to this, another restriction is nesting analytics variables within each other (`${queryParam(${title},${canonicalUrl})}`). Instead, use the platform version (or a combination): `QUERY_PARAM(TITLE,${myVariable})`.
