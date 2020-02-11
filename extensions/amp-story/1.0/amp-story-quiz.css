@@ -206,7 +206,6 @@ h3.i-amphtml-story-quiz-prompt {
     border-radius: var(--chip-radius) !important;
     font-size: 16px !important;
     line-height: 20px !important;
-    filter: brightness(0.94) !important;
 }
 
 .i-amphtml-story-quiz-post-selection:not(.i-amphtml-story-quiz-has-data) .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option::before {
