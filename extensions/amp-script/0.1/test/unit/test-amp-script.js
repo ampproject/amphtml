@@ -230,46 +230,68 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
   });
 });
 
-describes.fakeWin('AmpScriptService', {amp: {runtimeOn: false}}, env => {
-  let crypto;
-  let service;
+describes.repeated(
+  '',
+  {
+    'single ampdoc': {ampdoc: 'single'},
+    'shadow ampdoc': {ampdoc: 'shadow'},
+  },
+  (name, variant) => {
+    describes.fakeWin(
+      'AmpScriptService',
+      {
+        amp: {
+          runtimeOn: false,
+          ampdoc: variant.ampdoc,
+        },
+      },
+      env => {
+        let crypto;
+        let service;
 
-  beforeEach(() => {
-    crypto = {sha384Base64: env.sandbox.stub()};
-    env.sandbox.stub(Services, 'cryptoFor').returns(crypto);
-  });
+        beforeEach(() => {
+          crypto = {sha384Base64: env.sandbox.stub()};
+          env.sandbox.stub(Services, 'cryptoFor').returns(crypto);
+        });
 
-  function createMetaTag(name, content) {
-    const meta = document.createElement('meta');
-    meta.setAttribute('name', name);
-    meta.setAttribute('content', content);
-    env.ampdoc.getHeadNode().appendChild(meta);
+        function createMetaHash(name, content) {
+          if (variant.ampdoc === 'shadow') {
+            env.ampdoc.setMetaByName(name, content);
+          } else {
+            const meta = document.createElement('meta');
+            meta.setAttribute('name', name);
+            meta.setAttribute('content', content);
+            env.ampdoc.getHeadNode().appendChild(meta);
+          }
+        }
+
+        describe('checkSha384', () => {
+          it('should resolve if hash exists in meta tag', async () => {
+            createMetaHash('amp-script-src', 'sha384-my_fake_hash');
+
+            service = new AmpScriptService(env.ampdoc);
+
+            crypto.sha384Base64.resolves('my_fake_hash');
+
+            const promise = service.checkSha384('alert(1)', 'foo');
+            return promise.should.be.fulfilled;
+          });
+
+          it('should reject if hash does not exist in meta tag', () => {
+            createMetaHash('amp-script-src', 'sha384-another_fake_hash');
+
+            service = new AmpScriptService(env.ampdoc);
+
+            crypto.sha384Base64.resolves('my_fake_hash');
+
+            const promise = service.checkSha384('alert(1)', 'foo');
+            return promise.should.be.rejected;
+          });
+        });
+      }
+    );
   }
-
-  describe('checkSha384', () => {
-    it('should resolve if hash exists in meta tag', async () => {
-      createMetaTag('amp-script-src', 'sha384-my_fake_hash');
-
-      service = new AmpScriptService(env.ampdoc);
-
-      crypto.sha384Base64.resolves('my_fake_hash');
-
-      const promise = service.checkSha384('alert(1)', 'foo');
-      return promise.should.be.fulfilled;
-    });
-
-    it('should reject if hash does not exist in meta tag', () => {
-      createMetaTag('amp-script-src', 'sha384-another_fake_hash');
-
-      service = new AmpScriptService(env.ampdoc);
-
-      crypto.sha384Base64.resolves('my_fake_hash');
-
-      const promise = service.checkSha384('alert(1)', 'foo');
-      return promise.should.be.rejected;
-    });
-  });
-});
+);
 
 describe('SanitizerImpl', () => {
   let el;
