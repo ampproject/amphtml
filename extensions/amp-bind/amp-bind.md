@@ -63,7 +63,7 @@ limitations under the License.
 
 The `amp-bind` component enables custom stateful interactivity on AMP pages.
 
-For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely `amp-bind` for initial render.
+For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely on `amp-bind` for initial render.
 
 <figure class="alignment-wrapper  margin-">
 <amp-youtube
@@ -76,7 +76,7 @@ For performance and to avoid the risk of unexpected content jumping, `amp-bind` 
 
 1. [State](#state): A document-scope, mutable JSON state. State variables update in response to user actions. `amp-bind` does not evaluate expressions on page load. Visual elements should have their default "state" defined and not rely `amp-bind` for initial render.
 2. [Expressions](#expressions): JavaScript-like expressions that can reference the **state**.
-3. [Bindings](#bindings): Special attributes that link an element's property to an **expression**. A property is bound by wrapping it inside brackets, in the form of `[property]`.
+3. [Bindings](#bindings): Special attributes that link an element's property to a **state** via an **expression**. A property is bound by wrapping it inside brackets, in the form of `[property]`.
 
 ### Basic example
 
@@ -96,12 +96,14 @@ In the example above:
 
 - The **state** begins as empty.
 - It has a single **binding** to `[text]`, the text content of a node, on the `<p>` element.
-- The `[text]` value contains the **expression**, `'Hello ' + foo`.
-  - This expression concatenates the string 'Hello ' and the value of the **state variable** foo.
-- When the user taps/clicks the button, it triggers the `tap` event.
-- The `tap` event invokes the `AMP.setState()` method.
-- The `AMP.setState()` methods sets the `foo` **state variable** to the value of `Interactivity`.
-- The sate is no longer empty, so the pages updates the bound property to its state.
+- The `[text]` value contains the **expression**, `'Hello ' + foo`. This expression concatenates the string 'Hello ' and the value of the **state variable** foo.
+
+When the user taps/clicks the button:
+
+1. It triggers the `tap` event.
+1. The `tap` event invokes the `AMP.setState()` method.
+1. The `AMP.setState()` methods sets the `foo` **state variable** to the value of `Interactivity`.
+1. The state is no longer empty, so the page updates the bound property to its state.
 
 [tip type="note"]
 Calling `AMP.setState()` in some examples may set or change states of other examples on page. Refresh this page to see examples before `AMP.setState()`.
@@ -114,6 +116,7 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
 [example preview="top-frame" playground="true" imports="amp-bind"]
 
 ```html
+<head>
   <style amp-custom>
     .greenBorder {
       border: 5px solid green;
@@ -156,7 +159,7 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
 
 In the example above:
 
-- The `<amp-state>` component holds the complex nested JSON data. It has an `id` of "theFood" to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the **state** is empty.
+- The `<amp-state>` component declares state using a JSON string literal. It has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the **state** is empty.
 - The page loads with visual defaults.
   - The `<div>` element has `class="greenBorder"` defined.
   - The second `<p>` element has "I want cupcakes." defined within the tags.
@@ -168,16 +171,16 @@ In the example above:
 
 If a user clicks the "Set to sushi" button:
 
-- The `tap` event trigger the `AMP.setState` action.
-- The setState action turns `currentMeal` into a state and sets it to `sushi`.
-- AMP evaluates **bindings** with **expressions** that contain the state `currentMeal`.
-  - `[class]="theFood[currentMeal].style"` updates `class` to `redBorder`.
-  - `[text]="'I want to eat ' + currentMeal + '.'"` updates the inner text of the second `<p>` element to "I want to eat sushi".
-  - `[src]="theFood[currentMeal].imageUrl` updates the `src` of `<amp-img>` to `https://amp.dev/static/samples/img/image3.jpg`
+1. The `tap` event trigger the `AMP.setState` action.
+1. The setState action turns `currentMeal` into a state and sets it to `sushi`.
+1. AMP evaluates **bindings** with **expressions** that contain the state `currentMeal`.
+1. `[class]="theFood[currentMeal].style"` updates `class` to `redBorder`.
+1. `[text]="'I want to eat ' + currentMeal + '.'"` updates the inner text of the second `<p>` element to "I want to eat sushi".
+1. `[src]="theFood[currentMeal].imageUrl` updates the `src` of `<amp-img>` to `https://amp.dev/static/samples/img/image3.jpg`
 
 Using `[class]="theFood[currentMeal].style"` as an example of **expression** syntax evaluation:
 
-- `[class]` is the property to update
+- `[class]` is the property to update.
 - `theFood` is the id of the `<amp-state>` component.
 - `currentMeal` is the state name. In the case of `theFood` it will be `cupcakes` or `sushi`.
 - `style` is the **state variable**. It corresponds to the matching JSON key, and sets the bound property to that key's value.
@@ -223,7 +226,7 @@ Using `[class]="theFood[currentMeal].style"` as an example of **expression** syn
 
 [/example]
 
-- The `<amp-state>` component holds the complex nested JSON data. It has an `id` of "theFood" to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on email load, the **state** is empty.
+- The `<amp-state>` component declares state using a JSON string literal. It has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on email load, the **state** is empty.
 - The page loads with visual defaults.
 - The `<div>` element has `class="greenBorder"` defined.
 - The second `<p>` element has "I want cupcakes." defined within the tags.
@@ -234,11 +237,11 @@ Using `[class]="theFood[currentMeal].style"` as an example of **expression** syn
 
 If a user clicks the "Set to sushi" button:
 
-- The `tap` event trigger the `AMP.setState` action.
-- The setState action turns `currentMeal` into a state and sets it to `sushi`.
-- AMP evaluates **bindings** with **expressions** that contain the state `currentMeal`.
-- `[class]="theFood[currentMeal].style` updates `class` to `redBorder`.
-- `theFood[currentMeal].text` updates the inner text of the second `<p>` element to "Actually, I want to eat sushi.".
+1. The `tap` event trigger the `AMP.setState` action.
+1. The setState action turns `currentMeal` into a state and sets it to `sushi`.
+1. AMP evaluates **bindings** with **expressions** that contain the state `currentMeal`.
+1. `[class]="theFood[currentMeal].style` updates `class` to `redBorder`.
+1. `theFood[currentMeal].text` updates the inner text of the second `<p>` element to "Actually, I want to eat sushi.".
 
 Using `[class]="theFood[currentMeal].style"` as an example of **expression** syntax evaluation:
 
@@ -291,7 +294,7 @@ An `amp-state` element must contain a child `<script>` element.
 
 ##### `src` (optional)
 
-The URL of the remote endpoint that will return the JSON that will update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+The URL of the remote endpoint that will return the JSON and update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 [tip type="important"]
 The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
@@ -308,6 +311,26 @@ To send credentials, pass the value of `include`. If this value is set, the resp
 [/filter] <!-- formats="websites, stories, ads" -->
 
 [filter formats="email"]
+
+#### Actions
+
+##### `refresh`
+
+The `refresh` action refetches data from data point the `src` attribute points to. It ignores the browser cache.
+
+[example preview="inline" playground="true" imports="amp-bind"]
+
+```html
+<amp-state id="currentTime" src="/documentation/examples/api/time"></amp-state>
+<button on="tap:currentTime.refresh">
+  Refresh
+</button>
+<div [text]="currentTime.time"></div>
+```
+
+[/example]
+
+A common need for `refresh` is working with live content that needs to be updated, such as a live sports score.
 
 #### XHR batching
 
@@ -522,24 +545,6 @@ Calling `AMP.setState()` deep-merges the provided object literal with the curren
 ```
 
 [/example]
-
-### Refreshing state data
-
-The `refresh` action refetches data from data point the `src` attribute points to. It ignores the browser cache.
-
-[example preview="inline" playground="true" imports="amp-bind"]
-
-```html
-<amp-state id="currentTime" src="/documentation/examples/api/time"></amp-state>
-<button on="tap:currentTime.refresh">
-  Refresh
-</button>
-<div [text]="currentTime.time"></div>
-```
-
-[/example]
-
-A common need for `refresh` is working with live content that needs to be updated, such as a live sports score.
 
 ### Modifying history with `AMP.pushState()`
 
@@ -841,123 +846,6 @@ Static functions are not namespaced, e.g. use `keys(Object)` instead of `Object.
 
 [/example]
 
-#### Expression grammar
-
-The BNF-like grammar for `amp-bind` expressions:
-
-```text
-expr:
-    operation
-  | invocation
-  | member_access
-  | '(' expr ')'
-  | variable
-  | literal
-  ;
-
-operation:
-    '!' expr
-  | '-' expr %prec UMINUS
-  | '+' expr %prec UPLUS
-  |  expr '+' expr
-  | expr '-' expr
-  | expr '*' expr
-  | expr '/' expr
-  | expr '%' expr
-  | expr '&&' expr
-  | expr '||' expr
-  | expr '<=' expr
-  | expr '<' expr
-  | expr '>=' expr
-  | expr '>' expr
-  | expr '!=' expr
-  | expr '==' expr
-  | expr '?' expr ':' expr
-  ;
-
-invocation:
-    NAME args
-  | expr '.' NAME args
-  | expr '.' NAME '(' arrow_function ')'
-  | expr '.' NAME '(' arrow_function ',' expr ')'
-  ;
-
-arrow_function:
-    '(' ')' '=>' expr
-  | NAME '=>' expr
-  | '(' params ')' '=>' expr
-  ;
-
-params:
-    NAME ',' NAME
-  | params ',' NAME
-  ;
-
-args:
-    '(' ')'
-  | '(' array ')'
-  ;
-
-member_access:
-    expr member
-  ;
-
-member:
-    '.' NAME
-  | '[' expr ']'
-  ;
-
-variable:
-    NAME
-  ;
-
-literal:
-    primitive
-  | object_literal
-  | array_literal
-  ;
-
-primitive:
-    STRING
-  | NUMBER
-  | TRUE
-  | FALSE
-  | NULL
-  ;
-
-array_literal:
-    '[' ']'
-  | '[' array ']'
-  | '[' array ',' ']'
-  ;
-
-array:
-    expr
-  | array ',' expr
-  ;
-
-object_literal:
-    '{' '}'
-  | '{' object '}'
-  | '{' object ',' '}'
-  ;
-
-object:
-    key_value
-  | object ',' key_value
-  ;
-
-key_value:
-  key ':' expr
-  ;
-
-key:
-    NAME
-  | primitive
-  | '[' expr ']'
-  ;
-```
-
 ### Defining macros with `amp-bind-macro`
 
 Reuse `amp-bind` expression fragments by defining an `amp-bind-macro`. The `amp-bind-macro` element allows an expression that takes zero or more arguments and references the current state. Invoke `amp-bind-macros` like a function, referencing the `id` attribute value from anywhere in the document.
@@ -1030,9 +918,9 @@ Boolean expression results toggle boolean attributes. For example: `<amp-video [
 
 [/example]
 
-### XML compatibility
+### React and XML compatibility
 
-If developing with XML, use the alternative `data-amp-bind-property` syntax. The `[` and `]` characters in attribute names is invalid XML, making the `[property]` syntax unavailable.
+If developing with React or XML, use the alternative `data-amp-bind-property` syntax. The `[` and `]` characters in attribute names is invalid XML, making the `[property]` syntax unavailable.
 
 Replace the `property` field with the name of the property you would like to define in `data-amp-bind-property`.
 
@@ -1075,6 +963,10 @@ Bind an element's `class` using the `[class]` attribute. A `[class]` expression 
 <!-- This button adds both classes -->
 <button on="tap:AMP.setState({ myClass: 'background-green border-red' })">
   Working: Change Class
+</button>
+<!-- String arrays also work -->
+<button on="tap:AMP.setState({ myClass: ['background-green'] ,['border-red'] })">
+  Working string array: Change Class
 </button>
 <!-- This expression evaluates to class="background-green,border-red" -->
 <button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">
@@ -1557,3 +1449,120 @@ Below outlines the types of errors that may arise when working with `amp-bind`.
 ### Debugging State
 
 Use `AMP.printState()` to print the current state to the console.
+
+### Expression grammar
+
+The BNF-like grammar for `amp-bind` expressions:
+
+```text
+expr:
+    operation
+  | invocation
+  | member_access
+  | '(' expr ')'
+  | variable
+  | literal
+  ;
+
+operation:
+    '!' expr
+  | '-' expr %prec UMINUS
+  | '+' expr %prec UPLUS
+  |  expr '+' expr
+  | expr '-' expr
+  | expr '*' expr
+  | expr '/' expr
+  | expr '%' expr
+  | expr '&&' expr
+  | expr '||' expr
+  | expr '<=' expr
+  | expr '<' expr
+  | expr '>=' expr
+  | expr '>' expr
+  | expr '!=' expr
+  | expr '==' expr
+  | expr '?' expr ':' expr
+  ;
+
+invocation:
+    NAME args
+  | expr '.' NAME args
+  | expr '.' NAME '(' arrow_function ')'
+  | expr '.' NAME '(' arrow_function ',' expr ')'
+  ;
+
+arrow_function:
+    '(' ')' '=>' expr
+  | NAME '=>' expr
+  | '(' params ')' '=>' expr
+  ;
+
+params:
+    NAME ',' NAME
+  | params ',' NAME
+  ;
+
+args:
+    '(' ')'
+  | '(' array ')'
+  ;
+
+member_access:
+    expr member
+  ;
+
+member:
+    '.' NAME
+  | '[' expr ']'
+  ;
+
+variable:
+    NAME
+  ;
+
+literal:
+    primitive
+  | object_literal
+  | array_literal
+  ;
+
+primitive:
+    STRING
+  | NUMBER
+  | TRUE
+  | FALSE
+  | NULL
+  ;
+
+array_literal:
+    '[' ']'
+  | '[' array ']'
+  | '[' array ',' ']'
+  ;
+
+array:
+    expr
+  | array ',' expr
+  ;
+
+object_literal:
+    '{' '}'
+  | '{' object '}'
+  | '{' object ',' '}'
+  ;
+
+object:
+    key_value
+  | object ',' key_value
+  ;
+
+key_value:
+  key ':' expr
+  ;
+
+key:
+    NAME
+  | primitive
+  | '[' expr ']'
+  ;
+```

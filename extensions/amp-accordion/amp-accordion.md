@@ -29,7 +29,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>A clickable stacked list of headers that reveal or hide content associated with them.</td>
+    <td>A clickable stacked list of headers that collapse or expand content sections.  associated with them.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -71,9 +71,9 @@ The `amp-accordion` component allows you to display collapsible and expandable c
 
 [/filter] <!-- formats="email" -->
 
-#### Example
+### Example
 
-The example below contains an `amp-accordion` with three sections. Use of the `expanded` attribute on the third section expands it on page load. [filter formats="websites, ads"]Preserving the collapsed/expanded state is disable by including the `disable-session-state` attribute.[/filter] <!-- formats="websites, ads" -->
+The example below contains an `amp-accordion` with three sections. The `expanded` attribute on the third section expands it on page load. [filter formats="websites, ads"]Including the `disable-session-state` attribute preserves the collapsed/expanded state.[/filter] <!-- formats="websites, ads" -->
 
 [example preview="inline" playground="true" imports="amp-accordion"]
 
@@ -98,9 +98,9 @@ The example below contains an `amp-accordion` with three sections. Use of the `e
 
 [/example]
 
-#### Attributes
+## Attributes
 
-##### `animate`
+### `animate`
 
 Include the `animate` attribute on `<amp-accordion>` to add a slight "roll down" animation on expansion, and "roll up" animation on collapse.
 
@@ -131,17 +131,17 @@ Include the `animate` attribute on `<amp-accordion>` to add a slight "roll down"
 
 [filter formats="websites, stories"]
 
-##### `disable-session-states`
+### `disable-session-states`
 
 Include the `disable-session-states` attribute on `<amp-accordion>` to disable collapsed/expanded state preservation.
 
 [/filter]<!-- formats="websites, stories" -->
 
-##### `expanded`
+### `expanded`
 
 Include the `expanded` attribute on a nested `<section>` to display the section as expanded on page load.
 
-##### `expand-single-section`
+### `expand-single-section`
 
 Include the `expand-single-section` attribute to enforce one `<section>` expansion at a time. If the user clicks/taps on an unopened `<section>`, any currently expanded `<section>` will collapse.
 
@@ -170,7 +170,7 @@ Include the `expand-single-section` attribute to enforce one `<section>` expansi
 
 [/example]
 
-##### `[data-expand]`
+### `[data-expand]`
 
 Bind the `[data-expand]` attribute on a `<section>` to expand or collapse the section. An expanded section will collapse if the expression evaluates to false. A collapsed section will expand if the expression evaluates to anything that is not false.
 
@@ -202,9 +202,9 @@ Bind the `[data-expand]` attribute on a `<section>` to expand or collapse the se
 
 [filter formats="websites, stories"]
 
-### Actions
+## Actions
 
-#### `toggle`
+### `toggle`
 
 The `toggle` action switches the `expanded` and `collapsed` states of the `amp-accordion` sections. When called with no arguments, it will toggle all sections of the accordion. Specify a specific section by adding the `section` argument and the corresponding `id` as the value.
 
@@ -233,7 +233,7 @@ The `toggle` action switches the `expanded` and `collapsed` states of the `amp-a
 
 [/example]
 
-#### `expand`
+### `expand`
 
 The `expand` action expands the sections of the `amp-accordion`. If a section is already expanded, it will stay expanded. When called with no arguments, it will expand all sections of the accordion. Specify a specific section by adding the `section` argument and the corresponding `id` as the value.
 
@@ -244,7 +244,7 @@ The `expand` action expands the sections of the `amp-accordion`. If a section is
 </button>
 ```
 
-#### `collapse`
+### `collapse`
 
 The `collapse` action collapses the sections of the `amp-accordion`. If a section is already collapsed, it will stay collapsed. When called with no argument, it will collapse all section of the accordion. Specify a specific section by adding the `section` argument and the corresponding `id` as the value.
 
@@ -257,9 +257,9 @@ The `collapse` action collapses the sections of the `amp-accordion`. If a sectio
 
 [/filter]<!-- formats="websites, stories" -->
 
-### Events
+## Events
 
-The `amp-accordion` events below trigger on accordion sections.
+The `amp-accordion` events below trigger on accordion sections when clicked.
 
 [example preview="inline" playground="true" imports="amp-accordion"]
 
@@ -282,11 +282,11 @@ The `amp-accordion` events below trigger on accordion sections.
 
 [/example]
 
-#### `expand`
+### `expand`
 
 The `expand` event triggers on the target `amp-accordion` section that changes from the collapsed state to the expanded state. Calling `expand` on an already expanded section will not trigger the event.
 
-#### `collapse`
+### `collapse`
 
 The `collapse` event triggers on the target `amp-accordion` section that changes from the expanded state to the collapsed state. Calling `collapse` on an already collapsed section will not trigger the event.
 
@@ -309,7 +309,7 @@ amp-accordion {
 
 ## Accessibility
 
-`amp-accordion` automatically ads the following [ARIA attributes](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA):
+`amp-accordion` automatically adds the following [ARIA attributes](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA):
 
 - [`aria-controls`](https://www.w3.org/TR/wai-aria-1.1/#aria-controls): applied to the header element of each `amp-accordion` section.
 - [`aria-expanded` (state)](https://www.w3.org/TR/wai-aria-1.1/#aria-expanded): applied to the header element of each `amp-accordion` section.
