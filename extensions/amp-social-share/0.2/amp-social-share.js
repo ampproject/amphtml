@@ -32,11 +32,11 @@ const TAG = 'amp-social-share';
 class AmpSocialShare extends PreactBaseElement {
   /** @override */
   init() {
-    const renderDict = {
+    const renderDict = dict({
       'render': (_, ...children) => {
         return createElement(Fragment, null, children);
       },
-    };
+    });
     const viewer = Services.viewerForDoc(this.element);
     const platform = Services.platformFor(window);
     const typeConfig = this.getTypeConfigOrUndefined_(
@@ -64,10 +64,10 @@ class AmpSocialShare extends PreactBaseElement {
 
   /**
    * @private
-   * @param {string=} type
+   * @param {?string} type
    * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
    * @param {!../../../src/service/platform-impl.Platform} platform
-   * @return {dict=}
+   * @return {!JsonObject|undefined}
    */
   getTypeConfigOrUndefined_(type, viewer, platform) {
     userAssert(type, 'The type attribute is required. %s', this.element);
@@ -120,7 +120,7 @@ class AmpSocialShare extends PreactBaseElement {
    * because their values are resolved asynchronously.
    *
    * @private
-   * @param {dict} typeConfig
+   * @param {!JsonObject} typeConfig
    * @param {!../../../src/service/platform-impl.Platform} platform
    */
   setHrefAndTargetContext_(typeConfig, platform) {
@@ -130,10 +130,8 @@ class AmpSocialShare extends PreactBaseElement {
       'The data-share-endpoint attribute is required. %s',
       this.element
     );
-    const urlParams = {
-      ...typeConfig['defaultParams'],
-      ...getDataParamsFromAttributes(this.element),
-    };
+    const urlParams = getDataParamsFromAttributes(this.element);
+    Object.assign(urlParams, typeConfig['defaultParams']);
     const hrefWithVars = addParamsToUrl(
       dev().assertString(shareEndpoint),
       urlParams

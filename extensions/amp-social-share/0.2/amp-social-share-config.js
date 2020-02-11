@@ -19,7 +19,7 @@ import {dict} from '../../../src/utils/object';
 /**
  * Get social share configurations by supported type.
  * @param  {string} type
- * @return {!Object}
+ * @return {!JsonObject}
  */
 export function getSocialConfig(type) {
   return BUILTINS[type];
