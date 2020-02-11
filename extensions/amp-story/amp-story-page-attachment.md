@@ -93,7 +93,9 @@ Values: "light" (default), "dark"
 
 Story page attachments allow the same HTML elements as AMP Story along with additional components listed below, such as third party video players or social media embeds. This means you can add additional content that is too verbose or disallowed in an AMP Story page.
 
-<summary>List of allowed AMP components in a page attachment</summary>
+<details>
+  <summary>List of allowed AMP components in a page attachment</summary>
+</details>
 <ul>
   <li><code>&lt;amp-3d-gltf></code></li>
   <li><code>&lt;amp-3q-player></code></li>
