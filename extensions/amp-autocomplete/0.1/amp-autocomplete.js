@@ -249,13 +249,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_.setAttribute('aria-autocomplete', 'both');
     this.inputElement_.setAttribute('role', 'combobox');
 
-    if (
-      this.inputElement_.form &&
-      this.inputElement_.form.hasAttribute('autocomplete')
-    ) {
-      this.initialAutocompleteAttr_ = this.inputElement_.form.getAttribute(
-        'autocomplete'
-      );
+    const form = this.getFormOrNull_();
+    if (form && form.hasAttribute('autocomplete')) {
+      this.initialAutocompleteAttr_ = form.getAttribute('autocomplete');
     }
 
     // When SSR is supported, it is required.
@@ -328,6 +324,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.element
     );
     return /** @type {!HTMLInputElement} */ (possibleElements[0]);
+  }
+
+  /**
+   * @return {?HTMLFormElement}
+   */
+  getFormOrNull_() {
+    return this.inputElement_.form || null;
   }
 
   /**
@@ -901,16 +904,14 @@ export class AmpAutocomplete extends AMP.BaseElement {
    */
   toggleResultsHandler_(display) {
     // Set/reset "autocomplete" attribute on <form> ancestor if present.
-    if (this.inputElement_.form) {
+    const form = this.getFormOrNull_();
+    if (form) {
       if (display) {
-        this.inputElement_.form.setAttribute('autocomplete', 'off');
+        form.setAttribute('autocomplete', 'off');
       } else if (this.initialAutocompleteAttr_) {
-        this.inputElement_.form.setAttribute(
-          'autocomplete',
-          this.initialAutocompleteAttr_
-        );
+        form.setAttribute('autocomplete', this.initialAutocompleteAttr_);
       } else {
-        this.inputElement_.form.removeAttribute('autocomplete');
+        form.removeAttribute('autocomplete');
       }
     }
 
