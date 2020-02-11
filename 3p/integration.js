@@ -254,6 +254,7 @@ import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
+import {temedya} from '../ads/temedya';
 import {torimochi} from '../ads/torimochi';
 import {tracdelight} from '../ads/tracdelight';
 import {triplelift} from '../ads/triplelift';
@@ -270,6 +271,7 @@ import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
+import {whopainfeed} from '../ads/whopainfeed';
 import {widespace} from '../ads/widespace';
 import {wisteria} from '../ads/wisteria';
 import {wpmedia} from '../ads/wpmedia';
@@ -327,6 +329,8 @@ const AMP_EMBED_ALLOWED = {
   strossle: true,
   svknative: true,
   taboola: true,
+  temedya: true,
+  whopainfeed: true,
   yahoonativeads: true,
   zen: true,
   zergnet: true,
@@ -543,6 +547,7 @@ register('swoop', swoop);
 register('taboola', taboola);
 register('tcsemotion', tcsemotion);
 register('teads', teads);
+register('temedya', temedya);
 register('torimochi', torimochi);
 register('tracdelight', tracdelight);
 register('triplelift', triplelift);
@@ -561,6 +566,7 @@ register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
+register('whopainfeed', whopainfeed);
 register('widespace', widespace);
 register('wisteria', wisteria);
 register('wpmedia', wpmedia);
