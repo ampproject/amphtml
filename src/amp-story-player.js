@@ -136,6 +136,8 @@ export class AmpStoryPlayer {
           iframe => iframe === iframeEl
         );
 
+        messaging.setDefaultHandler(() => {});
+
         this.messagingFor_[iframeIdx] = messaging;
 
         // TODO(#26308): Appropiately set visibility to stories.
@@ -222,6 +224,7 @@ export class AmpStoryPlayer {
       'amp_js_v': '0.1',
       'visibilityState': 'inactive',
       'origin': url.origin,
+      'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
     });
 
