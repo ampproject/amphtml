@@ -141,7 +141,7 @@ export class AutocompleteBindingSingle {
    * @param {boolean} unusedActiveElement
    * @return {boolean}
    */
-  shouldPreventFormSubmissionOnEnter(unusedActiveElement) {
+  shouldPreventDefaultOnEnter(unusedActiveElement) {
     return !this.submitOnEnter_;
   }
 }

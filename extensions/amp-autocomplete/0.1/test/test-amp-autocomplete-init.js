@@ -348,14 +348,10 @@ describes.realWin(
       });
     });
 
-    it('should error without the form ancestor', () => {
-      return allowConsoleError(() => {
-        const autocomplete = setupAutocomplete({'filter': 'substring'});
-        doc.body.appendChild(autocomplete);
-        return expect(autocomplete.build()).to.be.rejectedWith(
-          'amp-autocomplete should be inside a <form> tag'
-        );
-      });
+    it('should not require a form ancestor', () => {
+      const autocomplete = setupAutocomplete({'filter': 'substring'});
+      doc.body.appendChild(autocomplete);
+      return expect(autocomplete.build()).to.be.fulfilled;
     });
 
     it('should read the autocomplete attribute on the form as null', () => {

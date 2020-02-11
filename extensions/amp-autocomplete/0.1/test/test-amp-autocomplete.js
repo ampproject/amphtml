@@ -39,7 +39,6 @@ describes.realWin(
     });
 
     function buildAmpAutocomplete(wantSsr) {
-      const form = doc.createElement('form');
       const element = createElementWithAttributes(doc, 'amp-autocomplete', {
         layout: 'container',
         filter: 'substring',
@@ -54,8 +53,7 @@ describes.realWin(
       script.innerHTML = '{ "items" : ["apple", "banana", "orange"] }';
       element.appendChild(script);
 
-      form.appendChild(element);
-      doc.body.appendChild(form);
+      doc.body.appendChild(element);
 
       if (wantSsr) {
         element.removeAttribute('filter');
@@ -678,7 +676,7 @@ describes.realWin(
             impl.activeElement_ = impl.createElementFromItem_('abc');
             env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
             env.sandbox
-              .stub(impl.binding_, 'shouldPreventFormSubmissionOnEnter')
+              .stub(impl.binding_, 'shouldPreventDefaultOnEnter')
               .returns(true);
             return impl.keyDownHandler_(event);
           })
@@ -777,6 +775,9 @@ describes.realWin(
     it('should call toggleResultsHandler_()', () => {
       const toggleResultsSpy = env.sandbox.spy(impl, 'toggleResults_');
       const resetSpy = env.sandbox.spy(impl, 'resetActiveElement_');
+      const form = doc.createElement('form');
+      form.appendChild(impl.element);
+      doc.body.appendChild(form);
       return impl
         .layoutCallback()
         .then(() => {
@@ -784,7 +785,7 @@ describes.realWin(
         })
         .then(() => {
           expect(toggleResultsSpy).to.have.been.calledOnce;
-          expect(impl.inputElement_.form.getAttribute('autocomplete')).to.equal(
+          expect(impl.getFormOrNull_().getAttribute('autocomplete')).to.equal(
             'off'
           );
           expect(resetSpy).not.to.have.been.called;

@@ -117,14 +117,14 @@ describes.realWin(
       });
 
       it('should prevent submission when "submit-on-enter" is absent', () => {
-        expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.true;
-        expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.true;
+        expect(binding.shouldPreventDefaultOnEnter(true)).to.be.true;
+        expect(binding.shouldPreventDefaultOnEnter(false)).to.be.true;
       });
 
       it('should not prevent submission when "submit-on-enter" is true', () => {
         binding = getBindingSingle({'submit-on-enter': 'true'});
-        expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.false;
-        expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.false;
+        expect(binding.shouldPreventDefaultOnEnter(true)).to.be.false;
+        expect(binding.shouldPreventDefaultOnEnter(false)).to.be.false;
       });
     });
 
@@ -209,8 +209,8 @@ describes.realWin(
       });
 
       it('should prevent default whenever there are active suggestions shown', () => {
-        expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.true;
-        expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.false;
+        expect(binding.shouldPreventDefaultOnEnter(true)).to.be.true;
+        expect(binding.shouldPreventDefaultOnEnter(false)).to.be.false;
       });
     });
   }
