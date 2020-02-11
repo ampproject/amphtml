@@ -1203,10 +1203,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
-        const shouldPreventSubmit = this.binding_.shouldPreventFormSubmissionOnEnter(
+        const shouldPreventDefault = this.binding_.shouldPreventDefaultOnEnter(
           !!this.activeElement_
         );
-        if (this.areResultsDisplayed_() && shouldPreventSubmit) {
+        if (this.areResultsDisplayed_() && shouldPreventDefault) {
           event.preventDefault();
         }
         this.binding_.removeSelectionHighlighting(this.inputElement_);
