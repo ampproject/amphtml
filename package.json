@@ -109,7 +109,7 @@
     "html-minifier": "4.0.0",
     "jest-cli": "24.9.0",
     "jest-dot-reporter": "1.0.12",
-    "jest-silent-reporter": "0.1.2",
+    "jest-silent-reporter": "0.2.1",
     "jison": "0.4.18",
     "jsdom": "16.0.1",
     "json-stable-stringify": "1.0.1",
