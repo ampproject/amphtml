@@ -17,7 +17,6 @@
 import {CONSENT_ITEM_STATE, constructConsentInfo} from '../consent-info';
 import {ConsentUI, consentUiClasses} from '../consent-ui';
 import {Services} from '../../../../src/services';
-import {dev} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {elementByTag} from '../../../../src/dom';
 import {macroTask} from '../../../../testing/yield';
@@ -26,6 +25,7 @@ import {
   resetServiceForTesting,
 } from '../../../../src/service';
 import {toggleExperiment} from '../../../../src/experiments';
+import {user} from '../../../../src/log';
 import {whenCalled} from '../../../../testing/test-helper.js';
 
 describes.realWin(
@@ -338,7 +338,7 @@ describes.realWin(
           ).to.be.false;
 
           // Send expand
-          sendIframeMessage(consentUI, 'enter-fullscreen');
+          sendMessageConsentUi(consentUI, 'enter-fullscreen');
 
           expect(consentUI.isFullscreen_).to.be.false;
           expect(
@@ -369,7 +369,7 @@ describes.realWin(
           consentUI.ui_.focus();
           expect(doc.activeElement).to.equal(consentUI.ui_);
 
-          sendIframeMessage(consentUI, 'enter-fullscreen');
+          sendMessageConsentUi(consentUI, 'enter-fullscreen');
 
           expect(consentUI.isFullscreen_).to.be.true;
           expect(
@@ -380,7 +380,7 @@ describes.realWin(
         });
 
         it('should show error and send messages back to iframe', async () => {
-          const errorSpy = env.sandbox.spy(dev(), 'warn');
+          const errorSpy = env.sandbox.spy(user(), 'warn');
           const windowMock = window.sandbox.mock({
             postMessage: () => {},
           });
@@ -394,7 +394,7 @@ describes.realWin(
           await macroTask();
 
           // Unsuccessful fullscreen event
-          sendIframeMessage(consentUI, 'enter-fullscreen');
+          sendMessageConsentUi(consentUI, 'enter-fullscreen');
 
           expect(errorSpy).to.be.calledOnce;
           expect(errorSpy.args[0][1]).to.match(/Could not enter fullscreen/);
@@ -413,7 +413,7 @@ describes.realWin(
           consentUI.ui_.focus();
 
           // Successful fullscreen event
-          sendIframeMessage(consentUI, 'enter-fullscreen');
+          sendMessageConsentUi(consentUI, 'enter-fullscreen');
 
           // Error not called another time
           expect(errorSpy).to.be.calledOnce;
@@ -491,7 +491,7 @@ describes.realWin(
         return getReadyIframeCmpConsentUi().then(consentUI => {
           const handleReadyStub = env.sandbox.stub(consentUI, 'handleReady_');
 
-          sendIframeMessage(consentUI, 'ready');
+          sendMessageConsentUi(consentUI, 'ready');
 
           expect(handleReadyStub).to.be.calledOnce;
         });
@@ -559,7 +559,7 @@ describes.realWin(
             'enterFullscreen_'
           );
 
-          sendIframeMessage(consentUI, 'enter-fullscreen');
+          sendMessageConsentUi(consentUI, 'enter-fullscreen');
 
           expect(enterFullscreenStub).to.be.calledOnce;
         });
@@ -576,7 +576,7 @@ describes.realWin(
             );
 
             consentUI.isIframeVisible_ = false;
-            sendIframeMessage(consentUI, 'enter-fullscreen');
+            sendMessageConsentUi(consentUI, 'enter-fullscreen');
 
             expect(enterFullscreenStub).to.not.be.called;
           });
@@ -650,7 +650,7 @@ describes.realWin(
      * @param {string} source
      * @param {string} action
      */
-    function sendIframeMessage(consentUI, action) {
+    function sendMessageConsentUi(consentUI, action) {
       consentUI.handleIframeMessages_({
         source: consentUI.ui_.contentWindow,
         data: {

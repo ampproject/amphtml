@@ -143,10 +143,10 @@ if (window && window.name) {
 
 window.addEventListener('message', (event) => {
   const data = event.data;
-  if (data.type === 'Error') {
+  if (data.type === 'error') {
     console.log('Could not complete fullscreen request:', data.message);
   }
-  else if (data.type === 'Success') {
+  else if (data.type === 'success') {
     console.log('Fullscreen command successfuly sent:', data.message);
   }
   else {

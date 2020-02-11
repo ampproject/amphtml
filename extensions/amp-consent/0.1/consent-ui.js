@@ -37,6 +37,15 @@ const TAG = 'amp-consent-ui';
 const CONSENT_STATE_MANAGER = 'consentStateManager';
 const DEFAULT_INITIAL_HEIGHT = '30vh';
 const DEFAULT_ENABLE_BORDER = true;
+const FULLSCREEN_SUCCESS = 'Entering fullscreen.';
+const FULLSCREEN_ERROR =
+  'Could not enter fullscreen. Fullscreen is only supported ' +
+  'when the iframe is visible and after user interaction.';
+
+export const messageType = {
+  error: 'error',
+  success: 'success',
+};
 
 // Classes for consent UI
 export const consentUiClasses = {
@@ -682,12 +691,11 @@ export class ConsentUI {
         (this.restrictFullscreenOn_ &&
           this.document_.activeElement !== this.ui_)
       ) {
-        const error = 'Could not enter fullscreen';
-        dev().warn(TAG, error);
-        this.sendIframeMessage_('Error', error);
+        user().warn(TAG, FULLSCREEN_ERROR);
+        this.sendIframeMessage_(messageType.error, FULLSCREEN_ERROR);
         return;
       }
-      this.sendIframeMessage_('Success', 'Entering fullscreen');
+      this.sendIframeMessage_(messageType.success, FULLSCREEN_SUCCESS);
 
       this.baseInstance_.mutateElement(() => {
         this.enterFullscreen_();
