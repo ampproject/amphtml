@@ -22,9 +22,18 @@ Before you can add your analytics service to AMP HTML runtime, you may need to:
 ## Adding your configuration to the AMP HTML runtime
 
 1. Create an [Intent-To-Implement issue](../../CONTRIBUTING.md#contributing-features) stating that you'll be adding your analytics service's configuration to AMP HTML's runtime. Be sure to include **cc @ampproject/wg-analytics** in your description.
-1. Develop a patch that implements the following: 1. A new configuration file in the vendors [folder](https://github.com/ampproject/amphtml/tree/master/extensions/amp-analytics/0.1/vendors) including any options above and beyond the default, such as: 1. `"vars": {}` for additional default variables. 1. `"requests": {}` for requests that your service will use. 1. `"optout":` if needed. We currently don't have a great opt-out system, so please reach out to help us design one that works well for you. 1. `"warningMessage":` if needed. Displays warning information from the vendor (such as deprecation or migration) in the console. 1. Import your configuration and include it in ANALYTICS_CONFIG in [vendors.js](0.1/vendors.js). 1. If you are using iframe transport, add a new line to ANALYTICS_IFRAME_TRANSPORT_CONFIG in iframe-transport-vendors.js containing `"*vendor-name*": "*url*"` 1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
-   reference. 1. A test in the [extensions/amp-analytics/0.1/test/vendor-requests.json
-   ](../../extensions/amp-analytics/0.1/test/vendor-requests.json) file. 1. A new batch plugin if required. Please refer to [Add Batch Plugin](#add-batch-plugin) for instructions.
+1. Develop a patch that implements the following:
+   1. A new configuration json file `${vendorName}.json` in the vendors [folder](https://github.com/ampproject/amphtml/tree/master/extensions/amp-analytics/0.1/vendors) including any options above and beyond the default, such as:
+      1. `"vars": {}` for additional default variables.
+      1. `"requests": {}` for requests that your service will use.
+      1. `"optout":` if needed. We currently don't have a great opt-out system, so please reach out to help us design one that works well for you.
+      1. `"warningMessage":` if needed. Displays warning information from the vendor (such as deprecation or migration) in the console.
+   1. If you are using iframe transport, also add a new line to ANALYTICS_IFRAME_TRANSPORT_CONFIG in iframe-transport-vendors.js containing `"*vendor-name*": "*url*"`
+   1. An example in the [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html)
+      reference.
+   1. A test in the [extensions/amp-analytics/0.1/test/vendor-requests.json
+      ](../../extensions/amp-analytics/0.1/test/vendor-requests.json) file.
+1. If a new batch plugin if required. Please refer to [Add Batch Plugin](#add-batch-plugin) for instructions.
 1. Test the new example you put in [examples/analytics-vendors.amp.html](../../examples/analytics-vendors.amp.html) to ensure the hits from the example are working as expected. For example, the data needed is being collected and displayed in your analytics dashboard.
 1. Submit a Pull Request with this patch, referencing the Intent-To-Implement issue.
 1. Add your analytics service to the [list of supported Analytics Vendors](https://github.com/ampproject/docs/blob/master/content/docs/analytics/analytics-vendors.md) by submitting a Pull Request to the [ampproject/docs](https://github.com/ampproject/docs) repo. Include the type, description, and link to your usage documentation.
@@ -52,11 +61,6 @@ To take this approach, review the documentation for publishers' integration with
 
 - Deep Dive: [Why not just use an iframe?](why-not-iframe.md)
 - Deep Dive: [Managing non-authenticated user state with AMP](https://github.com/ampproject/amphtml/blob/master/spec/amp-managing-user-state.md)
-- Review pull requests from other AMP Analytics providers:
-- [AT Internet](https://github.com/ampproject/amphtml/pull/1672)
-- [Piano](https://github.com/ampproject/amphtml/pull/1652)
-- [comScore](https://github.com/ampproject/amphtml/pull/1608)
-- [Parsely](https://github.com/ampproject/amphtml/pull/1595)
 - [amp-analytics sample](https://github.com/ampproject/amp-publisher-sample#amp-analytics-sample)
 - [amp-analytics](https://amp.dev/documentation/components/amp-analytics) reference documentation
 - [amp-analytics variables](analytics-vars.md) reference documentation
