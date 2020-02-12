@@ -765,22 +765,15 @@ export class GlobalVariableSource extends VariableSource {
   /**
    * Resolves the value via amp-experiment's variants service.
    * @param {function(!Object<string, string>):(?string)} getter
-   * @param {string} expr
+   * @param {string} unusedExpr
    * @return {!Promise<?string>}
    * @template T
    * @private
    */
-  getVariantsValue_(getter, expr) {
-    return Services.variantsForDocOrNull(this.ampdoc.getHeadNode())
-      .then(variants => {
-        userAssert(
-          variants,
-          'To use variable %s, amp-experiment should be configured',
-          expr
-        );
-        return variants.getVariants();
-      })
-      .then(variantsMap => getter(variantsMap));
+  getVariantsValue_(getter, unusedExpr) {
+    return Services.variantsForDoc(this.ampdoc.getHeadNode())
+      .then(variants => variants.getVariants())
+      .then(getter);
   }
 
   /**

@@ -124,7 +124,7 @@ describes.realWin(
           throw new Error('must have failed');
         },
         () => {
-          return Services.variantsForDocOrNull(ampdoc.getHeadNode())
+          return Services.variantsForDoc(ampdoc.getHeadNode())
             .then(service => service.getVariants())
             .then(variants => {
               expect(variants).to.deep.equal({});
@@ -147,7 +147,7 @@ describes.realWin(
         .returns(Promise.resolve(null));
 
       experiment.buildCallback();
-      return Services.variantsForDocOrNull(ampdoc.getHeadNode())
+      return Services.variantsForDoc(ampdoc.getHeadNode())
         .then(variantsService => variantsService.getVariants())
         .then(variants => {
           expect(variants).to.jsonEqual({
