@@ -88,11 +88,11 @@ export class AmpStoryPlayer {
     /** @private {!IframePool} */
     this.iframePool_ = new IframePool();
 
-    /** @private @const {!Object<string, !Promise>} */
-    this.connectedPromises_ = map();
+    /** @private {!Object<string, !Promise>} */
+    this.handshakePromises_ = map();
 
-    /** @private @const {!Object<string, !Function>} */
-    this.connectedResolvers_ = map();
+    /** @private {!Object<string, !Function>} */
+    this.handshakeResolvers_ = map();
 
     /** @private {number} */
     this.currentIdx_ = 0;
@@ -174,15 +174,15 @@ export class AmpStoryPlayer {
     const iframeIdx = story[IFRAME_IDX];
 
     const deferred = new Deferred();
-    this.connectedPromises_[iframeIdx] = deferred.promise;
-    this.connectedResolvers_[iframeIdx] = deferred.resolve;
+    this.handshakePromises_[iframeIdx] = deferred.promise;
+    this.handshakeResolvers_[iframeIdx] = deferred.resolve;
 
     this.initializeHandshake_(story, iframeEl).then(
       messaging => {
         messaging.setDefaultHandler(() => Promise.resolve());
 
         this.messagingFor_[iframeIdx] = messaging;
-        this.connectedResolvers_[iframeIdx](iframeIdx);
+        this.handshakeResolvers_[iframeIdx](iframeIdx);
       },
       err => {
         console /*OK*/
@@ -377,7 +377,7 @@ export class AmpStoryPlayer {
    * @param {number} iframeIdx
    */
   displayStory_(iframeIdx) {
-    this.connectedPromises_[iframeIdx].then(() => {
+    this.handshakePromises_[iframeIdx].then(() => {
       this.messagingFor_[iframeIdx].sendRequest(
         'visibilitychange',
         {state: 'visible'},
@@ -392,7 +392,7 @@ export class AmpStoryPlayer {
    * @param {number} iframeIdx
    */
   preRenderStory_(iframeIdx) {
-    this.connectedPromises_[iframeIdx].then(() => {
+    this.handshakePromises_[iframeIdx].then(() => {
       this.messagingFor_[iframeIdx].sendRequest(
         'visibilitychange',
         {state: 'prerender'},
@@ -407,7 +407,7 @@ export class AmpStoryPlayer {
    * @param {number} iframeIdx
    */
   pauseStory_(iframeIdx) {
-    this.connectedPromises_[iframeIdx].then(() => {
+    this.handshakePromises_[iframeIdx].then(() => {
       this.messagingFor_[iframeIdx].sendRequest(
         'visibilitychange',
         {state: 'paused'},
@@ -453,24 +453,29 @@ class IframePool {
   }
 
   /**
-   * Shifts both the iframePool and the storyIdsWithIframe forward. It returns
-   * the index of the story which will be detached of an iframe.
+   * Shifts iframe allocation forwards. It takes the leftmost iframe and
+   * allocates it to the next story to the right without an iframe. It also
+   * updates the storyIdsWithIframe by removing the reference to the detached
+   * story and adds the new one.
    * @param {number} nextStoryIdx
-   * @return {number}
+   * @return {number} Index of the detached story.
    */
   shiftForwards(nextStoryIdx) {
     const detachedStoryIdx = this.storyIdsWithIframe_.shift();
     this.storyIdsWithIframe_.push(nextStoryIdx);
 
     this.iframePool_.push(this.iframePool_.shift());
+
     return detachedStoryIdx;
   }
 
   /**
-   * Shifts both the iframePool and the storyIdsWithIframe backwards. It returns
-   * the index of the story which will be detached of an iframe.
+   * Shifts iframe allocation backwards. It takes the rightmost iframe and
+   * allocates it to the next story to the left without an iframe. It also
+   * updates the storyIdsWithIframe by removing the reference to the detached
+   * story and adds the new one.
    * @param {number} nextStoryIdx
-   * @return {number}
+   * @return {number} Index of the detached story.
    */
   shiftBackwards(nextStoryIdx) {
     const detachedStoryIdx = this.storyIdsWithIframe_.pop();
