@@ -563,7 +563,7 @@ export class Bind {
    *
    * e.g. "foo.bar".
    * @param {string} expr
-   * @return {*}
+   * @return {!Promise<*>}
    */
   getStateWithWait(expr) {
     const value = this.getState(expr);
@@ -574,7 +574,7 @@ export class Bind {
         return wait.then(() => this.getState(expr));
       }
     }
-    return undefined;
+    return Promise.resolve(value);
   }
 
   /**
