@@ -188,10 +188,9 @@ export class ScrollManager {
    * @return {!Promise<!../../../src/layout-rect.LayoutRectDef>}
    */
   getInitRootElementRect_() {
-    if (!this.initialRootRectPromise_) {
-      return this.measureRootElement_();
-    }
-    return devAssert(this.initialRootRectPromise_);
+    return devAssert(
+      this.initialRootRectPromise_ || this.measureRootElement_()
+    );
   }
 
   /**
@@ -199,13 +198,10 @@ export class ScrollManager {
    * @return {!Promise<!../../../src/layout-rect.LayoutRectDef>}
    */
   measureRootElement_() {
-    return this.mutator_.measureElement(() => {
-      const rectPromise = Promise.resolve(
-        this.viewport_.getLayoutRect(this.root_)
-      );
-      this.initialRootRectPromise_ =
-        this.initialRootRectPromise_ || rectPromise;
-      return rectPromise;
-    });
+    const rectPromise = this.mutator_.measureElement(() =>
+      this.viewport_.getLayoutRect(this.root_)
+    );
+    this.initialRootRectPromise_ = this.initialRootRectPromise_ || rectPromise;
+    return rectPromise;
   }
 }
