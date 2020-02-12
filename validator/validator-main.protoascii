@@ -2111,6 +2111,10 @@ tags: {
   attrs: {
     name: "datetime"
   }
+  attrs: {
+    name: "pubdate"
+    value: ""
+  }
 }
 # 4.5.12 The code element
 tags: {
