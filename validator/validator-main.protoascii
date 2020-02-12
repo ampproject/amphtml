@@ -1901,6 +1901,7 @@ tags: {
       protocol: "itms-services"
       protocol: "fb-me"
       protocol: "fb-messenger"
+      protocol: "feed"
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
       protocol: "line"
