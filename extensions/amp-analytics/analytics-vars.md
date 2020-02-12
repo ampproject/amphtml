@@ -94,6 +94,6 @@ Similar to this, another restriction is nesting analytics variables within each 
 
 `${queryParam(${title},${canonicalUrl})}`
 
-Instead, use the platform versiond (or a combination):
+Instead, use the platform version (or a combination):
 
 `QUERY_PARAM(TITLE,${myVariable})`
