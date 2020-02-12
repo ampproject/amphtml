@@ -16,7 +16,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {Controls} from './controls';
-import {FLOAT_TOLERANCE, DirectionX, DirectionY} from './def.js';
+import {DirectionX, DirectionY, FLOAT_TOLERANCE} from './def.js';
 import {HtmlLiteralTagDef} from './html';
 import {
   LayoutRectDef,
@@ -57,7 +57,6 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isFiniteNumber} from '../../../src/types';
 import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
 import {once} from '../../../src/utils/function';
 import {
