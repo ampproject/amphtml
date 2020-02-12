@@ -276,7 +276,7 @@ describes.fakeWin(
       });
     });
 
-    it('should call history.back() if stack is empty and passed false', () => {
+    it('should not call history.back() if stack is empty and passed false', () => {
       env.win.history.back = env.sandbox.stub();
       return history.goBack(false).then(() => {
         expect(env.win.history.back.called).false;
