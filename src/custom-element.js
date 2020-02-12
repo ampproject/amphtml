@@ -328,7 +328,7 @@ function createBaseCustomElementClass(win) {
      */
     getAmpDoc() {
       devAssert(this.ampdoc_, 'no ampdoc yet, since element is not attached');
-      return /** @typedef {!./service/ampdoc-impl.AmpDoc} */ this.ampdoc_;
+      return /** @type {!./service/ampdoc-impl.AmpDoc} */ (this.ampdoc_);
     }
 
     /**
@@ -343,8 +343,8 @@ function createBaseCustomElementClass(win) {
         this.resources_,
         'no resources yet, since element is not attached'
       );
-      return /** @typedef {!./service/resources-interface.ResourcesInterface} */ this
-        .resources_;
+      return /** @type {!./service/resources-interface.ResourcesInterface} */ (this
+        .resources_);
     }
 
     /**
@@ -572,7 +572,7 @@ function createBaseCustomElementClass(win) {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        startupChunk(this.getAmpDoc(), () => {
+        startupChunk(this.getAmpDoc(), function preconnect() {
           const TAG = this.tagName;
           if (!this.ownerDocument) {
             dev().error(TAG, 'preconnect without ownerDocument');

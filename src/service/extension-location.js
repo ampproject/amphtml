@@ -61,13 +61,14 @@ export function calculateExtensionScriptUrl(
 ) {
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   if (opt_extensionVersion == null) {
     opt_extensionVersion = '0.1';
   }
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}.js`;
+  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
 }
 
 /**

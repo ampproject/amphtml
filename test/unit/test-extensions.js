@@ -1047,6 +1047,56 @@ describes.sandboxed('Extensions', {}, () => {
         });
       });
 
+      it.only('should install doc services with arrow function', () => {
+        const factory1Spy = env.sandbox.spy();
+        const factory2Spy = env.sandbox.spy();
+        const factory1 = () => {
+          factory1Spy();
+          return {a: 1};
+        };
+        const factory2 = () => {
+          factory2Spy();
+          return {a: 2};
+        };
+
+        const extHolder = extensions.getExtensionHolder_('amp-test');
+        extHolder.scriptPresent = true;
+        expect(ampdoc.declaresExtension('amp-test')).to.be.false;
+        const promise = extensions.installExtensionForDoc(ampdoc, 'amp-test');
+        expect(ampdoc.declaresExtension('amp-test')).to.be.false;
+
+        // Services do not exist yet.
+        allowConsoleError(() => {
+          expect(() => getServiceForDoc(ampdoc, 'service1')).to.throw(
+            /to be registered/
+          );
+          expect(() => getServiceForDoc(ampdoc, 'service2')).to.throw(
+            /to be registered/
+          );
+        });
+        expect(factory1Spy).to.not.be.called;
+        expect(factory2Spy).to.not.be.called;
+
+        // Resolve the promise.
+        extensions.registerExtension(
+          'amp-test',
+          AMP => {
+            AMP.registerServiceForDoc('service1', factory1);
+            AMP.registerServiceForDoc('service2', factory2);
+          },
+          win.AMP
+        );
+        return promise.then(() => {
+          // Services registered.
+          expect(getServiceForDoc(ampdoc, 'service1').a).to.equal(1);
+          expect(getServiceForDoc(ampdoc, 'service2').a).to.equal(2);
+          expect(factory1Spy).to.be.calledOnce;
+          expect(factory2Spy).to.be.calledOnce;
+          // Extension is marked as declared.
+          expect(ampdoc.declaresExtension('amp-test')).to.be.true;
+        });
+      });
+
       // TODO(#16916): Make this test work with synchronous throws.
       it.skip('should survive factory failures', () => {
         const factory1Spy = env.sandbox.spy();

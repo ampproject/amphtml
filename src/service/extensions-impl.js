@@ -591,6 +591,9 @@ export class Extensions {
       opt_extensionVersion,
       getMode().localDev
     );
+    if (getMode().esm) {
+      scriptElement.setAttribute('type', 'module');
+    }
     scriptElement.src = scriptSrc;
     return scriptElement;
   }
