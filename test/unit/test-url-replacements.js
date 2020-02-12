@@ -942,6 +942,25 @@ describes.sandboxed('UrlReplacements', {}, env => {
           });
       });
 
+      it('Should replace VIDEO_STATE(video,parameter) with video data', () => {
+        const win = getFakeWindow();
+        env.sandbox.stub(Services, 'videoManagerForDoc').returns({
+          getVideoStateProperty() {
+            return Promise.resolve('1.5');
+          },
+        });
+        env.sandbox
+          .stub(win.document, 'getElementById')
+          .withArgs('video')
+          .returns(document.createElement('video'));
+
+        return Services.urlReplacementsForDoc(win.document.documentElement)
+          .expandUrlAsync('?sh=VIDEO_STATE(video,currentTime)')
+          .then(res => {
+            expect(res).to.equal('?sh=1.5');
+          });
+      });
+
       describe('PAGE_LOAD_TIME', () => {
         let win;
         let eventListeners;

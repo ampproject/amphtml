@@ -625,12 +625,11 @@ export class GlobalVariableSource extends VariableSource {
       return this.ampdoc.isVisible() ? '0' : '1';
     });
 
-    this.setAsync('VIDEO_STATE', () => {
-      user().warn(
-        TAG,
-        'VIDEO_STATE macro should not be used outside of <amp-analytics>'
+    this.setAsync('VIDEO_STATE', (id, property) => {
+      return Services.videoManagerForDoc(this.ampdoc).getVideoStateProperty(
+        id,
+        property
       );
-      return '';
     });
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {

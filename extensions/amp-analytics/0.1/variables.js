@@ -209,17 +209,6 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
-
-    this.register_('VIDEO_STATE', (id, property) => {
-      const root = this.ampdoc_.getRootNode();
-      const video = user().assertElement(
-        root.getElementById(/** @type {string} */ (id)),
-        `Could not find an element with id="${id}" for VIDEO_STATE`
-      );
-      return Services.videoManagerForDoc(this.ampdoc_)
-        .getAnalyticsDetails(video)
-        .then(details => (details ? details[property] : ''));
-    });
   }
 
   /**
