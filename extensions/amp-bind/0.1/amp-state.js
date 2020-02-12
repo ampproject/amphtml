@@ -74,7 +74,6 @@ export class AmpState extends AMP.BaseElement {
         bind.addOverridableKey(element.getAttribute('id'));
       });
     }
-
     // Parse child <script> tag and/or fetch JSON from `src` attribute.
     // The latter is allowed to overwrite the former.
     this.parseAndUpdate();
