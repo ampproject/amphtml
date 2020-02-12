@@ -359,7 +359,7 @@ export class Services {
   static mutatorForDoc(elementOrAmpDoc) {
     return /** @type {!./service/mutator-interface.MutatorInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
-      'resources'
+      'mutator'
     ));
   }
 
