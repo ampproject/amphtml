@@ -16,6 +16,7 @@
 
 import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
+import {devAssert} from '../../../src/log';
 
 /**
  * @typedef {{
@@ -60,8 +61,8 @@ export class ScrollManager {
     /** @const @private {!Element} */
     this.root_ = root;
 
-    /**  @private {?../../../src/layout-rect.LayoutRectDef} */
-    this.initialRootLayoutRect_ = null;
+    /**  @private {?Promise} */
+    this.initialRootRectPromise_ = null;
   }
 
   /**
@@ -125,39 +126,39 @@ export class ScrollManager {
    * @private
    */
   onScroll_(e) {
-    const firstMeasure = this.initialRootLayoutRect_ === null;
-    return this.getInitRootElementRect_().then(initialRootLayoutRect => {
-      const {
-        height: initialScrollHeight,
-        width: initialScrollWidth,
-      } = initialRootLayoutRect;
-
-      return (firstMeasure
+    const isFirstMeasure = this.initialRootLayoutRect_ === null;
+    return Promise.all([
+      // Initial root layout rectangle
+      this.getInitRootElementRect_(),
+      // Current root layout rectangle
+      isFirstMeasure
         ? this.getInitRootElementRect_()
-        : this.measureRootElement_()
-      ).then(layoutRect => {
-        const {
-          top: scrollTop,
-          left: scrollLeft,
-          width: scrollWidth,
-          height: scrollHeight,
-        } = layoutRect;
-        /** {./scroll-manager.ScrollEventDef} */
-        const scrollEvent = {
-          top: e.top - scrollTop,
-          left: e.left - scrollLeft,
-          width: e.width,
-          height: e.height,
-          scrollWidth,
-          scrollHeight,
-          initialSize: {
-            scrollHeight: initialScrollHeight,
-            scrollWidth: initialScrollWidth,
-          },
-        };
-        // Fire all of our children scroll observables
-        this.scrollObservable_.fire(scrollEvent);
-      });
+        : this.measureRootElement_(),
+    ]).then(rects => {
+      // Initial root layout rectangle
+      const {height: initialScrollHeight, width: initialScrollWidth} = rects[0];
+      // Current root layout rectangle
+      const {
+        top: scrollTop,
+        left: scrollLeft,
+        width: scrollWidth,
+        height: scrollHeight,
+      } = rects[1];
+      /** {./scroll-manager.ScrollEventDef} */
+      const scrollEvent = {
+        top: e.top - scrollTop,
+        left: e.left - scrollLeft,
+        width: e.width,
+        height: e.height,
+        scrollWidth,
+        scrollHeight,
+        initialSize: {
+          scrollHeight: initialScrollHeight,
+          scrollWidth: initialScrollWidth,
+        },
+      };
+      // Fire all of our children scroll observables
+      this.scrollObservable_.fire(scrollEvent);
     });
   }
 
@@ -187,7 +188,10 @@ export class ScrollManager {
    * @return {!Promise<!../../../src/layout-rect.LayoutRectDef>}
    */
   getInitRootElementRect_() {
-    return this.initialRootRectPromise_ || this.measureRootElement_();
+    if (!this.initialRootRectPromise_) {
+      return this.measureRootElement_();
+    }
+    return devAssert(this.initialRootRectPromise_);
   }
 
   /**
