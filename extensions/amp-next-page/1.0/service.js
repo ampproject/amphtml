@@ -31,7 +31,9 @@ import {
   removeChildren,
   removeElement,
   scopedQuerySelector,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
+import {clamp, mapRange} from '../../../src/utils/math';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
@@ -41,7 +43,9 @@ import {
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
-import {setStyles, toggle} from '../../../src/style';
+import {resetStyles, setStyle, setStyles, toggle} from '../../../src/style';
+import {throttle} from '../../../src/utils/rate-limit';
+
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {validatePage, validateUrl} from './utils';
@@ -58,10 +62,13 @@ const DOC_CONTAINER_CLASS = 'i-amphtml-next-page-document-container';
 const SHADOW_ROOT_CLASS = 'i-amphtml-next-page-shadow-root';
 const PLACEHOLDER_CLASS = 'i-amphtml-next-page-placeholder';
 
+/** @enum {string} */
+export const Transition = {
+  NONE: 'none',
+  FADE_IN: 'fade-in',
+  FADE_IN_SCROLL: 'fade-in-scroll',
+};
 const ASYNC_NOOP = () => Promise.resolve();
-
-/** @enum */
-export const Direction = {UP: 1, DOWN: -1};
 
 export class NextPageService {
   /**
@@ -122,12 +129,6 @@ export class NextPageService {
     /** @private {?Page} */
     this.lastFetchedPage_ = null;
 
-    /** @private {!Direction} */
-    this.scrollDirection_ = Direction.DOWN;
-
-    /** @private {number} */
-    this.lastScrollTop_ = 0;
-
     /** @private {?Page} */
     this.hostPage_ = null;
 
@@ -136,6 +137,9 @@ export class NextPageService {
 
     /** @private {boolean} */
     this.hasDeepParsing_ = false;
+
+    /** @private {!Transition} */
+    this.transition_ = Transition.NONE;
 
     /** @private {?string} */
     this.nextSrc_ = null;
@@ -170,6 +174,16 @@ export class NextPageService {
     // Save the <amp-next-page> from the host page
     this.host_ = element;
 
+    // Parse attributes
+    this.nextSrc_ = this.getHost_().getAttribute('src');
+    this.hasDeepParsing_ =
+      this.getHost_().hasAttribute('deep-parsing') || !this.nextSrc_;
+    const transition = this.getHost_().getAttribute('transition');
+    if (transition) {
+      userAssert(Object.values(Transition).includes(transition));
+      this.transition_ = /** @type {Transition} */ (transition);
+    }
+
     // Get the separator and more box (and remove the provided elements in the process)
     this.separator_ = this.getSeparatorElement_(element);
     this.footer_ = this.getFooterElement_(element);
@@ -177,6 +191,8 @@ export class NextPageService {
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
     this.toggleHiddenAndReplaceableElements(this.doc_);
+    // Have the footer be always visible
+    insertAfterOrAtStart(this.host_, this.footer_, null /** after */);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
@@ -194,19 +210,19 @@ export class NextPageService {
       this.setLastFetchedPage(this.hostPage_);
     }
 
-    // Have the footer be always visible
-    insertAfterOrAtStart(this.host_, this.footer_, null /** after */);
-
-    this.nextSrc_ = this.getHost_().getAttribute('src');
-    this.hasDeepParsing_ =
-      this.getHost_().hasAttribute('deep-parsing') || !this.nextSrc_;
     this.initializePageQueue_();
 
     this.getHost_().classList.add(NEXT_PAGE_CLASS);
 
-    this.viewport_.onScroll(() => this.updateScroll_());
-    this.viewport_.onResize(() => this.updateScroll_());
-    this.updateScroll_();
+    const updateHostVisibilityThrottled = throttle(
+      this.win_,
+      this.updateHostVisibility_.bind(this),
+      200
+    );
+
+    this.viewport_.onScroll(updateHostVisibilityThrottled.bind(this));
+    this.viewport_.onResize(updateHostVisibilityThrottled.bind(this));
+    this.updateHostVisibility_();
   }
 
   /**
@@ -220,13 +236,46 @@ export class NextPageService {
   /**
    * @private
    */
-  updateScroll_() {
-    this.updateScrollDirection_();
+  updateHostVisibility_() {
     if (this.finished_) {
       return;
     }
     this.readyPromise_.then(() => {
       this.maybeFetchNext();
+
+      let vh,
+        scroll,
+        height = 0;
+      this.mutator_.measureMutateElement(
+        this.getHost_(),
+        () => {
+          // Measure the position of the host page (edge case)
+          vh = this.viewport_.getHeight();
+          scroll = this.viewport_.getScrollTop();
+          // Document height is the same as the distance from the top
+          // to the <amp-next-page> element
+          const {top} = this.host_.getLayoutBox();
+          height = top;
+        },
+        () => {
+          let relativePos;
+          if (scroll < height - vh) {
+            relativePos = ViewportRelativePos.CONTAINS_VIEWPORT;
+          } else if (scroll < height && height <= vh && scroll <= 0) {
+            relativePos = ViewportRelativePos.INSIDE_VIEWPORT;
+          } else if (scroll < height) {
+            relativePos = this.visibilityObserver_.isScrollingDown()
+              ? ViewportRelativePos.LEAVING_VIEWPORT
+              : ViewportRelativePos.ENTERING_VIEWPORT;
+          } else {
+            relativePos = ViewportRelativePos.OUTSIDE_VIEWPORT;
+          }
+
+          this.hostPage_.relativePos = relativePos;
+          this.hostPage_.visiblePercent = clamp((height - scroll) / vh, 0, 1);
+          this.updateVisibility();
+        }
+      );
     });
   }
 
@@ -309,6 +358,33 @@ export class NextPageService {
           /** @type {!Document|!ShadowRoot} */ (devAssert(page.document))
         )
       );
+
+    // Handle transitions between pages
+    if (this.transition_ === Transition.FADE_IN_SCROLL) {
+      this.pages_.forEach(page => {
+        const pageContents =
+          page === this.hostPage_
+            ? /** @type {!HostPage} */ (this.hostPage_).hostPageContents
+            : [page.container];
+        if (page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT) {
+          pageContents.forEach(element => {
+            this.mutator_.mutateElement(element, () => {
+              setStyle(
+                element,
+                'opacity',
+                mapRange(page.visiblePercent, 0.05, 0.5, 0, 1)
+              );
+            });
+          });
+        } else if (page.isVisible()) {
+          pageContents.forEach(element => {
+            this.mutator_.mutateElement(element, () => {
+              resetStyles(element, ['opacity']);
+            });
+          });
+        }
+      });
+    }
   }
 
   /**
@@ -328,14 +404,16 @@ export class NextPageService {
         ? PAUSE_PAGE_COUNT
         : pausePageCountForTesting;
 
-    const scrollingDown = this.scrollDirection_ === Direction.DOWN;
     // Hide the host (first) page if needed
-    if (scrollingDown && this.hostPage_.isVisible()) {
+    if (
+      this.visibilityObserver_.isScrollingDown() &&
+      this.hostPage_.isVisible()
+    ) {
       this.hostPage_.setVisibility(VisibilityState.HIDDEN);
     }
 
     // Get all the pages that the user scrolled past (or didn't see yet)
-    const previousPages = scrollingDown
+    const previousPages = this.visibilityObserver_.isScrollingDown()
       ? this.pages_.slice(1, index).reverse()
       : this.pages_.slice(index + 1);
 
@@ -421,7 +499,7 @@ export class NextPageService {
 
   /**
    * Creates the initial (host) page based on the window's metadata
-   * @return {!Page}
+   * @return {!HostPage}
    */
   createHostPage() {
     const {title, location} = this.doc_;
@@ -431,7 +509,30 @@ export class NextPageService {
       parseOgImage(this.doc_) ||
       parseFavicon(this.doc_) ||
       '';
-    return new HostPage(
+
+    // Any element that is outside of the <amp-next-page> element
+    // is considered part of the host article
+    const hostPageContents = toArray(
+      scopedQuerySelectorAll(
+        dev().assertElement(this.doc_.body),
+        '> *:not(amp-next-page)'
+      )
+    );
+
+    // Set-up transitions
+    if (this.transition_ === Transition.FADE_IN_SCROLL) {
+      hostPageContents.forEach(element => {
+        this.mutator_.mutateElement(element, () => {
+          setStyles(element, {
+            'opacity': 1,
+            'will-change': 'opacity',
+            'transition': 'opacity 0.3s',
+          });
+        });
+      });
+    }
+
+    return /** @type {!HostPage} */ (new HostPage(
       this,
       {
         url,
@@ -440,8 +541,9 @@ export class NextPageService {
       },
       PageState.INSERTED /** initState */,
       VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_ /** initDoc */
-    );
+      this.doc_,
+      hostPageContents
+    ));
   }
 
   /**
@@ -464,11 +566,21 @@ export class NextPageService {
     this.visibilityObserver_.observe(
       shadowRoot /** element */,
       container /** parent */,
-      position => {
+      (position, visiblePercent) => {
         page.relativePos = position;
+        page.visiblePercent = visiblePercent;
         this.updateVisibility();
       }
     );
+
+    // Set-up transitions
+    if (this.transition_ === Transition.FADE_IN_SCROLL) {
+      setStyles(container, {
+        'opacity': 1,
+        'will-change': 'opacity',
+        'transition': 'opacity 0.1s',
+      });
+    }
 
     return container;
   }
@@ -664,16 +776,6 @@ export class NextPageService {
         this.viewport_.getHeight()) /
         this.viewport_.getHeight()
     );
-  }
-
-  /**
-   * @private
-   */
-  updateScrollDirection_() {
-    const scrollTop = this.viewport_.getScrollTop();
-    this.scrollDirection_ =
-      scrollTop > this.lastScrollTop_ ? Direction.DOWN : Direction.UP;
-    this.lastScrollTop_ = scrollTop;
   }
 
   /**
