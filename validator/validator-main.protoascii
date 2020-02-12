@@ -1968,6 +1968,7 @@ tags: {
   attrs: {
     name: "type"
     value_casei: "text/html"
+    value_casei: "application/rss+xml"
   }
   attr_lists: "name-attr"
   # <amp-bind>
