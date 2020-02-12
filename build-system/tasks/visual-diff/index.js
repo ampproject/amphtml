@@ -41,6 +41,7 @@ const {
 const {execOrDie, execScriptAsync} = require('../../common/exec');
 const {isTravisBuild} = require('../../common/travis');
 const {startServer, stopServer} = require('../serve');
+const {waitUntilUsed} = require('tcp-port-used');
 
 // optional dependencies for local development (outside of visual diff tests)
 let puppeteer;
@@ -53,6 +54,9 @@ const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
 const HOST = 'localhost';
 const PORT = 8000;
+const PERCY_AGENT_PORT = 5338;
+const PERCY_AGENT_RETRY_MS = 100;
+const PERCY_AGENT_TIMEOUT_MS = 5000;
 const NAVIGATE_TIMEOUT_MS = 30000;
 const MAX_PARALLEL_TABS = 5;
 const WAIT_FOR_TABS_MS = 1000;
@@ -131,11 +135,20 @@ async function launchPercyAgent() {
   }
 
   const env = argv.percy_agent_debug ? {LOG_LEVEL: 'debug'} : {};
-  percyAgentProcess_ = execScriptAsync('npx percy start', {
-    cwd: __dirname,
-    env: Object.assign(env, process.env),
-    stdio: ['ignore', process.stdout, process.stderr],
-  });
+  percyAgentProcess_ = execScriptAsync(
+    `npx percy start --port ${PERCY_AGENT_PORT}`,
+    {
+      cwd: __dirname,
+      env: Object.assign(env, process.env),
+      stdio: ['ignore', process.stdout, process.stderr],
+    }
+  );
+  await waitUntilUsed(
+    PERCY_AGENT_PORT,
+    PERCY_AGENT_RETRY_MS,
+    PERCY_AGENT_TIMEOUT_MS
+  );
+  log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
 }
 
 /**
