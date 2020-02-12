@@ -59,6 +59,12 @@ CMP_CONFIG['Marfeel'] = {
   'promptUISrc': 'https://marfeel.mgr.consensu.org/amp/index.html',
 };
 
+CMP_CONFIG['Ogury'] = {
+  'consentInstanceId': 'Ogury',
+  'checkConsentHref': 'https://api.ogury.mgr.consensu.org/v1/check-for-consent',
+  'promptUISrc': 'https://www.ogury.mgr.consensu.org/amp.html',
+};
+
 CMP_CONFIG['SourcePoint'] = {
   'consentInstanceId': 'SourcePoint',
   'checkConsentHref': 'https://sourcepoint.mgr.consensu.org/consent/v2/amp',
