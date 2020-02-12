@@ -376,7 +376,7 @@ export class AmpList extends AMP.BaseElement {
         );
 
         const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-        return bind.getState(ampStatePath);
+        return bind.getStateWithWait(ampStatePath);
       })
       .then(json => {
         userAssert(

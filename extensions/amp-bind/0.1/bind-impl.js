@@ -164,6 +164,9 @@ export class Bind {
     /** @private {!Array<string>} */
     this.overridableKeys_ = [];
 
+    /** @private {!Object<string, !Promise<*>>} */
+    this.asyncLoadingAmpStates_ = map();
+
     /**
      * Upper limit on total number of bindings.
      *
@@ -551,6 +554,27 @@ export class Bind {
       return this.copyJsonObject_(/** @type {JsonObject} */ (value));
     }
     return value;
+  }
+
+  /**
+   * Returns a copy of the global state for a given field-based expression.
+   * If called during initial load and pointed to an amp-state, this will wait
+   * for it to finish its fetch.
+   *
+   * e.g. "foo.bar".
+   * @param {string} expr
+   * @return {*}
+   */
+  getStateWithWait(expr) {
+    const value = this.getState(expr);
+    if (!value) {
+      const key = expr.split('.')[0]; // only retain up to the first accessor
+      const wait = this.asyncLoadingAmpStates_[key];
+      if (wait) {
+        return wait.then(() => this.getState(expr));
+      }
+    }
+    return undefined;
   }
 
   /**
@@ -1788,5 +1812,14 @@ export class Bind {
       }
       this.localWin_.dispatchEvent(event);
     }
+  }
+
+  /**
+   *
+   * @param {string} id
+   * @param {!Promise<*>} promise
+   */
+  registerAsyncAmpState(id, promise) {
+    this.asyncLoadingAmpStates_[id] = promise;
   }
 }

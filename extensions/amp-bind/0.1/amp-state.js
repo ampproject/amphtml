@@ -74,6 +74,7 @@ export class AmpState extends AMP.BaseElement {
         bind.addOverridableKey(element.getAttribute('id'));
       });
     }
+
     // Parse child <script> tag and/or fetch JSON from `src` attribute.
     // The latter is allowed to overwrite the former.
     this.parseAndUpdate();
@@ -188,8 +189,9 @@ export class AmpState extends AMP.BaseElement {
         ? UrlReplacementPolicy.OPT_IN
         : UrlReplacementPolicy.ALL;
 
-    return getViewerAuthTokenIfAvailable(element).then(token =>
-      this.fetch_(ampdoc, policy, opt_refresh, token).catch(error => {
+    return getViewerAuthTokenIfAvailable(element)
+      .then(token => this.fetch_(ampdoc, policy, opt_refresh, token))
+      .catch(error => {
         const event = error
           ? createCustomEvent(
               this.win,
@@ -200,8 +202,7 @@ export class AmpState extends AMP.BaseElement {
         // Trigger "fetch-error" event on fetch failure.
         const actions = Services.actionServiceForDoc(element);
         actions.trigger(element, 'fetch-error', event, ActionTrust.LOW);
-      })
-    );
+      });
   }
 
   /**
@@ -212,10 +213,19 @@ export class AmpState extends AMP.BaseElement {
    */
   fetchAndUpdate_(isInit, opt_refresh) {
     // Don't fetch in prerender mode.
-    return this.getAmpDoc()
+    const fetchAndUpdatePromise = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
       .then(json => this.updateState_(json, isInit));
+
+    Services.bindForDocOrNull(this.element).then(bind => {
+      devAssert(bind);
+      bind.registerAsyncAmpState(
+        this.element.getAttribute('id'),
+        fetchAndUpdatePromise
+      );
+    });
+    return fetchAndUpdatePromise;
   }
 
   /**
