@@ -24,7 +24,6 @@ import {
 } from './url';
 import {dict, map} from './utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
-import {Deferred} from './utils/promise';
 import {cssText} from '../build/amp-story-player-iframe.css';
 import {setStyle} from './style';
 import {toArray} from './types';
@@ -91,9 +90,6 @@ export class AmpStoryPlayer {
     /** @private {!Object<string, !Promise>} */
     this.handshakePromises_ = map();
 
-    /** @private {!Object<string, !Function>} */
-    this.handshakeResolvers_ = map();
-
     /** @private {number} */
     this.currentIdx_ = 0;
   }
@@ -127,8 +123,8 @@ export class AmpStoryPlayer {
       story[IFRAME_IDX] = idx;
       this.setUpMessagingForIframe_(story, this.iframes_[idx]);
 
-      this.iframePool_.addIframe(idx);
-      this.iframePool_.addStory(idx);
+      this.iframePool_.addIframeIdx(idx);
+      this.iframePool_.addStoryIdx(idx);
     }
   }
 
@@ -173,22 +169,19 @@ export class AmpStoryPlayer {
   setUpMessagingForIframe_(story, iframeEl) {
     const iframeIdx = story[IFRAME_IDX];
 
-    const deferred = new Deferred();
-    this.handshakePromises_[iframeIdx] = deferred.promise;
-    this.handshakeResolvers_[iframeIdx] = deferred.resolve;
-
-    this.initializeHandshake_(story, iframeEl).then(
-      messaging => {
-        messaging.setDefaultHandler(() => Promise.resolve());
-
-        this.messagingFor_[iframeIdx] = messaging;
-        this.handshakeResolvers_[iframeIdx](iframeIdx);
-      },
-      err => {
-        console /*OK*/
-          .log({err});
-      }
-    );
+    this.handshakePromises_[iframeIdx] = new Promise(resolve => {
+      this.initializeHandshake_(story, iframeEl).then(
+        messaging => {
+          messaging.setDefaultHandler(() => Promise.resolve());
+          this.messagingFor_[iframeIdx] = messaging;
+          resolve();
+        },
+        err => {
+          console /*OK*/
+            .log({err});
+        }
+      );
+    });
   }
 
   /**
@@ -234,20 +227,11 @@ export class AmpStoryPlayer {
       return;
     }
 
-    // Display first story.
-    const firstStory = this.stories_[0];
-    const iframeIdx = firstStory[IFRAME_IDX];
-    const storyIframe = this.iframes_[iframeIdx];
-    this.layoutIframe_(firstStory, storyIframe);
-    this.displayStory_(iframeIdx);
-
-    // Pre-render next stories.
-    for (let idx = 1; idx < this.stories_.length && idx < MAX_IFRAMES; idx++) {
+    for (let idx = 0; idx < this.stories_.length && idx < MAX_IFRAMES; idx++) {
       const story = this.stories_[idx];
       const iframeIdx = story[IFRAME_IDX];
       const iframe = this.iframes_[iframeIdx];
-      this.layoutIframe_(story, iframe);
-      this.preRenderStory_(iframeIdx);
+      this.layoutIframe_(story, iframe, idx === 0 ? 'visible' : 'prerender');
     }
 
     this.isLaidOut_ = true;
@@ -265,10 +249,10 @@ export class AmpStoryPlayer {
     this.currentIdx_++;
 
     const previousStory = this.stories_[this.currentIdx_ - 1];
-    this.pauseStory_(previousStory[IFRAME_IDX]);
+    this.updateVisibilityState_(previousStory[IFRAME_IDX], 'paused');
 
     const currentStory = this.stories_[this.currentIdx_];
-    this.displayStory_(currentStory[IFRAME_IDX]);
+    this.updateVisibilityState_(currentStory[IFRAME_IDX], 'visible');
 
     const nextStoryIdx = this.currentIdx_ + 1;
     if (
@@ -276,7 +260,6 @@ export class AmpStoryPlayer {
       this.stories_[nextStoryIdx][IFRAME_IDX] === null
     ) {
       this.swapIframes_(nextStoryIdx);
-      this.preRenderStory_(this.stories_[nextStoryIdx][IFRAME_IDX]);
     }
   }
 
@@ -292,15 +275,14 @@ export class AmpStoryPlayer {
     this.currentIdx_--;
 
     const previousStory = this.stories_[this.currentIdx_ + 1];
-    this.pauseStory_(previousStory[IFRAME_IDX]);
+    this.updateVisibilityState_(previousStory[IFRAME_IDX], 'paused');
 
     const currentStory = this.stories_[this.currentIdx_];
-    this.displayStory_(currentStory[IFRAME_IDX]);
+    this.updateVisibilityState_(currentStory[IFRAME_IDX], 'visible');
 
     const nextStoryIdx = this.currentIdx_ - 1;
     if (nextStoryIdx >= 0 && this.stories_[nextStoryIdx][IFRAME_IDX] === null) {
       this.swapIframes_(nextStoryIdx, true /** backwards */);
-      this.preRenderStory_(this.stories_[nextStoryIdx][IFRAME_IDX]);
     }
   }
 
@@ -324,34 +306,36 @@ export class AmpStoryPlayer {
     detachedStory[IFRAME_IDX] = null;
 
     const nextIframe = this.iframes_[nextStory[IFRAME_IDX]];
-    this.layoutIframe_(nextStory, nextIframe);
+    this.layoutIframe_(nextStory, nextIframe, 'prerender');
     this.setUpMessagingForIframe_(nextStory, nextIframe);
   }
 
   /**
    * @param {!Element} story
    * @param {!Element} iframe
+   * @param {string} visibilityState
    * @private
    */
-  layoutIframe_(story, iframe) {
-    const {href} = this.getEncodedLocation_(story.href);
+  layoutIframe_(story, iframe, visibilityState) {
+    const {href} = this.getEncodedLocation_(story.href, visibilityState);
 
     iframe.setAttribute('src', href);
   }
 
   /**
-   * Gets encoded url for viewer usage.
+   * Gets encoded url for player usage.
    * @param {string} href
+   * @param {string} visibilityState
    * @return {!Location}
    * @private
    */
-  getEncodedLocation_(href) {
+  getEncodedLocation_(href, visibilityState = 'inactive') {
     const {location} = this.win_;
     const url = parseUrlWithA(this.cachedA_, location.href);
 
     const params = dict({
       'amp_js_v': '0.1',
-      'visibilityState': 'inactive',
+      'visibilityState': visibilityState,
       'origin': url.origin,
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
@@ -372,45 +356,15 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Sends a message to the story document to make it visible.
-   * @private
+   * Updates the visibility state of the story inside the iframe.
    * @param {number} iframeIdx
+   * @param {string} visibilityState
    */
-  displayStory_(iframeIdx) {
+  updateVisibilityState_(iframeIdx, visibilityState) {
     this.handshakePromises_[iframeIdx].then(() => {
       this.messagingFor_[iframeIdx].sendRequest(
         'visibilitychange',
-        {state: 'visible'},
-        true
-      );
-    });
-  }
-
-  /**
-   * Sends a message to the story document to pre-render it.
-   * @private
-   * @param {number} iframeIdx
-   */
-  preRenderStory_(iframeIdx) {
-    this.handshakePromises_[iframeIdx].then(() => {
-      this.messagingFor_[iframeIdx].sendRequest(
-        'visibilitychange',
-        {state: 'prerender'},
-        true
-      );
-    });
-  }
-
-  /**
-   * Sends a message to the story document to pause it.
-   * @private
-   * @param {number} iframeIdx
-   */
-  pauseStory_(iframeIdx) {
-    this.handshakePromises_[iframeIdx].then(() => {
-      this.messagingFor_[iframeIdx].sendRequest(
-        'visibilitychange',
-        {state: 'paused'},
+        {state: visibilityState},
         true
       );
     });
@@ -440,7 +394,7 @@ class IframePool {
    * @param {number} idx
    * @public
    */
-  addIframe(idx) {
+  addIframeIdx(idx) {
     this.iframePool_.push(idx);
   }
 
@@ -448,7 +402,7 @@ class IframePool {
    * @param {number} idx
    * @public
    */
-  addStory(idx) {
+  addStoryIdx(idx) {
     this.storyIdsWithIframe_.push(idx);
   }
 
