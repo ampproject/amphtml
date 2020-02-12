@@ -90,4 +90,10 @@ One known caveat is when substituting a variable for a macro (not including its 
 
 This will result in the first QUERY_PARAM working as intended but the second QUERY_PARAM will not get parsed corretly due to the second pair of parenthesis from the macros within.
 
-Similar to this, another restriction is nesting analytics variables within each other (`${queryParam(${title},${canonicalUrl})}`). Instead, use the platform version (or a combination): `QUERY_PARAM(TITLE,${myVariable})`.
+Similar to this, another restriction is nesting analytics variables within each other:
+
+`${queryParam(${title},${canonicalUrl})}`
+
+Instead, use the platform version (or a combination):
+
+`QUERY_PARAM(TITLE,${myVariable})`
