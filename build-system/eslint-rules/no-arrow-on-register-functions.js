@@ -18,8 +18,9 @@
 const expression = 'CallExpression[callee.property.name=registerServiceForDoc]';
 module.exports = function(context) {
   return {
-    [expression](node) {
+    [expression]: function(node) {
       if (node.arguments[1].type === 'ArrowFunctionExpression') {
+        // TODO(erwinm): add fixer method.
         context.report({
           node,
           message:
