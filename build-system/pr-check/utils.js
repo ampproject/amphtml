@@ -18,6 +18,12 @@
 const colors = require('ansi-colors');
 const requestPromise = require('request-promise');
 const {
+  execOrDie,
+  execScriptAsync,
+  execWithError,
+  exec,
+} = require('../common/exec');
+const {
   gitBranchCreationPoint,
   gitBranchName,
   gitCommitHash,
@@ -31,7 +37,6 @@ const {
   travisBuildNumber,
   travisPullRequestSha,
 } = require('../common/travis');
-const {execOrDie, execWithError, exec} = require('../common/exec');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const BUILD_OUTPUT_FILE = isTravisBuild()
@@ -129,6 +134,29 @@ async function startSauceConnect(functionName) {
     colors.cyan(startScCmd)
   );
   execOrDie(startScCmd);
+}
+
+/**
+ * Start DNS monitor
+ * @return {!Promise}
+ */
+function startDnsMonitor_() {
+  // if (!isTravisBuild()) {
+  //   return Promise.resolve(null);
+  // }
+
+  let resolver;
+  const deferred = new Promise(resolverIn => {
+    resolver = resolverIn;
+  });
+
+  const dnsProcess = execScriptAsync('gulp dns-monitor --nonblocking');
+
+  // Wait for the heartbeat from stderr before starting the test
+  dnsProcess.stderr.on('data', () => {
+    resolver(dnsProcess);
+  });
+  return deferred;
 }
 
 /**
@@ -231,6 +259,35 @@ function timedExecOrDie(cmd, fileName = 'utils.js') {
   const startTime = startTimer(cmd, fileName);
   execOrDie(cmd);
   stopTimer(cmd, fileName, startTime);
+}
+
+/**
+ * Executes the command and check unpermitted DNS requests in the interim. In
+ * case if failure, it terminates.
+ * @param {string} cmd
+ * @param {string} fileName
+ */
+async function timedExecOrDieWithDnsMonitor(cmd, fileName = 'utils.js') {
+  return startDnsMonitor_().then(dnsMonitor => {
+    timedExecOrDie(cmd, fileName);
+    if (dnsMonitor) {
+      dnsMonitor.stdout.pipe(process.stdout);
+      dnsMonitor.stderr.pipe(process.stderr);
+      dnsMonitor.on('exit', code => {
+        if (code) {
+          process.exit(1);
+        }
+        resolver();
+      });
+      dnsMonitor.kill('SIGTERM');
+      let resolver;
+      return new Promise(resolverIn => {
+        resolver = resolverIn;
+      });
+    } else {
+      return Promise.resolve();
+    }
+  });
 }
 
 /**
@@ -387,6 +444,7 @@ module.exports = {
   stopTimedJob,
   timedExec,
   timedExecOrDie,
+  timedExecOrDieWithDnsMonitor,
   timedExecWithError,
   uploadBuildOutput,
   uploadDistOutput,
