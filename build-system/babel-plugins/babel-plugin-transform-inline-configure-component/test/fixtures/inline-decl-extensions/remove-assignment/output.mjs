@@ -4,4 +4,4 @@ class RemoveAssignment {
 }
 
 import { RemoveAssignment as _RemoveAssignment } from './input-base-class';
-foo(RemoveAssignment);
+foo(_RemoveAssignment);

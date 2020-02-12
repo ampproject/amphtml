@@ -13,33 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const fs = require('fs-extra');
-const fsPath = require('path');
-const tempy = require('tempy');
-const {addNamed} = require('@babel/helper-module-imports');
-const {transformFileSync, transformSync} = require('@babel/core');
+const {dirname, relative, join} = require('path');
+const {transformFileSync} = require('@babel/core');
 
 /**
  * @fileoverview
- * Finds `configureComponent(Ctor, {foo: 'bar'})` calls and:
+ * Finds `configureComponent(MyConstructor, {foo: 'bar'})` calls and:
  *
- * 1. Inlines imported `Ctor` in current scope.
+ * 1. Inlines imported `MyConstructor` in current scope.
  *
  * 2. Replaces `*.STATIC_CONFIG_.foo` accesses to their value as
  *    defined in config object `{foo: 'bar'}`.
  *
  * 3. Replaces `configureComponent(...)` call with identifier for inlined, static
- *    `Ctor`.
+ *    `MyConstructor`.
  */
 
+const calleeName = 'configureComponent';
+const replacedMember = 'STATIC_CONFIG_';
+
 /**
- * Sub-plugin that transforms inlined file that exports wrapped ctor.
+ * Sub-plugin that transforms inlined file that exports wrapped constructor.
  * @return {Object}
  */
 function transformRedefineInline({types: t}) {
-  const resetRelativePath = (relative, path) =>
-    fsPath.join(relative, path).replace(/^[^.]/, './$&');
-
   const propValueNode = (propValues, key, opt_default) =>
     propValues[key] || opt_default || t.identifier('undefined');
 
@@ -67,24 +64,15 @@ function transformRedefineInline({types: t}) {
       ExportDefaultDeclaration: unexport,
       ExportNamedDeclaration: unexport,
       ExportAllDeclaration: unexport,
-      Program(path, {opts}) {
-        if (!opts.hoistedDecls || !opts.hoistedDecls.length) {
-          return;
-        }
-        path.unshiftContainer(
-          'body',
-          t.variableDeclaration('const', opts.hoistedDecls)
-        );
-      },
       ImportDeclaration(path, {opts}) {
         const {source} = path.node;
         if (source.value.startsWith('.')) {
-          source.value = resetRelativePath(opts.relImportPath, source.value);
+          source.value = join(opts.from, source.value).replace(/^[^.]/, './$&');
         }
       },
       MemberExpression(path, {opts}) {
         // Handle x.y.{...}.$replacedMember prop accesses
-        if (!t.isIdentifier(path.node.property, {name: opts.replacedMember})) {
+        if (!t.isIdentifier(path.node.property, {name: replacedMember})) {
           return;
         }
 
@@ -135,7 +123,7 @@ function transformRedefineInline({types: t}) {
  * @return {Object}
  */
 const redefineInline = (sourceFilename, opts) =>
-  transformSync(fs.readFileSync(sourceFilename).toString(), {
+  transformFileSync(sourceFilename.toString(), {
     configFile: false,
     code: false,
     ast: true,
@@ -165,20 +153,21 @@ module.exports = function({types: t}) {
     name: 'transform-inline-decl-extensions',
     visitor: {
       CallExpression(path, {file}) {
-        if (!t.isIdentifier(path.node.callee, {name: 'configureComponent'})) {
+        if (!t.isIdentifier(path.node.callee, {name: calleeName})) {
           return;
         }
 
-        const [importedId, propsObj] = path.get('arguments');
-
-        if (!t.isIdentifier(importedId)) {
+        const [importedId, propsObj] = path.node.arguments;
+        if (!t.isIdentifier(importedId) || !t.isObjectExpression(propsObj)) {
           return;
         }
-
-        const importedIdName = importedId.node.name;
 
         const program = path.findParent(p => t.isProgram(p));
-        const importPath = getImportPath(program.node.body, importedIdName);
+
+        const importPath = getImportPath(program.node.body, importedId.name);
+        if (!importPath) {
+          return;
+        }
 
         for (const name in program.scope.bindings) {
           if (name) {
@@ -186,26 +175,9 @@ module.exports = function({types: t}) {
           }
         }
 
-        if (!importPath) {
-          return;
-        }
+        const propValues = Object.create(null);
 
-        const currentDirname = fsPath.dirname(file.opts.filename);
-        const importedFilename = require.resolve(
-          fsPath.join(currentDirname, importPath)
-        );
-        const importedDirname = fsPath.dirname(importedFilename);
-        const relImportPath = fsPath.relative(currentDirname, importedDirname);
-
-        const replacedMember = 'STATIC_CONFIG_';
-
-        const properties = propsObj.get('properties');
-
-        const propValues = {};
-
-        for (let i = 0; i < properties.length; i++) {
-          const path = properties[i];
-          const {key, value} = path.node;
+        for (const {key, value} of propsObj.properties) {
           const {name} = key;
 
           if (t.isMemberExpression(value)) {
@@ -232,16 +204,18 @@ module.exports = function({types: t}) {
           propValues[name] = id;
         }
 
+        const currentDirname = dirname(file.opts.filename);
+        const importedModule = join(currentDirname, importPath);
+
         // TODO(alanorozco): sourcemaps
-        const importedInline = redefineInline(importedFilename, {
-          relImportPath,
-          replacedMember,
+        const importedInline = redefineInline(require.resolve(importedModule), {
           propValues,
+          from: relative(currentDirname, dirname(importedModule)),
         });
 
         program.unshiftContainer('body', importedInline.ast.program.body);
 
-        path.replaceWith(t.identifier(importedIdName));
+        path.replaceWith(t.identifier(importedId.name));
       },
     },
   };

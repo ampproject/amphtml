@@ -1,3 +1,6 @@
+const _a = 'value for a',
+      _b = 'value for b',
+      _c = 'value for c';
 const a = _a,
       b = _b,
       c = _c;
@@ -28,8 +31,5 @@ class Destructuring {
 
 }
 
-const _a = 'value for a',
-      _b = 'value for b',
-      _c = 'value for c';
 import { Destructuring as _Destructuring } from './input-base-class';
-foo(Destructuring);
+foo(_Destructuring);

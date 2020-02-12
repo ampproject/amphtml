@@ -1,3 +1,9 @@
+const _foo = 'value for foo',
+      _bar = 'value for bar',
+      _nestedObject = {
+  foo: 'foo'
+};
+
 class DirectAccess {
   setProps() {
     _foo;
@@ -15,11 +21,6 @@ class DirectAccess {
 
 }
 
-const _foo = 'value for foo',
-      _bar = 'value for bar',
-      _nestedObject = {
-  foo: 'foo'
-};
 import { DirectAccess as _DirectAccess } from './input-base-class';
 const _scopedId = 'value for scopedId';
-foo(DirectAccess);
+foo(_DirectAccess);
