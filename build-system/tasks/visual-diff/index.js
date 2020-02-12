@@ -147,9 +147,8 @@ async function launchPercyAgent() {
     PERCY_AGENT_PORT,
     PERCY_AGENT_RETRY_MS,
     PERCY_AGENT_TIMEOUT_MS
-  ).then(() => {
-    log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
-  });
+  );
+  log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
 }
 
 /**
