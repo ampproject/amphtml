@@ -22,10 +22,10 @@ import {
   parseUrlWithA,
   removeFragment,
 } from './url';
-import {dict} from './utils/object';
+import {dict, map} from './utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
+import {Deferred} from './utils/promise';
 import {cssText} from '../build/amp-story-player-iframe.css';
-import {findIndex} from './utils/array';
 import {setStyle} from './style';
 import {toArray} from './types';
 
@@ -35,6 +35,12 @@ const LoadStateClass = {
   LOADED: 'i-amphtml-story-player-loaded',
   ERROR: 'i-amphtml-story-player-error',
 };
+
+/** @const {number} */
+const MAX_IFRAMES = 3;
+
+/** @const {string} */
+const IFRAME_IDX = '__AMP_IFRAME_IDX__';
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -78,6 +84,18 @@ export class AmpStoryPlayer {
 
     /** @private {boolean} */
     this.isLaidOut_ = false;
+
+    /** @private {!IframePool} */
+    this.iframePool_ = new IframePool();
+
+    /** @private @const {!Object<string, !Promise>} */
+    this.connectedPromises_ = map();
+
+    /** @private @const {!Object<string, !Function>} */
+    this.connectedResolvers_ = map();
+
+    /** @private {number} */
+    this.currentIdx_ = 0;
   }
 
   /**
@@ -93,9 +111,25 @@ export class AmpStoryPlayer {
     this.stories_ = toArray(this.element_.querySelectorAll('a'));
 
     this.initializeShadowRoot_();
+    this.initializeIframes_();
+  }
 
-    // TODO(#26308): Build all child iframes.
-    this.buildIframe_(this.stories_[0]);
+  /** @private */
+  initializeIframes_() {
+    this.stories_.forEach(story => {
+      story[IFRAME_IDX] = null;
+    });
+
+    for (let idx = 0; idx < MAX_IFRAMES && idx < this.stories_.length; idx++) {
+      const story = this.stories_[idx];
+      this.buildIframe_(story);
+
+      story[IFRAME_IDX] = idx;
+      this.setUpMessagingForIframe_(story, this.iframes_[idx]);
+
+      this.iframePool_.addIframe(idx);
+      this.iframePool_.addStory(idx);
+    }
   }
 
   /** @private */
@@ -128,20 +162,27 @@ export class AmpStoryPlayer {
 
     this.initializeLoadingListeners_(iframeEl);
     this.rootEl_.appendChild(iframeEl);
+  }
+
+  /**
+   * Sets up messaging for a story inside an iframe.
+   * @param {!Element} story
+   * @param {!Element} iframeEl
+   * @private
+   */
+  setUpMessagingForIframe_(story, iframeEl) {
+    const iframeIdx = story[IFRAME_IDX];
+
+    const deferred = new Deferred();
+    this.connectedPromises_[iframeIdx] = deferred.promise;
+    this.connectedResolvers_[iframeIdx] = deferred.resolve;
 
     this.initializeHandshake_(story, iframeEl).then(
       messaging => {
-        const iframeIdx = findIndex(
-          this.iframes_,
-          iframe => iframe === iframeEl
-        );
-
-        messaging.setDefaultHandler(() => {});
+        messaging.setDefaultHandler(() => Promise.resolve());
 
         this.messagingFor_[iframeIdx] = messaging;
-
-        // TODO(#26308): Appropiately set visibility to stories.
-        this.displayStory_(iframeIdx);
+        this.connectedResolvers_[iframeIdx](iframeIdx);
       },
       err => {
         console /*OK*/
@@ -193,10 +234,98 @@ export class AmpStoryPlayer {
       return;
     }
 
-    // TODO(#26308): Layout all child iframes.
-    this.layoutIframe_(this.stories_[0], this.iframes_[0]);
+    // Display first story.
+    const firstStory = this.stories_[0];
+    const iframeIdx = firstStory[IFRAME_IDX];
+    const storyIframe = this.iframes_[iframeIdx];
+    this.layoutIframe_(firstStory, storyIframe);
+    this.displayStory_(iframeIdx);
+
+    // Pre-render next stories.
+    for (let idx = 1; idx < this.stories_.length && idx < MAX_IFRAMES; idx++) {
+      const story = this.stories_[idx];
+      const iframeIdx = story[IFRAME_IDX];
+      const iframe = this.iframes_[iframeIdx];
+      this.layoutIframe_(story, iframe);
+      this.preRenderStory_(iframeIdx);
+    }
 
     this.isLaidOut_ = true;
+  }
+
+  /**
+   * Navigates to the next story in the player.
+   * @private
+   */
+  next_() {
+    if (this.currentIdx_ + 1 >= this.stories_.length) {
+      return;
+    }
+
+    this.currentIdx_++;
+
+    const previousStory = this.stories_[this.currentIdx_ - 1];
+    this.pauseStory_(previousStory[IFRAME_IDX]);
+
+    const currentStory = this.stories_[this.currentIdx_];
+    this.displayStory_(currentStory[IFRAME_IDX]);
+
+    const nextStoryIdx = this.currentIdx_ + 1;
+    if (
+      nextStoryIdx < this.stories_.length &&
+      this.stories_[nextStoryIdx][IFRAME_IDX] === null
+    ) {
+      this.swapIframes_(nextStoryIdx);
+      this.preRenderStory_(this.stories_[nextStoryIdx][IFRAME_IDX]);
+    }
+  }
+
+  /**
+   * Navigates to the previous story in the player.
+   * @private
+   */
+  previous_() {
+    if (this.currentIdx_ - 1 < 0) {
+      return;
+    }
+
+    this.currentIdx_--;
+
+    const previousStory = this.stories_[this.currentIdx_ + 1];
+    this.pauseStory_(previousStory[IFRAME_IDX]);
+
+    const currentStory = this.stories_[this.currentIdx_];
+    this.displayStory_(currentStory[IFRAME_IDX]);
+
+    const nextStoryIdx = this.currentIdx_ - 1;
+    if (nextStoryIdx >= 0 && this.stories_[nextStoryIdx][IFRAME_IDX] === null) {
+      this.swapIframes_(nextStoryIdx, true /** backwards */);
+      this.preRenderStory_(this.stories_[nextStoryIdx][IFRAME_IDX]);
+    }
+  }
+
+  /**
+   * Detaches iframe from a story and gives it to the next story. It detaches
+   * the iframe from the story furthest away; depending where the user is
+   * navigating and allocates it to a story that the user is close to seeing.
+   * @param {number} nextStoryIdx
+   * @param {boolean} backwards
+   * @private
+   */
+  swapIframes_(nextStoryIdx, backwards = false) {
+    const detachedStoryIdx = backwards
+      ? this.iframePool_.shiftBackwards(nextStoryIdx)
+      : this.iframePool_.shiftForwards(nextStoryIdx);
+
+    const detachedStory = this.stories_[detachedStoryIdx];
+    const nextStory = this.stories_[nextStoryIdx];
+
+    nextStory[IFRAME_IDX] = detachedStory[IFRAME_IDX];
+    detachedStory[IFRAME_IDX] = null;
+
+    const nextIframe = this.iframes_[nextStory[IFRAME_IDX]];
+    this.layoutIframe_(nextStory, nextIframe);
+    this.setUpMessagingForIframe_(nextStory, nextIframe);
   }
 
   /**
@@ -248,11 +377,43 @@ export class AmpStoryPlayer {
    * @param {number} iframeIdx
    */
   displayStory_(iframeIdx) {
-    this.messagingFor_[iframeIdx].sendRequest(
-      'visibilitychange',
-      {state: 'visible'},
-      true
-    );
+    this.connectedPromises_[iframeIdx].then(() => {
+      this.messagingFor_[iframeIdx].sendRequest(
+        'visibilitychange',
+        {state: 'visible'},
+        true
+      );
+    });
+  }
+
+  /**
+   * Sends a message to the story document to pre-render it.
+   * @private
+   * @param {number} iframeIdx
+   */
+  preRenderStory_(iframeIdx) {
+    this.connectedPromises_[iframeIdx].then(() => {
+      this.messagingFor_[iframeIdx].sendRequest(
+        'visibilitychange',
+        {state: 'prerender'},
+        true
+      );
+    });
+  }
+
+  /**
+   * Sends a message to the story document to pause it.
+   * @private
+   * @param {number} iframeIdx
+   */
+  pauseStory_(iframeIdx) {
+    this.connectedPromises_[iframeIdx].then(() => {
+      this.messagingFor_[iframeIdx].sendRequest(
+        'visibilitychange',
+        {state: 'paused'},
+        true
+      );
+    });
   }
 }
 
@@ -260,3 +421,63 @@ self.onload = () => {
   const manager = new AmpStoryPlayerManager(self);
   manager.loadPlayers();
 };
+
+/**
+ * Manages the iframes used to host the stories inside the player. It keeps
+ * track of the iframes hosting stories, and what stories have an iframe.
+ */
+class IframePool {
+  /** @public */
+  constructor() {
+    /** @private @const {!Array<number>} */
+    this.iframePool_ = [];
+
+    /** @private @const {!Array<number>} */
+    this.storyIdsWithIframe_ = [];
+  }
+
+  /**
+   * @param {number} idx
+   * @public
+   */
+  addIframe(idx) {
+    this.iframePool_.push(idx);
+  }
+
+  /**
+   * @param {number} idx
+   * @public
+   */
+  addStory(idx) {
+    this.storyIdsWithIframe_.push(idx);
+  }
+
+  /**
+   * Shifts both the iframePool and the storyIdsWithIframe forward. It returns
+   * the index of the story which will be detached of an iframe.
+   * @param {number} nextStoryIdx
+   * @return {number}
+   */
+  shiftForwards(nextStoryIdx) {
+    const detachedStoryIdx = this.storyIdsWithIframe_.shift();
+    this.storyIdsWithIframe_.push(nextStoryIdx);
+
+    this.iframePool_.push(this.iframePool_.shift());
+    return detachedStoryIdx;
+  }
+
+  /**
+   * Shifts both the iframePool and the storyIdsWithIframe backwards. It returns
+   * the index of the story which will be detached of an iframe.
+   * @param {number} nextStoryIdx
+   * @return {number}
+   */
+  shiftBackwards(nextStoryIdx) {
+    const detachedStoryIdx = this.storyIdsWithIframe_.pop();
+    this.storyIdsWithIframe_.unshift(nextStoryIdx);
+
+    this.iframePool_.unshift(this.iframePool_.pop());
+
+    return detachedStoryIdx;
+  }
+}
