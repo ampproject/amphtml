@@ -53,6 +53,10 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ## Release Notes
 
+### 1.0.30
+
+- Remove engine section from pacakge.json to allow any version of nodejs.
+
 ### 1.0.29
 
 - Reintroduce node v8 support. Supports node v8, v10, v12 and v14.
