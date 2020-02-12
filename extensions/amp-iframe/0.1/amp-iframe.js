@@ -19,10 +19,10 @@ import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfi
 import {LayoutPriority, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {base64EncodeFromBytes} from '../../../src/utils/base64.js';
-import {createCustomEvent, getData} from '../../../src/event-helper';
+import {createCustomEvent, getData, listen} from '../../../src/event-helper';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {endsWith} from '../../../src/string';
+import {endsWith, startsWith} from '../../../src/string';
 import {
   isAdLike,
   isPausable,
@@ -102,6 +102,9 @@ export class AmpIframe extends AMP.BaseElement {
 
     /** @private {string} */
     this.sandbox_ = '';
+
+    /** @private {Function} */
+    this.unlistenPym_ = null;
 
     /**
      * The source of the iframe. May change to null for tracking iframes
@@ -470,6 +473,11 @@ export class AmpIframe extends AMP.BaseElement {
       /*opt_allowOpaqueOrigin*/ true
     );
 
+    // Listen for resize messages sent by Pym.js.
+    this.unlistenPym_ = listen(this.win, 'message', event => {
+      return this.listenForPymMessage_(/** @type {!MessageEvent} */ (event));
+    });
+
     if (this.isClickToPlay_) {
       listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
@@ -488,6 +496,37 @@ export class AmpIframe extends AMP.BaseElement {
         }, 1000);
       }
     });
+  }
+
+  /**
+   * Listen for Pym.js messages for 'height' and 'width'.
+   *
+   * @see http://blog.apps.npr.org/pym.js/
+   * @param {!MessageEvent} event
+   * @private
+   */
+  listenForPymMessage_(event) {
+    if (!this.iframe_ || event.source !== this.iframe_.contentWindow) {
+      return;
+    }
+    const data = getData(event);
+    if (typeof data !== 'string' || !startsWith(data, 'pym')) {
+      return;
+    }
+
+    // The format of the message takes the form of `pymxPYMx${id}xPYMx${type}xPYMx${message}`.
+    // The id is unnecessary for integration with amp-iframe; the possible types include
+    // 'height', 'width', 'parentPositionInfo', 'navigateTo', and  'scrollToChildPos'.
+    // Only the 'height' and 'width' messages are currently supported.
+    // See <https://github.com/nprapps/pym.js/blob/57feb68/src/pym.js#L85-L102>
+    const args = data.split(/xPYMx/);
+    if ('height' === args[2]) {
+      this.updateSize_(parseInt(args[3], 10), undefined);
+    } else if ('width' === args[2]) {
+      this.updateSize_(undefined, parseInt(args[3], 10));
+    } else {
+      user().warn(TAG_, `Unsupported Pym.js message: ${data}`);
+    }
   }
 
   /** @override */
@@ -528,6 +567,10 @@ export class AmpIframe extends AMP.BaseElement {
    * @override
    **/
   unlayoutCallback() {
+    if (this.unlistenPym_) {
+      this.unlistenPym_();
+      this.unlistenPym_ = null;
+    }
     if (this.iframe_) {
       removeElement(this.iframe_);
       if (this.placeholder_) {

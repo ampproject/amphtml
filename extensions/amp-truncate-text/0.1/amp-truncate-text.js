@@ -22,7 +22,7 @@ import {
   iterateCursor,
 } from '../../../src/dom';
 import {createShadowRoot} from './shadow-utils';
-import {dev, userAssert} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {toArray} from '../../../src/types';
@@ -81,12 +81,6 @@ export class AmpTruncateText extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(
-      isExperimentOn(this.win, 'amp-truncate-text'),
-      'The amp-truncate-text experiment must be enabled to use this ' +
-        'component.'
-    );
-
     this.useShadow_ =
       !!this.element.attachShadow &&
       isExperimentOn(this.win, 'amp-truncate-text-shadow');
