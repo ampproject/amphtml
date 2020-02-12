@@ -220,8 +220,12 @@ window.AMP.viewport = {};
 window.AMP.viewport.getScrollLeft;
 window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
-window.AMP.attachShadowDoc;
-window.AMP.attachShadowDocAsStream;
+
+/** @type {function(!HTMLElement, !Document, !string, Object)} */
+window.AMP.attachShadowDoc = function(element, document, url, options) {};
+
+/** @type {function(!HTMLElement, !string, Object)} */
+window.AMP.attachShadowDocAsStream = function(element, url, options) {};
 
 /** @constructor */
 function AmpConfigType() {}
