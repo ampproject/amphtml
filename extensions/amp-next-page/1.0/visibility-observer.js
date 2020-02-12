@@ -143,7 +143,6 @@ export class VisibilityObserverEntry {
       // through being scrolling into/out of the viewport in which case
       // we don't need to update the visibility
       this.relativePos_ = ViewportRelativePos.LEAVING_VIEWPORT;
-      return;
     }
 
     callback(this.relativePos_);
