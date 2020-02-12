@@ -101,8 +101,8 @@ describes.realWin(
 
     function testIframe(iframe) {
       expect(iframe).to.not.equal(null);
-      expect(iframe.getAttribute('src')).to.equal(
-        `${ORIGIN}/dc/amp-addthis.html`
+      expect(iframe.getAttribute('src')).to.match(
+        new RegExp(`^${ORIGIN}/dc/amp-addthis.html?`)
       );
       expect(iframe.getAttribute('title')).to.equal(ALT_TEXT);
     }
