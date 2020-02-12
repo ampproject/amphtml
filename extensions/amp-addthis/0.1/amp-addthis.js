@@ -303,11 +303,7 @@ class AmpAddThis extends AMP.BaseElement {
         // Document has overly long cache age: go.amp.dev/issue/24848
         // Adding AMP runtime version as a meaningless query param to force bust
         // cached versions.
-        'src': addParamToUrl(
-          `${ORIGIN}/dc/amp-addthis.html`,
-          '_amp_',
-          internalRuntimeVersion()
-        ),
+        'src': `${ORIGIN}/dc/amp-addthis.html?_amp_=${internalRuntimeVersion()}`,
         'id': this.widgetId_,
         'pco': this.productCode_,
         'containerClassName': this.containerClassName_,
