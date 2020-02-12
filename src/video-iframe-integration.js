@@ -26,7 +26,7 @@ import {tryResolve} from '../src/utils/promise';
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
 const TAG = '<amp-video-iframe>';
-const DOCS_URL = 'https://amp.dev/documentation/components/amp-video-iframe';
+const DOCS_URL = 'https://go.amp.dev/c/amp-video-iframe';
 const __AMP__ = '__AMP__VIDEO_IFRAME__';
 
 /**
@@ -213,7 +213,7 @@ export class AmpVideoIntegration {
     const types = {
       'jwplayer': () => {
         userAssert(
-          !obj.tagName,
+          obj.on,
           'jwplayer integration takes a jwplayer instance, not an element.'
         );
         userAssert(
