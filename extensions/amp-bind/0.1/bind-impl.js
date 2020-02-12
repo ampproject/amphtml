@@ -1821,5 +1821,9 @@ export class Bind {
    */
   registerAsyncAmpState(id, promise) {
     this.asyncLoadingAmpStates_[id] = promise;
+
+    promise
+      .then(() => delete this.asyncLoadingAmpStates_[id])
+      .catch(() => delete this.asyncLoadingAmpStates_[id]);
   }
 }
