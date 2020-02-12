@@ -196,20 +196,17 @@ export class AmpList extends AMP.BaseElement {
     // is missing attributes in the constructor.
     this.initialSrc_ = this.element.getAttribute('src');
 
-    // TODO(amphtml): Decouple "initial content" from diffing in new version.
-    if (this.element.hasAttribute('diffable')) {
-      // Set container to the initial content, if it exists. This allows
-      // us to DOM diff with the rendered result.
-      const initialContent = scopedQuerySelector(
-        this.element,
-        '> div[role=list]:not([placeholder]):not([fallback]):not([fetch-error])'
-      );
-      if (initialContent) {
-        this.container_ = initialContent;
-        this.hasInitialContent_ = true;
-      }
-    }
-    if (!this.container_) {
+    // Set container to the initial content, if it exists. This allows
+    // us to DOM diff with the rendered result.
+    const initialContent = scopedQuerySelector(
+      this.element,
+      '> div[role=list]:not([placeholder]):not([fallback]):not([fetch-error])'
+    );
+    // TODO: need to have the validator ensure that all children are also SSRed with role=listitem.
+    if (initialContent) {
+      this.container_ = initialContent;
+      this.hasInitialContent_ = true;
+    } else {
       this.container_ = this.createContainer_();
       this.element.appendChild(this.container_);
     }
@@ -246,8 +243,6 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    this.layoutCompleted_ = true;
-
     // If a placeholder exists and it's taller than amp-list, attempt a resize.
     const placeholder = this.getPlaceholder();
     if (placeholder) {
@@ -264,6 +259,13 @@ export class AmpList extends AMP.BaseElement {
       this.initializeLoadMoreElements_();
     }
 
+    // We want to skip fetch/render iff the amp-list was SSRed with content, but only on the first layout.
+    // TODO(amphtml): are we also willing to use the SSRed html on subsequent layouts?
+    if (this.hasInitialContent_ && !this.layoutCompleted_) {
+      this.layoutCompleted_ = true;
+      return Promise.resolve();
+    }
+    this.layoutCompleted_ = true;
     return this.fetchList_();
   }
 
