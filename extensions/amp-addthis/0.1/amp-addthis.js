@@ -52,8 +52,6 @@ import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
 import {PostMessageDispatcher} from './post-message-dispatcher';
 import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
 import {Services} from '../../../src/services';
-
-import {addParamToUrl, parseUrlDeprecated} from '../../../src/url';
 import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
@@ -70,6 +68,7 @@ import {getWidgetOverload} from './addthis-utils/get-widget-id-overloaded-with-j
 import {internalRuntimeVersion} from '../../../src/internal-version';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
+import {parseUrlDeprecated} from '../../../src/url';
 import {setStyle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
