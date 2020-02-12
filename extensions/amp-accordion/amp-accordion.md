@@ -29,7 +29,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>A clickable stacked list of headers that collapse or expand content sections.  associated with them.</td>
+    <td>A clickable stacked list of headers that collapse or expand content sections.</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
