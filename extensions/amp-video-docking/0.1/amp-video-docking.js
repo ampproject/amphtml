@@ -196,10 +196,8 @@ function complainAboutPortrait(element) {
  * @private
  */
 export function getPosterImageSrc(element) {
-  const attr = ['poster', 'data-poster'].reduce(
-    (existing, attr) => existing || element.getAttribute(attr),
-    null
-  );
+  const attr =
+    element.getAttribute('poster') || element.getAttribute('data-poster');
   if (attr) {
     return attr;
   }
