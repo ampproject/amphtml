@@ -563,7 +563,7 @@ export class Bind {
    *
    * e.g. "foo.bar".
    * @param {string} expr
-   * @return {!Promise<*>}
+   * @return {!Promise}
    */
   getStateWithWait(expr) {
     const value = this.getState(expr);
@@ -1817,7 +1817,7 @@ export class Bind {
   /**
    *
    * @param {string} id
-   * @param {!Promise<*>} promise
+   * @param {!Promise} promise
    */
   registerAsyncAmpState(id, promise) {
     this.asyncLoadingAmpStates_[id] = promise;
