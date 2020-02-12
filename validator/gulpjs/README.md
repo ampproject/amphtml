@@ -41,6 +41,10 @@ To treat warnings as errors, replace the last line of the validation closure wit
 
 ## Release Notes
 
+### 1.0.3
+
+- Remove engine section from pacakge.json to allow any version of gulpjs.
+
 ### 1.0.2
 
 - Add failAfterWarningOrError option
