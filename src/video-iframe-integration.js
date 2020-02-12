@@ -338,7 +338,6 @@ export class AmpVideoIntegration {
    * @param {string} event
    */
   postEvent(event) {
-    userAssert(validEvents.indexOf(event) > -1, `Invalid event [${event}]`);
     this.postToParent_(dict({'event': event}));
   }
 
