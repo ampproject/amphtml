@@ -204,7 +204,7 @@ export class AmpVideoIntegration {
       'jwplayer': () => {
         userAssert(
           obj.on,
-          'jwplayer integration takes a jwplayer instance, not an element.'
+          'jwplayer integration takes a jwplayer instance as first argument.'
         );
         userAssert(
           !opt_initializer,
