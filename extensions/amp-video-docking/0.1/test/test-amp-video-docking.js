@@ -17,6 +17,7 @@ import {
   Actions,
   BASE_CLASS_NAME,
   DOCKED_TO_CORNER_SIZING_RATIO,
+  DockTargetType,
   MARGIN_AREA_WIDTH_PERC,
   MARGIN_MAX,
   MIN_WIDTH,
@@ -26,7 +27,6 @@ import {
   PLACEHOLDER_ICON_SMALL_MARGIN,
   PLACEHOLDER_ICON_SMALL_WIDTH,
   REVERT_TO_INLINE_RATIO,
-  TargetType,
   VideoDocking,
   getPosterImageSrc,
 } from '../amp-video-docking';
@@ -1337,7 +1337,7 @@ describes.realWin('video docking', {amp: true}, env => {
       },
     },
     (name, {useSlot, topBoundary}) => {
-      const targetType = useSlot ? 'slot element' : 'corner';
+      const DocktargetType = useSlot ? 'slot element' : 'corner';
 
       function maybeCreateSlotElementLtwh(left, top, width, height) {
         if (!useSlot) {
@@ -1362,7 +1362,7 @@ describes.realWin('video docking', {amp: true}, env => {
       });
 
       describe('getTargetFor_', () => {
-        it(`should use ${targetType} as target type`, () => {
+        it(`should use ${DocktargetType} as target type`, () => {
           maybeCreateSlotElementLtwh(190, topBoundary, 200, 150);
 
           const video = createVideo();
@@ -1383,9 +1383,9 @@ describes.realWin('video docking', {amp: true}, env => {
           expect(target.rect).to.not.be.null;
 
           if (useSlot) {
-            expect(target.type).to.equal(TargetType.SLOT);
+            expect(target.type).to.equal(DockTargetType.SLOT);
           } else {
-            expect(target.type).to.equal(TargetType.CORNER);
+            expect(target.type).to.equal(DockTargetType.CORNER);
             expect(target.directionX).to.not.be.undefined;
           }
         });
@@ -1528,7 +1528,9 @@ describes.realWin('video docking', {amp: true}, env => {
 
           docking.currentlyDocked_ = {
             video,
-            target: {type: useSlot ? TargetType.SLOT : TargetType.CORNER},
+            target: {
+              type: useSlot ? DockTargetType.SLOT : DockTargetType.CORNER,
+            },
           };
 
           docking.trigger_(action);

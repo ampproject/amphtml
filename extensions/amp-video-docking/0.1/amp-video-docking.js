@@ -122,7 +122,7 @@ export const BASE_CLASS_NAME = 'i-amphtml-video-docked';
 export const Actions = {DOCK: 'dock', UNDOCK: 'undock'};
 
 /** @enum {string} */
-export const TargetType = {
+export const DockTargetType = {
   // Dynamically calculated corner based on viewport percentage. Draggable.
   CORNER: 'corner',
   // Targets author-defined element's box. Not draggable.
@@ -132,7 +132,7 @@ export const TargetType = {
 /**
  * @struct @typedef {{
  *   video: !VideoOrBaseElementDef,
- *   target: !TargetDef,
+ *   target: !DockTargetDef,
  *   step: number,
  * }}
  */
@@ -140,11 +140,11 @@ let DockedDef;
 
 /**
  * @struct @typedef {{
- *   type: TargetType,
+ *   type: DockTargetType,
  *   rect: !LayoutRectDef,
  * }}
  */
-let TargetDef;
+let DockTargetDef;
 
 // Function should ideally be in `dom.js`, but moving it causes a bunch of ads
 // tests to fail, for some reason.
@@ -596,7 +596,7 @@ export class VideoDocking {
   /**
    * Returns the area's target when a video should be docked.
    * @param {!VideoOrBaseElementDef} video
-   * @return {?TargetDef}
+   * @return {?DockTargetDef}
    * @private
    */
   getTargetFor_(video) {
@@ -729,7 +729,7 @@ export class VideoDocking {
 
   /**
    * @param {!VideoOrBaseElementDef} video
-   * @param {!TargetDef} target
+   * @param {!DockTargetDef} target
    * @private
    */
   dockOnPositionChange_(video, target) {
@@ -756,7 +756,7 @@ export class VideoDocking {
 
   /**
    * @param {!VideoOrBaseElementDef} video
-   * @param {!TargetDef} target
+   * @param {!DockTargetDef} target
    * @param {number=} opt_step
    * @return {!Promise}
    * @private
@@ -785,7 +785,7 @@ export class VideoDocking {
 
   /**
    * @param {!VideoOrBaseElementDef} video
-   * @param {!TargetDef} target
+   * @param {!DockTargetDef} target
    * @param {number} step
    * @param {boolean=} opt_isTransferLayerStep
    * @return {!Promise}
@@ -1173,7 +1173,7 @@ export class VideoDocking {
 
   /**
    * @param {!VideoOrBaseElementDef} video
-   * @param {!TargetDef} target
+   * @param {!DockTargetDef} target
    * @param {number} step
    */
   setCurrentlyDocked_(video, target, step) {
@@ -1238,7 +1238,7 @@ export class VideoDocking {
       return;
     }
 
-    if (this.isDockedToType_(TargetType.SLOT)) {
+    if (this.isDockedToType_(DockTargetType.SLOT)) {
       return;
     }
 
@@ -1277,7 +1277,7 @@ export class VideoDocking {
   }
 
   /**
-   * @param {!TargetType} type
+   * @param {!DockTargetType} type
    * @return {boolean}
    * @private
    */
@@ -1532,7 +1532,7 @@ export class VideoDocking {
 
   /**
    * @param {!VideoOrBaseElementDef} video
-   * @param {!TargetDef} target
+   * @param {!DockTargetDef} target
    * @param {number} step in [0..1]
    * @return {{x: number, y: number, scale: number, relativeX: !DirectionX}}
    */
@@ -1681,7 +1681,7 @@ export class VideoDocking {
    * Otherwise returns a rectangle calculated relative to viewport and sticking
    * to the horizontal `directionX`.
    * @param {!AmpElement|!VideoOrBaseElementDef} video
-   * @return {!TargetDef}
+   * @return {!DockTargetDef}
    * @private
    */
   getUsableTarget_(video) {
@@ -1690,13 +1690,13 @@ export class VideoDocking {
 
     if (slot) {
       return {
-        type: TargetType.SLOT,
+        type: DockTargetType.SLOT,
         rect: letterboxRect(inlineRect, slot.getPageLayoutBox()),
       };
     }
 
     return {
-      type: TargetType.CORNER,
+      type: DockTargetType.CORNER,
       rect: topCornerRect(
         inlineRect,
         this.viewportRect_,
