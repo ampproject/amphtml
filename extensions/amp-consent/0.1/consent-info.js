@@ -123,10 +123,9 @@ export function recalculateConsentStateValue(newState, previousState) {
 /**
  * Compose the value to store to localStorage based on the consentInfo
  * @param {!ConsentInfoDef} consentInfo
- * @param {boolean=} opt_forceNew
  * @return {?boolean|Object}
  */
-export function composeStoreValue(consentInfo, opt_forceNew) {
+export function composeStoreValue(consentInfo) {
   const obj = map();
   const consentState = consentInfo['consentState'];
   if (consentState == CONSENT_ITEM_STATE.ACCEPTED) {

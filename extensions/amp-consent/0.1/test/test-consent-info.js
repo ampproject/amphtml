@@ -129,9 +129,9 @@ describes.fakeWin('ConsentInfo', {}, () => {
     });
 
     it('new format', () => {
-      expect(composeStoreValue(consentInfo, true)).to.be.null;
+      expect(composeStoreValue(consentInfo)).to.be.null;
       consentInfo['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
-      expect(composeStoreValue(consentInfo, true)).to.deep.equal({
+      expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 1,
       });
     });
