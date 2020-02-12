@@ -99,6 +99,7 @@
           <option>didomi</option>
           <option>sirdata</option>
           <option>Marfeel</option>
+          <option>Ogury</option>
           <option>SourcePoint</option>
         </select>
         <input type="submit" value="Go">
@@ -204,7 +205,7 @@
         </div>
       </amp-consent>
       <!-- End sirdata example -->
-      
+
       <!-- Marfeel example -->
       <amp-consent id='marfeelConsent' layout='nodisplay' type='Marfeel'>
         <script type="application/json">
@@ -222,6 +223,28 @@
         </div>
       </amp-consent>
       <!-- End Marfeel example -->
+
+      <!-- Ogury example -->
+      <amp-consent id='ogury' layout='nodisplay' type='Ogury'>
+        <script type="application/json">
+          {
+            "postPromptUI": "custom-prompt-ui",
+            "clientConfig": {
+              "assetKey": "OGY-316B32F7E5B7"
+            },
+            "uiConfig": {
+              "overlay": true
+            }
+          }
+        </script>
+        <div id="custom-prompt-ui">
+          Post Prompt UI
+          <button on="tap:ogury.prompt(consent=Ogury)" role="button">
+            Privacy Settings
+          </button>
+        </div>
+      </amp-consent>
+      <!-- End Ogury example -->
 
       <!-- SourcePoint example -->
       <amp-consent id='consent' layout='nodisplay' type='SourcePoint'>
