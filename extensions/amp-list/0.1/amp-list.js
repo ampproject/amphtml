@@ -243,6 +243,8 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    const isFirstLayout = !this.layoutCompleted_;
+    this.layoutCompleted_ = true;
     // If a placeholder exists and it's taller than amp-list, attempt a resize.
     const placeholder = this.getPlaceholder();
     if (placeholder) {
@@ -261,11 +263,9 @@ export class AmpList extends AMP.BaseElement {
 
     // We want to skip fetch/render iff the amp-list was SSRed with content, but only on the first layout.
     // TODO(amphtml): are we also willing to use the SSRed html on subsequent layouts?
-    if (this.hasInitialContent_ && !this.layoutCompleted_) {
-      this.layoutCompleted_ = true;
+    if (this.hasInitialContent_ && isFirstLayout) {
       return Promise.resolve();
     }
-    this.layoutCompleted_ = true;
     return this.fetchList_();
   }
 
