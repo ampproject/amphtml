@@ -11,6 +11,9 @@
     "enabled": true,
     "_sp_duid": {
       "value": "$IF($IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)), $IF(COOKIE(_sp_duid), COOKIE(_sp_duid), LINKER_PARAM(linker,_sp_duid)), $SUBSTR(QUERY_PARAM(_sp),0,36))"
+    },
+    "_sp_id": {
+      "value": "LINKER_PARAM(linker, amp_id)"
     }
   },
   "vars": {
