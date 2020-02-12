@@ -53,58 +53,29 @@ As expected, this emits errors because the provided string in the example, `<htm
 
 ## Release Notes
 
-### 1.0.10
+### 1.0.29
 
-- Fixed [#4246: amphtml-validator CLI fails on Mac OS X](https://github.com/ampproject/amphtml/issues/4246).
+- Reintroduce node v8 support. Supports node v8, v10, v12 and v14.
 
-### 1.0.11
+### 1.0.28
 
-- Added support for AMP4ADS (via --html_format command line flag) and
-  argument for validateString function in the API.
+- Reintroduce node v10 support and introduce node v14 support.
 
-### 1.0.12
+### 1.0.27
 
-- Added support for --user-agent option.
+- Removed references to amp.validator.categorizeError.
 
-### 1.0.13
+### 1.0.26
 
-- Added newInstance method, a simple API that's not async.
+- Introduce node v12 support and remove node v10 support.
 
-### 1.0.15
+### 1.0.25
 
-- Added support for installing on Windows.
-  `npm install -g amphtml-validator` should now just work.
+- Broken release, removed.
 
-### 1.0.16
+### 1.0.24
 
-- `npm install amphtml-validator` (local install) should now work on Windows,
-  for `require('amphtml-validator')`.
-
-### 1.0.17
-
-- If the amphtml-validator command is already patched up for Windows, leave it
-  alone instead of failing. Relevant if the package has been installed globally
-  and now we're performing a local install on top of it.
-
-### 1.0.18
-
-- Small tweaks to this file and package.json.
-
-### 1.0.19
-
-- Set correct process exit status for old versions of Node.js (v0.10.25).
-
-### 1.0.20
-
-- Better npm post-install for virtual machines, running debian over windows with SMB shared folder.
-
-### 1.0.21
-
-- --html_format=AMP4ADS is no longer experimental.
-
-### 1.0.22
-
-- --html_format=AMP4EMAIL added.
+- Introduce node v10 support and remove node 8 support.
 
 ### 1.0.23
 
@@ -112,26 +83,55 @@ As expected, this emits errors because the provided string in the example, `<htm
   On systems where the Node.js binary is called nodejs, consider installing
   the nodejs-legacy Debian package or better yet, NVM.
 
-### 1.0.24
+### 1.0.22
 
-- Introduce node v10 support and remove node 8 support.
+- --html_format=AMP4EMAIL added.
 
-### 1.0.25
+### 1.0.21
 
-- Broken release, removed.
+- --html_format=AMP4ADS is no longer experimental.
 
-### 1.0.26
+### 1.0.20
 
-- Introduce node v12 support and remove node v10 support.
+- Better npm post-install for virtual machines, running debian over windows with SMB shared folder.
 
-### 1.0.27
+### 1.0.19
 
-- Removed references to amp.validator.categorizeError.
+- Set correct process exit status for old versions of Node.js (v0.10.25).
 
-### 1.0.28
+### 1.0.18
 
-- Reintroduce node v10 support and introduce node v14 support.
+- Small tweaks to this file and package.json.
 
-### 1.0.29
+### 1.0.17
 
-- Reintroduce node v8 support. Supports node v8, v10, v12 and v14.
+- If the amphtml-validator command is already patched up for Windows, leave it
+  alone instead of failing. Relevant if the package has been installed globally
+  and now we're performing a local install on top of it.
+
+### 1.0.16
+
+- `npm install amphtml-validator` (local install) should now work on Windows,
+  for `require('amphtml-validator')`.
+
+### 1.0.15
+
+- Added support for installing on Windows.
+  `npm install -g amphtml-validator` should now just work.
+
+### 1.0.13
+
+- Added newInstance method, a simple API that's not async.
+
+### 1.0.12
+
+- Added support for --user-agent option.
+
+### 1.0.11
+
+- Added support for AMP4ADS (via --html_format command line flag) and
+  argument for validateString function in the API.
+
+### 1.0.10
+
+- Fixed [#4246: amphtml-validator CLI fails on Mac OS X](https://github.com/ampproject/amphtml/issues/4246).
