@@ -626,7 +626,11 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     this.setAsync('VIDEO_STATE', () => {
-      console.log('Bad bad bad');
+      user().warn(
+        TAG,
+        'VIDEO_STATE macro should not be used outside of <amp-analytics>'
+      );
+      return '';
     });
 
     this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
