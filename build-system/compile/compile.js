@@ -18,6 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
+const gap = require('gulp-append-prepend');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
@@ -28,15 +29,33 @@ const {
   handleCompilerError,
   handleTypeCheckError,
 } = require('./closure-compile');
-const {isTravisBuild} = require('../travis');
+const {checkForUnknownDeps} = require('./check-for-unknown-deps');
+const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
+const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
+const {isTravisBuild} = require('../common/travis');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const isProdBuild = !!argv.type;
 const queue = [];
 let inProgress = 0;
-const MAX_PARALLEL_CLOSURE_INVOCATIONS = argv.single_pass ? 1 : 4;
+
+// There's a race in the gulp plugin of closure compiler that gets exposed
+// during various local development scenarios.
+// See https://github.com/google/closure-compiler-npm/issues/9
+const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
+
+/**
+ * Prefixes the the tmp directory if we need to shadow files that have been
+ * preprocess by babel in the `dist` task.
+ *
+ * @param {!Array<string>} paths
+ * @return {!Array<string>}
+ */
+function convertPathsToTmpRoot(paths) {
+  return paths.map(path => path.replace(/^(\!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
+}
 
 // Compiles AMP with the closure compiler. This is intended only for
 // production use. During development we intend to continue using
@@ -45,19 +64,22 @@ exports.closureCompile = async function(
   entryModuleFilename,
   outputDir,
   outputFilename,
-  options
+  options,
+  timeInfo
 ) {
   // Rate limit closure compilation to MAX_PARALLEL_CLOSURE_INVOCATIONS
   // concurrent processes.
   return new Promise(function(resolve, reject) {
     function start() {
       inProgress++;
-      compile(entryModuleFilename, outputDir, outputFilename, options).then(
+      compile(
+        entryModuleFilename,
+        outputDir,
+        outputFilename,
+        options,
+        timeInfo
+      ).then(
         function() {
-          if (isTravisBuild()) {
-            // Print a progress dot after each task to avoid Travis timeouts.
-            process.stdout.write('.');
-          }
           inProgress--;
           next();
           resolve();
@@ -81,39 +103,44 @@ exports.closureCompile = async function(
 function cleanupBuildDir() {
   del.sync('build/fake-module');
   del.sync('build/patched-module');
-  fs.mkdirsSync('build/patched-module/document-register-element/build');
+  del.sync('build/parsers');
   fs.mkdirsSync('build/fake-module/third_party/babel');
   fs.mkdirsSync('build/fake-module/src/polyfills/');
   fs.mkdirsSync('build/fake-polyfills/src/polyfills');
 }
 exports.cleanupBuildDir = cleanupBuildDir;
 
-function compile(entryModuleFilenames, outputDir, outputFilename, options) {
+function compile(
+  entryModuleFilenames,
+  outputDir,
+  outputFilename,
+  options,
+  timeInfo
+) {
   const hideWarningsFor = [
+    'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
     'third_party/closure-library/sha384-generated.js',
-    'third_party/subscriptions-project/',
     'third_party/d3/',
+    'third_party/inputmask/',
     'third_party/mustache/',
+    'third_party/react-dates/',
+    'third_party/set-dom/',
+    'third_party/subscriptions-project/',
     'third_party/vega/',
     'third_party/webcomponentsjs/',
-    'third_party/rrule/',
-    'third_party/react-dates/',
-    'third_party/amp-toolbox-cache-url/',
-    'third_party/inputmask/',
     'node_modules/',
     'build/patched-module/',
-    // Generated code.
-    'extensions/amp-access/0.1/access-expr-impl.js',
   ];
   const baseExterns = [
-    'build-system/amp.extern.js',
-    'build-system/dompurify.extern.js',
-    'build-system/event-timing.extern.js',
-    'build-system/layout-jank.extern.js',
-    'third_party/closure-compiler/externs/web_animations.js',
+    'build-system/externs/amp.extern.js',
+    'build-system/externs/dompurify.extern.js',
+    'build-system/externs/layout-jank.extern.js',
+    'build-system/externs/performance-observer.extern.js',
+    'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
+    'build-system/externs/preact.extern.js',
   ];
   const define = [`VERSION=${internalRuntimeVersion}`];
   if (argv.pseudo_names) {
@@ -137,16 +164,16 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
 
     console /*OK*/
       .assert(typeof entryModuleFilenames == 'string');
-    return singlePassCompile(entryModuleFilenames, compilationOptions);
+    return singlePassCompile(
+      entryModuleFilenames,
+      compilationOptions,
+      timeInfo
+    );
   }
 
   return new Promise(function(resolve, reject) {
-    let entryModuleFilename;
-    if (entryModuleFilenames instanceof Array) {
-      entryModuleFilename = entryModuleFilenames[0];
-    } else {
-      entryModuleFilename = entryModuleFilenames;
-      entryModuleFilenames = [entryModuleFilename];
+    if (!(entryModuleFilenames instanceof Array)) {
+      entryModuleFilenames = [entryModuleFilenames];
     }
     const unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
@@ -163,90 +190,7 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         internalRuntimeVersion +
         '/';
     }
-    const srcs = [
-      '3p/3p.js',
-      // Ads config files.
-      'ads/_*.js',
-      'ads/alp/**/*.js',
-      'ads/google/**/*.js',
-      'ads/inabox/**/*.js',
-      // Files under build/. Should be sparse.
-      'build/*.css.js',
-      'build/fake-module/**/*.js',
-      'build/patched-module/**/*.js',
-      'build/experiments/**/*.js',
-      // A4A has these cross extension deps.
-      'extensions/amp-ad-network*/**/*-config.js',
-      'extensions/amp-ad/**/*.js',
-      'extensions/amp-a4a/**/*.js',
-      // Currently needed for crypto.js and visibility.js.
-      // Should consider refactoring.
-      'extensions/amp-analytics/**/*.js',
-      // Needed for WebAnimationService
-      'extensions/amp-animation/**/*.js',
-      // For amp-bind in the web worker (ww.js).
-      'extensions/amp-bind/**/*.js',
-      // Needed to access to Variant interface from other extensions
-      'extensions/amp-experiment/**/*.js',
-      // Needed to access form impl from other extensions
-      'extensions/amp-form/**/*.js',
-      // Needed to access inputmask impl from other extensions
-      'extensions/amp-inputmask/**/*.js',
-      // Needed for AccessService
-      'extensions/amp-access/**/*.js',
-      // Needed for AmpStoryVariableService
-      'extensions/amp-story/**/*.js',
-      // Needed for SubscriptionsService
-      'extensions/amp-subscriptions/**/*.js',
-      // Needed to access UserNotificationManager from other extensions
-      'extensions/amp-user-notification/**/*.js',
-      // Needed for VideoService
-      'extensions/amp-video-service/**/*.js',
-      // Needed to access ConsentPolicyManager from other extensions
-      'extensions/amp-consent/**/*.js',
-      // Needed to access AmpGeo type for service locator
-      'extensions/amp-geo/**/*.js',
-      // Needed for AmpViewerAssistanceService
-      'extensions/amp-viewer-assistance/**/*.js',
-      // Needed for AmpViewerIntegrationVariableService
-      'extensions/amp-viewer-integration/**/*.js',
-      // Needed for amp-smartlinks dep on amp-skimlinks
-      'extensions/amp-skimlinks/0.1/**/*.js',
-      'src/*.js',
-      'src/**/*.js',
-      '!third_party/babel/custom-babel-helpers.js',
-      // Exclude since it's not part of the runtime/extension binaries.
-      '!extensions/amp-access/0.1/amp-login-done.js',
-      'builtins/**.js',
-      'third_party/caja/html-sanitizer.js',
-      'third_party/closure-library/sha384-generated.js',
-      'third_party/css-escape/css-escape.js',
-      'third_party/fuzzysearch/index.js',
-      'third_party/mustache/**/*.js',
-      'third_party/timeagojs/**/*.js',
-      'third_party/vega/**/*.js',
-      'third_party/d3/**/*.js',
-      'third_party/subscriptions-project/*.js',
-      'third_party/webcomponentsjs/ShadowCSS.js',
-      'third_party/rrule/rrule.js',
-      'third_party/react-dates/bundle.js',
-      'third_party/amp-toolbox-cache-url/**/*.js',
-      'third_party/inputmask/**/*.js',
-      'node_modules/dompurify/dist/purify.es.js',
-      'node_modules/promise-pjs/promise.js',
-      'node_modules/set-dom/src/**/*.js',
-      'node_modules/web-animations-js/web-animations.install.js',
-      'node_modules/web-activities/activity-ports.js',
-      'node_modules/@ampproject/animations/dist/animations.mjs',
-      'node_modules/@ampproject/worker-dom/dist/' +
-        'unminified.index.safe.mjs.patched.js',
-      'node_modules/document-register-element/build/' +
-        'document-register-element.patched.js',
-      // 'node_modules/core-js/modules/**.js',
-      // Not sure what these files are, but they seem to duplicate code
-      // one level below and confuse the compiler.
-      '!node_modules/core-js/modules/library/**.js',
-    ];
+    const srcs = [...CLOSURE_SRC_GLOBS];
     // Add needed path for extensions.
     // Instead of globbing all extensions, this will only add the actual
     // extension path for much quicker build times.
@@ -321,16 +265,17 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
     if (options.externs) {
       externs = externs.concat(options.externs);
     }
-    externs.push('build-system/amp.multipass.extern.js');
+    externs.push('build-system/externs/amp.multipass.extern.js');
 
     /* eslint "google-camelcase/google-camelcase": 0*/
     const compilerOptions = {
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      // Transpile from ES6 to ES5.
-      language_in: 'ECMASCRIPT6',
-      language_out: 'ECMASCRIPT5',
+      language_in: 'ECMASCRIPT_2018',
+      // Do not transpile down to ES5 if running with `--esm`, since we do
+      // limited transpilation in Babel.
+      language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
       // respective top level polyfills.js files.
@@ -345,45 +290,63 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       ],
       entry_point: entryModuleFilenames,
       module_resolution: 'NODE',
+      package_json_entry_names: 'module,main',
       process_common_js_modules: true,
       // This strips all files from the input set that aren't explicitly
       // required.
-      only_closure_dependencies: true,
+      dependency_mode: 'PRUNE',
       output_wrapper: wrapper,
       source_map_include_content: !!argv.full_sourcemaps,
       source_map_location_mapping: '|' + sourceMapBase,
       warning_level: options.verboseLogging ? 'VERBOSE' : 'DEFAULT',
+      // These arrays are filled in below.
       jscomp_error: [],
-      // moduleLoad: Demote "module not found" errors to ignore missing files
-      //     in type declarations in the swg.js bundle.
-      // accessControls: Demote "Access to private variable" errors to allow
-      //     AMP code to access variables in other files.
-      jscomp_warning: ['moduleLoad', 'accessControls'],
-      // Turn off warning for "Unknown @define" since we use define to pass
-      // args such as FORTESTING to our runner.
-      jscomp_off: ['unknownDefines'],
+      jscomp_warning: [],
+      jscomp_off: [],
       define,
       hide_warnings_for: hideWarningsFor,
     };
+    if (argv.pseudo_names) {
+      // Some optimizations get turned off when pseudo_names is on.
+      // This causes some errors caused by the babel transformations
+      // that we apply like unreachable code because we turn a conditional
+      // falsey. (ex. is IS_DEV transformation which causes some conditionals
+      // to be unreachable/suspicious code since the whole expression is
+      // falsey)
+      compilerOptions.jscomp_off.push('uselessCode', 'externsValidation');
+    }
+    if (argv.pretty_print) {
+      compilerOptions.formatting = 'PRETTY_PRINT';
+    }
 
-    // For now do type check separately
+    // See https://github.com/google/closure-compiler/wiki/Warnings#warnings-categories
+    // for a full list of closure's default error / warning levels.
     if (options.typeCheckOnly) {
       // Don't modify compilation_level to a lower level since
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
       compilerOptions.jscomp_error.push(
-        'checkTypes',
         'accessControls',
+        'conformanceViolations',
+        'checkTypes',
         'const',
         'constantProperty',
         'globalThis'
       );
+      compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
       compilerOptions.conformance_configs =
-        'build-system/conformance-config.textproto';
+        'build-system/test-configs/conformance-config.textproto';
+    } else {
+      compilerOptions.jscomp_warning.push('accessControls', 'moduleLoad');
+      compilerOptions.jscomp_off.push('unknownDefines');
     }
 
     if (compilerOptions.define.length == 0) {
       delete compilerOptions.define;
+    }
+
+    if (!argv.single_pass) {
+      compilerOptions.js_module_root.push(SRC_TEMP_DIR);
     }
 
     const compilerOptionsArray = [];
@@ -402,10 +365,14 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
       }
     });
 
+    const gulpSrcs = !argv.single_pass ? convertPathsToTmpRoot(srcs) : srcs;
+    const gulpBase = !argv.single_pass ? SRC_TEMP_DIR : '.';
+
     if (options.typeCheckOnly) {
       return gulp
-        .src(srcs, {base: '.'})
-        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .src(gulpSrcs, {base: gulpBase})
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
         .on('error', err => {
           handleTypeCheckError();
           reject(err);
@@ -413,17 +380,31 @@ function compile(entryModuleFilenames, outputDir, outputFilename, options) {
         .pipe(nop())
         .on('end', resolve);
     } else {
+      timeInfo.startTime = Date.now();
       return gulp
-        .src(srcs, {base: '.'})
+        .src(gulpSrcs, {base: gulpBase})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
-        .pipe(gulpClosureCompile(compilerOptionsArray))
+        .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
         .on('error', err => {
           handleCompilerError(outputFilename);
           reject(err);
         })
         .pipe(rename(outputFilename))
+        .pipe(
+          gulpIf(
+            !argv.pseudo_names && !options.skipUnknownDepsCheck,
+            checkForUnknownDeps()
+          )
+        )
+        .on('error', reject)
         .pipe(sourcemaps.write('.'))
+        .pipe(
+          gulpIf(
+            options.esmPassCompilation,
+            gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
+          )
+        )
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);
     }

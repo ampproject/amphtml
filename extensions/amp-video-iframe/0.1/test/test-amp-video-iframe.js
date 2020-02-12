@@ -16,15 +16,12 @@
 
 import '../amp-video-iframe';
 import {Services} from '../../../../src/services';
-import {
-  VideoAnalyticsEvents,
-  VideoEvents,
-} from '../../../../src/video-interface';
+import {VideoEvents} from '../../../../src/video-interface';
 import {
   addAttributesToElement,
+  createElementWithAttributes,
   whenUpgradedToCustomElement,
 } from '../../../../src/dom';
-import {htmlFor} from '../../../../src/static-template';
 import {listenOncePromise} from '../../../../src/event-helper';
 import {tryParseJson} from '../../../../src/json';
 
@@ -40,16 +37,17 @@ describes.realWin(
     },
   },
   env => {
-    const {any} = sinon.match;
     const defaultFixture = 'video-iframe.html';
 
     let win;
     let doc;
     let videoManagerStub;
+    let any;
 
     beforeEach(() => {
       win = env.win;
       doc = win.document;
+      any = env.sandbox.match.any;
 
       videoManagerStub = {
         register: env.sandbox.spy(),
@@ -75,13 +73,11 @@ describes.realWin(
             height: size[1],
           };
 
-    function createVideoIframe({size, src} = {}) {
-      const html = htmlFor(doc);
-      const el = html`
-        <amp-video-iframe poster="foo.png"></amp-video-iframe>
-      `;
-      el.setAttribute('src', src || getIframeSrc());
-      addAttributesToElement(el, layoutConfigAttrs(size));
+    function createVideoIframe(attrs = {}, opt_size) {
+      const el = createElementWithAttributes(doc, 'amp-video-iframe', attrs);
+      const {src = getIframeSrc(), poster = 'foo.png'} = attrs;
+      addAttributesToElement(el, {src, poster});
+      addAttributesToElement(el, layoutConfigAttrs(opt_size));
       doc.body.appendChild(el);
       return el;
     }
@@ -96,11 +92,10 @@ describes.realWin(
         .returns(true);
     }
 
-    function layoutAndLoad(videoIframe) {
-      return whenUpgradedToCustomElement(videoIframe).then(() => {
-        videoIframe.implementation_.layoutCallback();
-        return listenOncePromise(videoIframe, VideoEvents.LOAD);
-      });
+    async function layoutAndLoad(videoIframe) {
+      await whenUpgradedToCustomElement(videoIframe);
+      videoIframe.implementation_.layoutCallback();
+      return listenOncePromise(videoIframe, VideoEvents.LOAD);
     }
 
     function stubPostMessage(videoIframe) {
@@ -119,6 +114,16 @@ describes.realWin(
     }
 
     describe('#layoutCallback', () => {
+      it('uses data-param-* in src', async () => {
+        const element = createVideoIframe({
+          'data-param-vid': 'my_vid',
+          'data-param-foo-bar': 'foo bar',
+        });
+        await layoutAndLoad(element);
+        const {src} = element.querySelector('iframe');
+        expect(src).to.match(/\?vid=my_vid&fooBar=foo%20bar#.*$/);
+      });
+
       it('sets metadata in iframe name', async () => {
         const metadata = {
           canonicalUrl: 'foo.html',
@@ -173,7 +178,7 @@ describes.realWin(
         ];
 
         trackingSizes.forEach(size => {
-          const {implementation_} = createVideoIframe({size});
+          const {implementation_} = createVideoIframe({}, size);
           allowConsoleError(() => {
             expect(() => implementation_.buildCallback()).to.throw();
           });
@@ -183,16 +188,23 @@ describes.realWin(
 
     describe('#createPlaceholderCallback', () => {
       it('creates an amp-img with the poster as src', () => {
-        const videoIframe = createVideoIframe();
-
-        const placeholder = videoIframe.implementation_.createPlaceholderCallback();
-
+        const poster = 'foo.bar';
+        const placeholder = createVideoIframe({poster}).createPlaceholder();
         expect(placeholder).to.have.attribute('placeholder');
         expect(placeholder.tagName.toLowerCase()).to.equal('amp-img');
         expect(placeholder.getAttribute('layout')).to.equal('fill');
-        expect(placeholder.getAttribute('src')).to.equal(
-          videoIframe.getAttribute('poster')
-        );
+        expect(placeholder.getAttribute('src')).to.equal(poster);
+      });
+
+      it("uses data-param-* in the poster's src", () => {
+        expect(
+          createVideoIframe({
+            'data-param-my-poster-param': 'my param',
+            'data-param-another': 'value',
+          })
+            .createPlaceholder()
+            .getAttribute('src')
+        ).to.match(/\?myPosterParam=my%20param&another=value$/);
       });
     });
 
@@ -272,8 +284,8 @@ describes.realWin(
 
         videoIframe.implementation_.onMessage_(message);
 
-        expect(postMessage.withArgs(sinon.match(expectedResponseMessage))).to
-          .have.been.calledOnce;
+        expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
+          .to.have.been.calledOnce;
       });
 
       it('should return 0 if not in autoplay range', async () => {
@@ -304,8 +316,8 @@ describes.realWin(
 
         videoIframe.implementation_.onMessage_(message);
 
-        expect(postMessage.withArgs(sinon.match(expectedResponseMessage))).to
-          .have.been.calledOnce;
+        expect(postMessage.withArgs(env.sandbox.match(expectedResponseMessage)))
+          .to.have.been.calledOnce;
       });
 
       [
@@ -354,7 +366,7 @@ describes.realWin(
           if (accept) {
             const expectedEventVars = {eventType, vars: vars || {}};
             const expectedDispatch = dispatch.withArgs(
-              VideoAnalyticsEvents.CUSTOM,
+              VideoEvents.CUSTOM_TICK,
               expectedEventVars
             );
             implementation_.onMessage_({data});
@@ -363,8 +375,8 @@ describes.realWin(
             allowConsoleError(() => {
               expect(() => implementation_.onMessage_({data})).to.throw();
             });
-            expect(dispatch.withArgs(VideoAnalyticsEvents.CUSTOM, any)).to.not
-              .have.been.called;
+            expect(dispatch.withArgs(VideoEvents.CUSTOM_TICK, any)).to.not.have
+              .been.called;
           }
         });
       });
@@ -418,7 +430,7 @@ describes.realWin(
 
           expect(
             postMessage.withArgs(
-              sinon.match({
+              env.sandbox.match({
                 event: 'method',
                 method: lowercaseMethod,
               })

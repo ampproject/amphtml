@@ -37,6 +37,7 @@ const LANGUAGE_CODE_CHUNK_REGEX = /\w+/gi;
  * @param {!Object<string, !../localized-strings.LocalizedStringBundleDef>} localizedStringBundles
  * @param {!Array<string>} languageCodes
  * @param {!LocalizedStringId} localizedStringId
+ * @return {string|null}
  */
 function findLocalizedString(
   localizedStringBundles,
@@ -124,12 +125,13 @@ export class LocalizationService {
    * @return {!LocalizationService} For chaining.
    */
   registerLocalizedStringBundle(languageCode, localizedStringBundle) {
-    if (!this.localizedStringBundles_[languageCode]) {
-      this.localizedStringBundles_[languageCode] = {};
+    const normalizedLangCode = languageCode.toLowerCase();
+    if (!this.localizedStringBundles_[normalizedLangCode]) {
+      this.localizedStringBundles_[normalizedLangCode] = {};
     }
 
     Object.assign(
-      this.localizedStringBundles_[languageCode],
+      this.localizedStringBundles_[normalizedLangCode],
       localizedStringBundle
     );
     return this;
@@ -141,6 +143,7 @@ export class LocalizationService {
    *     used.  The language is based on the language at that part of the
    *     document.  If unspecified, will use the document-level language, if
    *     one exists, or the default otherwise.
+   * @return {string|null}
    */
   getLocalizedString(localizedStringId, elementToUse = undefined) {
     const languageCodes = elementToUse

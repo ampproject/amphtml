@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const ORACLEINFINITYANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const ORACLEINFINITYANALYTICS_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
@@ -82,3 +84,5 @@ export const ORACLEINFINITYANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {ORACLEINFINITYANALYTICS_CONFIG};

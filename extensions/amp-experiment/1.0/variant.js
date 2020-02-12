@@ -71,7 +71,7 @@ export class Variants {
  * Allocates the current page view to an experiment variant based on the given
  * experiment from the config.
  * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
- * @param {!../../../src/service/viewer-impl.Viewer} viewer
+ * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
  * @param {string} experimentName
  * @param {!JsonObject} experimentObject
  * @return {!Promise<?string>}
@@ -86,9 +86,9 @@ export function allocateVariant(
   validateExperiment(experimentName, experimentObject);
 
   // Variant can be overridden from URL fragment.
-  const override = viewer.getParam(ATTR_PREFIX + experimentName);
+  const override = ampdoc.getParam(ATTR_PREFIX + experimentName);
   if (override && hasOwn(experimentObject['variants'], override)) {
-    return Promise.resolve(/** @type {?string} */ (override));
+    return Promise.resolve(override);
   }
 
   const sticky = experimentObject['sticky'] !== false;

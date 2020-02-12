@@ -17,13 +17,12 @@
 import {
   AMP_LIVE_LIST_CUSTOM_SLOT_ID,
   LiveListManager,
-  liveListManagerForDoc,
+  SERVICE_ID,
 } from './live-list-manager';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-live-list-0.1.css';
 import {Layout} from '../../../src/layout';
 import {childElementByAttr} from '../../../src/dom';
-import {isExperimentOn} from '../../../src/experiments';
 import {user, userAssert} from '../../../src/log';
 
 /**
@@ -118,7 +117,7 @@ export class AmpLiveList extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?../../../src/service/viewport/viewport-impl.Viewport} */
+    /** @private {?../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = null;
 
     /** @private {?LiveListManager} */
@@ -193,7 +192,10 @@ export class AmpLiveList extends AMP.BaseElement {
   buildCallback() {
     this.viewport_ = this.getViewport();
 
-    this.manager_ = liveListManagerForDoc(this.getAmpDoc());
+    LiveListManager.forDoc(this.element).then(manager => {
+      this.manager_ = manager;
+      this.manager_.register(this.liveListId_, this);
+    });
 
     this.customSlotId_ = this.element[AMP_LIVE_LIST_CUSTOM_SLOT_ID];
 
@@ -237,11 +239,7 @@ export class AmpLiveList extends AMP.BaseElement {
       actualCount
     );
 
-    if (isExperimentOn(this.win, 'amp-live-list-sorting')) {
-      this.isReverseOrder_ = this.element.getAttribute('sort') === 'ascending';
-    }
-
-    this.manager_.register(this.liveListId_, this);
+    this.isReverseOrder_ = this.element.getAttribute('sort') === 'ascending';
 
     // Make sure we hide the button
     this.toggleUpdateButton_(false);
@@ -999,12 +997,6 @@ export class AmpLiveList extends AMP.BaseElement {
    * @return {boolean}
    */
   isElementBelowViewport_(element) {
-    if (isExperimentOn(this.win, 'layers')) {
-      // Well, if the scroller is above the viewport, but the element is way
-      // down in the box, is it above or below?
-      return this.viewport_.getLayoutRect(element).top > 0;
-    }
-
     return (
       this.viewport_.getLayoutRect(element).top >
       this.viewport_.getScrollTop() + this.viewport_.getSize().height
@@ -1041,4 +1033,5 @@ export class AmpLiveList extends AMP.BaseElement {
 
 AMP.extension('amp-live-list', '0.1', function(AMP) {
   AMP.registerElement('amp-live-list', AmpLiveList, CSS);
+  AMP.registerServiceForDoc(SERVICE_ID, LiveListManager);
 });

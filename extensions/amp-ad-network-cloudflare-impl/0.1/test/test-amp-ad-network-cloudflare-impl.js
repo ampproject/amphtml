@@ -76,12 +76,12 @@ describes.realWin(
       el.setAttribute('type', 'cloudflare');
       el.setAttribute('data-cf-network', 'cloudflare');
       el.setAttribute('src', 'https://firebolt.cloudflaredemo.com/a4a-ad.html');
-      sandbox
+      env.sandbox
         .stub(AmpAdNetworkCloudflareImpl.prototype, 'getSigningServiceNames')
         .callsFake(() => {
           return ['cloudflare', 'cloudflare-dev'];
         });
-      sandbox.stub(vendors, 'NETWORKS').callsFake({
+      env.sandbox.stub(vendors, 'NETWORKS').callsFake({
         cloudflare: {
           base: 'https://firebolt.cloudflaredemo.com',
         },
@@ -92,7 +92,7 @@ describes.realWin(
             'https://cf-test.com/path/ad?width=SLOT_WIDTH&height=SLOT_HEIGHT',
         },
       });
-      sandbox.stub(el, 'tryUpgrade_').callsFake(() => {});
+      env.sandbox.stub(el, 'tryUpgrade_').callsFake(() => {});
       doc.body.appendChild(el);
       cloudflareImpl = new AmpAdNetworkCloudflareImpl(el);
     });

@@ -77,4 +77,12 @@ export const AsyncInputClasses = {
    * and use async-input elements.
    */
   'ASYNC_INPUT': 'i-amphtml-async-input',
+  /**
+   * i-async-require-action
+   *
+   * Class that is added when the async call should be treated
+   * as a required action for the form. These calls will be
+   * executed before the presubmit calls of all async inputs.
+   */
+  'ASYNC_REQUIRED_ACTION': 'i-async-require-action',
 };

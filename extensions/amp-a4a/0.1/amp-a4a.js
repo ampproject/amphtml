@@ -59,7 +59,6 @@ import {
 import {installUrlReplacementsForEmbed} from '../../../src/service/url-replacements-impl';
 import {isAdPositionAllowed} from '../../../src/ad-helper';
 import {isArray, isEnumValue, isObject} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {parseJson} from '../../../src/json';
 import {setStyle} from '../../../src/style';
 import {signingServerURLs} from '../../../ads/_a4a-config';
@@ -298,7 +297,7 @@ export class AmpA4A extends AMP.BaseElement {
     /**
      * Frame in which the creative renders (friendly if validated AMP, xdomain
      * otherwise).
-     * {?HTMLIframeElement}
+     * @type {?HTMLIFrameElement}
      */
     this.iframe = null;
 
@@ -373,7 +372,9 @@ export class AmpA4A extends AMP.BaseElement {
     return this.isRelayoutNeededFlag;
   }
 
-  /** @override */
+  /** @override
+      @return {!Promise|undefined}
+  */
   buildCallback() {
     this.creativeSize_ = {
       width: this.element.getAttribute('width'),
@@ -388,7 +389,7 @@ export class AmpA4A extends AMP.BaseElement {
     this.uiHandler = new AMP.AmpAdUIHandler(this);
 
     const verifier = signatureVerifierFor(this.win);
-    this.keysetPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.keysetPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
         this.getSigningServiceNames().forEach(signingServiceName => {
@@ -497,7 +498,11 @@ export class AmpA4A extends AMP.BaseElement {
     // matches amp-ad loader predicate such that A4A impl does not load.
     if (preconnect) {
       preconnect.forEach(p => {
-        this.preconnect.url(p, /*opt_preloadAs*/ true);
+        Services.preconnectFor(this.win).url(
+          this.getAmpDoc(),
+          p,
+          /*opt_preloadAs*/ true
+        );
       });
     }
   }
@@ -556,9 +561,14 @@ export class AmpA4A extends AMP.BaseElement {
    */
   shouldInitializePromiseChain_() {
     const slotRect = this.getIntersectionElementLayoutBox();
-    if (
+    const fixedSizeZeroHeightOrWidth =
       this.getLayout() != Layout.FLUID &&
-      (slotRect.height == 0 || slotRect.width == 0)
+      (slotRect.height == 0 || slotRect.width == 0);
+    if (
+      fixedSizeZeroHeightOrWidth ||
+      this.element.hasAttribute('hidden') ||
+      // TODO(levitzky): May need additional checks for other display:hidden cases.
+      this.element.classList.contains('i-amphtml-hidden-by-media-query')
     ) {
       dev().fine(
         TAG,
@@ -633,7 +643,7 @@ export class AmpA4A extends AMP.BaseElement {
     //   - Rendering fails => return false
     //   - Chain cancelled => don't return; drop error
     //   - Uncaught error otherwise => don't return; percolate error up
-    this.adPromise_ = Services.viewerForDoc(this.getAmpDoc())
+    this.adPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => {
         checkStillCurrent();
@@ -757,7 +767,8 @@ export class AmpA4A extends AMP.BaseElement {
         if (
           this.experimentalNonAmpCreativeRenderMethod_ == XORIGIN_MODE.NAMEFRAME
         ) {
-          this.preconnect.preload(
+          Services.preconnectFor(this.win).preload(
+            this.getAmpDoc(),
             getDefaultBootstrapBaseUrl(this.win, 'nameframe')
           );
         }
@@ -769,7 +780,10 @@ export class AmpA4A extends AMP.BaseElement {
           safeframeVersionHeader != DEFAULT_SAFEFRAME_VERSION
         ) {
           this.safeframeVersion = safeframeVersionHeader;
-          this.preconnect.preload(this.getSafeframePath());
+          Services.preconnectFor(this.win).preload(
+            this.getAmpDoc(),
+            this.getSafeframePath()
+          );
         }
         // Note: Resolving a .then inside a .then because we need to capture
         // two fields of fetchResponse, one of which is, itself, a promise,
@@ -855,13 +869,15 @@ export class AmpA4A extends AMP.BaseElement {
         );
         // Preload any fonts.
         (creativeMetaDataDef.customStylesheets || []).forEach(font =>
-          this.preconnect.preload(font.href)
+          Services.preconnectFor(this.win).preload(this.getAmpDoc(), font.href)
         );
 
         const urls = Services.urlForDoc(this.element);
         // Preload any AMP images.
         (creativeMetaDataDef.images || []).forEach(
-          image => urls.isSecure(image) && this.preconnect.preload(image)
+          image =>
+            urls.isSecure(image) &&
+            Services.preconnectFor(this.win).preload(this.getAmpDoc(), image)
         );
         return creativeMetaDataDef;
       })
@@ -998,10 +1014,10 @@ export class AmpA4A extends AMP.BaseElement {
             this.isRelayoutNeededFlag = true;
             this.getResource().layoutCanceled();
             // Only Require relayout after page visible
-            Services.viewerForDoc(this.getAmpDoc())
+            this.getAmpDoc()
               .whenNextVisible()
               .then(() => {
-                Services.resourcesForDoc(this.getAmpDoc())./*OK*/ requireLayout(
+                Services.ownersForDoc(this.getAmpDoc())./*OK*/ requireLayout(
                   this.element
                 );
               });
@@ -1219,11 +1235,6 @@ export class AmpA4A extends AMP.BaseElement {
     }
   }
 
-  /** @override */
-  createPlaceholderCallback() {
-    return this.uiHandler.createPlaceholder();
-  }
-
   /**
    * Gets the Ad URL to send an XHR Request to.  To be implemented
    * by network.
@@ -1333,7 +1344,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /** @return {boolean} whether html creatives should be sandboxed. */
   sandboxHTMLCreativeFrame() {
-    return isExperimentOn(this.win, 'sandbox-ads');
+    return true;
   }
 
   /**
@@ -1503,11 +1514,13 @@ export class AmpA4A extends AMP.BaseElement {
         extensionIds: creativeMetaData.customElementExtensions || [],
         fonts: fontsArray,
       },
-      embedWin => {
+      (embedWin, ampdoc) => {
+        const parentAmpdoc = this.getAmpDoc();
         installUrlReplacementsForEmbed(
-          this.getAmpDoc(),
+          // TODO(#22733): Cleanup `parentAmpdoc` once ampdoc-fie is launched.
+          ampdoc || parentAmpdoc,
           embedWin,
-          new A4AVariableSource(this.getAmpDoc(), embedWin)
+          new A4AVariableSource(parentAmpdoc, embedWin)
         );
       }
     ).then(friendlyIframeEmbed => {
@@ -1555,20 +1568,18 @@ export class AmpA4A extends AMP.BaseElement {
     if (this.sentinel) {
       mergedAttributes['data-amp-3p-sentinel'] = this.sentinel;
     }
-    if (isExperimentOn(this.win, 'no-sync-xhr-in-ads')) {
-      // Block synchronous XHR in ad. These are very rare, but super bad for UX
-      // as they block the UI thread for the arbitrary amount of time until the
-      // request completes.
-      mergedAttributes['allow'] = "sync-xhr 'none';";
-    }
-    this.iframe = createElementWithAttributes(
+    // Block synchronous XHR in ad. These are very rare, but super bad for UX
+    // as they block the UI thread for the arbitrary amount of time until the
+    // request completes.
+    mergedAttributes['allow'] = "sync-xhr 'none';";
+    this.iframe = /** @type {!HTMLIFrameElement} */ (createElementWithAttributes(
       /** @type {!Document} */ (this.element.ownerDocument),
       'iframe',
       /** @type {!JsonObject} */ (Object.assign(
         mergedAttributes,
         SHARED_IFRAME_PROPERTIES
       ))
-    );
+    ));
     if (this.sandboxHTMLCreativeFrame()) {
       applySandbox(this.iframe);
     }
@@ -1579,7 +1590,8 @@ export class AmpA4A extends AMP.BaseElement {
     // to frame but prior to load to allow for earlier access.
     const frameLoadPromise = this.xOriginIframeHandler_.init(
       this.iframe,
-      /* opt_isA4A */ true
+      /* opt_isA4A */ true,
+      this.letCreativeTriggerRenderStart()
     );
     protectFunctionWrapper(this.onCreativeRender, this, err => {
       dev().error(
@@ -1622,6 +1634,17 @@ export class AmpA4A extends AMP.BaseElement {
         ),
       })
     );
+  }
+
+  /**
+   * Whether AMP Ad Xorigin Iframe handler should wait for the creative to
+   * call render-start, rather than triggering it itself. Example use case
+   * is that amp-sticky-ad should trigger render-start itself so that the
+   * sticky container isn't shown before an ad is ready.
+   * @return {boolean}
+   */
+  letCreativeTriggerRenderStart() {
+    return false;
   }
 
   /**
@@ -1784,7 +1807,10 @@ export class AmpA4A extends AMP.BaseElement {
         metaData.images = metaDataObj['images'].splice(0, 5);
       }
       if (this.isSinglePageStoryAd) {
-        if (!metaDataObj['ctaUrl'] || !metaDataObj['ctaType']) {
+        // CTA Type is a required meta tag. CTA Url can come from meta tag, or
+        // (temporarily) amp-ad-exit config.
+        // TODO(#24080): maybe rerequire cta url?
+        if (!metaDataObj['ctaType']) {
           throw new Error(INVALID_SPSA_RESPONSE);
         }
         this.element.setAttribute('data-vars-ctatype', metaDataObj['ctaType']);
@@ -1914,6 +1940,7 @@ export class AmpA4A extends AMP.BaseElement {
 
   /**
    * @param {string=} headerValue Method as given in header.
+   * @return {?XORIGIN_MODE}
    */
   getNonAmpCreativeRenderingMethod(headerValue) {
     if (headerValue) {
@@ -1923,7 +1950,7 @@ export class AmpA4A extends AMP.BaseElement {
           `cross-origin render mode header ${headerValue}`
         );
       } else {
-        return headerValue;
+        return /** @type {XORIGIN_MODE} */ (headerValue);
       }
     }
     return Services.platformFor(this.win).isIos()

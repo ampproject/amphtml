@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as CID from '../../src/service/cid-impl';
+
 import {Services} from '../../src/services';
 import {createIframePromise} from '../../testing/iframe';
 import {installDocService} from '../../src/service/ampdoc-impl';
@@ -23,14 +25,8 @@ describe
   .configure()
   .skipFirefox()
   .run('document-info', () => {
-    let sandbox;
-
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-    });
-
-    afterEach(() => {
-      sandbox.restore();
+      window.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
     });
 
     function getWin(links, metas) {
@@ -59,7 +55,8 @@ describe
         }
         const {win} = iframe;
         installDocService(win, /* isSingleDoc */ true);
-        sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
+        window.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
+        win.__AMP_SERVICES.documentInfo = null;
         installDocumentInfoServiceForDoc(win.document);
         return iframe.win;
       });
@@ -76,9 +73,12 @@ describe
     it('should provide the sourceUrl', () => {
       const win = {
         document: {
-          nodeType: /* document */ 9,
+          nodeType: /* DOCUMENT */ 9,
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
+          },
+          getRootNode() {
+            return win.document;
           },
         },
         Math: {
@@ -104,6 +104,9 @@ describe
           nodeType: /* document */ 9,
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
+          },
+          getRootNode() {
+            return win.document;
           },
         },
         Math: {
@@ -135,6 +138,17 @@ describe
         );
         expect(Services.documentInfoForDoc(win.document).pageViewId).to.equal(
           '1234'
+        );
+      });
+    });
+
+    it('should provide the pageViewId64', () => {
+      return getWin({'canonical': ['https://twitter.com/']}).then(win => {
+        expect(Services.documentInfoForDoc(win.document).pageViewId64).to.equal(
+          'abcdef'
+        );
+        expect(Services.documentInfoForDoc(win.document).pageViewId64).to.equal(
+          'abcdef'
         );
       });
     });
@@ -287,6 +301,9 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
+          getRootNode() {
+            return win.document;
+          },
         },
         Math: {
           random() {
@@ -313,6 +330,9 @@ describe
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
+          getRootNode() {
+            return win.document;
+          },
         },
         Math: {
           random() {
@@ -337,6 +357,9 @@ describe
           nodeType: /* document */ 9,
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
+          },
+          getRootNode() {
+            return win.document;
           },
         },
         Math: {

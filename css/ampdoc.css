@@ -46,35 +46,11 @@ html:not([amp4ads]) body {
   margin: 0 !important;
 }
 
-/**
- * TODO(torch2424, #22059): if/when "inabox-preserve-height-auto" launched, merge
- * these styles into : `html:not([amp4ads]), html:not([amp4ads]) body` above, and a new.
- * :not([amp4ads])
- */
-html.i-amphtml-inabox-preserve-height-auto,
-html.i-amphtml-inabox-preserve-height-auto body {
-  height: auto !important;
-}
-
-html.i-amphtml-inabox-preserve-height-auto body {
-  margin: 0 !important;
-}
-
 /** These properties can be overriden by user stylesheets. */
 body {
   /* Text adjust is set to 100% to avoid iOS Safari bugs in Viewer where
      the font-size is sometimes not restored during orientation. See #449. */
   text-size-adjust: 100%;
-}
-
-/**
- * We intentionally break with HTML5's default [hidden] styling to apply
- * !important.
- */
-[hidden] {
-  /* This must be !important, else the toggle helper system would break down
-     due to specificity */
-  display: none !important;
 }
 
 /**
@@ -100,6 +76,11 @@ html.i-amphtml-fie > body {
   overflow: visible !important;
 }
 
+/**
+ * The `position: relative` is necessary to ensure that `paddingTop` can be
+ * applied to a document to offset the header height, and it doesn't missplace
+ * `position: absolute` elements.
+ */
 html.i-amphtml-singledoc:not(.i-amphtml-inabox) > body,
 html.i-amphtml-fie:not(.i-amphtml-inabox) > body {
   position: relative !important;
@@ -195,26 +176,6 @@ html.i-amphtml-ios-embed.i-amphtml-ios-overscroll > #i-amphtml-wrapper {
 }
 
 
-/**
- * iOS-Embed Wrapper shadow root mode. The `body` children are distributed
- * inside a scrollable element inside the shadow root.
- */
-html.i-amphtml-ios-embed-sd {
-  overflow: hidden !important;
-  position: static !important;
-}
-
-html.i-amphtml-ios-embed-sd > body,
-html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  overflow: hidden !important;
-}
-
-
 .i-amphtml-scroll-disabled {
   overflow-x: hidden !important;
   overflow-y: hidden !important;
@@ -237,7 +198,7 @@ html.i-amphtml-singledoc.i-amphtml-ios-embed-sd > body {
  * before the instagram implementation loads.
  */
 amp-instagram {
-  padding: 64px 0px 0px 0px !important;
+  padding: 54px 0px 0px 0px !important;
   background-color: white;
 }
 
@@ -338,7 +299,7 @@ amp-story-page {
   background-color: #757575;
 }
 
-amp-story .i-amphtml-loader {
+amp-story .amp-active > div {
   display: none !important;
 }
 
@@ -359,12 +320,14 @@ amp-autocomplete {
   display: inline-block !important;
 }
 
-amp-autocomplete > input {
-  padding: .5rem; /* default-ui-space-large */
-  border: 1px solid rgba(0,0,0,.33) /* default-ui-med-gray */
+amp-autocomplete > input,
+amp-autocomplete > textarea {
+  padding: 0.5rem; /* default-ui-space-large */
+  border: 1px solid rgba(0, 0, 0, 0.33); /* default-ui-med-gray */
 }
 
 amp-autocomplete > input,
+amp-autocomplete > textarea,
 .i-amphtml-autocomplete-results {
   font-size: 1rem; /* default-ui-font-size */
   line-height: 1.5rem; /* default-ui-space-large */
@@ -381,28 +344,4 @@ amp-autocomplete > input,
  */
 [amp-fx^="fly-in"] {
   visibility: hidden;
-}
-
-/**
- * amp-addthis
- */
-
-/**
- * Make amp-addthis tool floating if user give data-widget-type
- */
-@media only screen and (max-width: 979px) {
-  amp-addthis[data-widget-type="floating"] {
-    position: fixed !important;
-    width: 100% !important;
-    height: 50px;
-    bottom: 0;
-  }
-}
-@media only screen and (min-width: 979px) {
-  amp-addthis[data-widget-type="floating"] {
-    position: fixed !important;
-    width: 70px !important;
-    height: 320px!important;
-    top: 200px;
-  }
 }

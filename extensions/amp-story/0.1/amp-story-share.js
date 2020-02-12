@@ -61,13 +61,13 @@ const MIN_BUTTON_PADDING = 10;
 
 /**
  * Key for share providers in bookend config.
- * @private @const {string}
+ * @package @const {string}
  */
 export const SHARE_PROVIDERS_KEY = 'shareProviders';
 
 /**
  * Deprecated key for share providers in bookend config.
- * @private @const {string}
+ * @package @const {string}
  */
 export const DEPRECATED_SHARE_PROVIDERS_KEY = 'share-providers';
 
@@ -204,7 +204,10 @@ export class ShareWidget {
     this.requestService_ = Services.storyRequestServiceV01(this.win);
   }
 
-  /** @param {!Window} win */
+  /**
+   * @param {!Window} win
+   * @return {!ShareWidget}
+   */
   static create(win) {
     return new ShareWidget(win);
   }
@@ -273,7 +276,7 @@ export class ShareWidget {
         const failureString = localizationService.getLocalizedString(
           LocalizedStringId.AMP_STORY_SHARING_CLIPBOARD_FAILURE_TEXT
         );
-        Toast.show(this.win, failureString);
+        Toast.show(this.win, dev().assertString(failureString));
       });
       return;
     }
@@ -449,7 +452,10 @@ export class ScrollableShareWidget extends ShareWidget {
     this.containerWidth_ = null;
   }
 
-  /** @param {!Window} win */
+  /**
+   * @param {!Window} win
+   * @return {!ScrollableShareWidget}
+   */
   static create(win) {
     return new ScrollableShareWidget(win);
   }

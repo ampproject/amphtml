@@ -37,7 +37,6 @@ import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
-import {getServiceForDoc} from '../../../src/service';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
 import {isFiniteNumber} from '../../../src/types';
@@ -227,7 +226,8 @@ function getIntersectionRect(element) {
  * @param {!../../../src/layout-rect.LayoutRectDef} rect
  * @return {boolean}
  */
-function isSizedLayoutRect({width, height}) {
+function isSizedLayoutRect(rect) {
+  const {width, height} = rect;
   return width > 0 && height > 0;
 }
 
@@ -262,7 +262,7 @@ export class VideoDocking {
 
     /**
      * @private
-     * @const {!../../../src/service/viewport/viewport-impl.Viewport}
+     * @const {!../../../src/service/viewport/viewport-interface.ViewportInterface}
      */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
@@ -537,6 +537,10 @@ export class VideoDocking {
       this.dismissOnTap_();
     });
 
+    listen(container, VideoDockingEvents.SCROLL_BACK, () => {
+      this.scrollBack_();
+    });
+
     this.addDragListeners_(container);
     this.addDragListeners_(overlay);
 
@@ -571,12 +575,7 @@ export class VideoDocking {
     }
 
     installPositionObserverServiceForDoc(this.ampdoc_);
-
-    // No getter in services.js.
-    return /** @type {!PositionObserver} */ (getServiceForDoc(
-      this.ampdoc_,
-      'position-observer'
-    ));
+    return Services.positionObserverForDoc(this.ampdoc_.getHeadNode());
   }
 
   /**
@@ -634,7 +633,9 @@ export class VideoDocking {
    * @private
    */
   getFixedSlotLayoutBox_() {
-    return this.getFixedLayoutBox_(dev().assertElement(this.getSlot_()));
+    return dev()
+      .assertElement(this.getSlot_())
+      .getPageLayoutBox();
   }
 
   /**
@@ -909,6 +910,7 @@ export class VideoDocking {
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @param {!DockTargetDef} target
    * @param {number=} opt_step
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   dockInTransferLayerStep_(video, target, opt_step) {
@@ -1087,6 +1089,7 @@ export class VideoDocking {
    * @param {number} step in [0..1]
    * @param {number} transitionDurationMs
    * @param {RelativeX=} opt_relativeX
+   * @return {!Promise}
    * @private
    */
   placeAt_(video, x, y, scale, step, transitionDurationMs, opt_relativeX) {
@@ -1120,6 +1123,7 @@ export class VideoDocking {
       );
 
       placeholderIcon.classList.toggle('amp-rtl', isPlacementRtl);
+      this.getControls_().container.classList.toggle('amp-rtl', isPlacementRtl);
     }
 
     // Setting explicit dimensions is needed to match the video's aspect
@@ -1957,6 +1961,19 @@ export class VideoDocking {
       return;
     }
     removeElement(el);
+  }
+
+  /** @private */
+  scrollBack_() {
+    if (!this.currentlyDocked_) {
+      return;
+    }
+    // Don't set duration or curve.
+    // Rely on Viewport service to determine timing based on scroll Δ.
+    this.viewport_.animateScrollIntoView(
+      this.getDockedVideo_().element,
+      'center'
+    );
   }
 }
 

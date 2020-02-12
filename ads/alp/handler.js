@@ -264,6 +264,7 @@ export function getA2AAncestor(win) {
  * Returns the Nth parent of the given window.
  * @param {!Window} win
  * @param {number} distance frames above us.
+ * @return {!Window}
  */
 function getNthParentWindow(win, distance) {
   let parent = win;

@@ -29,7 +29,6 @@ tags: {  # <amp-autocomplete>
   tag_name: "AMP-AUTOCOMPLETE"
   spec_name: "amp-autocomplete"
   requires_extension: "amp-autocomplete"
-  mandatory_ancestor: "FORM"
   attrs: {
     name: "filter"
     value_casei: "custom"
@@ -42,14 +41,24 @@ tags: {  # <amp-autocomplete>
       if_value_regex: "custom"
       also_requires_attr: "filter-expr"
     }
+    mandatory: true
   }
   attrs: {
     name: "filter-expr"
     requires_extension: "amp-bind"
   }
   attrs: { name: "filter-value" }
+  attrs: { name: "highlight-user-entry" }
+  attrs: { name: "inline" }
+  attrs: { name: "items" }
   attrs: { name: "max-entries" }
   attrs: { name: "min-characters" }
+  attrs: {
+    name: "query"
+    trigger: {
+      also_requires_attr: "src"
+    }
+  }
   attrs: {
     name: "src"
     value_url: {
@@ -58,13 +67,9 @@ tags: {  # <amp-autocomplete>
     }
   }
   attrs: { name: "submit-on-enter" }
-  attrs: { 
-    name: "suggest-first" 
-    trigger: {
-      also_requires_attr: "filter"
-    }
+  attrs: {
+    name: "suggest-first"
   }
-  attrs: { name: "highlight-user-entry" }
   attrs: { name: "template" }
   # amp-bind
   attrs: {

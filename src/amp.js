@@ -22,21 +22,23 @@
 import './polyfills'; // eslint-disable-line sort-imports-es6-autofix/sort-imports-es6
 
 import {Services} from './services';
-import {
-  adopt,
-  installAmpdocServices,
-  installBuiltins,
-  installRuntimeServices,
-} from './runtime';
+import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {getMode} from './mode';
+import {
+  installAmpdocServices,
+  installBuiltinElements,
+  installRuntimeServices,
+} from './service/core-services';
 import {installAutoLightboxExtension} from './auto-lightbox';
 import {installDocService} from './service/ampdoc-impl';
 import {installErrorReporting} from './error';
 import {installPerformanceService} from './service/performance-impl';
 import {installPlatformService} from './service/platform-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {installStandaloneExtension} from './standalone';
 import {
   installStylesForDoc,
   makeBodyVisible,
@@ -45,6 +47,7 @@ import {
 import {internalRuntimeVersion} from './internal-version';
 import {maybeTrackImpression} from './impression';
 import {maybeValidate} from './validator-integration';
+import {preconnectToOrigin} from './preconnect';
 import {startupChunk} from './chunk';
 import {stubElementsForDoc} from './service/custom-element-registry';
 
@@ -89,6 +92,7 @@ if (shouldMainBootstrapRun) {
   startupChunk(self.document, function initial() {
     /** @const {!./service/ampdoc-impl.AmpDoc} */
     const ampdoc = ampdocService.getAmpDoc(self.document);
+    installPlatformService(self);
     installPerformanceService(self);
     /** @const {!./service/performance-impl.Performance} */
     const perf = Services.performanceFor(self);
@@ -97,7 +101,9 @@ if (shouldMainBootstrapRun) {
     ) {
       perf.addEnabledExperiment('no-boilerplate');
     }
-    installPlatformService(self);
+    if (getMode().esm) {
+      perf.addEnabledExperiment('esm');
+    }
     fontStylesheetTimeout(self);
     perf.tick('is');
     installStylesForDoc(
@@ -113,23 +119,28 @@ if (shouldMainBootstrapRun) {
           maybeTrackImpression(self);
         });
         startupChunk(self.document, function adoptWindow() {
-          adopt(self);
+          adoptWithMultidocDeps(self);
         });
         startupChunk(self.document, function builtins() {
           // Builtins.
-          installBuiltins(self);
+          installBuiltinElements(self);
         });
         startupChunk(self.document, function stub() {
           // Pre-stub already known elements.
           stubElementsForDoc(ampdoc);
         });
-        startupChunk(self.document, function final() {
-          installPullToRefreshBlocker(self);
-          installAutoLightboxExtension(ampdoc);
-
-          maybeValidate(self);
-          makeBodyVisible(self.document);
-        });
+        startupChunk(
+          self.document,
+          function final() {
+            installPullToRefreshBlocker(self);
+            installAutoLightboxExtension(ampdoc);
+            installStandaloneExtension(ampdoc);
+            maybeValidate(self);
+            makeBodyVisible(self.document);
+            preconnectToOrigin(self.document);
+          },
+          /* makes the body visible */ true
+        );
         startupChunk(self.document, function finalTick() {
           perf.tick('e_is');
           Services.resourcesForDoc(ampdoc).ampInitComplete();

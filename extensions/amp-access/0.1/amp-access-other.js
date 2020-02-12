@@ -31,7 +31,7 @@ export class AccessOtherAdapter {
     /** @const */
     this.ampdoc = ampdoc;
 
-    /** @const @private {!./amp-access-source.AccessTypeAdapterContextDef} */
+    /** @const @protected {!./amp-access-source.AccessTypeAdapterContextDef} */
     this.context_ = context;
 
     /** @private {?JsonObject} */

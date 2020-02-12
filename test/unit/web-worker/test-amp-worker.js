@@ -20,24 +20,24 @@ import {
   invokeWebWorker,
 } from '../../../src/web-worker/amp-worker';
 import {dev} from '../../../src/log';
+import {getMode} from '../../../src/mode';
 import {installXhrService} from '../../../src/service/xhr-impl';
 
 describe('invokeWebWorker', () => {
-  let sandbox;
   let fakeWin;
 
   let ampWorker;
   let postMessageStub;
   let fakeWorker;
+  let fetchTextCallStub;
   let workerReadyPromise;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    sandbox.stub(Services, 'ampdocServiceFor').returns({
+    window.sandbox.stub(Services, 'ampdocServiceFor').returns({
       isSingleDoc: () => false,
     });
 
-    postMessageStub = sandbox.stub();
+    postMessageStub = window.sandbox.stub();
 
     fakeWorker = {};
     fakeWorker.postMessage = postMessageStub;
@@ -45,27 +45,25 @@ describe('invokeWebWorker', () => {
     // Fake Worker constructor just returns our `fakeWorker` instance.
     fakeWin = {
       Worker: () => fakeWorker,
-      Blob: sandbox.stub(),
-      URL: {createObjectURL: sandbox.stub()},
+      Blob: window.sandbox.stub(),
+      URL: {createObjectURL: window.sandbox.stub()},
       location: window.location,
     };
 
     // Stub xhr.fetchText() to return a resolved promise.
     installXhrService(fakeWin);
-    sandbox.stub(Services.xhrFor(fakeWin), 'fetchText').callsFake(() =>
-      Promise.resolve({
-        text() {
-          return Promise.resolve();
-        },
-      })
-    );
+    fetchTextCallStub = window.sandbox
+      .stub(Services.xhrFor(fakeWin), 'fetchText')
+      .callsFake(() =>
+        Promise.resolve({
+          text() {
+            return Promise.resolve();
+          },
+        })
+      );
 
     ampWorker = ampWorkerForTesting(fakeWin);
     workerReadyPromise = ampWorker.fetchPromiseForTesting();
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   it('should check if Worker is supported', () => {
@@ -78,13 +76,22 @@ describe('invokeWebWorker', () => {
   it('should send and receive a message', () => {
     // Sending.
     const invokePromise = invokeWebWorker(fakeWin, 'foo', ['bar', 123]);
+    getMode(fakeWin).bypassInterceptorForDev = true;
 
     return workerReadyPromise.then(() => {
       expect(postMessageStub).to.have.been.calledWithMatch({
         method: 'foo',
-        args: sinon.match(['bar', 123]),
+        args: window.sandbox.match(['bar', 123]),
         id: 0,
       });
+
+      expect(fetchTextCallStub).to.have.been.calledWithMatch(
+        'http://localhost:9876/dist/ww.js',
+        {
+          ampCors: false,
+          bypassInterceptorForDev: true,
+        }
+      );
 
       // Receiving.
       const data = {
@@ -186,7 +193,7 @@ describe('invokeWebWorker', () => {
   });
 
   it('should log error when unexpected message is received', () => {
-    const errorStub = sandbox.stub(dev(), 'error');
+    const errorStub = window.sandbox.stub(dev(), 'error');
 
     invokeWebWorker(fakeWin, 'foo');
 

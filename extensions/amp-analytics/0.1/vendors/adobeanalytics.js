@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const ADOBEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const ADOBEANALYTICS_CONFIG = jsonLiteral({
   'transport': {'xhrpost': false, 'beacon': false, 'image': true},
   'vars': {
     'pageName': 'TITLE',
@@ -44,3 +46,5 @@ export const ADOBEANALYTICS_CONFIG = /** @type {!JsonObject} */ ({
       'https://${host}${requestPath}?${basePrefix}&pe=lnk_${linkType}&pev1=${linkUrl}&pev2=${linkName}',
   },
 });
+
+export {ADOBEANALYTICS_CONFIG};

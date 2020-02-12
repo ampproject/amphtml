@@ -51,12 +51,9 @@ describe('Layout', () => {
       // in whitelist.
       'AMP-AD',
       'AMP-ANIM',
-      'AMP-BRIGHTCOVE',
-      'AMP-DAILYMOTION',
       'AMP-EMBED',
       'AMP-FACEBOOK',
       'AMP-FACEBOOK-COMMENTS',
-      'AMP-FACEBOOK-LIKE',
       'AMP-FACEBOOK-PAGE',
       'AMP-GOOGLE-DOCUMENT-EMBED',
       'AMP-IFRAME',
@@ -65,8 +62,7 @@ describe('Layout', () => {
       'AMP-LIST',
       'AMP-PINTEREST',
       'AMP-PLAYBUZZ',
-      'AMP-YOUTUBE',
-      'AMP-VIMEO',
+      'AMP-TWITTER',
 
       // matched by video player naming convention (fake)
       'AMP-FOO-PLAYER',
@@ -75,8 +71,11 @@ describe('Layout', () => {
       // matched by video player naming convention (actual)
       'AMP-JWPLAYER',
       'AMP-OOYALA-PLAYER',
-      'AMP-VIDEO',
       'AMP-VIDEO-IFRAME',
+      'AMP-YOUTUBE',
+      'AMP-VIMEO',
+      'AMP-BRIGHTCOVE',
+      'AMP-DAILYMOTION',
     ];
     elementsValidTagNames.forEach(function(tag) {
       el.tagName = tag;
@@ -88,7 +87,7 @@ describe('Layout', () => {
     const elementsInvalidTagNames = [
       'AMP-POSITION-OBSERVER',
       'AMP-BODYMOVIN-ANIMATION',
-      'AMP-TWITTER',
+      'AMP-VIDEO',
       'AMP-REDDIT',
       'AMP-GITHUB',
     ];
@@ -284,7 +283,7 @@ describe('Layout', () => {
     div.setAttribute('layout', 'fixed');
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(
-        /Expected height to be available/
+        /The "height" attribute is missing/
       );
     });
   });
@@ -319,7 +318,7 @@ describe('Layout', () => {
     allowConsoleError(() => {
       expect(function() {
         applyStaticLayout(div);
-      }).to.throw(/Expected width to be either absent or equal "auto"/);
+      }).to.throw(/The "width" attribute must be missing or "auto"/);
     });
   });
 
@@ -342,7 +341,7 @@ describe('Layout', () => {
     div.setAttribute('layout', 'fixed-height');
     allowConsoleError(() => {
       expect(() => applyStaticLayout(div)).to.throw(
-        /Expected height to be available/
+        /The "height" attribute is missing/
       );
     });
   });
@@ -467,7 +466,7 @@ describe('Layout', () => {
     allowConsoleError(() => {
       expect(function() {
         applyStaticLayout(div);
-      }).to.throw(/Unknown layout: foo/);
+      }).to.throw(/Invalid "layout" value: foo/);
     });
   });
 
@@ -536,7 +535,7 @@ describe('Layout', () => {
     allowConsoleError(() => {
       expect(() => {
         applyStaticLayout(pixel);
-      }).to.throw(/Invalid width value/);
+      }).to.throw(/Invalid "width" value: X/);
     });
   });
 
@@ -548,7 +547,7 @@ describe('Layout', () => {
     allowConsoleError(() => {
       expect(() => {
         applyStaticLayout(pixel);
-      }).to.throw(/Invalid height value/);
+      }).to.throw(/Invalid "height" value: X/);
     });
   });
 

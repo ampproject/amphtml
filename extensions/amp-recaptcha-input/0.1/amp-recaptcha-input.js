@@ -21,15 +21,15 @@
  */
 
 import {
+  AmpRecaptchaService,
+  recaptchaServiceForDoc,
+} from './amp-recaptcha-service';
+import {
   AsyncInputAttributes,
   AsyncInputClasses,
 } from '../../../src/async-input';
 import {CSS} from '../../../build/amp-recaptcha-input-0.1.css';
 import {Layout} from '../../../src/layout';
-import {
-  installRecaptchaServiceForDoc,
-  recaptchaServiceForDoc,
-} from './amp-recaptcha-service';
 import {setStyles, toggle} from '../../../src/style';
 import {userAssert} from '../../../src/log';
 
@@ -76,24 +76,26 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       this.element
     );
 
-    this.recaptchaService_ = recaptchaServiceForDoc(this.getAmpDoc());
+    return recaptchaServiceForDoc(this.element).then(service => {
+      this.recaptchaService_ = service;
 
-    return this.mutateElement(() => {
-      toggle(this.element);
-      // Add the required AsyncInput class
-      this.element.classList.add(AsyncInputClasses.ASYNC_INPUT);
-      /**
-       * These styles will create an in-place element, that is 1x1,
-       * but invisible. Absolute positioning keeps it where it would have
-       * been, without taking up space. Thus, layoutCallback will still
-       * be called at the appropriate time
-       */
-      setStyles(this.element, {
-        'position': 'absolute',
-        'width': '1px',
-        'height': '1px',
-        'overflow': 'hidden',
-        'visibility': 'hidden',
+      return this.mutateElement(() => {
+        toggle(this.element);
+        // Add the required AsyncInput class
+        this.element.classList.add(AsyncInputClasses.ASYNC_INPUT);
+        /**
+         * These styles will create an in-place element, that is 1x1,
+         * but invisible. Absolute positioning keeps it where it would have
+         * been, without taking up space. Thus, layoutCallback will still
+         * be called at the appropriate time
+         */
+        setStyles(this.element, {
+          'position': 'absolute',
+          'width': '1px',
+          'height': '1px',
+          'overflow': 'hidden',
+          'visibility': 'hidden',
+        });
       });
     });
   }
@@ -144,6 +146,6 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  installRecaptchaServiceForDoc(AMP.ampdoc);
+  AMP.registerServiceForDoc('amp-recaptcha', AmpRecaptchaService);
   AMP.registerElement(TAG, AmpRecaptchaInput, CSS);
 });

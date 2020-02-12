@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/* eslint-disable local/window-property-name */
 
 import {dict} from '../src/utils/object';
 import {getData, listen} from '../src/event-helper';
@@ -69,16 +70,6 @@ const validMethods = [
   'fullscreenexit',
   'showcontrols',
   'hidecontrols',
-];
-
-const validEvents = [
-  'canplay',
-  'load',
-  'playing',
-  'pause',
-  'ended',
-  'muted',
-  'unmuted',
 ];
 
 /**
@@ -327,6 +318,7 @@ export class AmpVideoIntegration {
 
   /**
    * @param {function()} callback
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   safePlayOrPause_(callback) {
@@ -344,11 +336,6 @@ export class AmpVideoIntegration {
    * @param {string} event
    */
   postEvent(event) {
-    userAssert(
-      validEvents.indexOf(event) > -1,
-      `%s Invalid event [${event}]`,
-      TAG
-    );
     this.postToParent_(dict({'event': event}));
   }
 
@@ -372,11 +359,12 @@ export class AmpVideoIntegration {
   /**
    * @param {!JsonObject} data
    * @param {function()=} opt_callback
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   postToParent_(data, opt_callback) {
     const id = this.callCounter_++;
-    const completeData = Object.assign({id}, data);
+    const completeData = {id, ...data};
 
     if (!getMode(this.win_).test && this.win_.parent) {
       this.win_.parent./*OK*/ postMessage(completeData, '*');
@@ -401,6 +389,7 @@ export class AmpVideoIntegration {
    * Returns message id for testing. Private as message id is an implementation
    * detail that others should not rely on.
    * @param {function(!JsonObject)} callback
+   * @return {*} TODO(#23582): Specify return type
    * @private
    */
   getIntersectionForTesting_(callback) {
@@ -438,7 +427,7 @@ export function adopt(global) {
   global[__AMP__] = true;
 
   // Hacky way to make AMP errors (e.g. from listenFor) do *something*.
-  global.reportError = console.error.bind(console);
+  global.__AMP_REPORT_ERROR = console.error.bind(console);
 
   // Initialize one object per frame.
   const integration = new AmpVideoIntegration(global);

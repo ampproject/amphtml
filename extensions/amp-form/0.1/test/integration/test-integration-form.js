@@ -39,7 +39,6 @@ describes.realWin(
     const {testServerPort} = window.ampTestRuntimeConfig;
     const baseUrl = `http://localhost:${testServerPort}`;
     let doc;
-    let sandbox;
 
     const realSetTimeout = window.setTimeout;
     const stubSetTimeout = (callback, delay) => {
@@ -51,12 +50,13 @@ describes.realWin(
     };
 
     beforeEach(() => {
-      sandbox = env.sandbox;
       doc = env.win.document;
 
-      sandbox.stub(Services, 'formSubmitForDoc').returns(() => {
-        fire: () => {};
-      });
+      env.sandbox.stub(Services, 'formSubmitForDoc').returns(
+        Promise.resolve(() => {
+          fire: () => {};
+        })
+      );
 
       const mustache = document.createElement('script');
       mustache.setAttribute('custom-template', 'amp-mustache');
@@ -146,9 +146,9 @@ describes.realWin(
           on: 'submit:sameform.submit',
         });
         const ampForm = new AmpForm(form, 'sameform');
-        sandbox.spy(ampForm, 'handleXhrSubmit_');
-        sandbox.spy(ampForm, 'handleSubmitAction_');
-        sandbox.spy(ampForm.xhr_, 'fetch');
+        env.sandbox.spy(ampForm, 'handleXhrSubmit_');
+        env.sandbox.spy(ampForm, 'handleSubmitAction_');
+        env.sandbox.spy(ampForm.xhr_, 'fetch');
         const fetch = poll('submit request sent', () =>
           ampForm.xhrSubmitPromiseForTesting()
         );
@@ -207,7 +207,7 @@ describes.realWin(
         // Stubbing timeout to catch async-thrown errors and expect
         // them. These catch errors thrown inside the catch-clause of the
         // xhr request using rethrowAsync.
-        sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
+        env.sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
         const form = getForm({
           id: 'form1',
@@ -220,7 +220,7 @@ describes.realWin(
           },
         });
         const ampForm = new AmpForm(form, 'form1');
-        const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
+        const fetchSpy = env.sandbox.spy(ampForm.xhr_, 'fetch');
         const fetch = poll(
           'submit request sent',
           () => fetchSpy.returnValues[0]
@@ -286,7 +286,7 @@ describes.realWin(
         // Stubbing timeout to catch async-thrown errors and expect
         // them. These catch errors thrown inside the catch-clause of the
         // xhr request using rethrowAsync.
-        sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
+        env.sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
         const form = getForm({
           id: 'form1',
@@ -299,7 +299,7 @@ describes.realWin(
           },
         });
         const ampForm = new AmpForm(form, 'form1');
-        const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
+        const fetchSpy = env.sandbox.spy(ampForm.xhr_, 'fetch');
         const fetch = poll(
           'submit request sent',
           () => fetchSpy.returnValues[0]
@@ -331,7 +331,7 @@ describes.realWin(
         // Stubbing timeout to catch async-thrown errors and expect
         // them. These catch errors thrown inside the catch-clause of the
         // xhr request using rethrowAsync.
-        sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
+        env.sandbox.stub(window, 'setTimeout').callsFake(stubSetTimeout);
 
         const form = getForm({
           id: 'form1',
@@ -346,7 +346,7 @@ describes.realWin(
           },
         });
         const ampForm = new AmpForm(form, 'form1');
-        const fetchSpy = sandbox.spy(ampForm.xhr_, 'fetch');
+        const fetchSpy = env.sandbox.spy(ampForm.xhr_, 'fetch');
         const fetch = poll(
           'submit request sent',
           () => fetchSpy.returnValues[0]

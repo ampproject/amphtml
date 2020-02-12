@@ -64,6 +64,9 @@ export class PooolVendor {
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
 
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(this.ampdoc);
+
     /** @private {string} */
     this.accessUrl_ = ACCESS_CONFIG['authorization'];
 
@@ -75,6 +78,9 @@ export class PooolVendor {
 
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(this.ampdoc.win);
+
+    /** @const @private {?../../../src/service/navigation.Navigation} */
+    this.navigation_ = Services.navigationForDoc(this.ampdoc);
 
     /** @const @private {!JsonObject} For shape see PooolConfigDef */
     this.pooolConfig_ = this.accessSource_.getAdapterConfig();
@@ -89,7 +95,7 @@ export class PooolVendor {
     this.itemID_ = this.pooolConfig_['itemID'] || '';
 
     /** @const {!Element} */
-    this.iframe_ = document.createElement('iframe');
+    this.iframe_ = this.ampdoc.win.document.createElement('iframe');
 
     this.initializeIframe_();
 
@@ -172,7 +178,7 @@ export class PooolVendor {
    * @private
    */
   renderPoool_() {
-    const pooolContainer = document.getElementById('poool');
+    const pooolContainer = this.ampdoc.getElementById('poool');
     const urlPromise = this.accessSource_.buildUrl(
       addParamsToUrl(
         this.iframeUrl_,
@@ -196,6 +202,7 @@ export class PooolVendor {
       this.iframe_.src = url;
       listenFor(this.iframe_, 'release', this.onRelease_.bind(this));
       listenFor(this.iframe_, 'resize', this.onResize_.bind(this));
+      listenFor(this.iframe_, 'click', this.onClick_.bind(this));
       pooolContainer.appendChild(this.iframe_);
     });
   }
@@ -204,10 +211,26 @@ export class PooolVendor {
    * @private
    */
   onRelease_() {
-    const articlePreview = document.querySelector('[poool-access-preview]');
-    articlePreview.setAttribute('amp-access-hide', '');
-    const articleContent = document.querySelector('[poool-access-content]');
-    articleContent.removeAttribute('amp-access-hide');
+    const articlePreview = this.ampdoc
+      .getRootNode()
+      .querySelector('[poool-access-preview]');
+
+    if (articlePreview) {
+      this.mutator_.mutateElement(articlePreview, () => {
+        articlePreview.setAttribute('amp-access-hide', '');
+      });
+    }
+
+    const articleContent = this.ampdoc
+      .getRootNode()
+      .querySelector('[poool-access-content]');
+
+    if (articleContent) {
+      this.mutator_.mutateElement(articleContent, () => {
+        articleContent.removeAttribute('amp-access-hide');
+      });
+    }
+
     resetStyles(this.iframe_, ['transform']);
   }
 
@@ -217,6 +240,16 @@ export class PooolVendor {
    */
   onResize_(msg) {
     setStyle(this.iframe_, 'height', msg.height);
+  }
+
+  /**
+   * @private
+   * @param {!Object} msg
+   */
+  onClick_(msg) {
+    if (msg.url) {
+      this.navigation_.navigateTo(this.ampdoc.win, msg.url);
+    }
   }
 
   /**

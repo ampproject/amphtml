@@ -21,11 +21,11 @@
 
 import {Services} from './services';
 import {dev} from './log';
-import {getService, registerServiceBuilder} from './service';
 import {htmlFor} from './static-template';
 import {parseUrlDeprecated} from './url';
+import {registerServiceBuilder} from './service';
 import {startsWith} from './string';
-import {toWin} from './types';
+import {whenDocumentComplete} from './document-ready';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
@@ -71,7 +71,7 @@ export function setPreconnectFeaturesForTesting(features) {
   preconnectFeatures = features;
 }
 
-class PreconnectService {
+export class PreconnectService {
   /**
    * @param {!Window} win
    */
@@ -112,7 +112,7 @@ class PreconnectService {
   /**
    * Preconnects to a URL. Always also does a dns-prefetch because
    * browser support for that is better.
-   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {boolean=} opt_alsoConnecting Set this flag if you also just
    *    did or are about to connect to this host. This is for the case
@@ -122,16 +122,16 @@ class PreconnectService {
    *    when it is more fully rendered, you already know that the connection
    *    will be used very soon.
    */
-  url(viewer, url, opt_alsoConnecting) {
-    viewer.whenFirstVisible().then(() => {
-      this.url_(viewer, url, opt_alsoConnecting);
+  url(ampdoc, url, opt_alsoConnecting) {
+    ampdoc.whenFirstVisible().then(() => {
+      this.url_(ampdoc, url, opt_alsoConnecting);
     });
   }
 
   /**
    * Preconnects to a URL. Always also does a dns-prefetch because
    * browser support for that is better.
-   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {boolean=} opt_alsoConnecting Set this flag if you also just
    *    did or are about to connect to this host. This is for the case
@@ -140,8 +140,9 @@ class PreconnectService {
    *    E.g. when you preconnect to a host that an embed will connect to
    *    when it is more fully rendered, you already know that the connection
    *    will be used very soon.
+   * @private
    */
-  url_(viewer, url, opt_alsoConnecting) {
+  url_(ampdoc, url, opt_alsoConnecting) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
@@ -185,18 +186,18 @@ class PreconnectService {
       }
     }, 10000);
 
-    this.preconnectPolyfill_(viewer, origin);
+    this.preconnectPolyfill_(ampdoc, origin);
   }
 
   /**
    * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
-   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {string=} opt_preloadAs
    */
-  preload(viewer, url, opt_preloadAs) {
+  preload(ampdoc, url, opt_preloadAs) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
@@ -204,7 +205,7 @@ class PreconnectService {
       return;
     }
     this.urls_[url] = true;
-    this.url(viewer, url, /* opt_alsoConnecting */ true);
+    this.url(ampdoc, url, /* opt_alsoConnecting */ true);
     if (!this.features_.preload) {
       return;
     }
@@ -216,7 +217,7 @@ class PreconnectService {
       //   as attribute).
       return;
     }
-    viewer.whenFirstVisible().then(() => {
+    ampdoc.whenFirstVisible().then(() => {
       this.performPreload_(url);
     });
   }
@@ -275,11 +276,11 @@ class PreconnectService {
    * This is expected and fine to leave as is. Its fine to send a non 404
    * response, but please make it small :)
    *
-   * @param {!./service/viewer-impl.Viewer} viewer
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} origin
    * @private
    */
-  preconnectPolyfill_(viewer, origin) {
+  preconnectPolyfill_(ampdoc, origin) {
     // Unfortunately there is no reliable way to feature detect whether
     // preconnect is supported, so we do this only in Safari, which is
     // the most important browser without support for it.
@@ -317,68 +318,29 @@ class PreconnectService {
   }
 }
 
-export class Preconnect {
-  /**
-   * @param {!PreconnectService} preconnectService
-   * @param {!Element} element
-   */
-  constructor(preconnectService, element) {
-    /** @const @private {!PreconnectService} */
-    this.preconnectService_ = preconnectService;
-
-    /** @const @private {!Element} */
-    this.element_ = element;
-
-    /** @private {?./service/viewer-impl.Viewer} */
-    this.viewer_ = null;
-  }
-
-  /**
-   * @return {!./service/viewer-impl.Viewer}
-   * @private
-   */
-  getViewer_() {
-    if (!this.viewer_) {
-      this.viewer_ = Services.viewerForDoc(this.element_);
-    }
-    return this.viewer_;
-  }
-
-  /**
-   * Preconnects to a URL. Always also does a dns-prefetch because
-   * browser support for that is better.
-   * @param {string} url
-   * @param {boolean=} opt_alsoConnecting Set this flag if you also just
-   *    did or are about to connect to this host. This is for the case
-   *    where preconnect is issued immediate before or after actual connect
-   *    and preconnect is used to flatten a deep HTTP request chain.
-   *    E.g. when you preconnect to a host that an embed will connect to
-   *    when it is more fully rendered, you already know that the connection
-   *    will be used very soon.
-   */
-  url(url, opt_alsoConnecting) {
-    this.preconnectService_.url(this.getViewer_(), url, opt_alsoConnecting);
-  }
-
-  /**
-   * Asks the browser to preload a URL. Always also does a preconnect
-   * because browser support for that is better.
-   *
-   * @param {string} url
-   * @param {string=} opt_preloadAs
-   */
-  preload(url, opt_preloadAs) {
-    this.preconnectService_.preload(this.getViewer_(), url, opt_preloadAs);
-  }
+/**
+ * @param {!Window} window
+ */
+export function installPreconnectService(window) {
+  registerServiceBuilder(window, 'preconnect', PreconnectService);
 }
 
 /**
- * @param {!Element} element
- * @return {!Preconnect}
+ * Preconnects to the source URL and canonical domains to make sure
+ * outbound navigations are quick. Waits for onload to avoid blocking
+ * more high priority loads.
+ * @param {!Document} document
+ * @return {Promise} When work is done.
  */
-export function preconnectForElement(element) {
-  const serviceHolder = toWin(element.ownerDocument.defaultView);
-  registerServiceBuilder(serviceHolder, 'preconnect', PreconnectService);
-  const preconnectService = getService(serviceHolder, 'preconnect');
-  return new Preconnect(preconnectService, element);
+export function preconnectToOrigin(document) {
+  return whenDocumentComplete(document).then(() => {
+    const win = document.defaultView;
+    if (win) {
+      const preconnect = Services.preconnectFor(win);
+      const info = Services.documentInfoForDoc(document.documentElement);
+      const ampdoc = Services.ampdoc(document);
+      preconnect.url(ampdoc, info.sourceUrl);
+      preconnect.url(ampdoc, info.canonicalUrl);
+    }
+  });
 }

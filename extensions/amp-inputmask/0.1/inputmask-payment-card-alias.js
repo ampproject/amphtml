@@ -28,7 +28,10 @@ export function factory(Inputmask) {
     dict({
       'payment-card': {
         'postValidation': buffer => /[\s\d]+/.test(buffer.join('')),
-        /** @param {!JsonObject} opts */
+        /**
+         * @param {!JsonObject} opts
+         * @return {*} TODO(#23582): Specify return type
+         */
         'mask': function(opts) {
           opts['definitions'] = dict({
             'x': {

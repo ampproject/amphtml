@@ -64,8 +64,8 @@ export class LinkerManager {
     /** @const @private {!../../../src/service/url-impl.Url} */
     this.urlService_ = Services.urlForDoc(this.element_);
 
-    /** @const @private {Promise<../../amp-form/0.1/form-submit-service.FormSubmitService>} */
-    this.formSubmitService_ = Services.formSubmitPromiseForDoc(ampdoc);
+    /** @const @private {!Promise<../../amp-form/0.1/form-submit-service.FormSubmitService>} */
+    this.formSubmitService_ = Services.formSubmitForDoc(ampdoc);
 
     /** @private {?UnlistenDef} */
     this.formSubmitUnlistener_ = null;
@@ -82,6 +82,7 @@ export class LinkerManager {
    * and register the callback with the navigation service. Since macro
    * resolution is asynchronous the callback may be looking for these values
    * before they are ready.
+   * @return {*} TODO(#23582): Specify return type
    */
   init() {
     if (!isObject(this.config_)) {
@@ -118,6 +119,7 @@ export class LinkerManager {
           }
         });
         this.resolvedIds_[name] = expandedIds;
+        return expandedIds;
       });
     });
 
@@ -171,7 +173,7 @@ export class LinkerManager {
     const location = WindowInterface.getLocation(this.ampdoc_.win);
     const isProxyOrigin = this.urlService_.isProxyOrigin(location);
     linkerNames.forEach(name => {
-      const mergedConfig = Object.assign({}, defaultConfig, config[name]);
+      const mergedConfig = {...defaultConfig, ...config[name]};
 
       if (mergedConfig['enabled'] !== true) {
         user().info(
@@ -204,9 +206,9 @@ export class LinkerManager {
    * @return {!Promise<string>} expanded template.
    */
   expandTemplateWithUrlParams_(template, expansionOptions) {
-    const bindings = this.variableService_.getMacros();
+    const bindings = this.variableService_.getMacros(this.element_);
     return this.variableService_
-      .expandTemplate(template, expansionOptions)
+      .expandTemplate(template, expansionOptions, this.element_)
       .then(expanded => {
         const urlReplacements = Services.urlReplacementsForDoc(this.element_);
         return urlReplacements.expandUrlAsync(expanded, bindings);
@@ -214,24 +216,36 @@ export class LinkerManager {
   }
 
   /**
-   * If the document has existing cid meta tag they do not need to explicity
+   * If the document has existing cid meta tag they do not need to explicitly
    * opt-in to use linker.
    * @return {boolean}
    * @private
    */
   isLegacyOptIn_() {
-    const optInMeta = this.ampdoc_.win.document.head./*OK*/ querySelector(
-      'meta[name="amp-google-client-id-api"][content="googleanalytics"]'
-    );
+    if (this.type_ !== 'googleanalytics') {
+      return false;
+    }
+
     if (
-      !optInMeta ||
-      optInMeta.hasAttribute(LINKER_CREATED) ||
-      this.type_ !== 'googleanalytics'
+      this.ampdoc_.getMetaByName('amp-google-client-id-api') !==
+      'googleanalytics'
     ) {
       return false;
     }
 
-    optInMeta.setAttribute(LINKER_CREATED, '');
+    const headNode = this.ampdoc_.getHeadNode();
+    const linkerCreatedEl =
+      headNode instanceof ShadowRoot
+        ? this.ampdoc_.getBody()
+        : headNode.querySelector(
+            'meta[name="amp-google-client-id-api"][content="googleanalytics"]'
+          );
+
+    if (linkerCreatedEl.hasAttribute(LINKER_CREATED)) {
+      return false;
+    }
+
+    linkerCreatedEl.setAttribute(LINKER_CREATED, '');
     return true;
   }
 
@@ -299,6 +313,7 @@ export class LinkerManager {
    * @param {string} url
    * @param {string} name Name given in linker config.
    * @param {?Array} domains
+   * @return {*} TODO(#23582): Specify return type
    */
   isDomainMatch_(url, name, domains) {
     const {hostname} = this.urlService_.parse(url);
@@ -413,6 +428,7 @@ export class LinkerManager {
    * @param {!Element} form
    * @param {function(string)} actionXhrMutator
    * @param {string} linkerName
+   * @return {*} TODO(#23582): Specify return type
    */
   addDataToForm_(form, actionXhrMutator, linkerName) {
     const ids = this.resolvedIds_[linkerName];
@@ -490,6 +506,7 @@ function getBaseDomain(domain) {
 /**
  * Escape any regex flags other than `*`
  * @param {string} str
+ * @return {*} TODO(#23582): Specify return type
  */
 function regexEscape(str) {
   return str.replace(/[-\/\\^$+?.()|[\]{}]/g, '\\$&');

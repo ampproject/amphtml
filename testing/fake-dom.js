@@ -102,13 +102,30 @@ export class FakeWindow {
     EventListeners.intercept(this.document.documentElement);
     EventListeners.intercept(this.document.body);
 
-    // Document.hidden property.
+    // Document.hidden and document.visibilityState properties.
     /** @private {boolean} */
     this.documentHidden_ = spec.hidden !== undefined ? spec.hidden : false;
+    /** @private {?string} */
+    this.visibilityState_ = null;
+
     Object.defineProperty(this.document, 'hidden', {
       get: () => this.documentHidden_,
       set: value => {
         this.documentHidden_ = value;
+        this.visibilityState_ = null;
+        this.document.eventListeners.fire({type: 'visibilitychange'});
+      },
+    });
+    Object.defineProperty(this.document, 'visibilityState', {
+      get: () => {
+        if (this.visibilityState_) {
+          return this.visibilityState_;
+        }
+        return this.documentHidden_ ? 'hidden' : 'visible';
+      },
+      set: value => {
+        this.visibilityState_ = value;
+        this.documentHidden_ = value != 'visible';
         this.document.eventListeners.fire({type: 'visibilitychange'});
       },
     });
@@ -193,9 +210,10 @@ export class FakeWindow {
 
     // Storage.
     /** @const {!FakeStorage|undefined} */
-    this.localStorage = spec.localStorageOff
-      ? undefined
-      : new FakeStorage(this);
+    this.localStorage = spec.localStorageOff ? undefined : new FakeStorage();
+
+    /** @const {!FakeStorage} */
+    this.sessionStorage = new FakeStorage();
 
     // Timers and animation frames.
     /** @const */
@@ -235,6 +253,11 @@ export class FakeWindow {
      * @const
      */
     this.requestAnimationFrame = raf;
+
+    // Styles.
+    this.getComputedStyle = function() {
+      return window.getComputedStyle.apply(window, arguments);
+    };
   }
 
   /** polyfill addEventListener. */
@@ -396,6 +419,7 @@ export class FakeLocation {
     Object.defineProperty(this, 'href', {
       get: () => this.url_.href,
       set: href => this.assign(href),
+      configurable: true,
     });
 
     const properties = [
@@ -440,7 +464,7 @@ export class FakeLocation {
    */
   change_(args) {
     const change = parseUrlDeprecated(this.url_.href);
-    Object.assign({}, change, args);
+    ({...change, ...args});
     this.changes.push(change);
   }
 
@@ -584,11 +608,7 @@ export class FakeHistory {
  * @extends {Storage}
  */
 export class FakeStorage {
-  /** @param {!Window} win */
-  constructor(win) {
-    /** @const */
-    this.win = win;
-
+  constructor() {
     /** @const {!Object<string, string>} */
     this.values = {};
 

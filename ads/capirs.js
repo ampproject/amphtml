@@ -67,13 +67,13 @@ export function capirs(global, data) {
     },
   };
 
-  loadScript(global, '//ssp.rambler.ru/lpdid.js');
   loadScript(global, '//ssp.rambler.ru/capirs_async.js');
 }
 
 /**
  * @param {!Window} global
  * @param {!Object} banner
+ * @return {*} TODO(#23582): Specify return type
  */
 function getWidth(global, banner) {
   let width;

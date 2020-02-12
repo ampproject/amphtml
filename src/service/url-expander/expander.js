@@ -15,7 +15,8 @@
  */
 
 import {hasOwn} from '../../utils/object';
-import {rethrowAsync, user, userAssert} from '../../log';
+import {rethrowAsync, user} from '../../log';
+import {trimStart} from '../../string';
 import {tryResolve} from '../../utils/promise';
 
 /** @private @const {string} */
@@ -23,10 +24,6 @@ const PARSER_IGNORE_FLAG = '`';
 
 /** @private @const {string} */
 const TAG = 'Expander';
-
-/** A whitelist for replacements whose values should not be %-encoded. */
-/** @const {Object<string, boolean>} */
-export const NOENCODE_WHITELIST = {'ANCESTOR_ORIGIN': true};
 
 /** Rudamentary parser to handle nested Url replacement. */
 export class Expander {
@@ -138,7 +135,6 @@ export class Expander {
     let match = matches[matchIndex];
     let numOfPendingCalls = 0;
     let ignoringChars = false;
-    let nextArgShouldBeRaw = false;
 
     const evaluateNextLevel = encode => {
       let builder = '';
@@ -146,11 +142,12 @@ export class Expander {
       const args = [];
 
       while (urlIndex < url.length && matchIndex <= matches.length) {
+        const trimmedBuilder = builder.trim();
         if (match && urlIndex === match.start) {
           // Collect any chars that may be prefixing the macro, if we are in
           // a nested context trim the args.
-          if (builder.trim().length) {
-            results.push(numOfPendingCalls ? builder.trimStart() : builder);
+          if (trimmedBuilder) {
+            results.push(numOfPendingCalls ? trimStart(builder) : builder);
           }
 
           // If we know we are at the start of a macro, we figure out how to
@@ -169,10 +166,11 @@ export class Expander {
             };
           } else {
             // Macro is from the global source.
-            binding = Object.assign({}, this.variableSource_.get(match.name), {
+            binding = {
+              ...this.variableSource_.get(match.name),
               name: match.name,
               encode,
-            });
+            };
           }
 
           urlIndex = match.stop + 1;
@@ -196,16 +194,18 @@ export class Expander {
         } else if (url[urlIndex] === PARSER_IGNORE_FLAG) {
           if (!ignoringChars) {
             ignoringChars = true;
-            nextArgShouldBeRaw = true;
-            userAssert(
-              builder.trim() === '',
-              `The substring "${builder}" was lost during url-replacement. ` +
-                'Please ensure the url syntax is correct'
-            );
-            builder = '';
+            // Collect any chars that may exist before backticks, eg FOO(a`b`)
+            if (trimmedBuilder) {
+              results.push(trimmedBuilder);
+            }
           } else {
             ignoringChars = false;
+            // Collect any chars inside backticks without trimming whitespace.
+            if (builder.length) {
+              results.push(builder);
+            }
           }
+          builder = '';
           urlIndex++;
         } else if (
           numOfPendingCalls &&
@@ -213,13 +213,10 @@ export class Expander {
           !ignoringChars
         ) {
           // Commas tell us to create a new argument when in nested context and
-          // not ignoring them due to backticks. We push any string built so far,
-          // create a new array for the next argument, and reset our string
-          // builder.
-          if (builder.length) {
-            const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
-            results.push(nextArg);
-            nextArgShouldBeRaw = false;
+          // we push any string built so far, create a new array for the next
+          // argument, and reset our string builder.
+          if (trimmedBuilder) {
+            results.push(trimmedBuilder);
           }
           args.push(results);
           results = [];
@@ -242,12 +239,10 @@ export class Expander {
           urlIndex++;
           numOfPendingCalls--;
           const binding = stack.pop();
-          const nextArg = nextArgShouldBeRaw ? builder : builder.trim();
-          if (nextArg) {
-            results.push(nextArg);
+          if (trimmedBuilder) {
+            results.push(trimmedBuilder);
           }
           args.push(results);
-          nextArgShouldBeRaw = false;
           const value = this.evaluateBinding_(binding, /* opt_args */ args);
           return value;
         } else {
@@ -291,15 +286,18 @@ export class Expander {
    *    the FOO binding opt_args will be [[Result of BAR, Result of BAR], [123]].
    *    This structure is so that the outer array will have the correct number of
    *    arguments, but we still can resolve each macro separately.
+   * @return {string|!Promise<string>}
    */
   evaluateBinding_(bindingInfo, opt_args) {
     const {encode, name} = bindingInfo;
     let binding;
-    if (hasOwn(bindingInfo, 'prioritized')) {
+    if (bindingInfo.prioritized != undefined) {
+      // Has to explicity check for undefined because bindingInfo.priorityized
+      // could not be a function but a false value. For example {FOO: 0}
       // If a binding is passed in through the bindings argument it always takes
       // precedence.
       binding = bindingInfo.prioritized;
-    } else if (this.sync_ && hasOwn(bindingInfo, 'sync')) {
+    } else if (this.sync_ && bindingInfo.sync != undefined) {
       // Use the sync resolution if avaliable when called synchronously.
       binding = bindingInfo.sync;
     } else if (this.sync_) {
@@ -311,14 +309,12 @@ export class Expander {
       binding = bindingInfo.async || bindingInfo.sync;
     }
 
-    // We should only ever encode the top level resolution, or not at all.
-    const shouldEncode = encode && !NOENCODE_WHITELIST[name];
     if (this.sync_) {
       const result = this.evaluateBindingSync_(binding, name, opt_args);
-      return shouldEncode ? encodeURIComponent(result) : result;
+      return encode ? encodeURIComponent(result) : result;
     } else {
       return this.evaluateBindingAsync_(binding, name, opt_args).then(result =>
-        shouldEncode ? encodeURIComponent(result) : result
+        encode ? encodeURIComponent(result) : result
       );
     }
   }
@@ -440,6 +436,7 @@ export class Expander {
    * This will cast all arguments to string before calling the macro.
    *  [[Result of BAR, Result of BAR], 123]. => ['resultresult', '123']
    * @param {Array<!Array>|undefined} argsArray
+   * @return {Array<string>|undefined}
    */
   processArgsSync_(argsArray) {
     if (!argsArray) {

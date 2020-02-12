@@ -43,7 +43,7 @@ describes.realWin(
     },
   },
   function(env) {
-    let win, doc, sandbox;
+    let win, doc;
     let configWithCredentials;
     let uidService;
     let crypto;
@@ -56,12 +56,12 @@ describes.realWin(
     const jsonMockResponses = {
       '//invalidConfig': '{"transport": {"iframe": "fake.com"}}',
       '//config1': '{"vars": {"title": "remote"}}',
-      'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
-      '//config-rv2': '{"requests": {"foo": "https://example.com/remote"}}',
+      'https://foo/My%20Test%20Title': '{"vars": {"title": "magic"}}',
+      '//config-rv2': '{"requests": {"foo": "https://example.test/remote"}}',
       'https://rewriter.com': '{"vars": {"title": "rewritten"}}',
     };
     const trivialConfig = {
-      'requests': {'foo': 'https://example.com/bar'},
+      'requests': {'foo': 'https://example.test/bar'},
       'triggers': {'pageview': {'on': 'visible', 'request': 'foo'}},
     };
 
@@ -96,10 +96,9 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      sandbox = env.sandbox;
       ampdoc = env.ampdoc;
       configWithCredentials = false;
-      doc.title = 'Test Title';
+      doc.title = 'My Test Title';
       resetServiceForTesting(win, 'xhr');
       jsonRequestConfigs = {};
       registerServiceBuilder(win, 'xhr', function() {
@@ -127,11 +126,11 @@ describes.realWin(
       link.setAttribute('href', './test-canonical.html');
       doc.head.appendChild(link);
       cidServiceForDocForTesting(ampdoc);
-      viewer = win.services.viewer.obj;
+      viewer = win.__AMP_SERVICES.viewer.obj;
       ins = instrumentationServiceForDocForTesting(ampdoc);
       installUserNotificationManagerForTesting(ampdoc);
 
-      const wi = mockWindowInterface(sandbox);
+      const wi = mockWindowInterface(env.sandbox);
       requestVerifier = new ImagePixelVerifier(wi);
       return Services.userNotificationManagerForDoc(doc.head).then(manager => {
         uidService = manager;
@@ -195,7 +194,7 @@ describes.realWin(
       it('sends a basic hit', function() {
         const analytics = getAnalyticsTag(trivialConfig);
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/bar');
+          requestVerifier.verifyRequest('https://example.test/bar');
         });
       });
 
@@ -221,8 +220,8 @@ describes.realWin(
         const el = doc.createElement('amp-analytics');
         el.setAttribute('trigger', 'immediate');
         el.textContent = config;
-        const whenFirstVisibleStub = sandbox
-          .stub(viewer, 'whenFirstVisible')
+        const whenFirstVisibleStub = env.sandbox
+          .stub(ampdoc, 'whenFirstVisible')
           .callsFake(() => new Promise(function() {}));
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
@@ -288,7 +287,7 @@ describes.realWin(
       it('does not send a hit when request is not provided', function() {
         expectAsyncConsoleError(onAndRequestAttributesError);
         const analytics = getAnalyticsTag({
-          'requests': {'foo': 'https://example.com/bar'},
+          'requests': {'foo': 'https://example.test/bar'},
           'triggers': [{'on': 'visible'}],
         });
 
@@ -308,33 +307,33 @@ describes.realWin(
       it('expands nested requests', function() {
         const analytics = getAnalyticsTag({
           'requests': {
-            'foo': 'https://example.com/bar&${foobar}&baz',
+            'foo': 'https://example.test/bar&${foobar}&baz',
             'foobar': 'f1',
           },
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         });
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/bar&f1&baz');
+          requestVerifier.verifyRequest('https://example.test/bar&f1&baz');
         });
       });
 
       it('expand nested requests with vendor provided value', () => {
         const analytics = getAnalyticsTag({
           'requests': {
-            'foo': 'https://example.com/bar&${clientId}&baz',
+            'foo': 'https://example.test/bar&${clientId}&baz',
             'clientId': 'c1',
           },
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         });
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/bar&c1&baz');
+          requestVerifier.verifyRequest('https://example.test/bar&c1&baz');
         });
       });
 
       it('expands nested requests (3 levels)', function() {
         const analytics = getAnalyticsTag({
           'requests': {
-            'foo': 'https://example.com/bar&${foobar}',
+            'foo': 'https://example.test/bar&${foobar}',
             'foobar': '${baz}',
             'baz': 'b1',
           },
@@ -342,14 +341,14 @@ describes.realWin(
         });
 
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/bar&b1');
+          requestVerifier.verifyRequest('https://example.test/bar&b1');
         });
       });
 
       it('should tolerate invalid triggers', function() {
         expectAsyncConsoleError(/No request strings defined/);
         const analytics = getAnalyticsTag({
-          'request': {'foo': 'https://example.com'},
+          'request': {'foo': 'https://example.test'},
           'triggers': [],
         });
         return waitForNoSendRequest(analytics);
@@ -370,7 +369,7 @@ describes.realWin(
         expectAsyncConsoleError(/Request string not found/);
         const analytics = getAnalyticsTag({
           'requests': {
-            'foo': 'https://example.com/bar&${foobar}',
+            'foo': 'https://example.test/bar&${foobar}',
             'foobar': '${baz}',
             'baz': 'b1',
           },
@@ -378,7 +377,7 @@ describes.realWin(
         });
 
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/bar&b1');
+          requestVerifier.verifyRequest('https://example.test/bar&b1');
           requestVerifier.verifyRequest('b1');
         });
       });
@@ -387,14 +386,14 @@ describes.realWin(
         const analytics = getAnalyticsTag({
           'requests': {
             'htmlAttrRequest':
-              'https://example.com/bar&ids=${htmlAttr(div,id)}',
+              'https://example.test/bar&ids=${htmlAttr(div,id)}',
           },
           'triggers': [{'on': 'visible', 'request': 'htmlAttrRequest'}],
         });
 
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/bar&ids=HTML_ATTR(div,id)'
+            'https://example.test/bar&ids=HTML_ATTR(div,id)'
           );
         });
       });
@@ -402,20 +401,19 @@ describes.realWin(
       it('fills cid', function() {
         const analytics = getAnalyticsTag({
           'requests': {
-            'foo': 'https://example.com/cid=${clientId(analytics-abc)}',
+            'foo': 'https://example.test/cid=${clientId(analytics-abc)}',
           },
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         });
 
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /^https:\/\/example.com\/cid=[a-zA-Z\-]+/
+            /^https:\/\/example.test\/cid=[a-zA-Z\-]+/
           );
         });
       });
 
-      // TODO(lannka, #12476): Make this test work with sinon 4.0.
-      it.skip('fills internally provided trigger vars', function() {
+      it('fills internally provided trigger vars', function() {
         const analytics = getAnalyticsTag({
           'requests': {
             'timer':
@@ -433,8 +431,8 @@ describes.realWin(
         });
 
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest(
-            /https:\/\/e.com\/start=[0-9]+&duration=0/
+          requestVerifier.verifyRequestMatch(
+            /https:\/\/e.com\/start=[0-9]+&duration=[0-9]/
           );
           requestVerifier.verifyRequest('https://e.com/totalVisibleTime=0');
         });
@@ -442,13 +440,13 @@ describes.realWin(
 
       it('should create and destroy analytics group', () => {
         const analytics = getAnalyticsTag({
-          requests: {foo: 'https://example.com/bar'},
+          requests: {foo: 'https://example.test/bar'},
           triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
           vars: {foo: 'bar'},
         });
         return waitForNoSendRequest(analytics).then(() => {
           expect(analytics.analyticsGroup_).to.be.ok;
-          const disposeStub = sandbox.stub(
+          const disposeStub = env.sandbox.stub(
             analytics.analyticsGroup_,
             'dispose'
           );
@@ -461,7 +459,7 @@ describes.realWin(
       it('expands urls in config request', () => {
         const analytics = getAnalyticsTag(
           {
-            'requests': {'foo': 'https://example.com/${title}'},
+            'requests': {'foo': 'https://example.test/${title}'},
             'triggers': [{'on': 'visible', 'request': 'foo'}],
           },
           {
@@ -469,13 +467,13 @@ describes.realWin(
           }
         );
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/magic');
+          requestVerifier.verifyRequest('https://example.test/magic');
         });
       });
 
       it('updates requestCount on each request', () => {
         const analytics = getAnalyticsTag({
-          'host': 'example.com',
+          'host': 'example.test',
           'requests': {
             'pageview1': '/test1=${requestCount}',
             'pageview2': '/test2=${requestCount}',
@@ -496,7 +494,7 @@ describes.realWin(
       it('expands trigger vars', () => {
         const analytics = getAnalyticsTag({
           'requests': {
-            'pageview': 'https://example.com/test1=${var1}&test2=${var2}',
+            'pageview': 'https://example.test/test1=${var1}&test2=${var2}',
           },
           'triggers': [
             {
@@ -511,7 +509,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/test1=x&test2=test2'
+            'https://example.test/test1=x&test2=test2'
           );
         });
       });
@@ -523,39 +521,44 @@ describes.realWin(
             'var2': 'test2',
           },
           'requests': {
-            'pageview': 'https://example.com/test1=${var1}&test2=${var2}',
+            'pageview': 'https://example.test/test1=${var1}&test2=${var2}',
           },
           'triggers': [{'on': 'visible', 'request': 'pageview'}],
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/test1=x&test2=test2'
+            'https://example.test/test1=x&test2=test2'
           );
         });
       });
 
       it('expands platform vars', () => {
+        env.sandbox
+          .stub(viewer, 'getReferrerUrl')
+          .returns('http://fake.example/?foo=bar');
         const analytics = getAnalyticsTag({
           'requests': {
             'pageview':
-              'https://example.com/title=${title}&ref=${documentReferrer}',
+              'https://example.test/title=${title}&ref=${documentReferrer}',
           },
           'triggers': [{'on': 'visible', 'request': 'pageview'}],
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/title=Test%20Title&ref=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html/
+            /https:\/\/example.test\/title=My%20Test%20Title&ref=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar/
           );
         });
       });
 
       it('expands url-replacements vars', function() {
         const analytics = getAnalyticsTag({
-          'requests': {'foo': 'https://example.com/TITLE'},
+          'requests': {'foo': 'https://example.test/TITLE'},
           'triggers': [{'on': 'visible', 'request': 'foo'}],
         });
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/Test%20Title');
+          requestVerifier.verifyRequest(
+            'https://example.test/My%20Test%20Title'
+          );
         });
       });
 
@@ -566,7 +569,7 @@ describes.realWin(
             'var2': 'config2',
           },
           'requests': {
-            'pageview': 'https://example.com/test1=${var1}&test2=${var2}',
+            'pageview': 'https://example.test/test1=${var1}&test2=${var2}',
           },
           'triggers': [
             {
@@ -580,7 +583,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/test1=trigger1&test2=config2'
+            'https://example.test/test1=trigger1&test2=config2'
           );
         });
       });
@@ -597,7 +600,7 @@ describes.realWin(
           el1.dataset.varsTest = 'foo';
           analyticsGroup.root_.getRootElement().appendChild(el1);
 
-          const handlerSpy = sandbox.spy();
+          const handlerSpy = env.sandbox.spy();
           analyticsGroup.addTrigger(
             {'on': 'click', 'selector': '.x', 'vars': {'test': 'bar'}},
             handlerSpy
@@ -616,13 +619,13 @@ describes.realWin(
         const analytics = getAnalyticsTag({
           'vars': {'random': 428},
           'requests': {
-            'pageview': 'https://example.com/test1=${title}&test2=${random}',
+            'pageview': 'https://example.test/test1=${title}&test2=${random}',
           },
           'triggers': [{'on': 'visible', 'request': 'pageview'}],
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/test1=Test%20Title&test2=428'
+            'https://example.test/test1=My%20Test%20Title&test2=428'
           );
         });
       });
@@ -634,7 +637,7 @@ describes.realWin(
             'c2': 'config&2',
           },
           'requests': {
-            'base': 'https://example.com/test?c1=${c1}&t1=${t1}',
+            'base': 'https://example.test/test?c1=${c1}&t1=${t1}',
             'pageview': '${base}&c2=${c2}&t2=${t2}',
           },
           'triggers': [
@@ -650,7 +653,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/test?c1=config%201&t1=trigger%3D1&c2=config%262&t2=trigger%3F2'
+            'https://example.test/test?c1=config%201&t1=trigger%3D1&c2=config%262&t2=trigger%3F2'
           );
         });
       });
@@ -662,7 +665,7 @@ describes.realWin(
             'c2': 'config&2',
           },
           'requests': {
-            'base': 'https://example.com/test?',
+            'base': 'https://example.test/test?',
             'pageview': '${base}c1=${c1}&c2=${c2}',
           },
           'triggers': [
@@ -674,16 +677,19 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/test?c1=Config%2C%20The%20Barbarian,config%201&c2=config%262'
+            'https://example.test/test?c1=Config%2C%20The%20Barbarian,config%201&c2=config%262'
           );
         });
       });
 
       it('expands url-replacements vars', () => {
+        env.sandbox
+          .stub(viewer, 'getReferrerUrl')
+          .returns('http://fake.example/?foo=bar');
         const analytics = getAnalyticsTag({
           'requests': {
             'pageview':
-              'https://example.com/test1=${var1}&test2=${var2}&title=TITLE',
+              'https://example.test/test1=${var1}&test2=${var2}&title=TITLE',
           },
           'triggers': [
             {
@@ -698,7 +704,7 @@ describes.realWin(
         });
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example.com\/test1=x&test2=http%3A%2F%2Flocalhost%3A9876%2F(context|debug).html&title=Test%20Title/
+            /https:\/\/example.test\/test1=x&test2=http%3A%2F%2Ffake.example%2F%3Ffoo%3Dbar&title=My%20Test%20Title/
           );
         });
       });
@@ -706,7 +712,7 @@ describes.realWin(
       it('expands complex vars', () => {
         const analytics = getAnalyticsTag({
           'requests': {
-            'pageview': 'https://example.com/test1=${qp_foo}',
+            'pageview': 'https://example.test/test1=${qp_foo}',
           },
           'triggers': [
             {
@@ -721,7 +727,7 @@ describes.realWin(
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
         );
-        sandbox
+        env.sandbox
           .stub(urlReplacements.getVariableSource(), 'get')
           .callsFake(function(name) {
             return {
@@ -733,7 +739,7 @@ describes.realWin(
 
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/test1=_query_param_foo_'
+            'https://example.test/test1=_query_param_foo_'
           );
         });
       });
@@ -741,10 +747,10 @@ describes.realWin(
 
     describe('expand selector', () => {
       it('expands selector with config variable', () => {
-        const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
-        const addStub = sandbox.stub(tracker, 'add');
+        const tracker = ins.root_.getTracker('click', ClickEventTracker);
+        const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag({
-          requests: {foo: 'https://example.com/bar'},
+          requests: {foo: 'https://example.test/bar'},
           triggers: [{on: 'click', selector: '${foo}', request: 'foo'}],
           vars: {foo: 'bar'},
         });
@@ -757,13 +763,10 @@ describes.realWin(
 
       function selectorExpansionTest(selector) {
         it('expand selector value: ' + selector, () => {
-          const tracker = ins.ampdocRoot_.getTracker(
-            'click',
-            ClickEventTracker
-          );
-          const addStub = sandbox.stub(tracker, 'add');
+          const tracker = ins.root_.getTracker('click', ClickEventTracker);
+          const addStub = env.sandbox.stub(tracker, 'add');
           const analytics = getAnalyticsTag({
-            requests: {foo: 'https://example.com/bar'},
+            requests: {foo: 'https://example.test/bar'},
             triggers: [
               {on: 'click', selector: '${foo}, ${bar}', request: 'foo'},
             ],
@@ -799,28 +802,28 @@ describes.realWin(
         'p:nth-child(2)',
       ].map(selectorExpansionTest);
 
-      it('does not expands selector with platform variable', () => {
-        const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
-        const addStub = sandbox.stub(tracker, 'add');
+      it('expands selector with platform variable', () => {
+        const tracker = ins.root_.getTracker('click', ClickEventTracker);
+        const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag({
-          requests: {foo: 'https://example.com/bar'},
+          requests: {foo: 'https://example.test/bar'},
           triggers: [{on: 'click', selector: '${title}', request: 'foo'}],
         });
         return waitForNoSendRequest(analytics).then(() => {
           expect(addStub).to.be.calledOnce;
           const config = addStub.args[0][2];
-          expect(config['selector']).to.equal('TITLE');
+          expect(config['selector']).to.equal('My Test Title');
         });
       });
     });
 
     describe('optout by function', () => {
       beforeEach(() => {
-        sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').returns(
+        env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').returns(
           Promise.resolve({
             'requests': {
               'foo': {
-                baseUrl: 'https://example.com/bar',
+                baseUrl: 'https://example.test/bar',
               },
             },
             'triggers': {
@@ -841,7 +844,7 @@ describes.realWin(
         win['foo'] = {'bar': () => false};
         const analytics = getAnalyticsTag(trivialConfig);
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/bar');
+          requestVerifier.verifyRequest('https://example.test/bar');
         });
       });
 
@@ -862,18 +865,18 @@ describes.realWin(
           'type': 'testVendor',
         });
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/bar');
+          requestVerifier.verifyRequest('https://example.test/bar');
         });
       });
     });
 
     describe('optout by id', () => {
       beforeEach(() => {
-        sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').returns(
+        env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').returns(
           Promise.resolve({
             'requests': {
               'foo': {
-                baseUrl: 'https://example.com/bar',
+                baseUrl: 'https://example.test/bar',
               },
             },
             'triggers': {
@@ -910,7 +913,7 @@ describes.realWin(
           'type': 'testVendor',
         });
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/bar');
+          requestVerifier.verifyRequest('https://example.test/bar');
         });
       });
     });
@@ -919,7 +922,7 @@ describes.realWin(
       let config;
       beforeEach(() => {
         config = {
-          vars: {host: 'example.com', path: 'helloworld'},
+          vars: {host: 'example.test', path: 'helloworld'},
           extraUrlParams: {
             's.evar0': '0',
             's.evar1': '${path}',
@@ -934,7 +937,7 @@ describes.realWin(
         const analytics = getAnalyticsTag(config);
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/helloworld?a=b&s.evar0=0&s.evar1=helloworld&foofoo=baz'
+            'https://example.test/helloworld?a=b&s.evar0=0&s.evar1=helloworld&foofoo=baz'
           );
         });
       });
@@ -944,7 +947,7 @@ describes.realWin(
         const analytics = getAnalyticsTag(config);
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/helloworld?a=b&foofoo=baz&v0=0&v1=helloworld'
+            'https://example.test/helloworld?a=b&foofoo=baz&v0=0&v1=helloworld'
           );
         });
       });
@@ -955,7 +958,7 @@ describes.realWin(
         const analytics = getAnalyticsTag(config);
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/helloworld?a=b&foofoo=baz&v0=0&v1=helloworld&c=d&v=e'
+            'https://example.test/helloworld?a=b&foofoo=baz&v0=0&v1=helloworld&c=d&v=e'
           );
         });
       });
@@ -966,7 +969,7 @@ describes.realWin(
         const analytics = getAnalyticsTag(config);
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/helloworld?s.evar0=0&s.evar1=helloworld&foofoo=baz&a=b'
+            'https://example.test/helloworld?s.evar0=0&s.evar1=helloworld&foofoo=baz&a=b'
           );
         });
       });
@@ -976,7 +979,7 @@ describes.realWin(
         const analytics = getAnalyticsTag(config);
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/helloworld?a=b&foo=0'
+            'https://example.test/helloworld?a=b&foo=0'
           );
         });
       });
@@ -1004,7 +1007,7 @@ describes.realWin(
       it('allows a request through', () => {
         const analytics = getAnalyticsTag(getConfig(1));
 
-        sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.005));
+        env.sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.005));
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest('/test1=1');
         });
@@ -1018,11 +1021,11 @@ describes.realWin(
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
         );
-        sandbox.stub(urlReplacements.getVariableSource(), 'get').returns({
+        env.sandbox.stub(urlReplacements.getVariableSource(), 'get').returns({
           async: 0,
           sync: 0,
         });
-        sandbox
+        env.sandbox
           .stub(crypto, 'uniform')
           .withArgs('0')
           .returns(Promise.resolve(0.005));
@@ -1034,7 +1037,7 @@ describes.realWin(
       it('does not allow a request through', () => {
         const analytics = getAnalyticsTag(getConfig(1));
 
-        sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.1));
+        env.sandbox.stub(crypto, 'uniform').returns(Promise.resolve(0.1));
         return waitForNoSendRequest(analytics);
       });
 
@@ -1147,7 +1150,7 @@ describes.realWin(
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
         );
-        sandbox
+        env.sandbox
           .stub(urlReplacements.getVariableSource(), 'get')
           .returns({sync: 1});
         return waitForSendRequest(analytics).then(() => {
@@ -1187,7 +1190,9 @@ describes.realWin(
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
         );
-        sandbox.stub(urlReplacements.getVariableSource(), 'get').returns(null);
+        env.sandbox
+          .stub(urlReplacements.getVariableSource(), 'get')
+          .returns(null);
 
         return waitForNoSendRequest(analytics);
       });
@@ -1203,7 +1208,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: 0});
 
@@ -1222,7 +1227,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: false});
 
@@ -1241,7 +1246,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: null});
 
@@ -1260,7 +1265,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: NaN});
 
@@ -1279,7 +1284,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: undefined});
 
@@ -1309,7 +1314,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns({sync: 1});
           return waitForSendRequest(analytics).then(() => {
@@ -1349,7 +1354,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns(null);
 
@@ -1371,7 +1376,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns(null);
 
@@ -1391,7 +1396,7 @@ describes.realWin(
           const urlReplacements = Services.urlReplacementsForDoc(
             analytics.element
           );
-          sandbox
+          env.sandbox
             .stub(urlReplacements.getVariableSource(), 'get')
             .returns('page');
 
@@ -1404,7 +1409,7 @@ describes.realWin(
       it('should resume fetch when consent is given', () => {
         const analytics = getAnalyticsTag(
           {
-            'requests': {'foo': 'https://example.com/local'},
+            'requests': {'foo': 'https://example.test/local'},
             'triggers': [{'on': 'visible', 'request': 'foo'}],
           },
           {
@@ -1412,20 +1417,20 @@ describes.realWin(
           }
         );
 
-        sandbox.stub(uidService, 'get').callsFake(id => {
+        env.sandbox.stub(uidService, 'get').callsFake(id => {
           expect(id).to.equal('amp-user-notification1');
           return Promise.resolve();
         });
 
         return waitForSendRequest(analytics).then(() => {
-          requestVerifier.verifyRequest('https://example.com/local');
+          requestVerifier.verifyRequest('https://example.test/local');
         });
       });
 
       it('should not fetch when consent is not given', () => {
         const analytics = getAnalyticsTag(
           {
-            'requests': {'foo': 'https://example.com/local'},
+            'requests': {'foo': 'https://example.test/local'},
             'triggers': [{'on': 'visible', 'request': 'foo'}],
           },
           {
@@ -1433,7 +1438,7 @@ describes.realWin(
           }
         );
 
-        sandbox.stub(uidService, 'get').callsFake(id => {
+        env.sandbox.stub(uidService, 'get').callsFake(id => {
           expect(id).to.equal('amp-user-notification1');
           return Promise.reject();
         });
@@ -1453,7 +1458,7 @@ describes.realWin(
         () => {
           const analytics = getAnalyticsTag(
             {
-              'requests': {'foo': 'https://example.com/local'},
+              'requests': {'foo': 'https://example.test/local'},
               'triggers': [{'on': 'visible', 'request': 'foo'}],
             },
             {
@@ -1461,12 +1466,12 @@ describes.realWin(
             }
           );
 
-          sandbox.stub(uidService, 'get').callsFake(id => {
+          env.sandbox.stub(uidService, 'get').callsFake(id => {
             expect(id).to.equal('amp-user-notification1');
             return Promise.reject();
           });
 
-          sandbox.stub(viewer, 'isVisible').returns(false);
+          env.sandbox.stub(ampdoc, 'isVisible').returns(false);
           analytics.layoutCallback();
           analytics.resumeCallback();
           analytics.unlayoutCallback();
@@ -1488,11 +1493,11 @@ describes.realWin(
       it('should not add listener when eventType is not whitelist', function() {
         expectAsyncConsoleError(clickTrackerNotSupportedError);
         // Right now we only whitelist VISIBLE & HIDDEN
-        const tracker = ins.ampdocRoot_.getTracker('click', ClickEventTracker);
-        const addStub = sandbox.stub(tracker, 'add');
+        const tracker = ins.root_.getTracker('click', ClickEventTracker);
+        const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag(
           {
-            requests: {foo: 'https://example.com/bar'},
+            requests: {foo: 'https://example.test/bar'},
             triggers: [{on: 'click', request: 'foo'}],
           },
           {
@@ -1506,14 +1511,11 @@ describes.realWin(
       });
 
       it('replace selector and selectionMethod when in scope', () => {
-        const tracker = ins.ampdocRoot_.getTracker(
-          'visible',
-          VisibilityTracker
-        );
-        const addStub = sandbox.stub(tracker, 'add');
+        const tracker = ins.root_.getTracker('visible', VisibilityTracker);
+        const addStub = env.sandbox.stub(tracker, 'add');
         const analytics = getAnalyticsTag(
           {
-            requests: {foo: 'https://example.com/bar'},
+            requests: {foo: 'https://example.test/bar'},
             triggers: [{on: 'visible', selector: 'amp-iframe', request: 'foo'}],
           },
           {
@@ -1536,7 +1538,7 @@ describes.realWin(
           {
             'requests': {
               'pageview':
-                'https://example.com/test1=${var1}&CLIENT_ID(analytics-abc)=${var2}',
+                'https://example.test/test1=${var1}&CLIENT_ID(analytics-abc)=${var2}',
             },
             'triggers': [
               {
@@ -1555,7 +1557,7 @@ describes.realWin(
         );
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/test1=CLIENT_ID(analytics-abc)&' +
+            'https://example.test/test1=CLIENT_ID(analytics-abc)&' +
               'CLIENT_ID(analytics-abc)=test2'
           );
         });
@@ -1565,7 +1567,7 @@ describes.realWin(
         const analytics = getAnalyticsTag(
           {
             'requests': {
-              'foo': 'https://example.com/cid=${clientId(analytics-abc)}',
+              'foo': 'https://example.test/cid=${clientId(analytics-abc)}',
             },
             'triggers': [{'on': 'visible', 'request': 'foo'}],
           },
@@ -1576,7 +1578,7 @@ describes.realWin(
 
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/cid=CLIENT_ID(analytics-abc)'
+            'https://example.test/cid=CLIENT_ID(analytics-abc)'
           );
         });
       });
@@ -1584,7 +1586,7 @@ describes.realWin(
       it('should replace whitelist variable', () => {
         const analytics = getAnalyticsTag(
           {
-            'requests': {'foo': 'https://example.com/random=${random}'},
+            'requests': {'foo': 'https://example.test/random=${random}'},
             'triggers': [{'on': 'visible', 'request': 'foo'}],
           },
           {
@@ -1595,7 +1597,7 @@ describes.realWin(
 
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /^https:\/\/example.com\/random=0.[0-9]/
+            /^https:\/\/example.test\/random=0.[0-9]/
           );
         });
       });
@@ -1605,7 +1607,7 @@ describes.realWin(
           {
             'requests': {
               'foo':
-                'https://example.com/cid=${clientId(analytics-abc)}random=RANDOM',
+                'https://example.test/cid=${clientId(analytics-abc)}random=RANDOM',
             },
             'triggers': [{'on': 'visible', 'request': 'foo'}],
           },
@@ -1617,7 +1619,7 @@ describes.realWin(
 
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequestMatch(
-            /https:\/\/example\.com\/cid=CLIENT_ID\(analytics-abc\)random=0\.[0-9]+/
+            /https:\/\/example\.test\/cid=CLIENT_ID\(analytics-abc\)random=0\.[0-9]+/
           );
         });
       });
@@ -1627,7 +1629,7 @@ describes.realWin(
           {
             'requests': {
               'pageview':
-                'https://example.com/VIEWER&AMP_VERSION&' +
+                'https://example.test/VIEWER&AMP_VERSION&' +
                 'test1=${var1}&test2=${var2}&test3=${var3}&url=AMPDOC_URL',
             },
             'triggers': [
@@ -1649,7 +1651,7 @@ describes.realWin(
         );
         return waitForSendRequest(analytics).then(() => {
           requestVerifier.verifyRequest(
-            'https://example.com/VIEWER&%24internalRuntimeVersion%24' +
+            'https://example.test/VIEWER&%24internalRuntimeVersion%24' +
               '&test1=x&test2=about%3Asrcdoc&test3=CLIENT_ID' +
               '&url=about%3Asrcdoc'
           );
@@ -1684,11 +1686,11 @@ describes.realWin(
         const urlReplacements = Services.urlReplacementsForDoc(
           analytics.element
         );
-        sandbox.stub(urlReplacements.getVariableSource(), 'get').returns({
+        env.sandbox.stub(urlReplacements.getVariableSource(), 'get').returns({
           async: 0,
           sync: 0,
         });
-        sandbox
+        env.sandbox
           .stub(crypto, 'uniform')
           .withArgs('0')
           .returns(Promise.resolve(0.005))
@@ -1715,9 +1717,9 @@ describes.realWin(
         expectAsyncConsoleError(noTriggersError);
         expectAsyncConsoleError(noRequestStringsError);
 
-        sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').resolves({});
+        env.sandbox.stub(AnalyticsConfig.prototype, 'loadConfig').resolves({});
 
-        const linkerStub = sandbox.stub(LinkerManager.prototype, 'init');
+        const linkerStub = env.sandbox.stub(LinkerManager.prototype, 'init');
 
         analytics.buildCallback();
         return analytics.layoutCallback().then(() => {
@@ -1747,13 +1749,13 @@ describes.realWin(
         doc.body.appendChild(el);
         const analytics = new AmpAnalytics(el);
 
-        sandbox
+        env.sandbox
           .stub(AnalyticsConfig.prototype, 'loadConfig')
           .returns(Promise.resolve(sampleconfig));
 
         analytics.buildCallback();
         analytics.preconnectCallback();
-        const initSpy = sandbox.spy(
+        const initSpy = env.sandbox.spy(
           Transport.prototype,
           'maybeInitIframeTransport'
         );
@@ -1763,7 +1765,7 @@ describes.realWin(
       });
     });
 
-    describe('parentPostMessage in inabox case', () => {
+    describe('parentPostMessage', () => {
       let postMessageSpy;
 
       function waitForParentPostMessage(opt_max) {
@@ -1792,12 +1794,23 @@ describes.realWin(
       }
 
       it('does send a hit when parentPostMessage is provided inabox', function() {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         const analytics = getAnalyticsTag({
-          'requests': {'foo': 'https://example.com/bar'},
+          'requests': {'foo': 'https://example.test/bar'},
           'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
         });
-        postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+        postMessageSpy = env.sandbox.spy(analytics.win.parent, 'postMessage');
+        return waitForNoSendRequest(analytics).then(() => {
+          return waitForParentPostMessage();
+        });
+      });
+
+      it('does send a hit when parentPostMessage is provided for FIE', function() {
+        const analytics = getAnalyticsTag({
+          'triggers': [{'on': 'visible', 'parentPostMessage': 'foo'}],
+        });
+        analytics.element.classList.add('i-amphtml-fie');
+        postMessageSpy = env.sandbox.spy(analytics.win.parent, 'postMessage');
         return waitForNoSendRequest(analytics).then(() => {
           return waitForParentPostMessage();
         });
@@ -1805,7 +1818,7 @@ describes.realWin(
 
       it('does not send with parentPostMessage not inabox', function() {
         const analytics = getAnalyticsTag({
-          'requests': {'foo': 'https://example.com/bar'},
+          'requests': {'foo': 'https://example.test/bar'},
           'triggers': [
             {
               'on': 'visible',
@@ -1813,29 +1826,29 @@ describes.realWin(
             },
           ],
         });
-        postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+        postMessageSpy = env.sandbox.spy(analytics.win.parent, 'postMessage');
         return waitForNoSendRequest(analytics).then(() => {
           return waitForNoParentPostMessage();
         });
       });
 
       it('not send when request and parentPostMessage are not provided', function() {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         expectAsyncConsoleError(onAndRequestAttributesInaboxError);
         const analytics = getAnalyticsTag({
-          'requests': {'foo': 'https://example.com/bar'},
+          'requests': {'foo': 'https://example.test/bar'},
           'triggers': [{'on': 'visible'}],
         });
-        postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+        postMessageSpy = env.sandbox.spy(analytics.win.parent, 'postMessage');
         return waitForNoSendRequest(analytics).then(() => {
           return waitForNoParentPostMessage();
         });
       });
 
       it('send when request and parentPostMessage are provided', function() {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         const analytics = getAnalyticsTag({
-          'requests': {'foo': 'https://example.com/bar'},
+          'requests': {'foo': 'https://example.test/bar'},
           'triggers': [
             {
               'on': 'visible',
@@ -1844,7 +1857,7 @@ describes.realWin(
             },
           ],
         });
-        postMessageSpy = sandbox.spy(analytics.win.parent, 'postMessage');
+        postMessageSpy = env.sandbox.spy(analytics.win.parent, 'postMessage');
         return waitForSendRequest(analytics).then(() => {
           return waitForParentPostMessage(analytics);
         });
@@ -1875,7 +1888,7 @@ describes.realWin(
       });
 
       it('is 0 for inabox', () => {
-        env.win.AMP_MODE.runtime = 'inabox';
+        env.win.__AMP_MODE.runtime = 'inabox';
         expect(getAnalyticsTag(getConfig()).getLayoutPriority()).to.equal(
           LayoutPriority.CONTENT
         );

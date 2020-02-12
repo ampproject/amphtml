@@ -15,7 +15,6 @@
  */
 
 import '../amp-autocomplete';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-autocomplete init',
@@ -30,7 +29,6 @@ describes.realWin(
     beforeEach(() => {
       win = env.win;
       doc = win.document;
-      toggleExperiment(win, 'amp-autocomplete', true);
     });
 
     function setupAutocomplete(
@@ -53,10 +51,6 @@ describes.realWin(
         script.setAttribute('type', 'application/json');
         script.innerHTML = json;
         ampAutocomplete.appendChild(script);
-      } else {
-        sandbox
-          .stub(ampAutocomplete.implementation_, 'getRemoteData_')
-          .resolves(json.items);
       }
 
       return ampAutocomplete;
@@ -83,8 +77,18 @@ describes.realWin(
       return ampAutocomplete.build().then(() => ampAutocomplete);
     }
 
-    it('should layout with experiment on', () => {
-      let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
+    it('should build with "inline" and "query" when specified', () => {
+      return getAutocomplete({
+        'filter': 'substring',
+        'query': 'q',
+      }).then(ampAutocomplete => {
+        const impl = ampAutocomplete.implementation_;
+        expect(impl.queryKey_).to.equal('q');
+      });
+    });
+
+    it('should layout', () => {
+      let impl, autocompleteSpy, clearAllSpy, filterSpy, renderSpy;
       return getAutocomplete({
         'filter': 'substring',
       })
@@ -95,22 +99,22 @@ describes.realWin(
           expect(impl.inputElement_).not.to.be.null;
           expect(impl.container_).not.to.be.null;
           expect(impl.filter_).to.equal('substring');
-          filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
-          clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
-          filterSpy = sandbox.spy(impl, 'filterData_');
-          renderSpy = sandbox.spy(impl, 'renderResults_');
+          autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
+          clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
+          filterSpy = env.sandbox.spy(impl, 'filterData_');
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
           return ampAutocomplete.layoutCallback();
         })
         .then(() => {
           expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
-          expect(filterAndRenderSpy).to.have.been.calledOnce;
+          expect(autocompleteSpy).to.have.been.calledOnce;
           expect(clearAllSpy).to.have.been.calledOnce;
           expect(filterSpy).not.to.have.been.called;
           expect(renderSpy).not.to.have.been.called;
         });
     });
 
-    it('should render with experiment on', () => {
+    it('should render inline data before first user interaction', () => {
       let impl, filterAndRenderSpy, clearAllSpy, filterSpy, renderSpy;
       return getAutocomplete({
         'filter': 'substring',
@@ -123,25 +127,59 @@ describes.realWin(
           expect(impl.inputElement_).not.to.be.null;
           expect(impl.container_).not.to.be.null;
           expect(impl.filter_).to.equal('substring');
-          filterAndRenderSpy = sandbox.spy(impl, 'filterDataAndRenderResults_');
-          clearAllSpy = sandbox.spy(impl, 'clearAllItems_');
-          filterSpy = sandbox.spy(impl, 'filterData_');
-          renderSpy = sandbox.spy(impl, 'renderResults_');
+          filterAndRenderSpy = env.sandbox.spy(
+            impl,
+            'filterDataAndRenderResults_'
+          );
+          clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
+          filterSpy = env.sandbox.spy(impl, 'filterData_');
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
           return ampAutocomplete.layoutCallback();
         })
         .then(() => {
           expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
           expect(filterAndRenderSpy).to.have.been.calledOnce;
           expect(clearAllSpy).to.have.been.calledOnce;
-          expect(filterSpy).to.have.been.calledOnce;
-          expect(renderSpy).to.have.been.calledOnce;
+          expect(filterSpy).to.have.been.called;
+          expect(renderSpy).to.have.been.called;
+        });
+    });
+
+    it('should not render remote data before first user interaction', () => {
+      let impl, autocompleteSpy, clearAllSpy, filterSpy, renderSpy;
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'min-characters': '0',
+        },
+        '{ "items" : ["apple", "banana", "orange"] }',
+        false
+      )
+        .then(ampAutocomplete => {
+          impl = ampAutocomplete.implementation_;
+          expect(impl.sourceData_).to.be.null;
+          expect(impl.inputElement_).not.to.be.null;
+          expect(impl.container_).not.to.be.null;
+          expect(impl.filter_).to.equal('substring');
+          autocompleteSpy = env.sandbox.spy(impl, 'autocomplete_');
+          clearAllSpy = env.sandbox.spy(impl, 'clearAllItems_');
+          filterSpy = env.sandbox.spy(impl, 'filterData_');
+          renderSpy = env.sandbox.spy(impl, 'renderResults_');
+          return ampAutocomplete.layoutCallback();
+        })
+        .then(() => {
+          expect(impl.inputElement_.hasAttribute('autocomplete')).to.be.true;
+          expect(autocompleteSpy).to.have.been.calledOnce;
+          expect(clearAllSpy).to.have.been.calledOnce;
+          expect(filterSpy).not.to.have.been.called;
+          expect(renderSpy).not.to.have.been.called;
         });
     });
 
     it('should require filter attribute', () => {
       return allowConsoleError(() => {
         return expect(getAutocomplete({})).to.be.rejectedWith(
-          'amp-autocomplete requires "filter" attribute.​​​'
+          /requires "filter" attribute/
         );
       });
     });
@@ -171,15 +209,6 @@ describes.realWin(
         'max-entries': '10',
       }).then(ampAutocomplete => {
         expect(ampAutocomplete.implementation_.maxEntries_).to.equal(10);
-      });
-    });
-
-    it('should not render with experiment off', () => {
-      toggleExperiment(win, 'amp-autocomplete', false);
-      return allowConsoleError(() => {
-        return expect(getAutocomplete({})).to.be.rejectedWith(
-          'Experiment amp-autocomplete is not turned on.'
-        );
       });
     });
 
@@ -221,7 +250,24 @@ describes.realWin(
       });
     });
 
-    it('should fetch remote data when specified in src', () => {
+    it('should accept different item property from JSON script', () => {
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'items': 'fruit',
+        },
+        '{ "fruit" : [ "apples", "bananas", "pears" ] }'
+      ).then(ampAutocomplete => {
+        const impl = ampAutocomplete.implementation_;
+        expect(impl.sourceData_).to.have.ordered.members([
+          'apples',
+          'bananas',
+          'pears',
+        ]);
+      });
+    });
+
+    it('should not fetch remote data when specified in src before first user interaction', () => {
       const data = {
         items: [
           'Albany, New York',
@@ -241,19 +287,71 @@ describes.realWin(
       ).then(ampAutocomplete => {
         ampAutocomplete.layoutCallback().then(() => {
           const impl = ampAutocomplete.implementation_;
-          expect(impl.sourceData_).to.have.ordered.members(data.items);
+          expect(impl.sourceData_).to.be.null;
         });
       });
     });
 
-    it('should error without the form ancestor', () => {
-      return allowConsoleError(() => {
-        const autocomplete = setupAutocomplete({'filter': 'substring'});
-        doc.body.appendChild(autocomplete);
-        return expect(autocomplete.build()).to.be.rejectedWith(
-          'amp-autocomplete should be inside a <form> tag'
-        );
+    it('should not fetch remote data when specified in src and using items property before first user interaction', () => {
+      const data = {
+        cities: [
+          'Albany, New York',
+          'Annapolis, Maryland',
+          'Atlanta, Georgia',
+          'Augusta, Maine',
+          'Austin, Texas',
+        ],
+      };
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'src': 'https://examples.com/json',
+          'items': 'cities',
+        },
+        data,
+        false
+      ).then(ampAutocomplete => {
+        ampAutocomplete.layoutCallback().then(() => {
+          const impl = ampAutocomplete.implementation_;
+          expect(impl.sourceData_).to.be.null;
+        });
       });
+    });
+
+    it('should not fetch remote data when specified in src and using nested items property before first user interactino', () => {
+      const data = {
+        deeply: {
+          nested: {
+            cities: [
+              'Albany, New York',
+              'Annapolis, Maryland',
+              'Atlanta, Georgia',
+              'Augusta, Maine',
+              'Austin, Texas',
+            ],
+          },
+        },
+      };
+      return getAutocomplete(
+        {
+          'filter': 'substring',
+          'src': 'https://examples.com/json',
+          'items': 'deeply.nested.cities',
+        },
+        data,
+        false
+      ).then(ampAutocomplete => {
+        ampAutocomplete.layoutCallback().then(() => {
+          const impl = ampAutocomplete.implementation_;
+          expect(impl.sourceData_).be.null;
+        });
+      });
+    });
+
+    it('should not require a form ancestor', () => {
+      const autocomplete = setupAutocomplete({'filter': 'substring'});
+      doc.body.appendChild(autocomplete);
+      return expect(autocomplete.build()).to.be.fulfilled;
     });
 
     it('should read the autocomplete attribute on the form as null', () => {

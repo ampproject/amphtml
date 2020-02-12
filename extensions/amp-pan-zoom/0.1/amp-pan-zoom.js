@@ -198,6 +198,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @param {number} x
    * @param {number} y
    * @param {number} scale
+   * @return {*} TODO(#23582): Specify return type
    */
   transform(x, y, scale) {
     this.updatePanZoomBounds_(scale);
@@ -218,7 +219,10 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     this.createZoomButton_();
-    this.scheduleLayout(dev().assertElement(this.content_));
+    Services.ownersForDoc(this.element).scheduleLayout(
+      this.element,
+      dev().assertElement(this.content_)
+    );
     return this.resetContentDimensions_().then(this.setupEvents_());
   }
 
@@ -230,7 +234,10 @@ export class AmpPanZoom extends AMP.BaseElement {
   /** @override */
   resumeCallback() {
     if (this.content_) {
-      this.scheduleLayout(this.content_);
+      Services.ownersForDoc(this.element).scheduleLayout(
+        this.element,
+        this.content_
+      );
     }
     this.setupEvents_();
   }
@@ -433,6 +440,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * Given a x offset relative to the viewport, return the x offset
    * relative to the amp-pan-zoom component.
    * @param {number} clientX
+   * @return {number}
    * @private
    */
   getOffsetX_(clientX) {
@@ -444,6 +452,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * Given a y offset relative to the viewport, return the y offset
    * relative to the amp-pan-zoom component.
    * @param {number} clientY
+   * @return {number}
    * @private
    */
   getOffsetY_(clientY) {
@@ -755,7 +764,7 @@ export class AmpPanZoom extends AMP.BaseElement {
    * @private
    */
   triggerTransformEnd_(scale, x, y) {
-    const transformEndEvent = createCustomEvent(
+    const event = createCustomEvent(
       this.win,
       `${TAG}.transformEnd`,
       dict({
@@ -764,12 +773,7 @@ export class AmpPanZoom extends AMP.BaseElement {
         'y': y,
       })
     );
-    this.action_.trigger(
-      this.element,
-      'transformEnd',
-      transformEndEvent,
-      ActionTrust.HIGH
-    );
+    this.action_.trigger(this.element, 'transformEnd', event, ActionTrust.HIGH);
     this.element.dispatchCustomEvent('transformEnd');
   }
 
@@ -828,6 +832,7 @@ export class AmpPanZoom extends AMP.BaseElement {
   /**
    * @param {number} clientX
    * @param {number} clientY
+   * @return {*} TODO(#23582): Specify return type
    */
   onDoubletapZoom_(clientX, clientY) {
     const newScale =

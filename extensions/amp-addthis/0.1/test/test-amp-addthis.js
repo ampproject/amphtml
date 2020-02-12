@@ -31,6 +31,7 @@ import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
 import {getWidgetOverload} from '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
+import {startsWith} from '../../../../src/string';
 import {toArray} from '../../../../src/types';
 
 describes.realWin(
@@ -101,9 +102,11 @@ describes.realWin(
 
     function testIframe(iframe) {
       expect(iframe).to.not.equal(null);
-      expect(iframe.getAttribute('src')).to.equal(
-        `${ORIGIN}/dc/amp-addthis.html`
-      );
+      const srcPrefix = `${ORIGIN}/dc/amp-addthis.html?`;
+      expect(
+        startsWith(iframe.getAttribute('src'), srcPrefix),
+        `iframe src starts with ${srcPrefix}`
+      ).to.be.true;
       expect(iframe.getAttribute('title')).to.equal(ALT_TEXT);
     }
 
@@ -591,7 +594,7 @@ describes.realWin(
     });
 
     it('getSessionId: returns a string of 16 characters containing 0-9 a-f', () => {
-      expect(typeof getSessionId() === 'string').to.equal(true);
+      expect(typeof getSessionId()).to.equal('string');
       expect(getSessionId().length).to.equal(16);
       expect(/^[0-9a-f]{16}$/.test(getSessionId())).to.equal(true);
 
@@ -602,7 +605,7 @@ describes.realWin(
     });
 
     it('createCUID: returns a string of 16 characters containing 0-9 a-f', () => {
-      expect(typeof createCUID() === 'string').to.equal(true);
+      expect(typeof createCUID()).to.equal('string');
 
       const a = createCUID();
       const b = createCUID();

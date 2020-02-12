@@ -22,7 +22,10 @@ import {Services} from '../src/services';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {deserializeMessage, isAmpMessage} from '../src/3p-frame-messaging';
-import {installAmpdocServices, installRuntimeServices} from '../src/runtime';
+import {
+  installAmpdocServices,
+  installRuntimeServices,
+} from '../src/service/core-services';
 import {install as installCustomElements} from '../src/polyfills/custom-elements';
 import {installDocService} from '../src/service/ampdoc-impl';
 import {installExtensionsService} from '../src/service/extensions-impl';
@@ -92,8 +95,8 @@ export function createFixtureIframe(
     // on that window.
     window.beforeLoad = function(win) {
       // Flag as being a test window.
-      win.AMP_TEST_IFRAME = true;
-      win.AMP_TEST = true;
+      win.__AMP_TEST_IFRAME = true;
+      win.__AMP_TEST = true;
       // Set the testLocation on iframe to parent's location since location of
       // the test iframe is about:srcdoc.
       // Unfortunately location object is not configurable, so we have to define
@@ -222,7 +225,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     iframe.srcdoc = '<!doctype><html><head><body><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
-      iframe.contentWindow.AMP_TEST_IFRAME = true;
+      iframe.contentWindow.__AMP_TEST_IFRAME = true;
       iframe.contentWindow.testLocation = new FakeLocation(
         window.location.href,
         iframe.contentWindow
@@ -237,10 +240,12 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       installDocService(iframe.contentWindow, /* isSingleDoc */ true);
       const ampdoc = Services.ampdocServiceFor(
         iframe.contentWindow
-      ).getAmpDoc();
+      ).getSingleDoc();
       installExtensionsService(iframe.contentWindow);
       installRuntimeServices(iframe.contentWindow);
-      installCustomElements(iframe.contentWindow);
+      // The anonymous class parameter allows us to detect native classes vs
+      // transpiled classes.
+      installCustomElements(iframe.contentWindow, class {});
       installAmpdocServices(ampdoc);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
       // Act like no other elements were loaded by default.
@@ -295,8 +300,8 @@ export function createServedIframe(src) {
     iframe.src = src;
     iframe.onload = function() {
       const win = iframe.contentWindow;
-      win.AMP_TEST_IFRAME = true;
-      win.AMP_TEST = true;
+      win.__AMP_TEST_IFRAME = true;
+      win.__AMP_TEST = true;
       installRuntimeServices(win);
       resolve({
         win,

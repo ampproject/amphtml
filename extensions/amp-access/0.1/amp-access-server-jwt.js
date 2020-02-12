@@ -89,9 +89,6 @@ export class AccessServerJwtAdapter {
     /** @private @const */
     this.clientAdapter_ = new AccessClientAdapter(ampdoc, configJson, context);
 
-    /** @private @const {!../../../src/service/viewer-impl.Viewer} */
-    this.viewer_ = Services.viewerForDoc(ampdoc);
-
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(ampdoc.win);
 
@@ -101,14 +98,8 @@ export class AccessServerJwtAdapter {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
-    const stateElement = ampdoc
-      .getRootNode()
-      .querySelector('meta[name="i-amphtml-access-state"]');
-
     /** @private @const {?string} */
-    this.serverState_ = stateElement
-      ? stateElement.getAttribute('content')
-      : null;
+    this.serverState_ = ampdoc.getMetaByName('i-amphtml-access-state');
 
     const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server-jwt');
 
@@ -116,7 +107,7 @@ export class AccessServerJwtAdapter {
     this.isProxyOrigin_ = isProxyOrigin(ampdoc.win.location) || isInExperiment;
 
     const serviceUrlOverride = isInExperiment
-      ? this.viewer_.getParam('serverAccessService')
+      ? ampdoc.getParam('serverAccessService')
       : null;
 
     /** @private @const {string} */

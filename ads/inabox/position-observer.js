@@ -34,6 +34,9 @@ let PositionEntryDef;
 /** @const */
 const MIN_EVENT_INTERVAL_IN_MS = 100;
 
+/** @const */
+const AMP_INABOX_POSITION_OBSERVER = 'ampInaboxPositionObserver';
+
 export class PositionObserver {
   /**
    * @param {!Window} win
@@ -43,7 +46,7 @@ export class PositionObserver {
     this.win_ = win;
     /** @private {?Observable} */
     this.positionObservable_ = null;
-    /** @private {!Element} */
+    /** @protected {!Element} */
     this.scrollingElement_ = getScrollingElement(this.win_);
     /** @private {?LayoutRectDef} */
     this.viewportRect_ = null;
@@ -92,14 +95,15 @@ export class PositionObserver {
    */
   getPositionEntry_(element) {
     return {
-      viewportRect: /** @type {!LayoutRectDef} */ (this.viewportRect_),
+      'viewportRect': /** @type {!LayoutRectDef} */ (this.viewportRect_),
       // relative position to viewport
-      targetRect: this.getTargetRect(element),
+      'targetRect': this.getTargetRect(element),
     };
   }
 
   /**
    * A  method to get viewport rect
+   * @return {LayoutRectDef}
    */
   getViewportRect() {
     const {scrollingElement_: scrollingElement, win_: win} = this;
@@ -132,7 +136,11 @@ export class PositionObserver {
     const parentWin = element.ownerDocument.defaultView;
     for (
       let j = 0, tempWin = parentWin;
-      j < 10 && tempWin != this.win_ && tempWin != this.win_.top;
+      j < 10 &&
+      // win can be null if the ad iframe is already destroyed
+      tempWin &&
+      tempWin != this.win_ &&
+      tempWin != this.win_.top;
       j++, tempWin = tempWin.parent
     ) {
       const parentFrameRect = layoutRectFromDomRect(
@@ -178,4 +186,15 @@ function getScrollingElement(win) {
  */
 function isWebKit(ua) {
   return /WebKit/i.test(ua) && !/Edge/i.test(ua);
+}
+
+/**
+ * Use an existing position observer within the window, if any.
+ * @param {!Window} win
+ * @return {!PositionObserver}
+ */
+export function getPositionObserver(win) {
+  win[AMP_INABOX_POSITION_OBSERVER] =
+    win[AMP_INABOX_POSITION_OBSERVER] || new PositionObserver(win);
+  return win[AMP_INABOX_POSITION_OBSERVER];
 }

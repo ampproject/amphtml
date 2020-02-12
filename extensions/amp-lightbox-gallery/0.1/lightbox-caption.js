@@ -75,7 +75,7 @@ export class LightboxCaption {
     /** @private @const */
     this.textContainer_ = textContainer;
 
-    /** @private @const */
+    /** @protected @const */
     this.overflowMask_ = overflowMask;
 
     /** @private @const */

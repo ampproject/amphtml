@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const TOPMAILRU_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const TOPMAILRU_CONFIG = jsonLiteral({
   'transport': {
     'beacon': false,
     'xhrpost': false,
@@ -48,3 +50,5 @@ export const TOPMAILRU_CONFIG = /** @type {!JsonObject} */ ({
     },
   },
 });
+
+export {TOPMAILRU_CONFIG};

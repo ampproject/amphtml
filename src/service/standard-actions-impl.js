@@ -52,6 +52,12 @@ export function getAutofocusElementForShowAction(element) {
 const TAG = 'STANDARD-ACTIONS';
 
 /**
+ * Regular expression that identifies AMP CSS classes with 'i-amphtml-' prefixes.
+ * @type {!RegExp}
+ */
+const AMP_CSS_RE = /^i-amphtml-/;
+
+/**
  * This service contains implementations of some of the most typical actions,
  * such as hiding DOM elements.
  * @implements {../service.EmbeddableService}
@@ -63,6 +69,8 @@ export class StandardActions {
    * @param {!Window=} opt_win
    */
   constructor(ampdoc, opt_win) {
+    // TODO(#22733): remove subroooting once ampdoc-fie is launched.
+
     /** @const {!./ampdoc-impl.AmpDoc} */
     this.ampdoc = ampdoc;
 
@@ -70,10 +78,10 @@ export class StandardActions {
       ? opt_win.document.documentElement
       : ampdoc.getHeadNode();
 
-    /** @const @private {!./resources-impl.Resources} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @const @private {!./mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
-    /** @const @private {!./viewport/viewport-impl.Viewport} */
+    /** @const @private {!./viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     // Explicitly not setting `Action` as a member to scope installation to one
@@ -135,8 +143,8 @@ export class StandardActions {
    * @private Visible to tests only.
    */
   handleAmpTarget_(invocation) {
-    // All global `AMP` actions require high trust.
-    if (!invocation.satisfiesTrust(ActionTrust.HIGH)) {
+    // All global `AMP` actions require default trust.
+    if (!invocation.satisfiesTrust(ActionTrust.DEFAULT)) {
       return null;
     }
     const {node, method, args} = invocation;
@@ -311,7 +319,7 @@ export class StandardActions {
   handleHide_(invocation) {
     const target = dev().assertElement(invocation.node);
 
-    this.resources_.mutateElement(target, () => {
+    this.mutator_.mutateElement(target, () => {
       if (target.classList.contains('i-amphtml-element')) {
         target./*OK*/ collapse();
       } else {
@@ -329,7 +337,8 @@ export class StandardActions {
    * @return {?Promise}
    * @private Visible to tests only.
    */
-  handleShow_({node}) {
+  handleShow_(invocation) {
+    const {node} = invocation;
     const target = dev().assertElement(node);
     const ownerWindow = toWin(target.ownerDocument.defaultView);
 
@@ -342,7 +351,7 @@ export class StandardActions {
       return null;
     }
 
-    this.resources_.measureElement(() => {
+    this.mutator_.measureElement(() => {
       if (
         computedStyle(ownerWindow, target).display == 'none' &&
         !isShowable(target)
@@ -362,7 +371,7 @@ export class StandardActions {
     if (autofocusElOrNull && Services.platformFor(ownerWindow).isIos()) {
       this.handleShowSync_(target, autofocusElOrNull);
     } else {
-      this.resources_.mutateElement(target, () => {
+      this.mutator_.mutateElement(target, () => {
         this.handleShowSync_(target, autofocusElOrNull);
       });
     }
@@ -412,8 +421,12 @@ export class StandardActions {
       args['class'],
       "Argument 'class' must be a string."
     );
+    // prevent toggling of amp internal classes
+    if (AMP_CSS_RE.test(className)) {
+      return null;
+    }
 
-    this.resources_.mutateElement(target, () => {
+    this.mutator_.mutateElement(target, () => {
       if (args['force'] !== undefined) {
         // must be boolean, won't do type conversion
         const shouldForce = user().assertBoolean(

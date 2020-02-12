@@ -39,6 +39,7 @@ let syncScriptLoads = 0;
 
 /**
  * Returns the registration map
+ * @return {*} TODO(#23582): Specify return type
  */
 export function getRegistrations() {
   if (!registrations) {
@@ -231,7 +232,8 @@ export function validateData(data, mandatoryFields, opt_optionalFields) {
       allowedFields = allowedFields.concat(field);
     } else {
       userAssert(
-        data[field],
+        // Allow zero values for height, width etc.
+        data[field] != null,
         'Missing attribute for %s: %s.',
         data.type,
         field

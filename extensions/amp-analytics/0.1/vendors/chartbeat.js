@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const CHARTBEAT_CONFIG = /** @type {!JsonObject} */ ({
+import {jsonLiteral} from '../../../../src/json';
+
+const CHARTBEAT_CONFIG = jsonLiteral({
   'requests': {
     'host': 'https://ping.chartbeat.net',
     'basePrefix':
@@ -28,8 +30,9 @@ export const CHARTBEAT_CONFIG = /** @type {!JsonObject} */ ({
       'g2=${zone}&' +
       'g3=${sponsorName}&' +
       'g4=${contentType}&' +
-      'c=120&' +
+      'c=${totalTime}&' +
       'x=${scrollTop}&' +
+      'm=${maxScrollDepth}&' +
       'y=${scrollHeight}&' +
       'o=${scrollWidth}&' +
       'w=${viewportHeight}&' +
@@ -44,6 +47,7 @@ export const CHARTBEAT_CONFIG = /** @type {!JsonObject} */ ({
       'i=${title}&' +
       'T=${timestamp}&' +
       'tz=${timezone}&' +
+      'sn=${requestCount}&' +
       'C=2',
     'baseSuffix': '&_',
     'interval': '${host}${basePrefix}${baseSuffix}',
@@ -76,3 +80,5 @@ export const CHARTBEAT_CONFIG = /** @type {!JsonObject} */ ({
     'image': true,
   },
 });
+
+export {CHARTBEAT_CONFIG};

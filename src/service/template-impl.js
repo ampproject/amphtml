@@ -27,7 +27,7 @@ import {rootNodeFor, scopedQuerySelector} from '../dom';
  */
 
 /**
- * @typedef {function(new:BaseTemplate, !Element, !Window)}
+ * @typedef {typeof BaseTemplate}
  */
 let TemplateClassDef;
 
@@ -292,7 +292,7 @@ export class Templates {
     } else if (opt_querySelector) {
       return scopedQuerySelector(parent, opt_querySelector);
     } else {
-      return parent.querySelector('template, script');
+      return parent.querySelector('template, script[type="text/plain"]');
     }
   }
 
@@ -407,6 +407,7 @@ export function installTemplatesService(win) {
  * @param {!Window} win
  * @param {string} type
  * @param {!TemplateClassDef} templateClass
+ * @return {undefined}
  */
 export function registerExtendedTemplate(win, type, templateClass) {
   const templatesService = getService(win, 'templates');

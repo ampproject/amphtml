@@ -31,16 +31,16 @@ FAIL
 |      /* all other @ rules are banned */
 |      @supports (display: flex) {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css.html:31:4 CSS syntax error in tag 'style amp-custom (AMP4EMAIL)' - saw invalid at rule '@supports'. [AUTHOR_STYLESHEET_PROBLEM]
+amp4email_feature_tests/css.html:31:4 CSS syntax error in tag 'style amp-custom (AMP4EMAIL)' - saw invalid at rule '@supports'.
 |      @font-face {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css.html:32:4 CSS syntax error in tag 'style amp-custom (AMP4EMAIL)' - saw invalid at rule '@font-face'. [AUTHOR_STYLESHEET_PROBLEM]
+amp4email_feature_tests/css.html:32:4 CSS syntax error in tag 'style amp-custom (AMP4EMAIL)' - saw invalid at rule '@font-face'.
 |      @keyframes slidein {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css.html:33:4 CSS syntax error in tag 'style amp-custom (AMP4EMAIL)' - saw invalid at rule '@keyframes'. [AUTHOR_STYLESHEET_PROBLEM]
+amp4email_feature_tests/css.html:33:4 CSS syntax error in tag 'style amp-custom (AMP4EMAIL)' - saw invalid at rule '@keyframes'.
 |      @invalid {}
 >>     ^~~~~~~~~
-amp4email_feature_tests/css.html:34:4 CSS syntax error in tag 'style amp-custom (AMP4EMAIL)' - saw invalid at rule '@invalid'. [AUTHOR_STYLESHEET_PROBLEM]
+amp4email_feature_tests/css.html:34:4 CSS syntax error in tag 'style amp-custom (AMP4EMAIL)' - saw invalid at rule '@invalid'.
 |    </style>
 |  </head>
 |  <body>

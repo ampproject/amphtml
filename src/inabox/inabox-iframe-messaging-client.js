@@ -15,15 +15,17 @@
  */
 
 import {IframeMessagingClient} from '../../3p/iframe-messaging-client';
-import {getService, registerServiceBuilder} from '../service';
+import {canInspectWindow} from '../iframe-helper';
+import {getExistingServiceOrNull, registerServiceBuilder} from '../service';
+import {isExperimentOn} from '../experiments';
 import {tryParseJson} from '../json';
 
 /**
  * @param {!Window} win
- * @return {!../../3p/iframe-messaging-client.IframeMessagingClient}
+ * @return {?../../3p/iframe-messaging-client.IframeMessagingClient}
  */
 export function iframeMessagingClientFor(win) {
-  return /** @type {!../../3p/iframe-messaging-client.IframeMessagingClient} */ (getService(
+  return /** @type {?../../3p/iframe-messaging-client.IframeMessagingClient} */ (getExistingServiceOrNull(
     win,
     'iframeMessagingClient'
   ));
@@ -33,12 +35,17 @@ export function iframeMessagingClientFor(win) {
  * @param {!Window} win
  */
 export function installIframeMessagingClient(win) {
-  registerServiceBuilder(
-    win,
-    'iframeMessagingClient',
-    createIframeMessagingClient.bind(null, win),
-    /* opt_instantiate */ true
-  );
+  if (
+    !isExperimentOn(win, 'inabox-viewport-friendly') ||
+    !canInspectWindow(win.top)
+  ) {
+    registerServiceBuilder(
+      win,
+      'iframeMessagingClient',
+      createIframeMessagingClient.bind(null, win),
+      /* opt_instantiate */ true
+    );
+  }
 }
 
 /**
@@ -54,13 +61,6 @@ function createIframeMessagingClient(win) {
     sentinel = dataObject['_context']['sentinel'];
   }
   iframeClient.setSentinel(sentinel || getRandom(win));
-
-  // Bet the top window is the scrollable window and loads host script.
-  // TODO(lannka,#9120):
-  // 1) check window ancestor origin, if the top window is in same origin,
-  // don't bother to use post messages.
-  // 2) broadcast the request
-  iframeClient.setHostWindow(win.top);
   return iframeClient;
 }
 

@@ -16,16 +16,19 @@
 
 const log = require('fancy-log');
 const {
-  closureNailgunPort,
+  checkTypesNailgunPort,
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
-const {isTravisBuild} = require('../travis');
 const {maybeUpdatePackages} = require('./update-packages');
+const {transferSrcsToTempDir} = require('./helpers');
 
 /**
  * Dedicated type check path.
@@ -37,6 +40,7 @@ async function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
+  transferSrcsToTempDir({isChecktypes: true});
   const compileSrcs = [
     './src/amp.js',
     './src/amp-shadow.js',
@@ -66,12 +70,10 @@ async function checkTypes() {
     .sort();
   return compileCss()
     .then(async () => {
-      await startNailgunServer(closureNailgunPort, /* detached */ false);
+      await startNailgunServer(checkTypesNailgunPort, /* detached */ false);
     })
     .then(() => {
-      if (!isTravisBuild()) {
-        log('Checking types...');
-      }
+      log('Checking types...');
       return Promise.all([
         closureCompile(
           compileSrcs.concat(extensionSrcs),
@@ -80,7 +82,7 @@ async function checkTypes() {
           {
             include3pDirectories: true,
             includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js'],
+            extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
             typeCheckOnly: true,
           }
         ),
@@ -120,14 +122,8 @@ async function checkTypes() {
         ),
       ]);
     })
-    .then(() => {
-      if (isTravisBuild()) {
-        // New line after all the compilation progress dots on Travis.
-        console.log('\n');
-      }
-    })
     .then(async () => {
-      await stopNailgunServer(closureNailgunPort);
+      await stopNailgunServer(checkTypesNailgunPort);
     })
     .then(() => exitCtrlcHandler(handlerProcess));
 }
@@ -136,4 +132,10 @@ module.exports = {
   checkTypes,
 };
 
+/* eslint "google-camelcase/google-camelcase": 0 */
+
 checkTypes.description = 'Check source code for JS type errors';
+checkTypes.flags = {
+  disable_nailgun:
+    "  Doesn't use nailgun to invoke closure compiler (much slower)",
+};

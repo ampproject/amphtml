@@ -15,16 +15,17 @@
  */
 'use strict';
 
-const deglob = require('globs-to-files');
 const findImports = require('find-imports');
 const fs = require('fs');
+const globby = require('globby');
 const log = require('fancy-log');
 const minimatch = require('minimatch');
 const path = require('path');
+const testConfig = require('../../test-configs/config');
 
-const {gitDiffNameOnlyMaster} = require('../../git');
+const {gitDiffNameOnlyMaster} = require('../../common/git');
 const {green, cyan} = require('ansi-colors');
-const {isTravisBuild} = require('../../travis');
+const {isTravisBuild} = require('../../common/travis');
 const {reportTestSkipped} = require('../report-test-status');
 
 const EXTENSIONSCSSMAP = 'EXTENSIONS_CSS_MAP';
@@ -126,7 +127,9 @@ function getJsFilesFor(cssFile, cssJsFileMap) {
   return jsFiles;
 }
 
-function getUnitTestsToRun(unitTestPaths) {
+function getUnitTestsToRun() {
+  log(green('INFO:'), 'Determining which unit tests to run...');
+
   if (isLargeRefactor()) {
     log(
       green('INFO:'),
@@ -136,7 +139,7 @@ function getUnitTestsToRun(unitTestPaths) {
     return;
   }
 
-  const tests = unitTestsToRun(unitTestPaths);
+  const tests = unitTestsToRun();
   if (tests.length == 0) {
     log(
       green('INFO:'),
@@ -161,7 +164,7 @@ function getUnitTestsToRun(unitTestPaths) {
  * @param {!Array<string>} unitTestPaths
  * @return {!Array<string>}
  */
-function unitTestsToRun(unitTestPaths) {
+function unitTestsToRun(unitTestPaths = testConfig.unitTestPaths) {
   const cssJsFileMap = extractCssJsFileMap();
   const filesChanged = gitDiffNameOnlyMaster();
   const testsToRun = [];
@@ -185,12 +188,10 @@ function unitTestsToRun(unitTestPaths) {
   // Retrieves the set of unit tests that should be run
   // for a set of source files.
   function getTestsFor(srcFiles) {
-    const allUnitTests = deglob.sync(unitTestPaths);
-    return allUnitTests
-      .filter(testFile => {
-        return shouldRunTest(testFile, srcFiles);
-      })
-      .map(fullPath => path.relative(ROOT_DIR, fullPath));
+    const allUnitTests = globby.sync(unitTestPaths);
+    return allUnitTests.filter(testFile => {
+      return shouldRunTest(testFile, srcFiles);
+    });
   }
 
   filesChanged.forEach(file => {
@@ -208,7 +209,6 @@ function unitTestsToRun(unitTestPaths) {
   });
 
   if (srcFiles.length > 0) {
-    log(green('INFO:'), 'Determining which unit tests to run...');
     const moreTestsToRun = getTestsFor(srcFiles);
     moreTestsToRun.forEach(test => {
       if (!testsToRun.includes(test)) {
