@@ -631,21 +631,18 @@ export class ScrollEventTracker extends EventTracker {
   scrollHandler_(boundsH, boundsV, useInitialPageSize, listener, e) {
     // Calculates percentage scrolled by adding screen height/width to
     // top/left and dividing by the total scroll height/width.
+    const {scrollWidth, scrollHeight} = useInitialPageSize ? e.initialSize : e;
+
     this.triggerScrollEvents_(
       boundsV,
-      ((e.top + e.height) * 100) /
-        (useInitialPageSize
-          ? e.initialSize./*OK*/ scrollHeight
-          : e./*OK*/ scrollHeight),
+      ((e.top + e.height) * 100) / scrollHeight,
       VAR_V_SCROLL_BOUNDARY,
       listener
     );
+
     this.triggerScrollEvents_(
       boundsH,
-      ((e.left + e.width) * 100) /
-        (useInitialPageSize
-          ? e.initialSize./*OK*/ scrollWidth
-          : e./*OK*/ scrollWidth),
+      ((e.left + e.width) * 100) / scrollWidth,
       VAR_H_SCROLL_BOUNDARY,
       listener
     );
