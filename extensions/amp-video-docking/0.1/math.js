@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {DirectionX} from './def';
 import {LayoutRectDef, layoutRectLtwh} from '../../../src/layout-rect';
-import {RelativeX} from './def';
 import {mapRange} from '../../../src/utils/math.js';
 
 /**
@@ -79,13 +79,13 @@ const mapStep = (step, min, max) => mapRange(step, 0, 1, min, max);
  * @param {!LayoutRectDef} from
  * @param {!LayoutRectDef} to
  * @param {number=} step  in [0..1]
- * @return {{x: number, y: number, scale: number, relativeX: !RelativeX}}
+ * @return {{x: number, y: number, scale: number, relativeX: !DirectionX}}
  *  - x is offset from the original box in pixels.
  *  - y is offset from the original box in pixels.
  *  - scale is the
  */
 export function interpolatedBoxesTransform(from, to, step = 1) {
-  const relativeX = to.x < from.x ? RelativeX.LEFT : RelativeX.RIGHT;
+  const relativeX = to.x < from.x ? DirectionX.LEFT : DirectionX.RIGHT;
   const x = mapStep(step, from.x, to.x);
   const y = mapStep(step, from.y, to.y);
   const width = mapStep(step, from.width, to.width);
@@ -124,7 +124,7 @@ export function letterboxRect(original, container) {
 /**
  * @param {!LayoutRectDef} original
  * @param {!LayoutRectDef} container
- * @param {RelativeX} horizontalEdge
+ * @param {DirectionX} horizontalEdge
  * @param {number} widthRatio
  * @param {number} widthMin
  * @param {number} marginRatio
@@ -149,7 +149,7 @@ export function topCornerRect(
   const height = width / aspect;
 
   const x =
-    horizontalEdge == RelativeX.RIGHT
+    horizontalEdge == DirectionX.RIGHT
       ? container.right - margin - width
       : container.left + margin;
 

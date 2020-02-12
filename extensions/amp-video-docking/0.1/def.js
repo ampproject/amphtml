@@ -15,10 +15,10 @@
  */
 
 /** @enum {string} */
-export const RelativeX = {LEFT: 'left', RIGHT: 'right'};
+export const DirectionX = {LEFT: 'left', RIGHT: 'right'};
 
 /** @enum {string} */
-export const RelativeY = {TOP: 'top', BOTTOM: 'bottom'};
+export const DirectionY = {TOP: 'top', BOTTOM: 'bottom'};
 
 /** A loose small decimal amount to compensate for rough float calculations. */
 export const FLOAT_TOLERANCE = 0.02;

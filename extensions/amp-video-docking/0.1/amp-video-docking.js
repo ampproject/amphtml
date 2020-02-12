@@ -16,7 +16,7 @@
 import {ActionTrust} from '../../../src/action-constants';
 import {CSS} from '../../../build/amp-video-docking-0.1.css';
 import {Controls} from './controls';
-import {FLOAT_TOLERANCE, RelativeX, RelativeY} from './def.js';
+import {FLOAT_TOLERANCE, DirectionX, DirectionY} from './def.js';
 import {HtmlLiteralTagDef} from './html';
 import {
   LayoutRectDef,
@@ -122,7 +122,7 @@ export const BASE_CLASS_NAME = 'i-amphtml-video-docked';
 export const Actions = {DOCK: 'dock', UNDOCK: 'undock'};
 
 /** @enum {string} */
-const TargetType = {
+export const TargetType = {
   // Dynamically calculated corner based on viewport percentage. Draggable.
   CORNER: 'corner',
   // Targets author-defined element's box. Not draggable.
@@ -285,8 +285,8 @@ export class VideoDocking {
      * @private {!RelativeX}
      */
     this.cornerDirectionX_ = isRTL(this.getDoc_())
-      ? RelativeX.LEFT
-      : RelativeX.RIGHT;
+      ? DirectionX.LEFT
+      : DirectionX.RIGHT;
 
     const html = htmlFor(this.getDoc_());
 
@@ -362,7 +362,7 @@ export class VideoDocking {
     });
 
     /** @private @const {function():?Element} */
-    this.getSlot_ = once(() => this.querySlot_());
+    this.findSlotOnce_ = once(() => this.findSlot_());
 
     /** @private @const {?PositionObserver} */
     this.injectedPositionObserver_ = opt_injectedPositionObserver || null;
@@ -423,7 +423,7 @@ export class VideoDocking {
    * @return {?Element}
    * @private
    */
-  querySlot_() {
+  findSlot_() {
     const root = this.ampdoc_.getRootNode();
 
     // For consistency always honor the dock attribute on the first el in page.
@@ -464,7 +464,7 @@ export class VideoDocking {
    * @private
    */
   getTopBoundary_() {
-    const slot = this.getUsableSlot_();
+    const slot = this.getSlot_();
     if (slot) {
       // Match slot's top edge to tie transition to element.
       return slot.getPageLayoutBox().top;
@@ -502,7 +502,7 @@ export class VideoDocking {
     }
 
     const scrollDirection =
-      scrollTop > this.lastScrollTop_ ? RelativeY.TOP : RelativeY.BOTTOM;
+      scrollTop > this.lastScrollTop_ ? DirectionY.TOP : DirectionY.BOTTOM;
 
     this.scrollDirection_ = scrollDirection;
     this.lastScrollTop_ = scrollTop;
@@ -665,12 +665,12 @@ export class VideoDocking {
     if (this.isTransitioning_) {
       return;
     }
-    if (this.scrollDirection_ == RelativeY.TOP) {
+    if (this.scrollDirection_ == DirectionY.TOP) {
       const target = this.getTargetFor_(video);
       if (target) {
         this.dockOnPositionChange_(video, target);
       }
-    } else if (this.scrollDirection_ == RelativeY.BOTTOM) {
+    } else if (this.scrollDirection_ == DirectionY.BOTTOM) {
       if (!this.currentlyDocked_) {
         return;
       }
@@ -832,7 +832,7 @@ export class VideoDocking {
    */
   trigger_(action) {
     const element = dev().assertElement(
-      this.getUsableSlot_() || this.getDockedVideo_().element
+      this.getSlot_() || this.getDockedVideo_().element
     );
 
     const trust = ActionTrust.LOW;
@@ -923,7 +923,7 @@ export class VideoDocking {
    * @param {number} scale
    * @param {number} step in [0..1]
    * @param {number} transitionDurationMs
-   * @param {RelativeX=} opt_relativeX
+   * @param {DirectionX=} opt_relativeX
    * @return {!Promise}
    * @private
    */
@@ -947,8 +947,8 @@ export class VideoDocking {
     const {overlay} = this.getControls_();
     const placeholderBackground = this.getPlaceholderBackground_();
     const placeholderIcon = this.getPlaceholderRefs_()['icon'];
-    const hasRelativePlacement = isFiniteNumber(opt_relativeX);
-    const isPlacementRtl = opt_relativeX == RelativeX.LEFT;
+    const hasRelativePlacement = opt_relativeX !== undefined;
+    const isPlacementRtl = opt_relativeX == DirectionX.LEFT;
 
     if (hasRelativePlacement) {
       applyBreakpointClassname(
@@ -1307,7 +1307,7 @@ export class VideoDocking {
 
   /**
    * @param {!MouseEvent|!TouchEvent} e
-   * @param {!RelativeX} directionX
+   * @param {!DirectionX} directionX
    * @param {number} startX
    * @private
    */
@@ -1521,20 +1521,20 @@ export class VideoDocking {
 
   /**
    * @param {number} offsetX
-   * @return {!RelativeX}
+   * @return {!DirectionX}
    * @private
    */
   calculateDirectionX_(offsetX) {
     return this.getCenterX_(offsetX) >= this.viewportRect_.width / 2
-      ? RelativeX.RIGHT
-      : RelativeX.LEFT;
+      ? DirectionX.RIGHT
+      : DirectionX.LEFT;
   }
 
   /**
    * @param {!VideoOrBaseElementDef} video
    * @param {!TargetDef} target
    * @param {number} step in [0..1]
-   * @return {{x: number, y: number, scale: number, relativeX: !RelativeX}}
+   * @return {{x: number, y: number, scale: number, relativeX: !DirectionX}}
    */
   getDims_(video, target, step) {
     return interpolatedBoxesTransform(
@@ -1685,7 +1685,7 @@ export class VideoDocking {
    * @private
    */
   getUsableTarget_(video) {
-    const slot = this.getUsableSlot_();
+    const slot = this.getSlot_();
     const inlineRect = video.getLayoutBox();
 
     if (slot) {
@@ -1715,8 +1715,8 @@ export class VideoDocking {
    * @return {?Element}
    * @private
    */
-  getUsableSlot_() {
-    const slot = this.getSlot_();
+  getSlot_() {
+    const slot = this.findSlotOnce_();
 
     // Slots are optional by configuration but also by visibility.
     // If the slot element is hidden via media queries (`isVisibleBySize`),
