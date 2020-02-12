@@ -98,7 +98,7 @@ export class ScrollManager {
         left: scrollLeft,
         width: scrollWidth,
         height: scrollHeight,
-      } = (this.initialRootLayoutRect_ = layoutRect);
+      } = layoutRect;
 
       /** {./scroll-manager.ScrollEventDef} */
       const scrollEvent = {
@@ -126,7 +126,7 @@ export class ScrollManager {
    * @private
    */
   onScroll_(e) {
-    const isFirstMeasure = this.initialRootLayoutRect_ === null;
+    const isFirstMeasure = this.initialRootRectPromise_ === null;
     return Promise.all([
       // Initial root layout rectangle
       this.getInitRootElementRect_(),
