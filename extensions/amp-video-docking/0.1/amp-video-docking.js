@@ -145,15 +145,6 @@ let DockedDef;
  */
 let DockTargetDef;
 
-// Function should ideally be in `dom.js`, but moving it causes a bunch of ads
-// tests to fail, for some reason.
-// TODO(alanorozco): Move.
-/**
- * @param {!Object} obj
- * @return {boolean}
- */
-export const isElement = obj => obj.nodeType == /* ELEMENT */ 1;
-
 /**
  * @param {number} x
  * @param {number} y
@@ -1720,7 +1711,7 @@ export class VideoDocking {
     // Slots are optional by configuration but also by visibility.
     // If the slot element is hidden via media queries (`isVisibleBySize`),
     // fallback to corner.
-    if (slot && isElement(slot) && isVisibleBySize(slot)) {
+    if (slot && isVisibleBySize(slot)) {
       return slot;
     }
 
