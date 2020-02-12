@@ -764,6 +764,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
   it('should listen on a resource', () => {
     clock.tick(1);
     const target = win.document.createElement('div');
+    target.id = 'targetElementId';
     const resource = {
       getLayoutBox() {
         return {top: 10, left: 11, width: 110, height: 111};
@@ -793,6 +794,7 @@ describes.fakeWin('VisibilityManagerForDoc', {amp: true}, env => {
     clock.tick(11);
     return eventPromise.then(state => {
       expect(state.totalVisibleTime).to.equal(10);
+      expect(state.elementId).to.equal('targetElementId');
       expect(state.elementY).to.equal(10);
       expect(state.elementX).to.equal(11);
       expect(state.elementWidth).to.equal(110);

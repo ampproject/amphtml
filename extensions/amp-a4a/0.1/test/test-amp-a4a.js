@@ -1400,6 +1400,48 @@ describe('amp-a4a', () => {
       a4a.onLayoutMeasure();
       expect(a4a.adPromise_).to.be.ok;
     });
+    it('does not initialize promise chain when hidden by media query', async () => {
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
+      fetchMock.getOnce(
+        TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+        () => adResponse,
+        {name: 'ad'}
+      );
+      const {doc} = fixture;
+      const rect = layoutRectLtwh(0, 0, 200, 200);
+      const a4aElement = createA4aElement(doc, rect);
+      a4aElement.classList.add('i-amphtml-hidden-by-media-query');
+      const a4a = new MockA4AImpl(a4aElement);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      expect(a4a.adPromise_).to.not.be.ok;
+      // test without media query
+      a4aElement.classList.remove('i-amphtml-hidden-by-media-query');
+      a4a.onLayoutMeasure();
+      expect(a4a.adPromise_).to.be.ok;
+    });
+    it('does not initialize promise chain when has attribute "hidden"', async () => {
+      const fixture = await createIframePromise();
+      setupForAdTesting(fixture);
+      fetchMock.getOnce(
+        TEST_URL + '&__amp_source_origin=about%3Asrcdoc',
+        () => adResponse,
+        {name: 'ad'}
+      );
+      const {doc} = fixture;
+      const rect = layoutRectLtwh(0, 0, 200, 200);
+      const a4aElement = createA4aElement(doc, rect);
+      a4aElement.setAttribute('hidden', '');
+      const a4a = new MockA4AImpl(a4aElement);
+      a4a.buildCallback();
+      a4a.onLayoutMeasure();
+      expect(a4a.adPromise_).to.not.be.ok;
+      // test without media query
+      a4aElement.removeAttribute('hidden');
+      a4a.onLayoutMeasure();
+      expect(a4a.adPromise_).to.be.ok;
+    });
 
     /**
      * @param {boolean} isValidCreative
