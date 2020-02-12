@@ -1264,7 +1264,7 @@ describes.repeated(
 
             it('should render a list using local data', async () => {
               toggleExperiment(win, experimentName, true);
-              bind.getState = () => ({items: [1, 2, 3]});
+              bind.getStateWithWait = () => Promise.resolve({items: [1, 2, 3]});
 
               const ampStateEl = doc.createElement('amp-state');
               ampStateEl.setAttribute('id', 'okapis');
