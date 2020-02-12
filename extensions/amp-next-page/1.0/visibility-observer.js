@@ -44,28 +44,18 @@ export const ScrollDirection = {UP: 1, DOWN: -1};
 export class VisibilityObserverEntry {
   /**
    * @param {!VisibilityObserver} observer
-   * @param {function(!ViewportRelativePos, number)} callback
+   * @param {function(!ViewportRelativePos)} callback
    */
   constructor(observer, callback) {
     /** @private {!VisibilityObserver} */
     this.observer_ = observer;
-    /** @private {?Element} */
-    this.top_ = null;
-    /** @private {?Element} */
-    this.bottom_ = null;
     /** @private {?RelativePositions} */
     this.topSentinelPosition_ = null;
     /** @private {?RelativePositions} */
     this.bottomSentinelPosition_ = null;
-    /** @private {number} */
-    this.topSentinelTop_ = 0;
-    /** @private {number} */
-    this.bottomSentinelTop_ = 0;
     /** @private {!ViewportRelativePos} */
     this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
-    /** @private {number} */
-    this.visiblePercent_ = 0;
-    /** @private {function(!ViewportRelativePos, number)} */
+    /** @private {function(!ViewportRelativePos)} */
     this.callback_ = callback;
   }
 
@@ -127,7 +117,6 @@ export class VisibilityObserverEntry {
   updateRelativePos() {
     const {topSentinelPosition_: top, bottomSentinelPosition_: bottom} = this;
     const {INSIDE, TOP, BOTTOM} = RelativePositions;
-    const vh = this.observer_.viewportHeight;
 
     if (!top && !bottom) {
       // Early exit if this an intersection change happening before a
@@ -138,13 +127,11 @@ export class VisibilityObserverEntry {
       // viewport bounds meaning that the document is short enough
       // to be contained inside the viewport
       this.relativePos_ = ViewportRelativePos.INSIDE_VIEWPORT;
-      this.visiblePercent_ = 1;
     } else if ((!top || top === TOP) && (!bottom || bottom === BOTTOM)) {
       // The head of the document is above the viewport and the
       // foot of the document is below it, meaning that the viewport
       // is looking at a section of the document
       this.relativePos_ = ViewportRelativePos.CONTAINS_VIEWPORT;
-      this.visiblePercent_ = 1;
     } else if (
       ((!top || top === TOP) && bottom === TOP) ||
       (top === BOTTOM && (!bottom || bottom === BOTTOM))
@@ -153,7 +140,6 @@ export class VisibilityObserverEntry {
       // above or below the document meaning that the viewport hasn't
       // reached the document yet or has passed it
       this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
-      this.visiblePercent_ = 0;
     } else {
       const atBottom =
         (top === TOP || top === INSIDE) && (!bottom || bottom === BOTTOM);
@@ -165,12 +151,9 @@ export class VisibilityObserverEntry {
         !!atBottom === !!scrollingUp
           ? ViewportRelativePos.LEAVING_VIEWPORT
           : ViewportRelativePos.ENTERING_VIEWPORT;
-      this.visiblePercent_ = atBottom
-        ? 1 - this.topSentinelTop_ / vh
-        : this.bottomSentinelTop_ / vh;
     }
 
-    this.callback_(this.relativePos_, this.visiblePercent_);
+    this.callback_(this.relativePos_);
   }
 }
 

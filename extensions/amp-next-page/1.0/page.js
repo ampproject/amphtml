@@ -69,8 +69,6 @@ export class Page {
     this.visibilityState_ = VisibilityState.PRERENDER;
     /** @private {!ViewportRelativePos} */
     this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
-    /** @private {number} */
-    this.visiblePercent_ = 0;
   }
 
   /** @return {string} */
@@ -126,18 +124,6 @@ export class Page {
   /** @param {!ViewportRelativePos} position */
   set relativePos(position) {
     this.relativePos_ = position;
-  }
-
-  /**
-   * @param {number} percent
-   */
-  set visiblePercent(percent) {
-    this.visiblePercent_ = percent;
-  }
-
-  /** @return {number} */
-  get visiblePercent() {
-    return this.visiblePercent_;
   }
 
   /**
@@ -302,8 +288,6 @@ export class HostPage extends Page {
     this.state_ = initState;
     /** @override */
     this.visibilityState_ = initVisibility;
-    /** @override */
-    this.visiblePercent_ = 1;
     /** @private {!Document} */
     this.document_ = doc;
     /** @private {!Array<!Element>} */

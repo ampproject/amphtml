@@ -33,7 +33,6 @@ import {
   scopedQuerySelector,
   scopedQuerySelectorAll,
 } from '../../../src/dom';
-import {clamp, mapRange} from '../../../src/utils/math';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
@@ -43,7 +42,7 @@ import {
   parseOgImage,
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
-import {resetStyles, setStyle, setStyles, toggle} from '../../../src/style';
+import {setStyles, toggle} from '../../../src/style';
 import {throttle} from '../../../src/utils/rate-limit';
 
 import {toArray} from '../../../src/types';
@@ -62,12 +61,6 @@ const DOC_CONTAINER_CLASS = 'i-amphtml-next-page-document-container';
 const SHADOW_ROOT_CLASS = 'i-amphtml-next-page-shadow-root';
 const PLACEHOLDER_CLASS = 'i-amphtml-next-page-placeholder';
 
-/** @enum {string} */
-export const Transition = {
-  NONE: 'none',
-  FADE_IN: 'fade-in',
-  FADE_IN_SCROLL: 'fade-in-scroll',
-};
 const ASYNC_NOOP = () => Promise.resolve();
 
 export class NextPageService {
@@ -138,9 +131,6 @@ export class NextPageService {
     /** @private {boolean} */
     this.hasDeepParsing_ = false;
 
-    /** @private {!Transition} */
-    this.transition_ = Transition.NONE;
-
     /** @private {?string} */
     this.nextSrc_ = null;
 
@@ -178,11 +168,6 @@ export class NextPageService {
     this.nextSrc_ = this.getHost_().getAttribute('src');
     this.hasDeepParsing_ =
       this.getHost_().hasAttribute('deep-parsing') || !this.nextSrc_;
-    const transition = this.getHost_().getAttribute('transition');
-    if (transition) {
-      userAssert(Object.values(Transition).includes(transition));
-      this.transition_ = /** @type {Transition} */ (transition);
-    }
 
     // Get the separator and more box (and remove the provided elements in the process)
     this.separator_ = this.getSeparatorElement_(element);
@@ -272,7 +257,6 @@ export class NextPageService {
           }
 
           this.hostPage_.relativePos = relativePos;
-          this.hostPage_.visiblePercent = clamp((height - scroll) / vh, 0, 1);
           this.updateVisibility();
         }
       );
@@ -358,33 +342,6 @@ export class NextPageService {
           /** @type {!Document|!ShadowRoot} */ (devAssert(page.document))
         )
       );
-
-    // Handle transitions between pages
-    if (this.transition_ === Transition.FADE_IN_SCROLL) {
-      this.pages_.forEach(page => {
-        const pageContents =
-          page === this.hostPage_
-            ? /** @type {!HostPage} */ (this.hostPage_).hostPageContents
-            : [page.container];
-        if (page.relativePos === ViewportRelativePos.LEAVING_VIEWPORT) {
-          pageContents.forEach(element => {
-            this.mutator_.mutateElement(element, () => {
-              setStyle(
-                element,
-                'opacity',
-                mapRange(page.visiblePercent, 0.05, 0.5, 0, 1)
-              );
-            });
-          });
-        } else if (page.isVisible()) {
-          pageContents.forEach(element => {
-            this.mutator_.mutateElement(element, () => {
-              resetStyles(element, ['opacity']);
-            });
-          });
-        }
-      });
-    }
   }
 
   /**
@@ -519,19 +476,6 @@ export class NextPageService {
       )
     );
 
-    // Set-up transitions
-    if (this.transition_ === Transition.FADE_IN_SCROLL) {
-      hostPageContents.forEach(element => {
-        this.mutator_.mutateElement(element, () => {
-          setStyles(element, {
-            'opacity': 1,
-            'will-change': 'opacity',
-            'transition': 'opacity 0.3s',
-          });
-        });
-      });
-    }
-
     return /** @type {!HostPage} */ (new HostPage(
       this,
       {
@@ -566,21 +510,11 @@ export class NextPageService {
     this.visibilityObserver_.observe(
       shadowRoot /** element */,
       container /** parent */,
-      (position, visiblePercent) => {
+      position => {
         page.relativePos = position;
-        page.visiblePercent = visiblePercent;
         this.updateVisibility();
       }
     );
-
-    // Set-up transitions
-    if (this.transition_ === Transition.FADE_IN_SCROLL) {
-      setStyles(container, {
-        'opacity': 1,
-        'will-change': 'opacity',
-        'transition': 'opacity 0.1s',
-      });
-    }
 
     return container;
   }
