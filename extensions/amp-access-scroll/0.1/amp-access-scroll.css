@@ -24,18 +24,9 @@
   bottom: 0;
 }
 
-.amp-access-scroll-placeholder {
-  padding-top: 5px;
-  padding-left: 16px;
-  background-color: #fff;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-  box-sizing: border-box;
-}
-
 .amp-access-scroll-audio {
   position: fixed;
-  background-color: #fff;
+  background-color: transparent;
   position: fixed;
   z-index: 2147483647;
   display: block;
@@ -45,8 +36,6 @@
   height: 100px;
   left: 0;
   width: 100%;
-  border-top: 1px solid #e1e6e5; /* gray2 */
-  border-bottom: 1px solid transparent;
 }
 @media (min-width: 600px) {
   .amp-access-scroll-audio {
@@ -55,6 +44,5 @@
     left: auto;
     right: 16px;
     width: 475px;
-    border: 1px solid #e1e6e5; /* gray2 */
   }
 }

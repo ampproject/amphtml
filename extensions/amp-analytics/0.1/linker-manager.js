@@ -173,7 +173,7 @@ export class LinkerManager {
     const location = WindowInterface.getLocation(this.ampdoc_.win);
     const isProxyOrigin = this.urlService_.isProxyOrigin(location);
     linkerNames.forEach(name => {
-      const mergedConfig = Object.assign({}, defaultConfig, config[name]);
+      const mergedConfig = {...defaultConfig, ...config[name]};
 
       if (mergedConfig['enabled'] !== true) {
         user().info(
@@ -208,7 +208,7 @@ export class LinkerManager {
   expandTemplateWithUrlParams_(template, expansionOptions) {
     const bindings = this.variableService_.getMacros(this.element_);
     return this.variableService_
-      .expandTemplate(template, expansionOptions)
+      .expandTemplate(template, expansionOptions, this.element_)
       .then(expanded => {
         const urlReplacements = Services.urlReplacementsForDoc(this.element_);
         return urlReplacements.expandUrlAsync(expanded, bindings);
@@ -216,24 +216,36 @@ export class LinkerManager {
   }
 
   /**
-   * If the document has existing cid meta tag they do not need to explicity
+   * If the document has existing cid meta tag they do not need to explicitly
    * opt-in to use linker.
    * @return {boolean}
    * @private
    */
   isLegacyOptIn_() {
-    const optInMeta = this.ampdoc_.win.document.head./*OK*/ querySelector(
-      'meta[name="amp-google-client-id-api"][content="googleanalytics"]'
-    );
+    if (this.type_ !== 'googleanalytics') {
+      return false;
+    }
+
     if (
-      !optInMeta ||
-      optInMeta.hasAttribute(LINKER_CREATED) ||
-      this.type_ !== 'googleanalytics'
+      this.ampdoc_.getMetaByName('amp-google-client-id-api') !==
+      'googleanalytics'
     ) {
       return false;
     }
 
-    optInMeta.setAttribute(LINKER_CREATED, '');
+    const headNode = this.ampdoc_.getHeadNode();
+    const linkerCreatedEl =
+      headNode instanceof ShadowRoot
+        ? this.ampdoc_.getBody()
+        : headNode.querySelector(
+            'meta[name="amp-google-client-id-api"][content="googleanalytics"]'
+          );
+
+    if (linkerCreatedEl.hasAttribute(LINKER_CREATED)) {
+      return false;
+    }
+
+    linkerCreatedEl.setAttribute(LINKER_CREATED, '');
     return true;
   }
 

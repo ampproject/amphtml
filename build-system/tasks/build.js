@@ -18,6 +18,7 @@ const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllUnminifiedJs,
+  compileCoreRuntime,
   printConfigHelp,
   printNobuildHelp,
 } = require('./helpers');
@@ -29,9 +30,11 @@ const {buildExtensions} = require('./extension-helpers');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green} = require('ansi-colors');
+const {doServe} = require('./serve');
 const {maybeUpdatePackages} = require('./update-packages');
 const {parseExtensionFlags} = require('./extension-helpers');
-const {serve} = require('./serve');
+
+const argv = require('minimist')(process.argv.slice(2));
 
 /**
  * Enables watching for file changes in css, extensions.
@@ -40,7 +43,7 @@ const {serve} = require('./serve');
 async function watch() {
   maybeUpdatePackages();
   createCtrlcHandler('watch');
-  return performBuild(/* watch */ true);
+  await performBuild(/* watch */ true);
 }
 
 /**
@@ -88,8 +91,12 @@ async function performBuild(watch) {
   printConfigHelp(watch ? 'gulp watch' : 'gulp build');
   parseExtensionFlags();
   await performPrerequisiteSteps(watch);
-  await compileAllUnminifiedJs(watch);
-  await buildExtensions({watch});
+  if (argv.core_runtime_only) {
+    await compileCoreRuntime(watch, /* minify */ false);
+  } else {
+    await compileAllUnminifiedJs(watch);
+    await buildExtensions({watch});
+  }
 }
 
 /**
@@ -104,7 +111,7 @@ async function defaultTask() {
   printDefaultTaskHelp();
   parseExtensionFlags(/* preBuild */ true);
   await performPrerequisiteSteps(/* watch */ true);
-  await serve();
+  await doServe(/* lazyBuild */ true);
   log(green('JS and extensions will be lazily built when requested...'));
 }
 
@@ -122,6 +129,8 @@ build.flags = {
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
+  core_runtime_only: '  Builds only the core runtime.',
+  coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
 };
 
 watch.description = 'Watches for changes in files, re-builds when detected';
@@ -131,6 +140,7 @@ watch.flags = {
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
   noextensions: '  Watches and builds with no extensions.',
+  core_runtime_only: '  Watches and builds only the core runtime.',
 };
 
 defaultTask.description =

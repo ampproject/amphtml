@@ -283,6 +283,17 @@ export function imaVideo(global, data) {
   });
   controlsVisible = false;
 
+  // Play button
+  playPauseDiv = createIcon(global, 'play');
+  playPauseDiv.id = 'ima-play-pause';
+  setStyles(playPauseDiv, {
+    'width': '30px',
+    'height': '30px',
+    'margin-right': '20px',
+    'font-size': '1.25em',
+    'cursor': 'pointer',
+  });
+  controlsDiv.appendChild(playPauseDiv);
   // Ad progress
   countdownWrapperDiv = global.document.createElement('div');
   countdownWrapperDiv.id = 'ima-countdown';
@@ -301,17 +312,6 @@ export function imaVideo(global, data) {
   countdownDiv = global.document.createElement('div');
   countdownWrapperDiv.appendChild(countdownDiv);
   controlsDiv.appendChild(countdownWrapperDiv);
-  // Play button
-  playPauseDiv = createIcon(global, 'play');
-  playPauseDiv.id = 'ima-play-pause';
-  setStyles(playPauseDiv, {
-    'width': '30px',
-    'height': '30px',
-    'margin-right': '20px',
-    'font-size': '1.25em',
-    'cursor': 'pointer',
-  });
-  controlsDiv.appendChild(playPauseDiv);
   // Current time and duration.
   timeDiv = global.document.createElement('div');
   timeDiv.id = 'ima-time';
@@ -1138,13 +1138,17 @@ export function onPlayPauseClick() {
  * @visibleForTesting
  */
 export function playVideo() {
-  setStyle(adContainerDiv, 'display', 'none');
+  if (adsActive) {
+    adsManager.resume();
+  } else {
+    setStyle(adContainerDiv, 'display', 'none');
+    // Kick off the hide controls timer.
+    showControls();
+    videoPlayer.play();
+  }
   playerState = PlayerStates.PLAYING;
-  // Kick off the hide controls timer.
-  showControls();
-  changeIcon(playPauseDiv, 'pause');
   postMessage({event: VideoEvents.PLAYING});
-  videoPlayer.play();
+  changeIcon(playPauseDiv, 'pause');
 }
 
 /**
@@ -1153,20 +1157,22 @@ export function playVideo() {
  * @visibleForTesting
  */
 export function pauseVideo(event = null) {
-  videoPlayer.pause();
-  playerState = PlayerStates.PAUSED;
-  // Show controls and keep them there because we're paused.
-  clearInterval(hideControlsTimeout);
-  if (!adsActive) {
+  if (adsActive) {
+    adsManager.pause();
+  } else {
+    videoPlayer.pause();
+    // Show controls and keep them there because we're paused.
+    clearInterval(hideControlsTimeout);
     showControls();
+    if (event && event.type == 'webkitendfullscreen') {
+      // Video was paused because we exited fullscreen.
+      videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
+      fullscreen = false;
+    }
   }
-  changeIcon(playPauseDiv, 'play');
+  playerState = PlayerStates.PAUSED;
   postMessage({event: VideoEvents.PAUSE});
-  if (event && event.type == 'webkitendfullscreen') {
-    // Video was paused because we exited fullscreen.
-    videoPlayer.removeEventListener('webkitendfullscreen', pauseVideo);
-    fullscreen = false;
-  }
+  changeIcon(playPauseDiv, 'play');
 }
 
 /**
@@ -1313,7 +1319,7 @@ function onFullscreenChange(global) {
 
 /**
  * Show a subset of controls when ads are playing.
- * Visible controls are countdownDiv, muteUnmuteDiv, and fullscreenDiv
+ * Visible controls are countdownDiv, playPauseDiv, muteUnmuteDiv, and fullscreenDiv
  *
  * @visibleForTesting
  */
@@ -1322,24 +1328,21 @@ export function showAdControls() {
   const isSkippable = currentAd ? currentAd.getSkipTimeOffset() !== -1 : false;
   const miniControls = hasMobileStyles && isSkippable;
   // hide non-ad controls
-  const hideElement = button => setStyle(button, 'display', 'none');
-  [playPauseDiv, timeDiv, progressBarWrapperDiv].forEach(hideElement);
+  [timeDiv, progressBarWrapperDiv].forEach(button => {
+    setStyle(button, 'display', 'none');
+  });
   // set ad control styles
   setStyles(controlsDiv, {
     'height': miniControls ? '20px' : '30px',
     'justify-content': 'flex-end',
     'padding': '10px',
   });
-  const buttonDefaults = {
-    'height': miniControls ? '18px' : '22px',
-  };
-  setStyles(fullscreenDiv, buttonDefaults);
-  setStyles(
-    muteUnmuteDiv,
-    Object.assign(buttonDefaults, {
-      'margin-right': '10px',
-    })
-  );
+  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach(button => {
+    setStyles(button, {'height': miniControls ? '18px' : '22px'});
+  });
+  setStyles(muteUnmuteDiv, {'margin-right': '10px'});
+  // show pause button while ad begins playing
+  changeIcon(playPauseDiv, 'pause');
   // show ad controls
   setStyle(countdownWrapperDiv, 'display', 'flex');
   showControls();
@@ -1359,17 +1362,14 @@ export function resetControlsAfterAd() {
     'height': '100px',
     'padding': '60px 10px 10px',
   });
-  const buttonDefaults = {'height': '30px'};
-  setStyles(fullscreenDiv, buttonDefaults);
-  setStyles(
-    muteUnmuteDiv,
-    Object.assign(buttonDefaults, {
-      'margin-right': '20px',
-    })
-  );
+  [fullscreenDiv, playPauseDiv, muteUnmuteDiv].forEach(button => {
+    setStyles(button, {'height': '30px'});
+  });
+  setStyles(muteUnmuteDiv, {'margin-right': '20px'});
   // show non-ad controls
-  const showElement = button => setStyle(button, 'display', 'block');
-  [playPauseDiv, timeDiv, progressBarWrapperDiv].forEach(showElement);
+  [timeDiv, progressBarWrapperDiv].forEach(button => {
+    setStyle(button, 'display', 'block');
+  });
 }
 
 /**
@@ -1423,10 +1423,7 @@ function onMessage(global, event) {
   }
   switch (msg['func']) {
     case 'playVideo':
-      if (adsActive) {
-        adsManager.resume();
-        postMessage({event: VideoEvents.PLAYING});
-      } else if (playbackStarted) {
+      if (adsActive || playbackStarted) {
         playVideo();
       } else {
         // Auto-play support
@@ -1434,12 +1431,7 @@ function onMessage(global, event) {
       }
       break;
     case 'pauseVideo':
-      if (adsActive) {
-        adsManager.pause();
-        postMessage({event: VideoEvents.PAUSE});
-      } else if (playbackStarted) {
-        pauseVideo();
-      }
+      pauseVideo();
       break;
     case 'mute':
       muteVideo();

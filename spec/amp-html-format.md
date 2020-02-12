@@ -308,11 +308,11 @@ All other authored class names are allowed in AMP HTML markup.
 
 ### IDs
 
-Internal AMP IDs prefixed with `-amp-` and `i-amp-` are disallowed in AMP HTML.
+Certain ID names are disallowed in AMP HTML, such as IDs prefixed with `-amp-` and `i-amp-` that may conflict with internal AMP IDs.
 
-Consult AMP documentation for specific extensions before using `amp-` and `AMP` IDs to avoid conflict with the features provided by these extensions, such as `amp-access`.
+Consult the AMP documentation for specific extensions before using `amp-` and `AMP` IDs to avoid conflict with the features provided by these extensions, such as `amp-access`.
 
-All other authored IDs are allowed in AMP HTML markup.
+View the full list of disallowed ID names by searching for `mandatory-id-attr` [here](../validator/validator-main.protoascii).
 
 ### Links
 
@@ -363,7 +363,7 @@ In the following examples `<property>` needs to be in the white list above.
 
 #### Maximum size
 
-It is a validation error if the author stylesheet or inline styles together are larger than 50,000 bytes.
+It is a validation error if the author stylesheet or inline styles together are larger than 75,000 bytes.
 
 ### Keyframes stylesheet
 

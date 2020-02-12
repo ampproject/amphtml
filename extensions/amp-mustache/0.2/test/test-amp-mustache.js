@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as purifier from '../../../../src/purifier';
 import * as service from '../../../../src/service';
 import {AmpMustache} from '../amp-mustache';
+import {Purifier} from '../../../../src/purifier/purifier';
 import mustache from '../../../../third_party/mustache/mustache';
 
 describes.repeated(
@@ -28,18 +28,17 @@ describes.repeated(
     'with template[type=amp-mustache]': {templateType: 'template'},
   },
   (name, variant) => {
-    let sandbox;
     let viewerCanRenderTemplates = false;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      const getServiceForDocStub = sandbox.stub(service, 'getServiceForDoc');
+      const getServiceForDocStub = window.sandbox.stub(
+        service,
+        'getServiceForDoc'
+      );
       getServiceForDocStub.returns({
         hasCapability: unused => viewerCanRenderTemplates,
       });
     });
-
-    afterEach(() => sandbox.restore());
 
     // This test suite runs twice. First by creating templates of type template
     // and then by creating templates encapsulated within script.
@@ -82,6 +81,23 @@ describes.repeated(
       template.compileCallback();
       const result = template.render({value: 'abc'});
       expect(result./*OK*/ innerHTML).to.equal('value = abc');
+    });
+
+    // https://github.com/ampproject/amphtml/pull/17401
+    it('should render attrs with non-HTML namespaces', () => {
+      innerHtmlSetup(
+        '<svg width=50 height=50><g><image xlink:href="foo.svg" width=50 height=50></image></g></svg>'
+      );
+      template.compileCallback();
+      const result = template.render({});
+      expect(result./*OK*/ outerHTML).to.equal(
+        '<svg height="50" width="50"><g><image height="50" width="50" xlink:href="foo.svg"></image></g></svg>'
+      );
+      // Make sure [xlink:href] has the right namespace.
+      const image = result.querySelector('image');
+      const href = image.getAttributeNode('xlink:href');
+      expect(href.namespaceURI).to.equal('http://www.w3.org/1999/xlink');
+      expect(href.value).to.equal('foo.svg');
     });
 
     it('should render {{.}} from string', () => {
@@ -458,6 +474,7 @@ describes.repeated(
         const result = template.render({
           value:
             '<table class="valid-class">' +
+            '<colgroup><col><col></colgroup>' +
             '<caption>caption</caption>' +
             '<thead><tr><th colspan="2">header</th></tr></thead>' +
             '<tbody><tr><td>' +
@@ -470,6 +487,7 @@ describes.repeated(
         });
         expect(result./*OK*/ innerHTML).to.equal(
           'value = <table class="valid-class">' +
+            '<colgroup><col><col></colgroup>' +
             '<caption>caption</caption>' +
             '<thead><tr><th colspan="2">header</th></tr></thead>' +
             '<tbody><tr><td>' +
@@ -566,17 +584,17 @@ describes.repeated(
       });
 
       it('should not call mustache parsing', () => {
-        sandbox.spy(mustache, 'parse');
+        window.sandbox.spy(mustache, 'parse');
         template.compileCallback();
         expect(mustache.parse).to.have.not.been.called;
       });
 
       it('should not mustache render but still purify html', () => {
-        sandbox.spy(purifier, 'purifyHtml');
-        sandbox.spy(mustache, 'render');
+        window.sandbox.spy(Purifier.prototype, 'purifyHtml');
+        window.sandbox.spy(mustache, 'render');
         template.setHtml('<div>test</div>');
         expect(mustache.render).to.have.not.been.called;
-        expect(purifier.purifyHtml).to.have.been.called;
+        expect(Purifier.prototype.purifyHtml).to.have.been.called;
       });
     });
 

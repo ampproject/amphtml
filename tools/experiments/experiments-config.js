@@ -62,10 +62,10 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/3996',
   },
   {
-    id: 'amp-mega-menu',
-    name: 'AMP extension for a mega menu with expandable items',
-    spec: 'https://github.com/ampproject/amphtml/issues/24814',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24898',
+    id: 'amp-consent-restrict-fullscreen',
+    name: 'AMP consent restrict fullscreen API before user interaction',
+    spec: 'https://github.com/ampproject/amphtml/issues/26432',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
   },
   {
     id: 'amp-sidebar-v2',
@@ -108,6 +108,11 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/7743',
   },
   {
+    id: 'amp-list-init-from-state',
+    name: 'Allows amp-list to initialize off of amp-state',
+    spec: 'https://github.com/ampproject/amphtml/issues/26009',
+  },
+  {
     id: 'amp-playbuzz',
     name: 'AMP extension for playbuzz items (launched)',
     spec: 'https://github.com/ampproject/amphtml/issues/6106',
@@ -124,12 +129,6 @@ export const EXPERIMENTS = [
     name: 'Remove fixed transfer from iOS 12.2 and up',
     spec: 'https://github.com/ampproject/amphtml/issues/22220',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22220',
-  },
-  {
-    id: 'ios-scrollable-iframe',
-    name: 'iOS 13 enables iframe scrolling per spec',
-    spec: 'https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23379',
   },
   {
     id: 'chunked-amp',
@@ -203,6 +202,12 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
+    id: 'amp-next-page-v2',
+    name: 'Document-level (true) infinite scroll experience',
+    spec: 'https://github.com/ampproject/amphtml/issues/25500',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25634',
+  },
+  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
@@ -256,14 +261,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'TODO',
   },
   {
-    id: 'fie-css-cleanup',
-    name:
-      'Experiment to prevent regression after a major CSS clean up' +
-      ' for AMPHTML Ads in FIE rendering mode',
-    spec: 'https://github.com/ampproject/amphtml/issues/22418',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
-  },
-  {
     id: 'amp-user-location',
     name:
       'Expose the browser geolocation API for latitude and longitude ' +
@@ -278,13 +275,6 @@ export const EXPERIMENTS = [
       'For development use only',
     spec: 'N/A',
     cleanupIssue: 'N/A',
-  },
-  {
-    id: 'macro-after-long-task',
-    name:
-      'If applicable, convert remaining micro tasks to the next macro ' +
-      ' tasks if a previous micro task execution took too long',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/23464',
   },
   {
     id: 'pausable-iframe',
@@ -307,23 +297,17 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
   },
   {
-    id: 'use-responsive-ads-for-responsive-sizing-in-auto-ads',
-    name: 'Use amp-ad responsive to make amp auto ads responsive.',
-    spec: 'https://github.com/ampproject/amphtml/issues/24168',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
-  },
-  {
-    id: 'remove-viewer-query-params-on-navigate',
-    name: 'Removes query params from viewer iframe on navigation.',
-    spec: 'https://github.com/ampproject/amphtml/issues/25179',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24169',
-  },
-  {
     id: 'layoutbox-invalidate-on-scroll',
     name:
       'Invalidate the cached layoutboxes of elements nested in a scroller ' +
       'after that scroller scrolls.',
     spec: 'https://github.com/ampproject/amphtml/issues/24929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
+  },
+  {
+    id: 'amp-stream-gallery',
+    name: 'Enables component',
+    spec: 'https://github.com/ampproject/amphtml/issues/20595',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
   },
 ];

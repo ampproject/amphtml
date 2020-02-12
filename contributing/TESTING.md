@@ -48,11 +48,13 @@ Before running these commands, make sure you have Node.js, yarn, and Gulp instal
 | `gulp --extensions=minimal_set`                           | Runs "watch" and "serve", after building the extensions needed to load `article.amp.html`.                                                                                                                                                    |
 | `gulp --extensions_from=examples/foo.amp.html`            | Runs "watch" and "serve", after building only extensions from the listed examples.                                                                                                                                                            |
 | `gulp --noextensions`                                     | Runs "watch" and "serve" without building any extensions.                                                                                                                                                                                     |
-| `gulp dist`                                               | Builds production binaries.                                                                                                                                                                                                                   |
+| `gulp dist`                                               | Builds production binaries and applies AMP_CONFIG to runtime files.                                                                                                                                                                           |
+| `gulp dist --noconfig`                                    | Builds production binaries without applying AMP_CONFIG to runtime files.                                                                                                                                                                      |
 | `gulp dist --extensions=amp-foo,amp-bar`                  | Builds production binaries, with only the listed extensions.                                                                                                                                                                                  |
 | `gulp dist --extensions=minimal_set`                      | Builds production binaries, with only the extensions needed to load `article.amp.html`.                                                                                                                                                       |
 | `gulp dist --extensions_from=examples/foo.amp.html`       | Builds production binaries, with only extensions from the listed examples.                                                                                                                                                                    |
 | `gulp dist --noextensions`                                | Builds production binaries without building any extensions.                                                                                                                                                                                   |
+| `gulp dist --core_runtime_only`                           | Builds production binary for just the core runtime.                                                                                                                                                                                           |
 | `gulp dist --fortesting`                                  | Builds production binaries for local testing. (Allows use cases like ads, tweets, etc. to work with minified sources. Overrides `TESTING_HOST` if specified. Uses the production `AMP_CONFIG` by default.)                                    |
 | `gulp dist --fortesting --config=<config>`                | Builds production binaries for local testing, with the specified `AMP_CONFIG`. `config` can be `prod` or `canary`. (Defaults to `prod`.)                                                                                                      |
 | `gulp lint`                                               | Validates JS files against the ESLint linter.                                                                                                                                                                                                 |
@@ -69,6 +71,7 @@ Before running these commands, make sure you have Node.js, yarn, and Gulp instal
 | `gulp build --extensions=minimal_set`                     | Builds the AMP library, with only the extensions needed to load `article.amp.html`.                                                                                                                                                           |
 | `gulp build --extensions_from=examples/foo.amp.html`      | Builds the AMP library, with only the extensions needed to load the listed examples.                                                                                                                                                          |
 | `gulp build --noextensions`                               | Builds the AMP library with no extensions.                                                                                                                                                                                                    |
+| `gulp build --core_runtime_only`                          | Builds only the core runtime of the AMP library.                                                                                                                                                                                              |
 | `gulp build --fortesting`                                 | Builds the AMP library and sets the `test` field in `AMP_CONFIG` to `true`.                                                                                                                                                                   |
 | `gulp check-links --files=<files-path-glob>`              | Reports dead links in `.md` files.                                                                                                                                                                                                            |
 | `gulp check-links --local_changes`                        | Reports dead links in `.md` files changed in the local branch.                                                                                                                                                                                |
@@ -80,6 +83,7 @@ Before running these commands, make sure you have Node.js, yarn, and Gulp instal
 | `gulp watch --extensions=minimal_set`                     | Watches for changes in files, re-builds only the extensions needed to load `article.amp.html`.                                                                                                                                                |
 | `gulp watch --extensions_from=examples/foo.amp.html`      | Watches for changes in files, re-builds only the extensions needed to load the listed examples.                                                                                                                                               |
 | `gulp watch --noextensions`                               | Watches for changes in files, re-builds with no extensions.                                                                                                                                                                                   |
+| `gulp watch --core_runtime_only`                          | Watches for changes in the core runtime, re-builds.                                                                                                                                                                                           |
 | `gulp pr-check`                                           | Runs all the Travis CI checks locally.                                                                                                                                                                                                        |
 | `gulp pr-check --nobuild`                                 | Runs all the Travis CI checks locally, but skips the `gulp build` step.                                                                                                                                                                       |
 | `gulp pr-check --files=<test-files-path-glob>`            | Runs all the Travis CI checks locally, and restricts tests to the files provided.                                                                                                                                                             |
@@ -268,16 +272,27 @@ If a Percy test flakes and you would like to trigger a rerun, you can't do that 
 
 ### Running Visual Diff Tests Locally
 
-You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`. Once the environment variable is set up, you can run the AMP visual diff tests as described below.
-
-First, build the AMP runtime and run the gulp task that invokes the visual diff script:
+You can also run the visual tests locally during development. You must first create a free Percy account at [https://percy.io](https://percy.io), create a project, and set the `PERCY_TOKEN` environment variable using the unique value you find at `https://percy.io/<org>/<project>/integrations`:
 
 ```sh
-gulp build
+export PERCY_TOKEN="<unique-percy-token>"
+```
+
+Once the environment variable is set up, you can run the AMP visual diff tests.
+
+First, build the AMP runtime:
+
+```sh
+gulp dist --fortesting
+```
+
+Next, run the `gulp` task that invokes the visual diff tests:
+
+```sh
 gulp visual-diff --nobuild
 ```
 
-Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp build` on each execution.
+Note that if you drop the `--nobuild` flag, `gulp visual-diff` will run `gulp dist --fortesting` on each execution.
 
 The build will use the Percy credentials set via environment variables in the previous step, and run the tests on your local install of Chrome in headless mode. You can see the results at `https://percy.io/<org>/<project>`.
 
@@ -285,6 +300,12 @@ To see debugging info during Percy runs, you can run:
 
 ```sh
  gulp visual-diff --chrome_debug --webserver_debug
+```
+
+To run tests without uploading snapshots to Percy, you can run:
+
+```sh
+gulp visual-diff --percy_disabled
 ```
 
 The debug flags `--chrome_debug` and `--webserver_debug` can be used independently. To enable both debug flags, you can also run:

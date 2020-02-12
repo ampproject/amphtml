@@ -21,7 +21,12 @@ import {
 } from './bookend-component-interface';
 import {addAttributesToElement} from '../../../../../src/dom';
 import {dict} from '../../../../../src/utils/object';
-import {getSourceOriginForElement, userAssertValidProtocol} from '../../utils';
+import {
+  getSourceOriginForElement,
+  resolveImgSrc,
+  userAssertValidProtocol,
+} from '../../utils';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -92,9 +97,9 @@ export class PortraitComponent {
   }
 
   /** @override */
-  buildElement(portraitData, doc, data) {
+  buildElement(portraitData, win, data) {
     portraitData = /** @type {PortraitComponentDef} */ (portraitData);
-    const html = htmlFor(doc);
+    const html = htmlFor(win.document);
     const el = html`
         <a class="i-amphtml-story-bookend-portrait i-amphtml-story-bookend-component" target="_top">
           <h2 class="i-amphtml-story-bookend-component-category"
@@ -107,7 +112,16 @@ export class PortraitComponent {
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
-    addAttributesToElement(el, dict({'href': portraitData.url}));
+    addAttributesToElement(
+      el,
+      dict({
+        'href': resolveRelativeUrl(
+          portraitData.url,
+          getSourceUrl(win.location)
+        ),
+      })
+    );
+
     el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
       position: data.position,
       type: BOOKEND_COMPONENT_TYPES.PORTRAIT,
@@ -126,7 +140,12 @@ export class PortraitComponent {
 
     category.textContent = portraitData.category;
     title.textContent = portraitData.title;
-    addAttributesToElement(image, dict({'src': portraitData.image}));
+
+    addAttributesToElement(
+      image,
+      dict({'src': resolveImgSrc(win, portraitData.image)})
+    );
+
     meta.textContent = portraitData.domainName;
 
     return el;

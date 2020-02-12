@@ -47,6 +47,10 @@ limitations under the License.
     </td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
+    <td>container, fill, fixed, fixed-height, flex-item, intrinsic, responsive</td>
+  </tr>
+  <tr>
     <td class="col-fourty"><strong>Tutorials</strong></td>
     <td>
       <ul>
@@ -141,7 +145,7 @@ Under the hood, `amp-script` uses [@ampproject/worker-dom](https://github.com/am
 
 `amp-script` supports getting and setting [`amp-state`](https://amp.dev/documentation/components/amp-bind/#initializing-state-with-amp-state) JSON via JavaScript.
 
-This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings). These elements can be inside (descendants) or outside (non-descendants) of the `amp-script` element.
+This enables advanced interactions between `amp-script` and other AMP elements on the page via `amp-bind` [bindings](https://amp.dev/documentation/components/amp-bind/#bindings). Invoking `AMP.setState()` from `amp-script` may cause mutations to the DOM as long as it was triggered by user gesture, otherwise it will only implicitly set state (similar to [`amp-state` initialization](https://amp.dev/documentation/examples/components/amp-bind/?referrer=ampbyexample.com#initializing-state)).
 
 [tip type="default"]
 `AMP.setState()` requires the [`amp-bind`](https://amp.dev/documentation/components/amp-bind) extension script to be included in the document head.
@@ -196,13 +200,16 @@ If there's an API you'd like to see supported, please [file an issue](https://gi
 
 #### User gestures
 
-`amp-script` generally requires a user gesture to apply changes triggered by your JavaScript code to the page (we call these "mutations"). This requirement helps avoid poor user experience from unexpected content jumping.
+In some cases, `amp-script` requires a user gesture to apply changes triggered by your JavaScript code (we call these "mutations") to the `amp-script`'s DOM children. This helps avoid poor user experience from unexpected content jumping.
 
 The rules for mutations are as follows:
 
-1. Mutations are always accepted for five seconds after a user gesture.
-2. The five second interval is extended if the author script performs a `fetch()` as a result of the user gesture.
-3. Mutations are always accepted for `amp-script` elements with [`[layout!="container"]`](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute) and `height < 300px`.
+1. For `amp-script` elements with [non-container layout](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#supported-values-for-the-layout-attribute), mutations are always allowed.
+2. For `amp-script` elements with container layout, mutations are allowed for five seconds following a user gesture. This five second window is extended once if a `fetch()` is triggered.
+
+#### Creating AMP elements
+
+With regard to dynamic creation of AMP elements (e.g. via `document.createElement()`), only `amp-img` and `amp-layout` are currently allowed. Please upvote or comment on [#25344](https://github.com/ampproject/amphtml/issues/25344) with your use case.
 
 #### Security features
 
@@ -251,7 +258,7 @@ Example of script hashes:
 ```
 
 [tip type="default"]
-The JavaScript size and script hash requirements can be disabled during development by adding a `development` attribute to an `amp-script` element.
+The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to both the top-level `html` element and the `amp-script` element (or any of its parent nodes).
 [/tip]
 
 ## Attributes
@@ -287,12 +294,6 @@ The value of `max-age` should be chosen carefully:
 - A shorter `max-age` may prevent inclusion in AMP Caches that have a [minimum SXG lifetime](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache).
 
 If you don't publish signed exchanges, `max-age` does nothing.
-
-**development (optional, invalid)**
-
-A boolean attribute that disables the JS size and security constraints for a more convenient development experience.
-
-This attribute is not allowed by the AMP Validator and should not be used on pages in production.
 
 **common attributes**
 

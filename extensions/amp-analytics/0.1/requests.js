@@ -30,7 +30,7 @@ export class RequestHandler {
   /**
    * @param {!Element} element
    * @param {!JsonObject} request
-   * @param {!../../../src/preconnect.Preconnect} preconnect
+   * @param {!../../../src/preconnect.PreconnectService} preconnect
    * @param {./transport.Transport} transport
    * @param {boolean} isSandbox
    */
@@ -80,7 +80,7 @@ export class RequestHandler {
     /** @private {!Array<!Promise<!BatchSegmentDef>>} */
     this.batchSegmentPromises_ = [];
 
-    /** @private {!../../../src/preconnect.Preconnect} */
+    /** @private {!../../../src/preconnect.PreconnectService} */
     this.preconnect_ = preconnect;
 
     /** @private {./transport.Transport} */
@@ -129,7 +129,7 @@ export class RequestHandler {
     this.lastTrigger_ = trigger;
     const bindings = this.variableService_.getMacros(this.element_);
     bindings['RESOURCE_TIMING'] = getResourceTiming(
-      this.ampdoc_,
+      this.element_,
       trigger['resourceTimingSpec'],
       this.startTime_
     );
@@ -139,7 +139,10 @@ export class RequestHandler {
 
       this.baseUrlTemplatePromise_ = this.variableService_.expandTemplate(
         this.baseUrl,
-        expansionOption
+        expansionOption,
+        this.element_,
+        bindings,
+        this.whiteList_
       );
 
       this.baseUrlPromise_ = this.baseUrlTemplatePromise_.then(baseUrl => {
@@ -162,7 +165,13 @@ export class RequestHandler {
 
       this.requestOriginPromise_ = this.variableService_
         // expand variables in request origin
-        .expandTemplate(this.requestOrigin_, requestOriginExpansionOpt)
+        .expandTemplate(
+          this.requestOrigin_,
+          requestOriginExpansionOpt,
+          this.element_,
+          bindings,
+          this.whiteList_
+        )
         // substitute in URL values e.g. DOCUMENT_REFERRER -> https://example.com
         .then(expandedRequestOrigin => {
           return this.urlReplacementService_.expandUrlAsync(
@@ -174,7 +183,7 @@ export class RequestHandler {
         });
     }
 
-    const params = Object.assign({}, configParams, trigger['extraUrlParams']);
+    const params = {...configParams, ...trigger['extraUrlParams']};
     const timestamp = this.win.Date.now();
     const batchSegmentPromise = expandExtraUrlParams(
       this.variableService_,
@@ -182,6 +191,7 @@ export class RequestHandler {
       params,
       expansionOption,
       bindings,
+      this.element_,
       this.whiteList_
     ).then(params => {
       return dict({
@@ -249,7 +259,7 @@ export class RequestHandler {
       : baseUrlTemplatePromise;
 
     preconnectPromise.then(preUrl => {
-      this.preconnect_.url(preUrl, true);
+      this.preconnect_.url(this.ampdoc_, preUrl, true);
     });
 
     Promise.all([
@@ -410,7 +420,7 @@ export function expandPostMessage(
   expansionOption.freezeVar('extraUrlParams');
 
   const basePromise = variableService
-    .expandTemplate(msg, expansionOption)
+    .expandTemplate(msg, expansionOption, element)
     .then(base => {
       return urlReplacementService.expandStringAsync(base, bindings);
     });
@@ -420,14 +430,15 @@ export function expandPostMessage(
   }
 
   return basePromise.then(expandedMsg => {
-    const params = Object.assign({}, configParams, trigger['extraUrlParams']);
+    const params = {...configParams, ...trigger['extraUrlParams']};
     //return base url with the appended extra url params;
     return expandExtraUrlParams(
       variableService,
       urlReplacementService,
       params,
       expansionOption,
-      bindings
+      bindings,
+      element
     ).then(extraUrlParams => {
       return defaultSerializer(expandedMsg, [
         dict({'extraUrlParams': extraUrlParams}),
@@ -443,6 +454,7 @@ export function expandPostMessage(
  * @param {!Object} params
  * @param {!./variables.ExpansionOptions} expansionOption
  * @param {!Object} bindings
+ * @param {!Element} element
  * @param {!Object=} opt_whitelist
  * @return {!Promise<!Object>}
  * @private
@@ -453,6 +465,7 @@ function expandExtraUrlParams(
   params,
   expansionOption,
   bindings,
+  element,
   opt_whitelist
 ) {
   const requestPromises = [];
@@ -469,7 +482,7 @@ function expandExtraUrlParams(
 
     if (typeof value === 'string') {
       const request = variableService
-        .expandTemplate(value, option)
+        .expandTemplate(value, option, element)
         .then(value =>
           urlReplacements.expandStringAsync(value, bindings, opt_whitelist)
         )

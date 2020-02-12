@@ -81,7 +81,6 @@ let ViewportRatioDef;
 
 /**
  * A Resource binding for an AmpElement.
- * @package
  */
 export class Resource {
   /**
@@ -435,10 +434,19 @@ export class Resource {
     ) {
       return;
     }
+    if (
+      !this.element.ownerDocument ||
+      !this.element.ownerDocument.defaultView
+    ) {
+      // Most likely this is an element who's window has just been destroyed.
+      // This is an issue with FIE embeds destruction. Such elements will be
+      // considered "not displayable" until they are GC'ed.
+      this.state_ = ResourceState.NOT_LAID_OUT;
+      return;
+    }
 
     this.isMeasureRequested_ = false;
 
-    // TODO
     const oldBox = this.layoutBox_;
     this.measureViaResources_();
     const box = this.layoutBox_;
@@ -812,7 +820,6 @@ export class Resource {
    * once layout is complete. Only allowed to be called on a upgraded, built
    * and displayed element.
    * @return {!Promise}
-   * @package
    */
   startLayout() {
     if (this.layoutPromise_) {

@@ -24,17 +24,14 @@ import {
 } from '../../3p/3p';
 
 describe('3p', () => {
-  let sandbox;
   let clock;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
-    clock = sandbox.useFakeTimers();
+    clock = window.sandbox.useFakeTimers();
   });
 
   afterEach(() => {
     clock.tick(1000);
-    sandbox.restore();
   });
 
   describe('validateSrcPrefix()', () => {
@@ -127,6 +124,17 @@ describe('3p', () => {
           /xxxxxx must contain exactly one of attributes: red, green, blue./
         );
       });
+    });
+
+    it('should allow mandatory fields to have 0 as a value', () => {
+      validateData(
+        {
+          width: 0,
+          height: 0,
+          type: 'cats',
+        },
+        ['height', 'width']
+      );
     });
 
     it('should check mandatory fields with alternative options', () => {

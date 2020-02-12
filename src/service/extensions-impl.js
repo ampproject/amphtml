@@ -42,14 +42,14 @@ const LOADER_PROP = '__AMP_EXT_LDR';
  * (8 seconds is the same as the CSS boilerplate timoeout)
  * @const
  */
-const LOAD_TIMEOUT = 8000;
+const LOAD_TIMEOUT = 16000;
 
 /**
  * Contains data for the declaration of a custom element.
  *
  * @typedef {{
  *   implementationClass:
- *       function(new:../base-element.BaseElement, !Element),
+ *       typeof ../base-element.BaseElement,
  *   css: (?string|undefined),
  * }}
  */
@@ -248,11 +248,12 @@ export class Extensions {
       /* includeInserted */ false
     );
     devAssert(el, 'Cannot find script for extension: %s', extensionId);
-    // "Disconnect" the old script element and extension record.
+    // The previously awaited extension loader must not have finished or
+    // failed.
     const holder = this.extensions_[extensionId];
     if (holder) {
       devAssert(!holder.loaded && !holder.error);
-      delete this.extensions_[extensionId];
+      holder.scriptPresent = false;
     }
     el.setAttribute('i-amphtml-loaded-new-version', extensionId);
     const urlParts = parseExtensionUrl(el.src);
@@ -273,9 +274,19 @@ export class Extensions {
     const modifier =
       ':not([i-amphtml-loaded-new-version])' +
       (includeInserted ? '' : ':not([i-amphtml-inserted])');
-    return this.win.document.head./*OK*/ querySelector(
+    // We have to match against "src" because a few extensions, such as
+    // "amp-viewer-integration", do not have "custom-element" attribute.
+    const matches = this.win.document.head./*OK*/ querySelectorAll(
       `script[src*="/${extensionId}-"]` + modifier
     );
+    for (let i = 0; i < matches.length; i++) {
+      const match = matches[i];
+      const urlParts = parseExtensionUrl(match.src);
+      if (urlParts.extensionId === extensionId) {
+        return match;
+      }
+    }
+    return null;
   }
 
   /**
@@ -283,7 +294,7 @@ export class Extensions {
    * class when the extension has been loaded. If necessary, adds the extension
    * script to the page.
    * @param {string} elementName
-   * @return {!Promise<function(new:../base-element.BaseElement, !Element)>}
+   * @return {!Promise<typeof ../base-element.BaseElement>}
    */
   loadElementClass(elementName) {
     return this.preloadExtension(elementName).then(extension => {
@@ -301,7 +312,7 @@ export class Extensions {
    * restricted method and it's allowed to be called only during the overall
    * extension registration.
    * @param {string} name
-   * @param {function(new:../base-element.BaseElement, !Element)} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @param {?string|undefined} css
    * @restricted
    */
@@ -317,7 +328,7 @@ export class Extensions {
    * Installs the specified element implementation in the ampdoc.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @param {?string|undefined} css
    * @private
    */
@@ -340,7 +351,7 @@ export class Extensions {
   /**
    * @param {!Window} win
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @private
    */
   registerElementInWindow_(win, name, implementationClass) {
@@ -560,6 +571,12 @@ export class Extensions {
     }
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
+
+    // Propagate nonce to all generated script tags.
+    const currentScript = this.win.document.head.querySelector('script[nonce]');
+    if (currentScript) {
+      scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
+    }
 
     // Allow error information to be collected
     // https://github.com/ampproject/amphtml/issues/7353

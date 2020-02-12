@@ -161,10 +161,9 @@ export class SafeframeHostApi {
     this.creativeSize_ = creativeSize;
 
     /** @private {{width:number, height:number}} */
-    this.initialCreativeSize_ = /** @type {{width:number, height:number}} */ (Object.assign(
-      {},
-      creativeSize
-    ));
+    this.initialCreativeSize_ = /** @type {{width:number, height:number}} */ ({
+      ...creativeSize,
+    });
 
     /** @protected {?Promise} */
     this.delay_ = null;
@@ -746,7 +745,13 @@ export class SafeframeHostApi {
         this.checkStillCurrent_();
         this.onFluidResize_(newHeight);
       })
-      .catch(err => user().warn(TAG, err));
+      .catch(err => {
+        user().warn(TAG, err);
+        const {width, height} = this.baseInstance_.getSlotSize();
+        if (width && height) {
+          this.onFluidResize_(height);
+        }
+      });
   }
 
   /**

@@ -89,6 +89,7 @@ export function newPerformanceResourceTiming(
 describes.realWin('resourceTiming', {amp: true}, env => {
   let win;
   let ampdoc;
+  let element;
 
   /**
    * @param {!Array<!PerformanceResourceTiming} fakeEntries
@@ -101,8 +102,8 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     resourceTimingSpec,
     expectedResult
   ) {
-    sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
-    return getResourceTiming(ampdoc, resourceTimingSpec, Date.now()).then(
+    env.sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
+    return getResourceTiming(element, resourceTimingSpec, Date.now()).then(
       result => {
         expect(result).to.equal(expectedResult);
       }
@@ -112,12 +113,15 @@ describes.realWin('resourceTiming', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
+    element = document.createElement('amp-analytics');
+    element.getAmpDoc = () => ampdoc;
+    env.win.document.body.appendChild(element);
     installVariableServiceForTesting(ampdoc);
     installLinkerReaderService(win);
   });
 
   it('should return empty if the performance API is not supported', () => {
-    return getResourceTiming(ampdoc, newResourceTimingSpec(), Date.now()).then(
+    return getResourceTiming(element, newResourceTimingSpec(), Date.now()).then(
       result => {
         expect(result).to.equal('');
       }
@@ -126,7 +130,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty when resource timing is not supported', () => {
     // Performance API (ampdoc.performance) doesn't support resource timing.
-    return getResourceTiming(ampdoc, newResourceTimingSpec(), Date.now()).then(
+    return getResourceTiming(element, newResourceTimingSpec(), Date.now()).then(
       result => {
         expect(result).to.equal('');
       }
@@ -143,10 +147,12 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       false
     );
     const spec = newResourceTimingSpec();
-    sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
-    return getResourceTiming(win, spec, Date.now() - 60 * 1000).then(result => {
-      expect(result).to.equal('');
-    });
+    env.sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
+    return getResourceTiming(element, spec, Date.now() - 60 * 1000).then(
+      result => {
+        expect(result).to.equal('');
+      }
+    );
   });
 
   it('should return empty if resourceTimingSpec is empty', () => {
@@ -590,24 +596,27 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
     // Stub performance.now so that it returns a timestamp after the resource
     // timing entry.
-    const nowStub = sandbox.stub(win.performance, 'now');
+    const nowStub = env.sandbox.stub(win.performance, 'now');
     nowStub.onCall(0).returns(600);
     nowStub.onCall(1).returns(800);
 
-    const getEntriesStub = sandbox.stub(win.performance, 'getEntriesByType');
+    const getEntriesStub = env.sandbox.stub(
+      win.performance,
+      'getEntriesByType'
+    );
     getEntriesStub.onCall(0).returns([initialEntry]);
     getEntriesStub.onCall(1).returns([initialEntry, laterEntry]);
 
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${initiatorType}.${startTime}.${duration}';
 
-    return getResourceTiming(ampdoc, spec, Date.now())
+    return getResourceTiming(element, spec, Date.now())
       .then(result => {
         expect(result).to.equal('link.100.400');
         expect(spec['responseAfter']).to.equal(600);
 
         // Check resource timings a second time.
-        return getResourceTiming(ampdoc, spec, Date.now());
+        return getResourceTiming(element, spec, Date.now());
       })
       .then(result => {
         expect(result).to.equal('script.200.500');
@@ -618,7 +627,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
   it('should not update responseAfter if greater', () => {
     const spec = newResourceTimingSpec();
     spec['responseAfter'] = 1000;
-    sandbox.stub(win.performance, 'now').returns(500);
+    env.sandbox.stub(win.performance, 'now').returns(500);
     return runSerializeTest([], spec, '').then(() => {
       // responseAfter is greater than performance.now(), so it should not be
       // modified.
@@ -638,7 +647,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     const entries = new Array(150).fill(entry);
     // Stub performance.now so that it returns a timestamp after the resource
     // timing entry.
-    sandbox.stub(win.performance, 'now').returns(700);
+    env.sandbox.stub(win.performance, 'now').returns(700);
     const spec = newResourceTimingSpec();
     return runSerializeTest(entries, spec, '').then(() => {
       expect(spec['done']).to.be.true;

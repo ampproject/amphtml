@@ -26,6 +26,13 @@ import {
   originMatches,
 } from '../../../src/iframe-video';
 import {Services} from '../../../src/services';
+import {addParamsToUrl} from '../../../src/url';
+import {
+  createElementWithAttributes,
+  getDataParamsFromAttributes,
+  isFullscreenElement,
+  removeElement,
+} from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
@@ -33,9 +40,7 @@ import {
   looksLikeTrackingIframe,
 } from '../../../src/iframe-helper';
 import {getData, listen} from '../../../src/event-helper';
-import {htmlFor} from '../../../src/static-template';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
-import {isFullscreenElement, removeElement} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {once} from '../../../src/utils/function';
 
@@ -75,6 +80,15 @@ const ALLOWED_EVENTS = [
 const getAnalyticsEventTypePrefixRegex = once(
   () => new RegExp(`^${ANALYTICS_EVENT_TYPE_PREFIX}`)
 );
+
+/**
+ * @param {string} url
+ * @param {!Element} element
+ * @return {string}
+ * @private
+ */
+const addDataParamsToUrl = (url, element) =>
+  addParamsToUrl(url, getDataParamsFromAttributes(element));
 
 /**
  * @param {string} src
@@ -191,17 +205,19 @@ class AmpVideoIframe extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const {element} = this;
-    const html = htmlFor(element);
-    const poster = html`
-      <amp-img layout="fill" placeholder></amp-img>
-    `;
-
-    poster.setAttribute(
-      'src',
-      this.user().assertString(element.getAttribute('poster'))
+    const src = addDataParamsToUrl(
+      user().assertString(element.getAttribute('poster')),
+      element
     );
-
-    return poster;
+    return createElementWithAttributes(
+      devAssert(element.ownerDocument),
+      'amp-img',
+      dict({
+        'src': src,
+        'layout': 'fill',
+        'placeholder': '',
+      })
+    );
   }
 
   /** @override */
@@ -229,10 +245,10 @@ class AmpVideoIframe extends AMP.BaseElement {
   getSrc_() {
     const {element} = this;
     const urlService = Services.urlForDoc(element);
-    const src = urlService.assertHttpsUrl(element.getAttribute('src'), element);
+    const src = element.getAttribute('src');
 
     if (urlService.getSourceOrigin(src) === urlService.getWinOrigin(this.win)) {
-      this.user().warn(
+      user().warn(
         TAG,
         'Origins of document inside amp-video-iframe and the host are the ' +
           'same, which allows for same-origin behavior. However in AMP ' +
@@ -242,7 +258,7 @@ class AmpVideoIframe extends AMP.BaseElement {
       );
     }
 
-    return maybeAddAmpFragment(src);
+    return maybeAddAmpFragment(addDataParamsToUrl(src, element));
   }
 
   /**

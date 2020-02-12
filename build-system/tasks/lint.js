@@ -48,10 +48,7 @@ const rootDir = path.dirname(path.dirname(__dirname));
 function initializeStream(globs, streamOptions) {
   let stream = gulp.src(globs, streamOptions);
   if (isWatching) {
-    const watcher = lazypipe().pipe(
-      watch,
-      globs
-    );
+    const watcher = lazypipe().pipe(watch, globs);
     stream = stream.pipe(watcher());
   }
   return stream;
@@ -172,7 +169,7 @@ function eslintRulesChanged() {
  * @return {!Array<string>}
  */
 function getFilesToLint(files) {
-  const filesToLint = globby.sync(files);
+  const filesToLint = globby.sync(files, {gitignore: true});
   if (!isTravisBuild()) {
     log(colors.green('INFO: ') + 'Running lint on the following files:');
     filesToLint.forEach(file => {

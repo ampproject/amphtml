@@ -63,7 +63,7 @@ const ALLOWED_FOR_ALL_ROOT_TYPES = ['ampdoc', 'embed'];
  * @const {!Object<string, {
  *     name: string,
  *     allowedFor: !Array<string>,
- *     klass: function(new:./events.EventTracker)
+ *     klass: typeof ./events.EventTracker
  *   }>}
  */
 const TRACKER_TYPE = Object.freeze({
@@ -188,7 +188,7 @@ export function getTrackerKeyName(eventType) {
 
 /**
  * @param {string} parentType
- * @return {!Object<string, function(new:EventTracker)>}
+ * @return {!Object<string, typeof EventTracker>}
  */
 export function getTrackerTypesForParentType(parentType) {
   const filtered = {};
@@ -417,7 +417,6 @@ export class AmpStoryEventTracker extends CustomEventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
-    // TODO(Enriqe): add support for storySpec.
     const rootTarget = this.root.getRootElement();
 
     // Fire buffered events if any.
@@ -453,6 +452,24 @@ export class AmpStoryEventTracker extends CustomEventTracker {
   fireListener_(event, rootTarget, config, listener) {
     const type = event['type'];
     const vars = event['vars'];
+
+    const storySpec = config['storySpec'] || {};
+    const repeat =
+      storySpec['repeat'] === undefined ? true : storySpec['repeat'];
+    const eventDetails = vars['eventDetails'];
+    const tagName = config['tagName'];
+
+    if (
+      tagName &&
+      eventDetails['tagName'] &&
+      tagName.toLowerCase() !== eventDetails['tagName']
+    ) {
+      return;
+    }
+
+    if (repeat === false && eventDetails['repeated']) {
+      return;
+    }
 
     listener(new AnalyticsEvent(rootTarget, type, vars));
   }
@@ -1378,7 +1395,7 @@ function removeInternalVars(details) {
   if (!details) {
     return details;
   }
-  const clean = Object.assign({}, details);
+  const clean = {...details};
   delete clean[videoAnalyticsCustomEventTypeKey];
   return /** @type {!JsonObject} */ (clean);
 }

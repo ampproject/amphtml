@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Direction, Orientation, SwipeToDismiss} from './swipe-to-dismiss';
 import {Gestures} from '../../../src/gesture';
@@ -124,12 +125,15 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private {boolean} */
     this.opened_ = false;
 
+    /** @private {?Element} */
+    this.nestedMenu_ = null;
+
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
       this.win,
       cb => this.mutateElement(cb),
       // The sidebar is already animated by swipe to dismiss, so skip animation.
-      () => this.dismiss_(true, ActionTrust.HIGH)
+      () => this.dismiss_(/*skipAnimation*/ true, ActionTrust.HIGH)
     );
   }
 
@@ -152,6 +156,13 @@ export class AmpSidebar extends AMP.BaseElement {
       );
       element.setAttribute('side', this.side_);
     }
+
+    this.maybeBuildNestedMenu_();
+    // Nested menu may not be present during buildCallback if it is rendered
+    // dynamically with amp-list, in which case listen for dom update.
+    element.addEventListener(AmpEvents.DOM_UPDATE, () => {
+      this.maybeBuildNestedMenu_();
+    });
 
     // Get the toolbar attribute from the child navs.
     const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));
@@ -240,6 +251,24 @@ export class AmpSidebar extends AMP.BaseElement {
     );
 
     this.setupGestures_(this.element);
+  }
+
+  /**
+   * Loads the extension for nested menu if sidebar contains one and it
+   * has not been installed already.
+   */
+  maybeBuildNestedMenu_() {
+    if (this.nestedMenu_) {
+      return;
+    }
+    const nestedMenu = this.element.querySelector('amp-nested-menu');
+    if (nestedMenu) {
+      Services.extensionsFor(this.win).installExtensionForDoc(
+        this.getAmpDoc(),
+        'amp-nested-menu'
+      );
+      this.nestedMenu_ = nestedMenu;
+    }
   }
 
   /**
@@ -435,7 +464,14 @@ export class AmpSidebar extends AMP.BaseElement {
     this.viewport_.enterOverlayMode();
     this.setUpdateFn_(() => this.updateForOpening_(trust));
     this.getHistory_()
-      .push(() => this.close_(trust))
+      .push(() => {
+        // In iOS, close on back without animation due to swipe-to-go-back
+        if (this.isIos_) {
+          this.dismiss_(/*skipAnimation*/ true, trust);
+        } else {
+          this.close_(trust);
+        }
+      })
       .then(historyId => {
         this.historyId_ = historyId;
       });
@@ -454,19 +490,19 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   close_(trust) {
-    return this.dismiss_(false, trust);
+    return this.dismiss_(/*skipAnimation*/ false, trust);
   }
 
   /**
    * Dismisses the sidebar.
-   * @param {boolean} immediate Whether sidebar should close immediately,
-   *     without animation.
+   * @param {boolean} skipAnimation Whether sidebar should close immediately,
+   *  skipping animation.
    * @param {!ActionTrust} trust
    * @return {boolean} Whether the sidebar actually transitioned from "visible"
    *     to "hidden".
    * @private
    */
-  dismiss_(immediate, trust) {
+  dismiss_(skipAnimation, trust) {
     if (!this.opened_) {
       return false;
     }
@@ -475,9 +511,9 @@ export class AmpSidebar extends AMP.BaseElement {
     const scrollDidNotChange =
       this.initialScrollTop_ == this.viewport_.getScrollTop();
     const sidebarIsActive = this.element.contains(this.document_.activeElement);
-    this.setUpdateFn_(() => this.updateForClosing_(immediate, trust));
+    this.setUpdateFn_(() => this.updateForClosing_(skipAnimation, trust));
     // Immediately hide the sidebar so that animation does not play.
-    if (immediate) {
+    if (skipAnimation) {
       toggle(this.element, /* display */ false);
       toggle(this.getMaskElement_(), /* display */ false);
     }
@@ -509,7 +545,8 @@ export class AmpSidebar extends AMP.BaseElement {
       /* shouldNotPreventDefault */ false,
       /* shouldStopPropagation */ true
     );
-    gestures.onGesture(SwipeXRecognizer, ({data}) => {
+    gestures.onGesture(SwipeXRecognizer, e => {
+      const {data} = e;
       this.handleSwipe_(data);
     });
   }

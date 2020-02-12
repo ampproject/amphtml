@@ -88,7 +88,6 @@ export function rewriteAttributesForElement(
  * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @return {string}
- * @private
  * @visibleForTesting
  */
 export function rewriteAttributeValue(tagName, attrName, attrValue) {
@@ -103,7 +102,12 @@ export function rewriteAttributeValue(tagName, attrName, attrValue) {
  * @return {boolean}
  */
 export function isUrlAttribute(attrName) {
-  return attrName == 'src' || attrName == 'href' || attrName == 'srcset';
+  return (
+    attrName == 'src' ||
+    attrName == 'href' ||
+    attrName == 'xlink:href' ||
+    attrName == 'srcset'
+  );
 }
 
 /**
