@@ -20,8 +20,12 @@ module.exports = function(context) {
   return {
     [expression](node) {
       if (node.arguments[1].type === 'ArrowFunctionExpression') {
-        context.report({node, message: 'The 2nd argument of registerServiceForDoc should not be an arrow function.'});
+        context.report({
+          node,
+          message:
+            'The 2nd argument of registerServiceForDoc should not be an arrow function.',
+        });
       }
-    }
+    },
   };
 };
