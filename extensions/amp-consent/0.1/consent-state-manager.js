@@ -362,7 +362,7 @@ export class ConsentInstance {
         return;
       }
 
-      const value = composeStoreValue(consentInfo, true);
+      const value = composeStoreValue(consentInfo);
       if (value == null) {
         // Value can be false, do not use !value check
         // Nothing to store to localStorage
