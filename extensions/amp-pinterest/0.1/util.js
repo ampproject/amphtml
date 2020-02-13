@@ -36,12 +36,12 @@ function log(queryParams) {
   }
   query = query + '&via=' + encodeURIComponent(window.location.href);
   call.src = query;
-};
+}
 
 /**
  * Strip data from string
  * @param {string} str - the string to filter
- * @returns {string}
+ * @return {string}
  */
 function filter(str) {
   let decoded, ret;
@@ -49,21 +49,24 @@ function filter(str) {
   ret = '';
   try {
     decoded = decodeURIComponent(str);
-  } catch (e) { }
+  } catch (e) {}
   ret = decoded.replace(/</g, '&lt;');
   ret = ret.replace(/>/g, '&gt;');
   return ret;
-};
+}
 
 /**
  * Create a DOM element with attributes
+ * @param {Document} doc
  * @param {Object} data - the string to filter
- * @returns {DOMElement}
+ * @return {Element}
  */
-function make(data) {
-  let el = false, tag, attr;
+function make(doc, data) {
+  let el = null,
+    tag,
+    attr;
   for (tag in data) {
-    el = document.createElement(tag);
+    el = doc.createElement(tag);
     for (attr in data[tag]) {
       if (typeof data[tag][attr] === 'string') {
         set(el, attr, data[tag][attr]);
@@ -72,11 +75,11 @@ function make(data) {
     break;
   }
   return el;
-};
+}
 
 /**
  * Set a DOM element attribute
- * @param {DOMElement} data - the string to filter
+ * @param {Element} el - The element
  * @param {string} attr - the attribute key
  * @param {string} value - the attribute value
  */
@@ -86,12 +89,6 @@ function set(el, attr, value) {
   } else {
     el.setAttribute(attr, value);
   }
-};
+}
 
-export const Util = {
-  filter: filter,
-  guid: guid,
-  log: log,
-  make: make,
-  set: set,
-};
+export const Util = {filter, guid, log, make, set};

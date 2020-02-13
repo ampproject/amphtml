@@ -19,23 +19,68 @@
  * connection before the real request can be made.
  */
 
-
-import {getService} from './service';
-import {parseUrl} from './url';
-import {timer} from './timer';
-import {platformFor} from './platform';
+import {Services} from './services';
+import {dev} from './log';
+import {htmlFor} from './static-template';
+import {parseUrlDeprecated} from './url';
+import {registerServiceBuilder} from './service';
+import {startsWith} from './string';
+import {whenDocumentComplete} from './document-ready';
 
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
 
-export class Preconnect {
+/**
+ * @typedef {{
+ *   preload: (boolean|undefined),
+ *   preconnect: (boolean|undefined)
+ * }}
+ */
+let PreconnectFeaturesDef;
 
+/** @private {?PreconnectFeaturesDef} */
+let preconnectFeatures = null;
+
+/**
+ * Detect related features if feature detection is supported by the
+ * browser. Even if this fails, the browser may support the feature.
+ * @param {!Window} win
+ * @return {!PreconnectFeaturesDef}
+ */
+function getPreconnectFeatures(win) {
+  if (!preconnectFeatures) {
+    const linkTag = win.document.createElement('link');
+    const tokenList = linkTag['relList'];
+    linkTag.as = 'invalid-value';
+    if (!tokenList || !tokenList.supports) {
+      return {};
+    }
+    preconnectFeatures = {
+      preconnect: tokenList.supports('preconnect'),
+      preload: tokenList.supports('preload'),
+      onlyValidAs: linkTag.as != 'invalid-value',
+    };
+  }
+  return preconnectFeatures;
+}
+
+/**
+ * @param {?PreconnectFeaturesDef} features
+ */
+export function setPreconnectFeaturesForTesting(features) {
+  preconnectFeatures = features;
+}
+
+export class PreconnectService {
   /**
    * @param {!Window} win
    */
   constructor(win) {
+    /** @private @const {!Document} */
+    this.document_ = win.document;
+
     /** @private @const {!Element} */
-    this.head_ = win.document.head;
+    this.head_ = dev().assertElement(win.document.head);
     /**
      * Origin we've preconnected to and when that connection
      * expires as a timestamp in MS.
@@ -47,18 +92,27 @@ export class Preconnect {
      * @private @const {!Object<string, boolean>}
      */
     this.urls_ = {};
-    /** @private @const {!Platform}  */
-    this.platform_ = platformFor(win);
+    /** @private @const {!./service/platform-impl.Platform}  */
+    this.platform_ = Services.platformFor(win);
     // Mark current origin as preconnected.
-    this.origins_[parseUrl(win.location.href).origin] = true;
+    this.origins_[parseUrlDeprecated(win.location.href).origin] = true;
 
-    /** @private {boolean} */
-    this.preloadSupported_ = this.isPreloadSupported_();
+    /**
+     * Detect support for the given resource hints.
+     * Unfortunately not all browsers support this, so this can only
+     * be used as an affirmative signal.
+     * @private @const {!PreconnectFeaturesDef}
+     */
+    this.features_ = getPreconnectFeatures(win);
+
+    /** @private @const {!./service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(win);
   }
 
   /**
    * Preconnects to a URL. Always also does a dns-prefetch because
    * browser support for that is better.
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {boolean=} opt_alsoConnecting Set this flag if you also just
    *    did or are about to connect to this host. This is for the case
@@ -68,37 +122,63 @@ export class Preconnect {
    *    when it is more fully rendered, you already know that the connection
    *    will be used very soon.
    */
-  url(url, opt_alsoConnecting) {
+  url(ampdoc, url, opt_alsoConnecting) {
+    ampdoc.whenFirstVisible().then(() => {
+      this.url_(ampdoc, url, opt_alsoConnecting);
+    });
+  }
+
+  /**
+   * Preconnects to a URL. Always also does a dns-prefetch because
+   * browser support for that is better.
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} url
+   * @param {boolean=} opt_alsoConnecting Set this flag if you also just
+   *    did or are about to connect to this host. This is for the case
+   *    where preconnect is issued immediate before or after actual connect
+   *    and preconnect is used to flatten a deep HTTP request chain.
+   *    E.g. when you preconnect to a host that an embed will connect to
+   *    when it is more fully rendered, you already know that the connection
+   *    will be used very soon.
+   * @private
+   */
+  url_(ampdoc, url, opt_alsoConnecting) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
-    const origin = parseUrl(url).origin;
-    const now = timer.now();
+    const {origin} = parseUrlDeprecated(url);
+    const now = Date.now();
     const lastPreconnectTimeout = this.origins_[origin];
     if (lastPreconnectTimeout && now < lastPreconnectTimeout) {
       if (opt_alsoConnecting) {
-        this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS ;
+        this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS;
       }
       return;
     }
     // If we are about to use the connection, don't re-preconnect for
     // 180 seconds.
     const timeout = opt_alsoConnecting
-        ? ACTIVE_CONNECTION_TIMEOUT_MS
-        : PRECONNECT_TIMEOUT_MS;
+      ? ACTIVE_CONNECTION_TIMEOUT_MS
+      : PRECONNECT_TIMEOUT_MS;
     this.origins_[origin] = now + timeout;
-    const dns = document.createElement('link');
-    dns.setAttribute('rel', 'dns-prefetch');
-    dns.setAttribute('href', origin);
-    const preconnect = document.createElement('link');
+    // If we know that preconnect is supported, there is no need to do
+    // dedicated dns-prefetch.
+    let dns;
+    if (!this.features_.preconnect) {
+      dns = this.document_.createElement('link');
+      dns.setAttribute('rel', 'dns-prefetch');
+      dns.setAttribute('href', origin);
+      this.head_.appendChild(dns);
+    }
+    const preconnect = this.document_.createElement('link');
     preconnect.setAttribute('rel', 'preconnect');
     preconnect.setAttribute('href', origin);
-    this.head_.appendChild(dns);
+    preconnect.setAttribute('referrerpolicy', 'origin');
     this.head_.appendChild(preconnect);
 
     // Remove the tags eventually to free up memory.
-    timer.delay(() => {
-      if (dns.parentNode) {
+    this.timer_.delay(() => {
+      if (dns && dns.parentNode) {
         dns.parentNode.removeChild(dns);
       }
       if (preconnect.parentNode) {
@@ -106,53 +186,78 @@ export class Preconnect {
       }
     }, 10000);
 
-    this.preconnectPolyfill_(origin);
+    this.preconnectPolyfill_(ampdoc, origin);
   }
 
   /**
-   * Asks the browser to prefetch a URL. Always also does a preconnect
+   * Asks the browser to preload a URL. Always also does a preconnect
    * because browser support for that is better.
    *
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
    * @param {string} url
    * @param {string=} opt_preloadAs
    */
-  prefetch(url, opt_preloadAs) {
+  preload(ampdoc, url, opt_preloadAs) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
     if (this.urls_[url]) {
       return;
     }
-    const command = this.preloadSupported_ ? 'preload' : 'prefetch';
     this.urls_[url] = true;
-    this.url(url, /* opt_alsoConnecting */ true);
-    const prefetch = document.createElement('link');
-    prefetch.setAttribute('rel', command);
-    prefetch.setAttribute('href', url);
-    if (opt_preloadAs) {
-      prefetch.setAttribute('as', opt_preloadAs);
+    this.url(ampdoc, url, /* opt_alsoConnecting */ true);
+    if (!this.features_.preload) {
+      return;
     }
-    this.head_.appendChild(prefetch);
+    if (opt_preloadAs == 'document' && this.platform_.isSafari()) {
+      // Preloading documents currently does not work in Safari,
+      // because it
+      // - does not support preloading iframes
+      // - and uses a different cache for iframes (when loaded without
+      //   as attribute).
+      return;
+    }
+    ampdoc.whenFirstVisible().then(() => {
+      this.performPreload_(url);
+    });
+  }
+
+  /**
+   * Performs a preload using `<link rel="preload">`.
+   * @param {string} url
+   * @private
+   */
+  performPreload_(url) {
+    const preload = htmlFor(this.document_)`
+        <link rel="preload" referrerpolicy="origin" />`;
+    preload.setAttribute('href', url);
+    // Do not set 'as' attribute to correct value for now, for 2 reasons
+    // - document value is not yet supported and dropped
+    // - script is blocked due to CSP.
+    // Due to spec change we now have to also preload with the "as"
+    // being set to `fetch` when it would previously would be empty.
+    // See https://github.com/w3c/preload/issues/80
+    // for details.
+    if (this.features_.onlyValidAs) {
+      preload.as = 'fetch';
+    } else {
+      preload.as = '';
+    }
+    this.head_.appendChild(preload);
     // As opposed to preconnect we do not clean this tag up, because there is
     // no expectation as to it having an immediate effect.
   }
 
+  /**
+   * Skips over non HTTP/HTTPS URL.
+   * @param {string} url
+   * @return {boolean}
+   */
   isInterestingUrl_(url) {
-    if (url.indexOf('https:') == 0 || url.indexOf('http:') == 0) {
+    if (startsWith(url, 'https:') || startsWith(url, 'http:')) {
       return true;
     }
     return false;
-  }
-
-  /** @private */
-  isPreloadSupported_() {
-    const tokenList = document.createElement('link').relList;
-    if (!tokenList || !tokenList.supports) {
-      this.preloadSupported_ = false;
-      return this.preloadSupported_;
-    }
-    this.preloadSupported_ = tokenList.supports('preload');
-    return this.preloadSupported_;
   }
 
   /**
@@ -170,36 +275,72 @@ export class Preconnect {
    * amp_preconnect_polyfill in your DevTools console or server log:
    * This is expected and fine to leave as is. Its fine to send a non 404
    * response, but please make it small :)
+   *
+   * @param {!./service/ampdoc-impl.AmpDoc} ampdoc
+   * @param {string} origin
+   * @private
    */
-  preconnectPolyfill_(origin) {
-    // Unfortunately there is no way to feature detect whether preconnect is
-    // supported, so we do this only in Safari, which is the most important
-    // browser without support for it. This needs to be removed should it
-    // ever add support.
-    if (!this.platform_.isSafari()) {
+  preconnectPolyfill_(ampdoc, origin) {
+    // Unfortunately there is no reliable way to feature detect whether
+    // preconnect is supported, so we do this only in Safari, which is
+    // the most important browser without support for it.
+    if (
+      this.features_.preconnect ||
+      !(this.platform_.isSafari() || this.platform_.isIos())
+    ) {
       return;
     }
+
     // Don't attempt to preconnect for ACTIVE_CONNECTION_TIMEOUT_MS since
     // we effectively create an active connection.
     // TODO(@cramforce): Confirm actual http2 timeout in Safari.
-    this.origins_[origin] = timer.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
-    const url = origin +
-        '/amp_preconnect_polyfill_404_or_other_error_expected.' +
-        '_Do_not_worry_about_it?' + Math.random();
-    // We use an XHR without withCredentials(true), so we do not send cookies
-    // to the host and the host cannot set cookies.
+    const now = Date.now();
+    this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS;
+    // Make the URL change whenever we want to make a new request,
+    // but make it stay stable in between. While a given page
+    // would not actually make a new request, another page might
+    // and with this it has the same URL. If (and that is a big if)
+    // the server responds with a cacheable response, this reduces
+    // requests we make. More importantly, though, it reduces URL
+    // entropy as seen by servers and thus allows reverse proxies
+    // (read CDNs) to respond more efficiently.
+    const cacheBust = now - (now % ACTIVE_CONNECTION_TIMEOUT_MS);
+    const url =
+      origin +
+      '/robots.txt?_AMP_safari_preconnect_polyfill_cachebust=' +
+      cacheBust;
     const xhr = new XMLHttpRequest();
     xhr.open('HEAD', url, true);
+    // We only support credentialed preconnect for now.
+    xhr.withCredentials = true;
+
     xhr.send();
   }
 }
 
 /**
  * @param {!Window} window
- * @return {!Preconnect}
  */
-export function preconnectFor(window) {
-  return getService(window, 'preconnect', () => {
-    return new Preconnect(window);
+export function installPreconnectService(window) {
+  registerServiceBuilder(window, 'preconnect', PreconnectService);
+}
+
+/**
+ * Preconnects to the source URL and canonical domains to make sure
+ * outbound navigations are quick. Waits for onload to avoid blocking
+ * more high priority loads.
+ * @param {!Document} document
+ * @return {Promise} When work is done.
+ */
+export function preconnectToOrigin(document) {
+  return whenDocumentComplete(document).then(() => {
+    const win = document.defaultView;
+    if (win) {
+      const preconnect = Services.preconnectFor(win);
+      const info = Services.documentInfoForDoc(document.documentElement);
+      const ampdoc = Services.ampdoc(document);
+      preconnect.url(ampdoc, info.sourceUrl);
+      preconnect.url(ampdoc, info.canonicalUrl);
+    }
   });
-};
+}

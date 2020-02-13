@@ -13,31 +13,172 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var argv = require('minimist')(process.argv.slice(2));
-var gulp = require('gulp-help')(require('gulp'));
-var gls = require('gulp-live-server');
-var path = require('path');
-var util = require('gulp-util');
+const connect = require('gulp-connect');
+const globby = require('globby');
+const header = require('connect-header');
+const log = require('fancy-log');
+const minimist = require('minimist');
+const morgan = require('morgan');
+const watch = require('gulp-watch');
+const {
+  lazyBuildExtensions,
+  lazyBuildJs,
+  preBuildRuntimeFiles,
+  preBuildExtensions,
+} = require('../server/lazy-build');
+const {createCtrlcHandler} = require('../common/ctrlcHandler');
+const {cyan, green} = require('ansi-colors');
+const {logServeMode, setServeMode} = require('../server/app-utils');
 
-var port = argv.port || process.env.PORT || 8000;
+const argv = minimist(process.argv.slice(2), {string: ['rtv']});
+
+// Used for logging.
+let url = null;
+let quiet = !!argv.quiet;
+
+// Used for live reload.
+const serverFiles = globby.sync(['build-system/server/**']);
+
+// Used to enable / disable lazy building.
+let lazyBuild = false;
 
 /**
- * Starts a simple http server at the repository root
+ * Returns a list of middleware handler functions to use while serving
+ * @return {!Array<function()>}
  */
-function serve() {
-  var serverScript = path.join(__dirname, '../server.js')
-  var server = gls.new([serverScript, (argv.path || '/'), port]);
-  server.start();
-  util.log(util.colors.yellow(
-    'Run `gulp build` then go to http://localhost:' + port + '/examples.build/article.amp.max.html'
-  ));
+function getMiddleware() {
+  const middleware = [require('../server/app')]; // Lazy-required to enable live-reload
+  if (!quiet) {
+    middleware.push(morgan('dev'));
+  }
+  if (argv.cache) {
+    middleware.push(header({'cache-control': 'max-age=600'}));
+  }
+  if (lazyBuild) {
+    middleware.push(lazyBuildExtensions);
+    middleware.push(lazyBuildJs);
+  }
+  return middleware;
 }
 
-gulp.task('serve', 'Serves content in root dir over http://localhost:' +
-  port + '/', serve, {
-    options: {
-      'port': '  Specifies alternative port to use instead of default (8000)'
-    }
+/**
+ * Launches a server and waits for it to fully start up
+ *
+ * @param {?Object} connectOptions
+ * @param {?Object} serverOptions
+ * @param {?Object} modeOptions
+ */
+async function startServer(
+  connectOptions = {},
+  serverOptions = {},
+  modeOptions = {}
+) {
+  if (serverOptions.lazyBuild) {
+    lazyBuild = serverOptions.lazyBuild;
   }
-);
+  if (serverOptions.quiet) {
+    quiet = serverOptions.quiet;
+  }
+
+  let started;
+  const startedPromise = new Promise(resolve => {
+    started = resolve;
+  });
+  setServeMode(modeOptions);
+  const options = {
+    name: 'AMP Dev Server',
+    root: process.cwd(),
+    host: argv.host || 'localhost',
+    port: argv.port || 8000,
+    https: argv.https,
+    preferHttp1: true,
+    silent: true,
+    middleware: getMiddleware,
+    ...connectOptions,
+  };
+  connect.server(options, started);
+  await startedPromise;
+  url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
+  log(green('Started'), cyan(options.name), green('at'), cyan(url));
+  logServeMode();
+}
+
+/**
+ * Clears server files from the require cache to allow for in-process server
+ * live-reload.
+ */
+function resetServerFiles() {
+  for (const serverFile in serverFiles) {
+    delete require.cache[serverFiles[serverFile]];
+  }
+}
+
+/**
+ * Stops the currently running server
+ */
+function stopServer() {
+  if (url) {
+    connect.serverClose();
+    log(green('Stopped server at'), cyan(url));
+    url = null;
+  }
+}
+
+/**
+ * Closes the existing server and restarts it
+ */
+function restartServer() {
+  stopServer();
+  resetServerFiles();
+  startServer();
+}
+
+/**
+ * Performs pre-build steps requested via command line args.
+ */
+async function performPreBuildSteps() {
+  await preBuildRuntimeFiles();
+  await preBuildExtensions();
+}
+
+/**
+ * Entry point of the `gulp serve` task.
+ */
+async function serve() {
+  await doServe();
+}
+
+/**
+ * Starts a webserver at the repository root to serve built files.
+ * @param {boolean=} lazyBuild
+ */
+async function doServe(lazyBuild = false) {
+  createCtrlcHandler('serve');
+  watch(serverFiles, restartServer);
+  await startServer({}, {lazyBuild}, {});
+  if (lazyBuild) {
+    await performPreBuildSteps();
+  }
+}
+
+module.exports = {
+  serve,
+  doServe,
+  startServer,
+  stopServer,
+};
+
+serve.description = 'Starts a webserver at the project root directory';
+serve.flags = {
+  'host': '  Hostname or IP address to bind to (default: localhost)',
+  'port': '  Specifies alternative port (default: 8000)',
+  'https': '  Use HTTPS server',
+  'quiet': "  Run in quiet mode and don't log HTTP requests",
+  'cache': '  Make local resources cacheable by the browser',
+  'no_caching_extensions': '  Disable caching for extensions',
+  'compiled': '  Serve minified JS',
+  'cdn': '  Serve current prod JS',
+  'rtv': '  Serve JS from the RTV provided',
+};

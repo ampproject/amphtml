@@ -1,3 +1,0 @@
-FAIL
-feature_tests/amp_carousel.html:31:2 The attribute 'delay' in tag 'amp-carousel' is set to the invalid value ''. (see https://www.ampproject.org/docs/reference/extended/amp-carousel.html) [AMP_TAG_PROBLEM]
-feature_tests/amp_carousel.html:40:7 The tag 'amp-carousel extension .js script' is missing or incorrect, but required by 'amp-carousel'. (see https://www.ampproject.org/docs/reference/extended/amp-carousel.html) [AMP_TAG_PROBLEM]

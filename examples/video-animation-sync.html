@@ -1,0 +1,97 @@
+<!doctype html>
+<html ⚡>
+
+<head>
+  <meta charset="utf-8">
+  <title>amp-position-observer</title>
+  <link rel="canonical" href="amps.html">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script async custom-element="amp-animation" src="https://cdn.ampproject.org/v0/amp-animation-0.1.js"></script>
+  <script async custom-element="amp-position-observer" src="https://cdn.ampproject.org/v0/amp-position-observer-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+
+  <style amp-custom>
+    main {
+      font-family: Helvetica, sans-serif;
+      padding: 10px;
+      max-width: 412px;
+      margin: auto;
+    }
+
+    h1, h2, h3, h4 {
+      font-weight: normal;
+    }
+
+    amp-img img {
+      object-fit: cover;
+    }
+
+    .clock-hand {
+      position: absolute;
+      width: 2vw;
+      height: 20vw;
+      max-height: 90px;
+      max-width: 10px;
+      top: 50%;
+      left: 50%;
+      z-index: 2;
+      background: #FAFAFA;
+      transform-origin: 50% 0%;
+      border-radius: 10px;
+      transform: rotate(-180deg)
+    }
+
+    .spacer {
+      height: 70vh;
+      width: 100%;
+      background-image: -webkit-linear-gradient(#EEE 50%, white 50%);
+      background-image: linear-gradient(#EEE 50%, white 50%);
+      background-size: 100% 3em;
+    }
+
+    pre {
+      display: inline;
+    }
+  </style>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+  <amp-animation id="clockAnim" layout="nodisplay">
+    <script type="application/json">
+      {
+      "duration": "6s",
+      "fill": "both",
+      "animations": [
+        {
+          "selector": "#clock-scene .clock-hand",
+          "keyframes": [
+            { "transform": "rotate(-180deg)" },
+            { "transform": "rotate(180deg)" }
+          ]
+        }
+      ]
+    }
+    </script>
+  </amp-animation>
+  <main>
+    <h1>The clock animation timeline is synced with youtube animation timeline</h1>
+    <div id="clock-scene" class="clock-scene">
+      <amp-img layout="responsive" width=2 height=1.5 src="./img/clock.jpg">
+        <div class="clock-hand"></div>
+      </amp-img>
+    </div>
+    <amp-youtube
+        on="timeUpdate:clockAnim.seekTo(percent=event.percent)"
+        id="myYouTube"
+        data-videoid="VrS6akzR3sk"
+        width="358"
+        height="204"
+        layout="responsive">
+    </amp-youtube>
+    </div>
+    <div class="spacer"></div>
+  </main>
+</body>
+</html>

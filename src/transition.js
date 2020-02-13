@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-import {getCurve} from './curve';
 import * as st from './style';
+import {assertNotDisplay, setStyle} from './style';
+import {getCurve} from './curve';
 
-
-/**
- * TransitionDef function that accepts normtime, typically between 0 and 1 and
- * performs an arbitrary animation action. Notice that sometimes normtime can
- * dip above 1 or below 0. This is an acceptable case for some curves. The
- * second argument is a boolean value that equals "true" for the completed
- * transition and "false" for ongoing.
- * @typedef {function(normtime, boolean):RESULT}
- * @template RESULT
- */
-class TransitionDef {}
-
-
-export const NOOP = function(unusedTime) {return null;};
-
+export const NOOP = function(unusedTime) {
+  return null;
+};
 
 /**
  * Returns a transition that combines a number of other transitions and
@@ -48,22 +37,42 @@ export function all(transitions) {
   };
 }
 
+/**
+ * Returns a transition that combines the string result of other string-based
+ * transitions such as transform and scale using the given opt_delimiter.
+ * @param {!Array<!TransitionDef<string>>} transitions
+ * @param {string=} opt_delimiter Defaults to a single whitespace.
+ * @return {!TransitionDef<string>}
+ */
+export function concat(transitions, opt_delimiter = ' ') {
+  return (time, complete) => {
+    const results = [];
+    for (let i = 0; i < transitions.length; i++) {
+      const tr = transitions[i];
+      const result = tr(time, complete);
+      if (typeof result == 'string') {
+        results.push(result);
+      }
+    }
+    return results.join(opt_delimiter);
+  };
+}
 
 /**
  * Returns the specified transition with the time curved via specified curve
  * function.
  * @param {!TransitionDef<RESULT>} transition
- * @param {!Curve|string} curve
+ * @param {!./curve.CurveDef|string} curve
  * @return {!TransitionDef<RESULT>}
  * @template RESULT
  */
 export function withCurve(transition, curve) {
-  curve = getCurve(curve);
+  /** @const {?./curve.CurveDef} */
+  const curveFn = getCurve(curve);
   return (time, complete) => {
-    return transition(complete ? 1 : curve(time), complete);
+    return transition(complete ? 1 : curveFn(time), complete);
   };
 }
-
 
 /**
  * A transition that sets the CSS style of the specified element. The styles
@@ -76,11 +85,10 @@ export function withCurve(transition, curve) {
 export function setStyles(element, styles) {
   return (time, complete) => {
     for (const k in styles) {
-      st.setStyle(element, k, styles[k](time, complete));
+      setStyle(element, assertNotDisplay(k), styles[k](time, complete));
     }
   };
 }
-
 
 /**
  * A basic numeric interpolation.
@@ -93,7 +101,6 @@ export function numeric(start, end) {
     return start + (end - start) * time;
   };
 }
-
 
 /**
  * Spring numeric interpolation.
@@ -113,11 +120,9 @@ export function spring(start, end, extended, threshold) {
     if (time < threshold) {
       return start + (extended - start) * (time / threshold);
     }
-    return extended + (end - extended) * ((time - threshold) /
-        (1 - threshold));
+    return extended + (end - extended) * ((time - threshold) / (1 - threshold));
   };
 }
-
 
 /**
  * Adds "px" units.
@@ -129,7 +134,6 @@ export function px(transition) {
     return transition(time) + 'px';
   };
 }
-
 
 /**
  * A transition for "translateX" of CSS "transform" property.
@@ -146,6 +150,20 @@ export function translateX(transition) {
   };
 }
 
+/**
+ * A transition for "translateY" of CSS "transform" property.
+ * @param {!TransitionDef<number|string>} transition
+ * @return {!TransitionDef<string>}
+ */
+export function translateY(transition) {
+  return time => {
+    const res = transition(time);
+    if (typeof res == 'string') {
+      return `translateY(${res})`;
+    }
+    return `translateY(${res}px)`;
+  };
+}
 
 /**
  * A transition for "translate(x, y)" of CSS "transform" property.
@@ -170,7 +188,6 @@ export function translate(transitionX, opt_transitionY) {
     return `translate(${x},${y})`;
   };
 }
-
 
 /**
  * A transition for "scale" of CSS "transform" property.

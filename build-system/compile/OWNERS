@@ -1,0 +1,33 @@
+// For an explanation of the OWNERS rules and syntax, see:
+// https://github.com/ampproject/amp-github-apps/blob/master/owners/OWNERS.example
+
+{
+  rules: [
+    {
+      owners: [{name: 'ampproject/wg-infra'}],
+    },
+    {
+      pattern: '{build.conf,bundles.config,sources}.js',
+      owners: [
+        {name: 'ampproject/wg-infra'},
+        {name: 'ampproject/wg-runtime'},
+        {name: 'ampproject/wg-performance'},
+      ],
+    },
+    {
+      pattern: '{closure-compile,compile}.js',
+      owners: [{name: 'rsimha', notify: true}],
+    },
+    {
+      pattern: 'single-pass.js',
+      owners: [
+        {name: 'erwinmombay', notify: true},
+        {name: 'rsimha', notify: true},
+      ],
+    },
+    {
+      pattern: 'internal-version.js',
+      owners: [{name: 'danielrozenberg', notify: true}],
+    },
+  ],
+}

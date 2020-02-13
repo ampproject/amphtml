@@ -19,75 +19,121 @@ limitations under the License.
 A validator for the
 [AMP HTML format](https://github.com/ampproject/amphtml/blob/master/README.md).
 
-This is a very first release, rough on the edges. Fasten your seatbelts.
+If you just want to validate a page, please see
+[our documentation over at amp.dev](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp).
 
-Prerequisite: Linux Ubuntu 14 or similar, or Mac OS X 10.11.x or later
+## Chrome Extension
 
-###Mac OS X
+Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
 
-See [Building a command-line AMP Validator: Mac OS X](https://github.com/ampproject/amphtml/blob/master/validator/docs/building_a_command_line_amp_validator_for_mac_os_x.md).
+## Visual Studio Code Extension
 
-###Linux
+An extension for Visual Studio Code
+[VSCode marketplace](https://marketplace.visualstudio.com/items?itemName=amphtml.amphtml-validator)
+
+## Command Line Tool and Node.js API
+
+Please see [nodejs/README.md](https://github.com/ampproject/amphtml/blob/master/validator/nodejs/README.md).
+
+## Web UI
+
+Please see [webui/README.md](https://github.com/ampproject/amphtml/blob/master/validator/webui/README.md).
+
+## JSON
+
+The validator rules are exported in the JSON format and hosted on: `https://cdn.ampproject.org/v0/validator.json`
+
+The JSON rules are provided on best-effort basis and it's not recommended to
+rely on them in a production environment.
+
+## Building a Custom Validator
+
+This is only useful for development - e.g. when making changes to
+`engine/validator.js` or when authoring an AMP extension, and it's rough around
+the edges. Below are instructions for Linux Ubuntu 14.
+
+## Installation
+
+### Linux
 
 Install these packages using apt-get:
-* npm
-* nodejs
-* openjdk-7-jre
-* protobuf-compiler
-* python-protobuf
-* python2.7
 
-Then, run `build.py`. It creates `dist/validate`, a script which
-can print AMP HTML validation errors to the console.
+- `npm`
+- `openjdk-7-jre`
+- `protobuf-compiler`
+- `python2.7`
 
+Then use pip to `pip install protobuf`.
+
+In addition, install Node.js v4.4.2. E.g.,
+[by downloading](https://nodejs.org/en/download/) or
+[by using a package manager](https://nodejs.org/en/download/package-manager/) or
+[by using NVM](https://github.com/creationix/nvm).
+
+### OSX
+
+Dependencies:
+
+- npm
+- python 2.7 (should already be installed on OSX)
+- [homebrew](https://brew.sh/)
+
+  - protobuf
+
+    ```sh
+    brew install protobuf
+    mkdir -p /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages
+    echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages/homebrew.pth
+    ```
+
+  - openjdk-7-jre
+    ```sh
+    brew tap caskroom/cask
+    brew install Caskroom/cask/java
+    ```
+
+### Usage
+
+Then, run `python build.py`. This creates `dist/validator_minified.js`, which is
+equivalent to the validator deployed at cdn.ampproject.org. You may now
+use the `--validator_js` command line flag to
+[amphtml-validator](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp#command-line-tool) to use this validator.
+
+For use for testing with extensions, you can simply run `python build.py`
+to run all of the validator tests in the amphtml repo.
+To create/update `validator-*.out` files that are used in the test,
+run `python build.py --update_tests`.
+
+```sh
+$ amphtml-validator --validator_js dist/validator_minified.js testdata/feature_tests/several_errors.html
+testdata/feature_tests/several_errors.html:23:2 The attribute 'charset' may not appear in tag 'meta name= and content='.
+testdata/feature_tests/several_errors.html:26:2 The tag 'script' is disallowed except in specific forms.
+testdata/feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img)
+testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://amp.dev/documentation/components/amp-ad)
+...
 ```
-$ dist/validate
-usage: validate <file.html>
-$ dist/validate testdata/minimum_valid_amp.html
-PASS
-$ touch empty.html
-$ dist/validate empty.html
-FAIL
-empty.html:1:0 The mandatory tag 'html doctype' is missing or
-incorrect. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'html ⚡ for top-level html' is
-missing or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#ampd)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'head' is missing or incorrect.
-(see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'link rel=canonical' is missing
-or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'meta charset=utf-8' is missing
-or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'meta name=viewport' is missing
-or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'body' is missing or incorrect.
-(see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'amphtml engine v0.js script' is
-missing or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'noscript enclosure for
-boilerplate' is missing or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'boilerplate (js enabled)' is
-missing or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-empty.html:1:0 The mandatory tag 'boilerplate (noscript)' is
-missing or incorrect. (see
-https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
-[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+
+### Building on MacOS
+
+_Note: This is for building the validator from source. If you are simply running validator tests for extensions, see the Installation steps instead._
+
+- Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/).
+- Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
+- If your [npm](https://www.npmjs.com/) is out of date, run `npm i -g npm` to update it.
+
+To verify that you have the necessary prerequisites, run and verify:
+
+```sh
+$ protoc --version
+libprotoc 3.5.1
 ```
+
+and
+
+```sh
+$ python
+>>> import google.protobuf
+>>>
+```
+
+Now `cd amphtml/validator` and run `python build.py`.

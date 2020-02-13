@@ -1,3 +1,11 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Soundcloud clip.
+---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,100 +22,86 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-soundcloud"></a>amp-soundcloud
+# amp-soundcloud
+
+Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td> Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-soundcloud" src="https://cdn.ampproject.org/v0/amp-soundcloud-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-soundcloud/">amp-soundcloud.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/soundcloud.amp.html">soundcloud.amp.html</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-soundcloud/">Annotated code example for amp-soundcloud</a></td>
   </tr>
 </table>
 
-## Examples 
+[TOC]
+
+## Examples
+
+With the responsive layout, the `width` and `height` from the example should yield correct layouts for 1:1 aspect ratio embeds:
 
 Visual Mode:
+
 ```html
-<amp-soundcloud height=657
-    layout="fixed-height"
-    data-trackid="243169232"
-    data-visual="true"></amp-soundcloud>
+<amp-soundcloud
+  width="480"
+  height="480"
+  layout="responsive"
+  data-trackid="243169232"
+  data-visual="true"
+></amp-soundcloud>
 ```
 
 Classic Mode:
+
 ```html
-<amp-soundcloud height=657
-    layout="fixed-height"
-    data-trackid="243169232"
-    data-color="ff5500"></amp-soundcloud>
+<amp-soundcloud
+  width="480"
+  height="480"
+  layout="responsive"
+  data-trackid="243169232"
+  data-color="ff5500"
+></amp-soundcloud>
 ```
 
-## Required attributes
-
-**data-trackid**
-
-The ID of the track, an integer.
-
-## Optional attributes
-
-**data-visual**
-
-Value: `"true"` or `"false"`
-
-Default value: `"false"`
-
-If set to true, displays full width "Visual" mode. Otherwise, displays "Classic"
-mode.
-
-**data-color**
-
-Value: Hexadecimal color value (without the leading #).
-E.g. `data-color="e540ff"`
-
-Custom color override for the "Classic" mode. Ignored in "Visual" mode.
-
-**width and height**
-Layout is `fixed-height` and will fill all the available horizontal space. This is ideal for "Classic" mode, but for "Visual", height is recommended to be 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.
-
-## Validation errors
-
-The following lists validation errors specific to the `amp-soundcloud` tag
-(see also `amp-soundcloud` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+## Attributes
 
 <table>
   <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
+    <td width="40%"><strong>data-trackid</strong></td>
+    <td>This attribute is required if <code>data-playlistid</code> is not defined.<br />
+The value for this attribute is the ID of a track, an integer.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-soundcloud</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+    <td width="40%"><strong>data-playlistid</strong></td>
+    <td>This attribute is required if <code>data-trackid</code> is not defined.
+The value for this attribute is the ID of a playlist, an integer.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-    <td>Error thrown when <code>data-trackid</code> attribute missing.</td>
+    <td width="40%"><strong>data-secret-token (optional)</strong></td>
+    <td>The secret token of the track, if it is private.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
-    <td>Error thrown when the <code>data-trackid</code> attribute is invalid. Only integers allowed.</td>
+    <td width="40%"><strong>data-visual (optional)</strong></td>
+    <td>If set to <code>true</code>, displays full-width "Visual" mode; otherwise, it displays as "Classic" mode. The default value is <code>false</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>The only supported layout type is <code>FIXED_HEIGHT</code>. Error thrown if implied layout is any other value.</td>
+    <td width="40%"><strong>data-color (optional)</strong></td>
+    <td>This attribute is a custom color override for the "Classic" mode. The attribute is ignored in "Visual" mode. Specify a hexadecimal color value, without the leading # (e.g., <code>data-color="e540ff"</code>).</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>The only supported layout type is <code>FIXED_HEIGHT</code>. Error thrown if specified layout is any other value.</td>
+    <td width="40%"><strong>width and height</strong></td>
+    <td>The layout for <code>amp-soundcloud</code> is set to <code>fixed-height</code> and it fills all of the available horizontal space. This is ideal for the "Classic" mode, but for "Visual" mode, it's recommended that the height is 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.</td>
   </tr>
 </table>
+
+## Validation
+
+See [amp-soundcloud rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/validator-amp-soundcloud.protoascii) in the AMP validator specification.

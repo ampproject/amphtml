@@ -1,0 +1,56 @@
+{
+  "bookendVersion": "v1.0",
+  "shareProviders": [
+    "email",
+    "facebook",
+    "twitter",
+    "pinterest",
+    "whatsapp",
+    "gplus"
+  ],
+  "components": [
+    {
+      "type": "heading",
+      "text": "أمثلة"
+    },
+    {
+      "type": "small",
+      "title": "صغير",
+      "url": "http://example.com/1.html",
+      "image": "/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+    },
+    {
+      "type": "landscape",
+      "title": "أفقي",
+      "url": "http://example.com/2.html",
+      "image": "/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+    },
+    {
+      "type": "portrait",
+      "title": "عمودي",
+      "url": "http://example.com/3.html",
+      "image": "/examples/visual-tests/picsum.photos/image981_1600x900.jpg"
+    },
+    {
+      "type": "cta-link",
+      "links": [
+        {
+          "text": "واحد",
+          "url": "http://example.com/4.html"
+        },
+        {
+          "text": "اثنان",
+          "url": "http://example.com/4.html"
+        },
+        {
+          "text": "ثلاثة",
+          "url": "http://example.com/4.html"
+        }
+      ]
+    },
+    {
+      "type": "textbox",
+      "text": ["نهاد حداد", "كاظم الساهر", "أم كلثوم", "فريد الأطرش"]
+    }
+  ]
+}

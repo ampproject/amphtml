@@ -1,0 +1,10 @@
+<!doctype html>
+<body style="background-color: red">
+<iframe id="inner-frame"></iframe>
+<script>
+  var innerFrame = document.getElementById('inner-frame');
+  if (innerFrame) {
+    innerFrame.src = 'iframe-intersection.html' + location.hash;
+  }
+</script>
+</body>

@@ -16,7 +16,9 @@
 
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
-import {computeInMasterFrame, loadScript} from '../src/3p';
+import {loadScript} from './3p';
+import {setStyles} from '../src/style';
+import {startsWith} from '../src/string';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -27,11 +29,20 @@ import {computeInMasterFrame, loadScript} from '../src/3p';
  * @param {function(!Object)} cb
  */
 function getTwttr(global, cb) {
-  computeInMasterFrame(global, 'twttrCbs', done => {
-    loadScript(global, 'https://platform.twitter.com/widgets.js', () => {
-      done(global.twttr);
-    });
-  }, cb);
+  loadScript(global, 'https://platform.twitter.com/widgets.js', () => {
+    cb(global.twttr);
+  });
+  // Temporarily disabled the code sharing between frames.
+  // The iframe throttling implemented in modern browsers can break with this,
+  // because things may execute in frames that are currently throttled, even
+  // though they are needed in the main frame.
+  // See https://github.com/ampproject/amphtml/issues/3220
+  //
+  // computeInMasterFrame(global, 'twttrCbs', done => {
+  //  loadScript(global, 'https://platform.twitter.com/widgets.js', () => {
+  //    done(global.twttr);
+  //  });
+  //}, cb);
 }
 
 /**
@@ -39,36 +50,112 @@ function getTwttr(global, cb) {
  * @param {!Object} data
  */
 export function twitter(global, data) {
-  const tweet = document.createElement('div');
+  const tweet = global.document.createElement('div');
   tweet.id = 'tweet';
-  tweet.style.width = '100%';
+  setStyles(tweet, {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  });
   global.document.getElementById('c').appendChild(tweet);
   getTwttr(global, function(twttr) {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;
-    twttr.widgets.createTweet(data.tweetid, tweet, data)./*OK*/then(() => {
-      const iframe = global.document.querySelector('#c iframe');
-      // There is no iframe if the tweet was deleted. Thanks for resolving
-      // the promise, though :)
-      if (iframe && iframe.contentWindow) {
-        // Unfortunately the tweet isn't really done at this time.
-        // We listen for resize to learn when things are
-        // really done.
-        iframe.contentWindow.addEventListener('resize', function() {
-          render();
-        }, true);
-        render();
-      }
-    });
+
+    if (data.tweetid) {
+      twttr.widgets
+        .createTweet(cleanupTweetId_(data.tweetid), tweet, data)
+        ./*OK*/ then(el => tweetCreated(twttr, el));
+    } else if (data.momentid) {
+      twttr.widgets
+        .createMoment(data.momentid, tweet, data)
+        ./*OK*/ then(el => tweetCreated(twttr, el));
+    } else if (data.timelineSourceType) {
+      // Extract properties starting with 'timeline'.
+      const timelineData = Object.keys(data)
+        .filter(prop => startsWith(prop, 'timeline'))
+        .reduce((newData, prop) => {
+          newData[stripPrefixCamelCase(prop, 'timeline')] = data[prop];
+          return newData;
+        }, {});
+      twttr.widgets
+        .createTimeline(timelineData, tweet, data)
+        ./*OK*/ then(el => tweetCreated(twttr, el));
+    }
   });
 
+  /**
+   * Handles a tweet or moment being created, resizing as necessary.
+   * @param {!Object} twttr
+   * @param {?Element} el
+   */
+  function tweetCreated(twttr, el) {
+    if (!el) {
+      global.context.noContentAvailable();
+      return;
+    }
 
-  function render() {
-    const iframe = global.document.querySelector('#c iframe');
-    const body = iframe.contentWindow.document.body;
-    context.updateDimensions(
-        body./*OK*/offsetWidth,
-        body./*OK*/offsetHeight + /* margins */ 20);
+    resize(el);
+    twttr.events.bind('resize', event => {
+      // To be safe, make sure the resize event was triggered for the widget we
+      // created below.
+      if (el === event.target) {
+        resize(el);
+      }
+    });
   }
+
+  /**
+   * @param {!Element} container
+   */
+  function resize(container) {
+    const height = container./*OK*/ offsetHeight;
+    // 0 height is always wrong and we should get another resize request
+    // later.
+    if (height == 0) {
+      return;
+    }
+    context.updateDimensions(
+      container./*OK*/ offsetWidth,
+      height + /* margins */ 20
+    );
+  }
+
+  /**
+   * @param {string} input
+   * @param {string} prefix
+   * @return {*} TODO(#23582): Specify return type
+   */
+  function stripPrefixCamelCase(input, prefix) {
+    const stripped = input.replace(new RegExp('^' + prefix), '');
+    return stripped.charAt(0).toLowerCase() + stripped.substr(1);
+  }
+}
+
+/**
+ * @param {string} tweetid
+ * @visibleForTesting
+ * @return {*} TODO(#23582): Specify return type
+ */
+export function cleanupTweetId_(tweetid) {
+  // 1)
+  // Handle malformed ids such as
+  // https://twitter.com/abc123/status/585110598171631616
+  tweetid = tweetid.toLowerCase();
+  let match = tweetid.match(/https:\/\/twitter.com\/[^\/]+\/status\/(\d+)/);
+  if (match) {
+    return match[1];
+  }
+
+  // 2)
+  // Handle malformed ids such as
+  // 585110598171631616?ref_src
+  match = tweetid.match(/^(\d+)\?ref.*/);
+  if (match) {
+    return match[1];
+  }
+
+  return tweetid;
 }

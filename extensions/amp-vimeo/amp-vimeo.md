@@ -1,3 +1,11 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Vimeo video.
+---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,26 +22,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-vimeo"></a> `amp-vimeo`
+# amp-vimeo
+
+Displays a <a href="https://vimeo.com">Vimeo</a> video.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays a <a href="https://vimeo.com">Vimeo</a> video.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-vimeo" src="https://cdn.ampproject.org/v0/amp-vimeo-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, responsive</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-vimeo/">amp-vimeo.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/vimeo.amp.html">vimeo.amp.html</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-vimeo/">Annotated code example for amp-vimeo</a></td>
   </tr>
 </table>
+
+[TOC]
 
 ## Example
 
@@ -41,51 +49,32 @@ With responsive layout, the width and height from the example should yield corre
 
 ```html
 <amp-vimeo
-    data-videoid="27246366"
-    layout="responsive"
-    width="500" height="281"></amp-vimeo>
+  data-videoid="27246366"
+  layout="responsive"
+  width="500"
+  height="281"
+></amp-vimeo>
 ```
 
 ## Attributes
 
-**data-videoid**
-
-The Vimeo video id found in every Vimeo video page URL
-
-E.g. in https://vimeo.com/27246366 27246366 is the video id.
-
-## Validation errors
-
-The following lists validation errors specific to the `amp-vimeo` tag
-(see also `amp-vimeo` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
-
 <table>
   <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
+    <td width="40%"><strong>data-videoid (required)</strong></td>
+    <td>The Vimeo video id found in every Vimeo video page URL For example, <code>27246366</code> is the video id for the following url: <code>https://vimeo.com/27246366</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-vimeo</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+    <td width="40%"><strong>autoplay</strong></td>
+    <td>If this attribute is present, and the browser supports autoplay, the video will be automatically
+played as soon as it becomes visible. There are some conditions that the component needs to meet
+to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/amp-video-interface.md#autoplay">which are outlined in the Video in AMP spec</a>.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-    <td>Error thrown when <code>data-videoid</code> attribute missing.</td>
-  </tr>
-    <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
-    <td>Error thrown when the <code>data-videoid</code> attribute is invalid. Only integers allowed.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property 'example1' in attribute 'example2' in tag 'example3' is set to 'example4', which is invalid.</a></td>
-    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types.</td>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
   </tr>
 </table>
+
+## Validation
+
+See [amp-vimeo rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/validator-amp-vimeo.protoascii) in the AMP validator specification.

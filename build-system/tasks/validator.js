@@ -13,16 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+'use strict';
 
-var gulp = require('gulp-help')(require('gulp'));
-var execSync = require('child_process').execSync;
+const argv = require('minimist')(process.argv.slice(2));
+const {execOrDie} = require('../common/exec');
 
+let validatorArgs = '';
+if (argv.update_tests) {
+  validatorArgs += ' --update_tests';
+}
 
 /**
  * Simple wrapper around the python based validator build.
  */
-function validator() {
-  execSync('cd validator && python build.py')
+async function validator() {
+  execOrDie('cd validator && python build.py' + validatorArgs);
 }
 
-gulp.task('validator', 'Builds and tests the AMP validator.', validator);
+/**
+ * Simple wrapper around the python based validator webui build.
+ */
+async function validatorWebui() {
+  execOrDie('cd validator/webui && python build.py' + validatorArgs);
+}
+
+module.exports = {
+  validator,
+  validatorWebui,
+};
+
+validator.description = 'Builds and tests the AMP validator.';
+validatorWebui.description = 'Builds and tests the AMP validator web UI.';

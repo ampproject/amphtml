@@ -14,16 +14,49 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style';
+import {userAssert} from '../../../src/log';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
+  /** @param {!AmpElement} element */
+  constructor(element) {
+    super(element);
 
-  /** @override */
-  createdCallback() {
-    this.preconnect.url('https://cms.springboardplatform.com');
-    this.preconnect.url('https://www.springboardplatform.com');
+    /** @private {string} */
+    this.mode_ = '';
+
+    /** @private {string} */
+    this.contentId_ = '';
+
+    /** @private {string} */
+    this.domain_ = '';
+
+    /** @private {string} */
+    this.siteId_ = '';
+
+    /** @private {string} */
+    this.playerId_ = '';
+
+    /** @private {?HTMLIFrameElement} */
+    this.iframe_ = null;
+  }
+
+  /**
+   * @param {boolean=} opt_onLayout
+   * @override
+   */
+  preconnectCallback(opt_onLayout) {
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://cms.springboardplatform.com',
+      opt_onLayout
+    );
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://www.springboardplatform.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -33,111 +66,105 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const width = this.element.getAttribute('width');
-    const height = this.element.getAttribute('height');
-    const mode = AMP.assert(
-        this.element.getAttribute('data-mode'),
-        'The data-mode attribute is required for <amp-springboard-player> %s',
-        this.element);
-    const contentId = AMP.assert(
-        this.element.getAttribute('data-content-id'),
-        'The data-content-id attribute is required for' +
+    this.mode_ = userAssert(
+      this.element.getAttribute('data-mode'),
+      'The data-mode attribute is required for <amp-springboard-player> %s',
+      this.element
+    );
+    this.contentId_ = userAssert(
+      this.element.getAttribute('data-content-id'),
+      'The data-content-id attribute is required for' +
         '<amp-springboard-player> %s',
-        this.element);
-    const domain = AMP.assert(
-        this.element.getAttribute('data-domain'),
-        'The data-domain attribute is required for <amp-springboard-player> %s',
-        this.element);
-
-    /** @private @const {number} */
-    this.width_ = width;
-    /** @private @const {number} */
-    this.height_ = height;
-    /** @private @const {string} */
-    this.mode_ = mode;
-    /** @private @const {number} */
-    this.contentId_ = contentId;
-    /** @private @const {string} */
-    this.domain_ = domain;
-
-    if (!this.getPlaceholder()) {
-      this.buildImagePlaceholder_();
-    }
+      this.element
+    );
+    this.domain_ = userAssert(
+      this.element.getAttribute('data-domain'),
+      'The data-domain attribute is required for <amp-springboard-player> %s',
+      this.element
+    );
+    this.siteId_ = userAssert(
+      this.element.getAttribute('data-site-id'),
+      'The data-site-id attribute is required for' +
+        '<amp-springboard-player> %s',
+      this.element
+    );
+    this.playerId_ = userAssert(
+      this.element.getAttribute('data-player-id'),
+      'The data-player-id attribute is required for' +
+        '<amp-springboard-player> %s',
+      this.element
+    );
   }
 
   /** @override */
   layoutCallback() {
-    const iframe = document.createElement('iframe');
-    const siteId = AMP.assert(
-        this.element.getAttribute('data-site-id'),
-        'The data-site-id attribute is required for' +
-        '<amp-springboard-player> %s',
-        this.element);
-    const playerId = AMP.assert(
-        this.element.getAttribute('data-player-id'),
-        'The data-player-id attribute is required for' +
-        '<amp-springboard-player> %s',
-        this.element);
+    const iframe = this.element.ownerDocument.createElement('iframe');
     const items = this.element.getAttribute('data-items') || '10';
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.id = playerId + '_' + this.contentId_;
-    iframe.src = 'https://cms.springboardplatform.com/embed_iframe/' +
-    	encodeURIComponent(siteId) + '/' + encodeURIComponent(this.mode_) +
-    	'/' + encodeURIComponent(this.contentId_) + '/' +
-    	encodeURIComponent(playerId) + '/' + encodeURIComponent(this.domain_) +
-    	'/' + encodeURIComponent(items);
+    iframe.id = this.playerId_ + '_' + this.contentId_;
+    iframe.src =
+      'https://cms.springboardplatform.com/embed_iframe/' +
+      encodeURIComponent(this.siteId_) +
+      '/' +
+      encodeURIComponent(this.mode_) +
+      '/' +
+      encodeURIComponent(this.contentId_) +
+      '/' +
+      encodeURIComponent(this.playerId_) +
+      '/' +
+      encodeURIComponent(this.domain_) +
+      '/' +
+      encodeURIComponent(items);
     this.applyFillContent(iframe);
-    iframe.width = this.width_;
-    iframe.height = this.height_;
-    /** @private {?Element} */
-    this.iframe_ = iframe;
+    this.iframe_ = /** @type {HTMLIFrameElement} */ (iframe);
     this.element.appendChild(iframe);
-    return loadPromise(iframe);
+    return this.loadPromise(iframe);
   }
 
   /** @override */
   pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage('ampPause', '*');
+      this.iframe_.contentWindow./*OK*/ postMessage('ampPause', '*');
     }
   }
 
-  /** @private */
-  buildImagePlaceholder_() {
-    const imgPlaceholder = new Image();
-
-    setStyles(imgPlaceholder, {
-      // Cover matches Springboard Player size.
-      'object-fit': 'cover',
-      // Hiding the placeholder initially to give the browser time to fix
-      // the object-fit: cover.
-      'visibility': 'hidden',
-    });
-
-    imgPlaceholder.src = 'https://www.springboardplatform.com/storage/' +
-    	encodeURIComponent(this.domain_) + '/snapshots/' +
-    	encodeURIComponent(this.contentId_) + '.jpg';
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = this.win.document.createElement('amp-img');
+    this.propagateAttributes(['aria-label'], placeholder);
+    placeholder.setAttribute(
+      'src',
+      'https://www.springboardplatform.com/storage/' +
+        encodeURIComponent(this.domain_) +
+        '/snapshots/' +
+        encodeURIComponent(this.contentId_) +
+        '.jpg'
+    );
     /** Show default image for playlist */
     if (this.mode_ == 'playlist') {
-      imgPlaceholder.src =
+      placeholder.setAttribute(
+        'src',
         'https://www.springboardplatform.com/storage/default/' +
-        'snapshots/default_snapshot.png';
+          'snapshots/default_snapshot.png'
+      );
     }
-    imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
-
-    this.element.appendChild(imgPlaceholder);
-    this.applyFillContent(imgPlaceholder);
-
-    loadPromise(imgPlaceholder).then(() => {
-      setStyles(imgPlaceholder, {
-        'visibility': '',
-      });
-    });
+    placeholder.setAttribute('placeholder', '');
+    placeholder.setAttribute('referrerpolicy', 'origin');
+    placeholder.setAttribute('layout', 'fill');
+    if (placeholder.hasAttribute('aria-label')) {
+      placeholder.setAttribute(
+        'alt',
+        'Loading video - ' + placeholder.getAttribute('aria-label')
+      );
+    } else {
+      placeholder.setAttribute('alt', 'Loading video');
+    }
+    return placeholder;
   }
 }
 
-AMP.registerElement('amp-springboard-player', AmpSpringboardPlayer);
+AMP.extension('amp-springboard-player', '0.1', AMP => {
+  AMP.registerElement('amp-springboard-player', AmpSpringboardPlayer);
+});

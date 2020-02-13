@@ -1,3 +1,11 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Brid.tv player.
+---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,95 +22,91 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-brid-player"></a> `amp-brid-player`
+# amp-brid-player
+
+An <code>amp-brid-player</code> displays the Brid Player used in <a href="https://www.brid.tv/">Brid.tv</a> Video Platform.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>An <code>amp-brid-player</code> displays the Brid Player used in <a href="https://www.brid.tv/">Brid.tv</a> Video Platform.
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-brid-player" src="https://cdn.ampproject.org/v0/amp-brid-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/brid-player.amp.html">brid-player.amp.html</a></td>
+    <td><a href="https://amp.dev/documentation/examples/components/amp-brid-player/"> Annotated code example for amp-brid-player</a></td>
   </tr>
 </table>
 
-The following lists validation errors specific to the `amp-brid-player` tag
-(see also `amp-brid-player` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
-    <td>Error thrown when required <code>amp-brid-player</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
-    <td>Error thrown when <code>data-partner</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
-      <td>Error thrown when <code>data-player</code> attribute is missing.</td>
-  </tr>
-  <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ONEOF_ATTR_MISSING</a></td>
-      <td>Error thrown when either the <code>data-video</code> or <code>data-playlist</code> attributes are missing.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
-    <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
-    <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">INVALID_PROPERTY_VALUE_IN_ATTR_VALUE</a></td>
-    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
-  </tr>
-</table>
+[TOC]
 
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
 
-Examples:
+Example:
 
 ```html
 <amp-brid-player
-    data-partner="264"
-    data-player="4144"
-    data-video="13663"
-    layout="responsive"
-    width="480" height="270">
+  data-partner="264"
+  data-player="4144"
+  data-video="13663"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-brid-player>
 ```
 
 ## Attributes
 
-**data-partner**
+<table>
+  <tr>
+    <td width="40%"><strong>autoplay</strong></td>
+    <td>If this attribute is present, and the browser supports autoplay:
+<ul>
+  <li>the video is automatically muted before autoplay starts</li>
+  <li>when the video is scrolled out of view, the video is paused</li>
+  <li>when the video is scrolled into view, the video resumes playback</li>
+  <li>when the user taps the video, the video is unmuted</li>
+  <li>if the user has interacted with the video (e.g., mutes/unmutes, pauses/resumes, etc.), and the video is scrolled in or out of view, the state of the video remains as how the user left it. For example, if the user pauses the video, then scrolls the video out of view and returns to the video, the video is still paused.</li>
+</ul></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-partner</strong></td>
+    <td>The Brid.tv partner ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-player</strong></td>
+    <td>The Brid.tv player ID. Specific to every partner.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-video</strong></td>
+    <td>The Brid.tv video ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-playlist</strong></td>
+    <td>The Brid.tv playlist ID or custom string value for dynamic playlists.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-outstream</strong></td>
+    <td>The Brid.tv outstream unit ID.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>data-dynamic</strong></td>
+    <td>Parameter used to specify type of dynamic playlist, e.g. latest, channel, tag.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.</td>
+  </tr>
+</table>
 
-The Brid.tv partner id.
+Embed code must either have video, playlist or outstream attribute.
 
-**data-player**
+## Validation
 
-The Brid.tv player id. Specific to every partner.
-
-**data-video**
-
-The Brid.tv video ID.
-
-**data-playlist**
-
-The Brid.tv playlist ID. Embed must either have video or playlist attribute.
+See [amp-brid-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/validator-amp-brid-player.protoascii) in the AMP validator specification.

@@ -1,3 +1,11 @@
+---
+$category@: media
+formats:
+  - websites
+teaser:
+  text: Displays a Beachfront Reach video player.
+---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -14,44 +22,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+# amp-reach-player
 
-# <a name="amp-reach"></a> `amp-reach-player`
+Displays the Reach Player configured in the <a href="http://beachfrontreach.com">Beachfront Reach</a> platform.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>
-    An <code>amp-reach-player</code> component displays the Reach Player configured in the <a href="https://platform.beachfrontreach.com">Beachfront Reach</a> platform.
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Beta</td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-reach-player" src="https://cdn.ampproject.org/v0/amp-reach-player-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
+    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
+    <td>fill, fixed, fixed-height, flex-item, responsive</td>
+  </tr>
+  <tr>
     <td width="40%"><strong>Examples</strong></td>
     <td>
-    <a href="https://github.com/ampproject/amphtml/blob/master/examples/reach-player.amp.html">reach-player.amp.html</a>
+    <a href="https://amp.dev/documentation/examples/components/amp-reach-player/">Annotated code example for amp-reach-player</a>
     </td>
   </tr>
 </table>
 
-The following lists validation errors specific to the `amp-reach-player` tag
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-    <tr>
-      <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'data-embed-id' is missing in tag 'amp-reach-player'.</a></td>
-      <td>Error thrown when <code>data-embed-id</code> attribute is missing.</td>
-    </tr>
-</table>
+[TOC]
 
 ## Example
 
@@ -61,16 +53,28 @@ Example:
 
 ```html
 <amp-reach-player
-      data-embed-id="default"
-      layout="responsive"
-      width="560"
-      height="315">
-</amp-reach>
+  data-embed-id="default"
+  layout="responsive"
+  width="560"
+  height="315"
+>
+</amp-reach-player>
 ```
 
 ## Attributes
 
-**data-embed-id**
+<table>
+  <tr>
+    <td width="40%"><strong>data-embed-id</strong></td>
+    <td>The Reach player embed id found in the "players" section or in the generated embed itself.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>common attributes</strong></td>
+    <td>This element includes <a href="https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes">common attributes</a> extended to AMP components.
+</td>
+  </tr>
+</table>
 
-The Reach player embed id found in the "players" section or in the generated embed itself.
+## Validation
 
+See [amp-reach-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/validator-amp-reach-player.protoascii) in the AMP validator specification.

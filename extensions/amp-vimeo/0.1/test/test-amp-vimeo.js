@@ -14,51 +14,56 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
-require('../amp-vimeo');
-import {adopt} from '../../../../src/runtime';
+import '../amp-vimeo';
 
-adopt(window);
+describes.realWin(
+  'amp-vimeo',
+  {
+    amp: {
+      extensions: ['amp-vimeo'],
+    },
+  },
+  env => {
+    let win, doc;
 
-describe('amp-vimeo', () => {
+    beforeEach(() => {
+      win = env.win;
+      doc = win.document;
+    });
 
-  function getVimeo(videoId, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      const vimeo = iframe.doc.createElement('amp-vimeo');
+    async function getVimeo(videoId, opt_responsive) {
+      const vimeo = doc.createElement('amp-vimeo');
       vimeo.setAttribute('data-videoid', videoId);
       vimeo.setAttribute('width', '111');
       vimeo.setAttribute('height', '222');
       if (opt_responsive) {
         vimeo.setAttribute('layout', 'responsive');
       }
-      iframe.doc.body.appendChild(vimeo);
-      vimeo.implementation_.layoutCallback();
+      doc.body.appendChild(vimeo);
+      await vimeo.build();
+      await vimeo.layoutCallback();
       return vimeo;
-    });
-  }
+    }
 
-  it('renders', () => {
-    return getVimeo('123').then(vimeo => {
+    it('renders', async () => {
+      const vimeo = await getVimeo('123');
       const iframe = vimeo.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal(
-          'https://player.vimeo.com/video/123');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
+      expect(iframe.src).to.equal('https://player.vimeo.com/video/123');
     });
-  });
 
-  it('renders responsively', () => {
-    return getVimeo('234', true).then(vimeo => {
+    it('renders responsively', async () => {
+      const vimeo = await getVimeo('234', true);
       const iframe = vimeo.querySelector('iframe');
       expect(iframe).to.not.be.null;
-      expect(iframe.className).to.match(/-amp-fill-content/);
+      expect(iframe.className).to.match(/i-amphtml-fill-content/);
     });
-  });
 
-  it('requires data-videoid', () => {
-    return getVimeo('').should.eventually.be.rejectedWith(
-        /The data-videoid attribute is required for/);
-  });
-});
+    it('requires data-videoid', () => {
+      return getVimeo('').should.eventually.be.rejectedWith(
+        /The data-videoid attribute is required for/
+      );
+    });
+  }
+);

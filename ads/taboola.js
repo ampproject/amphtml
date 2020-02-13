@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, validateDataExists, validateExactlyOne} from '../src/3p';
+import {loadScript, validateData} from '../3p/3p';
 
 /**
  * @param {!Window} global
@@ -23,14 +23,16 @@ import {loadScript, validateDataExists, validateExactlyOne} from '../src/3p';
 export function taboola(global, data) {
   // do not copy the following attributes from the 'data' object
   // to _tablloa global object
-  const blackList = ['height', 'initialWindowHeight', 'initialWindowWidth',
-    'type', 'width', 'placement', 'mode'];
+  const blackList = ['height', 'type', 'width', 'placement', 'mode'];
 
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
-  validateDataExists(data, ['publisher', 'placement', 'mode']);
-  validateExactlyOne(data, ['article', 'video', 'photo', 'search', 'category',
-    'homepage', 'others']);
+  validateData(data, [
+    'publisher',
+    'placement',
+    'mode',
+    ['article', 'video', 'photo', 'search', 'category', 'homepage', 'other'],
+  ]);
 
   // setup default values for referrer and url
   const params = {
@@ -46,17 +48,18 @@ export function taboola(global, data) {
   });
 
   // push the two object into the '_taboola' global
-  (global._taboola = global._taboola || []).push([{
-    viewId: global.context.pageViewId,
-    publisher: data.publisher,
-    placement: data.placement,
-    mode: data.mode,
-    framework: 'amp',
-    container: 'c',
-  },
+  (global._taboola = global._taboola || []).push([
+    {
+      viewId: global.context.pageViewId,
+      publisher: data.publisher,
+      placement: data.placement,
+      mode: data.mode,
+      framework: 'amp',
+      container: 'c',
+    },
     params,
-    {flush: true}]
-  );
+    {flush: true},
+  ]);
 
   // install observation on entering/leaving the view
   global.context.observeIntersection(function(changes) {
@@ -72,5 +75,10 @@ export function taboola(global, data) {
   });
 
   // load the taboola loader asynchronously
-  loadScript(global, `https://cdn.taboola.com/libtrc/${encodeURIComponent(data.publisher)}/loader.js`);
+  loadScript(
+    global,
+    `https://cdn.taboola.com/libtrc/${encodeURIComponent(
+      data.publisher
+    )}/loader.js`
+  );
 }
