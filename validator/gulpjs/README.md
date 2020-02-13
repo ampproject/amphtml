@@ -41,6 +41,11 @@ To treat warnings as errors, replace the last line of the validation closure wit
 
 ## Release Notes
 
+### 1.0.4
+
+- Update amphtml-validator dependency to 1.0.30, gulp to 4.0.2 and mocha to
+  7.0.1.
+
 ### 1.0.3
 
 - Remove engine section from pacakge.json to allow any version of gulpjs.
