@@ -28,10 +28,15 @@ const nop = require('gulp-nop');
 const pathModule = require('path');
 =======
 const path = require('path');
+<<<<<<< HEAD
 >>>>>>> Broken Gulp
+=======
+const realFs = require('fs');
+>>>>>>> wrong directory output
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
+const tap = require('gulp-tap');
 const terser = require('terser');
 const through = require('through2');
 const {
@@ -75,14 +80,69 @@ function loadSourceMap(file) {
 }
 
 /**
- * Apply Babel Transforms on output from Closure Compuler, then cleanup whitespace with Terser.
+ * Apply Babel Transforms on output from Closure Compuler, then cleanup added space with Terser.
  * @param {string} directory directory this file lives in
  * @return {!Promise}
  */
 function postClosureBabel(directory) {
   return through.obj(function(file, enc, next) {
-    console.log({file, directory});
+    if (path.extname(file.path) === '.map') {
+      return next(null, file);
+    }
+
+    function returnMapFirst(map) {
+      let first = true;
+      return function(file) {
+        if (first) {
+          first = false;
+          return map;
+        }
+        return loadSourceMap(file);
+      };
+    }
+
+    const map = loadSourceMap(file.path);
+    const {code, map: babelMap} = babel.transformSync(file.contents, {
+      plugins: conf.plugins({isPostCompile: true}),
+      retainLines: true,
+      sourceMaps: true,
+      inputSourceMap: false,
+    });
+    let remapped = resorcery(
+      babelMap,
+      returnMapFirst(map),
+      !argv.full_sourcemaps
+    );
+
+    const {code: compressed, map: terserMap} = terser.minify(code, {
+      mangle: false,
+      compress: {
+        defaults: false,
+        unused: true,
+      },
+      output: {
+        beautify: !!argv.pretty_print,
+        comments: 'all',
+        keep_quoted_props: true,
+      },
+      sourceMap: true,
+    });
+    file.contents = Buffer.from(compressed, 'utf-8');
+
+    // TODO: Resorcery should support a chain, instead of having to call
+    // multiple times.
+    remapped = resorcery(
+      terserMap,
+      returnMapFirst(remapped),
+      !argv.full_sourcemaps
+    );
+    fs.outputFileSync(
+      path.resolve(directory, `${file.path}.map`),
+      remapped.toString()
+    );
+
     return next(null, file);
+
     // const extension = path.extname(filename);
     // const filepath = path.resolve(directory, filename);
     // console.log('postClosureBabel', {
@@ -507,8 +567,8 @@ function compile(
             gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
           )
         )
-        .pipe(gulp.dest(outputDir))
         .pipe(postClosureBabel(outputDir))
+        .pipe(gulp.dest(outputDir))
         .on('end', resolve);
     }
   });
