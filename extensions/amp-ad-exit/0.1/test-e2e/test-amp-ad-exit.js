@@ -23,11 +23,9 @@ describes.endtoend(
   },
   env => {
     let controller;
-    let requestBank;
 
     beforeEach(() => {
       controller = env.controller;
-      requestBank = env.requestBank;
     });
 
     // Setting the time explicitly to avoid test flakiness.
@@ -93,7 +91,43 @@ describes.endtoend(
       await expect(await controller.getCurrentUrl()).to.match(
         /^http:\/\/localhost:8000\/\?product2&r=0\.\d+$/
       );
-      await requestBank.withdraw('tracking');
+
+      await expect(
+        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking'
+      ).to.have.sentCount(1);
+    });
+
+    it('variable target "current" should point to product1 by default', async () => {
+      const headline = await controller.findElement('h1');
+      await setTime(Number.MAX_VALUE);
+      await controller.click(headline);
+
+      const windows = await controller.getAllWindows();
+      await expect(windows.length).to.equal(2);
+
+      await controller.switchToWindow(windows[1]);
+      await expect(await controller.getCurrentUrl()).to.match(
+        /^http:\/\/localhost:8000\/\?product1&x=\d+&y=\d+&e=headline&shouldNotBeReplaced=AMP_VERSION$/
+      );
+    });
+
+    it('should open product2 after setting varible target', async () => {
+      const headline = await controller.findElement('h1');
+      const nextButton = await controller.findElement('#next-btn');
+      await setTime(Number.MAX_VALUE);
+      await controller.click(nextButton);
+      await controller.click(headline);
+
+      const windows = await controller.getAllWindows();
+      await expect(windows.length).to.equal(2);
+
+      await controller.switchToWindow(windows[1]);
+      await expect(await controller.getCurrentUrl()).to.match(
+        /^http:\/\/localhost:8000\/\?product2&r=0\.\d+$/
+      );
+      await expect(
+        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking'
+      ).to.have.sentCount(1);
     });
   }
 );

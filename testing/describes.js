@@ -110,7 +110,7 @@ import {maybeTrackImpression} from '../src/impression';
 import {resetScheduledElementForTesting} from '../src/service/custom-element-registry';
 import {setStyles} from '../src/style';
 import fetchMock from 'fetch-mock/es5/client-bundle';
-import sinon from 'sinon'; // eslint-disable-line local/no-import
+import sinon from /*OK*/ 'sinon';
 
 /** Should have something in the name, otherwise nothing is shown. */
 const SUB = ' ';
@@ -648,10 +648,7 @@ class RealWinFixture {
         } else {
           // The anonymous class parameter allows us to detect native classes
           // vs transpiled classes.
-          installCustomElements(
-            win,
-            NATIVE_CUSTOM_ELEMENTS_V1 ? class {} : undefined
-          );
+          installCustomElements(win, class {});
         }
 
         // Intercept event listeners
@@ -795,7 +792,7 @@ class AmpFixture {
     /**
      * Creates a custom element without registration.
      * @param {string=} opt_name
-     * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass
+     * @param {typeof ./base-element.BaseElement} opt_implementationClass
      * @return {!AmpElement}
      */
     env.createAmpElement = createAmpElement.bind(null, win);
@@ -926,7 +923,7 @@ function installAmpAdStylesPromise(win) {
  * Creates a custom element without registration.
  * @param {!Window} win
  * @param {string=} opt_name
- * @param {function(new:./base-element.BaseElement, !Element)} opt_implementationClass
+ * @param {typeof ./base-element.BaseElement} opt_implementationClass
  * @return {!AmpElement}
  */
 function createAmpElement(win, opt_name, opt_implementationClass) {

@@ -301,8 +301,8 @@ export class AmpAnalytics extends AMP.BaseElement {
         const expansionOptions = this.expansionOptions_(
           dict({}),
           trigger,
-          undefined,
-          true
+          undefined /* opt_iterations */,
+          true /* opt_noEncode */
         );
         const TAG = this.getName_();
         if (!trigger) {
@@ -361,7 +361,11 @@ export class AmpAnalytics extends AMP.BaseElement {
             } else if (trigger['selector']) {
               // Expand the selector using variable expansion.
               return this.variableService_
-                .expandTemplate(trigger['selector'], expansionOptions)
+                .expandTemplate(
+                  trigger['selector'],
+                  expansionOptions,
+                  this.element
+                )
                 .then(selector => {
                   trigger['selector'] = selector;
                   this.addTrigger_(trigger);
@@ -753,7 +757,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   expandTemplateWithUrlParams_(spec, expansionOptions) {
     return this.variableService_
-      .expandTemplate(spec, expansionOptions)
+      .expandTemplate(spec, expansionOptions, this.element)
       .then(key =>
         Services.urlReplacementsForDoc(this.element).expandUrlAsync(
           key,

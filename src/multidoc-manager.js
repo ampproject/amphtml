@@ -227,6 +227,7 @@ export class MultidocManager {
    * @return {!./runtime.ShadowDoc}
    */
   attachShadowDoc(hostElement, doc, url, opt_initParams) {
+    user().assertString(url);
     dev().fine(TAG, 'Attach shadow doc:', doc);
     // TODO(dvoytenko, #9490): once stable, port full document case to emulated
     // stream.
@@ -269,6 +270,7 @@ export class MultidocManager {
    * @return {!Object}
    */
   attachShadowDocAsStream(hostElement, url, opt_initParams) {
+    user().assertString(url);
     dev().fine(TAG, 'Attach shadow doc as stream');
     return this.attachShadowDoc_(
       hostElement,
@@ -356,6 +358,9 @@ export class MultidocManager {
               // Ignore.
             } else if (name == 'viewport') {
               // Ignore.
+            } else if (name) {
+              // Store meta name/content pairs.
+              ampdoc.setMetaByName(name, n.getAttribute('content') || '');
             } else {
               // TODO(dvoytenko): copy other meta tags.
               dev().warn(TAG, 'meta ignored: ', n);

@@ -14,122 +14,36 @@
  * limitations under the License.
  */
 
+import {
+  findElements,
+  resetAllElements,
+  verifyElementsBuilt,
+  verifyPromptsHidden,
+} from './common';
+
 describes.endtoend(
   'amp-consent',
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-consent/amp-consent-basic-uses.amp.html#amp-geo=us',
-    experiments: ['amp-consent-geo-override'],
     // TODO (micajuineho): Add shadow-demo after #25985 is fixed and viewer-demo when...
     environments: ['single'],
   },
   env => {
     let controller;
-    let ui1;
-    let ui2;
-    let postPromptUi;
-    let tillResponded;
-    let accepted;
-    let autoReject;
-    let defaultBlock;
-    let notBlocked;
-    let twitter;
-    let requestBank;
 
     beforeEach(() => {
       controller = env.controller;
-      requestBank = env.requestBank;
     });
 
-    async function findElements() {
-      ui1 = await controller.findElement('#ui1');
-      ui2 = await controller.findElement('#ui2');
-      postPromptUi = await controller.findElement('#postPromptUI');
-      tillResponded = await controller.findElement(
-        '[data-block-on-consent="_till_responded"]'
-      );
-      accepted = await controller.findElement(
-        '[data-block-on-consent="_till_accepted"]'
-      );
-      autoReject = await controller.findElement(
-        '[data-block-on-consent="_auto_reject"]'
-      );
-      defaultBlock = await controller.findElement(
-        '[data-block-on-consent="default"]'
-      );
-      notBlocked = await controller.findElement(
-        '[src="/examples/img/ima-poster.png"]'
-      );
-      twitter = await controller.findElement(
-        '[data-tweetid="885634330868850689"]'
-      );
-    }
-
-    async function verifyElementsBuilt(builtMap) {
-      const elementsMap = {
-        'tillResponded': tillResponded,
-        'accepted': accepted,
-        'autoReject': autoReject,
-        'defaultBlock': defaultBlock,
-        'notBlocked': notBlocked,
-        'twitter': twitter,
-      };
-
-      await expect(builtMap.length).to.equal(elementsMap.length);
-      const elementIds = Object.keys(elementsMap);
-
-      for (let i = 0; i < elementIds.length; i++) {
-        const elementId = elementIds[i];
-        const element = elementsMap[elementId];
-        const shouldBeBuilt = builtMap[elementId];
-
-        if (shouldBeBuilt) {
-          // Should be visible
-          await expect(
-            controller.getElementAttribute(element, 'class')
-          ).to.not.match(/amp-notbuilt/);
-        } else {
-          // Should not be visible
-          await expect(
-            controller.getElementAttribute(element, 'class')
-          ).to.match(/amp-notbuilt/);
-        }
-      }
-    }
-
-    async function verifyPromptsHidden(hiddenMap) {
-      const elementsMap = {
-        'ui1': ui1,
-        'ui2': ui2,
-        'postPromptUi': postPromptUi,
-      };
-
-      await expect(hiddenMap.length).to.equal(elementsMap.length);
-      const elementIds = Object.keys(elementsMap);
-
-      for (let i = 0; i < elementIds.length; i++) {
-        const elementId = elementIds[i];
-        const element = elementsMap[elementId];
-        const shouldBeHidden = hiddenMap[elementId];
-
-        if (shouldBeHidden) {
-          // Should be hidden
-          await expect(controller.getElementProperty(element, 'hidden')).to.be
-            .true;
-        } else {
-          // Should not be hidden
-          await expect(controller.getElementProperty(element, 'hidden')).to.be
-            .false;
-        }
-      }
-    }
-
     it('should respect server side decision and persist it', async () => {
+      resetAllElements();
+
       const currentUrl = await controller.getCurrentUrl();
 
       // Block/unblock elements based off of 'reject' from response
-      await findElements();
-      await verifyElementsBuilt({
+      await findElements(controller);
+      await verifyElementsBuilt(controller, {
         'tillResponded': true,
         'accepted': false,
         'autoReject': true,
@@ -137,12 +51,11 @@ describes.endtoend(
         'notBlocked': true,
         'twitter': false,
       });
-      await verifyPromptsHidden({
+      await verifyPromptsHidden(controller, {
         'ui1': true,
         'ui2': true,
         'postPromptUi': false,
       });
-      // [true, true, false]);
 
       // Navigate away to random page
       await controller.navigateTo('http://localhost:8000/');
@@ -150,8 +63,8 @@ describes.endtoend(
       await controller.navigateTo(currentUrl);
 
       // Verify same behavior after refresh
-      await findElements();
-      await verifyElementsBuilt({
+      await findElements(controller);
+      await verifyElementsBuilt(controller, {
         'tillResponded': true,
         'accepted': false,
         'autoReject': true,
@@ -159,15 +72,16 @@ describes.endtoend(
         'notBlocked': true,
         'twitter': false,
       });
-      await verifyPromptsHidden({
+      await verifyPromptsHidden(controller, {
         'ui1': true,
         'ui2': true,
         'postPromptUi': false,
       });
 
       // Check the analytics request consentState
-      const req = await requestBank.withdraw('tracking');
-      await expect(req.url).to.match(/consentState=insufficient/);
+      await expect(
+        'http://localhost:8000/amp4test/request-bank/e2e/deposit/tracking?consentState=insufficient'
+      ).to.have.been.sent;
     });
   }
 );
