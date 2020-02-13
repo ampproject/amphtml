@@ -77,7 +77,8 @@ inline std::optional<uint8_t> ParseToken(char c, uint8_t state,
       state = static_cast<uint8_t>(StateCode::OBJECT_END);
     } else if (c == ',' && state == static_cast<uint8_t>(
         StateCode::OBJECT_SEPARATOR)) {
-      state = static_cast<uint8_t>(htmlparser::json::StateCode::OBJECT);
+      state = static_cast<uint8_t>(
+          htmlparser::json::StateCode::OBJECT_KEY_BEGIN_QUOTE);
     }
 
     return state;

@@ -83,9 +83,9 @@ TEST(ParserTest, ValidJson) {
   // Array inside array.
   EXPECT_TRUE(V("[1, [2, [3, [4, 5]]], true, false, [\"a\", \"b\"]]").first);
   // End with a comma OK.
-  EXPECT_TRUE(V("[1, 2, 3,]").first);
-  EXPECT_TRUE(V("[\"amaltas\", \"seol\", \"hello\", \"ok\\uA93Cbye\",]").first);
-  EXPECT_TRUE(V("[1.0, 2.0, 3.0, 4.0e+3, 5.12e-3, 6.40e3, 0.1, -0.1,]").first);
+  EXPECT_TRUE(V("[1, 2, 3]").first);
+  EXPECT_TRUE(V("[\"amaltas\", \"seol\", \"hello\", \"ok\\uA93Cbye\"]").first);
+  EXPECT_TRUE(V("[1.0, 2.0, 3.0, 4.0e+3, 5.12e-3, 6.40e3, 0.1, -0.1]").first);
 
   // Object.
   // Empty.
@@ -114,13 +114,13 @@ TEST(ParserTest, ValidJson) {
   EXPECT_TRUE(V("{      \"hello\"      :       -0.193e+3         }").first);
 
   // Multiple values, nested multi line objects.
-  EXPECT_TRUE(V(R"(
+  auto v = V(R"(
       {"hello": "world",
        "foo": "bar",
        "age": 33, "a": true,
        "kids": 2,
        "names": ["foo", "bar"],
-       "scores": [8, 10, [1, 2, 3.14, 0.34e+3,], [-34.39, 0.340e-3, true]],
+       "scores": [8, 10, [1, 2, 3.14, 0.34e+3], [-34.39, 0.340e-3, true]],
        "addresses": [{
            "home": "tracy, ca",
            "zip": 95304}, {
@@ -128,7 +128,8 @@ TEST(ParserTest, ValidJson) {
            "zip": 94043}],
        "own_home": true,
        "has_car": false,
-       "ssn": null,})").first);
+       "ssn": null})");
+  EXPECT_TRUE(v.first);
 }
 
 TEST(ParserTest, InvalidJson) {
@@ -241,9 +242,9 @@ TEST(ParserTest, InvalidJson) {
   EXPECT_FALSE(v.first);
   EXPECT_EQ(v.second.second, 6);
   // Nested not closed.
-  v = V("[1, 2, [3, 4, [5, \"a\",], true,], null, 1.2,");
+  v = V("[1, 2, [3, 4, [5, \"a\"], true], null, 1.2,");
   EXPECT_FALSE(v.first);
-  EXPECT_EQ(v.second.second, 43);
+  EXPECT_EQ(v.second.second, 41);
 
   // Closed with wrong bracket.
   v = V("[1,2,3}");
@@ -257,7 +258,7 @@ TEST(ParserTest, InvalidJson) {
   v = V("[,1,2,3]");
   EXPECT_FALSE(v.first);
   EXPECT_EQ(v.second.second, 2 /* first comma before item */);
-  EXPECT_TRUE(V("[1,2,3,]").first);  // Last comma allowed.
+  EXPECT_TRUE(V("[1,2,3]").first);  // Fixed previous error.
 
   // Objects.
   v = V("{3: 4}");
@@ -328,6 +329,35 @@ TEST(ParserTest, LargeObjects) {
   {"state":{"state_id":"UP","state_name":"Uttar Pradesh"}},
   {"state":{"state_id":"WB","state_name":"West Bengal"}}]})JSON";
   EXPECT_TRUE(V(json).first);
+}
+
+TEST(ParserTest, TrailingComma) {
+  auto v = V("{\"vars\": {\"account\": 7436 },\"extraUrlParams\": {\"int\": "
+             "\"%%interest%%\"},}");
+  EXPECT_FALSE(v.first);  // Trailing comma in object declaration.
+
+  v = V("{\"vars\": {\"account\": 7436 },\"extraUrlParams\": {\"int\": "
+        "\"%%interest%%\"}}");
+  EXPECT_TRUE(v.first);  // Trailing comma fixed.
+
+  v = V("[1,2,3,]");
+  EXPECT_FALSE(v.first);  // Trailing comma in array declaration.
+  EXPECT_EQ(v.second.second, 8);
+  v = V("[1,2,\"hello\",]");
+  EXPECT_FALSE(v.first);  // Trailing comma in array declaration.
+  v = V("[1,2,true,]");
+  EXPECT_FALSE(v.first);  // Trailing comma in array declaration.
+  v = V("[1,2,false,]");
+  EXPECT_FALSE(v.first);  // Trailing comma in array declaration.
+
+  v = V("[1,2,3]");      // Trailing comma fixed.
+  EXPECT_TRUE(v.first);  // Trailing comma fixed.
+  v = V("[1,2,\"hello\"]");
+  EXPECT_TRUE(v.first);  // Trailing comma fixed.
+  v = V("[1,2,true]");
+  EXPECT_TRUE(v.first);  // Trailing comma fixed.
+  v = V("[1,2,false]");
+  EXPECT_TRUE(v.first);  // Trailing comma fixed.
 }
 
 }  // namespace htmlparser::json
