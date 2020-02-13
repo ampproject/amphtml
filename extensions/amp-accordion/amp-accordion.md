@@ -235,7 +235,7 @@ The `toggle` action switches the `expanded` and `collapsed` states of the `amp-a
 
 ### `expand`
 
-The `expand` action expands the sections of the `amp-accordion`. If a section is already expanded, it will stay expanded. When called with no arguments, it will expand all sections of the accordion. Specify a specific section by adding the `section` argument and the corresponding `id` as the value.
+The `expand` action expands the sections of the `amp-accordion`. If a section is already expanded, it will stay expanded. When called with no arguments, it will expand all sections of the accordion. Specify a section by adding the `section` argument and the corresponding `id` as the value.
 
 ```html
 <button on="tap:myAccordion.expand">Expand All Sections</button>
@@ -246,7 +246,7 @@ The `expand` action expands the sections of the `amp-accordion`. If a section is
 
 ### `collapse`
 
-The `collapse` action collapses the sections of the `amp-accordion`. If a section is already collapsed, it will stay collapsed. When called with no argument, it will collapse all section of the accordion. Specify a specific section by adding the `section` argument and the corresponding `id` as the value.
+The `collapse` action collapses the sections of the `amp-accordion`. If a section is already collapsed, it will stay collapsed. When called with no argument, it will collapse all section of the accordion. Specify a section by adding the `section` argument and the corresponding `id` as the value.
 
 ```html
 <button on="tap:myAccordion.collapse">Collapse All Sections</button>
