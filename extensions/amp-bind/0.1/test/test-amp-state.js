@@ -73,7 +73,10 @@ describes.realWin(
         .stub(ampState, 'fetch_')
         .returns(Promise.resolve({remote: 'data'}));
 
-      bind = {setState: env.sandbox.stub()};
+      bind = {
+        setState: env.sandbox.stub(),
+        registerAsyncAmpState: env.sandbox.stub(),
+      };
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
@@ -109,6 +112,22 @@ describes.realWin(
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
         {skipEval: true, skipAmpState: false}
+      );
+    });
+
+    it.only('should register itself with bind if performing a fetch', async () => {
+      element.setAttribute('src', 'https://foo.com/bar?baz=1');
+      element.build();
+
+      whenFirstVisiblePromiseResolve();
+      await whenFirstVisiblePromise;
+
+      // await one macro-task to let viewer/fetch promise chains resolve.
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(bind.registerAsyncAmpState).to.have.been.calledWith(
+        'myAmpState',
+        ampState.getFetchAndUpdatePromiseForTesting()
       );
     });
 

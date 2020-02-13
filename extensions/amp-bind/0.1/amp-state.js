@@ -44,6 +44,9 @@ export class AmpState extends AMP.BaseElement {
      * @private {?JsonObject|undefined}
      */
     this.localData_ = undefined;
+
+    /** @private {Promise} */
+    this.fetchAndUpdatePromise_ = undefined;
   }
 
   /** @override */
@@ -212,7 +215,7 @@ export class AmpState extends AMP.BaseElement {
    */
   fetchAndUpdate_(isInit, opt_refresh) {
     // Don't fetch in prerender mode.
-    const fetchAndUpdatePromise = this.getAmpDoc()
+    this.fetchAndUpdatePromise_ = this.getAmpDoc()
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
       .then(json => this.updateState_(json, isInit));
@@ -221,10 +224,18 @@ export class AmpState extends AMP.BaseElement {
       devAssert(bind);
       bind.registerAsyncAmpState(
         this.element.getAttribute('id'),
-        fetchAndUpdatePromise
+        this.fetchAndUpdatePromise_
       );
     });
-    return fetchAndUpdatePromise;
+    return this.fetchAndUpdatePromise_;
+  }
+
+  /**
+   * @return {Promise}
+   * @visibleForTesting
+   */
+  getFetchAndUpdatePromiseForTesting() {
+    return this.fetchAndUpdatePromise_;
   }
 
   /**
