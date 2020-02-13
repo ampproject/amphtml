@@ -115,7 +115,7 @@ describes.realWin(
       );
     });
 
-    it.only('should register itself with bind if performing a fetch', async () => {
+    it('should register itself with bind if performing a fetch', async () => {
       element.setAttribute('src', 'https://foo.com/bar?baz=1');
       element.build();
 
@@ -130,6 +130,18 @@ describes.realWin(
         ampState.getFetchAndUpdatePromiseForTesting()
       );
     });
+
+    it('should not register itself if not init', async () => {
+      element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
+
+      whenFirstVisiblePromiseResolve();
+      await whenFirstVisiblePromise;
+
+      // await one macro-task to let viewer/fetch promise chains resolve.
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(bind.registerAsyncAmpState).to.not.have.been.called;
+    })
 
     it('should trigger "fetch-error" if fetch fails', async () => {
       ampState.fetch_.returns(Promise.reject());

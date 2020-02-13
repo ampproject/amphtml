@@ -491,12 +491,9 @@ export class Bind {
 
     return rescanPromise.then(() => {
       if (options.update) {
-        console.error('doing eval!', options.wait)
-        return this.evaluate_(options.wait)
-          .then(() => {
-            console.error('completed eval!');
-          })
-          .then(results => this.apply_(results, {constrain: addedElements}));
+        return this.evaluate_(options.wait).then(results =>
+          this.apply_(results, {constrain: addedElements})
+        );
       }
     });
   }
@@ -569,23 +566,26 @@ export class Bind {
    * @return {!Promise<*>}
    */
   getStateWithWait(expr) {
-    const value = this.getState(expr);
-    if (value) {
-      return Promise.resolve(value);
+    const hasLoadingAmpState =
+      Object.keys(this.asyncLoadingAmpStates_).length > 0;
+    if (!hasLoadingAmpState) {
+      return Promise.resolve(this.getState(expr));
     }
 
     let wait;
-    if (expr) {
-      wait = this.asyncLoadingAmpStates_[expr.split('.')[0]];
-    } else if (Object.keys(this.asyncLoadingAmpStates_).length > 0) {
-      // Without an expression, then wait for all async amp states.
+    if (expr === '.') {
+      // If getting everything, then wait for all async amp states.
       wait = Promise.all(Object.values(this.asyncLoadingAmpStates_));
+    } else {
+      wait = Promise.resolve().then(
+        () => this.asyncLoadingAmpStates_[expr.split('.')[0]]
+      );
     }
 
-    if (wait) {
-      return wait.then(() => this.getState(expr));
-    }
-    return Promise.resolve(value);
+    return wait.then(
+      () => this.getState(expr),
+      () => this.getState(expr)
+    );
   }
 
   /**
@@ -1105,11 +1105,15 @@ export class Bind {
    */
   evaluate_(opt_wait) {
     const state = opt_wait
-      ? this.getStateWithWait()
+      ? this.getStateWithWait('.')
       : Promise.resolve(this.state_);
     const evaluatePromise = state.then(s =>
       this.ww_('bind.evaluateBindings', [s])
     );
+
+    // return evaluatePromise.then(() => {
+    //   return state;
+    // });
 
     return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
@@ -1128,7 +1132,6 @@ export class Bind {
           this.reportError_(userError, elements[0]);
         }
       });
-      console.error('returning results', console.trace());
       dev().info(TAG, 'evaluation:', results);
       return results;
     });

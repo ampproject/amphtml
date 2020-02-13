@@ -1148,7 +1148,7 @@ describes.repeated(
               expect(bind.rescan).calledWithExactly(
                 [child],
                 [list.container_],
-                {update: true, fast: true}
+                {update: true, fast: true, wait: true}
               );
             });
 
@@ -1174,7 +1174,7 @@ describes.repeated(
               expect(bind.rescan).calledWithExactly(
                 [child],
                 [list.container_],
-                {update: true, fast: true}
+                {update: true, fast: true, wait: true}
               );
             });
           });
@@ -1211,6 +1211,7 @@ describes.repeated(
                 {
                   update: true,
                   fast: true,
+                  wait: true,
                 }
               );
             });
