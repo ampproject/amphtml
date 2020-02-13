@@ -83,12 +83,19 @@ function loadSourceMap(file) {
 
 /**
  * Apply Babel Transforms on output from Closure Compuler, then cleanup added space with Terser.
+ *
  * @param {string} directory directory this file lives in
+ * @param {boolean} isEsmBuild
  * @return {!Promise}
  */
-function postClosureBabel(directory) {
+function postClosureBabel(directory, isEsmBuild) {
   return through.obj(function(file, enc, next) {
     if (path.extname(file.path) === '.map') {
+      return next(null, file);
+    }
+
+    const babelPlugins = conf.plugins({isPostCompile: true, isEsmBuild});
+    if (babelPlugins.length === 0) {
       return next(null, file);
     }
 
@@ -105,7 +112,7 @@ function postClosureBabel(directory) {
 
     const map = loadSourceMap(file.path);
     const {code, map: babelMap} = babel.transformSync(file.contents, {
-      plugins: conf.plugins({isPostCompile: true}),
+      plugins: babelPlugins,
       retainLines: true,
       sourceMaps: true,
       inputSourceMap: false,
@@ -505,7 +512,7 @@ function compile(
             gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
           )
         )
-        .pipe(postClosureBabel(outputDir))
+        .pipe(postClosureBabel(outputDir, options.esmPassCompilation))
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);
     }

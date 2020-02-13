@@ -42,6 +42,7 @@ const defaultPlugins = isEsmBuild => [
 ];
 
 const postCompilationPlugins = [localPlugin('transform-function-declarations')];
+const postCompilationES5Plugins = [];
 
 const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
@@ -152,6 +153,10 @@ function plugins({
   isPostCompile,
 }) {
   if (isPostCompile) {
+    if (!isEsmBuild) {
+      return postCompilationES5Plugins;
+    }
+
     return postCompilationPlugins;
   }
 
