@@ -28,6 +28,7 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
+import {addParamToUrl} from '../../../src/url';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
@@ -439,9 +440,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   generateSrc_(opt_query = '') {
-    const encodedQueryKey = encodeURIComponent(this.queryKey_);
-    const encodedQuery = encodeURIComponent(opt_query);
-    return `${this.srcBase_}?${encodedQueryKey}=${encodedQuery}`;
+    return addParamToUrl(this.srcBase_, this.queryKey_, opt_query);
   }
 
   /**
