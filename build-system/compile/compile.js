@@ -138,76 +138,12 @@ function postClosureBabel(directory) {
       returnMapFirst(remapped),
       !argv.full_sourcemaps
     );
-    fs.outputFileSync(
-      path.resolve(directory, `${file.path}.map`),
+    fs.writeFileSync(
+      path.resolve(directory, `${path.basename(file.path)}.map`),
       remapped.toString()
     );
 
     return next(null, file);
-
-    // const extension = path.extname(filename);
-    // const filepath = path.resolve(directory, filename);
-    // console.log('postClosureBabel', {
-    //   filename,
-    //   directory,
-    //   extension,
-    //   filepath,
-    // });
-
-    // function returnMapFirst(map) {
-    //   let first = true;
-    //   return function(file) {
-    //     if (first) {
-    //       first = false;
-    //       return map;
-    //     }
-    //     return loadSourceMap(file);
-    //   };
-    // }
-
-    // const map = loadSourceMap(filepath);
-    // const {code, map: babelMap} = babel.transformFileSync(filepath, {
-    //   plugins: conf.plugins({isPostCompile: true}),
-    //   retainLines: true,
-    //   sourceMaps: true,
-    //   inputSourceMap: false,
-    // });
-    // let remapped = resorcery(
-    //   babelMap,
-    //   returnMapFirst(map),
-    //   !argv.full_sourcemaps
-    // );
-
-    // const {code: compressed, map: terserMap} = terser.minify(code, {
-    //   mangle: false,
-    //   compress: {
-    //     defaults: false,
-    //     unused: true,
-    //   },
-    //   output: {
-    //     beautify: !!argv.pretty_print,
-    //     comments: 'all',
-    //     keep_quoted_props: true,
-    //   },
-    //   sourceMap: true,
-    // });
-
-    // // TODO: Resorcery should support a chain, instead of having to call
-    // // multiple times.
-    // remapped = resorcery(
-    //   terserMap,
-    //   returnMapFirst(remapped),
-    //   !argv.full_sourcemaps
-    // );
-
-    // fs.outputFileSync(filepath, compressed);
-    // fs.outputFileSync(
-    //   path.resolve(directory, `${filename}.map`),
-    //   remapped.toString()
-    // );
-
-    // console.log('calling cb', {filename, file});
-    // cb(null, file);
   });
 }
 
