@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,81 @@
  */
 
 .amp-access-scroll-bar {
-  height: 44px;
   position: fixed;
-  left: 0;
-  width: 100%;
   background: transparent;
   z-index: 2147483647;
-  bottom: 0;
+
+  bottom: 10px;
+  height: 49px;
+  left: auto;
+  right: 0px;
+  width: 44px;
 }
 
-.amp-access-scroll-audio {
+.amp-access-scroll-bar.amp-access-scroll-holdback {
+  bottom: 0;
+  height: 44px;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+.amp-access-scroll-revealed {
+  bottom: 0;
+  height: 59px;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+.amp-access-scroll-sheet.amp-access-scroll-holdback {
   position: fixed;
-  background-color: transparent;
-  position: fixed;
+  background: transparent;
   z-index: 2147483647;
-  display: block;
 
   /* mobile */
   bottom: 44px;
   height: 100px;
   left: 0;
+  right: 0;
   width: 100%;
 }
+
 @media (min-width: 600px) {
-  .amp-access-scroll-audio {
+  .amp-access-scroll-sheet.amp-access-scroll-holdback {
     bottom: 63px;
+    height: 56px;
+    left: auto;
+    right: 16px;
+    width: 475px;
+  }
+}
+
+.amp-access-scroll-sheet {
+  position: fixed;
+  background: transparent;
+  z-index: 2147483647;
+}
+
+/*
+  mobile media query needed for !important.
+  !important is necessary because mobile style
+  should override inline style.
+*/
+@media (max-width: 599px) {
+  .amp-access-scroll-sheet {
+    /* mobile */
+    bottom: 59px;
+    height: 100px;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+  }
+}
+
+@media (min-width: 600px) {
+  .amp-access-scroll-sheet {
+    bottom: 75px;
     height: 56px;
     left: auto;
     right: 16px;

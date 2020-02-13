@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 
 import {Services} from '../../../src/services';
+import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {createElementWithAttributes} from '../../../src/dom';
+import {hasOwn} from '../../../src/utils/object';
 
 /** @abstract */
 export class ScrollComponent {
@@ -26,8 +28,19 @@ export class ScrollComponent {
 
     /** @protected @property {?function(Window):undefined} */
     this.setWindow_ = null;
+
     /** @protected {?HTMLIFrameElement} */
     this.frame_ = null;
+
+    /** @protected {ScrollComponent.HorizontalLayout} */
+    this.layout_ = {
+      'width': null,
+      'left': null,
+      'right': null,
+    };
+
+    /** @protected */
+    this.HOLDBACK_CLASS = 'amp-access-scroll-holdback';
 
     /** @type {Promise<Window>} */
     this.window = new Promise(resolve => {
@@ -74,4 +87,53 @@ export class ScrollComponent {
   mutate_(mutator) {
     Services.vsyncFor(this.doc_.win).mutate(mutator);
   }
+
+  /**
+   * @param {Object} updates
+   * @return {boolean} true if changed
+   * @protected
+   */
+  updateHorizontalLayout(updates) {
+    let changed = false;
+    // only update styles already set in the layout, updates in place
+    Object.keys(this.layout_).forEach(key => {
+      if (!hasOwn(updates, key)) {
+        return;
+      }
+      const size = this.cssSize(updates[key]);
+      if (this.layout_[key] !== size) {
+        this.layout_[key] = size;
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
+  /**
+   * This method should only be called inside of a mutate_ callback.
+   *
+   * @param {!Element} el
+   * @protected
+   */
+  renderHorizontalLayout(el) {
+    setStyles(el, assertDoesNotContainDisplay(this.layout_));
+  }
+
+  /**
+   * @param {string|number} size
+   * @return {string}
+   */
+  cssSize(size) {
+    return typeof size === 'number' ? px(size) : size;
+  }
 }
+
+/**
+ * Anything affecting vertical layout (height, top, bottom) is ommitted.
+ * @typedef {{
+ *    width: ?string,
+ *    left: ?string,
+ *    right: ?string
+ * }}
+ */
+ScrollComponent.HorizontalLayout;
