@@ -59,6 +59,7 @@ export function calculateExtensionScriptUrl(
   opt_extensionVersion,
   opt_isLocalDev
 ) {
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
   if (opt_extensionVersion == null) {
@@ -67,7 +68,7 @@ export function calculateExtensionScriptUrl(
   const extensionVersion = opt_extensionVersion
     ? '-' + opt_extensionVersion
     : '';
-  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}.js`;
+  return `${base}/rtv/${rtv}/v0/${extensionId}${extensionVersion}${fileExtension}`;
 }
 
 /**
@@ -85,11 +86,15 @@ export function calculateEntryPointScriptUrl(
   isLocalDev,
   opt_rtv
 ) {
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, isLocalDev);
-  if (opt_rtv) {
-    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;
+  if (isLocalDev) {
+    return `${base}/${entryPoint}${fileExtension}`;
   }
-  return `${base}/${entryPoint}.js`;
+  if (opt_rtv) {
+    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}${fileExtension}`;
+  }
+  return `${base}/${entryPoint}${fileExtension}`;
 }
 
 /**
@@ -99,7 +104,9 @@ export function calculateEntryPointScriptUrl(
  */
 export function parseExtensionUrl(scriptUrl) {
   // Note that the "(\.max)?" group only applies to local dev.
-  const matches = scriptUrl.match(/^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.js$/i);
+  const matches = scriptUrl.match(
+    /^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i
+  );
   return {
     extensionId: matches ? matches[2] : undefined,
     extensionVersion: matches ? matches[3] : undefined,
