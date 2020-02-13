@@ -20,12 +20,12 @@ import {devAssert} from '../../../src/log';
 
 /** @enum {number} */
 export const PageState = {
-  QUEUED: 0,
-  FETCHING: 1,
-  LOADED: 2,
-  FAILED: 3,
-  INSERTED: 4,
-  PAUSED: 5,
+  QUEUED: 1,
+  FETCHING: 2,
+  LOADED: 3,
+  FAILED: 4,
+  INSERTED: 5,
+  PAUSED: 6,
 };
 
 export const VISIBLE_DOC_CLASS = 'amp-next-page-visible';

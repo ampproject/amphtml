@@ -24,6 +24,7 @@ import {
 } from '../../../src/service/position-observer/position-observer-impl';
 import {RelativePositions} from '../../../src/layout-rect';
 import {Services} from '../../../src/services';
+import {devAssert} from '../../../src/log';
 import {throttle} from '../../../src/utils/rate-limit';
 
 /** @enum {number} */
@@ -53,10 +54,29 @@ export class VisibilityObserverEntry {
     this.topSentinelPosition_ = null;
     /** @private {?RelativePositions} */
     this.bottomSentinelPosition_ = null;
-    /** @private {!ViewportRelativePos} */
-    this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
     /** @private {function(!ViewportRelativePos)} */
     this.callback_ = callback;
+  }
+
+  /**
+   * @return {function(!ViewportRelativePos)}
+   */
+  get callback() {
+    return this.callback_;
+  }
+
+  /**
+   * @return {?RelativePositions}
+   */
+  get top() {
+    return this.topSentinelPosition_;
+  }
+
+  /**
+   * @return {?RelativePositions}
+   */
+  get bottom() {
+    return this.bottomSentinelPosition_;
   }
 
   /**
@@ -90,11 +110,8 @@ export class VisibilityObserverEntry {
    * @param {?PositionInViewportEntryDef} position
    */
   topSentinelPositionChanged(position) {
-    if (position.positionRect) {
-      this.topSentinelTop_ = position.positionRect.top;
-    }
     this.topSentinelPosition_ = position.relativePos;
-    this.updateRelativePos();
+    this.observer_.updateRelativePos(this);
   }
 
   /**
@@ -103,57 +120,43 @@ export class VisibilityObserverEntry {
    * @param {?PositionInViewportEntryDef} position
    */
   bottomSentinelPositionChanged(position) {
-    if (position.positionRect) {
-      this.bottomSentinelTop_ = position.positionRect.top;
-    }
     this.bottomSentinelPosition_ = position.relativePos;
-    this.updateRelativePos();
+    this.observer_.updateRelativePos(this);
   }
 
   /**
-   * Calculates the position of the element relative to the viewport
-   * based on the positions of the injected bottom and top sentinel elements
+   * @return {boolean}
    */
-  updateRelativePos() {
-    const {topSentinelPosition_: top, bottomSentinelPosition_: bottom} = this;
-    const {INSIDE, TOP, BOTTOM} = RelativePositions;
+  usesSentinel() {
+    return true;
+  }
+}
 
-    if (!top && !bottom) {
-      // Early exit if this an intersection change happening before a
-      // sentinel position change
-      return;
-    } else if (top === INSIDE && bottom === INSIDE) {
-      // Both the top and bottom sentinel elements are within the
-      // viewport bounds meaning that the document is short enough
-      // to be contained inside the viewport
-      this.relativePos_ = ViewportRelativePos.INSIDE_VIEWPORT;
-    } else if ((!top || top === TOP) && (!bottom || bottom === BOTTOM)) {
-      // The head of the document is above the viewport and the
-      // foot of the document is below it, meaning that the viewport
-      // is looking at a section of the document
-      this.relativePos_ = ViewportRelativePos.CONTAINS_VIEWPORT;
-    } else if (
-      ((!top || top === TOP) && bottom === TOP) ||
-      (top === BOTTOM && (!bottom || bottom === BOTTOM))
-    ) {
-      // Both the top and the bottom of the document are either
-      // above or below the document meaning that the viewport hasn't
-      // reached the document yet or has passed it
-      this.relativePos_ = ViewportRelativePos.OUTSIDE_VIEWPORT;
-    } else {
-      const atBottom =
-        (top === TOP || top === INSIDE) && (!bottom || bottom === BOTTOM);
-      const scrollingUp = this.observer_.isScrollingUp();
-      // The remaining case is the case where the document is halfway
-      // through being scrolling into/out of the viewport in which case
-      // we don't need to update the visibility
-      this.relativePos_ =
-        !!atBottom === !!scrollingUp
-          ? ViewportRelativePos.LEAVING_VIEWPORT
-          : ViewportRelativePos.ENTERING_VIEWPORT;
-    }
+class VisibilityObserverHostEntry extends VisibilityObserverEntry {
+  /**
+   * @param {!VisibilityObserver} observer
+   * @param {function(!ViewportRelativePos)} callback
+   * @param {!Element} limitingElement
+   */
+  constructor(observer, callback, limitingElement) {
+    super(observer, callback);
 
-    this.callback_(this.relativePos_);
+    /** @private {!Element} */
+    this.limitingElement_ = limitingElement;
+  }
+
+  /**
+   * @override
+   */
+  usesSentinel() {
+    return false;
+  }
+
+  /**
+   * @return {!Element}
+   */
+  get limitingElement() {
+    return this.limitingElement_;
   }
 }
 
@@ -186,6 +189,9 @@ export default class VisibilityObserver {
     /** @private {number} */
     this.viewportHeight_ = 0;
 
+    /** @private {boolean} */
+    this.measuring_ = false;
+
     /**
      * @private
      * @const {!../../../src/service/mutator-interface.MutatorInterface}
@@ -208,32 +214,45 @@ export default class VisibilityObserver {
     return this.mutator_;
   }
 
-  /** @return {number} */
-  get viewportHeight() {
-    return this.viewportHeight_;
-  }
-
   /**
    * @private
    */
   updateScroll_() {
-    this.mutator_.measureElement(() => {
-      this.viewportHeight_ = this.viewport_.getHeight();
-      const scrollTop = this.viewport_.getScrollTop();
-      const delta = scrollTop - this.lastScrollTop_;
-      // Throttle
-      if (Math.abs(delta) < SCROLL_DIRECTION_THRESHOLD) {
-        return;
-      }
-      const scrollDirection =
-        delta > 0 ? ScrollDirection.DOWN : ScrollDirection.UP;
-      if (this.lastScrollDirection_ !== scrollDirection) {
-        this.entries_.forEach(entry => entry.updateRelativePos());
-      }
-      this.lastScrollTop_ = scrollTop;
-      this.lastScrollDirection_ = this.scrollDirection_;
-      this.scrollDirection_ = scrollDirection;
-    });
+    if (this.measuring_) {
+      return;
+    }
+    this.measuring_ = true;
+    this.mutator_
+      .measureElement(() => {
+        this.viewportHeight_ = this.viewport_.getHeight();
+        const scrollTop = this.viewport_.getScrollTop();
+        const delta = scrollTop - this.lastScrollTop_;
+        // Throttle
+        if (Math.abs(delta) < SCROLL_DIRECTION_THRESHOLD) {
+          return;
+        }
+        const scrollDirection =
+          delta > 0 ? ScrollDirection.DOWN : ScrollDirection.UP;
+
+        this.entries_.forEach(entry => {
+          // Entries that rely on scroll should be updated on every scroll
+          // while entries that reliy on sentinels should only be updated
+          // if the scroll direction changes
+          if (
+            !entry.usesSentinel() ||
+            this.lastScrollDirection_ !== scrollDirection
+          ) {
+            this.updateRelativePos(entry);
+          }
+        });
+
+        this.lastScrollTop_ = scrollTop;
+        this.lastScrollDirection_ = this.scrollDirection_;
+        this.scrollDirection_ = scrollDirection;
+      })
+      .then(() => {
+        this.measuring_ = false;
+      });
   }
 
   /**
@@ -262,10 +281,105 @@ export default class VisibilityObserver {
   }
 
   /**
+   * @param {!Element} limitingElement element that delimits the host page
+   * @param {function(!ViewportRelativePos)} callback
+   */
+  observeHost(limitingElement, callback) {
+    const entry = new VisibilityObserverHostEntry(
+      this,
+      callback,
+      limitingElement
+    );
+    this.entries_.push(entry);
+  }
+
+  /**
    * @return {!PositionObserver}
    */
   getPositionObserver() {
     installPositionObserverServiceForDoc(this.ampdoc_);
     return Services.positionObserverForDoc(this.ampdoc_.getHeadNode());
+  }
+
+  /**
+   * Calculates the position of the element relative to the viewport
+   * based on the positions of the injected bottom and top sentinel elements
+   *
+   * @param {!VisibilityObserverEntry} entry
+   */
+  updateRelativePos(entry) {
+    const relativePos = entry.usesSentinel()
+      ? this.getRelativePosFromSentinel(entry)
+      : this.getRelativePosFromScroll(
+          /** @type {!VisibilityObserverHostEntry} */ (entry)
+        );
+    if (!relativePos) {
+      return;
+    }
+    entry.callback(devAssert(relativePos));
+  }
+
+  /**
+   * @param {!VisibilityObserverHostEntry} entry
+   * @return {?ViewportRelativePos}
+   */
+  getRelativePosFromScroll(entry) {
+    // Measure the position of the host page (edge case)
+    const {viewportHeight_: vh, lastScrollTop_: scroll} = this;
+    // Document height is the same as the distance from the top
+    // to the <amp-next-page> element
+    const {top: height} = entry.limitingElement.getLayoutBox();
+    if (scroll < height - vh) {
+      return ViewportRelativePos.CONTAINS_VIEWPORT;
+    } else if (scroll < height && height <= vh && scroll <= 0) {
+      return ViewportRelativePos.INSIDE_VIEWPORT;
+    } else if (scroll < height) {
+      return this.isScrollingDown()
+        ? ViewportRelativePos.LEAVING_VIEWPORT
+        : ViewportRelativePos.ENTERING_VIEWPORT;
+    }
+    return ViewportRelativePos.OUTSIDE_VIEWPORT;
+  }
+
+  /**
+   * @param {!VisibilityObserverEntry} entry
+   * @return {?ViewportRelativePos}
+   */
+  getRelativePosFromSentinel(entry) {
+    const {top, bottom} = entry;
+    const {INSIDE, TOP, BOTTOM} = RelativePositions;
+    if (!top && !bottom) {
+      // Early exit if this an intersection change happening before a
+      // sentinel position change
+      return null;
+    } else if (top === INSIDE && bottom === INSIDE) {
+      // Both the top and bottom sentinel elements are within the
+      // viewport bounds meaning that the document is short enough
+      // to be contained inside the viewport
+      return ViewportRelativePos.INSIDE_VIEWPORT;
+    } else if ((!top || top === TOP) && (!bottom || bottom === BOTTOM)) {
+      // The head of the document is above the viewport and the
+      // foot of the document is below it, meaning that the viewport
+      // is looking at a section of the document
+      return ViewportRelativePos.CONTAINS_VIEWPORT;
+    } else if (
+      ((!top || top === TOP) && bottom === TOP) ||
+      (top === BOTTOM && (!bottom || bottom === BOTTOM))
+    ) {
+      // Both the top and the bottom of the document are either
+      // above or below the document meaning that the viewport hasn't
+      // reached the document yet or has passed it
+      return ViewportRelativePos.OUTSIDE_VIEWPORT;
+    } else {
+      const atBottom =
+        (top === TOP || top === INSIDE) && (!bottom || bottom === BOTTOM);
+      const scrollingUp = this.isScrollingUp();
+      // The remaining case is the case where the document is halfway
+      // through being scrolling into/out of the viewport in which case
+      // we don't need to update the visibility
+      return !!atBottom === !!scrollingUp
+        ? ViewportRelativePos.LEAVING_VIEWPORT
+        : ViewportRelativePos.ENTERING_VIEWPORT;
+    }
   }
 }

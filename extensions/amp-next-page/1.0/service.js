@@ -31,7 +31,6 @@ import {
   removeChildren,
   removeElement,
   scopedQuerySelector,
-  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {escapeCssSelectorIdent} from '../../../src/css';
@@ -43,7 +42,6 @@ import {
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
 import {setStyles, toggle} from '../../../src/style';
-import {throttle} from '../../../src/utils/rate-limit';
 
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
@@ -182,6 +180,7 @@ export class NextPageService {
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
 
+    // Initialize services
     this.multidocManager_ = new MultidocManager(
       this.win_,
       Services.ampdocServiceFor(this.win_),
@@ -189,6 +188,13 @@ export class NextPageService {
       Services.timerFor(this.win_)
     );
     this.visibilityObserver_ = new VisibilityObserver(this.ampdoc_);
+    this.readyPromise_.then(() => {
+      // Observe the host page's visibility
+      this.visibilityObserver_.observeHost(this.getHost_(), position => {
+        this.hostPage_.relativePos = position;
+        this.updateVisibility();
+      });
+    });
 
     if (!this.pages_) {
       this.pages_ = [this.hostPage_];
@@ -198,16 +204,6 @@ export class NextPageService {
     this.initializePageQueue_();
 
     this.getHost_().classList.add(NEXT_PAGE_CLASS);
-
-    const updateHostVisibilityThrottled = throttle(
-      this.win_,
-      this.updateHostVisibility_.bind(this),
-      200
-    );
-
-    this.viewport_.onScroll(updateHostVisibilityThrottled.bind(this));
-    this.viewport_.onResize(updateHostVisibilityThrottled.bind(this));
-    this.updateHostVisibility_();
   }
 
   /**
@@ -219,63 +215,17 @@ export class NextPageService {
   }
 
   /**
-   * @private
-   */
-  updateHostVisibility_() {
-    if (this.finished_) {
-      return;
-    }
-    this.readyPromise_.then(() => {
-      this.maybeFetchNext();
-
-      let vh,
-        scroll,
-        height = 0;
-      this.mutator_.measureMutateElement(
-        this.getHost_(),
-        () => {
-          // Measure the position of the host page (edge case)
-          vh = this.viewport_.getHeight();
-          scroll = this.viewport_.getScrollTop();
-          // Document height is the same as the distance from the top
-          // to the <amp-next-page> element
-          const {top} = this.host_.getLayoutBox();
-          height = top;
-        },
-        () => {
-          let relativePos;
-          if (scroll < height - vh) {
-            relativePos = ViewportRelativePos.CONTAINS_VIEWPORT;
-          } else if (scroll < height && height <= vh && scroll <= 0) {
-            relativePos = ViewportRelativePos.INSIDE_VIEWPORT;
-          } else if (scroll < height) {
-            relativePos = this.visibilityObserver_.isScrollingDown()
-              ? ViewportRelativePos.LEAVING_VIEWPORT
-              : ViewportRelativePos.ENTERING_VIEWPORT;
-          } else {
-            relativePos = ViewportRelativePos.OUTSIDE_VIEWPORT;
-          }
-
-          this.hostPage_.relativePos = relativePos;
-          this.updateVisibility();
-        }
-      );
-    });
-  }
-
-  /**
    * @param {boolean=} force
    * @return {!Promise}
    */
   maybeFetchNext(force = false) {
-    devAssert(!this.finished_);
+    // If a page is already queued to be fetched, we need to wait for it
+    const isFetching = this.pages_.some(page => page.is(PageState.FETCHING));
+    // If we're still too far from the bottom, we don't need to perform this now
+    const isTooEarly =
+      this.getViewportsAway_() > PRERENDER_VIEWPORT_COUNT && !force;
 
-    // If a page is already queued to be fetched, wait for it
-    if (this.pages_.some(page => page.is(PageState.FETCHING))) {
-      return Promise.resolve();
-    }
-    // If we're still too far from the bottom, early return
-    if (this.getViewportsAway_() > PRERENDER_VIEWPORT_COUNT && !force) {
+    if (this.finished_ || isFetching || isTooEarly) {
       return Promise.resolve();
     }
 
@@ -315,11 +265,10 @@ export class NextPageService {
    */
   updateVisibility() {
     this.pages_.forEach((page, index) => {
-      if (
-        page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT &&
-        page.isVisible()
-      ) {
-        page.setVisibility(VisibilityState.HIDDEN);
+      if (page.relativePos === ViewportRelativePos.OUTSIDE_VIEWPORT) {
+        if (page.isVisible()) {
+          page.setVisibility(VisibilityState.HIDDEN);
+        }
       } else {
         if (!page.isVisible()) {
           page.setVisibility(VisibilityState.VISIBLE);
@@ -342,6 +291,9 @@ export class NextPageService {
           /** @type {!Document|!ShadowRoot} */ (devAssert(page.document))
         )
       );
+
+    // Check if we're close to the bottom, if so fetch more pages
+    this.maybeFetchNext();
   }
 
   /**
