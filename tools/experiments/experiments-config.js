@@ -68,13 +68,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
   },
   {
-    id: 'amp-consent-geo-override',
-    name: 'AMP consent modified to support CCPA',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/lannka-consent-design/extensions/amp-consent/amp-consent.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25623',
-  },
-  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
@@ -310,5 +303,11 @@ export const EXPERIMENTS = [
       'after that scroller scrolls.',
     spec: 'https://github.com/ampproject/amphtml/issues/24929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
+  },
+  {
+    id: 'amp-stream-gallery',
+    name: 'Enables component',
+    spec: 'https://github.com/ampproject/amphtml/issues/20595',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
   },
 ];
