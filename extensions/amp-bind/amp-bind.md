@@ -63,7 +63,7 @@ limitations under the License.
 
 The `amp-bind` component enables custom stateful interactivity on AMP pages.
 
-For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely on `amp-bind` for initial render.
+For performance, and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means visual elements should be given a default state and not rely on `amp-bind` for initial render.
 
 <figure class="alignment-wrapper  margin-">
 <amp-youtube
