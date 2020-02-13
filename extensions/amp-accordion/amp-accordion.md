@@ -139,7 +139,7 @@ Include the `disable-session-states` attribute on `<amp-accordion>` to disable c
 
 ### `expanded`
 
-Include the `expanded` attribute on one or more nested `<section>` to display those section as expanded on page load. 
+Include the `expanded` attribute on one or more nested `<section>` to display those section as expanded on page load.
 
 ### `expand-single-section`
 
@@ -284,7 +284,7 @@ The `amp-accordion` events below trigger on accordion sections when clicked.
 
 ### `expand`
 
-The `expand` event triggers on the target `amp-accordion` section that changes from the collapsed state to the expanded state. Calling `expand` on an already expanded section will not trigger the event.
+The `expand` event triggers on the target `amp-accordion` section that changes from the collapsed state to the expanded state. Calling `expand` on an already expanded section will not trigger the `expand` event.
 
 ### `collapse`
 

@@ -78,7 +78,7 @@ For performance, and to avoid the risk of unexpected content jumping, `amp-bind`
 2. [Expressions](#expressions): JavaScript-like expressions that can reference the **state**.
 3. [Bindings](#bindings): Special attributes that link an element's property to a **state** via an **expression**. A property is bound by wrapping it inside brackets, in the form of `[property]`.
 
-### Basic example
+### Example without declared state
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -109,7 +109,7 @@ When the user taps/clicks the button:
 Calling `AMP.setState()` in some examples may set or change states of other examples on page. Refresh this page to see examples before `AMP.setState()`.
 [/tip]
 
-### A slightly more complex example
+### Example with declared state
 
 [filter formats="websites, stories, ads"]
 
@@ -230,7 +230,7 @@ Using `[class]="theFood[currentMeal].style"` as an example of **expression** syn
 
 [/example]
 
-- The `<amp-state>` component declares state using a JSON string literal. It has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on email load, the **state** is empty.
+- The `<amp-state>` component declares state using a JSON object. It has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on email load, the **state** is empty.
 - The page loads with visual defaults.
 - The `<div>` element has `class="greenBorder"` defined.
 - The second `<p>` element has "I want cupcakes." defined within the tags.
@@ -320,7 +320,7 @@ To send credentials, pass the value of `include`. If this value is set, the resp
 
 ##### `refresh`
 
-The `refresh` action refetches data from data point the `src` attribute points to. It ignores the browser cache.
+The `refresh` action refetches data from data point the `src` attribute points to. This action will make a network request bypassing the browser's caching mechanisms.
 
 [example preview="inline" playground="true" imports="amp-bind"]
 
@@ -334,7 +334,7 @@ The `refresh` action refetches data from data point the `src` attribute points t
 
 [/example]
 
-A common need for `refresh` is working with live content that needs to be updated, such as a live sports score.
+We recommend [`amp-script`](../amp-script/amp-script.md) for most use cases working with live content. In a subset of cases, `refresh` with `amp-bind` will work.
 
 #### XHR batching
 
@@ -631,7 +631,7 @@ Single-parameter arrow functions can't have parentheses, e.g. use `x => x + 1` i
 - [reduce](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce)
 - [slice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice)
 - [some](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some)
-- [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort) (not-in-place)
+- [sort](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort)
 - [splice](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice) (not-in-place)
 
 [example preview="inline" playground="true" imports="amp-bind"]
