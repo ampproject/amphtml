@@ -241,6 +241,9 @@ export class Transport {
    * @param {string|undefined} referrerPolicy
    */
   static sendRequestUsingImage(win, request, suppressWarnings, referrerPolicy) {
+    if (!win) {
+      return;
+    }
     const image = createPixel(win, request.url, referrerPolicy);
     loadPromise(image)
       .then(() => {

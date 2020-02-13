@@ -29,6 +29,7 @@ const TAG = 'pixel';
  * @return {!Element}
  */
 export function createPixel(win, src, referrerPolicy) {
+  // Caller need to verify window is not destroyed when creating pixel
   if (referrerPolicy && referrerPolicy !== 'no-referrer') {
     user().error(TAG, 'Unsupported referrerPolicy: %s', referrerPolicy);
   }
