@@ -88,6 +88,9 @@ export function calculateEntryPointScriptUrl(
 ) {
   const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, isLocalDev);
+  if (isLocalDev) {
+    return `${base}/${entryPoint}${fileExtension}`;
+  }
   if (opt_rtv) {
     return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}${fileExtension}`;
   }
