@@ -296,8 +296,8 @@ export class AmpStoryPlayer {
    */
   swapIframes_(nextStoryIdx, backwards = false) {
     const detachedStoryIdx = backwards
-      ? this.iframePool_.shiftBackwards(nextStoryIdx)
-      : this.iframePool_.shiftForwards(nextStoryIdx);
+      ? this.iframePool_.rotateRight(nextStoryIdx)
+      : this.iframePool_.rotateLeft(nextStoryIdx);
 
     const detachedStory = this.stories_[detachedStoryIdx];
     const nextStory = this.stories_[nextStoryIdx];
@@ -407,14 +407,13 @@ class IframePool {
   }
 
   /**
-   * Shifts iframe allocation forwards. It takes the leftmost iframe and
-   * allocates it to the next story to the right without an iframe. It also
-   * updates the storyIdsWithIframe by removing the reference to the detached
-   * story and adds the new one.
+   * Takes the leftmost iframe and allocates it to the next story to the right
+   * without an iframe. It also updates the storyIdsWithIframe by removing the
+   * reference to the detached story and adds the new one.
    * @param {number} nextStoryIdx
    * @return {number} Index of the detached story.
    */
-  shiftForwards(nextStoryIdx) {
+  rotateLeft(nextStoryIdx) {
     const detachedStoryIdx = this.storyIdsWithIframe_.shift();
     this.storyIdsWithIframe_.push(nextStoryIdx);
 
@@ -424,14 +423,13 @@ class IframePool {
   }
 
   /**
-   * Shifts iframe allocation backwards. It takes the rightmost iframe and
-   * allocates it to the next story to the left without an iframe. It also
-   * updates the storyIdsWithIframe by removing the reference to the detached
-   * story and adds the new one.
+   * Takes the rightmost iframe and allocates it to the next story to the left
+   * without an iframe. It also updates the storyIdsWithIframe by removing the
+   * reference to the detached story and adds the new one.
    * @param {number} nextStoryIdx
    * @return {number} Index of the detached story.
    */
-  shiftBackwards(nextStoryIdx) {
+  rotateRight(nextStoryIdx) {
     const detachedStoryIdx = this.storyIdsWithIframe_.pop();
     this.storyIdsWithIframe_.unshift(nextStoryIdx);
 
