@@ -1093,7 +1093,7 @@ export class Bind {
    * @private
    */
   evaluate_(opt_wait) {
-    const state = opt_wait ? this.getStateWithWait() : this.state_;
+    const state = opt_wait ? this.getStateWithWait() : Promise.resolve(this.state_);
     const evaluatePromise = state.then(s =>
       this.ww_('bind.evaluateBindings', [s])
     );
