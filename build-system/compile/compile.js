@@ -16,15 +16,24 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
+const babel = require('@babel/core');
+const conf = require('./build.conf');
 const del = require('del');
 const fs = require('fs-extra');
 const gap = require('gulp-append-prepend');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
+<<<<<<< HEAD
 const pathModule = require('path');
+=======
+const path = require('path');
+>>>>>>> Broken Gulp
 const rename = require('gulp-rename');
+const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
+const terser = require('terser');
+const through = require('through2');
 const {
   gulpClosureCompile,
   handleCompilerError,
@@ -56,6 +65,88 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
  */
 function convertPathsToTmpRoot(paths) {
   return paths.map(path => path.replace(/^(!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
+}
+
+function loadSourceMap(file) {
+  if (file.startsWith('dist')) {
+    return fs.readFile(`${file}.map`);
+  }
+  return null;
+}
+
+/**
+ * Apply Babel Transforms on output from Closure Compuler, then cleanup whitespace with Terser.
+ * @param {string} directory directory this file lives in
+ * @return {!Promise}
+ */
+function postClosureBabel(directory) {
+  return through.obj(function(file, enc, next) {
+    console.log({file, directory});
+    return next(null, file);
+    // const extension = path.extname(filename);
+    // const filepath = path.resolve(directory, filename);
+    // console.log('postClosureBabel', {
+    //   filename,
+    //   directory,
+    //   extension,
+    //   filepath,
+    // });
+
+    // function returnMapFirst(map) {
+    //   let first = true;
+    //   return function(file) {
+    //     if (first) {
+    //       first = false;
+    //       return map;
+    //     }
+    //     return loadSourceMap(file);
+    //   };
+    // }
+
+    // const map = loadSourceMap(filepath);
+    // const {code, map: babelMap} = babel.transformFileSync(filepath, {
+    //   plugins: conf.plugins({isPostCompile: true}),
+    //   retainLines: true,
+    //   sourceMaps: true,
+    //   inputSourceMap: false,
+    // });
+    // let remapped = resorcery(
+    //   babelMap,
+    //   returnMapFirst(map),
+    //   !argv.full_sourcemaps
+    // );
+
+    // const {code: compressed, map: terserMap} = terser.minify(code, {
+    //   mangle: false,
+    //   compress: {
+    //     defaults: false,
+    //     unused: true,
+    //   },
+    //   output: {
+    //     beautify: !!argv.pretty_print,
+    //     comments: 'all',
+    //     keep_quoted_props: true,
+    //   },
+    //   sourceMap: true,
+    // });
+
+    // // TODO: Resorcery should support a chain, instead of having to call
+    // // multiple times.
+    // remapped = resorcery(
+    //   terserMap,
+    //   returnMapFirst(remapped),
+    //   !argv.full_sourcemaps
+    // );
+
+    // fs.outputFileSync(filepath, compressed);
+    // fs.outputFileSync(
+    //   path.resolve(directory, `${filename}.map`),
+    //   remapped.toString()
+    // );
+
+    // console.log('calling cb', {filename, file});
+    // cb(null, file);
+  });
 }
 
 // Compiles AMP with the closure compiler. This is intended only for
@@ -417,6 +508,7 @@ function compile(
           )
         )
         .pipe(gulp.dest(outputDir))
+        .pipe(postClosureBabel(outputDir))
         .on('end', resolve);
     }
   });

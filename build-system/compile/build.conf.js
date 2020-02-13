@@ -41,6 +41,8 @@ const defaultPlugins = isEsmBuild => [
   getReplacePlugin(isEsmBuild),
 ];
 
+const postCompilationPlugins = [localPlugin('transform-function-declarations')];
+
 const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
   './polyfills/domtokenlist': ['installDOMTokenList'],
@@ -138,8 +140,23 @@ function getJsonConfigurationPlugin() {
  * @param {!Object<string, boolean>} buildFlags
  * @return {!Array<string|!Array<string|!Object>>}
  */
+<<<<<<< HEAD
 function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
   const applied = [...defaultPlugins(isEsmBuild || false)];
+=======
+function plugins({
+  isEsmBuild,
+  isForTesting,
+  isSinglePass,
+  isChecktypes,
+  isPostCompile,
+}) {
+  if (isPostCompile) {
+    return postCompilationPlugins;
+  }
+
+  const applied = [...defaultPlugins];
+>>>>>>> Broken Gulp
   // TODO(erwinm): This is temporary until we remove the assert/log removals
   // from the java transformation to the babel transformation.
   // There is currently a weird interaction where when we do the transform
@@ -151,6 +168,7 @@ function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
     applied.push(localPlugin('transform-amp-asserts'));
   }
   if (isEsmBuild) {
+<<<<<<< HEAD
     applied.push([
       'filter-imports',
       {
@@ -160,6 +178,10 @@ function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
         },
       },
     ]);
+=======
+    applied.push(['filter-imports', {imports: esmRemovedImports}]);
+    applied.push(localPlugin('transform-function-declarations'));
+>>>>>>> Broken Gulp
   }
   if (isChecktypes) {
     applied.push(localPlugin('transform-simple-object-destructure'));
