@@ -5,7 +5,7 @@ formats:
   - ads
   - email
 teaser:
-  text: A clickable stacked list of headers that reveal or hide content associated with them.
+  text: A stacked list of headers that collapse or expand content sections with user interaction.
 ---
 
 <!---
@@ -29,7 +29,7 @@ limitations under the License.
 <table>
   <tr>
     <td class="col-fourty"><strong>Description</strong></td>
-    <td>A clickable stacked list of headers that collapse or expand content sections.</td>
+    <td>A stacked list of headers that collapse or expand content sections with user interaction. </td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -139,7 +139,7 @@ Include the `disable-session-states` attribute on `<amp-accordion>` to disable c
 
 ### `expanded`
 
-Include the `expanded` attribute on a nested `<section>` to display the section as expanded on page load.
+Include the `expanded` attribute on one or more nested `<section>` to display those section as expanded on page load. 
 
 ### `expand-single-section`
 
