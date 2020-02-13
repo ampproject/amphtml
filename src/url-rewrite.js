@@ -88,7 +88,6 @@ export function rewriteAttributesForElement(
  * @param {string} attrName Lowercase attribute name.
  * @param {string} attrValue
  * @return {string}
- * @private
  * @visibleForTesting
  */
 export function rewriteAttributeValue(tagName, attrName, attrValue) {

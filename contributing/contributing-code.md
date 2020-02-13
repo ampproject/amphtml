@@ -194,16 +194,16 @@ We have a well-defined process for handling requests for changes to the **experi
 
 ### Process for requesting a cherry-pick
 
-Use the following process to request a cherry-pick if you have a change that you believe meets the cherry-pick criteria.
+The following outlines the process to request a cherry-pick.
 
-If you run into any issues or have any questions when requesting a cherry-pick, please use the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).
-
-- Ensure there is a GitHub issue filed for the problem that needs to be resolved _before_ filing the cherry-pick request issue.
-- File the cherry-pick request issue using the [Cherry-pick request template](https://github.com/ampproject/amphtml/issues/new?title=%F0%9F%8C%B8%20Cherry%20pick%20request%20for%20%3CYOUR_ISSUE_NUMBER%3E%20into%20%3CRELEASE_ISSUE_NUMBER%3E%20%28Pending%29&template=cherry_pick_template.md). Follow the instructions in the template, providing all of the requested data. **Make sure you fill out this issue completely or your cherry-pick may not be seen or acted upon.**
-- Get the necessary approval for your cherry-pick (indicated via comments on the cherry-pick request issue).
+- Ensure there is a [GitHub issue](https://github.com/ampproject/amphtml/issues/new/choose) filed for the problem that needs to be resolved _before_ filing the cherry-pick request issue.
+- File the cherry-pick request issue using the [Cherry-pick request template](https://github.com/ampproject/amphtml/issues/new?title=%F0%9F%8C%B8%20Cherry%20pick%20request%20for%20%3CYOUR_ISSUE_NUMBER%3E%20into%20%3CRELEASE_ISSUE_NUMBER%3E%20%28Pending%29&template=cherry_pick_template.md). Follow the instructions in the template, providing all the requested data. **Make sure you fill out this issue completely or your cherry-pick may not be seen or acted upon.**
+- Get the necessary approval for your cherry-pick, indicated via comments on the cherry-pick request issue.
   - For cherry-picks into **experimental**/**beta**, at least one member of the [Approvers WG](https://github.com/orgs/ampproject/teams/wg-approvers/members) must approve the cherry-pick/rollback.
   - For cherry-picks into **stable**/**lts** at least one member from the [Cherry-Pick Approvers group](https://github.com/orgs/ampproject/teams/cherry-pick-approvers/members) must approve the cherry-pick.
-- After the cherry-pick has been approved, the person currently handling releases (on-duty engineer) will work with you to ensure the cherry-pick is made.
-- **Once the cherry-pick is made you are responsible for verifying that the cherry-pick you requested fixes the reported issue and that it does not cause other issues.**
+- Once approved, the on-duty engineer handling releases will work with you to ensure the cherry-pick is made.
+- **Once the cherry-pick is made you are responsible for verifying the cherry-pick fixes the issue and does not cause other issues.**
 
-**If you are requesting a cherry-pick to fix an issue in production** it is very likely you will _also_ need a cherry-pick into the **experimental**/**beta** releases since otherwise the problem your cherry-pick addresses would reappear as soon as the **beta** release is promoted to **stable**. Work with the on-duty engineer to determine if you need a cherry-pick to both release channels and make sure your cherry-pick request issue reflects what you determine.
+**If you are requesting a cherry-pick to fix an issue in production** it is likely you will _also_ need a cherry-pick into the **experimental**/**beta** releases. Problems cherry-picked in **stable** could be overridden after promoting **beta**. The on-duty engineer will help determine if you need to cherry-pick both release channels.
+
+If you run into any issues or have any questions when requesting a cherry-pick, please use the [AMP Slack #release channel](https://amphtml.slack.com/messages/C4NVAR0H3/) ([sign up for Slack](https://bit.ly/amp-slack-signup)).

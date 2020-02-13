@@ -19,19 +19,17 @@ import {jsonLiteral} from '../../../../src/json';
 const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
   'vars': {
     'clientId': 'CLIENT_ID(__gads)',
-    'data':
-      '{"skus": "${skus}","source": "${source}","active": "${active}","product": "${product}"}',
+    'productObj': '{"product": [${products}]}',
+    'stateParams': '${publicationId}:${state}',
+    'eventParams': '${publicationId}:${event}',
   },
   'requests': {
     'baseUrl': 'https://pubads.g.doubleclick.net/subopt',
     'baseParams':
-      'u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&' +
-      '_amp_source_origin=${sourceHost}',
+      'u_tz=240&v=1&cookie=${clientId}&cdm=${sourceHostName}&_amp_source_origin=${sourceHost}&extrainfo=',
     'sendBase': '${baseUrl}/data?${baseParams}',
-    'stateParams': 'states=${publicationId}%3A${state}%3A${productId}',
-    'eventParams': 'events=${publicationId}%3A${event}%3A${data}',
-    'sendSubscriptionState': '${sendBase}&${stateParams}',
-    'sendEvent': '${sendBase}&${eventParams}',
+    'sendSubscriptionState': '${sendBase}${productObj}&states=${stateParams}',
+    'sendEvent': '${sendBase}${data}&events=${eventParams}',
   },
   'triggers': {
     'onSubscribed': {
@@ -39,6 +37,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendSubscriptionState',
       'vars': {
         'state': 'subscriber',
+        'products': '"${productId}"',
       },
     },
     'onNotSubscribed': {
@@ -46,6 +45,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendSubscriptionState',
       'vars': {
         'state': 'non_subscriber',
+        'products': '"${productId}"',
       },
     },
     'onShowOffers': {
@@ -53,6 +53,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'offers_shown',
+        'data': '{"skus": "${skus}","source": "${source}"}',
       },
     },
     'onPaywall': {
@@ -60,7 +61,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'paywall',
-        'active': 'false',
+        'data': '{"is_active": false, "source": "${source}"}',
       },
     },
     'onSelectOffer': {
@@ -68,7 +69,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'offer_selected',
-        'active': 'true',
+        'data': '{"is_active": true,"product": "${product}"}',
       },
     },
     'onStartBuyflow': {
@@ -76,7 +77,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'payment_flow_start',
-        'active': 'true',
+        'data': '{"is_active": true,"product": "${product}"}',
       },
     },
     'onPaymentComplete': {
@@ -84,7 +85,7 @@ const SUBSCRIPTIONS_PROPENSITY_CONFIG = jsonLiteral({
       'request': 'sendEvent',
       'vars': {
         'event': 'payment_complete',
-        'active': 'true',
+        'data': '{"is_active": true,"product": "${product}"}',
       },
     },
   },

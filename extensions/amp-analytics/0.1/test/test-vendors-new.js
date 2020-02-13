@@ -123,16 +123,14 @@ describes.realWin(
                 const keys = Object.keys(merged);
                 for (let i = 0; i < keys.length; i++) {
                   const key = keys[i];
-                  // Three opt params here because that is currently
-                  // the max number of params for any macro
-                  merged[key] = (opt_param, opt_param2, opt_param3) => {
-                    const params = [opt_param, opt_param2, opt_param3]
+                  merged[key] = (...args) => {
+                    let params = args
                       .filter(val => val !== undefined)
                       .join(',');
                     if (params) {
                       params = '(' + params + ')';
                     }
-                    return `_${key.replace('$', '')}${params}_`;
+                    return `_${key.replace('$', '').toLowerCase()}${params}_`;
                   };
                 }
                 return /** @type {!JsonObject} */ (merged);

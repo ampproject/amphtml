@@ -24,6 +24,7 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
 import {dev, devAssert} from '../log';
+import {escapeCssSelectorIdent} from '../css';
 import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
@@ -317,6 +318,9 @@ export class AmpDoc {
     /** @private {!Object<string, string>} */
     this.params_ = (opt_options && opt_options.params) || map();
 
+    /** @protected {!Object<string, string>} */
+    this.meta_ = (opt_options && opt_options.meta) || map();
+
     /** @private @const {!Array<string>} */
     this.declaredExtensions_ = [];
 
@@ -412,6 +416,38 @@ export class AmpDoc {
   getParam(name) {
     const v = this.params_[name];
     return v == null ? null : v;
+  }
+
+  /**
+   * Returns the value of an ampdoc's meta tag content for a given name, or
+   * `null` if the meta tag does not exist.
+   * @param {string} name
+   * @return {?string}
+   */
+  getMetaByName(name) {
+    if (!name) {
+      return null;
+    }
+
+    const el = dev()
+      .assertElement(this.win.document.head)
+      .querySelector(`meta[name="${escapeCssSelectorIdent(name)}"]`);
+
+    return el ? el.getAttribute('content') || '' : null;
+  }
+
+  /**
+   * Stores the value of an ampdoc's meta tag content for a given name. To be
+   * implemented by subclasses.
+   * @param {string} unusedName
+   * @param {string} unusedContent
+   *
+   * Avoid using this method in components. It is only meant to be used by the
+   * runtime for AmpDoc subclasses where <meta> elements do not exist and name/
+   * content pairs must be stored in this.meta_.
+   */
+  setMetaByName(unusedName, unusedContent) {
+    devAssert(null, 'not implemented');
   }
 
   /**
@@ -866,6 +902,22 @@ export class AmpDocShadow extends AmpDoc {
   /** @override */
   whenReady() {
     return this.readyPromise_;
+  }
+
+  /** @override */
+  getMetaByName(name) {
+    return this.meta_[name] !== undefined ? this.meta_[name] : null;
+  }
+
+  /** @override */
+  setMetaByName(name, content) {
+    if (!name) {
+      throw dev().createError(
+        'Attempted to store invalid meta name/content pair'
+      );
+    }
+
+    this.meta_[name] = content;
   }
 }
 
