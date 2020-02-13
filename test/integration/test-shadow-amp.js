@@ -26,21 +26,28 @@ describes.integration(
       <script async src="/dist/shadow-v0.js"></script>
       <div id="host"></div>
       <script>
-        function fetchDocument(url) {
-          var xhr = new XMLHttpRequest();
-          return new Promise((resolve, reject) => {
-            xhr.open('GET', url, true);
-            xhr.responseType = 'document';
-            xhr.setRequestHeader('Accept', 'text/html');
-            xhr.onload = () => resolve(xhr.responseXML);
-            xhr.send();
-          });
+        function parseDoc() {
+          return new DOMParser().parseFromString(\`
+            <!doctype html>
+            <html amp lang="en">
+              <head>
+                <meta charset="utf-8">
+                <script async src="https://cdn.ampproject.org/v0.js"></script>
+                <title>Hello, AMPs</title>
+                <link rel="canonical" href="https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/">
+                <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+                <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+              </head>
+              <body>
+                <h1>Shadow AMP document</h1>
+                <amp-img src="https://placekitten.com/640/480" layout="responsive" width="640" height="480"></amp-img>
+              </body>
+            </html>
+          \`, 'text/html');
         }
-
         (window.AMP = window.AMP || []).push(() => {
           const host = document.getElementById('host');
-          const testUrl = 'http://localhost:9876/test/fixtures/served/shadow.html';
-          fetchDocument(testUrl).then(doc => AMP.attachShadowDoc(host, doc, testUrl));
+          AMP.attachShadowDoc(host, parseDoc(), testUrl));
         });
       </script>
     `,
@@ -51,7 +58,7 @@ describes.integration(
 
     beforeEach(async () => {
       docController = new BrowserController(env.win);
-      await docController.waitForShadowRoot('#host', 25000);
+      await docController.waitForShadowRoot('#host', 15000);
       shadowDoc = env.win.document.getElementById('host').shadowRoot;
     });
 
