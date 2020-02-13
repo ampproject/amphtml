@@ -1221,6 +1221,24 @@ describe
             toAdd = createElement(env, /* container */ null, '[text]="1+1"');
           });
 
+          it('{update: true, fast: true, wait: true}', async () => {
+            const options = {update: true, fast: true, wait: true};
+
+            await onBindReadyAndSetState(env, bind, {foo: 'foo'});
+            expect(toRemove.textContent).to.equal('foo');
+
+            // [i-amphtml-binding] necessary in {fast: true}.
+            toAdd.setAttribute('i-amphtml-binding', '');
+
+            // `toAdd` should be scanned and updated.
+            await onBindReadyAndRescan(env, bind, [toAdd], [toRemove], options);
+            expect(toAdd.textContent).to.equal('2');
+
+            await onBindReadyAndSetState(env, bind, {foo: 'bar'});
+            // The `toRemove` element's bindings should have been removed.
+            expect(toRemove.textContent).to.not.equal('bar');
+          });
+
           it('{update: true, fast: true}', async () => {
             const options = {update: true, fast: true};
 
