@@ -494,7 +494,7 @@ describes.realWin(
           .be.ok;
 
         service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
-        service.scrollDirection_ = ScrollDirection.UP;
+        service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
 
         await service.hidePreviousPages_(
           0 /** index */,
@@ -531,7 +531,7 @@ describes.realWin(
         const {container} = service.pages_[2];
         expect(container).to.be.ok;
         service.pages_[2].visibilityState_ = VisibilityState.VISIBLE;
-        service.scrollDirection_ = ScrollDirection.UP;
+        service.visibilityObserver_.scrollDirection_ = ScrollDirection.UP;
         await service.hidePreviousPages_(
           0 /** index */,
           0 /** pausePageCountForTesting */
@@ -541,7 +541,7 @@ describes.realWin(
           VisibilityState.HIDDEN
         );
 
-        service.scrollDirection_ = ScrollDirection.DOWN;
+        service.visibilityObserver_.scrollDirection_ = ScrollDirection.DOWN;
         await service.resumePausedPages_(
           1 /** index */,
           0 /** pausePageCountForTesting */
