@@ -53,7 +53,7 @@
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "cli-highlight": "2.1.4",
-    "codecov": "3.6.1",
+    "codecov": "3.6.5",
     "commander": "4.1.1",
     "connect-header": "0.0.5",
     "cssnano": "4.1.10",
