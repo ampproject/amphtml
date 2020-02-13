@@ -17,9 +17,12 @@
 import {jsonLiteral} from '../../../../src/json';
 
 const WEBENGAGE_CONFIG = jsonLiteral({
+  'vars': {
+    'clientId': 'CLIENT_ID(we_luid)',
+  },
   'requests': {
     'base':
-      'https://c.${region}.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId(we_luid)}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application',
+      'https://c.${region}.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application',
     'wePageview': {
       'baseUrl': '${base}&eventName=Page Viewed',
     },
@@ -31,6 +34,22 @@ const WEBENGAGE_CONFIG = jsonLiteral({
     'wePageviewTrigger': {
       'on': 'visible',
       'request': 'wePageview',
+    },
+  },
+  'linkers': {
+    '_we_linker': {
+      'destinationDomains': ['*'],
+      'enabled': true,
+      'ids': {
+        'we_luid': '${clientId}',
+      },
+      'proxyOnly': false,
+    },
+  },
+  'cookies': {
+    'we_luid': {
+      'value':
+        '$IF(LINKER_PARAM(_we_linker, we_luid),LINKER_PARAM(_we_linker, we_luid))',
     },
   },
 });
