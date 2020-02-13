@@ -38,7 +38,6 @@ import {
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
 import {VideoDockingEvents, pointerCoords} from './events';
-import {ViewportInterface} from '../../../src/service/viewport/viewport-interface';
 import {applyBreakpointClassname} from './breakpoints';
 import {
   calculateLeftJustifiedX,
@@ -259,7 +258,7 @@ export class VideoDocking {
     /** @private @const */
     this.manager_ = once(() => Services.videoManagerForDoc(ampdoc));
 
-    /** @private @const {!ViewportInterface} */
+    /** @private @const {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
     this.viewport_ = Services.viewportForDoc(ampdoc);
 
     /** @private @const {!LayoutRectDef} */

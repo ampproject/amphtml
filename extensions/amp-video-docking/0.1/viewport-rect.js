@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {LayoutRectDef, layoutRectLtwh} from '../../../src/layout-rect';
-import {ViewportInterface} from '../../../src/service/viewport/viewport-interface';
 
 /**
  * @param {function():T} get
@@ -30,7 +29,7 @@ const readonlyGetterProp = get => ({
 /**
  * Returns a `LayoutRectDef`-like object whose values match the viewport's area
  * accoding to service.
- * @param {!ViewportInterface} viewport
+ * @param {!../../../src/service/viewport/viewport-interface/ViewportInterface} viewport
  * @return {!LayoutRectDef} with dynamic getters
  */
 export function createViewportRect(viewport) {
