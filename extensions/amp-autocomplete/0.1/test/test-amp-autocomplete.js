@@ -996,5 +996,18 @@ describes.realWin(
         );
       });
     });
+
+    it('should preserve existing query parameters when generating src values from "query" attribute', () => {
+      return impl.layoutCallback().then(() => {
+        impl.queryKey_ = 'q';
+        impl.srcBase_ = 'https://www.data.com/?param=1';
+        expect(impl.generateSrc_('')).to.equal(
+          'https://www.data.com/?param=1&q='
+        );
+        expect(impl.generateSrc_('abc')).to.equal(
+          'https://www.data.com/?param=1&q=abc'
+        );
+      });
+    });
   }
 );
