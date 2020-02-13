@@ -112,7 +112,7 @@
     </amp-state>
     <button on="tap:AMP.setState({ myVariableUrl: 'http://ads.localhost:8000/save-variables?' + variables + '&' + count , count: count + 1})">Save variables</button>
     <button on="tap:AMP.setState({ myRequestUrl: 'http://ads.localhost:8000/run-variable-substitution?' + requestParameters + '&' + count , count: count + 1})">Send request</button>
-    <button on="tap:AMP.setState({ myResultsUrl: 'http://ads.localhost:8000/get-request?' + requestParameters + '&' + count , count: count + 1})">Get results</button>
+    <button on="tap:AMP.setState({ myResultsUrl: 'http://ads.localhost:8000/get-variable-request?' + requestParameters + '&' + count , count: count + 1})">Get results</button>
     <br>
 
     <amp-iframe id="amp-iframe-request" title="Request iframe" width="500" height="50" layout="responsive" sandbox="allow-scripts allow-same-origin" src="http://ads.localhost:8000/run-variable-substitution" [src]="myRequestUrl">
@@ -122,5 +122,4 @@
         <amp-img layout="fill" src="examples/img/cats-anim-placeholder.gif" placeholder></amp-img>
     </amp-iframe>
 </body>
-
 </html>

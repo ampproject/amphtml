@@ -48,17 +48,8 @@ function saveVariables(req, res) {
     }
   }
   variables = requestVariables;
-  res.send(`<!doctype html>
-    <html>
-    <head>
-        <title>AMP Analytics</title>
-        <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">   
-    </head> 
-    <body>
-    <h3>Variables:</h3>
-    ${variables ? JSON.stringify(variables, null, 2) : 'N/A'}
-    </body>
-    </html>`);
+  res.json({'vars': variables});
+  return;
 }
 
 function runVariableSubstitution(req, res) {
@@ -85,7 +76,7 @@ function runVariableSubstitution(req, res) {
     <h3>'<amp-analytics>' request: </h3>
       ${
         testParameters
-          ? 'http://ads.localhost:8000/save-request?' + testParameters
+          ? 'http://ads.localhost:8000/save-variable-request?' + testParameters
           : 'N/A'
       }
 
@@ -93,7 +84,7 @@ function runVariableSubstitution(req, res) {
       <script type="application/json">
         {
             "requests": {
-              "endpoint": "http://ads.localhost:8000/save-request?${testParameters}"
+              "endpoint": "http://ads.localhost:8000/save-variable-request?${testParameters}"
             },
             "triggers": {
                 "pageview": {
@@ -114,7 +105,7 @@ function runVariableSubstitution(req, res) {
     </html>`);
 }
 
-function saveRequest(req, res) {
+function saveVariableRequest(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -123,25 +114,14 @@ function saveRequest(req, res) {
   url = req.originalUrl;
 }
 
-function getRequest(req, res) {
-  res.send(`<!doctype html>
-    <html>
-    <head>
-      <title>AMP Analytics</title>
-      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">   
-    </head> 
-    <body>
-    <h3>Results</h3>
-      Variables: ${JSON.stringify(variableSubstitution, null, 2)}
-    <br>
-      Request: ${url}
-    </body>
-    </html>`);
+function getVariableRequest(req, res) {
+  res.json({'Results': variableSubstitution, 'URL': url});
+  return;
 }
 
 module.exports = {
-  getRequest,
+  getVariableRequest,
   runVariableSubstitution,
-  saveRequest,
+  saveVariableRequest,
   saveVariables,
 };
