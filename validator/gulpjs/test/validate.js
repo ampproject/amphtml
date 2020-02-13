@@ -66,7 +66,7 @@ describe('gulp-amphtml-validator', function() {
       const validFile = createFile(VALID_FILE);
       validate.write(validFile);
       validate.once('data', function(file) {
-        assert.equal(file.ampValidationResult.status, 'N/A');
+        assert.equal(file.ampValidationResult.status, 'UNKNOWN');
         done();
       });
     });
@@ -92,8 +92,8 @@ describe('gulp-amphtml-validator', function() {
       format.write(pass);
       format.end();
       format.once('finish', function() {
-        assert.equal(logger.logged, 'AMP Validation results:\n\n' + VALID_FILE +
-          ': \u001b[32mPASS\u001b[39m');
+        assert.ok(logger.logged.includes('AMP Validation results:\n\n' + VALID_FILE +
+          ': \u001b[32mPASS\u001b[39m'));
         done();
       });
     });
@@ -118,9 +118,9 @@ describe('gulp-amphtml-validator', function() {
       format.write(fail);
       format.end();
       format.once('finish', function() {
-        assert.equal(logger.logged, 'AMP Validation results:\n\n' +
+        assert.ok(logger.logged.includes('AMP Validation results:\n\n' +
           INVALID_FILE + ': \u001b[31mFAIL\u001b[39m\n' + INVALID_FILE +
-          ':24:4 ' + '\u001b[31merrorMessage\u001b[39m (see specUrl)');
+          ':24:4 ' + '\u001b[31merrorMessage\u001b[39m (see specUrl)'));
         done();
       });
     });
@@ -175,7 +175,7 @@ describe('gulp-amphtml-validator', function() {
   function createFileWithValidatorFailure(name) {
     const file = createFileStub(name);
     file.ampValidationResult = {
-      status: 'N/A',
+      status: 'UNKNOWN',
     };
     return file;
   }
