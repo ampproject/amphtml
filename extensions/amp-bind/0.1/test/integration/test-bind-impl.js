@@ -28,6 +28,7 @@ import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {dev, user} from '../../../../../src/log';
 import {toArray} from '../../../../../src/types';
+import {Deferred} from '../../../../../src/utils/promise';
 
 /**
  * @param {!Object} env
@@ -1221,22 +1222,27 @@ describe
             toAdd = createElement(env, /* container */ null, '[text]="1+1"');
           });
 
-          it('{update: true, fast: true, wait: true}', async () => {
+          it.only('{update: true, fast: true, wait: true}', async () => {
             const options = {update: true, fast: true, wait: true};
+            toAdd = createElement(env, null, '[text]=foo');
 
-            await onBindReadyAndSetState(env, bind, {foo: 'foo'});
-            expect(toRemove.textContent).to.equal('foo');
-
-            // [i-amphtml-binding] necessary in {fast: true}.
-            toAdd.setAttribute('i-amphtml-binding', '');
+            const {resolve: resolveFetch, promise} = new Deferred();
+            await onBindReadyAndSetState(env, bind, {});
+            bind.registerAsyncAmpState('foo', promise);
 
             // `toAdd` should be scanned and updated.
-            await onBindReadyAndRescan(env, bind, [toAdd], [toRemove], options);
-            expect(toAdd.textContent).to.equal('2');
+            const rescanPromise = onBindReadyAndRescan(
+              env,
+              bind,
+              [toAdd],
+              [],
+              options
+            );
 
-            await onBindReadyAndSetState(env, bind, {foo: 'bar'});
-            // The `toRemove` element's bindings should have been removed.
-            expect(toRemove.textContent).to.not.equal('bar');
+            expect(toAdd.textContent).to.equal('');
+            await bind.setState({foo: 'hello'}).then(() => resolveFetch());
+            await rescanPromise;
+            expect(toAdd.textContent).to.equal('hello');
           });
 
           it('{update: true, fast: true}', async () => {

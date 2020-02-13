@@ -45,7 +45,7 @@ export class AmpState extends AMP.BaseElement {
      */
     this.localData_ = undefined;
 
-    /** @private {Promise} */
+    /** @private {Promise=} */
     this.fetchAndUpdatePromise_ = undefined;
   }
 
@@ -210,7 +210,7 @@ export class AmpState extends AMP.BaseElement {
   /**
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise<undefined>}
+   * @return {!Promise}
    * @private
    */
   fetchAndUpdate_(isInit, opt_refresh) {
@@ -227,7 +227,7 @@ export class AmpState extends AMP.BaseElement {
         this.fetchAndUpdatePromise_
       );
     });
-    return this.fetchAndUpdatePromise_;
+    return /**@type {!Promise} */ this.fetchAndUpdatePromise_;
   }
 
   /**
