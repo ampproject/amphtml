@@ -1048,7 +1048,13 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
-  'temedya': {},
+  'temedya': {
+    prefetch: [
+      'https://vidyome-com.cdn.vidyome.com/vidyome/builds/temedya-amp.js',
+      'https://vidyome-com.cdn.vidyome.com/vidyome/builds/widgets.js',
+    ],
+    renderStartImplemented: true,
+  },
 
   'torimochi': {
     renderStartImplemented: true,

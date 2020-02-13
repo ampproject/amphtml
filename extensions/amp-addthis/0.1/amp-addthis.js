@@ -52,7 +52,6 @@ import {DwellMonitor} from './addthis-utils/monitors/dwell-monitor';
 import {PostMessageDispatcher} from './post-message-dispatcher';
 import {ScrollMonitor} from './addthis-utils/monitors/scroll-monitor';
 import {Services} from '../../../src/services';
-
 import {callEng} from './addthis-utils/eng';
 import {callLojson} from './addthis-utils/lojson';
 import {callPjson} from './addthis-utils/pjson';
@@ -66,6 +65,7 @@ import {
 } from './addthis-utils/mode';
 import {getOgImage} from './addthis-utils/meta';
 import {getWidgetOverload} from './addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
+import {internalRuntimeVersion} from '../../../src/internal-version';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/event-helper';
 import {parseUrlDeprecated} from '../../../src/url';
@@ -299,7 +299,10 @@ class AmpAddThis extends AMP.BaseElement {
       dict({
         'frameborder': 0,
         'title': ALT_TEXT,
-        'src': `${ORIGIN}/dc/amp-addthis.html`,
+        // Document has overly long cache age: go.amp.dev/issue/24848
+        // Adding AMP runtime version as a meaningless query param to force bust
+        // cached versions.
+        'src': `${ORIGIN}/dc/amp-addthis.html?_amp_=${internalRuntimeVersion()}`,
         'id': this.widgetId_,
         'pco': this.productCode_,
         'containerClassName': this.containerClassName_,
