@@ -152,7 +152,7 @@ export class Extensions {
     try {
       this.currentExtensionId_ = extensionId;
       factory(arg, arg['_']);
-      if (getMode().localDev || getMode().test) {
+      if (getMode(this.win).localDev || getMode(this.win).test) {
         if (Object.freeze) {
           const m = holder.extension;
           m.elements = Object.freeze(m.elements);
@@ -483,7 +483,7 @@ export class Extensions {
    * @private
    */
   getCurrentExtensionHolder_(opt_forName) {
-    if (!this.currentExtensionId_ && !getMode().test) {
+    if (!this.currentExtensionId_ && !getMode(this.win).test) {
       dev().error(TAG, 'unknown extension for ', opt_forName);
     }
     return this.getExtensionHolder_(
@@ -582,14 +582,14 @@ export class Extensions {
     // https://github.com/ampproject/amphtml/issues/7353
     scriptElement.setAttribute('crossorigin', 'anonymous');
     let loc = this.win.location;
-    if (getMode().test && this.win.testLocation) {
+    if (getMode(this.win).test && this.win.testLocation) {
       loc = this.win.testLocation;
     }
     const scriptSrc = calculateExtensionScriptUrl(
       loc,
       extensionId,
       opt_extensionVersion,
-      getMode().localDev
+      getMode(this.win).localDev
     );
     scriptElement.src = scriptSrc;
     return scriptElement;
