@@ -302,6 +302,8 @@ function extractAdSenseTextContent(el) {
 
 AMP.extension(TAG, '0.1', AMP => {
   const service = new NextPageService();
-  AMP.registerServiceForDoc(SERVICE_ID, () => service);
+  AMP.registerServiceForDoc(SERVICE_ID, function() {
+    return service;
+  });
   AMP.registerElement(TAG, AmpNextPage, CSS);
 });
