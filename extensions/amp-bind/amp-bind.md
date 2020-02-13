@@ -298,7 +298,7 @@ An `amp-state` element must contain a child `<script>` element.
 
 ##### `src` (optional)
 
-The URL of the remote endpoint that will return the JSON and update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+The URL of the remote endpoint that must return JSON, which is used to this `amp-state`. This must be a HTTP service with a proper CORS configuration for the page. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 [tip type="important"]
 The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
