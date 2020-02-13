@@ -240,6 +240,7 @@ export class AmpStoryPlayer {
   /**
    * Navigates to the next story in the player.
    * @private
+   * @visibleForTesting
    */
   next_() {
     if (this.currentIdx_ + 1 >= this.stories_.length) {
@@ -266,6 +267,7 @@ export class AmpStoryPlayer {
   /**
    * Navigates to the previous story in the player.
    * @private
+   * @visibleForTesting
    */
   previous_() {
     if (this.currentIdx_ - 1 < 0) {
@@ -282,7 +284,7 @@ export class AmpStoryPlayer {
 
     const nextStoryIdx = this.currentIdx_ - 1;
     if (nextStoryIdx >= 0 && this.stories_[nextStoryIdx][IFRAME_IDX] === null) {
-      this.swapIframes_(nextStoryIdx, true /** backwards */);
+      this.swapIframes_(nextStoryIdx, true /** reverse */);
     }
   }
 
@@ -291,11 +293,11 @@ export class AmpStoryPlayer {
    * the iframe from the story furthest away; depending where the user is
    * navigating and allocates it to a story that the user is close to seeing.
    * @param {number} nextStoryIdx
-   * @param {boolean} backwards
+   * @param {boolean} reverse
    * @private
    */
-  swapIframes_(nextStoryIdx, backwards = false) {
-    const detachedStoryIdx = backwards
+  swapIframes_(nextStoryIdx, reverse = false) {
+    const detachedStoryIdx = reverse
       ? this.iframePool_.rotateRight(nextStoryIdx)
       : this.iframePool_.rotateLeft(nextStoryIdx);
 
