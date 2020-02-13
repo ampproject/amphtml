@@ -163,7 +163,7 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
 
 In the example above:
 
-- The `<amp-state>` component declares state using a JSON string literal. It has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the **state** is empty.
+- The `<amp-state>` component declares state using JSON. The `<amp-state>` element has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the **state** is empty.
 - The page loads with visual defaults.
   - The `<div>` element has `class="greenBorder"` defined.
   - The second `<p>` element has "I want cupcakes." defined within the tags.
