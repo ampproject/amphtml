@@ -63,7 +63,7 @@ limitations under the License.
 
 The `amp-bind` component enables custom stateful interactivity on AMP pages.
 
-For performance and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means that the visual elements should be given a default state and not rely on `amp-bind` for initial render.
+For performance, and to avoid the risk of unexpected content jumping, `amp-bind` does not evaluate expressions on page load. This means visual elements should be given a default state and not rely on `amp-bind` for initial render.
 
 <figure class="alignment-wrapper  margin-">
 <amp-youtube
@@ -163,7 +163,7 @@ Calling `AMP.setState()` in some examples may set or change states of other exam
 
 In the example above:
 
-- The `<amp-state>` component declares state using a JSON string literal. It has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the **state** is empty.
+- The `<amp-state>` component declares state using JSON. The `<amp-state>` element has an `id` of `theFood` to allow us to reference the defined data. But because `<amp-bind>` does not evaluate `<amp-state>` on page load, the **state** is empty.
 - The page loads with visual defaults.
   - The `<div>` element has `class="greenBorder"` defined.
   - The second `<p>` element has "I want cupcakes." defined within the tags.
@@ -298,7 +298,7 @@ An `amp-state` element must contain a child `<script>` element.
 
 ##### `src` (optional)
 
-The URL of the remote endpoint that will return the JSON and update this `amp-state`. This must be a CORS HTTP service. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+The URL of the remote endpoint that must return JSON, which is used to this `amp-state`. This must be a HTTP service with a proper CORS configuration for the page. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
 
 [tip type="important"]
 The endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
@@ -970,7 +970,7 @@ Bind an element's `class` using the `[class]` attribute. A `[class]` expression 
 </button>
 <!-- String arrays also work -->
 <button
-  on="tap:AMP.setState({ myClass: ['background-green'] ,['border-red'] })"
+  on="tap:AMP.setState({ myClass: ['background-green'], ['border-red'] })"
 >
   Working string array: Change Class
 </button>
