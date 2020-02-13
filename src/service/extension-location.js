@@ -59,9 +59,9 @@ export function calculateExtensionScriptUrl(
   opt_extensionVersion,
   opt_isLocalDev
 ) {
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, opt_isLocalDev);
   const rtv = getMode().rtvVersion;
-  const fileExtension = getMode().esm ? '.mjs' : '.js';
   if (opt_extensionVersion == null) {
     opt_extensionVersion = '0.1';
   }
@@ -86,11 +86,12 @@ export function calculateEntryPointScriptUrl(
   isLocalDev,
   opt_rtv
 ) {
+  const fileExtension = getMode().esm ? '.mjs' : '.js';
   const base = calculateScriptBaseUrl(location, isLocalDev);
   if (opt_rtv) {
-    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}.js`;
+    return `${base}/rtv/${getMode().rtvVersion}/${entryPoint}${fileExtension}`;
   }
-  return `${base}/${entryPoint}.js`;
+  return `${base}/${entryPoint}${fileExtension}`;
 }
 
 /**
@@ -100,7 +101,7 @@ export function calculateEntryPointScriptUrl(
  */
 export function parseExtensionUrl(scriptUrl) {
   // Note that the "(\.max)?" group only applies to local dev.
-  const matches = scriptUrl.match(/^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.js$/i);
+  const matches = scriptUrl.match(/^(.*)\/(.*)-([0-9.]+|latest)(\.max)?\.(?:js|mjs)$/i);
   return {
     extensionId: matches ? matches[2] : undefined,
     extensionVersion: matches ? matches[3] : undefined,

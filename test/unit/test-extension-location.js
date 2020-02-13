@@ -30,6 +30,7 @@ describes.sandboxed('Extension Location', {}, () => {
 
     afterEach(() => {
       initLogConstructor();
+      window.__AMP_MODE = {};
     });
 
     it('with local mode', () => {
@@ -213,10 +214,11 @@ describes.sandboxed('Module Extension Location', {}, () => {
 
     afterEach(() => {
       initLogConstructor();
+      window.__AMP_MODE = {};
     });
 
     it('with local mode', () => {
-      window.__AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123', esm: 1};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -233,7 +235,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
 
     it('with remote mode', () => {
-      window.__AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123', esm: 1};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -250,7 +252,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
 
     it('should allow no versions', () => {
-      window.__AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123', esm: 1};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -267,7 +269,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
 
     it('should handles single pass experiment', () => {
-      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
+      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp', esm: 1};
       const script = calculateExtensionScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -295,6 +297,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
 
     it('with local mode', () => {
+      window.__AMP_MODE = {esm: 1};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -308,7 +311,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
 
     it('with remote mode', () => {
-      window.__AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123', esm: 1};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -322,7 +325,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
 
     it('with remote mode & rtv', () => {
-      window.__AMP_MODE = {rtvVersion: '123'};
+      window.__AMP_MODE = {rtvVersion: '123', esm: 1};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -337,7 +340,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
 
     it('should handle single pass experiment', () => {
-      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp'};
+      window.__AMP_MODE = {rtvVersion: '123', singlePassType: 'sp', esm: 1};
       const script = calculateEntryPointScriptUrl(
         {
           pathname: 'examples/ads.amp.html',
@@ -354,6 +357,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
 
   describe('get correct URL parts', () => {
     it('non-RTV urls', () => {
+      window.__AMP_MODE = {esm: 1};
       const urlParts = parseExtensionUrl(
         'https://cdn.ampproject.org/v0/amp-ad-1.0.mjs'
       );
@@ -362,6 +366,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
 
     it('RTV urls', () => {
+      window.__AMP_MODE = {esm: 1};
       const urlParts = parseExtensionUrl(
         'https://cdn.ampproject.org/rtv/123/v0/amp-ad-0.1.mjs'
       );
@@ -370,6 +375,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
 
     it('extensions with "latest" version', () => {
+      window.__AMP_MODE = {esm: 1};
       const urlParts = parseExtensionUrl(
         'https://cdn.ampproject.org/v0/amp-ad-latest.mjs'
       );
@@ -378,6 +384,7 @@ describes.sandboxed('Module Extension Location', {}, () => {
     });
 
     it('extensions with .max suffix', () => {
+      window.__AMP_MODE = {esm: 1};
       const urlParts = parseExtensionUrl(
         'https://cdn.ampproject.org/v0/amp-ad-latest.max.mjs'
       );

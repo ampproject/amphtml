@@ -145,9 +145,7 @@ function adoptShared(global, callback) {
    * @param {string} name
    * @param {function(new:Object, !./service/ampdoc-impl.AmpDoc)} implementationClass
    */
-  global.AMP.registerServiceForDoc = function(name, implementationClass) {
-    extensions.addService(name, implementationClass);
-  }
+  global.AMP.registerServiceForDoc = extensions.addService.bind(extensions);
 
   // Experiments.
   /**
