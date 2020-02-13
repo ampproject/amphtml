@@ -33,14 +33,13 @@ const readonlyGetterProp = get => ({
  * @return {!LayoutRectDef} with dynamic getters
  */
 export function createViewportRect(viewport) {
-  const rect = layoutRectLtwh(0, 0, 0, 0);
+  const width = readonlyGetterProp(() => viewport.getSize().width);
+  const height = readonlyGetterProp(() => viewport.getSize().height);
 
-  Object.defineProperties(rect, {
-    right: readonlyGetterProp(() => rect.width),
-    bottom: readonlyGetterProp(() => rect.height),
-    width: readonlyGetterProp(() => viewport.getSize().width),
-    height: readonlyGetterProp(() => viewport.getSize().height),
+  return Object.defineProperties(layoutRectLtwh(0, 0, 0, 0), {
+    width,
+    height,
+    right: width,
+    bottom: height,
   });
-
-  return rect;
 }
