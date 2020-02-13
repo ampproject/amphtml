@@ -955,6 +955,61 @@ describe
           });
         });
 
+        describe('getStateWithWait', () => {
+          it('should return the same result as getState if already present', async () => {
+            await bind.initializePromiseForTesting();
+            await bind.setState({mystate: {mykey: 'myval'}});
+            const state = await bind.getStateWithWait('mystate.mykey');
+
+            expect(state).to.equal('myval');
+          });
+
+          it('should not wait if the still-loading state is irrelevant', async () => {
+            await bind.initializePromiseForTesting();
+            await bind.setState({mystate: {mykey: 'myval'}});
+            bind.registerAsyncAmpState('otherkey', new Promise(unused => {})); // never going to resolve
+
+            const state = await bind.getStateWithWait('mystate.mykey');
+            expect(state).to.equal('myval');
+          });
+
+          it('should wait for a relevant key', async () => {
+            const {promise, resolve} = new Deferred();
+            bind.registerAsyncAmpState('mystate', promise);
+
+            await bind.initializePromiseForTesting();
+            const statePromise = bind.getStateWithWait('mystate.mykey');
+
+            await bind.setState({mystate: {mykey: 'myval'}}).then(resolve);
+            expect(await statePromise).to.equal('myval');
+          });
+
+          it('should stop waiting for a key if its fetch rejects', async () => {
+            const {promise, reject} = new Deferred();
+            bind.registerAsyncAmpState('mystate', promise);
+
+            await bind.initializePromiseForTesting();
+            const statePromise = bind.getStateWithWait('mystate.mykey');
+            reject();
+
+            expect(await statePromise).to.equal(undefined);
+          });
+
+          it('should wait for all keys if given "."', async () => {
+            const {promise: p1, resolve: r1} = new Deferred();
+            const {promise: p2, resolve: r2} = new Deferred();
+            bind.registerAsyncAmpState('mystate1', p1); // never going to resolve
+            bind.registerAsyncAmpState('mystate2', p2); // never going to resolve
+
+            await bind.initializePromiseForTesting();
+            const statePromise = bind.getStateWithWait('.');
+            r1(); 
+
+            await bind.setState({mystate: {mykey: 'myval'}}).then(r2);
+            expect(await statePromise).to.deep.equal({mystate: {mykey: 'myval'}});
+          });
+        });
+
         it('should support pushStateWithExpression()', () => {
           env.sandbox.spy(history, 'push');
 
@@ -1222,25 +1277,19 @@ describe
             toAdd = createElement(env, /* container */ null, '[text]="1+1"');
           });
 
-          it.only('{update: true, fast: true, wait: true}', async () => {
-            const options = {update: true, fast: true, wait: true};
+          it('{update: true, wait: true}', async () => {
+            const options = {update: true, fast: false, wait: true};
             toAdd = createElement(env, null, '[text]=foo');
 
+            await bind.initializePromiseForTesting();
             const {resolve: resolveFetch, promise} = new Deferred();
-            await onBindReadyAndSetState(env, bind, {});
             bind.registerAsyncAmpState('foo', promise);
-
-            // `toAdd` should be scanned and updated.
-            const rescanPromise = onBindReadyAndRescan(
-              env,
-              bind,
-              [toAdd],
-              [],
-              options
-            );
-
+            const rescanPromise = bind.rescan([toAdd], [], options);
             expect(toAdd.textContent).to.equal('');
-            await bind.setState({foo: 'hello'}).then(() => resolveFetch());
+
+            await bind
+              .setState({foo: 'hello'}, {skipEval: true, skipAmpState: false})
+              .then(() => resolveFetch());
             await rescanPromise;
             expect(toAdd.textContent).to.equal('hello');
           });
