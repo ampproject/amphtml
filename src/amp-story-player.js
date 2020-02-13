@@ -171,6 +171,14 @@ export class AmpStoryPlayer {
       this.initializeHandshake_(story, iframeEl).then(
         messaging => {
           messaging.setDefaultHandler(() => Promise.resolve());
+
+          messaging.registerHandler('selectDocument', (event, data) => {
+            if (data.next) {
+              this.next_();
+            } else if (data.previous) {
+              this.previous_();
+            }
+          });
           this.messagingFor_[iframeIdx] = messaging;
           resolve();
         },
@@ -242,7 +250,6 @@ export class AmpStoryPlayer {
   /**
    * Navigates to the next story in the player.
    * @private
-   * @visibleForTesting
    */
   next_() {
     if (this.currentIdx_ + 1 >= this.stories_.length) {
@@ -256,11 +263,19 @@ export class AmpStoryPlayer {
       previousStory[IFRAME_IDX],
       VisibilityState.INACTIVE
     );
+    this.iframes_[previousStory[IFRAME_IDX]].setAttribute(
+      'i-amphtml-story-position',
+      -1
+    );
 
     const currentStory = this.stories_[this.currentIdx_];
     this.updateVisibilityState_(
       currentStory[IFRAME_IDX],
       VisibilityState.VISIBLE
+    );
+    this.iframes_[currentStory[IFRAME_IDX]].setAttribute(
+      'i-amphtml-story-position',
+      0
     );
 
     const nextStoryIdx = this.currentIdx_ + 1;
@@ -275,7 +290,6 @@ export class AmpStoryPlayer {
   /**
    * Navigates to the previous story in the player.
    * @private
-   * @visibleForTesting
    */
   previous_() {
     if (this.currentIdx_ - 1 < 0) {
@@ -289,11 +303,19 @@ export class AmpStoryPlayer {
       previousStory[IFRAME_IDX],
       VisibilityState.INACTIVE
     );
+    this.iframes_[previousStory[IFRAME_IDX]].setAttribute(
+      'i-amphtml-story-position',
+      -1
+    );
 
     const currentStory = this.stories_[this.currentIdx_];
     this.updateVisibilityState_(
       currentStory[IFRAME_IDX],
       VisibilityState.VISIBLE
+    );
+    this.iframes_[currentStory[IFRAME_IDX]].setAttribute(
+      'i-amphtml-story-position',
+      0
     );
 
     const nextStoryIdx = this.currentIdx_ - 1;
@@ -321,11 +343,16 @@ export class AmpStoryPlayer {
     const detachedStory = this.stories_[detachedStoryIdx];
     const nextStory = this.stories_[nextStoryIdx];
 
+    this.messagingFor_[detachedStory[IFRAME_IDX]].unregisterHandler(
+      'selectDocument'
+    );
+
     nextStory[IFRAME_IDX] = detachedStory[IFRAME_IDX];
     detachedStory[IFRAME_IDX] = undefined;
 
     const nextIframe = this.iframes_[nextStory[IFRAME_IDX]];
     this.layoutIframe_(nextStory, nextIframe, VisibilityState.PRERENDER);
+    nextIframe.setAttribute('i-amphtml-story-position', reverse ? -1 : 1);
     this.setUpMessagingForIframe_(nextStory, nextIframe);
   }
 
@@ -358,6 +385,7 @@ export class AmpStoryPlayer {
       'origin': url.origin,
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
+      'cap': 'swipe',
     });
 
     const fragmentParam = getFragment(href);
