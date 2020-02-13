@@ -63,9 +63,7 @@ inline std::optional<uint8_t> ParseToken(char c, uint8_t state,
     state = states_stack->back();
     states_stack->pop_back();
 
-    // The following four transitions are hacks until I figure out goto
-    // support in the grammar file syntax.
-    // TODO(amaltas): Fix the grammar.txt file to support GOTO.
+    // TODO: Fix the grammar.txt file to support GOTO.
     if (c == ',' &&
         state == static_cast<uint8_t>(StateCode::ARRAY_SEPARATOR)) {
       state = static_cast<uint8_t>(StateCode::ARRAY_NEXT_ITEM);

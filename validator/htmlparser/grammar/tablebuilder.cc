@@ -192,7 +192,7 @@ bool TableBuilder::OutputHeaderFile(
   fd << "};\n\n";
 
   fd << "enum class CallbackCode {\n";
-  fd << "  // TODO(amaltas): Implement callbacks.\n";
+  fd << "  // TODO: Implement callbacks.\n";
   fd << "};\n\n";
 
   fd << R"(
@@ -278,7 +278,7 @@ inline static bool HasPopBit(uint32_t code) {
   return ((code & 0x40) >> 6) == 1;
 }
 
-// TODO(amaltas): In follow up change modify the signature to accept a unicode
+// TODO: In follow up change modify the signature to accept a unicode
 // character, that is char32_t and based on the charset for this state return
 // the code from second last or last column accordingly.
 inline static uint32_t CodeForToken(char c, uint8_t state) {

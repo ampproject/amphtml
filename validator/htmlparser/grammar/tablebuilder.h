@@ -34,7 +34,7 @@
 // states. Unline LR parsers there is no shift at each stage of parsing.
 
 // See grammar.txt tutorial for learning grammar syntax.
-// TODO(amaltas): Add grammer tutorial.
+// TODO: Add grammer tutorial.
 //
 // Notes:
 //  - Supports up to 255 unique states.
