@@ -491,9 +491,12 @@ export class Bind {
 
     return rescanPromise.then(() => {
       if (options.update) {
-        return this.evaluate_(options.wait).then(results =>
-          this.apply_(results, {constrain: addedElements})
-        );
+        console.error('doing eval!', options.wait)
+        return this.evaluate_(options.wait)
+          .then(() => {
+            console.error('completed eval!');
+          })
+          .then(results => this.apply_(results, {constrain: addedElements}));
       }
     });
   }
@@ -563,16 +566,24 @@ export class Bind {
    *
    * e.g. "foo.bar".
    * @param {string} expr
-   * @return {!Promise}
+   * @return {!Promise<*>}
    */
   getStateWithWait(expr) {
     const value = this.getState(expr);
-    if (!value) {
-      const key = expr.split('.')[0]; // only retain up to the first accessor
-      const wait = this.asyncLoadingAmpStates_[key];
-      if (wait) {
-        return wait.then(() => this.getState(expr));
-      }
+    if (value) {
+      return Promise.resolve(value);
+    }
+
+    let wait;
+    if (expr) {
+      wait = this.asyncLoadingAmpStates_[expr.split('.')[0]];
+    } else if (Object.keys(this.asyncLoadingAmpStates_).length > 0) {
+      // Without an expression, then wait for all async amp states.
+      wait = Promise.all(Object.values(this.asyncLoadingAmpStates_));
+    }
+
+    if (wait) {
+      return wait.then(() => this.getState(expr));
     }
     return Promise.resolve(value);
   }
@@ -1093,7 +1104,9 @@ export class Bind {
    * @private
    */
   evaluate_(opt_wait) {
-    const state = opt_wait ? this.getStateWithWait() : Promise.resolve(this.state_);
+    const state = opt_wait
+      ? this.getStateWithWait()
+      : Promise.resolve(this.state_);
     const evaluatePromise = state.then(s =>
       this.ww_('bind.evaluateBindings', [s])
     );
@@ -1115,6 +1128,7 @@ export class Bind {
           this.reportError_(userError, elements[0]);
         }
       });
+      console.error('returning results', console.trace());
       dev().info(TAG, 'evaluation:', results);
       return results;
     });
