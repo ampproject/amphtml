@@ -16,6 +16,7 @@
 
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Timeago} from './timeago';
+import {dict} from '../../../src/utils/object';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {userAssert} from '../../../src/log';
@@ -26,7 +27,7 @@ const TAG = 'amp-timeago';
 class AmpTimeago extends PreactBaseElement {
   /** @override */
   init() {
-    return {'init': this.element.textContent};
+    return dict({'cutoffText': this.element.textContent});
   }
 
   /** @override */

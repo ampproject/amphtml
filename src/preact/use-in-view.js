@@ -20,11 +20,12 @@ import {useEffect, useLayoutEffect, useRef, useState} from './index';
  * @param {HTMLElement} node
  * @param {function():(function():undefined|undefined)} effect
  * @param {!Array<*>=} opt_deps
- * @return {object} ref
  */
 export function useInViewEffect(node, effect, opt_deps) {
   const {0: isIntersecting, 1: set} = useState(true);
-  const observerRef = useRef(null);
+  /** @type {{current: (null|IntersectionObserver)}} */ const observerRef = useRef(
+    null
+  );
   if (observerRef.current === null) {
     observerRef.current = new IntersectionObserver(entries => {
       const last = entries[entries.length - 1];

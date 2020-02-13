@@ -46,7 +46,12 @@ export function Timeago(props) {
  * @return {string}
  */
 function getFuzzyTimestampValue(props) {
-  const {datetime, locale, init, cutoff} = props;
+  const {
+    'datetime': datetime,
+    'locale': locale,
+    'cutoff': cutoff,
+    'cutoffText': cutoffText,
+  } = props;
   if (!cutoff) {
     return timeago(datetime, locale);
   }
@@ -54,7 +59,7 @@ function getFuzzyTimestampValue(props) {
   const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
   if (secondsAgo > cutoff) {
-    return init;
+    return cutoffText;
   }
   return timeago(datetime, locale);
 }
