@@ -29,14 +29,16 @@ const pathModule = require('path');
 =======
 const path = require('path');
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> Broken Gulp
 =======
 const realFs = require('fs');
 >>>>>>> wrong directory output
+=======
+>>>>>>> remove unused deps
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
-const tap = require('gulp-tap');
 const terser = require('terser');
 const through = require('through2');
 const {
