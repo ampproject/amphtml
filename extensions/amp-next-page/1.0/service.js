@@ -467,15 +467,6 @@ export class NextPageService {
       parseFavicon(this.doc_) ||
       '';
 
-    // Any element that is outside of the <amp-next-page> element
-    // is considered part of the host article
-    const hostPageContents = toArray(
-      scopedQuerySelectorAll(
-        dev().assertElement(this.doc_.body),
-        '> *:not(amp-next-page)'
-      )
-    );
-
     return /** @type {!HostPage} */ (new HostPage(
       this,
       {
@@ -485,8 +476,7 @@ export class NextPageService {
       },
       PageState.INSERTED /** initState */,
       VisibilityState.VISIBLE /** initVisibility */,
-      this.doc_,
-      hostPageContents
+      this.doc_
     ));
   }
 

@@ -64,22 +64,22 @@ export class VisibilityObserverEntry {
    * @param {!Element} parent
    */
   observe(element, parent) {
-    this.top_ = element.ownerDocument.createElement('div');
-    this.top_.classList.add('i-amphtml-next-page-document-top-sentinel');
-    this.bottom_ = element.ownerDocument.createElement('div');
-    this.bottom_.classList.add('i-amphtml-next-page-document-bottom-sentinel');
+    const top = element.ownerDocument.createElement('div');
+    top.classList.add('i-amphtml-next-page-document-top-sentinel');
+    const bottom = element.ownerDocument.createElement('div');
+    bottom.classList.add('i-amphtml-next-page-document-bottom-sentinel');
 
-    parent.insertBefore(this.top_, element);
-    parent.insertBefore(this.bottom_, element.nextSibling);
+    parent.insertBefore(top, element);
+    parent.insertBefore(bottom, element.nextSibling);
 
     this.observer_
       .getPositionObserver()
-      .observe(this.top_, PositionObserverFidelity.LOW, position =>
+      .observe(top, PositionObserverFidelity.LOW, position =>
         this.topSentinelPositionChanged(position)
       );
     this.observer_
       .getPositionObserver()
-      .observe(this.bottom_, PositionObserverFidelity.LOW, position =>
+      .observe(bottom, PositionObserverFidelity.LOW, position =>
         this.bottomSentinelPositionChanged(position)
       );
   }
@@ -253,7 +253,7 @@ export default class VisibilityObserver {
   /**
    * @param {!Element} element
    * @param {!Element} parent
-   * @param {function(!ViewportRelativePos, number)} callback
+   * @param {function(!ViewportRelativePos)} callback
    */
   observe(element, parent, callback) {
     const entry = new VisibilityObserverEntry(this, callback);

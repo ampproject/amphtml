@@ -280,9 +280,8 @@ export class HostPage extends Page {
    * @param {!PageState} initState
    * @param {!VisibilityState} initVisibility
    * @param {!Document} doc
-   * @param {!Array<!Element>} hostPageContents
    */
-  constructor(manager, meta, initState, initVisibility, doc, hostPageContents) {
+  constructor(manager, meta, initState, initVisibility, doc) {
     super(manager, meta);
     /** @override */
     this.state_ = initState;
@@ -290,19 +289,10 @@ export class HostPage extends Page {
     this.visibilityState_ = initVisibility;
     /** @private {!Document} */
     this.document_ = doc;
-    /** @private {!Array<!Element>} */
-    this.hostPageContents_ = hostPageContents;
   }
 
   /** @override */
   get document() {
     return this.document_;
-  }
-
-  /**
-   * @return {!Array<!Element>}
-   */
-  get hostPageContents() {
-    return this.hostPageContents_;
   }
 }
