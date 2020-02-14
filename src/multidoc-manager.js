@@ -295,7 +295,7 @@ export class MultidocManager {
           );
           body.classList.add('amp-shadow');
           ampdoc.setBody(body);
-          return body;
+          return Promise.resolve(body);
         });
         writer.onBodyChunk(() => {
           // TODO(dvoytenko): find a better and more stable way to make

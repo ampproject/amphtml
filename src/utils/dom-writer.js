@@ -38,10 +38,10 @@ export class DomWriter {
    * element is not possible.
    *
    * The callback will be given the parsed document and it must return back
-   * the reconstructed `<body>` node in the target DOM where all children
-   * will be streamed into.
+   * a promise of the reconstructed `<body>` node in the target DOM where all
+   * children will be streamed into.
    *
-   * @param {function(!Document):!Element} unusedCallback
+   * @param {function(!Document):!Promise<!Element>} unusedCallback
    */
   onBody(unusedCallback) {}
 
@@ -85,7 +85,7 @@ export class DomWriterStreamer {
     /** @private @const */
     this.boundMerge_ = this.merge_.bind(this);
 
-    /** @private {?function(!Document):!Element} */
+    /** @private {?function(!Document):!Promise<!Element>} */
     this.onBody_ = null;
 
     /** @private {?function()} */
@@ -103,7 +103,7 @@ export class DomWriterStreamer {
     /** @private {boolean} */
     this.eof_ = false;
 
-    /** @private {?Element} */
+    /** @private {?Promise<!Element>} */
     this.targetBody_ = null;
   }
 
@@ -178,31 +178,33 @@ export class DomWriterStreamer {
 
   /** @private */
   merge_() {
-    this.mergeScheduled_ = false;
-
     // Body has been newly parsed.
     if (!this.targetBody_ && this.parser_.body) {
       this.targetBody_ = this.onBody_(this.parser_);
     }
 
-    // Merge body children.
     if (this.targetBody_) {
-      const inputBody = dev().assertElement(this.parser_.body);
-      const targetBody = devAssert(this.targetBody_);
-      let transferCount = 0;
-      removeNoScriptElements(inputBody);
-      while (inputBody.firstChild) {
-        transferCount++;
-        targetBody.appendChild(inputBody.firstChild);
-      }
-      if (transferCount > 0) {
-        this.onBodyChunk_();
-      }
-    }
+      this.targetBody_.then(targetBody => {
+        this.mergeScheduled_ = false;
 
-    // EOF.
-    if (this.eof_) {
-      this.onEnd_();
+        // Merge body children.
+        const inputBody = dev().assertElement(this.parser_.body);
+        devAssert(targetBody);
+        let transferCount = 0;
+        removeNoScriptElements(inputBody);
+        while (inputBody.firstChild) {
+          transferCount++;
+          targetBody.appendChild(inputBody.firstChild);
+        }
+        if (transferCount > 0) {
+          this.onBodyChunk_();
+        }
+
+        // EOF.
+        if (this.eof_) {
+          this.onEnd_();
+        }
+      });
     }
   }
 }
@@ -229,7 +231,7 @@ export class DomWriterBulk {
     /** @const @private */
     this.vsync_ = Services.vsyncFor(win);
 
-    /** @private {?function(!Document):!Element} */
+    /** @private {?function(!Document):!Promise<!Element>} */
     this.onBody_ = null;
 
     /** @private {?function()} */
@@ -313,20 +315,21 @@ export class DomWriterBulk {
     // Merge body.
     if (doc.body) {
       const inputBody = doc.body;
-      const targetBody = this.onBody_(doc);
-      let transferCount = 0;
-      removeNoScriptElements(inputBody);
-      while (inputBody.firstChild) {
-        transferCount++;
-        targetBody.appendChild(inputBody.firstChild);
-      }
-      if (transferCount > 0) {
-        this.onBodyChunk_();
-      }
-    }
+      this.onBody_(doc).then(targetBody => {
+        let transferCount = 0;
+        removeNoScriptElements(inputBody);
+        while (inputBody.firstChild) {
+          transferCount++;
+          targetBody.appendChild(inputBody.firstChild);
+        }
+        if (transferCount > 0) {
+          this.onBodyChunk_();
+        }
 
-    // EOF.
-    this.onEnd_();
+        // EOF.
+        this.onEnd_();
+      });
+    }
   }
 }
 
