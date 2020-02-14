@@ -903,8 +903,8 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it('Should replace VIDEO_STATE(video,parameter) with video data', () => {
         const win = getFakeWindow();
         env.sandbox.stub(Services, 'videoManagerForDoc').returns({
-          getAnalyticsDetails() {
-            return Promise.resolve({currentTime: 1.5});
+          getVideoStateProperty() {
+            return Promise.resolve('1.5');
           },
         });
         env.sandbox

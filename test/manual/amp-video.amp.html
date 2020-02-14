@@ -109,6 +109,9 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
+
+  <amp-pixel src="https://donot.worry/?ct=VIDEO_STATE(my-video,currentTime)&r=TOTAL_ENGAGED_TIME&b=BACKGROUND_STATE"></amp-pixel>
+
   <div style="display: flex; flex-direction: column; height: 100vh">
     <div>
       <h1>AMP Video Players</h1>
@@ -212,6 +215,9 @@
             },
             "videoSpec": {
               "interval": 2
+            },
+            "extraUrlParams": {
+              "currentTime": "VIDEO_STATE(my-video,currentTime)"
             }
           },
           "myVideoSession": {
