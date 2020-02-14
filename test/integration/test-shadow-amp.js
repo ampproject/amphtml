@@ -21,34 +21,14 @@ describes.integration(
     amp: false,
     body: `
       <!-- unminified src for local-tests.js -->
-      <script async src="/dist/amp-shadow.js"></script>
+      <script src="/dist/amp-shadow.js"></script>
       <!-- minified src for single-pass-tests.js -->
-      <script async src="/dist/shadow-v0.js"></script>
+      <script src="/dist/shadow-v0.js"></script>
+      <script src="/test/fixtures/shadow.js"></script>
       <div id="host"></div>
       <script>
-        function parseDoc() {
-          return new DOMParser().parseFromString(\`
-            <!doctype html>
-            <html amp lang="en">
-              <head>
-                <meta charset="utf-8">
-                <script async src="https://cdn.ampproject.org/v0.js"></script>
-                <title>Hello, AMPs</title>
-                <link rel="canonical" href="https://amp.dev/documentation/guides-and-tutorials/start/create/basic_markup/">
-                <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-                <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-              </head>
-              <body>
-                <h1>Shadow AMP document</h1>
-                <amp-img src="https://placekitten.com/640/480" layout="responsive" width="640" height="480"></amp-img>
-              </body>
-            </html>
-          \`, 'text/html');
-        }
-        (window.AMP = window.AMP || []).push(() => {
-          const host = document.getElementById('host');
-          AMP.attachShadowDoc(host, parseDoc(), testUrl));
-        });
+        const host = document.getElementById('host');
+        AMP.attachShadowDoc(host, shadowDoc(), '');
       </script>
     `,
   },
