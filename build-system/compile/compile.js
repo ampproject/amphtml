@@ -50,7 +50,6 @@ const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
-const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
@@ -131,7 +130,7 @@ function postClosureBabel(directory, isEsmBuild) {
       },
       output: {
         beautify: !!argv.pretty_print,
-        comments: 'all',
+        comments: /\/*/,
         keep_quoted_props: true,
       },
       sourceMap: true,
@@ -489,8 +488,12 @@ function compile(
     } else {
       timeInfo.startTime = Date.now();
       return gulp
+<<<<<<< HEAD
         .src(gulpSrcs, {base: SRC_TEMP_DIR})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
+=======
+        .src(gulpSrcs, {base: gulpBase})
+>>>>>>> Remove broken shorten-license
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
         .on('error', err => {

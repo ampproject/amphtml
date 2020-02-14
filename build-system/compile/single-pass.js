@@ -45,7 +45,6 @@ const {
   handleSinglePassCompilerError,
 } = require('./closure-compile');
 const {checkForUnknownDeps} = require('./check-for-unknown-deps');
-const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
@@ -681,8 +680,12 @@ function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
     gulp
+<<<<<<< HEAD
       .src(srcs, {base: SRC_TEMP_DIR})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
+=======
+      .src(srcs, {base: transformDir})
+>>>>>>> Remove broken shorten-license
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(gulpClosureCompile(flagsArray))
       .on('error', err => {
