@@ -31,33 +31,38 @@ using namespace std::string_literals;
 // Tests manufactured tags functions.
 TEST(ParserTest, ParseManufacturedTags) {
   htmlparser::Parser parser("<html><div>Hello</div></html>");
-  EXPECT_NOT_NULL(parser.Parse());
+  auto doc = parser.Parse();
+  EXPECT_NOT_NULL(doc);
   EXPECT_FALSE(parser.Accounting().has_manufactured_html);
   EXPECT_TRUE(parser.Accounting().has_manufactured_head);
   EXPECT_TRUE(parser.Accounting().has_manufactured_body);
 
   htmlparser::Parser parser2("<html><head></head><div>Hello</div></html>");
-  EXPECT_NOT_NULL(parser2.Parse());
+  doc = parser2.Parse();
+  EXPECT_NOT_NULL(doc);
   EXPECT_FALSE(parser2.Accounting().has_manufactured_html);
   EXPECT_FALSE(parser2.Accounting().has_manufactured_head);
   EXPECT_TRUE(parser2.Accounting().has_manufactured_body);
 
   htmlparser::Parser parser3("<html><head></head><body><div>Hello</div>"
                              "</body></html>");
-  EXPECT_NOT_NULL(parser3.Parse());
+  doc = parser3.Parse();
+  EXPECT_NOT_NULL(doc);
   EXPECT_FALSE(parser3.Accounting().has_manufactured_html);
   EXPECT_FALSE(parser3.Accounting().has_manufactured_head);
   EXPECT_FALSE(parser3.Accounting().has_manufactured_body);
 
   // Missing end (closing) tags does not amount to manufactured tags.
   htmlparser::Parser parser4("<html><head><body><div>Hello</div>");
-  EXPECT_NOT_NULL(parser4.Parse());
+  doc = parser4.Parse();
+  EXPECT_NOT_NULL(doc);
   EXPECT_FALSE(parser4.Accounting().has_manufactured_html);
   EXPECT_FALSE(parser4.Accounting().has_manufactured_head);
   EXPECT_FALSE(parser4.Accounting().has_manufactured_body);
 
   htmlparser::Parser parser5("hello");
-  htmlparser::NodePtr doc = parser5.Parse();
+  doc = parser5.Parse();
+  EXPECT_NOT_NULL(doc);
   EXPECT_TRUE(parser5.Accounting().has_manufactured_html);
   EXPECT_TRUE(parser5.Accounting().has_manufactured_head);
   EXPECT_TRUE(parser5.Accounting().has_manufactured_body);
@@ -94,7 +99,7 @@ TEST(ParserTest, LineColTest) {
        .frameset_ok = true,
        .record_node_offsets = false,
        .record_attribute_offsets = false,
-       .on_node_callback = [&](htmlparser::NodePtr n,
+       .on_node_callback = [&](htmlparser::Node* n,
                                htmlparser::Token t) {
          switch (t.atom) {
            case htmlparser::Atom::HTML: {
@@ -129,7 +134,8 @@ TEST(ParserTest, LineColTest) {
          num_callbacks++;
        }
       });
-  EXPECT_NOT_NULL(parser.Parse());
+  auto doc = parser.Parse();
+  EXPECT_NOT_NULL(doc.get());
   EXPECT_EQ(num_callbacks, 6 /* html, head, body, div, img, a */);
 
   num_callbacks = 0;
@@ -153,7 +159,7 @@ TEST(ParserTest, LineColTest) {
         // For tests we rely on callbacks.
         .record_node_offsets = false,
         .record_attribute_offsets = false,
-        .on_node_callback = [&](htmlparser::NodePtr n,
+        .on_node_callback = [&](htmlparser::Node* n,
                                 htmlparser::Token t) {
           switch (t.atom) {
             case htmlparser::Atom::HTML: {
@@ -265,7 +271,7 @@ TEST(ParserTest, LineBreakAtPeekableCharacter) {
         .frameset_ok = true,
         .record_node_offsets = false,
         .record_attribute_offsets = false,
-        .on_node_callback = [&](htmlparser::NodePtr n,
+        .on_node_callback = [&](htmlparser::Node* n,
                                 htmlparser::Token t) {
           num_callbacks++;
           auto pos = t.position_in_html_src;
@@ -310,10 +316,10 @@ TEST(ParserTest, SubsequentyBodyTagAttributesCopied) {
   std::string html = ("<html>\n<body id=\"bdy\">\n<div>hello</div></body>"s
                       "<body class=\"bd-cls\"><div>world</div></body></html>");
   htmlparser::Parser parser(html);
-  htmlparser::NodePtr root = parser.Parse();
+  auto root = parser.Parse();
   EXPECT_NOT_NULL(root);
   std::stringbuf buf;
-  htmlparser::Renderer::Render(root, &buf);
+  htmlparser::Renderer::Render(root.get(), &buf);
   EXPECT_EQ(buf.str(),
             "<html><head></head><body id=\"bdy\" class=\"bd-cls\">\n"
             "<div>hello</div><div>world</div></body></html>");
@@ -325,10 +331,10 @@ TEST(ParserTest, WhitespaceTest) {
                       "<div>hello</div>                        </body>"s
                       "<body class=\"bd-cls\"><div>world</div></body></html>");
   htmlparser::Parser parser(html);
-  htmlparser::NodePtr root = parser.Parse();
+  auto root = parser.Parse();
   EXPECT_NOT_NULL(root);
   std::stringbuf buf;
-  htmlparser::Renderer::Render(root, &buf);
+  htmlparser::Renderer::Render(root.get(), &buf);
   EXPECT_EQ(buf.str(),
             "<html><head></head><body id=\"bdy\" class=\"bd-cls\">\n"
             "                    <div>hello</div>                        "
@@ -343,10 +349,10 @@ TEST(ParserTest, NonAsciiWhitespaceNotTransformed) {
                       "white&#160;space.txt\">Whitespace in the link</a>"
                       "\xc2\xa0 \xc2\xa0 \xc2\xa0");
   htmlparser::Parser parser(html);
-  htmlparser::NodePtr root = parser.Parse();
+  auto root = parser.Parse();
   EXPECT_NOT_NULL(root);
   std::stringbuf buf;
-  htmlparser::Renderer::Render(root, &buf);
+  htmlparser::Renderer::Render(root.get(), &buf);
   EXPECT_EQ(buf.str(),
             "<!DOCTYPE html><html><head><meta charset=\"utf-8\">"
             "</head><body><a href=\"https://s3.amazonaws.com/amaltas.backup"
@@ -364,10 +370,10 @@ TEST(ParserTest, OnlyAsciiWhitespaceInHTMLTags) {
                       "https://s3.amazonaws.com/amaltas.backup/"
                       "white&#160;space.txt\">Whitespace in the link</a>");
   htmlparser::Parser parser(html);
-  htmlparser::NodePtr root = parser.Parse();
+  auto root = parser.Parse();
   EXPECT_NOT_NULL(root);
   std::stringbuf buf;
-  htmlparser::Renderer::Render(root, &buf);
+  htmlparser::Renderer::Render(root.get(), &buf);
   // HTML parser did the right thing. Stuffed everything in <body> as if
   // <a<space>href is a text.
   EXPECT_EQ(buf.str(),
@@ -601,7 +607,7 @@ TEST(ParserTest, ParserAccounting) {
   doc = p7.Parse();
   EXPECT_NOT_NULL(doc);
   std::stringbuf output_buf;
-  htmlparser::Renderer::Render(doc, &output_buf);
+  htmlparser::Renderer::Render(doc.get(), &output_buf);
   EXPECT_EQ(output_buf.str(), R"HTML(<html><head>
 <title>foo</title>
 </head>
@@ -638,7 +644,7 @@ TEST(ParserTest, WhitespaceBeforeHeadIgnoredAfterBodyAppendedToBody) {
   auto doc = p.Parse();
   EXPECT_NOT_NULL(doc);
   std::stringbuf output_buf;
-  htmlparser::Renderer::Render(doc, &output_buf);
+  htmlparser::Renderer::Render(doc.get(), &output_buf);
   EXPECT_EQ(output_buf.str(), R"HTML(<!DOCTYPE html><html><head>
 <title>foo</title>
 </head>
@@ -674,7 +680,7 @@ TEST(ParserTest, WhitespaceBeforeHeadIgnoredAfterBodyAppendedToBody) {
   doc = p2.Parse();
   EXPECT_NOT_NULL(doc);
   std::stringbuf output_buf2;
-  htmlparser::Renderer::Render(doc, &output_buf2);
+  htmlparser::Renderer::Render(doc.get(), &output_buf2);
   EXPECT_EQ(output_buf2.str(), R"HTML(<!-- comment 1 --><!-- comment 2 --><!DOCTYPE html><html><head>
 <title>foo</title>
 </head>
@@ -700,7 +706,7 @@ TEST(ParserTest, ImageVsImg) {
   auto doc = p.Parse();
   EXPECT_NOT_NULL(doc);
   std::stringbuf buf;
-  htmlparser::Renderer::Render(doc, &buf);
+  htmlparser::Renderer::Render(doc.get(), &buf);
   EXPECT_EQ(buf.str(), R"HTML(<html><head></head><body>
   <img src="foo1.png">
   <img src="foo2.png">
@@ -718,7 +724,7 @@ TEST(ParserTest, VoidElementsParsedCorrectly) {
   auto doc = p.Parse();
   EXPECT_NOT_NULL(doc);
   std::stringbuf buf;
-  htmlparser::Renderer::Render(doc, &buf);
+  htmlparser::Renderer::Render(doc.get(), &buf);
   EXPECT_EQ(buf.str(), R"HTML(<html><head></head><body>
   <img src="foo.png"></body></html>)HTML");
 }

@@ -44,7 +44,7 @@ inline void WriteQuoted(const std::string& str, std::stringbuf* buf) {
 }
 }  // namespace.
 
-RenderError Renderer::Render(NodePtr node, std::stringbuf* buf) {
+RenderError Renderer::Render(Node* node, std::stringbuf* buf) {
   switch (node->Type()) {
     case NodeType::ERROR_NODE:
       return RenderError::ERROR_NODE_NO_RENDER;
@@ -52,7 +52,7 @@ RenderError Renderer::Render(NodePtr node, std::stringbuf* buf) {
       Strings::Escape(node->Data().data(), buf);
       return RenderError::NO_ERROR;
     case NodeType::DOCUMENT_NODE:
-      for (NodePtr c = node->FirstChild(); c; c = c->NextSibling()) {
+      for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
         auto err = Render(c, buf);
         if (err != RenderError::NO_ERROR) {
           return  err;
@@ -135,7 +135,7 @@ RenderError Renderer::Render(NodePtr node, std::stringbuf* buf) {
   buf->sputc('>');
 
   // Add initial newline where there is danger of a newline being ignored.
-  if (NodePtr c = node->FirstChild();
+  if (Node* c = node->FirstChild();
       c && c->Type() == NodeType::TEXT_NODE && Strings::StartsWith(
       c->Data(), "\n")) {
     if (node->DataAtom() == Atom::PRE ||
@@ -149,7 +149,7 @@ RenderError Renderer::Render(NodePtr node, std::stringbuf* buf) {
   if (std::find(kRawTextNodes.begin(),
                 kRawTextNodes.end(),
                 node->DataAtom()) != kRawTextNodes.end()) {
-    for (NodePtr c = node->FirstChild(); c; c = c->NextSibling()) {
+    for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
       if (c->Type() == NodeType::TEXT_NODE) {
         WriteToBuffer(c->Data().data(), buf);
       } else {
@@ -165,7 +165,7 @@ RenderError Renderer::Render(NodePtr node, std::stringbuf* buf) {
       return RenderError::PLAIN_TEXT_ABORT;
     }
   } else {
-    for (NodePtr c = node->FirstChild(); c; c = c->NextSibling()) {
+    for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
       auto err = Render(c, buf);
       if (err != RenderError::NO_ERROR) {
         return err;

@@ -28,7 +28,7 @@
 
 namespace htmlparser {
 
-using OnNodeCallback = std::function<void(NodePtr parsed_node,
+using OnNodeCallback = std::function<void(Node* parsed_node,
                                           Token original_token)>;
 
 struct ParseOptions {
@@ -102,7 +102,7 @@ struct ParseAccounting {
   // invalid syntax or is XHTML 4 or legacy doctype.
   bool quirks_mode = false;
 
-  // TODO(amaltas): Implemnent this.
+  // TODO: Implemnent this.
   int total_nodes;
 };
 
@@ -117,25 +117,25 @@ struct ParseAccounting {
 // dropped, with no corresponding node in the resulting tree.
 //
 // The html string is assumed to be UTF-8 encoded.
-[[nodiscard]] NodePtr Parse(std::string_view html);
-[[nodiscard]] NodePtr ParseWithOptions(std::string_view html,
-                                       const ParseOptions& options);
+[[nodiscard]] std::unique_ptr<Node> Parse(std::string_view html);
+[[nodiscard]] std::unique_ptr<Node> ParseWithOptions(
+    std::string_view html, const ParseOptions& options);
 
-[[nodiscard]] std::vector<NodePtr> ParseFragment(
-    std::string_view html, NodePtr fragment_parent = nullptr);
+[[nodiscard]] std::vector<Node*> ParseFragment(
+    std::string_view html, Node* fragment_parent = nullptr);
 
-[[nodiscard]] std::vector<NodePtr> ParseFragmentWithOptions(
+[[nodiscard]] std::vector<Node*> ParseFragmentWithOptions(
     const std::string_view html,
     const ParseOptions& options,
-    NodePtr fragment_parent = nullptr);
+    Node* fragment_parent = nullptr);
 
 class Parser {
  public:
   Parser(std::string_view html,
          const ParseOptions& options = {},
-         NodePtr fragment_parent = nullptr);
+         Node* fragment_parent = nullptr);
 
-  [[nodiscard]] NodePtr Parse();
+  [[nodiscard]] std::unique_ptr<Node> Parse();
 
   ParseAccounting Accounting() const { return accounting_; }
 
@@ -143,22 +143,22 @@ class Parser {
   // Useful for error reporting, report generation etc.
   LineCol CurrentTokenizerPosition() { return tokenizer_->CurrentPosition(); }
 
-  // TODO(amaltas): In a follow up CL make these methods accessible by getting
+  // TODO: In a follow up CL make these methods accessible by getting
   // rid of the above helper Parse methods, make constructor public to allow
   // clients to create and use Parser object.
 
-  friend NodePtr Parse(std::string_view html);
+  friend std::unique_ptr<Node> Parse(std::string_view html);
 
-  friend NodePtr ParseWithOptions(std::string_view html,
-                                  const ParseOptions& options);
+  friend std::unique_ptr<Node> ParseWithOptions(
+      std::string_view html, const ParseOptions& options);
 
-  friend std::vector<NodePtr> ParseFragment(std::string_view html,
-                                            NodePtr fragment_parent);
+  friend std::vector<Node*> ParseFragment(std::string_view html,
+                                            Node* fragment_parent);
 
-  friend std::vector<NodePtr> ParseFragmentWithOptions(
+  friend std::vector<Node*> ParseFragmentWithOptions(
       const std::string_view html,
       const ParseOptions& options,
-      NodePtr fragment_parent);
+      Node* fragment_parent);
 
  private:
   enum class Scope {
@@ -307,23 +307,23 @@ class Parser {
 
   // Adds a child node n to the top element, and pushes n onto the stack
   // of open elements if it is an element node.
-  void AddChild(NodePtr node);
+  void AddChild(Node* node);
 
   // Returns whether the next node to be added should be foster parented.
   bool ShouldFosterParent();
 
   // Adds a child node according to the foster parenting rules.
   // Section 12.2.6.1, "foster parenting".
-  void FosterParent(NodePtr node);
+  void FosterParent(Node* node);
 
   void InBodyEndTagFormatting(Atom atom, std::string_view tag_name);
 
-  NodePtr top();
+  Node* top();
 
   void AddText(const std::string& text);
 
   // Copies attributes of the token's attributes to the node.
-  void CopyAttributes(NodePtr node, Token token) const;
+  void CopyAttributes(Node* node, Token token) const;
 
   // Provides the tokens for the parser.
   std::unique_ptr<Tokenizer> tokenizer_;
@@ -339,15 +339,15 @@ class Parser {
   bool has_self_closing_token_ = false;
 
   // Document root element.
-  NodePtr document_;
+  std::unique_ptr<Node> document_;
 
   // Section 12.2.4.3 says "The markers are inserted when entering applet,
   // object, marquee, template, td, th, and caption elements, and are used
   // to prevent formatting from "leaking" into applet, object, marquee,
   // template, td, th, and caption elements".
   //
-  // TODO(amaltas): This is just a marker. Consider making it static and const.
-  NodePtr scope_marker_;
+  // TODO: This is just a marker. Consider making it static and const.
+  std::unique_ptr<Node> scope_marker_;
 
   // The stack of open elements (section 12.2.4.2) and active formatting
   // elements (section 12.2.4.3).
@@ -355,8 +355,8 @@ class Parser {
   NodeStack active_formatting_elements_stack_;
 
   // Element pointers (section 12.2.4.4).
-  NodePtr head_;
-  NodePtr form_;
+  Node* head_ = nullptr;
+  Node* form_ = nullptr;
 
   // Other parsing state flags (section 12.2.4.5).
   bool scripting_ = true;
@@ -375,7 +375,7 @@ class Parser {
   // in parent_node.
   bool fragment_ = false;
   // The context element when parsing an HTML fragment (section 12.4).
-  NodePtr fragment_parent_node_;
+  Node* fragment_parent_node_;
 
 
   // Whether new elements should be inserted according to

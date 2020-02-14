@@ -38,27 +38,27 @@ namespace {
 std::string ExtractWhitespace(const std::string& s);
 }  // namespace.
 
-NodePtr Parse(std::string_view html) {
+std::unique_ptr<Node> Parse(std::string_view html) {
   Parser parser(html, {
     .scripting = true,
     .frameset_ok = true,
     .record_node_offsets = true,
     .record_attribute_offsets = true,
     .allow_deprecated_tags = false});
-  return parser.Parse();
+  return std::unique_ptr<Node>(parser.Parse());
 }
 
-NodePtr ParseWithOptions(std::string_view html,
+std::unique_ptr<Node> ParseWithOptions(std::string_view html,
                          const ParseOptions& options) {
   Parser parser(html, options);
   return parser.Parse();
 }
 
-std::vector<NodePtr> ParseFragmentWithOptions(std::string_view html,
+std::vector<Node*> ParseFragmentWithOptions(std::string_view html,
                                               const ParseOptions& options,
-                                              NodePtr fragment_parent) {
+                                              Node* fragment_parent) {
   Parser parser(html, options, fragment_parent);
-  NodePtr root = Node::make_node(NodeType::ELEMENT_NODE, Atom::HTML);
+  auto root = Node::make_node(NodeType::ELEMENT_NODE, Atom::HTML);
   parser.document_->AppendChild(root);
   parser.open_elements_stack_.Push(root);
 
@@ -68,7 +68,7 @@ std::vector<NodePtr> ParseFragmentWithOptions(std::string_view html,
 
   parser.ResetInsertionMode();
 
-  for (NodePtr node = fragment_parent; node; node = node->Parent()) {
+  for (Node* node = fragment_parent; node; node = node->Parent()) {
     if (node->Type() == NodeType::ELEMENT_NODE &&
         node->DataAtom() == Atom::FORM) {
       parser.form_ = node;
@@ -76,24 +76,22 @@ std::vector<NodePtr> ParseFragmentWithOptions(std::string_view html,
     }
   }
 
-  NodePtr doc = parser.Parse();
+  auto doc = parser.Parse();
 
-  if (fragment_parent) {
-    doc = root;
-  }
-
-  std::vector<NodePtr> nodes;
-  for (NodePtr c = doc->FirstChild(); c;) {
-    NodePtr next = c->NextSibling();
+  Node* parent = fragment_parent ? root : doc.get();
+  std::vector<Node*> nodes;
+  for (Node* c = parent->FirstChild(); c;) {
+    Node* next = c->NextSibling();
     nodes.push_back(c);
-    doc->RemoveChild(c);
+    parent->RemoveChild(c).release();
     c = next;
   }
+
   return nodes;
 }
 
-std::vector<NodePtr> ParseFragment(std::string_view html,
-                                   NodePtr fragment_parent) {
+std::vector<Node*> ParseFragment(std::string_view html,
+                                   Node* fragment_parent) {
   // Expects clients to update the offsets relative to the parent which
   // this fragment belongs.
   ParseOptions options = {
@@ -108,7 +106,7 @@ std::vector<NodePtr> ParseFragment(std::string_view html,
 
 Parser::Parser(std::string_view html,
                const ParseOptions& options,
-               NodePtr fragment_parent) :
+               Node* fragment_parent) :
     tokenizer_(std::make_unique<Tokenizer>(html,
         fragment_parent ?
         AtomUtil::ToString(fragment_parent->atom_) : "")),
@@ -127,8 +125,8 @@ Parser::Parser(std::string_view html,
 
 #ifdef DUMP_NODES
 // Dumps the entire nodes in their final order after parsing.
-void DumpDocument(NodePtr doc) {
-  for (NodePtr c = doc->FirstChild(); c; c = c->NextSibling()) {
+void DumpDocument(Node* doc) {
+  for (Node* c = doc->FirstChild(); c; c = c->NextSibling()) {
     std::cerr << c->NameSpace() << ": " << AtomUtil::ToString(c->DataAtom())
               << std::endl;
     DumpDocument(c);
@@ -136,10 +134,10 @@ void DumpDocument(NodePtr doc) {
 }
 #endif  // DUMP_NODES
 
-NodePtr Parser::Parse() {
+std::unique_ptr<Node> Parser::Parse() {
   bool eof = tokenizer_->IsEOF();
   while (!eof) {
-    NodePtr node = open_elements_stack_.Top();
+    Node* node = open_elements_stack_.Top();
     tokenizer_->SetAllowCDATA(node && !node->name_space_.empty());
     // Read and parse the next token.
     TokenType token_type = tokenizer_->Next(!template_stack_.empty());
@@ -159,16 +157,16 @@ NodePtr Parser::Parse() {
   DumpDocument(document_);
 #endif
 
-  return document_;
+  return std::move(document_);
 }  // End Parser::Parse.
 
-NodePtr Parser::top() {
-  NodePtr node = open_elements_stack_.Top();
+Node* Parser::top() {
+  Node* node = open_elements_stack_.Top();
   if (node) {
     return node;
   }
 
-  return document_;
+  return document_.get();
 }  // End Parser::Top.
 
 template<typename... Args>
@@ -185,7 +183,7 @@ bool Parser::PopUntil(Scope scope, Args... match_tags) {
 int Parser::IndexOfElementInScope(Scope scope,
     const std::vector<Atom>& match_tags) const {
   for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-    NodePtr node = open_elements_stack_.at(i);
+    Node* node = open_elements_stack_.at(i);
     if (node->name_space_.empty()) {
       for (Atom a : match_tags) {
         if (a == node->atom_) {
@@ -248,7 +246,7 @@ bool Parser::ElementInScope(Scope scope, Args... tags) const {
 
 void Parser::ClearStackToContext(Scope scope) {
   for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-    NodePtr node = open_elements_stack_.at(i);
+    Node* node = open_elements_stack_.at(i);
     Atom atom = node->atom_;
     switch (scope) {
       case Scope::TableScope:
@@ -281,7 +279,7 @@ void Parser::GenerateImpliedEndTags(
     const std::initializer_list<Atom>& exceptions) {
   int i = open_elements_stack_.size() - 1;
   for (; i >= 0; --i) {
-    NodePtr node = open_elements_stack_.at(i);
+    Node* node = open_elements_stack_.at(i);
     if (node->node_type_ == NodeType::ELEMENT_NODE) {
       switch (node->atom_) {
         case Atom::DD:
@@ -311,7 +309,7 @@ void Parser::GenerateImpliedEndTags(
   open_elements_stack_.Pop(open_elements_stack_.size() - i - 1);
 }  // Parser::GenerateImpliedEndTags.
 
-void Parser::AddChild(NodePtr node) {
+void Parser::AddChild(Node* node) {
   if (ShouldFosterParent()) {
     FosterParent(node);
   } else {
@@ -333,12 +331,13 @@ bool Parser::ShouldFosterParent() {
           a == Atom::TR);
 }  // Parser::ShouldFosterParent.
 
-void Parser::FosterParent(NodePtr node) {
-  NodePtr table;
-  NodePtr parent;
-  NodePtr prev;
-  NodePtr tpl;
-  int i;
+void Parser::FosterParent(Node* node) {
+  std::unique_ptr<Node> n(node);
+  Node* table = nullptr;
+  Node* parent = nullptr;
+  Node* prev = nullptr;
+  Node* tpl = nullptr;
+  int i = -1;
   for (i = open_elements_stack_.size() - 1; i >= 0; --i) {
     if (open_elements_stack_.at(i)->atom_ == Atom::TABLE) {
       table = open_elements_stack_.at(i);
@@ -346,7 +345,7 @@ void Parser::FosterParent(NodePtr node) {
     }
   }
 
-  int j;
+  int j = -1;
   for (j = open_elements_stack_.size() - 1; j >= 0; --j) {
     if (open_elements_stack_.at(j)->atom_ == Atom::TEMPLATE) {
       tpl = open_elements_stack_.at(j);
@@ -355,7 +354,7 @@ void Parser::FosterParent(NodePtr node) {
   }
 
   if (tpl && (!table || j > i)) {
-    tpl->AppendChild(node);
+    tpl->AppendChild(n.release());
     return;
   }
 
@@ -378,37 +377,37 @@ void Parser::FosterParent(NodePtr node) {
 
   if (prev && prev->node_type_ == NodeType::TEXT_NODE &&
       node->node_type_ == NodeType::TEXT_NODE) {
-    prev->data_ += node->data_;
+    prev->data_ += n->data_;
     return;
   }
 
-  parent->InsertBefore(node, table);
+  parent->InsertBefore(n.release(), table);
 }  // Parser::FosterParent.
 
 void Parser::AddText(const std::string& text) {
   if (text.empty()) return;
 
-  NodePtr text_node = Node::make_node(NodeType::TEXT_NODE);
+  auto text_node = std::unique_ptr<Node>(Node::make_node(NodeType::TEXT_NODE));
   text_node->data_ = text;
   text_node->position_in_html_src_ = token_.position_in_html_src;
 
   if (ShouldFosterParent()) {
-    FosterParent(text_node);
+    FosterParent(text_node.release());
     return;
   }
 
-  NodePtr top_node = top();
+  Node* top_node = top();
   if (top_node->LastChild() &&
       top_node->LastChild()->node_type_ == NodeType::TEXT_NODE) {
     top_node->LastChild()->data_ += text;
     return;
   }
 
-  AddChild(text_node);
+  AddChild(text_node.release());
 }  // Parser::AddText.
 
 void Parser::AddElement() {
-  NodePtr element_node = Node::make_node(NodeType::ELEMENT_NODE, token_.atom);
+  Node* element_node = Node::make_node(NodeType::ELEMENT_NODE, token_.atom);
   if (token_.atom == Atom::UNKNOWN) {
     element_node->data_ = token_.data;
   }
@@ -462,7 +461,7 @@ void Parser::AddFormattingElement() {
   // Implement the Noah's Ark clause, but with three per family instead of two.
   int identical_elements = 0;
   for (int i = active_formatting_elements_stack_.size() - 1; i >= 0; --i) {
-    NodePtr node = active_formatting_elements_stack_.at(i);
+    Node* node = active_formatting_elements_stack_.at(i);
     if (node->node_type_ == NodeType::SCOPE_MARKER_NODE) break;
     if (node->node_type_ != NodeType::ELEMENT_NODE) continue;
     if (node->name_space_ != "") continue;
@@ -499,14 +498,14 @@ void Parser::AddFormattingElement() {
 // Section 12.2.4.3.
 void Parser::ClearActiveFormattingElements() {
   while (active_formatting_elements_stack_.size() != 0) {
-    NodePtr node = active_formatting_elements_stack_.Pop();
+    Node* node = active_formatting_elements_stack_.Pop();
     if (node->node_type_ == NodeType::SCOPE_MARKER_NODE) break;
   }
 }  // Parser::ClearActiveFormattingElements.
 
 // Section 12.2.4.3.
 void Parser::ReconstructActiveFormattingElements() {
-  NodePtr node = active_formatting_elements_stack_.Top();
+  Node* node = active_formatting_elements_stack_.Top();
   if (!node) return;
 
   if (node->node_type_ == NodeType::SCOPE_MARKER_NODE ||
@@ -527,7 +526,7 @@ void Parser::ReconstructActiveFormattingElements() {
 
   do {
     i++;
-    NodePtr clone = active_formatting_elements_stack_.at(i)->Clone();
+    auto clone = active_formatting_elements_stack_.at(i)->Clone();
     AddChild(clone);
     active_formatting_elements_stack_.Replace(i, clone);
   } while (i < active_formatting_elements_stack_.size() - 1);
@@ -548,7 +547,7 @@ void Parser::SetOriginalIM() {
 // Section 12.2.4.1, "reset the insertion mode".
 void Parser::ResetInsertionMode() {
   for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-    NodePtr node = open_elements_stack_.at(i);
+    Node* node = open_elements_stack_.at(i);
     bool last = (i == 0);
     if (last && fragment_parent_node_) {
       node = fragment_parent_node_;
@@ -557,8 +556,8 @@ void Parser::ResetInsertionMode() {
     switch (node->atom_) {
       case Atom::SELECT:
         if (!last) {
-          NodePtr ancestor = node;
-          NodePtr first = open_elements_stack_.at(0);
+          Node* ancestor = node;
+          Node* first = open_elements_stack_.at(0);
           while (ancestor != first) {
             ancestor = open_elements_stack_.at(open_elements_stack_.Index(
                   ancestor) - 1);
@@ -578,7 +577,7 @@ void Parser::ResetInsertionMode() {
         break;
       case Atom::TD:
       case Atom::TH:
-        // TODO(amaltas): Remove this divergence from the HTML5 spec.
+        // TODO: Remove this divergence from the HTML5 spec.
         //
         // https://bugs.chromium.org/p/chromium/issues/detail?id=829668
         insertion_mode_ = std::bind(&Parser::InCellIM, this);
@@ -650,7 +649,7 @@ bool Parser::InitialIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = std::move(token_.data);
       if (record_node_offsets_) {
         node->position_in_html_src_ = token_.position_in_html_src;
@@ -659,17 +658,17 @@ bool Parser::InitialIM() {
       return true;
     }
     case TokenType::DOCTYPE_TOKEN: {
-      auto doctype = ParseDoctype(token_.data);
-      NodePtr node = std::get<0>(doctype);
+      auto [node, quirks_mode] = ParseDoctype(token_.data);
       if (record_node_offsets_) {
         node->position_in_html_src_ = token_.position_in_html_src;
       }
-      document_->AppendChild(node);
-      accounting_.quirks_mode = std::get<1>(doctype);
+      Node* doctype_node = node.release();
+      document_->AppendChild(doctype_node);
+      accounting_.quirks_mode = quirks_mode;
       insertion_mode_ = std::bind(&Parser::BeforeHTMLIM, this);
 
       if (on_node_callback_) {
-        on_node_callback_(node, token_);
+        on_node_callback_(doctype_node, token_);
       }
 
       return true;
@@ -723,7 +722,7 @@ bool Parser::BeforeHTMLIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = std::data(token_.data);
       document_->AppendChild(node);
       return true;
@@ -778,7 +777,7 @@ bool Parser::BeforeHeadIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
@@ -854,7 +853,7 @@ bool Parser::InHeadIM() {
         }
         case Atom::TEMPLATE: {
           AddElement();
-          active_formatting_elements_stack_.Push(scope_marker_);
+          active_formatting_elements_stack_.Push(scope_marker_.get());
           frameset_ok_ = false;
           insertion_mode_ = std::bind(&Parser::InTemplateIM, this);
           template_stack_.push_back(std::bind(&Parser::InTemplateIM, this));
@@ -884,12 +883,12 @@ bool Parser::InHeadIM() {
         case Atom::TEMPLATE: {
           if (!open_elements_stack_.Contains(Atom::TEMPLATE)) return true;
 
-          // TODO(amaltas): Remove this divergence from the HTML5 spec.
+          // TODO: Remove this divergence from the HTML5 spec.
           //
           // See https://bugs.chromium.org/p/chromium/issues/detail?id=829668
           GenerateImpliedEndTags();
           for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-            NodePtr node = open_elements_stack_.at(i);
+            Node* node = open_elements_stack_.at(i);
             if (node->name_space_.empty() && node->atom_ == Atom::TEMPLATE) {
               open_elements_stack_.Pop(open_elements_stack_.size() - i);
               break;
@@ -908,7 +907,7 @@ bool Parser::InHeadIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
@@ -1066,7 +1065,7 @@ bool Parser::AfterHeadIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -1089,7 +1088,7 @@ bool Parser::InBodyIM() {
   switch (token_.token_type) {
     case TokenType::TEXT_TOKEN: {
       std::string d = token_.data;
-      NodePtr node = open_elements_stack_.Top();
+      Node* node = open_elements_stack_.Top();
       switch (node->atom_) {
         case Atom::PRE:
         case Atom::LISTING: {
@@ -1157,7 +1156,7 @@ bool Parser::InBodyIM() {
             return true;
           }
           if (open_elements_stack_.size() >= 2) {
-            NodePtr body = open_elements_stack_.at(1);
+            Node* body = open_elements_stack_.at(1);
             if (body->node_type_ == NodeType::ELEMENT_NODE &&
                 body->atom_ == Atom::BODY) {
               frameset_ok_ = false;
@@ -1178,9 +1177,10 @@ bool Parser::InBodyIM() {
             // Ignore the token.
             return true;
           }
-          NodePtr body = open_elements_stack_.at(1);
+          auto body = open_elements_stack_.at(1);
           if (body->Parent()) {
-            body->Parent()->RemoveChild(body);
+            auto removed_body = body->Parent()->RemoveChild(body);
+            open_elements_stack_.Remove(removed_body.get());
           }
           // Remove all nodes except one, the last in the stack.
           open_elements_stack_.Pop(open_elements_stack_.size() - 1);
@@ -1221,7 +1221,7 @@ bool Parser::InBodyIM() {
         case Atom::H5:
         case Atom::H6: {
           PopUntil(Scope::ButtonScope, Atom::P);
-          NodePtr top_node = top();
+          Node* top_node = top();
           if (top_node) {
             switch (top_node->atom_) {
               case Atom::H1:
@@ -1262,7 +1262,7 @@ bool Parser::InBodyIM() {
         case Atom::LI: {
           frameset_ok_ = false;
           for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-            NodePtr node = open_elements_stack_.at(i);
+            Node* node = open_elements_stack_.at(i);
             switch (node->atom_) {
               case Atom::LI:
                 open_elements_stack_.Pop(open_elements_stack_.size() - i);
@@ -1284,7 +1284,7 @@ bool Parser::InBodyIM() {
         case Atom::DT: {
           frameset_ok_ = false;
           for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-            NodePtr node = open_elements_stack_.at(i);
+            Node* node = open_elements_stack_.at(i);
             switch (node->atom_) {
               case Atom::DD:
               case Atom::DT:
@@ -1318,7 +1318,7 @@ bool Parser::InBodyIM() {
         case Atom::A: {
           for (int i = active_formatting_elements_stack_.size() - 1;
                i >= 0; --i) {
-            NodePtr node = active_formatting_elements_stack_.at(i);
+            Node* node = active_formatting_elements_stack_.at(i);
             if (node->node_type_ == NodeType::SCOPE_MARKER_NODE) break;
             if (node->node_type_ == NodeType::ELEMENT_NODE &&
                 node->atom_ == Atom::A) {
@@ -1362,7 +1362,7 @@ bool Parser::InBodyIM() {
         case Atom::OBJECT: {
           ReconstructActiveFormattingElements();
           AddElement();
-          active_formatting_elements_stack_.Push(scope_marker_);
+          active_formatting_elements_stack_.Push(scope_marker_.get());
           frameset_ok_ = false;
           break;
         }
@@ -1374,7 +1374,6 @@ bool Parser::InBodyIM() {
           frameset_ok_ = false;
           insertion_mode_ = std::bind(&Parser::InTableIM, this);
           return true;
-          break;
         }
         case Atom::AREA:
         case Atom::BR:
@@ -1474,7 +1473,7 @@ bool Parser::InBodyIM() {
             ParseImpliedToken(TokenType::START_TAG_TOKEN, Atom::LABEL,
                 AtomUtil::ToString(Atom::LABEL));
             AddText(prompt);
-            NodePtr node = Node::make_node(NodeType::ELEMENT_NODE, Atom::INPUT);
+            Node* node = Node::make_node(NodeType::ELEMENT_NODE, Atom::INPUT);
             std::copy(attributes.begin(), attributes.end(),
                 std::back_inserter(node->attributes_));
             AddChild(node);
@@ -1646,7 +1645,7 @@ bool Parser::InBodyIM() {
             }
             PopUntil(Scope::DefaultScope, Atom::FORM);
           } else {
-            NodePtr node = form_;
+            Node* node = form_;
             form_ = nullptr;
             int i = IndexOfElementInScope(Scope::DefaultScope,
                 {Atom::FORM});
@@ -1729,18 +1728,18 @@ bool Parser::InBodyIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       AddChild(node);
       break;
     }
     case TokenType::ERROR_TOKEN: {
-      // TODO(amaltas): Remove this divergence from the HTML5 spec.
+      // TODO: Remove this divergence from the HTML5 spec.
       if (template_stack_.size() > 0) {
         insertion_mode_ = std::bind(&Parser::InTemplateIM, this);
         return false;
       } else {
-        for (NodePtr n : open_elements_stack_) {
+        for (Node* n : open_elements_stack_) {
           switch (n->atom_) {
             case Atom::DD:
             case Atom::LI:
@@ -1786,7 +1785,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
   // Steps 1-4. The outer loop.
   for (int i = 0; i < 8; ++i) {
     // Step 5. Find the formatting element.
-    NodePtr formatting_element;
+    Node* formatting_element = nullptr;
     for (int j = active_formatting_elements_stack_.size() - 1; j >= 0; --j) {
       if (active_formatting_elements_stack_.at(j)->node_type_ ==
           NodeType::SCOPE_MARKER_NODE) {
@@ -1815,7 +1814,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
     }
 
     // Steps 9-10. Find the furthest block.
-    NodePtr furthest_block;
+    Node* furthest_block = nullptr;
     for (int k = fe_index; k < open_elements_stack_.size(); ++k) {
       if (open_elements_stack_.at(k)->IsSpecialElement()) {
         furthest_block = open_elements_stack_.at(k);
@@ -1824,7 +1823,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
     }
 
     if (!furthest_block) {
-      NodePtr e = open_elements_stack_.Pop();
+      Node* e = open_elements_stack_.Pop();
       while (e != formatting_element) {
         e = open_elements_stack_.Pop();
       }
@@ -1833,12 +1832,12 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
     }
 
     // Steps 11-12. Find the common ancestor and bookmark node.
-    NodePtr common_ancestor = open_elements_stack_.at(fe_index - 1);
+    Node* common_ancestor = open_elements_stack_.at(fe_index - 1);
     auto bookmark = active_formatting_elements_stack_.Index(formatting_element);
 
     // Step 13. The inner loop. Find the last_node to reparent.
-    NodePtr last_node = furthest_block;
-    NodePtr node = furthest_block;
+    Node* last_node = furthest_block;
+    Node* node = furthest_block;
     int x = open_elements_stack_.Index(node);
     // Steps 13.1-12.2
     for (int j = 0; j < 3; ++j) {
@@ -1855,7 +1854,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
         break;
       }
       // Step 13.7.
-      NodePtr clone = node->Clone();
+      Node* clone = node->Clone();
       active_formatting_elements_stack_.Replace(
           active_formatting_elements_stack_.Index(node), clone);
       open_elements_stack_.Replace(
@@ -1867,7 +1866,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
       }
       // Step 13.9.
       if (last_node->Parent()) {
-        last_node->Parent()->RemoveChild(last_node);
+        last_node->Parent()->RemoveChild(last_node).release();
       }
       node->AppendChild(last_node);
       // Step 13.10.
@@ -1877,7 +1876,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
     // Step 14. Reparent lastNode to the common ancestor,
     // or for misnested table nodes, to the foster parent.
     if (last_node->Parent()) {
-      last_node->Parent()->RemoveChild(last_node);
+      last_node->Parent()->RemoveChild(last_node).release();
     }
 
     switch (common_ancestor->atom_) {
@@ -1894,7 +1893,7 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
 
     // Steps 15-17. Reparent nodes from the furthest block's children
     // to a clone of the formatting element.
-    NodePtr clone = formatting_element->Clone();
+    Node* clone = formatting_element->Clone();
     furthest_block->ReparentChildrenTo(clone);
     furthest_block->AppendChild(clone);
 
@@ -1943,7 +1942,7 @@ bool Parser::TextIM() {
       break;
     case TokenType::TEXT_TOKEN: {
       std::string_view data_view = token_.data;
-      NodePtr node = open_elements_stack_.Top();
+      Node* node = open_elements_stack_.Top();
       if ((node->atom_ == Atom::TEXTAREA) && !node->FirstChild()) {
         // Ignore a newline at the start of a <textarea> block.
         if (!data_view.empty() && data_view.front() == '\r') {
@@ -1997,7 +1996,7 @@ bool Parser::InTableIM() {
       switch (token_.atom) {
         case Atom::CAPTION: {
           ClearStackToContext(Scope::TableScope);
-          active_formatting_elements_stack_.Push(scope_marker_);
+          active_formatting_elements_stack_.Push(scope_marker_.get());
           AddElement();
           insertion_mode_ = std::bind(&Parser::InCaptionIM, this);
           return true;
@@ -2119,7 +2118,7 @@ bool Parser::InTableIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2231,7 +2230,7 @@ bool Parser::InColumnGroupIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2366,7 +2365,7 @@ bool Parser::InTableBodyIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       AddChild(node);
       return true;
@@ -2387,7 +2386,7 @@ bool Parser::InRowIM() {
         case Atom::TH:  {
           ClearStackToContext(Scope::TableRowScope);
           AddElement();
-          active_formatting_elements_stack_.Push(scope_marker_);
+          active_formatting_elements_stack_.Push(scope_marker_.get());
           insertion_mode_ = std::bind(&Parser::InCellIM, this);
           return true;
         }
@@ -2616,7 +2615,7 @@ bool Parser::InSelectIM() {
         }
         case Atom::OPTGROUP: {
           int i = open_elements_stack_.size() - 1;
-          NodePtr node = open_elements_stack_.at(i);
+          Node* node = open_elements_stack_.at(i);
           if (node && node->atom_ == Atom::OPTION) {
             i--;
           }
@@ -2644,7 +2643,7 @@ bool Parser::InSelectIM() {
       break;
     }
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2687,7 +2686,7 @@ bool Parser::InSelectInTableIM() {
          // tag is arguably incorrect (conceptually), but it mimics what
          // Chromium does.
          for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-           NodePtr node = open_elements_stack_.at(i);
+           Node* node = open_elements_stack_.at(i);
            if (node->atom_ == Atom::SELECT) {
              open_elements_stack_.Pop(open_elements_stack_.size() - i);
              break;
@@ -2783,7 +2782,7 @@ bool Parser::InTemplateIM() {
       // See https://bugs.chromium.org/p/chromium/issues/detail?id=829668
       GenerateImpliedEndTags();
       for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-        NodePtr node = open_elements_stack_.at(i);
+        Node* node = open_elements_stack_.at(i);
         if (node->name_space_.empty() && node->atom_ == Atom::TEMPLATE) {
           open_elements_stack_.Pop(open_elements_stack_.size() - i);
           break;
@@ -2833,7 +2832,7 @@ bool Parser::AfterBodyIM() {
           open_elements_stack_.at(0)->atom_ == Atom::HTML)
           << "html: bad parser state: <html> element not found, in the "
              "after-body insertion mode";
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       open_elements_stack_.at(0)->AppendChild(node);
       return true;
@@ -2850,7 +2849,7 @@ bool Parser::AfterBodyIM() {
 bool Parser::InFramesetIM() {
   switch (token_.token_type) {
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2904,7 +2903,7 @@ bool Parser::InFramesetIM() {
 bool Parser::AfterFramesetIM() {
   switch (token_.token_type) {
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       AddChild(node);
       break;
@@ -2959,7 +2958,7 @@ bool Parser::AfterAfterBodyIM() {
       }
       break;
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       document_->AppendChild(node);
       return true;
@@ -2978,7 +2977,7 @@ bool Parser::AfterAfterBodyIM() {
 bool Parser::AfterAfterFramesetIM() {
   switch (token_.token_type) {
     case TokenType::COMMENT_TOKEN: {
-      NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* node = Node::make_node(NodeType::COMMENT_NODE);
       node->data_ = token_.data;
       document_->AppendChild(node);
       break;
@@ -3025,7 +3024,7 @@ bool Parser::ParseForeignContent() {
       AddText(token_.data);
       break;
     case TokenType::COMMENT_TOKEN: {
-      NodePtr comment_node = Node::make_node(NodeType::COMMENT_NODE);
+      Node* comment_node = Node::make_node(NodeType::COMMENT_NODE);
       comment_node->data_ = token_.data;
       AddChild(comment_node);
       break;
@@ -3048,7 +3047,7 @@ bool Parser::ParseForeignContent() {
       }
       if (is_breakout_tag) {
         for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
-          NodePtr node = open_elements_stack_.at(i);
+          Node* node = open_elements_stack_.at(i);
           if (node->name_space_.empty() ||
               HtmlIntegrationPoint(*node) ||
               MathMLTextIntegrationPoint(*node)) {
@@ -3115,7 +3114,7 @@ bool Parser::ParseForeignContent() {
 bool Parser::InForeignContent() {
   if (open_elements_stack_.size() == 0) return false;
 
-  NodePtr node = open_elements_stack_.Top();
+  Node* node = open_elements_stack_.Top();
   if (node->name_space_.empty()) return false;
   Atom token_atom = token_.atom;
   TokenType token_type = token_.token_type;
@@ -3220,7 +3219,7 @@ void Parser::ParseCurrentToken() {
   }
 }  // Parser::ParseCurrentToken.
 
-void Parser::CopyAttributes(NodePtr node, Token token) const {
+void Parser::CopyAttributes(Node* node, Token token) const {
   if (token.attributes.empty()) return;
   std::set<std::string> attr_keys;
   std::transform(node->attributes_.begin(),

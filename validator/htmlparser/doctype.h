@@ -17,6 +17,7 @@
 #ifndef HTMLPARSER__DOCTYPE_H_
 #define HTMLPARSER__DOCTYPE_H_
 
+#include <memory>
 #include <string_view>
 #include <tuple>
 
@@ -34,7 +35,7 @@ namespace htmlparser {
 // is DoctypeNode, whose Data is the name, and which has attributes
 // named "system" and "public" for the two identifiers if they were present.
 // bool is quirks. i.e. whether the document should be parsed in "quirks mode".
-std::tuple<NodePtr, bool> ParseDoctype(std::string_view s);
+std::tuple<std::unique_ptr<Node>, bool> ParseDoctype(std::string_view s);
 
 // Quirky IDs is a list of public doctype identifiers that cause a document to
 // be interpreted in quirks mode. The identifiers should be in lower case.

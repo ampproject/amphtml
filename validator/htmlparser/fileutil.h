@@ -49,7 +49,7 @@ struct FileReadOptions {
   bool ignore_comments = false;
 
   // Comments character. Ignores lines starting with this character.
-  // TODO(amaltas): Add support for // style comments.
+  // TODO: Add support for // style comments.
   char comments_char = '#';
 
   // Converts case of the file content.
