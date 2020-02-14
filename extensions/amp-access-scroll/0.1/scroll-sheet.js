@@ -85,7 +85,7 @@ export class Sheet extends ScrollComponent {
         this.frame_.setAttribute('src', state.url);
       }
       this.renderHorizontalLayout();
-      this.frame_.title = state.title;
+      this.frame_.setAttribute('title', state.title);
       toggle(this.frame_, state.open);
     });
   }
