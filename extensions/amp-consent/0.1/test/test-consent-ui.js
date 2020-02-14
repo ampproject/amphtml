@@ -89,8 +89,6 @@ describes.realWin(
           },
         });
       });
-
-      toggleExperiment(win, 'amp-consent-v2', true);
     });
 
     afterEach(() => env.sandbox.restore());

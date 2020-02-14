@@ -27,7 +27,6 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
 describes.realWin(
@@ -53,7 +52,6 @@ describes.realWin(
       doc = env.win.document;
       ampdoc = env.ampdoc;
       win = env.win;
-      toggleExperiment(win, 'amp-consent-v2', true);
 
       storageValue = {};
       jsonMockResponses = {
@@ -741,19 +739,6 @@ describes.realWin(
         event.source = iframe.contentWindow;
         win.dispatchEvent(event);
         expect(actionSpy).to.not.be.called;
-      });
-
-      it('ignore info w/o amp-consent-v2 flag', () => {
-        // TODO(@zhouyx): Remove with amp-consent-v2 flag
-        toggleExperiment(win, 'amp-consent-v2', false);
-        event.data = {
-          'type': 'consent-response',
-          'action': 'accept',
-          'info': 'accept-string',
-        };
-        event.source = iframe.contentWindow;
-        win.dispatchEvent(event);
-        expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT, undefined);
       });
 
       it('ignore msg from incorrect source', () => {
