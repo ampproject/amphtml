@@ -1,3 +1,14 @@
+---
+$category: layout
+formats:
+  - websites
+  - email
+  - ads
+  - stories
+teaser:
+  text: "AMP's layout system for any element."
+---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
