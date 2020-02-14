@@ -577,9 +577,8 @@ export class Bind {
       // If getting everything, then wait for all async amp states.
       wait = Promise.all(Object.values(this.asyncLoadingAmpStates_));
     } else {
-      wait = Promise.resolve().then(
-        () => this.asyncLoadingAmpStates_[expr.split('.')[0]]
-      );
+      const stateKey = expr.split('.')[0];
+      wait = Promise.resolve(this.asyncLoadingAmpStates_[stateKey]);
     }
 
     return wait.then(
