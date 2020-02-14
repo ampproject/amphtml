@@ -19,24 +19,15 @@
   background: transparent;
   z-index: 2147483647;
 
-  bottom: 10px;
-  height: 49px;
+  bottom: 0;
+  height: 59px;
   left: auto;
   right: 0px;
-  width: 44px;
+  width: 47px;
 }
 
 .amp-access-scroll-bar.amp-access-scroll-holdback {
-  bottom: 0;
   height: 44px;
-  left: 0;
-  right: 0;
-  width: 100%;
-}
-
-.amp-access-scroll-revealed {
-  bottom: 0;
-  height: 59px;
   left: 0;
   right: 0;
   width: 100%;

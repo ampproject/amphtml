@@ -16,7 +16,7 @@
 
 import {PROTOCOL_VERSION} from './scroll-protocol';
 import {ScrollComponent} from './scroll-component';
-import {dict, hasOwn} from '../../../src/utils/object';
+import {dict} from '../../../src/utils/object';
 
 /**
  * UI for Scroll users.
@@ -40,20 +40,6 @@ class Bar extends ScrollComponent {
     /** @protected */
     this.baseUrl_ = baseUrl;
 
-    /** @protected {!Bar.State} */
-    this.state_ = {
-      revealed: false,
-    };
-
-    this.updateHorizontalLayout({
-      ['width']: this.cssSize('100%'),
-      ['right']: this.cssSize(0),
-      ['left']: this.cssSize(0),
-    });
-
-    /** @protected */
-    this.REVEALED_CLASS = 'amp-access-scroll-revealed';
-
     this.render_();
   }
 
@@ -64,7 +50,6 @@ class Bar extends ScrollComponent {
         this.makeIframe_();
         this.setWindow_(this.frame_.contentWindow);
       }
-      this.toggleClass(this.REVEALED_CLASS, this.state_.revealed);
       this.renderHorizontalLayout();
     });
   }
@@ -105,15 +90,7 @@ class Bar extends ScrollComponent {
    * @param {!JsonObject} action
    */
   update(action) {
-    let changed = this.updateHorizontalLayout(action);
-
-    if (
-      hasOwn(action, 'revealed') &&
-      this.state_.revealed !== action['revealed']
-    ) {
-      this.state_.revealed = action['revealed'];
-      changed = true;
-    }
+    const changed = this.updateHorizontalLayout(action);
 
     if (changed) {
       this.render_();
@@ -174,10 +151,3 @@ export class ActivateBar extends Bar {
       });
   }
 }
-
-/**
- * @typedef {{
- *    revealed: boolean
- * }}
- */
-Bar.State;

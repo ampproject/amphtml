@@ -38,12 +38,6 @@ export class Sheet extends ScrollComponent {
       open: false,
       title: this.DEFAULT_TITLE_,
     };
-
-    this.updateHorizontalLayout({
-      ['width']: this.cssSize(475),
-      ['left']: 'auto',
-      ['right']: this.cssSize(16),
-    });
   }
   /**
    * @param {!JsonObject} action
