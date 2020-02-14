@@ -28,9 +28,9 @@ namespace htmlparser {
 class NodeNavigator {
  public:
   // Creates a navigation model for a node as a root.
-  explicit NodeNavigator(NodePtr node);
+  explicit NodeNavigator(Node* node);
 
-  NodePtr Current();
+  Node* Current();
   NodeType Type();
   std::string LocalName();
   std::string Prefix();
@@ -47,10 +47,10 @@ class NodeNavigator {
 
  private:
   // The root node.
-  NodePtr root_;
+  Node* root_;
 
   // The current node at a particular navigation stage.
-  NodePtr current_;
+  Node* current_;
 };
 
 }  // namespace htmlparser
