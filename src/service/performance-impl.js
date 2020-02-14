@@ -533,10 +533,8 @@ export class Performance {
         // and we just need to tick `pc`. (it will give us the relative
         // time since the viewer initialized the timer)
         this.tick('pc');
-        // We don't have the actual csi timer's clock start time,
-        // so we just have to use `docVisibleTime`.
         // TODO before merge: what should be the actual value here? performance.now() or performance.now() - docVisibleTime?
-        this.prerenderComplete_(this.win.performance.now());
+        this.prerenderComplete_(this.win.performance.now() - docVisibleTime);
       }
       this.flush();
     });

@@ -718,14 +718,17 @@ describes.realWin('performance', {amp: true}, env => {
           .withArgs('csi')
           .returns('1');
         env.sandbox.stub(viewer, 'isEmbedded').returns(true);
-        clock.tick(300);
+        whenFirstVisibleResolve();
+        whenFirstVisiblePromise.then(() => {
+          clock.tick(300);
+        });
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(
             viewerSendMessageStub.withArgs('prerenderComplete').firstCall
               .args[1].value
           ).to.equal(300);
-          expect(getPerformanceMarks()).to.deep.equal(['dr', 'ol', 'pc']);
+          expect(getPerformanceMarks()).to.deep.equal(['dr', 'ol', 'visible', 'ofv', 'pc',]);
         });
       });
 
