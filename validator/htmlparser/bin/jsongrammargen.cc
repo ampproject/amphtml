@@ -1,5 +1,5 @@
 //
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 //
 
 // To regenerate states.h file, run:
-// blaze clean (blaze clean is necessary to take into account txt file changes).
+// blaze clean (necessary to take into account txt file changes)
 // bazel build htmlparser/bin:jsongrammargen
 // bazel-bin/htmlparser/bin/jsongrammargen
 
@@ -24,7 +24,7 @@
 #include "grammar/tablebuilder.h"
 
 constexpr std::string_view kLicenseHeader = R"LICENSETXT(//
-// Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+// Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
