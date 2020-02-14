@@ -25,7 +25,7 @@ namespace htmlparser {
 namespace testing {
 
 inline constexpr std::array<std::string_view, 2> kTestDataDirs{
-    "testdata/webkit/*.dat",
+    "testdata/tree-construction/*.dat",
     "testdata/go/*.dat",
 };
 

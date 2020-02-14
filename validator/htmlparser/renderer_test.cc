@@ -27,9 +27,9 @@ namespace htmlparser {
 
 void CheckParseRenderOutput(std::string_view input,
                             std::string_view expected_output) {
-  htmlparser::NodePtr doc = htmlparser::Parse(input);
+  auto doc = htmlparser::Parse(input);
   std::stringbuf buf;
-  auto err = htmlparser::Renderer::Render(doc, &buf);
+  auto err = htmlparser::Renderer::Render(doc.get(), &buf);
   EXPECT_EQ(err, htmlparser::RenderError::NO_ERROR);
   EXPECT_EQ(buf.str(), expected_output.data());
 }

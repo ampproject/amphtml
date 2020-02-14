@@ -153,7 +153,7 @@ class Tokenizer {
   char ReadByte();
 
   // Moves cursor back past one byte.
-  // TODO(amaltas): Consider implementing peek after checking performance
+  // TODO: Consider implementing peek after checking performance
   // impact.
   void UnreadByte();
 

@@ -39,6 +39,28 @@ TEST(StringsTest, LowerUpperTest) {
   EXPECT_EQ(lower, "AMALTAS");
 };
 
+TEST(StringsTest, ConvertNewLinesTest) {
+  std::string s1 = "hello\nworld";
+  htmlparser::Strings::ConvertNewLines(&s1);
+  EXPECT_EQ(s1, "hello\nworld");
+
+  std::string s2 = "hello\rworld";
+  htmlparser::Strings::ConvertNewLines(&s2);
+  EXPECT_EQ(s2, "hello\nworld");
+
+  std::string s3 = "hello\r\nworld";
+  htmlparser::Strings::ConvertNewLines(&s3);
+  EXPECT_EQ(s3, "hello\nworld");
+
+  std::string s4 = "hello\r\r\nworld";
+  htmlparser::Strings::ConvertNewLines(&s4);
+  EXPECT_EQ(s4, "hello\n\nworld");
+
+  std::string s5 = "hello\r\n\f\r\nworld";
+  htmlparser::Strings::ConvertNewLines(&s5);
+  EXPECT_EQ(s5, "hello\n\n\nworld");
+}
+
 TEST(StringsTest, EqualFoldTest) {
   // Left upper and right lower.
   EXPECT_TRUE(htmlparser::Strings::EqualFold(
@@ -78,6 +100,37 @@ TEST(StringsTest, DecodeUtf8SymbolTest) {
     }
   }
 };
+
+TEST(StringsTest, DecodeUtf8SymbolTestImmutableStringView) {
+  std::string str = "AmaltaśAś";
+  auto decoded_symbol = htmlparser::Strings::DecodeUtf8Symbol(str, 0);
+  EXPECT_TRUE(decoded_symbol.has_value());
+  EXPECT_EQ(decoded_symbol.value(), 65 /* A */);
+
+  decoded_symbol = htmlparser::Strings::DecodeUtf8Symbol(str, 1);
+  EXPECT_TRUE(decoded_symbol.has_value());
+  EXPECT_EQ(decoded_symbol.value(), 109  /* m */);
+
+  decoded_symbol = htmlparser::Strings::DecodeUtf8Symbol(str, 6);
+  EXPECT_TRUE(decoded_symbol.has_value());
+  EXPECT_EQ(decoded_symbol.value(), 0x15b  /* ś */);
+
+  // Next character is at previous + 2, as previous char is 2 byte codepoint.
+  decoded_symbol = htmlparser::Strings::DecodeUtf8Symbol(str, 7);
+  EXPECT_FALSE(decoded_symbol.has_value());
+  // Above index corrected.
+  decoded_symbol = htmlparser::Strings::DecodeUtf8Symbol(str, 8);
+  EXPECT_TRUE(decoded_symbol.has_value());
+  EXPECT_EQ(decoded_symbol.value(), 65  /* A */);
+
+  // negative index is error.
+  decoded_symbol = htmlparser::Strings::DecodeUtf8Symbol(str, -1);
+  EXPECT_FALSE(decoded_symbol.has_value());
+
+  // out of bound is error.
+  decoded_symbol = htmlparser::Strings::DecodeUtf8Symbol(str, 100000);
+  EXPECT_FALSE(decoded_symbol.has_value());
+}
 
 TEST(StringsTest, StartsEndsTest) {
   std::string name = "AMALTASsSŚŚSŚ";

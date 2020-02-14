@@ -28,6 +28,11 @@ namespace htmlparser {
 
 Node::Node(NodeType node_type) : node_type_(node_type) {}
 
+Node::~Node() {
+  if (first_child_) delete first_child_;
+  if (next_sibling_) delete next_sibling_;
+}
+
 void Node::SetData(std::string_view data) {
   data_ = data;
 }
@@ -74,7 +79,7 @@ bool Node::IsSpecialElement() const {
   return false;
 }
 
-bool Node::InsertBefore(NodePtr new_child, NodePtr old_child) {
+bool Node::InsertBefore(Node* new_child, Node* old_child) {
   // Checks if it new_child is already attached.
   if (new_child->Parent() ||
       new_child->PrevSibling() ||
@@ -82,8 +87,8 @@ bool Node::InsertBefore(NodePtr new_child, NodePtr old_child) {
     return false;
   }
 
-  NodePtr prev;
-  NodePtr next;
+  Node* prev = nullptr;
+  Node* next = nullptr;
   if (old_child) {
     prev = old_child->PrevSibling();
     next = old_child;
@@ -102,65 +107,62 @@ bool Node::InsertBefore(NodePtr new_child, NodePtr old_child) {
     last_child_ = new_child;
   }
 
-  new_child->parent_ = weak_from_this();
+  new_child->parent_ = this;
   new_child->prev_sibling_ = prev;
   new_child->next_sibling_ = next;
 
   return true;
 }
 
-bool Node::AppendChild(NodePtr new_child) {
+bool Node::AppendChild(Node* new_child) {
   // Checks if it new_child is already attached.
   CHECK(!(new_child->Parent() ||
           new_child->PrevSibling() ||
           new_child->NextSibling()))
       << "html: AppendChild called for an attached child Node";
 
-  NodePtr last = LastChild();
+  Node* last = LastChild();
   if (last) {
     last->next_sibling_ = new_child;
   } else {
     first_child_ = new_child;
   }
   last_child_ = new_child;
-  new_child->parent_ = weak_from_this();
+  new_child->parent_ = this;
   new_child->prev_sibling_ = last;
 
   return true;
 }
 
-bool Node::RemoveChild(NodePtr c) {
-  if (!c->Parent()) return false;
-
+std::unique_ptr<Node> Node::RemoveChild(Node* c) {
   // Remove child called for a non-child node.
-  CHECK(c->Parent() == shared_from_this())
+  CHECK(c->parent_ == this)
       << "html: RemoveChild called for a non-child Node";
 
-  if (FirstChild() == c) {
-    first_child_ = c->NextSibling();
+  if (first_child_ == c) {
+    first_child_ = c->next_sibling_;
   }
 
-  if (c->NextSibling()) {
-    c->NextSibling()->prev_sibling_ = c->PrevSibling();
+  if (c->next_sibling_) {
+    c->NextSibling()->prev_sibling_ = c->prev_sibling_;
   }
 
-  if (LastChild() == c) {
-    last_child_ = c->PrevSibling();
+  if (last_child_ == c) {
+    last_child_ = c->prev_sibling_;
   }
 
-  if (c->PrevSibling()) {
-    c->PrevSibling()->next_sibling_ = c->NextSibling();
+  if (c->prev_sibling_) {
+    c->prev_sibling_->next_sibling_ = c->next_sibling_;
   }
 
-  c->parent_ = std::shared_ptr<Node>(nullptr);
-  c->prev_sibling_ = std::shared_ptr<Node>(nullptr);
+  c->parent_ = nullptr;
+  c->prev_sibling_ = nullptr;
   c->next_sibling_ = nullptr;
-
-  return true;
+  return std::unique_ptr<Node>(c);
 }
 
-NodePtr Node::Clone() const {
-  NodePtr clone = make_node(node_type_);
+Node* Node::Clone() const {
+  Node* clone = make_node(node_type_);
   clone->atom_ = atom_;
   clone->data_ = data_;
   std::copy(attributes_.begin(), attributes_.end(),
@@ -168,18 +170,17 @@ NodePtr Node::Clone() const {
   return clone;
 }
 
-void Node::ReparentChildrenTo(NodePtr destination) {
+void Node::ReparentChildrenTo(Node* destination) {
   while (true) {
-    NodePtr child = first_child_;
+    Node* child = first_child_;
     if (!child) break;
-    RemoveChild(child);
-    destination->AppendChild(child);
+    destination->AppendChild(RemoveChild(child).release());
   }
 }
 
-NodePtr NodeStack::Pop() {
+Node* NodeStack::Pop() {
   if (stack_.size() > 0) {
-    NodePtr node = stack_.back();
+    Node* node = stack_.back();
     stack_.pop_back();
     return node;
   }
@@ -196,14 +197,14 @@ void NodeStack::Pop(int count) {
   stack_.erase(stack_.end() - count, stack_.end());
 }
 
-NodePtr NodeStack::Top() {
+Node* NodeStack::Top() {
   if (stack_.size() > 0) return stack_.at(stack_.size() - 1);
   return nullptr;
 }
 
-int NodeStack::Index(NodePtr node) {
+int NodeStack::Index(Node* node) {
   for (int i = stack_.size() - 1; i >= 0; --i) {
-    NodePtr other = stack_[i];
+    Node* other = stack_[i];
     if (other == node) {
       return i;
     }
@@ -213,26 +214,26 @@ int NodeStack::Index(NodePtr node) {
 }
 
 bool NodeStack::Contains(Atom atom) {
-  for (NodePtr n : stack_) {
+  for (Node* n : stack_) {
     if (n->atom_ == atom && n->name_space_.empty()) return true;
   }
   return false;
 }
 
-void NodeStack::Push(NodePtr node) {
+void NodeStack::Push(Node* node) {
   stack_.push_back(node);
 }
 
-void NodeStack::Insert(int index, NodePtr node) {
+void NodeStack::Insert(int index, Node* node) {
   stack_.insert(stack_.begin() + index, node);
 }
 
-void NodeStack::Replace(int i, NodePtr node) {
+void NodeStack::Replace(int i, Node* node) {
   if (i > stack_.size() - 1) return;
   stack_[i] = node;
 }
 
-void NodeStack::Remove(NodePtr node) {
+void NodeStack::Remove(Node* node) {
   for (auto it = stack_.begin(); it != stack_.end(); ++it) {
     if (*it == node) {
       stack_.erase(it);
@@ -243,7 +244,7 @@ void NodeStack::Remove(NodePtr node) {
 
 namespace {
 
-std::optional<Error> CheckTreeConsistencyInternal(NodePtr node, int depth) {
+std::optional<Error> CheckTreeConsistencyInternal(Node* node, int depth) {
   if (depth == 0x1e4) {
     return error("html: tree looks like it contains a cycle");
   }
@@ -253,7 +254,7 @@ std::optional<Error> CheckTreeConsistencyInternal(NodePtr node, int depth) {
     return err;
   }
 
-  for (NodePtr c = node->FirstChild(); c; c = c->NextSibling()) {
+  for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
     auto err = CheckTreeConsistencyInternal(c, depth+1);
     if (err) {
       return err;
@@ -265,16 +266,16 @@ std::optional<Error> CheckTreeConsistencyInternal(NodePtr node, int depth) {
 
 }  // namespace
 
-std::optional<Error> CheckTreeConsistency(NodePtr node) {
+std::optional<Error> CheckTreeConsistency(Node* node) {
   return CheckTreeConsistencyInternal(node, 0);
 }
 
-std::optional<Error> CheckNodeConsistency(NodePtr node) {
+std::optional<Error> CheckNodeConsistency(Node* node) {
   if (!node) return std::nullopt;
 
   int num_parents = 0;
 
-  for (NodePtr parent = node->Parent(); parent; parent = parent->Parent()) {
+  for (Node* parent = node->Parent(); parent; parent = parent->Parent()) {
     num_parents++;
     if (num_parents == 0x1e4) {
       return error("html: parent list looks like an infinite loop");
@@ -282,7 +283,7 @@ std::optional<Error> CheckNodeConsistency(NodePtr node) {
   }
 
   int num_forwards = 0;
-  for (NodePtr c = node->FirstChild(); c; c = c->NextSibling()) {
+  for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
     num_forwards++;
     if (num_forwards == 0x1e6) {
       return error("html: forward list of children looks like an infinite "
@@ -294,7 +295,7 @@ std::optional<Error> CheckNodeConsistency(NodePtr node) {
   }
 
   int num_backwards = 0;
-  for (NodePtr c = node->LastChild(); c; c = c->PrevSibling()) {
+  for (Node* c = node->LastChild(); c; c = c->PrevSibling()) {
     num_backwards++;
     if (num_backwards == 0x1e6) {
       return error("html: backward list of children looks like an infinite "
@@ -323,7 +324,7 @@ std::optional<Error> CheckNodeConsistency(NodePtr node) {
     }
 
     bool parent_has_n_as_a_child = false;
-    for (NodePtr c = node->Parent()->FirstChild(); c; c = c->NextSibling()) {
+    for (Node* c = node->Parent()->FirstChild(); c; c = c->NextSibling()) {
       if (c == node) {
         parent_has_n_as_a_child = true;
         break;
@@ -352,9 +353,9 @@ std::optional<Error> CheckNodeConsistency(NodePtr node) {
   }
 
   // Sorted inserts and no duplicates.
-  std::vector<NodePtr> seen;
-  NodePtr last;
-  for (NodePtr c = node->FirstChild(); c; c = c->NextSibling()) {
+  std::vector<Node*> seen;
+  Node* last = nullptr;
+  for (Node* c = node->FirstChild(); c; c = c->NextSibling()) {
     auto insert_position = std::lower_bound(seen.begin(),
                                             seen.end(),
                                             c);
@@ -365,12 +366,13 @@ std::optional<Error> CheckNodeConsistency(NodePtr node) {
     seen.insert(insert_position, c);
     last = c;
   }
+
   if (last != node->LastChild()) {
-    return error("html: inconsistent last relationshp");
+    return error("html: inconsistent last relationship");
   }
 
-  NodePtr first;
-  for (NodePtr c = node->LastChild(); c; c = c->PrevSibling()) {
+  Node* first = nullptr;
+  for (Node* c = node->LastChild(); c; c = c->PrevSibling()) {
     auto iter = std::lower_bound(seen.begin(),
                                  seen.end(),
                                  c);
@@ -397,9 +399,9 @@ bool Node::IsBlockElementNode() {
                    atom_) != kBlockElements.end();
 }
 
-std::string Node::InnerText() {
-  static std::function<void(const NodePtr, std::string*)> output;
-  output = [](const NodePtr node, std::string* buf) {
+std::string Node::InnerText() const {
+  static std::function<void(const Node*, std::string*)> output;
+  output = [](const Node* node, std::string* buf) {
     switch (node->Type()) {
       case NodeType::TEXT_NODE: {
         buf->append(node->Data());
@@ -414,14 +416,14 @@ std::string Node::InnerText() {
         break;
     }
 
-    for (NodePtr child = node->FirstChild(); child;
+    for (Node* child = node->FirstChild(); child;
          child = child->NextSibling()) {
       output(child, buf);
     }
   };
 
   std::string buffer;
-  output(shared_from_this(), &buffer);
+  output(this, &buffer);
 
   if (!buffer.empty() && buffer.at(buffer.size() - 1) == ' ') {
     buffer.erase(buffer.size() - 1);
@@ -429,7 +431,7 @@ std::string Node::InnerText() {
   return buffer;
 }
 
-void Node::UpdateChildNodesPositions(NodePtr relative_node) {
+void Node::UpdateChildNodesPositions(Node* relative_node) {
   // Cannot proceed if relative node has no positional information.
   if (!relative_node->PositionInHtmlSrc().has_value()) return;
 

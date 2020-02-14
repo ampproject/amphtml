@@ -109,14 +109,22 @@ bool Strings::IsDigit(char c) {
 
 void Strings::ConvertNewLines(std::string* s) {
   for (std::size_t i = 0; i < s->size(); i++) {
-    if (s->at(i) != '\r') continue;
+    char c = s->at(i);
+    if (!(c == '\r' || c == '\f')) continue;
 
     // Converts any lone \r that is not followed by \n to \n.
     // \r\rfoo becomes \n\nfoo.
-    // \r\r\nfoo becomes \n\r\nfoo.
-    // TODO(amaltas): Add unit tests for all such scenarios.
+    // \r\r\nfoo becomes \n\nfoo.
+    // \r\f\r\nfoo becomes \n\n\nfoo
     std::size_t next = i + 1;
-    if (next >= s->size() || s->at(next) != '\n') {
+    if (c == '\r') {
+      if (next >= s->size() || s->at(next) != '\n') {
+        (*s)[i] = '\n';
+        continue;
+      }
+    }
+
+    if (c == '\f') {
       (*s)[i] = '\n';
       continue;
     }
@@ -144,14 +152,24 @@ std::string Strings::ToHexString(char32_t c) {
   return ss.str();
 }
 
-int Strings::CodePointByteSequenceCount(uint8_t c) {
+int8_t Strings::CodePointByteSequenceCount(uint8_t c) {
   if ((c & 0x80) == 0) return 1;     // Ascii char.
   if ((c & 0xe0) == 0xc0) return 2;  // 2 bytes sequence.
   if ((c & 0xf0) == 0xe0) return 3;  // 3 bytes sequence.
   if ((c & 0xf8) == 0xf0) return 4;  // 4 bytes sequence.
 
 
-  // Make compiler happy.
+  // Defaults to 1 byte ascii.
+  return 1;
+}
+
+int8_t Strings::CodePointNumBytes(char32_t c) {
+  if (c & 0xffffff80) return 1;
+  if (c & 0xfffff800) return 2;
+  if (c & 0xffff0000) return 3;
+  if (c & 0xffe00000) return 4;
+
+  // Defaults to 1 byte ascii.
   return 1;
 }
 

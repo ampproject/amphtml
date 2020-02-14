@@ -18,10 +18,10 @@
 
 namespace htmlparser {
 
-NodeNavigator::NodeNavigator(NodePtr node) : root_(node), current_(node) {
+NodeNavigator::NodeNavigator(Node* node) : root_(node), current_(node) {
 }
 
-NodePtr NodeNavigator::Current() {
+Node* NodeNavigator::Current() {
   return current_;
 }
 
@@ -67,7 +67,7 @@ void NodeNavigator::MoveToRoot() {
 }
 
 bool NodeNavigator::MoveToParent() {
-  NodePtr parent = current_->Parent();
+  Node* parent = current_->Parent();
   if (parent) {
     current_ = parent;
     return true;
@@ -77,7 +77,7 @@ bool NodeNavigator::MoveToParent() {
 }
 
 bool NodeNavigator::MoveToChild() {
-  NodePtr child = current_->FirstChild();
+  Node* child = current_->FirstChild();
   if (child) {
     current_ = child;
     return true;
@@ -87,7 +87,7 @@ bool NodeNavigator::MoveToChild() {
 }
 
 bool NodeNavigator::MoveToFirst() {
-  NodePtr previous_sibling = current_->PrevSibling();
+  Node* previous_sibling = current_->PrevSibling();
   if (!previous_sibling) {
     return false;
   }
@@ -101,7 +101,7 @@ bool NodeNavigator::MoveToFirst() {
 }
 
 bool NodeNavigator::MoveToNext() {
-  NodePtr sibling = current_->NextSibling();
+  Node* sibling = current_->NextSibling();
   if (sibling) {
     current_ = sibling;
     return true;
@@ -111,7 +111,7 @@ bool NodeNavigator::MoveToNext() {
 }
 
 bool NodeNavigator::MoveToPrevious() {
-  NodePtr sibling = current_->PrevSibling();
+  Node* sibling = current_->PrevSibling();
   if (sibling) {
     current_ = sibling;
     return true;
