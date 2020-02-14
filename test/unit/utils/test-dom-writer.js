@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Deferred} from '../../../src/utils/promise';
 import {DomWriterBulk, DomWriterStreamer} from '../../../src/utils/dom-writer';
 import {macroTask} from '../../../testing/yield';
 
@@ -147,6 +148,24 @@ describes.fakeWin('DomWriterStreamer', {amp: true}, env => {
           });
         });
       });
+
+      it('should not transfer elements until target body is ready', async () => {
+        const {promise, resolve} = new Deferred();
+        writer.onBody(() => {
+          onBodySpy();
+          return promise;
+        });
+
+        writer.write('<body>');
+        writer.write('<child></child>');
+        env.flushVsync();
+        expect(onBodySpy).to.be.calledOnce;
+        expect(win.document.body.querySelector('child')).not.to.exist;
+
+        resolve(win.document.body);
+        await macroTask();
+        expect(win.document.body.querySelector('child')).to.exist;
+      });
     });
 });
 
@@ -243,5 +262,25 @@ describes.fakeWin('DomWriterBulk', {amp: true}, env => {
     expect(win.document.body.querySelector('child2')).not.to.exist;
     expect(win.document.body.querySelector('child3')).to.exist;
     return Promise.all([onBodyPromise, onEndPromise]);
+  });
+
+  it('should not transfer elements until target body is ready', async () => {
+    const {promise, resolve} = new Deferred();
+    writer.onBody(() => {
+      onBodySpy();
+      return promise;
+    });
+
+    writer.write('<body>');
+    writer.write('<child></child>');
+    writer.close();
+    env.flushVsync();
+
+    expect(onBodySpy).to.be.calledOnce;
+    expect(win.document.body.querySelector('child')).not.to.exist;
+
+    resolve(win.document.body);
+    await macroTask();
+    expect(win.document.body.querySelector('child')).to.exist;
   });
 });
