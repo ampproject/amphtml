@@ -636,18 +636,6 @@ export class GlobalVariableSource extends VariableSource {
         .then(details => (details ? details[property] : ''));
     });
 
-    this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(win).getFirstContentfulPaint();
-    });
-
-    this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(win).getFirstViewportReady();
-    });
-
-    this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(win).getMakeBodyVisible();
-    });
-
     this.setAsync('AMP_STATE', key => {
       // This is safe since AMP_STATE is not an A4A whitelisted variable.
       const root = this.ampdoc.getRootNode();
