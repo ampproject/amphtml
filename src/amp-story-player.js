@@ -29,6 +29,8 @@ import {findIndex} from './utils/array';
 import {setStyle} from './style';
 import {toArray} from './types';
 
+// This a test
+
 /** @enum {string} */
 const LoadStateClass = {
   LOADING: 'i-amphtml-story-player-loading',
