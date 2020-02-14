@@ -581,10 +581,7 @@ export class Bind {
       wait = Promise.resolve(this.asyncLoadingAmpStates_[stateKey]);
     }
 
-    return wait.then(
-      () => this.getState(expr),
-      () => this.getState(expr)
-    );
+    return wait.catch(() => {}).then(() => this.getState(expr));
   }
 
   /**
