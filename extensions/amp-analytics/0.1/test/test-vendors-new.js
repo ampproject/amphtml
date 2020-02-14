@@ -16,7 +16,7 @@
 
 import {AmpAnalytics} from '../amp-analytics';
 import {AnalyticsConfig} from '../config';
-import {ExpansionOptions} from '../variables';
+import {ExpansionOptions, variableServiceForDoc} from '../variables';
 import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
 import {
   ImagePixelVerifier,
@@ -40,6 +40,7 @@ describes.realWin(
   function(env) {
     let win, doc;
     let requestVerifier;
+    let elementMacros;
 
     beforeEach(() => {
       win = env.win;
@@ -47,6 +48,10 @@ describes.realWin(
       const wi = mockWindowInterface(env.sandbox);
       wi.getLocation.returns(win.location);
       requestVerifier = new ImagePixelVerifier(wi);
+      elementMacros = {
+        'COOKIE': null,
+        'CONSENT_STATE': null,
+      };
     });
 
     describe('Should not contain iframe transport if not whitelisted', () => {
@@ -104,6 +109,32 @@ describes.realWin(
               config = analytics.config_;
               done();
             });
+
+            // Have to get service after analytics element is created
+            const variableService = variableServiceForDoc(doc);
+
+            window.sandbox
+              .stub(variableService, 'getMacros')
+              .callsFake(function() {
+                // Add all the macros in amp-analytics
+                const merged = {...this.macros_, ...elementMacros};
+
+                // Change the resolving function
+                const keys = Object.keys(merged);
+                for (let i = 0; i < keys.length; i++) {
+                  const key = keys[i];
+                  merged[key] = (...args) => {
+                    let params = args
+                      .filter(val => val !== undefined)
+                      .join(',');
+                    if (params) {
+                      params = '(' + params + ')';
+                    }
+                    return `_${key.replace('$', '').toLowerCase()}${params}_`;
+                  };
+                }
+                return /** @type {!JsonObject} */ (merged);
+              });
           });
 
           it('test requests', function*() {
@@ -161,8 +192,8 @@ describes.realWin(
               // Write this out for easy copy pasting.
               if (url !== val) {
                 throw new Error(
-                  `Vendor ${vendor}, request ${name} doesn't match` +
-                    `Expected value ${val}, get value ${url}`
+                  `Vendor ${vendor}, request ${name} doesn't match. ` +
+                    `Expected value ${val}, get value ${url}.`
                 );
               }
               expect(url).to.equal(val);
