@@ -331,6 +331,9 @@ export class DomWriterBulk {
         // EOF.
         this.onEnd_();
       });
+    } else {
+      // EOF.
+      this.onEnd_();
     }
   }
 }
