@@ -14,13 +14,9 @@
 // limitations under the license.
 //
 
-// Generates casetable.h header file.
-// Compile this script:
-// > bazel build htmlparser/bin:casetablegen
-//
-// Run the script
-// > ./bazel-bin/htmlparser/bin/casetablegen
-// > blaze test third_party/htmlparser:casetable_test
+// To regenerate casetable.h file, run:
+// bazel build htmlparser/bin:casetablegen
+// bazel-bin/htmlparser/bin/casetablegen
 //
 // TODO(amaltas): Add a genrule to auto generate the header file every time
 // library/software is built.
@@ -35,8 +31,7 @@
 
 const char kFileHeader[] =
     R"HEADER(// AUTO GENERATED; DO NOT EDIT.
-// To regenerate this file, use the following command:
-// $ bazel-bin/htmlparser/bin/casetablegen
+// To regenerate this file, see comments in bin/casetable.cc
 
 #ifndef HTMLPARSER__CASETABLE_H_
 #define HTMLPARSER__CASETABLE_H_

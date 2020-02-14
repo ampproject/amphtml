@@ -14,13 +14,9 @@
 // limitations under the license.
 //
 
-// Generates entity.h header file.
-// Compile this script:
-// > bazel build htmlparser/bin:entitytablegen
-//
-// Run the script:
-// > ./bazel-bin/htmlparser/bin/entitytablegen
-// > blaze test third_party/htmlparser:entity_test
+// To regenerate entity.h file, run:
+// bazel build htmlparser/bin:entitytablegen
+// bazel-bin/htmlparser/bin/entitytablegen
 
 #include <charconv>
 #include <fstream>
@@ -35,8 +31,7 @@
 
 const char kFileHeader[] =
     R"HEADER(// AUTO GENERATED; DO NOT EDIT.
-// To regenerate this file, run the following command:
-// # bazel-bin/htmlparser/bin/entitytablegen
+// To regenerate this file, see comments in bin/entitytablegen.cc
 
 #ifndef HTMLPARSER__ENTITY_H_
 #define HTMLPARSER__ENTITY_H_
