@@ -189,7 +189,7 @@ app.get('/a4a/:bid', (req, res) => {
   cors.enableCors(req, res);
   const {bid} = req.params;
   const body = `
-  <a href=https://ampbyexample.com target=_blank>
+  <a href=https://amp.dev target=_blank>
     <amp-img alt="AMP Ad" height=250 src=//localhost:9876/amp4test/request-bank/${bid}/deposit/image width=300></amp-img>
   </a>
   <amp-pixel src="//localhost:9876/amp4test/request-bank/${bid}/deposit/pixel/foo?cid=CLIENT_ID(a)"></amp-pixel>
