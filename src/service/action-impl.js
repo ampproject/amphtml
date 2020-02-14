@@ -807,10 +807,6 @@ export class ActionService {
    * @private
    */
   queryWhitelist_() {
-    const root = this.ampdoc.getRootNode();
-    if (!root.head && !(root instanceof ShadowRoot)) {
-      return null;
-    }
     const actionWhitelist = this.ampdoc.getMetaByName('amp-action-whitelist');
     if (actionWhitelist === null) {
       return null;
