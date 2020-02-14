@@ -228,7 +228,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(67);
+          expect(variables.length).to.equal(64);
         });
       });
 
@@ -863,48 +863,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
         return expandUrlAsync('?sh=PAGE_LOAD_TIME').then(res => {
           expect(res).to.match(/sh=\d+/);
         });
-      });
-
-      it('should replace FIRST_CONTENTFUL_PAINT', () => {
-        const win = getFakeWindow();
-        env.sandbox.stub(Services, 'performanceFor').returns({
-          getFirstContentfulPaint() {
-            return 1;
-          },
-        });
-        return Services.urlReplacementsForDoc(win.document.documentElement)
-          .expandUrlAsync('FIRST_CONTENTFUL_PAINT')
-          .then(res => {
-            expect(res).to.match(/^\d+$/);
-          });
-      });
-
-      it('should replace FIRST_VIEWPORT_READY', () => {
-        const win = getFakeWindow();
-        env.sandbox.stub(Services, 'performanceFor').returns({
-          getFirstViewportReady() {
-            return 1;
-          },
-        });
-        return Services.urlReplacementsForDoc(win.document.documentElement)
-          .expandUrlAsync('FIRST_VIEWPORT_READY')
-          .then(res => {
-            expect(res).to.match(/^\d+$/);
-          });
-      });
-
-      it('should replace MAKE_BODY_VISIBLE', () => {
-        const win = getFakeWindow();
-        env.sandbox.stub(Services, 'performanceFor').returns({
-          getMakeBodyVisible() {
-            return 1;
-          },
-        });
-        return Services.urlReplacementsForDoc(win.document.documentElement)
-          .expandUrlAsync('MAKE_BODY_VISIBLE')
-          .then(res => {
-            expect(res).to.match(/^\d+$/);
-          });
       });
 
       it('should reject protocol changes', () => {

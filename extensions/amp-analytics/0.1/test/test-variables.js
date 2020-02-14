@@ -462,6 +462,33 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
+    it('should replace FIRST_CONTENTFUL_PAINT', () => {
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getFirstContentfulPaint() {
+          return Promise.resolve(1);
+        },
+      });
+      return check('FIRST_CONTENTFUL_PAINT', '1');
+    });
+
+    it('should replace FIRST_VIEWPORT_READY', () => {
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getFirstViewportReady() {
+          return Promise.resolve(1);
+        },
+      });
+      return check('FIRST_VIEWPORT_READY', '1');
+    });
+
+    it('should replace MAKE_BODY_VISIBLE', () => {
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getMakeBodyVisible() {
+          return Promise.resolve(1);
+        },
+      });
+      return check('MAKE_BODY_VISIBLE', '1');
+    });
+
     describe('$MATCH', () => {
       it('handles default index', () => {
         return check('$MATCH(thisisatest, thisisatest)', 'thisisatest');
