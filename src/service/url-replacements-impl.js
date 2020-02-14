@@ -626,14 +626,10 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     this.setAsync('VIDEO_STATE', (id, property) => {
-      const root = this.ampdoc.getRootNode();
-      const video = user().assertElement(
-        root.getElementById(/** @type {string} */ (id)),
-        `Could not find an element with id="${id}" for VIDEO_STATE`
+      return Services.videoManagerForDoc(this.ampdoc).getVideoStateProperty(
+        id,
+        property
       );
-      return Services.videoManagerForDoc(this.ampdoc)
-        .getAnalyticsDetails(video)
-        .then(details => (details ? details[property] : ''));
     });
 
     this.setAsync('AMP_STATE', key => {
