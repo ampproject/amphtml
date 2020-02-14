@@ -46,8 +46,8 @@
 // .   return;
 // }
 
-#ifndef QUALITY_DNI_VALIDATOR_HTMLPARSER_DEFER_H_
-#define QUALITY_DNI_VALIDATOR_HTMLPARSER_DEFER_H_
+#ifndef HTMLPARSER__DEFER_H_
+#define HTMLPARSER__DEFER_H_
 
 #include <functional>
 
@@ -82,4 +82,4 @@ class Defer {
 
 }  // namespace htmlparser
 
-#endif  // QUALITY_DNI_VALIDATOR_HTMLPARSER_DEFER_H_
+#endif  // HTMLPARSER__DEFER_H_

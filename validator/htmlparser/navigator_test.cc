@@ -32,22 +32,18 @@ TEST(NavigatorTest, BasicNavigation) {
   navigator.MoveToChild();  // <html>.
   EXPECT_EQ(navigator.Value(), "No scripting Hello world foo bar foo baz");
   EXPECT_EQ(navigator.Current()->DataAtom(), Atom::HTML);
-  EXPECT_EQ(navigator.LocalName(), "html");
 
   navigator.MoveToChild();  // <head>
   EXPECT_EQ(navigator.Value(), "No scripting");
   EXPECT_EQ(navigator.Current()->DataAtom(), Atom::HEAD);
-  EXPECT_EQ(navigator.LocalName(), "head");
 
   navigator.MoveToNext();  // <body>
   EXPECT_EQ(navigator.Value(), "Hello world foo bar foo baz");
   EXPECT_EQ(navigator.Current()->DataAtom(), Atom::BODY);
-  EXPECT_EQ(navigator.LocalName(), "body");
 
   EXPECT_TRUE(navigator.MoveToChild());  // Body's first child div.
   EXPECT_EQ(navigator.Value(), "Hello world foo bar");  // two divs.
   EXPECT_EQ(navigator.Current()->DataAtom(), Atom::DIV);
-  EXPECT_EQ(navigator.LocalName(), "div");
 
   EXPECT_TRUE(navigator.MoveToChild());
   EXPECT_EQ(navigator.Value(), "Hello world");  // Text node.
@@ -59,14 +55,12 @@ TEST(NavigatorTest, BasicNavigation) {
   EXPECT_TRUE(navigator.MoveToNext());
   EXPECT_EQ(navigator.Value(), "foo bar");  // Text node.
   EXPECT_EQ(navigator.Current()->DataAtom(), Atom::DIV);
-  EXPECT_EQ(navigator.LocalName(), "div");
 
   // Go back to parent node.
   EXPECT_TRUE(navigator.MoveToParent());
   EXPECT_TRUE(navigator.MoveToNext());
   EXPECT_EQ(navigator.Value(), "foo baz");
   EXPECT_EQ(navigator.Current()->DataAtom(), Atom::H1);
-  EXPECT_EQ(navigator.LocalName(), "h1");
 
   // Reset.
   navigator.MoveToRoot();

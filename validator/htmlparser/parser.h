@@ -205,7 +205,7 @@ class Parser {
   // "Any other end tag" handling from 12.2.6.5 The rules for parsing tokens
   // in foreign content
   // https://html.spec.whatwg.org/multipage/syntax.html#parsing-main-inforeign
-  void InBodyEndTagOther(Atom tag_atom, const std::string& tag_name);
+  void InBodyEndTagOther(Atom tag_atom, std::string_view tag_name);
 
   // ----------------
   // Insertion modes.
@@ -302,7 +302,8 @@ class Parser {
   // the top node has a tag name of dd, dt, li, optgroup, option, p, rb, rp,
   // rt or rtc.
   // If exceptions are specified, nodes with that name will not be popped off.
-  void GenerateImpliedEndTags(const std::vector<std::string>& exceptions = {});
+  void GenerateImpliedEndTags(
+      const std::initializer_list<Atom>& exceptions = {});
 
   // Adds a child node n to the top element, and pushes n onto the stack
   // of open elements if it is an element node.
@@ -315,7 +316,7 @@ class Parser {
   // Section 12.2.6.1, "foster parenting".
   void FosterParent(NodePtr node);
 
-  void InBodyEndTagFormatting(Atom atom, const std::string& tag_name);
+  void InBodyEndTagFormatting(Atom atom, std::string_view tag_name);
 
   NodePtr top();
 

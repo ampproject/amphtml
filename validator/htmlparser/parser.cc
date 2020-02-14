@@ -59,7 +59,6 @@ std::vector<NodePtr> ParseFragmentWithOptions(std::string_view html,
                                               NodePtr fragment_parent) {
   Parser parser(html, options, fragment_parent);
   NodePtr root = Node::make_node(NodeType::ELEMENT_NODE, Atom::HTML);
-  root->SetData(AtomUtil::ToString(Atom::HTML));
   parser.document_->AppendChild(root);
   parser.open_elements_stack_.Push(root);
 
@@ -112,7 +111,7 @@ Parser::Parser(std::string_view html,
                NodePtr fragment_parent) :
     tokenizer_(std::make_unique<Tokenizer>(html,
         fragment_parent ?
-        AtomUtil::ToString(fragment_parent->DataAtom()) : "")),
+        AtomUtil::ToString(fragment_parent->atom_) : "")),
     on_node_callback_(options.on_node_callback),
     document_(Node::make_node(NodeType::DOCUMENT_NODE)),
     scope_marker_(Node::make_node(NodeType::SCOPE_MARKER_NODE)),
@@ -130,7 +129,8 @@ Parser::Parser(std::string_view html,
 // Dumps the entire nodes in their final order after parsing.
 void DumpDocument(NodePtr doc) {
   for (NodePtr c = doc->FirstChild(); c; c = c->NextSibling()) {
-    std::cerr << c->NameSpace() << ": " << c->Data() << std::endl;
+    std::cerr << c->NameSpace() << ": " << AtomUtil::ToString(c->DataAtom())
+              << std::endl;
     DumpDocument(c);
   }
 }
@@ -140,7 +140,7 @@ NodePtr Parser::Parse() {
   bool eof = tokenizer_->IsEOF();
   while (!eof) {
     NodePtr node = open_elements_stack_.Top();
-    tokenizer_->SetAllowCDATA(node && node->name_space_ != "");
+    tokenizer_->SetAllowCDATA(node && !node->name_space_.empty());
     // Read and parse the next token.
     TokenType token_type = tokenizer_->Next(!template_stack_.empty());
 
@@ -278,9 +278,9 @@ void Parser::ClearStackToContext(Scope scope) {
 }  // Parser::ClearStackToContext.
 
 void Parser::GenerateImpliedEndTags(
-    const std::vector<std::string>& exceptions) {
-  int i;
-  for (i = open_elements_stack_.size() - 1; i >= 0; --i) {
+    const std::initializer_list<Atom>& exceptions) {
+  int i = open_elements_stack_.size() - 1;
+  for (; i >= 0; --i) {
     NodePtr node = open_elements_stack_.at(i);
     if (node->node_type_ == NodeType::ELEMENT_NODE) {
       switch (node->atom_) {
@@ -294,8 +294,8 @@ void Parser::GenerateImpliedEndTags(
         case Atom::RP:
         case Atom::RT:
         case Atom::RTC:
-          for (auto& e : exceptions) {
-            if (node->data_ == e) {
+          for (auto e : exceptions) {
+            if (node->atom_ == e) {
               // Pop nodes and return early.
               open_elements_stack_.Pop(open_elements_stack_.size() - i - 1);
               return;
@@ -409,7 +409,9 @@ void Parser::AddText(const std::string& text) {
 
 void Parser::AddElement() {
   NodePtr element_node = Node::make_node(NodeType::ELEMENT_NODE, token_.atom);
-  element_node->data_ = token_.data;
+  if (token_.atom == Atom::UNKNOWN) {
+    element_node->data_ = token_.data;
+  }
 
   switch (token_.atom) {
     case Atom::HTML: {
@@ -649,7 +651,7 @@ bool Parser::InitialIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
-      node->data_ = token_.data;
+      node->data_ = std::move(token_.data);
       if (record_node_offsets_) {
         node->position_in_html_src_ = token_.position_in_html_src;
       }
@@ -722,7 +724,7 @@ bool Parser::BeforeHTMLIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
-      node->data_ = token_.data;
+      node->data_ = std::data(token_.data);
       document_->AppendChild(node);
       return true;
     }
@@ -777,7 +779,7 @@ bool Parser::BeforeHeadIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
-      node->data_ = token_.data;
+      node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
     }
@@ -907,7 +909,7 @@ bool Parser::InHeadIM() {
     }
     case TokenType::COMMENT_TOKEN: {
       NodePtr node = Node::make_node(NodeType::COMMENT_NODE);
-      node->data_ = token_.data;
+      node->data_ = std::move(token_.data);
       AddChild(node);
       return true;
     }
@@ -969,7 +971,7 @@ bool Parser::InHeadNoscriptIM() {
       break;
     }
     case TokenType::TEXT_TOKEN: {
-      std::string_view data_view = token_.data;
+      std::string_view data_view = std::move(token_.data);
       if (Strings::IsAllWhitespaceChars(data_view)) {
         // It was all whitespace.
         return InHeadIM();
@@ -1473,7 +1475,6 @@ bool Parser::InBodyIM() {
                 AtomUtil::ToString(Atom::LABEL));
             AddText(prompt);
             NodePtr node = Node::make_node(NodeType::ELEMENT_NODE, Atom::INPUT);
-            node->data_ = AtomUtil::ToString(Atom::INPUT);
             std::copy(attributes.begin(), attributes.end(),
                 std::back_inserter(node->attributes_));
             AddChild(node);
@@ -1545,7 +1546,7 @@ bool Parser::InBodyIM() {
         case Atom::RP:
         case Atom::RT: {
           if (ElementInScope(Scope::DefaultScope, Atom::RUBY)) {
-            GenerateImpliedEndTags({"rtc"});
+            GenerateImpliedEndTags({Atom::RTC});
           }
           AddElement();
           break;
@@ -1560,7 +1561,7 @@ bool Parser::InBodyIM() {
           }
           AdjustForeignAttributes(&token_.attributes);
           AddElement();
-          top()->name_space_ = token_.data;
+          top()->name_space_ = AtomUtil::ToString(token_.atom);
           if (has_self_closing_token_) {
             open_elements_stack_.Pop();
             AcknowledgeSelfClosingTag();
@@ -1699,7 +1700,10 @@ bool Parser::InBodyIM() {
         case Atom::STRONG:
         case Atom::TT:
         case Atom::U: {
-          InBodyEndTagFormatting(token_.atom, token_.data);
+          InBodyEndTagFormatting(token_.atom,
+                                 token_.atom != Atom::UNKNOWN ?
+                                 AtomUtil::ToString(token_.atom) :
+                                 token_.data);
           break;
         }
         case Atom::APPLET:
@@ -1771,8 +1775,7 @@ bool Parser::InBodyIM() {
   return true;
 }  // Parser::InBodyIM.
 
-void Parser::InBodyEndTagFormatting(Atom tag_atom,
-                                    const std::string& tag_name) {
+void Parser::InBodyEndTagFormatting(Atom tag_atom, std::string_view tag_name) {
   // This is the "adoption agency" algorithm, described at
   // https://html.spec.whatwg.org/multipage/syntax.html#adoptionAgency
 
@@ -1912,13 +1915,13 @@ void Parser::InBodyEndTagFormatting(Atom tag_atom,
   }
 }  // Parser::InBodyEndTagFormatting.
 
-void Parser::InBodyEndTagOther(Atom tag_atom, const std::string& tag_name) {
+void Parser::InBodyEndTagOther(Atom tag_atom, std::string_view tag_name) {
   for (int i = open_elements_stack_.size() - 1; i >= 0; --i) {
     // Two element nodes have the same tag if they have the same Data (a
     // string-typed field). As an optimization, for common HTML tags, each
-    // Data string is assigned a unique, non-zero DataAtom (a uint32-typed
+    // Data string is assigned a unique, non-zero Atom (a uint32-typed
     // field), since integer comparison is faster than string comparison.
-    // Uncommon (custom) tags get a zero DataAtom.
+    // Uncommon (custom) tags get a zero Atom.
     //
     // The if condition here is equivalent to (node->data_ == tag_name).
     if (open_elements_stack_.at(i)->atom_ == tag_atom &&
@@ -3058,17 +3061,10 @@ bool Parser::ParseForeignContent() {
       if (top()->name_space_ == "math") {
         AdjustMathMLAttributeNames(&token_.attributes);
       } else if (top()->name_space_ == "svg") {
-        // Adjust SVG tag names. The tokenizer lower-cases tag names, but SVG
-        // wants e.g. "foreignObject" with a capital second "O".
-        auto x = std::lower_bound(std::begin(kSvgTagNameAdjustments),
-                                  std::end(kSvgTagNameAdjustments),
-                                  token_.data,
-                                  PairComparator<std::string_view,
-                                                 std::string_view>());
-        if (x != std::end(kSvgTagNameAdjustments) &&
-            x->first == token_.data) {
-          token_.atom = AtomUtil::ToAtom(x->second.data());
-          token_.data = x->second.data();
+        for (auto [name, adjusted] : kSvgTagNameAdjustments) {
+          if (name == token_.atom) {
+            token_.atom = adjusted;
+          }
         }
         AdjustSVGAttributeNames(&token_.attributes);
       } else {
@@ -3095,8 +3091,13 @@ bool Parser::ParseForeignContent() {
         if (open_elements_stack_.at(i)->name_space_.empty()) {
           return insertion_mode_();
         }
-        auto& node_data = open_elements_stack_.at(i)->data_;
-        auto& token_data = token_.data;
+
+        auto sn = open_elements_stack_.at(i);
+        auto node_data = sn->atom_ != Atom::UNKNOWN ?
+            AtomUtil::ToString(sn->atom_) : sn->data_;
+        auto token_data = token_.atom != Atom::UNKNOWN ?
+            AtomUtil::ToString(token_.atom) : token_.data;
+
         if (Strings::EqualFold(node_data, token_data)) {
           open_elements_stack_.Pop(open_elements_stack_.size() - i);
           break;

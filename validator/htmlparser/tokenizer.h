@@ -107,7 +107,7 @@ class Tokenizer {
 
   // Returns the unescaped text of a text, comment or doctype token. The
   // contents of the returned slice may change on the next call to Next.
-  std::optional<std::string> Text();
+  std::string Text();
 
   // Returns the lower-cased name of a tag token (the `img` out of
   // `<IMG SRC="foo">`) and whether the tag has attributes.
