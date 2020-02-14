@@ -17,17 +17,27 @@
 import {Services} from '../../../src/services';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {createElementWithAttributes} from '../../../src/dom';
+import {devAssert} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
 
 /** @abstract */
 export class ScrollComponent {
-  /** @param {!../../../src/service/ampdoc-impl.AmpDoc} doc */
-  constructor(doc) {
+  /**
+   * @param {!../../../src/service/ampdoc-impl.AmpDoc} doc
+   * @param {boolean} holdback
+   */
+  constructor(doc, holdback) {
     /** @protected {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.doc_ = doc;
 
+    /** @protected */
+    this.holdback_ = holdback;
+
     /** @protected @property {?function(Window):undefined} */
     this.setWindow_ = null;
+
+    /** @protected {?Element} */
+    this.root_ = null;
 
     /** @protected {?HTMLIFrameElement} */
     this.frame_ = null;
@@ -71,12 +81,12 @@ export class ScrollComponent {
 
   /**
    * Add element to doc and promote to fixed layer.
-   * @param {!Element} el
    * @protected
    * */
-  mount_(el) {
-    this.doc_.getBody().appendChild(el);
-    Services.viewportForDoc(this.doc_).addToFixedLayer(el);
+  mount() {
+    const root = devAssert(this.root_);
+    this.doc_.getBody().appendChild(root);
+    Services.viewportForDoc(this.doc_).addToFixedLayer(root);
   }
 
   /**
@@ -84,8 +94,23 @@ export class ScrollComponent {
    * @param {function():undefined} mutator
    * @protected
    */
-  mutate_(mutator) {
+  mutate(mutator) {
     Services.vsyncFor(this.doc_.win).mutate(mutator);
+  }
+
+  /**
+   *
+   * @param {string} className
+   * @param {boolean} condition
+   * @protected
+   */
+  toggleClass(className, condition) {
+    const classes = devAssert(this.root_).classList;
+    if (condition) {
+      classes.add(className);
+    } else {
+      classes.remove(className);
+    }
   }
 
   /**
@@ -110,13 +135,12 @@ export class ScrollComponent {
   }
 
   /**
-   * This method should only be called inside of a mutate_ callback.
+   * This method should only be called inside of a mutate() callback.
    *
-   * @param {!Element} el
    * @protected
    */
-  renderHorizontalLayout(el) {
-    setStyles(el, assertDoesNotContainDisplay(this.layout_));
+  renderHorizontalLayout() {
+    setStyles(devAssert(this.root_), assertDoesNotContainDisplay(this.layout_));
   }
 
   /**

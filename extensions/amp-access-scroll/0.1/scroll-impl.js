@@ -152,13 +152,12 @@ export class ScrollAccessVendor extends AccessClientAdapter {
   authorize() {
     // TODO(dbow): Handle timeout?
     return super.authorize().then(response => {
+      const holdback = response['features'] && response['features']['h'];
       const isStory = this.ampdoc
         .getRootNode()
         .querySelector('amp-story[standalone]');
 
       if (response && response['scroll']) {
-        const holdback = response['features'] && response['features']['h'];
-
         if (!isStory) {
           // Display Scrollbar and set up features
           const bar = new ScrollUserBar(
@@ -198,7 +197,9 @@ export class ScrollAccessVendor extends AccessClientAdapter {
           response['blocker'] &&
           ScrollContentBlocker.shouldCheck(this.ampdoc)
         ) {
-          new ScrollContentBlocker(this.ampdoc, this.accessSource_).check();
+          new ScrollContentBlocker(this.ampdoc, this.accessSource_).check(
+            holdback
+          );
         }
       }
       return response;
@@ -234,8 +235,10 @@ class ScrollContentBlocker {
 
   /**
    * Check if the Scroll App blocks the resource request.
+   *
+   * @param {boolean} holdback
    */
-  check() {
+  check(holdback) {
     Services.xhrFor(this.ampdoc_.win)
       .fetchJson('https://block.scroll.com/check.json')
       .then(
@@ -250,7 +253,8 @@ class ScrollContentBlocker {
           new ActivateBar(
             this.ampdoc_,
             this.accessSource_,
-            connectHostname(this.accessSource_.getAdapterConfig())
+            connectHostname(this.accessSource_.getAdapterConfig()),
+            holdback
           );
         }
       });

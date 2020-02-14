@@ -26,19 +26,23 @@ export class Sheet extends ScrollComponent {
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} doc
    * @param {boolean} holdback
    */
-  constructor(doc, holdback = true) {
-    super(doc);
+  constructor(doc, holdback) {
+    super(doc, holdback);
+
+    /** @private {string} */
+    this.DEFAULT_TITLE_ = 'Scroll Feature';
+
     /** @private {!Sheet.State} */
     this.state_ = {
       url: '',
       open: false,
-      holdback,
+      title: this.DEFAULT_TITLE_,
     };
 
     this.updateHorizontalLayout({
       ['width']: this.cssSize(475),
-      ['right']: this.cssSize(16),
       ['left']: 'auto',
+      ['right']: this.cssSize(16),
     });
   }
   /**
@@ -50,24 +54,20 @@ export class Sheet extends ScrollComponent {
     switch (action['_scramp']) {
       case 'au':
         changed = this.updateHorizontalLayout(action);
-        // update state atoms other than layout
-        Object.keys(this.state_).forEach(key => {
-          if (key === 'layout' || !hasOwn(action, key)) {
-            return;
-          }
-          const val = action[key];
-
-          if (this.state_[key] !== val) {
-            this.state_[key] = val;
+        ['open', 'url', 'title'].forEach(key => {
+          if (hasOwn(action, key) && action[key] !== this.state_[key]) {
+            this.state_[key] = action[key];
             changed = true;
           }
         });
         break;
       case 'st':
-        if (action['revealed'] === false && this.state_.open) {
-          this.state_.open = false;
-          changed = true;
-        }
+        ['revealed'].forEach(key => {
+          if (hasOwn(action, key) && action[key] !== this.state_[key]) {
+            this.state_[key] = action[key];
+            changed = true;
+          }
+        });
         break;
     }
 
@@ -81,44 +81,42 @@ export class Sheet extends ScrollComponent {
    * @private
    */
   render_(state) {
-    this.mutate_(() => {
+    this.mutate(() => {
       if (!this.frame_) {
-        this.frame_ = this.makeIframe_();
+        this.makeIframe_();
         this.setWindow_(this.frame_.contentWindow);
       }
 
       if (this.frame_.src !== state.url) {
         this.frame_.setAttribute('src', state.url);
       }
-      this.renderHorizontalLayout(this.frame_);
+      this.renderHorizontalLayout();
+      this.frame_.title = state.title;
       toggle(this.frame_, state.open);
     });
   }
 
   /**
-   * @return {!HTMLIFrameElement}
    * @private
    * */
   makeIframe_() {
-    const frame = this.el(
+    this.frame_ = /** @type {!HTMLIFrameElement} */ (this.el(
       'iframe',
       dict({
         'class': 'amp-access-scroll-sheet',
         'scrolling': 'no',
         'frameborder': '0',
         'allowtransparency': 'true',
-        'title': 'Scroll Feature',
+        'title': this.DEFAULT_TITLE_,
         'sandbox':
           'allow-scripts allow-same-origin ' +
           'allow-top-navigation allow-popups ' +
           'allow-popups-to-escape-sandbox',
       })
-    );
-    if (this.state_.holdback) {
-      frame.classList.add(this.HOLDBACK_CLASS);
-    }
-    this.mount_(frame);
-    return /** @type {!HTMLIFrameElement} */ (frame);
+    ));
+    this.root_ = this.frame_;
+    this.toggleClass(this.HOLDBACK_CLASS, this.holdback_);
+    this.mount();
   }
 }
 
@@ -126,7 +124,7 @@ export class Sheet extends ScrollComponent {
  * @typedef {{
  *    open: boolean,
  *    url: string,
- *    holdback: boolean
+ *    title: string
  * }}
  */
 Sheet.State;

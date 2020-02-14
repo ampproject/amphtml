@@ -31,11 +31,8 @@ class Bar extends ScrollComponent {
    * @param {string} baseUrl
    * @param {boolean} holdback
    */
-  constructor(doc, accessSource, baseUrl, holdback = true) {
-    super(doc);
-
-    /** @private {?Element} */
-    this.root_ = null;
+  constructor(doc, accessSource, baseUrl, holdback) {
+    super(doc, holdback);
 
     /** @protected */
     this.accessSource_ = accessSource;
@@ -45,7 +42,6 @@ class Bar extends ScrollComponent {
 
     /** @protected {!Bar.State} */
     this.state_ = {
-      holdback,
       revealed: false,
     };
 
@@ -63,27 +59,21 @@ class Bar extends ScrollComponent {
 
   /** @private */
   render_() {
-    this.mutate_(() => {
+    this.mutate(() => {
       if (!this.frame_) {
-        this.frame_ = this.makeIframe_();
+        this.makeIframe_();
         this.setWindow_(this.frame_.contentWindow);
       }
-      if (this.state_.revealed) {
-        this.root_.classList.add(this.REVEALED_CLASS);
-      } else {
-        this.root_.classList.remove(this.REVEALED_CLASS);
-      }
-
-      this.renderHorizontalLayout(this.root_);
+      this.toggleClass(this.REVEALED_CLASS, this.state_.revealed);
+      this.renderHorizontalLayout();
     });
   }
 
   /**
-   * @return {!HTMLIFrameElement}
    * @protected
    * */
   makeIframe_() {
-    const frame = this.el(
+    this.frame_ = /** @type {!HTMLIFrameElement} */ (this.el(
       'iframe',
       dict({
         'scrolling': 'no',
@@ -97,22 +87,18 @@ class Bar extends ScrollComponent {
           'allow-top-navigation allow-popups ' +
           'allow-popups-to-escape-sandbox',
       })
-    );
+    ));
 
-    const root = this.el(
+    this.root_ = this.el(
       'div',
       dict({
         'class': 'amp-access-scroll-bar',
       }),
-      [frame]
+      [this.frame_]
     );
-    this.root_ = root;
-    if (this.state_.holdback) {
-      root.classList.add(this.HOLDBACK_CLASS);
-    }
-    this.mount_(root);
 
-    return /** @type {!HTMLIFrameElement} */ (frame);
+    this.toggleClass(this.HOLDBACK_CLASS, this.holdback_);
+    this.mount();
   }
 
   /**
@@ -138,16 +124,16 @@ class Bar extends ScrollComponent {
 export class ScrollUserBar extends Bar {
   /**
    * Load the scrollbar URL in the iframe.
-   *
+   * @protected
    * @override
    * */
   makeIframe_() {
-    const frame = Bar.prototype.makeIframe_.call(this);
+    Bar.prototype.makeIframe_.call(this);
     // Set iframe to scrollbar URL.
     this.accessSource_
       .buildUrl(
         `${this.baseUrl_}/html/amp/${
-          this.state_.holdback ? 'scrollbar' : 'scrolltab'
+          this.holdback_ ? 'scrollbar' : 'scrolltab'
         }` +
           '?rid=READER_ID' +
           '&cid=CLIENT_ID(scroll1)' +
@@ -157,18 +143,20 @@ export class ScrollUserBar extends Bar {
         false
       )
       .then(scrollbarUrl => {
-        frame.setAttribute('src', scrollbarUrl);
+        this.frame_.setAttribute('src', scrollbarUrl);
       });
-    return frame;
   }
 }
 /**
  * Add link to the Scroll App connect page.
  */
 export class ActivateBar extends Bar {
-  /** @override */
+  /**
+   * @protected
+   * @override
+   * */
   makeIframe_() {
-    const frame = Bar.prototype.makeIframe_.call(this);
+    Bar.prototype.makeIframe_.call(this);
 
     this.accessSource_
       .buildUrl(
@@ -182,16 +170,14 @@ export class ActivateBar extends Bar {
         false
       )
       .then(url => {
-        frame.setAttribute('src', url);
+        this.frame_.setAttribute('src', url);
       });
-    return frame;
   }
 }
 
 /**
  * @typedef {{
- *    revealed: boolean,
- *    holdback: boolean
+ *    revealed: boolean
  * }}
  */
 Bar.State;
