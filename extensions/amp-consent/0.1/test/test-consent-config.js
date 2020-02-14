@@ -233,16 +233,16 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
               'consentRequired': true,
             },
             'waldo': {
-              'checkConsentHref': 'https://example.com/check-consent',
+              'checkConsentHref': 'https://example.test/check-consent',
               'consentRequired': 'remote',
             },
             'geoGroupUnknown': {
-              'checkConsentHref': 'https://example.com/check-consent',
+              'checkConsentHref': 'https://example.test/check-consent',
               'consentRequired': true,
             },
             'invalid': {
               'consentInstanceId': 'error',
-              'checkConsentHref': 'https://example.com/check-consent',
+              'checkConsentHref': 'https://example.test/check-consent',
             },
           },
         };
@@ -305,7 +305,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
           'consentInstanceId': 'abc',
-          'checkConsentHref': 'https://example.com/check-consent',
+          'checkConsentHref': 'https://example.test/check-consent',
           'consentRequired': 'remote',
         });
       });
@@ -315,7 +315,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
           'consentInstanceId': 'abc',
           'geoOverride': {
             'geoGroupUnknown': {
-              'checkConsentHref': 'https://example.com/check-consent',
+              'checkConsentHref': 'https://example.test/check-consent',
               'consentRequired': true,
             },
           },
@@ -335,7 +335,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
           'consentInstanceId': 'abc',
-          'checkConsentHref': 'https://example.com/check-consent',
+          'checkConsentHref': 'https://example.test/check-consent',
           'consentRequired': true,
         });
       });
@@ -343,13 +343,13 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       it('should have remote consentRequired if checkConsentHref', async () => {
         geoConfig = {
           'consentInstanceId': 'abc',
-          'checkConsentHref': 'https://example.com/check-consent',
+          'checkConsentHref': 'https://example.test/check-consent',
         };
         appendConfigScriptElement(doc, element, geoConfig);
         const consentConfig = new ConsentConfig(element);
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
           'consentInstanceId': 'abc',
-          'checkConsentHref': 'https://example.com/check-consent',
+          'checkConsentHref': 'https://example.test/check-consent',
           'consentRequired': 'remote',
         });
       });
@@ -395,7 +395,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
           'consentInstanceId': 'abc',
           'consentRequired': false,
-          'checkConsentHref': 'https://example.com/check-consent',
+          'checkConsentHref': 'https://example.test/check-consent',
         });
       });
     });
@@ -497,7 +497,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
         element,
         dict({
           'consentInstanceId': 'ABC',
-          'checkConsentHref': 'example.com/',
+          'checkConsentHref': 'example.test/',
           'policy': {
             'ABC': undefined,
           },
@@ -506,7 +506,7 @@ describes.realWin('ConsentConfig', {amp: 1}, env => {
       const consentConfig = new ConsentConfig(element);
       expect(await consentConfig.getConsentConfigPromise()).to.deep.equal({
         'consentInstanceId': 'ABC',
-        'checkConsentHref': 'example.com/',
+        'checkConsentHref': 'example.test/',
         'consentRequired': 'remote',
         'policy': {},
       });

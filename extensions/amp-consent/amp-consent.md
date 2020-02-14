@@ -663,6 +663,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
 - Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
 - Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
+- Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
 - SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
 
 - Your Integrated platform here!

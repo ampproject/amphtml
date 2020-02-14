@@ -22,3 +22,7 @@ standardize how AMPHTML documents should be parsed for validation.
 
 It is maintained by the [AMP Working Group](https://amp.dev/community/working-groups/amp4email/):
 [Caching](https://amp.dev/community/working-groups/caching/)
+
+This parser is in active development and has several outstanding TODOs.
+This may cause certain parsing tests to fail. See htmldataset_test.cc for
+examples of tests that are currently excluded due to this.
