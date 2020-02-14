@@ -23,12 +23,12 @@ import * as lolex from 'lolex';
 import {AmpEvents} from '../../../../../src/amp-events';
 import {Bind} from '../../bind-impl';
 import {BindEvents} from '../../bind-events';
+import {Deferred} from '../../../../../src/utils/promise';
 import {RAW_OBJECT_ARGS_KEY} from '../../../../../src/action-constants';
 import {Services} from '../../../../../src/services';
 import {chunkInstanceForTesting} from '../../../../../src/chunk';
 import {dev, user} from '../../../../../src/log';
 import {toArray} from '../../../../../src/types';
-import {Deferred} from '../../../../../src/utils/promise';
 
 /**
  * @param {!Object} env
@@ -1003,10 +1003,12 @@ describe
 
             await bind.initializePromiseForTesting();
             const statePromise = bind.getStateWithWait('.');
-            r1(); 
+            r1();
 
             await bind.setState({mystate: {mykey: 'myval'}}).then(r2);
-            expect(await statePromise).to.deep.equal({mystate: {mykey: 'myval'}});
+            expect(await statePromise).to.deep.equal({
+              mystate: {mykey: 'myval'},
+            });
           });
         });
 
