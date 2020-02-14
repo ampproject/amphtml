@@ -79,8 +79,9 @@ describe('amp-analytics', function() {
           // localhost:9876/amp4test/compose-doc
           expect(q['cookie']).to.equal('test');
 
-          // FCP only resolves for Chrome and Opera
-          expect(q['fcp']).to.not.be.null;
+          if (window.PerformancePaintTiming) {
+            expect(q['fcp']).to.not.be.null;
+          }
           expect(q['fvr']).to.not.be.null;
           expect(q['mbv']).to.not.be.null;
           expect(
