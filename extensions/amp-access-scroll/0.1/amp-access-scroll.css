@@ -33,29 +33,6 @@
   width: 100%;
 }
 
-.amp-access-scroll-sheet.amp-access-scroll-holdback {
-  position: fixed;
-  background: transparent;
-  z-index: 2147483647;
-
-  /* mobile */
-  bottom: 44px;
-  height: 100px;
-  left: 0;
-  right: 0;
-  width: 100%;
-}
-
-@media (min-width: 600px) {
-  .amp-access-scroll-sheet.amp-access-scroll-holdback {
-    bottom: 63px;
-    height: 56px;
-    left: auto;
-    right: 16px;
-    width: 475px;
-  }
-}
-
 .amp-access-scroll-sheet {
   position: fixed;
   background: transparent;
@@ -85,5 +62,18 @@
     left: auto;
     right: 16px;
     width: 475px;
+  }
+}
+
+.amp-access-scroll-sheet.amp-access-scroll-holdback {
+  /* mobile */
+  bottom: 44px;
+  height: 100px;
+}
+
+@media (min-width: 600px) {
+  .amp-access-scroll-sheet.amp-access-scroll-holdback {
+    bottom: 63px;
+    height: 56px;
   }
 }
