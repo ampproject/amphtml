@@ -362,7 +362,7 @@ export class ConsentInstance {
         // TODO: Need utf8Encode if necessary.
         user().error(
           TAG,
-          'Cannot store consentString which length exceeds %s ' +
+          'Cannot store consentString which length exceeds %s. ' +
             'Previous stored consentInfo will be cleared',
           CONSENT_STRING_MAX_LENGTH
         );
