@@ -269,7 +269,7 @@ export class VideoDocking {
 
     /**
      * Overriden when user drags the video to a different corner.
-     * @private {!RelativeX}
+     * @private {!DirectionX}
      */
     this.cornerDirectionX_ = isRTL(this.getDoc_())
       ? DirectionX.LEFT
@@ -305,7 +305,7 @@ export class VideoDocking {
     /** @private {?{width: number, height: number}} */
     this.sizedAt_ = null;
 
-    /** @private {?RelativeY} */
+    /** @private {?DirectionY} */
     this.scrollDirection_ = null;
 
     /** @private {number} */
@@ -1269,7 +1269,9 @@ export class VideoDocking {
    * @private
    */
   isDockedToType_(type) {
-    return this.currentlyDocked_ && this.currentlyDocked_.target.type == type;
+    return (
+      !!this.currentlyDocked_ && this.currentlyDocked_.target.type === type
+    );
   }
 
   /**
