@@ -38,7 +38,10 @@ export function useIntersect(ref) {
     if (node) {
       observer.observe(node);
     }
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      set({isIntersecting: false});
+    };
   }, [ref.current, observerRef.current]);
 
   const last =
