@@ -25,10 +25,8 @@ namespace htmlparser {
 namespace testing {
 
 inline constexpr std::array<std::string_view, 2> kTestDataDirs{
-    "testdata/"
-    "webkit/*.dat",
-    "testdata/go/"
-    "*.dat",
+    "testdata/webkit/*.dat",
+    "testdata/go/*.dat",
 };
 
 // Some test input result in parse trees are not 'well-formed' despite

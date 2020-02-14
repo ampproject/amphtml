@@ -93,7 +93,8 @@ TEST(NodeTest, NodeRemoveChild) {
   EXPECT_EQ(doc->FirstChild()->FirstChild()->NextSibling().use_count() , 2);
 
   // Body is next sibling of head.
-  EXPECT_EQ(doc->FirstChild()->FirstChild()->NextSibling()->Data(), "body");
+  EXPECT_EQ(doc->FirstChild()->FirstChild()->NextSibling()->DataAtom(),
+            htmlparser::Atom::BODY);
   //               html           head         body
 
   // Remove head.
@@ -104,7 +105,8 @@ TEST(NodeTest, NodeRemoveChild) {
             "<html><body><div>Hello</div></body></html>");
 
   // Body is now first child of html.
-  EXPECT_EQ(doc->FirstChild()->FirstChild()->Data(), "body");
+  EXPECT_EQ(doc->FirstChild()->FirstChild()->DataAtom(),
+            htmlparser::Atom::BODY);
   EXPECT_EQ(doc->FirstChild()->FirstChild().use_count() , 2);
   EXPECT_FALSE(CheckNodeConsistency(doc).has_value());
 }
@@ -114,7 +116,6 @@ TEST(NodeTest, NodeAppendChild) {
       "<html><head></head><body><div>Hello</div></body></html>");
   EXPECT_FALSE(CheckNodeConsistency(doc).has_value());
   NodePtr newDiv = Node::make_node(NodeType::ELEMENT_NODE, Atom::DIV);
-  newDiv->SetData("div");
   NodePtr textContent = Node::make_node(NodeType::TEXT_NODE);
   textContent->SetData("World");
   newDiv->AppendChild(textContent);
@@ -133,7 +134,6 @@ TEST(NodeTest, NodeInsertBefore) {
       "<html><head></head><body><div>World</div></body></html>");
   EXPECT_FALSE(CheckNodeConsistency(doc).has_value());
   NodePtr newDiv = Node::make_node(NodeType::ELEMENT_NODE, Atom::DIV);
-  newDiv->SetData("div");
   NodePtr textContent = Node::make_node(NodeType::TEXT_NODE);
   textContent->SetData("Hello");
   newDiv->AppendChild(textContent);
@@ -159,7 +159,8 @@ TEST(NodeTest, NodeReparentChildren) {
       doc->FirstChild()->FirstChild());
   std::stringbuf buf;
   EXPECT_EQ(Renderer::Render(doc, &buf), RenderError::NO_ERROR);
-  EXPECT_EQ(doc->FirstChild()->FirstChild()->FirstChild()->Data(), "div");
+  EXPECT_EQ(doc->FirstChild()->FirstChild()->FirstChild()->DataAtom(),
+            htmlparser::Atom::DIV);
   EXPECT_EQ(buf.str(),
             "<html><head><div>Hello</div><div>World</div></head><body></body>"
             "</html>");
@@ -168,7 +169,6 @@ TEST(NodeTest, NodeReparentChildren) {
 
 TEST(NodeTest, AttributeTest) {
   NodePtr div = Node::make_node(NodeType::ELEMENT_NODE, Atom::DIV);
-  div->SetData("div");
   Attribute attr_a{.name_space = "", .key = "class", .value = "foo"};
   Attribute attr_b{.name_space = "", .key = "id", .value = "myDiv"};
   Attribute attr_c{.name_space = "", .key = "class", .value = "bar"};

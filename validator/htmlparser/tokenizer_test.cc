@@ -264,20 +264,17 @@ TEST(TokenizerTest, TestMustangTemplateCase) {
       tokens.push_back(token);
       switch (token.atom) {
         case htmlparser::Atom::TEMPLATE:
-          EXPECT_EQ(token.data, "template");
           EXPECT_EQ(token.attributes.size(), 1);
           EXPECT_EQ(token.attributes.at(0).key, "type");
           EXPECT_EQ(token.attributes.at(0).value, "amp-mustache");
           break;
         case htmlparser::Atom::P:
-          EXPECT_EQ(token.data, "p");
           EXPECT_EQ(token.attributes.size(), 1);
           EXPECT_EQ(token.attributes.at(0).key,
                     "{{#bluetheme}}class");
           EXPECT_EQ(token.attributes.at(0).value, "foo{{/bluetheme}}");
           break;
         case htmlparser::Atom::SCRIPT:
-          EXPECT_EQ(token.data, "script");
           EXPECT_EQ(token.attributes.size(), 2);
           EXPECT_EQ(token.attributes.at(0).key,
                     "{{#fastrender}}async{{/fastrender}}");
@@ -286,19 +283,16 @@ TEST(TokenizerTest, TestMustangTemplateCase) {
           EXPECT_EQ(token.attributes.at(1).value, "big.js");
           break;
         case htmlparser::Atom::DIV:
-          EXPECT_EQ(token.data, "div");
           EXPECT_EQ(token.attributes.size(), 1);
           EXPECT_EQ(token.attributes.at(0).key, "data-{{variable}}");
           EXPECT_EQ(token.attributes.at(0).value, "hello");
           break;
         case htmlparser::Atom::SPAN:
-          EXPECT_EQ(token.data, "span");
           EXPECT_EQ(token.attributes.size(), 1);
           EXPECT_EQ(token.attributes.at(0).key, "data-{{\\notallowed}}");
           EXPECT_EQ(token.attributes.at(0).value, "hello");
           break;
         case htmlparser::Atom::H1:
-          EXPECT_EQ(token.data, "h1");
           EXPECT_EQ(token.attributes.size(), 2);
           EXPECT_EQ(token.attributes.at(0).key, "data-{{");
           EXPECT_EQ(token.attributes.at(0).value, "");
@@ -306,14 +300,12 @@ TEST(TokenizerTest, TestMustangTemplateCase) {
           EXPECT_EQ(token.attributes.at(1).value, "hello");
           break;
         case htmlparser::Atom::H2:
-          EXPECT_EQ(token.data, "h2");
           EXPECT_EQ(token.attributes.size(), 1);
           EXPECT_EQ(token.attributes.at(0).key,
                     "data-{{#allowed}}foo{{/allowed}}");
           EXPECT_EQ(token.attributes.at(0).value, "hello");
           break;
         case htmlparser::Atom::IMG:
-          EXPECT_EQ(token.data, "img");
           EXPECT_EQ(token.attributes.size(), 2);
           EXPECT_EQ(token.attributes.at(0).key, "{{#border}}class");
           EXPECT_EQ(token.attributes.at(0).value, "border");
@@ -338,20 +330,17 @@ TEST(TokenizerTest, TestMustangTemplateCase) {
       tokens.push_back(token);
       switch (token.atom) {
         case htmlparser::Atom::TEMPLATE:
-          EXPECT_EQ(token.data, "template");
           EXPECT_EQ(token.attributes.size(), 1);
           EXPECT_EQ(token.attributes.at(0).key, "type");
           EXPECT_EQ(token.attributes.at(0).value, "amp-mustache");
           break;
         case htmlparser::Atom::P:
-          EXPECT_EQ(token.data, "p");
           EXPECT_EQ(token.attributes.size(), 1);
           EXPECT_EQ(token.attributes.at(0).key,
                     "{{#bluetheme}}class");
           EXPECT_EQ(token.attributes.at(0).value, "foo{{/bluetheme}}");
           break;
         case htmlparser::Atom::SCRIPT:
-          EXPECT_EQ(token.data, "script");
           EXPECT_EQ(token.attributes.size(), 3);  // <-- template mode 2.
           EXPECT_EQ(token.attributes.at(0).key,
                     "{{#fastrender}}async{{");  // template mode entire block.
@@ -362,13 +351,11 @@ TEST(TokenizerTest, TestMustangTemplateCase) {
           EXPECT_EQ(token.attributes.at(2).value, "big.js");
           break;
         case htmlparser::Atom::DIV:
-          EXPECT_EQ(token.data, "div");
           EXPECT_EQ(token.attributes.size(), 1);
           EXPECT_EQ(token.attributes.at(0).key, "data-{{variable}}");
           EXPECT_EQ(token.attributes.at(0).value, "hello");
           break;
         case htmlparser::Atom::IMG:
-          EXPECT_EQ(token.data, "img");
           EXPECT_EQ(token.attributes.size(), 2);
           EXPECT_EQ(token.attributes.at(0).key, "{{#border}}class");
           EXPECT_EQ(token.attributes.at(0).value, "border");

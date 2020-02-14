@@ -734,15 +734,18 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
       case ' ':
       case '\n':
       case '\r':
+      case '\t':
       case '\f':
-      case '/':
+      case '/': {
         std::get<0>(pending_attribute_).end = raw_.end - 1;
         return;
+      }
       case '=':
-      case '>':
+      case '>': {
         UnreadByte();
         std::get<0>(pending_attribute_).end = raw_.end;
         return;
+      }
     }
   }
 }
@@ -951,7 +954,7 @@ std::string_view Tokenizer::Raw() {
   return buffer_.substr(raw_.start, size);
 }
 
-std::optional<std::string> Tokenizer::Text() {
+std::string Tokenizer::Text() {
   switch (token_type_) {
     case TokenType::TEXT_TOKEN:
     case TokenType::COMMENT_TOKEN:
@@ -974,7 +977,7 @@ std::optional<std::string> Tokenizer::Text() {
       break;
   }
 
-  return std::nullopt;
+  return "";
 }
 
 std::optional<std::tuple<std::string, bool>> Tokenizer::TagName() {
@@ -1033,7 +1036,7 @@ Token Tokenizer::token() {
   t.token_type = token_type_;
   switch (token_type_) {
     case TokenType::TEXT_TOKEN: {
-      t.data = Text().value_or("");
+      t.data = Text();
       int line_number = current_line_col_.first;
       int column_number = current_line_col_.second - t.data.size();
       // Shift to previous line, where this text belongs.
@@ -1052,7 +1055,7 @@ Token Tokenizer::token() {
     }
     case TokenType::COMMENT_TOKEN:
     case TokenType::DOCTYPE_TOKEN:
-      t.data = Text().value_or("");
+      t.data = Text();
       break;
     case TokenType::START_TAG_TOKEN:
     case TokenType::SELF_CLOSING_TAG_TOKEN:
@@ -1064,7 +1067,6 @@ Token Tokenizer::token() {
         Atom atom = AtomUtil::ToAtom(tag_name);
         if (atom != Atom::UNKNOWN) {
           t.atom = atom;
-          t.data = AtomUtil::ToString(atom);
         } else {
           t.atom = Atom::UNKNOWN;
           t.data = tag_name;

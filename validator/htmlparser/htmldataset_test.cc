@@ -175,15 +175,17 @@ std::optional<Error> DumpLevel(NodePtr node, std::stringbuf* buffer,
       return error("unexpected DocumentNode");
       break;
     case NodeType::ELEMENT_NODE: {
+      std::string tag_name = node->DataAtom() == Atom::UNKNOWN ?
+          node->Data().data() : AtomUtil::ToString(node->DataAtom());
       if (!node->NameSpace().empty()) {
         buffer->sputc('<');
         buffer->sputn(node->NameSpace().data(), node->NameSpace().size());
         buffer->sputc(' ');
-        buffer->sputn(node->Data().data(), node->Data().size());
+        buffer->sputn(tag_name.c_str(), tag_name.size());
         buffer->sputc('>');
       } else {
         buffer->sputc('<');
-        buffer->sputn(node->Data().data(), node->Data().size());
+        buffer->sputn(tag_name.c_str(), tag_name.size());
         buffer->sputc('>');
       }
       std::vector<Attribute> attributes;
@@ -316,10 +318,13 @@ TEST(HTMLDatasetTest, WebkitData) {
 
         std::string html = test_case.text;
         if (!test_case.context.empty()) {
+          Atom context_atom = AtomUtil::ToAtom(test_case.context);
           NodePtr context_node = Node::make_node(
               NodeType::ELEMENT_NODE,
-              AtomUtil::ToAtom(test_case.context));
-          context_node->SetData(test_case.context);
+              context_atom);
+          if (context_atom == Atom::UNKNOWN) {
+            context_node->SetData(test_case.context);
+          }
           std::vector<NodePtr> nodes =
               ParseFragmentWithOptions(html, options, context_node);
           NodePtr doc = Node::make_node(NodeType::DOCUMENT_NODE);

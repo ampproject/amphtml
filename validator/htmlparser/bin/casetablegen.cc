@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
   options.white_space_transform =
       htmlparser::FileReadOptions::LineTransforms::StripWhitespace();
   if (!htmlparser::FileUtil::ReadFileLines(
-          options, "htmlparser/data/CaseFolding.txt", &lines)) {
+          options, "testdata/go/CaseFolding.txt", &lines)) {
     std::cerr << "Error reading input file." << std::endl;
     return EXIT_FAILURE;
   }
