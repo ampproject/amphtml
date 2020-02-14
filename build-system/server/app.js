@@ -35,6 +35,12 @@ const pc = process;
 const autocompleteEmailData = require('./autocomplete-test-data');
 const runVideoTestBench = require('./app-video-testbench');
 const {
+  getVariableRequest,
+  runVariableSubstitution,
+  saveVariableRequest,
+  saveVariables,
+} = require('./variable-substitution');
+const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
 } = require('./recaptcha-router');
@@ -754,6 +760,26 @@ app.use('/impression-proxy/', (req, res) => {
 
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
+
+/**
+ * Acts in a similar fashion to /serve_mode_change. Saves
+ * analytics requests via /run-variable-substitution, and
+ * then returns the encoded/substituted/replaced request
+ * via /get-variable-request.
+ */
+
+// Saves the variables input to be used in run-variable-substitution
+app.get('/save-variables', saveVariables);
+
+// Creates an iframe with amp-analytics. Analytics request
+// uses save-variable-request as its endpoint.
+app.get('/run-variable-substitution', runVariableSubstitution);
+
+// Saves the analytics request to the dev server.
+app.get('/save-variable-request', saveVariableRequest);
+
+// Returns the saved analytics request.
+app.get('/get-variable-request', getVariableRequest);
 
 let forcePromptOnNext = false;
 app.post('/get-consent-v1/', (req, res) => {

@@ -54,6 +54,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/server/amp4test.js',
       'build-system/server/app-index/boilerplate.js',
+      'build-system/server/variable-substitution.js',
       'build-system/tasks/extension-generator/index.js',
       'css/ampdoc.css',
       'css/ampshared.css',
@@ -1135,6 +1136,7 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/amp4test.js',
       'build-system/server/app-index/amphtml-helpers.js',
       'build-system/server/app-video-testbench.js',
+      'build-system/server/variable-substitution.js',
       'build-system/server/app.js',
       'build-system/server/app-utils.js',
       'build-system/server/shadow-viewer.js',
