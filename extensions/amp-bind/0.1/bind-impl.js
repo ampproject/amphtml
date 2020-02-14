@@ -1100,16 +1100,12 @@ export class Bind {
    * @private
    */
   evaluate_(opt_wait) {
-    const state = opt_wait
+    const statePromise = opt_wait
       ? this.getStateWithWait('.')
       : Promise.resolve(this.state_);
-    const evaluatePromise = state.then(s =>
-      this.ww_('bind.evaluateBindings', [s])
+    const evaluatePromise = statePromise.then(state =>
+      this.ww_('bind.evaluateBindings', [state])
     );
-
-    // return evaluatePromise.then(() => {
-    //   return state;
-    // });
 
     return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
@@ -1840,8 +1836,6 @@ export class Bind {
   registerAsyncAmpState(id, promise) {
     this.asyncLoadingAmpStates_[id] = promise;
 
-    promise
-      .then(() => delete this.asyncLoadingAmpStates_[id])
-      .catch(() => delete this.asyncLoadingAmpStates_[id]);
+    promise.catch(() => {}).then(() => delete this.asyncLoadingAmpStates_[id]);
   }
 }
