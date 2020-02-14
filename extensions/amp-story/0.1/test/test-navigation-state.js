@@ -24,7 +24,9 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
   beforeEach(() => {
     storeService = new AmpStoryStoreService(env.win);
-    registerServiceBuilder(env.win, 'story-store', () => storeService);
+    registerServiceBuilder(env.win, 'story-store', function() {
+      return storeService;
+    });
     hasBookend = false;
     navigationState = new NavigationState(
       env.win,

@@ -38,7 +38,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function() {
+      return storeService;
+    });
 
     const consentConfig = {
       consents: {ABC: {checkConsentHref: 'https://example.com'}},
@@ -58,7 +60,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
       .returns(styles);
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function() {
+      return localizationService;
+    });
 
     // Test DOM structure:
     // <amp-story>

@@ -117,7 +117,9 @@ export const getRequestService = (win, storyEl) => {
 
   if (!service) {
     service = new AmpStoryRequestService(win, storyEl);
-    registerServiceBuilder(win, 'story-request', () => service);
+    registerServiceBuilder(win, 'story-request', function() {
+      return service;
+    });
   }
 
   return service;

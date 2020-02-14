@@ -43,14 +43,20 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     };
 
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function() {
+      return storeService;
+    });
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function() {
+      return localizationService;
+    });
 
-    registerServiceBuilder(win, 'performance', () => ({
-      isPerformanceTrackingOn: () => isPerformanceTrackingOn,
-    }));
+    registerServiceBuilder(win, 'performance', function() {
+      return {
+        isPerformanceTrackingOn: () => isPerformanceTrackingOn,
+      };
+    });
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);

@@ -54,7 +54,9 @@ export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
   methods.forEach(method => {
     impl[method] = () => {};
   });
-  registerServiceBuilderForDoc(ampdoc, serviceId, () => impl);
+  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
+    return impl;
+  });
   const mock = {};
   methods.forEach(method => {
     mock[method] = sandbox.stub(impl, method);

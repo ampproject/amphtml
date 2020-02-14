@@ -30,7 +30,9 @@ export const getMediaQueryService = win => {
 
   if (!service) {
     service = new AmpStoryMediaQueryService(win);
-    registerServiceBuilder(win, 'story-media-query', () => service);
+    registerServiceBuilder(win, 'story-media-query', function() {
+      return service;
+    });
   }
 
   return service;

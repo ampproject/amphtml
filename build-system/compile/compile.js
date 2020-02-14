@@ -401,7 +401,7 @@ function compile(
         .pipe(sourcemaps.write('.'))
         .pipe(
           gulpIf(
-            options.esmPassCompilation,
+            !!argv.esm,
             gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
           )
         )

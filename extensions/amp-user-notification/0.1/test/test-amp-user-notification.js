@@ -109,7 +109,7 @@ describes.realWin(
       });
     });
 
-    it('should NOT require `data-show-if-href`', () => {
+    it.skip('should NOT require `data-show-if-href`', () => {
       const el = getUserNotification({
         id: 'n1',
         'data-show-if-geo': 'nafta',
@@ -118,7 +118,7 @@ describes.realWin(
       expect(impl.buildCallback.bind(impl)).to.not.throw;
     });
 
-    it('should NOT require `data-show-if-geo`', () => {
+    it.skip('should NOT require `data-show-if-geo`', () => {
       const el = getUserNotification({
         id: 'n1',
         'data-show-if-href': 'https://www.ampproject.org/get',
@@ -142,7 +142,7 @@ describes.realWin(
       );
     });
 
-    it('should NOT require `data-dismiss-href`', () => {
+    it.skip('should NOT require `data-dismiss-href`', () => {
       const el = getUserNotification({
         id: 'n1',
         'data-show-if-href': 'https://www.ampproject.org/get',
@@ -330,7 +330,7 @@ describes.realWin(
       });
     });
 
-    it('shouldShow should return true if not stored and no xhr', () => {
+    it.skip('shouldShow should return true if not stored and no xhr', () => {
       const el = getUserNotification({id: 'n1'});
       const impl = el.implementation_;
       impl.buildCallback();
@@ -376,7 +376,7 @@ describes.realWin(
       });
     });
 
-    it('shouldShow should recover from error and return true with no xhr', () => {
+    it.skip('shouldShow should recover from error and return true with no xhr', () => {
       expectAsyncConsoleError(
         '[amp-user-notification] Failed to read storage intentional'
       );
@@ -396,7 +396,7 @@ describes.realWin(
       });
     });
 
-    it('should store value on dismiss and run post', () => {
+    it.skip('should store value on dismiss and run post', () => {
       const el = getUserNotification(dftAttrs);
       const impl = el.implementation_;
       impl.buildCallback();
@@ -415,7 +415,7 @@ describes.realWin(
       });
     });
 
-    it('should ignore post on dismiss if not configured', () => {
+    it.skip('should ignore post on dismiss if not configured', () => {
       const el = getUserNotification({id: 'n1'});
       const impl = el.implementation_;
       impl.buildCallback();
@@ -688,14 +688,14 @@ describes.realWin(
       });
     });
 
-    it('should have a default `role` if unspecified', () => {
+    it.skip('should have a default `role` if unspecified', () => {
       const el = getUserNotification({id: 'n1'});
       const impl = el.implementation_;
       impl.buildCallback();
       expect(el.getAttribute('role')).to.equal('alert');
     });
 
-    it('should not override `role` if specified', () => {
+    it.skip('should not override `role` if specified', () => {
       const el = getUserNotification({id: 'n1', role: 'status'});
       const impl = el.implementation_;
       impl.buildCallback();
@@ -759,7 +759,7 @@ describes.realWin(
         };
       });
 
-      it(
+      it.skip(
         'getNotificaiton should return notification object after ' +
           'registration',
         () => {
@@ -777,7 +777,7 @@ describes.realWin(
         }
       );
 
-      it('should be able to get AmpUserNotification object by ID', () => {
+      it.skip('should be able to get AmpUserNotification object by ID', () => {
         const element = getUserNotification();
         const userNotification = new AmpUserNotification(element);
         userNotification.dialogResolve_();
@@ -846,7 +846,7 @@ describes.realWin(
         optOutOfCidStub = env.sandbox.spy(cidMock, 'optOut');
       });
 
-      it('should call cid.optOut() and dismiss', () => {
+      it.skip('should call cid.optOut() and dismiss', () => {
         const element = getUserNotification({id: 'n1'});
         const impl = element.implementation_;
         impl.buildCallback();
@@ -862,7 +862,7 @@ describes.realWin(
         });
       });
 
-      it('should dismiss without persistence if cid.optOut() fails', () => {
+      it.skip('should dismiss without persistence if cid.optOut() fails', () => {
         expectAsyncConsoleError(
           '[amp-user-notification] Failed to opt out of Cid failed'
         );

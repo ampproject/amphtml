@@ -52,7 +52,9 @@ export const getVariableService = win => {
 
   if (!service) {
     service = new AmpStoryVariableService(win);
-    registerServiceBuilder(win, 'story-variable', () => service);
+    registerServiceBuilder(win, 'story-variable', function() {
+      return service;
+    });
   }
 
   return service;
