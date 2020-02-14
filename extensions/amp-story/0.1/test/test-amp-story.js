@@ -94,11 +94,9 @@ describes.realWin(
       win.document.body.appendChild(element);
 
       const localizationService = new LocalizationService(win);
-      registerServiceBuilder(
-        win,
-        'localization-v01',
-        () => localizationService
-      );
+      registerServiceBuilder(win, 'localization-v01', function() {
+        return localizationService;
+      });
 
       AmpStory.isBrowserSupported = () => true;
       story = new AmpStory(element);

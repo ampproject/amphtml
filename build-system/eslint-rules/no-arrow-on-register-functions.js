@@ -15,18 +15,24 @@
  */
 'use strict';
 
-const expression = 'CallExpression[callee.property.name=registerServiceForDoc]';
+const expression = [
+  'CallExpression[callee.property.name=/registerService.*/]',
+  'CallExpression[callee.name=/registerService.*/]',
+].join(',');
+
 module.exports = function(context) {
   return {
     [expression]: function(node) {
-      if (node.arguments[1].type === 'ArrowFunctionExpression') {
-        // TODO(erwinm): add fixer method.
-        context.report({
-          node,
-          message:
-            'The 2nd argument of registerServiceForDoc should not be an arrow function.',
-        });
-      }
+      node.arguments.forEach(arg => {
+        if (arg.type === 'ArrowFunctionExpression') {
+          // TODO(erwinm): add fixer method.
+          context.report({
+            node,
+            message:
+              'registerService* methods should not use arrow functions as a constructor.',
+          });
+        }
+      });
     },
   };
 };
