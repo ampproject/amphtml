@@ -1699,7 +1699,7 @@ describes.realWin(
       top.document.body.appendChild(host);
       shadowRoot = host.attachShadow({mode: 'open'});
       shadowDoc = ampdocService.installShadowDoc(
-        'https://example.com',
+        'https://example.test',
         shadowRoot
       );
       env.sandbox.stub(Services, 'resourcesForDoc').returns({});
