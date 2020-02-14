@@ -64,6 +64,10 @@ export class Performance {
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
 
+    /** @const @private {number} */
+    this.timeOrigin_ =
+      win.performance.timeOrigin || win.performance.timing.navigationStart;
+
     /** @private {?./ampdoc-impl.AmpDoc} */
     this.ampdoc_ = null;
 
@@ -233,11 +237,7 @@ export class Performance {
         this.tickDelta('msr', this.win.performance.now());
 
         // Tick timeOrigin so that epoch time can be calculated by consumers.
-        this.tickDelta(
-          'timeOrigin',
-          this.win.performance.timeOrigin ||
-            this.win.performance.timing.navigationStart
-        );
+        this.tickDelta('timeOrigin', this.timeOrigin_);
 
         return this.maybeAddStoryExperimentId_();
       })
@@ -535,6 +535,7 @@ export class Performance {
         this.tick('pc');
         // We don't have the actual csi timer's clock start time,
         // so we just have to use `docVisibleTime`.
+        // TODO before merge: what should be the actual value here? performance.now() or performance.now() - docVisibleTime?
         this.prerenderComplete_(this.win.performance.now());
       }
       this.flush();
@@ -578,8 +579,8 @@ export class Performance {
     if (opt_delta == undefined) {
       // Marking only makes sense for non-deltas.
       this.mark(label);
-      data['value'] = this.win.Date.now();
       delta = this.win.performance.now();
+      data['value'] = this.timeOrigin_ + delta;
     } else {
       data['delta'] = delta = Math.max(opt_delta, 0);
     }
@@ -634,7 +635,7 @@ export class Performance {
    * @param {string} label The variable name as it will be reported.
    */
   tickSinceVisible(label) {
-    const now = this.win.Date.now();
+    const now = this.timeOrigin_ + this.win.performance.now();
     const visibleTime = this.ampdoc_ ? this.ampdoc_.getFirstVisibleTime() : 0;
     const v = visibleTime ? Math.max(now - visibleTime, 0) : 0;
     this.tickDelta(label, v);

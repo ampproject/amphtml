@@ -39,6 +39,7 @@ describes.realWin('performance', {amp: true}, env => {
       // set initial Date.now to 100, so that we can differentiate between time relative to epoch and relative to process start (value vs. delta).
       now: timeOrigin,
     });
+    Object.defineProperty(win.performance, 'timeOrigin', {value: timeOrigin}); // timeOrigin is read-only.
     win.performance.now = clock.performance.now;
     installPlatformService(env.win);
     installPerformanceService(env.win);
@@ -856,6 +857,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       performance: {
         getEntriesByType: env.sandbox.stub(),
         now: () => Date.now(),
+        timeOrigin: 100,
       },
     };
 
