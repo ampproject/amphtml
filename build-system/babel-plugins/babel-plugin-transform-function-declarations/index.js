@@ -95,9 +95,9 @@ function createVariableDeclaration(t, path) {
     arrowFunction
   );
 
-  // Making an existing FunctionDeclaration a const VariableDeclaration is safe.
+  // Making an existing FunctionDeclaration a let VariableDeclaration is safe.
   // The name was already reserved for the FunctionDeclaration.
-  return t.variableDeclaration('const', [declarations]);
+  return t.variableDeclaration('let', [declarations]);
 }
 
 // Attempt to convert simple single ReturnStatement FunctionDeclarations to ArrowFunctionExpressions.

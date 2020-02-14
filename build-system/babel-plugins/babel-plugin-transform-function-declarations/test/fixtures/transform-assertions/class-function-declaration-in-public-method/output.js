@@ -15,7 +15,7 @@
  */
 class Foo {
   foo() {
-    const testInFooClass = () => '';
+    let testInFooClass = () => '';
   }
 
 }

@@ -13,4 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const thing = (a, b) => a + b; 
+const thing = (a, b) => a + b;
+let thing2 = (a, b) => a * b;

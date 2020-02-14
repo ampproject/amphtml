@@ -13,4 +13,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const test = async (a, b) => a + b;
+let test = async (a, b) => a + b;
