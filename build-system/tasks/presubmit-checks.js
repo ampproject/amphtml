@@ -174,7 +174,6 @@ const forbiddenTerms = {
       'build-system/server/routes/analytics.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
-      'extensions/amp-analytics/0.1/vendors.js',
     ],
   },
   // Service factories that should only be installed once.
