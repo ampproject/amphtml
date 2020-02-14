@@ -317,14 +317,23 @@ export class VideoManager {
   }
 
   /**
-   * Gets the current analytics details for the given video.
+   * Gets the current analytics details property for the given video.
    * Fails silently if the video is not registered.
-   * @param {!AmpElement} videoElement
-   * @return {!Promise<!VideoAnalyticsDetailsDef|undefined>}
+   * @param {string} id
+   * @param {string} property
+   * @return {!Promise<string>}
    */
-  getAnalyticsDetails(videoElement) {
+  getVideoStateProperty(id, property) {
+    const root = this.ampdoc.getRootNode();
+    const videoElement = user().assertElement(
+      root.getElementById(/** @type {string} */ (id)),
+      `Could not find an element with id="${id}" for VIDEO_STATE`
+    );
     const entry = this.getEntryForElement_(videoElement);
-    return entry ? entry.getAnalyticsDetails() : Promise.resolve();
+    return (entry
+      ? entry.getAnalyticsDetails()
+      : Promise.resolve()
+    ).then(details => (details ? details[property] : ''));
   }
 
   /**
