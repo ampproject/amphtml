@@ -19,6 +19,7 @@ import {dict} from '../../../src/utils/object';
 import {
   getViewerAuthTokenIfAvailable,
   getViewerInterceptResponse,
+  responseXssiJson,
   setupAMPCors,
   setupInit,
   setupJsonFetchInit,
@@ -289,6 +290,31 @@ describes.sandboxed('utils/xhr-utils', {}, env => {
         undefined,
         e => expect(e).to.not.be.undefined
       );
+    });
+  });
+
+  describe('responseXssiJson', () => {
+    it('should use response.json() if prefix is missing or empty', async () => {
+      const response = {
+        text: env.sandbox.spy(),
+        json: env.sandbox.spy(),
+      };
+      await responseXssiJson(response);
+      await responseXssiJson(response, '');
+      expect(response.text).to.not.have.been.called;
+      expect(response.json).to.have.been.calledTwice;
+    });
+
+    it('should not strip characters if the prefix is not present', async () => {
+      const response = {text: () => Promise.resolve('{"a": 1}')};
+      const json = await responseXssiJson(response, 'while(1)');
+      expect(json).to.deep.equal({a: 1});
+    });
+
+    it('should strip prefix from text if prefix is present', async () => {
+      const response = {text: () => Promise.resolve('while(1){"a": 1}')};
+      const json = await responseXssiJson(response, 'while(1)');
+      expect(json).to.deep.equal({a: 1});
     });
   });
 });

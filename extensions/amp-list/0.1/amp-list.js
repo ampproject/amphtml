@@ -1322,7 +1322,7 @@ export class AmpList extends AMP.BaseElement {
       urlReplacement: this.getPolicy_(),
       refresh,
       token,
-      xssiPrefix: this.element.getAttribute('xssi-prefix') || undefined,
+      xssiPrefix: this.element.getAttribute('xssi-prefix'),
     });
   }
 

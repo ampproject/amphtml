@@ -56,7 +56,6 @@ describe('batchFetchJsonFor', () => {
       })
     );
 
-    xhr = {xssiJson: () => Promise.resolve(data)};
     window.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
     batchedXhr = {fetchJson};
