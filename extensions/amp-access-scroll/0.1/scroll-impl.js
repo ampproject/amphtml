@@ -17,6 +17,7 @@
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
 import {ActivateBar, ScrollUserBar} from './scroll-bar';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
+import {PROTOCOL_VERSION} from './scroll-protocol';
 import {ReadDepthTracker} from './read-depth-tracker.js';
 import {Relay} from './scroll-relay';
 import {Services} from '../../../src/services';
@@ -28,7 +29,6 @@ import {installStylesForDoc} from '../../../src/style-installer';
 import {parseQueryString} from '../../../src/url';
 
 const TAG = 'amp-access-scroll-elt';
-export const PROTOCOL_VERSION = '1';
 /**
  * @param {string} baseUrl
  * @return {!JsonObject}

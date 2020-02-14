@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {PROTOCOL_VERSION} from './scroll-impl';
+import {PROTOCOL_VERSION} from './scroll-protocol';
 import {ScrollComponent} from './scroll-component';
 import {dict, hasOwn} from '../../../src/utils/object';
 
