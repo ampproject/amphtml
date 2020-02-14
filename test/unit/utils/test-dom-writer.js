@@ -15,6 +15,7 @@
  */
 
 import {DomWriterBulk, DomWriterStreamer} from '../../../src/utils/dom-writer';
+import {macroTask} from '../../../testing/yield';
 
 describes.fakeWin('DomWriterStreamer', {amp: true}, env => {
   describe
@@ -35,7 +36,7 @@ describes.fakeWin('DomWriterStreamer', {amp: true}, env => {
           writer.onBody(parsedDoc => {
             resolve(parsedDoc.body);
             onBodySpy();
-            return win.document.body;
+            return Promise.resolve(win.document.body);
           });
         });
         writer.onBodyChunk(() => {
@@ -164,7 +165,7 @@ describes.fakeWin('DomWriterBulk', {amp: true}, env => {
       writer.onBody(parsedDoc => {
         resolve(parsedDoc.body);
         onBodySpy(parsedDoc);
-        return win.document.body;
+        return Promise.resolve(win.document.body);
       });
     });
     writer.onBodyChunk(() => {
@@ -188,7 +189,7 @@ describes.fakeWin('DomWriterBulk', {amp: true}, env => {
     });
   });
 
-  it('should wait for body until stream is closed', () => {
+  it('should wait for body until stream is closed', async () => {
     writer.write('<body class="b">');
     env.flushVsync();
     expect(onBodySpy).to.not.be.called;
@@ -201,13 +202,14 @@ describes.fakeWin('DomWriterBulk', {amp: true}, env => {
 
     writer.close();
     env.flushVsync();
+    await macroTask();
     expect(onBodySpy).to.be.calledOnce;
     expect(win.document.body.textContent).to.equal('abc');
     expect(writer.eof_).to.be.true;
     return Promise.all([onBodyPromise, onEndPromise]);
   });
 
-  it('should process for body chunks together', () => {
+  it('should process for body chunks together', async () => {
     writer.write('<body class="b">');
     env.flushVsync();
     expect(onBodySpy).to.not.be.called;
@@ -222,6 +224,7 @@ describes.fakeWin('DomWriterBulk', {amp: true}, env => {
 
     writer.close();
     env.flushVsync();
+    await macroTask();
     expect(onBodySpy).to.be.calledOnce;
     expect(win.document.body.querySelector('child')).to.exist;
     expect(win.document.body.querySelector('child2')).to.exist;
@@ -229,12 +232,13 @@ describes.fakeWin('DomWriterBulk', {amp: true}, env => {
     return Promise.all([onBodyPromise, onEndPromise]);
   });
 
-  it('should not parse noscript as markup', () => {
+  it('should not parse noscript as markup', async () => {
     writer.write('<body>');
     writer.write('<child1></child1><noscript><child2></child2></noscript>');
     writer.write('<child3></child3>');
     writer.close();
     env.flushVsync();
+    await macroTask();
     expect(win.document.body.querySelector('child1')).to.exist;
     expect(win.document.body.querySelector('child2')).not.to.exist;
     expect(win.document.body.querySelector('child3')).to.exist;
