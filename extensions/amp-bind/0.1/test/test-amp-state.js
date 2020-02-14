@@ -141,7 +141,7 @@ describes.realWin(
       await new Promise(resolve => setTimeout(resolve, 0));
 
       expect(bind.registerAsyncAmpState).to.not.have.been.called;
-    })
+    });
 
     it('should trigger "fetch-error" if fetch fails', async () => {
       ampState.fetch_.returns(Promise.reject());
