@@ -36,7 +36,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>An easy way to embed and play stories in a website.</td>
+    <td>Embed and play stories in a non-AMP website.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Scripts</strong></td>
@@ -47,51 +47,21 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><ul>
+    <td>
       <li>See <a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-story/player.html">code snippet</a>.</li>
-    </ul></td>
+    </td>
   </tr>
 </table>
 
 [TOC]
 
-## AMP story player usage
+## Usage
 
 Use `amp-story-player` to embed and play stories within a webpage.
 
 ### Embed in a non-AMP page
 
-The following example demonstrates a basic embed of <amp-story-player> in a non-AMP webpage.
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <script
-      async
-      src="https://cdn.ampproject.org/amp-story-player-v0.js"
-    ></script>
-    <link
-      href="https://cdn.ampproject.org/amp-story-player-v0.css"
-      rel="stylesheet"
-      type="text/css"
-    />
-  </head>
-  <body>
-    <h1>This is a NON-AMP page that embeds a story below:</h1>
-    <amp-story-player style="width: 360px; height: 600px;">
-      <a
-        href="https://example.com/story.html"
-        style="--story-player-poster: url('https://example.com/img/promo3x4.jpg');"
-      >
-        <span>A description for my story.</span>
-      </a>
-    </amp-story-player>
-  </body>
-</html>
-```
-
-The high-level API for the player looks like the following:
+The code snippet below demonstrates an embed of `<amp-story-player>` in a non-AMP webpage.
 
 [example preview="top-frame" playground="true"]
 
@@ -140,12 +110,9 @@ The high-level API for the player looks like the following:
   <amp-story-player style="width: 360px; height: 600px;">
     <a
       href="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/"
-      data-poster-portrait-src="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/img/promo3x4.jpg"
-      class="story"
+      style="--story-player-poster: url('https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/img/promo3x4.jpg')"
     >
-      <span class="title"
-        >A local’s guide to what to eat and do in Mexico City</span
-      >
+      A local’s guide to what to eat and do in Mexico City
     </a>
   </amp-story-player>
 </body>
@@ -157,37 +124,31 @@ The high-level API for the player looks like the following:
 
 The inline width and height ensures that the player will not cause any jumps in your website while the script is being loaded. Feel free to modify the values, but we recommend maintaining a 3:5 aspect ratio.
 
-<table>
-  <tr>
-    <td width="40%"><strong>width [recommended]</strong></td>
-    <td>Width of the player in pixels.</td>
-  </tr>
-  <tr>
-    <td width="50%"><strong>height [recommended]</strong></td>
-    <td>Height of the player in pixels.</td>
-  </tr>
-</table>
+#### width [recommended]
+
+Width of the player in pixels.
+
+#### height [recommended]
+
+Height of the player in pixels.
 
 ## Specify embedded story
 
-The `<amp-story-player>` component contains one or more `<a>` tags, each of which represent a story. Use the `href` attribute to point to a particular story.
+The `<amp-story-player>` component contains one `<a>` tag. Point the href attribute to the story URL.
 
-To provide a better experience for the user while the story is being loaded, as well as allowing search engines to crawl the embedded stories, you can provide some text inside the anchor tags.
+Place descriptive text of the story within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
 
-You can also provide an image to work as a placeholder while the story is being loaded. Just add a `--story-player-poster` CSS variable as an inline style of the first anchor tag with its corresponding image URL:
+Use a poster image as a placeholder to display to users while the story loads. Add the `--story-player-poster` CSS variable as an inline style of the `<a>` tag and point to the poster image URL.
 
 ### Attributes
 
-<table>
-  <tr>
-    <td width="40%"><strong>href</strong></td>
-    <td>URL pointing to the story.</td>
-  </tr>
-  <tr>
-    <td width="50%"><strong>style="--story-player-poster: url('...');" [recommended]</strong></td>
-    <td>URL pointing to the poster image of the story.</td>
-  </tr>
-</table>
+#### href
+
+URL pointing to the story.
+
+#### style="--story-player-poster: url('...');" [recommended]
+
+CSS variable with the URL pointing to the poster image of the story.
 
 ```html
 <amp-story-player style="width: 360px; height: 600px;">
@@ -195,7 +156,7 @@ You can also provide an image to work as a placeholder while the story is being 
     href="https://www.example.com/story.html"
     style="--story-player-poster: url('https://www.example.com/assets/cover1.html');"
   >
-    <span>A title that describes this story.</span>
+    A title that describes this story.
   </a>
 </amp-story-player>
 ```
