@@ -728,7 +728,13 @@ describes.realWin('performance', {amp: true}, env => {
             viewerSendMessageStub.withArgs('prerenderComplete').firstCall
               .args[1].value
           ).to.equal(300);
-          expect(getPerformanceMarks()).to.deep.equal(['dr', 'ol', 'visible', 'ofv', 'pc',]);
+          expect(getPerformanceMarks()).to.deep.equal([
+            'dr',
+            'ol',
+            'visible',
+            'ofv',
+            'pc',
+          ]);
         });
       });
 

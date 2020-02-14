@@ -502,8 +502,6 @@ export class Performance {
   measureUserPerceivedVisualCompletenessTime_() {
     const didStartInPrerender = !this.ampdoc_.hasBeenVisible();
 
-    // This will only be relevant if the ampdoc is in prerender mode.
-    // (hasn't been visible yet, ever at this point)
     let docVisibleTime = -1;
     this.ampdoc_.whenFirstVisible().then(() => {
       docVisibleTime = this.win.performance.now();
