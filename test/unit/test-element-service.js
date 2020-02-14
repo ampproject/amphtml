@@ -471,7 +471,9 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
     registerServiceBuilderForDoc(
       nodeInTopWin,
       'foo',
-      () => service,
+      function() {
+        return service;
+      },
       /* opt_instantiate */ true
     );
     return getElementServiceIfAvailableForDocInEmbedScope(
@@ -488,7 +490,9 @@ describes.fakeWin('in embed scope', {amp: true}, env => {
     registerServiceBuilderForDoc(
       nodeInTopWin,
       'foo',
-      () => service,
+      function() {
+        return service;
+      },
       /* opt_instantiate */ true
     );
     return getElementServiceIfAvailableForDocInEmbedScope(

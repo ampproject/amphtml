@@ -92,7 +92,7 @@ describes.realWin(
       container.appendChild(gridLayer);
     }
 
-    it(
+    it.skip(
       'Should add corresponding CSS class when a full bleed animation target is' +
         ' attached as a child of a grid layer with fill template.',
       () => {
@@ -122,7 +122,7 @@ describes.realWin(
       }
     );
 
-    it(
+    it.skip(
       'Should not add additional CSS class to the target when a full-bleed ' +
         'animation is used BUT the target is a child of a grid layer with a ' +
         'template other than `fill`.',
@@ -153,7 +153,7 @@ describes.realWin(
       }
     );
 
-    it(
+    it.skip(
       'Should not add additional CSS class to the target when a non-full-bleed' +
         'animation is used.',
       () => {

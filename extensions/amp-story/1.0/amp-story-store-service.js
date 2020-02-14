@@ -36,7 +36,9 @@ export const getStoreService = win => {
 
   if (!service) {
     service = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => service);
+    registerServiceBuilder(win, 'story-store', function() {
+      return service;
+    });
   }
 
   return service;

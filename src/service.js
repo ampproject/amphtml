@@ -123,11 +123,15 @@ export function installServiceInEmbedScope(embedWin, id, service) {
       getAmpdocServiceHolder(ampdoc),
       ampdoc,
       id,
-      () => service,
+      function() {
+        return service;
+      },
       /* override */ true
     );
   } else {
-    registerServiceInternal(embedWin, embedWin, id, () => service);
+    registerServiceInternal(embedWin, embedWin, id, function() {
+      return service;
+    });
     getServiceInternal(embedWin, id); // Force service to build.
   }
 }
@@ -632,7 +636,9 @@ export function adoptServiceForEmbedDoc(ampdoc, id) {
     getAmpdocServiceHolder(ampdoc),
     ampdoc,
     id,
-    () => service
+    function() {
+      return service;
+    }
   );
 }
 

@@ -189,15 +189,16 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!AmpStoryStoreService} */
     this.storeService_ = new AmpStoryStoreService(this.win);
-    registerServiceBuilder(this.win, 'story-store', () => this.storeService_);
+    const storeService = this.storeService_;
+    registerServiceBuilder(this.win, 'story-store', function() {
+      return storeService;
+    });
 
     /** @private @const {!AmpStoryRequestService} */
-    this.requestService_ = new AmpStoryRequestService(this.win, this.element);
-    registerServiceBuilder(
-      this.win,
-      'story-request-v01',
-      () => this.requestService_
-    );
+    const requestService = new AmpStoryRequestService(this.win, this.element);
+    registerServiceBuilder(this.win, 'story-request-v01', function() {
+      return requestService;
+    });
 
     /** @private {!NavigationState} */
     this.navigationState_ = new NavigationState(this.win, () =>
@@ -212,6 +213,7 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
+    const localizationService = this.localizationService_;
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)
       .registerLocalizedStringBundle('en', LocalizedStringsEn);
@@ -225,11 +227,9 @@ export class AmpStory extends AMP.BaseElement {
       enXaPseudoLocaleBundle
     );
 
-    registerServiceBuilder(
-      this.win,
-      'localization-v01',
-      () => this.localizationService_
-    );
+    registerServiceBuilder(this.win, 'localization-v01', function() {
+      return localizationService;
+    });
 
     /** @private @const {!Bookend} */
     this.bookend_ = new Bookend(this.win, this.element);
@@ -254,9 +254,10 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @const @private {!AmpStoryVariableService} */
     this.variableService_ = new AmpStoryVariableService();
-    registerServiceBuilder(this.win, 'story-variable', () =>
-      this.variableService_.get()
-    );
+    const variableService = this.variableService_;
+    registerServiceBuilder(this.win, 'story-variable', function() {
+      return variableService.get();
+    });
 
     /** @private {?./amp-story-page.AmpStoryPage} */
     this.activePage_ = null;
