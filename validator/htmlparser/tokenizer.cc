@@ -45,6 +45,10 @@ inline char Tokenizer::ReadByte() {
 
   char c = buffer_.at(raw_.end++);
   current_line_col_.second++;
+  int multi_byte = Strings::CodePointByteSequenceCount(c);
+  if (multi_byte > 1) {
+    current_line_col_.second -= (multi_byte - 1);
+  }
 
   if (c == '\n') {
     lines_cols_.back() = current_line_col_;

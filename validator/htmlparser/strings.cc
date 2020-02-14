@@ -144,10 +144,15 @@ std::string Strings::ToHexString(char32_t c) {
   return ss.str();
 }
 
-bool Strings::IsInitialCodePointByte(uint8_t c) {
-  return (((c & 0xe0) == 0xc0) ||  // 2 bytes sequence.
-          ((c & 0xf0) == 0xe0) ||  // 3 bytes sequence.
-          ((c & 0xf8) == 0xf0));   // 4 bytes sequence.
+int Strings::CodePointByteSequenceCount(uint8_t c) {
+  if ((c & 0x80) == 0) return 1;     // Ascii char.
+  if ((c & 0xe0) == 0xc0) return 2;  // 2 bytes sequence.
+  if ((c & 0xf0) == 0xe0) return 3;  // 3 bytes sequence.
+  if ((c & 0xf8) == 0xf0) return 4;  // 4 bytes sequence.
+
+
+  // Make compiler happy.
+  return 1;
 }
 
 std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
@@ -164,7 +169,7 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     return c;
   }
 
-  if (!IsInitialCodePointByte(c)) {
+  if (!(CodePointByteSequenceCount(c) > 1)) {
     return std::nullopt;
   }
 
@@ -500,7 +505,8 @@ bool Strings::EqualFold(std::string_view l, std::string_view r) {
       continue;
     }
 
-    if (!(IsInitialCodePointByte(l_char) && IsInitialCodePointByte(r_char))) {
+    if (!(CodePointByteSequenceCount(l_char) > 1 &&
+          CodePointByteSequenceCount(r_char) > 1)) {
       return false;
     }
 
@@ -668,7 +674,7 @@ void CaseTransformInternal(bool to_upper, std::string* s) {
       continue;
     }
 
-    if (Strings::IsInitialCodePointByte(code_point)) {
+    if (Strings::CodePointByteSequenceCount(code_point) > 1) {
       std::string_view sv = *s;
       sv.remove_prefix(i);
       auto decoded = Strings::DecodeUtf8Symbol(&sv);
@@ -718,7 +724,7 @@ bool ExtractChars(std::string_view str, std::vector<char32_t>* chars) {
       str.remove_prefix(1);
       continue;
     // Check if this character is member of codepoint sequence.
-    } else if (Strings::IsInitialCodePointByte(c)) {
+    } else if (Strings::CodePointByteSequenceCount(c) > 1) {
       // Decode moves the string view prefix so no need to remove prefix
       // manually.
       auto old_big_char = Strings::DecodeUtf8Symbol(&str);
