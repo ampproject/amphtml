@@ -205,6 +205,8 @@ export class DomWriterStreamer {
           this.onEnd_();
         }
       });
+    } else if (this.eof_) {
+      this.onEnd_();
     }
   }
 }
