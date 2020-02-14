@@ -16,6 +16,7 @@
 
 #include "htmlparser/renderer.h"
 
+#include "htmlparser/atomutil.h"
 #include "htmlparser/elements.h"
 #include "htmlparser/strings.h"
 
@@ -100,7 +101,9 @@ RenderError Renderer::Render(NodePtr node, std::stringbuf* buf) {
 
   // Render the <xxx> opening tag.
   buf->sputc('<');
-  WriteToBuffer(node->Data().data(), buf);
+  WriteToBuffer(node->DataAtom() == Atom::UNKNOWN ?
+                node->Data().data() : AtomUtil::ToString(node->DataAtom()),
+                buf);
   for (auto& attr : node->Attributes()) {
     std::string ns = attr.name_space;
     std::string k = attr.key;
@@ -172,7 +175,9 @@ RenderError Renderer::Render(NodePtr node, std::stringbuf* buf) {
 
   // Render the </xxx> closing tag.
   WriteToBuffer("</", buf);
-  WriteToBuffer(node->Data().data(), buf);
+  WriteToBuffer(node->DataAtom() == Atom::UNKNOWN ?
+                node->Data().data() : AtomUtil::ToString(node->DataAtom()),
+                buf);
   buf->sputc('>');
 
   return RenderError::NO_ERROR;
