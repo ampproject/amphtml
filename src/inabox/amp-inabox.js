@@ -22,6 +22,7 @@ import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {adopt} from '../runtime';
+import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
@@ -43,7 +44,6 @@ import {
 } from '../style-installer';
 import {internalRuntimeVersion} from '../internal-version';
 import {maybeValidate} from '../validator-integration';
-import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
@@ -69,6 +69,7 @@ try {
   makeBodyVisibleRecovery(self.document);
   throw e;
 }
+allowLongTasksInChunking();
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);

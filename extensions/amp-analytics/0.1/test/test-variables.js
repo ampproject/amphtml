@@ -28,6 +28,8 @@ import {
   linkerReaderServiceFor,
 } from '../linker-reader';
 
+const fakeElement = document.documentElement;
+
 describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
   let variables;
 
@@ -58,28 +60,34 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       'c': 'https://www.google.com/a?b=1&c=2',
     };
 
-    function check(template, expected, vars) {
-      const actual = variables.expandTemplateSync(
-        template,
-        new ExpansionOptions(vars)
-      );
-      expect(actual).to.equal(expected);
+    function check(template, expected, vars, opt_freeze) {
+      const expansion = new ExpansionOptions(vars);
+      if (opt_freeze) {
+        expansion.freezeVar(opt_freeze);
+      }
+      const actual = variables.expandTemplate(template, expansion, fakeElement);
+      return expect(actual).to.eventually.equal(expected);
     }
 
     it('expands nested vars (encode once)', () => {
-      check('${a}', 'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2', vars);
+      return check(
+        '${a}',
+        'https%3A%2F%2Fwww.google.com%2Fa%3Fb%3D1%26c%3D2',
+        vars
+      );
     });
 
     it('expands nested vars (no encode)', () => {
-      const actual = variables.expandTemplateSync(
+      const actual = variables.expandTemplate(
         '${a}',
-        new ExpansionOptions(vars, undefined, true)
+        new ExpansionOptions(vars, undefined, true),
+        fakeElement
       );
-      expect(actual).to.equal('https://www.google.com/a?b=1&c=2');
+      expect(actual).to.eventually.equal('https://www.google.com/a?b=1&c=2');
     });
 
     it('expands complicated string', () => {
-      check('${foo}', 'HELLO%2FWORLD%2BWORLD%2BHELLO%2BHELLO', {
+      return check('${foo}', 'HELLO%2FWORLD%2BWORLD%2BHELLO%2BHELLO', {
         'foo': '${a}+${b}+${c}+${hello}',
         'a': '${hello}/${world}',
         'b': '${world}',
@@ -90,66 +98,119 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('expands zeros', () => {
-      check('${zero}', '0', {'zero': 0});
+      return check('${zero}', '0', {'zero': 0});
     });
 
     it('drops unknown vars', () => {
-      check('a=${known}&b=${unknown}', 'a=KNOWN&b=', {'known': 'KNOWN'});
+      return check('a=${known}&b=${unknown}', 'a=KNOWN&b=', {'known': 'KNOWN'});
     });
 
     it('does not expand macros', () => {
-      check('MACRO(a,b)', 'MACRO(a,b)', {});
+      return check('MACRO(a,b)', 'MACRO(a,b)', {});
     });
 
-    it('supports macro args', () => {
+    it('does not handle nested macros using ${} syntax', () => {
+      // VariableService.expandTemplate's regex cannot parse nested ${}.
+      return check('${a${b}}', '}', {
+        'a': 'TIMESTAMP',
+        'b': 'TIMESTAMP',
+      });
+    });
+
+    it('supports macro args', () =>
       check('${foo}', 'AAA(BBB(1))', {
         'foo': 'AAA(BBB(1))',
-      });
+      })
+        .then(() =>
+          // This is a result of `getNameArgs` strange behavior. Leaving here as
+          // pseudo documentation. We mostly avoid this problem, as now we expand any
+          // valid macros when they are seen in `Variables#expandTemplate`.
+          check('${foo}', 'AAA(BBB(1%2C2))', {
+            'foo': 'AAA(BBB(1,2))',
+          })
+        )
+        .then(() =>
+          check('${foo}', 'true', {
+            'foo': '$EQUALS($SUBSTR(zyxabc,3),abc)',
+          })
+        )
+        .then(() => {
+          env.sandbox.useFakeTimers(123456789);
 
-      // TODO: fix this, should be 'AAA(BBB(1,2))'
-      check('${foo}', 'AAA(BBB(1%2C2))', {
-        'foo': 'AAA(BBB(1,2))',
-      });
-
-      check('${foo}&${bar(3,4)}', 'FOO(1,2)&BAR(3,4)', {
-        'foo': 'FOO(1,2)',
-        'bar': 'BAR',
-      });
-
-      // TODO: fix this, should be 'AAA(1,2)%26BBB(3,4)%26CCC(5,6)%26DDD(7,8)'
-      check('${all}', 'AAA(1%2C2)%26BBB(3%2C4)%26CCC(5%2C6)%26DDD(7,8)', {
-        'a': 'AAA',
-        'b': 'BBB',
-        'c': 'CCC(5,6)',
-        'd': 'DDD(7,8)',
-        'all': '${a(1,2)}&${b(3,4)}&${c}&${d}',
-      });
-    });
+          // Arguments (3,4) and (5,TIMESTAMP) do not include parenthesis,
+          // so they are parsed and encoded correctly when sent to urlReplacements
+          return check(
+            '${foo}&${bar(3,4)}&${bar(5,TIMESTAMP)}',
+            'FOO(1,2)&4&123456789',
+            {
+              'foo': 'FOO(1,2)',
+              'bar': 'QUERY_PARAM',
+            }
+          );
+        })
+        .then(() =>
+          // Macros that take additonal arugments in the arglist (after expansion),
+          // and getNameArgs doesn't handle them
+          check(
+            '${foo}&${bar(2,$TOUPPERCASE(lowercase)}&${bar(5,QUERY_PARAM(6,7))}&${baz($NOT(true))}',
+            'FOO(3,4)&(lowercase)(lowercase)&&',
+            {
+              'foo': 'FOO(3,4)',
+              'bar': 'QUERY_PARAM',
+              'baz': '$TOUPPERCASE',
+            }
+          )
+        )
+        .then(() =>
+          // See comment about getNameArgs above.
+          check('${all}', '2%264', {
+            'a': 'QUERY_PARAM',
+            'b': 'QUERY_PARAM(3,4)',
+            'all': '${a(1,2)}&${b}',
+          })
+        )
+        .then(() =>
+          check('${all}&${c}&${d}', 'CCC(5%2C6)%26DDD(7,8)&CCC(5,6)&DDD(7,8)', {
+            'c': 'CCC(5,6)',
+            'd': 'DDD(7,8)',
+            'all': '${c}&${d}',
+          })
+        )
+        .then(() =>
+          check('${nested}', 'default', {
+            'nested': '${deeper}',
+            'deeper': '$IF(true, QUERY_PARAM(foo, default), never)',
+          })
+        ));
 
     it('respect freeze variables', () => {
-      const vars = new ExpansionOptions({
-        'fooParam': 'QUERY_PARAM',
-        'freeze': 'error',
-      });
-      vars.freezeVar('freeze');
-      const actual = variables.expandTemplateSync(
+      return check(
         '${fooParam(foo,bar)}${nonfreeze}${freeze}',
-        vars
+        'bar${freeze}',
+        {
+          'fooParam': 'QUERY_PARAM',
+          'freeze': 'error',
+        },
+        'freeze'
       );
-      expect(actual).to.equal('QUERY_PARAM(foo,bar)${freeze}');
     });
 
     it('expands array vars', () => {
-      check('${array}', 'xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,bar,', {
-        'foo': 'bar',
-        'array': [
-          'xy&x', // special chars should be encoded
-          'MACRO(abc,def)', // do not encode macro
-          'MACRO(abc,def)&123', // this is not a macro
-          '${foo}', // vars in array should be expanded
-          '${bar}', // undefined vars should be empty
-        ],
-      });
+      return check(
+        '${array}',
+        '123,xy%26x,MACRO(abc,def),MACRO(abc%2Cdef)%26123,bar,',
+        {
+          'foo': 'bar',
+          'array': [
+            123,
+            'xy&x', // special chars should be encoded
+            'MACRO(abc,def)', // do not encode macro
+            'MACRO(abc,def)&123', // this is not a macro
+            '${foo}', // vars in array should be expanded
+            '${bar}', // undefined vars should be empty
+          ],
+        }
+      );
     });
 
     it('handles array with no vars', () => {
@@ -159,7 +220,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
     });
 
     it('handles empty var name', () => {
-      check('${}', '', {});
+      return check('${}', '', {});
     });
 
     describe('should handle recursive vars', () => {
@@ -174,18 +235,19 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
         expectAsyncConsoleError(
           /Maximum depth reached while expanding variables/
         );
-        check('${1}', '123%24%7B4%7D', recursiveVars);
+        return check('${1}', '123%24%7B4%7D', recursiveVars);
       });
 
       it('customize recursions to 5', () => {
         expectAsyncConsoleError(
           /Maximum depth reached while expanding variables/
         );
-        const actual = variables.expandTemplateSync(
+        const actual = variables.expandTemplate(
           '${1}',
-          new ExpansionOptions(recursiveVars, 5)
+          new ExpansionOptions(recursiveVars, 5),
+          fakeElement
         );
-        expect(actual).to.equal('123412%24%7B3%7D');
+        return expect(actual).to.eventually.equal('123412%24%7B3%7D');
       });
     });
   });
@@ -219,7 +281,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('handles consecutive macros in inner arguments', () => {
       env.sandbox.useFakeTimers(123456789);
-      win.location.href = 'https://example.com/?test=yes';
+      win.location.href = 'https://example.test/?test=yes';
       return check(
         '$IF(QUERY_PARAM(test), 1.$SUBSTR(TIMESTAMP, 0, 10)QUERY_PARAM(test), ``)',
         '1.123456789yes'
@@ -228,7 +290,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('handles consecutive macros w/o parens in inner arguments', () => {
       env.sandbox.useFakeTimers(123456789);
-      win.location.href = 'https://example.com/?test=yes';
+      win.location.href = 'https://example.test/?test=yes';
       return check('$IF(QUERY_PARAM(test), 1.TIMESTAMP, ``)', '1.123456789');
     });
 
@@ -239,7 +301,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('should not trim right of string before macro', () => {
       env.sandbox.useFakeTimers(123456789);
-      win.location.href = 'https://example.com/?test=yes';
+      win.location.href = 'https://example.test/?test=yes';
       return check(
         '$IF(QUERY_PARAM(test), foo TIMESTAMP, ``)',
         'foo%20123456789'
@@ -398,6 +460,33 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = 'test=123';
       await check('COOKIE(test)', '');
       doc.cookie = '';
+    });
+
+    it('should replace FIRST_CONTENTFUL_PAINT', () => {
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getFirstContentfulPaint() {
+          return Promise.resolve(1);
+        },
+      });
+      return check('FIRST_CONTENTFUL_PAINT', '1');
+    });
+
+    it('should replace FIRST_VIEWPORT_READY', () => {
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getFirstViewportReady() {
+          return Promise.resolve(1);
+        },
+      });
+      return check('FIRST_VIEWPORT_READY', '1');
+    });
+
+    it('should replace MAKE_BODY_VISIBLE', () => {
+      env.sandbox.stub(Services, 'performanceFor').returns({
+        getMakeBodyVisible() {
+          return Promise.resolve(1);
+        },
+      });
+      return check('MAKE_BODY_VISIBLE', '1');
     });
 
     describe('$MATCH', () => {

@@ -124,15 +124,21 @@ describes.realWin(
         .returns(isEmbedded);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-      registerServiceBuilder(win, 'performance', () => ({
-        isPerformanceTrackingOn: () => false,
-      }));
+      registerServiceBuilder(win, 'performance', function() {
+        return {
+          isPerformanceTrackingOn: () => false,
+        };
+      });
 
       const storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', () => storeService);
+      registerServiceBuilder(win, 'story-store', function() {
+        return storeService;
+      });
 
       const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', () => localizationService);
+      registerServiceBuilder(win, 'localization', function() {
+        return localizationService;
+      });
 
       AmpStory.isBrowserSupported = () => true;
     });
@@ -352,7 +358,7 @@ describes.realWin(
 
       await story.layoutCallback();
       expect(replaceStateStub).to.have.been.calledWith(
-        {ampStoryPageId: firstPageId},
+        {ampStoryNavigationPath: [firstPageId]},
         ''
       );
     });
@@ -1520,11 +1526,19 @@ describes.realWin(
         };
 
         describe('without #cap=swipe', () => {
-          it('should handle touch events at the story level', async () => {
+          it('should handle h touch events at the story level', async () => {
             await createStoryWithPages(2);
             const touchmoveSpy = env.sandbox.spy();
             story.win.document.addEventListener('touchmove', touchmoveSpy);
             dispatchSwipeEvent(100, 0);
+            expect(touchmoveSpy).to.not.have.been.called;
+          });
+
+          it('should handle v touch events at the story level', async () => {
+            await createStoryWithPages(2);
+            const touchmoveSpy = env.sandbox.spy();
+            story.win.document.addEventListener('touchmove', touchmoveSpy);
+            dispatchSwipeEvent(0, 100);
             expect(touchmoveSpy).to.not.have.been.called;
           });
 
@@ -1544,11 +1558,19 @@ describes.realWin(
           before(() => (hasSwipeCapability = true));
           after(() => (hasSwipeCapability = false));
 
-          it('should let touch events bubble up to be forwarded', async () => {
+          it('should let h touch events bubble up to be forwarded', async () => {
             await createStoryWithPages(2);
             const touchmoveSpy = env.sandbox.spy();
             story.win.document.addEventListener('touchmove', touchmoveSpy);
             dispatchSwipeEvent(100, 0);
+            expect(touchmoveSpy).to.have.been.called;
+          });
+
+          it('should let v touch events bubble up to be forwarded', async () => {
+            await createStoryWithPages(2);
+            const touchmoveSpy = env.sandbox.spy();
+            story.win.document.addEventListener('touchmove', touchmoveSpy);
+            dispatchSwipeEvent(0, 100);
             expect(touchmoveSpy).to.have.been.called;
           });
 
