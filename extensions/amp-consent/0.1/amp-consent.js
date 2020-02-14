@@ -41,7 +41,6 @@ import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {isEnumValue} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
 
 const CONSENT_STATE_MANAGER = 'consentStateManager';
@@ -266,10 +265,7 @@ export class AmpConsent extends AMP.BaseElement {
         user().error(TAG, 'consent-response message missing required info');
         return;
       }
-      if (
-        isExperimentOn(this.win, 'amp-consent-v2') &&
-        data['info'] !== undefined
-      ) {
+      if (data['info'] !== undefined) {
         if (typeof data['info'] != 'string') {
           user().error(
             TAG,

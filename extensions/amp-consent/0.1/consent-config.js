@@ -21,8 +21,6 @@ import {Services} from '../../../src/services';
 import {deepMerge, hasOwn, map} from '../../../src/utils/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
-import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
 
 const TAG = 'amp-consent/consent-config';
 
@@ -38,9 +36,6 @@ export class ConsentConfig {
   constructor(element) {
     /** @private {!Element} */
     this.element_ = element;
-
-    /** @private {!Window} */
-    this.win_ = toWin(element.ownerDocument.defaultView);
 
     /** @private {?string} */
     this.matchedGeoGroup_ = null;
@@ -76,14 +71,6 @@ export class ConsentConfig {
    */
   convertInlineConfigFormat_(config) {
     const consentsConfigDepr = config['consents'];
-    if (!isExperimentOn(this.win_, 'amp-consent-v2')) {
-      userAssert(consentsConfigDepr, '%s: consents config is required', TAG);
-      userAssert(
-        Object.keys(consentsConfigDepr).length != 0,
-        "%s: can't find consent instance",
-        TAG
-      );
-    }
 
     if (!config['consents']) {
       // New format, return
@@ -275,10 +262,6 @@ export class ConsentConfig {
    * @return {?JsonObject}
    */
   getCMPConfig_() {
-    if (!isExperimentOn(this.win_, 'amp-consent-v2')) {
-      return null;
-    }
-
     const type = this.element_.getAttribute('type');
     if (!type) {
       return null;

@@ -128,24 +128,19 @@ describes.fakeWin('ConsentInfo', {}, () => {
       };
     });
 
-    it('legacy stored value', () => {
-      //TODO(@zhouyx): Remove after turn on amp-consent-v2
+    it('new format', () => {
       expect(composeStoreValue(consentInfo)).to.be.null;
       consentInfo['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
-      expect(composeStoreValue(consentInfo)).to.equal(true);
-    });
-
-    it('new format', () => {
-      expect(composeStoreValue(consentInfo, true)).to.be.null;
-      consentInfo['consentState'] = CONSENT_ITEM_STATE.ACCEPTED;
-      expect(composeStoreValue(consentInfo, true)).to.deep.equal({
+      expect(composeStoreValue(consentInfo)).to.deep.equal({
         's': 1,
       });
     });
 
     it('add field only when defined', () => {
       consentInfo['consentState'] = CONSENT_ITEM_STATE.REJECTED;
-      expect(composeStoreValue(consentInfo)).to.deep.equal(false);
+      expect(composeStoreValue(consentInfo)).to.deep.equal({
+        's': 0,
+      });
       consentInfo['idDirty'] = false;
       consentInfo['consentString'] = 'test';
       expect(composeStoreValue(consentInfo)).to.deep.equal({

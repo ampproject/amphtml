@@ -30,7 +30,6 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';
@@ -218,12 +217,6 @@ export class ConsentInstance {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {boolean} */
-    this.isAmpConsentV2ExperimentOn_ = isExperimentOn(
-      ampdoc.win,
-      'amp-consent-v2'
-    );
-
     /** @private {string} */
     this.id_ = id;
 
@@ -369,10 +362,7 @@ export class ConsentInstance {
         return;
       }
 
-      const value = composeStoreValue(
-        consentInfo,
-        this.isAmpConsentV2ExperimentOn_
-      );
+      const value = composeStoreValue(consentInfo);
       if (value == null) {
         // Value can be false, do not use !value check
         // Nothing to store to localStorage

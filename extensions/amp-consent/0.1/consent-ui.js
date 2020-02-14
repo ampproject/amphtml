@@ -84,9 +84,7 @@ export class ConsentUI {
 
     /** @private {boolean} */
     this.overlayEnabled_ =
-      isExperimentOn(baseInstance.win, 'amp-consent-v2') &&
-      config['uiConfig'] &&
-      config['uiConfig']['overlay'] === true;
+      config['uiConfig'] && config['uiConfig']['overlay'] === true;
 
     /** @private {string} */
     this.consentPromptCaption_ =
@@ -189,7 +187,7 @@ export class ConsentUI {
         );
       }
       this.ui_ = dev().assertElement(promptElement);
-    } else if (promptUISrc && isExperimentOn(this.win_, 'amp-consent-v2')) {
+    } else if (promptUISrc) {
       // Create an iframe element with the provided src
       this.isCreatedIframe_ = true;
       this.ui_ = this.createPromptIframeFromSrc_(promptUISrc);
