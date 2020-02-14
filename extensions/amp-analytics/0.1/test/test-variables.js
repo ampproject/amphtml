@@ -281,7 +281,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('handles consecutive macros in inner arguments', () => {
       env.sandbox.useFakeTimers(123456789);
-      win.location.href = 'https://example.com/?test=yes';
+      win.location.href = 'https://example.test/?test=yes';
       return check(
         '$IF(QUERY_PARAM(test), 1.$SUBSTR(TIMESTAMP, 0, 10)QUERY_PARAM(test), ``)',
         '1.123456789yes'
@@ -290,7 +290,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('handles consecutive macros w/o parens in inner arguments', () => {
       env.sandbox.useFakeTimers(123456789);
-      win.location.href = 'https://example.com/?test=yes';
+      win.location.href = 'https://example.test/?test=yes';
       return check('$IF(QUERY_PARAM(test), 1.TIMESTAMP, ``)', '1.123456789');
     });
 
@@ -301,7 +301,7 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
 
     it('should not trim right of string before macro', () => {
       env.sandbox.useFakeTimers(123456789);
-      win.location.href = 'https://example.com/?test=yes';
+      win.location.href = 'https://example.test/?test=yes';
       return check(
         '$IF(QUERY_PARAM(test), foo TIMESTAMP, ``)',
         'foo%20123456789'

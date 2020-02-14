@@ -29,7 +29,7 @@ describes.realWin(
         'sandbox': 'allow-scripts',
         'name': 'some_name',
       });
-      frame.src = 'http://example.com';
+      frame.src = 'http://example.test';
       frame.sentinel = '42';
       queue = new IframeTransportMessageQueue(env.win, frame);
     });

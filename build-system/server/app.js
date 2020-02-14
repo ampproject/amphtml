@@ -684,7 +684,7 @@ function getLiveBlogItem() {
         <div class="social-box">
           <amp-social-share type="facebook"
               data-param-text="Hello world"
-              data-param-href="https://example.com/?ref=URL"
+              data-param-href="https://example.test/?ref=URL"
               data-param-app_id="145634995501895"></amp-social-share>
           <amp-social-share type="twitter"></amp-social-share>
         </div>

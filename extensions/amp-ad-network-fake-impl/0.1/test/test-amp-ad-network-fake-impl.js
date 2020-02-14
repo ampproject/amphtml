@@ -37,7 +37,7 @@ describes.realWin(
     const metaCharset = `<meta charset=utf-8></meta>`;
     const metaViewport = `<meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"></meta>`;
     const ampCustomStyle = `<style amp-custom></style>`;
-    const linkIcon = `<link href=https://example.com/favicon.ico rel=icon>`;
+    const linkIcon = `<link href=https://example.test/favicon.ico rel=icon>`;
     let doc;
     let win;
     let fakeImplElem;

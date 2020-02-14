@@ -25,7 +25,7 @@ import {user} from '../../../../src/log';
 
 describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   let iframeTransport;
-  const frameUrl = 'http://example.com';
+  const frameUrl = 'http://example.test';
 
   beforeEach(() => {
     iframeTransport = new IframeTransport(
@@ -61,7 +61,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   });
 
   it('enqueues event messages correctly', () => {
-    const url = 'https://example.com/test';
+    const url = 'https://example.test/test';
     const config = {iframe: url};
     iframeTransport.sendRequest('hello, world!', config);
     const {queue} = IframeTransport.getFrameData(iframeTransport.getType());
@@ -74,8 +74,8 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     const iframeTransport2 = new IframeTransport(
       env.ampdoc.win,
       'some_other_vendor_type',
-      {iframe: 'https://example.com/test2'},
-      'https://example.com/test2-2'
+      {iframe: 'https://example.test/test2'},
+      'https://example.test/test2-2'
     );
 
     const frame1 = IframeTransport.getFrameData(iframeTransport.getType());
@@ -89,7 +89,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
   });
 
   it('correctly tracks usageCount and destroys iframes', () => {
-    const frameUrl2 = 'https://example.com/test2';
+    const frameUrl2 = 'https://example.test/test2';
     const iframeTransport2 = new IframeTransport(
       env.ampdoc.win,
       'some_other_vendor_type',
@@ -161,7 +161,7 @@ describes.realWin('amp-analytics.iframe-transport', {amp: true}, env => {
     expect(createPerformanceObserverSpy).to.not.be.called;
 
     // Create frame for a new vendor
-    const frameUrl2 = 'https://example.com/test2';
+    const frameUrl2 = 'https://example.test/test2';
     new IframeTransport(
       env.ampdoc.win,
       'some_other_vendor_type',

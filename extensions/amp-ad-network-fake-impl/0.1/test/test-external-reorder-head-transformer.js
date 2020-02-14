@@ -30,7 +30,7 @@ const crossorigin = `<link crossorigin href=https://fonts.gstatic.com/ rel="dns-
 const metaCharset = `<meta charset=utf-8></meta>`;
 const metaViewport = `<meta name=viewport content="width=device-width,minimum-scale=1,initial-scale=1"></meta>`;
 const ampCustomStyle = `<style amp-custom></style>`;
-const linkIcon = `<link href=https://example.com/favicon.ico rel=icon>`;
+const linkIcon = `<link href=https://example.test/favicon.ico rel=icon>`;
 const ampViewerIntegration = `<script async src=https://cdn.ampproject.org/v0/amp-viewer-integration-0.1.js></script>`;
 const ampGmail = `<script async src=https://cdn.ampproject.org/v0/amp-viewer-integration-gmail-0.1.js></script>`;
 

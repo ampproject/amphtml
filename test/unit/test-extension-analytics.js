@@ -55,7 +55,7 @@ describes.realWin(
           () => {
             const config = {
               'requests': {
-                'pageview': 'https://example.com/analytics',
+                'pageview': 'https://example.test/analytics',
               },
               'triggers': {
                 'trackPageview': {
@@ -112,10 +112,10 @@ describes.realWin(
       });
 
       it('track event with one request', () => {
-        builder.track('test', 'fake.com');
+        builder.track('test', 'fake.test');
         expect(builder.config_).to.jsonEqual({
           'requests': {
-            'test-request-0': 'fake.com',
+            'test-request-0': 'fake.test',
           },
           'triggers': {
             'test': {
@@ -127,11 +127,11 @@ describes.realWin(
       });
 
       it('track event with multiple request', () => {
-        builder.track('test', ['fake.com', 'fake1.com']);
+        builder.track('test', ['fake.test', 'fake1.test']);
         expect(builder.config_).to.jsonEqual({
           'requests': {
-            'test-request-0': 'fake.com',
-            'test-request-1': 'fake1.com',
+            'test-request-0': 'fake.test',
+            'test-request-1': 'fake1.test',
           },
           'triggers': {
             'test': {
@@ -143,11 +143,11 @@ describes.realWin(
       });
 
       it('track multi event', () => {
-        builder.track('test', 'fake.com').track('test1', 'fake1.com');
+        builder.track('test', 'fake.test').track('test1', 'fake1.test');
         expect(builder.config_).to.jsonEqual({
           'requests': {
-            'test-request-0': 'fake.com',
-            'test1-request-0': 'fake1.com',
+            'test-request-0': 'fake.test',
+            'test1-request-0': 'fake1.test',
           },
           'triggers': {
             'test': {
@@ -164,7 +164,7 @@ describes.realWin(
 
       it('should not add already tracked event', () => {
         try {
-          builder.track('test', 'fake.com').track('test', 'example.com');
+          builder.track('test', 'fake.test').track('test', 'example.test');
         } catch (e) {
           expect(e.message).to.equal(
             'customEventReporterBuilder should not track same eventType twice'
@@ -183,7 +183,7 @@ describes.realWin(
             },
           };
         };
-        const reporter = builder.track('test', 'fake.com').build();
+        const reporter = builder.track('test', 'fake.test').build();
         expect(reporter.trigger).to.exist;
       });
 
@@ -265,7 +265,7 @@ describes.realWin(
         env.win.document.body.appendChild(parentEle);
         const buildPromise = parentEle.build();
         builder = new CustomEventReporterBuilder(parentEle);
-        reporter = builder.track('test', 'fake.com').build();
+        reporter = builder.track('test', 'fake.test').build();
         return buildPromise;
       });
 
@@ -279,7 +279,7 @@ describes.realWin(
         expect(script.textContent).to.jsonEqual(
           JSON.stringify({
             'requests': {
-              'test-request-0': 'fake.com',
+              'test-request-0': 'fake.test',
             },
             'triggers': {
               'test': {
@@ -315,7 +315,7 @@ describes.realWin(
       let resolver;
       const config = {
         'requests': {
-          'pageview': 'https://example.com/analytics',
+          'pageview': 'https://example.test/analytics',
         },
         'triggers': {
           'trackPageview': {
@@ -326,7 +326,7 @@ describes.realWin(
       };
       const config2 = {
         'requests': {
-          'pageview': 'https://example.com/analytics2',
+          'pageview': 'https://example.test/analytics2',
         },
         'triggers': {
           'trackPageview': {

@@ -1362,7 +1362,7 @@ describes.realWin('installExtensionsInFie', {amp: true}, env => {
       iframeDocEl = iframeWin.document.documentElement;
       setParentWindow(iframeWin, parentWin);
       ampdoc = ampdocService.installFieDoc(
-        'https://example.com/embed',
+        'https://example.test/embed',
         iframeWin
       );
     });
