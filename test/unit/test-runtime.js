@@ -31,6 +31,7 @@ import {
 import {installAmpdocServices} from '../../src/service/core-services';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {macroTask} from '../../testing/yield';
 import {setShadowDomSupportedVersionForTesting} from '../../src/web-components';
 import {toggleExperiment} from '../../src/experiments';
 import {vsyncForTesting} from '../../src/service/vsync-impl';
@@ -1508,7 +1509,7 @@ describes.realWin(
           shadowDoc = win.AMP.attachShadowDocAsStream(hostElement, docUrl);
           writer = shadowDoc.writer;
           writer.write('<body><child>');
-          return ampdoc.waitForBodyOpen().then(() => {
+          return ampdoc.waitForBodyOpen().then(async () => {
             const shadowRoot = getShadowRoot(hostElement);
             const body =
               shadowRoot.querySelector('body') ||
@@ -1517,6 +1518,7 @@ describes.realWin(
             expect(body).to.have.class('amp-shadow');
             expect(body.style.position).to.equal('relative');
             env.flushVsync();
+            await macroTask();
             expect(body.querySelector('child')).to.exist;
             expect(ampdoc.getBody()).to.exist;
           });
