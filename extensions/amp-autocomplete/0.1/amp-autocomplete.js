@@ -628,9 +628,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   selectHandler_(event) {
+    const element = dev().assertElement(event.target);
+    const selectedValue = this.setInputValue_(this.getItemElement_(element));
     return this.mutateElement(() => {
-      const element = dev().assertElement(event.target);
-      this.selectItem_(this.getItemElement_(element));
+      this.selectItem_(selectedValue);
     });
   }
 
@@ -1010,18 +1011,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
   /**
    * Writes the selected value into the input field.
    * @param {?Element} element
+   * @return {?string}
    * @private
    */
-  selectItem_(element) {
+  setInputValue_(element) {
     if (element === null || element.hasAttribute('data-disabled')) {
-      return;
+      return null;
     }
     const selectedValue =
       element.getAttribute('data-value') || element.textContent;
-
-    this.fireSelectEvent_(selectedValue);
-    this.clearAllItems_();
-    this.toggleResults_(false);
 
     this.inputElement_.value = this.binding_.getUserInputForUpdateWithSelection(
       selectedValue,
@@ -1029,6 +1027,19 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.userInput_
     );
     this.userInput_ = this.binding_.getUserInputForUpdate(this.inputElement_);
+
+    return selectedValue;
+  }
+
+  /**
+   * Finish item selection with the selected value.
+   * @param {string} value
+   * @private
+   */
+  selectItem_(value) {
+    this.fireSelectEvent_(value);
+    this.clearAllItems_();
+    this.toggleResults_(false);
   }
 
   /**
@@ -1044,6 +1055,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
       /** @type {!JsonObject} */ ({value})
     );
     this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
+  }
+
+  /**
+   * Triggers a native 'change' event on the input.
+   * @private
+   */
+  fireNativeChangeEvent_() {
+    const changeEvent = createCustomEvent(this.win, 'change', null);
+    this.inputElement_.dispatchEvent(changeEvent);
   }
 
   /**
@@ -1209,12 +1229,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
           event.preventDefault();
         }
         this.binding_.removeSelectionHighlighting(this.inputElement_);
-        return this.mutateElement(() => {
-          if (this.areResultsDisplayed_() && !!this.activeElement_) {
-            this.selectItem_(this.activeElement_);
+        if (this.areResultsDisplayed_() && this.activeElement_) {
+          const selectedValue = this.setInputValue_(this.activeElement_);
+          return this.mutateElement(() => {
+            this.selectItem_(selectedValue);
+            this.fireNativeChangeEvent_();
             this.resetActiveElement_();
-            return Promise.resolve();
-          }
+          });
+        }
+        return this.mutateElement(() => {
           this.toggleResults_(false);
         });
       case Keys.ESCAPE:
@@ -1229,9 +1252,15 @@ export class AmpAutocomplete extends AMP.BaseElement {
       case Keys.TAB:
         if (this.areResultsDisplayed_() && this.activeElement_) {
           event.preventDefault();
-          this.selectItem_(this.activeElement_);
+          const selectedValue = this.setInputValue_(this.activeElement_);
+          return this.mutateElement(() => {
+            this.selectItem_(selectedValue);
+            this.fireNativeChangeEvent_();
+          });
         }
-        return Promise.resolve();
+        return this.mutateElement(() => {
+          this.toggleResults_(false);
+        });
       case Keys.BACKSPACE:
         this.detectBackspace_ = this.shouldSuggestFirst_;
         return Promise.resolve();

@@ -812,14 +812,14 @@ describes.realWin(
         })
         .then(() => {
           expect(getItemSpy).to.have.been.calledTwice;
-          expect(selectItemSpy).to.have.been.called;
+          expect(selectItemSpy).to.have.been.calledWith(null);
           expect(impl.inputElement_.value).to.equal('');
           mockEl = impl.createElementFromItem_('abc');
           return impl.selectHandler_({target: mockEl});
         })
         .then(() => {
           expect(getItemSpy).to.have.been.calledWith(mockEl);
-          expect(selectItemSpy).to.have.been.calledWith(mockEl);
+          expect(selectItemSpy).to.have.been.calledWith('abc');
           expect(impl.inputElement_.value).to.equal('abc');
         });
     });
@@ -827,11 +827,9 @@ describes.realWin(
     it('should fire select event from selectItem_', () => {
       const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
       const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
-      const mockEl = doc.createElement('div');
       return impl.layoutCallback().then(() => {
         impl.toggleResults_(true);
-        mockEl.setAttribute('data-value', 'test');
-        impl.selectItem_(mockEl);
+        impl.selectItem_('test');
         expect(fireEventSpy).to.have.been.calledOnce;
         expect(fireEventSpy).to.have.been.calledWith('test');
         expect(triggerSpy).to.have.been.calledOnce;
