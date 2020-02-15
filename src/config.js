@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+import {escapeCssSelectorIdent} from './css';
+import {map} from './utils/object';
+
 /**
  * Allows for runtime configuration. Internally, the runtime should
  * use the src/config.js module for various constants. We can use the
@@ -22,6 +25,30 @@
  * @type {!Object<string, string>}
  */
 const env = self.AMP_CONFIG || {};
+
+/**
+ * Check for a custom URL definition in special <meta> tags. Note that this does
+ * not allow for distinct custom URLs in AmpDocShadow instances. The shell is
+ * allowed to define one set of custom URLs via AMP_CONFIG (recommended) or by
+ * including <meta> tags in the shell <head>. Those custom URLs then apply to
+ * all AMP documents loaded in the shell.
+ * @param {string} name
+ * @return {?string}
+ * @private
+ */
+function getMetaUrl(name) {
+  if (!self.document || !self.document.head) {
+    return null;
+  }
+  const metaEl = self.document.head.querySelector(
+    `meta[name="${escapeCssSelectorIdent(name)}"]`
+  );
+  return (metaEl && metaEl.getAttribute('content')) || null;
+}
+
+/** @type {!Object<string, ?string>} */
+const metaUrls = map();
+metaUrls['runtime-host'] = getMetaUrl('runtime-host');
 
 const thirdPartyFrameRegex =
   typeof env['thirdPartyFrameRegex'] == 'string'
@@ -38,7 +65,8 @@ export const urls = {
   thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
   thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
   thirdPartyFrameRegex: thirdPartyFrameRegex || /^d-\d+\.ampproject\.net$/,
-  cdn: env['cdnUrl'] || 'https://cdn.ampproject.org',
+  cdn:
+    env['cdnUrl'] || metaUrls['runtime-host'] || 'https://cdn.ampproject.org',
   /* Note that cdnProxyRegex is only ever checked against origins
    * (proto://host[:port]) so does not need to consider path
    */
