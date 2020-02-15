@@ -165,7 +165,6 @@ describes.realWin.skip(
                   .stub(ExpansionOptions.prototype, 'getVar')
                   .callsFake(function(name) {
                     let val = this.vars[name];
-                    // Vendor defined variable
                     if (val == null || val == '') {
                       val = '!' + name;
                     }

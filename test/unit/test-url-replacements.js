@@ -228,7 +228,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(63);
+          expect(variables.length).to.equal(62);
         });
       });
 
