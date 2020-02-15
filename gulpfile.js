@@ -111,7 +111,7 @@ function checkFlags(name, taskFunc) {
     if (validFlags.length > 0) {
       log('Valid flags for', cyan(`gulp ${name}`) + ':');
       validFlags.forEach(key => {
-        console.log(cyan(`\t--${key}`) + `: ${taskFunc.flags[key]}`);
+        log(cyan(`\t--${key}`) + `: ${taskFunc.flags[key]}`);
       });
     }
     process.exit(1);
