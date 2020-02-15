@@ -16,6 +16,8 @@
   </style>
   <script async custom-element="amp-story"
         src="https://cdn.ampproject.org/v0/amp-story-1.0.js"></script>
+        <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -24,6 +26,26 @@
     publisher="The AMP Team"
     publisher-logo-src="./img/AMP-Brand-White-Icon.svg"
     poster-portrait-src="./img/overview.jpg">
+
+    <amp-analytics id="analytics1">
+      <script type="application/json">
+        {
+          "requests": {
+            "endpoint": "https://raw.githubusercontent.com/ampproject/amphtml/master/examples/img/ampicon.png",
+            "base": "${endpoint}?${type|default:foo}&path=${canonicalPath}",
+            "click": "${base}?&index=${storyPageIndex}&id=${storyPageId}&reactionType=${storyReactionType}&reactionId=${storyReactionId}&reactionResponseId=${storyReactionResponse}"
+          },
+          "triggers": {
+            "trackQuizResponse": {
+              "on": "story-reaction",
+              "tagname": "amp-story-quiz",
+              "request": "click"
+            }
+          }
+        }
+      </script>
+    </amp-analytics>
+
     <amp-story-page id="cover">
       <amp-story-grid-layer template="fill">
           <amp-img src="https://i.pinimg.com/originals/60/3d/be/603dbeae12bb77121f912d48aee8ee4e.jpg"
@@ -42,7 +64,8 @@
       </amp-story-grid-layer>
       <amp-story-grid-layer>
         <amp-story-quiz
-          id='cat-question-appear'>
+          id='cat-question-appear'
+          endpoint="http://localhost:3000/reactions">
           <h1>When did the domestic cat first appear on the scene?</h1>
           <option>7,000 years ago</option>
           <option correct>500,000 years ago</option>
@@ -80,7 +103,8 @@
           }
         </style>
         <amp-story-grid-layer id="cat-question-cute">
-          <amp-story-quiz>
+          <amp-story-quiz
+            id="cats-cute-quiz">
             <h2>Are cats cute?</h2>
             <option correct>Yes</option>
             <option>No</option>

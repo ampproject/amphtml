@@ -26,6 +26,7 @@ import {adoptWithMultidocDeps} from './runtime';
 import {cssText as ampDocCss} from '../build/ampdoc.css';
 import {cssText as ampSharedCss} from '../build/ampshared.css';
 import {fontStylesheetTimeout} from './font-stylesheet-timeout';
+import {getMode} from './mode';
 import {
   installAmpdocServices,
   installBuiltinElements,
@@ -99,6 +100,9 @@ if (shouldMainBootstrapRun) {
       self.document.documentElement.hasAttribute('i-amphtml-no-boilerplate')
     ) {
       perf.addEnabledExperiment('no-boilerplate');
+    }
+    if (getMode().esm) {
+      perf.addEnabledExperiment('esm');
     }
     fontStylesheetTimeout(self);
     perf.tick('is');

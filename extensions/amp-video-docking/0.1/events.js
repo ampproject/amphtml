@@ -25,7 +25,7 @@ export const VideoDockingEvents = {
 /**
  * @param {!MouseEvent|!TouchEvent} e
  * @return {{x: number, y: number}}
- * @private
+ * @package
  */
 export function pointerCoords(e) {
   const coords = e.touches ? e.touches[0] : e;

@@ -74,7 +74,7 @@ As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2
 
 An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
-<amp-img alt="AMP story tag hierarchy" layout="fixed" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
+<amp-img alt="AMP story tag hierarchy" layout="responsive" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
     <img alt="AMP story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
   </noscript>
@@ -266,15 +266,15 @@ The `amp-story` component represents an entire story. The component itself imple
   </tr>
   <tr id="poster-portrait-src">
     <td width="40%"><strong>poster-portrait-src [required]</strong></td>
-    <td>A URL to the <a href="#posters">story poster</a> in portrait format (3x4 aspect ratio).</td>
+    <td>A URL to the <a href="#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)">story poster</a> in portrait format (3x4 aspect ratio).</td>
   </tr>
   <tr id="poster-square-src">
-    <td width="40%"><strong>poster-square-src [required]</strong></td>
-    <td>A URL to the <a href="#posters">story poster</a> in square format (1x1 aspect ratio).</td>
+    <td width="40%"><strong>poster-square-src [optional]</strong></td>
+    <td>A URL to the <a href="#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)">story poster</a> in square format (1x1 aspect ratio).</td>
   </tr>
   <tr id="poster-landscape-src">
-    <td width="40%"><strong>poster-landscape-src [required]</strong></td>
-    <td>A URL to the <a href="#posters">story poster</a> in landscape format (4x3 aspect ratio).</td>
+    <td width="40%"><strong>poster-landscape-src [optional]</strong></td>
+    <td>A URL to the <a href="#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)">story poster</a> in landscape format (4x3 aspect ratio).</td>
   </tr>
   <tr id="supports-landscape">
     <td width="40%"><strong>supports-landscape [optional]</strong></td>
@@ -300,7 +300,7 @@ The `amp-story` component represents an entire story. The component itself imple
 
 ### Metadata guidelines
 
-Metadata attributes display a preview of the story across the AMP stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rick, embedded experience AMP stories surfaces to come.
+Metadata attributes display a preview of the story across the AMP stories ecosystem, such as rendering an engaging preview link in the bookend of a related stories. These attributes future-proof your story for rich, embedded experience AMP stories surfaces to come.
 
 These metadata attributes supplement and do not replace any Structured Data (e.g. JSON-LD) on the page. We still recommend adding [Structured Data](https://developers.google.com/search/docs/data-types/article#amp-sd) to all your AMP pages, including AMP stories.
 

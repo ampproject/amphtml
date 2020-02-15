@@ -81,7 +81,7 @@ amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:61:6 Tag 'amp-e
 |      <!-- Invalid: amp-experiment not allowed as a child of amp-story -->
 |      <amp-experiment>
 >>     ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:77:4 Tag 'amp-experiment' is disallowed as child of tag 'amp-story'. Child tag must be one of ['amp-analytics', 'amp-consent', 'amp-geo', 'amp-pixel', 'amp-sidebar', 'amp-story-access', 'amp-story-auto-ads', 'amp-story-bookend', 'amp-story-page']. (see https://amp.dev/documentation/components/amp-story)
+amp-story/1.0/test/validator-amp-story-amp-experiment-error.html:77:4 Tag 'amp-experiment' is disallowed as child of tag 'amp-story'. Child tag must be one of ['amp-analytics', 'amp-consent', 'amp-geo', 'amp-pixel', 'amp-sidebar', 'amp-story-auto-ads', 'amp-story-bookend', 'amp-story-page']. (see https://amp.dev/documentation/components/amp-story)
 |          <script type="application/json">
 |            {
 |              "background-color-test": {

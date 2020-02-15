@@ -90,7 +90,9 @@ export const getMediaPerformanceMetricsService = win => {
 
   if (!service) {
     service = new MediaPerformanceMetricsService(win);
-    registerServiceBuilder(win, 'media-performance-metrics', () => service);
+    registerServiceBuilder(win, 'media-performance-metrics', function() {
+      return service;
+    });
   }
 
   return service;

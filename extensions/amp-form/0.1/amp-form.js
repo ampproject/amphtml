@@ -31,6 +31,7 @@ import {
 import {FormDirtiness} from './form-dirtiness';
 import {FormEvents} from './form-events';
 import {FormSubmitService} from './form-submit-service';
+import {Keys} from '../../../src/utils/key-codes';
 import {
   SOURCE_ORIGIN_PARAM,
   addParamsToUrl,
@@ -395,6 +396,15 @@ export class AmpForm {
       e => {
         checkUserValidityAfterInteraction_(dev().assertElement(e.target));
         this.validator_.onBlur(e);
+      },
+      true
+    );
+
+    this.form_.addEventListener(
+      AmpEvents.FORM_VALUE_CHANGE,
+      e => {
+        checkUserValidityAfterInteraction_(dev().assertElement(e.target));
+        this.validator_.onInput(e);
       },
       true
     );
@@ -1587,7 +1597,8 @@ export class AmpFormService {
 
       this.installSubmissionHandlers_(root.querySelectorAll('form'));
       AmpFormTextarea.install(ampdoc);
-      this.installGlobalEventListener_(root);
+      this.installDomUpdateEventListener_(root);
+      this.installFormSubmissionShortcutForTextarea_(root);
     });
   }
 
@@ -1615,9 +1626,34 @@ export class AmpFormService {
    * @param {!Document|!ShadowRoot} doc
    * @private
    */
-  installGlobalEventListener_(doc) {
+  installDomUpdateEventListener_(doc) {
     doc.addEventListener(AmpEvents.DOM_UPDATE, () => {
       this.installSubmissionHandlers_(doc.querySelectorAll('form'));
+    });
+  }
+
+  /**
+   * Listen for Ctrl/Cmd + Enter in textarea elements
+   * to trigger form submission when relevant.
+   * @param {!Document|!ShadowRoot} doc
+   */
+  installFormSubmissionShortcutForTextarea_(doc) {
+    doc.addEventListener('keydown', e => {
+      if (
+        e.defaultPrevented ||
+        e.key != Keys.ENTER ||
+        !(e.ctrlKey || e.metaKey) ||
+        e.target.tagName !== 'TEXTAREA'
+      ) {
+        return;
+      }
+      const {form} = e.target;
+      const ampForm = form ? formOrNullForElement(form) : null;
+      if (!ampForm) {
+        return;
+      }
+      ampForm.handleSubmitEvent_(e);
+      e.preventDefault();
     });
   }
 }
