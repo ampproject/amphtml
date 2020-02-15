@@ -18,8 +18,8 @@ import {requireExternal} from '../../../../src/module';
 
 /**
  * Implements the `maximum-nights` attribute on the date range picker.
- * @param {function(new:React.Component, !JsonObject)} WrappedComponent A date-picker component to wrap
- * @return {function(new:React.Component, !JsonObject)}
+ * @param {typeof React.Component} WrappedComponent A date-picker component to wrap
+ * @return {typeof React.Component}
  */
 export function wrap(WrappedComponent) {
   const react = requireExternal('react');

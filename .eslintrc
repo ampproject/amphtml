@@ -80,6 +80,7 @@
     "local/is-experiment-on": 2,
     "local/json-configuration": 2,
     "local/no-array-destructuring": 2,
+    "local/no-arrow-on-register-functions": 2,
     "local/no-deep-destructuring": 2,
     "local/no-destructure-assignment-params": 2,
     "local/no-duplicate-import": 2,
@@ -229,6 +230,20 @@
         "module": false,
         "process": false,
         "require": false
+      }
+    },
+    {
+      "files": ["**/*.extern.js"],
+      "rules": {
+        "no-var": 0,
+        "no-undef": 0,
+        "no-unused-vars": 0,
+        "prefer-const": 0,
+        "require-jsdoc": 0,
+        "jsdoc/check-tag-names": 0,
+        "local/closure-type-primitives": 0,
+        "local/no-duplicate-name-typedef": 0,
+        "google-camelcase/google-camelcase": 0
       }
     }
   ]

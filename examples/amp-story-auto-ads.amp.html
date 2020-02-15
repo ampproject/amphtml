@@ -45,7 +45,11 @@
   <amp-analytics>
     <script type="application/json">
       {
-        "transport": {"beacon": "true", "xhrpost": "false", "image": "true"},
+        "transport": {
+          "beacon": false,
+          "xhrpost": false,
+          "image": true
+        },
         "requests": {
           "endpoint": "https://www.example.com",
           "base": "${endpoint}?id=${adId}zx=${timestamp}"

@@ -108,8 +108,7 @@ describes.realWin(
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
-        true,
-        false
+        {skipEval: true, skipAmpState: false}
       );
     });
 
@@ -180,8 +179,7 @@ describes.realWin(
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {local: 'data'}},
-        true,
-        false
+        {skipEval: true, skipAmpState: false}
       );
 
       // await one macro-task to let viewer/fetch promise chains resolve.
@@ -200,8 +198,7 @@ describes.realWin(
       expect(ampState.fetch_).to.not.have.been.called;
       expect(bind.setState).calledWithMatch(
         {myAmpState: {local: 'data'}},
-        true,
-        false
+        {skipEval: true, skipAmpState: false}
       );
 
       whenFirstVisiblePromiseResolve();
@@ -212,8 +209,7 @@ describes.realWin(
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
-        true,
-        false
+        {skipEval: true, skipAmpState: false}
       );
     });
 
@@ -252,8 +248,7 @@ describes.realWin(
       expect(ampState.fetch_).to.have.been.called;
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
-        false,
-        true
+        {skipEval: false, skipAmpState: true}
       );
     });
 
@@ -282,8 +277,7 @@ describes.realWin(
 
       expect(bind.setState).calledWithMatch(
         {myAmpState: {remote: 'data'}},
-        true,
-        false
+        {skipEval: true, skipAmpState: false}
       );
     });
   }

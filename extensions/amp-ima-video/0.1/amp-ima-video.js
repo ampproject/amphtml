@@ -297,6 +297,11 @@ class AmpImaVideo extends AMP.BaseElement {
     }
   }
 
+  /** @override */
+  pauseCallback() {
+    this.pause();
+  }
+
   // VideoInterface Implementation. See ../src/video-interface.VideoInterface
 
   /** @override */

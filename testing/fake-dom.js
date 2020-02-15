@@ -63,7 +63,7 @@ export class FakeWindow {
     /** @const */
     this.Promise = window.Promise;
     /** @const */
-    this.pageYOffset = window.pageYOffset;
+    this./*OK*/ pageYOffset = window./*OK*/ pageYOffset;
 
     /** @const */
     this.crypto = window.crypto || window.msCrypto;
@@ -255,6 +255,11 @@ export class FakeWindow {
      * @const
      */
     this.requestAnimationFrame = raf;
+
+    // Styles.
+    this.getComputedStyle = function() {
+      return window.getComputedStyle.apply(window, arguments);
+    };
   }
 
   /** polyfill addEventListener. */

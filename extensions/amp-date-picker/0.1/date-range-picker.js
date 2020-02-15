@@ -22,7 +22,7 @@ import {wrap as withMaximumNights} from './wrappers/maximum-nights';
 
 /**
  * Create a DateRangePicker React component
- * @return {function(new:React.Component, !JsonObject)} A date range picker component class
+ * @return {typeof React.Component} A date range picker component class
  */
 function createDateRangePickerBase() {
   const constants = /** @type {JsonObject} */ (requireExternal(
@@ -30,7 +30,7 @@ function createDateRangePickerBase() {
   ));
   const DAY_SIZE = constants['DAY_SIZE'];
   const HORIZONTAL_ORIENTATION = constants['HORIZONTAL_ORIENTATION'];
-  const DayPickerRangeController = /** @type {function(new: React.Component, !JsonObject)} */ (requireExternal(
+  const DayPickerRangeController = /** @type {typeof  React.Component} */ (requireExternal(
     'react-dates'
   )['DayPickerRangeController']);
 
@@ -94,12 +94,12 @@ function createDateRangePickerBase() {
   return WrappedDayPickerRangeController;
 }
 
-/** @private {?function(new:React.Component, !JsonObject)} */
+/** @private {?typeof React.Component} */
 let DateRangePicker_ = null;
 
 /**
  * Creates a date range picker, injecting its dependencies.
- * @return {function(new:React.Component, !JsonObject)} A date range picker component class
+ * @return {typeof React.Component} A date range picker component class
  */
 export function createDateRangePicker() {
   if (!DateRangePicker_) {

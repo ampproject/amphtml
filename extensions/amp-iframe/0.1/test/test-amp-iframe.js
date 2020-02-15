@@ -1059,6 +1059,64 @@ describes.realWin(
             ActionTrust.HIGH
           );
         });
+
+        it('should listen for Pym.js height event', function*() {
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            sandbox: 'allow-scripts allow-same-origin',
+            width: 200,
+            height: 200,
+            resizable: '',
+          });
+          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+          const impl = ampIframe.implementation_;
+          return new Promise((resolve, unusedReject) => {
+            impl.updateSize_ = (height, width) => {
+              resolve({height, width});
+            };
+            const iframe = ampIframe.querySelector('iframe');
+            iframe.contentWindow.postMessage(
+              {
+                sentinel: 'amp-test',
+                type: 'requestPymjsHeight',
+                height: 234,
+              },
+              '*'
+            );
+          }).then(res => {
+            expect(res.height).to.equal(234);
+            expect(res.width).to.be.an('undefined');
+          });
+        });
+
+        it('should listen for Pym.js width event', function*() {
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            sandbox: 'allow-scripts allow-same-origin',
+            width: 200,
+            height: 200,
+            resizable: '',
+          });
+          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+          const impl = ampIframe.implementation_;
+          return new Promise((resolve, unusedReject) => {
+            impl.updateSize_ = (height, width) => {
+              resolve({height, width});
+            };
+            const iframe = ampIframe.querySelector('iframe');
+            iframe.contentWindow.postMessage(
+              {
+                sentinel: 'amp-test',
+                type: 'requestPymjsWidth',
+                width: 345,
+              },
+              '*'
+            );
+          }).then(res => {
+            expect(res.width).to.equal(345);
+            expect(res.height).to.be.an('undefined');
+          });
+        });
       });
 
       describe('pause/resume', () => {

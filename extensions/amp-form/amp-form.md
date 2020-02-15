@@ -100,6 +100,8 @@ Here's an example of a basic form:
 
 ## Attributes
 
+[filter formats="websites, stories, ads"]
+
 ##### target
 
 Indicates where to display the form response after submitting the form. The value must be `_blank` or `_top`.
@@ -111,9 +113,9 @@ Specifies a server endpoint to handle the form input. The value must be an `http
 - For `method=GET`: use this attribute or [`action-xhr`](#action-xhr).
 - For `method=POST`: use the [`action-xhr`](#action-xhr) attribute.
 
-{% call callout('Note', type='note') %}
+[tip type="note"]
 The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fallback to using `action` and `target` in cases where the `amp-form` extension fails to load.
-{% endcall %}
+[/tip][/filter] <!-- formats="websites, stories, ads" -->
 
 ##### action-xhr
 
@@ -128,6 +130,8 @@ This attribute is required for `method=POST`, and is optional for `method=GET`.
 The value for `action-xhr` can be the same or a different endpoint than `action` and has the same `action` requirements above.
 
 To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
+
+[filter formats="websites, stories, ads"]
 
 ##### data-initialize-from-url (optional)
 
@@ -158,15 +162,34 @@ Limitations:
 Specifies that a prefix should be stripped prior to parsing the fetched json from the `action-xhr` endpoint. If the prefix is not present in the response, then this attribute will have no effect.
 This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
+[/filter] <!-- formats="websites, stories, ads" -->
+
 ##### Other form attributes
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
+
+[filter formats="websites, stories, ads"]
 
 ##### custom-validation-reporting
 
 This is an optional attribute that enables and selects a custom validation reporting strategy. Valid values are one of: `show-first-on-submit`, `show-all-on-submit` or `as-you-go`.
 
 See the [Custom Validation](#custom-validations) section for more details.
+
+[/filter] <!-- formats="websites, stories, ads" -->
+
+[filter formats="email"]
+
+##### Invalid AMP email attributes
+
+The AMP for Email spec disallows the use of the following attributes on the AMP email format.
+
+- `action`
+- `name`
+- `target`
+- `verify-xhr`
+
+[/filter]<!-- formats="email" -->
 
 ## Inputs and fields
 
@@ -200,21 +223,9 @@ Learn more about [Actions and Events in AMP](https://amp.dev/documentation/guide
 
 ## Events
 
-The `amp-form` exposes the following events:
+Use `amp-form` events with the [`on` attribute](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on)
 
-| Event            | Fired when                                                                                                           |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `submit`         | The form is submitted and before the submission is complete.                                                         |
-| `submit-success` | The form submission is done and the response is a success.                                                           |
-| `submit-error`   | The form submission is done and the response is an error.                                                            |
-| `verify`         | Asynchronous verification is initiated.                                                                              |
-| `verify-error`   | Asynchronous verification is done and the response is an error.                                                      |
-| `valid`          | The form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)). |
-| `invalid`        | The form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)).       |
-
-These events can be used via the [`on` attribute](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#on).
-
-For example, the following listens to both the `submit-success` and `submit-error` events and shows different lightboxes depending on the event:
+The following example listens to both the `submit-success` and `submit-error` events and shows different lightboxes depending on the event:
 
 ```html
 <form
@@ -224,7 +235,38 @@ For example, the following listens to both the `submit-success` and `submit-erro
 ></form>
 ```
 
-See the [full example here](../../examples/forms.amp.html).
+### `amp-form` event list
+
+#### `submit`
+
+The form is submitted and before the submission is complete.
+
+#### `submit-success`
+
+The form submission is done and the response is a success.
+
+#### `submit-error`
+
+The form submission is done and the response is an error.
+
+[filter formats="websites, ads"]
+
+#### `verify`
+
+Asynchronous verification is initiated.
+
+#### `verify-error`
+
+Asynchronous verification is done and the response is an error.
+
+#### `valid`
+
+The form's validation state changes to "valid" (in accordance with its [reporting strategy](#reporting-strategies)).
+
+#### `invalid`
+
+The form's validation state to "invalid" (in accordance with its [reporting strategy](#reporting-strategies)).
+[/filter]<!-- formats="websites, ads" -->
 
 #### Input events
 
@@ -333,7 +375,7 @@ You can render success or error responses in your form by using [extended templa
 
 ### To render responses with templating:
 
-- Apply a response attribute to _any direct child_ of the `<form>` element.
+- Apply a response attribute to any descendent of the `<form>` element.
 - Render the response in the child element by including a template via `<template></template>` or `<script type="text/plain"></script>` tag inside it or by referencing a template with a `template="id_of_other_template"` attribute.
 - Provide a valid JSON object for responses to `submit-success` and `submit-error`. Both success and error responses should have a `Content-Type: application/json` header.
 
@@ -467,6 +509,8 @@ Then `amp-bind` updates the `<p>` element's text to match the `subscibe` state:
 </p>
 ...
 ```
+
+[filter formats="websites, ads"]
 
 ### Redirecting after a submission
 
@@ -691,6 +735,8 @@ Once the user tries to submit the form, AMP will try to resolve the variables an
 Note how `CANONICAL_HOSTNAME` above did not get replaced because it was not in the whitelist through `data-amp-replace` attribute on the first field.
 
 Substitutions will happen on every subsequent submission. Read more about [variable substitutions in AMP](../../spec/amp-var-substitutions.md).
+
+[/filter]<!-- formats="websites, ads" -->
 
 ## Polyfills
 

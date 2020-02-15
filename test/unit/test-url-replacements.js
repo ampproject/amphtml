@@ -104,15 +104,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
                 });
               });
             }
-            if (opt_options.withStoryVariableService) {
-              markElementScheduledForTesting(iframe.win, 'amp-story');
-              registerServiceBuilder(iframe.win, 'story-variable', function() {
-                return Promise.resolve({
-                  pageIndex: 546,
-                  pageId: 'id-123',
-                });
-              });
-            }
             if (opt_options.withViewerIntegrationVariableService) {
               markElementScheduledForTesting(
                 iframe.win,
@@ -237,7 +228,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(68);
+          expect(variables.length).to.equal(62);
         });
       });
 
@@ -794,27 +785,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
         }
       );
 
-      it('should replace STORY_PAGE_INDEX and STORY_PAGE_ID', () => {
-        return expect(
-          expandUrlAsync(
-            '?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID',
-            /*opt_bindings*/ undefined,
-            {withStoryVariableService: true}
-          )
-        ).to.eventually.equal('?index=546&id=id-123');
-      });
-
-      // TODO(#16916): Make this test work with synchronous throws.
-      it.skip(
-        'should replace STORY_PAGE_INDEX and STORY_PAGE_ID' +
-          ' with empty string if amp-story is not configured',
-        () => {
-          return expect(
-            expandUrlAsync('?index=STORY_PAGE_INDEX&id=STORY_PAGE_ID')
-          ).to.eventually.equal('?index=&id=');
-        }
-      );
-
       it('should replace TIMESTAMP', () => {
         return expandUrlAsync('?ts=TIMESTAMP').then(res => {
           expect(res).to.match(/ts=\d+/);
@@ -883,48 +853,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
         });
       });
 
-      it('should replace FIRST_CONTENTFUL_PAINT', () => {
-        const win = getFakeWindow();
-        env.sandbox.stub(Services, 'performanceFor').returns({
-          getFirstContentfulPaint() {
-            return 1;
-          },
-        });
-        return Services.urlReplacementsForDoc(win.document.documentElement)
-          .expandUrlAsync('FIRST_CONTENTFUL_PAINT')
-          .then(res => {
-            expect(res).to.match(/^\d+$/);
-          });
-      });
-
-      it('should replace FIRST_VIEWPORT_READY', () => {
-        const win = getFakeWindow();
-        env.sandbox.stub(Services, 'performanceFor').returns({
-          getFirstViewportReady() {
-            return 1;
-          },
-        });
-        return Services.urlReplacementsForDoc(win.document.documentElement)
-          .expandUrlAsync('FIRST_VIEWPORT_READY')
-          .then(res => {
-            expect(res).to.match(/^\d+$/);
-          });
-      });
-
-      it('should replace MAKE_BODY_VISIBLE', () => {
-        const win = getFakeWindow();
-        env.sandbox.stub(Services, 'performanceFor').returns({
-          getMakeBodyVisible() {
-            return 1;
-          },
-        });
-        return Services.urlReplacementsForDoc(win.document.documentElement)
-          .expandUrlAsync('MAKE_BODY_VISIBLE')
-          .then(res => {
-            expect(res).to.match(/^\d+$/);
-          });
-      });
-
       it('should reject protocol changes', () => {
         const win = getFakeWindow();
         const {documentElement} = win.document;
@@ -963,8 +891,8 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it('Should replace VIDEO_STATE(video,parameter) with video data', () => {
         const win = getFakeWindow();
         env.sandbox.stub(Services, 'videoManagerForDoc').returns({
-          getAnalyticsDetails() {
-            return Promise.resolve({currentTime: 1.5});
+          getVideoStateProperty() {
+            return Promise.resolve('1.5');
           },
         });
         env.sandbox
@@ -1176,25 +1104,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
         });
       });
 
-      it('should replace ANCESTOR_ORIGIN', () => {
-        return expect(
-          expandUrlAsync(
-            'ANCESTOR_ORIGIN/recipes',
-            /*opt_bindings*/ undefined,
-            {
-              withViewerIntegrationVariableService: {
-                ancestorOrigin: () => {
-                  return 'http://margarine-paradise.com';
-                },
-                fragmentParam: (param, defaultValue) => {
-                  return param == 'ice_cream' ? '2' : defaultValue;
-                },
-              },
-            }
-          )
-        ).to.eventually.equal('http://margarine-paradise.com/recipes');
-      });
-
       it('should replace FRAGMENT_PARAM with 2', () => {
         const win = getFakeWindow();
         win.location = {originalHash: '#margarine=1&ice=2&cream=3'};
@@ -1203,6 +1112,23 @@ describes.sandboxed('UrlReplacements', {}, env => {
           .then(res => {
             expect(res).to.equal('?sh=2&s');
           });
+      });
+
+      it('should replace AMP_GEO(ISOCountry) and AMP_GEO', () => {
+        env.sandbox.stub(Services, 'geoForDocOrNull').returns(
+          Promise.resolve({
+            'ISOCountry': 'unknown',
+            'ISOCountryGroups': ['nafta', 'waldo'],
+            'nafta': true,
+            'waldo': true,
+            'matchedISOCountryGroups': ['nafta', 'waldo'],
+          })
+        );
+        return expandUrlAsync('?geo=AMP_GEO,country=AMP_GEO(ISOCountry)').then(
+          res => {
+            expect(res).to.equal('?geo=nafta%2Cwaldo,country=unknown');
+          }
+        );
       });
 
       it.configure()

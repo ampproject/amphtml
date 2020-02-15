@@ -16,7 +16,7 @@
 
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../amp-analytics';
-import {ExpansionOptions} from '../variables';
+import {ExpansionOptions, variableServiceForDoc} from '../variables';
 //import {IFRAME_TRANSPORTS} from '../iframe-transport-vendors';
 import {
   ImagePixelVerifier,
@@ -61,6 +61,7 @@ describes.realWin.skip(
   function(env) {
     let win, doc;
     let requestVerifier;
+    let elementMacros;
 
     beforeEach(() => {
       win = env.win;
@@ -68,6 +69,10 @@ describes.realWin.skip(
       const wi = mockWindowInterface(env.sandbox);
       wi.getLocation.returns(win.location);
       requestVerifier = new ImagePixelVerifier(wi);
+      elementMacros = {
+        'COOKIE': null,
+        'CONSENT_STATE': null,
+      };
     });
 
     function getAnalyticsTag(config, attrs) {
@@ -160,25 +165,34 @@ describes.realWin.skip(
                   .stub(ExpansionOptions.prototype, 'getVar')
                   .callsFake(function(name) {
                     let val = this.vars[name];
-                    // Vendor defined variable
                     if (val == null || val == '') {
                       val = '!' + name;
                     }
-                    // amp-analytics variable
-                    switch (name) {
-                      case 'scrollLeft':
-                      case 'scrollTop':
-                        return `_${name
-                          .split(/(?=[A-Z])/)
-                          .join('_')
-                          .toLowerCase()}_`;
-                      default:
-                        return val;
-                    }
+                    return val;
                   });
                 analytics.createdCallback();
                 analytics.buildCallback();
                 yield analytics.layoutCallback();
+
+                // Have to get service after analytics element is created
+                const variableService = variableServiceForDoc(doc);
+
+                window.sandbox
+                  .stub(variableService, 'getMacros')
+                  .callsFake(function() {
+                    // Add all the macros in amp-analytics
+                    const merged = {...this.macros_, ...elementMacros};
+
+                    // Change the resolving function
+                    const keys = Object.keys(merged);
+                    for (let i = 0; i < keys.length; i++) {
+                      const key = keys[i];
+                      merged[key] = (opt_param, opt_param2, opt_param3) => {
+                        return `_${key.replace('$', '')}_`;
+                      };
+                    }
+                    return /** @type {!JsonObject} */ (merged);
+                  });
 
                 // Wait for event queue to clear.
                 yield macroTask();

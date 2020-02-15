@@ -70,18 +70,14 @@ function onBindReady(env, bind) {
  * @param {!Object} env
  * @param {!Bind} bind
  * @param {!Object} state
- * @param {boolean=} opt_isAmpStateMutation
+ * @param {boolean=} skipAmpState
  * @return {!Promise}
  */
-function onBindReadyAndSetState(env, bind, state, opt_isAmpStateMutation) {
+function onBindReadyAndSetState(env, bind, state, skipAmpState) {
   return bind
     .initializePromiseForTesting()
     .then(() => {
-      return bind.setState(
-        state,
-        /* opt_skipEval */ undefined,
-        opt_isAmpStateMutation
-      );
+      return bind.setState(state, {skipAmpState});
     })
     .then(() => {
       env.flushVsync();

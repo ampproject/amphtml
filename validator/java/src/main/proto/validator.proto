@@ -270,7 +270,7 @@ message CdataSpec {
   optional int32 max_bytes = 1 [default = -2];
   // If false, bytes inside URLs are not included in the byte calculation for
   // max_bytes. This is used for handling signed exchange transformations which
-  // can potentially take the number of bytes over the 50,000 byte limit due
+  // can potentially take the number of bytes over the 75,000 byte limit due
   // to rewriting URLs to point at an AMP Cache.
   optional bool url_bytes_included = 9 [default = true];
   // If provided, a URL which linking to a section / sentence in the

@@ -56,7 +56,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
     });
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function() {
+      return localizationService;
+    });
 
     parentEl = win.document.createElement('div');
     win.document.body.appendChild(parentEl);
@@ -84,7 +86,9 @@ describes.realWin('amp-story-embedded-component', {amp: true}, env => {
       'triggerAnalyticsEvent'
     );
     storeService = getStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function() {
+      return storeService;
+    });
   });
 
   it('should build the tooltip', () => {
