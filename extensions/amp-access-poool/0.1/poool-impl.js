@@ -64,8 +64,8 @@ export class PooolVendor {
     /** @private {!../../amp-access/0.1/amp-access-source.AccessSource} */
     this.accessSource_ = accessSource;
 
-    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(this.ampdoc);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(this.ampdoc);
 
     /** @private {string} */
     this.accessUrl_ = ACCESS_CONFIG['authorization'];
@@ -216,7 +216,7 @@ export class PooolVendor {
       .querySelector('[poool-access-preview]');
 
     if (articlePreview) {
-      this.resources_.mutateElement(articlePreview, () => {
+      this.mutator_.mutateElement(articlePreview, () => {
         articlePreview.setAttribute('amp-access-hide', '');
       });
     }
@@ -226,7 +226,7 @@ export class PooolVendor {
       .querySelector('[poool-access-content]');
 
     if (articleContent) {
-      this.resources_.mutateElement(articleContent, () => {
+      this.mutator_.mutateElement(articleContent, () => {
         articleContent.removeAttribute('amp-access-hide');
       });
     }

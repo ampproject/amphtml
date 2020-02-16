@@ -31,6 +31,7 @@ import {
 import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
+import {createCustomEvent} from '../../../../src/event-helper';
 import {
   createFormDataWrapper,
   isFormDataWrapper,
@@ -853,6 +854,29 @@ describes.repeated(
 
               return submitEventPromise;
             });
+          });
+        });
+
+        it('should check validity on FORM_VALUE_CHANGE event', () => {
+          setCheckValiditySupportedForTesting(true);
+          return getAmpForm(getForm()).then(ampForm => {
+            const form = ampForm.form_;
+            const emailInput = createElement('input');
+            emailInput.setAttribute('name', 'email');
+            emailInput.setAttribute('required', '');
+            form.appendChild(emailInput);
+            env.sandbox.spy(form, 'checkValidity');
+            env.sandbox.spy(ampForm.validator_, 'onInput');
+
+            const event = createCustomEvent(
+              env.win,
+              AmpEvents.FORM_VALUE_CHANGE,
+              /* detail */ null,
+              {bubbles: true}
+            );
+            emailInput.dispatchEvent(event);
+            expect(form.checkValidity).to.be.called;
+            expect(ampForm.validator_.onInput).to.be.calledWith(event);
           });
         });
 

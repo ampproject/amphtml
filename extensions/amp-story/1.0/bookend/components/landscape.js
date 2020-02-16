@@ -26,6 +26,7 @@ import {
   resolveImgSrc,
   userAssertValidProtocol,
 } from '../../utils';
+import {getSourceUrl, resolveRelativeUrl} from '../../../../../src/url';
 import {htmlFor, htmlRefs} from '../../../../../src/static-template';
 import {userAssert} from '../../../../../src/log';
 
@@ -96,9 +97,9 @@ export class LandscapeComponent {
   }
 
   /** @override */
-  buildElement(landscapeData, doc, data) {
+  buildElement(landscapeData, win, data) {
     landscapeData = /** @type {LandscapeComponentDef} */ (landscapeData);
-    const html = htmlFor(doc);
+    const html = htmlFor(win.document);
     const el = html`
         <a class="i-amphtml-story-bookend-landscape
             i-amphtml-story-bookend-component" target="_top">
@@ -112,7 +113,16 @@ export class LandscapeComponent {
           <div class="i-amphtml-story-bookend-component-meta"
             ref="meta"></div>
         </a>`;
-    addAttributesToElement(el, dict({'href': landscapeData.url}));
+    addAttributesToElement(
+      el,
+      dict({
+        'href': resolveRelativeUrl(
+          landscapeData.url,
+          getSourceUrl(win.location)
+        ),
+      })
+    );
+
     el[AMP_STORY_BOOKEND_COMPONENT_DATA] = {
       position: data.position,
       type: BOOKEND_COMPONENT_TYPES.LANDSCAPE,
@@ -135,7 +145,7 @@ export class LandscapeComponent {
 
     addAttributesToElement(
       image,
-      dict({'src': resolveImgSrc(doc, landscapeData.image)})
+      dict({'src': resolveImgSrc(win, landscapeData.image)})
     );
 
     meta.textContent = landscapeData.domainName;

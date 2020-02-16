@@ -148,8 +148,8 @@ export class RealTimeConfigManager {
    * Converts a URL into its corresponding shortened callout string.
    * We also truncate to a maximum length of 50 characters.
    * For instance, if we are passed
-   * "https://example.com/example.php?foo=a&bar=b, then we return
-   * example.com/example.php
+   * "https://example.test/example.php?foo=a&bar=b, then we return
+   * example.test/example.php
    * @param {string} url
    * @return {string}
    */

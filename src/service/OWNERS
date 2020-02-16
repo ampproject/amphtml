@@ -8,7 +8,7 @@
       owners: [{name: 'ampproject/wg-ui-and-a11y'}],
     },
     {
-      pattern: '{cid-*,*-cid-*,*-cid}.js',
+      pattern: '{cid-*,*-cid-*,*-cid,url-replacements-impl}.js',
       owners: [{name: 'ampproject/wg-analytics'}],
     },
   ],

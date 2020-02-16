@@ -206,6 +206,8 @@ In the following example, we display a `toolbar` if the window width is less tha
 See live demos at [AMP By Example](https://amp.dev/documentation/examples/components/amp-sidebar/).
 {% endcall %}
 
+[filter formats="stories"]
+
 ## Sidebar for Stories
 
 Use of `amp-sidebar` is supported within the `amp-story` [component](https://www.ampproject.org/stories/).
@@ -250,6 +252,8 @@ The following example shows a simple `amp-sidebar` within an `amp-story`.
       ...
   </body>
 ```
+
+[/filter]<!-- formats="stories" -->
 
 ## Attributes
 

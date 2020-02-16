@@ -39,6 +39,7 @@ import {BG_CONFIG} from './vendors/bg';
 import {BROWSI_CONFIG} from './vendors/browsi';
 import {BURT_CONFIG} from './vendors/burt';
 import {BYSIDE_CONFIG} from './vendors/byside';
+import {CAPTAINMETRICS_CONFIG} from './vendors/captainmetrics';
 import {CHARTBEAT_CONFIG} from './vendors/chartbeat';
 import {CLICKY_CONFIG} from './vendors/clicky';
 import {COLANALYTICS_CONFIG} from './vendors/colanalytics';
@@ -117,7 +118,6 @@ const DEFAULT_CONFIG = jsonLiteral({
     'ampGeo': 'AMP_GEO',
     'ampState': 'AMP_STATE',
     'ampVersion': 'AMP_VERSION',
-    'ancestorOrigin': 'ANCESTOR_ORIGIN',
     'authdata': 'AUTHDATA',
     'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
     'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
@@ -200,6 +200,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'browsi': includeJsonLiteral(BROWSI_CONFIG),
         'burt': includeJsonLiteral(BURT_CONFIG),
       'byside': includeJsonLiteral(BYSIDE_CONFIG),
+      'captainmetrics': includeJsonLiteral(CAPTAINMETRICS_CONFIG),
       'chartbeat': includeJsonLiteral(CHARTBEAT_CONFIG),
       'clicky': includeJsonLiteral(CLICKY_CONFIG),
       'colanalytics': includeJsonLiteral(COLANALYTICS_CONFIG),

@@ -21,7 +21,7 @@ import {map} from '../../../src/utils/object';
 import {registerServiceBuilder} from '../../../src/service';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
-/** @private @const {string} */
+/** @package @const {string} */
 export const ANALYTICS_TAG_NAME = '__AMP_ANALYTICS_TAG_NAME__';
 
 /** @enum {string} */
@@ -71,7 +71,9 @@ export const getAnalyticsService = (win, el) => {
 
   if (!service) {
     service = new StoryAnalyticsService(win, el);
-    registerServiceBuilder(win, 'story-analytics', () => service);
+    registerServiceBuilder(win, 'story-analytics', function() {
+      return service;
+    });
   }
 
   return service;

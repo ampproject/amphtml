@@ -261,12 +261,6 @@ export class GlobalVariableSource extends VariableSource {
       return this.getFragmentParamData_(param, defaultValue);
     });
 
-    // Returns the first item in the ancestorOrigins array, if available.
-    this.setAsync(
-      'ANCESTOR_ORIGIN',
-      this.getViewerIntegrationValue_('ancestorOrigin', 'ANCESTOR_ORIGIN')
-    );
-
     /**
      * Stores client ids that were generated during this page view
      * indexed by scope.
@@ -632,26 +626,10 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     this.setAsync('VIDEO_STATE', (id, property) => {
-      const root = this.ampdoc.getRootNode();
-      const video = user().assertElement(
-        root.getElementById(/** @type {string} */ (id)),
-        `Could not find an element with id="${id}" for VIDEO_STATE`
+      return Services.videoManagerForDoc(this.ampdoc).getVideoStateProperty(
+        id,
+        property
       );
-      return Services.videoManagerForDoc(this.ampdoc)
-        .getAnalyticsDetails(video)
-        .then(details => (details ? details[property] : ''));
-    });
-
-    this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(win).getFirstContentfulPaint();
-    });
-
-    this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(win).getFirstViewportReady();
-    });
-
-    this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(win).getMakeBodyVisible();
     });
 
     this.setAsync('AMP_STATE', key => {
@@ -826,29 +804,6 @@ export class GlobalVariableSource extends VariableSource {
         expr
       );
       return getter(/** @type {!ShareTrackingFragmentsDef} */ (fragments));
-    });
-  }
-
-  /**
-   * Resolves the value via amp-viewer-integration's service.
-   * @param {string} property
-   * @param {string} name
-   * @return {!AsyncResolverDef}
-   * @private
-   */
-  getViewerIntegrationValue_(property, name) {
-    return /** @type {!AsyncResolverDef} */ ((param, defaultValue = '') => {
-      const service = Services.viewerIntegrationVariableServiceForOrNull(
-        this.ampdoc.win
-      );
-      return service.then(viewerIntegrationVariables => {
-        userAssert(
-          viewerIntegrationVariables,
-          'To use variable %s amp-viewer-integration must be installed',
-          name
-        );
-        return viewerIntegrationVariables[property](param, defaultValue);
-      });
     });
   }
 }
