@@ -126,6 +126,7 @@ module.exports = {
 build.description = 'Builds the AMP library';
 build.flags = {
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
+  fortesting: '  Builds the AMP library for local testing',
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',

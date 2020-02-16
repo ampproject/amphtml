@@ -341,6 +341,10 @@ function assignIssue(issue, assignees) {
   return request(options);
 }
 
+module.exports = {
+  process3pGithubPr,
+};
+
 process3pGithubPr.description = 'Automatically triage 3P integration PRs';
 process3pGithubPr.flags = {
   dryrun: "  Generate process but don't push it out",

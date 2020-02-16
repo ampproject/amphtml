@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-/* global require */
+/* global require, process */
 
+const argv = require('minimist')(process.argv.slice(2));
 const gulp = require('gulp-help')(require('gulp'));
+const log = require('fancy-log');
+const {cyan, red} = require('ansi-colors');
+
 const {
   checkExactVersions,
 } = require('./build-system/tasks/check-exact-versions');
@@ -68,50 +72,98 @@ const {validator, validatorWebui} = require('./build-system/tasks/validator');
 const {vendorConfigs} = require('./build-system/tasks/vendor-configs');
 const {visualDiff} = require('./build-system/tasks/visual-diff');
 
-// Keep this list alphabetized.
-gulp.task('a4a', a4a);
-gulp.task('ava', ava);
-gulp.task('babel-plugin-tests', babelPluginTests);
-gulp.task('build', build);
-gulp.task('bundle-size', bundleSize);
-gulp.task('caches-json', cachesJson);
-gulp.task('check-exact-versions', checkExactVersions);
-gulp.task('check-links', checkLinks);
-gulp.task('check-owners', checkOwners);
-gulp.task('check-types', checkTypes);
-gulp.task('clean', clean);
-gulp.task('codecov-upload', codecovUpload);
-gulp.task('compile-jison', compileJison);
-gulp.task('create-golden-css', createGoldenCss);
-gulp.task('css', css);
-gulp.task('csvify-size', csvifySize);
-gulp.task('default', defaultTask);
-gulp.task('dep-check', depCheck);
-gulp.task('dev-dashboard-tests', devDashboardTests);
-gulp.task('dist', dist);
-gulp.task('e2e', e2e);
-gulp.task('firebase', firebase);
-gulp.task('generate-vendor-jsons', generateVendorJsons);
-gulp.task('get-zindex', getZindex);
-gulp.task('integration', integration);
-gulp.task('lint', lint);
-gulp.task('make-extension', makeExtension);
-gulp.task('nailgun-start', nailgunStart);
-gulp.task('nailgun-stop', nailgunStop);
-gulp.task('performance', performance);
-gulp.task('pr-check', prCheck);
-gulp.task('prepend-global', prependGlobal);
-gulp.task('presubmit', presubmit);
-gulp.task('prettify', prettify);
-gulp.task('process-3p-github-pr', process3pGithubPr);
-gulp.task('process-github-issues', processGithubIssues);
-gulp.task('serve', serve);
-gulp.task('size', size);
-gulp.task('todos:find-closed', todosFindClosed);
-gulp.task('unit', unit);
-gulp.task('update-packages', updatePackages);
-gulp.task('validator', validator);
-gulp.task('validator-webui', validatorWebui);
-gulp.task('vendor-configs', vendorConfigs);
-gulp.task('visual-diff', visualDiff);
-gulp.task('watch', watch);
+/**
+ * Creates a gulp task using the given name and task function.
+ *
+ * @param {string} name
+ * @param {function} taskFunc
+ */
+function createTask(name, taskFunc) {
+  checkFlags(name, taskFunc);
+  gulp.task(name, taskFunc);
+}
+
+/**
+ * Checks if the flags passed in to a task are valid.
+ * @param {string} name
+ * @param {function} taskFunc
+ */
+function checkFlags(name, taskFunc) {
+  if (!argv._.includes(name)) {
+    return; // This isn't the task being run.
+  }
+  const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
+  const usedFlags = Object.keys(argv).slice(1); // Skip the '_' argument
+  const invalidFlags = [];
+  usedFlags.forEach(flag => {
+    if (!validFlags.includes(flag)) {
+      invalidFlags.push(`--${flag}`);
+    }
+  });
+  if (invalidFlags.length > 0) {
+    log(
+      red('ERROR:'),
+      'Found invalid flags for',
+      cyan(`gulp ${name}`) + ':',
+      cyan(invalidFlags.join(', '))
+    );
+    log('For detailed usage information, run', cyan('gulp help') + '.');
+    if (validFlags.length > 0) {
+      log('Valid flags for', cyan(`gulp ${name}`) + ':');
+      validFlags.forEach(key => {
+        log(cyan(`\t--${key}`) + `: ${taskFunc.flags[key]}`);
+      });
+    }
+    process.exit(1);
+  }
+}
+
+/**
+ * All the gulp tasks. Keep this list alphabetized.
+ */
+createTask('a4a', a4a);
+createTask('ava', ava);
+createTask('babel-plugin-tests', babelPluginTests);
+createTask('build', build);
+createTask('bundle-size', bundleSize);
+createTask('caches-json', cachesJson);
+createTask('check-exact-versions', checkExactVersions);
+createTask('check-links', checkLinks);
+createTask('check-owners', checkOwners);
+createTask('check-types', checkTypes);
+createTask('clean', clean);
+createTask('codecov-upload', codecovUpload);
+createTask('compile-jison', compileJison);
+createTask('create-golden-css', createGoldenCss);
+createTask('css', css);
+createTask('csvify-size', csvifySize);
+createTask('default', defaultTask);
+createTask('dep-check', depCheck);
+createTask('dev-dashboard-tests', devDashboardTests);
+createTask('dist', dist);
+createTask('e2e', e2e);
+createTask('firebase', firebase);
+createTask('generate-vendor-jsons', generateVendorJsons);
+createTask('get-zindex', getZindex);
+createTask('integration', integration);
+createTask('lint', lint);
+createTask('make-extension', makeExtension);
+createTask('nailgun-start', nailgunStart);
+createTask('nailgun-stop', nailgunStop);
+createTask('performance', performance);
+createTask('pr-check', prCheck);
+createTask('prepend-global', prependGlobal);
+createTask('presubmit', presubmit);
+createTask('prettify', prettify);
+createTask('process-3p-github-pr', process3pGithubPr);
+createTask('process-github-issues', processGithubIssues);
+createTask('serve', serve);
+createTask('size', size);
+createTask('todos:find-closed', todosFindClosed);
+createTask('unit', unit);
+createTask('update-packages', updatePackages);
+createTask('validator', validator);
+createTask('validator-webui', validatorWebui);
+createTask('vendor-configs', vendorConfigs);
+createTask('visual-diff', visualDiff);
+createTask('watch', watch);
