@@ -1,6 +1,5 @@
 <!---
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
-
+Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -21,7 +20,7 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-ad
+<amp-embed
   width="320"
   height="320"
   type="temedya"
@@ -35,7 +34,7 @@ limitations under the License.
   data-organicItem="organic-item-count"
   data-theme="theme-style"
 >
-</amp-ad>
+</amp-embed>
 ```
 
 ## Configuration

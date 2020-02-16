@@ -23,6 +23,8 @@ import {
   removeFragment,
 } from './url';
 import {dict} from './utils/object';
+// Source for this constant is css/amp-story-player-iframe.css
+import {cssText} from '../build/amp-story-player-iframe.css';
 import {findIndex} from './utils/array';
 import {setStyle} from './style';
 import {toArray} from './types';
@@ -33,13 +35,6 @@ const LoadStateClass = {
   LOADED: 'i-amphtml-story-player-loaded',
   ERROR: 'i-amphtml-story-player-error',
 };
-
-/** @const {string} */
-const CSS = `
-  :host { all: initial; display: block; border-radius: 0 !important; width: 405px; height: 720px; overflow: auto; }
-  .story-player-iframe { height: 100%; width: 100%; flex: 0 0 100%; border: 0; opacity: 0; transition: opacity 500ms ease; }
-  main { display: flex; flex-direction: row; height: 100%; }
-  .i-amphtml-story-player-loaded iframe { opacity: 1; }`;
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -99,7 +94,7 @@ export class AmpStoryPlayer {
 
     this.initializeShadowRoot_();
 
-    // TODO(Enriqe): Build all child iframes.
+    // TODO(#26308): Build all child iframes.
     this.buildIframe_(this.stories_[0]);
   }
 
@@ -112,7 +107,7 @@ export class AmpStoryPlayer {
 
     // Inject default styles
     const styleEl = this.doc_.createElement('style');
-    styleEl.textContent = CSS;
+    styleEl.textContent = cssText;
     shadowRoot.appendChild(styleEl);
     shadowRoot.appendChild(this.rootEl_);
   }
@@ -141,9 +136,11 @@ export class AmpStoryPlayer {
           iframe => iframe === iframeEl
         );
 
+        messaging.setDefaultHandler(() => {});
+
         this.messagingFor_[iframeIdx] = messaging;
 
-        // TODO(Enriqe): Appropiately set visibility to stories.
+        // TODO(#26308): Appropiately set visibility to stories.
         this.displayStory_(iframeIdx);
       },
       err => {
@@ -196,7 +193,7 @@ export class AmpStoryPlayer {
       return;
     }
 
-    // TODO(Enriqe): Layout all child iframes.
+    // TODO(#26308): Layout all child iframes.
     this.layoutIframe_(this.stories_[0], this.iframes_[0]);
 
     this.isLaidOut_ = true;
@@ -227,6 +224,8 @@ export class AmpStoryPlayer {
       'amp_js_v': '0.1',
       'visibilityState': 'inactive',
       'origin': url.origin,
+      'showStoryUrlInfo': '0',
+      'storyPlayer': 'v0',
     });
 
     const fragmentParam = getFragment(href);
