@@ -50,7 +50,7 @@ import {getData, getDetail, isLoaded, listen} from '../../../src/event-helper';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
-import {prepareImageAnimation} from '@ampproject/animations/dist/animations.mjs';
+import {prepareImageAnimation} from '@ampproject/animations';
 import {reportError} from '../../../src/error';
 import {setStyle, setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
@@ -187,9 +187,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
 
     /** @private @const */
     this.boundMeasureMutate_ = this.measureMutateElement.bind(this);
-
-    /** @private {boolean} */
-    this.swipeStarted_ = false;
 
     /** @private @const */
     this.swipeToDismiss_ = new SwipeToDismiss(
@@ -638,14 +635,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
    */
   swipeGesture_(data) {
     if (data.first) {
-      if (this.swipeStarted_) {
-        dev().error(
-          TAG,
-          'badly ordered swipe gestures: second first without last'
-        );
-      }
-      this.swipeStarted_ = true;
-
       const {sourceElement} = this.getCurrentElement_();
       const parentCarousel = this.getSourceElementParentCarousel_(
         sourceElement
@@ -657,20 +646,6 @@ export class AmpLightboxGallery extends AMP.BaseElement {
         mask: dev().assertElement(this.mask_),
         overlay: dev().assertElement(this.overlay_),
       });
-      return;
-    }
-
-    if (!this.swipeStarted_) {
-      dev().error(
-        TAG,
-        'badly ordered swipe gestures: subsequent without first'
-      );
-      return;
-    }
-
-    if (data.last) {
-      this.swipeToDismiss_.endSwipe(data);
-      this.swipeStarted_ = false;
       return;
     }
 

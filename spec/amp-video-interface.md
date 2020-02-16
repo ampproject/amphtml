@@ -7,16 +7,29 @@ or partially.
 This document describes all the features (**work in progress, incomplete**) that
 these players implement.
 
-These players include:
+## Players
+
+### Generic
+
+- [amp-video](https://amp.dev/documentation/components/amp-video)
+- [amp-video-iframe](https://amp.dev/documentation/components/amp-video-iframe)
+
+### For 3rd party services
 
 - [amp-3q-player](https://amp.dev/documentation/components/amp-3q-player)
 - [amp-brid-player](https://amp.dev/documentation/components/amp-brid-player)
+- [amp-brightcove](https://amp.dev/documentation/components/amp-brightcove)
 - [amp-dailymotion](https://amp.dev/documentation/components/amp-dailymotion)
+- [amp-delight-player](https://amp.dev/documentation/components/amp-delight-player)
 - [amp-gfycat](https://amp.dev/documentation/components/amp-gfycat)
 - [amp-ima-video](https://amp.dev/documentation/components/amp-ima-video)
+- [amp-minute-media-player](https://amp.dev/documentation/components/amp-minute-media-player)
+- [amp-mowplayer](https://amp.dev/documentation/components/amp-mowplayer)
 - [amp-nexxtv-player](https://amp.dev/documentation/components/amp-nexxtv-player)
 - [amp-ooyala-player](https://amp.dev/documentation/components/amp-ooyala-player)
-- [amp-video](https://amp.dev/documentation/components/amp-video)
+- [amp-powr-player](https://amp.dev/documentation/components/amp-powr-player)
+- [amp-vimeo](https://amp.dev/documentation/components/amp-vimeo)
+- [amp-viqeo-player](https://amp.dev/documentation/components/amp-viqeo-player)
 - [amp-wistia-player](https://amp.dev/documentation/components/amp-wistia-player)
 - [amp-youtube](https://amp.dev/documentation/components/amp-youtube)
 

@@ -343,10 +343,10 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
-   * @return {!../extensions/amp-next-page/0.2/service.NextPageService}
+   * @return {!../extensions/amp-next-page/1.0/service.NextPageService}
    */
   static nextPageServiceForDoc(elementOrAmpDoc) {
-    return /** @type {!../extensions/amp-next-page/0.2/service.NextPageService} */ (getServiceForDoc(
+    return /** @type {!../extensions/amp-next-page/1.0/service.NextPageService} */ (getServiceForDoc(
       elementOrAmpDoc,
       'next-page'
     ));
@@ -359,7 +359,7 @@ export class Services {
   static mutatorForDoc(elementOrAmpDoc) {
     return /** @type {!./service/mutator-interface.MutatorInterface} */ (getServiceForDoc(
       elementOrAmpDoc,
-      'resources'
+      'mutator'
     ));
   }
 
@@ -622,22 +622,6 @@ export class Services {
    */
   static localizationServiceV01(win) {
     return getService(win, 'localization-v01');
-  }
-
-  /**
-   * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
-   */
-  static viewerIntegrationVariableServiceForOrNull(win) {
-    return (
-      /** @type {!Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>} */
-      (getElementServiceIfAvailable(
-        win,
-        'viewer-integration-variable',
-        'amp-viewer-integration',
-        true
-      ))
-    );
   }
 
   /**

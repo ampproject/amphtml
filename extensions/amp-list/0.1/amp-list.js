@@ -22,7 +22,7 @@ import {
   DIFF_IGNORE,
   DIFF_KEY,
   markElementForDiffing,
-} from '../../../src/sanitation';
+} from '../../../src/purifier/sanitation';
 import {Deferred} from '../../../src/utils/promise';
 import {
   Layout,
@@ -60,6 +60,7 @@ import {
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 import {isArray, toArray} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
@@ -70,6 +71,9 @@ const TAG = 'amp-list';
 /** @const {string} */
 const TABBABLE_ELEMENTS_QUERY =
   'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"]), audio[controls], video[controls], [contenteditable]:not([contenteditable="false"])';
+
+// Technically the ':' is not considered part of the scheme, but it is useful to include.
+const AMP_STATE_URI_SCHEME = 'amp-state:';
 
 /**
  * @typedef {{
@@ -192,6 +196,7 @@ export class AmpList extends AMP.BaseElement {
     // is missing attributes in the constructor.
     this.initialSrc_ = this.element.getAttribute('src');
 
+    // TODO(amphtml): Decouple "initial content" from diffing in new version.
     if (this.element.hasAttribute('diffable')) {
       // Set container to the initial content, if it exists. This allows
       // us to DOM diff with the rendered result.
@@ -339,6 +344,49 @@ export class AmpList extends AMP.BaseElement {
     );
   }
 
+  /**
+   * Returns true if element's src points to amp-state.
+   *
+   * @param {string} src
+   * @return {boolean}
+   * @private
+   */
+  isAmpStateSrc_(src) {
+    return (
+      isExperimentOn(this.win, 'amp-list-init-from-state') &&
+      startsWith(src, AMP_STATE_URI_SCHEME)
+    );
+  }
+
+  /**
+   * Gets the json an amp-list that has an "amp-state:" uri. For example,
+   * src="amp-state:json.path".
+   *
+   * @param {string} src
+   * @return {Promise<!JsonObject>}
+   * @private
+   */
+  getAmpStateJson_(src) {
+    return Services.bindForDocOrNull(this.element)
+      .then(bind => {
+        userAssert(bind, '"amp-state:" URLs require amp-bind to be installed.');
+        userAssert(
+          !this.ssrTemplateHelper_.isEnabled(),
+          '[amp-list]: "amp-state" URIs cannot be used in SSR mode.'
+        );
+
+        const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
+        return bind.getState(ampStatePath);
+      })
+      .then(json => {
+        userAssert(
+          typeof json !== 'undefined',
+          `[amp-list] No data was found at provided uri: ${src}`
+        );
+        return json;
+      });
+  }
+
   /** @override */
   mutatedAttributesCallback(mutations) {
     dev().info(TAG, 'mutate:', this.element, mutations);
@@ -351,13 +399,17 @@ export class AmpList extends AMP.BaseElement {
     const renderLocalData = data => {
       // Remove the 'src' now that local data is used to render the list.
       this.element.setAttribute('src', '');
+      userAssert(
+        !this.ssrTemplateHelper_.isEnabled(),
+        '[amp-list] "[src]" may not be bound in SSR mode.'
+      );
+
       const array = /** @type {!Array} */ (isArray(data) ? data : [data]);
       this.resetIfNecessary_(/* isFetch */ false);
       return this.scheduleRender_(array, /* append */ false);
     };
 
     const src = mutations['src'];
-    const state = /** @type {!JsonObject} */ (mutations)['state'];
     if (src !== undefined) {
       if (typeof src === 'string') {
         // Defer to fetch in layoutCallback() before first layout.
@@ -370,9 +422,6 @@ export class AmpList extends AMP.BaseElement {
       } else {
         this.user().error(TAG, 'Unexpected "src" type: ' + src);
       }
-    } else if (state !== undefined) {
-      user().error(TAG, '[state] is deprecated, please use [src] instead.');
-      promise = renderLocalData(state);
     }
 
     const isLayoutContainer = mutations['is-layout-container'];
@@ -545,18 +594,29 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   fetchList_(opt_refresh = false) {
-    if (!this.element.getAttribute('src')) {
+    const elementSrc = this.element.getAttribute('src');
+    if (!elementSrc) {
       return Promise.resolve();
     }
+
     let fetch;
     if (this.ssrTemplateHelper_.isEnabled()) {
       fetch = this.ssrTemplate_(opt_refresh);
     } else {
-      fetch = this.prepareAndSendFetch_(opt_refresh).then(data => {
+      fetch = this.isAmpStateSrc_(elementSrc)
+        ? this.getAmpStateJson_(elementSrc)
+        : this.prepareAndSendFetch_(opt_refresh);
+      fetch = fetch.then(data => {
+        // Bail if the src has changed while resolving the xhr request.
+        if (elementSrc !== this.element.getAttribute('src')) {
+          return;
+        }
+
         const items = this.computeListItems_(data);
         if (this.loadMoreEnabled_) {
           this.updateLoadMoreSrc_(/** @type {!JsonObject} */ (data));
         }
+
         return this.scheduleRender_(
           items,
           /*opt_append*/ false,
@@ -620,6 +680,7 @@ export class AmpList extends AMP.BaseElement {
    * @return {!Promise}
    */
   ssrTemplate_(refresh) {
+    const elementSrc = this.element.getAttribute('src');
     let request;
     // Construct the fetch init data that would be called by the viewer
     // passed in as the 'originalRequest'.
@@ -678,7 +739,13 @@ export class AmpList extends AMP.BaseElement {
           throw user().createError('Error proxying amp-list templates', error);
         }
       )
-      .then(data => this.scheduleRender_(data, /* append */ false));
+      .then(data => {
+        // Bail if the src has changed while resolving the xhr request.
+        if (elementSrc !== this.element.getAttribute('src')) {
+          return;
+        }
+        this.scheduleRender_(data, /* append */ false);
+      });
   }
 
   /**
@@ -830,6 +897,13 @@ export class AmpList extends AMP.BaseElement {
       return Promise.resolve(elements);
     }
 
+    if (!binding) {
+      user().warn(
+        TAG,
+        'Missing "binding" attribute. Using binding="refresh" is recommended for performance.'
+      );
+    }
+
     /**
      * @param {!../../../extensions/amp-bind/0.1/bind-impl.Bind} bind
      * @return {!Promise<!Array<!Element>>}
@@ -915,6 +989,12 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * Updates `this.container_` by DOM diffing its children against `elements`.
+   *
+   * TODO(amphtml): The diffing feature is dark-launched and highly complex.
+   * See markElementForDiffing() and markContainerForDiffing_() for examples.
+   * Validate whether or not this complexity is warranted before fully launching
+   * (e.g. in a new version) and pushing documentation.
+   *
    * @param {!Element} container
    * @param {!Array<!Element>} elements
    * @private

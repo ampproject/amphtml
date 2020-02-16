@@ -393,13 +393,13 @@ The following config sends out the first request ping after 1 second and then se
 
 The `amp-analytics` component defines many basic variables that can be used in requests. A list of all such variables is available in the [`amp-analytics` Variables Guide](./analytics-vars.md). In addition, all of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) are also supported.
 
-The `vars` configuration object can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information. Arrays can be used to specify a list of values that should be URL encoded separately while preserving the comma delimiter.
+The `vars` configuration object can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information. Arrays can be used to specify a list of values that should be URL encoded separately while preserving the comma delimiter. Substituting built-in and custom variables within arrays is supported, except when the variable expands into another array.
 
 ```json
 "vars": {
   "account": "ABC123",
   "countryCode": "tr",
-  "tags": ["Swift,Jonathan", "Gulliver's Travels"]
+  "tags": ["Swift,Jonathan", "Gulliver's Travels", "${account}"]
 }
 ```
 

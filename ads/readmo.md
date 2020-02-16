@@ -28,7 +28,7 @@ ReadMo only requires a section code to run. Please work your account manager to 
   height="400"
   type="readmo"
   layout="responsive"
-  data-url="https://yoursite.com"
+  data-url="https://yourdomain.com"
   data-infinite="true"
   data-section="1234567"
 >

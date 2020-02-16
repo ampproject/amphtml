@@ -79,13 +79,13 @@ export class DraggableDrawer extends AMP.BaseElement {
     /** @private {!Array<!Element>} AMP components within the drawer. */
     this.ampComponents_ = [];
 
-    /** @private {?Element} */
+    /** @protected {?Element} */
     this.containerEl_ = null;
 
     /** @protected {?Element} */
     this.contentEl_ = null;
 
-    /** @private {?Element} */
+    /** @protected {?Element} */
     this.headerEl_ = null;
 
     /** @protected {!DrawerState} */
@@ -266,14 +266,24 @@ export class DraggableDrawer extends AMP.BaseElement {
       return;
     }
 
-    event.stopPropagation();
-
     const coordinates = this.getClientTouchCoordinates_(event);
     if (!coordinates) {
       return;
     }
 
     const {x, y} = coordinates;
+
+    this.touchEventState_.swipingUp = y < this.touchEventState_.lastY;
+    this.touchEventState_.lastY = y;
+
+    if (
+      this.state_ === DrawerState.CLOSED &&
+      !this.touchEventState_.swipingUp
+    ) {
+      return;
+    }
+
+    event.stopPropagation();
 
     if (this.touchEventState_.isSwipeY === null) {
       this.touchEventState_.isSwipeY =
@@ -283,9 +293,6 @@ export class DraggableDrawer extends AMP.BaseElement {
         return;
       }
     }
-
-    this.touchEventState_.swipingUp = y < this.touchEventState_.lastY;
-    this.touchEventState_.lastY = y;
 
     this.onSwipeY_({
       event,
@@ -475,7 +482,7 @@ export class DraggableDrawer extends AMP.BaseElement {
 
   /**
    * Fully closes the drawer from its current position.
-   * @private
+   * @protected
    */
   closeInternal_() {
     if (this.state_ === DrawerState.CLOSED) {

@@ -24,10 +24,10 @@ const {
   extensionBundles,
   verifyExtensionBundles,
 } = require('../compile/bundles.config');
-const {compileJs, mkdirSync} = require('./helpers');
 const {endBuildStep} = require('./helpers');
 const {isTravisBuild} = require('../common/travis');
 const {jsifyCssAsync} = require('./jsify-css');
+const {maybeToEsmName, compileJs, mkdirSync} = require('./helpers');
 const {vendorConfigs} = require('./vendor-configs');
 
 const {green, red, cyan} = colors;
@@ -154,6 +154,19 @@ function maybeInitializeExtensions(
 }
 
 /**
+ * Set the extensions to build from example documents
+ * (for internal use by `gulp performance`)
+ *
+ * @param {Array<string>} examples Path to example documents
+ */
+function setExtensionsToBuildFromDocuments(examples) {
+  extensionsToBuild = dedupe([
+    ...DEFAULT_EXTENSION_SET,
+    ...getExtensionsFromArg(examples.join(',')),
+  ]);
+}
+
+/**
  * Process the command line arguments --noextensions, --extensions, and
  * --extensions_from and return a list of the referenced extensions.
  *
@@ -204,6 +217,10 @@ function parseExtensionFlags(preBuild = false) {
   }
 
   const buildOrPreBuild = preBuild ? 'pre-build' : 'build';
+  const coreRuntimeOnlyMessage =
+    green('⤷ Use ') +
+    cyan('--core_runtime_only ') +
+    green('to build just the core runtime.');
   const noExtensionsMessage =
     green('⤷ Use ') +
     cyan('--noextensions ') +
@@ -223,7 +240,9 @@ function parseExtensionFlags(preBuild = false) {
     cyan('foo.amp.html') +
     green('.');
 
-  if (preBuild) {
+  if (argv.core_runtime_only) {
+    log(green('Building just the core runtime.'));
+  } else if (preBuild) {
     log(
       green('Pre-building extension(s):'),
       cyan(getExtensionsToBuild(preBuild).join(', '))
@@ -242,6 +261,7 @@ function parseExtensionFlags(preBuild = false) {
     } else {
       log(green('Building all AMP extensions.'));
     }
+    log(coreRuntimeOnlyMessage);
     log(noExtensionsMessage);
     log(extensionsMessage);
     log(inaboxSetMessage);
@@ -349,6 +369,32 @@ async function doBuildExtension(extensions, extension, options) {
 }
 
 /**
+ * Watches the contents of an extension directory. When a file in the given path
+ * changes, the extension is rebuilt.
+ *
+ * @param {string} path
+ * @param {string} name
+ * @param {string} version
+ * @param {string} latestVersion
+ * @param {boolean} hasCss
+ * @param {?Object} options
+ */
+function watchExtension(path, name, version, latestVersion, hasCss, options) {
+  watch(path + '/**/*', function() {
+    const bundleComplete = buildExtension(
+      name,
+      version,
+      latestVersion,
+      hasCss,
+      {...options, continueOnError: true}
+    );
+    if (options.onWatchBuild) {
+      options.onWatchBuild(bundleComplete);
+    }
+  });
+}
+
+/**
  * Copies extensions from
  * extensions/$name/$version/$name.js
  * to
@@ -388,18 +434,12 @@ async function buildExtension(
   // recompiles JS.
   if (options.watch) {
     options.watch = false;
-    watch(path + '/**/*', function() {
-      const bundleComplete = buildExtension(
-        name,
-        version,
-        latestVersion,
-        hasCss,
-        {...options, continueOnError: true}
-      );
-      if (options.onWatchBuild) {
-        options.onWatchBuild(bundleComplete);
-      }
-    });
+    watchExtension(path, name, version, latestVersion, hasCss, options);
+    // When an ad network extension is being watched, also watch amp-a4a.
+    if (name.match(/amp-ad-network-.*-impl/)) {
+      const a4aPath = `extensions/amp-a4a/${version}`;
+      watchExtension(a4aPath, name, version, latestVersion, hasCss, options);
+    }
   }
   if (hasCss) {
     mkdirSync('build');
@@ -504,10 +544,12 @@ async function buildExtensionJs(path, name, version, latestVersion, options) {
   const aliasBundle = extensionAliasBundles[name];
   const isAliased = aliasBundle && aliasBundle.version == version;
   if (isAliased) {
-    const src = `${name}-${version}${options.minify ? '' : '.max'}.js`;
-    const dest = `${name}-${aliasBundle.aliasedVersion}${
-      options.minify ? '' : '.max'
-    }.js`;
+    const src = maybeToEsmName(
+      `${name}-${version}${options.minify ? '' : '.max'}.js`
+    );
+    const dest = maybeToEsmName(
+      `${name}-${aliasBundle.aliasedVersion}${options.minify ? '' : '.max'}.js`
+    );
     fs.copySync(`dist/v0/${src}`, `dist/v0/${dest}`);
     fs.copySync(`dist/v0/${src}.map`, `dist/v0/${dest}.map`);
   }
@@ -530,4 +572,5 @@ module.exports = {
   getExtensionsToBuild,
   maybeInitializeExtensions,
   parseExtensionFlags,
+  setExtensionsToBuildFromDocuments,
 };
