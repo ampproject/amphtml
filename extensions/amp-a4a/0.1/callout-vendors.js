@@ -176,10 +176,10 @@ const RTC_VENDORS = jsonConfiguration({
   },
   browsi: {
     url:
-      'https://amp.browsiprod.com/predict?pvid=PAGEVIEWID_64&ot=ELEMENT_POS&pk=PUB_KEY&sk=SITE_KEY&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&ai=ATTR(data-amp-slot-index)&aq=ATTR(data-google-query-id)&t=ATTR(type)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
+      'https://amp.browsiprod.com/predict?pvid=PAGEVIEWID_64&ot=ELEMENT_POS&ul=SCROLL_TOP&pl=PAGE_HEIGHT&bks=BKG_STATE&pk=PUB_KEY&sk=SITE_KEY&h=ATTR(height)&adix=ATTR(data-amp-slot-index)&ref=REFERRER&url=HREF',
     macros: ['PUB_KEY', 'SITE_KEY'],
     errorReportingUrl:
-      'https://amp.browsiprod.com/predictError?e=ERROR_TYPE&h=HREF',
+      'https://events.browsiprod.com/events/amp?e=ERROR_TYPE&h=HREF&et=predict_error',
     disableKeyAppend: true,
   },
 });
