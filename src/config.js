@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import {escapeCssSelectorIdent} from './css';
-import {map} from './utils/object';
-
 /**
  * Allows for runtime configuration. Internally, the runtime should
  * use the src/config.js module for various constants. We can use the
@@ -37,18 +34,21 @@ const env = self.AMP_CONFIG || {};
  * @private
  */
 function getMetaUrl(name) {
+  // Avoid exceptions in unit tests
   if (!self.document || !self.document.head) {
     return null;
   }
-  const metaEl = self.document.head.querySelector(
-    `meta[name="${escapeCssSelectorIdent(name)}"]`
+
+  const metaEl = self.document.head./*OK*/ querySelector(
+    `meta[name="${name}"]`
   );
   return (metaEl && metaEl.getAttribute('content')) || null;
 }
 
 /** @type {!Object<string, ?string>} */
-const metaUrls = map();
-metaUrls['runtime-host'] = getMetaUrl('runtime-host');
+const metaUrls = {
+  'runtime-host': getMetaUrl('runtime-host'),
+};
 
 const thirdPartyFrameRegex =
   typeof env['thirdPartyFrameRegex'] == 'string'
