@@ -332,6 +332,7 @@ export class ResourcesImpl {
         dev().fine(TAG_, 'force build:', r.debugid);
       }
 
+      // TODO(willchou): Risk of long task due to long microtask queue?
       return r.whenBuilt().then(() => {
         const wasIntersecting = r.isInViewport();
         let isDisplayed = this.measureResource_(r, clientRect);
@@ -360,6 +361,8 @@ export class ResourcesImpl {
 
         // For just-unloaded resources, setInViewport() will be called
         // as part of Resource.unlayout().
+        // TODO(willchou): Decouple toggleLoading(true) from viewportCallback()
+        // and make it lazier (only trigger on 1vp).
         r.setInViewport(isIntersecting);
 
         // TODO(willchou): The lack of "update on scroll throttling" means
