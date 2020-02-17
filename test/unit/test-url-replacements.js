@@ -1931,12 +1931,18 @@ describes.sandboxed('UrlReplacements', {}, env => {
           );
         });
 
-        it('should concatenate and respect QUERY_PARAM from addparams', () => {
-          a.href = 'http://whitelisted.com/link?first=QUERY_PARAM(foo,YYYY)';
-          a.setAttribute('data-amp-addparams', 'second=QUERY_PARAM(bar,XXXX)');
+        it('should concatenate and expand additional params w/ whitelist', () => {
+          a.href = 'http://example.com/link?first=QUERY_PARAM(src,YYYY)';
+          a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+          a.setAttribute(
+            'data-amp-addparams',
+            'second=QUERY_PARAM(baz,XXXX)&third=CLIENT_ID(_ga)&' +
+              'fourth=link123'
+          );
           urlReplacements.maybeExpandLink(a, null);
           expect(a.href).to.equal(
-            'http://whitelisted.com/link?first=QUERY_PARAM(foo,YYYY)&second=QUERY_PARAM(bar,XXXX)'
+            'http://example.com/link?first=YYYY&second=XXXX&' +
+              'third=CLIENT_ID(_ga)&fourth=link123'
           );
         });
 
