@@ -193,7 +193,7 @@ export class ResourcesImpl {
       this.ampdoc.getVisibilityState()
     );
 
-    /** @private @const {?IntersectionObserver} */
+    /** @private {?IntersectionObserver} */
     this.intersectionObserver_ = null;
 
     if (isExperimentOn(this.win, 'intersect-resources')) {
@@ -203,7 +203,6 @@ export class ResourcesImpl {
       // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
       // supports it via {root: document}, which throws on other browsers.
       try {
-        /** @private @const {?IntersectionObserver} */
         this.intersectionObserver_ = new IntersectionObserver(
           this.intersects_.bind(this),
           {
