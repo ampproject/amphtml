@@ -51,18 +51,24 @@ describes.realWin(
       const viewer = Services.viewerForDoc(env.ampdoc);
       env.sandbox.stub(Services, 'viewerForDoc').returns(viewer);
 
-      registerServiceBuilder(win, 'performance', () => ({
-        isPerformanceTrackingOn: () => false,
-      }));
+      registerServiceBuilder(win, 'performance', function() {
+        return {
+          isPerformanceTrackingOn: () => false,
+        };
+      });
 
       const storeService = new AmpStoryStoreService(win);
-      registerServiceBuilder(win, 'story-store', () => storeService);
+      registerServiceBuilder(win, 'story-store', function() {
+        return storeService;
+      });
 
       storyEl = win.document.createElement('amp-story');
       win.document.body.appendChild(storyEl);
 
       const localizationService = new LocalizationService(win);
-      registerServiceBuilder(win, 'localization', () => localizationService);
+      registerServiceBuilder(win, 'localization', function() {
+        return localizationService;
+      });
 
       AmpStory.isBrowserSupported = () => true;
 

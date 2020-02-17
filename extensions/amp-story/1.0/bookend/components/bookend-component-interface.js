@@ -54,9 +54,9 @@ export class BookendComponentInterface {
   /**
    * Builds the DOM element for the component.
    * @param {../bookend-component.BookendComponentDef} unusedComponentJson
-   * @param {!Document} unusedDoc
+   * @param {!Window} unusedWin
    * @param {!Object} unusedData
    * @return {!Element}
    */
-  buildElement(unusedComponentJson, unusedDoc, unusedData) {}
+  buildElement(unusedComponentJson, unusedWin, unusedData) {}
 }

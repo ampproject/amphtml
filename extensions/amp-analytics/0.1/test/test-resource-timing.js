@@ -26,11 +26,11 @@ export function newResourceTimingSpec() {
   return {
     'resources': {
       'foo_bar': {
-        'host': '(foo|bar).example.com',
+        'host': '(foo|bar).example.test',
         'path': '/lib.js',
       },
       'foo_style': {
-        'host': 'example.com',
+        'host': 'example.test',
         'path': '.*.css',
       },
     },
@@ -89,6 +89,7 @@ export function newPerformanceResourceTiming(
 describes.realWin('resourceTiming', {amp: true}, env => {
   let win;
   let ampdoc;
+  let element;
 
   /**
    * @param {!Array<!PerformanceResourceTiming} fakeEntries
@@ -102,7 +103,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     expectedResult
   ) {
     env.sandbox.stub(win.performance, 'getEntriesByType').returns(fakeEntries);
-    return getResourceTiming(ampdoc, resourceTimingSpec, Date.now()).then(
+    return getResourceTiming(element, resourceTimingSpec, Date.now()).then(
       result => {
         expect(result).to.equal(expectedResult);
       }
@@ -112,12 +113,15 @@ describes.realWin('resourceTiming', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     ampdoc = env.ampdoc;
+    element = document.createElement('amp-analytics');
+    element.getAmpDoc = () => ampdoc;
+    env.win.document.body.appendChild(element);
     installVariableServiceForTesting(ampdoc);
     installLinkerReaderService(win);
   });
 
   it('should return empty if the performance API is not supported', () => {
-    return getResourceTiming(ampdoc, newResourceTimingSpec(), Date.now()).then(
+    return getResourceTiming(element, newResourceTimingSpec(), Date.now()).then(
       result => {
         expect(result).to.equal('');
       }
@@ -126,7 +130,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty when resource timing is not supported', () => {
     // Performance API (ampdoc.performance) doesn't support resource timing.
-    return getResourceTiming(ampdoc, newResourceTimingSpec(), Date.now()).then(
+    return getResourceTiming(element, newResourceTimingSpec(), Date.now()).then(
       result => {
         expect(result).to.equal('');
       }
@@ -135,7 +139,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty when start time has passed 1s', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -144,14 +148,16 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     );
     const spec = newResourceTimingSpec();
     env.sandbox.stub(win.performance, 'getEntriesByType').returns([entry]);
-    return getResourceTiming(win, spec, Date.now() - 60 * 1000).then(result => {
-      expect(result).to.equal('');
-    });
+    return getResourceTiming(element, spec, Date.now() - 60 * 1000).then(
+      result => {
+        expect(result).to.equal('');
+      }
+    );
   });
 
   it('should return empty if resourceTimingSpec is empty', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -163,7 +169,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty if encoding spec is empty', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -177,7 +183,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty if encoding spec is missing delim', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -191,7 +197,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should return empty if encoding spec is missing entry', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -205,7 +211,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should serialize matching entries', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -219,7 +225,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should serialize multiple matching entries', () => {
     const entry1 = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -227,7 +233,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       false
     );
     const entry2 = newPerformanceResourceTiming(
-      'http://bar.example.com/lib.js',
+      'http://bar.example.test/lib.js',
       'script',
       700,
       100,
@@ -243,7 +249,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should match against the first spec', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -255,7 +261,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     // Note that both spec'd resources match.
     spec.resources = {
       'foo_bar': {
-        'host': '(foo|bar).example.com',
+        'host': '(foo|bar).example.test',
         'path': '/lib.js',
       },
       'any': {},
@@ -266,7 +272,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should accept empty per-resource specs', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -279,7 +285,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     spec.resources = {
       'any': {},
       'foo_bar': {
-        'host': '(foo|bar).example.com',
+        'host': '(foo|bar).example.test',
         'path': '/lib.js',
       },
     };
@@ -289,7 +295,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should should only report resources if the host matches', () => {
     const entry1 = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js',
+      'http://foo.example.test/lib.js',
       'script',
       100,
       500,
@@ -297,7 +303,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       false
     );
     const entry2 = newPerformanceResourceTiming(
-      'http://baz.example.com/lib.js',
+      'http://baz.example.test/lib.js',
       'script',
       700,
       100,
@@ -306,13 +312,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     );
 
     const spec = newResourceTimingSpec();
-    spec.resources = {'foo': {'host': 'foo.example.com'}};
+    spec.resources = {'foo': {'host': 'foo.example.test'}};
     return runSerializeTest([entry1, entry2], spec, 'foo-script-100-500-7200');
   });
 
   it('should should only report resources if the path matches', () => {
     const entry1 = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js',
+      'http://foo.example.test/lib.js',
       'script',
       100,
       500,
@@ -320,7 +326,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       false
     );
     const entry2 = newPerformanceResourceTiming(
-      'http://foo.example.com/extra.js',
+      'http://foo.example.test/extra.js',
       'script',
       700,
       100,
@@ -330,14 +336,14 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
     const spec = newResourceTimingSpec();
     spec.resources = {
-      'foo': {'host': 'foo.example.com', 'path': 'lib.js'},
+      'foo': {'host': 'foo.example.test', 'path': 'lib.js'},
     };
     return runSerializeTest([entry1, entry2], spec, 'foo-script-100-500-7200');
   });
 
   it('should should only report resources if the query matches', () => {
     const entry1 = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=200',
+      'http://foo.example.test/lib.js?v=200',
       'script',
       100,
       500,
@@ -345,7 +351,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       false
     );
     const entry2 = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=test',
+      'http://foo.example.test/lib.js?v=test',
       'script',
       700,
       100,
@@ -356,7 +362,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     const spec = newResourceTimingSpec();
     spec.resources = {
       'foo': {
-        'host': 'foo.example.com',
+        'host': 'foo.example.test',
         'path': 'lib.js',
         'query': '^\\?v=\\d+',
       },
@@ -366,7 +372,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should replace ${key} and ${initiatorType}', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/style.css?v=200',
+      'http://foo.example.test/style.css?v=200',
       'link',
       100,
       500,
@@ -380,7 +386,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should replace ${startTime} and ${duration}', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/style.css?v=200',
+      'http://foo.example.test/style.css?v=200',
       'link',
       100,
       500,
@@ -394,7 +400,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should replace ${domainLookupTime} and ${tcpConnectTime}', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/style.css?v=200',
+      'http://foo.example.test/style.css?v=200',
       'link',
       100,
       500,
@@ -408,7 +414,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should replace ${serverResponseTime} and ${networkTransferTime}', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/style.css?v=200',
+      'http://foo.example.test/style.css?v=200',
       'link',
       100,
       500,
@@ -422,7 +428,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should replace ${transferSize}, ${encodedBodySize}, ${decodedBodySize}', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/style.css?v=200',
+      'http://foo.example.test/style.css?v=200',
       'link',
       100,
       500,
@@ -437,7 +443,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should use the base specified in encoding', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/style.css?v=200',
+      'http://foo.example.test/style.css?v=200',
       'link',
       100,
       500,
@@ -453,7 +459,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should reject invalid bases (over 36)', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/style.css?v=200',
+      'http://foo.example.test/style.css?v=200',
       'link',
       100,
       500,
@@ -470,7 +476,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should not replace other analytics variables', () => {
     const entry1 = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -478,7 +484,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       false
     );
     const entry2 = newPerformanceResourceTiming(
-      'http://bar.example.com/lib.js',
+      'http://bar.example.test/lib.js',
       'script',
       700,
       100,
@@ -493,7 +499,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should URL-encode the results', () => {
     const entry1 = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       500,
@@ -501,7 +507,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       false
     );
     const entry2 = newPerformanceResourceTiming(
-      'http://bar.example.com/lib.js',
+      'http://bar.example.test/lib.js',
       'script',
       700,
       100,
@@ -520,7 +526,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should only include resources downloaded after `responseAfter`', () => {
     const entry1 = newPerformanceResourceTiming(
-      'http://foo.example.com/lib.js?v=123',
+      'http://foo.example.test/lib.js?v=123',
       'script',
       100,
       200,
@@ -528,7 +534,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       false
     );
     const entry2 = newPerformanceResourceTiming(
-      'http://bar.example.com/lib.js',
+      'http://bar.example.test/lib.js',
       'script',
       200,
       200,
@@ -536,7 +542,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       true
     );
     const entry3 = newPerformanceResourceTiming(
-      'http://bar.example.com/lib.js',
+      'http://bar.example.test/lib.js',
       'script',
       300,
       200,
@@ -556,7 +562,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should reject invalid (non-numeric) responseAfter fields', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/style.css?v=200',
+      'http://foo.example.test/style.css?v=200',
       'link',
       100,
       500,
@@ -572,7 +578,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should update responseAfter', () => {
     const initialEntry = newPerformanceResourceTiming(
-      'https://example.com/lib.css',
+      'https://example.test/lib.css',
       'link',
       100,
       400,
@@ -580,7 +586,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
       false
     );
     const laterEntry = newPerformanceResourceTiming(
-      'https://bar.example.com/lib.js',
+      'https://bar.example.test/lib.js',
       'script',
       200,
       500,
@@ -604,13 +610,13 @@ describes.realWin('resourceTiming', {amp: true}, env => {
     const spec = newResourceTimingSpec();
     spec['encoding']['entry'] = '${initiatorType}.${startTime}.${duration}';
 
-    return getResourceTiming(ampdoc, spec, Date.now())
+    return getResourceTiming(element, spec, Date.now())
       .then(result => {
         expect(result).to.equal('link.100.400');
         expect(spec['responseAfter']).to.equal(600);
 
         // Check resource timings a second time.
-        return getResourceTiming(ampdoc, spec, Date.now());
+        return getResourceTiming(element, spec, Date.now());
       })
       .then(result => {
         expect(result).to.equal('script.200.500');
@@ -650,7 +656,7 @@ describes.realWin('resourceTiming', {amp: true}, env => {
 
   it('should not report if resourceTimingSpec is done', () => {
     const entry = newPerformanceResourceTiming(
-      'http://foo.example.com/style.css?v=200',
+      'http://foo.example.test/style.css?v=200',
       'link',
       100,
       500,
