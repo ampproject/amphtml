@@ -143,7 +143,7 @@ if (window && window.name) {
 // Add event listener for focus for a11y
 window.addEventListener('focus', () => {
   const headerElement = document.querySelector('h1');
-  console.log('Focused!', headerElement);
+  console.log('I am focused after you clicked on me!', headerElement);
   if (headerElement) {
     headerElement.focus();
   }

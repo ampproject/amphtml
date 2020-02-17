@@ -300,7 +300,7 @@ describe('Google A4A utils', () => {
       expect(
         getAmpRuntimeTypeParameter({
           AMP_CONFIG: {type: 'experimental'},
-          location: {origin: 'https://www.example.com'},
+          location: {origin: 'https://www.example.test'},
         })
       ).to.be.null;
     });

@@ -175,7 +175,7 @@ Now that you have all of the files copied locally you can actually build the cod
 
   An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
 
-- Closure Compiler is automatically installed by Yarn, but it requires Java 8 which you need to install separately. AMP's version of Closure Compiler won't run with newer versions of Java. Download an installer for Mac, Linux or Windows [here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
+- Closure Compiler is automatically installed by Yarn, but it requires Java 8 which you need to install separately. AMP's version of Closure Compiler won't run with newer versions of Java. Download an installer for Mac, Linux or Windows [here](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
 
   - Note: If you are using Mac OS and have multiple versions of Java installed, make sure you are using Java 8 by adding this to `~/.bashrc`:
 
