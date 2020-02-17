@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-reddit
 
-Displays a Reddit comment or post embed.
-
 ## Examples
 
 Use the `amp-reddit` component to embed a Reddit post or comment.

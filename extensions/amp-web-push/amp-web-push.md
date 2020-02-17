@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Allows users to subscribe to web push notifications.
+  text: Allows users to subscribe to [web push notifications](https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/).
 ---
 
 <!--
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-web-push
-
-Allows users to subscribe to <a href="https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/">web push notifications</a>.
 
 ## Behavior
 

@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-video-docking
 
-Functionality for videos that minimize ("dock") to a corner or a custom position on scroll.
-
 ## Behavior
 
 The `amp-video-docking` extension allows videos to be minimized to a corner or

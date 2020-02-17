@@ -26,8 +26,6 @@ limitations under the License.
 
 # amp-bind
 
-Adds custom interactivity with data binding and expressions.
-
 ## Usage
 
 The `amp-bind` component enables custom stateful interactivity on AMP pages.

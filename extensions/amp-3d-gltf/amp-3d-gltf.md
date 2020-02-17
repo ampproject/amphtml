@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-3d-gltf
 
-Displays GL Transmission Format (gITF) 3D models.
-
 ## Usage
 
 The `amp-3d-gltf` component displays 3D models that are in gITF format.

@@ -5,7 +5,7 @@ formats:
   - stories
   - ads
 teaser:
-  text: Triggers and monitors the loading of custom fonts.
+  text: Trigger and monitor the loading of custom fonts on AMP pages.
 ---
 
 <!---
@@ -25,8 +25,6 @@ limitations under the License.
 -->
 
 # amp-font
-
-Trigger and monitor the loading of custom fonts on AMP pages.
 
 ## Behavior
 

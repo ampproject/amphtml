@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a Vimeo video.
+  text: Displays a [Vimeo](https://vimeo.com) video.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-vimeo
-
-Displays a <a href="https://vimeo.com">Vimeo</a> video.
 
 ## Example
 

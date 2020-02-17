@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays the Kaltura Player as used in Kaltura's Video Platform.
+  text: Displays the Kaltura Player as used in Kaltura's [Video Platform](https://corp.kaltura.com/).
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-kaltura-player
-
-An <code>amp-kaltura-player</code> component displays the Kaltura Player as used in Kaltura's <a href="https://corp.kaltura.com/">Video Platform</a>.
 
 ## Example
 

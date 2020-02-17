@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-fx-flying-carpet
 
-A flying carpet wraps its children in a unique full-screen scrolling container. In particular, this allows you to display a full-screen ad without taking up the entire viewport, making for a better user experience.
-
 [tip type="note"]
 Check if your ad network permits use of flying carpets when implementing the `amp-fx-flying-carpet` to display adds.
 [/tip]

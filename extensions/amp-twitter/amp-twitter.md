@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Displays a Twitter tweet.
+  text: Displays a Twitter Tweet or Moment.
 ---
 
 <!---
@@ -24,8 +24,6 @@ limitations under the License.
 -->
 
 # amp-twitter
-
-Displays a Twitter Tweet or Moment.
 
 ## Behavior
 

@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a Brid.tv player.
+  text: Displays a [Brid.tv](https://www.brid.tv/) player.
 ---
 
 <!---
@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-brid-player
 
-An <code>amp-brid-player</code> displays the Brid Player used in <a href="https://www.brid.tv/">Brid.tv</a> Video Platform.
+An `amp-brid-player` displays the Brid Player used in [Brid.tv](https://www.brid.tv/) Video Platform.
 
 ## Example
 

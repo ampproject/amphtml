@@ -4,7 +4,7 @@ formats:
   - websites
   - ads
 teaser:
-  text: Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
+  text: Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with other AMP components.
 ---
 
 <!---
@@ -24,9 +24,6 @@ limitations under the License.
 -->
 
 # amp-position-observer
-
-Monitors the position of an element within the viewport as a user scrolls, and dispatches events that can be used with
-other AMP components.
 
 ## Overview
 

@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a cloud-hosted Mow Player.
+  text: Displays a cloud-hosted [Mow Player](https://mowplayer.com/).
 ---
 
 <!--
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-mowplayer
-
-Displays a cloud-hosted <a href="https://mowplayer.com/">Mow Player</a>.
 
 ## Behavior
 

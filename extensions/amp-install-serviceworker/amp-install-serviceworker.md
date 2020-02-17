@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Installs a ServiceWorker.
+  text: Installs a [ServiceWorker](https://developers.google.com/web/fundamentals/primers/service-worker/) for the current page.
 ---
 
 <!---
@@ -24,8 +24,6 @@ limitations under the License.
 -->
 
 # amp-install-serviceworker
-
-Installs a [ServiceWorker](https://developers.google.com/web/fundamentals/primers/service-worker/) for the current page.
 
 ## Behavior
 

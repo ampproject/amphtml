@@ -26,7 +26,7 @@ limitations under the License.
 
 # amp-video
 
-A replacement for the HTML5 <code>video</code> tag; only to be used for direct HTML5 video file embeds.
+A replacement for the HTML5 `video` tag; only to be used for direct HTML5 video file embeds.
 
 ## Behavior
 

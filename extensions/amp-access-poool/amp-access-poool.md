@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Displays a Poool paywall. See poool.tech and demo.poool.tech for more details. amp-access-poool is based on, and requires, AMP Access.
+  text: Displays a Poool paywall.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-access-poool
-
-Displays a Poool paywall
 
 See [poool.tech](https://poool.tech) and [demo.poool.tech](https://demo.poool.tech) for more details. `amp-access-poool` is based on, and requires,
 [AMP Access](https://amp.dev/documentation/components/amp-access).

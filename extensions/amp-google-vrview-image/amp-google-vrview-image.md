@@ -26,8 +26,6 @@ limitations under the License.
 
 # amp-google-vrview-image
 
-VR image
-
 ## Overview
 
 See [Google VR View](https://developers.google.com/vr/concepts/vrview) for more details.

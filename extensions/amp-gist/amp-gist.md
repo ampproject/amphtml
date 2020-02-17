@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Creates an iframe and displays a Gist from GitHub
+  text: Creates an iframe and displays a [GitHub Gist](https://gist.github.com/).
 ---
 
 <!--
@@ -24,12 +24,6 @@ limitations under the License.
 -->
 
 # amp-gist
-
-Displays a <a href="https://gist.github.com/">GitHub Gist</a>.
-
-## Behavior
-
-This extension creates an iframe and displays a [gist from GitHub](https://help.github.com/articles/about-gists/).
 
 #### Example: Embedding multiple files
 

@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays visualizations created by using Vega visualization grammar.
+  text: Displays visualizations created by using [Vega](https://vega.github.io/vega/) visualization grammar.
 experimental: true
 ---
 
@@ -24,8 +24,6 @@ limitations under the License.
 -->
 
 # amp-viz-vega
-
-Displays visualizations created using <a href="https://vega.github.io/vega/">Vega</a> visualization grammar.
 
 ## What is Vega?
 

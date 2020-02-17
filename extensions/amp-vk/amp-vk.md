@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Embeds a VK post or poll widget.
+  text: Embeds a [VK](https://vk.com/) post or poll widget.
 ---
 
 <!--
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-vk
-
-Embeds a <a href="https://vk.com/">VK</a> post or poll widget.
 
 ## Behavior
 

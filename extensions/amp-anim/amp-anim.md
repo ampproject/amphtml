@@ -26,8 +26,6 @@ limitations under the License.
 
 # amp-anim
 
-A runtime-managed animated image, typically a GIF.
-
 ## Behavior
 
 The `amp-anim` component is almost identical to the `amp-img` element, but allows the AMP runtime to reduce CPU usage when the animation is off-screen. Like [other elements](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders), it supports an optional `placeholder` child, to display while the `src` file is loading:

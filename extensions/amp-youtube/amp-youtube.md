@@ -4,7 +4,7 @@ formats:
   - websites
   - ads
 teaser:
-  text: Displays a YouTube video.
+  text: Displays a [YouTube](https://www.youtube.com/) video.
 ---
 
 <!---
@@ -24,8 +24,6 @@ limitations under the License.
 -->
 
 # amp-youtube
-
-Displays a <a href="https://www.youtube.com/">YouTube</a> video.
 
 ## Example
 

@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a simple embedded Hulu video.
+  text: Displays a simple embedded [Hulu](http://www.hulu.com) video.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-hulu
-
-Displays a simple embedded <a href="http://www.hulu.com">Hulu</a> video.
 
 ## Example
 

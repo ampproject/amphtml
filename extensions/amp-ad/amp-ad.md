@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-ad / amp-embed
 
-A container to display an ad. The <code>amp-embed</code> is an alias to the <code>amp-ad</code> tag, deriving all of its functionality with a different tag name. Use <code>amp-embed</code> when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.
+The `amp-embed` is an alias to the `amp-ad` tag, deriving all of its functionality with a different tag name. Use `amp-embed` when semantically more accurate. AMP documents only support ads/embeds served via HTTPS.
 
 {% call callout('Note', type='note') %}
 The specification of `amp-ad` / `amp-embed` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.

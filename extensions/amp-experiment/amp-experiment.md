@@ -25,7 +25,7 @@ limitations under the License.
 
 # amp-experiment
 
-Conduct user experience experiments (such as A/B testing and multivariate testing) on an AMP document and collect corresponding data with <code>amp-pixel</code> or <code>amp-analytics</code>.
+Conduct user experience experiments (such as A/B testing and multivariate testing) on an AMP document and collect corresponding data with `amp-pixel` or `amp-analytics`.
 
 ## Behavior
 

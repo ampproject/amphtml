@@ -24,9 +24,9 @@ limitations under the License.
 
 # amp-riddle-quiz
 
-Displays any <a href="https://www.riddle.com/">Riddle</a> item content (e.g., quiz, list, poll, etc.)
+Displays any [Riddle](https://www.riddle.com/) item content (e.g., quiz, list, poll, etc.)
 
-This component embeds <a href="https://www.riddle.com/">Riddle</a> content (e.g., quiz, list, poll, etc.).
+This component embeds [Riddle](https://www.riddle.com/) content (e.g., quiz, list, poll, etc.).
 
 ## Example
 

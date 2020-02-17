@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: An amp-powr-player component displays the Powr Player as configured in the Powr platform.
+  text: An `amp-powr-player` component displays the Powr Player as configured in the [Powr](https://powr.com) platform.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-powr-player
-
-An <code>amp-powr-player</code> component displays the Powr Player as configured in the <a href="https://powr.com">Powr</a> platform.
 
 ## Example
 

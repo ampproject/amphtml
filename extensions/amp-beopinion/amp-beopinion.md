@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Embeds BeOpinion content.
+  text: Embeds [BeOpinion](https://beopinion.com/) content.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-beopinion
-
-Embeds <a href="https://beopinion.com/">BeOpinion</a> content.
 
 ## Behavior
 

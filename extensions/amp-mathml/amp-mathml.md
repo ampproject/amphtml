@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays a MathML formula.
+  text: Displays a [MathML formula](https://www.w3.org/Math/).
 ---
 
 <!--
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-mathml
-
-Displays a <a href="https://www.w3.org/Math/">MathML formula</a>.
 
 ## Behavior
 

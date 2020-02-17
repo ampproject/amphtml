@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Displays a Gfycat video GIF.
+  text: Displays a [Gfycat](https://gfycat.com/) video GIF.
 ---
 
 <!---
@@ -24,8 +24,6 @@ limitations under the License.
 -->
 
 # amp-gfycat
-
-Displays a <a href="https://gfycat.com/">Gfycat</a> video GIF.
 
 ## Example
 

@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a Springboard Platform video player.
+  text: Displays a [Springboard Platform](http://publishers.springboardplatform.com) video player.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-springboard-player
-
-Displays the Springboard Player used in the <a href="http://publishers.springboardplatform.com">Springboard
 
 ## Example
 

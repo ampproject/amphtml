@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-3q-player
 
-Embeds videos from <a href="https://www.3qsdn.com/en/">3Q SDN</a>.
-
 ## Example
 
 With the `responsive` layout, the width and height in this should yield correct layouts for 16:9 aspect ratio videos:

@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Allows publishers to easily integrate with the LaterPay micropayments platform.
+  text: Allows publishers to easily integrate with the [LaterPay](https://www.laterpay.net) micropayments platform.
 ---
 
 <!---
@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-access-laterpay
 
-Allows publishers to easily integrate with the <a href="https://www.laterpay.net">LaterPay</a> micropayments platform. <code>amp-access-laterpay</code> is based on, and requires <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.
+`amp-access-laterpay` is based on, and requires <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.
 
 ## Behavior
 

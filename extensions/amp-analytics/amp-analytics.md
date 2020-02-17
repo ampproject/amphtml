@@ -26,8 +26,6 @@ limitations under the License.
 
 # amp-analytics
 
-Capture analytics data from an AMP document.
-
 ## Sending analytics to a vendor or in-house?
 
 Before you start using AMP analytics on your site, you need to decide whether you will use third-party analytics tools to analyze user engagement, or your own in-house solution.

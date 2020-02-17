@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-auto-ads
 
-Dynamically injects ads into an AMP page by using a remotely-served configuration file.
-
 ## Behavior
 
 Given a sufficient number of valid placements (supplied in the configuration),

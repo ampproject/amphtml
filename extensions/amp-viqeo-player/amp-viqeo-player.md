@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a Viqeo video player.
+  text: Displays a [Viqeo](https://viqeo.tv/) video player.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-viqeo-player
-
-Displays a <a href="https://viqeo.tv/">Viqeo</a> video player.
 
 ## Example
 

@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a Wistia video.
+  text: Displays a [Wistia](https://wistia.com) video.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-wistia-player
-
-Displays a <a href="https://wistia.com">Wistia</a> video.
 
 ## Example
 

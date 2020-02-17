@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a Soundcloud clip.
+  text: Displays a [Soundcloud](https://soundcloud.com/) clip.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-soundcloud
-
-Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.
 
 ## Examples
 

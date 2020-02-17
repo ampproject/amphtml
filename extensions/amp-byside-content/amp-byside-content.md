@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-byside-content
 
-Displays dynamic content from the <a href="http://www.byside.com/">BySide service</a>.
+Displays dynamic content from the [BySide service](http://www.byside.com/).
 
 ## Behavior
 

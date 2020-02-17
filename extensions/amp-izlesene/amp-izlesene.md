@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays an Izlesene video.
+  text: Displays an [Izlesene](https://www.izlesene.com/) video.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-izlesene
-
-Displays an embedded <a href="https://www.izlesene.com/">Izlesene</a> video.
 
 ## Example
 

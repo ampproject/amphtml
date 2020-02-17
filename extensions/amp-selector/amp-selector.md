@@ -25,8 +25,6 @@ limitations under the License.
 
 # amp-selector
 
-Represents a control that presents a menu of options and lets the user choose from it.
-
 ## Behavior
 
 The AMP selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.

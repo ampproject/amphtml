@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-app-banner
 
-A wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
+Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
 
 ## Behavior
 

@@ -5,7 +5,7 @@ formats:
   - websites
   - dynamic-content
 teaser:
-  text: Request the user's precise location.
+  text: Requests the user's location and provides it to AMP components.
 experimental: true
 ---
 <!--
@@ -25,8 +25,6 @@ limitations under the License.
 -->
 
 # amp-user-location
-
-Requests the user's location and provides it to AMP components.
 
 ## Behavior
 

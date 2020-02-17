@@ -25,8 +25,6 @@ limitations under the License.
 
 # amp-next-page
 
-Dynamically loads more documents recommended for the user.
-
 ## Behavior
 
 Given a list of pages, `amp-next-page` tries to load them after the current

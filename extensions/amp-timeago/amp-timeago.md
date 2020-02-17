@@ -4,7 +4,7 @@ formats:
   - websites
   - email
 teaser:
-  text: Provides fuzzy timestamps by formatting dates as "time ago" (for example, 3 hours ago).
+  text: Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 hours ago).
 ---
 
 <!--
@@ -24,8 +24,6 @@ limitations under the License.
 -->
 
 # amp-timeago
-
-Provides fuzzy timestamps by formatting dates as `*** time ago` (for example, 3 hours ago).
 
 ## Usage
 

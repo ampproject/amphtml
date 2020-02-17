@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Embeds an iframe containing a video player.
+  text: Embeds an [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) containing a video player.
 ---
 
 <!--
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-video-iframe
-
-Displays an [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) containing a video player.
 
 ## When should I use this?
 

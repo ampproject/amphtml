@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Displays a Facebook post or video.
+  text: Displays a Facebook post, video or comment.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-facebook
-
-Displays a Facebook post, video or comment.
 
 ## Overview
 

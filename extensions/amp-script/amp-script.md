@@ -25,8 +25,6 @@ limitations under the License.
 
 # amp-script
 
-Allows running custom JavaScript to render UI.
-
 ## Overview
 
 The `amp-script` component allows you run custom JavaScript to render UI elements, such as a React component.

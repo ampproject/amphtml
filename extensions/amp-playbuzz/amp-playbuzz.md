@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays any Playbuzz content (e.g., list, poll, etc.).
+  text: Displays any Playbuzz item content (e.g., list, poll, etc.).
 ---
 
 <!---
@@ -24,8 +24,7 @@ limitations under the License.
 
 # amp-playbuzz
 
-Displays any Playbuzz item content (e.g., list, poll, etc.)<br>
-Can be any item URL taken from <a href="http://www.playbuzz.com">playbuzz.com
+Can be any item URL taken from [playbuzz.com](http://www.playbuzz.com).
 
 ## Examples
 

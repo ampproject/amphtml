@@ -5,7 +5,7 @@ formats:
   - ads
   - email
 teaser:
-  text: Allows rendering of Mustache.js templates.
+  text: Allows rendering of [Mustache.js](https://github.com/janl/mustache.js/) templates.
 ---
 
 <!---
@@ -25,8 +25,6 @@ limitations under the License.
 -->
 
 # amp-mustache
-
-Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</a>.
 
 ## Version notes
 

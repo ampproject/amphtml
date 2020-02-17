@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-user-notification
 
-Displays a dismissable notification to the user.
-
 ## Usage
 
 An `id` is required because multiple `amp-user-notification` elements are allowed and the `id` is used to differentiate them.

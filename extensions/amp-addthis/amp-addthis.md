@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Displays AddThis customizable social share buttons.
+  text: Displays [AddThis](https://www.addthis.com) customizable social share buttons.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-addthis
-
-Displays <a href="https://www.addthis.com">AddThis</a> customizable social share buttons.
 
 ## Why AddThis?
 

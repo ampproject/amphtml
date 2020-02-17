@@ -5,7 +5,7 @@ formats:
   - stories
   - ads
 teaser:
-  text: Replaces the HTML5 audio tag.
+  text: Replaces the HTML5 `audio` tag.
 ---
 
 <!---
@@ -26,7 +26,7 @@ limitations under the License.
 
 # amp-audio
 
-A replacement for the HTML5 <code>audio</code> tag. The <code>amp-audio</code> component is only to be used for direct HTML5 audio file embeds.
+The `amp-audio` component is only to be used for direct HTML5 audio file embeds.
 
 ## Behavior
 

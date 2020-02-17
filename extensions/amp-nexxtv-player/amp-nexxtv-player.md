@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-nexxtv-player
 
-Displays a media stream from the nexxOMNIA platform.
-
 ## Example
 
 With the responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:

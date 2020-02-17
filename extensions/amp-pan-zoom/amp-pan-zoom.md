@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-pan-zoom
 
-Provides zooming and panning for arbitrary content.
-
 ## Behavior
 
 The `<amp-pan-zoom>` component takes one child of arbitrary content and enables the ability for the user to zoom and pan the content via double tap or pinch-to-zoom actions. Tap events registered on the zoomable content or its children will trigger after a 300ms delay.

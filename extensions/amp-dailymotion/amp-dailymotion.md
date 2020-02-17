@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a Dailymotion video.
+  text: Displays a [Dailymotion](http://www.dailymotion.com/) video.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-dailymotion
-
-Displays a <a href="http://www.dailymotion.com/">Dailymotion</a> video.
 
 ## Example
 

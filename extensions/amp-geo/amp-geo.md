@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-geo
 
-Provides an approximate country-level geolocation interface.
-
 ## Usage
 
 The `amp-geo` component provides country-level geolocation. The `amp-geo` component also provides a simple mechanism to group countries, making it easier to apply attributes to several countries at once.

@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a cloud-hosted JW Player.
+  text: Displays a cloud-hosted [JW Player](https://www.jwplayer.com/).
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-jwplayer
-
-Displays a cloud-hosted <a href="https://www.jwplayer.com/">JW Player</a>.
 
 ## Example
 

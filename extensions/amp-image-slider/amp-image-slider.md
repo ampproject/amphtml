@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-image-slider
 
-A slider to compare two images.
-
 ## Behavior
 
 The `amp-image-slider` component requires exactly two `amp-img` elements as its children. The first child image displays on the left, the second child image displays on the right.

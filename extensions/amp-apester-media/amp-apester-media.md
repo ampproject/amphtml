@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays an Apester smart unit.
+  text: Displays an [Apester](https://apester.com/) smart unit.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-apester-media
-
-Displays a <a href="https://apester.com/">Apester</a> smart unit.
 
 ## Examples
 

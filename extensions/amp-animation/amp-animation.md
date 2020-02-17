@@ -25,8 +25,6 @@ limitations under the License.
 
 # amp-animation
 
-Defines and runs animations.
-
 ## Overview
 
 AMP Animations rely on [Web Animations API](https://www.w3.org/TR/web-animations/) to define and run animations in AMP documents.

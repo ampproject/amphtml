@@ -26,8 +26,7 @@ limitations under the License.
 
 # amp-list
 
-Fetches content dynamically from a CORS JSON endpoint and renders it
-using a supplied template.
+Fetches content dynamically from a CORS JSON endpoint and renders it using a supplied template.
 
 ## Usage
 

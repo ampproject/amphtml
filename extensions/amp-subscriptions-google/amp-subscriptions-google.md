@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-subscriptions-google
 
-Implements subscription-style access protocol for Subscribe with Google.
-
 ## Introduction
 
 The `amp-subscriptions-google` is the extension that enables Subscribe with Google in an AMP page.

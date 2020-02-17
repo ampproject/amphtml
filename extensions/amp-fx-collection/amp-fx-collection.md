@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-fx-collection
 
-Provides a collection of preset visual effects, such as parallax.
-
 ## Overview
 
 The `amp-fx-collection` extension provides a collection of preset visual effects,

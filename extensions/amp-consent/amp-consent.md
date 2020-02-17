@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Provides the ability to collect and store a user's consent through a UI control.
+  text: Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.
 ---
 
 <!--
@@ -24,8 +24,6 @@ limitations under the License.
 -->
 
 # amp-consent
-
-Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.
 
 ## Overview
 

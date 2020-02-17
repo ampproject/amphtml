@@ -25,8 +25,6 @@ limitations under the License.
 
 # amp-image-lightbox
 
-Provides a lightbox effect for a specified image.
-
 ## Behavior
 
 The `amp-image-lightbox` component provides a lightbox experience for a specified image. When the user clicks the image, the image displays in the center of a full-viewport lightbox.

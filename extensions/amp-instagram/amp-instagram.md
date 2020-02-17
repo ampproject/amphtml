@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-instagram
 
-Displays an Instagram embed.
-
 ## Behavior
 
 The `width` and `height` attributes are special for the Instagram embed.

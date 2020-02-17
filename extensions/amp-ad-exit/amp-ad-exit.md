@@ -4,7 +4,7 @@ formats:
   - websites
   - ads
 teaser:
-  text: Provides configurable behavior for ad exits for A4A (AMP for Ads).
+  text: Provides configurable behavior for ad exits for [AMPHTML ads](https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads).
 ---
 
 <!--
@@ -24,8 +24,6 @@ limitations under the License.
 -->
 
 # amp-ad-exit
-
-Provides configurable behavior for ad exits for [AMPHTML ads](https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads).
 
 ## Overview
 

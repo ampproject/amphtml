@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Embeds a video player for instream video ads that are integrated with the IMA SDK.
+  text: Embeds a video player for instream video ads that are integrated with the [IMA SDK](https://developers.google.com/interactive-media-ads/docs/sdks/html5/).
 ---
 
 <!---
@@ -23,10 +23,6 @@ limitations under the License.
 -->
 
 # amp-ima-video
-
-Embeds a video player for instream video ads that are integrated with
-the
-<a href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA SDK</a>.
 
 ## Overview
 

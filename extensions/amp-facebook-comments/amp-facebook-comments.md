@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-facebook-comments
 
-Embeds the Facebook comments plugin.
-
 ## Overview
 
 You can use the `amp-facebook-comments` component to embed the [Facebook comments plugin](https://developers.facebook.com/docs/plugins/comments).

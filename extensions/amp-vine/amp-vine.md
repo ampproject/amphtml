@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-vine
 
-Displays a Vine simple embed.
-
 ## Example
 
 A Vine simple embed has equal width and height:

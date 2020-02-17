@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Displays a Pinterest widget or Save button.
+  text: Displays a Pinterest widget, Save button, or Follow button.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-pinterest
-
-Displays a Pinterest widget, Save button, or Follow button.
 
 ## Examples
 

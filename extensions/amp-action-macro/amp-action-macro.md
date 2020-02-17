@@ -21,8 +21,6 @@ limitations under the License.
 
 # amp-action-macro
 
-Creates reusable actions.
-
 ## Overview
 
 The `amp-action-macro` component allows for the creation of reusable actions.

@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-o2-player
 
-Displays the AOL O2Player.
-
 ## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.

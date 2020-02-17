@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-subscriptions
 
-Implements subscription-style access protocol.
-
 ## Introduction
 
 The `amp-subscriptions` extension implements subscription-style access/paywall rules.

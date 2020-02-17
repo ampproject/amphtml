@@ -24,7 +24,7 @@ limitations under the License.
 
 # amp-reach-player
 
-Displays the Reach Player configured in the <a href="http://beachfrontreach.com">Beachfront Reach</a> platform.
+Displays the Reach Player configured in the [Beachfront Reach](http://beachfrontreach.com) platform.
 
 ## Example
 

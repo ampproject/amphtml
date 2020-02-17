@@ -24,8 +24,6 @@ limitations under the License.
 
 # amp-iframe
 
-Displays an iframe.
-
 ## Behavior
 
 `amp-iframe` has several important differences from vanilla iframes that are designed to make it more secure and avoid AMP files that are dominated by a single iframe:

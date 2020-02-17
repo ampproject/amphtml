@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays an Ooyala video.
+  text: Displays an [Ooyala](https://www.ooyala.com/) video.
 ---
 
 <!---
@@ -23,8 +23,6 @@ limitations under the License.
 -->
 
 # amp-ooyala-player
-
-Displays an <a href="https://www.ooyala.com/">Ooyala</a> video.
 
 ## Example
 
