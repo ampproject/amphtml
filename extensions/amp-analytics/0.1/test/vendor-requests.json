@@ -39,10 +39,10 @@
   },
   "browsi": {
     "host": "https://events.browsiprod.com/events/amp",
-    "base": "https://events.browsiprod.com/events/amp?pk=testPub&sk=testSite&et=!type&pvid=_page_view_id_64_&aid=_source_url_",
-    "pageview": "https://events.browsiprod.com/events/amp?pk=testPub&sk=testSite&et=!type&pvid=_page_view_id_64_&aid=_source_url_&ref=_document_referrer_&sh=_viewport_height_&pl=_scroll_height_&plt=_page_load_time_&clt=_content_load_time_&nt=_nav_type_&eup=extra_url_params",
-    "engagement": "https://events.browsiprod.com/events/amp?pk=testPub&sk=testSite&et=!type&pvid=_page_view_id_64_&aid=_source_url_&now=_timestamp_&ul=_scroll_top_&top=_total_engaged_time_",
-    "visibility": "https://events.browsiprod.com/events/amp?pk=testPub&sk=testSite&et=!type&pvid=_page_view_id_64_&aid=_source_url_&adix=!index&ex=_element_x_&ey=_element_y_&ew=_element_width_&eh=_element_height_"
+    "base": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_",
+    "pageview": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_&ref=_document_referrer_&sh=_viewport_height_&pl=_scroll_height_&plt=_page_load_time_&clt=_content_load_time_&nt=_nav_type_&eup=",
+    "engagement": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_&ul=_scroll_top_&top=_total_engaged_time_",
+    "visibility": "https://events.browsiprod.com/events/amp?pk=!pubKey&sk=!siteKey&et=!type&pvid=_page_view_id_64_&aid=_ampdoc_url_&now=_timestamp_&adix=!index&ex=!elementX&ey=!elementY&ew=!elementWidth&eh=!elementHeight"
   },
   "burt": {
     "host": "//ignore.c.richmetrics.com/",

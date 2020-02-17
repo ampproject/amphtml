@@ -26,7 +26,7 @@ const BROWSI_CONFIG = jsonLiteral({
       '&sk=${siteKey}' +
       '&et=${type}' +
       '&pvid=PAGE_VIEW_ID_64' +
-      '&aid1=${ampdocUrl}' +
+      '&aid=${ampdocUrl}' +
       '&now=${timestamp}',
     'engagement': '${base}&ul=${scrollTop}&top=${totalEngagedTime}',
     'pageview':
