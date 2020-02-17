@@ -335,25 +335,22 @@ export class ResourcesImpl {
 
       return r.whenBuilt().then(() => {
         const wasIntersecting = r.isInViewport();
-        let noLongerDisplayed = this.measureResource_(r, clientRect);
+        let isDisplayed = this.measureResource_(r, clientRect);
 
-        // Sometimes the intersection callback is too early to recognize
-        // client rect changes due to animations (e.g. amp-accordion).
-        // These cases can still be detected since isIntersecting == false
-        // despite the target element overlapping the root's bounds.
-        if (
-          !noLongerDisplayed &&
-          wasIntersecting &&
-          !isIntersecting &&
-          layoutRectsOverlap(clientRect, rootBounds)
-        ) {
-          // TODO(willchou): Sometimes causes an unnecessary unload when
-          // expanding an accordion with [animate] due to extra intersection
-          // callbacks during the animation.
-          noLongerDisplayed = true;
+        if (wasIntersecting && !isIntersecting) {
+          // Sometimes `isDisplayed` is incorrectly `true` when the element is
+          // actually hidden! This happens due to stale clientRect values during
+          // animations e.g. while an amp-accordion[animate] is collapsing.
+          // Override with the correct `isIntersecting` value in these cases.
+          if (isDisplayed && layoutRectsOverlap(clientRect, rootBounds)) {
+            // TODO(willchou): Sometimes causes an unnecessary unload when
+            // expanding an accordion with [animate] due to extra intersection
+            // callbacks during the animation.
+            isDisplayed = false;
+          }
         }
 
-        if (noLongerDisplayed) {
+        if (!isDisplayed) {
           toUnload.push(r);
           return;
         }
@@ -370,10 +367,12 @@ export class ResourcesImpl {
         // that scrolled-over elements are no longer deferred, which results
         // in longer delays for in-viewport elements after fast scrolling.
         // Fix by queueing intersection entries when scroll velocity is high.
-        if (isIntersecting && r.isDisplayed()) {
-          if (r.getState() === ResourceState.READY_FOR_LAYOUT) {
-            this.scheduleLayoutOrPreload(r, /* layout */ true);
-          }
+        if (
+          isIntersecting &&
+          r.isDisplayed() &&
+          r.getState() === ResourceState.READY_FOR_LAYOUT
+        ) {
+          this.scheduleLayoutOrPreload(r, /* layout */ true);
         }
       });
     });
@@ -1163,7 +1162,8 @@ export class ResourcesImpl {
   }
 
   /**
-   * Returns true if the resource was previously displayed but is no longer.
+   * Always returns true unless the resource was previously displayed but is
+   * not displayed now (i.e. the resource should be unloaded).
    * @param {!Resource} r
    * @param {!ClientRect=} opt_premeasuredRect
    * @return {boolean}
@@ -1172,7 +1172,7 @@ export class ResourcesImpl {
   measureResource_(r, opt_premeasuredRect) {
     const wasDisplayed = r.isDisplayed();
     r.measure(opt_premeasuredRect);
-    return wasDisplayed && !r.isDisplayed();
+    return !(wasDisplayed && !r.isDisplayed());
   }
 
   /**
@@ -1239,8 +1239,8 @@ export class ResourcesImpl {
           return;
         }
         if (this.relayoutAll_ || r.isMeasureRequested()) {
-          const noLongerDisplayed = this.measureResource_(r);
-          if (noLongerDisplayed) {
+          const isDisplayed = this.measureResource_(r);
+          if (!isDisplayed) {
             toUnload.push(r);
           }
           dev().fine(TAG_, 'force remeasure:', r.debugid);
@@ -1325,8 +1325,8 @@ export class ResourcesImpl {
         }
 
         if (needsMeasure) {
-          const noLongerDisplayed = this.measureResource_(r);
-          if (noLongerDisplayed) {
+          const isDisplayed = this.measureResource_(r);
+          if (!isDisplayed) {
             if (!toUnload) {
               toUnload = [];
             }
