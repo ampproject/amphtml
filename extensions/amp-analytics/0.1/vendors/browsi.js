@@ -17,63 +17,34 @@
 import {jsonLiteral} from '../../../../src/json';
 
 const BROWSI_CONFIG = jsonLiteral({
-  'vars': {
-    'pubKey': '',
-    'siteKey': '',
-  },
   'transport': {'beacon': true, 'xhrpost': true, 'image': false},
   'requests': {
+    'host': 'https://events.browsiprod.com/events/amp',
     'base':
-      'https://www.browsi.com/ampData?' +
+      '${host}?' +
       'pk=${pubKey}' +
       '&sk=${siteKey}' +
       '&et=${type}' +
-      '&pvid=PAGE_VIEW_ID_64',
-    'engagement':
-      '${base}' +
-      '&path=${canonicalPath}' +
-      '&now=${timestamp}' +
-      '&st=${scrollTop}' +
-      '&ph=${scrollHeight}',
+      '&pvid=PAGE_VIEW_ID_64' +
+      '&aid1=${ampdocUrl}' +
+      '&now=${timestamp}',
+    'engagement': '${base}&ul=${scrollTop}&top=${totalEngagedTime}',
     'pageview':
       '${base}' +
-      '&client=${clientId(siteKey)}' +
-      '&lng=${browserLanguage}' +
       '&ref=${documentReferrer}' +
-      '&pdt=${pageDownloadTime}' +
+      '&sh=${viewportHeight}' +
+      '&pl=${scrollHeight}' +
       '&plt=${pageLoadTime}' +
-      '&t=${title}' +
-      '&tzc=${timezoneCode}' +
-      '&sh=${availableScreenHeight}' +
-      '&sw=${availableScreenWidth}' +
-      '&vh=${viewportHeight}' +
-      '&vw=${viewportWidth}' +
-      '&ua=${userAgent}',
+      '&clt=${contentLoadTime}' +
+      '&nt=${navType}' +
+      '&eup=${extraUrlParams}',
     'visibility':
       '${base}' +
-      '&isd=${initialScrollDepth}' +
-      '&ir=${intersectionRatio}' +
-      '&irct=${intersectionRect}' +
-      '&msd=${maxScrollDepth}' +
-      '&c=${counter(siteKey)}' +
-      '&mcvt=${maxContinuousVisibleTime}' +
-      '&tvt=${totalVisibleTime}' +
-      '&fst=${firstSeenTime}' +
-      '&lst=${lastSeenTime}' +
-      '&fvt=${firstVisibleTime}' +
-      '&lvt=${lastVisibleTime}' +
-      '&mvp=${minVisiblePercentage}' +
-      '&mxvp=${maxVisiblePercentage}' +
+      '&adix=${index}' +
       '&ex=${elementX}' +
       '&ey=${elementY}' +
       '&ew=${elementWidth}' +
-      '&eh=${elementHeight}' +
-      '&tt=${totalTime}' +
-      '&tet=${totalEngagedTime}' +
-      '&ltv=${loadTimeVisibility}' +
-      '&bas=${backgroundedAtStart}' +
-      '&b=${backgrounded}' +
-      '&subTitle=${subTitle}',
+      '&eh=${elementHeight}',
   },
   'triggers': {
     'page-view': {
@@ -87,59 +58,26 @@ const BROWSI_CONFIG = jsonLiteral({
       'on': 'timer',
       'timerSpec': {
         'interval': 3,
-        'maxTimerLength': 180,
+        'maxTimerLength': 30,
       },
       'request': 'engagement',
       'vars': {
         'type': 'engagement',
       },
     },
-    'visibility50': {
+    'v100-0': {
       'on': 'visible',
       'request': 'visibility',
-      'selector': 'amp-ad',
-      'important': 'true',
-      'visibilitySpec': {
-        'visiblePercentageMin': 50,
-        'totalTimeMin': 1000,
-        'continuousTimeMin': 200,
-        'continuousTimeMax': 20000,
-        'repeat': false,
-      },
-      'vars': {
-        'type': 'visibility50',
-      },
-    },
-    'visibility100-1': {
-      'on': 'visible',
-      'request': 'visibility',
-      'selector': 'amp-ad:nth-child(1)',
+      'selector': "amp-ad[data-amp-slot-index='0']",
       'important': 'true',
       'visibilitySpec': {
         'visiblePercentageMin': 100,
-        'totalTimeMin': 1000,
         'continuousTimeMin': 1000,
-        'continuousTimeMax': 10000,
         'repeat': false,
       },
       'vars': {
-        'type': 'visibility100',
-      },
-    },
-    'visibility100-2': {
-      'on': 'visible',
-      'request': 'visibility',
-      'selector': 'amp-ad:nth-child(2)',
-      'important': 'true',
-      'visibilitySpec': {
-        'visiblePercentageMin': 100,
-        'totalTimeMin': 1000,
-        'continuousTimeMin': 1000,
-        'continuousTimeMax': 10000,
-        'repeat': false,
-      },
-      'vars': {
-        'type': 'visibility100',
+        'type': 'v100',
+        'index': 0,
       },
     },
   },
