@@ -14,23 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# \_PING_
+# \_PING\_
 
 A fake cmp type that is only used for local development.
 
 ## Example
 
 ```html
-<amp-consent id='ABC' layout='nodisplay' type='_ping_'>
+<amp-consent id="ABC" layout="nodisplay" type="_ping_">
   <script type="application/json">
-  {
-    "consents": {},
-      "postPromptUI": "postPromptUI",
-      "clientConfig": {
-        "CMP_id": "test_id",
-        "other_info": "test_info"
-      }
-  }
+    {
+      "consents": {},
+        "postPromptUI": "postPromptUI",
+        "clientConfig": {
+          "CMP_id": "test_id",
+          "other_info": "test_info"
+        }
+    }
   </script>
   <div id="postPromptUI">
     Post Prompt UI

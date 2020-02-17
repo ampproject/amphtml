@@ -18,7 +18,6 @@ import {handleClick, warmupDynamic, warmupStatic} from '../../ads/alp/handler';
 import {parseUrlDeprecated} from '../../src/url';
 
 describe('alp-handler', () => {
-  let sandbox;
   let event;
   let anchor;
   let open;
@@ -26,7 +25,6 @@ describe('alp-handler', () => {
   let image;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     image = undefined;
     win = {
       location: {},
@@ -34,32 +32,32 @@ describe('alp-handler', () => {
       Image() {
         image = this;
       },
-      postMessage: sandbox.stub(),
+      postMessage: window.sandbox.stub(),
       _id: 'base-win',
     };
     win.parent = {
-      postMessage: sandbox.stub(),
+      postMessage: window.sandbox.stub(),
       _id: 'p0',
     };
     win.parent.parent = {
-      postMessage: sandbox.stub(),
+      postMessage: window.sandbox.stub(),
       _id: 'p1',
     };
     win.parent.parent.parent = {
-      postMessage: sandbox.stub(),
+      postMessage: window.sandbox.stub(),
       _id: 'p2',
     };
     win.parent.parent.parent.parent = {
-      postMessage: sandbox.stub(),
+      postMessage: window.sandbox.stub(),
       _id: 'p3',
     };
-    open = sandbox.stub(win, 'open').callsFake(() => {
+    open = window.sandbox.stub(win, 'open').callsFake(() => {
       return {};
     });
     const doc = {
       defaultView: win,
       head: {
-        appendChild: sandbox.spy(),
+        appendChild: window.sandbox.spy(),
       },
     };
     win.document = doc;
@@ -72,7 +70,7 @@ describe('alp-handler', () => {
           'https://cdn.ampproject.org/c/www.example.com/amp.html'
         ),
       ownerDocument: doc,
-      getAttribute: sandbox.stub(),
+      getAttribute: window.sandbox.stub(),
       get search() {
         return parseUrlDeprecated(this.href).search;
       },
@@ -81,13 +79,9 @@ describe('alp-handler', () => {
       trusted: true,
       buttons: 0,
       target: anchor,
-      preventDefault: sandbox.spy(),
+      preventDefault: window.sandbox.spy(),
       defaultPrevented: false,
     };
-  });
-
-  afterEach(() => {
-    sandbox.restore();
   });
 
   function simpleSuccess() {
@@ -196,7 +190,7 @@ describe('alp-handler', () => {
   });
 
   it('should perform special navigation if specially asked for', () => {
-    const navigateSpy = sandbox.spy();
+    const navigateSpy = window.sandbox.spy();
     const opt_navigate = val => {
       navigateSpy();
       expect(val).to.equal(

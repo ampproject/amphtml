@@ -7,6 +7,7 @@ formats:
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -37,7 +38,7 @@ A generic carousel for displaying multiple similar pieces of content along a hor
     <td>
       <ul>
         <li>carousel: fixed, fixed-height, and nodisplay.</li>
-        <li>slides: fill, fixed, fixed-height, flex-item, nodisplay, and responsive.</li>
+        <li>slides: fill, fixed, fixed-height, flex-item, nodisplay, and responsive. See best practices below for additional considerations about slides.</li>
       </ul>
     </td>
   </tr>
@@ -58,76 +59,99 @@ The carousel consists of an arbitrary number of items, as well as optional navig
 The carousel advances between items if the user swipes or clicks an optional navigation arrow.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
+
 ```html
-<amp-carousel width="450"
-  height="300">
-  <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+<amp-carousel width="450" height="300" layout="responsive" type="slides">
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
-    height="300"></amp-img>
-  <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+    height="300"
+  ></amp-img>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
     width="450"
-    height="300"></amp-img>
-  <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+    height="300"
+  ></amp-img>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
     width="450"
-    height="300"></amp-img>
+    height="300"
+  ></amp-img>
 </amp-carousel>
 ```
-[/example]
 
+[/example]
 
 ### Advancing to a specific slide
 
-Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a carousel with the "carousel-id" ID  to the slide at index=N (the first slide is at index=0, the second slide is at index=1, and so on).
+Setting a method for the `on` attribute on an element to `tap:carousel-id.goToSlide(index=N)` will, on user tap or click, advance a carousel with the "carousel-id" ID to the slide at index=N (the first slide is at index=0, the second slide is at index=1, and so on).
 
 In the following example, we have a carousel of three images with preview buttons below the carousel. When a user clicks one of the buttons, the corresponding carousel item displays.
 
 [example preview="inline" playground="true" imports="amp-carousel"]
+
 ```html
-<amp-carousel id="carousel-with-preview"
+<amp-carousel
+  id="carousel-with-preview"
+  width="450"
+  height="300"
+  layout="responsive"
+  type="slides"
+>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
     width="450"
     height="300"
     layout="responsive"
-    type="slides">
-    <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
-      width="450"
-      height="300"
-      layout="responsive"
-      alt="apples"></amp-img>
-    <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
-      width="450"
-      height="300"
-      layout="responsive"
-      alt="lemons"></amp-img>
-    <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
-      width="450"
-      height="300"
-      layout="responsive"
-      alt="blueberries"></amp-img>
-  </amp-carousel>
-  <div class="carousel-preview">
-    <button on="tap:carousel-with-preview.goToSlide(index=0)">
-      <amp-img src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
-        width="60"
-        height="40"
-        alt="apples"></amp-img>
-    </button>
-    <button on="tap:carousel-with-preview.goToSlide(index=1)">
-      <amp-img src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
-        width="60"
-        height="40"
-        alt="lemons"></amp-img>
-    </button>
-    <button on="tap:carousel-with-preview.goToSlide(index=2)">
-      <amp-img src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
-        width="60"
-        height="40"
-        alt="blueberries"></amp-img>
-    </button>
-  </div>
+    alt="apples"
+  ></amp-img>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+    width="450"
+    height="300"
+    layout="responsive"
+    alt="lemons"
+  ></amp-img>
+  <amp-img
+    src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+    width="450"
+    height="300"
+    layout="responsive"
+    alt="blueberries"
+  ></amp-img>
+</amp-carousel>
+<div class="carousel-preview">
+  <button on="tap:carousel-with-preview.goToSlide(index=0)">
+    <amp-img
+      src="{{server_for_email}}/static/inline-examples/images/image1.jpg"
+      width="60"
+      height="40"
+      alt="apples"
+    ></amp-img>
+  </button>
+  <button on="tap:carousel-with-preview.goToSlide(index=1)">
+    <amp-img
+      src="{{server_for_email}}/static/inline-examples/images/image2.jpg"
+      width="60"
+      height="40"
+      alt="lemons"
+    ></amp-img>
+  </button>
+  <button on="tap:carousel-with-preview.goToSlide(index=2)">
+    <amp-img
+      src="{{server_for_email}}/static/inline-examples/images/image3.jpg"
+      width="60"
+      height="40"
+      alt="blueberries"
+    ></amp-img>
+  </button>
+</div>
 ```
+
 [/example]
 
 ## Attributes
+
 <table>
   <tr>
     <td width="40%"><strong>type</strong></td>
@@ -185,6 +209,7 @@ The visibility of arrows can also be controlled via styling, and a media query c
 <p><em>Example: Displays a slides carousel with controls, looping, and delayed autoplay</em></p>
 
 [example preview="inline" playground="true" imports="amp-carousel"]
+
 ```html
 <amp-carousel type="slides"
   width="450"
@@ -206,7 +231,9 @@ The visibility of arrows can also be controlled via styling, and a media query c
     height="300"></amp-img>
 </amp-carousel>
 ```
+
 [/example]</td>
+
   </tr>
   <tr>
     <td width="40%"><strong>common attributes</strong></td>
@@ -215,29 +242,39 @@ The visibility of arrows can also be controlled via styling, and a media query c
 </table>
 
 ## Styling
+
 - You may use the `amp-carousel` element selector to style it freely.
 - You may use the `.amp-carousel-slide` class selector to target carousel items.
 - The visual state of an `amp-carousel` button when it's disabled is hidden.
 - By default, `.amp-carousel-button` uses an inlined SVG as the background-image of the buttons. You may override this with your own SVG or image as in the example below.
 
-
-*Example: Default `.amp-carousel-button` inlined SVG*
+_Example: Default `.amp-carousel-button` inlined SVG_
 
 ```css
 .amp-carousel-button-prev {
   left: 16px;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff"%3E%3Cpath d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/%3E%3C/svg%3E');
 }
 ```
 
-*Example: Overriding the default `.amp-carousel-button` inlined SVG*
+_Example: Overriding the default `.amp-carousel-button` inlined SVG_
 
 ```css
 .amp-carousel-button-prev {
   left: 5%;
-  background-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="%23fff"%3E%3Cpath d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z"  /%3E%3C/svg%3E');
 }
 ```
+
+Note that the SVG content needs to have certain characters, including `<`, `>` and `#` encoded. This can be done using a tool like [SVGO](https://github.com/svg/svgo) or using [`encodeURIComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent).
+
+## Supported Layouts for Slides
+
+As noted above, the `type="slides"` designation on `amp-carousel 0.1` supports the following layouts: `fill`, `fixed`, `fixed-height`, `flex-item`, `nodisplay`, and `responsive`.
+
+Publishers should be aware that while this mode explictly supports `fixed` layout sizes, it also employs `display: flex;` in its styling. In other words nested elements can have `layout=fixed` sizing, though via styling it only respects absolute width up to 100%. One way to workaround this limitation is by using `flex-shrink: 0` on any fixed layout slides.
+
+For an accessible and smooth user experience, it is generally good practice when using `type="slides"` that all children of that carousel and the carousel itself share the same dimensional ratios as well as the same layout type.
 
 ## Validation
 

@@ -160,7 +160,7 @@ module.exports = function({template, types: t}) {
         // interpolation strings) to generate the raw value (this is an AST
         // requirement).
         if (cooked || !endOfString) {
-          const raw = cooked.replace(/\${|\\/g, '\\$&');
+          const raw = cooked.replace(/\${|\\|`/g, '\\$&');
           quasis.push(t.templateElement({cooked, raw}));
         }
 

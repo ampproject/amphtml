@@ -26,7 +26,7 @@ FAIL
 |  <!doctype html>
 |  <html ⚡ data-ampdevmode>
 >> ^~~~~~~~~
-feature_tests/dev_mode.html:26:0 Tag 'html' marked with attribute 'data-ampdevmode'. Validator will suppress errors regarding any other tag with this attribute. [GENERIC]
+feature_tests/dev_mode.html:26:0 Tag 'html' marked with attribute 'data-ampdevmode'. Validator will suppress errors regarding any other tag with this attribute.
 |  <head>
 |    <meta charset="utf-8">
 |    <link rel="canonical" href="./regular-html-version.html">
@@ -40,10 +40,10 @@ feature_tests/dev_mode.html:26:0 Tag 'html' marked with attribute 'data-ampdevmo
 |    <!-- Still produces an error -->
 |    <faketag></faketag>
 >>   ^~~~~~~~~
-feature_tests/dev_mode.html:38:2 The tag 'faketag' is disallowed. [DISALLOWED_HTML]
+feature_tests/dev_mode.html:38:2 The tag 'faketag' is disallowed.
 |    <anotherfaketag></anotherfaketag>
 >>   ^~~~~~~~~
-feature_tests/dev_mode.html:39:2 The tag 'anotherfaketag' is disallowed. [DISALLOWED_HTML]
+feature_tests/dev_mode.html:39:2 The tag 'anotherfaketag' is disallowed.
 |
 |    <!-- Tagged with data-ampdevmode, so errors are suppressed. -->
 |    <faketag data-ampdevmode></faketag>

@@ -15,10 +15,11 @@
  */
 
 import {CSS} from '../../../build/amp-next-page-0.1.css';
-import {MultidocManager} from '../../../src/runtime';
+import {MultidocManager} from '../../../src/multidoc-manager';
 import {PositionObserverFidelity} from '../../../src/service/position-observer/position-observer-worker';
 import {Services} from '../../../src/services';
-import {dev, user, userAssert} from '../../../src/log';
+import {VisibilityState} from '../../../src/visibility-state';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
 import {installPositionObserverServiceForDoc} from '../../../src/service/position-observer/position-observer-impl';
@@ -40,7 +41,7 @@ const TAG = 'amp-next-page';
 /**
  * @typedef {{
  *   ampUrl: string,
- *   amp: ?Object,
+ *   amp: (?../../../src/runtime.ShadowDoc | undefined),
  *   recUnit: {el: ?Element, isObserving: boolean},
  *   cancelled: boolean
  * }}
@@ -75,8 +76,8 @@ export class NextPageService {
     /** @private {?Element} */
     this.separator_ = null;
 
-    /** @private {?../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = null;
+    /** @private {?../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = null;
 
     /** @private {?MultidocManager} */
     this.multidocManager_ = null;
@@ -153,7 +154,7 @@ export class NextPageService {
 
     this.navigation_ = Services.navigationForDoc(ampDoc);
     this.viewport_ = Services.viewportForDoc(ampDoc);
-    this.resources_ = Services.resourcesForDoc(ampDoc);
+    this.mutator_ = Services.mutatorForDoc(ampDoc);
     this.multidocManager_ = new MultidocManager(
       win,
       Services.ampdocServiceFor(win),
@@ -173,6 +174,17 @@ export class NextPageService {
       win.document.title,
       canonicalUrl
     );
+
+    // TODO(wassgha): Untype as ShadowDoc and tighten the ShadowDoc type spec
+    /** @type {!../../../src/runtime.ShadowDoc} */
+    const amp = {
+      ampdoc: ampDoc,
+      url: win.document.location.href,
+      title: win.document.title,
+      canonicalUrl,
+    };
+    documentRef.amp = amp;
+
     this.documentRefs_.push(documentRef);
     this.activeDocumentRef_ = this.documentRefs_[0];
 
@@ -198,7 +210,7 @@ export class NextPageService {
    * Attach a ShadowDoc using the given document.
    * @param {!Element} shadowRoot Root element to attach the shadow document to.
    * @param {!Document} doc Document to attach.
-   * @return {?Object} Return value of {@link MultidocManager#attachShadowDoc}
+   * @return {?../../../src/runtime.ShadowDoc} Return value of {@link MultidocManager#attachShadowDoc}
    */
   attachShadowDoc_(shadowRoot, doc) {
     if (this.hideSelector_) {
@@ -216,13 +228,27 @@ export class NextPageService {
       removeElement(item);
     }
 
-    const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {});
-    installStylesForDoc(amp.ampdoc, CSS, null, false, TAG);
+    /** @type {!../../../src/runtime.ShadowDoc} */
+    const amp = this.multidocManager_.attachShadowDoc(shadowRoot, doc, '', {
+      visibilityState: VisibilityState.PRERENDER,
+    });
+    const ampdoc = devAssert(amp.ampdoc);
+    installStylesForDoc(ampdoc, CSS, null, false, TAG);
 
-    const body = amp.ampdoc.getBody();
+    const body = ampdoc.getBody();
     body.classList.add('i-amphtml-next-page-document');
 
     return amp;
+  }
+
+  /**
+   * Creates an invisible element used to measure the position of the documents
+   * @return {!Element}
+   */
+  createMeasurer_() {
+    const measurer = this.win_.document.createElement('div');
+    measurer.classList.add('i-amphtml-next-page-measurer');
+    return measurer;
   }
 
   /**
@@ -246,6 +272,9 @@ export class NextPageService {
 
       const container = this.win_.document.createElement('div');
 
+      const measurer = this.createMeasurer_();
+      container.appendChild(measurer);
+
       const separator = this.separator_.cloneNode(true);
       separator.removeAttribute('separator');
       container.appendChild(separator);
@@ -260,7 +289,7 @@ export class NextPageService {
       const page = this.nextArticle_;
       this.appendPageHandler_(container).then(() => {
         this.positionObserver_.observe(
-          separator,
+          measurer,
           PositionObserverFidelity.LOW,
           position => this.positionUpdate_(page, position)
         );
@@ -311,10 +340,9 @@ export class NextPageService {
                 this.positionObserver_.unobserve(articleLinks);
                 documentRef.recUnit.isObserving = true;
               }
-              this.resources_.mutateElement(container, () => {
+              this.mutator_.mutateElement(container, () => {
                 try {
-                  const amp = this.attachShadowDoc_(shadowRoot, doc);
-                  documentRef.amp = amp;
+                  documentRef.amp = this.attachShadowDoc_(shadowRoot, doc);
 
                   toggle(dev().assertElement(documentRef.recUnit.el), false);
                   this.documentQueued_ = false;
@@ -457,24 +485,28 @@ export class NextPageService {
       return;
     }
 
-    let documentRef;
+    let ref = this.documentRefs_[i];
     let analyticsEvent = '';
 
-    if (position.relativePos === 'top') {
-      documentRef = this.documentRefs_[i + 1];
-      analyticsEvent = 'amp-next-page-scroll';
-    } else if (position.relativePos === 'bottom') {
-      documentRef = this.documentRefs_[i];
-      analyticsEvent = 'amp-next-page-scroll-back';
+    switch (position.relativePos) {
+      case 'top':
+        ref = this.documentRefs_[i + 1];
+        analyticsEvent = 'amp-next-page-scroll';
+        break;
+      case 'bottom':
+        analyticsEvent = 'amp-next-page-scroll-back';
+        break;
+      default:
+        break;
     }
 
-    if (documentRef && documentRef.amp) {
+    if (ref && ref.amp) {
       this.triggerAnalyticsEvent_(
         analyticsEvent,
-        documentRef.ampUrl,
+        ref.ampUrl,
         this.activeDocumentRef_.ampUrl
       );
-      this.setActiveDocument_(documentRef);
+      this.setActiveDocument_(ref);
     }
   }
 
@@ -497,17 +529,55 @@ export class NextPageService {
 
   /**
    * Sets the specified document as active, updating the document title and URL.
-   * @param {!DocumentRef} documentRef Reference to the document to set as
-   *     active.
+   *
+   * @param {!DocumentRef} ref Reference to the document to be activated
    * @private
    */
-  setActiveDocument_(documentRef) {
-    const {amp} = documentRef;
-    this.win_.document.title = amp.title || '';
-    this.activeDocumentRef_ = documentRef;
-    this.setActiveDocumentInHistory_(documentRef);
+  setActiveDocument_(ref) {
+    this.documentRefs_.forEach(docRef => {
+      const {amp} = docRef;
+      // Update the title and history
+      if (docRef === ref) {
+        this.win_.document.title = amp.title || '';
+        this.activeDocumentRef_ = docRef;
+        this.setActiveDocumentInHistory_(docRef);
+        // Show the active document
+        this.setDocumentVisibility_(docRef, VisibilityState.VISIBLE);
+      } else {
+        // Hide other documents
+        this.setDocumentVisibility_(docRef, VisibilityState.HIDDEN);
+      }
+    });
 
     // TODO(emarchiori): Consider updating position fixed elements.
+  }
+
+  /**
+   * Manually overrides the document's visible state to the given state
+   *
+   * @param {!DocumentRef} ref Reference to the document to change
+   * @param {!../../../src/visibility-state.VisibilityState} visibilityState
+   * @private
+   */
+  setDocumentVisibility_(ref, visibilityState) {
+    // Prevent updating visibility of the host document
+    if (ref === this.documentRefs_[0]) {
+      return;
+    }
+
+    const ampDoc = ref.amp && ref.amp.ampdoc;
+
+    // Prevent hiding of documents that are not shadow docs
+    if (!ampDoc) {
+      return;
+    }
+
+    // Prevent hiding of documents that are being pre-rendered
+    if (!ampDoc.hasBeenVisible() && visibilityState == VisibilityState.HIDDEN) {
+      return;
+    }
+
+    ref.amp.setVisibilityState(visibilityState);
   }
 
   /**

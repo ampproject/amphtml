@@ -18,7 +18,6 @@ import {Services} from './services';
 import {dev} from './log';
 import {getData} from './event-helper';
 import {getServiceForDoc, registerServiceBuilderForDoc} from './service';
-import {isExperimentOn} from './experiments';
 import {makeBodyVisibleRecovery} from './style-installer';
 import PriorityQueue from './utils/priority-queue';
 
@@ -31,6 +30,7 @@ const TAG = 'CHUNK';
  * @type {boolean}
  */
 let deactivated = /nochunking=1/.test(self.location.hash);
+let allowLongTasks = false;
 
 /**
  * @const {!Promise}
@@ -113,6 +113,14 @@ export function chunkInstanceForTesting(elementOrAmpDoc) {
  */
 export function deactivateChunking() {
   deactivated = true;
+}
+
+/**
+ * Allow continuing macro tasks after a long task (>5ms).
+ * In particular this is the case when AMP runs in the `amp-inabox` ads mode.
+ */
+export function allowLongTasksInChunking() {
+  allowLongTasks = true;
 }
 
 /**
@@ -300,11 +308,7 @@ class Chunks {
     this.boundExecute_ = this.execute_.bind(this);
     /** @private {number} */
     this.durationOfLastExecution_ = 0;
-    /** @private {boolean} */
-    this.macroAfterLongTask_ = isExperimentOn(
-      this.win_,
-      'macro-after-long-task'
-    );
+
     /**
      * Set to true if we scheduled a macro or micro task to execute the next
      * task. If true, we don't schedule another one.
@@ -449,7 +453,7 @@ class Chunks {
     // last instruction yeild back to the main thread.
     // 5 milliseconds is a magic number.
     if (
-      this.macroAfterLongTask_ &&
+      !allowLongTasks &&
       this.bodyIsVisible_ &&
       this.durationOfLastExecution_ > 5
     ) {

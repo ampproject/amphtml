@@ -227,7 +227,7 @@ describes.realWin(
         return savedCreateElement.call(doc, name);
       };
       const element = doc.createElement('div');
-      element.toggleFallback = sandbox.spy();
+      element.toggleFallback = env.sandbox.spy();
       const audio = new AmpAudio(element);
       const promise = audio.buildAudioElement();
       doc.createElement = savedCreateElement;

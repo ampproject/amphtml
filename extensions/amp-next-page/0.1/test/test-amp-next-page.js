@@ -16,6 +16,7 @@
 import * as DocFetcher from '../../../../src/document-fetcher';
 import {AmpNextPage} from '../amp-next-page';
 import {Services} from '../../../../src/services';
+import {VisibilityState} from '../../../../src/visibility-state';
 import {getServicePromiseForDoc} from '../../../../src/service';
 import {layoutRectLtwh} from '../../../../src/layout-rect';
 import {macroTask} from '../../../../testing/yield';
@@ -63,14 +64,14 @@ describes.realWin(
 
       ampdoc.getUrl = () => document.location.href;
 
-      fetchDocumentMock = sandbox.mock(DocFetcher);
-      sandbox
-        .stub(Services.resourcesForDoc(ampdoc), 'mutateElement')
+      fetchDocumentMock = env.sandbox.mock(DocFetcher);
+      env.sandbox
+        .stub(Services.mutatorForDoc(ampdoc), 'mutateElement')
         .callsFake((unused, mutator) => {
           mutator();
           return Promise.resolve();
         });
-      sandbox.stub(nextPage, 'mutateElement').callsFake(mutator => {
+      env.sandbox.stub(nextPage, 'mutateElement').callsFake(mutator => {
         mutator();
         return Promise.resolve();
       });
@@ -108,14 +109,12 @@ describes.realWin(
       });
 
       it('does not fetch the next document before 3 viewports away', function*() {
-        const xhrMock = sandbox.mock(Services.xhrFor(win));
+        const xhrMock = env.sandbox.mock(Services.xhrFor(win));
         xhrMock.expects('fetch').never();
-        sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+        env.sandbox
+          .stub(viewport, 'getClientRectAsync')
           // 4x viewports away
-          return Promise.resolve(
-            layoutRectLtwh(0, 0, sizes.width, sizes.height * 5)
-          );
-        });
+          .resolves(layoutRectLtwh(0, 0, sizes.width, sizes.height * 5));
 
         win.dispatchEvent(new Event('scroll'));
         yield macroTask();
@@ -125,12 +124,10 @@ describes.realWin(
 
       it('fetches the next document within 3 viewports away', function*() {
         env.fetchMock.get('*', EXAMPLE_PAGE);
-        sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+        env.sandbox
+          .stub(viewport, 'getClientRectAsync')
           // 1x viewport away
-          return Promise.resolve(
-            layoutRectLtwh(0, 0, sizes.width, sizes.height * 2)
-          );
-        });
+          .resolves(layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
 
         win.dispatchEvent(new Event('scroll'));
         yield macroTask();
@@ -139,19 +136,17 @@ describes.realWin(
       });
 
       it('only fetches the next document once', function*() {
-        const xhrMock = sandbox.mock(Services.xhrFor(win));
+        const xhrMock = env.sandbox.mock(Services.xhrFor(win));
         // Promise which is never resolved.
         xhrMock
           .expects('fetch')
           .returns(new Promise(() => {}))
           .once();
 
-        sandbox.stub(viewport, 'getClientRectAsync').callsFake(() => {
+        env.sandbox
+          .stub(viewport, 'getClientRectAsync')
           // 1x viewport away
-          return Promise.resolve(
-            layoutRectLtwh(0, 0, sizes.width, sizes.height * 2)
-          );
-        });
+          .resolves(layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
 
         win.dispatchEvent(new Event('scroll'));
         yield macroTask();
@@ -167,20 +162,16 @@ describes.realWin(
           ampdoc,
           'next-page'
         );
-        const attachShadowDocSpy = sandbox.spy(
+        const attachShadowDocSpy = env.sandbox.spy(
           nextPageService.multidocManager_,
           'attachShadowDoc'
         );
 
-        sandbox
+        env.sandbox
           .stub(viewport, 'getClientRectAsync')
           .onFirstCall()
-          .callsFake(() => {
-            // 1x viewport away
-            return Promise.resolve(
-              layoutRectLtwh(0, 0, sizes.width, sizes.height * 2)
-            );
-          });
+          // 1x viewport away
+          .resolves(layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
 
         win.dispatchEvent(new Event('scroll'));
         yield macroTask();
@@ -209,19 +200,15 @@ describes.realWin(
           ampdoc,
           'next-page'
         );
-        const attachShadowDocSpy = sandbox.spy(
+        const attachShadowDocSpy = env.sandbox.spy(
           nextPageService.multidocManager_,
           'attachShadowDoc'
         );
-        sandbox
+        env.sandbox
           .stub(viewport, 'getClientRectAsync')
           .onFirstCall()
-          .callsFake(() => {
-            // 1x viewport away
-            return Promise.resolve(
-              layoutRectLtwh(0, 0, sizes.width, sizes.height * 2)
-            );
-          });
+          // 1x viewport away
+          .resolves(layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
         win.dispatchEvent(new Event('scroll'));
         yield macroTask();
         const shadowDoc = attachShadowDocSpy.firstCall.returnValue.ampdoc;
@@ -242,19 +229,15 @@ describes.realWin(
           ampdoc,
           'next-page'
         );
-        const attachShadowDocSpy = sandbox.spy(
+        const attachShadowDocSpy = env.sandbox.spy(
           nextPageService.multidocManager_,
           'attachShadowDoc'
         );
-        sandbox
+        env.sandbox
           .stub(viewport, 'getClientRectAsync')
           .onFirstCall()
-          .callsFake(() => {
-            // 1x viewport away
-            return Promise.resolve(
-              layoutRectLtwh(0, 0, sizes.width, sizes.height * 2)
-            );
-          });
+          // 1x viewport away
+          .resolves(layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
         win.dispatchEvent(new Event('scroll'));
         yield macroTask();
 
@@ -285,7 +268,7 @@ describes.realWin(
         const srcUrl = 'https://example.com/config.json';
         element.setAttribute('src', srcUrl);
 
-        const fetchJsonStub = sandbox
+        const fetchJsonStub = env.sandbox
           .stub(Services.batchedXhrFor(win), 'fetchJson')
           .resolves({
             ok: true,
@@ -297,7 +280,7 @@ describes.realWin(
           ampdoc,
           'next-page'
         );
-        const registerSpy = sandbox.spy(nextPageService, 'register');
+        const registerSpy = env.sandbox.spy(nextPageService, 'register');
 
         yield nextPage.buildCallback();
         yield macroTask();
@@ -407,7 +390,7 @@ describes.realWin(
           ampdoc,
           'next-page'
         );
-        const registerSpy = sandbox.spy(nextPageService, 'register');
+        const registerSpy = env.sandbox.spy(nextPageService, 'register');
 
         yield nextPage.buildCallback();
         yield macroTask();
@@ -492,7 +475,7 @@ describes.realWin(
           ampdoc,
           'next-page'
         );
-        const registerSpy = sandbox.spy(nextPageService, 'register');
+        const registerSpy = env.sandbox.spy(nextPageService, 'register');
 
         yield nextPage.buildCallback();
         yield macroTask();
@@ -520,12 +503,68 @@ describes.realWin(
           ampdoc,
           'next-page'
         );
-        const registerSpy = sandbox.spy(nextPageService, 'register');
+        const registerSpy = env.sandbox.spy(nextPageService, 'register');
 
         yield nextPage.buildCallback();
         yield macroTask();
 
         expect(registerSpy.calledWith(element, config)).to.be.true;
+      });
+    });
+
+    describe('manual visibility management', () => {
+      beforeEach(done => {
+        element.innerHTML = `
+          <script type="application/json">
+            {
+              "pages": [
+                {
+                  "image": "/examples/img/hero@1x.jpg",
+                  "title": "Title 1",
+                  "ampUrl": "/document1"
+                },
+                {
+                  "image": "/examples/img/hero@1x.jpg",
+                  "title": "Title 2",
+                  "ampUrl": "/document2"
+                }
+              ],
+              "hideSelectors": [
+                "header",
+                "footer"
+              ]
+            }
+          </script>`;
+        nextPage.buildCallback().then(done);
+      });
+
+      it('defaults to the prerender visibility state for the next document', function*() {
+        env.fetchMock.get('*', EXAMPLE_PAGE);
+
+        const nextPageService = yield getServicePromiseForDoc(
+          ampdoc,
+          'next-page'
+        );
+        const attachShadowDocSpy = env.sandbox.spy(
+          nextPageService.multidocManager_,
+          'attachShadowDoc'
+        );
+
+        env.sandbox
+          .stub(viewport, 'getClientRectAsync')
+          .onFirstCall()
+          // 1x viewport away
+          .resolves(layoutRectLtwh(0, 0, sizes.width, sizes.height * 2));
+
+        win.dispatchEvent(new Event('scroll'));
+        yield macroTask();
+
+        const shadowDoc = attachShadowDocSpy.firstCall.returnValue.ampdoc;
+        yield shadowDoc.whenReady();
+
+        expect(shadowDoc.getVisibilityState()).to.equal(
+          VisibilityState.PRERENDER
+        );
       });
     });
   }

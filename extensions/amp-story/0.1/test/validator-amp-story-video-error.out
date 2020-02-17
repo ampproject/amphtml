@@ -30,7 +30,7 @@ FAIL
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |    <script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-0.1.js"></script>
 >>   ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-video-error.html:30:2 The attribute 'src' in tag 'amp-story extension .js script' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-story-0.1.js'. (see https://amp.dev/documentation/components/amp-story) [CUSTOM_JAVASCRIPT_DISALLOWED]
+amp-story/0.1/test/validator-amp-story-video-error.html:30:2 The attribute 'src' in tag 'amp-story extension .js script' is set to the invalid value 'https://cdn.ampproject.org/v0/amp-story-0.1.js'. (see https://amp.dev/documentation/components/amp-story)
 |    <script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js"></script>
 |  </head>
 |  <body>
@@ -40,9 +40,9 @@ amp-story/0.1/test/validator-amp-story-video-error.html:30:2 The attribute 'src'
 |          <!-- This should fail because amp-video doesn't have the [poster] attribute. -->
 |          <amp-video width="480"
 >>         ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-video-error.html:38:8 The mandatory attribute 'autoplay' is missing in tag 'amp-story >> amp-video'. (see https://amp.dev/documentation/components/amp-video) [AMP_TAG_PROBLEM]
+amp-story/0.1/test/validator-amp-story-video-error.html:38:8 The mandatory attribute 'autoplay' is missing in tag 'amp-story >> amp-video'. (see https://amp.dev/documentation/components/amp-video)
 >>         ^~~~~~~~~
-amp-story/0.1/test/validator-amp-story-video-error.html:38:8 The mandatory attribute 'poster' is missing in tag 'amp-story >> amp-video'. (see https://amp.dev/documentation/components/amp-video) [AMP_TAG_PROBLEM]
+amp-story/0.1/test/validator-amp-story-video-error.html:38:8 The mandatory attribute 'poster' is missing in tag 'amp-story >> amp-video'. (see https://amp.dev/documentation/components/amp-video)
 |                     height="270"
 |                     src="/video/tokyo.mp4"
 |                     layout="responsive">

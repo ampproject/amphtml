@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.70 */
+/** Version: 0.1.22.93 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -58,27 +58,28 @@ function onDocumentReady(doc, callback) {
 }
 
 /**
- * Calls the callback when document's state satisfies the stateFn.
+ * Calls the callback once when document's state satisfies the condition.
  * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
+ * @param {function(!Document):boolean} condition
  * @param {function(!Document)} callback
  */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
+function onDocumentState(doc, condition, callback) {
+  if (condition(doc)) {
+    // Execute callback right now.
     callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
+    return;
   }
+
+  // Execute callback (once!) after condition is satisfied.
+  let callbackHasExecuted = false;
+  const readyListener = () => {
+    if (condition(doc) && !callbackHasExecuted) {
+      callback(doc);
+      callbackHasExecuted = true;
+      doc.removeEventListener('readystatechange', readyListener);
+    }
+  };
+  doc.addEventListener('readystatechange', readyListener);
 }
 
 /**
@@ -359,6 +360,13 @@ function log(var_args) {
 }
 
 /**
+ * @param  {...*} var_args [description]
+ */
+function warn(var_args) {
+  console.warn.apply(console, arguments);
+}
+
+/**
  * Throws an error if the first argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.
@@ -372,15 +380,15 @@ function log(var_args) {
  *
  * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
- * @param {string=} opt_message The assertion message
+ * @param {string=} message The assertion message
  * @param {...*} var_args Arguments substituted into %s in the message.
  * @return {T} The value of shouldBeTrueish.
  * @template T
  */
-function assert(shouldBeTrueish, opt_message, var_args) {
+function assert(shouldBeTrueish, message, var_args) {
   let firstElement;
   if (!shouldBeTrueish) {
-    const message = opt_message || 'Assertion failed';
+    message = message || 'Assertion failed';
     const splitMessage = message.split('%s');
     const first = splitMessage.shift();
     let formatted = first;
@@ -426,6 +434,7 @@ function toString(val) {
 var log_1 = {
   assert,
   debugLog,
+  warn,
   log
 };
 var log_3 = log_1.debugLog;
@@ -452,10 +461,10 @@ var log_3 = log_1.debugLog;
  *  a. The element itself has a nextSibling.
  *  b. Any of the element ancestors has a nextSibling.
  * @param {!Element} element
- * @param {?Node=} opt_stopNode
+ * @param {?Node=} stopNode
  * @return {boolean}
  */
-function hasNextNodeInDocumentOrder(element, opt_stopNode) {
+function hasNextNodeInDocumentOrder(element, stopNode) {
   let currentElement = element;
   do {
     if (currentElement.nextSibling) {
@@ -463,7 +472,7 @@ function hasNextNodeInDocumentOrder(element, opt_stopNode) {
     }
   } while (
     (currentElement = currentElement.parentNode) &&
-    currentElement != opt_stopNode
+    currentElement != stopNode
   );
   return false;
 }
@@ -485,28 +494,8 @@ function hasNextNodeInDocumentOrder(element, opt_stopNode) {
  */
 
 /**
- * Determines if value is actually an Array.
- * @param {*} value
- * @return {boolean}
- */
-function isArray(value) {
-  return Array.isArray(value);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * @fileoverview This module declares JSON types as defined in the
+ * {@link http://json.org/}.
  */
 
 /**
@@ -525,16 +514,16 @@ function parseJson(json) {
  * Returns `undefined` if parsing fails.
  * Returns the `Object` corresponding to the JSON string when parsing succeeds.
  * @param {*} json JSON string to parse
- * @param {function(!Error)=} opt_onFailed Optional function that will be called
+ * @param {function(!Error)=} onFailed Optional function that will be called
  *     with the error if parsing fails.
  * @return {?JsonObject|undefined} May be extend to parse arrays.
  */
-function tryParseJson(json, opt_onFailed) {
+function tryParseJson(json, onFailed) {
   try {
     return parseJson(json);
   } catch (e) {
-    if (opt_onFailed) {
-      opt_onFailed(e);
+    if (onFailed) {
+      onFailed(e);
     }
     return undefined;
   }
@@ -692,7 +681,7 @@ class TypeChecker {
    * @private
    */
   toArray_(value) {
-    return isArray(value) ? value : [value];
+    return Array.isArray(value) ? value : [value];
   }
 }
 
@@ -868,7 +857,7 @@ class JsonLdParser {
     if (value == null || value === '') {
       return null;
     }
-    return isArray(value) ? value : [value];
+    return Array.isArray(value) ? value : [value];
   }
 
   /**

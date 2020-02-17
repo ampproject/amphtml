@@ -23,10 +23,13 @@ For more information, visit [www.adition.com](https://www.adition.com).
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="adition"
-    data-version="1"
-    data-wp_id="3470234">
+<amp-ad
+  width="300"
+  height="250"
+  type="adition"
+  data-version="1"
+  data-wp_id="3470234"
+>
 </amp-ad>
 ```
 

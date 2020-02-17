@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {listenFor} from '../../../src/iframe-helper';
@@ -37,7 +38,11 @@ export class AmpYotpo extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://staticw2.yotpo.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://staticw2.yotpo.com',
+      opt_onLayout
+    );
   }
 
   /** @override */
@@ -52,24 +57,6 @@ export class AmpYotpo extends AMP.BaseElement {
       'The data-widget-type attribute is required for <amp-yotpo> %s',
       this.element
     );
-    const iframe = getIframe(this.win, this.element, 'yotpo');
-    this.applyFillContent(iframe);
-
-    const unlisten = listenFor(
-      iframe,
-      'embed-size',
-      data => {
-        this.attemptChangeHeight(data['height']).catch(() => {
-          /* do nothing */
-        });
-      },
-      /* opt_is3P */ true
-    );
-    this.unlisteners_.push(unlisten);
-
-    this.element.appendChild(iframe);
-    this.iframe_ = iframe;
-    return this.loadPromise(iframe);
   }
 
   /** @override */
@@ -92,6 +79,28 @@ export class AmpYotpo extends AMP.BaseElement {
       this.iframe_ = null;
     }
     return true;
+  }
+
+  /** @override */
+  layoutCallback() {
+    const iframe = getIframe(this.win, this.element, 'yotpo');
+    this.applyFillContent(iframe);
+
+    const unlisten = listenFor(
+      iframe,
+      'embed-size',
+      data => {
+        this.attemptChangeHeight(data['height']).catch(() => {
+          /* do nothing */
+        });
+      },
+      /* opt_is3P */ true
+    );
+    this.unlisteners_.push(unlisten);
+
+    this.element.appendChild(iframe);
+    this.iframe_ = iframe;
+    return this.loadPromise(iframe);
   }
 }
 

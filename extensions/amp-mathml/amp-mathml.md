@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a MathML formula.
 ---
+
 <!--
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -47,25 +48,36 @@ This extension creates an iframe and renders a MathML formula.
 #### Example: The Quadratic Formula
 
 ```html
-<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]">
+<amp-mathml
+  layout="container"
+  data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"
+>
 </amp-mathml>
 ```
 
 #### Example: Cauchy's Integral Formula
 
 ```html
-<amp-mathml layout="container" data-formula="\[f(a) = \frac{1}{2\pi i} \oint\frac{f(z)}{z-a}dz\]">
+<amp-mathml
+  layout="container"
+  data-formula="\[f(a) = \frac{1}{2\pi i} \oint\frac{f(z)}{z-a}dz\]"
+>
 </amp-mathml>
 ```
+
 #### Example: Double angle formula for Cosines
 
 ```html
-<amp-mathml layout="container" data-formula="$$ \cos(θ+φ)=\cos(θ)\cos(φ)−\sin(θ)\sin(φ) $$">
+<amp-mathml
+  layout="container"
+  data-formula="$$ \cos(θ+φ)=\cos(θ)\cos(φ)−\sin(θ)\sin(φ) $$"
+>
 </amp-mathml>
 ```
+
 #### Example: Inline formula
 
-This is an example of a formula of ``<amp-mathml layout="container" inline data-formula="`x`"></amp-mathml>``, `<amp-mathml layout="container" inline data-formula="\(x = {-b \pm \sqrt{b^2-4ac} \over 2a}\)"></amp-mathml>` placed inline in the middle of a block of text. `<amp-mathml layout="container" inline data-formula="\( \cos(θ+φ) \)"></amp-mathml>` This shows how the formula will fit inside a block of text and can be styled with CSS.
+This is an example of a formula of `` <amp-mathml layout="container" inline data-formula="`x`"></amp-mathml> ``, `<amp-mathml layout="container" inline data-formula="\(x = {-b \pm \sqrt{b^2-4ac} \over 2a}\)"></amp-mathml>` placed inline in the middle of a block of text. `<amp-mathml layout="container" inline data-formula="\( \cos(θ+φ) \)"></amp-mathml>` This shows how the formula will fit inside a block of text and can be styled with CSS.
 
 ## Attributes
 
@@ -78,4 +90,5 @@ Specifies the formula to render.
 If specified, the component renders inline (`inline-block` in CSS).
 
 ## Validation
+
 See [amp-mathml rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mathml/validator-amp-mathml.protoascii) in the AMP validator specification.

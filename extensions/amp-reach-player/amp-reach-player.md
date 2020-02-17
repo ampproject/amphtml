@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Beachfront Reach video player.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -20,7 +21,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -->
-
 
 # amp-reach-player
 
@@ -53,10 +53,11 @@ Example:
 
 ```html
 <amp-reach-player
-      data-embed-id="default"
-      layout="responsive"
-      width="560"
-      height="315">
+  data-embed-id="default"
+  layout="responsive"
+  width="560"
+  height="315"
+>
 </amp-reach-player>
 ```
 

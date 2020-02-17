@@ -17,26 +17,23 @@
 import {Timer} from '../../src/service/timer-impl';
 
 describes.fakeWin('Timer', {}, env => {
-  let sandbox;
   let windowMock;
   let timer;
 
   beforeEach(() => {
-    sandbox = sinon.sandbox;
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(unusedCallback, unusedDelay) {};
     WindowApi.prototype.clearTimeout = function(unusedTimerId) {};
     WindowApi.prototype.document = {};
     WindowApi.prototype.Promise = window.Promise;
     const windowApi = new WindowApi();
-    windowMock = sandbox.mock(windowApi);
+    windowMock = env.sandbox.mock(windowApi);
 
     timer = new Timer(windowApi);
   });
 
   afterEach(() => {
     windowMock.verify();
-    sandbox.restore();
   });
 
   it('delay', () => {
@@ -90,7 +87,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        sinon.match(value => {
+        env.sandbox.match(value => {
           value();
           return true;
         }),
@@ -111,7 +108,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        sinon.match(value => {
+        env.sandbox.match(value => {
           value();
           return true;
         }),
@@ -138,7 +135,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        sinon.match(unusedValue => {
+        env.sandbox.match(unusedValue => {
           // No timeout
           return true;
         }),
@@ -159,7 +156,7 @@ describes.fakeWin('Timer', {}, env => {
     windowMock
       .expects('setTimeout')
       .withExactArgs(
-        sinon.match(value => {
+        env.sandbox.match(value => {
           // Immediate timeout
           value();
           return true;
@@ -200,7 +197,7 @@ describes.fakeWin('Timer', {}, env => {
 
   it('poll - clears out interval when complete', () => {
     const realTimer = new Timer(env.win);
-    const clearIntervalStub = sandbox.stub();
+    const clearIntervalStub = env.sandbox.stub();
     env.win.clearInterval = clearIntervalStub;
     return realTimer
       .poll(111, () => {

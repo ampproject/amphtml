@@ -50,6 +50,20 @@ const RTC_VENDORS = jsonConfiguration({
   ////////////////////////////////////////////////////////////////////
 
   // Add vendors here
+  ozone: {
+    url:
+      'https://elb.the-ozone-project.com/openrtb2/amp?tag_id=PLACEMENT_ID&gdpr_consent=CONSENT_STRING&ad_unit_code=AD_UNIT_CODE&site_id=SITE_ID&publisher_id=PUBLISHER_ID&custom_data=TGT&pubcid=PUBCID&adcid=ADCID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&curl=CANONICAL_URL&timeout=TIMEOUT&purl=HREF',
+    macros: [
+      'PLACEMENT_ID',
+      'SITE_ID',
+      'PUBLISHER_ID',
+      'AD_UNIT_CODE',
+      'PUBCID',
+    ],
+    errorReportingUrl:
+      'https://elb.the-ozone-project.com/amp_error?err=ERROR_TYPE&url=HREF',
+    disableKeyAppend: true,
+  },
   medianet: {
     url:
       'https://amprtc.media.net/rtb/getrtc?cid=CID&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&slot=ATTR(data-slot)&tgt=TGT&curl=CANONICAL_URL&to=TIMEOUT&purl=HREF',
@@ -72,8 +86,8 @@ const RTC_VENDORS = jsonConfiguration({
   },
   indexexchange: {
     url:
-      'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=CANONICAL_URL',
-    macros: ['SITE_ID'],
+      'https://amp.casalemedia.com/amprtc?v=1&w=ATTR(width)&h=ATTR(height)&ow=ATTR(data-override-width)&oh=ATTR(data-override-height)&ms=ATTR(data-multi-size)&s=SITE_ID&p=CANONICAL_URL&consent_state=CONSENT_STATE&consent_string=CONSENT_STRING',
+    macros: ['SITE_ID', 'CONSENT_STATE', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
   lotame: {
@@ -101,8 +115,8 @@ const RTC_VENDORS = jsonConfiguration({
   },
   aps: {
     url:
-      'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&pubid=PUB_UUID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%2C%22ms%22%3A%22ATTR(data-multi-size)%22%7D%5D&pj=PARAMS',
-    macros: ['PUB_ID', 'PARAMS', 'PUB_UUID'],
+      'https://aax.amazon-adsystem.com/e/dtb/bid?src=PUB_ID&pubid=PUB_UUID&amp=1&u=CANONICAL_URL&slots=%5B%7B%22sd%22%3A%22ATTR(data-slot)%22%2C%22s%22%3A%5B%22ATTR(width)xATTR(height)%22%5D%2C%22ms%22%3A%22ATTR(data-multi-size)%22%7D%5D&pj=PARAMS&gdprc=CONSENT_STRING',
+    macros: ['PUB_ID', 'PARAMS', 'PUB_UUID', 'CONSENT_STRING'],
     disableKeyAppend: true,
   },
   openwrap: {
@@ -148,6 +162,16 @@ const RTC_VENDORS = jsonConfiguration({
   yieldlab: {
     url: 'https://ad.yieldlab.net/yp/ADSLOT_ID?content=amp&t=amp%3D1',
     macros: ['ADSLOT_ID'],
+    disableKeyAppend: true,
+  },
+  automatad: {
+    url: 'https://pbs01.automatad.com/openrtb2/amp?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
+    disableKeyAppend: true,
+  },
+  prebidflux: {
+    url: 'https://prebid-server.flux-adserver.com/openrtb2/amp?tag_id=TAG_ID',
+    macros: ['TAG_ID'],
     disableKeyAppend: true,
   },
 });

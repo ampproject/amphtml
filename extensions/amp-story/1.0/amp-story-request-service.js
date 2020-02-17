@@ -71,7 +71,7 @@ export class AmpStoryRequestService {
       const credentials = bookendEl.getAttribute(
         BOOKEND_CREDENTIALS_ATTRIBUTE_NAME
       );
-      return this.loadJsonFromAttribute_(rawUrl, credentials);
+      return this.executeRequest(rawUrl, credentials ? {credentials} : {});
     }
 
     // Fallback. Check for an inline json config.
@@ -85,20 +85,13 @@ export class AmpStoryRequestService {
 
   /**
    * @param {string} rawUrl
-   * @param {string|null} credentials
+   * @param {Object=} opts
    * @return {(!Promise<!JsonObject>|!Promise<null>)}
-   * @private
    */
-  loadJsonFromAttribute_(rawUrl, credentials) {
-    const opts = {};
-
+  executeRequest(rawUrl, opts = {}) {
     if (!isProtocolValid(rawUrl)) {
       user().error(TAG, 'Invalid config url.');
       return Promise.resolve(null);
-    }
-
-    if (credentials) {
-      opts.credentials = credentials;
     }
 
     return Services.urlReplacementsForDoc(this.storyElement_)
@@ -124,7 +117,9 @@ export const getRequestService = (win, storyEl) => {
 
   if (!service) {
     service = new AmpStoryRequestService(win, storyEl);
-    registerServiceBuilder(win, 'story-request', () => service);
+    registerServiceBuilder(win, 'story-request', function() {
+      return service;
+    });
   }
 
   return service;

@@ -52,8 +52,7 @@ export class IframeTransportClient {
     );
 
     /** @protected {!IframeMessagingClient} */
-    this.iframeMessagingClient_ = new IframeMessagingClient(win);
-    this.iframeMessagingClient_.setHostWindow(this.win_.parent);
+    this.iframeMessagingClient_ = new IframeMessagingClient(win, win.parent);
     this.iframeMessagingClient_.setSentinel(
       dev().assertString(
         parsedFrameName['sentinel'],
@@ -183,7 +182,7 @@ export class IframeTransportContext {
     this.iframeMessagingClient_./*OK*/ sendMessage(
       MessageType.IFRAME_TRANSPORT_RESPONSE,
       /** @type {!JsonObject} */
-      (Object.assign({message: data}, this.baseMessage_))
+      ({message: data, ...this.baseMessage_})
     );
   }
 }

@@ -148,6 +148,7 @@ export class Linkmate {
         const linkObj = {
           'raw_url': link,
           'exclusive_match_requested': exclusive,
+          'link_source': 'linkmate',
         };
 
         postLinks.push(linkObj);
@@ -185,9 +186,7 @@ export class Linkmate {
         ) {
           mappings.push({
             anchor,
-            replacementUrl: `https://shop-links.co/${
-              smartLink['auction_id']
-            }/?amp=true`,
+            replacementUrl: `https://shop-links.co/${smartLink['auction_id']}/?amp=true`,
           });
         }
       });

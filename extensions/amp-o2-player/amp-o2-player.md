@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays an AOL O2Player.
 ---
+
 <!---
 Copyright 2016 O2Player. All Rights Reserved.
 
@@ -50,12 +51,14 @@ Example:
 
 ```html
 <amp-o2-player
-    data-pid="12345"
-    data-bcid="5678"
-    data-bid="54321"
-    data-vid="98765"
-    layout="responsive"
-    width="480" height="270">
+  data-pid="12345"
+  data-bcid="5678"
+  data-bid="54321"
+  data-vid="98765"
+  layout="responsive"
+  width="480"
+  height="270"
+>
 </amp-o2-player>
 ```
 

@@ -48,6 +48,9 @@ function initPlayer(global, data) {
         ./* OK */ offsetHeight;
       global.context.requestResize(undefined, height);
     },
+    onDestroy: () => {
+      global.context.noContentAvailable();
+    },
   };
   // eslint-disable-next-line no-undef
   SeedrPlayer(config);

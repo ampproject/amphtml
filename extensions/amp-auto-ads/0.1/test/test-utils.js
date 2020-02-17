@@ -22,13 +22,11 @@ const BOX = layoutRectLtwh(1, 5, 10, 10);
 
 describes.realWin('amp-auto-ads utils', {amp: true}, env => {
   let win;
-  let sandbox;
   let element;
   let measureStub;
 
   beforeEach(() => {
     win = env.win;
-    sandbox = env.sandbox;
 
     element = env.createAmpElement('amp-foobar');
     win.document.body.appendChild(element);
@@ -37,11 +35,13 @@ describes.realWin('amp-auto-ads utils', {amp: true}, env => {
   describe('getElementLayoutBox', () => {
     beforeEach(() => {
       const viewport = Services.viewportForDoc(element);
-      measureStub = sandbox.stub(viewport, 'getLayoutRect').callsFake(el => {
-        if (el === element) {
-          return BOX;
-        }
-      });
+      measureStub = env.sandbox
+        .stub(viewport, 'getLayoutRect')
+        .callsFake(el => {
+          if (el === element) {
+            return BOX;
+          }
+        });
     });
 
     it('should measure the element', () => {

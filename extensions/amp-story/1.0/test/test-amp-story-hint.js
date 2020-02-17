@@ -31,15 +31,19 @@ describes.fakeWin('amp-story hint layer', {}, env => {
     win = env.win;
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function() {
+      return localizationService;
+    });
 
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function() {
+      return storeService;
+    });
 
-    sandbox
+    env.sandbox
       .stub(Services, 'vsyncFor')
       .callsFake(() => ({mutate: task => task()}));
-    sandbox
+    env.sandbox
       .stub(Services, 'timerFor')
       .callsFake(() => ({delay: NOOP, cancel: NOOP}));
 
@@ -52,7 +56,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
   });
 
   it('should be able to show navigation help overlay', () => {
-    const hideAfterTimeoutStub = sandbox
+    const hideAfterTimeoutStub = env.sandbox
       .stub(ampStoryHint, 'hideAfterTimeout')
       .callsFake(NOOP);
 
@@ -67,7 +71,7 @@ describes.fakeWin('amp-story hint layer', {}, env => {
   });
 
   it('should be able to show no previous page help overlay', () => {
-    const hideAfterTimeoutStub = sandbox
+    const hideAfterTimeoutStub = env.sandbox
       .stub(ampStoryHint, 'hideAfterTimeout')
       .callsFake(NOOP);
 

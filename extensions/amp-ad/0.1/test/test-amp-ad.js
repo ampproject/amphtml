@@ -63,7 +63,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
 
       beforeEach(() => {
         const getUserNotificationStub = stubService(
-          sandbox,
+          window.sandbox,
           win,
           'userNotificationManager',
           'get'
@@ -125,12 +125,12 @@ describes.realWin('Ad loader', {amp: true}, env => {
         };
         ampAdElement.setAttribute('type', 'zort');
         const extensions = Services.extensionsFor(win);
-        const extensionsStub = sandbox
+        const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
           .returns(Promise.reject(new Error('I failed!')));
         ampAd = new AmpAd(ampAdElement);
-        sandbox.stub(ampAd.user(), 'error');
+        env.sandbox.stub(ampAd.user(), 'error');
         return ampAd.upgradeCallback().then(baseElement => {
           expect(extensionsStub).to.be.called;
           expect(ampAdElement.getAttribute('data-a4a-upgrade-type')).to.equal(
@@ -143,7 +143,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
       it('falls back to Delayed Fetch if remote.html is used', () => {
         const meta = doc.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/remote.html');
+        meta.setAttribute('content', 'https://example.test/remote.html');
         doc.head.appendChild(meta);
         a4aRegistry['zort'] = (win, element, useRemoteHtml) => {
           return !useRemoteHtml;
@@ -165,7 +165,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
           return zortInstance;
         };
         const extensions = Services.extensionsFor(win);
-        const extensionsStub = sandbox
+        const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
           .returns(Promise.resolve(zortConstructor));
@@ -182,7 +182,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
       it('uses Fast Fetch if remote.html and RTC are used', () => {
         const meta = doc.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/remote.html');
+        meta.setAttribute('content', 'https://example.test/remote.html');
         doc.head.appendChild(meta);
         a4aRegistry['zort'] = function() {
           return true;
@@ -194,7 +194,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
           return zortInstance;
         };
         const extensions = Services.extensionsFor(win);
-        const extensionsStub = sandbox
+        const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
           .returns(Promise.resolve(zortConstructor));
@@ -211,7 +211,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
       it('uses Fast Fetch if remote.html is used but disabled', () => {
         const meta = doc.createElement('meta');
         meta.setAttribute('name', 'amp-3p-iframe-src');
-        meta.setAttribute('content', 'https://example.com/remote.html');
+        meta.setAttribute('content', 'https://example.test/remote.html');
         doc.head.appendChild(meta);
         adConfig['zort'] = {remoteHTMLDisabled: true};
         a4aRegistry['zort'] = function() {
@@ -223,7 +223,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
           return zortInstance;
         };
         const extensions = Services.extensionsFor(win);
-        const extensionsStub = sandbox
+        const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
           .returns(Promise.resolve(zortConstructor));
@@ -247,7 +247,7 @@ describes.realWin('Ad loader', {amp: true}, env => {
           return zortInstance;
         };
         const extensions = Services.extensionsFor(win);
-        const extensionsStub = sandbox
+        const extensionsStub = env.sandbox
           .stub(extensions, 'loadElementClass')
           .withArgs('amp-ad-network-zort-impl')
           .returns(Promise.resolve(zortConstructor));

@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Displays a Minute Media player.
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -46,17 +47,21 @@ limitations under the License.
 ## Example
 
 Example with RESPONSIVE layout - width and height attributes determine the aspect ratio of the player embedded.
+
 ```html
-  <amp-minute-media-player
-    data-content-type="curated"
-    data-content-id="fSkmeWKF"
-    width="500" height="334"
-    layout="responsive"
-    autoplay>
-  </amp-minute-media-player>
+<amp-minute-media-player
+  data-content-type="curated"
+  data-content-id="fSkmeWKF"
+  width="500"
+  height="334"
+  layout="responsive"
+  autoplay
+>
+</amp-minute-media-player>
 ```
 
 Example with FIXED layout - fixed width and height.
+
 ```html
   <amp-minute-media-player
     data-content-type="semantic"
@@ -129,12 +134,9 @@ Example with FIXED layout - fixed width and height.
 </p>
     </td>
   </tr>
-    
-
-
-
 
 </table>
 
 ## Validation
+
 See [amp-minute-media-player rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-minute-media-player/validator-amp-minute-media-player.protoascii) in the AMP validator specification.

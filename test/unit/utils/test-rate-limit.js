@@ -18,20 +18,14 @@ import {debounce, throttle} from '../../../src/utils/rate-limit';
 
 describe('function utils', () => {
   describe('throttle', () => {
-    let sandbox;
     let clock;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      clock = sandbox.useFakeTimers();
-    });
-
-    afterEach(() => {
-      sandbox.restore();
+      clock = window.sandbox.useFakeTimers();
     });
 
     it('should work', () => {
-      const callback = sandbox.spy();
+      const callback = window.sandbox.spy();
       const throttledCallback = throttle(window, callback, 100);
 
       throttledCallback(1);
@@ -89,20 +83,14 @@ describe('function utils', () => {
   });
 
   describe('debounce', () => {
-    let sandbox;
     let clock;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      clock = sandbox.useFakeTimers();
-    });
-
-    afterEach(() => {
-      sandbox.restore();
+      clock = window.sandbox.useFakeTimers();
     });
 
     it('should wait before calling', () => {
-      const callback = sandbox.spy();
+      const callback = window.sandbox.spy();
       const debounced = debounce(window, callback, 100);
 
       debounced(1);

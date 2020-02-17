@@ -23,6 +23,7 @@ If you just want to validate a page, please see
 [our documentation over at amp.dev](https://amp.dev/documentation/guides-and-tutorials/learn/validation-workflow/validate_amp).
 
 ## Chrome Extension
+
 Please see [chromeextension/README.md](https://github.com/ampproject/amphtml/blob/master/validator/chromeextension/README.md).
 
 ## Visual Studio Code Extension
@@ -57,33 +58,35 @@ the edges. Below are instructions for Linux Ubuntu 14.
 
 Install these packages using apt-get:
 
-* `npm`
-* `openjdk-7-jre`
-* `protobuf-compiler`
-* `python2.7`
+- `npm`
+- `openjdk-7-jre`
+- `protobuf-compiler`
+- `python2.7`
 
 Then use pip to `pip install protobuf`.
 
 In addition, install Node.js v4.4.2. E.g.,
-  [by downloading](https://nodejs.org/en/download/) or
-  [by using a package manager](https://nodejs.org/en/download/package-manager/) or
-  [by using NVM](https://github.com/creationix/nvm).
+[by downloading](https://nodejs.org/en/download/) or
+[by using a package manager](https://nodejs.org/en/download/package-manager/) or
+[by using NVM](https://github.com/creationix/nvm).
 
 ### OSX
 
 Dependencies:
 
-* npm
-* python 2.7 (should already be installed on OSX)
-* [homebrew](https://brew.sh/)
-  * protobuf
+- npm
+- python 2.7 (should already be installed on OSX)
+- [homebrew](https://brew.sh/)
+
+  - protobuf
+
     ```sh
     brew install protobuf
     mkdir -p /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages
     echo 'import site; site.addsitedir("/usr/local/lib/python2.7/site-packages")' >> /Users/$(whoami)/Library/Python/2.7/lib/python/site-packages/homebrew.pth
     ```
 
-  * openjdk-7-jre
+  - openjdk-7-jre
     ```sh
     brew tap caskroom/cask
     brew install Caskroom/cask/java
@@ -101,7 +104,7 @@ to run all of the validator tests in the amphtml repo.
 To create/update `validator-*.out` files that are used in the test,
 run `python build.py --update_tests`.
 
-```
+```sh
 $ amphtml-validator --validator_js dist/validator_minified.js testdata/feature_tests/several_errors.html
 testdata/feature_tests/several_errors.html:23:2 The attribute 'charset' may not appear in tag 'meta name= and content='.
 testdata/feature_tests/several_errors.html:26:2 The tag 'script' is disallowed except in specific forms.
@@ -112,21 +115,25 @@ testdata/feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'am
 
 ### Building on MacOS
 
-*Note: This is for building the validator from source. If you are simply running validator tests for extensions, see the Installation steps instead.*
+_Note: This is for building the validator from source. If you are simply running validator tests for extensions, see the Installation steps instead._
 
-* Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/).
-* Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
-* If your [npm](https://www.npmjs.com/) is out of date, run `npm i -g npm` to update it.
+- Download protobuf with `brew install protobuf` via [homebrew](https://brew.sh/).
+- Use pip to `pip install google` and `pip install protobuf`. If you don't have pip, you can get it either via `brew install python` or [get-pip.py](https://bootstrap.pypa.io/get-pip.py).
+- If your [npm](https://www.npmjs.com/) is out of date, run `npm i -g npm` to update it.
 
 To verify that you have the necessary prerequisites, run and verify:
-```
+
+```sh
 $ protoc --version
 libprotoc 3.5.1
 ```
+
 and
-```
+
+```sh
 $ python
 >>> import google.protobuf
 >>>
 ```
+
 Now `cd amphtml/validator` and run `python build.py`.

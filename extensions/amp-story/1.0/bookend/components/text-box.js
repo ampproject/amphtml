@@ -56,13 +56,14 @@ export class TextBoxComponent {
    * @return {!TextBoxComponentDef}
    * @override
    * */
-  build({type, text}) {
+  build(textboxJson) {
+    const {type, text} = textboxJson;
     return {type, text};
   }
 
   /** @override */
-  buildElement(textboxData, doc, data) {
-    const html = htmlFor(doc);
+  buildElement(textboxData, win, data) {
+    const html = htmlFor(win.document);
     const container = html`
       <div
         class="i-amphtml-story-bookend-textbox

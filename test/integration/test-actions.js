@@ -22,11 +22,8 @@ describe
   .retryOnSaucelabs()
   .run('on="..."', () => {
     let fixture;
-    let sandbox;
 
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-
       return createFixtureIframe('test/fixtures/actions.html', 500).then(f => {
         fixture = f;
 
@@ -38,10 +35,6 @@ describe
     function waitForDisplay(element, display) {
       return () => fixture.win.getComputedStyle(element)['display'] === display;
     }
-
-    afterEach(() => {
-      sandbox.restore();
-    });
 
     describe('"tap" event', () => {
       it('<non-AMP element>.toggleVisibility', function*() {
@@ -76,7 +69,10 @@ describe
             // This is brittle but I don't know how else to stub
             // window navigation.
             const navigationService = fixture.win.__AMP_SERVICES.navigation.obj;
-            const navigateTo = sandbox.stub(navigationService, 'navigateTo');
+            const navigateTo = window.sandbox.stub(
+              navigationService,
+              'navigateTo'
+            );
 
             button.click();
             yield poll('navigateTo() called with correct args', () => {
@@ -88,7 +84,7 @@ describe
       it('AMP.print()', function*() {
         const button = fixture.doc.getElementById('printBtn');
 
-        const print = sandbox.stub(fixture.win, 'print');
+        const print = window.sandbox.stub(fixture.win, 'print');
 
         button.click();
         yield poll('print() called once', () => {

@@ -256,12 +256,7 @@ export class AmpNextPage extends AMP.BaseElement {
   fetchConfig_() {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
-    return batchFetchJsonFor(
-      ampdoc,
-      this.element,
-      /* opt_expr */ undefined,
-      policy
-    );
+    return batchFetchJsonFor(ampdoc, this.element, {urlReplacement: policy});
   }
 }
 
@@ -307,6 +302,8 @@ function extractAdSenseTextContent(el) {
 
 AMP.extension(TAG, '0.1', AMP => {
   const service = new NextPageService();
-  AMP.registerServiceForDoc(SERVICE_ID, () => service);
+  AMP.registerServiceForDoc(SERVICE_ID, function() {
+    return service;
+  });
   AMP.registerElement(TAG, AmpNextPage, CSS);
 });

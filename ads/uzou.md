@@ -20,11 +20,13 @@ For initial installation, let us know from [this form](https://docs.google.com/f
 
 ## Example
 
-
 ```html
-<amp-ad witdh="100" height="100"
-        type="uzou"
-        data-widget-params='{"placementCode": "your_placement_code"}'>
+<amp-ad
+  witdh="100"
+  height="100"
+  type="uzou"
+  data-widget-params='{"placementCode": "your_placement_code"}'
+>
 </amp-ad>
 ```
 

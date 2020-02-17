@@ -28,6 +28,7 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {Services} from '../../../src/services';
 import {getIframe} from '../../../src/3p-frame';
 import {listenFor} from '../../../src/iframe-helper';
 import {removeElement} from '../../../src/dom';
@@ -46,7 +47,11 @@ export class AmpGist extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://gist.github.com/', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://gist.github.com/',
+      opt_onLayout
+    );
   }
 
   /** @override */

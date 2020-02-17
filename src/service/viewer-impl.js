@@ -19,7 +19,12 @@ import {Observable} from '../observable';
 import {Services} from '../services';
 import {ViewerInterface} from './viewer-interface';
 import {VisibilityState} from '../visibility-state';
-import {dev, devAssert, duplicateErrorIfNecessary} from '../log';
+import {
+  dev,
+  devAssert,
+  duplicateErrorIfNecessary,
+  stripUserError,
+} from '../log';
 import {findIndex} from '../utils/array';
 import {
   getSourceOrigin,
@@ -422,6 +427,86 @@ export class ViewerImpl {
   }
 
   /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  getVisibilityState() {
+    return this.ampdoc.getVisibilityState();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  isVisible() {
+    return this.ampdoc.isVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  hasBeenVisible() {
+    return this.ampdoc.hasBeenVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  whenFirstVisible() {
+    return this.ampdoc.whenFirstVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  whenNextVisible() {
+    return this.ampdoc.whenNextVisible();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  getFirstVisibleTime() {
+    return this.ampdoc.getFirstVisibleTime();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  getLastVisibleTime() {
+    return this.ampdoc.getLastVisibleTime();
+  }
+
+  /**
+   * Passthrough for ampdoc visibility state. Only to be used by viewer
+   * integration.
+   * @restricted
+   * TODO(#22733): remove if no longer used by the viewer.
+   */
+  onVisibilityChanged(handler) {
+    return this.ampdoc.onVisibilityChanged(handler);
+  }
+
+  /**
    * Sets the viewer defined visibility state.
    * @param {?string|undefined} state
    * @private
@@ -776,17 +861,22 @@ export class ViewerImpl {
 }
 
 /**
- * Creates an error for the case where a channel cannot be established.
+ * Creates a dev error for the case where a channel cannot be established.
  * @param {*=} opt_reason
  * @return {!Error}
  */
 function getChannelError(opt_reason) {
+  let channelError;
   if (opt_reason instanceof Error) {
     opt_reason = duplicateErrorIfNecessary(opt_reason);
     opt_reason.message = 'No messaging channel: ' + opt_reason.message;
-    return opt_reason;
+    channelError = opt_reason;
+  } else {
+    channelError = new Error('No messaging channel: ' + opt_reason);
   }
-  return new Error('No messaging channel: ' + opt_reason);
+  // Force convert user error to dev error
+  channelError.message = stripUserError(channelError.message);
+  return channelError;
 }
 
 /**

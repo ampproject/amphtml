@@ -28,10 +28,8 @@ import {createElementWithAttributes} from '../../../../src/dom';
 describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   let impl;
   let element;
-  let sandbox;
 
   beforeEach(() => {
-    sandbox = env.sandbox;
     env.win.__AMP_MODE.test = true;
     const doc = env.win.document;
     // TODO(a4a-cam@): This is necessary in the short term, until A4A is
@@ -52,7 +50,6 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
   });
 
   afterEach(() => {
-    sandbox.restore();
     impl = null;
   });
 
@@ -406,7 +403,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         'json': JSON.stringify(json),
       });
       env.win.document.body.appendChild(element);
-      sandbox.defineProperty(env.win.document, 'referrer', {
+      env.sandbox.defineProperty(env.win.document, 'referrer', {
         value: 'https://www.google.com/',
       });
       const docInfo = Services.documentInfoForDoc(element);
@@ -415,11 +412,23 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
         env.win.document,
         env.win
       );
+      const docViewport = Services.viewportForDoc(this.getAmpDoc());
       impl.populateAdUrlState();
       const customMacros = impl.getCustomRealTimeConfigMacros_();
       expect(customMacros.PAGEVIEWID()).to.equal(docInfo.pageViewId);
+      expect(customMacros.PAGEVIEWID_64()).to.equal(docInfo.pageViewId64);
       expect(customMacros.HREF()).to.equal(env.win.location.href);
       expect(customMacros.TGT()).to.equal(JSON.stringify(json['targeting']));
+      expect(customMacros.ELEMENT_POS()).to.equal(
+        element.getBoundingClientRect().top + scrollY
+      );
+      expect(customMacros.SCROLL_TOP()).to.equal(docViewport.getScrollTop());
+      expect(customMacros.PAGE_HEIGHT()).to.equal(
+        docViewport.getScrollHeight()
+      );
+      expect(customMacros.BKG_STATE()).to.equal(
+        this.getAmpDoc().isVisible() ? 'visible' : 'hidden'
+      );
       Object.keys(macros).forEach(macro => {
         expect(customMacros.ATTR(macro)).to.equal(macros[macro]);
       });
@@ -484,7 +493,7 @@ describes.realWin('DoubleClick Fast Fetch RTC', {amp: true}, env => {
       );
       impl.populateAdUrlState();
       const viewer = Services.viewerForDoc(impl.getAmpDoc());
-      sandbox.stub(viewer, 'getReferrerUrl').returns(new Promise(() => {}));
+      env.sandbox.stub(viewer, 'getReferrerUrl').returns(new Promise(() => {}));
       const customMacros = impl.getCustomRealTimeConfigMacros_();
       return expect(customMacros.REFERRER(0)).to.eventually.be.undefined;
     });

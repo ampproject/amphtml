@@ -27,19 +27,17 @@ const SHARE = 300;
 
 /**
  * @param {{
- * loc:Location,
- * referrer:string,
- * title:string,
- * ampDoc: *,
- * pubId:string,
- * data: {
- *   url: string,
- *   service: string
- * }
+ *   loc:Location,
+ *   referrer:string,
+ *   title:string,
+ *   ampDoc: *,
+ *   pubId:string,
+ *   data: {url: string, service: string}
  * }} pjson
  * @return {{amp: number, cb: number, dc: number, dest: *, gen: number, mk: string, pub: *, rb: number, sid, url}}
  */
-const getPjsonData = ({loc, referrer, title, ampDoc, pubId, data}) => {
+const getPjsonData = pjson => {
+  const {loc, referrer, title, ampDoc, pubId, data} = pjson;
   const {href, hostname, search, pathname, hash, protocol, port} = loc;
   /** @typedef {{
    * du: string,

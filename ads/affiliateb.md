@@ -19,11 +19,14 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width="300" height="250"
-    type="affiliateb"
-    data-afb_a="l44x-y174897c"
-    data-afb_p="g2m"
-    data-afb_t="i">
+<amp-ad
+  width="300"
+  height="250"
+  type="affiliateb"
+  data-afb_a="l44x-y174897c"
+  data-afb_p="g2m"
+  data-afb_t="i"
+>
 </amp-ad>
 ```
 

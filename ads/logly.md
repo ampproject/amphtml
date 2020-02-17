@@ -14,16 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-
 # logly
 
 ## Display
 
 ```html
-<amp-ad width="300" height="568"
-    type="logly"
-    layout="responsive"
-    data-adspotid="123456">
+<amp-ad
+  width="300"
+  height="568"
+  type="logly"
+  layout="responsive"
+  data-adspotid="123456"
+>
 </amp-ad>
 ```
 

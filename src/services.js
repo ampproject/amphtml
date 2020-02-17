@@ -343,6 +343,28 @@ export class Services {
 
   /**
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!../extensions/amp-next-page/1.0/service.NextPageService}
+   */
+  static nextPageServiceForDoc(elementOrAmpDoc) {
+    return /** @type {!../extensions/amp-next-page/1.0/service.NextPageService} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'next-page'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
+   * @return {!./service/mutator-interface.MutatorInterface}
+   */
+  static mutatorForDoc(elementOrAmpDoc) {
+    return /** @type {!./service/mutator-interface.MutatorInterface} */ (getServiceForDoc(
+      elementOrAmpDoc,
+      'mutator'
+    ));
+  }
+
+  /**
+   * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc
    * @return {!./service/owners-interface.OwnersInterface}
    */
   static ownersForDoc(elementOrAmpDoc) {
@@ -396,6 +418,14 @@ export class Services {
       element,
       'position-observer'
     ));
+  }
+
+  /**
+   * @param {!Window} window
+   * @return {!./preconnect.PreconnectService}
+   */
+  static preconnectFor(window) {
+    return getService(window, 'preconnect');
   }
 
   /**
@@ -595,22 +625,6 @@ export class Services {
   }
 
   /**
-   * @param {!Window} win
-   * @return {?Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>}
-   */
-  static viewerIntegrationVariableServiceForOrNull(win) {
-    return (
-      /** @type {!Promise<?../extensions/amp-viewer-integration/0.1/variable-service.ViewerIntegrationVariableDef>} */
-      (getElementServiceIfAvailable(
-        win,
-        'viewer-integration-variable',
-        'amp-viewer-integration',
-        true
-      ))
-    );
-  }
-
-  /**
    * @param {!Element|!ShadowRoot} element
    * @return {!Promise<!../extensions/amp-animation/0.1/web-animation-service.WebAnimationService>}
    */
@@ -709,21 +723,6 @@ export class Services {
       element,
       'geo',
       'amp-geo',
-      true
-    ));
-  }
-
-  /**
-   * Returns a promise for the geo service or a promise for null if
-   * the service is not available on the current page.
-   * @param {!Element|!ShadowRoot} element
-   * @return {!Promise<?../extensions/amp-user-location/0.1/user-location-service.UserLocationService>}
-   */
-  static userLocationForDocOrNull(element) {
-    return /** @type {!Promise<?../extensions/amp-user-location/0.1/user-location-service.UserLocationService>} */ (getElementServiceIfAvailableForDoc(
-      element,
-      'user-location',
-      'amp-user-location',
       true
     ));
   }

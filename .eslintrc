@@ -15,14 +15,17 @@
     "es6": true,
     "browser": true
   },
- "parserOptions": {
+  "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module"
   },
   "globals": {
-    "AMP": false,
-    "context": false,
-    "global": false
+    "ANALYTICS_VENDOR_SPLIT": "readonly",
+    "NATIVE_CUSTOM_ELEMENTS_V1": "readonly",
+
+    "AMP": "readonly",
+    "context": "readonly",
+    "global": "readonly"
   },
   "settings": {
     "jsdoc": {
@@ -33,7 +36,7 @@
         "file": "fileoverview",
         "returns": "return"
       },
-      "allowOverrideWithoutParam" : true
+      "allowOverrideWithoutParam": true
     }
   },
   "rules": {
@@ -43,25 +46,28 @@
     "curly": 2,
     "google-camelcase/google-camelcase": 2,
     "jsdoc/check-param-names": 2,
-    "jsdoc/check-tag-names": [2, {
-      "definedTags": [
-        "closurePrimitive",
-        "deprecated",
-        "dict",
-        "export",
-        "final",
-        "nocollapse",
-        "noinline",
-        "package",
-        "record",
-        "restricted",
-        "struct",
-        "suppress",
-        "template",
-        "visibleForTesting"
-      ]
-    }],
-    "jsdoc/check-types": [2, { "noDefaults": true }],
+    "jsdoc/check-tag-names": [
+      2,
+      {
+        "definedTags": [
+          "closurePrimitive",
+          "deprecated",
+          "dict",
+          "export",
+          "final",
+          "nocollapse",
+          "noinline",
+          "package",
+          "record",
+          "restricted",
+          "struct",
+          "suppress",
+          "template",
+          "visibleForTesting"
+        ]
+      }
+    ],
+    "jsdoc/check-types": [2, {"noDefaults": true}],
     "jsdoc/require-param": 2,
     "jsdoc/require-param-name": 2,
     "jsdoc/require-param-type": 2,
@@ -74,7 +80,9 @@
     "local/is-experiment-on": 2,
     "local/json-configuration": 2,
     "local/no-array-destructuring": 2,
+    "local/no-arrow-on-register-functions": 2,
     "local/no-deep-destructuring": 2,
+    "local/no-destructure-assignment-params": 2,
     "local/no-duplicate-import": 2,
     "local/no-duplicate-name-typedef": 2,
     "local/no-es2015-number-props": 2,
@@ -86,9 +94,10 @@
     "local/no-import-rename": 2,
     "local/no-is-amp-alt": 2,
     "local/no-log-array": 2,
+    "local/no-mixed-interpolation": 2,
     "local/no-mixed-operators": 2,
     "local/no-module-exports": 2,
-    "local/no-mixed-interpolation": 2,
+    "local/no-rest": 2,
     "local/no-spread": 2,
     "local/no-style-display": 2,
     "local/no-style-property-setting": 2,
@@ -96,6 +105,8 @@
     "local/no-unload-listener": 2,
     "local/prefer-deferred-promise": 0,
     "local/prefer-destructuring": 2,
+    "local/prefer-spread-props": 2,
+    "local/prefer-unnested-spread-objects": 2,
     "local/private-prop-names": 2,
     "local/query-selector": 2,
     "local/split-single-pass-comment": 2,
@@ -111,7 +122,7 @@
     "no-eval": 2,
     "no-extend-native": 2,
     "no-extra-bind": 2,
-    "no-implicit-coercion": [2, { "boolean": false }],
+    "no-implicit-coercion": [2, {"boolean": false}],
     "no-implied-eval": 2,
     "no-iterator": 2,
     "no-lone-blocks": 2,
@@ -123,42 +134,55 @@
     "no-sequences": 2,
     "no-throw-literal": 2,
     "no-unused-expressions": 0,
-    "no-unused-vars": [2, {
-      "argsIgnorePattern": "^(var_args$|opt_|unused)",
-      "varsIgnorePattern": "(AmpElement|Def|Interface)$"
-    }],
+    "no-unused-vars": [
+      2,
+      {
+        "argsIgnorePattern": "^(var_args$|opt_|unused)",
+        "varsIgnorePattern": "(AmpElement|Def|Interface)$"
+      }
+    ],
     "no-useless-call": 2,
     "no-useless-concat": 2,
     "no-undef": 2,
     "no-var": 2,
-    "no-warning-comments": [2, { "terms": ["do not submit"], "location": "anywhere" }],
-    "notice/notice": [2,
+    "no-warning-comments": [
+      2,
+      {"terms": ["do not submit"], "location": "anywhere"}
+    ],
+    "notice/notice": [
+      2,
       {
         "mustMatch": "Copyright 20\\d{2} The AMP HTML Authors\\.",
-        "templateFile": "LICENSE-TEMPLATE.txt",
+        "templateFile": "build-system/common/LICENSE-TEMPLATE.txt",
         "messages": {
           "whenFailedToMatch": "Missing or incorrect license header"
         }
       }
     ],
-    "object-shorthand": [2, "properties", { "avoidQuotes": true }],
+    "object-shorthand": [2, "properties", {"avoidQuotes": true}],
     "prefer-const": 2,
     "prettier/prettier": 2,
     "radix": 2,
-    "require-jsdoc": [2, {
-      "require": {
-        "FunctionDeclaration": true,
-        "MethodDefinition": true,
-        "ClassDeclaration": false,
-        "ArrowFunctionExpression": false,
-        "FunctionExpression": false
+    "require-jsdoc": [
+      2,
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": false,
+          "ArrowFunctionExpression": false,
+          "FunctionExpression": false
+        }
       }
-    }],
-    "sort-imports-es6-autofix/sort-imports-es6": [2, {
-      "ignoreCase": false,
-      "ignoreMemberSort": false,
-      "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
-    }],
+    ],
+    "sort-imports-es6-autofix/sort-imports-es6": [
+      2,
+      {
+        "ignoreCase": false,
+        "ignoreMemberSort": false,
+        "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
+      }
+    ],
     "sort-requires/sort-requires": 2
   },
   "overrides": [
@@ -172,6 +196,7 @@
       ],
       "rules": {
         "require-jsdoc": 0,
+        "local/no-destructure-assignment-params": 0,
         "jsdoc/check-param-names": 0,
         "jsdoc/check-tag-names": 0,
         "jsdoc/check-types": 0,
@@ -191,8 +216,6 @@
         "before": false,
         "after": false,
         "assert": false,
-        "sinon": true,
-        "sandbox": true,
         "describes": true,
         "allowConsoleError": false,
         "expectAsyncConsoleError": false,
@@ -207,6 +230,20 @@
         "module": false,
         "process": false,
         "require": false
+      }
+    },
+    {
+      "files": ["**/*.extern.js"],
+      "rules": {
+        "no-var": 0,
+        "no-undef": 0,
+        "no-unused-vars": 0,
+        "prefer-const": 0,
+        "require-jsdoc": 0,
+        "jsdoc/check-tag-names": 0,
+        "local/closure-type-primitives": 0,
+        "local/no-duplicate-name-typedef": 0,
+        "google-camelcase/google-camelcase": 0
       }
     }
   ]

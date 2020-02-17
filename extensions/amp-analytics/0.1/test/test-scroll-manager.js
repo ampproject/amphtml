@@ -49,15 +49,15 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     scrollManager = new ScrollManager(ampdoc);
     root.scrollManager_ = scrollManager;
     fakeViewport = {
-      'getSize': sandbox
+      'getSize': env.sandbox
         .stub()
         .returns({top: 0, left: 0, height: 200, width: 200}),
-      'getScrollTop': sandbox.stub().returns(0),
-      'getScrollLeft': sandbox.stub().returns(0),
-      'getScrollHeight': sandbox.stub().returns(500),
-      'getScrollWidth': sandbox.stub().returns(500),
+      'getScrollTop': env.sandbox.stub().returns(0),
+      'getScrollLeft': env.sandbox.stub().returns(0),
+      'getScrollHeight': env.sandbox.stub().returns(500),
+      'getScrollWidth': env.sandbox.stub().returns(500),
       'onChanged': () => {
-        return sandbox.stub();
+        return env.sandbox.stub();
       },
     };
     scrollManager.viewport_ = fakeViewport;
@@ -66,7 +66,7 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
   it('should initalize, add listeners and dispose', () => {
     expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
 
-    scrollManager.addScrollHandler(sandbox.stub());
+    scrollManager.addScrollHandler(env.sandbox.stub());
     expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(1);
 
     scrollManager.dispose();
@@ -79,7 +79,7 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     () => {
       expect(scrollManager.viewportOnChangedUnlistener_).to.not.be.ok;
 
-      const fn1 = sandbox.stub();
+      const fn1 = env.sandbox.stub();
       scrollManager.addScrollHandler(fn1);
 
       expect(scrollManager.viewportOnChangedUnlistener_).to.be.ok;
@@ -93,8 +93,8 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
   );
 
   it('fires on scroll', () => {
-    const fn1 = sandbox.stub();
-    const fn2 = sandbox.stub();
+    const fn1 = env.sandbox.stub();
+    const fn2 = env.sandbox.stub();
     scrollManager.addScrollHandler(fn1);
     scrollManager.addScrollHandler(fn2);
 
@@ -126,18 +126,22 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
 
     expect(fn1).to.have.callCount(2);
     expect(
-      fn1.getCall(1).calledWithMatch(sinon.match(matcher(expectedScrollEvent)))
+      fn1
+        .getCall(1)
+        .calledWithMatch(env.sandbox.match(matcher(expectedScrollEvent)))
     ).to.be.true;
 
     expect(fn2).to.have.callCount(2);
     expect(
-      fn2.getCall(1).calledWithMatch(sinon.match(matcher(expectedScrollEvent)))
+      fn2
+        .getCall(1)
+        .calledWithMatch(env.sandbox.match(matcher(expectedScrollEvent)))
     ).to.be.true;
   });
 
   it('can remove specifc handlers', () => {
-    const fn1 = sandbox.stub();
-    const fn2 = sandbox.stub();
+    const fn1 = env.sandbox.stub();
+    const fn2 = env.sandbox.stub();
     scrollManager.addScrollHandler(fn1);
     scrollManager.addScrollHandler(fn2);
 

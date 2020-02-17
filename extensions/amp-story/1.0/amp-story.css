@@ -40,6 +40,15 @@ amp-consent {
   z-index: initial !important;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+
 /**
  * amp-hidden uses visiblity: hidden that does not propagate to shadow trees
  * because of amp-story-shadow-reset.css. Use display: none instead.
@@ -365,13 +374,11 @@ amp-story-grid-layer {
 }
 
 /**
- * Adds a width limit to make sure amp-twitter element only takes required
- * space, otherwise it takes whole width and causes a tooltip trigger in blank
- * space.
- * See #22334
+ * Prevents amp-video to layout until its element has been swapped by the media
+ * pool. See #26718 for context.
  */
-amp-story-grid-layer amp-twitter {
-  max-width: 500px !important;
+amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound {
+  display: none !important;
 }
 
 amp-story-grid-layer > * {
@@ -684,6 +691,7 @@ amp-story .amp-video-eq,
   animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1) !important;
   animation-iteration-count: infinite !important;
   opacity: 1 !important;
+  filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.25)) !important;
 }
 
 @keyframes fill-unfill-rotate {
@@ -992,4 +1000,13 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
   text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
+}
+
+amp-story-quiz {
+  align-self: center;
+  width: auto !important;
+  height: auto !important;
+  /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
+  min-width: 224px !important;
+  max-width: 400px !important;
 }

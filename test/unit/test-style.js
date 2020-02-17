@@ -17,16 +17,6 @@
 import * as st from '../../src/style';
 
 describe('Style', () => {
-  let sandbox;
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox;
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it('toggle', () => {
     const element = document.createElement('div');
 
@@ -75,7 +65,7 @@ describe('Style', () => {
   });
 
   it('setImportantStyles with vendor prefix', () => {
-    const spy = sandbox.spy();
+    const spy = window.sandbox.spy();
     const element = {
       style: {
         WebkitTransitionDurationImportant: '',

@@ -22,13 +22,16 @@ import {endsWith} from '../../src/string';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {installPlatformService} from '../../src/service/platform-impl';
 import {installTimerService} from '../../src/service/timer-impl';
+import {installViewerServiceForDoc} from '../../src/service/viewer-impl';
 import {toggle} from '../../src/style';
 import {toggleExperiment} from '../../src/experiments';
 import {user} from '../../src/log';
 
 describes.sandboxed('FixedLayer', {}, () => {
+  let parentApi;
   let documentApi;
   let ampdoc;
+  let viewer;
   let vsyncApi;
   let vsyncTasks;
   let docBody, docElem;
@@ -42,6 +45,7 @@ describes.sandboxed('FixedLayer', {}, () => {
   let timer;
 
   beforeEach(() => {
+    parentApi = {};
     documentApi = {};
     allRules = {};
 
@@ -123,7 +127,7 @@ describes.sandboxed('FixedLayer', {}, () => {
                 ]),
               ],
             },
-            // Uknown rule.
+            // Unknown rule.
             {
               type: 3,
             },
@@ -165,6 +169,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       },
       documentElement: docElem,
       body: docBody,
+      parent: parentApi,
     });
     documentApi.defaultView.document = documentApi;
     installDocService(documentApi.defaultView, /* isSingleDoc */ true);
@@ -172,7 +177,10 @@ describes.sandboxed('FixedLayer', {}, () => {
     installHiddenObserverForDoc(ampdoc);
     installPlatformService(documentApi.defaultView);
     installTimerService(documentApi.defaultView);
+    installViewerServiceForDoc(ampdoc);
     timer = Services.timerFor(documentApi.defaultView);
+    viewer = Services.viewerForDoc(ampdoc);
+    viewer.isEmbedded = () => true;
 
     vsyncTasks = [];
     vsyncApi = {
@@ -544,7 +552,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should add and remove element directly', () => {
-        const updateStub = sandbox.stub(fixedLayer, 'update');
+        const updateStub = window.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         // Add.
@@ -890,7 +898,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         expect(state['F0'].top).to.equal('0px');
 
         // Update to transient padding.
-        sandbox.stub(fixedLayer, 'update').callsFake(() => {});
+        window.sandbox.stub(fixedLayer, 'update').callsFake(() => {});
         fixedLayer.updatePaddingTop(22, /* transient */ true);
         vsyncTasks[0].measure(state);
         expect(state['F0'].fixed).to.be.true;
@@ -1160,7 +1168,7 @@ describes.sandboxed('FixedLayer', {}, () => {
         element1.setAttribute('style', 'bottom: 10px');
         element1.style.bottom = '10px';
 
-        const userError = sandbox.stub(user(), 'error');
+        const userError = window.sandbox.stub(user(), 'error');
         fixedLayer.setup();
         // Expect error regarding inline styles.
         expect(userError).calledWithMatch(
@@ -1197,7 +1205,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
           element1.computedStyle['display'] = '';
 
-          sandbox.stub(timer, 'delay').callsFake(callback => {
+          window.sandbox.stub(timer, 'delay').callsFake(callback => {
             callback();
           });
           return mutationObserver
@@ -1217,7 +1225,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should ignore descendants of already-tracked elements', () => {
-        const updateStub = sandbox.stub(fixedLayer, 'update');
+        const updateStub = window.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         element1.appendChild(element6);
@@ -1229,7 +1237,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       });
 
       it('should replace descendants of tracked elements', () => {
-        const updateStub = sandbox.stub(fixedLayer, 'update');
+        const updateStub = window.sandbox.stub(fixedLayer, 'update');
         expect(fixedLayer.elements_).to.have.length(5);
 
         element6.appendChild(element1);
@@ -1255,6 +1263,10 @@ describes.sandboxed('FixedLayer', {}, () => {
     const transfer = true;
 
     beforeEach(() => {
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
+
       fixedLayer = new FixedLayer(
         ampdoc,
         vsyncApi,
@@ -1270,6 +1282,9 @@ describes.sandboxed('FixedLayer', {}, () => {
       const ampdoc = new AmpDocSingle(win);
       installPlatformService(win);
       installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
 
       const fixedLayer = new FixedLayer(
         ampdoc,
@@ -1564,7 +1579,7 @@ describes.sandboxed('FixedLayer', {}, () => {
       element1.setAttribute('style', 'bottom: 10px');
       element1.style.bottom = '10px';
 
-      const userError = sandbox.stub(user(), 'error');
+      const userError = window.sandbox.stub(user(), 'error');
       fixedLayer.setup();
       // Expect error regarding inline styles.
       expect(userError).calledWithMatch(
@@ -1601,7 +1616,7 @@ describes.sandboxed('FixedLayer', {}, () => {
 
         element1.computedStyle['display'] = '';
 
-        sandbox.stub(timer, 'delay').callsFake(callback => {
+        window.sandbox.stub(timer, 'delay').callsFake(callback => {
           callback();
         });
         return mutationObserver
@@ -1691,9 +1706,148 @@ describes.sandboxed('FixedLayer', {}, () => {
   });
 });
 
+describes.sandboxed('FixedLayer Setup Execution Bailouts', {}, () => {
+  let win;
+  let ampdoc;
+  let viewer;
+  let vsyncApi;
+
+  beforeEach(() => {
+    win = new FakeWindow();
+    window.__AMP_MODE = {
+      localDev: false,
+      development: false,
+      minified: false,
+      test: false,
+      version: '$internalRuntimeVersion$',
+    };
+
+    const vsyncTasks = [];
+    vsyncApi = {
+      runPromise: task => {
+        vsyncTasks.push(task);
+        return Promise.resolve();
+      },
+      mutate: mutator => {
+        vsyncTasks.push({mutate: mutator});
+      },
+    };
+  });
+
+  it('should not perform setup when served canonically', () => {
+    ampdoc = new AmpDocSingle(win);
+    installPlatformService(win);
+    installTimerService(win);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
+    viewer.isEmbedded = () => false;
+
+    const fixedLayer = new FixedLayer(
+      ampdoc,
+      vsyncApi,
+      /* borderTop */ 0,
+      /* paddingTop */ 11,
+      /* transfer */ false
+    );
+    const executed = fixedLayer.setup();
+    expect(executed).to.be.false;
+  });
+
+  it('should perform setup when served within a viewer', () => {
+    ampdoc = new AmpDocSingle(win);
+    installPlatformService(win);
+    installTimerService(win);
+    installViewerServiceForDoc(ampdoc);
+    viewer = Services.viewerForDoc(ampdoc);
+    viewer.isEmbedded = () => true;
+
+    const fixedLayer = new FixedLayer(
+      ampdoc,
+      vsyncApi,
+      /* borderTop */ 0,
+      /* paddingTop */ 11,
+      /* transfer */ false
+    );
+    const executed = fixedLayer.setup();
+    expect(executed).to.be.true;
+  });
+});
+
+describes.sandboxed(
+  'FixedLayer Setup Execution Bailouts with Local Development',
+  {},
+  () => {
+    let win;
+    let ampdoc;
+    let viewer;
+    let vsyncApi;
+
+    beforeEach(() => {
+      win = new FakeWindow();
+      window.__AMP_MODE = {
+        localDev: true,
+        development: false,
+        minified: false,
+        test: false,
+        version: '$internalRuntimeVersion$',
+      };
+
+      const vsyncTasks = [];
+      vsyncApi = {
+        runPromise: task => {
+          vsyncTasks.push(task);
+          return Promise.resolve();
+        },
+        mutate: mutator => {
+          vsyncTasks.push({mutate: mutator});
+        },
+      };
+    });
+
+    it('should perform setup when served canonically', () => {
+      ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => false;
+
+      const fixedLayer = new FixedLayer(
+        ampdoc,
+        vsyncApi,
+        /* borderTop */ 0,
+        /* paddingTop */ 11,
+        /* transfer */ false
+      );
+      const executed = fixedLayer.setup();
+      expect(executed).to.be.true;
+    });
+
+    it('should perform setup when served within a viewer', () => {
+      ampdoc = new AmpDocSingle(win);
+      installPlatformService(win);
+      installTimerService(win);
+      installViewerServiceForDoc(ampdoc);
+      viewer = Services.viewerForDoc(ampdoc);
+      viewer.isEmbedded = () => true;
+
+      const fixedLayer = new FixedLayer(
+        ampdoc,
+        vsyncApi,
+        /* borderTop */ 0,
+        /* paddingTop */ 11,
+        /* transfer */ false
+      );
+      const executed = fixedLayer.setup();
+      expect(executed).to.be.true;
+    });
+  }
+);
+
 describes.realWin('FixedLayer', {}, env => {
   let win, doc;
   let ampdoc;
+  let viewer;
   let fixedLayer;
   let transferLayer;
   let root;
@@ -1723,6 +1877,9 @@ describes.realWin('FixedLayer', {}, env => {
         installPlatformService(win);
         installTimerService(win);
         ampdoc = new AmpDocSingle(win);
+        installViewerServiceForDoc(ampdoc);
+        viewer = Services.viewerForDoc(ampdoc);
+        viewer.isEmbedded = () => true;
         shadowRoot = win.document.body.attachShadow({mode: 'open'});
         fixedLayer = new FixedLayer(
           ampdoc,

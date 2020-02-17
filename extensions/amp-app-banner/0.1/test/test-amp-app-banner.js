@@ -84,7 +84,7 @@ describes.realWin(
         manifest.setAttribute('rel', rel);
         manifest.setAttribute('href', manifestObj.href);
         doc.head.appendChild(manifest);
-        sandbox
+        env.sandbox
           .mock(Services.xhrFor(win))
           .expects('fetchJson')
           .returns(
@@ -148,21 +148,25 @@ describes.realWin(
     }
 
     function testRemoveBannerIfDismissed() {
-      sandbox.stub(AbstractAppBanner.prototype, 'isDismissed').callsFake(() => {
-        return Promise.resolve(true);
-      });
+      env.sandbox
+        .stub(AbstractAppBanner.prototype, 'isDismissed')
+        .callsFake(() => {
+          return Promise.resolve(true);
+        });
       return testRemoveBanner();
     }
 
     function testSuiteIos() {
       it('should preconnect to app store', () => {
         return getAppBanner({iosMeta}).then(banner => {
+          const preconnect = Services.preconnectFor(win);
+          env.sandbox.stub(preconnect, 'url');
+
           const impl = banner.implementation_;
-          sandbox.stub(impl.preconnect, 'url');
           impl.preconnectCallback(true);
-          expect(impl.preconnect.url.called).to.be.true;
-          expect(impl.preconnect.url).to.be.calledOnce;
-          expect(impl.preconnect.url).to.have.been.calledWith(
+          expect(preconnect.url).to.be.calledOnce;
+          expect(preconnect.url).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://itunes.apple.com'
           );
         });
@@ -187,7 +191,7 @@ describes.realWin(
       });
 
       it('should parse meta content and setup hrefs', () => {
-        sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
+        env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
         return getAppBanner({iosMeta}).then(el => {
           expect(
             AbstractAppBanner.prototype.setupOpenButton_
@@ -208,7 +212,7 @@ describes.realWin(
               'should contain app-argument to allow opening an already ' +
               'installed application on iOS.'
           );
-          sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
+          env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
           return getAppBanner({
             iosMeta: {content: 'app-id=828256236'},
           }).then(el => {
@@ -240,18 +244,21 @@ describes.realWin(
     function testSuiteAndroid() {
       it('should preconnect to play store and preload manifest', () => {
         return getAppBanner({androidManifest}).then(banner => {
+          const preconnect = Services.preconnectFor(win);
+          env.sandbox.stub(preconnect, 'url');
+          env.sandbox.stub(preconnect, 'preload');
+
           const impl = banner.implementation_;
-          sandbox.stub(impl.preconnect, 'url');
-          sandbox.stub(impl.preconnect, 'preload');
           impl.preconnectCallback(true);
-          expect(impl.preconnect.url.called).to.be.true;
-          expect(impl.preconnect.url).to.have.been.calledOnce;
-          expect(impl.preconnect.url).to.have.been.calledWith(
+          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://play.google.com'
           );
-          expect(impl.preconnect.preload.called).to.be.true;
-          expect(impl.preconnect.preload).to.be.calledOnce;
-          expect(impl.preconnect.preload).to.have.been.calledWith(
+
+          expect(preconnect.preload).to.be.calledOnce;
+          expect(preconnect.preload).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://example.com/manifest.json'
           );
         });
@@ -259,18 +266,20 @@ describes.realWin(
 
       it('should preconnect to play store and preload origin-manifest', () => {
         return getAppBanner({originManifest: androidManifest}).then(banner => {
+          const preconnect = Services.preconnectFor(win);
+          env.sandbox.stub(preconnect, 'url');
+          env.sandbox.stub(preconnect, 'preload');
+
           const impl = banner.implementation_;
-          sandbox.stub(impl.preconnect, 'url');
-          sandbox.stub(impl.preconnect, 'preload');
           impl.preconnectCallback(true);
-          expect(impl.preconnect.url.called).to.be.true;
-          expect(impl.preconnect.url).to.have.been.calledOnce;
-          expect(impl.preconnect.url).to.have.been.calledWith(
+          expect(preconnect.url).to.have.been.calledOnce;
+          expect(preconnect.url).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://play.google.com'
           );
-          expect(impl.preconnect.preload.called).to.be.true;
-          expect(impl.preconnect.preload).to.be.calledOnce;
-          expect(impl.preconnect.preload).to.have.been.calledWith(
+          expect(preconnect.preload).to.be.calledOnce;
+          expect(preconnect.preload).to.have.been.calledWith(
+            env.sandbox.match.object, // AmpDoc
             'https://example.com/manifest.json'
           );
         });
@@ -291,7 +300,7 @@ describes.realWin(
       });
 
       it('should parse manifest and set hrefs', () => {
-        sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
+        env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
         return getAppBanner({androidManifest}).then(el => {
           expect(
             AbstractAppBanner.prototype.setupOpenButton_
@@ -304,7 +313,7 @@ describes.realWin(
       });
 
       it('should parse origin manifest and set hrefs', () => {
-        sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
+        env.sandbox.spy(AbstractAppBanner.prototype, 'setupOpenButton_');
         return getAppBanner({originManifest: androidManifest}).then(el => {
           expect(
             AbstractAppBanner.prototype.setupOpenButton_
@@ -331,24 +340,24 @@ describes.realWin(
       doc = win.document;
       ampdoc = env.ampdoc;
       const viewer = Services.viewerForDoc(ampdoc);
-      sandbox.stub(viewer, 'isEmbedded').callsFake(() => isEmbedded);
-      sandbox
+      env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => isEmbedded);
+      env.sandbox
         .stub(viewer, 'hasCapability')
         .callsFake(() => hasNavigateToCapability);
       platform = Services.platformFor(win);
-      sandbox.stub(platform, 'isIos').callsFake(() => isIos);
-      sandbox.stub(platform, 'isAndroid').callsFake(() => isAndroid);
-      sandbox.stub(platform, 'isChrome').callsFake(() => isChrome);
-      sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
-      sandbox.stub(platform, 'isFirefox').callsFake(() => isFirefox);
-      sandbox.stub(platform, 'isEdge').callsFake(() => isEdge);
+      env.sandbox.stub(platform, 'isIos').callsFake(() => isIos);
+      env.sandbox.stub(platform, 'isAndroid').callsFake(() => isAndroid);
+      env.sandbox.stub(platform, 'isChrome').callsFake(() => isChrome);
+      env.sandbox.stub(platform, 'isSafari').callsFake(() => isSafari);
+      env.sandbox.stub(platform, 'isFirefox').callsFake(() => isFirefox);
+      env.sandbox.stub(platform, 'isEdge').callsFake(() => isEdge);
 
       vsync = Services.vsyncFor(win);
-      sandbox.stub(vsync, 'runPromise').callsFake((task, state) => {
+      env.sandbox.stub(vsync, 'runPromise').callsFake((task, state) => {
         runTask(task, state);
         return Promise.resolve();
       });
-      sandbox.stub(vsync, 'run').callsFake(runTask);
+      env.sandbox.stub(vsync, 'run').callsFake(runTask);
     });
 
     describe('Choosing platform', () => {
@@ -569,7 +578,7 @@ describes.realWin(
         const openButton = doc.createElement('button');
         element.appendChild(openButton);
         openButton.setAttribute('open-button', '');
-        openButton.addEventListener = sandbox.spy();
+        openButton.addEventListener = env.sandbox.spy();
         const banner = new AbstractAppBanner(element);
         banner.setupOpenButton_(openButton, 'open-button', 'install-link');
         expect(openButton.addEventListener).to.have.been.calledWith('click');

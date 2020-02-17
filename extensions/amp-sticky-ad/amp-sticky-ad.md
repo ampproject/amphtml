@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Provides a way to display and stick ad content at the bottom of the page.
 ---
+
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -60,12 +61,15 @@ limitations under the License.
 - If no ad is filled, the sticky ad container will collapse and will no longer be visible.
 
 Example:
+
 ```html
 <amp-sticky-ad layout="nodisplay">
-  <amp-ad width="320"
-      height="50"
-      type="doubleclick"
-      data-slot="/35096353/amptesting/formats/sticky">
+  <amp-ad
+    width="320"
+    height="50"
+    type="doubleclick"
+    data-slot="/35096353/amptesting/formats/sticky"
+  >
   </amp-ad>
 </amp-sticky-ad>
 ```

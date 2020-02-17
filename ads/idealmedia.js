@@ -28,9 +28,18 @@ export function idealmedia(global, data) {
 
   document.body.appendChild(scriptRoot);
 
+  /**
+   * Returns path for provided js filename
+   * @param {string} publisher The first number.
+   * @return {string} Path to provided filename.
+   */
+  function getResourceFilePath(publisher) {
+    const publisherStr = publisher.replace(/[^A-z0-9]/g, '');
+    return `${publisherStr[0]}/${publisherStr[1]}`;
+  }
+
   const url =
-    `https://jsc.idealmedia.io/${encodeURIComponent(data.publisher[0])}/` +
-    `${encodeURIComponent(data.publisher[1])}/` +
+    `https://jsc.idealmedia.io/${getResourceFilePath(data.publisher)}/` +
     `${encodeURIComponent(data.publisher)}.` +
     `${encodeURIComponent(data.widget)}.js?t=` +
     Math.floor(Date.now() / 36e5);

@@ -21,7 +21,6 @@ import {devAssert, user, userAssert} from './log';
 import {getData, listen, loadPromise} from './event-helper';
 import {getMode} from './mode';
 import {isArray, toWin} from './types';
-import {preconnectForElement} from './preconnect';
 
 /**
  * Base class for all custom element implementations. Instead of inheriting
@@ -128,16 +127,14 @@ export class BaseElement {
         \__/  \__/ /__/     \__\ | _| `._____||__| \__| |__| |__| \__|  \______|
 
     Any private property for BaseElement should be declared in
-    build-system/amp.multipass.extern.js, this is so closure compiler doesn't
-    reuse the same symbol it would use in the core compilation unit for the
-    private property in the extensions compilation unit's private properties.
-     */
+    build-system/externs/amp.multipass.extern.js. This is so closure compiler
+    doesn't reuse the same symbol it would use in the core compilation unit for
+    the private property in the extensions compilation unit's private
+    properties.
+    */
 
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
-
-    /** @package {number} */
-    this.layoutWidth_ = -1;
 
     /** @package {boolean} */
     this.inViewport_ = false;
@@ -156,9 +153,6 @@ export class BaseElement {
 
     /** @private {?string} */
     this.defaultActionAlias_ = null;
-
-    /** @public {!./preconnect.Preconnect} */
-    this.preconnect = preconnectForElement(this.element);
   }
 
   /**
@@ -256,17 +250,6 @@ export class BaseElement {
    */
   getVsync() {
     return Services.vsyncFor(this.win);
-  }
-
-  /**
-   * Returns the layout width for this element. A `-1` value indicates that the
-   * layout is not yet known. A `0` value indicates that the element is not
-   * visible.
-   * @return {number}
-   * @public
-   */
-  getLayoutWidth() {
-    return this.layoutWidth_;
   }
 
   /**
@@ -586,7 +569,7 @@ export class BaseElement {
    * @param {ActionTrust} minTrust
    * @public
    */
-  registerAction(alias, handler, minTrust = ActionTrust.HIGH) {
+  registerAction(alias, handler, minTrust = ActionTrust.DEFAULT) {
     this.initActionMap_();
     this.actionMap_[alias] = {handler, minTrust};
   }
@@ -601,7 +584,7 @@ export class BaseElement {
   registerDefaultAction(
     handler,
     alias = DEFAULT_ACTION,
-    minTrust = ActionTrust.HIGH
+    minTrust = ActionTrust.DEFAULT
   ) {
     devAssert(
       !this.defaultActionAlias_,
@@ -658,6 +641,27 @@ export class BaseElement {
         element.setAttribute(attr, val);
       } else if (opt_removeMissingAttrs) {
         element.removeAttribute(attr);
+      }
+    }
+  }
+
+  /**
+   * Utility method to propagate all data attributes from this element
+   * to the target element. (For use with arbitrary data attributes.)
+   * Removes any data attributes that are missing on this element from
+   * the target element.
+   * @param {!Element} targetElement
+   */
+  propagateDataset(targetElement) {
+    for (const key in targetElement.dataset) {
+      if (!(key in this.element.dataset)) {
+        delete targetElement.dataset[key];
+      }
+    }
+
+    for (const key in this.element.dataset) {
+      if (targetElement.dataset[key] !== this.element.dataset[key]) {
+        targetElement.dataset[key] = this.element.dataset[key];
       }
     }
   }
@@ -820,9 +824,11 @@ export class BaseElement {
    * @public
    */
   changeHeight(newHeight) {
-    this.element
-      .getResources()
-      ./*OK*/ changeSize(this.element, newHeight, /* newWidth */ undefined);
+    Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
@@ -831,7 +837,7 @@ export class BaseElement {
    * is no longer visible.
    */
   collapse() {
-    this.element.getResources().collapseElement(this.element);
+    Services.mutatorForDoc(this.getAmpDoc()).collapseElement(this.element);
   }
 
   /**
@@ -839,7 +845,9 @@ export class BaseElement {
    * @return {!Promise}
    */
   attemptCollapse() {
-    return this.element.getResources().attemptCollapse(this.element);
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptCollapse(
+      this.element
+    );
   }
 
   /**
@@ -857,9 +865,11 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return this.element
-      .getResources()
-      .attemptChangeSize(this.element, newHeight, /* newWidth */ undefined);
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+      this.element,
+      newHeight,
+      /* newWidth */ undefined
+    );
   }
 
   /**
@@ -879,15 +889,13 @@ export class BaseElement {
    * @public
    */
   attemptChangeSize(newHeight, newWidth, opt_event) {
-    return this.element
-      .getResources()
-      .attemptChangeSize(
-        this.element,
-        newHeight,
-        newWidth,
-        /* newMargin */ undefined,
-        opt_event
-      );
+    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+      this.element,
+      newHeight,
+      newWidth,
+      /* newMargin */ undefined,
+      opt_event
+    );
   }
 
   /**
@@ -898,7 +906,7 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureElement(measurer) {
-    return this.element.getResources().measureElement(measurer);
+    return Services.mutatorForDoc(this.getAmpDoc()).measureElement(measurer);
   }
 
   /**
@@ -936,9 +944,11 @@ export class BaseElement {
    * @return {!Promise}
    */
   measureMutateElement(measurer, mutator, opt_element) {
-    return this.element
-      .getResources()
-      .measureMutateElement(opt_element || this.element, measurer, mutator);
+    return Services.mutatorForDoc(this.getAmpDoc()).measureMutateElement(
+      opt_element || this.element,
+      measurer,
+      mutator
+    );
   }
 
   /**
@@ -956,7 +966,7 @@ export class BaseElement {
    * is no longer visible.
    */
   expand() {
-    this.element.getResources().expandElement(this.element);
+    Services.mutatorForDoc(this.getAmpDoc()).expandElement(this.element);
   }
 
   /**

@@ -31,7 +31,7 @@ const {
   uploadBuildOutput,
 } = require('./utils');
 const {determineBuildTargets} = require('./build-targets');
-const {isTravisPullRequestBuild} = require('../travis');
+const {isTravisPullRequestBuild} = require('../common/travis');
 const {runYarnChecks} = require('./yarn-checks');
 
 const FILENAME = 'build.js';

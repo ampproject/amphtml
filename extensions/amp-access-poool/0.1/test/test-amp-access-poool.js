@@ -55,10 +55,10 @@ describes.fakeWin(
         getSource: () => accessSource,
       };
 
-      accessSourceMock = sandbox.mock(accessSource);
+      accessSourceMock = env.sandbox.mock(accessSource);
 
       vendor = new PooolVendor(accessService, accessSource);
-      xhrMock = sandbox.mock(vendor.xhr_);
+      xhrMock = env.sandbox.mock(vendor.xhr_);
     });
 
     afterEach(() => {
@@ -73,7 +73,7 @@ describes.fakeWin(
         container = document.createElement('div');
         container.id = 'poool-widget';
         document.body.appendChild(container);
-        sandbox.stub(vendor, 'renderPoool_');
+        env.sandbox.stub(vendor, 'renderPoool_');
       });
 
       afterEach(() => {

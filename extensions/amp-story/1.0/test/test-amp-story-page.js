@@ -43,14 +43,20 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     };
 
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function() {
+      return storeService;
+    });
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function() {
+      return localizationService;
+    });
 
-    registerServiceBuilder(win, 'performance', () => ({
-      isPerformanceTrackingOn: () => isPerformanceTrackingOn,
-    }));
+    registerServiceBuilder(win, 'performance', function() {
+      return {
+        isPerformanceTrackingOn: () => isPerformanceTrackingOn,
+      };
+    });
 
     const story = win.document.createElement('amp-story');
     story.getImpl = () => Promise.resolve(mediaPoolRoot);
@@ -63,7 +69,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     win.document.body.appendChild(story);
 
     page = new AmpStoryPage(element);
-    sandbox.stub(page, 'mutateElement').callsFake(fn => fn());
+    env.sandbox.stub(page, 'mutateElement').callsFake(fn => fn());
   });
 
   afterEach(() => {
@@ -101,7 +107,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should start the advancement when state becomes active', async () => {
-    const advancementStartStub = sandbox.stub(page.advancement_, 'start');
+    const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
 
     page.buildCallback();
     await page.layoutCallback();
@@ -111,15 +117,15 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should call waitForMedia after layoutCallback resolves', async () => {
-    const spy = sandbox.spy(page, 'waitForMediaLayout_');
+    const spy = env.sandbox.spy(page, 'waitForMediaLayout_');
     page.buildCallback();
     await page.layoutCallback();
     expect(spy).to.have.been.calledOnce;
   });
 
   it('should mark page as loaded after media is loaded', async () => {
-    const waitForMediaLayoutSpy = sandbox.spy(page, 'waitForMediaLayout_');
-    const markPageAsLoadedSpy = sandbox.spy(page, 'markPageAsLoaded_');
+    const waitForMediaLayoutSpy = env.sandbox.spy(page, 'waitForMediaLayout_');
+    const markPageAsLoadedSpy = env.sandbox.spy(page, 'markPageAsLoaded_');
     page.buildCallback();
     await page.layoutCallback();
     expect(markPageAsLoadedSpy).to.have.been.calledAfter(waitForMediaLayoutSpy);
@@ -133,7 +139,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
     page.buildCallback();
     await page.layoutCallback();
-    const animateInStub = sandbox.stub(page.animationManager_, 'animateIn');
+    const animateInStub = env.sandbox.stub(page.animationManager_, 'animateIn');
 
     page.setState(PageState.PLAYING);
 
@@ -141,10 +147,10 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should perform media operations when state becomes active', done => {
-    sandbox
+    env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
-    sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
     const videoEl = win.document.createElement('video');
     videoEl.setAttribute('src', 'https://example.com/video.mp3');
@@ -157,7 +163,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
       .then(mediaPool => {
-        mediaPoolMock = sandbox.mock(mediaPool);
+        mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('register')
           .withExactArgs(videoEl)
@@ -192,7 +198,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       url: 'https://amp.dev',
       html: '<video src="https://example.com/video.mp3"></video>',
     });
-    sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
+    env.sandbox.stub(page, 'loadPromise').returns(Promise.resolve());
 
     fiePromise.then(fie => {
       const fieDoc = fie.win.document;
@@ -200,7 +206,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
       let mediaPoolMock;
 
-      sandbox
+      env.sandbox
         .stub(page.resources_, 'getResourceForElement')
         .returns({isDisplayed: () => true});
 
@@ -209,7 +215,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
         .layoutCallback()
         .then(() => page.mediaPoolPromise_)
         .then(mediaPool => {
-          mediaPoolMock = sandbox.mock(mediaPool);
+          mediaPoolMock = env.sandbox.mock(mediaPool);
           mediaPoolMock
             .expects('register')
             .withExactArgs(videoEl)
@@ -240,7 +246,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should stop the advancement when state becomes not active', async () => {
-    const advancementStopStub = sandbox.stub(page.advancement_, 'stop');
+    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
 
     page.buildCallback();
     await page.layoutCallback();
@@ -257,7 +263,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
 
     page.buildCallback();
     await page.layoutCallback();
-    const cancelAllStub = sandbox.stub(page.animationManager_, 'cancelAll');
+    const cancelAllStub = env.sandbox.stub(page.animationManager_, 'cancelAll');
 
     page.setState(PageState.NOT_ACTIVE);
 
@@ -265,7 +271,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should pause/rewind media when state becomes not active', done => {
-    sandbox
+    env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
 
@@ -280,7 +286,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
       .then(mediaPool => {
-        mediaPoolMock = sandbox.mock(mediaPool);
+        mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
           .withExactArgs(videoEl, true /** rewindToBeginning */)
@@ -299,7 +305,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should stop the advancement when state becomes paused', async () => {
-    const advancementStopStub = sandbox.stub(page.advancement_, 'stop');
+    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
 
     page.buildCallback();
     await page.layoutCallback();
@@ -309,7 +315,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should pause media when state becomes paused', done => {
-    sandbox
+    env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
     const videoEl = win.document.createElement('video');
@@ -323,7 +329,7 @@ describes.realWin('amp-story-page', {amp: true}, env => {
       .layoutCallback()
       .then(() => page.mediaPoolPromise_)
       .then(mediaPool => {
-        mediaPoolMock = sandbox.mock(mediaPool);
+        mediaPoolMock = env.sandbox.mock(mediaPool);
         mediaPoolMock
           .expects('pause')
           .withExactArgs(videoEl, false /** rewindToBeginning */)
@@ -439,11 +445,11 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should start tracking media performance when entering the page', async () => {
-    sandbox
+    env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
     isPerformanceTrackingOn = true;
-    const startMeasuringStub = sandbox.stub(
+    const startMeasuringStub = env.sandbox.stub(
       page.mediaPerformanceMetricsService_,
       'startMeasuring'
     );
@@ -460,11 +466,11 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should stop tracking media performance when leaving the page', async () => {
-    sandbox
+    env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
     isPerformanceTrackingOn = true;
-    const stopMeasuringStub = sandbox.stub(
+    const stopMeasuringStub = env.sandbox.stub(
       page.mediaPerformanceMetricsService_,
       'stopMeasuring'
     );
@@ -478,15 +484,18 @@ describes.realWin('amp-story-page', {amp: true}, env => {
     page.setState(PageState.PLAYING);
     page.setState(PageState.NOT_ACTIVE);
 
-    expect(stopMeasuringStub).to.have.been.calledOnceWithExactly(videoEl);
+    expect(stopMeasuringStub).to.have.been.calledOnceWithExactly(
+      videoEl,
+      true /* sendMetrics */
+    );
   });
 
   it('should not start tracking media performance if tracking is off', async () => {
-    sandbox
+    env.sandbox
       .stub(page.resources_, 'getResourceForElement')
       .returns({isDisplayed: () => true});
     isPerformanceTrackingOn = false;
-    const startMeasuringStub = sandbox.stub(
+    const startMeasuringStub = env.sandbox.stub(
       page.mediaPerformanceMetricsService_,
       'startMeasuring'
     );

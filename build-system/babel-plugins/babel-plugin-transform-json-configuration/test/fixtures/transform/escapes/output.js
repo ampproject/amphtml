@@ -13,5 +13,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-`{"dblquote":"a[href$=\\".pdf\\"]","interpolate":"\${foo}","escape":"\\\\u00f8C"}`;
-JSON.parse(`{"dblquote":"a[href$=\\".pdf\\"]","interpolate":"\${foo}","escape":"\\\\u00f8C"}`);
+`{"dblquote":"a[href$=\\".pdf\\"]","interpolate":"\${foo}","escape":"\\\\u00f8C","tick":"foo\`bar"}`;
+JSON.parse(`{"dblquote":"a[href$=\\".pdf\\"]","interpolate":"\${foo}","escape":"\\\\u00f8C","tick":"foo\`bar"}`);

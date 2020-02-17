@@ -61,7 +61,11 @@ class Amp3QPlayer extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    this.preconnect.url('https://playout.3qsdn.com', opt_onLayout);
+    Services.preconnectFor(this.win).url(
+      this.getAmpDoc(),
+      'https://playout.3qsdn.com',
+      opt_onLayout
+    );
   }
 
   /** @override */

@@ -21,8 +21,14 @@
 // extensions/amp-ad-network-${NETWORK_NAME}-impl directory.
 
 import '../../amp-a4a/0.1/real-time-config-manager';
+import {EXPERIMENT_INFO_MAP as AMPDOC_FIE_EXPERIMENT_INFO_MAP} from '../../../src/ampdoc-fie';
 import {
-  ADX_ADY_EXP,
+  AmpA4A,
+  DEFAULT_SAFEFRAME_VERSION,
+  XORIGIN_MODE,
+  assignAdUrlToError,
+} from '../../amp-a4a/0.1/amp-a4a';
+import {
   AmpAnalyticsConfigDef,
   QQID_HEADER,
   SANDBOX_HEADER,
@@ -42,15 +48,8 @@ import {
   maybeAppendErrorParameter,
   truncAndTimeUrl,
 } from '../../../ads/google/a4a/utils';
-import {
-  AmpA4A,
-  DEFAULT_SAFEFRAME_VERSION,
-  XORIGIN_MODE,
-  assignAdUrlToError,
-} from '../../amp-a4a/0.1/amp-a4a';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -71,6 +70,11 @@ import {
   sraBlockCallbackHandler,
 } from './sra-utils';
 import {WindowInterface} from '../../../src/window-interface';
+import {
+  assertDoesNotContainDisplay,
+  setImportantStyles,
+  setStyles,
+} from '../../../src/style';
 import {
   createElementWithAttributes,
   isRTL,
@@ -102,7 +106,6 @@ import {
   metaJsonCreativeGrouper,
 } from '../../../ads/google/a4a/line-delimited-response-handler';
 import {parseQueryString} from '../../../src/url';
-import {setImportantStyles, setStyles} from '../../../src/style';
 import {stringHash32} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Decode} from '../../../src/utils/bytes';
@@ -128,12 +131,12 @@ const DOUBLECLICK_SRA_EXP_BRANCHES = {
 };
 
 /** @const {string} */
-const FLEXIBLE_AD_SLOTS_EXP = 'flexAdSlots';
+const ZINDEX_EXP = 'zIndexExp';
 
-/** @const @enum{string} */
-const FLEXIBLE_AD_SLOTS_BRANCHES = {
-  CONTROL: '21063173',
-  EXPERIMENT: '21063174',
+/**@const @enum{string} */
+const ZINDEX_EXP_BRANCHES = {
+  NO_ZINDEX: '21065356',
+  HOLDBACK: '21065357',
 };
 
 /**
@@ -293,14 +296,17 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
      */
     this.shouldSandbox_ = false;
 
-    /** @private {boolean} */
-    this.sendFlexibleAdSlotParams_ = true;
-
     /**
      * Set after the ad request is built.
      * @private {?FlexibleAdSlotDataTypeDef}
      */
     this.flexibleAdSlotData_ = null;
+
+    /**
+     * If true, will add a z-index to flex ad slots upon expansion.
+     * @private {boolean}
+     */
+    this.inZIndexHoldBack_ = false;
   }
 
   /**
@@ -381,8 +387,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     const experimentInfoMap = /** @type {!Object<string,
         !../../../src/experiments.ExperimentInfo>} */ ({
-      // Only select into SRA experiments if SRA not already explicitly
-      // enabled and refresh is not being used by any slot.
       [DOUBLECLICK_SRA_EXP]: {
         isTrafficEligible: () =>
           !forcedExperimentId &&
@@ -395,30 +399,18 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
         ),
       },
-      [FLEXIBLE_AD_SLOTS_EXP]: {
+      [ZINDEX_EXP]: {
         isTrafficEligible: () => true,
-        branches: Object.values(FLEXIBLE_AD_SLOTS_BRANCHES),
+        branches: Object.values(ZINDEX_EXP_BRANCHES),
       },
-      [[ADX_ADY_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [[ADX_ADY_EXP.control], [ADX_ADY_EXP.experiment]],
-      },
-      [[FIE_CSS_CLEANUP_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_CSS_CLEANUP_EXP.control],
-          [FIE_CSS_CLEANUP_EXP.experiment],
-        ],
-      },
+      ...AMPDOC_FIE_EXPERIMENT_INFO_MAP,
     });
     const setExps = this.randomlySelectUnsetExperiments_(experimentInfoMap);
     Object.keys(setExps).forEach(
       expName => setExps[expName] && this.experimentIds.push(setExps[expName])
     );
-    if (
-      setExps[FLEXIBLE_AD_SLOTS_EXP] == FLEXIBLE_AD_SLOTS_BRANCHES.EXPERIMENT
-    ) {
-      this.sendFlexibleAdSlotParams_ = false;
+    if (setExps[ZINDEX_EXP] == ZINDEX_EXP_BRANCHES.HOLDBACK) {
+      this.inZIndexHoldBack_ = true;
     }
   }
 
@@ -541,51 +533,45 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     let msz = null;
     let psz = null;
     let fws = null;
-    if (this.sendFlexibleAdSlotParams_) {
-      this.flexibleAdSlotData_ = getFlexibleAdSlotData(
-        this.win,
-        this.element.parentElement
-      );
-      const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
-      // If slotWidth is -1, that means its width must be determined by its
-      // parent container, and so should have the same value as parentWidth.
-      msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
-      psz = `${parentWidth}x-1`;
-      fws = fwSignal ? fwSignal : '0';
-    }
-    return Object.assign(
-      {
-        'iu': this.element.getAttribute('data-slot'),
-        'co':
-          this.jsonTargeting && this.jsonTargeting['cookieOptOut'] ? '1' : null,
-        'adk': this.adKey,
-        'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
-        'output': 'html',
-        'impl': 'ifr',
-        'tfcd': tfcd == undefined ? null : tfcd,
-        'adtest': isInManualExperiment(this.element) ? 'on' : null,
-        'ifi': this.ifi_,
-        'rc': this.refreshCount_ || null,
-        'frc': Number(this.fromResumeCallback) || null,
-        'fluid': this.isFluidRequest_ ? 'height' : null,
-        'fsf': this.forceSafeframe ? '1' : null,
-        // Both msz/psz send a height of -1 because height expansion is
-        // disallowed in AMP.
-        'msz': msz,
-        'psz': psz,
-        'fws': fws,
-        'scp': serializeTargeting(
-          (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
-          (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
-            null,
-          null
-        ),
-        'spsa': this.isSinglePageStoryAd
-          ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
-          : null,
-      },
-      googleBlockParameters(this)
+    this.flexibleAdSlotData_ = getFlexibleAdSlotData(
+      this.win,
+      this.element.parentElement
     );
+    const {fwSignal, slotWidth, parentWidth} = this.flexibleAdSlotData_;
+    // If slotWidth is -1, that means its width must be determined by its
+    // parent container, and so should have the same value as parentWidth.
+    msz = `${slotWidth == -1 ? parentWidth : slotWidth}x-1`;
+    psz = `${parentWidth}x-1`;
+    fws = fwSignal ? fwSignal : '0';
+    return {
+      'iu': this.element.getAttribute('data-slot'),
+      'co':
+        this.jsonTargeting && this.jsonTargeting['cookieOptOut'] ? '1' : null,
+      'adk': this.adKey,
+      'sz': this.isSinglePageStoryAd ? '1x1' : this.parameterSize,
+      'output': 'html',
+      'impl': 'ifr',
+      'tfcd': tfcd == undefined ? null : tfcd,
+      'adtest': isInManualExperiment(this.element) ? 'on' : null,
+      'ifi': this.ifi_,
+      'rc': this.refreshCount_ || null,
+      'frc': Number(this.fromResumeCallback) || null,
+      'fluid': this.isFluidRequest_ ? 'height' : null,
+      'fsf': this.forceSafeframe ? '1' : null,
+      'msz': msz,
+      'psz': psz,
+      'fws': fws,
+      'scp': serializeTargeting(
+        (this.jsonTargeting && this.jsonTargeting['targeting']) || null,
+        (this.jsonTargeting && this.jsonTargeting['categoryExclusions']) ||
+          null,
+        null
+      ),
+      'spsa': this.isSinglePageStoryAd
+        ? `${pageLayoutBox.width}x${pageLayoutBox.height}`
+        : null,
+      ...googleBlockParameters(this),
+    };
   }
 
   /**
@@ -761,6 +747,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     };
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
+      PAGEVIEWID_64: () =>
+        Services.documentInfoForDoc(this.element).pageViewId64,
       HREF: () => this.win.location.href,
       REFERRER: opt_timeout => this.getReferrer_(opt_timeout),
       TGT: () =>
@@ -781,6 +769,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return this.element.getAttribute(name);
         }
       },
+      ELEMENT_POS: () => this.element.getPageLayoutBox().top,
+      SCROLL_TOP: () =>
+        Services.viewportForDoc(this.getAmpDoc()).getScrollTop(),
+      PAGE_HEIGHT: () =>
+        Services.viewportForDoc(this.getAmpDoc()).getScrollHeight(),
+      BKG_STATE: () => (this.getAmpDoc().isVisible() ? 'visible' : 'hidden'),
       CANONICAL_URL: () =>
         Services.documentInfoForDoc(this.element).canonicalUrl,
     };
@@ -1195,6 +1189,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
               'Attempt to change size failed on fluid ' +
                 'creative. Will re-attempt when slot is out of the viewport.'
             );
+            const {width, height} = this.getSlotSize();
+            if (width && height) {
+              // This call is idempotent, so it's okay to make it multiple
+              // times.
+              this.fireFluidDelayedImpression();
+            }
             this.reattemptToExpandFluidCreative_ = true;
             this.setCssPosition_('absolute');
           });
@@ -1250,7 +1250,16 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
       (returnedSizeDifferent && heightNotIncreased)
     ) {
       this.attemptChangeSize(newHeight, newWidth).catch(() => {});
-      if (newWidth > width) {
+      if (
+        newWidth > width &&
+        // If 'fluid' were the primary requested size, ensure we do not trigger
+        // slot adjustment if the returned size is one of the requested multi-
+        // sizes. Slot adjustment should only be triggered when the creative
+        // size is not one of the requested sizes.
+        (!this.isFluidPrimaryRequest_ ||
+          (this.parameterSize &&
+            this.parameterSize.indexOf(`${newWidth}x${newHeight}`) == -1))
+      ) {
         this.adjustSlotPostExpansion_(newWidth);
       }
     }
@@ -1270,41 +1279,43 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     ) {
       return;
     }
+    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
     const isRtl = isRTL(this.win.document);
     const dirStr = isRtl ? 'Right' : 'Left';
-    // Guaranteed to be set after exiting if/else.
-    let /** ?number */ newMargin = null;
-    const {parentWidth, parentStyle} = this.flexibleAdSlotData_;
-    if (newWidth <= parentWidth) {
-      // Must center creative within its parent container
-      const parentPadding = parseInt(parentStyle[`padding${dirStr}`], 10) || 0;
-      const parentBorder =
-        parseInt(parentStyle[`border${dirStr}Width`], 10) || 0;
-      const whitespace = (this.flexibleAdSlotData_.parentWidth - newWidth) / 2;
-      newMargin = whitespace - parentPadding - parentBorder;
-    } else {
-      // Must center creative within the viewport
-      const viewportWidth = this.getViewport().getRect().width;
-      const pageLayoutBox = this.element.getPageLayoutBox();
-      const whitespace = (viewportWidth - newWidth) / 2;
-      if (isRtl) {
-        newMargin = pageLayoutBox.right + whitespace - viewportWidth;
+    const /** !Object<string, string> */ style = this.inZIndexHoldBack_
+        ? {'z-index': '11'}
+        : {};
+    // Compute offset margins if the slot is not centered by default.
+    if (parentStyle.textAlign != 'center') {
+      const getMarginStr = marginNum => `${Math.round(marginNum)}px`;
+      if (newWidth <= parentWidth) {
+        // Must center creative within its parent container
+        const parentPadding =
+          parseInt(parentStyle[`padding${dirStr}`], 10) || 0;
+        const parentBorder =
+          parseInt(parentStyle[`border${dirStr}Width`], 10) || 0;
+        const whitespace =
+          (this.flexibleAdSlotData_.parentWidth - newWidth) / 2;
+        style[isRtl ? 'margin-right' : 'margin-left'] = getMarginStr(
+          whitespace - parentPadding - parentBorder
+        );
       } else {
-        newMargin = -(pageLayoutBox.left - whitespace);
+        // Must center creative within the viewport
+        const viewportWidth = this.getViewport().getRect().width;
+        const pageLayoutBox = this.element.getPageLayoutBox();
+        const whitespace = (viewportWidth - newWidth) / 2;
+        if (isRtl) {
+          style['margin-right'] = getMarginStr(
+            pageLayoutBox.right + whitespace - viewportWidth
+          );
+        } else {
+          style['margin-left'] = getMarginStr(
+            -(pageLayoutBox.left - whitespace)
+          );
+        }
       }
     }
-    // setStyles cannot have computed style names, so we must do this by cases.
-    if (isRtl) {
-      setStyles(this.element, {
-        'z-index': '11',
-        'margin-right': `${Math.round(newMargin)}px`,
-      });
-    } else {
-      setStyles(this.element, {
-        'z-index': '11',
-        'margin-left': `${Math.round(newMargin)}px`,
-      });
-    }
+    setStyles(this.element, assertDoesNotContainDisplay(style));
   }
 
   /** @override */
@@ -1395,7 +1406,7 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
    */
   groupSlotsForSra() {
     return groupAmpAdsByType(
-      this.win,
+      this.getAmpDoc(),
       this.element.getAttribute('type'),
       getNetworkId
     );

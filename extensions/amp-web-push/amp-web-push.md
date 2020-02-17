@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Allows users to subscribe to web push notifications.
 ---
+
 <!--
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -44,19 +45,31 @@ Allows users to subscribe to <a href="https://developers.google.com/web/fundamen
 
 Developers compose widgets that appear based on a user's subscription state. Widgets are composed of AMP elements and can be as simple as a button or a text link.
 
-*Example*
+_Example_
 
 Clicking the subscription widget pops up a page prompting the user for notification permissions and signals the service worker (configured below) to subscribe the user to push in the background. Clicking the unsubscription widget signals the worker to unsubscribe the user from push in the background.
 
 ```html
 <!-- A subscription widget -->
-<amp-web-push-widget visibility="unsubscribed" layout="fixed" width="250" height="80">
+<amp-web-push-widget
+  visibility="unsubscribed"
+  layout="fixed"
+  width="250"
+  height="80"
+>
   <button on="tap:amp-web-push.subscribe">Subscribe to Notifications</button>
 </amp-web-push-widget>
 
 <!-- An unsubscription widget -->
-<amp-web-push-widget visibility="subscribed" layout="fixed" width="250" height="80">
-  <button on="tap:amp-web-push.unsubscribe">Unsubscribe from Notifications</button>
+<amp-web-push-widget
+  visibility="subscribed"
+  layout="fixed"
+  width="250"
+  height="80"
+>
+  <button on="tap:amp-web-push.unsubscribe">
+    Unsubscribe from Notifications
+  </button>
 </amp-web-push-widget>
 ```
 
@@ -146,4 +159,5 @@ All properties are <strong>required</strong>, and all URLs must begin with the s
 </table>
 
 ## Validation
+
 See [amp-web-push rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-web-push/validator-amp-web-push.protoascii) in the AMP validator specification.

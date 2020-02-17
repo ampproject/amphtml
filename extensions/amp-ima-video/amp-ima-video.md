@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Embeds a video player for instream video ads that are integrated with the IMA SDK.
 ---
+
 <!---
 Copyright 2017 The AMP HTML Authors. All Rights Reserved.
 
@@ -53,24 +54,34 @@ VAST-compliant ad response (for examples, see
 [IMA Sample Tags](https://developers.google.com/interactive-media-ads/docs/sdks/html5/tags)).
 
 The component HTML accepts the following types of HTML nodes as children:
-* `source` tags for content video, used in the same way as the standard `video` tag.
-* `track` tags for subtitles, in the same way as the standard `video` tag. If the track is hosted on a different origin than the document, you must add the `data-crossorigin` attribute to the `<amp-ima-video>` tag.
-* a `script` tag of type `application/json` used to provide [ImaSdkSettings](https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/apis#ima.ImaSdkSettings). Provide the property-translation of the setters in the linked documentation (e.g. to call `setNumRedirects(4)`, provide `{"numRedirects": 4}`).
+
+- `source` tags for content video, used in the same way as the standard `video` tag.
+- `track` tags for subtitles, in the same way as the standard `video` tag. If the track is hosted on a different origin than the document, you must add the `data-crossorigin` attribute to the `<amp-ima-video>` tag.
+- a `script` tag of type `application/json` used to provide [ImaSdkSettings](https://developers.google.com/interactive-media-ads/docs/sdks/html5/v3/apis#ima.ImaSdkSettings). Provide the property-translation of the setters in the linked documentation (e.g. to call `setNumRedirects(4)`, provide `{"numRedirects": 4}`).
 
 ## Example
 
 ```html
 <amp-ima-video
-    width=640 height=360 layout="responsive"
-    data-tag="ads.xml" data-poster="poster.png">
-  <source src="foo.mp4" type="video/mp4">
-  <source src="foo.webm" type="video/webm">
-  <track label="English subtitles" kind="subtitles" srclang="en" src="subtitles.vtt">
+  width="640"
+  height="360"
+  layout="responsive"
+  data-tag="ads.xml"
+  data-poster="poster.png"
+>
+  <source src="foo.mp4" type="video/mp4" />
+  <source src="foo.webm" type="video/webm" />
+  <track
+    label="English subtitles"
+    kind="subtitles"
+    srclang="en"
+    src="subtitles.vtt"
+  />
   <script type="application/json">
-  {
-    "locale": "en",
-    "numRedirects": 4
-  }
+    {
+      "locale": "en",
+      "numRedirects": 4
+    }
   </script>
 </amp-ima-video>
 ```
@@ -115,7 +126,6 @@ default, the first frame is displayed.</td>
 extended to AMP components.</td>
   </tr>
 </table>
-
 
 ## Validation
 

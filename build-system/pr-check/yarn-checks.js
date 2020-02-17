@@ -22,8 +22,8 @@
  */
 
 const colors = require('ansi-colors');
-const {getStderr} = require('../exec');
-const {gitDiffColor} = require('../git');
+const {getStderr} = require('../common/exec');
+const {gitDiffColor} = require('../common/git');
 
 /**
  * Makes sure package.json and yarn.lock are in sync.

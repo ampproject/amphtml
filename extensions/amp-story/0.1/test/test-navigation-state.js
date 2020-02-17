@@ -24,7 +24,9 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
   beforeEach(() => {
     storeService = new AmpStoryStoreService(env.win);
-    registerServiceBuilder(env.win, 'story-store', () => storeService);
+    registerServiceBuilder(env.win, 'story-store', function() {
+      return storeService;
+    });
     hasBookend = false;
     navigationState = new NavigationState(
       env.win,
@@ -40,7 +42,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
   it('should dispatch active page changes to all observers', () => {
     const observers = Array(5)
       .fill(undefined)
-      .map(() => sandbox.spy());
+      .map(() => env.sandbox.spy());
 
     observers.forEach(observer => navigationState.observe(observer));
 
@@ -48,7 +50,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     observers.forEach(observer => {
       expect(observer).to.have.been.calledWith(
-        sandbox.match(
+        env.sandbox.match(
           e =>
             e.type == StateChangeType.ACTIVE_PAGE &&
             e.value.pageIndex === 0 &&
@@ -63,7 +65,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     observers.forEach(observer => {
       expect(observer).to.have.been.calledWith(
-        sandbox.match(
+        env.sandbox.match(
           e =>
             e.type == StateChangeType.ACTIVE_PAGE &&
             e.value.pageIndex === 5 &&
@@ -78,7 +80,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
 
     observers.forEach(observer => {
       expect(observer).to.have.been.calledWith(
-        sandbox.match(
+        env.sandbox.match(
           e =>
             e.type == StateChangeType.ACTIVE_PAGE &&
             e.value.pageIndex === 2 &&
@@ -91,7 +93,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
   });
 
   it('should dispatch END on last page if story does NOT have bookend', () => {
-    const observer = sandbox.spy();
+    const observer = env.sandbox.spy();
 
     navigationState.observe(event => observer(event));
 
@@ -100,7 +102,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     navigationState.updateActivePage(1, 2);
 
     expect(observer).to.have.been.calledWith(
-      sandbox.match(
+      env.sandbox.match(
         e =>
           e.type == StateChangeType.ACTIVE_PAGE &&
           e.value.pageIndex === 1 &&
@@ -109,12 +111,12 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     );
 
     expect(observer).to.have.been.calledWith(
-      sandbox.match(e => e.type == StateChangeType.END)
+      env.sandbox.match(e => e.type == StateChangeType.END)
     );
   });
 
   it('should NOT dispatch END on last page if story has bookend', () => {
-    const observer = sandbox.spy();
+    const observer = env.sandbox.spy();
 
     navigationState.observe(event => observer(event));
 
@@ -123,7 +125,7 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     navigationState.updateActivePage(1, 2);
 
     expect(observer).to.have.been.calledWith(
-      sandbox.match(
+      env.sandbox.match(
         e =>
           e.type == StateChangeType.ACTIVE_PAGE &&
           e.value.pageIndex === 1 &&
@@ -132,12 +134,12 @@ describes.fakeWin('amp-story navigation state', {ampdoc: 'none'}, env => {
     );
 
     expect(observer).to.not.have.been.calledWith(
-      sandbox.match(e => e.type == StateChangeType.END)
+      env.sandbox.match(e => e.type == StateChangeType.END)
     );
   });
 
   it('should dispatch BOOKEND_ENTER/END and BOOKEND_EXIT', () => {
-    const observer = sandbox.spy();
+    const observer = env.sandbox.spy();
 
     navigationState.observe(event => observer(event.type));
 

@@ -24,7 +24,7 @@ const {
   RuntimeTestRunner,
   RuntimeTestConfig,
 } = require('./runtime-test/runtime-test-base');
-const {execOrDie} = require('../exec');
+const {execOrDie} = require('../common/exec');
 
 class Runner extends RuntimeTestRunner {
   constructor(config) {
@@ -37,7 +37,11 @@ class Runner extends RuntimeTestRunner {
       return;
     }
     execOrDie('gulp clean');
-    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+    if (argv.compiled) {
+      execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+    } else {
+      execOrDie(`gulp build --config ${argv.config}`);
+    }
   }
 }
 
@@ -66,6 +70,7 @@ integration.flags = {
   'chrome_flags': '  Uses the given flags to launch Chrome',
   'compiled':
     '  Changes integration tests to use production JS binaries for execution',
+  'single_pass': '  Run tests in Single Pass mode',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
   'coverage': '  Run tests in code coverage mode',
@@ -77,7 +82,9 @@ integration.flags = {
   'nobuild': '  Skips build step',
   'nohelp': '  Silence help messages that are printed prior to test run',
   'safari': '  Runs tests on Safari',
-  'saucelabs': '  Runs tests on saucelabs (requires setup)',
+  'saucelabs': '  Runs tests on Sauce Labs (requires setup)',
+  'stable': '  Runs Sauce Labs tests on stable browsers',
+  'beta': '  Runs Sauce Labs tests on beta browsers',
   'testnames': '  Lists the name of each test being run',
   'verbose': '  With logging enabled',
   'watch': '  Watches for changes in files, runs corresponding test(s)',

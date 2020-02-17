@@ -30,12 +30,11 @@ describes.realWin('AccessOtherAdapter', {amp: true}, env => {
     context = {
       buildUrl: () => {},
     };
-    contextMock = sandbox.mock(context);
+    contextMock = env.sandbox.mock(context);
   });
 
   afterEach(() => {
     contextMock.verify();
-    sandbox.restore();
   });
 
   describe('config', () => {
@@ -67,8 +66,6 @@ describes.realWin('AccessOtherAdapter', {amp: true}, env => {
     beforeEach(() => {
       adapter = new AccessOtherAdapter(ampdoc, {}, context);
     });
-
-    afterEach(() => {});
 
     it('should disable authorization without fallback object', () => {
       adapter.authorizationResponse_ = null;

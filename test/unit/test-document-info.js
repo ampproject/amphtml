@@ -25,15 +25,8 @@ describe
   .configure()
   .skipFirefox()
   .run('document-info', () => {
-    let sandbox;
-
     beforeEach(() => {
-      sandbox = sinon.sandbox;
-      sandbox.stub(CID, 'getRandomString64').returns('abcdef');
-    });
-
-    afterEach(() => {
-      sandbox.restore();
+      window.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
     });
 
     function getWin(links, metas) {
@@ -62,7 +55,7 @@ describe
         }
         const {win} = iframe;
         installDocService(win, /* isSingleDoc */ true);
-        sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
+        window.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
         win.__AMP_SERVICES.documentInfo = null;
         installDocumentInfoServiceForDoc(win.document);
         return iframe.win;

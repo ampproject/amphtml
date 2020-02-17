@@ -168,11 +168,6 @@
       "loading_complete_selectors": [".login-section"]
     },
     {
-      "url": "examples/visual-tests/amp-consent/amp-consent.amp.html",
-      "name": "amp-consent",
-      "interactive_tests": "examples/visual-tests/amp-consent/amp-consent.js"
-    },
-    {
       "url": "examples/visual-tests/font.amp/font.amp.html",
       "name": "Fonts",
       "loading_incomplete_selectors": [
@@ -684,6 +679,14 @@
       ],
     },
     {
+      "url": "examples/visual-tests/amp-story/amp-story-quiz-sizing-positioning.html",
+      "name": "amp-story-quiz: sizing and positioning",
+      "viewport": {"width": 320, "height": 480},
+      "loading_complete_selectors": [
+        ".i-amphtml-story-loaded",
+      ],
+    },
+    {
       "flaky": true,
       // See https://percy.io/ampproject/amphtml/builds/1434487/view/95137509/375?browser=firefox&mode=diff
       "url": "examples/visual-tests/amp-date-picker/amp-date-picker.amp.html",
@@ -732,6 +735,12 @@
       "no_base_test": true
     },
     {
+      "url": "examples/visual-tests/amphtml-ads/amp-fie-static.html",
+      "name": "amphtml-ads: friendly iframe static",
+      "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
+      "no_base_test": true
+    },
+    {
       "url": "examples/visual-tests/amphtml-ads/amp-inabox-adchoices.html",
       "name": "amphtml-ads: inabox adchoices",
       "interactive_tests": "examples/visual-tests/amphtml-ads/adchoices.js",
@@ -745,6 +754,39 @@
       ],
       "interactive_tests": "examples/visual-tests/amphtml-ads/static.js",
       "no_base_test": true
+    },
+    {
+      "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu.amp.html",
+      "name": "amp-mega-menu: basic usage",
+      "loading_complete_selectors": [".i-amphtml-mega-menu-heading"],
+      "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-mega-menu/amp-mega-menu-with-list.amp.html",
+      "name": "amp-mega-menu: template render",
+      "loading_complete_selectors": [".i-amphtml-mega-menu-heading"],
+      "interactive_tests": "examples/visual-tests/amp-mega-menu/amp-mega-menu.js"
+    },
+    {
+      "url": "examples/visual-tests/amp-video-docking/ltr.html",
+      "name": "amp-video-docking (left-to-right)",
+      "viewport": {"width": 800, "height": 600},
+      "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
+      "loading_complete_selectors": [".i-amphtml-video-component"],
+    },
+    {
+      "url": "examples/visual-tests/amp-video-docking/rtl.html",
+      "name": "amp-video-docking (right-to-left)",
+      "viewport": {"width": 800, "height": 600},
+      "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
+      "loading_complete_selectors": [".i-amphtml-video-component"],
+    },
+    {
+      "url": "examples/visual-tests/amp-video-docking/slot.html",
+      "name": "amp-video-docking (slot)",
+      "viewport": {"width": 800, "height": 600},
+      "interactive_tests": "examples/visual-tests/amp-video-docking/amp-video-docking.js",
+      "loading_complete_selectors": [".i-amphtml-video-component"],
     },
   ]
 }

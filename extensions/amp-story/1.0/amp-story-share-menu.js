@@ -15,6 +15,11 @@
  */
 
 import {
+  ANALYTICS_TAG_NAME,
+  StoryAnalyticsEvent,
+  getAnalyticsService,
+} from './story-analytics';
+import {
   Action,
   StateProperty,
   UIType,
@@ -88,6 +93,9 @@ export class ShareMenu {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win_);
+
+    /** @private {!./story-analytics.StoryAnalyticsService} */
+    this.analyticsService_ = getAnalyticsService(this.win_, storyEl);
 
     /** @private @const {!Element} */
     this.parentEl_ = storyEl;
@@ -224,6 +232,11 @@ export class ShareMenu {
         this.element_.classList.toggle(VISIBLE_CLASS, isOpen);
       });
     }
+    this.element_[ANALYTICS_TAG_NAME] = 'amp-story-share-menu';
+    this.analyticsService_.triggerEvent(
+      isOpen ? StoryAnalyticsEvent.OPEN : StoryAnalyticsEvent.CLOSE,
+      this.element_
+    );
   }
 
   /**

@@ -85,10 +85,10 @@ function isTemplateTagSupported() {
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {string} name The name of the custom element.
- * @return {function(new:AmpElement)} The custom element class.
+ * @return {typeof AmpElement} The custom element class.
  */
 export function createCustomElementClass(win, name) {
-  const baseCustomElement = /** @type {function(new:HTMLElement)} */ (createBaseCustomElementClass(
+  const baseCustomElement = /** @type {typeof HTMLElement} */ (createBaseCustomElementClass(
     win
   ));
   class CustomAmpElement extends baseCustomElement {
@@ -108,21 +108,20 @@ export function createCustomElementClass(win, name) {
       return name;
     }
   }
-  return /** @type {function(new:AmpElement)} */ (CustomAmpElement);
+  return /** @type {typeof AmpElement} */ (CustomAmpElement);
 }
 
 /**
  * Creates a base custom element class.
  *
  * @param {!Window} win The window in which to register the custom element.
- * @return {function(new:HTMLElement)}
+ * @return {typeof HTMLElement}
  */
 function createBaseCustomElementClass(win) {
   if (win.__AMP_BASE_CE_CLASS) {
     return win.__AMP_BASE_CE_CLASS;
   }
-  const htmlElement =
-    /** @type {function(new:HTMLElement)} */ (win.HTMLElement);
+  const htmlElement = /** @type {typeof HTMLElement} */ (win.HTMLElement);
 
   /**
    * @abstract @extends {HTMLElement}
@@ -369,7 +368,7 @@ function createBaseCustomElementClass(win) {
      * Upgrades the element to the provided new implementation. If element
      * has already been attached, it's layout validation and attachment flows
      * are repeated for the new implementation.
-     * @param {function(new:./base-element.BaseElement, !Element)} newImplClass
+     * @param {typeof ./base-element.BaseElement} newImplClass
      * @final @package
      */
     upgrade(newImplClass) {
@@ -413,8 +412,8 @@ function createBaseCustomElementClass(win) {
       this.classList.remove('i-amphtml-unresolved');
       this.implementation_.createdCallback();
       this.assertLayout_();
+      // TODO(wg-runtime): Don't set BaseElement ivars externally.
       this.implementation_.layout_ = this.layout_;
-      this.implementation_.layoutWidth_ = this.layoutWidth_;
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEventForTesting(AmpEvents.ATTACHED);
       this.getResources().upgraded(this);
@@ -464,6 +463,15 @@ function createBaseCustomElementClass(win) {
     getLayoutPriority() {
       devAssert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
       return this.implementation_.getLayoutPriority();
+    }
+
+    /**
+     * TODO(wg-runtime, #25824): Make Resource.getLayoutBox() the source of truth.
+     * @return {number}
+     * @deprecated
+     */
+    getLayoutWidth() {
+      return this.layoutWidth_;
     }
 
     /**
@@ -564,7 +572,7 @@ function createBaseCustomElementClass(win) {
         // If we do early preconnects we delay them a bit. This is kind of
         // an unfortunate trade off, but it seems faster, because the DOM
         // operations themselves are not free and might delay
-        startupChunk(self.document, () => {
+        startupChunk(this.getAmpDoc(), () => {
           const TAG = this.tagName;
           if (!this.ownerDocument) {
             dev().error(TAG, 'preconnect without ownerDocument');
@@ -588,16 +596,12 @@ function createBaseCustomElementClass(win) {
 
     /**
      * Updates the layout box of the element.
-     * See {@link BaseElement.getLayoutWidth} for details.
      * @param {!./layout-rect.LayoutRectDef} layoutBox
      * @param {boolean=} opt_measurementsChanged
      */
     updateLayoutBox(layoutBox, opt_measurementsChanged) {
       this.layoutWidth_ = layoutBox.width;
       this.layoutHeight_ = layoutBox.height;
-      if (this.isUpgraded()) {
-        this.implementation_.layoutWidth_ = this.layoutWidth_;
-      }
       if (this.isBuilt()) {
         try {
           this.implementation_.onLayoutMeasure();
@@ -615,7 +619,8 @@ function createBaseCustomElementClass(win) {
           this.toggleLoading(true);
         } else if (
           layoutBox.top < PREPARE_LOADING_THRESHOLD &&
-          layoutBox.top >= 0
+          layoutBox.top >= 0 &&
+          !this.loadingContainer_
         ) {
           // Few top elements will also be pre-initialized with a loading
           // element.
@@ -1829,9 +1834,9 @@ function createBaseCustomElementClass(win) {
 
         if (overflown) {
           this.overflowElement_.onclick = () => {
-            const resources = this.getResources();
-            resources./*OK*/ changeSize(this, requestedHeight, requestedWidth);
-            resources.mutateElement(this, () => {
+            const mutator = Services.mutatorForDoc(this.getAmpDoc());
+            mutator./*OK*/ changeSize(this, requestedHeight, requestedWidth);
+            mutator./*OK*/ mutateElement(this, () => {
               this.overflowCallback(
                 /* overflown */ false,
                 requestedHeight,
@@ -1852,15 +1857,18 @@ function createBaseCustomElementClass(win) {
      * @param {?Element=} opt_element
      */
     mutateOrInvoke_(mutator, opt_element) {
-      if (this.resources_) {
-        this.getResources().mutateElement(opt_element || this, mutator);
+      if (this.ampdoc_) {
+        Services.mutatorForDoc(this.getAmpDoc()).mutateElement(
+          opt_element || this,
+          mutator
+        );
       } else {
         mutator();
       }
     }
   }
   win.__AMP_BASE_CE_CLASS = BaseCustomElement;
-  return /** @type {function(new:HTMLElement)} */ (win.__AMP_BASE_CE_CLASS);
+  return /** @type {typeof HTMLElement} */ (win.__AMP_BASE_CE_CLASS);
 }
 
 /**
@@ -1910,7 +1918,7 @@ function isInternalOrServiceNode(node) {
  *
  * @param {!Window} win The window in which to register the custom element.
  * @param {string} name The name of the custom element.
- * @param {function(new:./base-element.BaseElement, !Element)=} opt_implementationClass For testing only.
+ * @param {(typeof ./base-element.BaseElement)=} opt_implementationClass For testing only.
  * @return {!Object} Prototype of element.
  */
 export function createAmpElementForTesting(win, name, opt_implementationClass) {

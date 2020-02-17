@@ -39,11 +39,11 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
 
   beforeEach(() => {
     win = env.win;
-    sandbox
+    env.sandbox
       .stub(Services, 'performanceFor')
       .returns({tickDelta: () => {}, flush: () => {}});
     service = new MediaPerformanceMetricsService();
-    tickStub = sandbox.stub(service.performanceService_, 'tickDelta');
+    tickStub = env.sandbox.stub(service.performanceService_, 'tickDelta');
   });
 
   afterEach(() => {
@@ -51,7 +51,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
   });
 
   it('should record and flush metrics', () => {
-    const flushStub = sandbox.stub(service.performanceService_, 'flush');
+    const flushStub = env.sandbox.stub(service.performanceService_, 'flush');
 
     const video = win.document.createElement('video');
     service.startMeasuring(video);
@@ -67,7 +67,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
   });
 
   it('should record and flush metrics on error', () => {
-    const flushStub = sandbox.stub(service.performanceService_, 'flush');
+    const flushStub = env.sandbox.stub(service.performanceService_, 'flush');
 
     const video = win.document.createElement('video');
     service.startMeasuring(video);
@@ -81,7 +81,7 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
   });
 
   it('should record and flush metrics for multiple media', () => {
-    const flushStub = sandbox.stub(service.performanceService_, 'flush');
+    const flushStub = env.sandbox.stub(service.performanceService_, 'flush');
 
     const video1 = win.document.createElement('video');
     const video2 = win.document.createElement('video');
@@ -98,6 +98,21 @@ describes.fakeWin('media-performance-metrics-service', {}, env => {
 
     expect(tickStub).to.have.callCount(9);
     expect(flushStub).to.have.been.calledTwice;
+  });
+
+  it('should not flush metrics if sendMetrics is false', () => {
+    const flushStub = env.sandbox.stub(service.performanceService_, 'flush');
+
+    const video = win.document.createElement('video');
+    service.startMeasuring(video);
+    clock.tick(20);
+    video.dispatchEvent(new Event('playing'));
+    clock.tick(100);
+    video.dispatchEvent(new Event('waiting'));
+    clock.tick(300);
+    service.stopMeasuring(video, false /** sendMetrics */);
+
+    expect(flushStub).to.not.have.been.called;
   });
 
   describe('Joint latency', () => {

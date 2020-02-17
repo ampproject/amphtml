@@ -6,6 +6,7 @@ teaser:
   text: Displays multiple similar pieces of content along a horizontal axis or vertical axis.
 experimental: true
 ---
+
 <!---
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -58,12 +59,15 @@ The carousel consists of an arbitrary number of items, as well as optional navig
 The carousel advances between items if the user swipes or uses the customizable arrow buttons.
 
 ## Attributes
+
 ### Using Media Queries
 
 The attributes for `<amp-base-carousel>` can be configured to use different options based on a media query. You can also use a value without any media queries. The format looks like:
 
 ```html
-<amp-base-carousel attr-name="(min-width: 1000px) valueOne, (min-width: 600px) valueTwo, defaultValue"></amp-base-carousel>
+<amp-base-carousel
+  attr-name="(min-width: 1000px) valueOne, (min-width: 600px) valueTwo, defaultValue"
+></amp-base-carousel>
 ```
 
 The media queries are evaluated from left to right, with the first matching media query being used. A default value (without a media query) is required. In this case, if the page has a screen width of 1000px or more, `valueOne` is used. If the width is between 999px and 600px, `valueTwo` is used. When it is 599px or smaller, `defaultValue` is used.
@@ -148,6 +152,7 @@ The media queries are evaluated from left to right, with the first matching medi
 </table>
 
 ## Events
+
 <table>
   <tr>
     <td width="40%"><strong><code>slideChange</code></strong></td>
@@ -156,6 +161,7 @@ The media queries are evaluated from left to right, with the first matching medi
 </table>
 
 ## Actions
+
 <table>
   <tr>
     <td width="40%"><strong><code>next</code></strong></td>
@@ -172,9 +178,11 @@ The media queries are evaluated from left to right, with the first matching medi
 </table>
 
 ## Styling
+
 - You may use the `amp-base-carousel` element selector to style the carousel freely.
 
 ### Customizing Arrow Buttons
+
 Arrow buttons can be customized by passing in your own custom markup. For example, you can recreate the default styling with the following HTML and CSS:
 
 ```css
@@ -203,7 +211,11 @@ Arrow buttons can be customized by passing in your own custom markup. For exampl
   <div>first slide</div>
   …
   <button slot="next-arrow" class="carousel-next" aria-label="Next"></button>
-  <button slot="prev-arrow" class="carousel-prev" aria-label="Previous"></button>
+  <button
+    slot="prev-arrow"
+    class="carousel-prev"
+    aria-label="Previous"
+  ></button>
 </amp-base-carousel>
 ```
 
@@ -254,14 +266,16 @@ When changing the number of visible slides using `visible-slides`, in response t
 ```html
 <!-- Using an aspect ratio of 3:2 for the slides in this example. -->
 <amp-base-carousel
-    layout="responsive" width="3" height="1"
-    heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)"
-    visible-count="(min-width: 600px) 4, 3"
-    advance-count="(min-width: 600px) 4, 3">
+  layout="responsive"
+  width="3"
+  height="1"
+  heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)"
+  visible-count="(min-width: 600px) 4, 3"
+  advance-count="(min-width: 600px) 4, 3"
+>
   <amp-img layout="flex-item" src="…"></amp-img>
   …
 </amp-base-carousel>
-
 ```
 
 ## Validation

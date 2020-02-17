@@ -170,8 +170,8 @@ export class Gestures {
    * gesture handler registered in this method the recognizer is installed
    * and from that point on it participates in the event processing.
    *
-   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
-   * @param {function(!Gesture<DATA>)} handler
+   * @param {function(new:GestureRecognizer, !Gestures)} recognizerConstr
+   * @param {function(!Gesture)} handler
    * @return {!UnlistenDef}
    * @template DATA
    */
@@ -192,7 +192,7 @@ export class Gestures {
    * true if anything was done. Returns false if there were no handlers
    * registered on the given gesture recognizer in first place.
    *
-   * @param {function(new:GestureRecognizer<DATA>, !Gestures)} recognizerConstr
+   * @param {function(new:GestureRecognizer, !Gestures)} recognizerConstr
    * @return {boolean}
    */
   removeGesture(recognizerConstr) {

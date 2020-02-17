@@ -21,6 +21,7 @@ import {
 } from '../../../../testing/test-helper';
 import {Transport} from '../transport';
 import {getMode} from '../../../../src/mode';
+import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {installTimerService} from '../../../../src/service/timer-impl';
 import {loadPromise} from '../../../../src/event-helper';
 
@@ -31,7 +32,6 @@ describes.realWin(
     allowExternalResources: true,
   },
   env => {
-    let sandbox;
     let win;
     let doc;
     let openXhrStub;
@@ -40,63 +40,65 @@ describes.realWin(
     let imagePixelVerifier;
 
     beforeEach(() => {
-      sandbox = env.sandbox;
       win = env.win;
       doc = win.document;
-      openXhrStub = sandbox.stub();
-      sendXhrStub = sandbox.stub();
-      sendBeaconStub = sandbox.stub();
+      openXhrStub = env.sandbox.stub();
+      sendXhrStub = env.sandbox.stub();
+      sendBeaconStub = env.sandbox.stub();
+
+      // Needed for PreconnectService.
+      installDocService(win, true);
     });
 
     it('prefers beacon over xhrpost and image', () => {
       setupStubs(true, true);
-      sendRequest(win, 'https://example.com/test', {
+      sendRequest(win, 'https://example.test/test', {
         beacon: true,
         xhrpost: true,
         image: true,
       });
-      expectBeacon('https://example.com/test', '');
+      expectBeacon('https://example.test/test', '');
       expectNoXhr();
       expectNoImagePixel();
     });
 
     it('prefers xhrpost over image', () => {
       setupStubs(true, true);
-      sendRequest(win, 'https://example.com/test', {
+      sendRequest(win, 'https://example.test/test', {
         beacon: false,
         xhrpost: true,
         image: true,
       });
       expectNoBeacon();
-      expectXhr('https://example.com/test', '');
+      expectXhr('https://example.test/test', '');
       expectNoImagePixel();
     });
 
     it('reluctantly uses image if nothing else is enabled', () => {
       setupStubs(true, true);
-      sendRequest(win, 'https://example.com/test', {
+      sendRequest(win, 'https://example.test/test', {
         image: true,
       });
       expectNoBeacon();
-      expectImagePixel('https://example.com/test');
+      expectImagePixel('https://example.test/test');
       expectNoXhr();
     });
 
     it('falls back to image setting suppressWarnings to true', () => {
       setupStubs(true, true);
-      sendRequest(win, 'https://example.com/test', {
+      sendRequest(win, 'https://example.test/test', {
         beacon: false,
         xhrpost: false,
         image: {suppressWarnings: true},
       });
       expectNoBeacon();
       expectNoXhr();
-      expectImagePixel('https://example.com/test');
+      expectImagePixel('https://example.test/test');
     });
 
     it('falls back to image setting referrerPolicy', () => {
       setupStubs(true, true);
-      sendRequest(win, 'https://example.com/test', {
+      sendRequest(win, 'https://example.test/test', {
         beacon: true,
         xhrpost: true,
         image: true,
@@ -104,48 +106,48 @@ describes.realWin(
       });
       expectNoBeacon();
       expectNoXhr();
-      expectImagePixel('https://example.com/test', 'no-referrer');
+      expectImagePixel('https://example.test/test', 'no-referrer');
     });
 
     it('falls back to xhrpost when enabled and beacon is not available', () => {
       setupStubs(false, true);
-      sendRequest(win, 'https://example.com/test', {
+      sendRequest(win, 'https://example.test/test', {
         beacon: true,
         xhrpost: true,
         image: true,
       });
       expectNoBeacon();
-      expectXhr('https://example.com/test', '');
+      expectXhr('https://example.test/test', '');
       expectNoImagePixel();
     });
 
     it('falls back to image when beacon not found and xhr disabled', () => {
       setupStubs(false, true);
-      sendRequest(win, 'https://example.com/test', {
+      sendRequest(win, 'https://example.test/test', {
         beacon: true,
         xhrpost: false,
         image: true,
       });
       expectNoBeacon();
       expectNoXhr();
-      expectImagePixel('https://example.com/test');
+      expectImagePixel('https://example.test/test');
     });
 
     it('falls back to image when beacon and xhr are not available', () => {
       setupStubs(false, false);
-      sendRequest(win, 'https://example.com/test', {
+      sendRequest(win, 'https://example.test/test', {
         beacon: true,
         xhrpost: true,
         image: true,
       });
       expectNoBeacon();
       expectNoXhr();
-      expectImagePixel('https://example.com/test');
+      expectImagePixel('https://example.test/test');
     });
 
     it('does not send a request when no transport methods are enabled', () => {
       setupStubs(true, true);
-      sendRequest(win, 'https://example.com/test', {});
+      sendRequest(win, 'https://example.test/test', {});
       expectNoBeacon();
       expectNoXhr();
       expectNoImagePixel();
@@ -316,7 +318,7 @@ describes.realWin(
     it('asserts that urls are https', () => {
       allowConsoleError(() => {
         expect(() => {
-          sendRequest(win, 'http://example.com/test', {image: true});
+          sendRequest(win, 'http://example.test/test', {image: true});
         }).to.throw(/https/);
       });
     });
@@ -359,7 +361,7 @@ describes.realWin(
       it('iframe asserts that urls are https', () => {
         allowConsoleError(() => {
           expect(() => {
-            sendRequestUsingIframe(win, 'http://example.com/test');
+            sendRequestUsingIframe(win, 'http://example.test/test');
           }).to.throw(/https/);
         });
       });
@@ -367,12 +369,12 @@ describes.realWin(
       it('forbids same origin', () => {
         const fakeWin = {
           location: {
-            href: 'https://example.com/abc',
+            href: 'https://example.test/abc',
           },
         };
         allowConsoleError(() => {
           expect(() => {
-            sendRequestUsingIframe(fakeWin, 'https://example.com/123');
+            sendRequestUsingIframe(fakeWin, 'https://example.test/123');
           }).to.throw(/Origin of iframe request/);
         });
       });
@@ -388,12 +390,8 @@ describes.realWin(
 
         const ampAnalyticsEl = null;
 
-        const preconnectSpy = sandbox.spy();
-        transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
-          preload: preconnectSpy,
-        });
+        transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.null;
-        expect(preconnectSpy).to.not.be.called;
       });
 
       it('initialize iframe transport when used', () => {
@@ -414,12 +412,8 @@ describes.realWin(
           'amp-analytics'
         );
 
-        const preconnectSpy = sandbox.spy();
-        transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
-          preload: preconnectSpy,
-        });
+        transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
-        expect(preconnectSpy).to.be.called;
 
         transport.deleteIframeTransport();
         expect(transport.iframeTransport_).to.be.null;
@@ -444,12 +438,8 @@ describes.realWin(
           'amp-analytics'
         );
 
-        const preconnectSpy = sandbox.spy();
-        transport.maybeInitIframeTransport(win, ampAnalyticsEl, {
-          preload: preconnectSpy,
-        });
+        transport.maybeInitIframeTransport(ampAnalyticsEl);
         expect(transport.iframeTransport_).to.be.ok;
-        expect(preconnectSpy).to.be.called;
 
         transport.deleteIframeTransport();
         expect(transport.iframeTransport_).to.be.null;
@@ -463,7 +453,7 @@ describes.realWin(
           image: true,
           iframe: '//test',
         });
-        const iframeTransportSendRequestSpy = sandbox.spy();
+        const iframeTransportSendRequestSpy = env.sandbox.spy();
         transport.iframeTransport_ = {
           sendRequest: iframeTransportSendRequestSpy,
         };
@@ -476,7 +466,7 @@ describes.realWin(
     });
 
     function setupStubs(beacon, xhr) {
-      const wi = mockWindowInterface(sandbox);
+      const wi = mockWindowInterface(env.sandbox);
       wi.getSendBeacon.returns(beacon ? sendBeaconStub : undefined);
 
       const FakeXMLHttpRequest = () => {

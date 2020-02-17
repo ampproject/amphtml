@@ -24,10 +24,18 @@
 
 const path = require('path');
 
-// TODO(choumx): Fix extensions code and add 'extensions/' here.
-const PATHS_TO_INCLUDE = ['src/', 'builtins/'];
+const ROOT_DIR = path.resolve(__dirname, '../../');
 
-const PATHS_TO_IGNORE = ['src/polyfills', 'test/'];
+// TODO(choumx): Fix extensions code and add 'extensions/' here.
+const PATHS_TO_INCLUDE = [
+  path.resolve(ROOT_DIR, 'src/'),
+  path.resolve(ROOT_DIR, 'builtins/'),
+];
+
+const PATHS_TO_IGNORE = [
+  path.resolve(ROOT_DIR, 'src/polyfills'),
+  path.resolve(ROOT_DIR, 'test/'),
+];
 
 const WINDOW_PROPERTIES = ['win', 'window', 'global', 'self'];
 

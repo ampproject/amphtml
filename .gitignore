@@ -1,6 +1,6 @@
 .DS_Store
 .g4ignore
-build
+build/
 .amp-build
 c
 /dist
@@ -12,7 +12,6 @@ npm-debug.log
 .idea
 .tm_properties
 .settings
-.vscode
 typings
 typings.json
 build-system/runner/dist
@@ -22,8 +21,6 @@ test/coverage
 *.swp
 *.swo
 yarn-error.log
-PERCY_BUILD_ID
-chromedriver.log
 sc-*-linux*
 sc-*-osx*
 sauce_connect_*
@@ -33,4 +30,6 @@ firebase
 .firebaserc
 firebase.json
 .firebase/
-extensions/amp-analytics/0.1/vendors/*.json
+src/purifier/dist
+build-system/tasks/performance/cache
+build-system/tasks/performance/results.json

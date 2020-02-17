@@ -19,7 +19,7 @@
 
 import * as eventHelper from '../../src/event-helper';
 import * as mode from '../../src/mode';
-import {maybeValidate} from '../../src/validator-integration';
+import {loadScript, maybeValidate} from '../../src/validator-integration';
 
 describes.fakeWin('validator-integration', {}, env => {
   let loadScriptStub;
@@ -28,8 +28,8 @@ describes.fakeWin('validator-integration', {}, env => {
   describe('maybeValidate', () => {
     beforeEach(() => {
       win = env.win;
-      loadScriptStub = sandbox.stub(eventHelper, 'loadPromise');
-      modeStub = sandbox.stub(mode, 'getMode');
+      loadScriptStub = env.sandbox.stub(eventHelper, 'loadPromise');
+      modeStub = env.sandbox.stub(mode, 'getMode');
     });
 
     it('should not load validator script if not in dev mode', () => {
@@ -50,6 +50,23 @@ describes.fakeWin('validator-integration', {}, env => {
       loadScriptStub.returns(Promise.resolve());
       maybeValidate(win);
       expect(loadScriptStub).to.have.been.called;
+    });
+  });
+
+  describe('loadScript', () => {
+    it('should propagate pre-existing nonces', () => {
+      const scriptEl = env.win.document.createElement('script');
+      scriptEl.setAttribute('nonce', '123');
+      win.document.head.append(scriptEl);
+      loadScriptStub = env.sandbox
+        .stub(eventHelper, 'loadPromise')
+        .returns(Promise.resolve());
+
+      loadScript(win.document, 'http://example.com');
+
+      expect(loadScriptStub).calledWith(
+        env.sandbox.match(el => el.getAttribute('nonce') === '123')
+      );
     });
   });
 });

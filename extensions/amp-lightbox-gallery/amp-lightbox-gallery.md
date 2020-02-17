@@ -6,6 +6,7 @@ formats:
 teaser:
   text: Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.
 ---
+
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -62,7 +63,13 @@ Tapping on any `<amp-img>` opens the image in a lightbox gallery. The lightbox g
 ### Lightbox with `<amp-carousel>`
 
 ```html
-<amp-carousel lightbox width="1600" height="900" layout="responsive" type="slides">
+<amp-carousel
+  lightbox
+  width="1600"
+  height="900"
+  layout="responsive"
+  type="slides"
+>
   <amp-img src="image1" width="200" height="100"></amp-img>
   <amp-img src="image1" width="200" height="100"></amp-img>
   <amp-img src="image1" width="200" height="100"></amp-img>
@@ -87,11 +94,19 @@ In this example, `<amp-lightbox-gallery>` displays the `figcaption` value as its
 
 ```html
 <figure>
-  <amp-img id="hero-img" lightbox="toronto" src="https://picsum.photos/1600/900?image=1075" layout="responsive" width="1600"
-    height="900" alt="Picture of CN tower.">
+  <amp-img
+    id="hero-img"
+    lightbox="toronto"
+    src="https://picsum.photos/1600/900?image=1075"
+    layout="responsive"
+    width="1600"
+    height="900"
+    alt="Picture of CN tower."
+  >
   </amp-img>
   <figcaption class="image">
-    Toronto's CN tower was built in 1976 and was the tallest free-standing structure until 2007.
+    Toronto's CN tower was built in 1976 and was the tallest free-standing
+    structure until 2007.
   </figcaption>
 </figure>
 ```
@@ -99,6 +114,7 @@ In this example, `<amp-lightbox-gallery>` displays the `figcaption` value as its
 #### Example 2: Using alt for description
 
 In this example, `<amp-lightbox-gallery>` displays the `alt` value as its description, showing "Picture of CN tower".
+
 ```html
 <amp-img
   id="hero-img"
@@ -107,28 +123,34 @@ In this example, `<amp-lightbox-gallery>` displays the `alt` value as its descri
   layout="responsive"
   width="1600"
   height="900"
-  alt="Picture of CN tower">
+  alt="Picture of CN tower"
+>
 </amp-img>
 ```
 
 ## Thumbnail API
+
 Lightboxed items have a thumbnail gallery view. You can optionally specify a thumbnail item for your lightboxed element via the attribute `lightbox-thumbnail-id` that references the `id` of an `<amp-img>` element with `layout="nodisplay"`.
 
 #### Example: using `lightbox-thumbnail-id` to specify a thumbnail
 
 ```html
-<amp-youtube width="480"
+<amp-youtube
+  width="480"
   height="270"
   layout="responsive"
   data-videoid="lBTCB7yLs8Y"
-  lightbox-thumbnail-id="my-thumbnail-img">
+  lightbox-thumbnail-id="my-thumbnail-img"
+>
 </amp-youtube>
 
-<amp-img id="my-thumbnail-img"
+<amp-img
+  id="my-thumbnail-img"
   width="200"
   height="200"
   layout="nodisplay"
-  src="https://picsum.photos/200/200?image=1074">
+  src="https://picsum.photos/200/200?image=1074"
+>
 </amp-img>
 ```
 
@@ -145,21 +167,21 @@ This event tracks when the lightbox is opened when the user clicks on a lightbox
 You can track this event using the following code snippet:
 
 ```html
-  <amp-analytics>
-      <script type="application/json">
-      {
-        "requests": {
-          "open": "https://foo.com/open",
-        },
-        "triggers": {
-          "trackLightboxOpened": {
-            "on": "lightboxOpened",
-            "request": "open"
-          }
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "open": "https://foo.com/open",
+      },
+      "triggers": {
+        "trackLightboxOpened": {
+          "on": "lightboxOpened",
+          "request": "open"
         }
       }
-      </script>
-      </amp-analytics>
+    }
+  </script>
+</amp-analytics>
 ```
 
 ### `thumbnailsViewToggled`
@@ -169,21 +191,21 @@ This event tracks when the thumbnails view is triggered by clicking on the trigg
 You can track this event using the following code snippet:
 
 ```html
-  <amp-analytics>
-      <script type="application/json">
-      {
-        "requests": {
-          "thumb": "https://foo.com/thumb",
-        },
-        "triggers": {
-          "trackThumbnailsViewToggled": {
-            "on": "thumbnailsViewToggled",
-            "request": "thumb"
-          }
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "thumb": "https://foo.com/thumb",
+      },
+      "triggers": {
+        "trackThumbnailsViewToggled": {
+          "on": "thumbnailsViewToggled",
+          "request": "thumb"
         }
       }
-      </script>
-      </amp-analytics>
+    }
+  </script>
+</amp-analytics>
 ```
 
 ### `descriptionOverflowToggled`
@@ -193,19 +215,19 @@ This event tracks when the user toggles the description by clicking on the descr
 You can track this event using the following code snippet:
 
 ```html
-  <amp-analytics>
-      <script type="application/json">
-      {
-        "requests": {
-          "descOverflow": "https://foo.com/descOverflow"
-        },
-        "triggers": {
-          "trackDescriptionOverflowed": {
-            "on": "descriptionOverflowToggled",
-            "request": "descOverflow"
-          }
+<amp-analytics>
+  <script type="application/json">
+    {
+      "requests": {
+        "descOverflow": "https://foo.com/descOverflow"
+      },
+      "triggers": {
+        "trackDescriptionOverflowed": {
+          "on": "descriptionOverflowToggled",
+          "request": "descOverflow"
         }
       }
-      </script>
-      </amp-analytics>
+    }
+  </script>
+</amp-analytics>
 ```

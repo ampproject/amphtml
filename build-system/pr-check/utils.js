@@ -25,13 +25,13 @@ const {
   gitDiffStatMaster,
   gitTravisMasterBaseline,
   shortSha,
-} = require('../git');
+} = require('../common/git');
 const {
   isTravisBuild,
   travisBuildNumber,
   travisPullRequestSha,
-} = require('../travis');
-const {execOrDie, execWithError, exec} = require('../exec');
+} = require('../common/travis');
+const {execOrDie, execWithError, exec} = require('../common/exec');
 const {replaceUrls, signalDistUpload} = require('../tasks/pr-deploy-bot-utils');
 
 const BUILD_OUTPUT_FILE = isTravisBuild()
@@ -370,7 +370,8 @@ function decryptTravisKey_() {
   // openssl 1.0.2g, which is used by Travis to decrypt.
   execOrDie(
     `openssl aes-256-cbc -md sha256 -k ${process.env.GCP_TOKEN} -in ` +
-      `build-system/sa-travis-key.json.enc -out ${OUTPUT_STORAGE_KEY_FILE} -d`
+      `build-system/common/sa-travis-key.json.enc -out ` +
+      `${OUTPUT_STORAGE_KEY_FILE} -d`
   );
 }
 

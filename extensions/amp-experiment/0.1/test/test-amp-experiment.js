@@ -135,7 +135,7 @@ describes.realWin(
 
     it('should add attributes to body element for the allocated variants', () => {
       addConfigElement('script');
-      const stub = sandbox.stub(variant, 'allocateVariant');
+      const stub = env.sandbox.stub(variant, 'allocateVariant');
       stub
         .withArgs(ampdoc, 'experiment-1', config['experiment-1'])
         .returns(Promise.resolve('variant-a'));

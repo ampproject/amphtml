@@ -19,23 +19,14 @@
     "type": "git",
     "url": "git+https://github.com/ampproject/amp-toolbox.git"
   },
-  "keywords": [
-    "amp",
-    "amp-toolbox",
-    "amp-url-api"
-  ],
+  "keywords": ["amp", "amp-toolbox", "amp-url-api"],
   "author": "AMPHTML Team",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/ampproject/amp-toolbox/issues"
   },
   "homepage": "https://github.com/ampproject/amp-toolbox#readme",
-  "files": [
-    "dist",
-    "package.json",
-    "../LICENSE",
-    "README.md"
-  ],
+  "files": ["dist", "package.json", "../LICENSE", "README.md"],
   "dependencies": {
     "punycode": "^2.1.1",
     "url-parse": "^1.4.3"

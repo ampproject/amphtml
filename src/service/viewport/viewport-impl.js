@@ -118,6 +118,9 @@ export class ViewportImpl {
     /** @private {boolean} */
     this.scrollTracking_ = false;
 
+    /** @private {Element} */
+    this.scrollingElement_ = null;
+
     /** @private {number} */
     this.scrollCount_ = 0;
 
@@ -224,6 +227,11 @@ export class ViewportImpl {
           // If the size has already been intialized, check it again in case
           // the size has changed between `disconnect` and `connect`.
           this.resize_();
+        }
+        if (this.scrollTop_) {
+          // Remeasure scrollTop when resource becomes visible to fix #11983
+          this./*OK*/ scrollTop_ = null;
+          this.getScrollTop();
         }
       } else {
         this.binding_.disconnect();
@@ -554,7 +562,10 @@ export class ViewportImpl {
 
   /** @override */
   getScrollingElement() {
-    return this.binding_.getScrollingElement();
+    if (this.scrollingElement_) {
+      return this.scrollingElement_;
+    }
+    return (this.scrollingElement_ = this.binding_.getScrollingElement());
   }
 
   /** @override */
@@ -1161,34 +1172,22 @@ const ViewportType = {
  * @return {string}
  */
 function getViewportType(win, viewer) {
-  const viewportType = viewer.getParam('viewportType') || ViewportType.NATURAL;
-  if (
-    !Services.platformFor(win).isIos() ||
-    viewportType != ViewportType.NATURAL
-  ) {
-    return viewportType;
-  }
-  const isIosIframeScrollableOn = isExperimentOn(win, 'ios-scrollable-iframe');
-  // Enable iOS Embedded mode so that it's easy to test against a more
-  // realistic iOS environment w/o an iframe.
-  if (
-    !isIframed(win) &&
-    (getMode(win).localDev || getMode(win).development) &&
-    !isIosIframeScrollableOn
-  ) {
-    return ViewportType.NATURAL_IOS_EMBED;
-  }
+  const isIframedIos = Services.platformFor(win).isIos() && isIframed(win);
 
   // Enable iOS Embedded mode for iframed tests (e.g. integration tests).
-  if (isIframed(win) && getMode(win).test) {
+  if (getMode(win).test && isIframedIos) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
 
   // Override to ios-embed for iframe-viewer mode.
-  if (isIframed(win) && viewer.isEmbedded() && !isIosIframeScrollableOn) {
+  if (
+    isIframedIos &&
+    viewer.isEmbedded() &&
+    !viewer.hasCapability('iframeScroll')
+  ) {
     return ViewportType.NATURAL_IOS_EMBED;
   }
-  return viewportType;
+  return ViewportType.NATURAL;
 }
 
 /**

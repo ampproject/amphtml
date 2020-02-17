@@ -24,7 +24,8 @@ import {Services} from '../../../src/services';
 import {addExperimentIdToElement} from '../../../ads/google/a4a/traffic-experiments';
 import {clamp} from '../../../src/utils/math';
 import {computedStyle, setStyle} from '../../../src/style';
-import {dev, user} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
+import {getData} from '../../../src/event-helper';
 import {hasOwn} from '../../../src/utils/object';
 import {randomlySelectUnsetExperiments} from '../../../src/experiments';
 import {toWin} from '../../../src/types';
@@ -38,6 +39,15 @@ const TAG = 'amp-ad-network-adsense-impl';
 const RAFMT_PARAMS = {
   [ADSENSE_RSPV_TAG]: 13,
   [ADSENSE_MCRSPV_TAG]: 15,
+};
+
+/** @const {!{branch: string, control: string, experiment: string}}
+    @visibleForTesting
+*/
+export const AD_SIZE_OPTIMIZATION_EXP = {
+  branch: 'adsense-ad-size-optimization',
+  control: '368226510',
+  experiment: '368226511',
 };
 
 /** @const {!{branch: string, control: string, experiment: string}}
@@ -76,6 +86,141 @@ export class ResponsiveState {
       return null;
     }
     return new ResponsiveState(element);
+  }
+
+  /**
+   * Upgrades the ad unit to responsive if there is an opt-in setting in localstorage.
+   * See https://github.com/ampproject/amphtml/issues/23568 for design.
+   * @param {!Element} element
+   * @param {string} adClientId
+   * @return {!Promise<?ResponsiveState>} a promise that resolves when any upgrade is complete.
+   */
+  static maybeUpgradeToResponsive(element, adClientId) {
+    if (!ResponsiveState.isInAdSizeOptimizationExperimentBranch_(element)) {
+      return Promise.resolve(null);
+    }
+    // If the ad unit is already responsive we don't upgrade again.
+    if (element.hasAttribute('data-auto-format')) {
+      return Promise.resolve(null);
+    }
+    return (
+      Services.storageForDoc(element)
+        .then(storage =>
+          storage.get(
+            ResponsiveState.getAdSizeOptimizationStorageKey_(adClientId)
+          )
+        )
+        .then(isAdSizeOptimizationEnabled => {
+          if (isAdSizeOptimizationEnabled) {
+            return ResponsiveState.upgradeToResponsive_(element);
+          }
+          return null;
+        })
+        // Do nothing if we fail to read localstorage.
+        .catch(() => {
+          dev().warn(TAG, 'Failed to look up publisher ad size settings.');
+          return null;
+        })
+    );
+  }
+
+  /**
+   * Upgrades the element to responsive.
+   *
+   * @param {!Element} element
+   * @return {!ResponsiveState} responsive state
+   * @private
+   */
+  static upgradeToResponsive_(element) {
+    element.setAttribute('height', ADSENSE_RSPV_WHITELISTED_HEIGHT);
+    element.setAttribute('width', '100vw');
+    element.setAttribute('data-full-width', '');
+    element.setAttribute('data-auto-format', 'rspv');
+
+    const state = ResponsiveState.createIfResponsive(element);
+    devAssert(state != null, 'Upgrade failed');
+    return /** @type {!ResponsiveState} */ (state);
+  }
+
+  /**
+   * Sets up a listener for a pingback of publisher settings in the ad response and
+   * writing such settings to localstorage.
+   *
+   * Note that we can have multiple listeners on the same page, which is okay because
+   * the settings for publishers should not change between different slots.
+   *
+   * Once the listener has received one valid setting update event, it will remove
+   * itself.
+   *
+   * See https://github.com/ampproject/amphtml/issues/23568 for design.
+   *
+   * @param {!Element} element to use for fetching storage.
+   * @param {!HTMLIFrameElement} iframe ad iframe.
+   * @param {string} adClientId
+   * @return {?Promise} a promise that resolves when ad size settings are updated, or null if no listener was attached.
+   */
+  static maybeAttachSettingsListener(element, iframe, adClientId) {
+    if (!ResponsiveState.isInAdSizeOptimizationExperimentBranch_(element)) {
+      return null;
+    }
+    let promiseResolver;
+    const savePromise = new Promise(resolve => {
+      promiseResolver = resolve;
+    });
+    const win = toWin(element.ownerDocument.defaultView);
+
+    const listener = event => {
+      if (event['source'] != iframe.contentWindow) {
+        return;
+      }
+      const data = getData(event);
+      // data will look like this:
+      // {
+      //   'googMsgType': 'adsense-settings',
+      //   'adClient': 'ca-pub-123',
+      //   'enableAutoAdSize': '1'
+      // }
+      if (!!data && data['googMsgType'] != 'adsense-settings') {
+        return;
+      }
+      if (data['adClient'] != adClientId) {
+        return;
+      }
+
+      const autoAdSizeStatus = data['enableAutoAdSize'] == '1';
+      win.removeEventListener('message', listener);
+
+      Services.storageForDoc(element)
+        .then(storage =>
+          storage
+            .set(
+              ResponsiveState.getAdSizeOptimizationStorageKey_(adClientId),
+              autoAdSizeStatus
+            )
+            .then(() => {
+              dev().info(
+                TAG,
+                `Saved publisher auto ad size setting: ${autoAdSizeStatus}`
+              );
+              promiseResolver();
+            })
+        )
+        // Do nothing if we fail to write to localstorage.
+        .catch(() => {
+          dev().warn(TAG, 'Failed to persist publisher auto ad size setting.');
+        });
+    };
+    win.addEventListener('message', listener);
+    return savePromise;
+  }
+
+  /**
+   * @param {string} adClientId
+   * @return {string} ad size optimization storage key.
+   * @private
+   */
+  static getAdSizeOptimizationStorageKey_(adClientId) {
+    return `aas-${adClientId}`;
   }
 
   /** @return {boolean} */
@@ -159,9 +304,34 @@ export class ResponsiveState {
   }
 
   /**
+   * Selects into the ad size optimization experiment.
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  static isInAdSizeOptimizationExperimentBranch_(element) {
+    const experimentInfoMap = /** @type {!Object<string,
+        !../../../src/experiments.ExperimentInfo>} */ ({
+      [[AD_SIZE_OPTIMIZATION_EXP.branch]]: {
+        isTrafficEligible: () => true,
+        branches: [
+          [AD_SIZE_OPTIMIZATION_EXP.control],
+          [AD_SIZE_OPTIMIZATION_EXP.experiment],
+        ],
+      },
+    });
+    const win = toWin(element.ownerDocument.defaultView);
+    const setExps = randomlySelectUnsetExperiments(win, experimentInfoMap);
+    Object.keys(setExps).forEach(expName =>
+      addExperimentIdToElement(setExps[expName], element)
+    );
+    return (
+      setExps[AD_SIZE_OPTIMIZATION_EXP.branch] ==
+      AD_SIZE_OPTIMIZATION_EXP.experiment
+    );
+  }
+
+  /**
    * Selects into the inconsistent responsive height fix experiment.
-   * Note that this needs to be done before responsive sizing, so it must
-   * be separate from divertExperiments below.
    * @return {boolean}
    * @private
    */

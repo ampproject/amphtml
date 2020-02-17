@@ -20,11 +20,13 @@ Experiment opt-ins are saved to `localStorage` and only enables the experiment o
 For content served from non-CDN domains, experiments can be toggled in the devtools console using:
 
 ```javascript
-AMP.toggleExperiment('experiment')
+AMP.toggleExperiment('my-experiment');
 ```
 
 ## Enable an experiment for a particular document
+
 Document can choose to opt in a certain experiments. To do that, simply put a meta tag of name `amp-experiments-opt-in` in the head of the HTML document before your AMP script (`https://cdn.ampproject.org/v0.js`). Its `content` value is a comma separated string of experiment IDs to opt in.
+
 ```HTML
 <head>
   ...
@@ -34,11 +36,31 @@ Document can choose to opt in a certain experiments. To do that, simply put a me
   ...
 </head>
 ```
+
 By doing so, the specified experiments will be enabled for all visitors of the document.
-Note not all experiments allow document level opt-in. For a full list of white listed experiments, please see `allow-doc-opt-in` attribute in the project's `prod-config.json` file.
-Note that document opt-in can be overridden by user opt-out.
+
+Note: **only some experiments** allow document level opt-in. For a full list of allowed experiments, please see `allow-doc-opt-in` attribute in [the `prod-config.json` file.](../../build-system/global-configs/prod-config.json)
+
+The document opt-in can also be overridden by user opt-out:
+
 ```javascript
-AMP.toggleExperiment('experiment', false);
+AMP.toggleExperiment('my-experiment', false);
+```
+
+### Enable automatically for invalid documents (demos and automated tests)
+
+Before an experiment is toggled on for production or its flag is completely removed, it's useful to have it turned on by default for manual testing pages or for automated test fixtures (e.g. HTML document fixtures for integration and visual tests).
+
+This enables the experimental runtime features that are required for a specific document and works for **every experiment**, but also **causes the document to become invalid**.
+
+To prevent race conditions caused from loading the runtime and an inline script to toggle the experiment, you'll have to include an `AMP.push` callback in your document's `<head>`:
+
+```html
+<script>
+  (self.AMP = self.AMP || []).push(function(AMP) {
+    AMP.toggleExperiment('my-experiment', true);
+  });
+</script>
 ```
 
 ## Adding a new experiment

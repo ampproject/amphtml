@@ -38,7 +38,9 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     const storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function() {
+      return storeService;
+    });
 
     const consentConfig = {
       consents: {ABC: {checkConsentHref: 'https://example.com'}},
@@ -53,12 +55,14 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     };
 
     const styles = {'background-color': 'rgb(0, 0, 0)'};
-    getComputedStyleStub = sandbox
+    getComputedStyleStub = env.sandbox
       .stub(win, 'getComputedStyle')
       .returns(styles);
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function() {
+      return localizationService;
+    });
 
     // Test DOM structure:
     // <amp-story>
@@ -83,7 +87,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     setConfig(defaultConfig);
 
     storyConsentEl = win.document.createElement('amp-story-consent');
-    storyConsentEl.getResources = () => win.__AMP_SERVICES.resources.obj;
+    storyConsentEl.getAmpDoc = () => storyConsentEl;
     storyConsentEl.appendChild(storyConsentConfigEl);
 
     storyEl.appendChild(consentEl);
@@ -263,7 +267,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
   });
 
   it('should broadcast the amp actions', () => {
-    sandbox.stub(storyConsent.actions_, 'trigger');
+    env.sandbox.stub(storyConsent.actions_, 'trigger');
 
     storyConsent.buildCallback();
 
@@ -300,7 +304,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
     consentConfigEl.textContent = JSON.stringify(config);
 
-    sandbox
+    env.sandbox
       .stub(Services, 'geoForDocOrNull')
       .resolves({matchedISOCountryGroups: ['eea']});
 
@@ -316,7 +320,7 @@ describes.realWin('amp-story-consent', {amp: true}, env => {
     const config = {consents: {ABC: {promptIfUnknownForGeoGroup: 'eea'}}};
     consentConfigEl.textContent = JSON.stringify(config);
 
-    sandbox
+    env.sandbox
       .stub(Services, 'geoForDocOrNull')
       .resolves({matchedISOCountryGroups: ['othergroup']});
 

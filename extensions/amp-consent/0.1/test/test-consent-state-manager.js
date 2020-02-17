@@ -37,9 +37,9 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
     win = env.win;
     ampdoc = env.ampdoc;
     storageValue = {};
-    storageGetSpy = sandbox.spy();
-    storageSetSpy = sandbox.spy();
-    storageRemoveSpy = sandbox.spy();
+    storageGetSpy = env.sandbox.spy();
+    storageSetSpy = env.sandbox.spy();
+    storageRemoveSpy = env.sandbox.spy();
 
     resetServiceForTesting(win, 'storage');
     registerServiceBuilder(win, 'storage', function() {
@@ -169,7 +169,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
       beforeEach(() => {
         manager.registerConsentInstance('test', {});
-        spy = sandbox.spy();
+        spy = env.sandbox.spy();
       });
 
       it('should call handler when consent state changes', () => {
@@ -245,15 +245,20 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
           expect(storageSetSpy).to.not.be.called;
           instance.update(CONSENT_ITEM_STATE.ACCEPTED);
           yield macroTask();
-          expect(storageSetSpy).to.be.calledOnce;
 
-          // legacy boolean consent state value
-          expect(storageSetSpy).to.be.calledWith('amp-consent:test', true);
+          expect(storageSetSpy).to.be.calledWith(
+            'amp-consent:test',
+            composeStoreValue(constructConsentInfo(CONSENT_ITEM_STATE.ACCEPTED))
+          );
+          expect(storageSetSpy).to.be.calledOnce;
           storageSetSpy.resetHistory();
           instance.update(CONSENT_ITEM_STATE.REJECTED);
           yield macroTask();
           expect(storageSetSpy).to.be.calledOnce;
-          expect(storageSetSpy).to.be.calledWith('amp-consent:test', false);
+          expect(storageSetSpy).to.be.calledWith(
+            'amp-consent:test',
+            composeStoreValue(constructConsentInfo(CONSENT_ITEM_STATE.REJECTED))
+          );
         });
 
         it('update consent info with consent string', function*() {
@@ -281,6 +286,18 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
             'amp-consent:test',
             composeStoreValue(consentInfo)
           );
+
+          instance.update(CONSENT_ITEM_STATE.DISMISS);
+          yield macroTask();
+          storageSetSpy.resetHistory();
+          storageRemoveSpy.resetHistory();
+          expect(storageSetSpy).to.not.be.called;
+          expect(storageRemoveSpy).to.not.be.called;
+
+          instance.update(CONSENT_ITEM_STATE.UNKNOWN, 'test');
+          yield macroTask();
+          expect(storageSetSpy).to.not.be.called;
+          expect(storageRemoveSpy).to.be.calledOnce;
         });
 
         it('remove consentInfo when consentStr length exceeds', function*() {
@@ -385,7 +402,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       let requestBody;
       let requestSpy;
       beforeEach(() => {
-        requestSpy = sandbox.spy();
+        requestSpy = env.sandbox.spy();
         resetServiceForTesting(win, 'xhr');
         registerServiceBuilder(win, 'xhr', function() {
           return {
@@ -603,7 +620,7 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
           const e = new Error('intentional');
           throw e;
         };
-        sandbox.stub(dev(), 'error');
+        env.sandbox.stub(dev(), 'error');
         storageValue['amp-consent:test'] = true;
         return instance.get().then(value => {
           expect(value).to.deep.equal(

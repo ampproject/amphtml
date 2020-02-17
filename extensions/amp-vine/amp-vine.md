@@ -5,6 +5,7 @@ formats:
 teaser:
   text: Displays a Vine simple embed.
 ---
+
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -47,9 +48,7 @@ Displays a Vine simple embed.
 A Vine simple embed has equal width and height:
 
 ```html
-<amp-vine width="400" height="400"
-  data-vineid="MdKjXez002d">
-</amp-vine>
+<amp-vine width="400" height="400" data-vineid="MdKjXez002d"> </amp-vine>
 ```
 
 ## Attributes

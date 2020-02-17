@@ -41,21 +41,23 @@ describes.realWin('amp-story-share-menu', {amp: true}, env => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
     embedded = true;
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function() {
+      return storeService;
+    });
 
-    // Making sure resource tasks run synchronously.
-    sandbox.stub(Services, 'resourcesForDoc').returns({
+    // Making sure mutator tasks run synchronously.
+    env.sandbox.stub(Services, 'mutatorForDoc').returns({
       mutateElement: (element, callback) => {
         callback();
         return Promise.resolve();
       },
     });
 
-    sandbox.stub(Services, 'localizationServiceV01').returns({
+    env.sandbox.stub(Services, 'localizationServiceV01').returns({
       getLocalizedString: localizedStringId => `string(${localizedStringId})`,
     });
 
-    sandbox.stub(Services, 'viewerForDoc').returns({
+    env.sandbox.stub(Services, 'viewerForDoc').returns({
       isEmbedded: () => embedded,
       sendMessageAwaitResponse: eventType => {
         if (eventType === 'moreInfoLinkUrl') {

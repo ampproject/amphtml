@@ -19,7 +19,7 @@ const {
   definitionFile,
   singletonFunctions,
   transformableMethods,
-} = require('../log-module-metadata.js');
+} = require('../babel-plugins/log-module-metadata.js');
 
 const selector = Object.keys(transformableMethods)
   .map(name => `CallExpression[callee.property.name=${name}]`)

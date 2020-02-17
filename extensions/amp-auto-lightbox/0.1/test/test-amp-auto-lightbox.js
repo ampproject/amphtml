@@ -22,7 +22,6 @@ import {
   ENABLED_LD_JSON_TYPES,
   ENABLED_OG_TYPE_ARTICLE,
   LIGHTBOXABLE_ATTR,
-  Mutation,
   RENDER_AREA_RATIO,
   REQUIRED_EXTENSION,
   Scanner,
@@ -52,8 +51,7 @@ describes.realWin(
   },
   env => {
     let html;
-
-    const {any} = sinon.match;
+    let any;
 
     const ldJsonSchemaTypes = Object.keys(ENABLED_LD_JSON_TYPES);
     const ogTypes = [ENABLED_OG_TYPE_ARTICLE];
@@ -104,7 +102,7 @@ describes.realWin(
 
     // necessary since element matching `withArgs` deep equals and overflows
     const matchEquals = comparison =>
-      sinon.match(subject => subject == comparison);
+      env.sandbox.match(subject => subject == comparison);
 
     function mockLoadedSignal(element, isLoadedSuccessfully) {
       const signals = new Signals();
@@ -117,12 +115,17 @@ describes.realWin(
       return element;
     }
 
+    function stubMutatorForDoc() {
+      env.sandbox.stub(Services, 'mutatorForDoc').returns({
+        mutateElement: (_, fn) => tryResolve(fn),
+      });
+    }
+
     beforeEach(() => {
+      any = env.sandbox.match.any;
       html = htmlFor(env.win.document);
 
-      env.sandbox
-        .stub(Mutation, 'mutate')
-        .callsFake((_, mutator) => tryResolve(mutator));
+      stubMutatorForDoc();
     });
 
     describe('meetsTreeShapeCriteria', () => {
@@ -137,14 +140,18 @@ describes.realWin(
           it(`${accepts ? 'accepts' : 'rejects'} ${accepts || rejects}`, () => {
             [
               html`
-                <amp-img src="asada.png"></amp-img>
-              `,
-              html`
-                <div><amp-img src="adobada.png"></amp-img></div>
+                <amp-img src="asada.png" layout="flex-item"></amp-img>
               `,
               html`
                 <div>
-                  <div><amp-img src="carnitas.png"></amp-img></div>
+                  <amp-img src="adobada.png" layout="flex-item"></amp-img>
+                </div>
+              `,
+              html`
+                <div>
+                  <div>
+                    <amp-img src="carnitas.png" layout="flex-item"></amp-img>
+                  </div>
                 </div>
               `,
             ].forEach(unwrapped => {
@@ -446,7 +453,7 @@ describes.realWin(
         mockCandidates([
           mockLoadedSignal(
             html`
-              <amp-img></amp-img>
+              <amp-img layout="flex-item"></amp-img>
             `,
             true
           ),
@@ -466,7 +473,7 @@ describes.realWin(
         mockCandidates([
           mockLoadedSignal(
             html`
-              <amp-img></amp-img>
+              <amp-img layout="flex-item"></amp-img>
             `,
             true
           ),
@@ -483,19 +490,19 @@ describes.realWin(
       it('sets attribute only for candidates that meet criteria', async () => {
         const a = mockLoadedSignal(
           html`
-            <amp-img src="a.png"></amp-img>
+            <amp-img src="a.png" layout="flex-item"></amp-img>
           `,
           true
         );
         const b = mockLoadedSignal(
           html`
-            <amp-img src="b.png"></amp-img>
+            <amp-img src="b.png" layout="flex-item"></amp-img>
           `,
           true
         );
         const c = mockLoadedSignal(
           html`
-            <amp-img src="c.png"></amp-img>
+            <amp-img src="c.png" layout="flex-item"></amp-img>
           `,
           true
         );
@@ -520,7 +527,7 @@ describes.realWin(
           [1, 2, 3].map(() =>
             mockLoadedSignal(
               html`
-                <amp-img src="a.png"></amp-img>
+                <amp-img src="a.png" layout="flex-item"></amp-img>
               `,
               true
             )
@@ -540,17 +547,32 @@ describes.realWin(
     });
 
     describe('runCandidates', () => {
+      it('ignores amp-img load signal after being unlaid out', async () => {
+        const img = html`
+          <amp-img src="bla.png" layout="flex-item"></amp-img>
+        `;
+
+        const signals = new Signals();
+        img.signals = () => signals;
+
+        signals.signal(CommonSignals.UNLOAD);
+        signals.signal(CommonSignals.LOAD_END);
+
+        const elected = await Promise.all(runCandidates(env.ampdoc, [img]));
+        expect(elected[0]).to.be.undefined;
+      });
+
       it('filters out candidates that fail to load', async () => {
         const shouldNotLoad = mockLoadedSignal(
           html`
-            <amp-img src="bla.png"></amp-img>
+            <amp-img src="bla.png" layout="flex-item"></amp-img>
           `,
           false
         );
 
         const shouldLoad = mockLoadedSignal(
           html`
-            <amp-img src="bla.png"></amp-img>
+            <amp-img src="bla.png" layout="flex-item"></amp-img>
           `,
           true
         );
@@ -681,6 +703,7 @@ describes.realWin(
 
             const lightboxable = createElementWithAttributes(doc, 'amp-img', {
               [LIGHTBOXABLE_ATTR]: '',
+              layout: 'flex-item',
             });
 
             doc.head.appendChild(extensionScript);
@@ -715,6 +738,7 @@ describes.realWin(
 
             const lightboxable = createElementWithAttributes(doc, 'amp-img', {
               [LIGHTBOXABLE_ATTR]: '',
+              layout: 'flex-item',
             });
 
             doc.head.appendChild(extensionScript);
@@ -730,7 +754,7 @@ describes.realWin(
     describe('apply', () => {
       it('sets attribute', async () => {
         const element = html`
-          <amp-img src="chabuddy.g"></amp-img>
+          <amp-img src="chabuddy.g" layout="flex-item"></amp-img>
         `;
 
         await apply(env.ampdoc, element);
@@ -742,7 +766,7 @@ describes.realWin(
         const candidates = [1, 2, 3].map(
           () =>
             html`
-              <amp-img></amp-img>
+              <amp-img layout="flex-item"></amp-img>
             `
         );
 
@@ -757,7 +781,7 @@ describes.realWin(
 
       it('dispatches event', async () => {
         const element = html`
-          <amp-img src="chabuddy.g"></amp-img>
+          <amp-img src="chabuddy.g" layout="flex-item"></amp-img>
         `;
 
         element.dispatchCustomEvent = env.sandbox.spy();

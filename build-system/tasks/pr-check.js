@@ -57,6 +57,7 @@ async function prCheck(cb) {
   printChangeSummary(FILENAME);
   const buildTargets = determineBuildTargets(FILENAME);
   runCheck('gulp lint --local_changes');
+  runCheck('gulp prettify --local_changes');
   runCheck('gulp presubmit');
   runCheck('gulp check-exact-versions');
 
@@ -70,15 +71,18 @@ async function prCheck(cb) {
 
   if (buildTargets.has('CACHES_JSON')) {
     runCheck('gulp caches-json');
-    runCheck('gulp json-syntax');
   }
 
   if (buildTargets.has('DOCS')) {
-    runCheck('gulp check-links');
+    runCheck('gulp check-links --local_changes');
   }
 
   if (buildTargets.has('DEV_DASHBOARD')) {
     runCheck('gulp dev-dashboard-tests');
+  }
+
+  if (buildTargets.has('OWNERS')) {
+    runCheck('gulp check-owners');
   }
 
   if (buildTargets.has('RUNTIME')) {

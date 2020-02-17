@@ -89,7 +89,7 @@ describes.realWin(
         'https://ib.3lift.com/ttj?inv_code=ampforadstest_main_feed'
       );
       tripleliftImplElem.setAttribute('data-use-a4a', 'true');
-      sandbox
+      env.sandbox
         .stub(AmpAdNetworkTripleliftImpl.prototype, 'getSigningServiceNames')
         .callsFake(() => {
           return ['cloudflare'];

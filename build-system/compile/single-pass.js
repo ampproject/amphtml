@@ -18,7 +18,7 @@ const babel = require('@babel/core');
 const babelify = require('babelify');
 const browserify = require('browserify');
 const colors = require('ansi-colors');
-const conf = require('../build.conf');
+const conf = require('./build.conf');
 const del = require('del');
 const devnull = require('dev-null');
 const fs = require('fs-extra');
@@ -28,8 +28,7 @@ const log = require('fancy-log');
 const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
-const Promise = require('bluebird');
-const relativePath = require('path').relative;
+const pkgUp = require('pkg-up');
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
@@ -41,16 +40,17 @@ const {
   extensionBundles,
   altMainBundles,
   TYPES,
-} = require('../../bundles.config');
+} = require('./bundles.config');
 const {
   gulpClosureCompile,
   handleSinglePassCompilerError,
 } = require('./closure-compile');
+const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
-const wrappers = require('../compile-wrappers');
-const {VERSION: internalRuntimeVersion} = require('../internal-version');
+const wrappers = require('./compile-wrappers');
+const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const argv = minimist(process.argv.slice(2));
 let singlePassDest =
@@ -105,16 +105,19 @@ exports.getFlags = function(config) {
     source_map_include_content: !!argv.full_sourcemaps,
     source_map_location_mapping: ['|/'],
     //new_type_inf: true,
-    language_in: 'ES6',
     // By default closure puts all of the public exports on the global, but
     // because of the wrapper modules (to mitigate async loading of scripts)
     // that we add to the js binaries this prevents other js binaries from
     // accessing the symbol, we remedy this by attaching all public exports
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
-    language_out: config.language_out || 'ES5',
+    language_in: 'ECMASCRIPT_2018',
+    language_out: config.esm
+      ? 'NO_TRANSPILE'
+      : config.language_out || 'ECMASCRIPT5',
     chunk_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
+    package_json_entry_names: 'module,main',
     process_common_js_modules: true,
     externs: config.externs,
     define: config.define,
@@ -162,7 +165,11 @@ exports.getBundleFlags = function(g) {
   Object.keys(g.packages)
     .sort()
     .forEach(function(pkg) {
-      srcs.push(pkg);
+      g.bundles[mainBundle].modules.push(pkg);
+      fs.outputFileSync(
+        `${g.tmp}/${pkg}`,
+        JSON.stringify(JSON.parse(readFile(pkg)), null, 4)
+      );
     });
 
   // Build up the weird flag structure that closure compiler calls
@@ -261,7 +268,6 @@ exports.getBundleFlags = function(g) {
       throw new Error('Expect to build more than one bundle.');
     }
   });
-  flagsArray.push('--js_module_root', `${g.tmp}/node_modules/`);
   flagsArray.push('--js_module_root', `${g.tmp}/`);
   return flagsArray;
 };
@@ -312,6 +318,7 @@ exports.getGraph = function(entryModules, config) {
     deps: true,
     detectGlobals: false,
     fast: true,
+    browserField: 'module',
   })
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
@@ -340,14 +347,21 @@ exports.getGraph = function(entryModules, config) {
         })
         .forEach(function(row) {
           const id = unifyPath(
-            exports.maybeAddDotJs(relativePath(process.cwd(), row.id))
+            exports.maybeAddDotJs(path.relative(process.cwd(), row.id))
           );
           topo.addNode(id, id);
-          const deps = (edges[id] = Object.keys(row.deps)
+          const deps = Object.keys(row.deps)
             .sort()
-            .map(function(dep) {
-              return unifyPath(relativePath(process.cwd(), row.deps[dep]));
-            }));
+            .map(dep => {
+              dep = unifyPath(path.relative(process.cwd(), row.deps[dep]));
+              if (dep.startsWith('node_modules/')) {
+                const pkgJson = pkgUp.sync({cwd: path.dirname(dep)});
+                const jsonId = unifyPath(path.relative(process.cwd(), pkgJson));
+                graph.packages[jsonId] = true;
+              }
+              return dep;
+            });
+          edges[id] = deps;
           graph.deps[id] = deps;
           if (row.entry) {
             graph.depOf[id] = {};
@@ -546,11 +560,13 @@ function isAltMainBundle(name) {
   });
 }
 
-exports.singlePassCompile = async function(entryModule, options) {
+exports.singlePassCompile = async function(entryModule, options, timeInfo) {
+  timeInfo.startTime = Date.now();
   return exports
     .getFlags({
       modules: [entryModule].concat(extensions),
       writeTo: singlePassDest,
+      esm: options.esm,
       define: options.define,
       externs: options.externs,
       hideWarningsFor: options.hideWarningsFor,
@@ -711,8 +727,15 @@ function compile(flagsArray) {
         handleSinglePassCompilerError();
         reject(err);
       })
+      .pipe(gulpIf(!argv.pseudo_names, checkForUnknownDeps()))
+      .on('error', reject)
       .pipe(sourcemaps.write('.'))
-      .pipe(gulpIf(/(\/amp-|\/_base)/, rename(path => (path.dirname += '/v0'))))
+      .pipe(
+        gulpIf(
+          /(\/amp-|\/_base)/,
+          rename(path => (path.dirname += '/v0'))
+        )
+      )
       .pipe(gulp.dest('.'))
       .on('end', resolve);
   });

@@ -20,11 +20,15 @@ const {
   startNailgunServer,
   stopNailgunServer,
 } = require('./nailgun');
+const {
+  createCtrlcHandler,
+  exitCtrlcHandler,
+} = require('../common/ctrlcHandler');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
 const {compileCss} = require('./css');
-const {createCtrlcHandler, exitCtrlcHandler} = require('../ctrlcHandler');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {maybeUpdatePackages} = require('./update-packages');
+const {transferSrcsToTempDir} = require('./helpers');
 
 /**
  * Dedicated type check path.
@@ -36,6 +40,7 @@ async function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
+  transferSrcsToTempDir({isChecktypes: true});
   const compileSrcs = [
     './src/amp.js',
     './src/amp-shadow.js',
@@ -77,7 +82,7 @@ async function checkTypes() {
           {
             include3pDirectories: true,
             includePolyfills: true,
-            extraGlobs: ['src/inabox/*.js'],
+            extraGlobs: ['src/inabox/*.js', '!node_modules/preact'],
             typeCheckOnly: true,
           }
         ),

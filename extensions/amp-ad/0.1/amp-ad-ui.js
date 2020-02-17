@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {ancestorElementsByTag} from '../../../src/dom';
 import {getAdContainer} from '../../../src/ad-helper';
-import {isProxyOrigin} from '../../../src/url';
-import {user} from '../../../src/log';
-
-const TAG = 'amp-ad';
 
 export class AmpAdUIHandler {
   /**
@@ -99,9 +96,9 @@ export class AmpAdUIHandler {
     let attemptCollapsePromise;
     if (this.containerElement_) {
       // Collapse the container element if there's one
-      attemptCollapsePromise = this.element_
-        .getResources()
-        .attemptCollapse(this.containerElement_);
+      attemptCollapsePromise = Services.mutatorForDoc(
+        this.element_.getAmpDoc()
+      ).attemptCollapse(this.containerElement_);
       attemptCollapsePromise.then(() => {});
     } else {
       attemptCollapsePromise = this.baseInstance_.attemptCollapse();
@@ -192,32 +189,11 @@ export class AmpAdUIHandler {
       resizeInfo.success = false;
       return Promise.resolve(resizeInfo);
     }
-    // TODO(#23926): cleanup once user activation for resize is
-    // implemented.
-    const isProxy = isProxyOrigin(this.baseInstance_.win.location);
-    if (isProxy) {
-      user().expectedError(TAG, 'RESIZE_REQUEST');
-    }
     return this.baseInstance_
       .attemptChangeSize(newHeight, newWidth, event)
       .then(
+        () => resizeInfo,
         () => {
-          return resizeInfo;
-        },
-        () => {
-          if (isProxy) {
-            // TODO(#23926): cleanup once user activation for resize is
-            // implemented.
-            user().expectedError(TAG, 'RESIZE_REJECT');
-            const activated =
-              event &&
-              event.userActivation &&
-              event.userActivation.hasBeenActive;
-            if (activated) {
-              // Report false negatives.
-              user().expectedError(TAG, 'RESIZE_REJECT_ACTIVE');
-            }
-          }
           resizeInfo.success = false;
           return resizeInfo;
         }

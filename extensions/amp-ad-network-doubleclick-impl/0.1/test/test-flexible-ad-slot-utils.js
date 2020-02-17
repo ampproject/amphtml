@@ -136,7 +136,7 @@ describes.realWin('#getFlexibleAdSlotData', {amp: true}, env => {
 
   it('should return the viewport width for CONTAINER layout', () => {
     const element = createResource({} /* config */, 'container');
-    sandbox
+    env.sandbox
       .stub(Services.viewportForDoc(element), 'getSize')
       .returns({width: 300});
     expect(getFlexibleAdSlotData(win, element).parentWidth).to.equal(300);

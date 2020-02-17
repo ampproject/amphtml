@@ -51,6 +51,14 @@ export function isUserErrorMessage(message) {
 
 /**
  * @param {string} message
+ * @return {string} The new message without USER_ERROR_SENTINEL
+ */
+export function stripUserError(message) {
+  return message.replace(USER_ERROR_SENTINEL, '');
+}
+
+/**
+ * @param {string} message
  * @return {boolean} Whether this message was a a user error from an iframe embed.
  */
 export function isUserErrorEmbed(message) {
@@ -59,7 +67,6 @@ export function isUserErrorEmbed(message) {
 
 /**
  * @enum {number}
- * @private Visible for testing only.
  */
 export const LogLevel = {
   OFF: 0,
@@ -742,12 +749,12 @@ const logs = self.__AMP_LOG;
  * Eventually holds a constructor for Log objects. Lazily initialized, so we
  * can avoid ever referencing the real constructor except in JS binaries
  * that actually want to include the implementation.
- * @type {?Function}
+ * @type {?typeof Log}
  */
 let logConstructor = null;
 
 /**
- * Initializes log contructor.
+ * Initializes log constructor.
  */
 export function initLogConstructor() {
   logConstructor = Log;
@@ -764,7 +771,7 @@ export function initLogConstructor() {
 }
 
 /**
- * Resets log contructor for testing.
+ * Resets log constructor for testing.
  */
 export function resetLogConstructorForTesting() {
   logConstructor = null;
