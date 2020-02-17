@@ -1132,12 +1132,12 @@ export class UrlReplacements {
    */
   expandSyncIfWhitelist_(href, whitelist) {
     return whitelist
-      ? (href = this.expandUrlSync(
+      ? this.expandUrlSync(
           href,
           /* opt_bindings */ undefined,
           /* opt_collectVars */ undefined,
           /* opt_whitelist */ whitelist
-        ))
+        )
       : href;
   }
 
