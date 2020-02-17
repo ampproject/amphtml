@@ -305,7 +305,7 @@ export const EXPERIMENTS = [
     spec:
       'https://github.com/ampproject/amphtml/blob/master/extensions/' +
       'amp-trinity-tts-player/amp-trinity-tts-player.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/XXXYYY',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26838',
   },
   {
     id: 'amp-stream-gallery',

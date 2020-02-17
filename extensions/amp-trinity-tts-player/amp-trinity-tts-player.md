@@ -44,18 +44,13 @@ limitations under the License.
   </tr>
 </table>
 
-
 ## Usage
 
 Player height should be set to `75`, for desktop or mobile.
 `campaignId` is required.
 
 ```html
-<amp-trinity-tts-player
-    height="75"
-    campaignId="XYZ"
->
-</amp-trinity-tts-player>
+<amp-trinity-tts-player height="75" campaignId="XYZ"> </amp-trinity-tts-player>
 ```
 
 ## Attributes
@@ -66,7 +61,6 @@ Player height should be set to `75`, for desktop or mobile.
     <td>Campaign ID. The only required parameter for component. (<strong>Required</strong>)</td>
   </tr>
 </table>
-
 
 ## Validation
 
