@@ -177,5 +177,12 @@ export class ResourcesInterface {
    * @param {number} newLayoutPriority
    */
   updateLayoutPriority(element, newLayoutPriority) {}
+
+  /**
+   * @param {string} name
+   * @return {boolean}
+   * @package
+   */
+  isExperimentOn(name) {}
 }
 /* eslint-enable no-unused-vars */

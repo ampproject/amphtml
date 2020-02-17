@@ -157,6 +157,11 @@ export class InaboxResources {
     return this.firstPassDone_.promise;
   }
 
+  /** @override */
+  isExperimentOn(unusedName) {
+    return false;
+  }
+
   /**
    * @private
    */

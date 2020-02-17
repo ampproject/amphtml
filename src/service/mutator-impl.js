@@ -60,7 +60,7 @@ export class MutatorImpl {
     });
 
     /** @private @const {boolean} */
-    this.intersect_ = isExperimentOn(this.win, 'intersect-resources');
+    this.intersect_ = this.resources_.isExperimentOn('intersect-resources');
   }
 
   /** @override */
@@ -221,9 +221,11 @@ export class MutatorImpl {
       mutate: () => {
         mutator();
 
-        // TODO(willchou): Survey measureMutateElement() callers to determine
-        // which should explicitly call requestMeasure(). Always requesting
+        // TODO(willchou): IntersectionObserver won't catch size changes,
+        // which means layout boxes may be stale. However, always requesting
         // measure after any mutation is overkill and probably expensive.
+        // Instead, survey measureMutateElement() callers to determine which
+        // should explicitly call requestMeasure() to fix this.
 
         // With IntersectionObserver, no need to remeasure and set relayout
         // on element size changes since enter/exit viewport will be detected.

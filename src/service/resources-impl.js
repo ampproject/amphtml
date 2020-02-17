@@ -193,36 +193,35 @@ export class ResourcesImpl {
       this.ampdoc.getVisibilityState()
     );
 
+    /** @private @const {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
+
     if (isExperimentOn(this.win, 'intersect-resources')) {
-      const platform = Services.platformFor(this.win);
-      // As of 1/2020, only Chrome 81+ has the required behavior for using
-      // rootMargin with viewport tracking in a cross-origin iframe (#25428).
-      const supportsIframes =
-        platform.isChrome() && platform.getMajorVersion() >= 81;
       const iframed = isIframed(this.win);
-      devAssert(supportsIframes || !iframed);
 
-      // Need to use scrollingElement as root for viewport tracking in iframed pages.
-      const root =
-        this.ampdoc.isSingleDoc() && iframed
-          ? this.win.document./*OK*/ scrollingElement
-          : null;
-      // TODO(willchou): Is 3x viewport loading rectangle too large given that
-      // IntersectionObserver is more responsive than scroll-bound measure?
-      // TODO(willchou): Support prerenderSize_ loading rectangle.
-      const rootMargin = '200% 25%';
-      /** @private @const {?IntersectionObserver} */
-      this.intersectionObserver_ = new IntersectionObserver(
-        this.intersects_.bind(this),
-        {
-          root,
-          rootMargin,
-        }
-      );
+      // Classic IntersectionObserver doesn't support viewport tracking and
+      // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
+      // supports it via {root: document}, which throws on other browsers.
+      try {
+        /** @private @const {?IntersectionObserver} */
+        this.intersectionObserver_ = new IntersectionObserver(
+          this.intersects_.bind(this),
+          {
+            root:
+              this.ampdoc.isSingleDoc() && iframed ? this.win.document : null,
+            // TODO(willchou): Is 3x viewport loading rectangle too large given that
+            // IntersectionObserver is more responsive than scroll-bound measure?
+            // TODO(willchou): Support prerenderSize_ loading rectangle.
+            rootMargin: '200% 25%',
+          }
+        );
 
-      // Wait for intersection callback instead of measuring all elements
-      // during the first pass.
-      this.relayoutAll_ = false;
+        // Wait for intersection callback instead of measuring all elements
+        // during the first pass.
+        this.relayoutAll_ = false;
+      } catch (e) {
+        dev().warn(TAG_, 'Falling back to classic Resources:', e);
+      }
     }
 
     // When user scrolling stops, run pass to check newly in-viewport elements.
@@ -276,6 +275,14 @@ export class ResourcesImpl {
         passive: true,
       });
     }
+  }
+
+  /** @override */
+  isExperimentOn(name) {
+    if (name == 'intersect-resources') {
+      return !!this.intersectionObserver_;
+    }
+    return false;
   }
 
   /**
