@@ -15,11 +15,13 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {getData} from '../../../src/event-helper';
 import {isExperimentOn} from '../../../src/experiments';
 import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-trinity-tts-player';
 const URL = 'https://trinitymedia.ai';
+const CDN_URL = 'https://vd.trinitymedia.ai';
 
 export class AmpTrinityTTSPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -54,22 +56,22 @@ export class AmpTrinityTTSPlayer extends AMP.BaseElement {
       iframe.setAttribute('hidden', true);
 
       window.addEventListener('message', event => {
-        if (event.data.type === 'trinity-player-rendered') {
+        if (getData(event)['type'] === 'trinity-player-rendered') {
           resolve();
           iframe.removeAttribute('hidden');
         }
       });
 
       iframe.addEventListener('load', () => {
-        iframe.contentWindow.postMessage(
-          {
+        iframe.contentWindow./*OK*/ postMessage(
+          /** @type {JsonObject} */ ({
             type: 'init',
             data: {
               text: this.getWin().document.body.innerHTML,
               campaignId: this.campaignId_,
               pageURL: this.getWin().location.href,
             },
-          },
+          }),
           '*'
         );
       });
@@ -88,7 +90,7 @@ export class AmpTrinityTTSPlayer extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.getWin().document.createElement('amp-img');
-    placeholder.setAttribute('src', `${URL}/player/img/loader.svg`);
+    placeholder.setAttribute('src', `${CDN_URL}/images/loader.svg`);
     placeholder.setAttribute('height', '75');
     placeholder.setAttribute('layout', 'fixed-height');
     placeholder.setAttribute('placeholder', '');
