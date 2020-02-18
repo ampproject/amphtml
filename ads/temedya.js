@@ -24,12 +24,12 @@ export function temedya(global, data) {
   validateData(data, ['title']);
   global._temedya = global._temedya || {
     title: data.title,
-    keyId: data.keyId,
-    siteId: data.siteId,
-    siteUrl: data.siteUrl,
-    typeId: data.typeId,
-    paidItem: data.paidItem,
-    organicItem: data.organicItem,
+    keyId: data.keyid,
+    siteId: data.siteid,
+    siteUrl: data.siteurl || global.context.canonicalUrl,
+    typeId: data.typeid,
+    paidItem: data.paiditem,
+    organicItem: data.organicitem,
     theme: data.theme,
   };
   global._temedya.AMPCallbacks = {
