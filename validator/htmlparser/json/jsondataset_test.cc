@@ -66,18 +66,18 @@ TEST(JSONParserTest, File6) {
   ParseAndValidateFile("json/testdata/6.json");
 }
 
+TEST(JSONParserTest, File7) {
+  ParseAndValidateFile("json/testdata/7.json");
+}
+
+TEST(JSONParserTest, File8) {
+  ParseAndValidateFile("json/testdata/8.json");
+}
+
 TEST(JSONParserTest, File9) {
   ParseAndValidateFile("json/testdata/9.json");
 }
 
 TEST(JSONParserTest, File10) {
   ParseAndValidateFile("json/testdata/10.json");
-}
-
-TEST(JSONParserTest, File11) {
-  ParseAndValidateFile("json/testdata/11.json");
-}
-
-TEST(JSONParserTest, File12) {
-  ParseAndValidateFile("json/testdata/12.json");
 }
