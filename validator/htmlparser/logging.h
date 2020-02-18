@@ -20,6 +20,8 @@
 #ifndef HTMLPARSER__LOGGING_H_
 #define HTMLPARSER__LOGGING_H_
 
+#include <iostream>
+
 #define CHECK(condition, message) \
 do { \
   if (!(condition)) { \
