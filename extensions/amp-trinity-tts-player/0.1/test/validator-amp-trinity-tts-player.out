@@ -16,9 +16,9 @@ PASS
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
 |  </head>
 |  <body>
-|      <amp-trinity-tts-player
-|         layout="fixed-height"
-|         height="75">
-|      </amp-trinity-tts-player>
+|    <amp-trinity-tts-player
+|      height="75"
+|      data-campaign-id="200">
+|    </amp-trinity-tts-player>
 |  </body>
 |  </html>

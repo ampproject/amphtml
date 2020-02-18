@@ -40,7 +40,7 @@ describes.realWin(
 
       element = win.document.createElement('amp-trinity-tts-player');
       element.setAttribute('height', '75');
-      element.setAttribute('campaignId', '2900000668');
+      element.setAttribute('data-campaign-id', '2900000668');
 
       win.document.body.appendChild(element);
     });

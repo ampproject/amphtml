@@ -39,8 +39,8 @@ export class AmpTrinityTTSPlayer extends AMP.BaseElement {
     userAssert(this.isExperimentOn_, `Experiment ${TAG} is not turned on.`);
 
     this.campaignId_ = userAssert(
-      this.element.getAttribute('campaignId'),
-      'campaignId attribute must be specified for <%s>',
+      this.element.getAttribute('data-campaign-id'),
+      'data-campaign-id attribute must be specified for <%s>',
       TAG
     );
   }
@@ -52,7 +52,7 @@ export class AmpTrinityTTSPlayer extends AMP.BaseElement {
     return new Promise(resolve => {
       this.element.setAttribute('layout', 'fixed-height');
 
-      const iframe = this.getWin().document.createElement('iframe');
+      const iframe = this.win.document.createElement('iframe');
       iframe.setAttribute('hidden', true);
 
       window.addEventListener('message', event => {
@@ -67,9 +67,9 @@ export class AmpTrinityTTSPlayer extends AMP.BaseElement {
           /** @type {JsonObject} */ ({
             type: 'init',
             data: {
-              text: this.getWin().document.body.innerHTML,
+              text: this.win.document.body./*OK*/ innerHTML,
               campaignId: this.campaignId_,
-              pageURL: this.getWin().location.href,
+              pageURL: this.win.location.href,
             },
           }),
           '*'
@@ -89,7 +89,7 @@ export class AmpTrinityTTSPlayer extends AMP.BaseElement {
 
   /** @override */
   createPlaceholderCallback() {
-    const placeholder = this.getWin().document.createElement('amp-img');
+    const placeholder = this.win.document.createElement('amp-img');
     placeholder.setAttribute('src', `${CDN_URL}/images/loader.svg`);
     placeholder.setAttribute('height', '75');
     placeholder.setAttribute('layout', 'fixed-height');

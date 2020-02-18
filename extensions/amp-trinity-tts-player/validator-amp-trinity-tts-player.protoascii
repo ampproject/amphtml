@@ -31,6 +31,11 @@ tags: {  # <amp-trinity-tts-player>
   attr_lists: "extended-amp-global"
   spec_url: "https://amp.dev/documentation/components/amp-trinity-tts-player"
   amp_layout: {
-    supported_layouts: RESPONSIVE
+    supported_layouts: FIXED_HEIGHT
+  }
+  attrs: {
+    name: "data-campaign-id"
+    mandatory: true
+    value_regex_casei: "\d+"
   }
 }
