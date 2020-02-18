@@ -18,7 +18,6 @@ import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {Services} from '../../../src/services';
-import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
@@ -44,6 +43,7 @@ import {
 } from '../../../src/mediasession-helper';
 import {setStyles, toggle} from '../../../src/style';
 import {toArray} from '../../../src/types';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {tryParseJson} from '../../../src/json';
 import {validatePage, validateUrl} from './utils';
 import VisibilityObserver, {ViewportRelativePos} from './visibility-observer';
