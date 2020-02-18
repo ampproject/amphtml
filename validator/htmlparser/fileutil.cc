@@ -52,7 +52,7 @@ bool FileUtil::ReadFileLines(const FileReadOptions& options,
 bool FileUtil::ReadFileLines(const FileReadOptions& options,
                              std::string_view filepath,
                              LineCallback callback) {
-  std::ifstream fd(filepath);
+  std::ifstream fd(filepath.data());
   defer(fd.close());
   return ReadFileLinesInternal(options, fd, callback);
 }
