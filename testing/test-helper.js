@@ -54,7 +54,9 @@ export function mockServiceForDoc(sandbox, ampdoc, serviceId, methods) {
   methods.forEach(method => {
     impl[method] = () => {};
   });
-  registerServiceBuilderForDoc(ampdoc, serviceId, () => impl);
+  registerServiceBuilderForDoc(ampdoc, serviceId, function() {
+    return impl;
+  });
   const mock = {};
   methods.forEach(method => {
     mock[method] = sandbox.stub(impl, method);
@@ -210,9 +212,9 @@ export class RequestBank {
 }
 
 export class BrowserController {
-  constructor(win) {
+  constructor(win, opt_rootNode) {
     this.win_ = win;
-    this.doc_ = this.win_.document;
+    this.rootNode_ = opt_rootNode || this.win_.document;
   }
 
   wait(duration) {
@@ -222,12 +224,30 @@ export class BrowserController {
   }
 
   /**
+   * @param {string} hostSelector
+   * @param {number=} timeout
+   * @return {!Promise}
+   */
+  waitForShadowRoot(hostSelector, timeout = 10000) {
+    const element = this.rootNode_.querySelector(hostSelector);
+    if (!element) {
+      throw new Error(`BrowserController query failed: ${hostSelector}`);
+    }
+    return poll(
+      `"${hostSelector}" to host shadow doc`,
+      () => !!element.shadowRoot,
+      /* onError */ undefined,
+      timeout
+    );
+  }
+
+  /**
    * @param {string} selector
    * @param {number=} timeout
    * @return {!Promise}
    */
   waitForElementBuild(selector, timeout = 5000) {
-    const elements = this.doc_.querySelectorAll(selector);
+    const elements = this.rootNode_.querySelectorAll(selector);
     if (!elements.length) {
       throw new Error(`BrowserController query failed: ${selector}`);
     }
@@ -250,7 +270,7 @@ export class BrowserController {
    * @return {!Promise}
    */
   waitForElementLayout(selector, timeout = 10000) {
-    const elements = this.doc_.querySelectorAll(selector);
+    const elements = this.rootNode_.querySelectorAll(selector);
     if (!elements.length) {
       throw new Error(`BrowserController query failed: ${selector}`);
     }
@@ -271,7 +291,7 @@ export class BrowserController {
   }
 
   click(selector) {
-    const element = this.doc_.querySelector(selector);
+    const element = this.rootNode_.querySelector(selector);
     if (element) {
       element.dispatchEvent(new /*OK*/ CustomEvent('click', {bubbles: true}));
     }

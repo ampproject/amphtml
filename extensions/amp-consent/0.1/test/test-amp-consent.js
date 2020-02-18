@@ -27,7 +27,6 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
 import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
 describes.realWin(
@@ -53,7 +52,6 @@ describes.realWin(
       doc = env.win.document;
       ampdoc = env.ampdoc;
       win = env.win;
-      toggleExperiment(win, 'amp-consent-v2', true);
 
       storageValue = {};
       jsonMockResponses = {
@@ -241,13 +239,6 @@ describes.realWin(
 
     describe('geo-override server communication', () => {
       let ampConsent;
-      beforeEach(() => {
-        toggleExperiment(win, 'amp-consent-geo-override', true);
-      });
-
-      afterEach(() => {
-        toggleExperiment(win, 'amp-consent-geo-override', false);
-      });
 
       it('checks local storage before making sever request', async () => {
         const config = {
@@ -750,19 +741,6 @@ describes.realWin(
         expect(actionSpy).to.not.be.called;
       });
 
-      it('ignore info w/o amp-consent-v2 flag', () => {
-        // TODO(@zhouyx): Remove with amp-consent-v2 flag
-        toggleExperiment(win, 'amp-consent-v2', false);
-        event.data = {
-          'type': 'consent-response',
-          'action': 'accept',
-          'info': 'accept-string',
-        };
-        event.source = iframe.contentWindow;
-        win.dispatchEvent(event);
-        expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT, undefined);
-      });
-
       it('ignore msg from incorrect source', () => {
         event.data = {
           'type': 'consent-response',
@@ -825,12 +803,7 @@ describes.realWin(
         });
       });
 
-      afterEach(() => {
-        toggleExperiment(win, 'amp-consent-geo-override', false);
-      });
-
       it('should not show promptUI if local storage has decision', async () => {
-        toggleExperiment(win, 'amp-consent-geo-override', true);
         const config = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
@@ -945,7 +918,6 @@ describes.realWin(
 
         describe('hide/show postPromptUI with local storage', () => {
           beforeEach(() => {
-            toggleExperiment(win, 'amp-consent-geo-override', true);
             defaultConfig = dict({
               'consentInstanceId': 'ABC',
               'consentRequired': true,
@@ -957,10 +929,6 @@ describes.realWin(
             consentElement.appendChild(postPromptUI);
             doc.body.appendChild(consentElement);
             ampConsent = new AmpConsent(consentElement);
-          });
-
-          afterEach(() => {
-            toggleExperiment(win, 'amp-consent-geo-override', false);
           });
 
           it('hides postPromptUI with no local storage decision', async () => {

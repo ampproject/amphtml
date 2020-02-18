@@ -18,7 +18,7 @@
 
 'use strict';
 
-const colors = require('colors');
+const colors = require('colors/safe');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');

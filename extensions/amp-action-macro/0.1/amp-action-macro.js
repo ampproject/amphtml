@@ -103,6 +103,11 @@ export class AmpActionMacro extends AMP.BaseElement {
     return true;
   }
 
+  /** @override */
+  isLayoutSupported(unusedLayout) {
+    return true;
+  }
+
   /**
    * Checks if the invoking element is defined after the action being invoked.
    * This constraint is to prevent possible recursive calls.

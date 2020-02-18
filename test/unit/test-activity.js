@@ -35,6 +35,7 @@ describe('Activity getTotalEngagedTime', () => {
   let whenFirstVisibleResolve;
   let visibilityObservable;
   let mousedownObservable;
+  let mouseleaveObservable;
   let scrollObservable;
 
   beforeEach(() => {
@@ -45,6 +46,7 @@ describe('Activity getTotalEngagedTime', () => {
 
     visibilityObservable = new Observable();
     mousedownObservable = new Observable();
+    mouseleaveObservable = new Observable();
     scrollObservable = new Observable();
 
     fakeDoc = {
@@ -52,6 +54,8 @@ describe('Activity getTotalEngagedTime', () => {
       addEventListener(eventName, callback) {
         if (eventName === 'mousedown') {
           mousedownObservable.add(callback);
+        } else if (eventName === 'mouseleave') {
+          mouseleaveObservable.add(callback);
         }
       },
       documentElement: {
@@ -176,15 +180,23 @@ describe('Activity getTotalEngagedTime', () => {
       .stub(ampdoc, 'isVisible')
       .returns(true);
     whenFirstVisibleResolve();
-    return ampdoc.whenFirstVisible().then(() => {
-      clock.tick(3000);
-      mousedownObservable.fire();
-      clock.tick(1000);
-      isVisibleStub.returns(false);
-      visibilityObservable.fire();
-      clock.tick(10000);
-      return expect(activity.getTotalEngagedTime()).to.equal(4);
-    });
+    return ampdoc
+      .whenFirstVisible()
+      .then(() => {
+        clock.tick(3000);
+        mousedownObservable.fire();
+        clock.tick(1000);
+        isVisibleStub.returns(false);
+        visibilityObservable.fire();
+        clock.tick(10000);
+        return expect(activity.getTotalEngagedTime()).to.equal(4);
+      })
+      .then(() => {
+        mousedownObservable.fire();
+        mouseleaveObservable.fire();
+        clock.tick(2000);
+        return expect(activity.getTotalEngagedTime()).to.equal(4);
+      });
   });
 
   it('should accumulate engaged time over multiple activities', () => {
@@ -203,7 +215,7 @@ describe('Activity getTotalEngagedTime', () => {
 
   it(
     'should set event listeners on the document for' +
-      ' "mousedown", "mouseup", "mousemove", "keyup", "keydown"',
+      ' "mousedown", "mouseup", "mousemove", "keyup", "keydown", "mouseleave"',
     () => {
       const addEventListenerSpy = window.sandbox.spy(
         fakeDoc,
@@ -229,6 +241,10 @@ describe('Activity getTotalEngagedTime', () => {
         'keyup',
         activity.boundHandleActivity_
       );
+      expect(addEventListenerSpy).to.not.have.been.calledWith(
+        'mouseleave',
+        activity.boundHandleActivity_
+      );
       whenFirstVisibleResolve();
       return ampdoc.whenFirstVisible().then(() => {
         expect(addEventListenerSpy.getCall(0).args[0]).to.equal('mousedown');
@@ -236,6 +252,7 @@ describe('Activity getTotalEngagedTime', () => {
         expect(addEventListenerSpy.getCall(2).args[0]).to.equal('mousemove');
         expect(addEventListenerSpy.getCall(3).args[0]).to.equal('keydown');
         expect(addEventListenerSpy.getCall(4).args[0]).to.equal('keyup');
+        expect(addEventListenerSpy.getCall(5).args[0]).to.equal('mouseleave');
       });
     }
   );

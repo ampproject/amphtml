@@ -24,7 +24,7 @@
 export function decryptAesGcm(key, text) {
   const keybytes = base64Decode(key);
   const isIE = !!self.msCrypto;
-  const subtle = (self.crypto || self.msCrypto).subtle;
+  const subtle = isIE ? self.msCrypto.subtle : self.crypto.subtle;
   return wrapCryptoOp(subtle.importKey('raw', keybytes.buffer,
     'AES-GCM',
     true, ['decrypt'])).

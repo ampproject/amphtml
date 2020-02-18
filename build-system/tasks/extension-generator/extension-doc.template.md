@@ -61,6 +61,10 @@ limitations under the License.
   formats, include and filter multiple content blocks and code samples.
 -->
 
+## Usage
+
+One to three paragraph explaining the component usage. List important functionality. Explain why developers care about it.
+
 [filter formats=“websites”]
 
 Below is an example for websites.
@@ -93,10 +97,6 @@ Below is an example for ads.
 ```
 
 [/example][/filter]
-
-## Usage
-
-One to three paragraph explaining the component usage. List important functionality. Explain why developers care about it.
 
 ### Behavior users should be aware of (optional)
 

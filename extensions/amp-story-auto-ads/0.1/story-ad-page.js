@@ -21,6 +21,10 @@ import {
 } from './story-ad-analytics';
 import {CommonSignals} from '../../../src/common-signals';
 import {CtaTypes} from './story-ad-localization';
+import {
+  StateProperty,
+  UIType,
+} from '../../amp-story/1.0/amp-story-store-service';
 import {assertConfig} from '../../amp-ad-exit/0.1/config';
 import {assertHttpsUrl} from '../../../src/url';
 import {CSS as attributionCSS} from '../../../build/amp-story-auto-ads-attribution-0.1.css';
@@ -38,6 +42,7 @@ import {dict} from '../../../src/utils/object';
 import {getA4AMetaTags, getFrameDoc} from './utils';
 import {getServicePromiseForDoc} from '../../../src/service';
 import {parseJson} from '../../../src/json';
+import {setStyle} from '../../../src/style';
 
 /** @const {string} */
 const TAG = 'amp-story-auto-ads:page';
@@ -47,6 +52,9 @@ const TIMEOUT_LIMIT = 10000; // 10 seconds
 
 /** @const {string} */
 const GLASS_PANE_CLASS = 'i-amphtml-glass-pane';
+
+/** @const {string} */
+const DESKTOP_FULLBLEED_CLASS = 'i-amphtml-story-ad-fullbleed';
 
 /** @enum {string} */
 const PageAttributes = {
@@ -75,8 +83,9 @@ export class StoryAdPage {
    * @param {number} index
    * @param {!./story-ad-localization.StoryAdLocalization} localization
    * @param {!./story-ad-button-text-fitter.ButtonTextFitter} buttonFitter
+   * @param {!../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} storeService
    */
-  constructor(ampdoc, config, index, localization, buttonFitter) {
+  constructor(ampdoc, config, index, localization, buttonFitter, storeService) {
     /** @private @const {!JsonObject} */
     this.config_ = config;
 
@@ -107,6 +116,9 @@ export class StoryAdPage {
     /** @private {?Element} */
     this.adElement_ = null;
 
+    /** @private {?Element} */
+    this.adChoicesIcon_ = null;
+
     /** @private {?Document} */
     this.adDoc_ = null;
 
@@ -124,6 +136,12 @@ export class StoryAdPage {
 
     /** @private @const {./story-ad-button-text-fitter.ButtonTextFitter} */
     this.buttonFitter_ = buttonFitter;
+
+    /** @private {boolean} */
+    this.viewed_ = false;
+
+    /** @private @const {!../../amp-story/0.1/amp-story-store-service.AmpStoryStoreService|!../../amp-story/1.0/amp-story-store-service.AmpStoryStoreService} */
+    this.storeService_ = storeService;
   }
 
   /** @return {?Document} ad document within FIE */
@@ -148,6 +166,11 @@ export class StoryAdPage {
     return this.loaded_;
   }
 
+  /** @return {boolean} */
+  hasBeenViewed() {
+    return this.viewed_;
+  }
+
   /** @return {?Element} */
   getPageElement() {
     return this.pageElement_;
@@ -166,6 +189,7 @@ export class StoryAdPage {
    * respond accordingly.
    */
   toggleVisibility() {
+    this.viewed_ = true;
     // TODO(calebcordry): Properly handle visible attribute for custom ads.
     if (this.adDoc_) {
       toggleAttribute(
@@ -290,7 +314,14 @@ export class StoryAdPage {
       'id': this.id_,
     });
 
-    return createElementWithAttributes(this.doc_, 'amp-story-page', attributes);
+    const page = createElementWithAttributes(
+      this.doc_,
+      'amp-story-page',
+      attributes
+    );
+    // TODO(ccordry): Allow creative to change default background color.
+    setStyle(page, 'background-color', '#212125');
+    return page;
   }
 
   /**
@@ -471,7 +502,7 @@ export class StoryAdPage {
       })
     );
 
-    const adChoicesIcon = createElementWithAttributes(
+    this.adChoicesIcon_ = createElementWithAttributes(
       this.doc_,
       'img',
       dict({
@@ -479,14 +510,38 @@ export class StoryAdPage {
         'src': src,
       })
     );
+    this.storeService_.subscribe(
+      StateProperty.UI_STATE,
+      uiState => {
+        this.onUIStateUpdate_(uiState);
+      },
+      true /** callToInitialize */
+    );
 
-    adChoicesIcon.addEventListener(
+    this.adChoicesIcon_.addEventListener(
       'click',
       this.handleAttributionClick_.bind(this, href)
     );
 
-    createShadowRootWithStyle(root, adChoicesIcon, attributionCSS);
+    createShadowRootWithStyle(root, this.adChoicesIcon_, attributionCSS);
     this.pageElement_.appendChild(root);
+  }
+
+  /**
+   * Reacts to UI state updates and passes the information along as
+   * attributes to the shadowed attribution icon.
+   * @param {!UIType} uiState
+   * @private
+   */
+  onUIStateUpdate_(uiState) {
+    if (!this.adChoicesIcon_) {
+      return;
+    }
+
+    this.adChoicesIcon_.classList.toggle(
+      DESKTOP_FULLBLEED_CLASS,
+      uiState === UIType.DESKTOP_FULLBLEED
+    );
   }
 
   /**

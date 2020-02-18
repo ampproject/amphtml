@@ -47,7 +47,6 @@ import {
   getConsentPolicyState,
 } from '../../../src/consent';
 import {getIframe, preloadBootstrap} from '../../../src/3p-frame';
-import {isExperimentOn} from '../../../src/experiments';
 import {moveLayoutRect} from '../../../src/layout-rect';
 import {toWin} from '../../../src/types';
 
@@ -355,11 +354,9 @@ export class AmpAd3PImpl extends AMP.BaseElement {
 
     const consentPromise = this.getConsentState();
     const consentPolicyId = super.getConsentPolicy();
-    const isConsentV2Experiment = isExperimentOn(this.win, 'amp-consent-v2');
-    const consentStringPromise =
-      consentPolicyId && isConsentV2Experiment
-        ? getConsentPolicyInfo(this.element, consentPolicyId)
-        : Promise.resolve(null);
+    const consentStringPromise = consentPolicyId
+      ? getConsentPolicyInfo(this.element, consentPolicyId)
+      : Promise.resolve(null);
     const sharedDataPromise = consentPolicyId
       ? getConsentPolicySharedData(this.element, consentPolicyId)
       : Promise.resolve(null);
@@ -384,9 +381,7 @@ export class AmpAd3PImpl extends AMP.BaseElement {
         'initialConsentState': consents[1],
         'consentSharedData': consents[2],
       });
-      if (isConsentV2Experiment) {
-        opt_context['initialConsentValue'] = consents[3];
-      }
+      opt_context['initialConsentValue'] = consents[3];
 
       // In this path, the request and render start events are entangled,
       // because both happen inside a cross-domain iframe.  Separating them

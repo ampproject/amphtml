@@ -9,6 +9,8 @@
     ".eslintrc": "json",
     ".prettierrc": "json",
     ".renovaterc.json": "json",
+
+    // Enable YAML auto-formatting for these files.
     ".codecov.yml": "yaml",
     ".lando.yml": "yaml",
     ".lgtm.yml": "yaml",
@@ -17,7 +19,7 @@
 
   // Auto-fix JS files with ESLint using amphtml's custom settings. Needs
   // https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint
-  "eslint.autoFixOnSave": true,
+  "editor.codeActionsOnSave": {"source.fixAll.eslint": true},
   "[js]": {"editor.formatOnSave": false},
 
   // Auto-fix non-JS files with Prettier using amphtml's custom settings. Needs
