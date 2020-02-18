@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 1002
+spec_file_revision: 1006
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -4515,7 +4515,6 @@ tags: {
   attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
-        "button|"
         "file|"
         "image|"
         "password|"
