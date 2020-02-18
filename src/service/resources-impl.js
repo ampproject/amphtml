@@ -205,7 +205,7 @@ export class ResourcesImpl {
       const root =
         /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
           ? this.win.document
-          : nul);
+          : null);
       try {
         this.intersectionObserver_ = new IntersectionObserver(
           this.intersects_.bind(this),
