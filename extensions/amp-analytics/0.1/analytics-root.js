@@ -404,10 +404,7 @@ export class AnalyticsRoot {
   getScrollManager() {
     // TODO (zhouyx@): Disallow scroll trigger with host API
     if (!this.scrollManager_) {
-      this.scrollManager_ = new ScrollManager(
-        this.ampdoc,
-        this.getRootElement()
-      );
+      this.scrollManager_ = new ScrollManager(this);
     }
 
     return this.scrollManager_;

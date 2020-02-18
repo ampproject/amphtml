@@ -42,15 +42,14 @@ export let ScrollEventDef;
  */
 export class ScrollManager {
   /**
-   * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!Element} root
+   * @param {!./analytics-root.AnalyticsRoot} root
    */
-  constructor(ampdoc, root) {
+  constructor(root) {
     /** @const @private {!../../../src/service/viewport/viewport-interface.ViewportInterface} */
-    this.viewport_ = Services.viewportForDoc(ampdoc);
+    this.viewport_ = Services.viewportForDoc(root.ampdoc);
 
     /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
-    this.mutator_ = Services.mutatorForDoc(ampdoc);
+    this.mutator_ = Services.mutatorForDoc(root.ampdoc);
 
     /** @private {!UnlistenDef|null} */
     this.viewportOnChangedUnlistener_ = null;
@@ -59,7 +58,7 @@ export class ScrollManager {
     this.scrollObservable_ = new Observable();
 
     /** @const @private {!Element} */
-    this.root_ = root;
+    this.root_ = root.getRootElement();
 
     /**  @private {?Promise} */
     this.initialRootRectPromise_ = null;
@@ -92,16 +91,24 @@ export class ScrollManager {
     // Trigger an event to fire events that might have already happened.
     const size = this.viewport_.getSize();
 
-    this.getInitRootElementRect_().then(layoutRect => {
+    this.getInitRootElementRect_().then(initRootElementRect => {
+      // In the case of shadow/embedded documents, the root element's
+      // layoutRect is relative to the parent doc's origin
       const {
         top: scrollTop,
         left: scrollLeft,
         width: scrollWidth,
         height: scrollHeight,
-      } = layoutRect;
+      } = initRootElementRect;
 
       /** {./scroll-manager.ScrollEventDef} */
       const scrollEvent = {
+        // In the case of shadow documents (e.g. amp-next-page), we offset
+        // the event's top and left coordinates by the top/left position of
+        // the document's container element (so that scroll triggers become relative to
+        // container instead of the top-level host page). In the case of a top-level
+        // page, the container/root is the document body so scrollTop and scrollLeft
+        // are both 0 and the measurements are not affected
         top: this.viewport_.getScrollTop() - scrollTop,
         left: this.viewport_.getScrollLeft() - scrollLeft,
         width: size.width,
@@ -126,14 +133,11 @@ export class ScrollManager {
    * @private
    */
   onScroll_(e) {
-    const isFirstMeasure = this.initialRootRectPromise_ === null;
     return Promise.all([
       // Initial root layout rectangle
       this.getInitRootElementRect_(),
       // Current root layout rectangle
-      isFirstMeasure
-        ? this.getInitRootElementRect_()
-        : this.measureRootElement_(),
+      this.measureRootElement_(),
     ]).then(rects => {
       // Initial root layout rectangle
       const {height: initialScrollHeight, width: initialScrollWidth} = rects[0];
@@ -146,6 +150,12 @@ export class ScrollManager {
       } = rects[1];
       /** {./scroll-manager.ScrollEventDef} */
       const scrollEvent = {
+        // In the case of shadow documents (e.g. amp-next-page), we offset
+        // the event's top and left coordinates by the top/left position of
+        // the document's container element (so that scroll triggers become relative to
+        // container instead of the top-level host page). In the case of a top-level
+        // page, the container/root is the document body so scrollTop and scrollLeft
+        // are both 0 and the measurements are not affected
         top: e.top - scrollTop,
         left: e.left - scrollLeft,
         width: e.width,

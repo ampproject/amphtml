@@ -51,7 +51,7 @@ describes.realWin('ScrollManager', {amp: 1}, env => {
     other.className = 'other';
     body.appendChild(other);
 
-    scrollManager = new ScrollManager(ampdoc, root.getRoot());
+    scrollManager = new ScrollManager(root);
     root.scrollManager_ = scrollManager;
     fakeViewport = {
       'getSize': env.sandbox
