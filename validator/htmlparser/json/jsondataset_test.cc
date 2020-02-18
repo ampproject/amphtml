@@ -66,10 +66,6 @@ TEST(JSONParserTest, File6) {
   ParseAndValidateFile("json/testdata/6.json");
 }
 
-TEST(JSONParserTest, File8) {
-  ParseAndValidateFile("json/testdata/8.json");
-}
-
 TEST(JSONParserTest, File9) {
   ParseAndValidateFile("json/testdata/9.json");
 }
