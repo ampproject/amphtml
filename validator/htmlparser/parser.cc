@@ -3067,7 +3067,8 @@ bool Parser::ParseForeignContent() {
         }
         AdjustSVGAttributeNames(&token_.attributes);
       } else {
-        LOG(FATAL) << "html: bad parser state: unexpected namespace";
+        throw std::runtime_error(
+             "html: bad parser state: unexpected namespace");
       }
 
       AdjustForeignAttributes(&token_.attributes);

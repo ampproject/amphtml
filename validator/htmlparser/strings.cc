@@ -779,7 +779,7 @@ uint8_t ReadContinuationByte(uint8_t byte) {
     return byte & 0x3f;
   }
 
-  LOG(FATAL) << "Invalid continuation byte.";
+  throw std::runtime_error("Invalid continuation byte.");
   return 0;
 }
 
