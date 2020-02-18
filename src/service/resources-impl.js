@@ -202,12 +202,15 @@ export class ResourcesImpl {
       // Classic IntersectionObserver doesn't support viewport tracking and
       // rootMargin in x-origin iframes (#25428). As of 1/2020, only Chrome 81+
       // supports it via {root: document}, which throws on other browsers.
+      const root =
+        /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
+          ? this.win.document
+          : nul);
       try {
         this.intersectionObserver_ = new IntersectionObserver(
           this.intersects_.bind(this),
           {
-            root:
-              this.ampdoc.isSingleDoc() && iframed ? this.win.document : null,
+            root,
             // TODO(willchou): Is 3x viewport loading rectangle too large given that
             // IntersectionObserver is more responsive than scroll-bound measure?
             // TODO(willchou): Support prerenderSize_ loading rectangle.
