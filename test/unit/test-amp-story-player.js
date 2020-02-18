@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryPlayer} from '../../src/amp-story-player';
+import {AmpStoryPlayer, IFRAME_IDX} from '../../src/amp-story-player';
 import {AmpStoryPlayerManager} from '../../src/amp-story-player-manager';
 import {toArray} from '../../src/types';
 
@@ -100,19 +100,20 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
       buildStoryPlayer(4);
       const stories = toArray(playerEl.querySelectorAll('a'));
 
+      // TODO(#26308): Replace with manager.loadPlayers() when swipe is enabled.
       const player = new AmpStoryPlayer(win, playerEl);
       player.buildCallback();
       player.layoutCallback();
 
-      // TODO: replace next_() with swipe.
+      // TODO(#26308): replace next_() with swipe.
       player.next_();
-      expect(stories[0]['__AMP_IFRAME_IDX__']).to.eql(0);
-      expect(stories[3]['__AMP_IFRAME_IDX__']).to.eql(null);
+      expect(stories[0][IFRAME_IDX]).to.eql(0);
+      expect(stories[3][IFRAME_IDX]).to.eql(undefined);
 
-      // TODO: replace next_() with swipe.
+      // TODO(#26308): replace next_() with swipe.
       player.next_();
-      expect(stories[0]['__AMP_IFRAME_IDX__']).to.eql(null);
-      expect(stories[3]['__AMP_IFRAME_IDX__']).to.eql(0);
+      expect(stories[0][IFRAME_IDX]).to.eql(undefined);
+      expect(stories[3][IFRAME_IDX]).to.eql(0);
     }
   );
 
@@ -123,17 +124,18 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
       buildStoryPlayer(4);
       const stories = toArray(playerEl.querySelectorAll('a'));
 
+      // TODO(#26308): Replace with manager.loadPlayers() when swipe is enabled.
       const player = new AmpStoryPlayer(win, playerEl);
       player.buildCallback();
       player.layoutCallback();
 
-      // TODO: replace next_() & previous_() with swipe.
+      // TODO(#26308): replace next_() & previous_() with swipe.
       player.next_();
       player.next_();
       player.previous_();
 
-      expect(stories[0]['__AMP_IFRAME_IDX__']).to.eql(0);
-      expect(stories[3]['__AMP_IFRAME_IDX__']).to.eql(null);
+      expect(stories[0][IFRAME_IDX]).to.eql(0);
+      expect(stories[3][IFRAME_IDX]).to.eql(undefined);
     }
   );
 });

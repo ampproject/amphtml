@@ -24,6 +24,8 @@ import {
 } from './url';
 import {dict, map} from './utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
+import {IframePool} from './amp-story-player-iframe-pool';
+import {VisibilityState} from './visibility-state';
 import {cssText} from '../build/amp-story-player-iframe.css';
 import {setStyle} from './style';
 import {toArray} from './types';
@@ -39,7 +41,7 @@ const LoadStateClass = {
 const MAX_IFRAMES = 3;
 
 /** @const {string} */
-const IFRAME_IDX = '__AMP_IFRAME_IDX__';
+export const IFRAME_IDX = '__AMP_IFRAME_IDX__';
 
 /**
  * Note that this is a vanilla JavaScript class and should not depend on AMP
@@ -112,10 +114,6 @@ export class AmpStoryPlayer {
 
   /** @private */
   initializeIframes_() {
-    this.stories_.forEach(story => {
-      story[IFRAME_IDX] = null;
-    });
-
     for (let idx = 0; idx < MAX_IFRAMES && idx < this.stories_.length; idx++) {
       const story = this.stories_[idx];
       this.buildIframe_(story);
@@ -231,7 +229,11 @@ export class AmpStoryPlayer {
       const story = this.stories_[idx];
       const iframeIdx = story[IFRAME_IDX];
       const iframe = this.iframes_[iframeIdx];
-      this.layoutIframe_(story, iframe, idx === 0 ? 'visible' : 'prerender');
+      this.layoutIframe_(
+        story,
+        iframe,
+        idx === 0 ? VisibilityState.VISIBLE : VisibilityState.PRERENDER
+      );
     }
 
     this.isLaidOut_ = true;
@@ -250,17 +252,23 @@ export class AmpStoryPlayer {
     this.currentIdx_++;
 
     const previousStory = this.stories_[this.currentIdx_ - 1];
-    this.updateVisibilityState_(previousStory[IFRAME_IDX], 'paused');
+    this.updateVisibilityState_(
+      previousStory[IFRAME_IDX],
+      VisibilityState.PAUSED
+    );
 
     const currentStory = this.stories_[this.currentIdx_];
-    this.updateVisibilityState_(currentStory[IFRAME_IDX], 'visible');
+    this.updateVisibilityState_(
+      currentStory[IFRAME_IDX],
+      VisibilityState.VISIBLE
+    );
 
     const nextStoryIdx = this.currentIdx_ + 1;
     if (
       nextStoryIdx < this.stories_.length &&
-      this.stories_[nextStoryIdx][IFRAME_IDX] === null
+      this.stories_[nextStoryIdx][IFRAME_IDX] === undefined
     ) {
-      this.swapIframes_(nextStoryIdx);
+      this.allocateIframeForStory_(nextStoryIdx);
     }
   }
 
@@ -277,14 +285,23 @@ export class AmpStoryPlayer {
     this.currentIdx_--;
 
     const previousStory = this.stories_[this.currentIdx_ + 1];
-    this.updateVisibilityState_(previousStory[IFRAME_IDX], 'paused');
+    this.updateVisibilityState_(
+      previousStory[IFRAME_IDX],
+      VisibilityState.PAUSED
+    );
 
     const currentStory = this.stories_[this.currentIdx_];
-    this.updateVisibilityState_(currentStory[IFRAME_IDX], 'visible');
+    this.updateVisibilityState_(
+      currentStory[IFRAME_IDX],
+      VisibilityState.VISIBLE
+    );
 
     const nextStoryIdx = this.currentIdx_ - 1;
-    if (nextStoryIdx >= 0 && this.stories_[nextStoryIdx][IFRAME_IDX] === null) {
-      this.swapIframes_(nextStoryIdx, true /** reverse */);
+    if (
+      nextStoryIdx >= 0 &&
+      this.stories_[nextStoryIdx][IFRAME_IDX] === undefined
+    ) {
+      this.allocateIframeForStory_(nextStoryIdx, true /** reverse */);
     }
   }
 
@@ -296,7 +313,7 @@ export class AmpStoryPlayer {
    * @param {boolean} reverse
    * @private
    */
-  swapIframes_(nextStoryIdx, reverse = false) {
+  allocateIframeForStory_(nextStoryIdx, reverse = false) {
     const detachedStoryIdx = reverse
       ? this.iframePool_.rotateRight(nextStoryIdx)
       : this.iframePool_.rotateLeft(nextStoryIdx);
@@ -305,10 +322,10 @@ export class AmpStoryPlayer {
     const nextStory = this.stories_[nextStoryIdx];
 
     nextStory[IFRAME_IDX] = detachedStory[IFRAME_IDX];
-    detachedStory[IFRAME_IDX] = null;
+    detachedStory[IFRAME_IDX] = undefined;
 
     const nextIframe = this.iframes_[nextStory[IFRAME_IDX]];
-    this.layoutIframe_(nextStory, nextIframe, 'prerender');
+    this.layoutIframe_(nextStory, nextIframe, VisibilityState.PRERENDER);
     this.setUpMessagingForIframe_(nextStory, nextIframe);
   }
 
@@ -331,7 +348,7 @@ export class AmpStoryPlayer {
    * @return {!Location}
    * @private
    */
-  getEncodedLocation_(href, visibilityState = 'inactive') {
+  getEncodedLocation_(href, visibilityState = VisibilityState.INACTIVE) {
     const {location} = this.win_;
     const url = parseUrlWithA(this.cachedA_, location.href);
 
@@ -361,6 +378,7 @@ export class AmpStoryPlayer {
    * Updates the visibility state of the story inside the iframe.
    * @param {number} iframeIdx
    * @param {string} visibilityState
+   * @private
    */
   updateVisibilityState_(iframeIdx, visibilityState) {
     this.handshakePromises_[iframeIdx].then(() => {
@@ -377,66 +395,3 @@ self.onload = () => {
   const manager = new AmpStoryPlayerManager(self);
   manager.loadPlayers();
 };
-
-/**
- * Manages the iframes used to host the stories inside the player. It keeps
- * track of the iframes hosting stories, and what stories have an iframe.
- */
-class IframePool {
-  /** @public */
-  constructor() {
-    /** @private @const {!Array<number>} */
-    this.iframePool_ = [];
-
-    /** @private @const {!Array<number>} */
-    this.storyIdsWithIframe_ = [];
-  }
-
-  /**
-   * @param {number} idx
-   * @public
-   */
-  addIframeIdx(idx) {
-    this.iframePool_.push(idx);
-  }
-
-  /**
-   * @param {number} idx
-   * @public
-   */
-  addStoryIdx(idx) {
-    this.storyIdsWithIframe_.push(idx);
-  }
-
-  /**
-   * Takes the leftmost iframe and allocates it to the next story to the right
-   * without an iframe. It also updates the storyIdsWithIframe by removing the
-   * reference to the detached story and adds the new one.
-   * @param {number} nextStoryIdx
-   * @return {number} Index of the detached story.
-   */
-  rotateLeft(nextStoryIdx) {
-    const detachedStoryIdx = this.storyIdsWithIframe_.shift();
-    this.storyIdsWithIframe_.push(nextStoryIdx);
-
-    this.iframePool_.push(this.iframePool_.shift());
-
-    return detachedStoryIdx;
-  }
-
-  /**
-   * Takes the rightmost iframe and allocates it to the next story to the left
-   * without an iframe. It also updates the storyIdsWithIframe by removing the
-   * reference to the detached story and adds the new one.
-   * @param {number} nextStoryIdx
-   * @return {number} Index of the detached story.
-   */
-  rotateRight(nextStoryIdx) {
-    const detachedStoryIdx = this.storyIdsWithIframe_.pop();
-    this.storyIdsWithIframe_.unshift(nextStoryIdx);
-
-    this.iframePool_.unshift(this.iframePool_.pop());
-
-    return detachedStoryIdx;
-  }
-}
