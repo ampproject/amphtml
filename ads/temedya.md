@@ -26,12 +26,12 @@ limitations under the License.
   type="temedya"
   layout="responsive"
   data-title="widget-title"
-  data-siteId="site-id"
-  data-keyId="key-id"
-  data-siteUrl="site-url"
-  data-typeId="ad-type"
-  data-paidItem="paid-item-count"
-  data-organicItem="organic-item-count"
+  data-siteid="site-id"
+  data-keyid="key-id"
+  data-siteurl="site-url"
+  data-typeid="ad-type"
+  data-paiditem="paid-item-count"
+  data-organicitem="organic-item-count"
   data-theme="theme-style"
 >
 </amp-embed>
@@ -44,10 +44,10 @@ For details on the configuration semantics, please contact the ad network or ref
 ### Required parameters
 
 - `data-title`: Widget Title
-- `data-siteId`: Vidyome Website Id
-- `data-keyId`: Vidyome Widget Key Id
-- `data-siteUrl`: Web Site URL
-- `data-typeId`: Widget Type ID (7)
-- `data-paidItem`: Paid Item Count
-- `data-organicItem`: Organic Item Count
+- `data-siteid`: Vidyome Website Id
+- `data-keyid`: Vidyome Widget Key Id
+- `data-siteurl`: Web Site URL
+- `data-typeid`: Widget Type ID (7)
+- `data-paiditem`: Paid Item Count
+- `data-organicitem`: Organic Item Count
 - `data-theme`: Theme Type (light or dark)
