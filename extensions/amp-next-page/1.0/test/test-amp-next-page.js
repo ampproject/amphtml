@@ -114,6 +114,10 @@ describes.realWin(
         element.setAttribute('src', options.src);
       }
 
+      if (options.maxPages) {
+        element.setAttribute('max-pages', options.maxPages);
+      }
+
       doc.body.appendChild(element);
 
       if (waitForLayout) {
@@ -753,6 +757,33 @@ describes.realWin(
           }
         );
         expect(element.lastElementChild.innerText).to.equal('Rendered');
+      });
+    });
+
+    describe('page suggestion limiting', () => {
+      it('should register all pages if a limit is not specified', async () => {
+        const element = await getAmpNextPage({
+          inlineConfig: VALID_CONFIG,
+        });
+
+        const service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
+        expect(service.pages_.length).to.equal(3);
+        element.parentNode.removeChild(element);
+      });
+
+      it('should only register pages up to the given limit', async () => {
+        const element = await getAmpNextPage({
+          inlineConfig: VALID_CONFIG,
+          maxPages: 1,
+        });
+
+        const service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
+        expect(service.pages_.length).to.equal(2);
+        element.parentNode.removeChild(element);
       });
     });
   }

@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {HIDDEN_DOC_CLASS, HostPage, Page, PageState} from './page';
 import {MultidocManager} from '../../../src/multidoc-manager';
 import {Services} from '../../../src/services';
+import {triggerAnalyticsEvent} from '../../../src/analytics';
 import {
   UrlReplacementPolicy,
   batchFetchJsonFor,
@@ -137,6 +138,9 @@ export class NextPageService {
     /** @private {boolean} */
     this.hasDeepParsing_ = false;
 
+    /** @private {number} */
+    this.maxPages_ = Infinity;
+
     /** @private {?string} */
     this.nextSrc_ = null;
 
@@ -165,6 +169,13 @@ export class NextPageService {
     // Prevent multiple amp-next-page on the same document
     if (this.isBuilt()) {
       return;
+    }
+
+    if (this.ampdoc_.getBody().lastElementChild !== element) {
+      user().warn(
+        TAG,
+        'should be the last element in the body of the document, footer elements can be children of <amp-next-page>'
+      );
     }
 
     // Save the <amp-next-page> from the host page
@@ -199,7 +210,12 @@ export class NextPageService {
 
     this.nextSrc_ = this.getHost_().getAttribute('src');
     this.hasDeepParsing_ =
-      this.getHost_().hasAttribute('deep-parsing') || !this.nextSrc_;
+      (this.getHost_().hasAttribute('deep-parsing') &&
+        this.getHost_().getAttribute('deep-parsing') !== 'false') ||
+      !this.nextSrc_;
+    this.maxPages_ = this.getHost_().hasAttribute('max-pages')
+      ? this.getHost_().getAttribute('max-pages')
+      : Infinity;
     this.initializePageQueue_();
 
     this.getHost_().classList.add(NEXT_PAGE_CLASS);
@@ -408,6 +424,10 @@ export class NextPageService {
     const {title, url} = page;
     this.doc_.title = title;
     this.history_.replace({title, url});
+    triggerAnalyticsEvent(this.getHost_(), 'amp-next-page-scroll', {
+      'title': title,
+      'url': url,
+    });
   }
 
   /**
@@ -749,7 +769,11 @@ export class NextPageService {
    * @return {!Promise}
    */
   queuePages_(pages) {
-    if (!pages.length || this.finished_) {
+    if (
+      !pages.length ||
+      this.pages_.length > this.maxPages_ ||
+      this.finished_
+    ) {
       return Promise.resolve();
     }
     // Queue the given pages
@@ -759,7 +783,10 @@ export class NextPageService {
         // Prevent loops by checking if the page already exists
         // we use initialUrl since the url can get updated if
         // the page issues a redirect
-        if (this.pages_.some(page => page.initialUrl == meta.url)) {
+        if (
+          this.pages_.some(page => page.initialUrl == meta.url) ||
+          this.pages_.length > this.maxPages_
+        ) {
           return;
         }
         // Queue the page for fetching
@@ -991,6 +1018,20 @@ export class NextPageService {
       image.src = page.image;
       title.textContent = page.title;
       article.href = page.url;
+      article.addEventListener('click', e => {
+        triggerAnalyticsEvent(this.getHost_(), 'amp-next-page-click', {
+          'title': page.title,
+          'url': page.url,
+        });
+        const a2a = this.navigation_.navigateToAmpUrl(
+          page.url,
+          'content-discovery'
+        );
+        if (a2a) {
+          // A2A is enabled, don't navigate the browser.
+          e.preventDefault();
+        }
+      });
 
       content.appendChild(article);
     });
