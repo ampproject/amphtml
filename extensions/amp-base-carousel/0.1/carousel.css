@@ -35,6 +35,7 @@
   width: 100%;
   height: 100%;
   align-items: center;
+  outline: none;
 
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch !important;

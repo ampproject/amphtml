@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  clickThroughPages,
+  switchToAdFrame,
+} from './test-amp-story-auto-ads-utils';
+
 const viewport = {
   HEIGHT: 823,
   WIDTH: 500,
@@ -100,13 +105,6 @@ describes.endtoend(
   }
 );
 
-async function clickThroughPages(controller, numPages) {
-  for (let i = 0; i < numPages; i++) {
-    const page = await controller.findElement('[active]');
-    await controller.click(page);
-  }
-}
-
 async function validateAdOverlay(controller) {
   const overlayHost = await controller.findElement(
     '.i-amphtml-ad-overlay-host'
@@ -186,9 +184,4 @@ async function validateAdAttribution(controller, iconUrl) {
   });
 
   await controller.switchToLight();
-}
-
-async function switchToAdFrame(controller) {
-  const frame = await controller.findElement('#i-amphtml-ad-page-1 iframe');
-  await controller.switchToFrame(frame);
 }

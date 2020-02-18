@@ -28,13 +28,13 @@ import {
   batchFetchJsonFor,
   requestForBatchFetch,
 } from '../../../src/batched-json';
+import {addParamToUrl} from '../../../src/url';
 import {createCustomEvent} from '../../../src/event-helper';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, hasOwn, map, ownProperty} from '../../../src/utils/object';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {includes, startsWith} from '../../../src/string';
 import {isArray, isEnumValue, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {once} from '../../../src/utils/function';
 import {removeChildren, tryFocus} from '../../../src/dom';
@@ -232,12 +232,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
     this.queryKey_ = this.element.getAttribute('query');
     this.srcBase_ = this.element.getAttribute('src');
-    userAssert(
-      !this.queryKey_ || isExperimentOn(this.win, 'amp-autocomplete'),
-      'Experiment %s is not turned on for "query" attr. %s',
-      TAG,
-      this.element
-    );
 
     const jsonScript = this.element.querySelector(
       'script[type="application/json"]'
@@ -256,20 +250,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
     this.inputElement_.setAttribute('aria-autocomplete', 'both');
     this.inputElement_.setAttribute('role', 'combobox');
 
-    userAssert(
-      this.inputElement_.form,
-      '%s should be inside a <form> tag. %s',
-      TAG,
-      this.element
-    );
-    if (this.inputElement_.form.hasAttribute('autocomplete')) {
-      this.initialAutocompleteAttr_ = this.inputElement_.form.getAttribute(
-        'autocomplete'
-      );
+    const form = this.getFormOrNull_();
+    if (form && form.hasAttribute('autocomplete')) {
+      this.initialAutocompleteAttr_ = form.getAttribute('autocomplete');
     }
 
     // When SSR is supported, it is required.
-    this.isSsr_ = this.getSsrTemplateHelper().isSupported();
+    this.isSsr_ = this.getSsrTemplateHelper().isEnabled();
     this.hasTemplate_ = this.templates_.hasTemplate(
       this.element,
       'template, script[template]'
@@ -338,6 +325,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
       this.element
     );
     return /** @type {!HTMLInputElement} */ (possibleElements[0]);
+  }
+
+  /**
+   * @return {?HTMLFormElement}
+   */
+  getFormOrNull_() {
+    return this.inputElement_.form || null;
   }
 
   /**
@@ -446,9 +440,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   generateSrc_(opt_query = '') {
-    const encodedQueryKey = encodeURIComponent(this.queryKey_);
-    const encodedQuery = encodeURIComponent(opt_query);
-    return `${this.srcBase_}?${encodedQueryKey}=${encodedQuery}`;
+    return addParamToUrl(this.srcBase_, this.queryKey_, opt_query);
   }
 
   /**
@@ -910,16 +902,16 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @private
    */
   toggleResultsHandler_(display) {
-    // Set/reset "autocomplete" attribute on the <form> ancestor.
-    if (display) {
-      this.inputElement_.form.setAttribute('autocomplete', 'off');
-    } else if (this.initialAutocompleteAttr_) {
-      this.inputElement_.form.setAttribute(
-        'autocomplete',
-        this.initialAutocompleteAttr_
-      );
-    } else {
-      this.inputElement_.form.removeAttribute('autocomplete');
+    // Set/reset "autocomplete" attribute on <form> ancestor if present.
+    const form = this.getFormOrNull_();
+    if (form) {
+      if (display) {
+        form.setAttribute('autocomplete', 'off');
+      } else if (this.initialAutocompleteAttr_) {
+        form.setAttribute('autocomplete', this.initialAutocompleteAttr_);
+      } else {
+        form.removeAttribute('autocomplete');
+      }
     }
 
     // Toggle results.
@@ -1210,10 +1202,10 @@ export class AmpAutocomplete extends AMP.BaseElement {
         }
         return this.updateActiveItem_(-1);
       case Keys.ENTER:
-        const shouldPreventSubmit = this.binding_.shouldPreventFormSubmissionOnEnter(
+        const shouldPreventDefault = this.binding_.shouldPreventDefaultOnEnter(
           !!this.activeElement_
         );
-        if (this.areResultsDisplayed_() && shouldPreventSubmit) {
+        if (this.areResultsDisplayed_() && shouldPreventDefault) {
           event.preventDefault();
         }
         this.binding_.removeSelectionHighlighting(this.inputElement_);

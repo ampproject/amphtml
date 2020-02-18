@@ -94,7 +94,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
       serviceAdapter
     );
     const domStub = env.sandbox.stub(
-      localSubscriptionPlatform.rootNode_,
+      localSubscriptionPlatform.rootNode_.body,
       'addEventListener'
     );
 
@@ -209,7 +209,7 @@ describes.fakeWin('LocalSubscriptionsIframePlatform', {amp: true}, env => {
           })
         )
         .once();
-      const expectedConfigWithVars = Object.assign({}, expectedConfig);
+      const expectedConfigWithVars = {...expectedConfig};
       expectedConfigWithVars.config.iframeVars = {VAR1: 'A', VAR2: 'B'};
       serviceConfig.services[0]['iframeVars'] = ['VAR1', 'VAR2'];
       const localSubscriptionPlatform = localSubscriptionPlatformFactory(

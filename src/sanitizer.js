@@ -23,7 +23,7 @@ import {
   WHITELISTED_ATTRS_BY_TAGS,
   WHITELISTED_TARGETS,
   isValidAttr,
-} from './sanitation';
+} from './purifier/sanitation';
 import {dict} from './utils/object';
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 import {isAmp4Email} from './format';
@@ -91,10 +91,11 @@ export function sanitizeHtml(html, doc) {
   };
 
   // No Caja support for <script> or <svg>.
-  const cajaBlacklistedTags = Object.assign(
-    {'script': true, 'svg': true},
-    BLACKLISTED_TAGS
-  );
+  const cajaBlacklistedTags = {
+    'script': true,
+    'svg': true,
+    ...BLACKLISTED_TAGS,
+  };
 
   const parser = htmlSanitizer.makeSaxParser({
     'startTag': function(tagName, attribs) {

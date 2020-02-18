@@ -31,6 +31,7 @@ import {
 import {DIRTINESS_INDICATOR_CLASS} from '../form-dirtiness';
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
+import {createCustomEvent} from '../../../../src/event-helper';
 import {
   createFormDataWrapper,
   isFormDataWrapper,
@@ -74,9 +75,9 @@ describes.repeated(
           createTextNode = ownerDoc.createTextNode.bind(ownerDoc);
 
           // Force sync mutateElement to make testing easier.
-          const resources = Services.resourcesForDoc(env.ampdoc);
+          const mutator = Services.mutatorForDoc(env.ampdoc);
           mutateElementStub = env.sandbox
-            .stub(resources, 'mutateElement')
+            .stub(mutator, 'mutateElement')
             .callsArg(1);
 
           // This needs to be stubbed to stop the function from,
@@ -96,7 +97,7 @@ describes.repeated(
           env.ampdoc.getBody().appendChild(form);
           const ampForm = new AmpForm(form, 'amp-form-test-id');
           env.sandbox
-            .stub(ampForm.ssrTemplateHelper_, 'isSupported')
+            .stub(ampForm.ssrTemplateHelper_, 'isEnabled')
             .returns(false);
           return Promise.resolve(ampForm);
         }
@@ -243,9 +244,9 @@ describes.repeated(
               env.sandbox.stub(form, 'submit');
               env.sandbox.stub(form, 'checkValidity').returns(true);
               env.sandbox.stub(ampForm, 'analyticsEvent_');
-              ampForm.ssrTemplateHelper_.isSupported.restore();
+              ampForm.ssrTemplateHelper_.isEnabled.restore();
               env.sandbox
-                .stub(ampForm.ssrTemplateHelper_, 'isSupported')
+                .stub(ampForm.ssrTemplateHelper_, 'isEnabled')
                 .returns(true);
               env.sandbox
                 .stub(ampForm.viewer_, 'isTrustedViewer')
@@ -306,17 +307,16 @@ describes.repeated(
                 .returns(template);
 
               const ssr = env.sandbox.stub(ampForm.ssrTemplateHelper_, 'ssr');
+              const response = {
+                init: {status: 200},
+                html: '<div>much success</div>',
+                body: '{"message": "hello"}',
+              };
               ssr
                 .onFirstCall()
-                .resolves({
-                  init: {status: 200},
-                  html: '<div>much success</div>',
-                })
+                .resolves(response)
                 .onSecondCall()
-                .resolves({
-                  init: {status: 200},
-                  html: '<div>much success</div>',
-                });
+                .resolves(response);
 
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
@@ -382,17 +382,16 @@ describes.repeated(
                 .returns(template);
 
               const ssr = env.sandbox.stub(ampForm.ssrTemplateHelper_, 'ssr');
+              const response = {
+                init: {status: 404},
+                html: '<div>much error</div>',
+                body: '{"message": "error"}',
+              };
               ssr
                 .onFirstCall()
-                .resolves({
-                  init: {status: 404},
-                  html: '<div>much error</div>',
-                })
+                .resolves(response)
                 .onSecondCall()
-                .resolves({
-                  init: {status: 404},
-                  html: '<div>much error</div>',
-                });
+                .resolves(response);
 
               const handleSubmitEventPromise = ampForm.handleSubmitEvent_(
                 event
@@ -858,6 +857,29 @@ describes.repeated(
           });
         });
 
+        it('should check validity on FORM_VALUE_CHANGE event', () => {
+          setCheckValiditySupportedForTesting(true);
+          return getAmpForm(getForm()).then(ampForm => {
+            const form = ampForm.form_;
+            const emailInput = createElement('input');
+            emailInput.setAttribute('name', 'email');
+            emailInput.setAttribute('required', '');
+            form.appendChild(emailInput);
+            env.sandbox.spy(form, 'checkValidity');
+            env.sandbox.spy(ampForm.validator_, 'onInput');
+
+            const event = createCustomEvent(
+              env.win,
+              AmpEvents.FORM_VALUE_CHANGE,
+              /* detail */ null,
+              {bubbles: true}
+            );
+            emailInput.dispatchEvent(event);
+            expect(form.checkValidity).to.be.called;
+            expect(ampForm.validator_.onInput).to.be.calledWith(event);
+          });
+        });
+
         it('should allow verifying elements with a presubmit request', () => {
           const formPromise = getAmpForm(getVerificationForm());
           const fetchReject = {
@@ -1249,6 +1271,25 @@ describes.repeated(
           });
         });
 
+        it('should respect the xssi-prefix option when parsing json', async () => {
+          const form = createElement('form');
+          form.setAttribute('method', 'GET');
+          form.setAttribute('action-xhr', 'https://example.com/xssi-json');
+          form.setAttribute('xssi-prefix', 'while(1)');
+
+          const ampForm = await getAmpForm(form);
+          env.sandbox.stub(ampForm.xhr_, 'fetch').resolves('{}');
+          env.sandbox.stub(ampForm.xhr_, 'xssiJson').resolves({});
+
+          ampForm.handleSubmitEvent_({
+            target: ampForm.form_,
+            preventDefault: () => {},
+          });
+
+          await whenCalled(ampForm.xhr_.xssiJson);
+          expect(ampForm.xhr_.xssiJson).to.be.calledWith('{}', 'while(1)');
+        });
+
         it('should trigger amp-form-submit analytics event with form data', () => {
           return getAmpForm(getForm()).then(ampForm => {
             env.sandbox.stub(ampForm.xhr_, 'fetch').resolves({
@@ -1417,6 +1458,7 @@ describes.repeated(
 
           env.sandbox.stub(Services, 'xhrFor').returns({
             fetch: () => Promise.resolve({json: () => Promise.resolve()}),
+            xssiJson: () => Promise.resolve({}),
           });
 
           const ampForm = await getAmpForm(form);
@@ -2396,7 +2438,7 @@ describes.repeated(
                 .stub(Services, 'navigationForDoc')
                 .returns({navigateTo});
               env.sandbox
-                .stub(ampForm.ssrTemplateHelper_, 'isSupported')
+                .stub(ampForm.ssrTemplateHelper_, 'isEnabled')
                 .returns(false);
             });
 

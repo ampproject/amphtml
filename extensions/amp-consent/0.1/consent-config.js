@@ -18,11 +18,9 @@ import {CMP_CONFIG} from './cmps';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {GEO_IN_GROUP} from '../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../src/services';
-import {deepMerge, map} from '../../../src/utils/object';
+import {deepMerge, hasOwn, map} from '../../../src/utils/object';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {getChildJsonConfig} from '../../../src/json';
-import {isExperimentOn} from '../../../src/experiments';
-import {toWin} from '../../../src/types';
 
 const TAG = 'amp-consent/consent-config';
 
@@ -38,9 +36,6 @@ export class ConsentConfig {
   constructor(element) {
     /** @private {!Element} */
     this.element_ = element;
-
-    /** @private {!Window} */
-    this.win_ = toWin(element.ownerDocument.defaultView);
 
     /** @private {?string} */
     this.matchedGeoGroup_ = null;
@@ -76,14 +71,6 @@ export class ConsentConfig {
    */
   convertInlineConfigFormat_(config) {
     const consentsConfigDepr = config['consents'];
-    if (!isExperimentOn(this.win_, 'amp-consent-v2')) {
-      userAssert(consentsConfigDepr, '%s: consents config is required', TAG);
-      userAssert(
-        Object.keys(consentsConfigDepr).length != 0,
-        "%s: can't find consent instance",
-        TAG
-      );
-    }
 
     if (!config['consents']) {
       // New format, return
@@ -206,7 +193,16 @@ export class ConsentConfig {
       // Stop at the first group that the geoService says we're in and then merge configs.
       for (let i = 0; i < geoGroups.length; i++) {
         if (geoService.isInCountryGroup(geoGroups[i]) === GEO_IN_GROUP.IN) {
-          deepMerge(mergedConfig, config['geoOverride'][geoGroups[i]], 1);
+          const geoConfig = config['geoOverride'][geoGroups[i]];
+          if (hasOwn(geoConfig, 'consentInstanceId')) {
+            user().error(
+              TAG,
+              'consentInstanceId cannot be overriden in geoGroup:',
+              geoGroups[i]
+            );
+            delete geoConfig['consentInstanceId'];
+          }
+          deepMerge(mergedConfig, geoConfig, 1);
           this.matchedGeoGroup_ = geoGroups[i];
           break;
         }
@@ -266,10 +262,6 @@ export class ConsentConfig {
    * @return {?JsonObject}
    */
   getCMPConfig_() {
-    if (!isExperimentOn(this.win_, 'amp-consent-v2')) {
-      return null;
-    }
-
     const type = this.element_.getAttribute('type');
     if (!type) {
       return null;

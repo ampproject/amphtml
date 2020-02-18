@@ -52,6 +52,8 @@ supported by the AMP component library.
 3. If you've built a **custom player** or are using one provided by an **unsupported 3rd party**, **you should use `amp-video-iframe`**. This is different from using [`amp-iframe`](https://amp.dev/documentation/components/amp-iframe) in that it enables
    [Video Features on AMP](../../spec/amp-video-interface.md). See [behavior](#behavior) below for more details.
 
+4. If you're a **3rd party video vendor**, **you can use `amp-video-iframe`** to [provide a simple way for authors to embed video.](#vendors)
+
 ## Behavior
 
 `amp-video-iframe` has several important differences from vanilla iframes and `amp-iframe`.
@@ -119,6 +121,22 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
     <td width="40%"><strong>referrerpolicy</strong></td>
     <td>The <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/referrerPolicy"><code>referrerpolicy</code></a> to be set on the iframe element.</td>
   </tr>
+  <tr>
+    <td width="40%"><a id="data-param"></a><strong>data-param-*</strong></td>
+    <td>
+      All <code>data-param-*</code> attributes are added as query parameters
+      to the iframe's <code>src</code>. They may be used to pass custom values
+      through to the player document.<br />
+      Keys and values will be URI encoded. Keys will be camel cased.
+      <ul>
+        <li><code>data-param-foo="bar"</code> becomes <code>&foo=bar</code></li>
+        <li>
+          <code>data-param-channel-id="SOME_VALUE"</code> becomes
+          <code>&channelId=SOME_VALUE</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 ## Usage
@@ -129,14 +147,53 @@ Include an `amp-video-iframe` on your AMP document:
 <amp-video-iframe
   layout="responsive"
   width="16"
-  height="16"
+  height="9"
   src="/my-video-player.html"
   poster="/my-video-poster.jpg"
 >
 </amp-video-iframe>
 ```
 
-## Integration inside the frame
+`my-video-player.html` is the inner document loaded inside the frame that plays the video. This document must include and bootstrap [an integration script](#integration) so that the AMP document including the `<amp-video-iframe>` can coordinate the video's playback.
+
+### <a id="vendors"></a> For third-party video vendors
+
+If you're a vendor that does _not_ provide a [custom video player component](../../spec/amp-video-interface.md), you can use `amp-video-iframe` to allow AMP document authors to embed video provided through your service.
+
+By hosting a generic [integration document](#integration) that can reference videos with URL parameters, authors don't need to provide the inner player document themselves, but only include an `<amp-video-iframe>` tag in the AMP document:
+
+```html
+<!--
+  data-param-* attributes are added to src and poster, so this would use the
+  following composed urls:
+
+  src: https://vendor.example/amp-video-iframe
+      ?videoid=MY_VIDEO_ID
+      &channelid=MY_CHANNEL_ID
+
+  poster: https://vendor.example/poster.jpg
+      ?videoid=MY_VIDEO_ID
+      &channelid=MY_CHANNEL_ID
+-->
+<amp-video-iframe
+  layout="responsive"
+  width="16"
+  height="9"
+  src="https://vendor.example/amp-video-iframe"
+  poster="https://vendor.example/poster.jpg"
+  data-param-videoid="MY_VIDEO_ID"
+  data-param-channelid="MY_CHANNEL_ID"
+>
+</amp-video-iframe>
+```
+
+The `src` and `poster` URLs are appended with [`data-param-*` attributes as query string](#data-param).
+
+The `/amp-video-iframe` document bootstraps the [integration script](#integration) so that the AMP document can coordinate with the player.
+
+Note: For most video providers, `amp-video-iframe` provides enough tools for common playback actions (see [methods](#method) and [events](#postEvent)). Refer to the [vendor player spec](../../spec/amp-3p-video.md) for more details on whether you can use `amp-video-iframe` or you should build a third-party player component instead.
+
+## <a id="integration"></a> Integration inside the frame
 
 In order for the video integration to work, the embedded document (e.g. `my-video-player.html`) must include a small library:
 

@@ -1,0 +1,38 @@
+{
+  "transport": {
+    "beacon": true,
+    "xhrpost": true,
+    "useBody": true,
+    "image": false
+  },
+  "vars": {
+    "deviceId": "CLIENT_ID(amplitude_amp_id)"
+  },
+  "requests": {
+    "host": "https://api.amplitude.com",
+    "event": {
+      "baseUrl": "${host}/amp/event"
+    }
+  },
+  "extraUrlParams": {
+    "api_key": "${apiKey}",
+    "device_id": "${deviceId}",
+    "library": "amp/${ampVersion}",
+    "time": "${timestamp}",
+    "language": "${browserLanguage}",
+    "user_agent": "${userAgent}"
+  },
+  "linkers": {
+    "amplitude": {
+      "ids": {
+        "amplitude_amp_id": "${deviceId}"
+      },
+      "proxyOnly": false
+    }
+  },
+  "cookies": {
+    "amplitude_amp_id": {
+      "value": "LINKER_PARAM(amplitude, amplitude_amp_id)"
+    }
+  }
+}

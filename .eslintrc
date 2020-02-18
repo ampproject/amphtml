@@ -80,6 +80,7 @@
     "local/is-experiment-on": 2,
     "local/json-configuration": 2,
     "local/no-array-destructuring": 2,
+    "local/no-arrow-on-register-functions": 2,
     "local/no-deep-destructuring": 2,
     "local/no-destructure-assignment-params": 2,
     "local/no-duplicate-import": 2,
@@ -93,9 +94,10 @@
     "local/no-import-rename": 2,
     "local/no-is-amp-alt": 2,
     "local/no-log-array": 2,
+    "local/no-mixed-interpolation": 2,
     "local/no-mixed-operators": 2,
     "local/no-module-exports": 2,
-    "local/no-mixed-interpolation": 2,
+    "local/no-rest": 2,
     "local/no-spread": 2,
     "local/no-style-display": 2,
     "local/no-style-property-setting": 2,
@@ -103,6 +105,8 @@
     "local/no-unload-listener": 2,
     "local/prefer-deferred-promise": 0,
     "local/prefer-destructuring": 2,
+    "local/prefer-spread-props": 2,
+    "local/prefer-unnested-spread-objects": 2,
     "local/private-prop-names": 2,
     "local/query-selector": 2,
     "local/split-single-pass-comment": 2,
@@ -226,6 +230,20 @@
         "module": false,
         "process": false,
         "require": false
+      }
+    },
+    {
+      "files": ["**/*.extern.js"],
+      "rules": {
+        "no-var": 0,
+        "no-undef": 0,
+        "no-unused-vars": 0,
+        "prefer-const": 0,
+        "require-jsdoc": 0,
+        "jsdoc/check-tag-names": 0,
+        "local/closure-type-primitives": 0,
+        "local/no-duplicate-name-typedef": 0,
+        "google-camelcase/google-camelcase": 0
       }
     }
   ]

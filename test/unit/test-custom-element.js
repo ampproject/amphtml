@@ -329,12 +329,10 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('Element - updateLayoutBox', () => {
         const element = new ElementClass();
         container.appendChild(element);
-        expect(element.layoutWidth_).to.equal(-1);
-        expect(element.implementation_.layoutWidth_).to.equal(-1);
+        expect(element.getLayoutWidth()).to.equal(-1);
 
         element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-        expect(element.layoutWidth_).to.equal(111);
-        expect(element.implementation_.layoutWidth_).to.equal(111);
+        expect(element.getLayoutWidth()).to.equal(111);
       });
 
       it('should tolerate errors in onLayoutMeasure', () => {
@@ -352,8 +350,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         return element.buildingPromise_.then(() => {
           allowConsoleError(() => {
             element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
-            expect(element.layoutWidth_).to.equal(111);
-            expect(element.implementation_.layoutWidth_).to.equal(111);
+            expect(element.getLayoutWidth()).to.equal(111);
             expect(errorStub).to.be.calledWith(AmpEvents.ERROR, 'intentional');
           });
         });
@@ -374,8 +371,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
               {top: 0, left: 0, width: 111, height: 51},
               /* opt_hasMeasurementsChanged */ false
             );
-            expect(element.layoutWidth_).to.equal(111);
-            expect(element.implementation_.layoutWidth_).to.equal(111);
+            expect(element.getLayoutWidth()).to.equal(111);
             expect(onMeasureChangeStub).to.have.not.been.called;
           });
         }
@@ -396,8 +392,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
               {top: 0, left: 0, width: 111, height: 51},
               /* opt_hasMeasurementsChanged */ true
             );
-            expect(element.layoutWidth_).to.equal(111);
-            expect(element.implementation_.layoutWidth_).to.equal(111);
+            expect(element.getLayoutWidth()).to.equal(111);
             expect(onMeasureChangeStub).to.have.been.called;
           });
         }
@@ -421,7 +416,6 @@ describes.realWin('CustomElement', {amp: true}, env => {
         expect(element.isUpgraded()).to.equal(true);
         expect(element.implementation_).to.be.instanceOf(TestElement);
         expect(element.implementation_.layout_).to.equal(Layout.FILL);
-        expect(element.implementation_.layoutWidth_).to.equal(111);
         expect(testElementCreatedCallback).to.be.calledOnce;
         expect(testElementFirstAttachedCallback).to.be.calledOnce;
         expect(element.isBuilt()).to.equal(false);
@@ -2189,8 +2183,8 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   let element;
   let overflowElement;
   let vsync;
-  let resources;
-  let resourcesMock;
+  let mutator;
+  let mutatorMock;
 
   class TestElement extends BaseElement {
     isLayoutSupported(unusedLayout) {
@@ -2207,12 +2201,13 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       TestElement
     );
     win.customElements.define('amp-test-overflow', ElementClass);
-    resources = Services.resourcesForDoc(doc);
-    resourcesMock = env.sandbox.mock(resources);
+    mutator = Services.mutatorForDoc(doc);
+    mutatorMock = env.sandbox.mock(mutator);
     element = new ElementClass();
+    element.ampdoc_ = doc;
     element.layoutWidth_ = 300;
     element.layout_ = Layout.FIXED;
-    element.resources_ = resources;
+    element.mutator_ = mutator;
     overflowElement = doc.createElement('div');
     overflowElement.setAttribute('overflow', '');
     element.appendChild(overflowElement);
@@ -2228,7 +2223,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   });
 
   afterEach(() => {
-    resourcesMock.verify();
+    mutatorMock.verify();
   });
 
   it('should NOT be initialized by default', () => {
@@ -2284,7 +2279,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   it('should force change size when clicked', () => {
     element.overflowCallback(true, 117, 113);
     expect(overflowElement).to.have.class('amp-visible');
-    resourcesMock
+    mutatorMock
       .expects('changeSize')
       .withExactArgs(element, 117, 113)
       .once();

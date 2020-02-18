@@ -16,14 +16,13 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const BBPromise = require('bluebird');
 const brotliSize = require('brotli-size');
 const fs = require('fs');
 const globby = require('globby');
 const log = require('fancy-log');
 const path = require('path');
-const requestPost = BBPromise.promisify(require('request').post);
 const url = require('url');
+const util = require('util');
 const {
   gitCommitHash,
   gitTravisMasterBaseline,
@@ -39,6 +38,8 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
 const {cyan, green, red, yellow} = require('ansi-colors');
+
+const requestPost = util.promisify(require('request').post);
 
 const fileGlobs = ['dist/*.js', 'dist/v0/*-?.?.js'];
 const normalizedRtvNumber = '1234567890123';

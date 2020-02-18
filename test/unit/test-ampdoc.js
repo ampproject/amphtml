@@ -121,6 +121,14 @@ describes.sandboxed('AmpDocService', {}, () => {
       expect(service.getAmpDoc(div)).to.equal(service.getSingleDoc());
     });
 
+    it('should return meta content values', () => {
+      const meta = document.createElement('meta');
+      meta.setAttribute('name', 'abc');
+      meta.setAttribute('content', '123');
+      document.head.appendChild(meta);
+      expect(service.getAmpDoc(meta).getMetaByName('abc')).to.equal('123');
+    });
+
     // For example, <amp-next-page> creates shadow documents in single-doc
     // mode.
     describe('shadow documents', () => {
@@ -283,36 +291,38 @@ describes.sandboxed('AmpDocService', {}, () => {
       });
     });
 
-    // TODO(dvoytenko, #11827): Make this test work on Safari.
-    it.configure()
-      .skipSafari()
-      .skipFirefox()
-      .run('should navigate via host', () => {
-        if (!shadowRoot) {
-          return;
+    it('should navigate via host', () => {
+      if (!shadowRoot) {
+        return;
+      }
+
+      const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+      const ampDoc = service.getAmpDoc(content);
+      expect(ampDoc).to.equal(newAmpDoc);
+
+      const content2 = document.createElement('span');
+      const host2 = document.createElement('div');
+
+      let shadowRoot2;
+      if (isShadowDomSupported()) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+          shadowRoot2 = host2.attachShadow({mode: 'open'});
+        } else {
+          shadowRoot2 = host2.createShadowRoot();
         }
+      }
 
-        const newAmpDoc = service.installShadowDoc(
-          'https://a.org/',
-          shadowRoot
-        );
-        const ampDoc = service.getAmpDoc(content);
-        expect(ampDoc).to.equal(newAmpDoc);
+      shadowRoot2.appendChild(content2);
+      shadowRoot.appendChild(host2);
+      expect(content2.parentNode).to.equal(shadowRoot2);
+      expect(shadowRoot2.host).to.equal(host2);
+      expect(host2.shadowRoot).to.equal(shadowRoot2);
+      expect(host2.parentNode).to.equal(shadowRoot);
 
-        const content2 = document.createElement('span');
-        const host2 = document.createElement('div');
-        const shadowRoot2 = host2.createShadowRoot();
-        shadowRoot2.appendChild(content2);
-        shadowRoot.appendChild(host2);
-        expect(content2.parentNode).to.equal(shadowRoot2);
-        expect(shadowRoot2.host).to.equal(host2);
-        expect(host2.shadowRoot).to.equal(shadowRoot2);
-        expect(host2.parentNode).to.equal(shadowRoot);
-
-        expect(service.getAmpDoc(host2)).to.equal(ampDoc);
-        expect(service.getAmpDoc(content2)).to.equal(ampDoc);
-        expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
-      });
+      expect(service.getAmpDoc(host2)).to.equal(ampDoc);
+      expect(service.getAmpDoc(content2)).to.equal(ampDoc);
+      expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
+    });
   });
 
   describe('fie-doc mode', () => {
@@ -409,36 +419,38 @@ describes.sandboxed('AmpDocService', {}, () => {
       });
     });
 
-    // TODO(dvoytenko, #11827): Make this test work on Safari.
-    it.configure()
-      .skipSafari()
-      .skipFirefox()
-      .run('should navigate via host', () => {
-        if (!shadowRoot) {
-          return;
+    it('should navigate via host', () => {
+      if (!shadowRoot) {
+        return;
+      }
+
+      const newAmpDoc = service.installShadowDoc('https://a.org/', shadowRoot);
+      const ampDoc = service.getAmpDoc(content);
+      expect(ampDoc).to.equal(newAmpDoc);
+
+      const content2 = document.createElement('span');
+      const host2 = document.createElement('div');
+
+      let shadowRoot2;
+      if (isShadowDomSupported()) {
+        if (getShadowDomSupportedVersion() == ShadowDomVersion.V1) {
+          shadowRoot2 = host2.attachShadow({mode: 'open'});
+        } else {
+          shadowRoot2 = host2.createShadowRoot();
         }
+      }
 
-        const newAmpDoc = service.installShadowDoc(
-          'https://a.org/',
-          shadowRoot
-        );
-        const ampDoc = service.getAmpDoc(content);
-        expect(ampDoc).to.equal(newAmpDoc);
+      shadowRoot2.appendChild(content2);
+      shadowRoot.appendChild(host2);
+      expect(content2.parentNode).to.equal(shadowRoot2);
+      expect(shadowRoot2.host).to.equal(host2);
+      expect(host2.shadowRoot).to.equal(shadowRoot2);
+      expect(host2.parentNode).to.equal(shadowRoot);
 
-        const content2 = document.createElement('span');
-        const host2 = document.createElement('div');
-        const shadowRoot2 = host2.createShadowRoot();
-        shadowRoot2.appendChild(content2);
-        shadowRoot.appendChild(host2);
-        expect(content2.parentNode).to.equal(shadowRoot2);
-        expect(shadowRoot2.host).to.equal(host2);
-        expect(host2.shadowRoot).to.equal(shadowRoot2);
-        expect(host2.parentNode).to.equal(shadowRoot);
-
-        expect(service.getAmpDoc(host2)).to.equal(ampDoc);
-        expect(service.getAmpDoc(content2)).to.equal(ampDoc);
-        expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
-      });
+      expect(service.getAmpDoc(host2)).to.equal(ampDoc);
+      expect(service.getAmpDoc(content2)).to.equal(ampDoc);
+      expect(service.getAmpDoc(shadowRoot2)).to.equal(ampDoc);
+    });
 
     describes.realWin('fie-doc', {}, env => {
       let childWin;

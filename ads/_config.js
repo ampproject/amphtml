@@ -177,6 +177,9 @@ const adConfig = jsonConfiguration({
     clientIdScope: 'amp_ecid_adensor',
     renderStartImplemented: true,
   },
+
+  'adservsolutions': {},
+
   'adsloom': {
     clientIdScope: 'AMP_ECID_ADSLOOM',
   },
@@ -333,6 +336,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn.broadstreetads.com/init-2.min.js',
   },
 
+  'byplay': {},
+
   'caajainfeed': {
     prefetch: ['https://cdn.amanad.adtdp.com/sdk/ajaamp.js'],
     preconnect: ['https://ad.amanad.adtdp.com'],
@@ -471,7 +476,6 @@ const adConfig = jsonConfiguration({
   },
 
   'forkmedia': {
-    prefetch: 'https://delivery.forkcdn.com/rappio/inread/v1.1/amp/inread.js',
     renderStartImplemented: true,
   },
 
@@ -716,6 +720,10 @@ const adConfig = jsonConfiguration({
 
   'nativeroll': {
     prefetch: 'https://cdn01.nativeroll.tv/js/seedr-player.min.js',
+  },
+
+  'nativery': {
+    preconnect: 'https://cdn.nativery.com',
   },
 
   'nativo': {
@@ -992,6 +1000,12 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'ssp': {
+    prefetch: 'https://ssp.imedia.cz/static/js/ssp.js',
+    renderStartImplemented: true,
+    consentHandlingOverride: true,
+  },
+
   'strossle': {
     preconnect: [
       'https://amp.spklw.com',
@@ -1034,6 +1048,14 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
+  'temedya': {
+    prefetch: [
+      'https://vidyome-com.cdn.vidyome.com/vidyome/builds/temedya-amp.js',
+      'https://vidyome-com.cdn.vidyome.com/vidyome/builds/widgets.js',
+    ],
+    renderStartImplemented: true,
+  },
+
   'torimochi': {
     renderStartImplemented: true,
   },
@@ -1074,6 +1096,11 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'vdoai': {
+    prefetch: 'https://a.vdo.ai/core/dependencies_amp/vdo.min.js',
+    renderStartImplemented: true,
+  },
+
   'videointelligence': {
     preconnect: 'https://s.vi-serve.com',
     renderStartImplemented: true,
@@ -1106,6 +1133,10 @@ const adConfig = jsonConfiguration({
     ],
   },
 
+  'whopainfeed': {
+    prefetch: 'https://widget.infeed.com.ar/widget/widget-amp.js',
+  },
+
   'widespace': {},
 
   'wisteria': {
@@ -1124,7 +1155,7 @@ const adConfig = jsonConfiguration({
   },
 
   'yahoo': {
-    prefetch: 'https://s.yimg.com/os/ampad/display.js',
+    prefetch: 'https://s.yimg.com/aaq/ampad/display.js',
     preconnect: 'https://us.adserver.yahoo.com',
   },
 
@@ -1198,6 +1229,8 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://dup.baidustatic.com/js/dm.js',
     renderStartImplemented: true,
   },
+
+  'sulvo': {},
 });
 
 export {adConfig};

@@ -40,6 +40,15 @@ amp-consent {
   z-index: initial !important;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+
 /**
  * amp-hidden uses visiblity: hidden that does not propagate to shadow trees
  * because of amp-story-shadow-reset.css. Use display: none instead.
@@ -362,6 +371,14 @@ amp-story-grid-layer {
   width: 100% !important;
   top: 0 !important;
   left: 0 !important;
+}
+
+/**
+ * Prevents amp-video to layout until its element has been swapped by the media
+ * pool. See #26718 for context.
+ */
+amp-story-page[active]:not(.i-amphtml-layout) amp-video.i-amphtml-poolbound {
+  display: none !important;
 }
 
 amp-story-grid-layer > * {
@@ -983,4 +1000,13 @@ amp-story-page .i-amphtml-story-page-open-attachment-label {
   text-overflow: ellipsis !important;
   text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.36) !important;
   white-space: nowrap !important;
+}
+
+amp-story-quiz {
+  align-self: center;
+  width: auto !important;
+  height: auto !important;
+  /* 224px = the width of a narrow phone (320px) - tap-safe margins (48px * 2) */
+  min-width: 224px !important;
+  max-width: 400px !important;
 }

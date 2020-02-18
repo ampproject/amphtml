@@ -170,7 +170,7 @@ describes.realWin(
     });
 
     it('has a minimum interval', () => {
-      let attrs = Object.assign({}, dftAttrs, {'data-poll-interval': 17000});
+      let attrs = {...dftAttrs, 'data-poll-interval': 17000};
       buildElement(elem, attrs);
       liveList.buildCallback();
       expect(liveList.element.getAttribute('data-poll-interval')).to.equal(
@@ -178,7 +178,7 @@ describes.realWin(
       );
       expect(liveList.getInterval()).to.equal(17000);
 
-      attrs = Object.assign({}, dftAttrs, {'data-poll-interval': 4000});
+      attrs = {...dftAttrs, 'data-poll-interval': 4000};
       buildElement(elem, attrs);
       liveList.buildCallback();
       expect(liveList.element.getAttribute('data-poll-interval')).to.equal(
@@ -190,7 +190,7 @@ describes.realWin(
     });
 
     it('should enforce max-items-per-page', () => {
-      let attrs = Object.assign({}, dftAttrs, {'data-max-items-per-page': ''});
+      let attrs = {...dftAttrs, 'data-max-items-per-page': ''};
       buildElement(elem, attrs);
       // Errors out because no data-max-items-per-page is given
       expect(liveList.element.getAttribute('data-max-items-per-page')).to.equal(
@@ -203,7 +203,7 @@ describes.realWin(
       });
 
       // Errors out because data-max-items-per-page does not exist
-      attrs = Object.assign({}, dftAttrs);
+      attrs = {...dftAttrs};
       expect('data-max-items-per-page' in attrs).to.be.true;
       delete attrs['data-max-items-per-page'];
       expect('data-max-items-per-page' in attrs).to.be.false;
@@ -215,7 +215,7 @@ describes.realWin(
       });
 
       // Errors out because data-max-items-per-page is not parseable as a number
-      attrs = Object.assign({}, dftAttrs, {'data-max-items-per-page': 'hello'});
+      attrs = {...dftAttrs, 'data-max-items-per-page': 'hello'};
       buildElement(elem, attrs);
       expect(liveList.element.getAttribute('data-max-items-per-page')).to.equal(
         'hello'
@@ -226,7 +226,7 @@ describes.realWin(
         }).to.throw(/must have data-max-items-per-page/);
       });
 
-      attrs = Object.assign({}, dftAttrs, {'data-max-items-per-page': '10'});
+      attrs = {...dftAttrs, 'data-max-items-per-page': '10'};
       buildElement(elem, attrs);
       expect(liveList.element.getAttribute('data-max-items-per-page')).to.equal(
         '10'
@@ -1038,10 +1038,7 @@ describes.realWin(
       // append child 2 first
       itemsSlot.appendChild(child2);
       itemsSlot.appendChild(child1);
-      buildElement(
-        elem,
-        Object.assign({}, dftAttrs, {'data-max-items-per-page': 2})
-      );
+      buildElement(elem, {...dftAttrs, 'data-max-items-per-page': 2});
       env.sandbox.stub(liveList, 'isElementBelowViewport_').returns(true);
       liveList.buildCallback();
       const removeChildSpy = env.sandbox.spy(
@@ -1088,10 +1085,7 @@ describes.realWin(
       // append child 2 first
       itemsSlot.appendChild(child2);
       itemsSlot.appendChild(child1);
-      buildElement(
-        elem,
-        Object.assign({}, dftAttrs, {'data-max-items-per-page': 2})
-      );
+      buildElement(elem, {...dftAttrs, 'data-max-items-per-page': 2});
       const pred = env.sandbox.stub(liveList, 'isElementBelowViewport_');
       // id1
       pred.onCall(0).returns(true);
@@ -1287,7 +1281,7 @@ describes.realWin(
         child2.setAttribute('data-sort-time', oldDate - 1);
         itemsSlot.appendChild(child1);
         itemsSlot.appendChild(child2);
-        buildElement(elem, Object.assign({}, dftAttrs, {'sort': 'ascending'}));
+        buildElement(elem, {...dftAttrs, 'sort': 'ascending'});
         liveList.buildCallback();
         expect(liveList.itemsSlot_.childElementCount).to.equal(2);
         expect(elem.querySelector('[update]')).to.have.class('amp-hidden');
@@ -1343,13 +1337,11 @@ describes.realWin(
         // append child 2 first
         itemsSlot.appendChild(child1);
         itemsSlot.appendChild(child2);
-        buildElement(
-          elem,
-          Object.assign({}, dftAttrs, {
-            'data-max-items-per-page': 2,
-            'sort': 'ascending',
-          })
-        );
+        buildElement(elem, {
+          ...dftAttrs,
+          'data-max-items-per-page': 2,
+          'sort': 'ascending',
+        });
         env.sandbox.stub(liveList, 'isElementAboveViewport_').returns(true);
         liveList.buildCallback();
         const removeChildSpy = env.sandbox.spy(
@@ -1396,13 +1388,11 @@ describes.realWin(
         // append child 2 first
         itemsSlot.appendChild(child1);
         itemsSlot.appendChild(child2);
-        buildElement(
-          elem,
-          Object.assign({}, dftAttrs, {
-            'data-max-items-per-page': 2,
-            'sort': 'ascending',
-          })
-        );
+        buildElement(elem, {
+          ...dftAttrs,
+          'data-max-items-per-page': 2,
+          'sort': 'ascending',
+        });
         const pred = env.sandbox.stub(liveList, 'isElementAboveViewport_');
         // id1
         pred.onCall(0).returns(true);

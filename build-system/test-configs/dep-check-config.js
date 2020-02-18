@@ -248,6 +248,13 @@ exports.rules = [
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/carousel.js',
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/carousel-events.js',
       'extensions/amp-carousel/0.2/amp-carousel.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
+      'extensions/amp-inline-gallery/0.1/amp-inline-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
+      'extensions/amp-inline-gallery/0.1/amp-inline-gallery-thumbnails.js->extensions/amp-base-carousel/0.1/carousel-events.js',
+      'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/action-source.js',
+      'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel.js',
+      'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/carousel-events.js',
+      'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/child-layout-manager.js',
+      'extensions/amp-stream-gallery/0.1/amp-stream-gallery.js->extensions/amp-base-carousel/0.1/responsive-attributes.js',
 
       // Facebook components
       'extensions/amp-facebook-page/0.1/amp-facebook-page.js->extensions/amp-facebook/0.1/facebook-loader.js',
@@ -263,6 +270,7 @@ exports.rules = [
       'extensions/amp-story/1.0/animation.js->extensions/amp-animation/0.1/web-animation-types.js',
       // Story ads
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/amp-story-store-service.js',
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/events.js',
       // TODO(#24080) Remove this when story ads have full ad network support.
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-ad-exit/0.1/config.js',
@@ -326,6 +334,8 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-minute-media-player/0.1/amp-minute-media-player.js->' +
         'src/service/video-manager-impl.js',
+      'extensions/amp-redbull-player/0.1/amp-redbull-player.js->' +
+        'src/service/video-manager-impl.js',
       'extensions/amp-vimeo/0.1/amp-vimeo.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-wistia-player/0.1/amp-wistia-player.js->' +
@@ -360,6 +370,12 @@ exports.rules = [
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
         'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-next-page/1.0/service.js->' +
+        'src/service/position-observer/position-observer-impl.js',
+      'extensions/amp-next-page/1.0/visibility-observer.js->' +
+        'src/service/position-observer/position-observer-worker.js',
+      'extensions/amp-next-page/1.0/visibility-observer.js->' +
+        'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->' +
         'src/service/notification-ui-manager.js',
       'extensions/amp-consent/0.1/amp-consent.js->' +
@@ -397,8 +413,6 @@ exports.rules = [
       'extensions/amp-experiment/1.0/amp-experiment.js->' +
         'src/service/origin-experiments-impl.js',
       'extensions/amp-script/0.1/amp-script.js->' +
-        'src/service/origin-experiments-impl.js',
-      'extensions/amp-live-list/0.1/live-list-manager.js->' +
         'src/service/origin-experiments-impl.js',
       // For action macros.
       'extensions/amp-action-macro/0.1/amp-action-macro.js->' +

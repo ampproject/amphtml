@@ -29,7 +29,6 @@ import {
   tryFocus,
 } from '../../../src/dom';
 import {dev, userAssert} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 import {mod} from '../../../src/utils/math';
 import {setModalAsClosed, setModalAsOpen} from '../../../src/modal';
 import {toArray} from '../../../src/types';
@@ -91,12 +90,6 @@ export class AmpMegaMenu extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    // TODO(#24898): remove this assert when cleaning up experiment post launch.
-    userAssert(
-      isExperimentOn(this.win, 'amp-mega-menu'),
-      'Turning on the amp-mega-menu experiment is necessary to use the amp-mega-menu component.'
-    );
-
     this.action_ = Services.actionServiceForDoc(this.element);
   }
 

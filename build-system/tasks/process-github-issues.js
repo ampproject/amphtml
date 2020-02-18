@@ -16,11 +16,12 @@
 'use strict';
 const argv = require('minimist')(process.argv.slice(2));
 const assert = require('assert');
-const BBPromise = require('bluebird');
 const colors = require('ansi-colors');
 const extend = require('util')._extend;
 const log = require('fancy-log');
-const request = BBPromise.promisify(require('request'));
+const util = require('util');
+
+const request = util.promisify(require('request'));
 
 const {GITHUB_ACCESS_TOKEN} = process.env;
 
@@ -121,7 +122,7 @@ function updateGitHubIssues() {
   for (let batch = 1; batch < NUM_BATCHES; batch++) {
     arrayPromises.push(getIssues(batch));
   }
-  return BBPromise.all(arrayPromises)
+  return Promise.all(arrayPromises)
     .then(requests => [].concat.apply([], requests))
     .then(issues => {
       const allIssues = issues;

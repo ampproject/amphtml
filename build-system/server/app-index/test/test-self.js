@@ -15,16 +15,15 @@
  */
 
 const amphtmlValidator = require('amphtml-validator');
-const BBPromise = require('bluebird');
-const fs = BBPromise.promisifyAll(require('fs'));
+const fs = require('fs');
 const path = require('path');
 const {expect} = require('chai');
-
 const {
   expectValidAmphtml,
   getBoundAttr,
   parseHtmlChunk,
 } = require('./helpers');
+
 
 describe('devdash', () => {
 
@@ -112,7 +111,7 @@ describe('devdash', () => {
         const validDocPath = path.join(__dirname,
             '../../../../validator/testdata/feature_tests/minimum_valid_amp.html');
 
-        const validDoc = (await fs.readFileAsync(validDocPath)).toString();
+        const validDoc = fs.readFileSync(validDocPath).toString();
 
         expectValidAmphtml(await amphtmlValidator.getInstance(), validDoc);
       });

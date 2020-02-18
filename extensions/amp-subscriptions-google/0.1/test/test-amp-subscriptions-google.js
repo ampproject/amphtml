@@ -23,6 +23,7 @@ import {
   ConfiguredRuntime,
   Entitlements,
   SubscribeResponse,
+  Entitlement as SwgEntitlement,
 } from '../../../../third_party/subscriptions-project/swg';
 import {
   Entitlement,
@@ -36,6 +37,7 @@ import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-fac
 import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
+const AMP_URL = 'myAMPurl.amp';
 
 describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let ampdoc;
@@ -60,6 +62,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     element = env.win.document.createElement('script');
     element.id = 'amp-subscriptions';
     env.win.document.head.appendChild(element);
+    env.sandbox.stub(ampdoc, 'getUrl').callsFake(() => AMP_URL);
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
@@ -137,6 +140,11 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     return stub.args[0][0];
   }
 
+  it('should set the current URL in analytics', () => {
+    const swgAnalytics = platform.runtime_.analytics();
+    expect(swgAnalytics.getContext().getUrl()).to.equal(AMP_URL);
+  });
+
   it('should reset runtime on platform reset', () => {
     expect(methods.reset).to.not.be.called;
     platform.reset();
@@ -158,7 +166,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     ]);
   });
 
-  it('should proxy fetch via AMP fetcher', () => {
+  it('should proxy fetch via AMP fetcher', async () => {
     const fetchStub = env.sandbox
       .stub(xhr, 'fetchJson')
       .callsFake((url, init) => {
@@ -168,18 +176,16 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
           prerenderSafe: true,
         });
         return Promise.resolve({
-          json: () => {
-            return Promise.resolve({entitlements: entitlementResponse});
-          },
+          json: () => Promise.resolve({entitlements: entitlementResponse}),
         });
       });
-    return platform.getEntitlements().then(ents => {
-      expect(ents.service).to.equal(PLATFORM_ID);
-      expect(fetchStub).to.be.calledOnce;
-    });
+
+    const ents = await platform.getEntitlements();
+    expect(ents.service).to.equal(PLATFORM_ID);
+    expect(fetchStub).to.be.calledOnce;
   });
 
-  it('should proxy fetch non-granting response', () => {
+  it('should proxy fetch non-granting response', async () => {
     const fetchStub = env.sandbox
       .stub(xhr, 'fetchJson')
       .callsFake((url, init) => {
@@ -189,65 +195,60 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
           prerenderSafe: true,
         });
         return Promise.resolve({
-          json: () => {
-            return Promise.resolve({
+          json: () =>
+            Promise.resolve({
               entitlements: {
                 source: 'subscribe.google.com',
                 products: ['example.org:registered_user'],
                 subscriptionToken: 'tok1',
               },
-            });
-          },
+            }),
         });
       });
-    return platform.getEntitlements().then(ents => {
-      expect(ents.source).to.equal(PLATFORM_ID);
-      expect(ents.granted).to.be.false;
-      expect(fetchStub).to.be.calledOnce;
-    });
+
+    const ents = await platform.getEntitlements();
+    expect(ents.source).to.equal(PLATFORM_ID);
+    expect(ents.granted).to.be.false;
+    expect(fetchStub).to.be.calledOnce;
   });
 
-  it('should proxy fetch empty response', () => {
-    env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-      return Promise.resolve({
-        json: () => {
-          return Promise.resolve({
+  it('should proxy fetch empty response', async () => {
+    env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
             entitlements: {},
-          });
-        },
-      });
-    });
-    return platform.getEntitlements().then(ents => {
-      expect(ents).to.be.null;
-    });
+          }),
+      })
+    );
+
+    const ents = await platform.getEntitlements();
+    expect(ents).to.be.null;
   });
 
-  it('should ack matching entitlements', () => {
-    env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-      return Promise.resolve({
-        json: () => {
-          return Promise.resolve({entitlements: entitlementResponse});
-        },
-      });
-    });
-    return platform.getEntitlements().then(() => {
-      expect(ackStub).to.be.calledOnce;
-    });
+  it('should ack matching entitlements', async () => {
+    env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () => Promise.resolve({entitlements: entitlementResponse}),
+      })
+    );
+
+    await platform.getEntitlements();
+    expect(ackStub).to.be.calledOnce;
   });
 
-  it('should NOT ack non-matching entitlements', () => {
-    env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-      return Promise.resolve({
-        json: () => {
-          return Promise.resolve({
+  it('should NOT ack non-matching entitlements', async () => {
+    env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+      Promise.resolve({
+        json: () =>
+          Promise.resolve({
             entitlements: {},
-          });
-        },
-      });
-    });
-    return platform.getEntitlements().then(() => {
-      expect(ackStub).to.not.be.called;
-    });
+          }),
+      })
+    );
+
+    await platform.getEntitlements();
+    expect(ackStub).to.not.be.called;
   });
 
   it('should ignore activate when granted', () => {
@@ -366,12 +367,30 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     callback(callbacks.flowCanceled)({flow: 'linkAccount'});
   });
 
-  it('should log subscribe start', () => {
-    analyticsMock
-      .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.STARTED)
-      .once();
-    callback(callbacks.flowStarted)({flow: Action.SUBSCRIBE});
+  describe('should log subscribe start', () => {
+    let productId;
+    let data;
+
+    afterEach(() => {
+      analyticsMock
+        .expects('actionEvent')
+        .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.STARTED, {
+          active: true,
+          product: productId,
+        })
+        .once();
+      callback(callbacks.flowStarted)({flow: Action.SUBSCRIBE, data});
+    });
+    it('should work without a productId', () => {
+      productId = 'unknown productId';
+    });
+
+    it('should work with a productId', () => {
+      productId = 'PRODUCTID';
+      data = {
+        product: productId,
+      };
+    });
   });
 
   it('should log subscribe cancel', () => {
@@ -382,28 +401,66 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     callback(callbacks.flowCanceled)({flow: Action.SUBSCRIBE});
   });
 
-  it('should reauthorize on complete subscribe', () => {
-    analyticsMock
-      .expects('actionEvent')
-      .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.SUCCESS)
-      .once();
-    const promise = Promise.resolve();
-    const response = new SubscribeResponse(
-      null,
-      null,
-      null,
-      null,
-      null,
-      () => promise
-    );
-    const resetPlatformsPromise = new Promise(resolve => {
-      env.sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
-        resolve();
+  describe('should reauthorize on complete subscribe', () => {
+    let productId;
+    let entitlements;
+    const serviceId = 'serviceId';
+
+    afterEach(() => {
+      analyticsMock
+        .expects('actionEvent')
+        .withExactArgs(PLATFORM_ID, Action.SUBSCRIBE, ActionStatus.SUCCESS, {
+          active: true,
+          product: productId,
+        })
+        .once();
+      const promise = Promise.resolve();
+      const response = new SubscribeResponse(
+        null,
+        null,
+        null,
+        entitlements,
+        productId,
+        () => promise,
+        null
+      );
+      const resetPlatformsPromise = new Promise(resolve => {
+        env.sandbox.stub(serviceAdapter, 'resetPlatforms').callsFake(() => {
+          resolve();
+        });
       });
+      callback(callbacks.subscribeResponse)(Promise.resolve(response));
+      expect(methods.reset).to.not.be.called;
+      return resetPlatformsPromise;
     });
-    callback(callbacks.subscribeResponse)(Promise.resolve(response));
-    expect(methods.reset).to.not.be.called;
-    return resetPlatformsPromise;
+
+    it('should work without entitlements', () => {
+      productId = 'unknown subscriptionToken';
+      entitlements = null;
+    });
+
+    it('should work with poorly formatted entitlements', () => {
+      productId = 'unknown subscriptionToken';
+      entitlements = new Entitlements(
+        serviceId,
+        null,
+        [new SwgEntitlement(null, [productId], null)],
+        productId
+      );
+    });
+
+    it('should work with Google formatted entitlements', () => {
+      productId = 'myProduct';
+      const token = JSON.stringify({
+        productId,
+      });
+      entitlements = new Entitlements(
+        serviceId,
+        null,
+        [new SwgEntitlement('google', [productId], token)],
+        productId
+      );
+    });
   });
 
   it('should delegate native subscribe request', () => {
@@ -415,7 +472,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     callback(callbacks.subscribeRequest)();
   });
 
-  it('should reset on successful login', () => {
+  it('should reset on successful login', async () => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
@@ -423,12 +480,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
-    return loginResult.then(() => {
-      expect(methods.reset).to.be.calledOnce.calledWithExactly();
-    });
+
+    await loginResult;
+    expect(methods.reset).to.be.calledOnce.calledWithExactly();
   });
 
-  it('should NOT reset on failed login', () => {
+  it('should NOT reset on failed login', async () => {
     const loginResult = Promise.resolve(false);
     serviceAdapterMock
       .expects('delegateActionToLocal')
@@ -436,12 +493,12 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       .returns(loginResult)
       .once();
     callback(callbacks.loginRequest)({linkRequested: false});
-    return loginResult.then(() => {
-      expect(methods.reset).to.not.be.called;
-    });
+
+    await loginResult;
+    expect(methods.reset).to.not.be.called;
   });
 
-  it('should reset on successful subscribe', () => {
+  it('should reset on successful subscribe', async () => {
     const loginResult = Promise.resolve(true);
     serviceAdapterMock
       .expects('delegateActionToLocal')
@@ -449,9 +506,9 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       .returns(loginResult)
       .once();
     callback(callbacks.subscribeRequest)();
-    return loginResult.then(() => {
-      expect(methods.reset).to.be.calledOnce.calledWithExactly();
-    });
+
+    await loginResult;
+    expect(methods.reset).to.be.calledOnce.calledWithExactly();
   });
 
   it('should infer the viewer from viewerUrl', () => {
@@ -464,36 +521,29 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     expect(platform.isGoogleViewer_).to.be.true;
   });
 
-  it('should infer the viewer from origin', () => {
+  it('should infer the viewer from origin', async () => {
     delete ampdoc.params_['viewerUrl'];
     let viewerOrigin = null;
     env.sandbox.stub(viewer, 'getViewerOrigin').callsFake(() => viewerOrigin);
 
-    return Promise.resolve()
-      .then(() => {
-        viewerOrigin = Promise.resolve('');
-        platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
-        return viewerOrigin;
-      })
-      .then(() => {
-        expect(platform.isGoogleViewer_).to.be.false;
+    await 'Event loop tick';
 
-        // Other origin.
-        viewerOrigin = Promise.resolve('https://other.com');
-        platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
-        return viewerOrigin;
-      })
-      .then(() => {
-        expect(platform.isGoogleViewer_).to.be.false;
+    viewerOrigin = Promise.resolve('');
+    platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
+    await viewerOrigin;
+    expect(platform.isGoogleViewer_).to.be.false;
 
-        // Google origin.
-        viewerOrigin = Promise.resolve('https://google.com');
-        platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
-        return viewerOrigin;
-      })
-      .then(() => {
-        expect(platform.isGoogleViewer_).to.be.true;
-      });
+    // Other origin.
+    viewerOrigin = Promise.resolve('https://other.com');
+    platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
+    await viewerOrigin;
+    expect(platform.isGoogleViewer_).to.be.false;
+
+    // Google origin.
+    viewerOrigin = Promise.resolve('https://google.com');
+    platform = new GoogleSubscriptionsPlatform(ampdoc, {}, serviceAdapter);
+    await viewerOrigin;
+    expect(platform.isGoogleViewer_).to.be.true;
   });
 
   it('should allow prerender if in a google viewer', () => {
@@ -595,41 +645,38 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   });
 
   describe('getEntitlements', () => {
-    it('should convert granted entitlements to internal shape', () => {
-      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-        return Promise.resolve({
-          json: () => {
-            return Promise.resolve({entitlements: entitlementResponse});
-          },
-        });
-      });
-      return platform.getEntitlements().then(entitlement => {
-        expect(entitlement.source).to.be.equal('google');
-        expect(entitlement.granted).to.be.equal(true);
-        expect(entitlement.grantReason).to.be.equal(GrantReason.SUBSCRIBER);
-        expect(entitlement.data).to.deep.equal(entitlementResponse);
-      });
+    it('should convert granted entitlements to internal shape', async () => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({entitlements: entitlementResponse}),
+        })
+      );
+
+      const entitlement = await platform.getEntitlements();
+      expect(entitlement.source).to.be.equal('google');
+      expect(entitlement.granted).to.be.equal(true);
+      expect(entitlement.grantReason).to.be.equal(GrantReason.SUBSCRIBER);
+      expect(entitlement.data).to.deep.equal(entitlementResponse);
     });
 
-    it('should convert non granted internal shape with granted == false', () => {
-      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-        return Promise.resolve({
-          json: () => {
-            return Promise.resolve({
+    it('should convert non granted internal shape with granted == false', async () => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+        Promise.resolve({
+          json: () =>
+            Promise.resolve({
               entitlements: {
                 source: 'google',
                 products: ['example.org:premium'],
                 subscriptionToken: '',
               },
-            });
-          },
-        });
-      });
-      return platform.getEntitlements().then(entitlement => {
-        expect(entitlement.source).to.be.equal('google');
-        expect(entitlement.granted).to.be.equal(false);
-        expect(entitlement.grantReason).to.be.null;
-      });
+            }),
+        })
+      );
+
+      const entitlement = await platform.getEntitlements();
+      expect(entitlement.source).to.be.equal('google');
+      expect(entitlement.granted).to.be.equal(false);
+      expect(entitlement.grantReason).to.be.null;
     });
   });
 
@@ -649,118 +696,104 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
       };
     }
 
-    it('should treat missing isReadyToPay as false', () => {
-      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-        return Promise.resolve({
-          json: () => {
-            return Promise.resolve({entitlements: entitlementResponse});
-          },
-        });
-      });
-      return platform.getEntitlements().then(() => {
-        expect(
-          platform.getSupportedScoreFactor(
-            SubscriptionsScoreFactor.IS_READY_TO_PAY
-          )
-        ).to.equal(0);
-      });
+    it('should treat missing isReadyToPay as false', async () => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({entitlements: entitlementResponse}),
+        })
+      );
+
+      await platform.getEntitlements();
+      expect(
+        platform.getSupportedScoreFactor(
+          SubscriptionsScoreFactor.IS_READY_TO_PAY
+        )
+      ).to.equal(0);
     });
 
-    it('should handle isReadyToPay true', () => {
-      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-        return Promise.resolve({
-          json: () => {
-            return Promise.resolve({
+    it('should handle isReadyToPay true', async () => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+        Promise.resolve({
+          json: () =>
+            Promise.resolve({
               isReadyToPay: true,
               entitlements: entitlementResponse,
-            });
-          },
-        });
-      });
+            }),
+        })
+      );
       //#TODO(jpettitt) remove stub when swj.js isRadyToPay is available
       env.sandbox
         .stub(platform.runtime_, 'getEntitlements')
         .resolves(fakeEntitlements(true));
 
-      return platform.getEntitlements().then(() => {
-        expect(
-          platform.getSupportedScoreFactor(
-            SubscriptionsScoreFactor.IS_READY_TO_PAY
-          )
-        ).to.equal(1);
-      });
+      await platform.getEntitlements();
+      expect(
+        platform.getSupportedScoreFactor(
+          SubscriptionsScoreFactor.IS_READY_TO_PAY
+        )
+      ).to.equal(1);
     });
 
-    it('should handle isReadyToPay false', () => {
-      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-        return Promise.resolve({
-          json: () => {
-            return Promise.resolve({
+    it('should handle isReadyToPay false', async () => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+        Promise.resolve({
+          json: () =>
+            Promise.resolve({
               isReadyToPay: false,
               entitlements: entitlementResponse,
-            });
-          },
-        });
-      });
+            }),
+        })
+      );
       //#TODO(jpettitt) remove stub when swj.js isRadyToPay is available
       env.sandbox
         .stub(platform.runtime_, 'getEntitlements')
         .resolves(fakeEntitlements(false));
 
-      return platform.getEntitlements().then(() => {
-        expect(
-          platform.getSupportedScoreFactor(
-            SubscriptionsScoreFactor.IS_READY_TO_PAY
-          )
-        ).to.equal(0);
-      });
+      await platform.getEntitlements();
+      expect(
+        platform.getSupportedScoreFactor(
+          SubscriptionsScoreFactor.IS_READY_TO_PAY
+        )
+      ).to.equal(0);
     });
 
-    it('should call getEncryptedDocumentKey with google.com', () => {
-      env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-        return Promise.resolve({
-          json: () => {
-            return Promise.resolve({entitlements: {}});
-          },
-        });
-      });
-      return platform.getEntitlements().then(() => {
-        expect(getEncryptedDocumentKeyStub).to.be.calledWith('google.com');
-      });
+    it('should call getEncryptedDocumentKey with google.com', async () => {
+      env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({entitlements: {}}),
+        })
+      );
+
+      await platform.getEntitlements();
+      expect(getEncryptedDocumentKeyStub).to.be.calledWith('google.com');
     });
 
-    it('should not add encryptedDocumentKey parameter to url', () => {
-      const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-        return Promise.resolve({
-          json: () => {
-            return Promise.resolve({entitlements: {}});
-          },
-        });
-      });
-      return platform.getEntitlements().then(() => {
-        return expect(fetchStub).to.be.calledWith(
-          'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements'
-        );
-      });
+    it('should not add encryptedDocumentKey parameter to url', async () => {
+      const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({entitlements: {}}),
+        })
+      );
+
+      await platform.getEntitlements();
+      expect(fetchStub).to.be.calledWith(
+        'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements'
+      );
     });
 
-    it('should add encryptedDocumentKey parameter to url', () => {
-      const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() => {
-        return Promise.resolve({
-          json: () => {
-            return Promise.resolve({entitlements: {}});
-          },
-        });
-      });
+    it('should add encryptedDocumentKey parameter to url', async () => {
+      const fetchStub = env.sandbox.stub(xhr, 'fetchJson').callsFake(() =>
+        Promise.resolve({
+          json: () => Promise.resolve({entitlements: {}}),
+        })
+      );
 
-      getEncryptedDocumentKeyStub.callsFake(() => {
-        return 'encryptedDocumentKey';
-      });
-      return platform.getEntitlements().then(() => {
-        return expect(fetchStub).to.be.calledWith(
-          'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?crypt=encryptedDocumentKey'
-        );
-      });
+      getEncryptedDocumentKeyStub.callsFake(() => 'encryptedDocumentKey');
+
+      await platform.getEntitlements();
+      expect(fetchStub).to.be.calledWith(
+        'https://news.google.com/swg/_/api/v1/publication/example.org/entitlements?crypt=encryptedDocumentKey'
+      );
     });
   });
 });

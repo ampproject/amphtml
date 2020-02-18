@@ -19,6 +19,8 @@ import {Deferred} from '../../../src/utils/promise';
 import {Layout, isLayoutSizeDefined} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {VideoAttributes, VideoEvents} from '../../../src/video-interface';
+import {redispatch} from '../../../src/iframe-video';
+import {startsWith} from '../../../src/string';
 
 import {dev, userAssert} from '../../../src/log';
 import {
@@ -32,6 +34,17 @@ import {getIframe} from '../../../src/3p-frame';
 import {installVideoManagerForDoc} from '../../../src/service/video-manager-impl';
 
 const TAG = 'amp-viqeo-player';
+
+const EVENTS = {
+  'ready': VideoEvents.LOAD,
+  'play': VideoEvents.PLAYING,
+  'pause': VideoEvents.PAUSE,
+  'mute': VideoEvents.MUTED,
+  'unmute': VideoEvents.UNMUTED,
+  'end': VideoEvents.ENDED,
+  'startAdvert': VideoEvents.AD_START,
+  'endAdvert': VideoEvents.AD_END,
+};
 
 /**
  * @implements {../../../src/video-interface.VideoInterface}
@@ -50,20 +63,17 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     /** @private {?Function} */
     this.playerReadyResolver_ = null;
 
-    /** @private {?number} */
-    this.volume_ = null;
-
     /** @private {?Function} */
     this.unlistenMessage_ = null;
-
-    /** @private {?Object} */
-    this.viqeoPlayer_ = null;
 
     /** @private {boolean} */
     this.hasAutoplay_ = false;
 
     /** @private {string} */
     this.videoId_ = '';
+
+    /** @private {Object<string, (number|Array)>} */
+    this.meta_ = {};
   }
 
   /**
@@ -114,6 +124,7 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
     installVideoManagerForDoc(this.element);
     Services.videoManagerForDoc(this.element).register(this);
+    this.playerReadyResolver_(this.iframe_);
   }
 
   /** @override */
@@ -162,26 +173,16 @@ class AmpViqeoPlayer extends AMP.BaseElement {
     ) {
       return;
     }
-
     const action = eventData['action'];
-    if (action === 'ready') {
-      this.element.dispatchCustomEvent(VideoEvents.LOAD);
-      this.playerReadyResolver_(this.iframe_);
-    } else if (action === 'play') {
-      this.element.dispatchCustomEvent(VideoEvents.PLAYING);
-    } else if (action === 'pause') {
-      this.element.dispatchCustomEvent(VideoEvents.PAUSE);
-    } else if (action === 'mute') {
-      this.element.dispatchCustomEvent(VideoEvents.MUTED);
-    } else if (action === 'unmute') {
-      this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
-    } else if (action === 'volume') {
-      this.volume_ = parseFloat(eventData['value']);
-      if (this.volume_ === 0) {
-        this.element.dispatchCustomEvent(VideoEvents.MUTED);
-      } else {
-        this.element.dispatchCustomEvent(VideoEvents.UNMUTED);
-      }
+    if (redispatch(this.element, action, EVENTS)) {
+      return;
+    }
+    if (startsWith(action, 'update')) {
+      const key = action.replace(
+        /^update([A-Z])(.*)$/,
+        (_, c, rest) => c.toLowerCase() + rest
+      );
+      this.meta_[key] = eventData['value'];
     }
   }
 
@@ -309,24 +310,19 @@ class AmpViqeoPlayer extends AMP.BaseElement {
 
   /** @override */
   getCurrentTime() {
-    if (!this.viqeoPlayer_) {
-      return 0;
-    }
-    return this.viqeoPlayer_.getCurrentTime();
+    return /** @type {number} */ (this.meta_['currentTime'] || 0);
   }
 
   /** @override */
   getDuration() {
-    if (!this.viqeoPlayer_) {
-      return 1;
-    }
-    return this.viqeoPlayer_.getDuration();
+    return /** @type {number} */ (this.meta_['duration'] || 1);
   }
 
   /** @override */
   getPlayedRanges() {
-    // Not supported.
-    return [];
+    return (
+      /** @type {!Array<!Array<number>>} */ (this.meta_['playedRanges'] || [])
+    );
   }
 
   /**

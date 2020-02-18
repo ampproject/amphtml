@@ -60,8 +60,8 @@ export class AmpStoryAffiliateLink {
     /** @private {string} */
     this.text_ = this.element_.textContent;
 
-    /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win_.document));
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win_.document));
 
     /** @private @const {!./story-analytics.StoryAnalyticsService} */
     this.analyticsService_ = getAnalyticsService(this.win_, element);
@@ -75,7 +75,7 @@ export class AmpStoryAffiliateLink {
       return;
     }
 
-    this.resources_.mutateElement(this.element_, () => {
+    this.mutator_.mutateElement(this.element_, () => {
       this.element_.textContent = '';
       this.element_.toggleAttribute('pristine', true);
       this.addPulseElement_();

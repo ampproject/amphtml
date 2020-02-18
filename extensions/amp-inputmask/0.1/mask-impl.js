@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpEvents} from '../../../src/amp-events';
 import {MASK_SEPARATOR_CHAR, MaskChars, NamedMasks} from './constants';
 import {MaskInterface} from './mask-interface';
 import {dict} from '../../../src/utils/object';
@@ -95,6 +96,10 @@ export class Mask {
     }
 
     this.controller_ = this.Inputmask_(config);
+
+    this.element_.addEventListener(AmpEvents.FORM_VALUE_CHANGE, () => {
+      this.mask();
+    });
   }
 
   /**

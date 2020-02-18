@@ -57,6 +57,6 @@ feature_tests/several_errors.html:40:2 The attribute 'height' in tag 'amp-ad' is
 >>       ^~~~~~~~~
 feature_tests/several_errors.html:43:6 The mandatory tag 'meta name=viewport' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 >>       ^~~~~~~~~
-feature_tests/several_errors.html:43:6 The mandatory tag 'amphtml engine v0.js script' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
->>       ^~~~~~~~~
 feature_tests/several_errors.html:43:6 The tag 'amp-ad extension .js script' is missing or incorrect, but required by 'amp-ad'. This will soon be an error. (see https://amp.dev/documentation/components/amp-ad)
+>>       ^~~~~~~~~
+feature_tests/several_errors.html:43:6 The mandatory tag 'amphtml engine v0.js script' is missing or incorrect. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)

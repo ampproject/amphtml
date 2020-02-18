@@ -27,7 +27,7 @@ import {
   registerServiceBuilder,
   resetServiceForTesting,
 } from '../../../../src/service';
-import {toggleExperiment} from '../../../../src/experiments';
+import {xhrServiceForTesting} from '../../../../src/service/xhr-impl';
 
 describes.realWin(
   'amp-consent',
@@ -52,7 +52,6 @@ describes.realWin(
       doc = env.win.document;
       ampdoc = env.ampdoc;
       win = env.win;
-      toggleExperiment(win, 'amp-consent-v2', true);
 
       storageValue = {};
       jsonMockResponses = {
@@ -63,6 +62,7 @@ describes.realWin(
         'https://geo-override-check2/': '{"consentRequired": true}',
         'http://www.origin.com/r/1': '{}',
         'https://invalid.response.com/': '{"consentRequired": 3}',
+        'https://xssi-prefix/': 'while(1){"consentRequired": false}',
       };
 
       xhrServiceMock = {
@@ -74,8 +74,12 @@ describes.realWin(
             json() {
               return Promise.resolve(JSON.parse(jsonMockResponses[url]));
             },
+            text() {
+              return Promise.resolve(jsonMockResponses[url]);
+            },
           });
         },
+        xssiJson: xhrServiceForTesting(win).xssiJson,
       };
 
       storageMock = {
@@ -219,17 +223,22 @@ describes.realWin(
             expect(isRequired).to.be.true;
           });
       });
+
+      it('respects the xssiPrefix option', async () => {
+        const remoteConfig = {
+          'consentInstanceId': 'abc',
+          'checkConsentHref': 'https://xssi-prefix/',
+          'xssiPrefix': 'while(1)',
+        };
+        ampConsent = getAmpConsent(doc, remoteConfig);
+        await ampConsent.buildCallback();
+        expect(await ampConsent.getConsentRequiredPromiseForTesting()).to.be
+          .false;
+      });
     });
 
     describe('geo-override server communication', () => {
       let ampConsent;
-      beforeEach(() => {
-        toggleExperiment(win, 'amp-consent-geo-override', true);
-      });
-
-      afterEach(() => {
-        toggleExperiment(win, 'amp-consent-geo-override', false);
-      });
 
       it('checks local storage before making sever request', async () => {
         const config = {
@@ -254,7 +263,7 @@ describes.realWin(
           .true;
       });
 
-      it('respects exisitng local storage decision', async () => {
+      it('respects existing local storage decision', async () => {
         const config = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
@@ -558,9 +567,7 @@ describes.realWin(
             'https://expire-cache/':
               '{"expireCache": true,"consentRequired": true, "consentStateValue": null, "consentString": null}',
             'https://expire-cache-2/':
-              '{"expireCache": true,"consentRequired": true, "consentStateValue": "accepted", "consentString": "myconsentstring"}',
-            'https://expire-cache-3/':
-              '{"expireCache": true,"consentRequired": false, "consentStateValue": null, "consentString": null}',
+              '{"expireCache": true,"consentRequired": true, "consentStateValue": "invalidState"}',
           };
         });
 
@@ -569,6 +576,37 @@ describes.realWin(
             'consentInstanceId': 'abc',
             'consentRequired': 'remote',
             'checkConsentHref': 'https://expire-cache/',
+          };
+          // 0 represents 'rejected' in storage
+          storageValue = {
+            'amp-consent:abc': {
+              [STORAGE_KEY.STATE]: 0,
+              [STORAGE_KEY.STRING]: 'mystring',
+            },
+          };
+          ampConsent = getAmpConsent(doc, inlineConfig);
+          await ampConsent.buildCallback();
+          await macroTask();
+          const stateManagerInfo = await ampConsent
+            .getConsentStateManagerForTesting()
+            .getSavedInstanceForTesting();
+          const stateValue = getConsentStateValue(
+            stateManagerInfo.consentState
+          );
+
+          expect(stateValue).to.equal('rejected');
+          expect(stateManagerInfo).to.deep.equal({
+            'consentState': 2,
+            'consentString': 'mystring',
+            'isDirty': true,
+          });
+        });
+
+        it('should not update cache with invalid consent info', async () => {
+          const inlineConfig = {
+            'consentInstanceId': 'abc',
+            'consentRequired': 'remote',
+            'checkConsentHref': 'https://expire-cache-2/',
           };
           // 0 represents 'rejected' in storage
           storageValue = {
@@ -703,19 +741,6 @@ describes.realWin(
         expect(actionSpy).to.not.be.called;
       });
 
-      it('ignore info w/o amp-consent-v2 flag', () => {
-        // TODO(@zhouyx): Remove with amp-consent-v2 flag
-        toggleExperiment(win, 'amp-consent-v2', false);
-        event.data = {
-          'type': 'consent-response',
-          'action': 'accept',
-          'info': 'accept-string',
-        };
-        event.source = iframe.contentWindow;
-        win.dispatchEvent(event);
-        expect(actionSpy).to.be.calledWith(ACTION_TYPE.ACCEPT, undefined);
-      });
-
       it('ignore msg from incorrect source', () => {
         event.data = {
           'type': 'consent-response',
@@ -778,12 +803,7 @@ describes.realWin(
         });
       });
 
-      afterEach(() => {
-        toggleExperiment(win, 'amp-consent-geo-override', false);
-      });
-
       it('should not show promptUI if local storage has decision', async () => {
-        toggleExperiment(win, 'amp-consent-geo-override', true);
         const config = {
           'consentInstanceId': 'abc',
           'consentRequired': 'remote',
@@ -898,7 +918,6 @@ describes.realWin(
 
         describe('hide/show postPromptUI with local storage', () => {
           beforeEach(() => {
-            toggleExperiment(win, 'amp-consent-geo-override', true);
             defaultConfig = dict({
               'consentInstanceId': 'ABC',
               'consentRequired': true,
@@ -910,10 +929,6 @@ describes.realWin(
             consentElement.appendChild(postPromptUI);
             doc.body.appendChild(consentElement);
             ampConsent = new AmpConsent(consentElement);
-          });
-
-          afterEach(() => {
-            toggleExperiment(win, 'amp-consent-geo-override', false);
           });
 
           it('hides postPromptUI with no local storage decision', async () => {
