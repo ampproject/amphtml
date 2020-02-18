@@ -74,5 +74,10 @@ amp-story[i-amphtml-vertical].i-amphtml-element amp-story-page.i-amphtml-element
 [i-amphtml-vertical] .i-amphtml-story-page-description > * {
   background: white !important;
   color: black !important;
-  font-size: 0.8rem !important;
+  font-size: 1rem !important;
+}
+
+
+[i-amphtml-vertical] .i-amphtml-story-page-description > h2 {
+  font-size: 1.5rem !important;
 }
