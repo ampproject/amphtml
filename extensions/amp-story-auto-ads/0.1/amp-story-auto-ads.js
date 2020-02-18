@@ -247,12 +247,30 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
 
   /**
    * Determines whether or not ad insertion is allowed based on how the story
-   * is served.
+   * is served, and the number of pages in the story.
    * @return {boolean}
    * @private
    */
   isAutomaticAdInsertionAllowed_() {
-    return !!this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD);
+    return (
+      !!this.storeService_.get(StateProperty.CAN_INSERT_AUTOMATIC_AD) &&
+      this.enoughPagesLeftInStory_(0) // Beginning of story.
+    );
+  }
+
+  /**
+   * Determine if enough pages in the story are left for ad placement to be
+   * possible.
+   * TODO(ccordry): also use this on subsequent ad requests.
+   * @param {number} pageIndex
+   * @return {boolean}
+   * @private
+   */
+  enoughPagesLeftInStory_(pageIndex) {
+    return (
+      this.storeService_.get(StateProperty.PAGE_IDS).length - pageIndex >
+      MIN_INTERVAL
+    );
   }
 
   /**
@@ -376,7 +394,8 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
       this.config_,
       index,
       this.localizationService_,
-      devAssert(this.buttonFitter_)
+      devAssert(this.buttonFitter_),
+      devAssert(this.storeService_)
     );
 
     this.maybeForceAdPlacement_(page);
@@ -442,19 +461,24 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
     if (this.adPageIds_[pageId]) {
       // We are switching to an ad.
       const adIndex = this.adPageIds_[pageId];
+      const adPage = this.adPages_[adIndex - 1];
+
+      if (!adPage.hasBeenViewed()) {
+        this.pendingAdView_ = false;
+        this.resetPageCount_();
+        if (this.enoughPagesLeftInStory_(pageIndex)) {
+          this.startNextAdPage_();
+        }
+      }
+
       // Tell the iframe that it is visible.
-      this.setVisibleAttribute_(this.adPages_[adIndex - 1]);
+      this.setVisibleAttribute_(adPage);
+
       // Fire the view event on the corresponding Ad.
       this.analyticsEvent_(AnalyticsEvents.AD_VIEWED, {
         [AnalyticsVars.AD_VIEWED]: Date.now(),
         [AnalyticsVars.AD_INDEX]: adIndex,
       });
-
-      // Previously inserted ad has been viewed.
-      this.pendingAdView_ = false;
-
-      // Start loading next ad.
-      this.startNextAdPage_();
 
       // Keeping track of this here so that we can contain the logic for when
       // we exit the ad within this extension.
@@ -484,7 +508,7 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
           this.analyticsEventWithCurrentAd_(AnalyticsEvents.AD_DISCARDED, {
             [AnalyticsVars.AD_DISCARDED]: Date.now(),
           });
-          this.startNextAdPage_(/* failure */ true);
+          this.startNextAdPage_();
         }
       });
     }
@@ -544,19 +568,20 @@ export class AmpStoryAutoAds extends AMP.BaseElement {
   /**
    * Start the process over.
    * @private
-   * @param {boolean=} opt_failure If we are calling this due to failed ad.
    */
-  startNextAdPage_(opt_failure) {
+  startNextAdPage_() {
     if (!this.firstAdViewed_) {
       this.firstAdViewed_ = true;
     }
-
-    if (!opt_failure) {
-      // Don't reset the count on a failed ad.
-      this.uniquePagesCount_ = 0;
-    }
-
     this.schedulePage_();
+  }
+
+  /**
+   * Reset the counter that tracks when to place ads.
+   * @private
+   */
+  resetPageCount_() {
+    this.uniquePagesCount_ = 0;
   }
 
   /**

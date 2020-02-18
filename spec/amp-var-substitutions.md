@@ -236,6 +236,7 @@ The tables below list the available URL variables grouped by type of usage. Furt
 | [Backgrounded At Start](#backgrounded-at-start)             | N/A               | `${backgroundedAtStart}`      |
 | [Carousel From Slide](#carousel-from-slide)                 | N/A               | `${fromSlide}`                |
 | [Carousel To Slide](#carousel-to-slide)                     | N/A               | `${toSlide}`                  |
+| [Element Id](#element-id)                                   | N/A               | `${elementId}`                |
 | [Element Height](#element-height)                           | N/A               | `${elementHeight}`            |
 | [Element Width](#element-width)                             | N/A               | `${elementWidth}`             |
 | [Element X](#element-x)                                     | N/A               | `${elementX}`                 |

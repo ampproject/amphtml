@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.84 */
+/** Version: 0.1.22.93 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -47,6 +47,12 @@ const AnalyticsEvent = {
   IMPRESSION_LINK: 12,
   IMPRESSION_SAVE_SUBSCR_TO_GOOGLE: 13,
   IMPRESSION_GOOGLE_UPDATED: 14,
+  IMPRESSION_SHOW_OFFERS_SMARTBOX: 15,
+  IMPRESSION_SHOW_OFFERS_SWG_BUTTON: 16,
+  IMPRESSION_SELECT_OFFER_SMARTBOX: 17,
+  IMPRESSION_SELECT_OFFER_SWG_BUTTON: 18,
+  IMPRESSION_SHOW_CONTRIBUTIONS_SWG_BUTTON: 19,
+  IMPRESSION_SELECT_CONTRIBUTION_SWG_BUTTON: 20,
   ACTION_SUBSCRIBE: 1000,
   ACTION_PAYMENT_COMPLETE: 1001,
   ACTION_ACCOUNT_CREATED: 1002,
@@ -64,6 +70,10 @@ const AnalyticsEvent = {
   ACTION_USER_CANCELED_PAYFLOW: 1014,
   ACTION_SAVE_SUBSCR_TO_GOOGLE_CONTINUE: 1015,
   ACTION_SAVE_SUBSCR_TO_GOOGLE_CANCEL: 1016,
+  ACTION_SWG_BUTTON_SHOW_OFFERS_CLICK: 1017,
+  ACTION_SWG_BUTTON_SELECT_OFFER_CLICK: 1018,
+  ACTION_SWG_BUTTON_SHOW_CONTRIBUTIONS_CLICK: 1019,
+  ACTION_SWG_BUTTON_SELECT_CONTRIBUTION_CLICK: 1020,
   EVENT_PAYMENT_FAILED: 2000,
   EVENT_CUSTOM: 3000,
   EVENT_CONFIRM_TX_ID: 3001,
@@ -230,6 +240,12 @@ class AnalyticsContext {
 
     /** @private {!Array<string>} */
     this.label_ = data[9] || [];
+
+    /** @private {?string} */
+    this.clientVersion_ = (data[10] == null) ? null : data[10];
+
+    /** @private {?string} */
+    this.url_ = (data[11] == null) ? null : data[11];
   }
 
   /**
@@ -359,6 +375,34 @@ class AnalyticsContext {
   }
 
   /**
+   * @return {?string}
+   */
+  getClientVersion() {
+    return this.clientVersion_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setClientVersion(value) {
+    this.clientVersion_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getUrl() {
+    return this.url_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setUrl(value) {
+    this.url_ = value;
+  }
+
+  /**
    * @return {!Array}
    * @override
    */
@@ -374,6 +418,8 @@ class AnalyticsContext {
       this.sku_,  // field 7 - sku
       this.readyToPay_,  // field 8 - ready_to_pay
       this.label_,  // field 9 - label
+      this.clientVersion_,  // field 10 - client_version
+      this.url_,  // field 11 - url
     ];
   }
 
@@ -706,6 +752,71 @@ class EventParams {
 /**
  * @implements {Message}
  */
+class FinishedLoggingResponse {
+ /**
+  * @param {!Array=} data
+  */
+  constructor(data = []) {
+
+    /** @private {?boolean} */
+    this.complete_ = (data[1] == null) ? null : data[1];
+
+    /** @private {?string} */
+    this.error_ = (data[2] == null) ? null : data[2];
+  }
+
+  /**
+   * @return {?boolean}
+   */
+  getComplete() {
+    return this.complete_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setComplete(value) {
+    this.complete_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getError() {
+    return this.error_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setError(value) {
+    this.error_ = value;
+  }
+
+  /**
+   * @return {!Array}
+   * @override
+   */
+  toArray() {
+    return [
+      this.label(),  // message label
+      this.complete_,  // field 1 - complete
+      this.error_,  // field 2 - error
+    ];
+  }
+
+  /**
+   * @return {string}
+   * @override
+   */
+  label() {
+    return 'FinishedLoggingResponse';
+  }
+}
+
+/**
+ * @implements {Message}
+ */
 class LinkSaveTokenRequest {
  /**
   * @param {!Array=} data
@@ -829,6 +940,15 @@ class SkuSelectedResponse {
 
     /** @private {?string} */
     this.oldSku_ = (data[2] == null) ? null : data[2];
+
+    /** @private {?boolean} */
+    this.oneTime_ = (data[3] == null) ? null : data[3];
+
+    /** @private {?string} */
+    this.playOffer_ = (data[4] == null) ? null : data[4];
+
+    /** @private {?string} */
+    this.oldPlayOffer_ = (data[5] == null) ? null : data[5];
   }
 
   /**
@@ -860,6 +980,48 @@ class SkuSelectedResponse {
   }
 
   /**
+   * @return {?boolean}
+   */
+  getOneTime() {
+    return this.oneTime_;
+  }
+
+  /**
+   * @param {boolean} value
+   */
+  setOneTime(value) {
+    this.oneTime_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getPlayOffer() {
+    return this.playOffer_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setPlayOffer(value) {
+    this.playOffer_ = value;
+  }
+
+  /**
+   * @return {?string}
+   */
+  getOldPlayOffer() {
+    return this.oldPlayOffer_;
+  }
+
+  /**
+   * @param {string} value
+   */
+  setOldPlayOffer(value) {
+    this.oldPlayOffer_ = value;
+  }
+
+  /**
    * @return {!Array}
    * @override
    */
@@ -868,6 +1030,9 @@ class SkuSelectedResponse {
       this.label(),  // message label
       this.sku_,  // field 1 - sku
       this.oldSku_,  // field 2 - old_sku
+      this.oneTime_,  // field 3 - one_time
+      this.playOffer_,  // field 4 - play_offer
+      this.oldPlayOffer_,  // field 5 - old_play_offer
     ];
   }
 
@@ -1029,6 +1194,7 @@ const PROTO_MAP = {
   'AnalyticsRequest': AnalyticsRequest,
   'EntitlementsResponse': EntitlementsResponse,
   'EventParams': EventParams,
+  'FinishedLoggingResponse': FinishedLoggingResponse,
   'LinkSaveTokenRequest': LinkSaveTokenRequest,
   'LinkingInfoResponse': LinkingInfoResponse,
   'SkuSelectedResponse': SkuSelectedResponse,
@@ -1062,6 +1228,817 @@ function deserialize(data) {
 function getLabel(messageType) {
   const message = /** @type {!Message} */ (new messageType());
   return message.label();
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * abstract View Class. Used to render the content within the Dialog. The
+ * extended class has actual content.
+ * @abstract
+ */
+class View {
+  /**
+   * Empty constructor.
+   */
+  constructor() {}
+
+  /**
+   * Gets the iframe element.
+   * @return {!Element}
+   * @abstract
+   */
+  getElement() {}
+
+  /**
+   * @param {!./dialog.Dialog} unusedDialog
+   * @return {!Promise}
+   * @abstract
+   */
+  init(unusedDialog) {}
+
+  /**
+   * Resizes the content.
+   */
+  resized() {
+    // Do nothing by default. Override if needed.
+  }
+
+  /**
+   * Accept the result.
+   * @return {!Promise}
+   * @abstract
+   */
+  whenComplete() {}
+
+  /**
+   * @return {boolean}
+   * @abstract
+   */
+  shouldFadeBody() {}
+
+  /**
+   * @return {boolean}
+   * @abstract
+   */
+  hasLoadingIndicator() {}
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {!../components/activities.ActivityPortDef} port
+ * @param {string} requireOrigin
+ * @param {boolean} requireOriginVerified
+ * @param {boolean} requireSecureChannel
+ * @return {!Promise<!Object>}
+ */
+function acceptPortResultData(
+  port,
+  requireOrigin,
+  requireOriginVerified,
+  requireSecureChannel
+) {
+  return port.acceptResult().then(result => {
+    if (
+      result.origin != requireOrigin ||
+      (requireOriginVerified && !result.originVerified) ||
+      (requireSecureChannel && !result.secureChannel)
+    ) {
+      throw new Error('channel mismatch');
+    }
+    return result.data;
+  });
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Debug logger, only log message if #swg.log=1
+ * @param {...*} var_args [decription]
+ */
+
+/* eslint-disable */
+
+function debugLog(var_args) {
+  if (/swg.debug=1/.test(self.location.hash)) {
+    const logArgs = Array.prototype.slice.call(arguments, 0);
+    logArgs.unshift('[Subscriptions]');
+    log.apply(log, logArgs);
+  }
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function log(var_args) {
+  console.log.apply(console, arguments);
+}
+
+/**
+ * @param  {...*} var_args [description]
+ */
+function warn(var_args) {
+  console.warn.apply(console, arguments);
+}
+
+/**
+ * Throws an error if the first argument isn't trueish.
+ *
+ * Supports argument substitution into the message via %s placeholders.
+ *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+ *     not evaluate to true.
+ * @param {string=} message The assertion message
+ * @param {...*} var_args Arguments substituted into %s in the message.
+ * @return {T} The value of shouldBeTrueish.
+ * @template T
+ */
+function assert(shouldBeTrueish, message, var_args) {
+  let firstElement;
+  if (!shouldBeTrueish) {
+    message = message || 'Assertion failed';
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
+    pushIfNonEmpty(messageArray, first);
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
+      if (val && val.tagName) {
+        firstElement = val;
+      }
+      const nextConstant = splitMessage.shift();
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
+    }
+    const e = new Error(formatted);
+    e.fromAssert = true;
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
+  }
+  return shouldBeTrueish;
+}
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
+
+function toString(val) {
+  // Do check equivalent to `val instanceof Element` without cross-window bug
+  if (val && val.nodeType == 1) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return /** @type {string} */ (val);
+}
+
+var log_1 = {
+  assert,
+  debugLog,
+  warn,
+  log
+};
+var log_2 = log_1.assert;
+var log_4 = log_1.warn;
+var log_5 = log_1.log;
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Returns a map-like object.
+ * If initial is provided, copies its own properties into the
+ * newly created object.
+ * @param {Object=} initial This should typically be an object literal.
+ * @return {!Object}
+ * @template T
+ */
+function map(initial) {
+  const obj = Object.create(null);
+  if (initial) {
+    Object.assign(obj, initial);
+  }
+  return obj;
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Returns an array of random values.  The length of the array is numInts.  Each
+ * int will be >= 0 and < maxVal.
+ * @param {!number} numInts
+ * @param {!number} maxVal
+ */
+function getRandomInts(numInts, maxVal) {
+  // Ensure array type is appropriate for the max value (performance)
+  const arr =
+    maxVal < 256
+      ? new Uint8Array(numInts)
+      : maxVal < 32768
+      ? new Uint16Array(numInts)
+      : new Uint32Array(numInts);
+
+  if (crypto && crypto.getRandomValues) {
+    crypto.getRandomValues(arr);
+    for (let i = arr.length - 1; i > -1; i--) {
+      arr[i] = arr[i] % maxVal;
+    }
+  } else {
+    // For older browsers
+    for (let i = arr.length - 1; i > -1; i--) {
+      arr[i] = Math.floor(Math.random() * maxVal);
+    }
+  }
+
+  return arr;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const CHARS = '0123456789ABCDEF';
+
+/**
+ * Polyfill for String.prototype.startsWith.
+ * @param {string} string
+ * @param {string} prefix
+ * @return {boolean}
+ */
+function startsWith(string, prefix) {
+  if (prefix.length > string.length) {
+    return false;
+  }
+  return string.lastIndexOf(prefix, 0) == 0;
+}
+
+/**
+ * Ensures the passed value is safe to use for character 19 per rfc4122,
+ * sec. 4.1.5.  "Sets the high bits of clock sequence".
+ * @param {!number} v
+ */
+function getChar19(v) {
+  return CHARS[(v & 0x3) | 0x8];
+}
+
+/**
+ * The returned identifier will always be an 8 digit valid hexidecimal number
+ * and will be unique for each MS within a given month.
+ * @return {string}
+ */
+function getMonthlyTimeIdentifier() {
+  const hexTime = Date.now().toString(16);
+  return hexTime.substring(hexTime.length - 8).toUpperCase();
+}
+
+/**
+ * Generates a RFC 4122 V4 UUID. Ex: "92329D39-6F5C-4520-ABFC-AAB64544E172"
+ * The first 8 digits are unique for the millisecond of the month.  The rest
+ * are randomly generated.
+ */
+function getUuid() {
+  let uuid = getMonthlyTimeIdentifier() + '-';
+  let rIndex = 0;
+  const rands = getRandomInts(23, 16);
+  for (let i = 9; i < 36; i++) {
+    switch (i) {
+      case 13:
+      case 18:
+      case 23:
+        uuid += '-';
+        break;
+      case 14:
+        uuid += '4';
+        break;
+      case 19:
+        uuid += getChar19(rands[rIndex++]);
+        break;
+      default:
+        uuid += CHARS[rands[rIndex++]];
+        break;
+    }
+  }
+  return uuid;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @type {Object<string, string>} */
+let propertyNameCache;
+
+/** @const {!Array<string>} */
+const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
+
+/**
+ * Default styles to be set for top level friendly iframe.
+ * Some attributes are not included such as height, left, margin-left; since
+ * these attributes are updated by @media queries and having these values
+ * defined here as !important does not work on IE/edge browsers.
+ * @const {!Object<string, string|number>}
+ */
+const defaultStyles = {
+  'align-content': 'normal',
+  'animation': 'none',
+  'align-items': 'normal',
+  'align-self': 'auto',
+  'alignment-baseline': 'auto',
+  'backface-visibility': 'hidden',
+  'background-clip': 'border-box',
+  'background-image': 'none',
+  'baseline-shift': '0',
+  'block-size': 'auto',
+  'border': 'none',
+  'border-collapse': 'separate',
+  'bottom': '0',
+  'box-sizing': 'border-box',
+  'break-after': 'auto',
+  'break-before': 'auto',
+  'break-inside': 'auto',
+  'buffered-rendering': 'auto',
+  'caption-side': 'top',
+  'caret-color': 'rgb(51, 51, 51)',
+  'clear': 'none',
+  'color': 'rgb(51, 51, 51)',
+  'color-rendering': 'auto',
+  'column-count': 'auto',
+  'column-fill': 'balance',
+  'column-gap': 'normal',
+  'column-rule-color': 'rgb(51, 51, 51)',
+  'column-rule-style': 'none',
+  'column-rule-width': '0',
+  'column-span': 'none',
+  'column-width': 'auto',
+  'contain': 'none',
+  'counter-increment': 'none',
+  'counter-reset': 'none',
+  'cursor': 'auto',
+  'direction': 'inherit',
+  'display': 'block',
+  'empty-cells': 'show',
+  'filter': 'none',
+  'flex': 'none', // flex-grow, flex-shrink, and flex-basis.
+  'flex-flow': 'row nowrap', // flex-direction, flex-wrap.
+  'float': 'none',
+  'flood-color': 'rgb(0, 0, 0)',
+  'flood-opacity': '1',
+  'font': 'none',
+  'font-size': 'medium',
+  'font-family': '',
+  'height': 'auto',
+  'hyphens': 'manual',
+  'image-rendering': 'auto',
+  'inline-size': '', // Setting to 'auto' will not allow override.
+  'isolation': 'auto',
+  'justify-content': 'normal',
+  'justify-items': 'normal',
+  'justify-self': 'auto',
+  'letter-spacing': 'normal',
+  'lighting-color': 'rgb(255, 255, 255)',
+  'line-break': 'auto',
+  'line-height': 'normal',
+  'mask': 'none',
+  'max-block-size': 'none',
+  'max-height': 'none',
+  'max-inline-size': 'none',
+  'max-width': 'none',
+  'min-block-size': 'none',
+  'min-height': '0',
+  'min-inline-size': '0',
+  'min-width': '0',
+  'mix-blend-mode': 'normal',
+  'object-fit': 'fill', // Important for Safari browser.
+  'offset-distance': 'none', // Chrome only (Experimental).
+  'offset-path': 'none', // Chrome only (Experimental).
+  'offset-rotate': 'auto 0deg', // Chrome only (Experimental).
+  'opacity': '1',
+  'order': '0',
+  'orphans': '2',
+  'outline': 'none',
+  'overflow-anchor': 'auto',
+  'overflow-wrap': 'normal',
+  'overflow': 'visible',
+  'padding': '0',
+  'page': '',
+  'perspective': 'none',
+  'pointer-events': 'auto',
+  'position': 'static',
+  'quotes': '',
+  'resize': 'none',
+  'right': '0',
+  'scroll-behavior': 'auto',
+  'tab-size': '8', // Only Chrome, Safari (Experimental).
+  'table-layout': 'auto',
+  'text-align': 'start',
+  'text-align-last': 'auto',
+  'text-anchor': 'start',
+  'text-combine-upright': 'none',
+  'text-decoration': 'none',
+  'text-indent': '0',
+  'text-orientation': 'mixed',
+  'text-overflow': 'clip',
+  'text-rendering': 'auto',
+  'text-shadow': 'none',
+  'text-size-adjust': 'auto',
+  'text-transform': 'none',
+  'text-underline-position': 'auto',
+  'top': 'auto',
+  'touch-action': 'auto',
+  'transform': 'none',
+  'transition': 'none 0s ease 0s',
+  'unicode-bidi': 'normal',
+  'user-select': 'auto',
+  'vector-effect': 'none',
+  'vertical-align': 'baseline',
+  'visibility': 'visible',
+  'white-space': 'normal',
+  'widows': '2',
+  'word-break': 'normal',
+  'word-spacing': '0',
+  'word-wrap': 'normal',
+  'writing-mode': 'horizontal-tb',
+  'zoom': '1',
+  'z-index': 'auto',
+};
+
+/**
+ * @export
+ * @param {string} camelCase camel cased string
+ * @return {string} title cased string
+ */
+function camelCaseToTitleCase(camelCase) {
+  return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
+}
+
+/**
+ * Checks the style if a prefixed version of a property exists and returns
+ * it or returns an empty string.
+ * @private
+ * @param {!Object} style
+ * @param {string} titleCase the title case version of a css property name
+ * @return {string} the prefixed property name or null.
+ */
+function getVendorJsPropertyName_(style, titleCase) {
+  for (let i = 0; i < vendorPrefixes.length; i++) {
+    const propertyName = vendorPrefixes[i] + titleCase;
+    if (style[propertyName] !== undefined) {
+      return propertyName;
+    }
+  }
+  return '';
+}
+
+/**
+ * Returns the possibly prefixed JavaScript property name of a style property
+ * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
+ * (ex. transitionDuration).
+ * @export
+ * @param {!Object} style
+ * @param {string} camelCase the camel cased version of a css property name
+ * @param {boolean=} bypassCache bypass the memoized cache of property
+ *   mapping
+ * @return {string}
+ */
+function getVendorJsPropertyName(style, camelCase, bypassCache) {
+  if (startsWith(camelCase, '--')) {
+    // CSS vars are returned as is.
+    return camelCase;
+  }
+  if (!propertyNameCache) {
+    propertyNameCache = map();
+  }
+  let propertyName = propertyNameCache[camelCase];
+  if (!propertyName || bypassCache) {
+    propertyName = camelCase;
+    if (style[camelCase] === undefined) {
+      const titleCase = camelCaseToTitleCase(camelCase);
+      const prefixedPropertyName = getVendorJsPropertyName_(style, titleCase);
+
+      if (style[prefixedPropertyName] !== undefined) {
+        propertyName = prefixedPropertyName;
+      }
+    }
+    if (!bypassCache) {
+      propertyNameCache[camelCase] = propertyName;
+    }
+  }
+  return propertyName;
+}
+
+/**
+ * Sets the CSS styles of the specified element with !important. The styles
+ * are specified as a map from CSS property names to their values.
+ * @param {!Element} element
+ * @param {!Object<string, string|number>} styles
+ */
+function setImportantStyles(element, styles) {
+  for (const k in styles) {
+    element.style.setProperty(
+      getVendorJsPropertyName(styles, k),
+      styles[k].toString(),
+      'important'
+    );
+  }
+}
+
+/**
+ * Sets the CSS style of the specified element with optional units, e.g. "px".
+ * @param {Element} element
+ * @param {string} property
+ * @param {?string|number|boolean} value
+ * @param {string=} units
+ * @param {boolean=} bypassCache
+ */
+function setStyle(element, property, value, units, bypassCache) {
+  const propertyName = getVendorJsPropertyName(
+    element.style,
+    property,
+    bypassCache
+  );
+  if (propertyName) {
+    element.style[propertyName] = /** @type {string} */ (units
+      ? value + units
+      : value);
+  }
+}
+
+/**
+ * Sets the CSS styles of the specified element. The styles
+ * a specified as a map from CSS property names to their values.
+ * @param {!Element} element
+ * @param {!Object<string, ?string|number|boolean>} styles
+ */
+function setStyles(element, styles) {
+  for (const k in styles) {
+    setStyle(element, k, styles[k]);
+  }
+}
+
+/**
+ * Resets styles that were set dynamically (i.e. inline)
+ * @param {!Element} element
+ * @param {!Array<string>} properties
+ */
+function resetStyles(element, properties) {
+  const styleObj = {};
+  properties.forEach(prop => {
+    styleObj[prop] = null;
+  });
+  setStyles(element, styleObj);
+}
+
+/**
+ * Resets all the styles of an element to a given value. Defaults to null.
+ * The valid values are 'inherit', 'initial', 'unset' or null.
+ * @param {!Element} element
+ */
+function resetAllStyles(element) {
+  setImportantStyles(element, defaultStyles);
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {string} */
+const styleType = 'text/css';
+
+/**
+ * Add attributes to an element.
+ * @param {!Element} element
+ * @param {!Object<string, string|number|boolean|!Object<string, string|number|boolean>>} attributes
+ * @return {!Element} updated element.
+ */
+function addAttributesToElement(element, attributes) {
+  for (const attr in attributes) {
+    if (attr == 'style') {
+      setStyles(
+        element,
+        /** @type {!Object<string, string|boolean|number>} */
+        (attributes[attr])
+      );
+    } else {
+      element.setAttribute(
+        attr,
+        /** @type {string|boolean|number} */ (attributes[attr])
+      );
+    }
+  }
+  return element;
+}
+
+/**
+ * Create a new element on document with specified tagName and attributes.
+ * @param {!Document} doc
+ * @param {string} tagName
+ * @param {!Object<string, string>} attributes
+ * @param {?(string|!Node|!ArrayLike<!Node>|!Array<!Node>)=} content
+ * @return {!Element} created element.
+ */
+function createElement(doc, tagName, attributes, content) {
+  const element = doc.createElement(tagName);
+  addAttributesToElement(element, attributes);
+  if (content != null) {
+    if (typeof content == 'string') {
+      element.textContent = content;
+    } else if (content.nodeType) {
+      element.appendChild(content);
+    } else if ('length' in content) {
+      for (let i = 0; i < content.length; i++) {
+        element.appendChild(content[i]);
+      }
+    } else {
+      log_2(false, 'Unsupported content: %s', content);
+    }
+  }
+  return element;
+}
+
+/**
+ * Removes the element.
+ * @param {!Element} element
+ */
+function removeElement(element) {
+  if (element.parentElement) {
+    element.parentElement.removeChild(element);
+  }
+}
+
+/**
+ * Removes all children from the parent element.
+ * @param {!Element} parent
+ */
+function removeChildren(parent) {
+  parent.textContent = '';
+}
+
+/**
+ * Injects the provided styles in the HEAD section of the document.
+ * @param {!../model/doc.Doc} doc The document object.
+ * @param {string} styleText The style string.
+ * @return {!Element}
+ */
+function injectStyleSheet(doc, styleText) {
+  const styleElement = createElement(doc.getWin().document, 'style', {
+    'type': styleType,
+  });
+  styleElement.textContent = styleText;
+  doc.getHead().appendChild(styleElement);
+  return styleElement;
+}
+
+/**
+ * Polyfill of the `Node.isConnected` API. See
+ * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isConnected(node) {
+  // Ensure that node is attached if specified. This check uses a new and
+  // fast `isConnected` API and thus only checked on platforms that have it.
+  // See https://www.chromestatus.com/feature/5676110549352448.
+  if ('isConnected' in node) {
+    return node['isConnected'];
+  }
+  // Polyfill.
+  const root = node.ownerDocument && node.ownerDocument.documentElement;
+  return (root && root.contains(node)) || false;
+}
+
+/**
+ * Returns true if current browser is a legacy version of Edge.
+ *
+ * Starting in January 2020, new versions of Edge will use the Chromium engine.
+ * These versions won't include the word "Edge" in their useragent.
+ * Instead, they'll include the word "Edg".
+ * So far, it seems safe to avoid detecting these new versions of Edge.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+function isLegacyEdgeBrowser(win) {
+  const nav = win.navigator;
+  return /Edge/i.test(nav && nav.userAgent);
 }
 
 /**
@@ -2890,2078 +3867,6 @@ var activityPorts_11 = activityPorts.createAbortError;
 var activityPorts_12 = activityPorts.isAbortError;
 
 /**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-/**
- * @implements {ActivityPortDef}
- */
-class ActivityPortDeprecated {
-  /**
-   * @param {!web-activities/activity-ports.ActivityPort} port
-   */
-  constructor(port) {
-    /** @private @const {!web-activities/activity-ports.ActivityPort} */
-    this.port_ = port;
-  }
-
-  /**
-   * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
-   */
-  acceptResult() {
-    return this.port_.acceptResult();
-  }
-}
-
-/**
- * @implements {ActivityPortDef}
- */
-class ActivityIframePort$1 {
-  /**
-   * @param {!HTMLIFrameElement} iframe
-   * @param {string} url
-   * @param {?Object=} args
-   */
-  constructor(iframe, url, args) {
-    /** @private @const {!web-activities/activity-ports.ActivityIframePort} */
-    this.iframePort_ = new activityPorts_2(iframe, url, args);
-    /** @private @const {!Object<string, function(!Object)>} */
-    this.callbackMap_ = {};
-    /** @private {?function(!../proto/api_messages.Message)} */
-    this.callbackOriginal_ = null;
-  }
-
-  /**
-   * Returns a promise that yields when the iframe is ready to be interacted
-   * with.
-   * @return {!Promise}
-   */
-  whenReady() {
-    return this.iframePort_.whenReady();
-  }
-
-  /**
-   * Waits until the activity port is connected to the host.
-   * @return {!Promise}
-   */
-  connect() {
-    return this.iframePort_.connect().then(() => {
-      // Attach a callback to receive messages after connection complete
-      this.iframePort_.onMessage(data => {
-        if (this.callbackOriginal_) {
-          this.callbackOriginal_(data);
-        }
-        const response = data && data['RESPONSE'];
-        if (!response) {
-          return;
-        }
-        const cb = this.callbackMap_[response[0]];
-        if (cb) {
-          cb(deserialize(response));
-        }
-      });
-    });
-  }
-
-  /**
-   * Disconnect the activity binding and cleanup listeners.
-   */
-  disconnect() {
-    this.iframePort_.disconnect();
-  }
-
-  /**
-   * Returns the mode of the activity: iframe, popup or redirect.
-   * @return {!web-activities/activity-ports.ActivityMode}
-   */
-  getMode() {
-    return this.iframePort_.getMode();
-  }
-
-  /**
-   * Accepts the result when ready. The client should verify the activity's
-   * mode, origin, verification and secure channel flags before deciding
-   * whether or not to trust the result.
-   *
-   * Returns the promise that yields when the activity has been completed and
-   * either a result, a cancelation or a failure has been returned.
-   *
-   * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
-   * @override
-   */
-  acceptResult() {
-    return this.iframePort_.acceptResult();
-  }
-
-  /**
-   * Register a callback to handle resize requests. Once successfully resized,
-   * ensure to call `resized()` method.
-   * @param {function(number)} callback
-   */
-  onResizeRequest(callback) {
-    return this.iframePort_.onResizeRequest(callback);
-  }
-
-  /**
-   * @param {!../proto/api_messages.Message} request
-   */
-  execute(request) {
-    this.iframePort_.message({'REQUEST': request.toArray()});
-  }
-
-  /**
-   * @param {!function(new: T)} message
-   * @param {function(!../proto/api_messages.Message)} callback
-   * @template T
-   */
-  on(message, callback) {
-    const label = getLabel(message);
-    if (!label) {
-      throw new Error('Invalid data type');
-    } else if (this.callbackMap_[label]) {
-      throw new Error('Invalid type or duplicate callback for ', label);
-    }
-    this.callbackMap_[label] = callback;
-  }
-
-  /**
-   * Signals back to the activity implementation that the client has updated
-   * the activity's size.
-   */
-  resized() {
-    this.iframePort_.resized();
-  }
-}
-
-class ActivityPorts$1 {
-  /**
-   * @param {!../runtime/deps.DepsDef} deps
-   */
-  constructor(deps) {
-    /** @private @const {!../runtime/deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
-    this.activityPorts_ = new activityPorts_1(deps.win());
-  }
-
-  /**
-   * Adds client version, publication, product and logging context information.
-   * @param {?Object=} args
-   * @return {!Object}
-   */
-  addDefaultArguments(args) {
-    const deps = this.deps_;
-    const pageConfig = deps.pageConfig();
-    const context = deps.analytics().getContext();
-    return Object.assign(
-      {
-        'analyticsContext': context.toArray(),
-        'publicationId': pageConfig.getPublicationId(),
-        'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.84',
-      },
-      args || {}
-    );
-  }
-
-  /*
-   * Start an activity within the specified iframe.
-   * @param {!HTMLIFrameElement} iframe
-   * @param {string} url
-   * @param {?Object=} args
-   * @return {!Promise<!ActivityIframePort>}
-   */
-  openActivityIframePort_(iframe, url, args) {
-    const activityPort = new ActivityIframePort$1(iframe, url, args);
-    return activityPort.connect().then(() => activityPort);
-  }
-
-  /**
-   * Start an activity within the specified iframe.
-   * @param {!HTMLIFrameElement} iframe
-   * @param {string} url
-   * @param {?Object=} args
-   * @param {boolean=} addDefaultArguments
-   * @return {!Promise<!ActivityIframePort>}
-   */
-  openIframe(iframe, url, args, addDefaultArguments = false) {
-    if (addDefaultArguments) {
-      args = this.addDefaultArguments(args);
-    }
-    return this.openActivityIframePort_(iframe, url, args);
-  }
-
-  /**
-   * Start an activity in a separate window. The result will be delivered
-   * to the `onResult` callback.
-   *
-   * The activity can be opened in two modes: "popup" and "redirect". This
-   * depends on the `target` value, but also on the browser/environment.
-   *
-   * The allowed `target` values are `_blank`, `_top` and name targets. The
-   * `_self`, `_parent` and similar targets are not allowed.
-   *
-   * The `_top` target indicates that the activity should be opened as a
-   * "redirect", while other targets indicate that the activity should be
-   * opened as a popup. The activity client will try to honor the requested
-   * target. However, it's not always possible. Some environments do not
-   * allow popups and they either force redirect or fail the window open
-   * request. In this case, the activity will try to fallback to the "redirect"
-   * mode.
-   *
-   * @param {string} requestId
-   * @param {string} url
-   * @param {string} target
-   * @param {?Object=} args
-   * @param {?web-activities/activity-ports.ActivityOpenOptions=} options
-   * @param {boolean=} addDefaultArguments
-   * @return {{targetWin: ?Window}}
-   */
-  open(requestId, url, target, args, options, addDefaultArguments = false) {
-    if (addDefaultArguments) {
-      args = this.addDefaultArguments(args);
-    }
-    return this.activityPorts_.open(requestId, url, target, args, options);
-  }
-
-  /**
-   * Registers the callback for the result of the activity opened with the
-   * specified `requestId` (see the `open()` method). The callback is a
-   * function that takes a single `ActivityPort` argument. The client
-   * can use this object to verify the port using it's origin, verified and
-   * secure channel flags. Then the client can call
-   * `ActivityPort.acceptResult()` method to accept the result.
-   *
-   * The activity result is handled via a separate callback because of a
-   * possible redirect. So use of direct callbacks and/or promises is not
-   * possible in that case.
-   *
-   * A typical implementation would look like:
-   * ```
-   * ports.onResult('request1', function(port) {
-   *   port.acceptResult().then(function(result) {
-   *     // Only verified origins are allowed.
-   *     if (result.origin == expectedOrigin &&
-   *         result.originVerified &&
-   *         result.secureChannel) {
-   *       handleResultForRequest1(result);
-   *     }
-   *   });
-   * })
-   *
-   * ports.open('request1', request1Url, '_blank');
-   * ```
-   *
-   * @param {string} requestId
-   * @param {function(!ActivityPortDef)} callback
-   */
-  onResult(requestId, callback) {
-    this.activityPorts_.onResult(requestId, port => {
-      callback(new ActivityPortDeprecated(port));
-    });
-  }
-
-  /**
-   * @param {function(!Error)} handler
-   */
-  onRedirectError(handler) {
-    this.activityPorts_.onRedirectError(handler);
-  }
-
-  /**
-   * @return {!web-activities/activity-ports.ActivityPorts}
-   */
-  getOriginalWebActivityPorts() {
-    return this.activityPorts_;
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Debug logger, only log message if #swg.log=1
- * @param {...*} var_args [decription]
- */
-
-/* eslint-disable */
-
-function debugLog(var_args) {
-  if (/swg.debug=1/.test(self.location.hash)) {
-    const logArgs = Array.prototype.slice.call(arguments, 0);
-    logArgs.unshift('[Subscriptions]');
-    log.apply(log, logArgs);
-  }
-}
-
-/**
- * @param  {...*} var_args [description]
- */
-function log(var_args) {
-  console.log.apply(console, arguments);
-}
-
-/**
- * @param  {...*} var_args [description]
- */
-function warn(var_args) {
-  console.warn.apply(console, arguments);
-}
-
-/**
- * Throws an error if the first argument isn't trueish.
- *
- * Supports argument substitution into the message via %s placeholders.
- *
- * Throws an error object that has two extra properties:
- * - associatedElement: This is the first element provided in the var args.
- *   It can be used for improved display of error messages.
- * - messageArray: The elements of the substituted message as non-stringified
- *   elements in an array. When e.g. passed to console.error this yields
- *   native displays of things like HTML elements.
- *
- * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
- *     not evaluate to true.
- * @param {string=} message The assertion message
- * @param {...*} var_args Arguments substituted into %s in the message.
- * @return {T} The value of shouldBeTrueish.
- * @template T
- */
-function assert(shouldBeTrueish, message, var_args) {
-  let firstElement;
-  if (!shouldBeTrueish) {
-    message = message || 'Assertion failed';
-    const splitMessage = message.split('%s');
-    const first = splitMessage.shift();
-    let formatted = first;
-    const messageArray = [];
-    pushIfNonEmpty(messageArray, first);
-    for (let i = 2; i < arguments.length; i++) {
-      const val = arguments[i];
-      if (val && val.tagName) {
-        firstElement = val;
-      }
-      const nextConstant = splitMessage.shift();
-      messageArray.push(val);
-      pushIfNonEmpty(messageArray, nextConstant.trim());
-      formatted += toString(val) + nextConstant;
-    }
-    const e = new Error(formatted);
-    e.fromAssert = true;
-    e.associatedElement = firstElement;
-    e.messageArray = messageArray;
-    throw e;
-  }
-  return shouldBeTrueish;
-}
-
-/**
- * @param {!Array} array
- * @param {*} val
- */
-function pushIfNonEmpty(array, val) {
-  if (val != '') {
-    array.push(val);
-  }
-}
-
-function toString(val) {
-  // Do check equivalent to `val instanceof Element` without cross-window bug
-  if (val && val.nodeType == 1) {
-    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
-  }
-  return /** @type {string} */ (val);
-}
-
-var log_1 = {
-  assert,
-  debugLog,
-  warn,
-  log
-};
-var log_2 = log_1.assert;
-var log_4 = log_1.warn;
-var log_5 = log_1.log;
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Returns a map-like object.
- * If initial is provided, copies its own properties into the
- * newly created object.
- * @param {Object=} initial This should typically be an object literal.
- * @return {!Object}
- * @template T
- */
-function map(initial) {
-  const obj = Object.create(null);
-  if (initial) {
-    Object.assign(obj, initial);
-  }
-  return obj;
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Returns an array of random values.  The length of the array is numInts.  Each
- * int will be >= 0 and < maxVal.
- * @param {!number} numInts
- * @param {!number} maxVal
- */
-function getRandomInts(numInts, maxVal) {
-  // Ensure array type is appropriate for the max value (performance)
-  const arr =
-    maxVal < 256
-      ? new Uint8Array(numInts)
-      : maxVal < 32768
-      ? new Uint16Array(numInts)
-      : new Uint32Array(numInts);
-
-  if (crypto && crypto.getRandomValues) {
-    crypto.getRandomValues(arr);
-    for (let i = arr.length - 1; i > -1; i--) {
-      arr[i] = arr[i] % maxVal;
-    }
-  } else {
-    // For older browsers
-    for (let i = arr.length - 1; i > -1; i--) {
-      arr[i] = Math.floor(Math.random() * maxVal);
-    }
-  }
-
-  return arr;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const CHARS = '0123456789ABCDEF';
-
-/**
- * Polyfill for String.prototype.startsWith.
- * @param {string} string
- * @param {string} prefix
- * @return {boolean}
- */
-function startsWith(string, prefix) {
-  if (prefix.length > string.length) {
-    return false;
-  }
-  return string.lastIndexOf(prefix, 0) == 0;
-}
-
-/**
- * Ensures the passed value is safe to use for character 19 per rfc4122,
- * sec. 4.1.5.  "Sets the high bits of clock sequence".
- * @param {!number} v
- */
-function getChar19(v) {
-  return CHARS[(v & 0x3) | 0x8];
-}
-
-/**
- * The returned identifier will always be an 8 digit valid hexidecimal number
- * and will be unique for each MS within a given month.
- * @return {string}
- */
-function getMonthlyTimeIdentifier() {
-  const hexTime = Date.now().toString(16);
-  return hexTime.substring(hexTime.length - 8).toUpperCase();
-}
-
-/**
- * Generates a RFC 4122 V4 UUID. Ex: "92329D39-6F5C-4520-ABFC-AAB64544E172"
- * The first 8 digits are unique for the millisecond of the month.  The rest
- * are randomly generated.
- */
-function getUuid() {
-  let uuid = getMonthlyTimeIdentifier() + '-';
-  let rIndex = 0;
-  const rands = getRandomInts(23, 16);
-  for (let i = 9; i < 36; i++) {
-    switch (i) {
-      case 13:
-      case 18:
-      case 23:
-        uuid += '-';
-        break;
-      case 14:
-        uuid += '4';
-        break;
-      case 19:
-        uuid += getChar19(rands[rIndex++]);
-        break;
-      default:
-        uuid += CHARS[rands[rIndex++]];
-        break;
-    }
-  }
-  return uuid;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @type {Object<string, string>} */
-let propertyNameCache;
-
-/** @const {!Array<string>} */
-const vendorPrefixes = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
-
-/**
- * Default styles to be set for top level friendly iframe.
- * Some attributes are not included such as height, left, margin-left; since
- * these attributes are updated by @media queries and having these values
- * defined here as !important does not work on IE/edge browsers.
- * @const {!Object<string, string|number>}
- */
-const defaultStyles = {
-  'align-content': 'normal',
-  'animation': 'none',
-  'align-items': 'normal',
-  'align-self': 'auto',
-  'alignment-baseline': 'auto',
-  'backface-visibility': 'hidden',
-  'background-clip': 'border-box',
-  'background-image': 'none',
-  'baseline-shift': '0',
-  'block-size': 'auto',
-  'border': 'none',
-  'border-collapse': 'separate',
-  'bottom': '0',
-  'box-sizing': 'border-box',
-  'break-after': 'auto',
-  'break-before': 'auto',
-  'break-inside': 'auto',
-  'buffered-rendering': 'auto',
-  'caption-side': 'top',
-  'caret-color': 'rgb(51, 51, 51)',
-  'clear': 'none',
-  'color': 'rgb(51, 51, 51)',
-  'color-rendering': 'auto',
-  'column-count': 'auto',
-  'column-fill': 'balance',
-  'column-gap': 'normal',
-  'column-rule-color': 'rgb(51, 51, 51)',
-  'column-rule-style': 'none',
-  'column-rule-width': '0',
-  'column-span': 'none',
-  'column-width': 'auto',
-  'contain': 'none',
-  'counter-increment': 'none',
-  'counter-reset': 'none',
-  'cursor': 'auto',
-  'direction': 'inherit',
-  'display': 'block',
-  'empty-cells': 'show',
-  'filter': 'none',
-  'flex': 'none', // flex-grow, flex-shrink, and flex-basis.
-  'flex-flow': 'row nowrap', // flex-direction, flex-wrap.
-  'float': 'none',
-  'flood-color': 'rgb(0, 0, 0)',
-  'flood-opacity': '1',
-  'font': 'none',
-  'font-size': 'medium',
-  'font-family': '',
-  'height': 'auto',
-  'hyphens': 'manual',
-  'image-rendering': 'auto',
-  'inline-size': '', // Setting to 'auto' will not allow override.
-  'isolation': 'auto',
-  'justify-content': 'normal',
-  'justify-items': 'normal',
-  'justify-self': 'auto',
-  'letter-spacing': 'normal',
-  'lighting-color': 'rgb(255, 255, 255)',
-  'line-break': 'auto',
-  'line-height': 'normal',
-  'mask': 'none',
-  'max-block-size': 'none',
-  'max-height': 'none',
-  'max-inline-size': 'none',
-  'max-width': 'none',
-  'min-block-size': 'none',
-  'min-height': '0',
-  'min-inline-size': '0',
-  'min-width': '0',
-  'mix-blend-mode': 'normal',
-  'object-fit': 'fill', // Important for Safari browser.
-  'offset-distance': 'none', // Chrome only (Experimental).
-  'offset-path': 'none', // Chrome only (Experimental).
-  'offset-rotate': 'auto 0deg', // Chrome only (Experimental).
-  'opacity': '1',
-  'order': '0',
-  'orphans': '2',
-  'outline': 'none',
-  'overflow-anchor': 'auto',
-  'overflow-wrap': 'normal',
-  'overflow': 'visible',
-  'padding': '0',
-  'page': '',
-  'perspective': 'none',
-  'pointer-events': 'auto',
-  'position': 'static',
-  'quotes': '',
-  'resize': 'none',
-  'right': '0',
-  'scroll-behavior': 'auto',
-  'tab-size': '8', // Only Chrome, Safari (Experimental).
-  'table-layout': 'auto',
-  'text-align': 'start',
-  'text-align-last': 'auto',
-  'text-anchor': 'start',
-  'text-combine-upright': 'none',
-  'text-decoration': 'none',
-  'text-indent': '0',
-  'text-orientation': 'mixed',
-  'text-overflow': 'clip',
-  'text-rendering': 'auto',
-  'text-shadow': 'none',
-  'text-size-adjust': 'auto',
-  'text-transform': 'none',
-  'text-underline-position': 'auto',
-  'top': 'auto',
-  'touch-action': 'auto',
-  'transform': 'none',
-  'transition': 'none 0s ease 0s',
-  'unicode-bidi': 'normal',
-  'user-select': 'auto',
-  'vector-effect': 'none',
-  'vertical-align': 'baseline',
-  'visibility': 'visible',
-  'white-space': 'normal',
-  'widows': '2',
-  'word-break': 'normal',
-  'word-spacing': '0',
-  'word-wrap': 'normal',
-  'writing-mode': 'horizontal-tb',
-  'zoom': '1',
-  'z-index': 'auto',
-};
-
-/**
- * @export
- * @param {string} camelCase camel cased string
- * @return {string} title cased string
- */
-function camelCaseToTitleCase(camelCase) {
-  return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
-}
-
-/**
- * Checks the style if a prefixed version of a property exists and returns
- * it or returns an empty string.
- * @private
- * @param {!Object} style
- * @param {string} titleCase the title case version of a css property name
- * @return {string} the prefixed property name or null.
- */
-function getVendorJsPropertyName_(style, titleCase) {
-  for (let i = 0; i < vendorPrefixes.length; i++) {
-    const propertyName = vendorPrefixes[i] + titleCase;
-    if (style[propertyName] !== undefined) {
-      return propertyName;
-    }
-  }
-  return '';
-}
-
-/**
- * Returns the possibly prefixed JavaScript property name of a style property
- * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
- * (ex. transitionDuration).
- * @export
- * @param {!Object} style
- * @param {string} camelCase the camel cased version of a css property name
- * @param {boolean=} bypassCache bypass the memoized cache of property
- *   mapping
- * @return {string}
- */
-function getVendorJsPropertyName(style, camelCase, bypassCache) {
-  if (startsWith(camelCase, '--')) {
-    // CSS vars are returned as is.
-    return camelCase;
-  }
-  if (!propertyNameCache) {
-    propertyNameCache = map();
-  }
-  let propertyName = propertyNameCache[camelCase];
-  if (!propertyName || bypassCache) {
-    propertyName = camelCase;
-    if (style[camelCase] === undefined) {
-      const titleCase = camelCaseToTitleCase(camelCase);
-      const prefixedPropertyName = getVendorJsPropertyName_(style, titleCase);
-
-      if (style[prefixedPropertyName] !== undefined) {
-        propertyName = prefixedPropertyName;
-      }
-    }
-    if (!bypassCache) {
-      propertyNameCache[camelCase] = propertyName;
-    }
-  }
-  return propertyName;
-}
-
-/**
- * Sets the CSS styles of the specified element with !important. The styles
- * are specified as a map from CSS property names to their values.
- * @param {!Element} element
- * @param {!Object<string, string|number>} styles
- */
-function setImportantStyles(element, styles) {
-  for (const k in styles) {
-    element.style.setProperty(
-      getVendorJsPropertyName(styles, k),
-      styles[k].toString(),
-      'important'
-    );
-  }
-}
-
-/**
- * Sets the CSS style of the specified element with optional units, e.g. "px".
- * @param {Element} element
- * @param {string} property
- * @param {?string|number|boolean} value
- * @param {string=} units
- * @param {boolean=} bypassCache
- */
-function setStyle(element, property, value, units, bypassCache) {
-  const propertyName = getVendorJsPropertyName(
-    element.style,
-    property,
-    bypassCache
-  );
-  if (propertyName) {
-    element.style[propertyName] = /** @type {string} */ (units
-      ? value + units
-      : value);
-  }
-}
-
-/**
- * Sets the CSS styles of the specified element. The styles
- * a specified as a map from CSS property names to their values.
- * @param {!Element} element
- * @param {!Object<string, ?string|number|boolean>} styles
- */
-function setStyles(element, styles) {
-  for (const k in styles) {
-    setStyle(element, k, styles[k]);
-  }
-}
-
-/**
- * Resets styles that were set dynamically (i.e. inline)
- * @param {!Element} element
- * @param {!Array<string>} properties
- */
-function resetStyles(element, properties) {
-  const styleObj = {};
-  properties.forEach(prop => {
-    styleObj[prop] = null;
-  });
-  setStyles(element, styleObj);
-}
-
-/**
- * Resets all the styles of an element to a given value. Defaults to null.
- * The valid values are 'inherit', 'initial', 'unset' or null.
- * @param {!Element} element
- */
-function resetAllStyles(element) {
-  setImportantStyles(element, defaultStyles);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {string} */
-const styleType = 'text/css';
-
-/**
- * Add attributes to an element.
- * @param {!Element} element
- * @param {!Object<string, string|number|boolean|!Object<string, string|number|boolean>>} attributes
- * @return {!Element} updated element.
- */
-function addAttributesToElement(element, attributes) {
-  for (const attr in attributes) {
-    if (attr == 'style') {
-      setStyles(
-        element,
-        /** @type {!Object<string, string|boolean|number>} */
-        (attributes[attr])
-      );
-    } else {
-      element.setAttribute(
-        attr,
-        /** @type {string|boolean|number} */ (attributes[attr])
-      );
-    }
-  }
-  return element;
-}
-
-/**
- * Create a new element on document with specified tagName and attributes.
- * @param {!Document} doc
- * @param {string} tagName
- * @param {!Object<string, string>} attributes
- * @param {?(string|!Node|!ArrayLike<!Node>|!Array<!Node>)=} content
- * @return {!Element} created element.
- */
-function createElement(doc, tagName, attributes, content) {
-  const element = doc.createElement(tagName);
-  addAttributesToElement(element, attributes);
-  if (content != null) {
-    if (typeof content == 'string') {
-      element.textContent = content;
-    } else if (content.nodeType) {
-      element.appendChild(content);
-    } else if ('length' in content) {
-      for (let i = 0; i < content.length; i++) {
-        element.appendChild(content[i]);
-      }
-    } else {
-      log_2(false, 'Unsupported content: %s', content);
-    }
-  }
-  return element;
-}
-
-/**
- * Removes the element.
- * @param {!Element} element
- */
-function removeElement(element) {
-  if (element.parentElement) {
-    element.parentElement.removeChild(element);
-  }
-}
-
-/**
- * Removes all children from the parent element.
- * @param {!Element} parent
- */
-function removeChildren(parent) {
-  parent.textContent = '';
-}
-
-/**
- * Injects the provided styles in the HEAD section of the document.
- * @param {!../model/doc.Doc} doc The document object.
- * @param {string} styleText The style string.
- * @return {!Element}
- */
-function injectStyleSheet(doc, styleText) {
-  const styleElement = createElement(doc.getWin().document, 'style', {
-    'type': styleType,
-  });
-  styleElement.textContent = styleText;
-  doc.getHead().appendChild(styleElement);
-  return styleElement;
-}
-
-/**
- * Polyfill of the `Node.isConnected` API. See
- * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected.
- * @param {!Node} node
- * @return {boolean}
- */
-function isConnected(node) {
-  // Ensure that node is attached if specified. This check uses a new and
-  // fast `isConnected` API and thus only checked on platforms that have it.
-  // See https://www.chromestatus.com/feature/5676110549352448.
-  if ('isConnected' in node) {
-    return node['isConnected'];
-  }
-  // Polyfill.
-  const root = node.ownerDocument && node.ownerDocument.documentElement;
-  return (root && root.contains(node)) || false;
-}
-
-/**
- * @param {!Window} win
- * @return {boolean}
- */
-function isEdgeBrowser$1(win) {
-  const nav = win.navigator;
-  return /Edge/i.test(nav && nav.userAgent);
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param {!Object<string, string>} map
- * @param {?string|?Element} langOrElement
- * @return {?string}
- */
-function msg(map, langOrElement) {
-  const lang = !langOrElement
-    ? ''
-    : typeof langOrElement == 'string'
-    ? langOrElement
-    : langOrElement.lang ||
-      (langOrElement.ownerDocument &&
-        langOrElement.ownerDocument.documentElement.lang);
-  let search = ((lang && lang.toLowerCase()) || 'en').replace(/_/g, '-');
-  while (search) {
-    if (search in map) {
-      return map[search];
-    }
-    const dash = search.lastIndexOf('-');
-    search = dash != -1 ? search.substring(0, dash) : '';
-  }
-  // "en" is always default.
-  return map['en'];
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/* @const */
-const toString_ = Object.prototype.toString;
-
-/**
- * Returns the ECMA [[Class]] of a value
- * @param {*} value
- * @return {string}
- */
-function toString$1(value) {
-  return toString_.call(value);
-}
-
-/**
- * Determines if value is actually an Object.
- * @param {*} value
- * @return {boolean}
- */
-function isObject(value) {
-  return toString$1(value) === '[object Object]';
-}
-
-/**
- * Checks whether `s` is a valid value of `enumObj`.
- *
- * @param {!Object<T>} enumObj
- * @param {T} s
- * @return {boolean}
- * @template T
- */
-function isEnumValue(enumObj, s) {
-  for (const k in enumObj) {
-    if (enumObj[k] === s) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * True if the value is a function.
- * @param {*} value
- */
-function isFunction(value) {
-  return value !== null && typeof value === 'function';
-}
-
-/**
- * True if the value is either true or false.
- * @param {?*} value
- */
-function isBoolean(value) {
-  return value === true || value === false;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Cached a-tag to avoid memory allocation during URL parsing.
- * @type {HTMLAnchorElement}
- */
-let a;
-
-/**
- * We cached all parsed URLs. As of now there are no use cases
- * of AMP docs that would ever parse an actual large number of URLs,
- * but we often parse the same one over and over again.
- * @type {Object<string, !LocationDef>}
- */
-let cache;
-
-/**
- * Returns a Location-like object for the given URL. If it is relative,
- * the URL gets resolved.
- * Consider the returned object immutable. This is enforced during
- * testing by freezing the object.
- * @param {string} url
- * @return {!LocationDef}
- */
-function parseUrl$1(url) {
-  if (!a) {
-    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
-    cache = self.UrlCache || (self.UrlCache = Object.create(null));
-  }
-
-  const fromCache = cache[url];
-  if (fromCache) {
-    return fromCache;
-  }
-
-  const info = parseUrlWithA(a, url);
-
-  return (cache[url] = info);
-}
-
-/**
- * Returns a Location-like object for the given URL. If it is relative,
- * the URL gets resolved.
- * @param {!HTMLAnchorElement} a
- * @param {string} url
- * @return {!LocationDef}
- */
-function parseUrlWithA(a, url) {
-  a.href = url;
-
-  // IE11 doesn't provide full URL components when parsing relative URLs.
-  // Assigning to itself again does the trick.
-  if (!a.protocol) {
-    a.href = a.href;
-  }
-
-  /** @type {!LocationDef} */
-  const info = {
-    href: a.href,
-    protocol: a.protocol,
-    host: a.host,
-    hostname: a.hostname,
-    port: a.port == '0' ? '' : a.port,
-    pathname: a.pathname,
-    search: a.search,
-    hash: a.hash,
-    origin: '', // Set below.
-  };
-
-  // Some IE11 specific polyfills.
-  // 1) IE11 strips out the leading '/' in the pathname.
-  if (info.pathname[0] !== '/') {
-    info.pathname = '/' + info.pathname;
-  }
-
-  // 2) For URLs with implicit ports, IE11 parses to default ports while
-  // other browsers leave the port field empty.
-  if (
-    (info.protocol == 'http:' && info.port == 80) ||
-    (info.protocol == 'https:' && info.port == 443)
-  ) {
-    info.port = '';
-    info.host = info.hostname;
-  }
-
-  // For data URI a.origin is equal to the string 'null' which is not useful.
-  // We instead return the actual origin which is the full URL.
-  if (a.origin && a.origin != 'null') {
-    info.origin = a.origin;
-  } else if (info.protocol == 'data:' || !info.host) {
-    info.origin = info.href;
-  } else {
-    info.origin = info.protocol + '//' + info.host;
-  }
-  return info;
-}
-
-/**
- * Parses and builds Object of URL query string.
- * @param {string} query The URL query string.
- * @return {!Object<string, string>}
- */
-function parseQueryString$1(query) {
-  if (!query) {
-    return {};
-  }
-  return (/^[?#]/.test(query) ? query.slice(1) : query)
-    .split('&')
-    .reduce((params, param) => {
-      const item = param.split('=');
-      const key = decodeURIComponent(item[0] || '');
-      const value = decodeURIComponent(item[1] || '');
-      if (key) {
-        params[key] = value;
-      }
-      return params;
-    }, {});
-}
-
-/**
- * Adds a parameter to a query string.
- * @param {string} url
- * @param {string} param
- * @param {string} value
- * @return {string}
- */
-function addQueryParam(url, param, value) {
-  const queryIndex = url.indexOf('?');
-  const fragmentIndex = url.indexOf('#');
-  let fragment = '';
-  if (fragmentIndex != -1) {
-    fragment = url.substring(fragmentIndex);
-    url = url.substring(0, fragmentIndex);
-  }
-  if (queryIndex == -1) {
-    url += '?';
-  } else if (queryIndex < url.length - 1) {
-    url += '&';
-  }
-  url += encodeURIComponent(param) + '=' + encodeURIComponent(value);
-  return url + fragment;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Have to put these in the map to avoid compiler optimization. Due to
- * optimization issues, this map only allows property-style keys. E.g. "hr1",
- * as opposed to "1hr".
- * @type {!Object<string, number>}
- * @package Visible for testing only.
- */
-const CACHE_KEYS = {
-  'nocache': 1,
-  'hr1': 3600000, // 1hr = 1000 * 60 * 60
-  'hr12': 43200000, // 12hr = 1000 * 60 * 60 * 12
-};
-
-/**
- * @return {string}
- */
-function feOrigin() {
-  return parseUrl$1('https://news.google.com').origin;
-}
-
-/**
- * @param {string} url Relative URL, e.g. "/service1".
- * @return {string} The complete URL.
- */
-function serviceUrl(url) {
-  return 'https://news.google.com/swg/_/api/v1' + url;
-}
-
-/**
- * @param {string} url  Relative URL, e.g. "/service1".
- * @return {string} The complete URL.
- */
-function adsUrl(url) {
-  return 'https://pubads.g.doubleclick.net' + url;
-}
-
-/**
- * @param {string} url Relative URL, e.g. "/offersiframe".
- * @param {string=} prefix
- * @return {string} The complete URL.
- */
-function feUrl(url, prefix = '') {
-  // Add cache param.
-  url = feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
-
-  // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
-  const query = parseQueryString$1(self.location.hash);
-  const boqJsMode = query['swg.boqjsmode'];
-  if (boqJsMode !== undefined) {
-    url = addQueryParam(url, 'jsmode', boqJsMode);
-  }
-
-  return url;
-}
-
-/**
- * @param {string} url FE URL.
- * @return {string} The complete URL including cache param.
- */
-function feCached(url) {
-  return addQueryParam(url, '_', cacheParam('hr1'));
-}
-
-/**
- * @param {!Object<string, ?>} args
- * @return {!Object<string, ?>}
- */
-function feArgs(args) {
-  return Object.assign(args, {
-    '_client': 'SwG 0.1.22.84',
-  });
-}
-
-/**
- * @param {string} cacheKey
- * @return {string}
- * @package Visible for testing only.
- */
-function cacheParam(cacheKey) {
-  let period = CACHE_KEYS[cacheKey];
-  if (period == null) {
-    period = 1;
-  }
-  if (period === 0) {
-    return '_';
-  }
-  const now = Date.now();
-  return String(period <= 1 ? now : Math.floor(now / period));
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {!Object<string, string>} */
-const iframeAttributes = {
-  'frameborder': '0',
-  'scrolling': 'no',
-};
-
-/**
- * @enum {string}
- */
-const Theme = {
-  LIGHT: 'light',
-  DARK: 'dark',
-};
-
-/**
- * The class for Smart button Api.
- */
-class SmartSubscriptionButtonApi {
-  /**
-   * @param {!./deps.DepsDef} deps
-   * @param {!Element} button
-   * @param {!../api/subscriptions.SmartButtonOptions} options
-   * @param {function()=} callback
-   */
-  constructor(deps, button, options, callback) {
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
-
-    /** @private @const {!Document} */
-    this.doc_ = this.win_.document;
-
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
-      this.doc_,
-      'iframe',
-      iframeAttributes
-    ));
-
-    /** @private @const {!Element} */
-    this.button_ = button;
-
-    /** @private {!../api/subscriptions.SmartButtonOptions} */
-    this.options_ = options;
-
-    /** @private const {function()=} */
-    this.callback_ = callback;
-
-    /** @private @const {string} */
-    this.src_ = feUrl('/smartboxiframe');
-
-    const frontendArguments = {
-      'productId': this.deps_.pageConfig().getProductId(),
-      'publicationId': this.deps_.pageConfig().getPublicationId(),
-      'theme': (this.options_ && this.options_.theme) || 'light',
-      'lang': (this.options_ && this.options_.lang) || 'en',
-    };
-    const messageTextColor = this.options_ && this.options_.messageTextColor;
-    if (messageTextColor) {
-      frontendArguments['messageTextColor'] = messageTextColor;
-    }
-
-    /** @private @const {!Object} */
-    this.args_ = feArgs(frontendArguments);
-  }
-
-  /**
-   * @param {SmartBoxMessage} smartBoxMessage
-   */
-  handleSmartBoxClick_(smartBoxMessage) {
-    if (smartBoxMessage && smartBoxMessage.getIsClicked()) {
-      if (!this.callback_) {
-        throw new Error('No callback!');
-      }
-      this.callback_();
-      return;
-    }
-  }
-
-  /**
-   * Make a call to build button content and listens for the 'click' message.
-   * @return {!Element}
-   */
-  start() {
-    /**
-     * Add a callback to the button itself to fire the iframe's button click
-     * action when user tabs to the container button and hits enter.
-     */
-    this.button_.addEventListener('click', () => {
-      this.callback_();
-    });
-
-    setImportantStyles(this.iframe_, {
-      'opacity': 1,
-      'position': 'absolute',
-      'top': 0,
-      'bottom': 0,
-      'left': 0,
-      'height': '100%',
-      'right': 0,
-      'width': '100%',
-    });
-    this.button_.appendChild(this.iframe_);
-    const analyticsContext = this.deps_
-      .analytics()
-      .getContext()
-      .toArray();
-    this.args_['analyticsContext'] = analyticsContext;
-    this.activityPorts_
-      .openIframe(this.iframe_, this.src_, this.args_)
-      .then(port => {
-        port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
-      });
-    return this.iframe_;
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * The button title should match that of button's SVG.
- */
-/** @type {!Object<string, string>} */
-const TITLE_LANG_MAP = {
-  'en': 'Subscribe with Google',
-  'ar': 'Google اشترك مع',
-  'de': 'Abonnieren mit Google',
-  'es': 'Suscríbete con Google',
-  'es-latam': 'Suscríbete con Google',
-  'es-latn': 'Suscríbete con Google',
-  'fr': "S'abonner avec Google",
-  'hi': 'Google के ज़रिये सदस्यता',
-  'id': 'Berlangganan dengan Google',
-  'it': 'Abbonati con Google',
-  'jp': 'Google で購読',
-  'ko': 'Google 을 통한구독',
-  'ms': 'Langgan dengan Google',
-  'nl': 'Abonneren via Google',
-  'no': 'Abonner med Google',
-  'pl': 'Subskrybuj z Google',
-  'pt': 'Subscrever com o Google',
-  'pt-br': 'Assine com o Google',
-  'ru': 'Подпиcka через Google',
-  'se': 'Prenumerera med Google',
-  'th': 'สมัครฟาน Google',
-  'tr': 'Google ile Abone Ol',
-  'uk': 'Підписатися через Google',
-  'zh-tw': '透過 Google 訂閱',
-};
-
-/**
- * The button stylesheet can be found in the `/assets/swg-button.css`.
- * It's produced by the `gulp assets` task and deployed to
- * `https://news.google.com/swg/js/v1/swg-button.css`.
- */
-class ButtonApi {
-  /**
-   * @param {!../model/doc.Doc} doc
-   * @param {!Promise<!./runtime.ConfiguredRuntime>} configuredRuntimePromise
-   */
-  constructor(doc, configuredRuntimePromise) {
-    /** @private @const {!../model/doc.Doc} */
-    this.doc_ = doc;
-
-    /** @private @const {!Promise<!./runtime.ConfiguredRuntime>} */
-    this.configuredRuntimePromise_ = configuredRuntimePromise;
-  }
-
-  /**
-   */
-  init() {
-    const head = this.doc_.getHead();
-    if (!head) {
-      return;
-    }
-
-    const url = 'https://news.google.com/swg/js/v1/swg-button.css';
-    const existing = head.querySelector(`link[href="${url}"]`);
-    if (existing) {
-      return;
-    }
-
-    // <link rel="stylesheet" href="..." type="text/css">
-    head.appendChild(
-      createElement(this.doc_.getWin().document, 'link', {
-        'rel': 'stylesheet',
-        'type': 'text/css',
-        'href': url,
-      })
-    );
-  }
-
-  /**
-   * @param {!../api/subscriptions.ButtonOptions|function()} optionsOrCallback
-   * @param {function()=} callback
-   * @return {!Element}
-   */
-  create(optionsOrCallback, callback) {
-    const button = createElement(this.doc_.getWin().document, 'button', {});
-    return this.attach(button, optionsOrCallback, callback);
-  }
-
-  /**
-   * @param {!Element} button
-   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
-   * @param {function()=} callback
-   * @return {!Element}
-   */
-  attach(button, optionsOrCallback, callback) {
-    const options = /** @type {!../api/subscriptions.ButtonOptions} */ (this.getOptions_(
-      optionsOrCallback
-    ));
-
-    const theme = options['theme'];
-    button.classList.add(`swg-button-${theme}`);
-    button.setAttribute('role', 'button');
-    if (options['lang']) {
-      button.setAttribute('lang', options['lang']);
-    }
-    button.setAttribute('title', msg(TITLE_LANG_MAP, button) || '');
-    button.addEventListener(
-      'click',
-      this.getCallback_(optionsOrCallback, callback)
-    );
-    button.addEventListener('click', () => {
-      this.configuredRuntimePromise_.then(configuredRuntime => {
-        configuredRuntime
-          .eventManager()
-          .logSwgEvent(
-            AnalyticsEvent.ACTION_SWG_BUTTON_CLICK,
-            /* isFromUserAction */ true
-          );
-      });
-    });
-    this.configuredRuntimePromise_.then(configuredRuntime => {
-      configuredRuntime
-        .eventManager()
-        .logSwgEvent(AnalyticsEvent.IMPRESSION_SWG_BUTTON);
-    });
-    return button;
-  }
-
-  /**
-   *
-   * @param {../api/subscriptions.ButtonOptions|../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
-   * @return {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions}
-   * @private
-   */
-  getOptions_(optionsOrCallback) {
-    const options =
-      /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */ (optionsOrCallback &&
-      typeof optionsOrCallback != 'function'
-        ? optionsOrCallback
-        : {'theme': Theme.LIGHT});
-
-    const theme = options['theme'];
-    if (theme !== Theme.LIGHT && theme !== Theme.DARK) {
-      options['theme'] = Theme.LIGHT;
-    }
-    return options;
-  }
-
-  /**
-   *
-   * @param {?../api/subscriptions.ButtonOptions|?../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
-   * @param {function()=} callback
-   * @return {function()|function(Event):boolean}
-   * @private
-   */
-  getCallback_(optionsOrCallback, callback) {
-    return (
-      /** @type {function()|function(Event):boolean} */ ((typeof optionsOrCallback ==
-      'function'
-        ? optionsOrCallback
-        : null) || callback)
-    );
-  }
-
-  /**
-   * @param {!./deps.DepsDef} deps
-   * @param {!Element} button
-   * @param {../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
-   * @param {function()=} callback
-   * @return {!Element}
-   */
-  attachSmartButton(deps, button, optionsOrCallback, callback) {
-    const options = /** @type {!../api/subscriptions.SmartButtonOptions} */ (this.getOptions_(
-      optionsOrCallback
-    ));
-    const castedCallback = /** @type {function()} */ (this.getCallback_(
-      optionsOrCallback,
-      callback
-    ));
-
-    // Add required CSS class, if missing.
-    button.classList.add('swg-smart-button');
-    button.addEventListener('click', () =>
-      this.configuredRuntimePromise_.then(configuredRuntime =>
-        configuredRuntime
-          .eventManager()
-          .logSwgEvent(
-            AnalyticsEvent.ACTION_SWG_BUTTON_CLICK,
-            /* isFromUserAction */ true
-          )
-      )
-    );
-
-    return new SmartSubscriptionButtonApi(
-      deps,
-      button,
-      options,
-      castedCallback
-    ).start();
-  }
-}
-
-const CSS = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @enum {number} */
-const CallbackId = {
-  ENTITLEMENTS: 1,
-  SUBSCRIBE_REQUEST: 2,
-  PAYMENT_RESPONSE: 3,
-  LOGIN_REQUEST: 4,
-  LINK_PROGRESS: 5,
-  LINK_COMPLETE: 6,
-  FLOW_STARTED: 7,
-  FLOW_CANCELED: 8,
-};
-
-/**
- */
-class Callbacks {
-  /**
-   */
-  constructor() {
-    /** @private @const {!Object<CallbackId, function(*)>} */
-    this.callbacks_ = {};
-    /** @private @const {!Object<CallbackId, *>} */
-    this.resultBuffer_ = {};
-  }
-
-  /**
-   * @param {function(!Promise<!../api/entitlements.Entitlements>)} callback
-   */
-  setOnEntitlementsResponse(callback) {
-    this.setCallback_(CallbackId.ENTITLEMENTS, callback);
-  }
-
-  /**
-   * @param {!Promise<!../api/entitlements.Entitlements>} promise
-   */
-  triggerEntitlementsResponse(promise) {
-    return this.trigger_(
-      CallbackId.ENTITLEMENTS,
-      promise.then(res => res.clone())
-    );
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasEntitlementsResponsePending() {
-    return !!this.resultBuffer_[CallbackId.ENTITLEMENTS];
-  }
-
-  /**
-   * @param {function(!../api/subscriptions.LoginRequest)} callback
-   */
-  setOnLoginRequest(callback) {
-    this.setCallback_(CallbackId.LOGIN_REQUEST, callback);
-  }
-
-  /**
-   * @param {!../api/subscriptions.LoginRequest} request
-   * @return {boolean} Whether the callback has been found.
-   */
-  triggerLoginRequest(request) {
-    return this.trigger_(CallbackId.LOGIN_REQUEST, request);
-  }
-
-  /**
-   * @param {function()} callback
-   */
-  setOnLinkProgress(callback) {
-    this.setCallback_(CallbackId.LINK_PROGRESS, callback);
-  }
-
-  /**
-   * @return {boolean} Whether the callback has been found.
-   */
-  triggerLinkProgress() {
-    return this.trigger_(CallbackId.LINK_PROGRESS, true);
-  }
-
-  /**
-   */
-  resetLinkProgress() {
-    this.resetCallback_(CallbackId.LINK_PROGRESS);
-  }
-
-  /**
-   * @param {function()} callback
-   */
-  setOnLinkComplete(callback) {
-    this.setCallback_(CallbackId.LINK_COMPLETE, callback);
-  }
-
-  /**
-   * @return {boolean} Whether the callback has been found.
-   */
-  triggerLinkComplete() {
-    return this.trigger_(CallbackId.LINK_COMPLETE, true);
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasLinkCompletePending() {
-    return !!this.resultBuffer_[CallbackId.LINK_COMPLETE];
-  }
-
-  /**
-   * @param {function()} callback
-   */
-  setOnSubscribeRequest(callback) {
-    this.setCallback_(CallbackId.SUBSCRIBE_REQUEST, callback);
-  }
-
-  /**
-   * @return {boolean} Whether the callback has been found.
-   */
-  triggerSubscribeRequest() {
-    return this.trigger_(CallbackId.SUBSCRIBE_REQUEST, true);
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasSubscribeRequestCallback() {
-    return !!this.callbacks_[CallbackId.SUBSCRIBE_REQUEST];
-  }
-
-  /**
-   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
-   */
-  setOnSubscribeResponse(callback) {
-    log_4(
-      `[swg.js:setOnSubscribeResponse]: This method has been deprecated, please switch usages to 'setOnPaymentResponse'`
-    );
-    this.setCallback_(CallbackId.PAYMENT_RESPONSE, callback);
-  }
-
-  /**
-   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
-   */
-  setOnContributionResponse(callback) {
-    log_4(
-      `[swg.js:setOnContributionResponse]: This method has been deprecated, please switch usages to 'setOnPaymentResponse'`
-    );
-    this.setCallback_(CallbackId.PAYMENT_RESPONSE, callback);
-  }
-
-  /**
-   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
-   */
-  setOnPaymentResponse(callback) {
-    this.setCallback_(CallbackId.PAYMENT_RESPONSE, callback);
-  }
-
-  /**
-   * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
-   * @return {boolean} Whether the callback has been found.
-   */
-  triggerPaymentResponse(responsePromise) {
-    return this.trigger_(
-      CallbackId.PAYMENT_RESPONSE,
-      responsePromise.then(res => res.clone())
-    );
-  }
-
-  /**
-   * @return {boolean}
-   */
-  hasPaymentResponsePending() {
-    return !!this.resultBuffer_[CallbackId.PAYMENT_RESPONSE];
-  }
-
-  /**
-   * @param {function({flow: string, data: !Object})} callback
-   */
-  setOnFlowStarted(callback) {
-    this.setCallback_(CallbackId.FLOW_STARTED, callback);
-  }
-
-  /**
-   * @param {string} flow
-   * @param {!Object=} data
-   * @return {boolean} Whether the callback has been found.
-   */
-  triggerFlowStarted(flow, data = {}) {
-    return this.trigger_(CallbackId.FLOW_STARTED, {
-      flow,
-      data,
-    });
-  }
-
-  /**
-   * @param {function({flow: string, data: !Object})} callback
-   */
-  setOnFlowCanceled(callback) {
-    this.setCallback_(CallbackId.FLOW_CANCELED, callback);
-  }
-
-  /**
-   * @param {string} flow
-   * @param {!Object=} data
-   * @return {boolean} Whether the callback has been found.
-   */
-  triggerFlowCanceled(flow, data = {}) {
-    return this.trigger_(CallbackId.FLOW_CANCELED, {
-      flow,
-      data,
-    });
-  }
-
-  /**
-   * @param {!CallbackId} id
-   * @param {function(?)} callback
-   * @private
-   */
-  setCallback_(id, callback) {
-    if (this.callbacks_[id]) {
-      log_4(
-        `[swg.js]: You have registered multiple callbacks for the same response.`
-      );
-    }
-    this.callbacks_[id] = callback;
-    // If result already exist, execute the callback right away.
-    if (id in this.resultBuffer_) {
-      this.executeCallback_(id, callback, this.resultBuffer_[id]);
-    }
-  }
-
-  /**
-   * @param {!CallbackId} id
-   * @param {*} data
-   * @return {boolean}
-   * @private
-   */
-  trigger_(id, data) {
-    this.resultBuffer_[id] = data;
-    const callback = this.callbacks_[id];
-    if (callback) {
-      this.executeCallback_(id, callback, data);
-    }
-    return !!callback;
-  }
-
-  /**
-   * @param {!CallbackId} id
-   * @private
-   */
-  resetCallback_(id) {
-    if (id in this.resultBuffer_) {
-      delete this.resultBuffer_[id];
-    }
-  }
-
-  /**
-   * @param {!CallbackId} id
-   * @param {function(*)} callback
-   * @param {*} data
-   * @private
-   */
-  executeCallback_(id, callback, data) {
-    // Always execute callbacks in a microtask.
-    Promise.resolve().then(() => {
-      callback(data);
-      this.resetCallback_(id);
-    });
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * abstract View Class. Used to render the content within the Dialog. The
- * extended class has actual content.
- * @abstract
- */
-class View {
-  /**
-   * Empty constructor.
-   */
-  constructor() {}
-
-  /**
-   * Gets the iframe element.
-   * @return {!Element}
-   * @abstract
-   */
-  getElement() {}
-
-  /**
-   * @param {!./dialog.Dialog} unusedDialog
-   * @return {!Promise}
-   * @abstract
-   */
-  init(unusedDialog) {}
-
-  /**
-   * Resizes the content.
-   */
-  resized() {
-    // Do nothing by default. Override if needed.
-  }
-
-  /**
-   * Accept the result.
-   * @return {!Promise}
-   * @abstract
-   */
-  whenComplete() {}
-
-  /**
-   * @return {boolean}
-   * @abstract
-   */
-  shouldFadeBody() {}
-
-  /**
-   * @return {boolean}
-   * @abstract
-   */
-  hasLoadingIndicator() {}
-}
-
-/**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -5028,49 +3933,8 @@ class ErrorUtils {
  * limitations under the License.
  */
 
-/**
- * @param {!../components/activities.ActivityPortDef} port
- * @param {string} requireOrigin
- * @param {boolean} requireOriginVerified
- * @param {boolean} requireSecureChannel
- * @return {!Promise<!Object>}
- */
-function acceptPortResultData(
-  port,
-  requireOrigin,
-  requireOriginVerified,
-  requireSecureChannel
-) {
-  return port.acceptResult().then(result => {
-    if (
-      result.origin != requireOrigin ||
-      (requireOriginVerified && !result.originVerified) ||
-      (requireSecureChannel && !result.secureChannel)
-    ) {
-      throw new Error('channel mismatch');
-    }
-    return result.data;
-  });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 /** @const {!Object<string, string>} */
-const iframeAttributes$1 = {
+const iframeAttributes = {
   'frameborder': '0',
   'scrolling': 'no',
 };
@@ -5107,7 +3971,7 @@ class ActivityIframeView extends View {
     this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
       this.doc_,
       'iframe',
-      iframeAttributes$1
+      iframeAttributes
     ));
 
     /** @private @const {!../components/activities.ActivityPorts} */
@@ -5329,14 +4193,14 @@ function bytesToString(bytes) {
 
 /**
  * Interpret a byte array as a UTF-8 string.
- * @param {!BufferSource} bytes
+ * @param {!Uint8Array} bytes
  * @return {string}
  */
 function utf8DecodeSync(bytes) {
   if (typeof TextDecoder !== 'undefined') {
     return new TextDecoder('utf-8').decode(bytes);
   }
-  const asciiString = bytesToString(new Uint8Array(bytes.buffer || bytes));
+  const asciiString = bytesToString(new Uint8Array(bytes));
   return decodeURIComponent(escape(asciiString));
 }
 
@@ -5380,6 +4244,11 @@ function base64UrlDecodeToBytes(str) {
  */
 
 /**
+ * @fileoverview This module declares JSON types as defined in the
+ * {@link http://json.org/}.
+ */
+
+/**
  * Simple wrapper around JSON.parse that casts the return value
  * to JsonObject.
  * Create a new wrapper if an array return value is desired.
@@ -5408,6 +4277,18 @@ function tryParseJson(json, onFailed) {
     }
     return undefined;
   }
+}
+
+/**
+ * Converts the passed string into a JSON object (if possible) and returns the
+ * value of the propertyName on that object.
+ * @param {string} jsonString
+ * @param {string} propertyName
+ * @return {*}
+ */
+function getPropertyFromJsonString(jsonString, propertyName) {
+  const json = tryParseJson(jsonString);
+  return (json && json[propertyName]) || null;
 }
 
 /**
@@ -5738,6 +4619,26 @@ class Entitlement {
       : [json];
     return jsonList.map(json => Entitlement.parseFromJson(json));
   }
+
+  /**
+   * Returns the SKU associated with this entitlement.
+   * @return {?string}
+   */
+  getSku() {
+    if (this.source !== 'google') {
+      return null;
+    }
+    const sku = (
+        /** @type {?string} */ (getPropertyFromJsonString(
+            this.subscriptionToken,
+            'productId'
+        ) || null)
+    );
+    if (!sku) {
+      log_4('Unable to retrieve SKU from SwG subscription token');
+    }
+    return sku;
+  }
 }
 
 /**
@@ -5838,9 +4739,10 @@ class SubscribeResponse$1 {
    * @param {?Entitlements} entitlements
    * @param {!string} productType
    * @param {function():!Promise} completeHandler
+   * @param {?string=} oldSku
    */
   constructor(raw, purchaseData, userData, entitlements, productType,
-      completeHandler) {
+      completeHandler, oldSku = null) {
     /** @const {string} */
     this.raw = raw;
     /** @const {!PurchaseData} */
@@ -5853,6 +4755,8 @@ class SubscribeResponse$1 {
     this.productType = productType;
     /** @private @const {function():!Promise} */
     this.completeHandler_ = completeHandler;
+    /** @const {?string} */
+    this.oldSku = oldSku;
   }
 
   /**
@@ -5865,7 +4769,9 @@ class SubscribeResponse$1 {
         this.userData,
         this.entitlements,
         this.productType,
-        this.completeHandler_);
+        this.completeHandler_,
+        this.oldSku
+    );
   }
 
   /**
@@ -5876,6 +4782,7 @@ class SubscribeResponse$1 {
       'purchaseData': this.purchaseData.json(),
       'userData': this.userData ? this.userData.json() : null,
       'entitlements': this.entitlements ? this.entitlements.json() : null,
+      'oldSku' : this.oldSku,
       'productType': this.productType,
     };
   }
@@ -6324,6 +5231,269 @@ function defaultConfig() {
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+
+/**
+ * Cached a-tag to avoid memory allocation during URL parsing.
+ * @type {HTMLAnchorElement}
+ */
+let a;
+
+/**
+ * We cached all parsed URLs. As of now there are no use cases
+ * of AMP docs that would ever parse an actual large number of URLs,
+ * but we often parse the same one over and over again.
+ * @type {Object<string, !LocationDef>}
+ */
+let cache;
+
+/**
+ * Returns a Location-like object for the given URL. If it is relative,
+ * the URL gets resolved.
+ * Consider the returned object immutable. This is enforced during
+ * testing by freezing the object.
+ * @param {string} url
+ * @return {!LocationDef}
+ */
+function parseUrl$1(url) {
+  if (!a) {
+    a = /** @type {!HTMLAnchorElement} */ (self.document.createElement('a'));
+    cache = self.UrlCache || (self.UrlCache = Object.create(null));
+  }
+
+  const fromCache = cache[url];
+  if (fromCache) {
+    return fromCache;
+  }
+
+  const info = parseUrlWithA(a, url);
+
+  return (cache[url] = info);
+}
+
+/**
+ * Returns a Location-like object for the given URL. If it is relative,
+ * the URL gets resolved.
+ * @param {!HTMLAnchorElement} a
+ * @param {string} url
+ * @return {!LocationDef}
+ */
+function parseUrlWithA(a, url) {
+  a.href = url;
+
+  // IE11 doesn't provide full URL components when parsing relative URLs.
+  // Assigning to itself again does the trick.
+  if (!a.protocol) {
+    a.href = a.href;
+  }
+
+  /** @type {!LocationDef} */
+  const info = {
+    href: a.href,
+    protocol: a.protocol,
+    host: a.host,
+    hostname: a.hostname,
+    port: a.port == '0' ? '' : a.port,
+    pathname: a.pathname,
+    search: a.search,
+    hash: a.hash,
+    origin: '', // Set below.
+  };
+
+  // Some IE11 specific polyfills.
+  // 1) IE11 strips out the leading '/' in the pathname.
+  if (info.pathname[0] !== '/') {
+    info.pathname = '/' + info.pathname;
+  }
+
+  // 2) For URLs with implicit ports, IE11 parses to default ports while
+  // other browsers leave the port field empty.
+  if (
+    (info.protocol == 'http:' && info.port == 80) ||
+    (info.protocol == 'https:' && info.port == 443)
+  ) {
+    info.port = '';
+    info.host = info.hostname;
+  }
+
+  // For data URI a.origin is equal to the string 'null' which is not useful.
+  // We instead return the actual origin which is the full URL.
+  if (a.origin && a.origin != 'null') {
+    info.origin = a.origin;
+  } else if (info.protocol == 'data:' || !info.host) {
+    info.origin = info.href;
+  } else {
+    info.origin = info.protocol + '//' + info.host;
+  }
+  return info;
+}
+
+/**
+ * Parses and builds Object of URL query string.
+ * @param {string} query The URL query string.
+ * @return {!Object<string, string>}
+ */
+function parseQueryString$1(query) {
+  if (!query) {
+    return {};
+  }
+  return (/^[?#]/.test(query) ? query.slice(1) : query)
+    .split('&')
+    .reduce((params, param) => {
+      const item = param.split('=');
+      const key = decodeURIComponent(item[0] || '');
+      const value = decodeURIComponent(item[1] || '');
+      if (key) {
+        params[key] = value;
+      }
+      return params;
+    }, {});
+}
+
+/**
+ * Adds a parameter to a query string.
+ * @param {string} url
+ * @param {string} param
+ * @param {string} value
+ * @return {string}
+ */
+function addQueryParam(url, param, value) {
+  const queryIndex = url.indexOf('?');
+  const fragmentIndex = url.indexOf('#');
+  let fragment = '';
+  if (fragmentIndex != -1) {
+    fragment = url.substring(fragmentIndex);
+    url = url.substring(0, fragmentIndex);
+  }
+  if (queryIndex == -1) {
+    url += '?';
+  } else if (queryIndex < url.length - 1) {
+    url += '&';
+  }
+  url += encodeURIComponent(param) + '=' + encodeURIComponent(value);
+  return url + fragment;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Have to put these in the map to avoid compiler optimization. Due to
+ * optimization issues, this map only allows property-style keys. E.g. "hr1",
+ * as opposed to "1hr".
+ * @type {!Object<string, number>}
+ * @package Visible for testing only.
+ */
+const CACHE_KEYS = {
+  'nocache': 1,
+  'hr1': 3600000, // 1hr = 1000 * 60 * 60
+  'hr12': 43200000, // 12hr = 1000 * 60 * 60 * 12
+};
+
+/**
+ * @return {string}
+ */
+function feOrigin() {
+  return parseUrl$1('https://news.google.com').origin;
+}
+
+/**
+ * @param {string} url Relative URL, e.g. "/service1".
+ * @return {string} The complete URL.
+ */
+function serviceUrl(url) {
+  return 'https://news.google.com/swg/_/api/v1' + url;
+}
+
+/**
+ * @param {string} url  Relative URL, e.g. "/service1".
+ * @return {string} The complete URL.
+ */
+function adsUrl(url) {
+  return 'https://pubads.g.doubleclick.net' + url;
+}
+
+/**
+ * @param {string} url Relative URL, e.g. "/offersiframe".
+ * @param {string=} prefix
+ * @return {string} The complete URL.
+ */
+function feUrl(url, prefix = '') {
+  // Add cache param.
+  url = feCached('https://news.google.com' + prefix + '/swg/_/ui/v1' + url);
+
+  // Optionally add jsmode param. This allows us to test against "aggressively" compiled Boq JS.
+  const query = parseQueryString$1(self.location.hash);
+  const boqJsMode = query['swg.boqjsmode'];
+  if (boqJsMode !== undefined) {
+    url = addQueryParam(url, 'jsmode', boqJsMode);
+  }
+
+  return url;
+}
+
+/**
+ * @param {string} url FE URL.
+ * @return {string} The complete URL including cache param.
+ */
+function feCached(url) {
+  return addQueryParam(url, '_', cacheParam('hr1'));
+}
+
+/**
+ * @param {!Object<string, ?>} args
+ * @return {!Object<string, ?>}
+ */
+function feArgs(args) {
+  return Object.assign(args, {
+    '_client': 'SwG 0.1.22.93',
+  });
+}
+
+/**
+ * @param {string} cacheKey
+ * @return {string}
+ * @package Visible for testing only.
+ */
+function cacheParam(cacheKey) {
+  let period = CACHE_KEYS[cacheKey];
+  if (period == null) {
+    period = 1;
+  }
+  if (period === 0) {
+    return '_';
+  }
+  const now = Date.now();
+  return String(period <= 1 ? now : Math.floor(now / period));
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  * The Flow goes like this:
  * a. Start Payments
@@ -6333,6 +5503,7 @@ function defaultConfig() {
  *
  * In other words, Flow = Payments + Account Creation.
  */
+
 /**
  * String values input by the publisher are mapped to the number values.
  * @type {!Object<string, number>}
@@ -6342,6 +5513,11 @@ const ReplaceSkuProrationModeMapping = {
   // be prorated and credited to the user. This is the current default
   // behavior.
   'IMMEDIATE_WITH_TIME_PRORATION': 1,
+};
+
+const RecurrenceMapping = {
+  'AUTO': 1,
+  'ONE_TIME': 2,
 };
 
 /**
@@ -6358,12 +5534,12 @@ function getEventParams(sku) {
 class PayStartFlow {
   /**
    * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.SubscriptionRequest|string} skuOrSubscriptionRequest
+   * @param {!../api/subscriptions.SubscriptionRequest} subscriptionRequest
    * @param {!../api/subscriptions.ProductType} productType
    */
   constructor(
     deps,
-    skuOrSubscriptionRequest,
+    subscriptionRequest,
     productType = ProductType.SUBSCRIPTION
   ) {
     /** @private @const {!./deps.DepsDef} */
@@ -6379,10 +5555,7 @@ class PayStartFlow {
     this.dialogManager_ = deps.dialogManager();
 
     /** @private @const {!../api/subscriptions.SubscriptionRequest} */
-    this.subscriptionRequest_ =
-      typeof skuOrSubscriptionRequest == 'string'
-        ? {'skuId': skuOrSubscriptionRequest}
-        : skuOrSubscriptionRequest;
+    this.subscriptionRequest_ = subscriptionRequest;
 
     /**@private @const {!ProductType} */
     this.productType_ = productType;
@@ -6392,16 +5565,6 @@ class PayStartFlow {
 
     /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
     this.eventManager_ = deps.eventManager();
-
-    // Map the proration mode to the enum value (if proration exists).
-    this.prorationMode = this.subscriptionRequest_.replaceSkuProrationMode;
-    this.prorationEnum = 0;
-    if (this.prorationMode) {
-      this.prorationEnum = ReplaceSkuProrationModeMapping[this.prorationMode];
-    } else if (this.subscriptionRequest_.oldSku) {
-      this.prorationEnum =
-        ReplaceSkuProrationModeMapping['IMMEDIATE_WITH_TIME_PRORATION'];
-    }
   }
 
   /**
@@ -6409,28 +5572,45 @@ class PayStartFlow {
    * @return {!Promise}
    */
   start() {
-    const req = this.subscriptionRequest_;
     // Add the 'publicationId' key to the subscriptionRequest_ object.
-    const swgPaymentRequest = Object.assign({}, req, {
+    const swgPaymentRequest = Object.assign({}, this.subscriptionRequest_, {
       'publicationId': this.pageConfig_.getPublicationId(),
     });
 
-    if (this.prorationEnum) {
-      swgPaymentRequest.replaceSkuProrationMode = this.prorationEnum;
+    // Map the proration mode to the enum value (if proration exists).
+    const prorationMode = swgPaymentRequest['replaceSkuProrationMode'];
+    if (prorationMode) {
+      swgPaymentRequest['replaceSkuProrationMode'] =
+        ReplaceSkuProrationModeMapping[prorationMode];
+    } else if (swgPaymentRequest['oldSku']) {
+      swgPaymentRequest['replaceSkuProrationMode'] =
+        ReplaceSkuProrationModeMapping['IMMEDIATE_WITH_TIME_PRORATION'];
+    }
+    // Assign one-time recurrence enum if applicable
+    if (swgPaymentRequest['oneTime']) {
+      swgPaymentRequest['paymentRecurrence'] = RecurrenceMapping['ONE_TIME'];
+      delete swgPaymentRequest['oneTime'];
     }
 
     // Start/cancel events.
-    this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SUBSCRIBE, req);
-    if (req.oldSku) {
-      this.analyticsService_.setSku(req.oldSku);
+    const flow =
+      this.productType_ == ProductType.UI_CONTRIBUTION
+        ? SubscriptionFlows.CONTRIBUTE
+        : SubscriptionFlows.SUBSCRIBE;
+
+    this.deps_.callbacks().triggerFlowStarted(flow, this.subscriptionRequest_);
+    if (swgPaymentRequest['oldSku']) {
+      this.analyticsService_.setSku(swgPaymentRequest['oldSku']);
     }
     this.eventManager_.logSwgEvent(
       AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
       true,
-      getEventParams(req.skuId)
+      getEventParams(swgPaymentRequest['skuId'])
     );
+    PayCompleteFlow.waitingForPayClient_ = true;
     this.payClient_.start(
-      {
+      /** @type {!PaymentDataRequest} */
+      ({
         'apiVersion': 1,
         'allowedPaymentMethods': ['CARD'],
         'environment': 'PRODUCTION',
@@ -6440,7 +5620,7 @@ class PayStartFlow {
           'startTimeMs': Date.now(),
           'productType': this.productType_,
         },
-      },
+      }),
       {
         forceRedirect:
           this.deps_.config().windowOpenMode == WindowOpenMode.REDIRECT,
@@ -6483,7 +5663,12 @@ class PayCompleteFlow {
         },
         reason => {
           if (isCancelError(reason)) {
-            deps.callbacks().triggerFlowCanceled(SubscriptionFlows.SUBSCRIBE);
+            const productType = /** @type {!Object} */ (reason)['productType'];
+            const flow =
+              productType == ProductType.UI_CONTRIBUTION
+                ? SubscriptionFlows.CONTRIBUTE
+                : SubscriptionFlows.SUBSCRIBE;
+            deps.callbacks().triggerFlowCanceled(flow);
             deps
               .eventManager()
               .logSwgEvent(AnalyticsEvent.ACTION_USER_CANCELED_PAYFLOW, true);
@@ -6492,8 +5677,8 @@ class PayCompleteFlow {
               .eventManager()
               .logSwgEvent(AnalyticsEvent.EVENT_PAYMENT_FAILED, false);
             deps.jserror().error('Pay failed', reason);
+            throw reason;
           }
-          throw reason;
         }
       );
     });
@@ -6548,11 +5733,10 @@ class PayCompleteFlow {
     );
     this.deps_.entitlementsManager().reset(true);
     this.response_ = response;
-    // TODO(dianajing): find a way to specify whether response is a subscription update
     const args = {
       'publicationId': this.deps_.pageConfig().getPublicationId(),
       'productType': this.response_['productType'],
-      // 'isSubscriptionUpdate': !!response.oldSku,
+      'isSubscriptionUpdate': !!this.response_['oldSku'],
     };
     // TODO(dvoytenko, #400): cleanup once entitlements is launched everywhere.
     if (response.userData && response.entitlements) {
@@ -6626,6 +5810,9 @@ class PayCompleteFlow {
   }
 }
 
+/** @private {boolean} */
+PayCompleteFlow.waitingForPayClient_ = false;
+
 /**
  * @param {!./deps.DepsDef} deps
  * @param {!Promise<!Object>} payPromise
@@ -6633,13 +5820,13 @@ class PayCompleteFlow {
  * @return {!Promise<!SubscribeResponse>}
  */
 function validatePayResponse(deps, payPromise, completeHandler) {
+  const wasRedirect = !PayCompleteFlow.waitingForPayClient_;
+  PayCompleteFlow.waitingForPayClient_ = false;
   return payPromise.then(data => {
     // 1) We log against a random TX ID which is how we track a specific user
     //    anonymously.
     // 2) If there was a redirect to gPay, we may have lost our stored TX ID.
     // 3) Pay service is supposed to give us the TX ID it logged against.
-
-    const hasLogged = deps.analytics().getHasLogged();
     let eventType = AnalyticsEvent.UNKNOWN;
     let eventParams = undefined;
     if (typeof data !== 'object' || !data['googleTransactionId']) {
@@ -6649,16 +5836,16 @@ function validatePayResponse(deps, payPromise, completeHandler) {
       // lost all connection to the events that preceded the payment event and
       // we at least want to know why that data was lost.
       eventParams = new EventParams();
-      eventParams.setHadLogged(hasLogged);
+      eventParams.setHadLogged(!wasRedirect);
       eventType = AnalyticsEvent.EVENT_GPAY_NO_TX_ID;
     } else {
       const oldTxId = deps.analytics().getTransactionId();
       const newTxId = data['googleTransactionId'];
 
-      if (!hasLogged) {
+      if (wasRedirect) {
         // This is the expected case for full redirects.  It may be happening
-        // unexpectedly at other times too though and we want to be aware of it
-        // if it does.
+        // unexpectedly at other times too though and we want to be aware of
+        // it if it does.
         deps.analytics().setTransactionId(newTxId);
         eventType = AnalyticsEvent.EVENT_GPAY_CANNOT_CONFIRM_TX_ID;
       } else {
@@ -6688,7 +5875,9 @@ function validatePayResponse(deps, payPromise, completeHandler) {
 function parseSubscriptionResponse(deps, data, completeHandler) {
   let swgData = null;
   let raw = null;
-  let productType = null;
+  let productType = ProductType.SUBSCRIPTION;
+  let oldSku = null;
+
   if (data) {
     if (typeof data == 'string') {
       raw = /** @type {string} */ (data);
@@ -6696,18 +5885,18 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
       // Assume it's a json object in the format:
       // `{integratorClientCallbackData: "..."}` or `{swgCallbackData: "..."}`.
       const json = /** @type {!Object} */ (data);
-      if ('productType' in data) {
-        productType = data['productType'];
-      }
       if ('swgCallbackData' in json) {
         swgData = /** @type {!Object} */ (json['swgCallbackData']);
       } else if ('integratorClientCallbackData' in json) {
         raw = json['integratorClientCallbackData'];
       }
+      if ('paymentRequest' in data) {
+        oldSku = (data['paymentRequest']['swg'] || {})['oldSku'];
+        productType =
+          (data['paymentRequest']['i'] || {})['productType'] ||
+          ProductType.SUBSCRIPTION;
+      }
     }
-  }
-  if (!productType) {
-    productType = ProductType.SUBSCRIPTION;
   }
   if (raw && !swgData) {
     raw = atob(raw);
@@ -6726,7 +5915,8 @@ function parseSubscriptionResponse(deps, data, completeHandler) {
     parseUserData(swgData),
     parseEntitlements(deps, swgData),
     productType,
-    completeHandler
+    completeHandler,
+    oldSku
   );
 }
 
@@ -6772,8 +5962,2373 @@ function parseEntitlements(deps, swgData) {
  * @return {?string}
  */
 function parseSkuFromPurchaseDataSafe(purchaseData) {
-  const json = tryParseJson(purchaseData.raw);
-  return (json && json['productId']) || null;
+  return (
+    /** @type {?string} */ (getPropertyFromJsonString(
+      purchaseData.raw,
+      'productId'
+    ) || null)
+  );
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @param {string} sku
+ * @return {!EventParams}
+ */
+function getEventParams$1(sku) {
+  return new EventParams([, , , , sku]);
+}
+
+/**
+ * Offers view is closable when request was originated from 'AbbrvOfferFlow'
+ * or from 'SubscribeOptionFlow'.
+ */
+const OFFERS_VIEW_CLOSABLE = true;
+
+// The value logged when the offers screen shows all available SKUs.
+const ALL_SKUS = '*';
+
+/**
+ * The class for Offers flow.
+ */
+class OffersFlow {
+  /**
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
+   */
+  constructor(deps, options) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+
+    let isClosable = options && options.isClosable;
+    if (isClosable == undefined) {
+      isClosable = false; // Default is to hide Close button.
+    }
+
+    const feArgsObj = deps.activities().addDefaultArguments({
+      'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+      'productType': ProductType.SUBSCRIPTION,
+      'list': (options && options.list) || 'default',
+      'skus': (options && options.skus) || null,
+      'isClosable': isClosable,
+    });
+
+    if (options && options.oldSku) {
+      feArgsObj['oldSku'] = options.oldSku;
+      log_2(feArgsObj['skus'], 'Need a sku list if old sku is provided!');
+
+      // Remove old sku from offers if in list.
+      let skuList = feArgsObj['skus'];
+      const /** @type {string} */ oldSku = feArgsObj['oldSku'];
+      skuList = skuList.filter(sku => sku !== oldSku);
+
+      log_2(
+        skuList.length > 0,
+        'Sku list only contained offer user already has'
+      );
+      feArgsObj['skus'] = skuList;
+    }
+
+    // Redirect to payments if only one upgrade option is passed.
+    if (feArgsObj['skus'] && feArgsObj['skus'].length === 1) {
+      const sku = feArgsObj['skus'][0];
+      const /** @type {string|undefined} */ oldSku = feArgsObj['oldSku'];
+      // Update subscription triggers experimental flag if oldSku is passed,
+      // so we need to check for oldSku to decide if it needs to be sent.
+      // Otherwise we might accidentally block a regular subscription request.
+      if (oldSku) {
+        const skuSelectedResponse = new SkuSelectedResponse();
+        skuSelectedResponse.setSku(sku);
+        skuSelectedResponse.setOldSku(oldSku);
+        this.startPayFlow_(skuSelectedResponse);
+        return;
+      }
+    }
+
+    /** @private  @const {!Array<!string>} */
+    this.skus_ = feArgsObj['skus'] || [ALL_SKUS];
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/offersiframe'),
+      feArgsObj,
+      /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * @param {SkuSelectedResponse} response
+   * @private
+   */
+  startPayFlow_(response) {
+    const sku = response.getSku();
+    if (sku) {
+      const /** @type {../api/subscriptions.SubscriptionRequest} */ subscriptionRequest = {
+          'skuId': sku,
+        };
+      const oldSku = response.getOldSku();
+      if (oldSku) {
+        subscriptionRequest['oldSku'] = oldSku;
+        this.deps_.analytics().setSku(oldSku);
+      }
+      this.eventManager_.logSwgEvent(
+        AnalyticsEvent.ACTION_OFFER_SELECTED,
+        true,
+        getEventParams$1(sku)
+      );
+      new PayStartFlow(this.deps_, subscriptionRequest).start();
+    }
+  }
+
+  /**
+   * @param {AlreadySubscribedResponse} response
+   * @private
+   */
+  handleLinkRequest_(response) {
+    if (response.getSubscriberOrMember()) {
+      this.eventManager_.logSwgEvent(
+        AnalyticsEvent.ACTION_ALREADY_SUBSCRIBED,
+        true
+      );
+      this.deps_.callbacks().triggerLoginRequest({
+        linkRequested: !!response.getLinkRequested(),
+      });
+    }
+  }
+
+  /**
+   * @param {ViewSubscriptionsResponse} response
+   * @private
+   */
+  startNativeFlow_(response) {
+    if (response.getNative()) {
+      this.deps_.callbacks().triggerSubscribeRequest();
+    }
+  }
+
+  /**
+   * Starts the offers flow or alreadySubscribed flow.
+   * @return {!Promise}
+   */
+  start() {
+    if (this.activityIframeView_) {
+      // So no error if skipped to payment screen.
+      // Start/cancel events.
+      // The second parameter is required by Propensity in AMP.
+      this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SHOW_OFFERS, {
+        skus: this.skus_,
+        source: 'SwG',
+      });
+      this.activityIframeView_.onCancel(() => {
+        this.deps_
+          .callbacks()
+          .triggerFlowCanceled(SubscriptionFlows.SHOW_OFFERS);
+      });
+      this.activityIframeView_.on(
+        SkuSelectedResponse,
+        this.startPayFlow_.bind(this)
+      );
+      this.activityIframeView_.on(
+        AlreadySubscribedResponse,
+        this.handleLinkRequest_.bind(this)
+      );
+      this.activityIframeView_.on(
+        ViewSubscriptionsResponse,
+        this.startNativeFlow_.bind(this)
+      );
+
+      return this.dialogManager_.openView(this.activityIframeView_);
+    }
+    return Promise.resolve();
+  }
+}
+
+/**
+ * The class for subscribe option flow.
+ */
+class SubscribeOptionFlow {
+  /**
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest|undefined} options
+   */
+  constructor(deps, options) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
+    this.options_ = options;
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      deps.win(),
+      this.activityPorts_,
+      feUrl('/optionsiframe'),
+      feArgs({
+        'publicationId': deps.pageConfig().getPublicationId(),
+        'productId': deps.pageConfig().getProductId(),
+        'list': (options && options.list) || 'default',
+        'skus': (options && options.skus) || null,
+        'isClosable': true,
+      }),
+      /* shouldFadeBody */ false
+    );
+  }
+
+  /**
+   * Starts the offers flow or alreadySubscribed flow.
+   * @return {!Promise}
+   */
+  start() {
+    // Start/cancel events.
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
+    this.activityIframeView_.onCancel(() => {
+      this.deps_
+        .callbacks()
+        .triggerFlowCanceled(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
+    });
+    this.activityIframeView_.on(
+      SubscribeResponse,
+      this.maybeOpenOffersFlow_.bind(this)
+    );
+
+    this.activityIframeView_.acceptResult().then(
+      result => {
+        const data = result.data;
+        const response = new SubscribeResponse();
+        if (data['subscribe']) {
+          response.setSubscribe(true);
+        }
+        this.maybeOpenOffersFlow_(response);
+      },
+      reason => {
+        this.dialogManager_.completeView(this.activityIframeView_);
+        throw reason;
+      }
+    );
+    this.eventManager_.logSwgEvent(
+      AnalyticsEvent.IMPRESSION_CLICK_TO_SHOW_OFFERS
+    );
+    return this.dialogManager_.openView(this.activityIframeView_);
+  }
+
+  /**
+   * @param {SubscribeResponse} response
+   * @private
+   */
+  maybeOpenOffersFlow_(response) {
+    if (response.getSubscribe()) {
+      const options = this.options_ || {};
+      if (options.isClosable == undefined) {
+        options.isClosable = OFFERS_VIEW_CLOSABLE;
+      }
+      this.eventManager_.logSwgEvent(AnalyticsEvent.ACTION_VIEW_OFFERS, true);
+      new OffersFlow(this.deps_, options).start();
+    }
+  }
+}
+
+/**
+ * The class for Abbreviated Offer flow.
+ *
+ */
+class AbbrvOfferFlow {
+  /**
+   * @param {!./deps.DepsDef} deps
+   * @param {!../api/subscriptions.OffersRequest=} options
+   */
+  constructor(deps, options = {}) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
+    this.options_ = options;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/abbrvofferiframe'),
+      feArgs({
+        'publicationId': deps.pageConfig().getPublicationId(),
+        'productId': deps.pageConfig().getProductId(),
+        'showNative': deps.callbacks().hasSubscribeRequestCallback(),
+        'list': (options && options.list) || 'default',
+        'skus': (options && options.skus) || null,
+        'isClosable': true,
+      }),
+      /* shouldFadeBody */ false
+    );
+  }
+
+  /**
+   * @param {AlreadySubscribedResponse} response
+   * @private
+   */
+  handleLinkRequest_(response) {
+    if (response.getSubscriberOrMember()) {
+      this.eventManager_.logSwgEvent(
+        AnalyticsEvent.ACTION_ALREADY_SUBSCRIBED,
+        true
+      );
+      this.deps_.callbacks().triggerLoginRequest({
+        linkRequested: !!response.getLinkRequested(),
+      });
+    }
+  }
+
+  /**
+   * Starts the offers flow
+   * @return {!Promise}
+   */
+  start() {
+    // Start/cancel events.
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_ABBRV_OFFER);
+    this.activityIframeView_.onCancel(() => {
+      this.deps_
+        .callbacks()
+        .triggerFlowCanceled(SubscriptionFlows.SHOW_ABBRV_OFFER);
+    });
+
+    // If the user is already subscribed, trigger login flow
+    this.activityIframeView_.on(
+      AlreadySubscribedResponse,
+      this.handleLinkRequest_.bind(this)
+    );
+
+    // If result is due to requesting offers, redirect to offers flow
+    this.activityIframeView_.acceptResult().then(result => {
+      if (result.data['viewOffers']) {
+        const options = this.options_ || {};
+        if (options.isClosable == undefined) {
+          options.isClosable = OFFERS_VIEW_CLOSABLE;
+        }
+        this.eventManager_.logSwgEvent(AnalyticsEvent.ACTION_VIEW_OFFERS, true);
+        new OffersFlow(this.deps_, options).start();
+        return;
+      }
+      if (result.data['native']) {
+        this.deps_.callbacks().triggerSubscribeRequest();
+        // The flow is complete.
+        this.dialogManager_.completeView(this.activityIframeView_);
+        return;
+      }
+    });
+
+    this.eventManager_.logSwgEvent(
+      AnalyticsEvent.IMPRESSION_CLICK_TO_SHOW_OFFERS_OR_ALREADY_SUBSCRIBED
+    );
+
+    return this.dialogManager_.openView(this.activityIframeView_);
+  }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/**
+ * @implements {ActivityPortDef}
+ */
+class ActivityPortDeprecated {
+  /**
+   * @param {!web-activities/activity-ports.ActivityPort} port
+   */
+  constructor(port) {
+    /** @private @const {!web-activities/activity-ports.ActivityPort} */
+    this.port_ = port;
+  }
+
+  /**
+   * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
+   */
+  acceptResult() {
+    return this.port_.acceptResult();
+  }
+}
+
+/**
+ * @implements {ActivityPortDef}
+ */
+class ActivityIframePort$1 {
+  /**
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {!../runtime/deps.DepsDef} deps
+   * @param {?Object=} args
+   */
+  constructor(iframe, url, deps, args) {
+    /** @private @const {!web-activities/activity-ports.ActivityIframePort} */
+    this.iframePort_ = new activityPorts_2(iframe, url, args);
+    /** @private @const {!Object<string, function(!Object)>} */
+    this.callbackMap_ = {};
+
+    /** @private @const {../runtime/deps.DepsDef} */
+    this.deps_ = deps;
+  }
+
+  /**
+   * Returns a promise that yields when the iframe is ready to be interacted
+   * with.
+   * @return {!Promise}
+   */
+  whenReady() {
+    return this.iframePort_.whenReady();
+  }
+
+  /**
+   * Waits until the activity port is connected to the host.
+   * @return {!Promise}
+   */
+  connect() {
+    return this.iframePort_.connect().then(() => {
+      // Attach a callback to receive messages after connection complete
+      this.iframePort_.onMessage(data => {
+        const response = data && data['RESPONSE'];
+        if (!response) {
+          return;
+        }
+        const cb = this.callbackMap_[response[0]];
+        if (cb) {
+          cb(deserialize(response));
+        }
+      });
+
+      if (this.deps_ && this.deps_.eventManager()) {
+        this.on(AnalyticsRequest, request => {
+          this.deps_.eventManager().logEvent({
+            eventType: request.getEvent(),
+            eventOriginator: EventOriginator.SWG_SERVER,
+            isFromUserAction: request.getMeta().getIsFromUserAction(),
+            additionalParameters: request.getParams(),
+          });
+        });
+      }
+    });
+  }
+
+  /**
+   * Disconnect the activity binding and cleanup listeners.
+   */
+  disconnect() {
+    this.iframePort_.disconnect();
+  }
+
+  /**
+   * Returns the mode of the activity: iframe, popup or redirect.
+   * @return {!web-activities/activity-ports.ActivityMode}
+   */
+  getMode() {
+    return this.iframePort_.getMode();
+  }
+
+  /**
+   * Accepts the result when ready. The client should verify the activity's
+   * mode, origin, verification and secure channel flags before deciding
+   * whether or not to trust the result.
+   *
+   * Returns the promise that yields when the activity has been completed and
+   * either a result, a cancelation or a failure has been returned.
+   *
+   * @return {!Promise<!web-activities/activity-ports.ActivityResult>}
+   * @override
+   */
+  acceptResult() {
+    return this.iframePort_.acceptResult();
+  }
+
+  /**
+   * Register a callback to handle resize requests. Once successfully resized,
+   * ensure to call `resized()` method.
+   * @param {function(number)} callback
+   */
+  onResizeRequest(callback) {
+    return this.iframePort_.onResizeRequest(callback);
+  }
+
+  /**
+   * @param {!../proto/api_messages.Message} request
+   */
+  execute(request) {
+    this.iframePort_.message({'REQUEST': request.toArray()});
+  }
+
+  /**
+   * @param {!function(new: T)} message
+   * @param {function(!../proto/api_messages.Message)} callback
+   * @template T
+   */
+  on(message, callback) {
+    let label = null;
+    try {
+      label = getLabel(message);
+    } catch (ex) {
+      // Thrown if message is not a proto object and has no label
+      label = null;
+    }
+    if (!label) {
+      throw new Error('Invalid data type');
+    } else if (this.callbackMap_[label]) {
+      throw new Error('Invalid type or duplicate callback for ', label);
+    }
+    this.callbackMap_[label] = callback;
+  }
+
+  /**
+   * Signals back to the activity implementation that the client has updated
+   * the activity's size.
+   */
+  resized() {
+    this.iframePort_.resized();
+  }
+}
+
+class ActivityPorts$1 {
+  /**
+   * @param {!../runtime/deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!../runtime/deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!web-activities/activity-ports.ActivityPorts} */
+    this.activityPorts_ = new activityPorts_1(deps.win());
+  }
+
+  /**
+   * Adds client version, publication, product and logging context information.
+   * @param {?Object=} args
+   * @return {!Object}
+   */
+  addDefaultArguments(args) {
+    const deps = this.deps_;
+    const pageConfig = deps.pageConfig();
+    const context = deps.analytics().getContext();
+    return Object.assign(
+      {
+        'analyticsContext': context.toArray(),
+        'publicationId': pageConfig.getPublicationId(),
+        'productId': pageConfig.getProductId(),
+        '_client': 'SwG 0.1.22.93',
+        'supportsEventManager': true,
+      },
+      args || {}
+    );
+  }
+
+  /*
+   * Start an activity within the specified iframe.
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {?Object=} args
+   * @return {!Promise<!ActivityIframePort>}
+   */
+  openActivityIframePort_(iframe, url, args) {
+    const activityPort = new ActivityIframePort$1(iframe, url, this.deps_, args);
+    return activityPort.connect().then(() => activityPort);
+  }
+
+  /**
+   * Start an activity within the specified iframe.
+   * @param {!HTMLIFrameElement} iframe
+   * @param {string} url
+   * @param {?Object=} args
+   * @param {boolean=} addDefaultArguments
+   * @return {!Promise<!ActivityIframePort>}
+   */
+  openIframe(iframe, url, args, addDefaultArguments = false) {
+    if (addDefaultArguments) {
+      args = this.addDefaultArguments(args);
+    }
+    return this.openActivityIframePort_(iframe, url, args);
+  }
+
+  /**
+   * Start an activity in a separate window. The result will be delivered
+   * to the `onResult` callback.
+   *
+   * The activity can be opened in two modes: "popup" and "redirect". This
+   * depends on the `target` value, but also on the browser/environment.
+   *
+   * The allowed `target` values are `_blank`, `_top` and name targets. The
+   * `_self`, `_parent` and similar targets are not allowed.
+   *
+   * The `_top` target indicates that the activity should be opened as a
+   * "redirect", while other targets indicate that the activity should be
+   * opened as a popup. The activity client will try to honor the requested
+   * target. However, it's not always possible. Some environments do not
+   * allow popups and they either force redirect or fail the window open
+   * request. In this case, the activity will try to fallback to the "redirect"
+   * mode.
+   *
+   * @param {string} requestId
+   * @param {string} url
+   * @param {string} target
+   * @param {?Object=} args
+   * @param {?web-activities/activity-ports.ActivityOpenOptions=} options
+   * @param {boolean=} addDefaultArguments
+   * @return {{targetWin: ?Window}}
+   */
+  open(requestId, url, target, args, options, addDefaultArguments = false) {
+    if (addDefaultArguments) {
+      args = this.addDefaultArguments(args);
+    }
+    return this.activityPorts_.open(requestId, url, target, args, options);
+  }
+
+  /**
+   * Registers the callback for the result of the activity opened with the
+   * specified `requestId` (see the `open()` method). The callback is a
+   * function that takes a single `ActivityPort` argument. The client
+   * can use this object to verify the port using it's origin, verified and
+   * secure channel flags. Then the client can call
+   * `ActivityPort.acceptResult()` method to accept the result.
+   *
+   * The activity result is handled via a separate callback because of a
+   * possible redirect. So use of direct callbacks and/or promises is not
+   * possible in that case.
+   *
+   * A typical implementation would look like:
+   * ```
+   * ports.onResult('request1', function(port) {
+   *   port.acceptResult().then(function(result) {
+   *     // Only verified origins are allowed.
+   *     if (result.origin == expectedOrigin &&
+   *         result.originVerified &&
+   *         result.secureChannel) {
+   *       handleResultForRequest1(result);
+   *     }
+   *   });
+   * })
+   *
+   * ports.open('request1', request1Url, '_blank');
+   * ```
+   *
+   * @param {string} requestId
+   * @param {function(!ActivityPortDef)} callback
+   */
+  onResult(requestId, callback) {
+    this.activityPorts_.onResult(requestId, port => {
+      callback(new ActivityPortDeprecated(port));
+    });
+  }
+
+  /**
+   * @param {function(!Error)} handler
+   */
+  onRedirectError(handler) {
+    this.activityPorts_.onRedirectError(handler);
+  }
+
+  /**
+   * @return {!web-activities/activity-ports.ActivityPorts}
+   */
+  getOriginalWebActivityPorts() {
+    return this.activityPorts_;
+  }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number}  */
+const FilterResult = {
+  /** The event is allowed to proceed to the listeners. */
+  PROCESS_EVENT: 0,
+  /** The event is canceled and the listeners are not informed about it. */
+  CANCEL_EVENT: 1,
+};
+
+/**
+ * Defines a client event in SwG
+ * Properties:
+ * - eventType: Required. The AnalyticsEvent type that occurred.
+ * - eventOriginator: Required.  The codebase that initiated the event.
+ * - isFromUserAction: Optional.  True if the user took an action to generate
+ *   the event.
+ * - additionalParameters: Optional.  A JSON object to store generic data.
+ *
+ *  @typedef {{
+ *    eventType: !AnalyticsEvent,
+ *    eventOriginator: !EventOriginator,
+ *    isFromUserAction: ?boolean,
+ *    additionalParameters: ?Object,
+ * }}
+ */
+let ClientEvent;
+
+/**
+ * @interface
+ */
+class ClientEventManagerApi {
+  /**
+   * Call this function to log an event. The registered listeners will be
+   * invoked unless the event is filtered.
+   * @param {!function(!ClientEvent)} listener
+   */
+  registerEventListener(listener) { }
+
+  /**
+   * Register a filterer for events if you need to potentially prevent the
+   * listeners from hearing about it.  A filterer should return
+   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
+   * event.
+   * @param {!function(!ClientEvent):FilterResult} filterer
+   */
+  registerEventFilterer(filterer) { }
+
+  /**
+   * Call this function to log an event.  It will immediately throw an error if
+   * the event is invalid.  It will then asynchronously call the filterers and
+   * stop the event if a filterer cancels it.  After that, it will call each
+   * listener asynchronously.
+   * @param {!ClientEvent} event
+   */
+  logEvent(event) { }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Determines if value is actually an Object.
+ * @param {*} value
+ * @return {boolean}
+ */
+function isObject(value) {
+  const str = Object.prototype.toString.call(value);
+  return str === '[object Object]';
+}
+
+/**
+ * Checks whether `s` is a valid value of `enumObj`.
+ *
+ * @param {!Object<T>} enumObj
+ * @param {T} s
+ * @return {boolean}
+ * @template T
+ */
+function isEnumValue(enumObj, s) {
+  for (const k in enumObj) {
+    if (enumObj[k] === s) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * True if the value is a function.
+ * @param {*} value
+ * @return {boolean}
+ */
+function isFunction(value) {
+  return typeof value === 'function';
+}
+
+/**
+ * True if the value is either true or false.
+ * @param {?*} value
+ * @return {boolean}
+ */
+function isBoolean(value) {
+  return typeof value === 'boolean';
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Helper function to describe an issue with an event object
+ * @param {!string} valueName
+ * @param {?*} value
+ * @returns {!string}
+ */
+function createEventErrorMessage(valueName, value) {
+  return 'Event has an invalid ' + valueName + '(' + value + ')';
+}
+
+/**
+ * Throws an error if the event is invalid.
+ * @param {!../api/client-event-manager-api.ClientEvent} event
+ */
+function validateEvent(event) {
+  if (!isObject(event)) {
+    throw new Error('Event must be a valid object');
+  }
+
+  if (!isEnumValue(AnalyticsEvent, event.eventType)) {
+    throw new Error(createEventErrorMessage('eventType', event.eventType));
+  }
+
+  if (!isEnumValue(EventOriginator, event.eventOriginator)) {
+    throw new Error(
+      createEventErrorMessage('eventOriginator', event.eventOriginator)
+    );
+  }
+
+  if (
+    !isObject(event.additionalParameters) &&
+    event.additionalParameters != null
+  ) {
+    throw new Error(
+      createEventErrorMessage(
+        'additionalParameters',
+        event.additionalParameters
+      )
+    );
+  }
+
+  if (event.isFromUserAction != null && !isBoolean(event.isFromUserAction)) {
+    throw new Error(
+      createEventErrorMessage('isFromUserAction', event.isFromUserAction)
+    );
+  }
+}
+
+/** @implements {../api/client-event-manager-api.ClientEventManagerApi} */
+class ClientEventManager {
+  /**
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   * @return {boolean}
+   */
+  static isPublisherEvent(event) {
+    return (
+      event.eventOriginator === EventOriginator.PROPENSITY_CLIENT ||
+      event.eventOriginator === EventOriginator.PUBLISHER_CLIENT ||
+      event.eventOriginator === EventOriginator.AMP_CLIENT
+    );
+  }
+
+  /**
+   *
+   * @param {!Promise} configuredPromise
+   */
+  constructor(configuredPromise) {
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
+    this.listeners_ = [];
+
+    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent):!FilterResult>} */
+    this.filterers_ = [];
+
+    /** @private {?Promise} */
+    this.lastAction_ = null;
+
+    /** @private @const {!Promise} */
+    this.isReadyPromise_ = configuredPromise;
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventListener(listener) {
+    if (!isFunction(listener)) {
+      throw new Error('Event manager listeners must be a function');
+    }
+    this.listeners_.push(listener);
+  }
+
+  /**
+   * @overrides
+   */
+  registerEventFilterer(filterer) {
+    if (!isFunction(filterer)) {
+      throw new Error('Event manager filterers must be a function');
+    }
+    this.filterers_.push(filterer);
+  }
+
+  /**
+   * @overrides
+   */
+  logEvent(event) {
+    validateEvent(event);
+    this.lastAction_ = this.isReadyPromise_.then(() => {
+      for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
+        try {
+          if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
+            return Promise.resolve();
+          }
+        } catch (e) {
+          log_5(e);
+        }
+      }
+      for (let listener = 0; listener < this.listeners_.length; listener++) {
+        try {
+          this.listeners_[listener](event);
+        } catch (e) {
+          log_5(e);
+        }
+      }
+      return Promise.resolve();
+    });
+  }
+
+  /**
+   * Creates an event with the arguments provided and calls logEvent.
+   * @param {!AnalyticsEvent} eventType
+   * @param {?boolean=} isFromUserAction
+   * @param {../proto/api_messages.EventParams=} eventParams
+   */
+  logSwgEvent(eventType, isFromUserAction = false, eventParams = null) {
+    this.logEvent({
+      eventType,
+      eventOriginator: EventOriginator.SWG_CLIENT,
+      isFromUserAction,
+      additionalParameters: eventParams,
+    });
+  }
+
+  /** @return {!Promise<null>} */
+  getReadyPromise() {
+    return this.isReadyPromise_;
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview
+ *
+ * Client-side experiments in SwG.
+ *
+ * The experiments can be set in a few different ways:
+ *  1. By gulp build rules using `--experiments=${experimentsString}` argument.
+ *  2. By `#swg.experiments=${experimentsString}` parameter in the URL's
+ *     fragment.
+ *  3. By `swg.configure({experiments: [array]})` call.
+ *
+ * The `${experimentsString}` is defined as following:
+ *  - experimentString = (experimentSpec,)*
+ *  - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+ *
+ * Some examples:
+ *  - `A,B` - defines two experiments "A" and "B" that will be turned on.
+ *  - `A:100,B:100` - the same: "A" and "B" will be turned on.
+ *  - `A:0` - the experiment "A" will be disabled.
+ *  - `A:1` - enable the experiment "A" in 1% of impressions.
+ *  - `A:10c` - enable the experiment "A" in 10% of impressions with 10%
+ *    control. In this case, 20% of the impressions will be split into two
+ *    categories: experiment and control. Notice, a control can be requested
+ *    only for the fraction under 20%.
+ */
+
+/**
+ * @enum {string}
+ */
+const Selection = {
+  EXPERIMENT: 'e',
+  CONTROL: 'c',
+};
+
+/**
+ * A comma-separated set of experiments.
+ * @type {string}
+ */
+let experimentsString = '';
+
+/**
+ * A parsed map of experiments.
+ * @type {?Object<string, boolean>}
+ */
+let experimentMap = null;
+
+/**
+ * Ensures that the experiments have been initialized and returns them.
+ * @param {!Window} win
+ * @return {!Object<string, boolean>}
+ */
+function getExperiments(win) {
+  if (!experimentMap) {
+    experimentMap = {};
+    let combinedExperimentString = experimentsString;
+    try {
+      const query = parseQueryString$1(win.location.hash);
+      const experimentStringFromHash = query['swg.experiments'];
+      if (experimentStringFromHash) {
+        combinedExperimentString += ',' + experimentStringFromHash;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      ErrorUtils.throwAsync(e);
+    }
+
+    // Format:
+    // - experimentString = (experimentSpec,)*
+    combinedExperimentString.split(',').forEach(s => {
+      s = s.trim();
+      if (!s) {
+        return;
+      }
+      try {
+        parseSetExperiment(win, experimentMap, s);
+      } catch (e) {
+        // Ignore: experiment parsing cannot block runtime.
+        ErrorUtils.throwAsync(e);
+      }
+    });
+  }
+  return experimentMap;
+}
+
+/**
+ * @param {!Window} win
+ * @param {?Object<string, boolean>} experimentMap
+ * @param {string} spec
+ */
+function parseSetExperiment(win, experimentMap, spec) {
+  // Format:
+  // - experimentSpec = experimentId | experimentId '=' num100 ('c')?
+  let experimentId;
+  let fraction;
+  let control = false;
+  const eq = spec.indexOf(':');
+  if (eq == -1) {
+    experimentId = spec;
+    fraction = 100;
+    control = false;
+  } else {
+    experimentId = spec.substring(0, eq).trim();
+    spec = spec.substring(eq + 1);
+    if (spec.substring(spec.length - 1) == Selection.CONTROL) {
+      control = true;
+      spec = spec.substring(0, spec.length - 1);
+    }
+    fraction = parseInt(spec, 10);
+  }
+  if (isNaN(fraction)) {
+    throw new Error('invalid fraction');
+  }
+
+  // Calculate "on"/"off".
+  let on;
+  if (fraction > 99) {
+    // Explicitly "on".
+    on = true;
+  } else if (fraction < 1) {
+    // Explicitly "off".
+    on = false;
+  } else if (win.sessionStorage) {
+    // Fractional and possibly with the control.
+    // Note that:
+    // a. We can't do persistent experiments if storage is not available.
+    // b. We can't run control on more than 20%.
+    control = control && fraction <= 20;
+    try {
+      // Set fraction in the experiment to make it unlaunchable.
+      const storageKey =
+        'subscribe.google.com:e:' +
+        experimentId +
+        ':' +
+        fraction +
+        (control ? 'c' : '');
+      let selection = parseSelection(win.sessionStorage.getItem(storageKey));
+      if (!selection) {
+        // Is experiment/control range?
+        if (win.Math.random() * 100 <= fraction * (control ? 2 : 1)) {
+          const inExperiment = control ? win.Math.random() <= 0.5 : true;
+          selection = inExperiment ? Selection.EXPERIMENT : Selection.CONTROL;
+          win.sessionStorage.setItem(storageKey, selection);
+        }
+      }
+      on = !!selection;
+      if (selection == Selection.CONTROL) {
+        experimentId = 'c-' + experimentId;
+      }
+    } catch (e) {
+      // Ignore: experiment parsing cannot block runtime.
+      on = false;
+      ErrorUtils.throwAsync(e);
+    }
+  } else {
+    on = false;
+  }
+
+  experimentMap[experimentId] = on;
+}
+
+/**
+ * @param {?string} s
+ * @return {?Selection}
+ */
+function parseSelection(s) {
+  // Do a simple if-then to inline the whole Selection enum.
+  return s == Selection.EXPERIMENT
+    ? Selection.EXPERIMENT
+    : s == Selection.CONTROL
+    ? Selection.CONTROL
+    : null;
+}
+
+/**
+ * Whether the specified experiment is on or off.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {boolean}
+ */
+function isExperimentOn(win, experimentId) {
+  return getExperiments(win)[experimentId] || false;
+}
+
+/**
+ * Toggles the experiment on or off. Returns the actual value of the experiment
+ * after toggling is done.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @param {boolean} on
+ */
+function setExperiment(win, experimentId, on) {
+  getExperiments(win)[experimentId] = on;
+}
+
+/**
+ * @return {!Array<string>}
+ */
+function getOnExperiments(win) {
+  const experimentMap = getExperiments(win);
+  const experiments = [];
+  for (const experiment in experimentMap) {
+    if (experimentMap[experiment]) {
+      experiments.push(experiment);
+    }
+  }
+  return experiments;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string, string>} */
+const iframeStyles = {
+  opacity: '0',
+  position: 'absolute',
+  top: '-10px',
+  left: '-10px',
+  height: '1px',
+  width: '1px',
+};
+
+// The initial iframe load takes ~500 ms.  We will wait at least that long
+// before a page redirect.  Subsequent logs are much faster.  We will wait at
+// most 100 ms.
+const MAX_FIRST_WAIT = 500;
+const MAX_WAIT = 200;
+// If we logged and rapidly redirected, we will add a short delay in case
+// a message hasn't been transmitted yet.
+const TIMEOUT_ERROR = 'AnalyticsService timed out waiting for a response';
+
+/**
+ *
+ * @param {!string} error
+ */
+function createErrorResponse(error) {
+  const response = new FinishedLoggingResponse();
+  response.setComplete(false);
+  response.setError(error);
+  return response;
+}
+
+class AnalyticsService {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = deps.doc();
+
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      this.doc_.getWin().document,
+      'iframe',
+      {}
+    ));
+    setImportantStyles(this.iframe_, iframeStyles);
+    this.doc_.getBody().appendChild(this.getElement());
+
+    /** @private @type {!boolean} */
+    this.everFinishedLog_ = false;
+
+    /**
+     * @private @const {!AnalyticsContext}
+     */
+    this.context_ = new AnalyticsContext();
+    this.setStaticContext_();
+
+    /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
+    this.serviceReady_ = null;
+
+    /** @private {?Promise} */
+    this.lastAction_ = null;
+
+    /** @private @const {!ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+    this.eventManager_.registerEventListener(
+      this.handleClientEvent_.bind(this)
+    );
+
+    // This code creates a 'promise to log' that we can use to ensure all
+    // logging is finished prior to redirecting the page.
+    /** @private {!number} */
+    this.unfinishedLogs_ = 0;
+
+    /** @private {?function(boolean)} */
+    this.loggingResolver_ = null;
+
+    /** @private {?Promise} */
+    this.promiseToLog_ = null;
+
+    // If logging doesn't work don't force the user to wait
+    /** @private {!boolean} */
+    this.loggingBroken_ = false;
+
+    // If logging exceeds the timeouts (see const comments above) don't make
+    // the user wait too long.
+    /** @private {?number} */
+    this.timeout_ = null;
+  }
+
+  /**
+   * @param {string} transactionId
+   */
+  setTransactionId(transactionId) {
+    this.context_.setTransactionId(transactionId);
+  }
+
+  /**
+   * @return {string}
+   */
+  getTransactionId() {
+    return /** @type {string} */ (this.context_.getTransactionId());
+  }
+
+  /**
+   * @return {?string}
+   */
+  getSku() {
+    return this.context_.getSku();
+  }
+
+  /**
+   * @param {string} sku
+   */
+  setSku(sku) {
+    this.context_.setSku(sku);
+  }
+
+  /**
+   * @param {string} url
+   */
+  setUrl(url) {
+    this.context_.setUrl(url);
+  }
+
+  /**
+   * @param {!Array<string>} labels
+   */
+  addLabels(labels) {
+    if (labels && labels.length > 0) {
+      const newLabels = [].concat(this.context_.getLabelList());
+      labels.forEach(label => {
+        if (newLabels.indexOf(label) == -1) {
+          newLabels.push(label);
+        }
+      });
+      this.context_.setLabelList(newLabels);
+    }
+  }
+
+  /**
+   * @return {!HTMLIFrameElement}
+   */
+  getElement() {
+    return this.iframe_;
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getQueryString_() {
+    return this.doc_.getWin().location.search;
+  }
+
+  /**
+   * @return {string}
+   * @private
+   */
+  getReferrer_() {
+    return this.doc_.getWin().document.referrer;
+  }
+
+  /**
+   * @private
+   */
+  setStaticContext_() {
+    const context = this.context_;
+    // These values should all be available during page load.
+    context.setTransactionId(getUuid());
+    context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
+    context.setClientVersion('SwG 0.1.22.93');
+
+    const utmParams = parseQueryString$1(this.getQueryString_());
+    const campaign = utmParams['utm_campaign'];
+    const medium = utmParams['utm_medium'];
+    const source = utmParams['utm_source'];
+    if (campaign) {
+      context.setUtmCampaign(campaign);
+    }
+    if (medium) {
+      context.setUtmMedium(medium);
+    }
+    if (source) {
+      context.setUtmSource(source);
+    }
+
+    const urlNode = this.doc_
+      .getRootNode()
+      .querySelector("link[rel='canonical']");
+    if (urlNode && urlNode.href) {
+      context.setUrl(urlNode.href);
+    }
+  }
+
+  /**
+   * @return {!Promise<!../components/activities.ActivityIframePort>}
+   */
+  start() {
+    if (!this.serviceReady_) {
+      // Please note that currently openIframe reads the current analytics
+      // context and that it may not contain experiments activated late during
+      // the publishers code lifecycle.
+      this.addLabels(getOnExperiments(this.doc_.getWin()));
+      this.serviceReady_ = this.activityPorts_
+        .openIframe(this.iframe_, feUrl('/serviceiframe'), null, true)
+        .then(
+          port => {
+            // Register a listener for the logging to code indicate it is
+            // finished logging.
+            port.on(FinishedLoggingResponse, this.afterLogging_.bind(this));
+            return port.whenReady().then(() => {
+              // The publisher should be done setting experiments but runtime
+              // will forward them here if they aren't.
+              this.addLabels(getOnExperiments(this.doc_.getWin()));
+              return port;
+            });
+          },
+          message => {
+            // If the port doesn't open register that logging is broken so
+            // nothing is just waiting.
+            this.loggingBroken_ = true;
+            this.afterLogging_(
+              createErrorResponse('Could not connect [' + message + ']')
+            );
+          }
+        );
+    }
+    return this.serviceReady_;
+  }
+
+  /**
+   * @param {boolean} isReadyToPay
+   */
+  setReadyToPay(isReadyToPay) {
+    this.context_.setReadyToPay(isReadyToPay);
+  }
+
+  /**
+   */
+  close() {
+    this.doc_.getBody().removeChild(this.getElement());
+  }
+
+  /**
+   * @return {!AnalyticsContext}
+   */
+  getContext() {
+    return this.context_;
+  }
+
+  /**
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   * @return {!AnalyticsRequest}
+   */
+  createLogRequest_(event) {
+    const meta = new AnalyticsEventMeta();
+    meta.setEventOriginator(event.eventOriginator);
+    meta.setIsFromUserAction(event.isFromUserAction);
+
+    const request = new AnalyticsRequest();
+    request.setEvent(event.eventType);
+    request.setContext(this.context_);
+    request.setMeta(meta);
+    if (event.additionalParameters instanceof EventParams) {
+      request.setParams(event.additionalParameters);
+    } // Ignore event.additionalParameters.  It may have data we shouldn't log.
+    return request;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  shouldLogPublisherEvents_() {
+    return this.deps_.config().enableSwgAnalytics === true;
+  }
+
+  /**
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   * @return {boolean}
+   */
+  shouldAlwaysLogEvent_(event) {
+    /* AMP_CLIENT events are considered publisher events and we generally only
+     * log those if the publisher decided to enable publisher event logging for
+     * privacy purposes.  The page load event is not private and is necessary
+     * just so we know the user is in AMP, so we will log it regardless of
+     * configuration.
+     */
+    return (
+      event.eventType === AnalyticsEvent.IMPRESSION_PAGE_LOAD &&
+      event.eventOriginator === EventOriginator.AMP_CLIENT
+    );
+  }
+
+  /**
+   *  Listens for new events from the events manager and handles logging
+   * @param {!../api/client-event-manager-api.ClientEvent} event
+   */
+  handleClientEvent_(event) {
+    //this event is just used to communicate information internally.  It should
+    //not be reported to the SwG analytics service.
+    if (event.eventType === AnalyticsEvent.EVENT_SUBSCRIPTION_STATE) {
+      return;
+    }
+
+    if (
+      ClientEventManager.isPublisherEvent(event) &&
+      !this.shouldLogPublisherEvents_() &&
+      !this.shouldAlwaysLogEvent_(event)
+    ) {
+      return;
+    }
+    // Register we sent a log, the port will call this.afterLogging_ when done.
+    this.unfinishedLogs_++;
+    this.lastAction_ = this.start().then(port =>
+      port.execute(this.createLogRequest_(event))
+    );
+  }
+
+  /**
+   * This function is called by the iframe after it sends the log to the server.
+   * @param {FinishedLoggingResponse=} response
+   */
+  afterLogging_(response) {
+    const success = (response && response.getComplete()) || false;
+    const error = (response && response.getError()) || 'Unknown logging Error';
+    const isTimeout = error === TIMEOUT_ERROR;
+
+    if (!success) {
+      log_5('Error when logging: ' + error);
+    }
+
+    this.unfinishedLogs_--;
+    if (!isTimeout) {
+      this.everFinishedLog_ = true;
+    }
+
+    // Nothing is waiting
+    if (this.loggingResolver_ === null) {
+      return;
+    }
+
+    if (this.unfinishedLogs_ === 0 || this.loggingBroken_ || isTimeout) {
+      if (this.timeout_ !== null) {
+        clearTimeout(this.timeout_);
+        this.timeout_ = null;
+      }
+      this.loggingResolver_(success);
+      this.promiseToLog_ = null;
+      this.loggingResolver_ = null;
+    }
+  }
+
+  /**
+   * Please note that logs sent after getLoggingPromise is called are not
+   * guaranteed to be finished when the promise is resolved.  You should call
+   * this function just prior to redirecting the page after SwG is finished
+   * logging.
+   * @return {!Promise}
+   */
+  getLoggingPromise() {
+    if (this.unfinishedLogs_ === 0 || this.loggingBroken_) {
+      return Promise.resolve(true);
+    }
+    if (this.promiseToLog_ === null) {
+      this.promiseToLog_ = new Promise(resolve => {
+        this.loggingResolver_ = resolve;
+      });
+
+      // The promise above should not wait forever if things go wrong.  Let
+      // the user proceed!
+      const whenDone = this.afterLogging_.bind(this);
+      this.timeout_ = setTimeout(
+        () => {
+          this.timeout_ = null;
+          whenDone(createErrorResponse(TIMEOUT_ERROR));
+        },
+        this.everFinishedLog_ ? MAX_WAIT : MAX_FIRST_WAIT
+      );
+    }
+
+    return this.promiseToLog_;
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string, string>} */
+const iframeAttributes$1 = {
+  'frameborder': '0',
+  'scrolling': 'no',
+};
+
+/**
+ * @enum {string}
+ */
+const Theme = {
+  LIGHT: 'light',
+  DARK: 'dark',
+};
+
+/**
+ * The class for Smart button Api.
+ */
+class SmartSubscriptionButtonApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   * @param {!Element} button
+   * @param {!../api/subscriptions.SmartButtonOptions} options
+   * @param {function()=} callback
+   */
+  constructor(deps, button, options, callback) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!Document} */
+    this.doc_ = this.win_.document;
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      this.doc_,
+      'iframe',
+      iframeAttributes$1
+    ));
+
+    /** @private @const {!Element} */
+    this.button_ = button;
+
+    /** @private {!../api/subscriptions.SmartButtonOptions} */
+    this.options_ = options;
+
+    /** @private const {function()=} */
+    this.callback_ = callback;
+
+    /** @private @const {string} */
+    this.src_ = feUrl('/smartboxiframe');
+
+    const frontendArguments = {
+      'productId': this.deps_.pageConfig().getProductId(),
+      'publicationId': this.deps_.pageConfig().getPublicationId(),
+      'theme': (this.options_ && this.options_.theme) || 'light',
+      'lang': (this.options_ && this.options_.lang) || 'en',
+    };
+    const messageTextColor = this.options_ && this.options_.messageTextColor;
+    if (messageTextColor) {
+      frontendArguments['messageTextColor'] = messageTextColor;
+    }
+
+    /** @private @const {!Object} */
+    this.args_ = feArgs(frontendArguments);
+  }
+
+  /**
+   * @param {SmartBoxMessage} smartBoxMessage
+   */
+  handleSmartBoxClick_(smartBoxMessage) {
+    if (smartBoxMessage && smartBoxMessage.getIsClicked()) {
+      if (!this.callback_) {
+        throw new Error('No callback!');
+      }
+      this.callback_();
+      return;
+    }
+  }
+
+  /**
+   * Make a call to build button content and listens for the 'click' message.
+   * @return {!Element}
+   */
+  start() {
+    setImportantStyles(this.iframe_, {
+      'opacity': 1,
+      'position': 'absolute',
+      'top': 0,
+      'bottom': 0,
+      'left': 0,
+      'height': '100%',
+      'right': 0,
+      'width': '100%',
+    });
+    this.button_.appendChild(this.iframe_);
+    const args = this.activityPorts_.addDefaultArguments(this.args_);
+    this.activityPorts_.openIframe(this.iframe_, this.src_, args).then(port => {
+      port.on(SmartBoxMessage, this.handleSmartBoxClick_.bind(this));
+    });
+    return this.iframe_;
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** English is the default language. */
+const DEFAULT_LANGUAGE_CODE = 'en';
+
+/**
+ * Gets a message for a given language code, from a map of messages.
+ * @param {!Object<string, string>} map
+ * @param {?string|?Element} languageCodeOrElement
+ * @return {?string}
+ */
+function msg(map, languageCodeOrElement) {
+  const defaultMsg = map[DEFAULT_LANGUAGE_CODE];
+
+  // Verify params.
+  if (typeof map !== 'object' || !languageCodeOrElement) {
+    return defaultMsg;
+  }
+
+  // Get language code.
+  let languageCode =
+    typeof languageCodeOrElement === 'string'
+      ? languageCodeOrElement
+      : getLanguageCodeFromElement(languageCodeOrElement);
+
+  // Normalize language code.
+  languageCode = languageCode.toLowerCase();
+  languageCode = languageCode.replace(/_/g, '-');
+
+  // Search for a message matching the language code.
+  // If a message can't be found, try again with a less specific language code.
+  const languageCodeSegments = languageCode.split('-');
+  while (languageCodeSegments.length) {
+    const key = languageCodeSegments.join('-');
+    if (key in map) {
+      return map[key];
+    }
+
+    // Simplify language code.
+    // Ex: "en-US-SF" => "en-US"
+    languageCodeSegments.pop();
+  }
+
+  // There was an attempt.
+  return defaultMsg;
+}
+
+/**
+ * Gets a language code (ex: "en-US") from a given Element.
+ * @param {!Element} element
+ * @return {string}
+ */
+function getLanguageCodeFromElement(element) {
+  if (element.lang) {
+    // Get language from element itself.
+    return element.lang;
+  }
+
+  if (element.ownerDocument && element.ownerDocument.documentElement.lang) {
+    // Get language from element's document.
+    return element.ownerDocument.documentElement.lang;
+  }
+
+  // There was an attempt.
+  return DEFAULT_LANGUAGE_CODE;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * The button title should match that of button's SVG.
+ */
+/** @type {!Object<string, string>} */
+const TITLE_LANG_MAP = {
+  'en': 'Subscribe with Google',
+  'ar': 'Google اشترك مع',
+  'de': 'Abonnieren mit Google',
+  'es': 'Suscríbete con Google',
+  'es-latam': 'Suscríbete con Google',
+  'es-latn': 'Suscríbete con Google',
+  'fr': "S'abonner avec Google",
+  'hi': 'Google के ज़रिये सदस्यता',
+  'id': 'Berlangganan dengan Google',
+  'it': 'Abbonati con Google',
+  'jp': 'Google で購読',
+  'ko': 'Google 을 통한구독',
+  'ms': 'Langgan dengan Google',
+  'nl': 'Abonneren via Google',
+  'no': 'Abonner med Google',
+  'pl': 'Subskrybuj z Google',
+  'pt': 'Subscrever com o Google',
+  'pt-br': 'Assine com o Google',
+  'ru': 'Подпиcka через Google',
+  'se': 'Prenumerera med Google',
+  'th': 'สมัครฟาน Google',
+  'tr': 'Google ile Abone Ol',
+  'uk': 'Підписатися через Google',
+  'zh-tw': '透過 Google 訂閱',
+};
+
+/**
+ * The button stylesheet can be found in the `/assets/swg-button.css`.
+ * It's produced by the `gulp assets` task and deployed to
+ * `https://news.google.com/swg/js/v1/swg-button.css`.
+ */
+class ButtonApi {
+  /**
+   * @param {!../model/doc.Doc} doc
+   * @param {!Promise<!./runtime.ConfiguredRuntime>} configuredRuntimePromise
+   */
+  constructor(doc, configuredRuntimePromise) {
+    /** @private @const {!../model/doc.Doc} */
+    this.doc_ = doc;
+
+    /** @private @const {!Promise<!./runtime.ConfiguredRuntime>} */
+    this.configuredRuntimePromise_ = configuredRuntimePromise;
+  }
+
+  /**
+   */
+  init() {
+    const head = this.doc_.getHead();
+    if (!head) {
+      return;
+    }
+
+    const url = 'https://news.google.com/swg/js/v1/swg-button.css';
+    const existing = head.querySelector(`link[href="${url}"]`);
+    if (existing) {
+      return;
+    }
+
+    // <link rel="stylesheet" href="..." type="text/css">
+    head.appendChild(
+      createElement(this.doc_.getWin().document, 'link', {
+        'rel': 'stylesheet',
+        'type': 'text/css',
+        'href': url,
+      })
+    );
+  }
+
+  /**
+   * @param {!../api/subscriptions.ButtonOptions|function()} optionsOrCallback
+   * @param {function()=} callback
+   * @return {!Element}
+   */
+  create(optionsOrCallback, callback) {
+    const button = createElement(this.doc_.getWin().document, 'button', {});
+    return this.attach(button, optionsOrCallback, callback);
+  }
+
+  /**
+   * @param {!Element} button
+   * @param {../api/subscriptions.ButtonOptions|function()} optionsOrCallback
+   * @param {function()=} callback
+   * @return {!Element}
+   */
+  attach(button, optionsOrCallback, callback) {
+    const options = this.setupButtonAndGetParams_(
+      button,
+      optionsOrCallback,
+      callback
+    ).options;
+
+    const theme = options['theme'];
+    button.classList.add(`swg-button-${theme}`);
+    button.setAttribute('role', 'button');
+    if (options['lang']) {
+      button.setAttribute('lang', options['lang']);
+    }
+    button.setAttribute('title', msg(TITLE_LANG_MAP, button) || '');
+    this.logSwgEvent_(AnalyticsEvent.IMPRESSION_SWG_BUTTON);
+
+    return button;
+  }
+
+  /**
+   * @param {!AnalyticsEvent} eventType
+   * @param {boolean=} isFromUserAction
+   */
+  logSwgEvent_(eventType, isFromUserAction) {
+    this.configuredRuntimePromise_.then(configuredRuntime => {
+      configuredRuntime.eventManager().logSwgEvent(eventType, isFromUserAction);
+    });
+  }
+
+  /**
+   *
+   * @param {../api/subscriptions.ButtonOptions|../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
+   * @return {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions}
+   * @private
+   */
+  getOptions_(optionsOrCallback) {
+    const options =
+      /** @type {!../api/subscriptions.ButtonOptions|!../api/subscriptions.SmartButtonOptions} */ (optionsOrCallback &&
+      typeof optionsOrCallback != 'function'
+        ? optionsOrCallback
+        : {'theme': Theme.LIGHT});
+
+    const theme = options['theme'];
+    if (theme !== Theme.LIGHT && theme !== Theme.DARK) {
+      options['theme'] = Theme.LIGHT;
+    }
+    return options;
+  }
+
+  /**
+   *
+   * @param {?../api/subscriptions.ButtonOptions|?../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
+   * @param {function()=} callback
+   * @return {function()|function(Event):boolean}
+   * @private
+   */
+  getCallback_(optionsOrCallback, callback) {
+    return (
+      /** @type {function()|function(Event):boolean} */ ((typeof optionsOrCallback ==
+      'function'
+        ? optionsOrCallback
+        : null) || callback)
+    );
+  }
+
+  /**
+   * @param {!Element} button
+   * @param {../api/subscriptions.SmartButtonOptions|function()|../api/subscriptions.ButtonOptions} optionsOrCallback
+   * @param {function()=} callbackFun
+   * @return {ButtonParams}
+   */
+  setupButtonAndGetParams_(button, optionsOrCallback, callbackFun) {
+    const options = this.getOptions_(optionsOrCallback);
+    const callback = this.getCallback_(optionsOrCallback, callbackFun);
+    const clickFun = event => {
+      this.logSwgEvent_(AnalyticsEvent.ACTION_SWG_BUTTON_CLICK, true);
+      if (typeof callback === 'function') {
+        callback(event);
+      }
+    };
+    button.addEventListener('click', clickFun);
+    return {options, clickFun};
+  }
+
+  /**
+   * @param {!./deps.DepsDef} deps
+   * @param {!Element} button
+   * @param {../api/subscriptions.SmartButtonOptions|function()} optionsOrCallback
+   * @param {function()=} callback
+   * @return {!Element}
+   */
+  attachSmartButton(deps, button, optionsOrCallback, callback) {
+    const params = this.setupButtonAndGetParams_(
+      button,
+      optionsOrCallback,
+      callback
+    );
+    // Add required CSS class, if missing.
+    button.classList.add('swg-smart-button');
+    return new SmartSubscriptionButtonApi(
+      deps,
+      button,
+      params.options,
+      params.clickFun
+    ).start();
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @enum {number} */
+const CallbackId = {
+  ENTITLEMENTS: 1,
+  SUBSCRIBE_REQUEST: 2,
+  PAYMENT_RESPONSE: 3,
+  LOGIN_REQUEST: 4,
+  LINK_PROGRESS: 5,
+  LINK_COMPLETE: 6,
+  FLOW_STARTED: 7,
+  FLOW_CANCELED: 8,
+};
+
+/**
+ */
+class Callbacks {
+  /**
+   */
+  constructor() {
+    /** @private @const {!Object<CallbackId, function(*)>} */
+    this.callbacks_ = {};
+    /** @private @const {!Object<CallbackId, *>} */
+    this.resultBuffer_ = {};
+    /** @private {?Promise} */
+    this.paymentResponsePromise_ = null;
+  }
+
+  /**
+   * @param {function(!Promise<!../api/entitlements.Entitlements>)} callback
+   */
+  setOnEntitlementsResponse(callback) {
+    this.setCallback_(CallbackId.ENTITLEMENTS, callback);
+  }
+
+  /**
+   * @param {!Promise<!../api/entitlements.Entitlements>} promise
+   */
+  triggerEntitlementsResponse(promise) {
+    return this.trigger_(
+      CallbackId.ENTITLEMENTS,
+      promise.then(res => res.clone())
+    );
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasEntitlementsResponsePending() {
+    return !!this.resultBuffer_[CallbackId.ENTITLEMENTS];
+  }
+
+  /**
+   * @param {function(!../api/subscriptions.LoginRequest)} callback
+   */
+  setOnLoginRequest(callback) {
+    this.setCallback_(CallbackId.LOGIN_REQUEST, callback);
+  }
+
+  /**
+   * @param {!../api/subscriptions.LoginRequest} request
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerLoginRequest(request) {
+    return this.trigger_(CallbackId.LOGIN_REQUEST, request);
+  }
+
+  /**
+   * @param {function()} callback
+   */
+  setOnLinkProgress(callback) {
+    this.setCallback_(CallbackId.LINK_PROGRESS, callback);
+  }
+
+  /**
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerLinkProgress() {
+    return this.trigger_(CallbackId.LINK_PROGRESS, true);
+  }
+
+  /**
+   */
+  resetLinkProgress() {
+    this.resetCallback_(CallbackId.LINK_PROGRESS);
+  }
+
+  /**
+   * @param {function()} callback
+   */
+  setOnLinkComplete(callback) {
+    this.setCallback_(CallbackId.LINK_COMPLETE, callback);
+  }
+
+  /**
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerLinkComplete() {
+    return this.trigger_(CallbackId.LINK_COMPLETE, true);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasLinkCompletePending() {
+    return !!this.resultBuffer_[CallbackId.LINK_COMPLETE];
+  }
+
+  /**
+   * @param {function()} callback
+   */
+  setOnSubscribeRequest(callback) {
+    this.setCallback_(CallbackId.SUBSCRIBE_REQUEST, callback);
+  }
+
+  /**
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerSubscribeRequest() {
+    return this.trigger_(CallbackId.SUBSCRIBE_REQUEST, true);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasSubscribeRequestCallback() {
+    return !!this.callbacks_[CallbackId.SUBSCRIBE_REQUEST];
+  }
+
+  /**
+   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
+   */
+  setOnSubscribeResponse(callback) {
+    log_4(
+      `[swg.js:setOnSubscribeResponse]: This method has been deprecated, please switch usages to 'setOnPaymentResponse'`
+    );
+    this.setCallback_(CallbackId.PAYMENT_RESPONSE, callback);
+  }
+
+  /**
+   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
+   */
+  setOnContributionResponse(callback) {
+    log_4(
+      `[swg.js:setOnContributionResponse]: This method has been deprecated, please switch usages to 'setOnPaymentResponse'`
+    );
+    this.setCallback_(CallbackId.PAYMENT_RESPONSE, callback);
+  }
+
+  /**
+   * @param {function(!Promise<!../api/subscribe-response.SubscribeResponse>)} callback
+   */
+  setOnPaymentResponse(callback) {
+    this.setCallback_(CallbackId.PAYMENT_RESPONSE, callback);
+  }
+
+  /**
+   * @param {!Promise<!../api/subscribe-response.SubscribeResponse>} responsePromise
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerPaymentResponse(responsePromise) {
+    this.paymentResponsePromise_ = responsePromise.then(
+      res => {
+        this.trigger_(
+          CallbackId.PAYMENT_RESPONSE,
+          Promise.resolve(res.clone())
+        );
+      },
+      reason => {
+        if (isCancelError(reason)) {
+          return;
+        }
+        throw reason;
+      }
+    );
+    return !!this.callbacks_[CallbackId.PAYMENT_RESPONSE];
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasPaymentResponsePending() {
+    return !!this.resultBuffer_[CallbackId.PAYMENT_RESPONSE];
+  }
+
+  /**
+   * @param {function({flow: string, data: !Object})} callback
+   */
+  setOnFlowStarted(callback) {
+    this.setCallback_(CallbackId.FLOW_STARTED, callback);
+  }
+
+  /**
+   * @param {string} flow
+   * @param {!Object=} data
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerFlowStarted(flow, data = {}) {
+    return this.trigger_(CallbackId.FLOW_STARTED, {
+      flow,
+      data,
+    });
+  }
+
+  /**
+   * @param {function({flow: string, data: !Object})} callback
+   */
+  setOnFlowCanceled(callback) {
+    this.setCallback_(CallbackId.FLOW_CANCELED, callback);
+  }
+
+  /**
+   * @param {string} flow
+   * @param {!Object=} data
+   * @return {boolean} Whether the callback has been found.
+   */
+  triggerFlowCanceled(flow, data = {}) {
+    return this.trigger_(CallbackId.FLOW_CANCELED, {
+      flow,
+      data,
+    });
+  }
+
+  /**
+   * @param {!CallbackId} id
+   * @param {function(?)} callback
+   * @private
+   */
+  setCallback_(id, callback) {
+    if (this.callbacks_[id]) {
+      log_4(
+        `[swg.js]: You have registered multiple callbacks for the same response.`
+      );
+    }
+    this.callbacks_[id] = callback;
+    // If result already exist, execute the callback right away.
+    if (id in this.resultBuffer_) {
+      this.executeCallback_(id, callback, this.resultBuffer_[id]);
+    }
+  }
+
+  /**
+   * @param {!CallbackId} id
+   * @param {*} data
+   * @return {boolean}
+   * @private
+   */
+  trigger_(id, data) {
+    this.resultBuffer_[id] = data;
+    const callback = this.callbacks_[id];
+    if (callback) {
+      this.executeCallback_(id, callback, data);
+    }
+    return !!callback;
+  }
+
+  /**
+   * @param {!CallbackId} id
+   * @private
+   */
+  resetCallback_(id) {
+    if (id in this.resultBuffer_) {
+      delete this.resultBuffer_[id];
+    }
+  }
+
+  /**
+   * @param {!CallbackId} id
+   * @param {function(*)} callback
+   * @param {*} data
+   * @private
+   */
+  executeCallback_(id, callback, data) {
+    // Always execute callbacks in a microtask.
+    Promise.resolve().then(() => {
+      callback(data);
+      this.resetCallback_(id);
+    });
+  }
 }
 
 /**
@@ -6851,8 +8406,19 @@ class ContributionsFlow {
    */
   startPayFlow_(response) {
     const sku = response.getSku();
+    const isOneTime = response.getOneTime();
     if (sku) {
-      new PayStartFlow(this.deps_, sku, ProductType.UI_CONTRIBUTION).start();
+      const /** @type {../api/subscriptions.SubscriptionRequest} */ contributionRequest = {
+          'skuId': sku,
+        };
+      if (isOneTime) {
+        contributionRequest['oneTime'] = isOneTime;
+      }
+      new PayStartFlow(
+        this.deps_,
+        contributionRequest,
+        ProductType.UI_CONTRIBUTION
+      ).start();
     }
   }
 
@@ -7053,7 +8619,7 @@ class DeferredAccountFlow {
   }
 }
 
-const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
+const CSS = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-animate,swg-loading-image{display:block}swg-loading-container{width:100%!important;display:-ms-flexbox!important;display:flex!important;-ms-flex-align:center!important;align-items:center!important;-ms-flex-pack:center!important;justify-content:center!important;min-height:148px!important;height:100%!important;bottom:0!important;margin-top:5px!important;z-index:2147483647!important}@media (min-height:630px), (min-width:630px){swg-loading-container{width:560px!important;margin-left:35px!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;background-color:#fff!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}swg-loading{z-index:2147483647!important;width:36px;height:36px;overflow:hidden;animation:mspin-rotate 1568.63ms linear infinite}swg-loading-animate{animation:mspin-revrot 5332ms steps(4) infinite}swg-loading-image{background-image:url(https://news.google.com/swg/js/v1/loader.svg);background-size:100%;width:11664px;height:36px;animation:swg-loading-film 5332ms steps(324) infinite}@keyframes swg-loading-film{0%{transform:translateX(0)}to{transform:translateX(-11664px)}}@keyframes mspin-rotate{0%{transform:rotate(0deg)}to{transform:rotate(1turn)}}@keyframes mspin-revrot{0%{transform:rotate(0deg)}to{transform:rotate(-1turn)}}\n/*# sourceURL=/./src/ui/ui.css*/";
 
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
@@ -7071,157 +8637,87 @@ const CSS$1 = "body{padding:0;margin:0}swg-container,swg-loading,swg-loading-ani
  * limitations under the License.
  */
 
-/**
- * @param {!Document} doc
- * @return {string}
- */
-function getReadyState(doc) {
-  return /** @type {string} */ (doc['readyState']);
-}
+/** @const {!Object<string|number>} */
+const friendlyIframeAttributes = {
+  'frameborder': 0,
+  'scrolling': 'no',
+  'src': 'about:blank',
+};
 
 /**
- * Whether the document is ready.
- * @param {!Document} doc
- * @return {boolean}
+ * The class for building friendly iframe.
  */
-function isDocumentReady(doc) {
-  const readyState = getReadyState(doc);
-  return readyState != 'loading' && readyState != 'uninitialized';
-}
-
-/**
- * Calls the callback when document is ready.
- * @param {!Document} doc
- * @param {function(!Document)} callback
- */
-function onDocumentReady(doc, callback) {
-  onDocumentState(doc, isDocumentReady, callback);
-}
-
-/**
- * Calls the callback when document's state satisfies the stateFn.
- * @param {!Document} doc
- * @param {function(!Document):boolean} stateFn
- * @param {function(!Document)} callback
- */
-function onDocumentState(doc, stateFn, callback) {
-  let ready = stateFn(doc);
-  if (ready) {
-    callback(doc);
-  } else {
-    const readyListener = () => {
-      if (stateFn(doc)) {
-        if (!ready) {
-          ready = true;
-          callback(doc);
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
-  }
-}
-
-/**
- * Returns a promise that is resolved when document is ready.
- * @param {!Document} doc
- * @return {!Promise<!Document>}
- */
-function whenDocumentReady(doc) {
-  return new Promise(resolve => {
-    onDocumentReady(doc, resolve);
-  });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @implements {Doc} */
-class GlobalDoc {
+class FriendlyIframe {
   /**
-   * @param {!Window|!Document} winOrDoc
+   * @param {!Document} doc
+   * @param {!Object<string, string|number>=} attrs
    */
-  constructor(winOrDoc) {
-    const isWin = !!winOrDoc.document;
-    /** @private @const {!Window} */
-    this.win_ = /** @type {!Window} */ (isWin
-      ? /** @type {!Window} */ (winOrDoc)
-      : /** @type {!Document} */ (winOrDoc).defaultView);
-    /** @private @const {!Document} */
-    this.doc_ = isWin
-      ? /** @type {!Window} */ (winOrDoc).document
-      : /** @type {!Document} */ (winOrDoc);
+  constructor(doc, attrs = {}) {
+    const mergedAttrs = Object.assign({}, friendlyIframeAttributes, attrs);
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
+      doc,
+      'iframe',
+      mergedAttrs
+    ));
+
+    // Ensure that the new iframe does not inherit any CSS styles.
+    resetAllStyles(this.iframe_);
+
+    /** @private @const {!Promise} */
+    this.ready_ = new Promise(resolve => {
+      this.iframe_.onload = resolve;
+    });
   }
 
-  /** @override */
-  getWin() {
-    return this.win_;
-  }
-
-  /** @override */
-  getRootNode() {
-    return this.doc_;
-  }
-
-  /** @override */
-  getRootElement() {
-    return this.doc_.documentElement;
-  }
-
-  /** @override */
-  getHead() {
-    // `document.head` always has a chance to be parsed, at least partially.
-    return /** @type {!Element} */ (this.doc_.head);
-  }
-
-  /** @override */
-  getBody() {
-    return this.doc_.body;
-  }
-
-  /** @override */
-  isReady() {
-    return isDocumentReady(this.doc_);
-  }
-
-  /** @override */
+  /**
+   * When promise is resolved.
+   * @return {!Promise}
+   */
   whenReady() {
-    return whenDocumentReady(this.doc_);
+    return this.ready_;
   }
 
-  /** @override */
-  addToFixedLayer(unusedElement) {
-    return Promise.resolve();
+  /**
+   * Gets the iframe element.
+   * @return {!HTMLIFrameElement}
+   */
+  getElement() {
+    return this.iframe_;
   }
-}
 
-/**
- * @param {!Document|!Window|!Doc} input
- * @return {!Doc}
- */
-function resolveDoc(input) {
-  // Is it a `Document`
-  if (/** @type {!Document} */ (input).nodeType === /* DOCUMENT */ 9) {
-    return new GlobalDoc(/** @type {!Document} */ (input));
+  /**
+   * Gets the document object of the iframe element.
+   * @return {!Document}
+   */
+  getDocument() {
+    const doc =
+      this.getElement().contentDocument ||
+      (this.getElement().contentWindow &&
+        this.getElement().contentWindow.document);
+
+    if (!doc) {
+      throw new Error('not loaded');
+    }
+    return doc;
   }
-  // Is it a `Window`?
-  if (/** @type {!Window} */ (input).document) {
-    return new GlobalDoc(/** @type {!Window} */ (input));
+
+  /**
+   * Gets the body of the iframe.
+   * @return {!Element}
+   */
+  getBody() {
+    return /** @type {!Element} */ (this.getDocument().body);
   }
-  return /** @type {!Doc} */ (input);
+
+  /**
+   * Whether the iframe is connected.
+   * @return {boolean}
+   */
+  isConnected() {
+    return isConnected(this.getElement());
+  }
 }
 
 /**
@@ -7493,87 +8989,158 @@ class LoadingView {
  * limitations under the License.
  */
 
-/** @const {!Object<string|number>} */
-const friendlyIframeAttributes = {
-  'frameborder': 0,
-  'scrolling': 'no',
-  'src': 'about:blank',
-};
+/**
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getReadyState(doc) {
+  return /** @type {string} */ (doc['readyState']);
+}
 
 /**
- * The class for building friendly iframe.
+ * Whether the document is ready.
+ * @param {!Document} doc
+ * @return {boolean}
  */
-class FriendlyIframe {
-  /**
-   * @param {!Document} doc
-   * @param {!Object<string, string|number>=} attrs
-   */
-  constructor(doc, attrs = {}) {
-    const mergedAttrs = Object.assign({}, friendlyIframeAttributes, attrs);
+function isDocumentReady(doc) {
+  const readyState = getReadyState(doc);
+  return readyState != 'loading' && readyState != 'uninitialized';
+}
 
-    /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
-      doc,
-      'iframe',
-      mergedAttrs
-    ));
+/**
+ * Calls the callback when document is ready.
+ * @param {!Document} doc
+ * @param {function(!Document)} callback
+ */
+function onDocumentReady(doc, callback) {
+  onDocumentState(doc, isDocumentReady, callback);
+}
 
-    // Ensure that the new iframe does not inherit any CSS styles.
-    resetAllStyles(this.iframe_);
-
-    /** @private @const {!Promise} */
-    this.ready_ = new Promise(resolve => {
-      this.iframe_.onload = resolve;
-    });
+/**
+ * Calls the callback once when document's state satisfies the condition.
+ * @param {!Document} doc
+ * @param {function(!Document):boolean} condition
+ * @param {function(!Document)} callback
+ */
+function onDocumentState(doc, condition, callback) {
+  if (condition(doc)) {
+    // Execute callback right now.
+    callback(doc);
+    return;
   }
 
-  /**
-   * When promise is resolved.
-   * @return {!Promise}
-   */
-  whenReady() {
-    return this.ready_;
-  }
-
-  /**
-   * Gets the iframe element.
-   * @return {!HTMLIFrameElement}
-   */
-  getElement() {
-    return this.iframe_;
-  }
-
-  /**
-   * Gets the document object of the iframe element.
-   * @return {!Document}
-   */
-  getDocument() {
-    const doc =
-      this.getElement().contentDocument ||
-      (this.getElement().contentWindow &&
-        this.getElement().contentWindow.document);
-
-    if (!doc) {
-      throw new Error('not loaded');
+  // Execute callback (once!) after condition is satisfied.
+  let callbackHasExecuted = false;
+  const readyListener = () => {
+    if (condition(doc) && !callbackHasExecuted) {
+      callback(doc);
+      callbackHasExecuted = true;
+      doc.removeEventListener('readystatechange', readyListener);
     }
-    return doc;
+  };
+  doc.addEventListener('readystatechange', readyListener);
+}
+
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise<!Document>}
+ */
+function whenDocumentReady(doc) {
+  return new Promise(resolve => {
+    onDocumentReady(doc, resolve);
+  });
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @implements {Doc} */
+class GlobalDoc {
+  /**
+   * @param {!Window|!Document} winOrDoc
+   */
+  constructor(winOrDoc) {
+    const isWin = !!winOrDoc.document;
+    /** @private @const {!Window} */
+    this.win_ = /** @type {!Window} */ (isWin
+      ? /** @type {!Window} */ (winOrDoc)
+      : /** @type {!Document} */ (winOrDoc).defaultView);
+    /** @private @const {!Document} */
+    this.doc_ = isWin
+      ? /** @type {!Window} */ (winOrDoc).document
+      : /** @type {!Document} */ (winOrDoc);
   }
 
-  /**
-   * Gets the body of the iframe.
-   * @return {!Element}
-   */
+  /** @override */
+  getWin() {
+    return this.win_;
+  }
+
+  /** @override */
+  getRootNode() {
+    return this.doc_;
+  }
+
+  /** @override */
+  getRootElement() {
+    return this.doc_.documentElement;
+  }
+
+  /** @override */
+  getHead() {
+    // `document.head` always has a chance to be parsed, at least partially.
+    return /** @type {!Element} */ (this.doc_.head);
+  }
+
+  /** @override */
   getBody() {
-    return /** @type {!Element} */ (this.getDocument().body);
+    return this.doc_.body;
   }
 
-  /**
-   * Whether the iframe is connected.
-   * @return {boolean}
-   */
-  isConnected() {
-    return isConnected(this.getElement());
+  /** @override */
+  isReady() {
+    return isDocumentReady(this.doc_);
   }
+
+  /** @override */
+  whenReady() {
+    return whenDocumentReady(this.doc_);
+  }
+
+  /** @override */
+  addToFixedLayer(unusedElement) {
+    return Promise.resolve();
+  }
+}
+
+/**
+ * @param {!Document|!Window|!Doc} input
+ * @return {!Doc}
+ */
+function resolveDoc(input) {
+  // Is it a `Document`
+  if (/** @type {!Document} */ (input).nodeType === /* DOCUMENT */ 9) {
+    return new GlobalDoc(/** @type {!Document} */ (input));
+  }
+  // Is it a `Window`?
+  if (/** @type {!Window} */ (input).document) {
+    return new GlobalDoc(/** @type {!Window} */ (input));
+  }
+  return /** @type {!Doc} */ (input);
 }
 
 /**
@@ -7747,7 +9314,7 @@ class Dialog {
     const iframeDoc = /** @type {!HTMLDocument} */ (this.iframe_.getDocument());
 
     // Inject Google fonts in <HEAD> section of the iframe.
-    injectStyleSheet(resolveDoc(iframeDoc), CSS$1);
+    injectStyleSheet(resolveDoc(iframeDoc), CSS);
 
     // Add Loading indicator.
     this.loadingView_ = new LoadingView(iframeDoc);
@@ -8635,11 +10202,13 @@ class EntitlementsManager {
       this.storage_.set(IS_READY_TO_PAY_STORAGE_KEY, String(isReadyToPay));
     }
     const signedData = json['signedEntitlements'];
+    const decryptedDocumentKey = json['decryptedDocumentKey'];
     if (signedData) {
       const entitlements = this.getValidJwtEntitlements_(
         signedData,
         /* requireNonExpired */ false,
-        isReadyToPay
+        isReadyToPay,
+        decryptedDocumentKey
       );
       if (entitlements) {
         return entitlements;
@@ -8647,7 +10216,12 @@ class EntitlementsManager {
     } else {
       const plainEntitlements = json['entitlements'];
       if (plainEntitlements) {
-        return this.createEntitlements_('', plainEntitlements, isReadyToPay);
+        return this.createEntitlements_(
+          '',
+          plainEntitlements,
+          isReadyToPay,
+          decryptedDocumentKey
+        );
       }
     }
     // Empty response.
@@ -8847,18 +10421,6 @@ function irtpStringToBoolean(value) {
  */
 const ExperimentFlags = {
   /**
-   * Enables GPay API in SwG.
-   * Cleanup issue: #406.
-   */
-  GPAY_API: 'gpay-api',
-
-  /**
-   * Enables GPay native support.
-   * Cleanup issue: #441.
-   */
-  GPAY_NATIVE: 'gpay-native',
-
-  /**
    * Enables the feature that allows you to replace one subscription
    * for another in the subscribe() API.
    */
@@ -8866,6 +10428,7 @@ const ExperimentFlags = {
 
   /**
    * Enables the contributions feature.
+   * DEPRECATED. This flag can be removed once not used by anyone.
    */
   CONTRIBUTIONS: 'contributions',
 
@@ -9512,6 +11075,9 @@ class LinkCompleteFlow {
       );
       return promise.then(
         response => {
+          deps
+            .eventManager()
+            .logSwgEvent(AnalyticsEvent.ACTION_LINK_CONTINUE, true);
           const flow = new LinkCompleteFlow(deps, response);
           flow.start();
         },
@@ -9523,6 +11089,11 @@ class LinkCompleteFlow {
             deps
               .callbacks()
               .triggerFlowCanceled(SubscriptionFlows.LINK_ACCOUNT);
+          } else {
+            // The user chose to continue but there was an error.
+            deps
+              .eventManager()
+              .logSwgEvent(AnalyticsEvent.ACTION_LINK_CONTINUE, true);
           }
         }
       );
@@ -9754,15 +11325,14 @@ class LinkSaveFlow {
    * @return {!Promise}
    */
   start() {
-    const iframeArgs = {
-      'publicationId': this.deps_.pageConfig().getPublicationId(),
+    const iframeArgs = this.activityPorts_.addDefaultArguments({
       'isClosable': true,
-    };
+    });
     this.activityIframeView_ = new ActivityIframeView(
       this.win_,
       this.activityPorts_,
       feUrl('/linksaveiframe'),
-      feArgs(iframeArgs),
+      iframeArgs,
       /* shouldFadeBody */ false,
       /* hasLoadingIndicator */ true
     );
@@ -9806,6 +11376,249 @@ class LinkSaveFlow {
         }
         throw reason;
       });
+  }
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @const {!Object<string,AnalyticsEvent>} */
+const PublisherEventToAnalyticsEvent = {
+  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
+  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
+  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
+  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+    AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
+  [Event.ACTION_PAYMENT_FLOW_STARTED]:
+    AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
+  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
+  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
+};
+
+/** @const {!Object<number,?Event>} */
+const AnalyticsEventToPublisherEvent = {
+  [AnalyticsEvent.UNKNOWN]: null,
+  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
+  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
+  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
+  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
+  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
+  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
+  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
+  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
+  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
+    Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
+  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
+    Event.ACTION_PAYMENT_FLOW_STARTED,
+  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
+  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
+  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
+};
+
+/**
+ * Converts a propensity event enum into an analytics event enum.
+ * @param {!Event|string} propensityEvent
+ * @returns {!AnalyticsEvent}
+ */
+function publisherEventToAnalyticsEvent(propensityEvent) {
+  return PublisherEventToAnalyticsEvent[propensityEvent];
+}
+
+/**
+ * Converts an analytics event enum into a propensity event enum.
+ * @param {!AnalyticsEvent} analyticsEvent
+ * @returns {?Event}
+ */
+function analyticsEventToPublisherEvent(analyticsEvent) {
+  return AnalyticsEventToPublisherEvent[analyticsEvent];
+}
+
+/**
+ * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @implements {../api/logger-api.LoggerApi}
+ */
+class Logger {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
+    this.eventManager_ = deps.eventManager();
+  }
+
+  /** @override */
+  sendSubscriptionState(state, jsonProducts) {
+    if (!isEnumValue(SubscriptionState, state)) {
+      throw new Error('Invalid subscription state provided');
+    }
+    if (
+      (SubscriptionState.SUBSCRIBER == state ||
+        SubscriptionState.PAST_SUBSCRIBER == state) &&
+      !jsonProducts
+    ) {
+      throw new Error(
+        'Entitlements must be provided for users with' +
+          ' active or expired subscriptions'
+      );
+    }
+    if (jsonProducts && !isObject(jsonProducts)) {
+      throw new Error('Entitlements must be an Object');
+    }
+    let productsOrSkus = null;
+    if (jsonProducts) {
+      productsOrSkus = JSON.stringify(jsonProducts);
+    }
+    this.eventManager_.logEvent({
+      eventType: AnalyticsEvent.EVENT_SUBSCRIPTION_STATE,
+      eventOriginator: EventOriginator.PUBLISHER_CLIENT,
+      isFromUserAction: null,
+      additionalParameters: {
+        state,
+        productsOrSkus,
+      },
+    });
+  }
+
+  /** @override */
+  sendEvent(userEvent) {
+    let data = null;
+    if (
+      !isEnumValue(Event, userEvent.name) ||
+      !publisherEventToAnalyticsEvent(userEvent.name)
+    ) {
+      throw new Error('Invalid user event provided(' + userEvent.name + ')');
+    }
+
+    if (userEvent.data) {
+      if (!isObject(userEvent.data)) {
+        throw new Error('Event data must be an Object(' + userEvent.data + ')');
+      } else {
+        data = Object.assign({}, data, userEvent.data);
+      }
+    }
+
+    if (isBoolean(userEvent.active)) {
+      if (!data) {
+        data = {};
+      }
+      Object.assign(data, {'is_active': userEvent.active});
+    } else if (userEvent.active != null) {
+      throw new Error('Event active must be a boolean');
+    }
+    this.eventManager_.logEvent({
+      eventType: publisherEventToAnalyticsEvent(userEvent.name),
+      eventOriginator: EventOriginator.PUBLISHER_CLIENT,
+      isFromUserAction: userEvent.active,
+      additionalParameters: data,
+    });
+  }
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+class LoginNotificationApi {
+  /**
+   * @param {!./deps.DepsDef} deps
+   */
+  constructor(deps) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private {?Promise} */
+    this.openViewPromise_ = null;
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/loginiframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+        // No need to ask the user. Just tell them you're logging them in.
+        userConsent: false,
+        // TODO(chenshay): Pass entitlements value here.
+      }),
+      /* shouldFadeBody */ true
+    );
+  }
+
+  /**
+   * Continues the Login flow (after waiting).
+   * @return {!Promise}
+   */
+  start() {
+    this.deps_
+      .callbacks()
+      .triggerFlowStarted(SubscriptionFlows.SHOW_LOGIN_NOTIFICATION);
+
+    this.openViewPromise_ = this.dialogManager_.openView(
+      this.activityIframeView_
+    );
+
+    return this.activityIframeView_.acceptResult().then(
+      () => {
+        // The consent part is complete.
+        this.dialogManager_.completeView(this.activityIframeView_);
+      },
+      reason => {
+        this.dialogManager_.completeView(this.activityIframeView_);
+        throw reason;
+      }
+    );
   }
 }
 
@@ -9909,65 +11722,47 @@ class LoginPromptApi {
  * limitations under the License.
  */
 
-class LoginNotificationApi {
+class OffersApi {
   /**
-   * @param {!./deps.DepsDef} deps
+   * @param {!../model/page-config.PageConfig} config
+   * @param {!./fetcher.Fetcher} fetcher
    */
-  constructor(deps) {
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
+  constructor(config, fetcher) {
+    /** @private @const {!../model/page-config.PageConfig} */
+    this.config_ = config;
 
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
-
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private {?Promise} */
-    this.openViewPromise_ = null;
-
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/loginiframe'),
-      feArgs({
-        publicationId: deps.pageConfig().getPublicationId(),
-        productId: deps.pageConfig().getProductId(),
-        // No need to ask the user. Just tell them you're logging them in.
-        userConsent: false,
-        // TODO(chenshay): Pass entitlements value here.
-      }),
-      /* shouldFadeBody */ true
-    );
+    /** @private @const {!./fetcher.Fetcher} */
+    this.fetcher_ = fetcher;
   }
 
   /**
-   * Continues the Login flow (after waiting).
-   * @return {!Promise}
+   * @param {?string=} productId
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
    */
-  start() {
-    this.deps_
-      .callbacks()
-      .triggerFlowStarted(SubscriptionFlows.SHOW_LOGIN_NOTIFICATION);
+  getOffers(productId = this.config_.getProductId()) {
+    if (!productId) {
+      throw new Error('getOffers requires productId in config or arguments');
+    }
+    return this.fetch_(productId);
+  }
 
-    this.openViewPromise_ = this.dialogManager_.openView(
-      this.activityIframeView_
+  /**
+   * @param {string} productId
+   * @return {!Promise<!Array<!../api/offer.Offer>>}
+   * @private
+   */
+  fetch_(productId) {
+    const url = serviceUrl(
+      '/publication/' +
+        encodeURIComponent(this.config_.getPublicationId()) +
+        '/offers' +
+        '?label=' +
+        encodeURIComponent(productId)
     );
-
-    return this.activityIframeView_.acceptResult().then(
-      () => {
-        // The consent part is complete.
-        this.dialogManager_.completeView(this.activityIframeView_);
-      },
-      reason => {
-        this.dialogManager_.completeView(this.activityIframeView_);
-        throw reason;
-      }
-    );
+    // TODO(dvoytenko): switch to a non-credentialed request after launch.
+    return this.fetcher_.fetchCredentialedJson(url).then(json => {
+      return json['offers'] || [];
+    });
   }
 }
 
@@ -11237,7 +13032,7 @@ function validatePaymentOptions(paymentOptions) {
            .includes(paymentOptions.environment)) {
     throw new Error(
         'Parameter environment in PaymentOptions can optionally be set to ' +
-        'PRODUCTION, otherwise it defaults to TEST.');
+        'PRODUCTION, otherwise it defaults to TEST. ' + paymentOptions.environment);
   }
 }
 
@@ -11970,9 +13765,7 @@ class PaymentsWebActivityDelegate {
    */
   isVerticalCenterExperimentEnabled_(paymentDataRequest) {
     return (
-      null &&
-      paymentDataRequest['i'] &&
-      paymentDataRequest['i'].renderContainerCenter
+      null  
     );
   }
 
@@ -12989,233 +14782,6 @@ function isNativeDisabledInRequest(request) {
  * limitations under the License.
  */
 
-/**
- * @fileoverview
- *
- * Client-side experiments in SwG.
- *
- * The experiments can be set in a few different ways:
- *  1. By gulp build rules using `--experiments=${experimentsString}` argument.
- *  2. By `#swg.experiments=${experimentsString}` parameter in the URL's
- *     fragment.
- *  3. By `swg.configure({experiments: [array]})` call.
- *
- * The `${experimentsString}` is defined as following:
- *  - experimentString = (experimentSpec,)*
- *  - experimentSpec = experimentId | experimentId '=' num100 ('c')?
- *
- * Some examples:
- *  - `A,B` - defines two experiments "A" and "B" that will be turned on.
- *  - `A:100,B:100` - the same: "A" and "B" will be turned on.
- *  - `A:0` - the experiment "A" will be disabled.
- *  - `A:1` - enable the experiment "A" in 1% of impressions.
- *  - `A:10c` - enable the experiment "A" in 10% of impressions with 10%
- *    control. In this case, 20% of the impressions will be split into two
- *    categories: experiment and control. Notice, a control can be requested
- *    only for the fraction under 20%.
- */
-
-/**
- * @enum {string}
- */
-const Selection = {
-  EXPERIMENT: 'e',
-  CONTROL: 'c',
-};
-
-/**
- * A comma-separated set of experiments.
- * @type {string}
- */
-let experimentsString = '';
-
-/**
- * A parsed map of experiments.
- * @type {?Object<string, boolean>}
- */
-let experimentMap = null;
-
-/**
- * Ensures that the experiments have been initialized and returns them.
- * @param {!Window} win
- * @return {!Object<string, boolean>}
- */
-function getExperiments(win) {
-  if (!experimentMap) {
-    experimentMap = {};
-    let combinedExperimentString = experimentsString;
-    try {
-      const query = parseQueryString$1(win.location.hash);
-      const experimentStringFromHash = query['swg.experiments'];
-      if (experimentStringFromHash) {
-        combinedExperimentString += ',' + experimentStringFromHash;
-      }
-    } catch (e) {
-      // Ignore: experiment parsing cannot block runtime.
-      ErrorUtils.throwAsync(e);
-    }
-
-    // Format:
-    // - experimentString = (experimentSpec,)*
-    combinedExperimentString.split(',').forEach(s => {
-      s = s.trim();
-      if (!s) {
-        return;
-      }
-      try {
-        parseSetExperiment(win, experimentMap, s);
-      } catch (e) {
-        // Ignore: experiment parsing cannot block runtime.
-        ErrorUtils.throwAsync(e);
-      }
-    });
-  }
-  return experimentMap;
-}
-
-/**
- * @param {!Window} win
- * @param {?Object<string, boolean>} experimentMap
- * @param {string} spec
- */
-function parseSetExperiment(win, experimentMap, spec) {
-  // Format:
-  // - experimentSpec = experimentId | experimentId '=' num100 ('c')?
-  let experimentId;
-  let fraction;
-  let control = false;
-  const eq = spec.indexOf(':');
-  if (eq == -1) {
-    experimentId = spec;
-    fraction = 100;
-    control = false;
-  } else {
-    experimentId = spec.substring(0, eq).trim();
-    spec = spec.substring(eq + 1);
-    if (spec.substring(spec.length - 1) == Selection.CONTROL) {
-      control = true;
-      spec = spec.substring(0, spec.length - 1);
-    }
-    fraction = parseInt(spec, 10);
-  }
-  if (isNaN(fraction)) {
-    throw new Error('invalid fraction');
-  }
-
-  // Calculate "on"/"off".
-  let on;
-  if (fraction > 99) {
-    // Explicitly "on".
-    on = true;
-  } else if (fraction < 1) {
-    // Explicitly "off".
-    on = false;
-  } else if (win.sessionStorage) {
-    // Fractional and possibly with the control.
-    // Note that:
-    // a. We can't do persistent experiments if storage is not available.
-    // b. We can't run control on more than 20%.
-    control = control && fraction <= 20;
-    try {
-      // Set fraction in the experiment to make it unlaunchable.
-      const storageKey =
-        'subscribe.google.com:e:' +
-        experimentId +
-        ':' +
-        fraction +
-        (control ? 'c' : '');
-      let selection = parseSelection(win.sessionStorage.getItem(storageKey));
-      if (!selection) {
-        // Is experiment/control range?
-        if (win.Math.random() * 100 <= fraction * (control ? 2 : 1)) {
-          const inExperiment = control ? win.Math.random() <= 0.5 : true;
-          selection = inExperiment ? Selection.EXPERIMENT : Selection.CONTROL;
-          win.sessionStorage.setItem(storageKey, selection);
-        }
-      }
-      on = !!selection;
-      if (selection == Selection.CONTROL) {
-        experimentId = 'c-' + experimentId;
-      }
-    } catch (e) {
-      // Ignore: experiment parsing cannot block runtime.
-      on = false;
-      ErrorUtils.throwAsync(e);
-    }
-  } else {
-    on = false;
-  }
-
-  experimentMap[experimentId] = on;
-}
-
-/**
- * @param {?string} s
- * @return {?Selection}
- */
-function parseSelection(s) {
-  // Do a simple if-then to inline the whole Selection enum.
-  return s == Selection.EXPERIMENT
-    ? Selection.EXPERIMENT
-    : s == Selection.CONTROL
-    ? Selection.CONTROL
-    : null;
-}
-
-/**
- * Whether the specified experiment is on or off.
- * @param {!Window} win
- * @param {string} experimentId
- * @return {boolean}
- */
-function isExperimentOn(win, experimentId) {
-  return getExperiments(win)[experimentId] || false;
-}
-
-/**
- * Toggles the experiment on or off. Returns the actual value of the experiment
- * after toggling is done.
- * @param {!Window} win
- * @param {string} experimentId
- * @param {boolean} on
- */
-function setExperiment(win, experimentId, on) {
-  getExperiments(win)[experimentId] = on;
-}
-
-/**
- * @return {!Array<string>}
- */
-function getOnExperiments(win) {
-  const experimentMap = getExperiments(win);
-  const experiments = [];
-  for (const experiment in experimentMap) {
-    if (experimentMap[experiment]) {
-      experiments.push(experiment);
-    }
-  }
-  return experiments;
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const PAY_REQUEST_ID = 'swg-pay';
-const GPAY_ACTIVITY_REQUEST$1 = 'GPAY';
-
 const REDIRECT_STORAGE_KEY = 'subscribe.google.com:rk';
 
 /**
@@ -13228,18 +14794,8 @@ const PAY_ORIGIN = {
 };
 
 /** @return {string} */
-function payOrigin() {
-  return PAY_ORIGIN['PRODUCTION'];
-}
-
-/** @return {string} */
 function payUrl() {
   return feCached(PAY_ORIGIN['PRODUCTION'] + '/gp/p/ui/pay');
-}
-
-/** @return {string} */
-function payDecryptUrl() {
-  return PAY_ORIGIN['PRODUCTION'] + '/gp/p/apis/buyflow/process';
 }
 
 /**
@@ -13255,22 +14811,58 @@ class PayClient {
     /** @private @const {!../components/activities.ActivityPorts} */
     this.activityPorts_ = deps.activities();
 
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
+    /** @private {?function(!Promise<!PaymentData>)} */
+    this.responseCallback_ = null;
 
-    /** @const @private {!PayClientBindingDef} */
-    this.binding_ = isExperimentOn(this.win_, ExperimentFlags.GPAY_API)
-      ? new PayClientBindingPayjs(
-          this.win_,
-          this.activityPorts_,
-          // Generates a new Google Transaction ID.
-          deps.analytics().getTransactionId()
-        )
-      : new PayClientBindingSwg(
-          this.win_,
-          this.activityPorts_,
-          this.dialogManager_
-        );
+    /** @private {?PaymentDataRequest} */
+    this.request_ = null;
+
+    /** @private {?Promise<!PaymentData>} */
+    this.response_ = null;
+
+    /** @private @const {!./analytics-service.AnalyticsService} */
+    this.analytics_ = deps.analytics();
+
+    /** @private @const {!RedirectVerifierHelper} */
+    this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
+
+    /** @private @const {!PaymentsAsyncClient} */
+    this.client_ = this.createClient_(
+      /** @type {!PaymentOptions} */
+      ({
+        environment: 'PRODUCTION',
+        'i': {
+          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
+        },
+      }),
+      this.analytics_.getTransactionId(),
+      this.handleResponse_.bind(this)
+    );
+
+    // Prepare new verifier pair.
+    this.redirectVerifierHelper_.prepare();
+
+    /** @private @const {!./client-event-manager.ClientEventManager} */
+    this.eventManager_ = deps.eventManager();
+  }
+
+  /**
+   * @param {!PaymentOptions} options
+   * @param {string} googleTransactionId
+   * @param {function(!Promise<!PaymentData>)} handler
+   * @return {!PaymentsAsyncClient}
+   * @private
+   */
+  createClient_(options, googleTransactionId, handler) {
+    // Assign Google Transaction ID to PaymentsAsyncClient.googleTransactionId_
+    // so it can be passed to gpay_async.js and stored in payment clearcut log.
+    PaymentsAsyncClient.googleTransactionId_ = googleTransactionId;
+    return new PaymentsAsyncClient(
+      options,
+      handler,
+      /* useIframe */ false,
+      this.activityPorts_.getOriginalWebActivityPorts()
+    );
   }
 
   /**
@@ -13291,180 +14883,17 @@ class PayClient {
    * @return {string}
    */
   getType() {
-    // TODO(dvoytenko, #406): remove once GPay API is launched.
-    return this.binding_.getType();
-  }
-
-  /**
-   * @param {!Object} paymentRequest
-   * @param {!PayOptionsDef=} options
-   */
-  start(paymentRequest, options = {}) {
-    this.binding_.start(paymentRequest, options);
-  }
-
-  /**
-   * @param {function(!Promise<!Object>)} callback
-   */
-  onResponse(callback) {
-    this.binding_.onResponse(callback);
-  }
-}
-
-/**
- * @implements {PayClientBindingDef}
- */
-class PayClientBindingSwg {
-  /**
-   * @param {!Window} win
-   * @param {!../components/activities.ActivityPorts} activityPorts
-   * @param {!../components/dialog-manager.DialogManager} dialogManager
-   */
-  constructor(win, activityPorts, dialogManager) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = activityPorts;
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = dialogManager;
-  }
-
-  /** @override */
-  getType() {
-    return 'SWG';
-  }
-
-  /** @override */
-  start(paymentRequest, options) {
-    const opener = this.activityPorts_.open(
-      GPAY_ACTIVITY_REQUEST$1,
-      payUrl(),
-      options.forceRedirect ? '_top' : '_blank',
-      feArgs(paymentRequest),
-      {}
-    );
-    this.dialogManager_.popupOpened((opener && opener.targetWin) || null);
-  }
-
-  /** @override */
-  onResponse(callback) {
-    const responseCallback = port => {
-      this.dialogManager_.popupClosed();
-      callback(this.validatePayResponse_(port));
-    };
-    this.activityPorts_.onResult(GPAY_ACTIVITY_REQUEST$1, responseCallback);
-    this.activityPorts_.onResult(PAY_REQUEST_ID, responseCallback);
-  }
-
-  /**
-   * @param {!../components/activities.ActivityPortDef} port
-   * @return {!Promise<!Object>}
-   * @private
-   */
-  validatePayResponse_(port) {
-    // Do not require security immediately: it will be checked below.
-    return port.acceptResult().then(result => {
-      if (result.origin != payOrigin()) {
-        throw new Error('channel mismatch');
-      }
-      const data = /** @type {!Object} */ (result.data);
-      if (data['redirectEncryptedCallbackData']) {
-        // Data is supplied as an encrypted blob.
-        const xhr = new Xhr(this.win_);
-        const url = payDecryptUrl();
-        const init = /** @type {!../utils/xhr.FetchInitDef} */ ({
-          method: 'post',
-          headers: {'Accept': 'text/plain, application/json'},
-          credentials: 'include',
-          body: data['redirectEncryptedCallbackData'],
-          mode: 'cors',
-        });
-        return xhr
-          .fetch(url, init)
-          .then(response => response.json())
-          .then(response => {
-            const dataClone = Object.assign({}, data);
-            delete dataClone['redirectEncryptedCallbackData'];
-            return Object.assign(dataClone, response);
-          });
-      }
-      // Data is supplied directly: must be a verified and secure channel.
-      if (result.originVerified && result.secureChannel) {
-        return data;
-      }
-      throw new Error('channel mismatch');
-    });
-  }
-}
-
-/**
- * Binding based on the https://github.com/google/payjs.
- * @implements {PayClientBindingDef}
- * @package Visible for testing only.
- */
-class PayClientBindingPayjs {
-  /**
-   * @param {!Window} win
-   * @param {!../components/activities.ActivityPorts} activityPorts
-   * @param {!string} googleTransactionId
-   */
-  constructor(win, activityPorts, googleTransactionId) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = activityPorts;
-
-    /** @private {?function(!Promise<!Object>)} */
-    this.responseCallback_ = null;
-
-    /** @private {?Promise<!Object>} */
-    this.response_ = null;
-
-    /** @private @const {!RedirectVerifierHelper} */
-    this.redirectVerifierHelper_ = new RedirectVerifierHelper(this.win_);
-
-    /** @private @const {!PaymentsAsyncClient} */
-    this.client_ = this.createClient_(
-      {
-        environment: 'PRODUCTION',
-        'i': {
-          'redirectKey': this.redirectVerifierHelper_.restoreKey(),
-        },
-      },
-      googleTransactionId,
-      this.handleResponse_.bind(this)
-    );
-
-    // Prepare new verifier pair.
-    this.redirectVerifierHelper_.prepare();
-  }
-
-  /**
-   * @param {!Object} options
-   * @param {string} googleTransactionId
-   * @param {function(!Promise<!Object>)} handler
-   * @return {!PaymentsAsyncClient}
-   * @private
-   */
-  createClient_(options, googleTransactionId, handler) {
-    // Assign Google Transaction ID to PaymentsAsyncClient.googleTransactionId_
-    // so it can be passed to gpay_async.js and stored in payment clearcut log.
-    PaymentsAsyncClient.googleTransactionId_ = googleTransactionId;
-    return new PaymentsAsyncClient(
-      options,
-      handler,
-      /* useIframe */ false,
-      this.activityPorts_.getOriginalWebActivityPorts()
-    );
-  }
-
-  /** @override */
-  getType() {
+    // TODO(alin04): remove once all references removed.
     return 'PAYJS';
   }
 
-  /** @override */
-  start(paymentRequest, options) {
+  /**
+   * @param {!PaymentDataRequest} paymentRequest
+   * @param {!PayOptionsDef=} options
+   */
+  start(paymentRequest, options = {}) {
+    this.request_ = paymentRequest;
+
     if (options.forceRedirect) {
       paymentRequest = Object.assign(paymentRequest, {
         'forceRedirect': options.forceRedirect || false,
@@ -13475,55 +14904,91 @@ class PayClientBindingPayjs {
       'disableNative',
       // The page cannot be iframed at this time. May be relaxed later
       // for AMP and similar contexts.
-      this.win_ != this.top_() ||
-        // Experiment must be enabled.
-        !isExperimentOn(this.win_, ExperimentFlags.GPAY_NATIVE)
+      this.win_ != this.top_()
     );
+    let resolver = null;
+    const promise = new Promise(resolve => (resolver = resolve));
     // Notice that the callback for verifier may execute asynchronously.
     this.redirectVerifierHelper_.useVerifier(verifier => {
       if (verifier) {
         setInternalParam(paymentRequest, 'redirectVerifier', verifier);
       }
-      this.client_.loadPaymentData(paymentRequest);
+      if (options.forceRedirect) {
+        const client = this.client_;
+        this.eventManager_.getReadyPromise().then(() => {
+          this.analytics_.getLoggingPromise().then(() => {
+            client.loadPaymentData(paymentRequest);
+            resolver(true);
+          });
+        });
+      } else {
+        this.client_.loadPaymentData(paymentRequest);
+        resolver(true);
+      }
     });
+    return promise;
   }
 
-  /** @override */
+  /**
+   * @param {function(!Promise<!PaymentData>)} callback
+   */
   onResponse(callback) {
     this.responseCallback_ = callback;
     const response = this.response_;
     if (response) {
       Promise.resolve().then(() => {
         if (response) {
-          callback(this.convertResponse_(response));
+          callback(this.convertResponse_(response, this.request_));
         }
       });
     }
   }
 
   /**
-   * @param {!Promise<!Object>} responsePromise
+   * @param {!Promise<!PaymentData>} responsePromise
    * @private
    */
   handleResponse_(responsePromise) {
     this.response_ = responsePromise;
     if (this.responseCallback_) {
-      this.responseCallback_(this.convertResponse_(this.response_));
+      this.responseCallback_(
+        this.convertResponse_(this.response_, this.request_)
+      );
     }
   }
 
   /**
-   * @param {!Promise<!Object>} response
-   * @return {!Promise<!Object>}
+   * @param {!Promise<!PaymentData>} response
+   * @param {?PaymentDataRequest} request
+   * @return {!Promise<!PaymentData>}
    * @private
    */
-  convertResponse_(response) {
-    return response.catch(reason => {
-      if (typeof reason == 'object' && reason['statusCode'] == 'CANCELED') {
-        return Promise.reject(createCancelError(this.win_));
-      }
-      return Promise.reject(reason);
-    });
+  convertResponse_(response, request) {
+    return response
+      .then(
+        // Temporary client side solution to remember the
+        // input params. TODO: Remove this once server-side
+        // input preservation is done and is part of the response.
+        res => {
+          if (request) {
+            res['paymentRequest'] = request;
+          }
+          return res;
+        }
+      )
+      .catch(reason => {
+        if (typeof reason == 'object' && reason['statusCode'] == 'CANCELED') {
+          const error = createCancelError(this.win_);
+          if (request) {
+            error['productType'] =
+              /** @type {!PaymentDataRequest} */ (request)['i']['productType'];
+          } else {
+            error['productType'] = null;
+          }
+          return Promise.reject(error);
+        }
+        return Promise.reject(reason);
+      });
   }
 
   /**
@@ -13705,7 +15170,7 @@ class RedirectVerifierHelper {
 }
 
 /**
- * @param {!Object} paymentRequest
+ * @param {!PaymentDataRequest} paymentRequest
  * @param {string} param
  * @param {*} value
  */
@@ -13713,569 +15178,6 @@ function setInternalParam(paymentRequest, param, value) {
   paymentRequest['i'] = Object.assign(paymentRequest['i'] || {}, {
     [param]: value,
   });
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const NO_PROMISE_ERR = 'No account promise provided';
-
-class WaitForSubscriptionLookupApi {
-  /**
-   * @param {!./deps.DepsDef} deps
-   * @param {?Promise} accountPromise
-   */
-  constructor(deps, accountPromise) {
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
-
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private {?Promise} */
-    this.openViewPromise_ = null;
-
-    /** @private {!Promise} */
-    this.accountPromise_ = accountPromise || Promise.reject(NO_PROMISE_ERR);
-
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/waitforsubscriptionlookupiframe'),
-      feArgs({
-        publicationId: deps.pageConfig().getPublicationId(),
-        productId: deps.pageConfig().getProductId(),
-      }),
-      /* shouldFadeBody */ true,
-      /* hasLoadingIndicator */ true
-    );
-  }
-
-  /**
-   * Starts the Login Flow.
-   * @return {!Promise}
-   */
-  start() {
-    this.openViewPromise_ = this.dialogManager_.openView(
-      this.activityIframeView_
-    );
-
-    return this.accountPromise_.then(
-      account => {
-        // Account was found.
-        this.dialogManager_.completeView(this.activityIframeView_);
-        return account;
-      },
-      reason => {
-        this.dialogManager_.completeView(this.activityIframeView_);
-        throw reason;
-      }
-    );
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-class OffersApi {
-  /**
-   * @param {!../model/page-config.PageConfig} config
-   * @param {!./fetcher.Fetcher} fetcher
-   */
-  constructor(config, fetcher) {
-    /** @private @const {!../model/page-config.PageConfig} */
-    this.config_ = config;
-
-    /** @private @const {!./fetcher.Fetcher} */
-    this.fetcher_ = fetcher;
-  }
-
-  /**
-   * @param {?string=} productId
-   * @return {!Promise<!Array<!../api/offer.Offer>>}
-   */
-  getOffers(productId = this.config_.getProductId()) {
-    if (!productId) {
-      throw new Error('getOffers requires productId in config or arguments');
-    }
-    return this.fetch_(productId);
-  }
-
-  /**
-   * @param {string} productId
-   * @return {!Promise<!Array<!../api/offer.Offer>>}
-   * @private
-   */
-  fetch_(productId) {
-    const url = serviceUrl(
-      '/publication/' +
-        encodeURIComponent(this.config_.getPublicationId()) +
-        '/offers' +
-        '?label=' +
-        encodeURIComponent(productId)
-    );
-    // TODO(dvoytenko): switch to a non-credentialed request after launch.
-    return this.fetcher_.fetchCredentialedJson(url).then(json => {
-      return json['offers'] || [];
-    });
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * @param {string} sku
- * @return {!EventParams}
- */
-function getEventParams$1(sku) {
-  return new EventParams([, , , , sku]);
-}
-
-/**
- * Offers view is closable when request was originated from 'AbbrvOfferFlow'
- * or from 'SubscribeOptionFlow'.
- */
-const OFFERS_VIEW_CLOSABLE = true;
-
-// The value logged when the offers screen shows all available SKUs.
-const ALL_SKUS = '*';
-
-/**
- * The class for Offers flow.
- */
-class OffersFlow {
-  /**
-   * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.OffersRequest|undefined} options
-   */
-  constructor(deps, options) {
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
-
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
-    this.eventManager_ = deps.eventManager();
-
-    let isClosable = options && options.isClosable;
-    if (isClosable == undefined) {
-      isClosable = false; // Default is to hide Close button.
-    }
-
-    const feArgsObj = {
-      'productId': deps.pageConfig().getProductId(),
-      'publicationId': deps.pageConfig().getPublicationId(),
-      'showNative': deps.callbacks().hasSubscribeRequestCallback(),
-      'productType': ProductType.SUBSCRIPTION,
-      'list': (options && options.list) || 'default',
-      'skus': (options && options.skus) || null,
-      'isClosable': isClosable,
-      'analyticsContext': deps
-        .analytics()
-        .getContext()
-        .toArray(),
-    };
-
-    this.prorationMode = feArgsObj['replaceSkuProrationMode'] || undefined;
-
-    if (options && options.oldSku) {
-      feArgsObj['oldSku'] = options.oldSku;
-    }
-
-    if (feArgsObj['oldSku']) {
-      log_2(feArgsObj['skus'], 'Need a sku list if old sku is provided!');
-
-      // Remove old sku from offers if in list.
-      let skuList = feArgsObj['skus'];
-      const /** @type {string} */ oldSku = feArgsObj['oldSku'];
-      skuList = skuList.filter(sku => sku !== oldSku);
-
-      log_2(
-        skuList.length > 0,
-        'Sku list only contained offer user already has'
-      );
-      feArgsObj['skus'] = skuList;
-    }
-
-    // Redirect to payments if only one upgrade option is passed.
-    if (feArgsObj['skus'] && feArgsObj['skus'].length === 1) {
-      const sku = feArgsObj['skus'][0];
-      const /** @type {string|undefined} */ oldSku = feArgsObj['oldSku'];
-      // Update subscription triggers experimental flag if oldSku is passed,
-      // so we need to check for oldSku to decide if it needs to be sent.
-      // Otherwise we might accidentally block a regular subscription request.
-      if (oldSku) {
-        new PayStartFlow(this.deps_, {
-          skuId: sku,
-          oldSku,
-          replaceSkuProrationMode: this.prorationMode,
-        }).start();
-        return;
-      }
-    }
-
-    /** @private @const {!string} */
-    this.skus_ = (feArgsObj['skus'] || []).join(',') || ALL_SKUS;
-
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/offersiframe'),
-      feArgs(feArgsObj),
-      /* shouldFadeBody */ true
-    );
-  }
-
-  /**
-   * @param {SkuSelectedResponse} response
-   * @private
-   */
-  startPayFlow_(response) {
-    const sku = response.getSku();
-    const oldSku = response.getOldSku();
-    if (sku) {
-      if (oldSku) {
-        this.deps_.analytics().setSku(oldSku);
-      }
-      this.eventManager_.logSwgEvent(
-        AnalyticsEvent.ACTION_OFFER_SELECTED,
-        true,
-        getEventParams$1(sku)
-      );
-      let skuOrSubscriptionRequest;
-      if (oldSku) {
-        skuOrSubscriptionRequest = {};
-        skuOrSubscriptionRequest['skuId'] = sku;
-        skuOrSubscriptionRequest['oldSku'] = oldSku;
-      } else {
-        skuOrSubscriptionRequest = sku;
-      }
-      new PayStartFlow(this.deps_, skuOrSubscriptionRequest).start();
-    }
-  }
-
-  /**
-   * @param {AlreadySubscribedResponse} response
-   * @private
-   */
-  handleLinkRequest_(response) {
-    if (response.getSubscriberOrMember()) {
-      this.eventManager_.logSwgEvent(
-        AnalyticsEvent.ACTION_ALREADY_SUBSCRIBED,
-        true
-      );
-      this.deps_.callbacks().triggerLoginRequest({
-        linkRequested: !!response.getLinkRequested(),
-      });
-    }
-  }
-
-  /**
-   * @param {ViewSubscriptionsResponse} response
-   * @private
-   */
-  startNativeFlow_(response) {
-    if (response.getNative()) {
-      this.deps_.callbacks().triggerSubscribeRequest();
-    }
-  }
-
-  /**
-   * Starts the offers flow or alreadySubscribed flow.
-   * @return {!Promise}
-   */
-  start() {
-    if (this.activityIframeView_) {
-      // So no error if skipped to payment screen.
-      // Start/cancel events.
-      this.deps_.callbacks().triggerFlowStarted(SubscriptionFlows.SHOW_OFFERS);
-      this.activityIframeView_.onCancel(() => {
-        this.deps_
-          .callbacks()
-          .triggerFlowCanceled(SubscriptionFlows.SHOW_OFFERS);
-      });
-      this.activityIframeView_.on(
-        SkuSelectedResponse,
-        this.startPayFlow_.bind(this)
-      );
-      this.activityIframeView_.on(
-        AlreadySubscribedResponse,
-        this.handleLinkRequest_.bind(this)
-      );
-      this.activityIframeView_.on(
-        ViewSubscriptionsResponse,
-        this.startNativeFlow_.bind(this)
-      );
-
-      this.eventManager_.logSwgEvent(
-        AnalyticsEvent.IMPRESSION_OFFERS,
-        null,
-        getEventParams$1(this.skus_)
-      );
-
-      return this.dialogManager_.openView(this.activityIframeView_);
-    }
-    return Promise.resolve();
-  }
-}
-
-/**
- * The class for subscribe option flow.
- */
-class SubscribeOptionFlow {
-  /**
-   * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.OffersRequest|undefined} options
-   */
-  constructor(deps, options) {
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
-    this.options_ = options;
-
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
-    this.eventManager_ = deps.eventManager();
-
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      deps.win(),
-      this.activityPorts_,
-      feUrl('/optionsiframe'),
-      feArgs({
-        'publicationId': deps.pageConfig().getPublicationId(),
-        'productId': deps.pageConfig().getProductId(),
-        'list': (options && options.list) || 'default',
-        'skus': (options && options.skus) || null,
-        'isClosable': true,
-      }),
-      /* shouldFadeBody */ false
-    );
-  }
-
-  /**
-   * Starts the offers flow or alreadySubscribed flow.
-   * @return {!Promise}
-   */
-  start() {
-    // Start/cancel events.
-    this.deps_
-      .callbacks()
-      .triggerFlowStarted(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
-    this.activityIframeView_.onCancel(() => {
-      this.deps_
-        .callbacks()
-        .triggerFlowCanceled(SubscriptionFlows.SHOW_SUBSCRIBE_OPTION);
-    });
-    this.activityIframeView_.on(
-      SubscribeResponse,
-      this.maybeOpenOffersFlow_.bind(this)
-    );
-
-    this.activityIframeView_.acceptResult().then(
-      result => {
-        const data = result.data;
-        const response = new SubscribeResponse();
-        if (data['subscribe']) {
-          response.setSubscribe(true);
-        }
-        this.maybeOpenOffersFlow_(response);
-      },
-      reason => {
-        this.dialogManager_.completeView(this.activityIframeView_);
-        throw reason;
-      }
-    );
-    this.eventManager_.logSwgEvent(
-      AnalyticsEvent.IMPRESSION_CLICK_TO_SHOW_OFFERS
-    );
-    return this.dialogManager_.openView(this.activityIframeView_);
-  }
-
-  /**
-   * @param {SubscribeResponse} response
-   * @private
-   */
-  maybeOpenOffersFlow_(response) {
-    if (response.getSubscribe()) {
-      const options = this.options_ || {};
-      if (options.isClosable == undefined) {
-        options.isClosable = OFFERS_VIEW_CLOSABLE;
-      }
-      this.eventManager_.logSwgEvent(AnalyticsEvent.ACTION_VIEW_OFFERS, true);
-      new OffersFlow(this.deps_, options).start();
-    }
-  }
-}
-
-/**
- * The class for Abbreviated Offer flow.
- *
- */
-class AbbrvOfferFlow {
-  /**
-   * @param {!./deps.DepsDef} deps
-   * @param {!../api/subscriptions.OffersRequest=} options
-   */
-  constructor(deps, options = {}) {
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!../api/subscriptions.OffersRequest|undefined} */
-    this.options_ = options;
-
-    /** @private @const {!Window} */
-    this.win_ = deps.win();
-
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!../components/dialog-manager.DialogManager} */
-    this.dialogManager_ = deps.dialogManager();
-
-    /** @private @const {!../runtime/client-event-manager.ClientEventManager} */
-    this.eventManager_ = deps.eventManager();
-
-    /** @private @const {!ActivityIframeView} */
-    this.activityIframeView_ = new ActivityIframeView(
-      this.win_,
-      this.activityPorts_,
-      feUrl('/abbrvofferiframe'),
-      feArgs({
-        'publicationId': deps.pageConfig().getPublicationId(),
-        'productId': deps.pageConfig().getProductId(),
-        'showNative': deps.callbacks().hasSubscribeRequestCallback(),
-        'list': (options && options.list) || 'default',
-        'skus': (options && options.skus) || null,
-        'isClosable': true,
-      }),
-      /* shouldFadeBody */ false
-    );
-  }
-
-  /**
-   * @param {AlreadySubscribedResponse} response
-   * @private
-   */
-  handleLinkRequest_(response) {
-    if (response.getSubscriberOrMember()) {
-      this.eventManager_.logSwgEvent(
-        AnalyticsEvent.ACTION_ALREADY_SUBSCRIBED,
-        true
-      );
-      this.deps_.callbacks().triggerLoginRequest({
-        linkRequested: !!response.getLinkRequested(),
-      });
-    }
-  }
-
-  /**
-   * Starts the offers flow
-   * @return {!Promise}
-   */
-  start() {
-    // Start/cancel events.
-    this.deps_
-      .callbacks()
-      .triggerFlowStarted(SubscriptionFlows.SHOW_ABBRV_OFFER);
-    this.activityIframeView_.onCancel(() => {
-      this.deps_
-        .callbacks()
-        .triggerFlowCanceled(SubscriptionFlows.SHOW_ABBRV_OFFER);
-    });
-
-    // If the user is already subscribed, trigger login flow
-    this.activityIframeView_.on(
-      AlreadySubscribedResponse,
-      this.handleLinkRequest_.bind(this)
-    );
-
-    // If result is due to requesting offers, redirect to offers flow
-    this.activityIframeView_.acceptResult().then(result => {
-      if (result.data['viewOffers']) {
-        const options = this.options_ || {};
-        if (options.isClosable == undefined) {
-          options.isClosable = OFFERS_VIEW_CLOSABLE;
-        }
-        this.eventManager_.logSwgEvent(AnalyticsEvent.ACTION_VIEW_OFFERS, true);
-        new OffersFlow(this.deps_, options).start();
-        return;
-      }
-      if (result.data['native']) {
-        this.deps_.callbacks().triggerSubscribeRequest();
-        // The flow is complete.
-        this.dialogManager_.completeView(this.activityIframeView_);
-        return;
-      }
-    });
-
-    this.eventManager_.logSwgEvent(
-      AnalyticsEvent.IMPRESSION_CLICK_TO_SHOW_OFFERS_OR_ALREADY_SUBSCRIBED
-    );
-
-    return this.dialogManager_.openView(this.activityIframeView_);
-  }
 }
 
 /**
@@ -14349,681 +15251,6 @@ class Preconnect {
     }
     this.doc_.head.appendChild(linkEl);
   }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-const PREFIX = 'subscribe.google.com';
-
-class Storage {
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    /** @private @const {!Window} */
-    this.win_ = win;
-
-    /** @private @const {!Object<string, !Promise<?string>>} */
-    this.values_ = {};
-  }
-
-  /**
-   * @param {string} key
-   * @return {!Promise<?string>}
-   */
-  get(key) {
-    if (!this.values_[key]) {
-      this.values_[key] = new Promise(resolve => {
-        if (this.win_.sessionStorage) {
-          try {
-            resolve(this.win_.sessionStorage.getItem(storageKey(key)));
-          } catch (e) {
-            // Ignore error.
-            resolve(null);
-          }
-        } else {
-          resolve(null);
-        }
-      });
-    }
-    return this.values_[key];
-  }
-
-  /**
-   * @param {string} key
-   * @param {string} value
-   * @return {!Promise}
-   */
-  set(key, value) {
-    this.values_[key] = Promise.resolve(value);
-    return new Promise(resolve => {
-      if (this.win_.sessionStorage) {
-        try {
-          this.win_.sessionStorage.setItem(storageKey(key), value);
-        } catch (e) {
-          // Ignore error.
-        }
-      }
-      resolve();
-    });
-  }
-
-  /**
-   * @param {string} key
-   * @return {!Promise}
-   */
-  remove(key) {
-    delete this.values_[key];
-    return new Promise(resolve => {
-      if (this.win_.sessionStorage) {
-        try {
-          this.win_.sessionStorage.removeItem(storageKey(key));
-        } catch (e) {
-          // Ignore error.
-        }
-      }
-      resolve();
-    });
-  }
-}
-
-/**
- * @param {string} key
- * @return {string}
- */
-function storageKey(key) {
-  return PREFIX + ':' + key;
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @enum {number}  */
-const FilterResult = {
-  /** The event is allowed to proceed to the listeners. */
-  PROCESS_EVENT: 0,
-  /** The event is canceled and the listeners are not informed about it. */
-  CANCEL_EVENT: 1,
-};
-
-/**
- * Defines a client event in SwG
- * Properties:
- * - eventType: Required. The AnalyticsEvent type that occurred.
- * - eventOriginator: Required.  The codebase that initiated the event.
- * - isFromUserAction: Optional.  True if the user took an action to generate
- *   the event.
- * - additionalParameters: Optional.  A JSON object to store generic data.
- *
- *  @typedef {{
- *    eventType: !AnalyticsEvent,
- *    eventOriginator: !EventOriginator,
- *    isFromUserAction: ?boolean,
- *    additionalParameters: ?Object,
- * }}
- */
-let ClientEvent;
-
-/**
- * @interface
- */
-class ClientEventManagerApi {
-  /**
-   * Call this function to log an event. The registered listeners will be
-   * invoked unless the event is filtered.
-   * @param {!function(!ClientEvent)} listener
-   */
-  registerEventListener(listener) { }
-
-  /**
-   * Register a filterer for events if you need to potentially prevent the
-   * listeners from hearing about it.  A filterer should return
-   * FilterResult.CANCEL_EVENT to prevent listeners from hearing about the
-   * event.
-   * @param {!function(!ClientEvent):FilterResult} filterer
-   */
-  registerEventFilterer(filterer) { }
-
-  /**
-   * Call this function to log an event.  It will immediately throw an error if
-   * the event is invalid.  It will then asynchronously call the filterers and
-   * stop the event if a filterer cancels it.  After that, it will call each
-   * listener asynchronously.
-   * @param {!ClientEvent} event
-   */
-  logEvent(event) { }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * Helper function to describe an issue with an event object
- * @param {!string} valueName
- * @param {?*} value
- * @returns {!string}
- */
-function createEventErrorMessage(valueName, value) {
-  return 'Event has an invalid ' + valueName + '(' + value + ')';
-}
-
-/**
- * Throws an error if the event is invalid.
- * @param {!../api/client-event-manager-api.ClientEvent} event
- */
-function validateEvent(event) {
-  if (!isObject(event)) {
-    throw new Error('Event must be a valid object');
-  }
-
-  if (!isEnumValue(AnalyticsEvent, event.eventType)) {
-    throw new Error(createEventErrorMessage('eventType', event.eventType));
-  }
-
-  if (!isEnumValue(EventOriginator, event.eventOriginator)) {
-    throw new Error(
-      createEventErrorMessage('eventOriginator', event.eventOriginator)
-    );
-  }
-
-  if (
-    !isObject(event.additionalParameters) &&
-    event.additionalParameters != null
-  ) {
-    throw new Error(
-      createEventErrorMessage(
-        'additionalParameters',
-        event.additionalParameters
-      )
-    );
-  }
-
-  if (event.isFromUserAction != null && !isBoolean(event.isFromUserAction)) {
-    throw new Error(
-      createEventErrorMessage('isFromUserAction', event.isFromUserAction)
-    );
-  }
-}
-
-/** @implements {../api/client-event-manager-api.ClientEventManagerApi} */
-class ClientEventManager {
-  /**
-   * @param {!../api/client-event-manager-api.ClientEvent} event
-   * @return {boolean}
-   */
-  static isPublisherEvent(event) {
-    return (
-      event.eventOriginator === EventOriginator.PROPENSITY_CLIENT ||
-      event.eventOriginator === EventOriginator.PUBLISHER_CLIENT ||
-      event.eventOriginator === EventOriginator.AMP_CLIENT
-    );
-  }
-
-  /**
-   *
-   * @param {!Promise} configuredPromise
-   */
-  constructor(configuredPromise) {
-    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent)>} */
-    this.listeners_ = [];
-
-    /** @private {!Array<function(!../api/client-event-manager-api.ClientEvent):!FilterResult>} */
-    this.filterers_ = [];
-
-    /** @private {?Promise} */
-    this.lastAction_ = null;
-
-    /** @private @const {!Promise} */
-    this.isReadyPromise_ = configuredPromise;
-  }
-
-  /**
-   * @overrides
-   */
-  registerEventListener(listener) {
-    if (!isFunction(listener)) {
-      throw new Error('Event manager listeners must be a function');
-    }
-    this.listeners_.push(listener);
-  }
-
-  /**
-   * @overrides
-   */
-  registerEventFilterer(filterer) {
-    if (!isFunction(filterer)) {
-      throw new Error('Event manager filterers must be a function');
-    }
-    this.filterers_.push(filterer);
-  }
-
-  /**
-   * @overrides
-   */
-  logEvent(event) {
-    validateEvent(event);
-    this.lastAction_ = this.isReadyPromise_.then(() => {
-      for (let filterer = 0; filterer < this.filterers_.length; filterer++) {
-        try {
-          if (this.filterers_[filterer](event) === FilterResult.CANCEL_EVENT) {
-            return Promise.resolve();
-          }
-        } catch (e) {
-          log_5(e);
-        }
-      }
-      for (let listener = 0; listener < this.listeners_.length; listener++) {
-        try {
-          this.listeners_[listener](event);
-        } catch (e) {
-          log_5(e);
-        }
-      }
-      return Promise.resolve();
-    });
-  }
-
-  /**
-   * Creates an event with the arguments provided and calls logEvent.
-   * @param {!AnalyticsEvent} eventType
-   * @param {?boolean=} isFromUserAction
-   * @param {../proto/api_messages.EventParams=} eventParams
-   */
-  logSwgEvent(eventType, isFromUserAction = false, eventParams = null) {
-    this.logEvent({
-      eventType,
-      eventOriginator: EventOriginator.SWG_CLIENT,
-      isFromUserAction,
-      additionalParameters: eventParams,
-    });
-  }
-}
-
-/**
- * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {!Object<string, string>} */
-const iframeStyles = {
-  display: 'none',
-};
-
-class AnalyticsService {
-  /**
-   * @param {!./deps.DepsDef} deps
-   */
-  constructor(deps) {
-    /** @private @const {!../model/doc.Doc} */
-    this.doc_ = deps.doc();
-
-    /** @private @const {!./deps.DepsDef} */
-    this.deps_ = deps;
-
-    /** @private @const {!../components/activities.ActivityPorts} */
-    this.activityPorts_ = deps.activities();
-
-    /** @private @const {!HTMLIFrameElement} */
-    this.iframe_ = /** @type {!HTMLIFrameElement} */ (createElement(
-      this.doc_.getWin().document,
-      'iframe',
-      {}
-    ));
-
-    setImportantStyles(this.iframe_, iframeStyles);
-
-    /** @private @const {string} */
-    this.src_ = feUrl('/serviceiframe');
-
-    /** @private @const {string} */
-    this.publicationId_ = deps.pageConfig().getPublicationId();
-
-    this.args_ = feArgs({
-      publicationId: this.publicationId_,
-    });
-
-    /** @private @type {!boolean} */
-    this.everLogged_ = false;
-
-    /**
-     * @private @const {!AnalyticsContext}
-     */
-    this.context_ = new AnalyticsContext();
-
-    this.context_.setTransactionId(getUuid());
-
-    /** @private {?Promise<!web-activities/activity-ports.ActivityIframePort>} */
-    this.serviceReady_ = null;
-
-    /** @private {?Promise} */
-    this.lastAction_ = null;
-
-    /** @private @const {!ClientEventManager} */
-    this.eventManager_ = deps.eventManager();
-    this.eventManager_.registerEventListener(
-      this.handleClientEvent_.bind(this)
-    );
-  }
-
-  /**
-   * @param {string} transactionId
-   */
-  setTransactionId(transactionId) {
-    this.context_.setTransactionId(transactionId);
-  }
-
-  /**
-   * @return {string}
-   */
-  getTransactionId() {
-    return /** @type {string} */ (this.context_.getTransactionId());
-  }
-
-  /**
-   * @return {?string}
-   */
-  getSku() {
-    return this.context_.getSku();
-  }
-
-  /**
-   * @param {string} sku
-   */
-  setSku(sku) {
-    this.context_.setSku(sku);
-  }
-
-  /**
-   * @param {!Array<string>} labels
-   */
-  addLabels(labels) {
-    if (labels && labels.length > 0) {
-      const newLabels = [].concat(this.context_.getLabelList());
-      labels.forEach(label => {
-        if (newLabels.indexOf(label) == -1) {
-          newLabels.push(label);
-        }
-      });
-      this.context_.setLabelList(newLabels);
-    }
-  }
-
-  /**
-   * @return {!HTMLIFrameElement}
-   */
-  getElement() {
-    return this.iframe_;
-  }
-
-  /**
-   * @return {string}
-   * @private
-   */
-  getQueryString_() {
-    return this.doc_.getWin().location.search;
-  }
-
-  /**
-   * @return {string}
-   * @private
-   */
-  getReferrer_() {
-    return this.doc_.getWin().document.referrer;
-  }
-
-  /**
-   * @private
-   */
-  setContext_() {
-    const utmParams = parseQueryString$1(this.getQueryString_());
-    this.context_.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    const campaign = utmParams['utm_campaign'];
-    const medium = utmParams['utm_medium'];
-    const source = utmParams['utm_source'];
-    if (campaign) {
-      this.context_.setUtmCampaign(campaign);
-    }
-    if (medium) {
-      this.context_.setUtmMedium(medium);
-    }
-    if (source) {
-      this.context_.setUtmSource(source);
-    }
-    this.addLabels(getOnExperiments(this.doc_.getWin()));
-  }
-
-  /**
-   * @return {!Promise<!../components/activities.ActivityIframePort>}
-   */
-  start() {
-    if (!this.serviceReady_) {
-      // TODO(sohanirao): Potentially do this even earlier
-      this.doc_.getBody().appendChild(this.getElement());
-      this.serviceReady_ = this.activityPorts_
-        .openIframe(this.iframe_, this.src_, this.args_)
-        .then(port => {
-          this.setContext_();
-          return port.whenReady().then(() => port);
-        });
-    }
-    return this.serviceReady_;
-  }
-
-  /**
-   * @param {boolean} isReadyToPay
-   */
-  setReadyToPay(isReadyToPay) {
-    this.context_.setReadyToPay(isReadyToPay);
-  }
-
-  /**
-   */
-  close() {
-    this.doc_.getBody().removeChild(this.getElement());
-  }
-
-  /**
-   * @return {!AnalyticsContext}
-   */
-  getContext() {
-    return this.context_;
-  }
-
-  /**
-   * Returns true if any logs have already be sent to the analytics server.
-   * @return {boolean}
-   */
-  getHasLogged() {
-    return this.everLogged_;
-  }
-
-  /**
-   * @param {!../api/client-event-manager-api.ClientEvent} event
-   * @return {!AnalyticsRequest}
-   */
-  createLogRequest_(event) {
-    const meta = new AnalyticsEventMeta();
-    meta.setEventOriginator(event.eventOriginator);
-    meta.setIsFromUserAction(event.isFromUserAction);
-
-    const request = new AnalyticsRequest();
-    request.setEvent(event.eventType);
-    request.setContext(this.context_);
-    request.setMeta(meta);
-    if (event.additionalParameters instanceof EventParams) {
-      request.setParams(event.additionalParameters);
-    } // Ignore event.additionalParameters.  It may have data we shouldn't log.
-    return request;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  shouldLogPublisherEvents_() {
-    return this.deps_.config().enableSwgAnalytics === true;
-  }
-
-  /**
-   * @param {!../api/client-event-manager-api.ClientEvent} event
-   * @return {boolean}
-   */
-  shouldAlwaysLogEvent_(event) {
-    /* AMP_CLIENT events are considered publisher events and we generally only
-     * log those if the publisher decided to enable publisher event logging for
-     * privacy purposes.  The page load event is not private and is necessary
-     * just so we know the user is in AMP, so we will log it regardless of
-     * configuration.
-     */
-    return (
-      event.eventType === AnalyticsEvent.IMPRESSION_PAGE_LOAD &&
-      event.eventOriginator === EventOriginator.AMP_CLIENT
-    );
-  }
-
-  /**
-   *  Listens for new events from the events manager and handles logging
-   * @param {!../api/client-event-manager-api.ClientEvent} event
-   */
-  handleClientEvent_(event) {
-    //this event is just used to communicate information internally.  It should
-    //not be reported to the SwG analytics service.
-    if (event.eventType === AnalyticsEvent.EVENT_SUBSCRIPTION_STATE) {
-      return;
-    }
-
-    if (
-      ClientEventManager.isPublisherEvent(event) &&
-      !this.shouldLogPublisherEvents_() &&
-      !this.shouldAlwaysLogEvent_(event)
-    ) {
-      return;
-    }
-    this.lastAction_ = this.start().then(port => {
-      const request = this.createLogRequest_(event);
-      this.everLogged_ = true;
-      port.execute(request);
-    });
-  }
-}
-
-/**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS-IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/** @const {!Object<string,AnalyticsEvent>} */
-const PublisherEventToAnalyticsEvent = {
-  [Event.IMPRESSION_PAYWALL]: AnalyticsEvent.IMPRESSION_PAYWALL,
-  [Event.IMPRESSION_AD]: AnalyticsEvent.IMPRESSION_AD,
-  [Event.IMPRESSION_OFFERS]: AnalyticsEvent.IMPRESSION_OFFERS,
-  [Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
-    AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
-  [Event.ACTION_OFFER_SELECTED]: AnalyticsEvent.ACTION_OFFER_SELECTED,
-  [Event.ACTION_PAYMENT_FLOW_STARTED]:
-    AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED,
-  [Event.ACTION_PAYMENT_COMPLETED]: AnalyticsEvent.ACTION_PAYMENT_COMPLETE,
-  [Event.EVENT_CUSTOM]: AnalyticsEvent.EVENT_CUSTOM,
-};
-
-/** @const {!Object<number,?Event>} */
-const AnalyticsEventToPublisherEvent = {
-  [AnalyticsEvent.UNKNOWN]: null,
-  [AnalyticsEvent.IMPRESSION_PAYWALL]: Event.IMPRESSION_PAYWALL,
-  [AnalyticsEvent.IMPRESSION_AD]: Event.IMPRESSION_AD,
-  [AnalyticsEvent.IMPRESSION_OFFERS]: Event.IMPRESSION_OFFERS,
-  [AnalyticsEvent.IMPRESSION_SUBSCRIBE_BUTTON]: null,
-  [AnalyticsEvent.IMPRESSION_SMARTBOX]: null,
-  [AnalyticsEvent.ACTION_SUBSCRIBE]: null,
-  [AnalyticsEvent.ACTION_PAYMENT_COMPLETE]: Event.ACTION_PAYMENT_COMPLETED,
-  [AnalyticsEvent.ACTION_ACCOUNT_CREATED]: null,
-  [AnalyticsEvent.ACTION_ACCOUNT_ACKNOWLEDGED]: null,
-  [AnalyticsEvent.ACTION_SUBSCRIPTIONS_LANDING_PAGE]:
-    Event.ACTION_SUBSCRIPTIONS_LANDING_PAGE,
-  [AnalyticsEvent.ACTION_PAYMENT_FLOW_STARTED]:
-    Event.ACTION_PAYMENT_FLOW_STARTED,
-  [AnalyticsEvent.ACTION_OFFER_SELECTED]: Event.ACTION_OFFER_SELECTED,
-  [AnalyticsEvent.EVENT_PAYMENT_FAILED]: null,
-  [AnalyticsEvent.EVENT_CUSTOM]: Event.EVENT_CUSTOM,
-};
-
-/**
- * Converts a propensity event enum into an analytics event enum.
- * @param {!Event|string} propensityEvent
- * @returns {!AnalyticsEvent}
- */
-function publisherEventToAnalyticsEvent(propensityEvent) {
-  return PublisherEventToAnalyticsEvent[propensityEvent];
-}
-
-/**
- * Converts an analytics event enum into a propensity event enum.
- * @param {!AnalyticsEvent} analyticsEvent
- * @returns {?Event}
- */
-function analyticsEventToPublisherEvent(analyticsEvent) {
-  return AnalyticsEventToPublisherEvent[analyticsEvent];
 }
 
 /**
@@ -15105,12 +15332,13 @@ class PropensityServer {
    * @return {string}
    */
   propensityUrl_(url) {
-    url = url + '&u_tz=240&v=' + this.version_;
+    url = addQueryParam(url, 'u_tz', '240');
+    url = addQueryParam(url, 'v', String(this.version_));
     const clientId = this.getClientId_();
     if (clientId) {
-      url = url + '&cookie=' + clientId;
+      url = addQueryParam(url, 'cookie', clientId);
     }
-    url = url + '&cdm=' + this.win_.location.hostname;
+    url = addQueryParam(url, 'cdm', this.win_.location.hostname);
     return url;
   }
 
@@ -15123,11 +15351,11 @@ class PropensityServer {
       method: 'GET',
       credentials: 'include',
     });
-    let userState = this.publicationId_ + ':' + state;
+    let url = adsUrl('/subopt/data');
+    url = addQueryParam(url, 'states', this.publicationId_ + ':' + state);
     if (productsOrSkus) {
-      userState = userState + ':' + encodeURIComponent(productsOrSkus);
+      url = addQueryParam(url, 'extrainfo', productsOrSkus);
     }
-    const url = adsUrl('/subopt/data?states=') + encodeURIComponent(userState);
     return this.fetcher_.fetch(this.propensityUrl_(url), init);
   }
 
@@ -15141,11 +15369,11 @@ class PropensityServer {
       method: 'GET',
       credentials: 'include',
     });
-    let eventInfo = this.publicationId_ + ':' + event;
+    let url = adsUrl('/subopt/data');
+    url = addQueryParam(url, 'events', this.publicationId_ + ':' + event);
     if (context) {
-      eventInfo = eventInfo + ':' + encodeURIComponent(context);
+      url = addQueryParam(url, 'extrainfo', context);
     }
-    const url = adsUrl('/subopt/data?events=') + encodeURIComponent(eventInfo);
     return this.fetcher_.fetch(this.propensityUrl_(url), init);
   }
 
@@ -15385,8 +15613,10 @@ class Propensity {
   }
 }
 
+const CSS$1 = ".swg-dialog,.swg-toast{box-sizing:border-box;background-color:#fff!important}.swg-toast{position:fixed!important;bottom:0!important;max-height:46px!important;z-index:2147483647!important;border:none!important}@media (max-height:640px), (max-width:640px){.swg-dialog,.swg-toast{width:480px!important;left:-240px!important;margin-left:50vw!important;border-top-left-radius:8px!important;border-top-right-radius:8px!important;box-shadow:0 1px 1px rgba(60,64,67,.3),0 1px 4px 1px rgba(60,64,67,.15)!important}}@media (min-width:640px) and (min-height:640px){.swg-dialog{width:630px!important;left:-315px!important;margin-left:50vw!important;background-color:transparent!important;border:none!important}.swg-toast{left:0!important}}@media (max-width:480px){.swg-dialog,.swg-toast{width:100%!important;left:0!important;right:0!important;margin-left:0!important}}\n/*# sourceURL=/./src/components/dialog.css*/";
+
 /**
- * Copyright 2019 The Subscribe with Google Authors. All Rights Reserved.
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15401,84 +15631,164 @@ class Propensity {
  * limitations under the License.
  */
 
+const PREFIX = 'subscribe.google.com';
+
+class Storage {
+  /**
+   * @param {!Window} win
+   */
+  constructor(win) {
+    /** @private @const {!Window} */
+    this.win_ = win;
+
+    /** @private @const {!Object<string, !Promise<?string>>} */
+    this.values_ = {};
+  }
+
+  /**
+   * @param {string} key
+   * @return {!Promise<?string>}
+   */
+  get(key) {
+    if (!this.values_[key]) {
+      this.values_[key] = new Promise(resolve => {
+        if (this.win_.sessionStorage) {
+          try {
+            resolve(this.win_.sessionStorage.getItem(storageKey(key)));
+          } catch (e) {
+            // Ignore error.
+            resolve(null);
+          }
+        } else {
+          resolve(null);
+        }
+      });
+    }
+    return this.values_[key];
+  }
+
+  /**
+   * @param {string} key
+   * @param {string} value
+   * @return {!Promise}
+   */
+  set(key, value) {
+    this.values_[key] = Promise.resolve(value);
+    return new Promise(resolve => {
+      if (this.win_.sessionStorage) {
+        try {
+          this.win_.sessionStorage.setItem(storageKey(key), value);
+        } catch (e) {
+          // Ignore error.
+        }
+      }
+      resolve();
+    });
+  }
+
+  /**
+   * @param {string} key
+   * @return {!Promise}
+   */
+  remove(key) {
+    delete this.values_[key];
+    return new Promise(resolve => {
+      if (this.win_.sessionStorage) {
+        try {
+          this.win_.sessionStorage.removeItem(storageKey(key));
+        } catch (e) {
+          // Ignore error.
+        }
+      }
+      resolve();
+    });
+  }
+}
+
 /**
- * @implements {../api/logger-api.LoggerApi}
+ * @param {string} key
+ * @return {string}
  */
-class Logger {
+function storageKey(key) {
+  return PREFIX + ':' + key;
+}
+
+/**
+ * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const NO_PROMISE_ERR = 'No account promise provided';
+
+class WaitForSubscriptionLookupApi {
   /**
    * @param {!./deps.DepsDef} deps
+   * @param {?Promise} accountPromise
    */
-  constructor(deps) {
-    /** @private @const {!../api/client-event-manager-api.ClientEventManagerApi} */
-    this.eventManager_ = deps.eventManager();
+  constructor(deps, accountPromise) {
+    /** @private @const {!./deps.DepsDef} */
+    this.deps_ = deps;
+
+    /** @private @const {!Window} */
+    this.win_ = deps.win();
+
+    /** @private @const {!../components/activities.ActivityPorts} */
+    this.activityPorts_ = deps.activities();
+
+    /** @private @const {!../components/dialog-manager.DialogManager} */
+    this.dialogManager_ = deps.dialogManager();
+
+    /** @private {?Promise} */
+    this.openViewPromise_ = null;
+
+    /** @private {!Promise} */
+    this.accountPromise_ = accountPromise || Promise.reject(NO_PROMISE_ERR);
+
+    /** @private @const {!ActivityIframeView} */
+    this.activityIframeView_ = new ActivityIframeView(
+      this.win_,
+      this.activityPorts_,
+      feUrl('/waitforsubscriptionlookupiframe'),
+      feArgs({
+        publicationId: deps.pageConfig().getPublicationId(),
+        productId: deps.pageConfig().getProductId(),
+      }),
+      /* shouldFadeBody */ true,
+      /* hasLoadingIndicator */ true
+    );
   }
 
-  /** @override */
-  sendSubscriptionState(state, jsonProducts) {
-    if (!isEnumValue(SubscriptionState, state)) {
-      throw new Error('Invalid subscription state provided');
-    }
-    if (
-      (SubscriptionState.SUBSCRIBER == state ||
-        SubscriptionState.PAST_SUBSCRIBER == state) &&
-      !jsonProducts
-    ) {
-      throw new Error(
-        'Entitlements must be provided for users with' +
-          ' active or expired subscriptions'
-      );
-    }
-    if (jsonProducts && !isObject(jsonProducts)) {
-      throw new Error('Entitlements must be an Object');
-    }
-    let productsOrSkus = null;
-    if (jsonProducts) {
-      productsOrSkus = JSON.stringify(jsonProducts);
-    }
-    this.eventManager_.logEvent({
-      eventType: AnalyticsEvent.EVENT_SUBSCRIPTION_STATE,
-      eventOriginator: EventOriginator.PUBLISHER_CLIENT,
-      isFromUserAction: null,
-      additionalParameters: {
-        state,
-        productsOrSkus,
+  /**
+   * Starts the Login Flow.
+   * @return {!Promise}
+   */
+  start() {
+    this.openViewPromise_ = this.dialogManager_.openView(
+      this.activityIframeView_
+    );
+
+    return this.accountPromise_.then(
+      account => {
+        // Account was found.
+        this.dialogManager_.completeView(this.activityIframeView_);
+        return account;
       },
-    });
-  }
-
-  /** @override */
-  sendEvent(userEvent) {
-    let data = null;
-    if (
-      !isEnumValue(Event, userEvent.name) ||
-      !publisherEventToAnalyticsEvent(userEvent.name)
-    ) {
-      throw new Error('Invalid user event provided(' + userEvent.name + ')');
-    }
-
-    if (userEvent.data) {
-      if (!isObject(userEvent.data)) {
-        throw new Error('Event data must be an Object(' + userEvent.data + ')');
-      } else {
-        data = {};
-        Object.assign(data, userEvent.data);
+      reason => {
+        this.dialogManager_.completeView(this.activityIframeView_);
+        throw reason;
       }
-    }
-
-    if (isBoolean(userEvent.active)) {
-      if (!data) {
-        data = {};
-      }
-      Object.assign(data, {'is_active': userEvent.active});
-    } else if (userEvent.active != null) {
-      throw new Error('Event active must be a boolean');
-    }
-    this.eventManager_.logEvent({
-      eventType: publisherEventToAnalyticsEvent(userEvent.name),
-      eventOriginator: EventOriginator.PUBLISHER_CLIENT,
-      isFromUserAction: userEvent.active,
-      additionalParameters: data,
-    });
+    );
   }
 }
 
@@ -15528,7 +15838,7 @@ class ConfiguredRuntime {
     /** @private @const {!../api/subscriptions.Config} */
     this.config_ = defaultConfig();
 
-    if (isEdgeBrowser$1(this.win_)) {
+    if (isLegacyEdgeBrowser(this.win_)) {
       // TODO(dvoytenko, b/120607343): Find a way to remove this restriction
       // or move it to Web Activities.
       this.config_.windowOpenMode = WindowOpenMode.REDIRECT;
@@ -15565,6 +15875,7 @@ class ConfiguredRuntime {
 
     /** @private @const {!AnalyticsService} */
     this.analyticsService_ = new AnalyticsService(this);
+    this.analyticsService_.start();
 
     /** @private @const {!PayClient} */
     this.payClient_ = new PayClient(this);
@@ -15588,6 +15899,7 @@ class ConfiguredRuntime {
     );
 
     // ALL CLEAR: DepsDef definition now complete.
+    this.eventManager_.logSwgEvent(AnalyticsEvent.IMPRESSION_PAGE_LOAD, false);
 
     /** @private @const {!OffersApi} */
     this.offersApi_ = new OffersApi(this.pageConfig_, this.fetcher_);
@@ -15602,7 +15914,7 @@ class ConfiguredRuntime {
     PayCompleteFlow.configurePending(this);
     this.payClient_.preconnect(preconnect);
 
-    injectStyleSheet(this.doc_, CSS);
+    injectStyleSheet(this.doc_, CSS$1);
 
     // Report redirect errors if any.
     this.activityPorts_.onRedirectError(error => {
@@ -15698,6 +16010,11 @@ class ConfiguredRuntime {
           break;
         case 'experiments':
           v.forEach(experiment => setExperiment(this.win_, experiment, true));
+          if (this.analytics()) {
+            // If analytics service isn't set up yet, then it will get the
+            // experiments later.
+            this.analytics().addLabels(v);
+          }
           break;
         case 'analyticsMode':
           if (v != AnalyticsMode.DEFAULT && v != AnalyticsMode.IMPRESSIONS) {
@@ -15754,7 +16071,20 @@ class ConfiguredRuntime {
   getEntitlements(encryptedDocumentKey) {
     return this.entitlementsManager_
       .getEntitlements(encryptedDocumentKey)
-      .then(entitlements => entitlements.clone());
+      .then(entitlements => {
+        // Auto update internal things tracking the user's current SKU.
+        if (entitlements) {
+          try {
+            const skus = entitlements.entitlements.map(
+              entitlement => entitlement.getSku() || 'unknown subscriptionToken'
+            );
+            if (skus.length > 0) {
+              this.analyticsService_.setSku(skus.join(','));
+            }
+          } catch (ex) {}
+        }
+        return entitlements.clone();
+      });
   }
 
   /** @override */
@@ -15813,10 +16143,6 @@ class ConfiguredRuntime {
 
   /** @override */
   showContributionOptions(options) {
-    log_2(
-      isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS),
-      'Not yet launched!'
-    );
     return this.documentParsed_.then(() => {
       const flow = new ContributionsFlow(this, options);
       return flow.start();
@@ -15891,7 +16217,7 @@ class ConfiguredRuntime {
       'for subscription updates please use the updateSubscription() method';
     log_2(typeof sku === 'string', errorMessage);
     return this.documentParsed_.then(() => {
-      return new PayStartFlow(this, sku).start();
+      return new PayStartFlow(this, {'skuId': sku}).start();
     });
   }
 
@@ -15920,15 +16246,15 @@ class ConfiguredRuntime {
 
   /** @override */
   contribute(skuOrSubscriptionRequest) {
-    log_2(
-      isExperimentOn(this.win_, ExperimentFlags.CONTRIBUTIONS),
-      'Not yet launched!'
-    );
-
+    /** @type {!../api/subscriptions.SubscriptionRequest} */
+    const request =
+      typeof skuOrSubscriptionRequest == 'string'
+        ? {'skuId': skuOrSubscriptionRequest}
+        : skuOrSubscriptionRequest;
     return this.documentParsed_.then(() => {
       return new PayStartFlow(
         this,
-        skuOrSubscriptionRequest,
+        request,
         ProductType.UI_CONTRIBUTION
       ).start();
     });

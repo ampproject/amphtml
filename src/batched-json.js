@@ -42,7 +42,7 @@ export const UrlReplacementPolicy = {
  *     vars. If OPT_IN, replaces whitelisted URL vars. Otherwise, don't expand.
  * @param {boolean|undefined} options.refresh Forces refresh of browser cache.
  * @param {string|undefined} options.token Auth token that forces a POST request.
- * @param {string|undefined} options.stripPrefix Prefix to optionally
+ * @param {string|undefined} options.xssiPrefix Prefix to optionally
  *     strip from the response before calling parseJson.
  * @return {!Promise<!JsonObject|!Array<JsonObject>>} Resolved with JSON
  *     result or rejected if response is invalid.
@@ -55,7 +55,7 @@ export function batchFetchJsonFor(
     urlReplacement = UrlReplacementPolicy.NONE,
     refresh = false,
     token = undefined,
-    stripPrefix = undefined,
+    xssiPrefix = undefined,
   } = {}
 ) {
   assertHttpsUrl(element.getAttribute('src'), element);
@@ -73,7 +73,7 @@ export function batchFetchJsonFor(
       }
       return xhr.fetchJson(data.xhrUrl, data.fetchOpt);
     })
-    .then(res => Services.xhrFor(ampdoc.win).xssiJson(res, stripPrefix))
+    .then(res => Services.xhrFor(ampdoc.win).xssiJson(res, xssiPrefix))
     .then(data => {
       if (data == null) {
         throw new Error('Response is undefined.');

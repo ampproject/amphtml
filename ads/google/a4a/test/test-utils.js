@@ -257,10 +257,10 @@ describe('Google A4A utils', () => {
   });
 
   describe('#getAmpRuntimeTypeParameter', () => {
-    it('should specify that this is canary', () => {
+    it('should specify that this is experimental', () => {
       expect(
         getAmpRuntimeTypeParameter({
-          AMP_CONFIG: {type: 'canary'},
+          AMP_CONFIG: {type: 'experimental'},
           location: {origin: 'https://www-example-com.cdn.ampproject.org'},
         })
       ).to.equal('2');
@@ -299,8 +299,8 @@ describe('Google A4A utils', () => {
     it('should not have `art` parameter when canonical', () => {
       expect(
         getAmpRuntimeTypeParameter({
-          AMP_CONFIG: {type: 'canary'},
-          location: {origin: 'https://www.example.com'},
+          AMP_CONFIG: {type: 'experimental'},
+          location: {origin: 'https://www.example.test'},
         })
       ).to.be.null;
     });

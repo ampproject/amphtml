@@ -253,6 +253,11 @@ export class FakeWindow {
      * @const
      */
     this.requestAnimationFrame = raf;
+
+    // Styles.
+    this.getComputedStyle = function() {
+      return window.getComputedStyle.apply(window, arguments);
+    };
   }
 
   /** polyfill addEventListener. */
@@ -459,7 +464,7 @@ export class FakeLocation {
    */
   change_(args) {
     const change = parseUrlDeprecated(this.url_.href);
-    Object.assign({}, change, args);
+    ({...change, ...args});
     this.changes.push(change);
   }
 

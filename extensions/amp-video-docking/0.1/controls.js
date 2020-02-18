@@ -20,10 +20,14 @@ import {Services} from '../../../src/services';
 import {Timeout} from './timeout';
 import {VideoDockingEvents, pointerCoords} from './events';
 import {applyBreakpointClassname} from './breakpoints';
-import {closestAncestorElementBySelector} from '../../../src/dom';
+import {
+  closestAncestorElementBySelector,
+  iterateCursor,
+} from '../../../src/dom';
 import {createCustomEvent, listen} from '../../../src/event-helper';
 import {dev, devAssert} from '../../../src/log';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
+import {layoutRectLtwh} from '../../../src/layout-rect';
 import {once} from '../../../src/utils/function';
 import {
   resetStyles,
@@ -32,7 +36,22 @@ import {
   translate,
 } from '../../../src/style';
 
-const TAG = 'amp-video-docking-controls';
+/**
+ * A single controls set can be displayed at a time on the controls layer.
+ *
+ * These map to their displayable classname portion in the format
+ * `amp-video-docked-control-set-${NAME}`
+ * e.g. `PLAYBACK: 'playback'` gets `amp-video-docked-control-set-playback`
+ * @enum {string}
+ */
+const ControlSet = {
+  // Playback buttons like play/pause, mute and fullscreen.
+  PLAYBACK: 'playback',
+
+  // Single button to scroll back to inline position of the component. Displayed
+  // during ad playback for CTA interaction.
+  SCROLL_BACK: 'scroll-back',
+};
 
 /** @private @const {!Array<!./breakpoints.SyntheticBreakpointDef>} */
 const BREAKPOINTS = [
@@ -77,7 +96,10 @@ const renderDockedOverlay = html =>
 const renderControls = html =>
   html`
     <div class="amp-video-docked-controls" hidden>
-      <div class="amp-video-docked-main-button-group">
+      <div
+        class="amp-video-docked-main-button-group
+               amp-video-docked-control-set-playback"
+      >
         <div class="amp-video-docked-button-group">
           <div
             role="button"
@@ -107,6 +129,19 @@ const renderControls = html =>
             role="button"
             ref="fullscreenButton"
             class="amp-video-docked-fullscreen"
+          ></div>
+        </div>
+      </div>
+      <div
+        class="amp-video-docked-main-button-group
+               amp-video-docked-control-set-scroll-back"
+        hidden
+      >
+        <div class="amp-video-docked-button-group">
+          <div
+            role="button"
+            ref="scrollBackButton"
+            class="amp-video-docked-scroll-back"
           ></div>
         </div>
       </div>
@@ -160,7 +195,15 @@ export class Controls {
     this.fullscreenButton_ = assertRef('fullscreenButton');
 
     /** @private @const {!Element} */
-    this.dismissContainer_ = assertRef('dismissContainer'); // eslint-disable-line
+    this.scrollBackButton_ = assertRef('scrollBackButton');
+
+    /** @private @const {!Element} */
+    this.dismissContainer_ = assertRef('dismissContainer');
+
+    /** @private @const {!NodeList} */
+    this.controlSets_ = this.container.querySelectorAll(
+      '.amp-video-docked-main-button-group'
+    );
 
     /** @private {boolean} */
     this.isDisabled_ = false;
@@ -197,13 +240,11 @@ export class Controls {
 
   /** @public */
   disable() {
-    dev().info(TAG, 'disable');
     this.isDisabled_ = true;
   }
 
   /** @public */
   enable() {
-    dev().info(TAG, 'enable');
     this.isDisabled_ = false;
   }
 
@@ -221,6 +262,19 @@ export class Controls {
   }
 
   /**
+   * Sets displayed controls set.
+   * @param {ControlSet} setName
+   * @private
+   */
+  useControlSet_(setName) {
+    const activeClassname = `amp-video-docked-control-set-${setName}`;
+
+    iterateCursor(this.controlSets_, controlSet => {
+      toggle(controlSet, controlSet.classList.contains(activeClassname));
+    });
+  }
+
+  /**
    * @param {!../../../src/video-interface.VideoOrBaseElementDef} video
    * @private
    */
@@ -233,13 +287,7 @@ export class Controls {
 
     this.videoUnlisteners_.push(
       this.listenWhenEnabled_(this.dismissButton_, click, () => {
-        this.container.dispatchEvent(
-          createCustomEvent(
-            this.ampdoc_.win,
-            VideoDockingEvents.DISMISS_ON_TAP,
-            /* detail */ undefined
-          )
-        );
+        this.dispatch_(VideoDockingEvents.DISMISS_ON_TAP);
       }),
 
       this.listenWhenEnabled_(this.playButton_, click, () => {
@@ -262,6 +310,10 @@ export class Controls {
         video.fullscreenEnter();
       }),
 
+      this.listenWhenEnabled_(this.scrollBackButton_, click, () => {
+        this.dispatch_(VideoDockingEvents.SCROLL_BACK);
+      }),
+
       listen(this.container, 'mouseup', () =>
         this.hideOnTimeout(TIMEOUT_AFTER_INTERACTION)
       ),
@@ -269,7 +321,25 @@ export class Controls {
       listen(element, VideoEvents.PLAYING, () => this.onPlay_()),
       listen(element, VideoEvents.PAUSE, () => this.onPause_()),
       listen(element, VideoEvents.MUTED, () => this.onMute_()),
-      listen(element, VideoEvents.UNMUTED, () => this.onUnmute_())
+      listen(element, VideoEvents.UNMUTED, () => this.onUnmute_()),
+
+      listen(element, VideoEvents.AD_START, () =>
+        this.useControlSet_(ControlSet.SCROLL_BACK)
+      ),
+
+      listen(element, VideoEvents.AD_END, () =>
+        this.useControlSet_(ControlSet.PLAYBACK)
+      )
+    );
+  }
+
+  /**
+   * @param {VideoDockingEvents} event
+   * @private
+   */
+  dispatch_(event) {
+    this.container.dispatchEvent(
+      createCustomEvent(this.ampdoc_.win, event, /* detail */ undefined)
     );
   }
 
@@ -357,33 +427,24 @@ export class Controls {
 
   /** @private */
   showOnNextAnimationFrame_() {
-    const {
-      container,
-      overlay,
-      playButton_: playButton,
-      pauseButton_: pauseButton,
-      muteButton_: muteButton,
-      unmuteButton_: unmuteButton,
-    } = this;
+    const {container, overlay} = this;
 
     toggle(container, true);
+
     container.classList.add('amp-video-docked-controls-shown');
     overlay.classList.add('amp-video-docked-controls-bg');
 
+    const isPlaying = this.isPlaying_();
+
+    toggle(this.playButton_, !isPlaying);
+    toggle(this.pauseButton_, isPlaying);
+
+    const isMuted = this.manager_().isMuted(this.video_);
+
+    toggle(this.muteButton_, !isMuted);
+    toggle(this.unmuteButton_, isMuted);
+
     this.listenToMouseMove_();
-
-    if (this.isPlaying_()) {
-      swap(playButton, pauseButton);
-    } else {
-      swap(pauseButton, playButton);
-    }
-
-    if (this.manager_().isMuted(this.video_)) {
-      swap(muteButton, unmuteButton);
-    } else {
-      swap(unmuteButton, muteButton);
-    }
-
     this.hideOnTimeout();
   }
 
@@ -395,7 +456,9 @@ export class Controls {
    * @param {number} height
    */
   positionOnVsync(scale, x, y, width, height) {
-    const {container, dismissContainer_: dismissContainer} = this;
+    this.area_ = layoutRectLtwh(x, y, width * scale, height * scale);
+
+    const {container} = this;
     const halfScale = scale / 2;
     const centerX = x + width * halfScale;
     const centerY = y + height * halfScale;
@@ -410,7 +473,7 @@ export class Controls {
     const dismissWidth = 40;
     const dismissX = width * halfScale - dismissMargin - dismissWidth;
     const dismissY = -(height * halfScale - dismissMargin - dismissWidth);
-    setImportantStyles(dismissContainer, {
+    setImportantStyles(this.dismissContainer_, {
       'transform': translate(dismissX, dismissY),
     });
   }

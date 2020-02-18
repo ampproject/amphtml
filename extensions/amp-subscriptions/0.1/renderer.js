@@ -28,8 +28,8 @@ export class Renderer {
     /** @const @private */
     this.ampdoc_ = ampdoc;
 
-    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     // Initial state is "unknown".
     this.setGrantState(null);
@@ -53,7 +53,7 @@ export class Renderer {
    * @private
    */
   setState_(type, state) {
-    this.resources_.mutateElement(this.ampdoc_.getBody(), () => {
+    this.mutator_.mutateElement(this.ampdoc_.getBody(), () => {
       this.getBodyElement_().classList.toggle(
         `${CSS_PREFIX}-${type}-unk`,
         state === null
@@ -99,7 +99,7 @@ export class Renderer {
    * @private
    */
   toggleState_(type, state) {
-    this.resources_.mutateElement(this.ampdoc_.getBody(), () => {
+    this.mutator_.mutateElement(this.ampdoc_.getBody(), () => {
       this.getBodyElement_().classList.toggle(`${CSS_PREFIX}-${type}`, state);
     });
   }

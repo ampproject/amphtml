@@ -24,7 +24,7 @@ import {Services} from '../../../src/services';
 import {closestAncestorElementBySelector} from '../../../src/dom';
 import {computedStyle} from '../../../src/style';
 import {createCustomEvent, getDetail} from '../../../src/event-helper';
-import {dev, devAssert} from '../../../src/log';
+import {dev, devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {htmlFor} from '../../../src/static-template';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -47,7 +47,14 @@ class AmpCarousel extends AMP.BaseElement {
       'goToSlide',
       actionInvocation => {
         const {args, trust} = actionInvocation;
-        this.carousel_.goToSlide(args['index'] || 0, {
+        const slide = Number(args['index'] || 0);
+        userAssert(
+          !isNaN(slide),
+          'Unexpected slide index for goToSlide action: %s. %s',
+          args['index'],
+          this.element
+        );
+        this.carousel_.goToSlide(slide, {
           actionSource: this.getActionSource_(trust),
         });
       },
@@ -224,7 +231,7 @@ class AmpCarousel extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (mutations['slide']) {
+    if (mutations['slide'] !== undefined) {
       this.carousel_.goToSlide(Number(mutations['slide']));
     }
   }
@@ -481,6 +488,11 @@ class AmpCarousel extends AMP.BaseElement {
     const isSlides = type == CarouselType.SLIDES;
 
     this.type_ = isSlides ? CarouselType.SLIDES : CarouselType.CAROUSEL;
+    // Use center alignment for slides to make sure fractional widths
+    // do not cause the wrong slide to be considered as active. For example,
+    // a slide is positioned at 100.5px, but the updated scroll position is
+    // truncated to 100px.
+    this.carousel_.updateAlignment(isSlides ? 'center' : 'start');
     this.carousel_.updateHideScrollbar(isSlides);
     this.carousel_.updateMixedLength(!isSlides);
     this.carousel_.updateSnap(isSlides);

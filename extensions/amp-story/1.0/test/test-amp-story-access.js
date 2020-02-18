@@ -37,7 +37,9 @@ describes.realWin('amp-story-access', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
     storeService = new AmpStoryStoreService(win);
-    registerServiceBuilder(win, 'story-store', () => storeService);
+    registerServiceBuilder(win, 'story-store', function() {
+      return storeService;
+    });
 
     accessConfigurationEl = win.document.createElement('script');
     accessConfigurationEl.setAttribute('id', 'amp-access');
@@ -47,7 +49,7 @@ describes.realWin('amp-story-access', {amp: true}, env => {
 
     storyEl = win.document.createElement('amp-story');
     const storyAccessEl = win.document.createElement('amp-story-access');
-    storyAccessEl.getResources = () => win.__AMP_SERVICES.resources.obj;
+    storyAccessEl.getAmpDoc = () => storyAccessEl;
 
     storyEl.appendChild(storyAccessEl);
 

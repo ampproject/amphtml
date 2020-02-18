@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// To contribute, please submit issues and PRs to https://github.com/snowplow-incubator/amphtml
+
 import {jsonLiteral} from '../../../../src/json';
 
 const SNOWPLOW_CONFIG = jsonLiteral({
@@ -42,6 +44,10 @@ const SNOWPLOW_CONFIG = jsonLiteral({
     'beacon': false,
     'xhrpost': false,
     'image': true,
+  },
+  'warningMessage': {
+    'message':
+      'This version of Snowplow AMP tracking is deprecated. Please use snowplow_v2.',
   },
 });
 

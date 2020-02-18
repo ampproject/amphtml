@@ -27,7 +27,7 @@ import {rootNodeFor, scopedQuerySelector} from '../dom';
  */
 
 /**
- * @typedef {function(new:BaseTemplate, !Element, !Window)}
+ * @typedef {typeof BaseTemplate}
  */
 let TemplateClassDef;
 

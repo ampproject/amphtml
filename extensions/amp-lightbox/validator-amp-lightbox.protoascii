@@ -65,7 +65,10 @@ tags: {  # <amp-lightbox>
   }
   attrs: { name: "controls" }
   attrs: { name: "from" }
-  attrs: { name: "scrollable" }
+  attrs: {
+    name: "scrollable"
+    disabled_by: "amp4email"
+  }
   # <amp-bind>
   attrs: { name: "[open]" }
   attr_lists: "extended-amp-global"

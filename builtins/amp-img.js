@@ -99,6 +99,7 @@ export class AmpImg extends BaseElement {
         this.img_,
         /* opt_removeMissingAttrs */ true
       );
+      this.propagateDataset(this.img_);
       guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     }
   }
@@ -184,6 +185,7 @@ export class AmpImg extends BaseElement {
     // It is important to call this before setting `srcset` attribute.
     this.maybeGenerateSizes_(/* sync setAttribute */ true);
     this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.img_);
+    this.propagateDataset(this.img_);
     guaranteeSrcForSrcsetUnsupportedBrowsers(this.img_);
     this.applyFillContent(this.img_, true);
     propagateObjectFitStyles(this.element, this.img_);
@@ -214,7 +216,7 @@ export class AmpImg extends BaseElement {
       return;
     }
 
-    const width = this.getLayoutWidth();
+    const width = this.element.getLayoutWidth();
     if (!this.shouldSetSizes_(width)) {
       return;
     }
@@ -269,7 +271,7 @@ export class AmpImg extends BaseElement {
     const img = dev().assertElement(this.img_);
     this.unlistenLoad_ = listen(img, 'load', () => this.hideFallbackImg_());
     this.unlistenError_ = listen(img, 'error', () => this.onImgLoadingError_());
-    if (this.getLayoutWidth() <= 0) {
+    if (this.element.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
     return this.loadPromise(img);

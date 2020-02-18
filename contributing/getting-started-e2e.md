@@ -175,7 +175,7 @@ Now that you have all of the files copied locally you can actually build the cod
 
   An alternative to installing `yarn` is to invoke each Yarn command in this guide with `npx yarn` during local development. This will automatically use the current stable version of `yarn`.
 
-- Closure Compiler is automatically installed by Yarn, but it requires Java 8 which you need to install separately. AMP's version of Closure Compiler won't run with newer versions of Java. Download an installer for Mac, Linux or Windows [here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
+- Closure Compiler is automatically installed by Yarn, but it requires Java 8 which you need to install separately. AMP's version of Closure Compiler won't run with newer versions of Java. Download an installer for Mac, Linux or Windows [here](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html).
 
   - Note: If you are using Mac OS and have multiple versions of Java installed, make sure you are using Java 8 by adding this to `~/.bashrc`:
 
@@ -306,6 +306,9 @@ The common workflow for making changes to files in Git is:
 - edit some files using your favorite editor
 
 - if your code requires a new dependency, run `yarn add --exact [--dev] <packagename>`, which will automatically update `package.json` and `yarn.lock`
+
+  - If it is a build-time dependency, use the `--dev` flag
+  - If it is a runtime dependency, add it to `build-system/compile/sources.js`
 
 - if you manually edited `package.json`, run `yarn` to install the dependency and generate an updated `yarn.lock` file
 
@@ -582,9 +585,9 @@ AMP is pushed to production after undergoing testing. Generally, it takes about 
 
 **Once the push of the build that includes your change is complete all users of AMP will be using the code you contributed!**
 
-You can see whether your change made it into a given build on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases). The build marked `Pre-release` is the version on the Dev Channel and the build marked `Latest Release` is what is running in production. Your Pull Request will be listed in the first build that includes it; if you don't see your Pull Request listed it will likely be in the next build.
+You can see whether your change made it into a given build on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases). The build marked `Pre-release` is the version on the Experimental Channel and the build marked `Latest Release` is what is running in production. Your Pull Request will be listed in the first build that includes it; if you don't see your Pull Request listed it will likely be in the next build.
 
-You can set your browser to use the Dev Channel build by enabling `dev-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page. This will let you see how your changes will affect any AMP page before your changes are rolled out to all AMP pages. Note that this only affects the browser in which you enable the experiment.
+You can set your browser to use the Experimental Channel build by enabling `experimental-channel` on the [AMP Experiments](https://cdn.ampproject.org/experiments.html) page. This will let you see how your changes will affect any AMP page before your changes are rolled out to all AMP pages. Note that this only affects the browser in which you enable the experiment.
 
 You can verify the AMP version your browser is using for a given page by looking at your browser's developer console. After loading an AMP page (e.g. [https://amp.dev](https://amp.dev)) the console will have a message like `Powered by AMP ⚡ HTML – Version <build number>`). The `<build number>` will match one of the build numbers on the [amphtml Releases page](https://github.com/ampproject/amphtml/releases).
 

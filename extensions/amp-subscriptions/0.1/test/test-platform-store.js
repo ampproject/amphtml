@@ -796,9 +796,10 @@ describes.realWin('Platform store', {}, env => {
       const entitlement = new Entitlement(entitlementData);
       platformStore.saveGrantEntitlement_(entitlement);
       expect(platformStore.grantStatusEntitlement_).to.be.equal(null);
-      const anotherEntitlement = new Entitlement(
-        Object.assign({}, entitlementData, {granted: true})
-      );
+      const anotherEntitlement = new Entitlement({
+        ...entitlementData,
+        granted: true,
+      });
       platformStore.saveGrantEntitlement_(anotherEntitlement);
       expect(platformStore.grantStatusEntitlement_.json()).to.deep.equal(
         anotherEntitlement.json()
@@ -815,16 +816,14 @@ describes.realWin('Platform store', {}, env => {
           granted: true,
         };
         const entitlement = new Entitlement(entitlementData);
-        const nextMeteredEntitlement = new Entitlement(
-          Object.assign({}, entitlementData, {
-            grantReason: GrantReason.METERING,
-          })
-        );
-        const subscribedMeteredEntitlement = new Entitlement(
-          Object.assign({}, entitlementData, {
-            grantReason: GrantReason.SUBSCRIBER,
-          })
-        );
+        const nextMeteredEntitlement = new Entitlement({
+          ...entitlementData,
+          grantReason: GrantReason.METERING,
+        });
+        const subscribedMeteredEntitlement = new Entitlement({
+          ...entitlementData,
+          grantReason: GrantReason.SUBSCRIBER,
+        });
         platformStore.saveGrantEntitlement_(entitlement);
         expect(platformStore.grantStatusEntitlement_.json()).to.deep.equal(
           entitlement.json()
