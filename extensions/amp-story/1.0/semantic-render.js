@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {includes, startsWith} from '../../../src/string';
+import {Services} from '../../../src/services';
+import {startsWith, includes} from '../../../src/string';
+import {dev} from '../../../src/log';
 
 /**
  * Renders the page description, and videos title/alt attributes in the page.
@@ -135,7 +136,7 @@ function extractTextContentTtml(text) {
       .textContent.replace(/[\s\n\r]+/g, ' ')
       .trim();
   } catch (e) {
-    console.error(e.message);
+    dev().error(e.message);
   }
   return '';
 }
@@ -172,6 +173,6 @@ function extractTextContentWebVtt(text) {
   // Super loose HTML parsing to get HTML entity parsing and removal
   // of WebVTT elements.
   const div = document.createElement('div');
-  div.innerHTML = text;
+  div./* element is never added to DOM */ innerHTML = text;
   return div.textContent;
 }
