@@ -2828,8 +2828,8 @@ bool Parser::AfterBodyIM() {
       break;
     case TokenType::COMMENT_TOKEN: {
       // The comment is attached to the <html> element.
-      CHECK((open_elements_stack_.siez() > 0 &&
-             open_elements_stack_.at(0)->atom_ == Atom::HTM),
+      CHECK((open_elements_stack_.size() > 0 &&
+             open_elements_stack_.at(0)->atom_ == Atom::HTML),
             "html: bad parser state: <html> element not found, in the "
             "after-body insertion mode");
       Node* node = Node::make_node(NodeType::COMMENT_NODE);
