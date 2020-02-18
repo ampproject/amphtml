@@ -22,7 +22,7 @@
 #include <sstream>
 #include <tuple>
 
-#include "base/logging.h"
+#include "logging.h"
 #include "casetable.h"
 #include "entity.h"
 #include "error.h"
@@ -784,9 +784,9 @@ uint8_t ReadContinuationByte(uint8_t byte) {
 }
 
 void CheckScalarValue(char32_t code_point) {
-  CHECK(!(code_point >= 0xd800 && code_point <= 0xdfff))
-      << "Lone surrogate U+" << Strings::ToHexString(code_point)
-      << " is not a valid scalar value.";
+  CHECK((!(code_point >= 0xd800 && code_point <= 0xdfff)),
+        "Lone surrogaate U+" + Strings::ToHexString(code_point) +
+        " is not a valid scalar value.");
 }
 
 inline bool IsOneByteASCIIChar(uint8_t c) {
