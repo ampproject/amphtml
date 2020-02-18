@@ -62,6 +62,7 @@ FAIL
 |          <span>Your email</span>
 |          <input type="email" name="email" required>
 |        </label>
+|        <input type="button" name="button">
 |        <input type="submit" value="Subscribe">
 |      </fieldset>
 |      <div>
@@ -104,7 +105,7 @@ FAIL
 |    <!-- Invalid: form action must be https. -->
 |    <form method="post" action-xhr="http://example.com/subscribe" target="_blank">
 >>   ^~~~~~~~~
-feature_tests/forms.html:104:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=POST]'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:105:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=POST]'. (see https://amp.dev/documentation/components/amp-form)
 |      <input type="submit" value="Subscribe">
 |    </form>
 |    <!-- Invalid: form action must be a non-cdn link. -->
@@ -126,7 +127,7 @@ feature_tests/forms.html:104:2 Invalid URL protocol 'http:' for attribute 'actio
 |    <!-- Invalid: form target must be _blank or _top -->
 |    <form method="post" action-xhr="https://example/subscribe" target="_new">
 >>   ^~~~~~~~~
-feature_tests/forms.html:124:2 The attribute 'target' in tag 'FORM [method=POST]' is set to the invalid value '_new'. (see https://amp.dev/documentation/components/amp-form)
+feature_tests/forms.html:125:2 The attribute 'target' in tag 'FORM [method=POST]' is set to the invalid value '_new'. (see https://amp.dev/documentation/components/amp-form)
 |      <input type="submit" value="Subscribe">
 |    </form>
 |    <!-- Invalid: input, select, option and textarea must be children of form. -->
@@ -135,11 +136,8 @@ feature_tests/forms.html:124:2 The attribute 'target' in tag 'FORM [method=POST]
 |      <option value="1">English</option>
 |    </select>
 |    <textarea name="comment"></textarea>
-|    <!-- Invalid: input can not be type="button|image". -->
+|    <!-- Invalid: input can not be type="image". -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-|      <input type="button" name="button">
->>     ^~~~~~~~~
-feature_tests/forms.html:135:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://amp.dev/documentation/components/amp-form)
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
 feature_tests/forms.html:136:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form)

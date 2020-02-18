@@ -43,14 +43,12 @@ FAIL
 |          <span>Your email</span>
 |          <input type="email" name="email" required>
 |        </label>
+|        <input type="button" name="button">
 |        <input type="submit" value="Subscribe">
 |      </fieldset>
 |    </form>
-|    <!-- Invalid: input can not be type="button|image". -->
+|    <!-- Invalid: input can not be type="image". -->
 |    <form method="post" action-xhr="https://example.com/subscribe" target="_blank">
-|      <input type="button" name="button">
->>     ^~~~~~~~~
-amp4ads_feature_tests/amp_form.html:50:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://amp.dev/documentation/components/amp-form)
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
 amp4ads_feature_tests/amp_form.html:51:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form)
