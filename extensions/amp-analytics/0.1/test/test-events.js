@@ -1738,7 +1738,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(tracker.root).to.equal(root);
     });
 
-    it('should add doc listener', function*() {
+    it('should add doc listener', async () => {
       const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').never();
       iniLoadTrackerMock.expects('getElementSignal').never();
@@ -1752,19 +1752,20 @@ describes.realWin('Events', {amp: 1}, env => {
         )
         .returns(unlisten)
         .once();
-      tracker.add(analyticsElement, 'visible', {}, eventResolver);
-      yield macroTask();
+      const res = tracker.add(analyticsElement, 'visible', {}, eventResolver);
+      expect(res).to.be.a('function');
+      await macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(function*(event) {
-        expect(event.target).to.equal(root.getRootElement());
-        expect(event.type).to.equal('visible');
-        expect(event.vars.totalVisibleTime).to.equal(10);
-        yield macroTask();
-        expect(unlisten).to.be.called;
-      });
+      const event = await eventPromise;
+      expect(event.target).to.equal(root.getRootElement());
+      expect(event.type).to.equal('visible');
+      expect(event.vars.totalVisibleTime).to.equal(10);
+      expect(unlisten).to.be.not.called;
+      await res();
+      expect(unlisten).to.be.calledOnce;
     });
 
-    it('should add root listener', function*() {
+    it('should add root listener', async () => {
       const config = {selector: ':root'};
       const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getElementSignal').never();
@@ -1778,19 +1779,25 @@ describes.realWin('Events', {amp: 1}, env => {
         .withExactArgs(matchEmptySpec, readyPromise, null, saveCallback)
         .returns(unlisten)
         .once();
-      tracker.add(analyticsElement, 'visible', config, eventResolver);
-      yield macroTask();
+      const res = tracker.add(
+        analyticsElement,
+        'visible',
+        config,
+        eventResolver
+      );
+      expect(res).to.be.a('function');
+      await macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(function*(event) {
-        expect(event.target).to.equal(root.getRootElement());
-        expect(event.type).to.equal('visible');
-        expect(event.vars.totalVisibleTime).to.equal(10);
-        yield macroTask();
-        expect(unlisten).to.be.called;
-      });
+      const event = await eventPromise;
+      expect(event.target).to.equal(root.getRootElement());
+      expect(event.type).to.equal('visible');
+      expect(event.vars.totalVisibleTime).to.equal(10);
+      expect(unlisten).to.be.not.called;
+      await res();
+      expect(unlisten).to.be.calledOnce;
     });
 
-    it('should add host listener and spec', function*() {
+    it('should add host listener and spec', async () => {
       const config = {visibilitySpec: {selector: ':host'}};
       const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getElementSignal').never();
@@ -1809,19 +1816,25 @@ describes.realWin('Events', {amp: 1}, env => {
         )
         .returns(unlisten)
         .once();
-      tracker.add(analyticsElement, 'visible', config, eventResolver);
-      yield macroTask();
+      const res = tracker.add(
+        analyticsElement,
+        'visible',
+        config,
+        eventResolver
+      );
+      expect(res).to.be.a('function');
+      await macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(function*(event) {
-        expect(event.target).to.equal(root.getRootElement());
-        expect(event.type).to.equal('visible');
-        expect(event.vars.totalVisibleTime).to.equal(10);
-        yield macroTask();
-        expect(unlisten).to.be.called;
-      });
+      const event = await eventPromise;
+      expect(event.target).to.equal(root.getRootElement());
+      expect(event.type).to.equal('visible');
+      expect(event.vars.totalVisibleTime).to.equal(10);
+      expect(unlisten).to.not.be.called;
+      await res();
+      expect(unlisten).to.be.calledOnce;
     });
 
-    it('should add target listener', function*() {
+    it('should add target listener', async () => {
       const config = {visibilitySpec: {selector: '.target'}};
       const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').once();
@@ -1851,20 +1864,20 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(res).to.be.a('function');
       const unlistenReady = getAmpElementSpy.returnValues[0];
       // #getAmpElement Promise
-      yield unlistenReady;
+      await unlistenReady;
       // #assertMeasurable_ Promise
-      yield macroTask();
+      await macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(function*(event) {
-        expect(event.target).to.equal(target);
-        expect(event.type).to.equal('visible');
-        expect(event.vars.totalVisibleTime).to.equal(10);
-        yield macroTask();
-        expect(unlisten).to.be.calledOnce;
-      });
+      const event = await eventPromise;
+      expect(event.target).to.equal(target);
+      expect(event.type).to.equal('visible');
+      expect(event.vars.totalVisibleTime).to.equal(10);
+      expect(unlisten).to.not.be.called;
+      await res();
+      expect(unlisten).to.be.calledOnce;
     });
 
-    it('should expand data params', function*() {
+    it('should expand data params', async () => {
       target.setAttribute('data-vars-foo', 'bar');
 
       const config = {selector: '.target'};
@@ -1888,19 +1901,25 @@ describes.realWin('Events', {amp: 1}, env => {
         )
         .returns(unlisten)
         .once();
-      tracker.add(analyticsElement, 'visible', config, eventResolver);
+      const res = tracker.add(
+        analyticsElement,
+        'visible',
+        config,
+        eventResolver
+      );
+      expect(res).to.be.a('function');
       const unlistenReady = getAmpElementSpy.returnValues[0];
       // #getAmpElement Promise
-      yield unlistenReady;
+      await unlistenReady;
       // #assertMeasurable_ Promise
-      yield macroTask();
+      await macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(function*(event) {
-        expect(event.vars.totalVisibleTime).to.equal(10);
-        expect(event.vars.foo).to.equal('bar');
-        yield macroTask();
-        expect(unlisten).to.be.calledOnce;
-      });
+      const event = await eventPromise;
+      expect(event.vars.totalVisibleTime).to.equal(10);
+      expect(event.vars.foo).to.equal('bar');
+      expect(unlisten).to.not.be.called;
+      await res();
+      expect(unlisten).to.be.calledOnce;
     });
 
     it('should pass func to get reportReady with "hidden" trigger', function*() {
