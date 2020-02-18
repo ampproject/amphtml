@@ -4,7 +4,12 @@
 {
   rules: [
     {
-      owners: [{name: 'memeglobal/amp-owners'}],
+      owners: [
+        {name: 'ampproject/wg-ui-and-a11y'},
+        {name: 'industral'},
+        {name: 'shlomisut'},
+        {name: 'orenliber'}
+      ],
     },
   ],
 }
