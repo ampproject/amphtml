@@ -510,9 +510,9 @@ amp-autocomplete/0.1/test/validator-amp-autocomplete.html:495:4 The specified la
 |      <amp-autocomplete widht="100" filter="prefix">
 >>     ^~~~~~~~~
 amp-autocomplete/0.1/test/validator-amp-autocomplete.html:503:4 The attribute 'widht' may not appear in tag 'amp-autocomplete'. (see https://amp.dev/documentation/components/amp-autocomplete)
-|        <input type="button" />
+|        <input type="file" />
 >>       ^~~~~~~~~
-amp-autocomplete/0.1/test/validator-amp-autocomplete.html:504:6 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://amp.dev/documentation/components/amp-form)
+amp-autocomplete/0.1/test/validator-amp-autocomplete.html:504:6 The tag 'INPUT [type=file]' may only appear as a descendant of tag 'form [method=post]'. (see https://amp.dev/documentation/components/amp-form)
 |        <script type="application/json">
 |          {}
 |        </script>
