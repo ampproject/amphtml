@@ -20,10 +20,10 @@
   z-index: 2147483647;
 
   bottom: 0;
-  height: 59px;
+  height: 60px;
   left: auto;
   right: 0px;
-  width: 47px;
+  width: 48px;
 }
 
 .amp-access-scroll-bar.amp-access-scroll-holdback {
@@ -47,7 +47,7 @@
 @media (max-width: 599px) {
   .amp-access-scroll-sheet {
     /* mobile */
-    bottom: 59px;
+    bottom: 60px;
     height: 100px;
     left: 0 !important;
     right: 0 !important;
@@ -57,7 +57,7 @@
 
 @media (min-width: 600px) {
   .amp-access-scroll-sheet {
-    bottom: 75px;
+    bottom: 76px;
     height: 56px;
     left: auto;
     right: 16px;
