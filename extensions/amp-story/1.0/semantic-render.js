@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
 import {dict} from '../../../src/utils/object';
-import {Services} from '../../../src/services';
-import {startsWith, includes} from '../../../src/string';
+import {includes, startsWith} from '../../../src/string';
 
 /**
  * Renders the page description, and videos title/alt attributes in the page.
