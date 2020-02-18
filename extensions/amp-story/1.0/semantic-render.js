@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {includes, startsWith} from '../../../src/string';
+import {Services} from '../../../src/services';
+import {startsWith, includes} from '../../../src/string';
+import {dev} from '../../../src/log';
 
 /**
  * Renders the page description, and videos title/alt attributes in the page.
@@ -136,7 +136,7 @@ function extractTextContentTtml(text) {
       .textContent.replace(/[\s\n\r]+/g, ' ')
       .trim();
   } catch (e) {
-    dev().error(e.message);
+    dev().error('TTML', e.message);
   }
   return '';
 }
