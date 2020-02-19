@@ -21,7 +21,7 @@ limitations under the License.
 ### Basic
 
 ```html
-<amp-ad
+<amp-embed
   width="320"
   height="320"
   type="temedya"
@@ -35,7 +35,7 @@ limitations under the License.
   data-organicItem="organic-item-count"
   data-theme="theme-style"
 >
-</amp-ad>
+</amp-embed>
 ```
 
 ## Configuration
