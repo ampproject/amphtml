@@ -873,6 +873,9 @@ export class NextPageService {
     const providedSeparator = childElementByAttr(element, 'separator');
     if (providedSeparator) {
       removeElement(providedSeparator);
+      if (!providedSeparator.hasAttribute('tabindex')) {
+        providedSeparator.setAttribute('tabindex', '0');
+      }
       return providedSeparator;
     }
     // If no separator is provided, we build a default one
@@ -889,6 +892,7 @@ export class NextPageService {
       <div
         class="amp-next-page-separator"
         aria-label="Next article separator"
+        tabindex="0"
       ></div>
     `;
   }
