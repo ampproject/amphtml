@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# TE Medya
+# TE Medya Native Widget Model
 
 ## Example of TE Medya's widget implementation
 
