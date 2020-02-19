@@ -25,14 +25,8 @@ limitations under the License.
   height="320"
   type="temedya"
   layout="responsive"
-  data-title="widget-title"
-  data-siteId="site-id"
-  data-keyId="key-id"
-  data-siteUrl="site-url"
-  data-typeId="ad-type"
-  data-paidItem="paid-item-count"
-  data-organicItem="organic-item-count"
-  data-theme="theme-style"
+  data-siteId="vidyome"
+  data-keyId="1rlN7oGR6ofEuJz6llh9Pj"
 >
 </amp-embed>
 ```
