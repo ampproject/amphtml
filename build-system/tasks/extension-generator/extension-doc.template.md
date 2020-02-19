@@ -59,7 +59,7 @@ limitations under the License.
 
 ## Usage
 
-One to three paragraph explaining the component usage. List important functionality. Explain why developers care about it.
+One to three paragraphs explaining the component usage. List important functionality. Explain why developers care about it.
 
 [filter formats=“websites”]
 
