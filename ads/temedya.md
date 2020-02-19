@@ -34,7 +34,6 @@ limitations under the License.
 ## Configuration
 
 For details on the configuration semantics, please contact the ad network or refer to their documentation. 
-You can visit [publishers.vidyome.com](https://publishers.vidyome.com) for ads.
 
 ### Required parameters
 
