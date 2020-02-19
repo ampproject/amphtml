@@ -27,6 +27,7 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isEnumValue, isFiniteNumber} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {startsWith} from '../../../src/string';
 
 const SCROLL_PRECISION_PERCENT = 5;
@@ -1424,7 +1425,10 @@ export class VisibilityTracker extends EventTracker {
     const waitForSpec = visibilitySpec['waitFor'];
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
-
+    const multiSelectorVisibilityOn = isExperimentOn(
+      this.root.ampdoc.win,
+      'multi-selector-visibility-trigger'
+    );
     if (reportWhenSpec) {
       userAssert(
         !visibilitySpec['repeat'],
@@ -1468,6 +1472,29 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
+    const getUnlistenPromiseForSelector = (selector, selectionMethod) => {
+      return this.root
+        .getAmpElement(
+          context.parentElement || context,
+          selector,
+          selectionMethod
+        )
+        .then(element => {
+          return visibilityManagerPromise.then(
+            visibilityManager => {
+              return visibilityManager.listenElement(
+                element,
+                visibilitySpec,
+                this.getReadyPromise(waitForSpec, selector, element),
+                createReportReadyPromiseFunc,
+                this.onEvent_.bind(this, eventType, listener, element)
+              );
+            },
+            () => {}
+          );
+        });
+    };
+
     let unlistenPromise;
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
@@ -1494,31 +1521,28 @@ export class VisibilityTracker extends EventTracker {
       // false missed searches.
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
-      unlistenPromise = this.root
-        .getAmpElement(
-          context.parentElement || context,
+
+      if (multiSelectorVisibilityOn && Array.isArray(selector)) {
+        unlistenPromise = Promise.all(
+          selector.map(s => getUnlistenPromiseForSelector(s, selectionMethod))
+        );
+      } else {
+        unlistenPromise = getUnlistenPromiseForSelector(
           selector,
           selectionMethod
-        )
-        .then(element => {
-          return visibilityManagerPromise.then(
-            visibilityManager => {
-              return visibilityManager.listenElement(
-                element,
-                visibilitySpec,
-                this.getReadyPromise(waitForSpec, selector, element),
-                createReportReadyPromiseFunc,
-                this.onEvent_.bind(this, eventType, listener, element)
-              );
-            },
-            () => {}
-          );
-        });
+        );
+      }
     }
 
     return function() {
       unlistenPromise.then(unlisten => {
-        unlisten();
+        if (multiSelectorVisibilityOn && Array.isArray(unlisten)) {
+          for (let i = 0; i < unlisten.length; i++) {
+            unlisten[i]();
+          }
+        } else {
+          unlisten();
+        }
       });
     };
   }
