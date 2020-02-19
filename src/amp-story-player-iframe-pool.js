@@ -52,7 +52,7 @@ export class IframePool {
    * @return {number} Index of the detached story.
    * @public
    */
-  rotateLeft(nextStoryIdx) {
+  rotateFirst(nextStoryIdx) {
     const detachedStoryIdx = this.storyIdsWithIframe_.shift();
     this.storyIdsWithIframe_.push(nextStoryIdx);
 
@@ -69,7 +69,7 @@ export class IframePool {
    * @return {number} Index of the detached story.
    * @public
    */
-  rotateRight(nextStoryIdx) {
+  rotateLast(nextStoryIdx) {
     const detachedStoryIdx = this.storyIdsWithIframe_.pop();
     this.storyIdsWithIframe_.unshift(nextStoryIdx);
 

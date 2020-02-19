@@ -315,8 +315,8 @@ export class AmpStoryPlayer {
    */
   allocateIframeForStory_(nextStoryIdx, reverse = false) {
     const detachedStoryIdx = reverse
-      ? this.iframePool_.rotateRight(nextStoryIdx)
-      : this.iframePool_.rotateLeft(nextStoryIdx);
+      ? this.iframePool_.rotateLast(nextStoryIdx)
+      : this.iframePool_.rotateFirst(nextStoryIdx);
 
     const detachedStory = this.stories_[detachedStoryIdx];
     const nextStory = this.stories_[nextStoryIdx];
