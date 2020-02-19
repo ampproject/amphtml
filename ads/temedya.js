@@ -21,16 +21,16 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function temedya(global, data) {
-  validateData(data, ['title']);
+  validateData(data, ['keyid']);
   global._temedya = global._temedya || {
-    title: data.title,
-    keyId: data.keyId,
-    siteId: data.siteId,
-    siteUrl: data.siteUrl,
-    typeId: data.typeId,
-    paidItem: data.paidItem,
-    organicItem: data.organicItem,
-    theme: data.theme,
+    title: data['title'] || 'false',
+    keyId: data['keyid'],
+    siteId: data['siteid'],
+    siteUrl: data['siteurl'] || global.context.canonicalUrl,
+    typeId: data['typeid'] || 7,
+    paidItem: data['paiditem'] || 4,
+    organicItem: data['organicitem'] || 0,
+    theme: data['theme'] || 'google',
   };
   global._temedya.AMPCallbacks = {
     renderStart: global.context.renderStart,
