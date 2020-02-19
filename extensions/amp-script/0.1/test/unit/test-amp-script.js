@@ -79,6 +79,19 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     return script.layoutCallback().should.be.rejected;
   });
 
+  it('should work with "text/javascript" content-type for same-origin src', () => {
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://foo.example/foo.txt');
+
+    stubFetch(
+      'https://foo.example/foo.txt',
+      {'Content-Type': 'text/javascript; charset=UTF-8'}, // Valid content-type.
+      'alert(1)'
+    );
+
+    return script.layoutCallback().should.be.fulfilled;
+  });
+
   it('should check sha384(author_js) for cross-origin src', async () => {
     env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
     element.setAttribute('src', 'https://bar.example/bar.js');

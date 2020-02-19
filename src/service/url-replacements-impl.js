@@ -626,26 +626,10 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     this.setAsync('VIDEO_STATE', (id, property) => {
-      const root = this.ampdoc.getRootNode();
-      const video = user().assertElement(
-        root.getElementById(/** @type {string} */ (id)),
-        `Could not find an element with id="${id}" for VIDEO_STATE`
+      return Services.videoManagerForDoc(this.ampdoc).getVideoStateProperty(
+        id,
+        property
       );
-      return Services.videoManagerForDoc(this.ampdoc)
-        .getAnalyticsDetails(video)
-        .then(details => (details ? details[property] : ''));
-    });
-
-    this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(win).getFirstContentfulPaint();
-    });
-
-    this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(win).getFirstViewportReady();
-    });
-
-    this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(win).getMakeBodyVisible();
     });
 
     this.setAsync('AMP_STATE', key => {

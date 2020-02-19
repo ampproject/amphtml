@@ -344,11 +344,14 @@ export class AmpScript extends AMP.BaseElement {
           const contentType = response.headers.get('Content-Type');
           if (
             !contentType ||
-            !startsWith(contentType, 'application/javascript')
+            !(
+              startsWith(contentType, 'application/javascript') ||
+              startsWith(contentType, 'text/javascript')
+            )
           ) {
             user().error(
               TAG,
-              'Same-origin "src" requires "Content-Type: application/javascript". ' +
+              'Same-origin "src" requires "Content-Type: text/javascript" or "Content-Type: application/javascript". ' +
                 'Fetched source for %s has "Content-Type: %s". ' +
                 'See https://amp.dev/documentation/components/amp-script/#security-features.',
               debugId,
