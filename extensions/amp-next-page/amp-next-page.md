@@ -241,19 +241,6 @@ The following configuration returned from the server will recommend two more doc
 
 ## Attributes
 
-### `attribute-name`
-
-Description of attribute. Use cases for this attribute.
-
-- `attribute-value-option-one` (default): `attribute-option-one-value` does this to `${name}`.
-- `attribute-value-option-two`: `attribute-option-two-value` does this to `${name}`.
-
-### `optional-attribute-name` (optional)
-
-Here, I write what `optional-attribute-name` will do to `${name}`.
-
-## Actions (optional)
-
 ### `src`
 
 The URL of the remote endpoint that returns the JSON that will be used to
