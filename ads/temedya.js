@@ -23,14 +23,14 @@ import {loadScript, validateData} from '../3p/3p';
 export function temedya(global, data) {
   validateData(data, ['keyid']);
   global._temedya = global._temedya || {
-    title: data['title'],
+    title: data['title'] || 'false',
     keyId: data['keyid'],
     siteId: data['siteid'],
-    siteUrl: data['siteurl'],
-    typeId: data['typeid'],
-    paidItem: data['paiditem'],
-    organicItem: data['organicitem'],
-    theme: data['theme'],
+    siteUrl: data['siteurl'] || global.context.canonicalUrl,
+    typeId: data['typeid'] || '7',
+    paidItem: data['paiditem'] || 4,
+    organicItem: data['organicitem'] || 0,
+    theme: data['theme'] || 'google',
   };
   global._temedya.AMPCallbacks = {
     renderStart: global.context.renderStart,
