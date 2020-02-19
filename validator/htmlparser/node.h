@@ -26,9 +26,9 @@
 #include <utility>
 #include <vector>
 
-#include "htmlparser/atom.h"
-#include "htmlparser/error.h"
-#include "htmlparser/token.h"
+#include "atom.h"
+#include "error.h"
+#include "token.h"
 
 namespace htmlparser {
 

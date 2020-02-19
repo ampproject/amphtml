@@ -14,13 +14,13 @@
 // limitations under the license.
 //
 
-#include "htmlparser/navigator.h"
+#include "navigator.h"
 
 #include <iostream>
 
 #include "gtest/gtest.h"
-#include "htmlparser/node.h"
-#include "htmlparser/parser.h"
+#include "node.h"
+#include "parser.h"
 
 using namespace htmlparser;
 

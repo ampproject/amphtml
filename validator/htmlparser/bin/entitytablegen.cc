@@ -25,9 +25,9 @@
 #include <utility>
 #include <vector>
 
-#include "htmlparser/defer.h"
-#include "htmlparser/fileutil.h"
-#include "htmlparser/strings.h"
+#include "defer.h"
+#include "fileutil.h"
+#include "strings.h"
 
 const char kFileHeader[] =
     R"HEADER(//
@@ -57,7 +57,7 @@ const char kFileHeader[] =
 #include <string>
 #include <string_view>
 
-#include "htmlparser/comparators.h"
+#include "comparators.h"
 
 namespace htmlparser {
 
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
   options.white_space_transform =
       htmlparser::FileReadOptions::LineTransforms::StripWhitespace();
   if (!htmlparser::FileUtil::ReadFileLines(
-          options, "htmlparser/data/entities.json", &lines)) {
+          options, "data/entities.json", &lines)) {
     std::cerr << "Error reading input file." << std::endl;
     return EXIT_FAILURE;
   }
@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
     return EXIT_FAILURE;
   }
 
-  std::ofstream fd("htmlparser/entity.h");
+  std::ofstream fd("entity.h");
   htmlparser::Defer __([&]() {fd.close();});
 
   fd << kFileHeader;

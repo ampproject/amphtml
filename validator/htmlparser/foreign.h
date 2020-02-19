@@ -20,7 +20,7 @@
 #include <string>
 #include <string_view>
 
-#include "htmlparser/node.h"
+#include "node.h"
 
 namespace htmlparser {
 

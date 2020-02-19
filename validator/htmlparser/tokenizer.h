@@ -22,7 +22,7 @@
 #include <tuple>
 #include <vector>
 
-#include "htmlparser/token.h"
+#include "token.h"
 
 namespace htmlparser {
 

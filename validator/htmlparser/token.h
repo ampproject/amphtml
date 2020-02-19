@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 
-#include "htmlparser/atom.h"
+#include "atom.h"
 
 namespace htmlparser {
 

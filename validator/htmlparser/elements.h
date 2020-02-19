@@ -19,7 +19,7 @@
 
 #include <array>
 
-#include "htmlparser/atom.h"
+#include "atom.h"
 
 namespace htmlparser {
 

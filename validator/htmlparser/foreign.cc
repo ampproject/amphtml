@@ -14,12 +14,12 @@
 // limitations under the license.
 //
 
-#include "htmlparser/foreign.h"
+#include "foreign.h"
 
 #include <algorithm>
 
-#include "htmlparser/comparators.h"
-#include "htmlparser/strings.h"
+#include "comparators.h"
+#include "strings.h"
 
 namespace htmlparser {
 

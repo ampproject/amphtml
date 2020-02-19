@@ -14,10 +14,10 @@
 // limitations under the license.
 //
 
-#include "htmlparser/atomutil.h"
+#include "atomutil.h"
 
 #include "gtest/gtest.h"
-#include "htmlparser/hash.h"
+#include "hash.h"
 
 TEST(AtomUtilTest, StringToAtom) {
   // String to atom.

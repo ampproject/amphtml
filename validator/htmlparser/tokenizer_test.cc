@@ -14,10 +14,10 @@
 // limitations under the license.
 //
 
-#include "htmlparser/tokenizer.h"
+#include "tokenizer.h"
 
 #include "gtest/gtest.h"
-#include "htmlparser/token.h"
+#include "token.h"
 
 // TODO: Add more complex html not-well-formed documents to cover
 // complex tokenization scenarios. Eg. <html>><head><<body;>> etc..
