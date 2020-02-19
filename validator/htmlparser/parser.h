@@ -22,9 +22,9 @@
 #include <functional>
 #include <vector>
 
-#include "htmlparser/atom.h"
-#include "htmlparser/node.h"
-#include "htmlparser/tokenizer.h"
+#include "atom.h"
+#include "node.h"
+#include "tokenizer.h"
 
 namespace htmlparser {
 

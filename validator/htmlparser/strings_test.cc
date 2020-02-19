@@ -14,7 +14,7 @@
 // limitations under the license.
 //
 
-#include "htmlparser/strings.h"
+#include "strings.h"
 
 #include <string>
 
