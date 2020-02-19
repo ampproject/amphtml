@@ -8,6 +8,7 @@ teaser:
   text: Requests the user's location and provides it to AMP components.
 experimental: true
 ---
+
 <!--
 Copyright 2019 The AMP HTML Authors. All Rights Reserved.
 
@@ -51,6 +52,7 @@ for the current domain, if the user has not already.
 ## AMP Events
 
 `amp-user-location` exposes the following events
+
 <table>
   <tr>
     <th width="30%">Event</th>
@@ -71,7 +73,6 @@ for the current domain, if the user has not already.
   </tr>
 </table>
 
-
 ## Variable Substitution
 
 The user's location is also available via AMP variable substitution:
@@ -86,4 +87,5 @@ syntax as above. It will wait for the location to be requested before resolving,
 request from occurring until that time. Polling is useful when the location is required for the request.
 
 ## Validation
+
 See [amp-user-location rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-location/validator-amp-user-location.protoascii) in the AMP validator specification.

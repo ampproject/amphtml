@@ -1,7 +1,7 @@
 ---
 $category: presentation
 formats:
-- websites
+  - websites
 teaser:
   text: FILL THIS IN.
 ---
