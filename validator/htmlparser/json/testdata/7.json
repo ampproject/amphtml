@@ -4388,9 +4388,7 @@
     },
     {
       "caucus": null,
-      "congress_numbers": [
-    116
-   ],
+      "congress_numbers": [116],
       "current": true,
       "description": "Junior Senator for Arizona",
       "district": null,
@@ -4711,5 +4709,5 @@
       "title_long": "Senator",
       "website": "https://www.senate.gov/senators/116thCongress/LoefflerKelly.htm"
     }
- ]
+  ]
 }
