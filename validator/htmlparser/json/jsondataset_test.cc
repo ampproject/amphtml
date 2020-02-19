@@ -26,7 +26,7 @@
 
 void ParseAndValidateFile(std::string file_path) {
   std::ifstream fd(file_path);
-  CHECK(fd.good());
+  EXPECT_TRUE(fd.good());
   htmlparser::defer(fd.close());
 
   std::stringbuf buf;
