@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {Services} from '../../../src/services';
 import {createElementWithAttributes} from '../../../src/dom';
-import {dev} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {includes, startsWith} from '../../../src/string';
+import {Services} from '../../../src/services';
+import {startsWith, includes} from '../../../src/string';
+import {dev} from '../../../src/log';
 
 /**
  * Renders the page description, and videos title/alt attributes in the page.
@@ -35,6 +35,22 @@ export function renderPageDescription(page, videos) {
       'id': descriptionElId,
     })
   );
+  const append = el => {
+    page.mutateElement(() => {
+      descriptionEl.appendChild(el);
+      // Add descriptionEl to actual page if that hasn't happened yet.
+      if (descriptionEl.parentNode) {
+        return;
+      }
+      page.element.parentElement.insertBefore(
+        descriptionEl,
+        page.element.nextElementSibling
+      );
+      if (!page.element.getAttribute('aria-labelledby')) {
+        page.element.setAttribute('aria-labelledby', descriptionElId);
+      }
+    });
+  };
 
   const addTagToDescriptionEl = (tagName, text) => {
     if (!text) {
@@ -42,37 +58,16 @@ export function renderPageDescription(page, videos) {
     }
     const el = page.win.document.createElement(tagName);
     el./* OK */ textContent = text;
-    descriptionEl.appendChild(el);
+    append(el);
   };
 
   addTagToDescriptionEl('h2', page.element.getAttribute('title'));
 
-  const fetches = [];
-
   videos.forEach(videoEl => {
     addTagToDescriptionEl('p', videoEl.getAttribute('alt'));
     addTagToDescriptionEl('p', videoEl.getAttribute('title'));
-    fetches.push(
-      fetchCaptions(page, videoEl).then(text => {
-        addTagToDescriptionEl('p', text);
-      })
-    );
-  });
-
-  Promise.all(fetches).then(() => {
-    if (descriptionEl.childElementCount === 0) {
-      return;
-    }
-
-    page.mutateElement(() => {
-      page.element.parentElement.insertBefore(
-        descriptionEl,
-        page.element.nextElementSibling
-      );
-
-      if (!page.element.getAttribute('aria-labelledby')) {
-        page.element.setAttribute('aria-labelledby', descriptionElId);
-      }
+    fetchCaptions(page, videoEl).then(text => {
+      addTagToDescriptionEl('p', text);
     });
   });
 }
