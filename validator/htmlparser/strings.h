@@ -20,6 +20,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace htmlparser {
 
@@ -57,8 +58,7 @@ class Strings {
     '\'',
     '<',
     '>',
-    '"',
-    '\r'};
+    '"'};
 
   inline static const std::string kNullChar = {'\0'};
 
@@ -109,7 +109,7 @@ class Strings {
   // updated, meaning cursor is at the first byte of the current character
   // decoded in s.
   static std::optional<char32_t>
-      DecodeUtf8Symbol(std::string_view s, int position = 0) {
+      DecodeUtf8Symbol(std::string_view s, std::size_t position = 0) {
     if (position < 0 || position > s.size()) return std::nullopt;
 
     if (position == 0) {
@@ -230,6 +230,25 @@ class Strings {
   // Prefix and suffix matching functions.
   static bool StartsWith(std::string_view s, std::string_view prefix);
   static bool EndsWith(std::string_view s, std::string_view suffix);
+
+  // Splits a string at delimiter character and returns the columns.
+  static std::vector<std::string> SplitStringAt(
+      std::string_view s, char delimiter);
+
+  // Splits the string at any utf8 or ascii whitespace and returns the columns.
+  // The returned values are the views of original string argument passed to
+  // this method. If the original string goes out of scope after this method is
+  // called, the contents of the columns is undefined.
+  static std::vector<std::string_view> SplitStrAtUtf8Whitespace(
+      std::string_view s);
+
+  // Determines if a character at current position is a whitespace char.
+  // Returns the number of bytes from current character that are part of the
+  // whitespace. For multichar whitespace like ideographic space \u3000 it
+  // returns 3 as ideographic space has 3 codepoints.
+  //
+  // Returns 0, if the character at current position is not a whitespace.
+  static int IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position = 0);
 
  private:
   // No instance of this class.

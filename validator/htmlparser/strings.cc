@@ -22,10 +22,11 @@
 #include <sstream>
 #include <tuple>
 
-#include "base/logging.h"
+#include "logging.h"
 #include "casetable.h"
 #include "entity.h"
 #include "error.h"
+#include "whitespacetable.h"
 
 namespace htmlparser {
 
@@ -284,6 +285,9 @@ void Strings::Escape(std::string_view s, std::stringbuf* escaped) {
 
     std::string esc = "";
     switch (c) {
+      case '"':
+        esc = "&#34;";
+        break;
       case '&':
         esc = "&amp;";
         break;
@@ -297,9 +301,6 @@ void Strings::Escape(std::string_view s, std::stringbuf* escaped) {
         break;
       case '>':
         esc = "&gt;";
-        break;
-      case '\r':
-        esc = "&#13;";
         break;
       default:
         continue;
@@ -554,6 +555,66 @@ bool Strings::EqualFold(std::string_view l, std::string_view r) {
   return l.empty() && r.empty();
 }
 
+std::vector<std::string> Strings::SplitStringAt(
+      std::string_view s, char delimiter) {
+  std::vector<std::string> columns;
+  size_t first = 0;
+
+  while (first < s.size()) {
+    auto second = s.find_first_of(delimiter, first);
+
+    if (first != second)
+      columns.emplace_back(std::string(s.substr(first, second-first)));
+
+    if (second == std::string_view::npos)
+      break;
+
+    first = second + 1;
+  }
+
+  return columns;
+}
+
+std::vector<std::string_view> Strings::SplitStrAtUtf8Whitespace(
+    std::string_view s) {
+  std::vector<std::string_view> columns;
+  std::size_t start = 0;
+  std::size_t end = 0;
+  while (end < s.size()) {
+    auto num_ws = IsUtf8WhiteSpaceChar(s, end);
+    if (num_ws > 0) {
+      if (start < end) {
+        columns.emplace_back(s.substr(start, end - start));
+      }
+      start = end + num_ws;
+      end = start;
+    } else {
+      end++;
+    }
+  }
+  columns.emplace_back(s.substr(start, s.size()));
+  return columns;
+}
+
+int Strings::IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position) {
+  std::size_t i = position;
+  int state = 0;
+  while (i < s.size()) {
+    uint8_t c = s.at(i++);
+    state = kWhitespaceTable[state][c];
+
+    if (state == 0) {
+      return 0;
+    }
+
+    if (state == 1) {
+      return i - position;
+    }
+  }
+
+  return 0;
+}
+
 namespace {
 
 // Reads an entity like "&lt;" from b[src:] and writes the corresponding "<"
@@ -718,14 +779,14 @@ uint8_t ReadContinuationByte(uint8_t byte) {
     return byte & 0x3f;
   }
 
-  LOG(FATAL) << "Invalid continuation byte.";
+  throw std::runtime_error("Invalid continuation byte.");
   return 0;
 }
 
 void CheckScalarValue(char32_t code_point) {
-  CHECK(!(code_point >= 0xd800 && code_point <= 0xdfff))
-      << "Lone surrogate U+" << Strings::ToHexString(code_point)
-      << " is not a valid scalar value.";
+  CHECK((!(code_point >= 0xd800 && code_point <= 0xdfff)),
+        "Lone surrogaate U+" + Strings::ToHexString(code_point) +
+        " is not a valid scalar value.");
 }
 
 inline bool IsOneByteASCIIChar(uint8_t c) {
