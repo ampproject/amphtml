@@ -183,7 +183,7 @@
         "sortname": "Durbin, Richard (Sen.) [D-IL]",
         "twitterid": "SenatorDurbin",
         "youtubeid": "SenatorDurbin"
-    },
+      },
       "phone": "202-224-2152",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -210,7 +210,7 @@
         "fax": "202-228-0359",
         "office": "379a Russell Senate Office Building",
         "rss_url": "http://www.enzi.senate.gov/public/index.cfm/rss/feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -231,7 +231,7 @@
         "sortname": "Enzi, Michael (Sen.) [R-WY]",
         "twitterid": "SenatorEnzi",
         "youtubeid": "senatorenzi"
-    },
+      },
       "phone": "202-224-3424",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -258,7 +258,7 @@
         "fax": "202-224-3808",
         "office": "290 Russell Senate Office Building",
         "rss_url": "http://www.lgraham.senate.gov/public/index.cfm?FuseAction=Rss.Feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -279,7 +279,7 @@
         "sortname": "Graham, Lindsey (Sen.) [R-SC]",
         "twitterid": "GrahamBlog",
         "youtubeid": "USSenLindseyGraham"
-    },
+      },
       "phone": "202-224-5972",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -306,7 +306,7 @@
         "fax": "202-228-0380",
         "office": "205 Russell Senate Office Building",
         "rss_url": "http://www.inhofe.senate.gov/rss/feeds/?type=all&amp;cachebuster=eea6c4d7%2d939c%2d5c1e%2db6c7aa3b8b291208"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -327,7 +327,7 @@
         "sortname": "Inhofe, James “Jim” (Sen.) [R-OK]",
         "twitterid": "InhofePress",
         "youtubeid": "jiminhofepressoffice"
-    },
+      },
       "phone": "202-224-4721",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -354,7 +354,7 @@
         "fax": "202-224-2499",
         "office": "317 Russell Senate Office Building",
         "rss_url": "http://www.mcconnell.senate.gov/public/?a=rss.feed"
-    },
+      },
       "leadership_title": "Senate Majority Leader",
       "party": "Republican",
       "person": {
@@ -375,7 +375,7 @@
         "sortname": "McConnell, Mitch (Sen.) [R-KY]",
         "twitterid": "McConnellPress",
         "youtubeid": null
-    },
+      },
       "phone": "202-224-2541",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -402,7 +402,7 @@
         "fax": "202-224-4680",
         "office": "728 Hart Senate Office Building",
         "rss_url": "https://www.reed.senate.gov//rss/feeds/?type=all"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -423,7 +423,7 @@
         "sortname": "Reed, John “Jack” (Sen.) [D-RI]",
         "twitterid": "SenJackReed",
         "youtubeid": "SenatorReed"
-    },
+      },
       "phone": "202-224-4642",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -450,7 +450,7 @@
         "fax": "202-224-3514",
         "office": "109 Hart Senate Office Building",
         "rss_url": "http://www.roberts.senate.gov/public/?a=rss.feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -471,7 +471,7 @@
         "sortname": "Roberts, Pat (Sen.) [R-KS]",
         "twitterid": "SenPatRoberts",
         "youtubeid": "SenPatRoberts"
-    },
+      },
       "phone": "202-224-4774",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -497,7 +497,7 @@
         "contact_form": "https://www.capito.senate.gov/contact/contact-shelley",
         "fax": "202-225-7856",
         "office": "172 Russell Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -518,7 +518,7 @@
         "sortname": "Capito, Shelley (Sen.) [R-WV]",
         "twitterid": "SenCapito",
         "youtubeid": null
-    },
+      },
       "phone": "202-224-6472",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -543,7 +543,7 @@
         "address": "255 Dirksen Senate Office Building Washington DC 20510",
         "contact_form": "https://www.markey.senate.gov/contact",
         "office": "255 Dirksen Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -564,7 +564,7 @@
         "sortname": "Markey, Edward “Ed” (Sen.) [D-MA]",
         "twitterid": "SenMarkey",
         "youtubeid": "RepMarkey"
-    },
+      },
       "phone": "202-224-2742",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -591,7 +591,7 @@
         "fax": "202-228-3261",
         "office": "531 Hart Senate Office Building",
         "rss_url": "http://tomudall.senate.gov/rss/?p=blog"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -612,7 +612,7 @@
         "sortname": "Udall, Tom (Sen.) [D-NM]",
         "twitterid": "SenatorTomUdall",
         "youtubeid": "senatortomudall"
-    },
+      },
       "phone": "202-224-6621",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -638,7 +638,7 @@
         "contact_form": "https://www.cassidy.senate.gov/contact",
         "fax": "202-225-7313",
         "office": "520 Hart Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -659,7 +659,7 @@
         "sortname": "Cassidy, Bill (Sen.) [R-LA]",
         "twitterid": "SenBillCassidy",
         "youtubeid": "SenatorBillCassidy"
-    },
+      },
       "phone": "202-224-5824",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -685,7 +685,7 @@
         "contact_form": "https://www.peters.senate.gov/contact/email-gary",
         "fax": "202-226-2356",
         "office": "724 Hart Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -706,7 +706,7 @@
         "sortname": "Peters, Gary (Sen.) [D-MI]",
         "twitterid": "SenGaryPeters",
         "youtubeid": "RepGaryPeters"
-    },
+      },
       "phone": "202-224-6221",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -733,7 +733,7 @@
         "fax": "202-224-6295",
         "office": "703 Hart Senate Office Building",
         "rss_url": "http://www.warner.senate.gov/public/?a=rss.feed"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -754,7 +754,7 @@
         "sortname": "Warner, Mark (Sen.) [D-VA]",
         "twitterid": "MarkWarner",
         "youtubeid": "SenatorMarkWarner"
-    },
+      },
       "phone": "202-224-2023",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -780,7 +780,7 @@
         "contact_form": "http://www.risch.senate.gov/public/index.cfm?p=Email",
         "fax": "202-224-2573",
         "office": "483 Russell Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -801,7 +801,7 @@
         "sortname": "Risch, James (Sen.) [R-ID]",
         "twitterid": "SenatorRisch",
         "youtubeid": "SenatorJamesRisch"
-    },
+      },
       "phone": "202-224-2752",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -828,7 +828,7 @@
         "fax": "202-228-3194",
         "office": "506 Hart Senate Office Building",
         "rss_url": "http://www.shaheen.senate.gov/rss/"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -849,7 +849,7 @@
         "sortname": "Shaheen, Jeanne (Sen.) [D-NH]",
         "twitterid": "SenatorShaheen",
         "youtubeid": "senatorshaheen"
-    },
+      },
       "phone": "202-224-2841",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -876,7 +876,7 @@
         "fax": "202-228-3997",
         "office": "313 Hart Senate Office Building",
         "rss_url": "http://www.merkley.senate.gov/rss/"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -897,7 +897,7 @@
         "sortname": "Merkley, Jeff (Sen.) [D-OR]",
         "twitterid": "SenJeffMerkley",
         "youtubeid": "SenatorJeffMerkley"
-    },
+      },
       "phone": "202-224-3753",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -924,7 +924,7 @@
         "fax": "202-228-3075",
         "office": "218 Russell Senate Office Building",
         "rss_url": "http://www.coons.senate.gov/rss/feeds/?type=all"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -945,7 +945,7 @@
         "sortname": "Coons, Chris (Sen.) [D-DE]",
         "twitterid": "ChrisCoons",
         "youtubeid": "senatorchriscoons"
-    },
+      },
       "phone": "202-224-5042",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -971,7 +971,7 @@
         "contact_form": "https://www.gardner.senate.gov/contact-cory/email-cory",
         "fax": "202-225-5870",
         "office": "354 Russell Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -992,7 +992,7 @@
         "sortname": "Gardner, Cory (Sen.) [R-CO]",
         "twitterid": "SenCoryGardner",
         "youtubeid": null
-    },
+      },
       "phone": "202-224-5941",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1017,7 +1017,7 @@
         "address": "326 Russell Senate Office Building Washington DC 20510",
         "contact_form": "http://www.cotton.senate.gov/?p=contact",
         "office": "326 Russell Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1038,7 +1038,7 @@
         "sortname": "Cotton, Tom (Sen.) [R-AR]",
         "twitterid": "SenTomCotton",
         "youtubeid": "RepTomCotton"
-    },
+      },
       "phone": "202-224-2353",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1064,7 +1064,7 @@
         "contact_form": "https://www.daines.senate.gov/connect/email-steve",
         "fax": "202-228-1236",
         "office": "320 Hart Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1085,7 +1085,7 @@
         "sortname": "Daines, Steve (Sen.) [R-MT]",
         "twitterid": "SteveDaines",
         "youtubeid": "SteveDainesMT"
-    },
+      },
       "phone": "202-224-2651",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1111,7 +1111,7 @@
         "contact_form": "https://www.booker.senate.gov/?p=contact",
         "fax": "202-224-8378",
         "office": "717 Hart Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -1132,7 +1132,7 @@
         "sortname": "Booker, Cory (Sen.) [D-NJ]",
         "twitterid": "SenBooker",
         "youtubeid": "SenCoryBooker"
-    },
+      },
       "phone": "202-224-3224",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1157,7 +1157,7 @@
         "address": "302 Hart Senate Office Building Washington DC 20510",
         "contact_form": "https://www.sullivan.senate.gov/contact/email",
         "office": "302 Hart Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1178,7 +1178,7 @@
         "sortname": "Sullivan, Dan (Sen.) [R-AK]",
         "twitterid": "SenDanSullivan",
         "youtubeid": null
-    },
+      },
       "phone": "202-224-3004",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1203,7 +1203,7 @@
         "address": "455 Russell Senate Office Building Washington DC 20510",
         "contact_form": "https://www.perdue.senate.gov/connect/email",
         "office": "455 Russell Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1224,7 +1224,7 @@
         "sortname": "Perdue, David (Sen.) [R-GA]",
         "twitterid": "sendavidperdue",
         "youtubeid": null
-    },
+      },
       "phone": "202-224-3521",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1249,7 +1249,7 @@
         "address": "730 Hart Senate Office Building Washington DC 20510",
         "contact_form": "https://www.ernst.senate.gov/public/index.cfm/contact",
         "office": "730 Hart Senate Office Building"
-    },
+      },
       "leadership_title": "Senate Republican Conference Vice Chair",
       "party": "Republican",
       "person": {
@@ -1270,7 +1270,7 @@
         "sortname": "Ernst, Joni (Sen.) [R-IA]",
         "twitterid": "SenJoniErnst",
         "youtubeid": null
-    },
+      },
       "phone": "202-224-3254",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1295,7 +1295,7 @@
         "address": "113 Dirksen Senate Office Building Washington DC 20510",
         "contact_form": "https://www.tillis.senate.gov/public/index.cfm/email-me",
         "office": "113 Dirksen Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1316,7 +1316,7 @@
         "sortname": "Tillis, Thom (Sen.) [R-NC]",
         "twitterid": "senthomtillis",
         "youtubeid": null
-    },
+      },
       "phone": "202-224-6342",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1341,7 +1341,7 @@
         "address": "502 Hart Senate Office Building Washington DC 20510",
         "contact_form": "https://www.rounds.senate.gov/contact/email-mike",
         "office": "502 Hart Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1362,7 +1362,7 @@
         "sortname": "Rounds, Mike (Sen.) [R-SD]",
         "twitterid": "SenatorRounds",
         "youtubeid": null
-    },
+      },
       "phone": "202-224-5842",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1387,7 +1387,7 @@
         "address": "107 Russell Senate Office Building Washington DC 20510",
         "contact_form": "http://www.sasse.senate.gov/public/index.cfm/email-ben",
         "office": "107 Russell Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1408,7 +1408,7 @@
         "sortname": "Sasse, Benjamin (Sen.) [R-NE]",
         "twitterid": "SenSasse",
         "youtubeid": null
-    },
+      },
       "phone": "202-224-4224",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1434,7 +1434,7 @@
         "contact_form": "https://www.crapo.senate.gov/contact",
         "fax": "202-228-1375",
         "office": "239 Dirksen Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1455,7 +1455,7 @@
         "sortname": "Crapo, Michael (Sen.) [R-ID]",
         "twitterid": "MikeCrapo",
         "youtubeid": "senatorcrapo"
-    },
+      },
       "phone": "202-224-6142",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1482,7 +1482,7 @@
         "fax": "202-224-6020",
         "office": "135 Hart Senate Office Building",
         "rss_url": "http://grassley.senate.gov/customcf/rss_feed.cfm"
-    },
+      },
       "leadership_title": "President Pro Tempore of the Senate",
       "party": "Republican",
       "person": {
@@ -1503,7 +1503,7 @@
         "sortname": "Grassley, Charles “Chuck” (Sen.) [R-IA]",
         "twitterid": "ChuckGrassley",
         "youtubeid": "senchuckgrassley"
-    },
+      },
       "phone": "202-224-3744",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1530,7 +1530,7 @@
         "fax": "202-224-3479",
         "office": "437 Russell Senate Office Building",
         "rss_url": "http://www.leahy.senate.gov/rss/feeds/press/"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -1551,7 +1551,7 @@
         "sortname": "Leahy, Patrick (Sen.) [D-VT]",
         "twitterid": "SenatorLeahy",
         "youtubeid": "SenatorPatrickLeahy"
-    },
+      },
       "phone": "202-224-4242",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1578,7 +1578,7 @@
         "fax": "202-224-5301",
         "office": "522 Hart Senate Office Building",
         "rss_url": "http://www.murkowski.senate.gov/public/?a=rss.feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1599,7 +1599,7 @@
         "sortname": "Murkowski, Lisa (Sen.) [R-AK]",
         "twitterid": "LisaMurkowski",
         "youtubeid": "senatormurkowski"
-    },
+      },
       "phone": "202-224-6665",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1626,7 +1626,7 @@
         "fax": "202-224-0238",
         "office": "154 Russell Senate Office Building",
         "rss_url": "http://www.murray.senate.gov/public/?a=rss.feed"
-    },
+      },
       "leadership_title": "Assistant Senate Minority Leader",
       "party": "Democrat",
       "person": {
@@ -1647,7 +1647,7 @@
         "sortname": "Murray, Patty (Sen.) [D-WA]",
         "twitterid": "PattyMurray",
         "youtubeid": "SenatorPattyMurray"
-    },
+      },
       "phone": "202-224-2621",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1673,7 +1673,7 @@
         "contact_form": "https://www.schumer.senate.gov/contact/email-chuck",
         "fax": "202-228-3027",
         "office": "322 Hart Senate Office Building"
-    },
+      },
       "leadership_title": "Senate Minority Leader",
       "party": "Democrat",
       "person": {
@@ -1694,7 +1694,7 @@
         "sortname": "Schumer, Charles “Chuck” (Sen.) [D-NY]",
         "twitterid": "SenSchumer",
         "youtubeid": "SenatorSchumer"
-    },
+      },
       "phone": "202-224-6542",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1721,7 +1721,7 @@
         "fax": "202-224-3416",
         "office": "304 Russell Senate Office Building",
         "rss_url": "http://www.shelby.senate.gov/public/index.cfm/rss/feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1742,7 +1742,7 @@
         "sortname": "Shelby, Richard (Sen.) [R-AL]",
         "twitterid": "SenShelby",
         "youtubeid": "SenatorRichardShelby"
-    },
+      },
       "phone": "202-224-5744",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1769,7 +1769,7 @@
         "fax": "202-228-2717",
         "office": "221 Dirksen Senate Office Building",
         "rss_url": "http://www.wyden.senate.gov/rss/feeds/?type=all&amp;"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -1790,7 +1790,7 @@
         "sortname": "Wyden, Ron (Sen.) [D-OR]",
         "twitterid": "RonWyden",
         "youtubeid": "senronwyden"
-    },
+      },
       "phone": "202-224-5244",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1817,7 +1817,7 @@
         "fax": "202-224-8149",
         "office": "260 Russell Senate Office Building",
         "rss_url": "http://www.blunt.senate.gov/public/?a=rss.feed"
-    },
+      },
       "leadership_title": "Senate Republican Policy Committee Chair",
       "party": "Republican",
       "person": {
@@ -1838,7 +1838,7 @@
         "sortname": "Blunt, Roy (Sen.) [R-MO]",
         "twitterid": "RoyBlunt",
         "youtubeid": "SenatorBlunt"
-    },
+      },
       "phone": "202-224-5721",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1865,7 +1865,7 @@
         "fax": "202-228-1371",
         "office": "141 Hart Senate Office Building",
         "rss_url": "http://www.boozman.senate.gov/public/index.cfm/rss/feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1886,7 +1886,7 @@
         "sortname": "Boozman, John (Sen.) [R-AR]",
         "twitterid": "JohnBoozman",
         "youtubeid": "BoozmanPressOffice"
-    },
+      },
       "phone": "202-224-4843",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1913,7 +1913,7 @@
         "fax": "202-228-2981",
         "office": "217 Russell Senate Office Building",
         "rss_url": "http://www.burr.senate.gov/public/index.cfm?fuseaction=rss.feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1934,7 +1934,7 @@
         "sortname": "Burr, Richard (Sen.) [R-NC]",
         "twitterid": "SenatorBurr",
         "youtubeid": "SenatorRichardBurr"
-    },
+      },
       "phone": "202-224-3154",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -1961,7 +1961,7 @@
         "fax": "202-228-6966",
         "office": "521 Dirksen Senate Office Building",
         "rss_url": "http://www.moran.senate.gov/public/index.cfm/rss/feed/"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -1982,7 +1982,7 @@
         "sortname": "Moran, Jerry (Sen.) [R-KS]",
         "twitterid": "JerryMoran",
         "youtubeid": "senatorjerrymoran"
-    },
+      },
       "phone": "202-224-6521",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2008,7 +2008,7 @@
         "contact_form": "https://www.portman.senate.gov/public/index.cfm/contact?p=contact-form",
         "office": "448 Russell Senate Office Building",
         "rss_url": "http://www.portman.senate.gov/public/index.cfm/rss/feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -2029,7 +2029,7 @@
         "sortname": "Portman, Robert “Rob” (Sen.) [R-OH]",
         "twitterid": "SenRobPortman",
         "youtubeid": "SenRobPortman"
-    },
+      },
       "phone": "202-224-3353",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2056,7 +2056,7 @@
         "fax": "202-228-0284",
         "office": "248 Russell Senate Office Building",
         "rss_url": "http://toomey.senate.gov/rss/?p=hot_topic"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -2077,7 +2077,7 @@
         "sortname": "Toomey, Patrick “Pat” (Sen.) [R-PA]",
         "twitterid": "SenToomey",
         "youtubeid": "sentoomey"
-    },
+      },
       "phone": "202-224-4254",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2103,7 +2103,7 @@
         "contact_form": "http://www.vanhollen.senate.gov/contact/email",
         "fax": "202-225-0375",
         "office": "110 Hart Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -2124,7 +2124,7 @@
         "sortname": "Van Hollen, Chris (Sen.) [D-MD]",
         "twitterid": "ChrisVanHollen",
         "youtubeid": "RepChrisVanHollen"
-    },
+      },
       "phone": "202-224-4654",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2151,7 +2151,7 @@
         "fax": "202-228-5429",
         "office": "511 Dirksen Senate Office Building",
         "rss_url": "http://www.thune.senate.gov/public/index.cfm/rss/feed"
-    },
+      },
       "leadership_title": "Assistant Senate Majority Leader",
       "party": "Republican",
       "person": {
@@ -2172,7 +2172,7 @@
         "sortname": "Thune, John (Sen.) [R-SD]",
         "twitterid": "SenJohnThune",
         "youtubeid": "johnthune"
-    },
+      },
       "phone": "202-224-2321",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2199,7 +2199,7 @@
         "fax": "202-228-5097",
         "office": "261 Russell Senate Office Building",
         "rss_url": "http://www.bennet.senate.gov/rss/feeds/?type=news"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -2220,7 +2220,7 @@
         "sortname": "Bennet, Michael (Sen.) [D-CO]",
         "twitterid": "SenatorBennet",
         "youtubeid": "SenatorBennet"
-    },
+      },
       "phone": "202-224-5852",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2246,7 +2246,7 @@
         "contact_form": "https://www.young.senate.gov/contact",
         "fax": "202-226-6866",
         "office": "185 Dirksen Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -2267,7 +2267,7 @@
         "sortname": "Young, Todd (Sen.) [R-IN]",
         "twitterid": "SenToddYoung",
         "youtubeid": "RepToddYoung"
-    },
+      },
       "phone": "202-224-5623",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2292,7 +2292,7 @@
         "address": "316 Hart Senate Office Building Washington DC 20510",
         "contact_form": "http://www.lankford.senate.gov/contact/email",
         "office": "316 Hart Senate Office Building"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -2313,7 +2313,7 @@
         "sortname": "Lankford, James (Sen.) [R-OK]",
         "twitterid": "SenatorLankford",
         "youtubeid": "SenatorLankford"
-    },
+      },
       "phone": "202-224-5754",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2340,7 +2340,7 @@
         "fax": "202-225-3407",
         "office": "104 Hart Senate Office Building",
         "rss_url": "http://www.scott.senate.gov/rss.xml"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -2361,7 +2361,7 @@
         "sortname": "Scott, Tim (Sen.) [R-SC]",
         "twitterid": "SenatorTimScott",
         "youtubeid": "SenatorTimScott"
-    },
+      },
       "phone": "202-224-6121",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2388,7 +2388,7 @@
         "fax": "202-224-9673",
         "office": "706 Hart Senate Office Building",
         "rss_url": "http://www.blumenthal.senate.gov/rss/feeds/?type=all"
-    },
+      },
       "leadership_title": null,
       "party": "Democrat",
       "person": {
@@ -2409,7 +2409,7 @@
         "sortname": "Blumenthal, Richard (Sen.) [D-CT]",
         "twitterid": "SenBlumenthal",
         "youtubeid": "SenatorBlumenthal"
-    },
+      },
       "phone": "202-224-2823",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2436,7 +2436,7 @@
         "fax": "202-228-0285",
         "office": "284 Russell Senate Office Building",
         "rss_url": "http://www.rubio.senate.gov/public/?a=rss.feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -2457,7 +2457,7 @@
         "sortname": "Rubio, Marco (Sen.) [R-FL]",
         "twitterid": "SenRubioPress",
         "youtubeid": "SenatorMarcoRubio"
-    },
+      },
       "phone": "202-224-3041",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2484,7 +2484,7 @@
         "fax": "202-228-1373",
         "office": "167 Russell Senate Office Building",
         "rss_url": "http://paul.senate.gov/rss/?p=news"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -2505,7 +2505,7 @@
         "sortname": "Paul, Rand (Sen.) [R-KY]",
         "twitterid": "RandPaul",
         "youtubeid": "SenatorRandPaul"
-    },
+      },
       "phone": "202-224-4343",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2532,7 +2532,7 @@
         "fax": "202-224-7999",
         "office": "338 Russell Senate Office Building",
         "rss_url": "http://www.hoeven.senate.gov/public/index.cfm/rss/feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -2553,7 +2553,7 @@
         "sortname": "Hoeven, John (Sen.) [R-ND]",
         "twitterid": "SenJohnHoeven",
         "youtubeid": "senatorjohnhoevennd"
-    },
+      },
       "phone": "202-224-2551",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2579,7 +2579,7 @@
         "contact_form": "https://www.lee.senate.gov/public/index.cfm/contact",
         "office": "361a Russell Senate Office Building",
         "rss_url": "http://www.lee.senate.gov/public/index.cfm/rss/feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -2600,7 +2600,7 @@
         "sortname": "Lee, Mike (Sen.) [R-UT]",
         "twitterid": "SenMikeLee",
         "youtubeid": "senatormikelee"
-    },
+      },
       "phone": "202-224-5444",
       "role_type": "senator",
       "role_type_label": "Senator",
@@ -2627,7 +2627,7 @@
         "fax": "920-230-7262",
         "office": "328 Hart Senate Office Building",
         "rss_url": "http://www.ronjohnson.senate.gov/public/index.cfm/rss/feed"
-    },
+      },
       "leadership_title": null,
       "party": "Republican",
       "person": {
@@ -2648,7 +2648,7 @@
         "sortname": "Johnson, Ron (Sen.) [R-WI]",
         "twitterid": "SenRonJohnson",
         "youtubeid": "SenatorRonJohnson"
-    },
+      },
       "phone": "202-224-5323",
       "role_type": "senator",
       "role_type_label": "Senator",
