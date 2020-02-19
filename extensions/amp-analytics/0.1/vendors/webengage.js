@@ -17,12 +17,9 @@
 import {jsonLiteral} from '../../../../src/json';
 
 const WEBENGAGE_CONFIG = jsonLiteral({
-  'vars': {
-    'clientId': 'CLIENT_ID(we_luid)',
-  },
   'requests': {
     'base':
-      'https://c.${region}.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application',
+      'https://c.${region}.webengage.com/amp?licenseCode=${licenseCode}&luid=${clientId(we_luid)}&pageUrl=${canonicalUrl}&pageTitle=${title}&referrer=${documentReferrer}&vh=${viewportHeight}&vw=${viewportWidth}&category=application',
     'wePageview': {
       'baseUrl': '${base}&eventName=Page Viewed',
     },
@@ -41,7 +38,7 @@ const WEBENGAGE_CONFIG = jsonLiteral({
       'destinationDomains': ['*'],
       'enabled': true,
       'ids': {
-        'we_luid': '${clientId}',
+        'we_luid': '${clientId(we_luid)}',
       },
       'proxyOnly': false,
     },
