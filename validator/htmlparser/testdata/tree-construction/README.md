@@ -1,5 +1,4 @@
-Tree Construction Tests
-=======================
+# Tree Construction Tests
 
 Each file containing tree construction tests consists of any number of
 tests separated by two newlines (LF) and a single newline before the end
@@ -31,7 +30,7 @@ errors.
 
 Then there \*may\* be a line that says "\#document-fragment", which must
 be followed by a newline (LF), followed by a string of characters that
-indicates the context element, followed by a newline (LF). If the string 
+indicates the context element, followed by a newline (LF). If the string
 of characters starts with "svg ", the context element is in the SVG
 namespace and the substring after "svg " is the local name. If the
 string of characters starts with "math ", the context element is in the
@@ -52,34 +51,34 @@ by a dump of the tree of the parsed DOM. Each node must be represented
 by a single line. Each line must start with "| ", followed by two spaces
 per parent node that the node has before the root document node.
 
--   Element nodes must be represented by a "`<`" then the *tag name
-    string* "`>`", and all the attributes must be given, sorted
-    lexicographically by UTF-16 code unit according to their *attribute
-    name string*, on subsequent lines, as if they were children of the
-    element node.
--   Attribute nodes must have the *attribute name string*, then an "="
-    sign, then the attribute value in double quotes (").
--   Text nodes must be the string, in double quotes. Newlines aren't
-    escaped.
--   Comments must be "`<`" then "`!-- `" then the data then "` -->`".
--   DOCTYPEs must be "`<!DOCTYPE `" then the name then if either of the
-    system id or public id is non-empty a space, public id in
-    double-quotes, another space an the system id in double-quotes, and
-    then in any case "`>`".
--   Processing instructions must be "`<?`", then the target, then a
-    space, then the data and then "`>`". (The HTML parser cannot emit
-    processing instructions, but scripts can, and the WebVTT to DOM
-    rules can emit them.)
--   Template contents are represented by the string "content" with the
-    children below it.
+- Element nodes must be represented by a "`<`" then the *tag name
+  string* "`>`", and all the attributes must be given, sorted
+  lexicographically by UTF-16 code unit according to their *attribute
+  name string*, on subsequent lines, as if they were children of the
+  element node.
+- Attribute nodes must have the *attribute name string*, then an "="
+  sign, then the attribute value in double quotes (").
+- Text nodes must be the string, in double quotes. Newlines aren't
+  escaped.
+- Comments must be "`<`" then "`!-- `" then the data then "` -->`".
+- DOCTYPEs must be "`<!DOCTYPE `" then the name then if either of the
+  system id or public id is non-empty a space, public id in
+  double-quotes, another space an the system id in double-quotes, and
+  then in any case "`>`".
+- Processing instructions must be "`<?`", then the target, then a
+  space, then the data and then "`>`". (The HTML parser cannot emit
+  processing instructions, but scripts can, and the WebVTT to DOM
+  rules can emit them.)
+- Template contents are represented by the string "content" with the
+  children below it.
 
-The *tag name string* is the local name prefixed by a namespace
+The _tag name string_ is the local name prefixed by a namespace
 designator. For the HTML namespace, the namespace designator is the
 empty string, i.e. there's no prefix. For the SVG namespace, the
 namespace designator is "svg ". For the MathML namespace, the namespace
 designator is "math ".
 
-The *attribute name string* is the local name prefixed by a namespace
+The _attribute name string_ is the local name prefixed by a namespace
 designator. For no namespace, the namespace designator is the empty
 string, i.e. there's no prefix. For the XLink namespace, the namespace
 designator is "xlink ". For the XML namespace, the namespace designator
