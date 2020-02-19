@@ -33,7 +33,8 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+You can visit [publishers.vidyome.com](https://publishers.vidyome.com) for ads.
 
 ### Required parameters
 
@@ -44,4 +45,6 @@ For details on the configuration semantics, please contact the ad network or ref
 - `data-typeId`: Widget Type ID (7)
 - `data-paidItem`: Paid Item Count
 - `data-organicItem`: Organic Item Count
-- `data-theme`: Theme Type (light or dark)
+- `data-theme`: Theme Type (light, dark, google)
+
+
