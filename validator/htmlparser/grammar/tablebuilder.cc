@@ -220,7 +220,7 @@ inline static uint8_t ToPushStateCode(uint32_t code);
 inline static uint8_t ToCurrentStateCode(uint32_t code);
 
 // Returns code for current token and active state.
-inline static uint32_t CodeForToken(char c, uint8_t state);
+inline static uint32_t CodeForToken(unsigned char c, uint8_t state);
 
 // Checks the push bit is on.
 inline static bool HasPushBit(uint32_t code);
@@ -295,15 +295,14 @@ inline static bool HasPopBit(uint32_t code) {
 // TODO: In follow up change modify the signature to accept a unicode
 // character, that is char32_t and based on the charset for this state return
 // the code from second last or last column accordingly.
-inline static uint32_t CodeForToken(char c, uint8_t state) {
-  int c_int = static_cast<int>(c);
-  if (c_int > 127) {
+inline static uint32_t CodeForToken(unsigned char c, uint8_t state) {
+  if (c > 127) {
 )";
 
   fd << "    return kParseStates[state][";
   fd << std::dec << charset_.size() - 1 << "];\n";
   fd << "  }\n";
-  fd << "  int index = kTokenIndexes[c_int];\n";
+  fd << "  int index = kTokenIndexes[c];\n";
   fd << "  if (index == -1) index = " << std::dec << charset_.size() << ";\n";
   fd << "  return kParseStates[state][index];\n}\n\n";
 
