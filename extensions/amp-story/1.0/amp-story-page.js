@@ -282,6 +282,9 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?Element} */
     this.cssVariablesStyleEl_ = null;
 
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    this.layoutBox_ = null;
+
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
 
@@ -497,13 +500,23 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
+  // TODO(26866): switch back to onMeasuredChange and remove the layoutBox
+  // equality checks.
   /** @override */
-  onMeasureChanged() {
+  onLayoutMeasure() {
+    const layoutBox = this.getLayoutBox();
     // Only measures from the first story page, that always gets built because
     // of the prerendering optimizations in place.
-    if (!this.isFirstPage_) {
+    if (
+      !this.isFirstPage_ ||
+      (this.layoutBox_ &&
+        this.layoutBox_.width === layoutBox.width &&
+        this.layoutBox_.height === layoutBox.height)
+    ) {
       return;
     }
+
+    this.layoutBox_ = layoutBox;
 
     return this.getVsync().runPromise(
       {
@@ -517,7 +530,7 @@ export class AmpStoryPage extends AMP.BaseElement {
                   height: this.element./*OK*/ clientHeight,
                   width: this.element./*OK*/ clientWidth,
                 }
-              : this.getLayoutBox();
+              : layoutBox;
           state.vh = height / 100;
           state.vw = width / 100;
           state.fiftyVw = Math.round(width / 2);
