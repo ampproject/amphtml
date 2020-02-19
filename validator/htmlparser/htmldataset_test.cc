@@ -300,29 +300,22 @@ void DumpDocument(Node* doc) {
 TEST(HTMLDatasetTest, WebkitData) {
   // Files excluded from testing due to remaining TODOs in the parser.
   std::vector<std::string> files_excluded_from_test = {
-      FLAGS_test_srcdir +
           "testdata/tree-construction/"
           "adoption01.dat",
-      FLAGS_test_srcdir +
           "testdata/tree-construction/blocks.dat",
-      FLAGS_test_srcdir +
           "testdata/tree-construction/"
           "foreign-fragment.dat",
-      FLAGS_test_srcdir +
           "testdata/tree-construction/isindex.dat",
-      FLAGS_test_srcdir +
           "testdata/tree-construction/"
           "main-element.dat",
-      FLAGS_test_srcdir +
           "testdata/tree-construction/tests11.dat",
-      FLAGS_test_srcdir +
           "testdata/tree-construction/tests19.dat",
-      FLAGS_test_srcdir +
           "testdata/tree-construction/tests25.dat",
   };
   int num_test_cases = 0;
   for (auto pattern : htmlparser::testing::kTestDataDirs) {
-    std::string full_path = FLAGS_test_srcdir + pattern.data();
+    std::string full_path =
+        pattern.data();
     std::vector<std::string> filenames;
     EXPECT_TRUE(FileUtil::Glob(full_path, &filenames))
         << "Error opening files: " << pattern;
