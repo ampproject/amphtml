@@ -557,11 +557,13 @@ export class Bind {
    * Returns the stringified value of the global state for a given field-based
    * expression, e.g. "foo.bar.baz".
    * @param {string} expr
-   * @return {string}
+   * @return {?string}
    */
   getStateValue(expr) {
     const value = getValueForExpr(this.state_, expr);
-    if (isObject(value) || isArray(value)) {
+    if (value === undefined || value === null) {
+      return null;
+    } else if (isObject(value) || isArray(value)) {
       return JSON.stringify(/** @type {JsonObject} */ (value));
     } else {
       return String(value);
