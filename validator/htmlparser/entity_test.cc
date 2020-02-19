@@ -14,7 +14,7 @@
 // limitations under the license.
 //
 
-#include "htmlparser/entity.h"
+#include "entity.h"
 
 #include "gtest/gtest.h"
 

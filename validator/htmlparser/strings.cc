@@ -14,7 +14,7 @@
 // limitations under the license.
 //
 
-#include "htmlparser/strings.h"
+#include "strings.h"
 
 #include <algorithm>
 #include <array>
@@ -23,9 +23,9 @@
 #include <tuple>
 
 #include "base/logging.h"
-#include "htmlparser/casetable.h"
-#include "htmlparser/entity.h"
-#include "htmlparser/error.h"
+#include "casetable.h"
+#include "entity.h"
+#include "error.h"
 
 namespace htmlparser {
 

@@ -14,15 +14,15 @@
 // limitations under the license.
 //
 
-#include "htmlparser/node.h"
+#include "node.h"
 
 #include <algorithm>
 #include <functional>
 #include <sstream>
 
 #include "base/logging.h"
-#include "htmlparser/atomutil.h"
-#include "htmlparser/elements.h"
+#include "atomutil.h"
+#include "elements.h"
 
 namespace htmlparser {
 

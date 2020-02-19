@@ -32,11 +32,11 @@
 #include <utility>
 #include <vector>
 
-#include "htmlparser/defer.h"
-#include "htmlparser/fileutil.h"
-#include "htmlparser/hash.h"
-#include "htmlparser/strings.h"
-#include "htmlparser/token.h"
+#include "defer.h"
+#include "fileutil.h"
+#include "hash.h"
+#include "strings.h"
+#include "token.h"
 
 namespace htmlparser {
 
@@ -183,17 +183,17 @@ int main(int argc, char** argv) {
   };
 
   if (!(FileUtil::ReadFileLines(
-            options, "htmlparser/data/htmltags.txt", &all_names) &&
+            options, "data/htmltags.txt", &all_names) &&
         FileUtil::ReadFileLines(
-            options, "htmlparser/data/htmlattributes.txt",
+            options, "data/htmlattributes.txt",
             &all_names) &&
         FileUtil::ReadFileLines(
-            options, "htmlparser/data/javascriptevents.txt",
+            options, "data/javascriptevents.txt",
             &all_names) &&
         FileUtil::ReadFileLines(
-            options, "htmlparser/data/extras.txt", &all_names) &&
+            options, "data/extras.txt", &all_names) &&
         FileUtil::ReadFileLines(
-            options, "htmlparser/data/amptags.txt", &all_names))) {
+            options, "data/amptags.txt", &all_names))) {
     std::cerr << "Error reading input txt files." << std::endl;
     return EXIT_FAILURE;
   }
@@ -297,7 +297,7 @@ int main(int argc, char** argv) {
     nameToTextOffset[s] = static_cast<uint32_t>(offset << 8 | s.size());
   }
 
-  std::ofstream fd("htmlparser/atom.h");
+  std::ofstream fd("atom.h");
   Defer ____([&]() {fd.close();});
 
   fd << R"(//

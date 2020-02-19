@@ -22,14 +22,14 @@
 #endif  // DUMP_NODES
 
 #include "base/logging.h"
-#include "htmlparser/atomutil.h"
-#include "htmlparser/comparators.h"
-#include "htmlparser/defer.h"
-#include "htmlparser/doctype.h"
-#include "htmlparser/error.h"
-#include "htmlparser/foreign.h"
-#include "htmlparser/parser.h"
-#include "htmlparser/strings.h"
+#include "atomutil.h"
+#include "comparators.h"
+#include "defer.h"
+#include "doctype.h"
+#include "error.h"
+#include "foreign.h"
+#include "parser.h"
+#include "strings.h"
 
 namespace htmlparser {
 

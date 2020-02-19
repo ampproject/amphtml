@@ -14,12 +14,12 @@
 // limitations under the license.
 //
 
-#include "htmlparser/tokenizer.h"
+#include "tokenizer.h"
 
-#include "htmlparser/atom.h"
-#include "htmlparser/atomutil.h"
-#include "htmlparser/defer.h"
-#include "htmlparser/strings.h"
+#include "atom.h"
+#include "atomutil.h"
+#include "defer.h"
+#include "strings.h"
 
 namespace htmlparser {
 

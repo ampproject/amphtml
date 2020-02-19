@@ -14,10 +14,10 @@
 // limitations under the license.
 //
 
-#include "htmlparser/casetable.h"
+#include "casetable.h"
 
 #include "gtest/gtest.h"
-#include "htmlparser/strings.h"
+#include "strings.h"
 
 // Just one test to ensure table mapping is correct.
 TEST(CasetableTest, TestTableMappingIsCorrect) {

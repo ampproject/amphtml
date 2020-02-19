@@ -14,7 +14,7 @@
 // limitations under the license.
 //
 
-#include "htmlparser/fileutil.h"
+#include "fileutil.h"
 
 #include <glob.h>
 
@@ -23,9 +23,9 @@
 #include <iostream>
 #include <sstream>
 
-#include "htmlparser/defer.h"
-#include "htmlparser/error.h"
-#include "htmlparser/strings.h"
+#include "defer.h"
+#include "error.h"
+#include "strings.h"
 
 namespace htmlparser {
 

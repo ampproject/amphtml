@@ -16,9 +16,10 @@ limitations under the License.
 
 # HTML Parser
 
-This is an HTML5 compliant parser, created to be used by the [AMPHTML
-Validator](https://github.com/ampproject/amphtml/tree/master/validator) to
-standardize how AMPHTML documents should be parsed for validation.
+This is an HTML5 compliant parser written in C++. It was created to be used by
+the
+[AMPHTML Validator](https://github.com/ampproject/amphtml/tree/master/validator)
+to standardize how AMPHTML documents should be parsed for AMP validation.
 
 It is maintained by the [AMP Working Group](https://amp.dev/community/working-groups/amp4email/):
 [Caching](https://amp.dev/community/working-groups/caching/)
