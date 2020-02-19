@@ -55,7 +55,8 @@ describes.integration(
       shadowDoc = env.win.document.getElementById('host').shadowRoot;
     });
 
-    it('should attach shadow AMP document', () => {
+    // TODO(kevinkimball, #26863): Flaky on Safari.
+    it.configure().skipSafari('should attach shadow AMP document', () => {
       return expect(shadowDoc.body.innerText).to.include('Shadow AMP document');
     });
 
