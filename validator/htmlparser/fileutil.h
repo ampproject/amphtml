@@ -27,6 +27,8 @@
 
 namespace htmlparser {
 
+using LineCallback = std::function<void(std::string_view, int)>;
+
 struct FileReadOptions {
   struct LineTransforms {
     // No transformations.
@@ -85,10 +87,10 @@ class FileUtil {
   // 2) Reads line by line to provided callback.
   static bool ReadFileLines(const FileReadOptions& options,
                             std::string_view filepath,
-                            std::function<void(std::string_view)> callback);
+                            LineCallback callback);
   static bool ReadFileLines(const FileReadOptions& options,
                             std::istream& fd,
-                            std::function<void(std::string_view)> callback);
+                            LineCallback callback);
 
 
   // 3) Lookup of single row of key/value multi-line data (separated by a marker
@@ -217,7 +219,8 @@ class FileUtil {
       std::function<void(T)> callback,
       std::function<T (std::string_view)> post_processing) {
     std::stringbuf data_buffer;
-    auto result = ReadFileLines(options, filepath, [&](std::string_view line) {
+    auto result = ReadFileLines(options, filepath, [&](std::string_view line,
+                                                       int line_number) {
       if (marker.compare(line) == 0) {
         callback(post_processing(data_buffer.str()));
         data_buffer.str("");
@@ -239,7 +242,8 @@ class FileUtil {
       std::function<void(T)> callback,
       std::function<T (std::string_view)> post_processing) {
     std::stringbuf data_buffer;
-    auto result = ReadFileLines(options, fd, [&](std::string_view line) {
+    auto result = ReadFileLines(options, fd, [&](std::string_view line,
+                                                 int line_number) {
       if (marker.compare(line) == 0) {
         callback(post_processing(data_buffer.str()));
         data_buffer.str("");

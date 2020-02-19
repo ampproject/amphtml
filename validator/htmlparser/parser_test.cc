@@ -718,7 +718,7 @@ TEST(ParserTest, ImageVsImg) {
 
 TEST(ParserTest, VoidElementsParsedCorrectly) {
   std::string html = R"HTML(<html><head></head><body>
-  <img src="foo.png" /></body></html>")HTML";
+  <img src="foo.png" /></body></html>)HTML";
 
   htmlparser::Parser p(html);
   auto doc = p.Parse();

@@ -31,12 +31,12 @@ namespace htmlparser {
 
 bool ReadFileLinesInternal(const FileReadOptions& options,
                            std::istream& fd,
-                           std::function<void(std::string_view)> callback);
+                           LineCallback callback);
 
 bool FileUtil::ReadFileLines(const FileReadOptions& options,
                              std::string_view filepath,
                              std::vector<std::string>* output) {
-  return ReadFileLines(options, filepath, [&](std::string_view line) {
+  return ReadFileLines(options, filepath, [&](std::string_view line, int) {
     output->push_back(line.data());
   });
 }
@@ -44,22 +44,22 @@ bool FileUtil::ReadFileLines(const FileReadOptions& options,
 bool FileUtil::ReadFileLines(const FileReadOptions& options,
                              std::istream& fd,
                              std::vector<std::string>* output) {
-  return ReadFileLinesInternal(options, fd, [&](std::string_view line) {
+  return ReadFileLinesInternal(options, fd, [&](std::string_view line, int) {
     output->push_back(line.data());
   });
 }
 
 bool FileUtil::ReadFileLines(const FileReadOptions& options,
                              std::string_view filepath,
-                             std::function<void(std::string_view)> callback) {
-  std::ifstream fd(filepath);
+                             LineCallback callback) {
+  std::ifstream fd(filepath.data());
   defer(fd.close());
   return ReadFileLinesInternal(options, fd, callback);
 }
 
 bool FileUtil::ReadFileLines(const FileReadOptions& options,
                              std::istream& fd,
-                             std::function<void(std::string_view)> callback) {
+                             LineCallback callback) {
   return ReadFileLinesInternal(options, fd, callback);
 }
 
@@ -85,13 +85,15 @@ bool FileUtil::Glob(std::string_view pattern,
 
 bool ReadFileLinesInternal(const FileReadOptions& options,
                            std::istream& fd,
-                           std::function<void(std::string_view)> callback) {
+                           LineCallback callback) {
   if (!fd.good()) {
     return false;
   }
 
+  int line_number = 0;
   std::string line;
   while (std::getline(fd, line)) {
+    line_number++;
     if (line.empty()) continue;
 
     if (options.ignore_comments && line.at(0) == options.comments_char) {
@@ -129,7 +131,7 @@ bool ReadFileLinesInternal(const FileReadOptions& options,
       }
     }
 
-    callback(line);
+    callback(line, line_number);
   }
 
   return true;
