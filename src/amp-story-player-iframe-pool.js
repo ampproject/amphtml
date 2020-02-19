@@ -45,7 +45,7 @@ export class IframePool {
   }
 
   /**
-   * Takes the leftmost iframe and allocates it to the next story to the right
+   * Takes the first iframe in the array and allocates it to the next story
    * without an iframe. It also updates the storyIdsWithIframe by removing the
    * reference to the detached story and adds the new one.
    * @param {number} nextStoryIdx
@@ -62,9 +62,9 @@ export class IframePool {
   }
 
   /**
-   * Takes the rightmost iframe and allocates it to the next story to the left
-   * without an iframe. It also updates the storyIdsWithIframe by removing the
-   * reference to the detached story and adds the new one.
+   * Takes the last iframe in the array and allocates it to the next incoming
+   * story without an iframe. It also updates the storyIdsWithIframe by removing
+   * the reference to the detached story and adds the new one.
    * @param {number} nextStoryIdx
    * @return {number} Index of the detached story.
    * @public

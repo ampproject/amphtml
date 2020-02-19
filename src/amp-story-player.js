@@ -254,7 +254,7 @@ export class AmpStoryPlayer {
     const previousStory = this.stories_[this.currentIdx_ - 1];
     this.updateVisibilityState_(
       previousStory[IFRAME_IDX],
-      VisibilityState.PAUSED
+      VisibilityState.INACTIVE
     );
 
     const currentStory = this.stories_[this.currentIdx_];
@@ -287,7 +287,7 @@ export class AmpStoryPlayer {
     const previousStory = this.stories_[this.currentIdx_ + 1];
     this.updateVisibilityState_(
       previousStory[IFRAME_IDX],
-      VisibilityState.PAUSED
+      VisibilityState.INACTIVE
     );
 
     const currentStory = this.stories_[this.currentIdx_];
@@ -332,7 +332,7 @@ export class AmpStoryPlayer {
   /**
    * @param {!Element} story
    * @param {!Element} iframe
-   * @param {string} visibilityState
+   * @param {!VisibilityState} visibilityState
    * @private
    */
   layoutIframe_(story, iframe, visibilityState) {
@@ -344,7 +344,7 @@ export class AmpStoryPlayer {
   /**
    * Gets encoded url for player usage.
    * @param {string} href
-   * @param {string} visibilityState
+   * @param {VisibilityState=} visibilityState
    * @return {!Location}
    * @private
    */
@@ -377,7 +377,7 @@ export class AmpStoryPlayer {
   /**
    * Updates the visibility state of the story inside the iframe.
    * @param {number} iframeIdx
-   * @param {string} visibilityState
+   * @param {!VisibilityState} visibilityState
    * @private
    */
   updateVisibilityState_(iframeIdx, visibilityState) {
