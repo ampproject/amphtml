@@ -21,19 +21,16 @@ the
 [AMPHTML Validator](https://github.com/ampproject/amphtml/tree/master/validator)
 to standardize how AMPHTML documents should be parsed for AMP validation.
 
-
 ## Maintainers
 
 This parser is maintained by the [AMP Working Group](https://amp.dev/community/working-groups/amp4email/):
 [Caching](https://amp.dev/community/working-groups/caching/)
-
 
 ## Current Status
 
 This parser is in active development and has several outstanding TODOs.
 This may cause certain parsing tests to fail. See htmldataset_test.cc for
 examples of tests that are currently excluded due to this.
-
 
 ## Building and Testing with Bazel
 
@@ -42,4 +39,3 @@ This code requires C++17. When building with [Bazel](https://bazel.build/) pleas
 
 For building, run: `bazel build --cxxopt='-std=c++17' parser`.
 For testing, run: `bazel test --cxxopt='-std=c++17' parser_test`.
-
