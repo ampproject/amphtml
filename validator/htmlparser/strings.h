@@ -109,7 +109,7 @@ class Strings {
   // updated, meaning cursor is at the first byte of the current character
   // decoded in s.
   static std::optional<char32_t>
-      DecodeUtf8Symbol(std::string_view s, int position = 0) {
+      DecodeUtf8Symbol(std::string_view s, std::size_t position = 0) {
     if (position < 0 || position > s.size()) return std::nullopt;
 
     if (position == 0) {
@@ -248,7 +248,7 @@ class Strings {
   // returns 3 as ideographic space has 3 codepoints.
   //
   // Returns 0, if the character at current position is not a whitespace.
-  static int IsUtf8WhiteSpaceChar(std::string_view s, int position = 0);
+  static int IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position = 0);
 
  private:
   // No instance of this class.

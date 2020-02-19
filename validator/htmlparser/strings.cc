@@ -578,8 +578,8 @@ std::vector<std::string> Strings::SplitStringAt(
 std::vector<std::string_view> Strings::SplitStrAtUtf8Whitespace(
     std::string_view s) {
   std::vector<std::string_view> columns;
-  int start = 0;
-  int end = 0;
+  std::size_t start = 0;
+  std::size_t end = 0;
   while (end < s.size()) {
     auto num_ws = IsUtf8WhiteSpaceChar(s, end);
     if (num_ws > 0) {
@@ -596,8 +596,8 @@ std::vector<std::string_view> Strings::SplitStrAtUtf8Whitespace(
   return columns;
 }
 
-int Strings::IsUtf8WhiteSpaceChar(std::string_view s, int position) {
-  int i = position;
+int Strings::IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position) {
+  std::size_t i = position;
   int state = 0;
   while (i < s.size()) {
     uint8_t c = s.at(i++);
