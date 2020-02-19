@@ -56,7 +56,6 @@ import {VideoUtils} from '../../../src/utils/video';
 import {
   childElement,
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   isAmpElement,
   iterateCursor,
   matches,
@@ -76,6 +75,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isMediaDisplayed, setTextBackgroundColor} from './utils';
 import {px, toggle} from '../../../src/style';
+import {renderPageDescription} from './semantic-render';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -1698,7 +1698,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setPageDescription_() {
     if (this.isBotUserAgent_) {
-      this.renderPageDescription_();
+      renderPageDescription(
+        this,
+        this.getMediaBySelector_(Selectors.ALL_AMP_VIDEO, true)
+      );
     }
 
     if (!this.isBotUserAgent_ && this.element.hasAttribute('title')) {
@@ -1712,53 +1715,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       }
       this.element.removeAttribute('title');
     }
-  }
-
-  /**
-   * Renders the page description, and videos title/alt attributes in the page.
-   * @private
-   */
-  renderPageDescription_() {
-    const descriptionElId = `i-amphtml-story-${this.element.id}-description`;
-    const descriptionEl = createElementWithAttributes(
-      this.win.document,
-      'div',
-      dict({
-        'class': 'i-amphtml-story-page-description',
-        'id': descriptionElId,
-      })
-    );
-
-    const addTagToDescriptionEl = (tagName, text) => {
-      if (!text) {
-        return;
-      }
-      const el = this.win.document.createElement(tagName);
-      el./* OK */ textContent = text;
-      descriptionEl.appendChild(el);
-    };
-
-    addTagToDescriptionEl('h2', this.element.getAttribute('title'));
-
-    this.getMediaBySelector_(Selectors.ALL_AMP_VIDEO, true).forEach(videoEl => {
-      addTagToDescriptionEl('p', videoEl.getAttribute('alt'));
-      addTagToDescriptionEl('p', videoEl.getAttribute('title'));
-    });
-
-    if (descriptionEl.childElementCount === 0) {
-      return;
-    }
-
-    this.mutateElement(() => {
-      this.element.parentElement.insertBefore(
-        descriptionEl,
-        this.element.nextElementSibling
-      );
-
-      if (!this.element.getAttribute('aria-labelledby')) {
-        this.element.setAttribute('aria-labelledby', descriptionElId);
-      }
-    });
   }
 
   /**
