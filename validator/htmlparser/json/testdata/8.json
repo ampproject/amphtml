@@ -4,9 +4,10 @@
     "offset": 0,
     "total_count": 436
   },
-  "objects": [{
+  "objects": [
+    {
       "caucus": null,
-      "congress_numbers": [115, 116 ],
+      "congress_numbers": [115, 116],
       "current": true,
       "description": "Resident Commissioner for Puerto Rico",
       "district": 0,
@@ -7615,7 +7616,8 @@
       "extra": {
         "address": "106 Cannon House Office Building; Washington DC 20515-2203",
         "office": "106 Cannon House Office Building",
-        "party_affiliations": [{
+        "party_affiliations": [
+          {
             "end": "2019-07-07",
             "party": "Republican",
             "start": "2019-01-03"
@@ -17029,7 +17031,8 @@
       "extra": {
         "address": "331 Cannon House Office Building; Washington DC 20515-3002",
         "office": "331 Cannon House Office Building",
-        "party_affiliations": [{
+        "party_affiliations": [
+          {
             "end": "2019-12-18",
             "party": "Democrat",
             "start": "2019-01-03"
