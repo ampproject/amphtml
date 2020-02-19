@@ -75,8 +75,8 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isMediaDisplayed, setTextBackgroundColor} from './utils';
 import {px, toggle} from '../../../src/style';
-import {upgradeBackgroundAudio} from './audio';
 import {renderPageDescription} from './semantic-render';
+import {upgradeBackgroundAudio} from './audio';
 
 /**
  * CSS class for an amp-story-page that indicates the entire page is loaded.
