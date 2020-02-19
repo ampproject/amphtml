@@ -38,7 +38,7 @@ describes.sandboxed('AmpDocService', {}, () => {
     delete window.document['__AMPDOC'];
   });
 
-  describe('params', {}, () => {
+  describe('params', () => {
     let doc, win;
 
     beforeEach(() => {
@@ -73,7 +73,7 @@ describes.sandboxed('AmpDocService', {}, () => {
       }).getSingleDoc();
 
       // Fragment parameters take precedence.
-      expect(ampdoc.getParam('other')).to.equal('three');
+      expect(ampdoc.getParam('other')).to.equal('zero');
       expect(ampdoc.getParam('param1')).to.be.null;
       expect(ampdoc.getParam('paddingTop')).to.be.null;
     });
