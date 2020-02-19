@@ -28,7 +28,7 @@ export function temedya(global, data) {
     siteId: data['siteid'],
     siteUrl: data['siteurl'] || global.context.canonicalUrl,
     typeId: data['typeid'] || 7,
-    paidItem: data['paiditem'] || 4,
+    paidItem: data['paiditem'] || 3,
     organicItem: data['organicitem'] || 0,
     theme: data['theme'] || 'google',
   };
