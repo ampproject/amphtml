@@ -54,6 +54,7 @@ import {GOOGLEADWORDS_CONFIG} from './vendors/googleadwords';
 import {GOOGLEANALYTICS_CONFIG} from './vendors/googleanalytics';
 import {GTAG_CONFIG} from './vendors/gtag';
 import {IBEATANALYTICS_CONFIG} from './vendors/ibeatanalytics';
+import {INFONLINE_ANONYMOUS_CONFIG} from './vendors/infonline_anonymous';
 import {INFONLINE_CONFIG} from './vendors/infonline';
 import {IPLABEL_CONFIG} from './vendors/iplabel';
 import {KEEN_CONFIG} from './vendors/keen';
@@ -215,6 +216,7 @@ export const ANALYTICS_CONFIG = ANALYTICS_VENDOR_SPLIT
       'gtag': includeJsonLiteral(GTAG_CONFIG),
       'ibeatanalytics': includeJsonLiteral(IBEATANALYTICS_CONFIG),
       'infonline': includeJsonLiteral(INFONLINE_CONFIG),
+      'infonline_anonymous': includeJsonLiteral(INFONLINE_ANONYMOUS_CONFIG),
       'iplabel': includeJsonLiteral(IPLABEL_CONFIG),
       'keen': includeJsonLiteral(KEEN_CONFIG),
       'kenshoo': includeJsonLiteral(KENSHOO_CONFIG),
@@ -279,6 +281,9 @@ if (!ANALYTICS_VENDOR_SPLIT) {
   }
 
   ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframePing'] = true;
+  ANALYTICS_CONFIG['infonline_anonymous']['triggers']['pageview'][
+    'iframePing'
+  ] = true;
 
   ANALYTICS_CONFIG['adobeanalytics_nativeConfig']['triggers']['pageLoad'][
     'iframePing'
