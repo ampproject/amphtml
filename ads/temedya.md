@@ -1,5 +1,6 @@
 <!---
 Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,27 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# TE Medya Native Widget Model
+# TE Medya
 
 ## Example of TE Medya's widget implementation
 
 ### Basic
 
 ```html
-<amp-embed
+<amp-ad
   width="320"
   height="320"
   type="temedya"
   layout="responsive"
-  data-siteId="vidyome"
-  data-keyId="1rlN7oGR6ofEuJz6llh9Pj"
+  data-title="widget-title"
+  data-siteId="site-id"
+  data-keyId="key-id"
+  data-siteUrl="site-url"
+  data-typeId="ad-type"
+  data-paidItem="paid-item-count"
+  data-organicItem="organic-item-count"
+  data-theme="theme-style"
 >
-</amp-embed>
+</amp-ad>
 ```
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation. 
+For details on the configuration semantics, please contact the ad network or refer to their documentation.
 
 ### Required parameters
 
@@ -44,6 +51,4 @@ For details on the configuration semantics, please contact the ad network or ref
 - `data-typeId`: Widget Type ID (7)
 - `data-paidItem`: Paid Item Count
 - `data-organicItem`: Organic Item Count
-- `data-theme`: Theme Type (light, dark, google)
-
-
+- `data-theme`: Theme Type (light | dark | google)
