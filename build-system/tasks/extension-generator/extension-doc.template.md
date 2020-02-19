@@ -50,10 +50,6 @@ limitations under the License.
     <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
     <td>FILL THIS IN</td>
   </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
 </table>
 
 <!--
