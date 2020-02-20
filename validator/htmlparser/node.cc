@@ -20,7 +20,7 @@
 #include <functional>
 #include <sstream>
 
-#include "base/logging.h"
+#include "logging.h"
 #include "atomutil.h"
 #include "elements.h"
 
@@ -115,11 +115,10 @@ bool Node::InsertBefore(Node* new_child, Node* old_child) {
 }
 
 bool Node::AppendChild(Node* new_child) {
-  // Checks if it new_child is already attached.
   CHECK(!(new_child->Parent() ||
           new_child->PrevSibling() ||
-          new_child->NextSibling()))
-      << "html: AppendChild called for an attached child Node";
+          new_child->NextSibling()),
+        "html: AppendChild called for an attached child Node");
 
   Node* last = LastChild();
   if (last) {
@@ -136,8 +135,7 @@ bool Node::AppendChild(Node* new_child) {
 
 std::unique_ptr<Node> Node::RemoveChild(Node* c) {
   // Remove child called for a non-child node.
-  CHECK(c->parent_ == this)
-      << "html: RemoveChild called for a non-child Node";
+  CHECK(c->parent_ == this, "html: RemoveChild called for a non-child Node");
 
   if (first_child_ == c) {
     first_child_ = c->next_sibling_;

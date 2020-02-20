@@ -14,10 +14,11 @@
 // limitations under the license.
 //
 
-#include "renderer.h"
+#include <algorithm>
 
 #include "atomutil.h"
 #include "elements.h"
+#include "renderer.h"
 #include "strings.h"
 
 namespace htmlparser {
