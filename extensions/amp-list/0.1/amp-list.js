@@ -61,7 +61,7 @@ import {
 } from '../../../src/utils/xhr-utils';
 import {isArray, toArray} from '../../../src/types';
 import {isExperimentOn} from '../../../src/experiments';
-import {px, setStyles, toggle} from '../../../src/style';
+import {px, setImportantStyles, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
 
@@ -176,8 +176,8 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+  isLayoutSupported(unusedLayout) {
+    return true;
   }
 
   /** @override */
@@ -956,35 +956,69 @@ export class AmpList extends AMP.BaseElement {
     dev().info(TAG, 'render:', this.element, elements);
     const container = dev().assertElement(this.container_);
 
-    return this.mutateElement(() => {
-      this.hideFallbackAndPlaceholder_();
+    let currentHeight;
+    return this.measureMutateElement(
+      () => {
+        currentHeight = this.element./*OK*/ offsetHeight;
+      },
+      () => {
+        setImportantStyles(this.element, {
+          'height': `${currentHeight}px`,
+          'overflow': 'hidden',
+        });
 
-      if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
-        this.diff_(container, elements);
-      } else {
-        if (!opt_append) {
-          removeChildren(container);
+        this.hideFallbackAndPlaceholder_();
+
+        if (
+          this.element.hasAttribute('diffable') &&
+          container.hasChildNodes()
+        ) {
+          this.diff_(container, elements);
+        } else {
+          if (!opt_append) {
+            removeChildren(container);
+          }
+          this.addElementsToContainer_(elements, container);
         }
-        this.addElementsToContainer_(elements, container);
+
+        const event = createCustomEvent(
+          this.win,
+          AmpEvents.DOM_UPDATE,
+          /* detail */ null,
+          {bubbles: true}
+        );
+        this.container_.dispatchEvent(event);
+
+        // Now that new contents have been rendered, clear pending size requests
+        // from previous calls to attemptToFit_(). Rejected size requests are
+        // saved as "pending" and are fulfilled later on 'focus' event.
+        // See resources-impl.checkPendingChangeSize_().
+        const r = this.element
+          .getResources()
+          .getResourceForElement(this.element);
+        r.resetPendingChangeSize();
+
+        if (this.element.getAttribute('layout') == Layout.CONTAINER) {
+          this.measureElement(() => {
+            const targetHeight = this.container_./*OK*/ scrollHeight;
+            const height = this.element./*OK*/ offsetHeight;
+            if (targetHeight > height) {
+              this.attemptChangeHeight(targetHeight).then(
+                () => {
+                  setImportantStyles(this.element, {
+                    'height': '',
+                    'overflow': '',
+                  });
+                },
+                () => {}
+              );
+            }
+          });
+        } else {
+          this.maybeResizeListToFitItems_();
+        }
       }
-
-      const event = createCustomEvent(
-        this.win,
-        AmpEvents.DOM_UPDATE,
-        /* detail */ null,
-        {bubbles: true}
-      );
-      this.container_.dispatchEvent(event);
-
-      // Now that new contents have been rendered, clear pending size requests
-      // from previous calls to attemptToFit_(). Rejected size requests are
-      // saved as "pending" and are fulfilled later on 'focus' event.
-      // See resources-impl.checkPendingChangeSize_().
-      const r = this.element.getResources().getResourceForElement(this.element);
-      r.resetPendingChangeSize();
-
-      this.maybeResizeListToFitItems_();
-    });
+    );
   }
 
   /**
