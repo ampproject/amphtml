@@ -38,6 +38,7 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
 const {cyan, green, red, yellow} = require('ansi-colors');
+const {report} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
 
@@ -53,10 +54,13 @@ const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
  * @return {Map<string, number>} the bundle size in KB rounded to 2 decimal
  *   points.
  */
-function getBrotliBundleSizes() {
+async function getBrotliBundleSizes() {
   // Brotli compressed size fluctuates because of changes in the RTV number, so
   // normalize this across pull requests by replacing that RTV with a constant.
   const bundleSizes = {};
+
+  const values = await report(process.cwd());
+  console.log(values);
 
   log(cyan('brotli'), 'bundle sizes are:');
   for (const filePath of globby.sync(fileGlobs)) {
@@ -110,7 +114,7 @@ async function storeBundleSize() {
       json: true,
       body: {
         token: process.env.BUNDLE_SIZE_TOKEN,
-        bundleSizes: getBrotliBundleSizes(),
+        bundleSizes: await getBrotliBundleSizes(),
       },
     });
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -176,7 +180,7 @@ async function reportBundleSize() {
         json: true,
         body: {
           baseSha,
-          bundleSizes: getBrotliBundleSizes(),
+          bundleSizes: await getBrotliBundleSizes(),
         },
       });
       if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -200,7 +204,7 @@ async function reportBundleSize() {
   }
 }
 
-function getLocalBundleSize() {
+async function getLocalBundleSize() {
   if (globby.sync(fileGlobs).length === 0) {
     log('Could not find runtime files.');
     log('Run', cyan('gulp dist --noextensions'), 'and re-run this task.');
@@ -214,7 +218,7 @@ function getLocalBundleSize() {
       cyan(shortSha(gitCommitHash())) + '.'
     );
   }
-  getBrotliBundleSizes();
+  await getBrotliBundleSizes();
 }
 
 async function bundleSize() {
@@ -225,7 +229,7 @@ async function bundleSize() {
   } else if (argv.on_pr_build) {
     return await reportBundleSize();
   } else if (argv.on_local_build) {
-    return getLocalBundleSize();
+    return await getLocalBundleSize();
   } else {
     log(red('Called'), cyan('gulp bundle-size'), red('with no task.'));
     process.exitCode = 1;
