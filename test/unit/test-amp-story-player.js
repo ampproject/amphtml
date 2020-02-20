@@ -21,11 +21,11 @@ import {toArray} from '../../src/types';
 describes.realWin('AmpStoryPlayer', {amp: false}, env => {
   let win;
   let playerEl;
+  let player;
   let url;
   let manager;
   let fireHandler;
   let fakeMessaging;
-  let fakeMessagingPromise;
   let messagingMock;
 
   function buildStoryPlayer(numStories = 1) {
@@ -39,6 +39,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
     }
     win.document.body.appendChild(playerEl);
     manager = new AmpStoryPlayerManager(win);
+    player = new AmpStoryPlayer(win, playerEl);
+    env.sandbox.stub(player, 'initializeHandshake_').resolves(fakeMessaging);
   }
 
   beforeEach(() => {
@@ -50,9 +52,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
         fireHandler = handler;
       },
     };
-    fakeMessagingPromise = new Promise(resolve => {
-      resolve(fakeMessaging);
-    });
 
     messagingMock = env.sandbox.mock(fakeMessaging);
   });
@@ -121,7 +120,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
       const stories = toArray(playerEl.querySelectorAll('a'));
 
       // TODO(#26308): Replace with manager.loadPlayers() when swipe is enabled.
-      const player = new AmpStoryPlayer(win, playerEl);
       player.buildCallback();
       player.layoutCallback();
 
@@ -145,7 +143,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
       const stories = toArray(playerEl.querySelectorAll('a'));
 
       // TODO(#26308): Replace with manager.loadPlayers() when swipe is enabled.
-      const player = new AmpStoryPlayer(win, playerEl);
       player.buildCallback();
       player.layoutCallback();
 
@@ -161,11 +158,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
 
   it('should register handlers at build time', async () => {
     buildStoryPlayer();
-    const player = new AmpStoryPlayer(win, playerEl);
-
-    env.sandbox
-      .stub(player, 'initializeHandshake_')
-      .resolves(fakeMessagingPromise);
 
     messagingMock.expects('registerHandler').withArgs('selectDocument');
     messagingMock.expects('setDefaultHandler');
@@ -174,13 +166,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
   });
 
   it('should navigate to next story when the last page of a story is tapped', async () => {
-    buildStoryPlayer();
-    const player = new AmpStoryPlayer(win, playerEl);
-    const nextSpy = env.sandbox.spy(player, 'next_');
-
-    env.sandbox
-      .stub(player, 'initializeHandshake_')
-      .resolves(fakeMessagingPromise);
+    buildStoryPlayer(2);
 
     await player.buildCallback();
     player.layoutCallback();
@@ -188,6 +174,8 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
     const fakeData = {next: true};
     fireHandler('selectDocument', fakeData);
 
-    expect(nextSpy).to.be.called;
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
   });
 });
