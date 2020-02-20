@@ -298,8 +298,6 @@ TEST(HTMLDatasetTest, WebkitData) {
           "adoption01.dat",
           "testdata/tree-construction/"
           "foreign-fragment.dat",
-          "testdata/tree-construction/"
-          "main-element.dat",
   };
   int num_test_cases = 0;
   for (auto pattern : htmlparser::testing::kTestDataDirs) {
@@ -367,5 +365,5 @@ TEST(HTMLDatasetTest, WebkitData) {
 
   // Hardcoded, whenever dataset changes. Ensures no new tests are added, or
   // old tests removed, without maintainers knowledge.
-  EXPECT_EQ(791, num_test_cases);
+  EXPECT_EQ(794, num_test_cases);
 };
