@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FixedLayer} from '../../../src/service/fixed-layer';
 import {FocusHandler} from './focus-handler';
 import {
   HighlightHandler,
@@ -68,6 +69,9 @@ export class AmpViewerIntegration {
      * @private {?HighlightHandler}
      */
     this.highlightHandler_ = null;
+
+    /** @private {?FixedLayer} */
+    this.fixedLayer_ = null;
   }
 
   /**
@@ -88,6 +92,8 @@ export class AmpViewerIntegration {
     if (!this.isWebView_ && !origin) {
       return Promise.resolve();
     }
+
+    this.initFixedLayer_(ampdoc);
 
     if (this.isWebView_ || this.isHandShakePoll_) {
       const source = isIframed(this.win) ? this.win.parent : null;
@@ -269,6 +275,22 @@ export class AmpViewerIntegration {
    */
   initKeyboardHandler_(messaging) {
     new KeyboardHandler(this.win, messaging);
+  }
+
+  /**
+   * @param {!AmpDoc} ampdoc
+   * @private
+   */
+  initFixedLayer_(ampdoc) {
+    const viewport = Services.viewportForDoc(ampdoc);
+    this.fixedLayer_ = new FixedLayer(
+      ampdoc,
+      viewport.vsync_,
+      viewport.binding_.getBorderTop(),
+      viewport.paddingTop_,
+      viewport.binding_.requiresFixedLayerTransfer()
+    );
+    ampdoc.whenReady().then(() => this.fixedLayer_.setup());
   }
 }
 

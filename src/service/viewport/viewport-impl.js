@@ -15,7 +15,6 @@
  */
 
 import {Animation} from '../../animation';
-import {FixedLayer} from './../fixed-layer';
 import {Observable} from '../../observable';
 import {Services} from '../../services';
 import {ViewportBindingDef} from './viewport-binding-def';
@@ -138,16 +137,6 @@ export class ViewportImpl {
 
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
-
-    /** @private @const {!FixedLayer} */
-    this.fixedLayer_ = new FixedLayer(
-      ampdoc,
-      this.vsync_,
-      this.binding_.getBorderTop(),
-      this.paddingTop_,
-      this.binding_.requiresFixedLayerTransfer()
-    );
-    ampdoc.whenReady().then(() => this.fixedLayer_.setup());
 
     this.viewer_.onMessage('viewport', this.updateOnViewportEvent_.bind(this));
     this.viewer_.onMessage('scroll', this.viewerSetScrollTop_.bind(this));
@@ -1022,7 +1011,10 @@ export class ViewportImpl {
     const oldSize = this.size_;
     this.size_ = null; // Need to recalc.
     const newSize = this.getSize();
-    this.fixedLayer_.update().then(() => {
+    const promise = this.fixedLayer_
+      ? this.fixedLayer_.update()
+      : Promise.resolve();
+    promise.then(() => {
       const widthChanged = !oldSize || oldSize.width != newSize.width;
       this.changed_(/*relayoutAll*/ widthChanged, 0);
       const sizeChanged = widthChanged || oldSize.height != newSize.height;
