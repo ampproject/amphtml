@@ -296,7 +296,6 @@ TEST(HTMLDatasetTest, WebkitData) {
   std::vector<std::string> files_excluded_from_test = {
           "testdata/tree-construction/"
           "adoption01.dat",
-          "testdata/tree-construction/blocks.dat",
           "testdata/tree-construction/"
           "foreign-fragment.dat",
           "testdata/tree-construction/isindex.dat",
@@ -369,5 +368,5 @@ TEST(HTMLDatasetTest, WebkitData) {
 
   // Hardcoded, whenever dataset changes. Ensures no new tests are added, or
   // old tests removed, without maintainers knowledge.
-  EXPECT_EQ(739, num_test_cases);
+  EXPECT_EQ(787, num_test_cases);
 };
