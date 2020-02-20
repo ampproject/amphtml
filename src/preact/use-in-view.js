@@ -18,39 +18,38 @@ import {useEffect, useRef} from './index';
 
 /**
  * @param {{current: HTMLElement}} ref
- * @param {function():(function():undefined|undefined)} effect
- * @param {!Array<*>=} opt_deps
+ * @param {function():(function():undefined|undefined)} fn
  */
-export function useInViewEffect(ref, effect, opt_deps) {
+export function useFnInView(ref, fn) {
   const isIntersectingRef = useRef(false);
-  /** @type {{current: (null|function():undefined|undefined)}} */ const unsubscribeRef = useRef(
+
+  // TODO: The IntersectionObserver should be shared across instances via context
+  // Currently assumes observing one node at a time -- does this by disconnecting all nodes
+  /** @type {{current: (null|IntersectionObserver)}} */ const observerRef = useRef(
     null
   );
-  useEffect(() => {
-    const node = ref.current;
-    const observer = new IntersectionObserver(entries => {
+  if (observerRef.current === null) {
+    observerRef.current = new IntersectionObserver(entries => {
       const {isIntersecting} = entries[entries.length - 1];
       if (isIntersecting !== isIntersectingRef.current) {
         isIntersectingRef.current = isIntersecting;
-        if (unsubscribeRef.current) {
-          unsubscribeRef.current();
-          unsubscribeRef.current = null;
-        }
         if (isIntersecting) {
-          unsubscribeRef.current = effect();
+          fn();
         }
       }
     });
+  }
+
+  // Hook for changes in IntersectionObserver dependencies
+  useEffect(() => {
+    const node = ref.current;
+    const observer = observerRef.current;
     if (node) {
       observer.observe(node);
     }
     return () => {
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-      }
       isIntersectingRef.current = false;
-      unsubscribeRef.current = null;
       observer.disconnect();
     };
-  }, [ref.current].concat(opt_deps));
+  }, [ref.current, observerRef.current]);
 }
