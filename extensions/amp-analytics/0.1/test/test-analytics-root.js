@@ -333,23 +333,82 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
       addTestInstance(root3.getElement(body, '#target'), null);
     });
 
-    it('should find an AMP element for AMP search', () => {
+    it('should find an AMP element for AMP search', async () => {
       child.classList.add('i-amphtml-element');
-      return root.getAmpElement(body, '#child').then(element => {
-        expect(element).to.equal(child);
-      });
+      const element = await root.getAmpElement(body, '#child');
+      expect(element).to.equal(child);
     });
 
-    it('should allow not-found element for AMP search', () => {
-      return root.getAmpElement(body, '#unknown').catch(error => {
+    it('should allow not-found element for AMP search', async () => {
+      await root.getAmpElement(body, '#unknown').catch(error => {
         expect(error).to.match(/Element "#unknown" not found/);
       });
     });
 
-    it('should fail if the found element is not AMP for AMP search', () => {
+    it('should fail if the found element is not AMP for AMP search', async () => {
       child.classList.remove('i-amphtml-element');
-      return root.getAmpElement(body, '#child').catch(error => {
+      await root.getAmpElement(body, '#child').catch(error => {
         expect(error).to.match(/required to be an AMP element/);
+      });
+    });
+
+    describe('get amp elements', () => {
+      let child2;
+      let elements;
+      let error;
+
+      beforeEach(() => {
+        error = false;
+        child2 = win.document.createElement('child');
+        body.appendChild(child2);
+        child.classList.add('i-amphtml-element');
+        child2.classList.add('i-amphtml-element');
+      });
+
+      afterEach(() => {
+        if (!error) {
+          expect(elements).to.contain(child);
+          expect(elements).to.contain(child2);
+          expect(elements.length).to.equal(2);
+        }
+      });
+
+      it('should find elements by ID', async () => {
+        child.id = 'myId';
+        child2.id = 'myId';
+        elements = await root.getAmpElements('#myId');
+      });
+
+      it('should find element by class', async () => {
+        child.classList.add('myClass');
+        child2.classList.add('myClass');
+        elements = await root.getAmpElements('.myClass');
+      });
+
+      it('should find element by tag name', async () => {
+        elements = await root.getAmpElements('child');
+      });
+
+      it('should find element by selector', async () => {
+        child.id = 'myId';
+        child2.id = 'myId';
+        child.classList.add('myClass');
+        child2.classList.add('myClass');
+        elements = await root.getAmpElements('#myId.myClass');
+      });
+
+      it('should allow not-found element for AMP search', async () => {
+        error = true;
+        await root.getAmpElement(body, '#unknown').catch(error => {
+          expect(error).to.match(/Element "#unknown" not found/);
+        });
+      });
+
+      it('should fail if the found element is not AMP for AMP search', async () => {
+        error = true;
+        await root.getAmpElements('#child').catch(error => {
+          expect(error).to.match(/required to be an AMP element/);
+        });
       });
     });
   });

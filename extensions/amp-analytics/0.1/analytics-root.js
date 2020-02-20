@@ -22,6 +22,7 @@ import {
   closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
+  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -276,6 +277,45 @@ export class AnalyticsRoot {
   }
 
   /**
+   * @param {string} selector DOM query selector.
+   * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
+   */
+  getElements_(selector) {
+    // Wait for document-ready to avoid false missed searches
+    return this.ampdoc.whenReady().then(() => {
+      const results = [];
+      const foundElements = scopedQuerySelectorAll(
+        dev().assertElement(this.ampdoc.getBody()),
+        selector
+      );
+
+      // Length is not supported in all browsers
+      if (foundElements && foundElements.length) {
+        for (let i = 0; i < foundElements.length; i++) {
+          results.push(foundElements[i]);
+        }
+      }
+      userAssert(results.length, `Element "${selector}" not found`);
+      return results;
+    });
+  }
+
+  /**
+   * Searches for the AMP elements that matches from the root.
+   *
+   * @param {string} selector DOM query selector.
+   * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
+   */
+  getAmpElements(selector) {
+    return this.getElements_(selector).then(elements => {
+      for (let i = 0; i < elements.length; i++) {
+        this.verifyAmpElement_(elements[i], selector);
+      }
+      return elements;
+    });
+  }
+
+  /**
    * Searches the AMP element that matches the selector within the scope of the
    * analytics root in relationship to the specified context node.
    *
@@ -287,13 +327,21 @@ export class AnalyticsRoot {
    */
   getAmpElement(context, selector, selectionMethod) {
     return this.getElement(context, selector, selectionMethod).then(element => {
-      userAssert(
-        element.classList.contains('i-amphtml-element'),
-        'Element "%s" is required to be an AMP element',
-        selector
-      );
+      this.verifyAmpElement_(element, selector);
       return element;
     });
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {string} selector
+   */
+  verifyAmpElement_(element, selector) {
+    userAssert(
+      element.classList.contains('i-amphtml-element'),
+      'Element "%s" is required to be an AMP element',
+      selector
+    );
   }
 
   /**
