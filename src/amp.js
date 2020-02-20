@@ -158,7 +158,7 @@ if (shouldMainBootstrapRun) {
       installStylesForDoc(
         ampdoc,
         ampDocCss + ampSharedCss,
-        bootstrap(ampdoc, perf),
+        () => bootstrap(ampdoc, perf),
         /* opt_isRuntimeCss */ true,
         /* opt_ext */ 'amp-runtime'
       );

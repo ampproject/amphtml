@@ -128,7 +128,7 @@ function getJsonConfigurationPlugin() {
  * @return {!Array<string|!Array<string|!Object>>}
  */
 function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
-  const applied = [...defaultPlugins(isEsmBuild)];
+  const applied = [...defaultPlugins(isEsmBuild || false)];
   // TODO(erwinm): This is temporary until we remove the assert/log removals
   // from the java transformation to the babel transformation.
   // There is currently a weird interaction where when we do the transform
