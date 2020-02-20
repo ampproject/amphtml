@@ -26,6 +26,7 @@ const INFONLINE_ANONYMOUS_CONFIG = jsonLiteral({
       '${url}?' +
       'ap=${ap}' +
       '&dn=${dn}' +
+      '&cn=${cn}' +
       '&st=${st}' +
       '&co=${co}' +
       '&cp=${cp}' +
@@ -38,6 +39,7 @@ const INFONLINE_ANONYMOUS_CONFIG = jsonLiteral({
       '${url}?' +
       'ap=${ap}' +
       '&dn=${dn}' +
+      '&cn=${cn}' +
       '&ev=${ev}' +
       '&st=${st}' +
       '&co=${co}' +
