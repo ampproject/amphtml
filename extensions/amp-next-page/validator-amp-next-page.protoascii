@@ -27,7 +27,7 @@ tags: {  # amp-next-page
 tags: {  # amp-next-page: JSON Config
   html_format: AMP
   tag_name: "SCRIPT"
-  spec_name: "AMP-NEXT-PAGE > SCRIPT"
+  spec_name: "AMP-NEXT-PAGE > SCRIPT[type=application/json]"
   requires_extension: "amp-next-page"
   mandatory_parent: "AMP-NEXT-PAGE"
   attrs: {
@@ -78,7 +78,7 @@ tags: {  # <amp-next-page>
     unique: true
   }
   reference_points: {
-    tag_spec_name: "AMP-NEXT-PAGE > SCRIPT"
+    tag_spec_name: "AMP-NEXT-PAGE > SCRIPT[type=application/json]"
     mandatory: true
     unique: true
   }
@@ -114,7 +114,7 @@ tags: {  # <amp-next-page src>
     unique: true
   }
   reference_points: {
-    tag_spec_name: "AMP-NEXT-PAGE > SCRIPT"
+    tag_spec_name: "AMP-NEXT-PAGE > SCRIPT[type=application/json]"
     unique: true
   }
   spec_url: "https://amp.dev/documentation/components/amp-next-page"
@@ -152,7 +152,7 @@ tags: {  # <amp-next-page type="adsense">
     unique: true
   }
   reference_points: {
-    tag_spec_name: "AMP-NEXT-PAGE > SCRIPT"
+    tag_spec_name: "AMP-NEXT-PAGE > SCRIPT[type=application/json]"
     unique: true
   }
   spec_url: "https://amp.dev/documentation/components/amp-next-page"

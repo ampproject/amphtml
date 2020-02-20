@@ -6807,10 +6807,16 @@ attr_lists: {
     name: "subscriptions-service"
     requires_extension: "amp-subscriptions"
   }
-  # amp-access specific attributes, see
-  # https://amp.dev/documentation/components/amp-access
-  attrs: { name: "next-page-hide" }
-  attrs: { name: "next-page-replace" }
+  # amp-next-page specific attributes, see
+  # https://amp.dev/documentation/components/amp-next-page
+  attrs: {
+    name: "next-page-hide",
+    requires_extension: "amp-next-page"
+  }
+  attrs: {
+    name: "next-page-replace",
+    requires_extension: "amp-next-page"
+  }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
   attrs: { name: "[aria-atomic]" }
