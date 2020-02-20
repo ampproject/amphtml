@@ -44,16 +44,16 @@ main {
 }
 
 .story-player-iframe:nth-child(1),
-main .story-player-iframe[i-amphtml-story-position="0"] {
+main .story-player-iframe[i-amphtml-iframe-position="0"] {
   transform: translate3d(0, 0, 0);
 }
 
 .story-player-iframe:nth-child(2),
 .story-player-iframe:nth-child(3),
-main .story-player-iframe[i-amphtml-story-position="1"] {
+main .story-player-iframe[i-amphtml-iframe-position="1"] {
   transform: translate3d(100%, 0, 0);
 }
 
-main .story-player-iframe[i-amphtml-story-position="-1"] {
+main .story-player-iframe[i-amphtml-iframe-position="-1"] {
   transform: translate3d(-100%, 0, 0);
 }

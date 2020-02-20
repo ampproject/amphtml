@@ -23,6 +23,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
   let playerEl;
   let url;
   let manager;
+  let fireHandler;
+  let fakeMessaging;
+  let fakeMessagingPromise;
+  let messagingMock;
 
   function buildStoryPlayer(numStories = 1) {
     playerEl = win.document.createElement('amp-story-player');
@@ -39,6 +43,22 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
 
   beforeEach(() => {
     win = env.win;
+
+    fakeMessaging = {
+      setDefaultHandler: () => {},
+      registerHandler: (event, handler) => {
+        fireHandler = handler;
+      },
+    };
+    fakeMessagingPromise = new Promise(resolve => {
+      resolve(fakeMessaging);
+    });
+
+    messagingMock = env.sandbox.mock(fakeMessaging);
+  });
+
+  afterEach(() => {
+    messagingMock.verify();
   });
 
   it('should build an iframe for each story', () => {
@@ -55,7 +75,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
 
     expect(storyIframe.getAttribute('src')).to.equals(
       url +
-        '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0'
+        '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
@@ -69,7 +89,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
 
     expect(storyIframe.getAttribute('src')).to.equals(
       url +
-        '&amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0'
+        '&amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
@@ -138,4 +158,36 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
       expect(stories[3][IFRAME_IDX]).to.eql(undefined);
     }
   );
+
+  it('should register handlers at build time', async () => {
+    buildStoryPlayer();
+    const player = new AmpStoryPlayer(win, playerEl);
+
+    env.sandbox
+      .stub(player, 'initializeHandshake_')
+      .resolves(fakeMessagingPromise);
+
+    messagingMock.expects('registerHandler').withArgs('selectDocument');
+    messagingMock.expects('setDefaultHandler');
+
+    await player.buildCallback();
+  });
+
+  it('should navigate to next story when the last page of a story is tapped', async () => {
+    buildStoryPlayer();
+    const player = new AmpStoryPlayer(win, playerEl);
+    const nextSpy = env.sandbox.spy(player, 'next_');
+
+    env.sandbox
+      .stub(player, 'initializeHandshake_')
+      .resolves(fakeMessagingPromise);
+
+    await player.buildCallback();
+    player.layoutCallback();
+
+    const fakeData = {next: true};
+    fireHandler('selectDocument', fakeData);
+
+    expect(nextSpy).to.be.called;
+  });
 });

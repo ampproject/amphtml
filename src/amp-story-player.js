@@ -37,6 +37,13 @@ const LoadStateClass = {
   ERROR: 'i-amphtml-story-player-error',
 };
 
+/** @enum {number} */
+const IframePosition = {
+  PREVIOUS: -1,
+  CURRENT: 0,
+  NEXT: 1,
+};
+
 /** @const {number} */
 const MAX_IFRAMES = 3;
 
@@ -61,9 +68,6 @@ export class AmpStoryPlayer {
 
     /** @private {!Window} */
     this.win_ = win;
-
-    /** @private {!Object<number, Messaging>} */
-    this.messagingFor_ = {};
 
     /** @private {!Array<!Element>} */
     this.iframes_ = [];
@@ -90,7 +94,7 @@ export class AmpStoryPlayer {
     this.iframePool_ = new IframePool();
 
     /** @private {!Object<string, !Promise>} */
-    this.handshakePromises_ = map();
+    this.messagingPromises_ = map();
 
     /** @private {number} */
     this.currentIdx_ = 0;
@@ -167,20 +171,14 @@ export class AmpStoryPlayer {
   setUpMessagingForIframe_(story, iframeEl) {
     const iframeIdx = story[IFRAME_IDX];
 
-    this.handshakePromises_[iframeIdx] = new Promise(resolve => {
+    this.messagingPromises_[iframeIdx] = new Promise(resolve => {
       this.initializeHandshake_(story, iframeEl).then(
         messaging => {
           messaging.setDefaultHandler(() => Promise.resolve());
-
           messaging.registerHandler('selectDocument', (event, data) => {
-            if (data.next) {
-              this.next_();
-            } else if (data.previous) {
-              this.previous_();
-            }
+            this.onSelectDocument_(data);
           });
-          this.messagingFor_[iframeIdx] = messaging;
-          resolve();
+          resolve(messaging);
         },
         err => {
           console /*OK*/
@@ -259,24 +257,10 @@ export class AmpStoryPlayer {
     this.currentIdx_++;
 
     const previousStory = this.stories_[this.currentIdx_ - 1];
-    this.updateVisibilityState_(
-      previousStory[IFRAME_IDX],
-      VisibilityState.INACTIVE
-    );
-    this.iframes_[previousStory[IFRAME_IDX]].setAttribute(
-      'i-amphtml-story-position',
-      -1
-    );
+    this.updatePreviousIframe_(previousStory[IFRAME_IDX]);
 
     const currentStory = this.stories_[this.currentIdx_];
-    this.updateVisibilityState_(
-      currentStory[IFRAME_IDX],
-      VisibilityState.VISIBLE
-    );
-    this.iframes_[currentStory[IFRAME_IDX]].setAttribute(
-      'i-amphtml-story-position',
-      0
-    );
+    this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
 
     const nextStoryIdx = this.currentIdx_ + 1;
     if (
@@ -299,24 +283,10 @@ export class AmpStoryPlayer {
     this.currentIdx_--;
 
     const previousStory = this.stories_[this.currentIdx_ + 1];
-    this.updateVisibilityState_(
-      previousStory[IFRAME_IDX],
-      VisibilityState.INACTIVE
-    );
-    this.iframes_[previousStory[IFRAME_IDX]].setAttribute(
-      'i-amphtml-story-position',
-      -1
-    );
+    this.updatePreviousIframe_(previousStory[IFRAME_IDX]);
 
     const currentStory = this.stories_[this.currentIdx_];
-    this.updateVisibilityState_(
-      currentStory[IFRAME_IDX],
-      VisibilityState.VISIBLE
-    );
-    this.iframes_[currentStory[IFRAME_IDX]].setAttribute(
-      'i-amphtml-story-position',
-      0
-    );
+    this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
 
     const nextStoryIdx = this.currentIdx_ - 1;
     if (
@@ -325,6 +295,39 @@ export class AmpStoryPlayer {
     ) {
       this.allocateIframeForStory_(nextStoryIdx, true /** reverse */);
     }
+  }
+
+  /**
+   * Updates an iframe to the `previous` state.
+   * @param {number} iframeIdx
+   * @private
+   */
+  updatePreviousIframe_(iframeIdx) {
+    this.updateVisibilityState_(iframeIdx, VisibilityState.INACTIVE);
+    this.updateIframePosition_(iframeIdx, IframePosition.PREVIOUS);
+  }
+
+  /**
+   * Updates an iframe to the `current` state.
+   * @param {number} iframeIdx
+   * @private
+   */
+  updateCurrentIframe_(iframeIdx) {
+    this.updateVisibilityState_(iframeIdx, VisibilityState.VISIBLE);
+    this.updateIframePosition_(iframeIdx, IframePosition.CURRENT);
+  }
+
+  /**
+   * Updates iframe position.
+   * @param {number} iframeIdx
+   * @param {!IframePosition} position
+   * @private
+   */
+  updateIframePosition_(iframeIdx, position) {
+    this.iframes_[iframeIdx].setAttribute(
+      'i-amphtml-iframe-position',
+      position
+    );
   }
 
   /**
@@ -343,16 +346,19 @@ export class AmpStoryPlayer {
     const detachedStory = this.stories_[detachedStoryIdx];
     const nextStory = this.stories_[nextStoryIdx];
 
-    this.messagingFor_[detachedStory[IFRAME_IDX]].unregisterHandler(
-      'selectDocument'
-    );
+    this.messagingPromises_[detachedStory[IFRAME_IDX]].then(messaging => {
+      messaging.unregisterHandler('selectDocument');
+    });
 
     nextStory[IFRAME_IDX] = detachedStory[IFRAME_IDX];
     detachedStory[IFRAME_IDX] = undefined;
 
     const nextIframe = this.iframes_[nextStory[IFRAME_IDX]];
     this.layoutIframe_(nextStory, nextIframe, VisibilityState.PRERENDER);
-    nextIframe.setAttribute('i-amphtml-story-position', reverse ? -1 : 1);
+    this.updateIframePosition_(
+      nextStory[IFRAME_IDX],
+      reverse ? IframePosition.PREVIOUS : IframePosition.NEXT
+    );
     this.setUpMessagingForIframe_(nextStory, nextIframe);
   }
 
@@ -409,13 +415,22 @@ export class AmpStoryPlayer {
    * @private
    */
   updateVisibilityState_(iframeIdx, visibilityState) {
-    this.handshakePromises_[iframeIdx].then(() => {
-      this.messagingFor_[iframeIdx].sendRequest(
-        'visibilitychange',
-        {state: visibilityState},
-        true
-      );
+    this.messagingPromises_[iframeIdx].then(messaging => {
+      messaging.sendRequest('visibilitychange', {state: visibilityState}, true);
     });
+  }
+
+  /**
+   * React to selectDocument events.
+   * @param {!Object} data
+   * @private
+   */
+  onSelectDocument_(data) {
+    if (data.next) {
+      this.next_();
+    } else if (data.previous) {
+      this.previous_();
+    }
   }
 }
 
