@@ -302,8 +302,7 @@ TEST(HTMLDatasetTest, WebkitData) {
           "testdata/tree-construction/isindex.dat",
           "testdata/tree-construction/"
           "main-element.dat",
-          "testdata/tree-construction/tests11.dat",
-          "testdata/tree-construction/tests19.dat",
+         "testdata/tree-construction/tests11.dat",
   };
   int num_test_cases = 0;
   for (auto pattern : htmlparser::testing::kTestDataDirs) {
@@ -323,7 +322,11 @@ TEST(HTMLDatasetTest, WebkitData) {
       defer(fd.close());
       EXPECT_TRUE(fd.good()) << "Error opening file path: " << path;
 
-      ParseOptions options = {.scripting = true, .frameset_ok = true};
+      ParseOptions options = {
+        .scripting = true,
+        .frameset_ok = true,
+        .allow_deprecated_tags = true
+      };
 
       while (!fd.eof()) {
         TestCaseData test_case{ReadParseTest(&fd)};
@@ -367,5 +370,5 @@ TEST(HTMLDatasetTest, WebkitData) {
 
   // Hardcoded, whenever dataset changes. Ensures no new tests are added, or
   // old tests removed, without maintainers knowledge.
-  EXPECT_EQ(621, num_test_cases);
+  EXPECT_EQ(726, num_test_cases);
 };
