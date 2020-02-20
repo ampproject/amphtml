@@ -20,4 +20,5 @@
  * This is run during the CI stage = performance;
  */
 
-console.log('hiiiiiiii :)');
+console /*OK*/
+  .log('hiiiiiiii :)');
