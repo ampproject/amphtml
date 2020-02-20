@@ -1472,28 +1472,19 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    const getUnlistenPromiseForSelector = (selector, selectionMethod) => {
-      return this.root
-        .getAmpElement(
-          context.parentElement || context,
-          selector,
-          selectionMethod
-        )
-        .then(element => {
-          return visibilityManagerPromise.then(
-            visibilityManager => {
-              return visibilityManager.listenElement(
-                element,
-                visibilitySpec,
-                this.getReadyPromise(waitForSpec, selector, element),
-                createReportReadyPromiseFunc,
-                this.onEvent_.bind(this, eventType, listener, element)
-              );
-            },
-            () => {}
+    const getUnlistenPromiseForElement = element =>
+      visibilityManagerPromise.then(
+        visibilityManager => {
+          return visibilityManager.listenElement(
+            element,
+            visibilitySpec,
+            this.getReadyPromise(waitForSpec, selector, element),
+            createReportReadyPromiseFunc,
+            this.onEvent_.bind(this, eventType, listener, element)
           );
-        });
-    };
+        },
+        () => {}
+      );
 
     let unlistenPromise;
     // Root selectors are delegated to analytics roots.
@@ -1523,14 +1514,38 @@ export class VisibilityTracker extends EventTracker {
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
 
       if (multiSelectorVisibilityOn && Array.isArray(selector)) {
+        userAssert(
+          !selectionMethod,
+          'Cannot have selectionMethod defined with an array selector: ',
+          selector
+        );
         unlistenPromise = Promise.all(
-          selector.map(s => getUnlistenPromiseForSelector(s, selectionMethod))
-        );
+          selector.map(individualSelector => {
+            return this.root.getAmpElements(individualSelector);
+          })
+        ).then(selectorArrayOfElements => {
+          const uniqueElements = [];
+          for (let i = 0; i < selectorArrayOfElements.length; i++) {
+            for (let j = 0; j < selectorArrayOfElements[i].length; j++) {
+              if (
+                uniqueElements.indexOf(selectorArrayOfElements[i][j]) === -1
+              ) {
+                uniqueElements.push(selectorArrayOfElements[i][j]);
+              }
+            }
+          }
+          return Promise.all(
+            uniqueElements.map(element => getUnlistenPromiseForElement(element))
+          );
+        });
       } else {
-        unlistenPromise = getUnlistenPromiseForSelector(
-          selector,
-          selectionMethod
-        );
+        unlistenPromise = this.root
+          .getAmpElement(
+            context.parentElement || context,
+            selector,
+            selectionMethod
+          )
+          .then(element => getUnlistenPromiseForElement(element));
       }
     }
 

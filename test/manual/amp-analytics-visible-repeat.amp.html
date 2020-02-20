@@ -61,13 +61,19 @@
       {
         "transport": {"beacon": false, "xhrpost": false},
         "requests": {
-          "base": "fake.com/ad?multiVisible=true&adId=${id}"
+          "base": "fake.com/ad?multiVisible=true&adId=${id}",
+          "queryAll": "fake.com/ad?querySelectorAll=true&adId=${id}"
         },
         "triggers": {
           "multiVisible": {
             "on": "visible",
             "request": "base",
             "selector": ["#ad1","#ad2"]
+          },
+          "querySelectorAll": {
+            "on": "visible",
+            "request": "queryAll",
+            "selector": [".myClass"]
           }
         }
       }
@@ -154,7 +160,18 @@
         data-valid='true'
         data-vars-id='ad2'
         data-ad-width=300
-        data-ad-height=250>
+        data-ad-height=250
+        class="myClass">
+    </amp-ad>
+
+    <amp-ad id='ad3' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad3'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
     </amp-ad>
 
 
