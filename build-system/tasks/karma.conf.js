@@ -286,7 +286,7 @@ module.exports = {
   browserNoActivityTimeout: 2 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
-  browserDisconnectTolerance: isTravisBuild() ? 2 : 0,
+  browserDisconnectTolerance: isTravisBuild() ? 3 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
