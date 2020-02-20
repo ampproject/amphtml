@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {createElement, useRef, useState} from '../../../src/preact';
+import {createElement, useEffect, useRef, useState} from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
-import {useOnEnterViewport} from '../../../src/preact/use-in-view';
+import {useInViewEffect} from '../../../src/preact/use-in-view';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
@@ -28,9 +28,9 @@ export function Timeago(props) {
     getFuzzyTimestampValue(props)
   );
   const ref = useRef(null);
-  useOnEnterViewport(ref, () => {
-    setTimestamp(getFuzzyTimestampValue(props));
-  });
+  useInViewEffect(ref, () => setTimestamp(getFuzzyTimestampValue(props)), [
+    props,
+  ]);
   useResourcesNotify();
   return createElement('time', {datetime: props['datetime'], ref}, timestamp);
 }
