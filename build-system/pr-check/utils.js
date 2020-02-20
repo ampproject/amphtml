@@ -121,7 +121,7 @@ async function startSauceConnect(functionName) {
     'https://amphtml-sauce-token-dealer.appspot.com/getJwtToken'
   );
   process.env['SAUCE_ACCESS_KEY'] = response.trim();
-  const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh';
+  const startScCmd = 'build-system/sauce_connect/start_sauce_connect.sh --verbose --logfile -';
   const fileLogPrefix = colors.bold(colors.yellow(`${functionName}:`));
   console.log(
     '\n' + fileLogPrefix,
