@@ -209,6 +209,21 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
+
+    // Was set async before
+    this.register_('FIRST_CONTENTFUL_PAINT', () => {
+      return Services.performanceFor(
+        this.ampdoc_.win
+      ).getFirstContentfulPaint();
+    });
+
+    this.register_('FIRST_VIEWPORT_READY', () => {
+      return Services.performanceFor(this.ampdoc_.win).getFirstViewportReady();
+    });
+
+    this.register_('MAKE_BODY_VISIBLE', () => {
+      return Services.performanceFor(this.ampdoc_.win).getMakeBodyVisible();
+    });
   }
 
   /**
@@ -226,6 +241,9 @@ export class VariableService {
   }
 
   /**
+   * TODO (micajuineho): If we add new synchronous macros, we
+   * will need to split this method and getMacros into sync and
+   * async version (currently all macros are async).
    * @param {string} name
    * @param {*} macro
    */
