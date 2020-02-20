@@ -17,6 +17,8 @@
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
+import {parseUrlDeprecated} from '../../../src/url';
+import {toWin} from '../../../src/types';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -29,11 +31,8 @@ export class PremiumadsNetworkConfig {
     this.autoAmpAdsElement_ = autoAmpAdsElement;
   }
 
-  /**
-   * @param {!Window} unused
-   * @override
-   */
-  isEnabled(unused) {
+  /** @override */
+  isEnabled() {
     return true;
   }
 
@@ -41,38 +40,46 @@ export class PremiumadsNetworkConfig {
    * True if responsive is enabled for auto-ads
    */
   isResponsiveEnabled() {
-    return false;
+    return true;
   }
 
   /** @override */
   getConfigUrl() {
     const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
-    const publisherId = this.autoAmpAdsElement_.getAttribute(
-      'data-publisher-id'
-    );
-    const tagId = this.autoAmpAdsElement_.getAttribute('data-tag-id');
+    const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
+    const win = toWin(this.autoAmpAdsElement_.ownerDocument.defaultView);
     return buildUrl(
-      '//v2.premiumads.com/ad-request/amp',
+      'https://localhost:5001/autoads',
       {
-        'p': publisherId,
-        't': tagId,
-        'u': docInfo.canonicalUrl,
-        'w': window.screen.width,
-        'h': window.screen.height,
+        'client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+        'plah': canonicalHostname,
+        'ama_t': 'amp',
+        'url': docInfo.canonicalUrl,
+        'debug_experiment_id':
+          (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] || null,
       },
-      /* maxLength */ 4096
+      4096
     );
   }
 
   /** @override */
   getAttributes() {
-    const attributes = dict({
-      'layout': 'fixed',
-      'data-multi-size-validation': 'false',
-      'type': 'doubleclick',
+    const attributesObj = dict({
+      'type': 'adsense',
       'data-ad': 'premiumads',
+      'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
     });
-    return attributes;
+    const dataAdHost = this.autoAmpAdsElement_.getAttribute('data-ad-host');
+    const dataAdHostChannel = this.autoAmpAdsElement_.getAttribute(
+      'data-ad-host-channel'
+    );
+    if (dataAdHost) {
+      attributesObj['data-ad-host'] = dataAdHost;
+      if (dataAdHostChannel) {
+        attributesObj['data-ad-host-channel'] = dataAdHostChannel;
+      }
+    }
+    return attributesObj;
   }
 
   /** @override */
