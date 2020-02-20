@@ -42,6 +42,7 @@ addons:
 stages:
   - name: build
   - name: test
+  - name: performance
   - name: experiment
     if: type = push
 jobs:
@@ -103,6 +104,21 @@ jobs:
       name: 'Experiment C Tests'
       script:
         - unbuffer node build-system/pr-check/experiment-tests.js --experiment=experimentC
+      cache: false
+    - stage: performance
+      name: 'Components'
+      script:
+        - unbuffer node build-system/pr-check/performance-tests.js --fixture=components --device=high
+      cache: false
+    - stage: performance
+      name: 'Real World Pages'
+      script:
+        - unbuffer node build-system/pr-check/performance-tests.js --fixture=realworld --device=high
+      cache: false
+    - stage: performance
+      name: 'Low Tier Devices'
+      script:
+        - unbuffer node build-system/pr-check/performance-tests.js --fixture=realworld --device=low
       cache: false
 before_cache:
   # do not store cache for pr builds or experiment stage builds
