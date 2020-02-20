@@ -25,15 +25,15 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "htmlparser/atomutil.h"
-#include "htmlparser/defer.h"
-#include "htmlparser/fileutil.h"
-#include "htmlparser/node.h"
-#include "htmlparser/parser.h"
-#include "htmlparser/renderer.h"
-#include "htmlparser/strings.h"
-#include "htmlparser/testconstants.h"
-#include "htmlparser/tokenizer.h"
+#include "atomutil.h"
+#include "defer.h"
+#include "fileutil.h"
+#include "node.h"
+#include "parser.h"
+#include "renderer.h"
+#include "strings.h"
+#include "testconstants.h"
+#include "tokenizer.h"
 
 using namespace htmlparser;
 

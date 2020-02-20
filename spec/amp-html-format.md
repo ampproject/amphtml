@@ -195,7 +195,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">script</td>
-    <td>Prohibited unless the type is <code>application/ld+json</code> or <code>text/plain</code>. (Other non-executable values may be added as needed.) Exception is the mandatory script tag to load the AMP runtime and the script tags to load extended components.</td>
+    <td>Prohibited unless the type is <code>application/ld+json</code>, <code>application/json</code>, or <code>text/plain</code>. (Other non-executable values may be added as needed.) Exception is the mandatory script tag to load the AMP runtime and the script tags to load extended components.</td>
   </tr>
   <tr>
     <td width="30%">noscript</td>

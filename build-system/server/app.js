@@ -413,7 +413,7 @@ app.use('/form/autocomplete/query', (req, res) => {
 });
 
 app.use('/form/autocomplete/error', (req, res) => {
-  res(500);
+  res.status(500).end();
 });
 
 app.use('/form/mention/query', (req, res) => {

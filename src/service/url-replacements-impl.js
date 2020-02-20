@@ -630,7 +630,7 @@ export class GlobalVariableSource extends VariableSource {
         if (!bind) {
           return '';
         }
-        return bind.getStateValue(/** @type {string} */ (key));
+        return bind.getStateValue(/** @type {string} */ (key)) || '';
       });
     });
   }
