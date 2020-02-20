@@ -287,7 +287,7 @@ module.exports = {
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
   // DO NOT SUBMIT
-  browserDisconnectTolerance: isTravisBuild() ? 6 : 0,
+  browserDisconnectTolerance: isTravisBuild() ? 2 : 0,
 
   // Import our gulp webserver as a Karma server middleware
   // So we instantly have all the custom server endpoints available
