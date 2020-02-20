@@ -291,12 +291,6 @@ std::optional<Error> Dump(Node* node, std::stringbuf* buffer) {
   return std::nullopt;
 }
 
-void DumpDocument(Node* doc) {
-  for (Node* c = doc->FirstChild(); c; c = c->NextSibling()) {
-    DumpDocument(c);
-  }
-}
-
 TEST(HTMLDatasetTest, WebkitData) {
   // Files excluded from testing due to remaining TODOs in the parser.
   std::vector<std::string> files_excluded_from_test = {
@@ -310,7 +304,6 @@ TEST(HTMLDatasetTest, WebkitData) {
           "main-element.dat",
           "testdata/tree-construction/tests11.dat",
           "testdata/tree-construction/tests19.dat",
-          "testdata/tree-construction/tests25.dat",
   };
   int num_test_cases = 0;
   for (auto pattern : htmlparser::testing::kTestDataDirs) {
@@ -374,5 +367,5 @@ TEST(HTMLDatasetTest, WebkitData) {
 
   // Hardcoded, whenever dataset changes. Ensures no new tests are added, or
   // old tests removed, without maintainers knowledge.
-  EXPECT_EQ(595, num_test_cases);
+  EXPECT_EQ(621, num_test_cases);
 };
