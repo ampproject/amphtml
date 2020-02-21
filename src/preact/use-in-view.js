@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import {dev} from '../log';
 import {useEffect, useRef} from './index';
+
+/** @type {null|IntersectionObserver} */ let sharedObserver = null;
 
 /**
  * @param {{current: HTMLElement}} ref
@@ -22,14 +25,8 @@ import {useEffect, useRef} from './index';
  */
 export function useFnInView(ref, fn) {
   const isIntersectingRef = useRef(false);
-
-  // TODO: The IntersectionObserver should be shared across instances via context
-  // Currently assumes observing one node at a time -- does this by disconnecting all nodes
-  /** @type {{current: (null|IntersectionObserver)}} */ const observerRef = useRef(
-    null
-  );
-  if (observerRef.current === null) {
-    observerRef.current = new IntersectionObserver(entries => {
+  if (sharedObserver === null) {
+    sharedObserver = new IntersectionObserver(entries => {
       const {isIntersecting} = entries[entries.length - 1];
       if (isIntersecting !== isIntersectingRef.current) {
         isIntersectingRef.current = isIntersecting;
@@ -39,17 +36,16 @@ export function useFnInView(ref, fn) {
       }
     });
   }
-
-  // Hook for changes in IntersectionObserver dependencies
   useEffect(() => {
     const node = ref.current;
-    const observer = observerRef.current;
     if (node) {
-      observer.observe(node);
+      sharedObserver.observe(dev().assertElement(node));
     }
     return () => {
       isIntersectingRef.current = false;
-      observer.disconnect();
+      if (node) {
+        sharedObserver.unobserve(dev().assertElement(node));
+      }
     };
-  }, [ref.current, observerRef.current]);
+  }, [ref.current]);
 }
