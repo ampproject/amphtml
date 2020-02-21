@@ -279,6 +279,7 @@ describes.realWin(
         ampStickyAd = win.document.createElement('amp-sticky-ad');
         ampStickyAd.setAttribute('layout', 'nodisplay');
         ampImg = win.document.createElement('amp-img');
+        ampImg.setAttribute('layout', 'nodisplay');
         ampAd1 = createElementWithAttributes(win.document, 'amp-ad', {
           'type': '_ping_',
           'height': 50,
