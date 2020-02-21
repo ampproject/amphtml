@@ -23,6 +23,17 @@
  */
 const env = self.AMP_CONFIG || {};
 
+const thirdPartyFrameRegex =
+  (typeof env['thirdPartyFrameRegex'] == 'string'
+    ? new RegExp(env['thirdPartyFrameRegex'])
+    : env['thirdPartyFrameRegex']) || /^d-\d+\.ampproject\.net$/;
+
+const cdnProxyRegex =
+  (typeof env['cdnProxyRegex'] == 'string'
+    ? new RegExp(env['cdnProxyRegex'])
+    : env['cdnProxyRegex']) ||
+  /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/;
+
 /**
  * Check for a custom URL definition in special <meta> tags. Note that this does
  * not allow for distinct custom URLs in AmpDocShadow instances. The shell is
@@ -39,6 +50,11 @@ function getMetaUrl(name) {
     return null;
   }
 
+  // Disallow on proxy origins
+  if (self.location && cdnProxyRegex.test(self.location.origin)) {
+    return null;
+  }
+
   const metaEl = self.document.head./*OK*/ querySelector(
     `meta[name="${name}"]`
   );
@@ -50,28 +66,17 @@ const metaUrls = {
   'runtime-host': getMetaUrl('runtime-host'),
 };
 
-const thirdPartyFrameRegex =
-  typeof env['thirdPartyFrameRegex'] == 'string'
-    ? new RegExp(env['thirdPartyFrameRegex'])
-    : env['thirdPartyFrameRegex'];
-
-const cdnProxyRegex =
-  typeof env['cdnProxyRegex'] == 'string'
-    ? new RegExp(env['cdnProxyRegex'])
-    : env['cdnProxyRegex'];
-
 /** @type {!Object<string, string|boolean|RegExp|Array<RegExp>>} */
 export const urls = {
   thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
   thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
-  thirdPartyFrameRegex: thirdPartyFrameRegex || /^d-\d+\.ampproject\.net$/,
+  thirdPartyFrameRegex,
   cdn:
     env['cdnUrl'] || metaUrls['runtime-host'] || 'https://cdn.ampproject.org',
   /* Note that cdnProxyRegex is only ever checked against origins
    * (proto://host[:port]) so does not need to consider path
    */
-  cdnProxyRegex:
-    cdnProxyRegex || /^https:\/\/([a-zA-Z0-9_-]+\.)?cdn\.ampproject\.org$/,
+  cdnProxyRegex,
   localhostRegex: /^https?:\/\/localhost(:\d+)?$/,
   errorReporting:
     env['errorReportingUrl'] || 'https://amp-error-reporting.appspot.com/r',
