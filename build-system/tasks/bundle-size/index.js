@@ -49,7 +49,7 @@ const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
 const replacementExpression = new RegExp(internalRuntimeVersion, 'g');
 
 /**
- * Get the brotli bundle sizes of the current build.
+ * Get the brotli bundle sizes of the current build after normalizing the RTV number.
  *
  * @return {Map<string, number>} the bundle size in KB rounded to 2 decimal
  *   points.
@@ -59,8 +59,6 @@ async function getBrotliBundleSizes() {
 
   log(cyan('brotli'), 'bundle sizes are:');
   const values = serialReport(process.cwd(), content =>
-    // Brotli compressed size fluctuates because of changes in the RTV number, so
-    // normalize this across pull requests by replacing that RTV with a constant.
     content.replace(replacementExpression, normalizedRtvNumber)
   );
   let next = await values.next();
