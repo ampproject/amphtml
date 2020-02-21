@@ -204,7 +204,7 @@ export class ResourcesImpl {
       // supports it via {root: document}, which throws on other browsers.
       const root =
         /** @type {?Element} */ (this.ampdoc.isSingleDoc() && iframed
-          ? this.win.document
+          ? /** @type {*} */ (this.win.document)
           : null);
       try {
         this.intersectionObserver_ = new IntersectionObserver(
