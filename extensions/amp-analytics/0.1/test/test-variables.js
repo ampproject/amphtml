@@ -462,12 +462,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
-    it('should replace TIMEZONE_CODE', () => {
-      // Need to fake the macros because timezone is browser dependent (Travis dies)
-      variables.macros_['TIMEZONE_CODE'] = () => 'America/Los_Angeles';
-      return check('?tz_code=TIMEZONE_CODE', '?tz_code=America%2FLos_Angeles');
-    });
-
     it('should replace FIRST_CONTENTFUL_PAINT', () => {
       env.sandbox.stub(Services, 'performanceFor').returns({
         getFirstContentfulPaint() {
