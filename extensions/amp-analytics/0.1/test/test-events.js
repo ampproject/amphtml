@@ -1898,6 +1898,9 @@ describes.realWin('Events', {amp: 1}, env => {
         targetSignals2 = new Signals();
         target2.signals = () => targetSignals2;
 
+        target.setAttribute('data-vars-id', '123');
+        target2.setAttribute('data-vars-id', '456');
+
         saveCallback2 = env.sandbox.match(arg => {
           if (typeof arg == 'function') {
             saveCallback2.callback = arg;
@@ -1977,12 +1980,14 @@ describes.realWin('Events', {amp: 1}, env => {
         expect(eventsSpy.getCall(0).args[2]).to.equal(target);
         expect(eventsSpy.getCall(0).args[3]).to.deep.equal({
           totalVisibleTime: 10,
+          id: '123',
         });
         expect(eventsSpy.getCall(1).args[0]).to.equal('visible');
         expect(eventsSpy.getCall(1).args[1]).to.equal(eventResolver);
         expect(eventsSpy.getCall(1).args[2]).to.equal(target2);
         expect(eventsSpy.getCall(1).args[3]).to.deep.equal({
           totalVisibleTime: 15,
+          id: '456',
         });
       });
 
@@ -2041,12 +2046,14 @@ describes.realWin('Events', {amp: 1}, env => {
         expect(eventsSpy.getCall(0).args[2]).to.equal(target);
         expect(eventsSpy.getCall(0).args[3]).to.deep.equal({
           totalVisibleTime: 10,
+          id: '123',
         });
         expect(eventsSpy.getCall(1).args[0]).to.equal('visible');
         expect(eventsSpy.getCall(1).args[1]).to.equal(eventResolver);
         expect(eventsSpy.getCall(1).args[2]).to.equal(target2);
         expect(eventsSpy.getCall(1).args[3]).to.deep.equal({
           totalVisibleTime: 15,
+          id: '456',
         });
       });
 
@@ -2071,7 +2078,6 @@ describes.realWin('Events', {amp: 1}, env => {
           .returns(unlisten)
           .once();
         res = tracker.add(analyticsElement, 'visible', config, eventResolver);
-        expect(res).to.be.a('function');
         const unlistenReady = getAmpElementSpy.returnValues[0];
         // #getAmpElement Promise
         await unlistenReady;
@@ -2085,6 +2091,7 @@ describes.realWin('Events', {amp: 1}, env => {
         expect(eventsSpy.getCall(0).args[2]).to.equal(target);
         expect(eventsSpy.getCall(0).args[3]).to.deep.equal({
           totalVisibleTime: 10,
+          id: '123',
         });
         expect(eventsSpy).to.be.calledOnce;
         unlisten2 = null;
