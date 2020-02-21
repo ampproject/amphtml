@@ -16,8 +16,6 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const brotliSize = require('brotli-size');
-const fs = require('fs');
 const globby = require('globby');
 const log = require('fancy-log');
 const path = require('path');
@@ -42,7 +40,12 @@ const {report} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
 
-const fileGlobs = ['dist/*.js', 'dist/v0/*-?.?.js'];
+const fileGlobs = [
+  'dist/*.js',
+  'dist/v0/*-?.?.js',
+  'dist/*.mjs',
+  'dist/v0/*-?.?.mjs',
+];
 const normalizedRtvNumber = '1234567890123';
 
 const expectedGitHubRepoSlug = 'ampproject/amphtml';
@@ -59,21 +62,37 @@ async function getBrotliBundleSizes() {
   // normalize this across pull requests by replacing that RTV with a constant.
   const bundleSizes = {};
 
-  const values = await report(process.cwd());
-  console.log(values);
-
   log(cyan('brotli'), 'bundle sizes are:');
-  for (const filePath of globby.sync(fileGlobs)) {
-    const normalizedFileContents = fs
-      .readFileSync(filePath, 'utf8')
-      .replace(new RegExp(internalRuntimeVersion, 'g'), normalizedRtvNumber);
-
-    const relativeFilePath = path.relative('.', filePath);
-    const bundleSize = parseFloat(
-      (brotliSize.sync(normalizedFileContents) / 1024).toFixed(2)
+  const values = report(process.cwd(), content =>
+    content.replace(
+      new RegExp(internalRuntimeVersion, 'g'),
+      normalizedRtvNumber
+    )
+  );
+  let next = await values.next();
+  let pathMap = undefined;
+  if (!next.done) {
+    const compressed = next.value[0];
+    pathMap = new Map(
+      Array.from(compressed.keys()).map(path => [path, undefined])
     );
-    log(' ', cyan(relativeFilePath) + ':', green(`${bundleSize}KB`));
-    bundleSizes[relativeFilePath] = bundleSize;
+  }
+  while (!next.done) {
+    const {value: currentValue} = next;
+    pathMap.forEach((pathValue, filePath) => {
+      const retrievedValues = currentValue[0].get(filePath);
+      if (pathValue === undefined && retrievedValues) {
+        const brotliSize = retrievedValues[0][0];
+        if (brotliSize !== null) {
+          const relativePath = path.relative('.', filePath);
+          const reportedSize = parseFloat((brotliSize / 1024).toFixed(2));
+          log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
+          pathMap.set(path, brotliSize);
+          bundleSize[relativePath] = reportedSize;
+        }
+      }
+    });
+    next = await values.next();
   }
 
   return bundleSizes;

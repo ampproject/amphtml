@@ -7,10 +7,10 @@
   resolved "https://registry.yarnpkg.com/@ampproject/animations/-/animations-0.2.0.tgz#82b6b68b6fe0eacbcc95d3f0a82ddf19a0e2b316"
   integrity sha512-CiMdKK9eMa6eqhqZc9bq86nPdgbALY+E8rKgUPR7wf2wGUNTm/jtFZQ7fn4sj/oggn0wvadBokabErtl1m1KSw==
 
-"@ampproject/filesize@3.0.2":
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/@ampproject/filesize/-/filesize-3.0.2.tgz#0399627dd535cf29d86f2e52a25e627669f1338a"
-  integrity sha512-CUC1ExcyCQo2nIGzu+EJDnayG0r014OdC19zEOTfU9sjDh/Y5pCtr3Nly8C1TXviMkDgmsb5qbjOLXRW95mLdQ==
+"@ampproject/filesize@3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@ampproject/filesize/-/filesize-3.1.0.tgz#1a2787f834e9212da73499feb07b1ff776acdb7c"
+  integrity sha512-/XeJR2fRy0trAttOt7qo0MLvFBD0bRA7FOR5fXPu61OpwqVxL2e7FLVXY1vSkzPivMhSxw2YHPm4Hw9XKufqaw==
   dependencies:
     bytes "3.1.0"
     fast-glob "3.1.1"
@@ -3491,13 +3491,6 @@ brorand@^1.0.1:
   resolved "https://registry.yarnpkg.com/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
   integrity sha1-EsJe/kCkXjwyPrhnWgoM5XsiNx8=
 
-brotli-size@4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/brotli-size/-/brotli-size-4.0.0.tgz#a05ee3faad3c0e700a2f2da826ba6b4d76e69e5e"
-  integrity sha512-uA9fOtlTRC0iqKfzff1W34DXUA3GyVqbUaeo3Rw3d4gd1eavKVCETXrn3NzO74W+UVkG3UHu8WxUi+XvKI/huA==
-  dependencies:
-    duplexer "0.1.1"
-
 browser-pack@^6.0.1:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/browser-pack/-/browser-pack-6.1.0.tgz#c34ba10d0b9ce162b5af227c7131c92c2ecd5774"
@@ -5521,7 +5514,7 @@ duplexer3@^0.1.4:
   resolved "https://registry.yarnpkg.com/duplexer3/-/duplexer3-0.1.4.tgz#ee01dd1cac0ed3cbc7fdbea37dc0a8f1ce002ce2"
   integrity sha1-7gHdHKwO08vH/b6jfcCo8c4ALOI=
 
-duplexer@0.1.1, duplexer@^0.1.1, duplexer@~0.1.1:
+duplexer@^0.1.1, duplexer@~0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/duplexer/-/duplexer-0.1.1.tgz#ace6ff808c1ce66b57d1ebf97977acb02334cfc1"
   integrity sha1-rOb/gIwc5mtX0ev5eXessCM0z8E=
