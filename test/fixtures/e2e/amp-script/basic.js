@@ -14,16 +14,8 @@
  * limitations under the License.
  */
 
-document.getElementById('simple').addEventListener('click', () => {
+document.querySelector('button').addEventListener('click', () => {
   const el = document.createElement('h1');
   el.textContent = 'Hello World!';
   document.body.appendChild(el);
-});
-
-document.getElementById('tail').addEventListener('click', () => {
-  setTimeout(function() {
-    const el = document.createElement('h1');
-    el.textContent = 'Hello World!';
-    document.body.appendChild(el);
-  }, 6000);
 });

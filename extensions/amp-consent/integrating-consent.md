@@ -59,7 +59,7 @@ window.parent.postMessage(
 );
 ```
 
-Action `'enter-fullscreen'` requests the AMP runtime to expand the iframe to fullscreen. Once the request is received, `amp-consent` will send a message via `postMessage()` to the iframe to inform the success of the request:
+Action `'enter-fullscreen'` requests the AMP runtime to expand the iframe to fullscreen. `amp-consent` will only allow the iframe enter fullscreen if it detects user interaction with the iframe (e.g. clicking on the iframe). Once the request is received, `amp-consent` will send a message (via `postMessage()`) to the iframe to inform the success of the request:
 
 ```javascript
   {

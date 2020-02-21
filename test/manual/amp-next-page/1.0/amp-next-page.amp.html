@@ -9,6 +9,7 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-1.0.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
     <script>
       (self.AMP=self.AMP||[]).push(function(AMP){
@@ -18,6 +19,17 @@
     <style amp-custom>
       .content {
         padding: 20px;
+      }
+      .amp-next-page-separator {
+        margin-top: 16px;
+        margin-bottom: 16px;
+      }
+      .my-footer {
+        padding: 24px;
+        text-align: center;
+        color: #AAAAAA;
+        display: block;
+        font-family: Arial, Helvetica, sans-serif;
       }
     </style>
 </head>
@@ -258,7 +270,8 @@
         quis metus in mi pharetra tempus. Etiam dapibus tellus vitae blandit
         rhoncus. Fusce commodo risus id sapien ultrices vehicula.
       </p>
-    </div>
+    </div>    
+    <!-- amp-next-page configuration -->
     <amp-next-page>
       <script type="application/json">
         [
@@ -284,12 +297,22 @@
           }
         ]
       </script>
-      <div amp-next-page-separator>
-          Read more
-      </div>
-      <div amp-next-page-more-box>
-          Here are a few more articles ...
-      </div>  
+      <!-- Custom Separator & Footer Elements
+        <div separator class="my-custom-separator">
+          <template type="amp-mustache">
+            <div class="my-custom-separator-content">
+              <amp-img src={{image}} layout="fixed" height="16" width="16"></amp-img>
+              <span>Next article: {{title}}</span>
+            </div>
+          </template>
+        </div>
+        <div footer class="my-custom-footer">
+            Here are a few more articles ...
+        </div>
+      -->
+      <span class="my-footer">
+        more footer content here
+      </span>
     </amp-next-page>
   </body>
 </html>
