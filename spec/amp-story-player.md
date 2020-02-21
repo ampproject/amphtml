@@ -1,7 +1,6 @@
 ---
 $category@: presentation
 formats:
-  - websites
   - stories
 teaser:
   text: A player for embedding and playing your favorite stories in your own website.
@@ -76,41 +75,12 @@ The code snippet below demonstrates an embed of `<amp-story-player>` in a non-AM
     rel="stylesheet"
     type="text/css"
   />
-  <style injected>
-    .story-player-iframe {
-      background-size: cover;
-      display: block;
-      position: relative;
-      height: 100%;
-      width: 100%;
-      flex: 0 0 100%;
-    }
-
-    .title {
-      background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0),
-        rgba(0, 0, 0, 1)
-      );
-      display: block;
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      color: #fff;
-      font-size: 40px;
-      padding: 88px 32px 32px 32px;
-      line-height: 1.25;
-      text-shadow: 3px 3px #000;
-    }
-  </style>
 </head>
 <body>
-  <h1>This is a NON-AMP page that embeds a story below:</h1>
   <amp-story-player style="width: 360px; height: 600px;">
     <a
-      href="https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/"
-      style="--story-player-poster: url('https://www-washingtonpost-com.cdn.ampproject.org/v/s/www.washingtonpost.com/graphics/2019/lifestyle/travel/amp-stories/a-locals-guide-to-what-to-eat-and-do-in-mexico-city/img/promo3x4.jpg')"
+      href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp/"
+      style="--story-player-poster: url('https://amp.dev/static/samples/img/story_dog2_portrait.jpg')"
     >
       A local’s guide to what to eat and do in Mexico City
     </a>
@@ -124,19 +94,15 @@ The code snippet below demonstrates an embed of `<amp-story-player>` in a non-AM
 
 The inline width and height ensures that the player will not cause any jumps in your website while the script is being loaded. Feel free to modify the values, but we recommend maintaining a 3:5 aspect ratio.
 
-#### width [recommended]
+#### style [recommended]
 
-Width of the player in pixels.
-
-#### height [recommended]
-
-Height of the player in pixels.
+Inline CSS properties for the width and height of the player. e.g. `style="width: 360px; height: 600px;"`
 
 ## Specify embedded story
 
 The `<amp-story-player>` component contains one `<a>` tag. Point the href attribute to the story URL.
 
-Place descriptive text of the story within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
+Place the story's title within the `<a>` tag. This provides a better user experience and allows search engines to crawl embedded stories.
 
 Use a poster image as a placeholder to display to users while the story loads. Add the `--story-player-poster` CSS variable as an inline style of the `<a>` tag and point to the poster image URL.
 
