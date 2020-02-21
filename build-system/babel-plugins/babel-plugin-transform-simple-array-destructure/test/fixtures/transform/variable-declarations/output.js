@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const _temp = document,
-      first = _temp[0],
-      second = _temp[1];
-
-const _temp2 = document(),
-      x = _temp2[0],
-      y = _temp2[1];
+const {
+  0: first,
+  1: second
+} = document;
+const {
+  0: x,
+  1: y
+} = document();

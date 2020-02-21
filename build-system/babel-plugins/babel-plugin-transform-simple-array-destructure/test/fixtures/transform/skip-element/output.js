@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 {
-  const _temp = document,
-        second = _temp[1];
-  const _temp2 = document,
-        x = _temp2[0],
-        z = _temp2[2];
+  const {
+    1: second
+  } = document;
+  const {
+    0: x,
+    2: z
+  } = document;
 }
 {
-  const _temp3 = document(),
-        second = _temp3[1];
-
-  const _temp4 = document(),
-        x = _temp4[0],
-        z = _temp4[2];
+  const {
+    1: second
+  } = document();
+  const {
+    0: x,
+    2: z
+  } = document();
 }

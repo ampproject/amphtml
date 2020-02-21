@@ -29,25 +29,17 @@ module.exports = function(babel) {
           );
         }
 
+        const props = [];
         const {elements} = path.node;
-        const id = path.scope.generateUidIdentifier();
-        path.replaceWith(id);
-
-        const destructures = [];
         for (let i = 0; i < elements.length; i++) {
           const element = elements[i];
           if (element === null) {
             continue;
           }
 
-          destructures.push(
-            t.variableDeclarator(
-              element,
-              t.memberExpression(t.clone(id), t.numericLiteral(i), true)
-            )
-          );
+          props.push(t.objectProperty(t.numericLiteral(i), element));
         }
-        parentPath.insertAfter(destructures);
+        path.replaceWith(t.objectPattern(props));
       },
     },
   };
