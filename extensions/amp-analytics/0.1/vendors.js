@@ -20,7 +20,6 @@ import {
   jsonLiteral,
 } from '../../../src/json';
 
-
 // TODO(zhouyx@: Rename file and object name)
 const DEFAULT_CONFIG = jsonLiteral({
   'transport': {'beacon': true, 'xhrpost': true, 'image': true},
@@ -95,5 +94,6 @@ const DEFAULT_CONFIG = jsonLiteral({
 /**
  * @const {!JsonObject}
  */
-export const ANALYTICS_CONFIG =
-  jsonConfiguration({'default': includeJsonLiteral(DEFAULT_CONFIG)});
+export const ANALYTICS_CONFIG = jsonConfiguration({
+  'default': includeJsonLiteral(DEFAULT_CONFIG),
+});
