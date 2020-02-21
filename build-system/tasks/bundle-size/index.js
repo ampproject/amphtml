@@ -68,8 +68,7 @@ async function getBrotliBundleSizes() {
     return bundleSizes;
   }
   while (!next.done) {
-    const {value: currentValue} = next;
-    const [filePath, brotliSize] = currentValue;
+    const [filePath, brotliSize] = next.value;
     const relativePath = path.relative('.', filePath);
     const reportedSize = parseFloat((brotliSize / 1024).toFixed(2));
     log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
