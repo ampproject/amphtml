@@ -35,6 +35,12 @@ const pc = process;
 const autocompleteEmailData = require('./autocomplete-test-data');
 const runVideoTestBench = require('./app-video-testbench');
 const {
+  getVariableRequest,
+  runVariableSubstitution,
+  saveVariableRequest,
+  saveVariables,
+} = require('./variable-substitution');
+const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
 } = require('./recaptcha-router');
@@ -407,7 +413,7 @@ app.use('/form/autocomplete/query', (req, res) => {
 });
 
 app.use('/form/autocomplete/error', (req, res) => {
-  res(500);
+  res.status(500).end();
 });
 
 app.use('/form/mention/query', (req, res) => {
@@ -684,7 +690,7 @@ function getLiveBlogItem() {
         <div class="social-box">
           <amp-social-share type="facebook"
               data-param-text="Hello world"
-              data-param-href="https://example.com/?ref=URL"
+              data-param-href="https://example.test/?ref=URL"
               data-param-app_id="145634995501895"></amp-social-share>
           <amp-social-share type="twitter"></amp-social-share>
         </div>
@@ -754,6 +760,26 @@ app.use('/impression-proxy/', (req, res) => {
 
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
+
+/**
+ * Acts in a similar fashion to /serve_mode_change. Saves
+ * analytics requests via /run-variable-substitution, and
+ * then returns the encoded/substituted/replaced request
+ * via /get-variable-request.
+ */
+
+// Saves the variables input to be used in run-variable-substitution
+app.get('/save-variables', saveVariables);
+
+// Creates an iframe with amp-analytics. Analytics request
+// uses save-variable-request as its endpoint.
+app.get('/run-variable-substitution', runVariableSubstitution);
+
+// Saves the analytics request to the dev server.
+app.get('/save-variable-request', saveVariableRequest);
+
+// Returns the saved analytics request.
+app.get('/get-variable-request', getVariableRequest);
 
 let forcePromptOnNext = false;
 app.post('/get-consent-v1/', (req, res) => {
@@ -900,7 +926,11 @@ app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
 app.get(
-  ['/examples/*.html', '/test/manual/*.html', '/test/fixtures/e2e/*/*.html'],
+  [
+    '/examples/(**/)?*.html',
+    '/test/manual/(**/)?*.html',
+    '/test/fixtures/e2e/(**/)?*.html',
+  ],
   (req, res, next) => {
     const filePath = req.path;
     const mode = SERVE_MODE;
@@ -975,7 +1005,7 @@ app.get(
 
         // Extract amp-consent for the given 'type' specified in URL query.
         if (
-          req.path.indexOf('/examples/cmp-vendors.amp.html') == 0 &&
+          req.path.indexOf('/examples/amp-consent/cmp-vendors.amp.html') == 0 &&
           req.query.type
         ) {
           const consent = file.match(

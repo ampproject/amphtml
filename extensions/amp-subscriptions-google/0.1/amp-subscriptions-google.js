@@ -39,6 +39,7 @@ import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factor
 import {UrlBuilder} from '../../amp-subscriptions/0.1/url-builder';
 import {assertHttpsUrl, parseUrlDeprecated} from '../../../src/url';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
+import {getData} from '../../../src/event-helper';
 import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -165,6 +166,7 @@ export class GoogleSubscriptionsPlatform {
       isFromUserAction: false,
       additionalParameters: null,
     });
+    this.runtime_.analytics().setUrl(ampdoc.getUrl());
     resolver();
 
     this.runtime_.setOnLoginRequest(request => {
@@ -184,6 +186,21 @@ export class GoogleSubscriptionsPlatform {
       );
     });
     this.runtime_.setOnFlowStarted(e => {
+      // This information is used by Propensity.
+      const params = /** @type {!JsonObject} */ ({});
+      const data = /** @type {!JsonObject} */ (getData(e) || {});
+      switch (e.flow) {
+        case Action.SUBSCRIBE:
+          params['product'] =
+            data['skuId'] || data['product'] || 'unknown productId';
+          params['active'] = true;
+          break;
+        case Action.SHOW_OFFERS:
+          params['skus'] = data['skus'] || '*';
+          params['source'] = data['source'] || 'unknown triggering source';
+          params['active'] = data['active'] || null;
+          break;
+      }
       if (
         e.flow == Action.SUBSCRIBE ||
         e.flow == Action.CONTRIBUTE ||
@@ -193,7 +210,8 @@ export class GoogleSubscriptionsPlatform {
         this.subscriptionAnalytics_.actionEvent(
           this.getServiceId(),
           e.flow,
-          ActionStatus.STARTED
+          ActionStatus.STARTED,
+          params
         );
       }
     });
@@ -420,10 +438,24 @@ export class GoogleSubscriptionsPlatform {
     response.complete().then(() => {
       this.serviceAdapter_.resetPlatforms();
     });
+    let product;
+    try {
+      const entitlement =
+        response.entitlements && response.entitlements.getEntitlementForThis();
+      if (entitlement) {
+        product = entitlement.getSku();
+      }
+    } catch (ex) {}
+    const params = /** @type {!JsonObject} */ ({
+      'active': true,
+      'product': product || 'unknown subscriptionToken',
+    });
+
     this.subscriptionAnalytics_.actionEvent(
       this.getServiceId(),
       eventType,
-      ActionStatus.SUCCESS
+      ActionStatus.SUCCESS,
+      params
     );
   }
 
@@ -704,7 +736,7 @@ AMP.extension(TAG, '0.1', function(AMP) {
      * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
      * @return {*} TODO(#23582): Specify return type
      */
-    ampdoc => {
+    function(ampdoc) {
       const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
       const element = ampdoc.getHeadNode();
       Services.subscriptionsServiceForDoc(element).then(service => {

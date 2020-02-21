@@ -1345,6 +1345,15 @@ describes.realWin(
         ).to.not.exist;
       });
 
+      it('should import meta content', () => {
+        const metaEl = win.document.createElement('meta');
+        metaEl.setAttribute('name', 'abc');
+        metaEl.setAttribute('content', '123');
+        importDoc.head.appendChild(metaEl);
+        const amp = win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
+        expect(amp.ampdoc.getMetaByName('abc')).to.equal('123');
+      });
+
       it('should start as visible by default', () => {
         win.AMP.attachShadowDoc(hostElement, importDoc, docUrl);
         expect(ampdoc.getVisibilityState()).to.equal('visible');
@@ -1625,7 +1634,7 @@ describes.realWin(
 
         it('should ignore unknown script', () => {
           expectAsyncConsoleError(
-            '[runtime] - unknown script:  [object HTMLScriptElement] ' +
+            '[multidoc-manager] - unknown script:  [object HTMLScriptElement] ' +
               'https://cdn.ampproject.org/other.js'
           );
 
@@ -1711,7 +1720,7 @@ describes.realWin(
 
         it('should ignore inline script if javascript', () => {
           expectAsyncConsoleError(
-            '[runtime] - unallowed inline javascript:  ' +
+            '[multidoc-manager] - unallowed inline javascript:  ' +
               '[object HTMLScriptElement]',
             2
           );

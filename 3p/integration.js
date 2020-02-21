@@ -115,6 +115,7 @@ import {blade} from '../ads/blade';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
 import {broadstreetads} from '../ads/broadstreetads';
+import {byplay} from '../ads/byplay';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
@@ -253,6 +254,7 @@ import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
+import {temedya} from '../ads/temedya';
 import {torimochi} from '../ads/torimochi';
 import {tracdelight} from '../ads/tracdelight';
 import {triplelift} from '../ads/triplelift';
@@ -262,12 +264,14 @@ import {ucfunnel} from '../ads/ucfunnel';
 import {unruly} from '../ads/unruly';
 import {uzou} from '../ads/uzou';
 import {valuecommerce} from '../ads/valuecommerce';
+import {vdoai} from '../ads/vdoai';
 import {videointelligence} from '../ads/videointelligence';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
+import {whopainfeed} from '../ads/whopainfeed';
 import {widespace} from '../ads/widespace';
 import {wisteria} from '../ads/wisteria';
 import {wpmedia} from '../ads/wpmedia';
@@ -325,6 +329,8 @@ const AMP_EMBED_ALLOWED = {
   strossle: true,
   svknative: true,
   taboola: true,
+  temedya: true,
+  whopainfeed: true,
   yahoonativeads: true,
   zen: true,
   zergnet: true,
@@ -395,6 +401,7 @@ register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
 register('broadstreetads', broadstreetads);
+register('byplay', byplay);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);
@@ -540,6 +547,7 @@ register('swoop', swoop);
 register('taboola', taboola);
 register('tcsemotion', tcsemotion);
 register('teads', teads);
+register('temedya', temedya);
 register('torimochi', torimochi);
 register('tracdelight', tracdelight);
 register('triplelift', triplelift);
@@ -550,6 +558,7 @@ register('ucfunnel', ucfunnel);
 register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);
+register('vdoai', vdoai);
 register('videointelligence', videointelligence);
 register('videonow', videonow);
 register('viqeoplayer', viqeoplayer);
@@ -557,6 +566,7 @@ register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
+register('whopainfeed', whopainfeed);
 register('widespace', widespace);
 register('wisteria', wisteria);
 register('wpmedia', wpmedia);

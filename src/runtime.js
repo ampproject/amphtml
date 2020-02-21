@@ -126,7 +126,7 @@ function adoptShared(global, callback) {
   /**
    * Registers an extended element and installs its styles.
    * @param {string} name
-   * @param {function(new:BaseElement, !Element)} implementationClass
+   * @param {typeof BaseElement} implementationClass
    * @param {?string|undefined} css
    */
   global.AMP.registerElement = extensions.addElement.bind(extensions);
@@ -134,7 +134,7 @@ function adoptShared(global, callback) {
   /**
    * Registers an extended template.
    * @param {string} name
-   * @param {function(new:BaseTemplate)} implementationClass
+   * @param {typeof BaseTemplate} implementationClass
    */
   global.AMP.registerTemplate = function(name, implementationClass) {
     registerExtendedTemplate(global, name, implementationClass);

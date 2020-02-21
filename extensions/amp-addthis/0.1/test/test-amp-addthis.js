@@ -31,6 +31,7 @@ import {getDetailsForMeta, getMetaElements} from './../addthis-utils/meta';
 import {getKeywordsString} from './../addthis-utils/classify';
 import {getSessionId} from '../addthis-utils/session';
 import {getWidgetOverload} from '../addthis-utils/get-widget-id-overloaded-with-json-for-anonymous-mode';
+import {startsWith} from '../../../../src/string';
 import {toArray} from '../../../../src/types';
 
 describes.realWin(
@@ -101,9 +102,11 @@ describes.realWin(
 
     function testIframe(iframe) {
       expect(iframe).to.not.equal(null);
-      expect(iframe.getAttribute('src')).to.equal(
-        `${ORIGIN}/dc/amp-addthis.html`
-      );
+      const srcPrefix = `${ORIGIN}/dc/amp-addthis.html?`;
+      expect(
+        startsWith(iframe.getAttribute('src'), srcPrefix),
+        `iframe src starts with ${srcPrefix}`
+      ).to.be.true;
       expect(iframe.getAttribute('title')).to.equal(ALT_TEXT);
     }
 
