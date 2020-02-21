@@ -62,9 +62,6 @@ async function getBrotliBundleSizes() {
     content.replace(replacementExpression, normalizedRtvNumber)
   );
   let next = await values.next();
-  if (next.done) {
-    return bundleSizes;
-  }
   while (!next.done) {
     const [filePath, brotliSize] = next.value;
     const relativePath = path.relative('.', filePath);
