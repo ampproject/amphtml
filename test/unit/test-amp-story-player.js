@@ -21,8 +21,12 @@ import {toArray} from '../../src/types';
 describes.realWin('AmpStoryPlayer', {amp: false}, env => {
   let win;
   let playerEl;
+  let player;
   let url;
   let manager;
+  let fireHandler;
+  let fakeMessaging;
+  let messagingMock;
 
   function buildStoryPlayer(numStories = 1) {
     playerEl = win.document.createElement('amp-story-player');
@@ -35,10 +39,25 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
     }
     win.document.body.appendChild(playerEl);
     manager = new AmpStoryPlayerManager(win);
+    player = new AmpStoryPlayer(win, playerEl);
+    env.sandbox.stub(player, 'initializeHandshake_').resolves(fakeMessaging);
   }
 
   beforeEach(() => {
     win = env.win;
+
+    fakeMessaging = {
+      setDefaultHandler: () => {},
+      registerHandler: (event, handler) => {
+        fireHandler = handler;
+      },
+    };
+
+    messagingMock = env.sandbox.mock(fakeMessaging);
+  });
+
+  afterEach(() => {
+    messagingMock.verify();
   });
 
   it('should build an iframe for each story', () => {
@@ -55,7 +74,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
 
     expect(storyIframe.getAttribute('src')).to.equals(
       url +
-        '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0'
+        '?amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
@@ -69,7 +88,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
 
     expect(storyIframe.getAttribute('src')).to.equals(
       url +
-        '&amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0'
+        '&amp_js_v=0.1#visibilityState=visible&origin=about%3Asrcdoc&showStoryUrlInfo=0&storyPlayer=v0&cap=swipe'
     );
   });
 
@@ -101,7 +120,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
       const stories = toArray(playerEl.querySelectorAll('a'));
 
       // TODO(#26308): Replace with manager.loadPlayers() when swipe is enabled.
-      const player = new AmpStoryPlayer(win, playerEl);
       player.buildCallback();
       player.layoutCallback();
 
@@ -125,7 +143,6 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
       const stories = toArray(playerEl.querySelectorAll('a'));
 
       // TODO(#26308): Replace with manager.loadPlayers() when swipe is enabled.
-      const player = new AmpStoryPlayer(win, playerEl);
       player.buildCallback();
       player.layoutCallback();
 
@@ -138,4 +155,27 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
       expect(stories[3][IFRAME_IDX]).to.eql(undefined);
     }
   );
+
+  it('should register handlers at build time', async () => {
+    buildStoryPlayer();
+
+    messagingMock.expects('registerHandler').withArgs('selectDocument');
+    messagingMock.expects('setDefaultHandler');
+
+    await player.buildCallback();
+  });
+
+  it('should navigate to next story when the last page of a story is tapped', async () => {
+    buildStoryPlayer(2);
+
+    await player.buildCallback();
+    player.layoutCallback();
+
+    const fakeData = {next: true};
+    fireHandler('selectDocument', fakeData);
+
+    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+  });
 });
