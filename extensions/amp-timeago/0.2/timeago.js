@@ -24,18 +24,18 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
-  const timestamp = useRef(getFuzzyTimestampValue(props));
+  const timestampRef = useRef(getFuzzyTimestampValue(props));
   const ref = useRef(null);
   const isIntersecting = useIsIntersecting(ref);
   if (isIntersecting === null || isIntersecting) {
     // Only update DOM on prop mutation or enter viewport
-    timestamp.current = getFuzzyTimestampValue(props);
+    timestampRef.current = getFuzzyTimestampValue(props);
   }
   useResourcesNotify();
   return createElement(
     'time',
     {datetime: props['datetime'], ref},
-    timestamp.current
+    timestampRef.current
   );
 }
 
