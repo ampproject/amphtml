@@ -82,7 +82,7 @@ The code snippet below demonstrates an embed of `<amp-story-player>` in a non-AM
       href="https://preview.amp.dev/documentation/examples/introduction/stories_in_amp/"
       style="--story-player-poster: url('https://amp.dev/static/samples/img/story_dog2_portrait.jpg')"
     >
-      A local’s guide to what to eat and do in Mexico City
+      Stories in AMP - Hello World
     </a>
   </amp-story-player>
 </body>
