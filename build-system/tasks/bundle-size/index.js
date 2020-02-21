@@ -36,7 +36,7 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
 const {cyan, green, red, yellow} = require('ansi-colors');
-const {report} = require('@ampproject/filesize');
+const {serialReport} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
 
@@ -50,6 +50,7 @@ const normalizedRtvNumber = '1234567890123';
 
 const expectedGitHubRepoSlug = 'ampproject/amphtml';
 const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
+const replacementExpression = new RegExp(internalRuntimeVersion, 'g');
 
 /**
  * Get the brotli bundle sizes of the current build.
@@ -59,10 +60,9 @@ const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
  */
 async function getBrotliBundleSizes() {
   const bundleSizes = {};
-  const replacementExpression = new RegExp(internalRuntimeVersion, 'g');
 
   log(cyan('brotli'), 'bundle sizes are:');
-  const values = report(process.cwd(), content =>
+  const values = serialReport(process.cwd(), content =>
     // Brotli compressed size fluctuates because of changes in the RTV number, so
     // normalize this across pull requests by replacing that RTV with a constant.
     content.replace(replacementExpression, normalizedRtvNumber)
@@ -71,21 +71,13 @@ async function getBrotliBundleSizes() {
   if (next.done) {
     return bundleSizes;
   }
-  const fileNames = next.value[0];
-  const paths = new Set(Array.from(fileNames.keys()));
   while (!next.done) {
     const {value: currentValue} = next;
-    paths.forEach(filePath => {
-      const brotliSize =
-        currentValue[0].get(filePath) && currentValue[0].get(filePath)[0][0];
-      if (brotliSize !== null) {
-        const relativePath = path.relative('.', filePath);
-        const reportedSize = parseFloat((brotliSize / 1024).toFixed(2));
-        log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
-        paths.delete(filePath);
-        bundleSizes[relativePath] = reportedSize;
-      }
-    });
+    const [filePath, brotliSize] = currentValue;
+    const relativePath = path.relative('.', filePath);
+    const reportedSize = parseFloat((brotliSize / 1024).toFixed(2));
+    log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
+    bundleSizes[relativePath] = reportedSize;
     next = await values.next();
   }
 
