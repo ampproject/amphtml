@@ -15,25 +15,20 @@
  */
 
 import {dev} from '../log';
-import {useEffect, useRef} from './index';
+import {useEffect, useState} from './index';
 
 /** @type {null|IntersectionObserver} */ let sharedObserver = null;
 
 /**
  * @param {{current: HTMLElement}} ref
- * @param {function():(function():undefined|undefined)} fn
+ * @return {boolean}
  */
-export function useFnInView(ref, fn) {
-  const isIntersectingRef = useRef(false);
+export function useIsIntersecting(ref) {
+  const {0: isIntersecting, 1: setIsIntersecting} = useState(null);
   if (sharedObserver === null) {
     sharedObserver = new IntersectionObserver(entries => {
-      const {isIntersecting} = entries[entries.length - 1];
-      if (isIntersecting !== isIntersectingRef.current) {
-        isIntersectingRef.current = isIntersecting;
-        if (isIntersecting) {
-          fn();
-        }
-      }
+      const last = entries[entries.length - 1];
+      setIsIntersecting(last.isIntersecting);
     });
   }
   useEffect(() => {
@@ -42,10 +37,11 @@ export function useFnInView(ref, fn) {
       sharedObserver.observe(dev().assertElement(node));
     }
     return () => {
-      isIntersectingRef.current = false;
       if (node) {
         sharedObserver.unobserve(dev().assertElement(node));
       }
     };
   }, [ref.current]);
+
+  return isIntersecting;
 }
