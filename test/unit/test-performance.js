@@ -866,7 +866,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       navigator: env.win.navigator,
       performance: {
         getEntriesByType: env.sandbox.stub(),
-        now: () => Date.now(),
+        now: () => 100,
         timeOrigin: 100,
       },
     };
