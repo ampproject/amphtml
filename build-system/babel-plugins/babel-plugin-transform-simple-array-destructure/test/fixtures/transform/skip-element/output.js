@@ -13,25 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+{
+  const _temp = document,
+        second = _temp[1];
+  const _temp2 = document,
+        x = _temp2[0],
+        z = _temp2[2];
+}
+{
+  const _temp3 = document(),
+        second = _temp3[1];
 
-import {useResourcesNotify} from '../../../src/preact/utils';
-import {useState} from '../../../src/preact';
-
-/**
- * Renders the children prop, waiting for it to resolve if it is a promise.
- *
- * @param {!JsonObject} props
- * @return {Preact.Renderable}
- */
-export function AsyncRender(props) {
-  const children = props['children'];
-  const [state, set] = useState(children);
-  useResourcesNotify();
-
-  if (state && state.then) {
-    Promise.resolve(children).then(set);
-    return null;
-  }
-
-  return state;
+  const _temp4 = document(),
+        x = _temp4[0],
+        z = _temp4[2];
 }

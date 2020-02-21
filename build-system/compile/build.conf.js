@@ -28,6 +28,7 @@ const defaultPlugins = isEsmBuild => [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
+  localPlugin('transform-simple-array-destructure'),
   getReplacePlugin(isEsmBuild),
 ];
 
