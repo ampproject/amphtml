@@ -189,6 +189,8 @@ export const WHITELISTED_ATTRS = [
   'subscriptions-display',
   'subscriptions-section',
   'subscriptions-service',
+  // Attributes for amp-subscriptions-google.
+  'subscriptions-google-rtc',
   // Attributes for amp-nested-menu.
   'amp-nested-submenu',
   'amp-nested-submenu-open',

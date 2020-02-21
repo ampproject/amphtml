@@ -44,8 +44,8 @@ import {getMode} from '../../../src/mode';
 import {getValueForExpr} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';
 
+import {devAssert, user, userAssert} from '../../../src/log';
 import {startsWith} from '../../../src/string';
-import {user, userAssert} from '../../../src/log';
 
 const TAG = 'amp-subscriptions-google';
 const PLATFORM_ID = 'subscribe.google.com';
@@ -113,6 +113,9 @@ export class GoogleSubscriptionsPlatform {
 
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
+
+    /** @private @const {!../../../src/service/vsync-impl.Vsync} */
+    this.vsync_ = Services.vsyncFor(ampdoc.win);
 
     /**
      * @private @const
@@ -271,8 +274,11 @@ export class GoogleSubscriptionsPlatform {
     /** @private @const {string} */
     this.skuMapUrl_ = this.serviceConfig_['skuMapUrl'] || null;
 
-    /** @private {?JsonObject} */
-    this.skuMap_ = null;
+    /** @private {JsonObject} */
+    this.skuMap_ = /** @type {!JsonObject} */ ({});
+
+    /** @private {!Promise} */
+    this.rtcPromise_ = this.maybeFetchRealTimeConfig();
   }
 
   /**
@@ -387,7 +393,7 @@ export class GoogleSubscriptionsPlatform {
    * it will default the server side configured offer carousel.
    * We do this so that a failure to return a skuMap doesn't block
    * a user purchase.
-   * @return {Promise}
+   * @return {!Promise}
    */
   maybeFetchRealTimeConfig() {
     let timeout = SERVICE_TIMEOUT;
@@ -396,16 +402,13 @@ export class GoogleSubscriptionsPlatform {
     }
 
     if (!this.skuMapUrl_) {
-      return Promise.resolve(null);
+      return Promise.resolve();
     }
 
     assertHttpsUrl(this.skuMapUrl_, 'skuMapUrl must be valid https Url');
-    // Prerender safe platforms don't have to wait for the
-    // page to become visible, all others wait for whenFirstVisible()
-    const visiblePromise = this.isPrerenderSafe()
-      ? Promise.resolve()
-      : this.ampdoc_.whenFirstVisible();
-    return visiblePromise
+    // RTC is never pre-render safe
+    return this.ampdoc_
+      .whenFirstVisible()
       .then(() =>
         this.urlBuilder_.buildUrl(
           /**  @type {string } */ (this.skuMapUrl_),
@@ -419,7 +422,11 @@ export class GoogleSubscriptionsPlatform {
         )
       )
       .then(resJson => {
-        this.skuMap_ = resJson;
+        userAssert(
+          resJson['subscribe.google.com'],
+          'skuMap does not contain subscribe.google.com section'
+        );
+        this.skuMap_ = resJson['subscribe.google.com'];
       })
       .catch(reason => {
         throw user().createError(
@@ -610,19 +617,25 @@ export class GoogleSubscriptionsPlatform {
     let mappedSku, carouselOptions;
     /*
      * If the id of the source element (sourceId) is in a map supplied via
-     * the skuMap Url we use that to lookip which sku to associate this button
+     * the skuMap Url we use that to lookup which sku to associate this button
      * with.
-     *
-     * if '
      */
+    const rtcPending = sourceId
+      ? this.ampdoc_
+          .getElementById(sourceId)
+          .hasAttribute('subscriptions-google-rtc')
+      : false;
+    // if subscriptions-google-rtc is set then this element is configured by the
+    // rtc url but has not yet been configured so we ignore it.
+    // Once the rtc resolves the attribute is changed to subscriptions-google-rtc-set.
+    if (rtcPending) {
+      return;
+    }
     if (sourceId && this.skuMap_) {
-      mappedSku = getValueForExpr(
-        this.skuMap_,
-        `subscribe.google.com.${sourceId}.sku`
-      );
+      mappedSku = getValueForExpr(this.skuMap_, `${sourceId}.sku`);
       carouselOptions = getValueForExpr(
         this.skuMap_,
-        `subscribe.google.com.${sourceId}.carouselOptions`
+        `${sourceId}.carouselOptions`
       );
     }
     if (action == Action.SUBSCRIBE) {
@@ -696,6 +709,28 @@ export class GoogleSubscriptionsPlatform {
       default:
       // do nothing
     }
+    // enable any real time buttons once it's resolved.
+    this.rtcPromise_.then(() => {
+      this.vsync_.mutate(() =>
+        Object.keys(/** @type {!Object} */ (this.skuMap_)).forEach(
+          elementId => {
+            const element = this.ampdoc_.getElementById(elementId);
+            if (element) {
+              devAssert(
+                element.hasAttribute('subscriptions-google-rtc'),
+                `Trying to set real time config on element '${elementId}' with missing 'subscriptions-google-rtc' attrbute`
+              );
+              element.setAttribute('subscriptions-google-rtc-set', '');
+              element.removeAttribute('subscriptions-google-rtc');
+            } else {
+              user().warn(
+                `Element "{elemendId}" in real time config not found`
+              );
+            }
+          }
+        )
+      );
+    });
   }
 }
 
