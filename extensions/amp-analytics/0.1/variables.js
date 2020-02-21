@@ -210,6 +210,15 @@ export class VariableService {
       this.linkerReader_.get(name, id)
     );
 
+    // Returns a promise resolving to viewport.getScrollTop.
+    this.register_('SCROLL_TOP', () =>
+      Services.viewportForDoc(this.ampdoc_).getScrollTop()
+    );
+
+    // Returns a promise resolving to viewport.getScrollLeft.
+    this.register_('SCROLL_LEFT', () =>
+      Services.viewportForDoc(this.ampdoc_).getScrollLeft()
+    );
     // Was set async before
     this.register_('FIRST_CONTENTFUL_PAINT', () => {
       return Services.performanceFor(
