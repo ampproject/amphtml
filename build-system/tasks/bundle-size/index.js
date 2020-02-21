@@ -18,6 +18,7 @@
 const argv = require('minimist')(process.argv.slice(2));
 const globby = require('globby');
 const log = require('fancy-log');
+const packageJson = require('../../../package.json');
 const path = require('path');
 const url = require('url');
 const util = require('util');
@@ -40,12 +41,7 @@ const {serialReport} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
 
-const fileGlobs = [
-  'dist/*.js',
-  'dist/v0/*-?.?.js',
-  'dist/*.mjs',
-  'dist/v0/*-?.?.mjs',
-];
+const fileGlobs = packageJson.filesize.track;
 const normalizedRtvNumber = '1234567890123';
 
 const expectedGitHubRepoSlug = 'ampproject/amphtml';
