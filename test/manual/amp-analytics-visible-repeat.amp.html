@@ -56,6 +56,9 @@
       }
     </script>
   </amp-analytics>
+  <!-- `"selector": [".myClass", "#ad2"]` will only fire 1 request for ad2 -->
+  <!-- `"selector": [".myClass"]` will not pick up ad1 because it does not have the specifed class -->
+  <!-- `"selector": [".myClass"]` will not pick up ad4 because it has not data-vars-* attribute -->
   <amp-analytics>
     <script type="application/json">
       {
@@ -169,6 +172,15 @@
         data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
         data-valid='true'
         data-vars-id='ad3'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+    </amp-ad>
+
+    <amp-ad id='ad4' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
         data-ad-width=300
         data-ad-height=250
         class="myClass">

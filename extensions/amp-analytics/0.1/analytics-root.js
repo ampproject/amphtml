@@ -20,6 +20,7 @@ import {Services} from '../../../src/services';
 import {VisibilityManagerForMApp} from './visibility-manager-for-mapp';
 import {
   closestAncestorElementBySelector,
+  getDataParamsFromAttributes,
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
@@ -32,6 +33,7 @@ import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/ini-load';
 
 const TAG = 'amp-analytics/analytics-root';
+const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 
 /**
  * An analytics root. Analytics can be scoped to either ampdoc, embed or
@@ -301,16 +303,30 @@ export class AnalyticsRoot {
 
   /**
    * Searches for the AMP elements that matches from the root.
+   * Only return elements that have the data-vars-* attribute.
    *
    * @param {string} selector DOM query selector.
    * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
    */
   getAmpElements(selector) {
     return this.getElements_(selector).then(elements => {
+      const dataVarsElements = [];
       for (let i = 0; i < elements.length; i++) {
         this.verifyAmpElement_(elements[i], selector);
+        if (this.elementContainsDataVarsAttribute_(elements[i])) {
+          dataVarsElements.push(elements[i]);
+        }
       }
-      return elements;
+      if (dataVarsElements.length !== elements.length) {
+        user().warn(
+          TAG,
+          '%s AMP elements were ommited from selector "%s"' +
+            ' because no data-vars-* attribute was found.',
+          elements.length - dataVarsElements.length,
+          selector
+        );
+      }
+      return dataVarsElements;
     });
   }
 
@@ -340,6 +356,22 @@ export class AnalyticsRoot {
       element.classList.contains('i-amphtml-element'),
       'Element "%s" is required to be an AMP element',
       selector
+    );
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  elementContainsDataVarsAttribute_(element) {
+    return (
+      Object.keys(
+        getDataParamsFromAttributes(
+          element,
+          /* computeParamNameFunc */ undefined,
+          VARIABLE_DATA_ATTRIBUTE_KEY
+        )
+      ).length !== 0
     );
   }
 

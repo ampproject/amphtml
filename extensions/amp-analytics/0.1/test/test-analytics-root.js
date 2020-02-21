@@ -361,6 +361,8 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
         error = false;
         child2 = win.document.createElement('child');
         body.appendChild(child2);
+        child.setAttribute('data-vars-id', '123');
+        child2.setAttribute('data-vars-id', '456');
         child.classList.add('i-amphtml-element');
         child2.classList.add('i-amphtml-element');
       });
@@ -395,6 +397,19 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, env => {
         child.classList.add('myClass');
         child2.classList.add('myClass');
         elements = await root.getAmpElements('#myId.myClass');
+      });
+
+      it('should only find elements with data-vars-*', async () => {
+        child.classList.add('myClass');
+        child2.classList.add('myClass');
+
+        const child3 = win.document.createElement('child');
+        body.appendChild(child3);
+        child3.classList.add('myClass');
+        child3.classList.add('i-amphtml-element');
+
+        elements = await root.getAmpElements('.myClass');
+        expect(elements).to.not.contain(child3);
       });
 
       it('should allow not-found element for AMP search', async () => {
