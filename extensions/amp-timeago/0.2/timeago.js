@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {createElement, useEffect, useRef} from '../../../src/preact';
+import {createElement, useRef} from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
-import {useIsIntersecting} from '../../../src/preact/use-in-view';
+import {useIsIntersecting} from '../../../src/preact/use-is-intersecting';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
