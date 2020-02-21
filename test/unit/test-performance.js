@@ -712,14 +712,15 @@ describes.realWin('performance', {amp: true}, env => {
         perf.coreServicesAvailable();
       });
 
-      it('should call prerenderComplete on viewer', () => {
+      it('should call prerenderComplete on viewer', async () => {
         env.sandbox
           .stub(viewer, 'getParam')
           .withArgs('csi')
           .returns('1');
         env.sandbox.stub(viewer, 'isEmbedded').returns(true);
+        clock.tick(100);
         whenFirstVisibleResolve();
-        whenFirstVisiblePromise.then(() => {
+        await whenFirstVisiblePromise.then(() => {
           clock.tick(300);
         });
         whenViewportLayoutCompleteResolve();
