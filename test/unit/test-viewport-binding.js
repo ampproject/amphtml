@@ -155,14 +155,14 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
 
   it('should fallback scrollTop to pageYOffset', () => {
     win.pageYOffset = 11;
-    delete win.document.scrollingElement.scrollTop;
+    win.document.scrollingElement.scrollTop = 0;
     expect(binding.getScrollTop()).to.equal(11);
   });
 
   it('should offset client rect for layout', () => {
     win.pageXOffset = 0;
     win.pageYOffset = 200;
-    delete win.document.scrollingElement;
+    win.document.scrollingElement.scrollTop = 0;
     const el = {
       getBoundingClientRect: () => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
@@ -178,7 +178,7 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
   it('should offset client rect for layout and position passed in', () => {
     win.pageXOffset = 0;
     win.pageYOffset = 2000;
-    delete win.document.scrollingElement;
+    win.document.scrollingElement.scrollTop = 0;
     const el = {
       getBoundingClientRect: () => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
