@@ -34,6 +34,9 @@ import {dev, devAssert, user} from '../../../src/log';
 const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';
 
+/** @visibleForTesting */
+export const CONSENT_STRING_MAX_LENGTH = 200;
+
 export class ConsentStateManager {
   /**
    * Creates an instance of ConsentStateManager.
@@ -346,14 +349,15 @@ export class ConsentInstance {
       }
 
       const consentStr = consentInfo['consentString'];
-      if (consentStr && consentStr.length > 150) {
+      if (consentStr && consentStr.length > CONSENT_STRING_MAX_LENGTH) {
         // Verify the length of consentString.
-        // 150 * 2 (utf8Encode) * 4/3 (base64) = 400 bytes.
+        // 200 * 2 (utf8Encode) * 4/3 (base64) = 533 bytes.
         // TODO: Need utf8Encode if necessary.
         user().error(
           TAG,
-          'Cannot store consentString which length exceeds 150 ' +
-            'Previous stored consentInfo will be cleared'
+          'Cannot store consentString which length exceeds %s. ' +
+            'Previous stored consentInfo will be cleared',
+          CONSENT_STRING_MAX_LENGTH
         );
         // If new consentInfo value cannot be stored, need to remove previous
         // value

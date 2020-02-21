@@ -18,7 +18,11 @@ import {
   composeStoreValue,
   constructConsentInfo,
 } from '../consent-info';
-import {ConsentInstance, ConsentStateManager} from '../consent-state-manager';
+import {
+  CONSENT_STRING_MAX_LENGTH,
+  ConsentInstance,
+  ConsentStateManager,
+} from '../consent-state-manager';
 import {dev} from '../../../../src/log';
 import {macroTask} from '../../../../testing/yield';
 import {
@@ -146,9 +150,8 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
       it('update consent string that exceeds max size', function*() {
         expectAsyncConsoleError(/Cannot store consentString/);
         manager.registerConsentInstance('test', {});
-        const MAX_LENGTH = 150;
         let testStr = 'a';
-        for (let i = 0; i < MAX_LENGTH; i++) {
+        for (let i = 0; i < CONSENT_STRING_MAX_LENGTH; i++) {
           testStr += 'a';
         }
         manager.updateConsentInstanceState(
@@ -302,9 +305,8 @@ describes.realWin('ConsentStateManager', {amp: 1}, env => {
 
         it('remove consentInfo when consentStr length exceeds', function*() {
           expectAsyncConsoleError(/Cannot store consentString/);
-          const MAX_LENGTH = 150;
           let testStr = 'a';
-          for (let i = 0; i < MAX_LENGTH; i++) {
+          for (let i = 0; i < CONSENT_STRING_MAX_LENGTH; i++) {
             testStr += 'a';
           }
           instance.update(CONSENT_ITEM_STATE.ACCEPTED, testStr);
