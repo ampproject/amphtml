@@ -56,7 +56,6 @@ import {VideoUtils} from '../../../src/utils/video';
 import {
   childElement,
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   isAmpElement,
   iterateCursor,
   matches,
@@ -76,6 +75,7 @@ import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isMediaDisplayed, setTextBackgroundColor} from './utils';
 import {px, toggle} from '../../../src/style';
+import {renderPageDescription} from './semantic-render';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -278,6 +278,12 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
+
+    /** @private {?Element} */
+    this.cssVariablesStyleEl_ = null;
+
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -494,13 +500,23 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
+  // TODO(26866): switch back to onMeasuredChange and remove the layoutBox
+  // equality checks.
   /** @override */
-  onMeasureChanged() {
+  onLayoutMeasure() {
+    const layoutBox = this.getLayoutBox();
     // Only measures from the first story page, that always gets built because
     // of the prerendering optimizations in place.
-    if (!this.isFirstPage_) {
+    if (
+      !this.isFirstPage_ ||
+      (this.layoutBox_ &&
+        this.layoutBox_.width === layoutBox.width &&
+        this.layoutBox_.height === layoutBox.height)
+    ) {
       return;
     }
+
+    this.layoutBox_ = layoutBox;
 
     return this.getVsync().runPromise(
       {
@@ -514,7 +530,7 @@ export class AmpStoryPage extends AMP.BaseElement {
                   height: this.element./*OK*/ clientHeight,
                   width: this.element./*OK*/ clientWidth,
                 }
-              : this.getLayoutBox();
+              : layoutBox;
           state.vh = height / 100;
           state.vw = width / 100;
           state.fiftyVw = Math.round(width / 2);
@@ -525,14 +541,20 @@ export class AmpStoryPage extends AMP.BaseElement {
           if (state.vh === 0 && state.vw === 0) {
             return;
           }
-          this.win.document.documentElement.setAttribute(
-            'style',
+          if (!this.cssVariablesStyleEl_) {
+            const doc = this.win.document;
+            this.cssVariablesStyleEl_ = doc.createElement('style');
+            this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
+            doc.head.appendChild(this.cssVariablesStyleEl_);
+          }
+          this.cssVariablesStyleEl_.textContent =
+            `:root {` +
             `--story-page-vh: ${px(state.vh)};` +
-              `--story-page-vw: ${px(state.vw)};` +
-              `--story-page-vmin: ${px(state.vmin)};` +
-              `--story-page-vmax: ${px(state.vmax)};` +
-              `--i-amphtml-story-page-50vw: ${px(state.fiftyVw)};`
-          );
+            `--story-page-vw: ${px(state.vw)};` +
+            `--story-page-vmin: ${px(state.vmin)};` +
+            `--story-page-vmax: ${px(state.vmax)};` +
+            `--i-amphtml-story-page-50vw: ${px(state.fiftyVw)};` +
+            `}`;
         },
       },
       {}
@@ -1689,7 +1711,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setPageDescription_() {
     if (this.isBotUserAgent_) {
-      this.renderPageDescription_();
+      renderPageDescription(
+        this,
+        this.getMediaBySelector_(Selectors.ALL_AMP_VIDEO, true)
+      );
     }
 
     if (!this.isBotUserAgent_ && this.element.hasAttribute('title')) {
@@ -1703,53 +1728,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       }
       this.element.removeAttribute('title');
     }
-  }
-
-  /**
-   * Renders the page description, and videos title/alt attributes in the page.
-   * @private
-   */
-  renderPageDescription_() {
-    const descriptionElId = `i-amphtml-story-${this.element.id}-description`;
-    const descriptionEl = createElementWithAttributes(
-      this.win.document,
-      'div',
-      dict({
-        'class': 'i-amphtml-story-page-description',
-        'id': descriptionElId,
-      })
-    );
-
-    const addTagToDescriptionEl = (tagName, text) => {
-      if (!text) {
-        return;
-      }
-      const el = this.win.document.createElement(tagName);
-      el./* OK */ textContent = text;
-      descriptionEl.appendChild(el);
-    };
-
-    addTagToDescriptionEl('h2', this.element.getAttribute('title'));
-
-    this.getMediaBySelector_(Selectors.ALL_AMP_VIDEO, true).forEach(videoEl => {
-      addTagToDescriptionEl('p', videoEl.getAttribute('alt'));
-      addTagToDescriptionEl('p', videoEl.getAttribute('title'));
-    });
-
-    if (descriptionEl.childElementCount === 0) {
-      return;
-    }
-
-    this.mutateElement(() => {
-      this.element.parentElement.insertBefore(
-        descriptionEl,
-        this.element.nextElementSibling
-      );
-
-      if (!this.element.getAttribute('aria-labelledby')) {
-        this.element.setAttribute('aria-labelledby', descriptionElId);
-      }
-    });
   }
 
   /**
