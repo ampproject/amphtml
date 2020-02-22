@@ -87,7 +87,7 @@ describe
           expect(largeScreen.offsetHeight).to.equal(0);
           fixture.iframe.width = 600;
           fixture.win.dispatchEvent(new fixture.win.Event('resize'));
-          return fixture.awaitEvent(AmpEvents.LOAD_START, 5).then(function() {
+          return fixture.awaitEvent(AmpEvents.LOAD_START, 4).then(function() {
             expect(smallScreen.className).to.match(
               /i-amphtml-hidden-by-media-query/
             );
