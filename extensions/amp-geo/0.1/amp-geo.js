@@ -53,6 +53,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
+import {isProxyOrigin, isSecureUrlDeprecated} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 import {urls} from '../../../src/config';
 
@@ -72,6 +73,7 @@ const GROUP_PREFIX = 'amp-geo-group-';
 const PRE_RENDER_REGEX = new RegExp(`${COUNTRY_PREFIX}(\\w+)`);
 const GEO_ID = 'ampGeo';
 const SERVICE_TAG = 'geo';
+const API_TIMEOUT = 60; // Seconds
 
 /**
  * Operating Mode
@@ -201,37 +203,57 @@ export class AmpGeo extends AMP.BaseElement {
       // We have a valid 2 letter ISO country
       this.mode_ = mode.GEO_HOT_PATCH;
       this.country_ = trimmedCountryMatch[1];
+    } else if (trimmedCountryMatch[0] === '' && urls.geoApi) {
+      // We were not patched, but an API is available
+      this.mode_ = mode.GEO_API;
     } else if (trimmedCountryMatch[0] === '' && !getMode(this.win).localDev) {
-      // We were not patched, fall back to API if available
-      if (urls.geoApi) {
-        this.mode_ = mode.GEO_API;
-      } else {
-        // if we're not in dev this is an error
-        // and we leave the country at the default 'unknown'
-        this.error_ = true;
-        dev().error(
-          TAG,
-          'GEONOTPATCHED: amp-geo served unpatched, ISO country not set'
-        );
-      }
+      // We were not patched, if we're not in dev this is an error
+      // and we leave the country at the default 'unknown'
+      this.error_ = true;
+      dev().error(
+        TAG,
+        'GEONOTPATCHED: amp-geo served unpatched, ISO country not set'
+      );
     }
 
-    if (this.mode_ !== mode.GEO_API) {
-      return Promise.resolve();
+    return this.mode_ !== mode.GEO_API
+      ? Promise.resolve()
+      : this.fetchCountry_().then(country => {
+          if (country) {
+            this.country_ = country;
+          } else {
+            // if API request fails, leave the country at the default 'unknown'
+            this.error_ = true;
+            dev().error(
+              TAG,
+              'GEONOTPATCHED: amp-geo served unpatched and API response not valid, ISO country not set'
+            );
+          }
+        });
+  }
+
+  /**
+   * Ensure API URL definition is usable and cast its type
+   * @param {*} url
+   * @return {?string}
+   */
+  validateApiUrl(url) {
+    if (typeof url !== 'string') {
+      user().error(TAG, 'geoApiUrl must be a string URL');
+      return null;
     }
 
-    return this.fetchCountry_().then(country => {
-      if (country) {
-        this.country_ = country;
-      } else {
-        // if API request fails, leave the country at the default 'unknown'
-        this.error_ = true;
-        dev().error(
-          TAG,
-          'GEONOTPATCHED: amp-geo served unpatched and API response not valid, ISO country not set'
-        );
-      }
-    });
+    if (!isSecureUrlDeprecated(url)) {
+      user().error(TAG, 'geoApiUrl must be secure (https)');
+      return null;
+    }
+
+    if (isProxyOrigin(url)) {
+      user().error(TAG, 'geoApiUrl cannot point to the AMP project CDN');
+      return null;
+    }
+
+    return url;
   }
 
   /**
@@ -259,11 +281,11 @@ export class AmpGeo extends AMP.BaseElement {
    *   "country": "de"
    * }
    *
-   * @return {Promise<(string|null)>}
+   * @return {Promise<?string>}
    */
   fetchCountry_() {
-    if (typeof urls.geoApi !== 'string') {
-      user().error(TAG, 'geoApiUrl environment variable must be a string URL');
+    const url = this.validateApiUrl(urls.geoApi);
+    if (!url) {
       return Promise.resolve(null);
     }
 
@@ -272,25 +294,34 @@ export class AmpGeo extends AMP.BaseElement {
       'API request is being used for country, this may result in FOUC'
     );
 
-    return Services.xhrFor(this.win)
-      .fetchJson(urls.geoApi, {
-        mode: 'cors',
-        method: 'GET',
-        credentials: 'omit',
-      })
-      .then(res => res.json())
-      .then(json => {
-        if (!/^[a-z]{2}$/i.test(json.country)) {
-          user().error(
-            TAG,
-            'Invalid API response, expected schema not matched for property "country"'
-          );
-          return null;
-        }
-        return json.country.toLowerCase();
-      })
-      .catch(reason => {
-        user().error(TAG, 'XHR country request failed', reason);
+    return Services.timerFor(this.win)
+      .timeoutPromise(
+        API_TIMEOUT * 1000,
+        Services.xhrFor(this.win)
+          .fetchJson(url, {
+            mode: 'cors',
+            method: 'GET',
+            credentials: 'omit',
+          })
+          .then(res => res.json())
+          .then(json => {
+            if (!/^[a-z]{2}$/i.test(json['country'])) {
+              user().error(
+                TAG,
+                'Invalid API response, expected schema not matched for property "country"'
+              );
+              return null;
+            }
+            return json['country'].toLowerCase();
+          })
+          .catch(reason => {
+            user().error(TAG, 'XHR country request failed', reason);
+            return null;
+          }),
+        `Timeout (${API_TIMEOUT} sec) reached waiting for API response`
+      )
+      .catch(error => {
+        user().error(TAG, error);
         return null;
       });
   }
