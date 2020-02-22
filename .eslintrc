@@ -22,6 +22,7 @@
   "globals": {
     "ANALYTICS_VENDOR_SPLIT": "readonly",
     "NATIVE_CUSTOM_ELEMENTS_V1": "readonly",
+    "IS_ESM": "readonly",
 
     "AMP": "readonly",
     "context": "readonly",
