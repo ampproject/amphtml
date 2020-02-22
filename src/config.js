@@ -61,18 +61,13 @@ function getMetaUrl(name) {
   return (metaEl && metaEl.getAttribute('content')) || null;
 }
 
-/** @type {!Object<string, ?string>} */
-const metaUrls = {
-  'runtime-host': getMetaUrl('runtime-host'),
-};
-
 /** @type {!Object<string, string|boolean|RegExp|Array<RegExp>>} */
 export const urls = {
   thirdParty: env['thirdPartyUrl'] || 'https://3p.ampproject.net',
   thirdPartyFrameHost: env['thirdPartyFrameHost'] || 'ampproject.net',
   thirdPartyFrameRegex,
   cdn:
-    env['cdnUrl'] || metaUrls['runtime-host'] || 'https://cdn.ampproject.org',
+    env['cdnUrl'] || getMetaUrl('runtime-host') || 'https://cdn.ampproject.org',
   /* Note that cdnProxyRegex is only ever checked against origins
    * (proto://host[:port]) so does not need to consider path
    */
