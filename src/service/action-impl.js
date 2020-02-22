@@ -807,17 +807,12 @@ export class ActionService {
    * @private
    */
   queryWhitelist_() {
-    const {head} = this.ampdoc.getRootNode();
-    if (!head) {
-      return null;
-    }
-    const meta = head.querySelector('meta[name="amp-action-whitelist"]');
-    if (!meta) {
+    const actionWhitelist = this.ampdoc.getMetaByName('amp-action-whitelist');
+    if (actionWhitelist === null) {
       return null;
     }
     return (
-      meta
-        .getAttribute('content')
+      actionWhitelist
         .split(',')
         // Turn an empty string whitelist into an empty array, otherwise the
         // parse error in the mapper below would trigger.
