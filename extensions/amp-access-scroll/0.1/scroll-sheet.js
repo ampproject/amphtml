@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,83 +15,110 @@
  */
 
 import {ScrollComponent} from './scroll-component';
-import {dict} from '../../../src/utils/object';
+import {dict, hasOwn} from '../../../src/utils/object';
 import {toggle} from '../../../src/style';
 
 /** Provides iframe for the Scroll Audio Player. */
-export class Audio extends ScrollComponent {
+export class Sheet extends ScrollComponent {
   /**
    *  Creates an instance of Audio.
    *
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} doc
+   * @param {boolean} holdback
    */
-  constructor(doc) {
-    super(doc);
-    /** @private {!Audio.State} */
+  constructor(doc, holdback) {
+    super(doc, holdback);
+
+    /** @private {string} */
+    this.DEFAULT_TITLE_ = 'Scroll Feature';
+
+    /** @private {!Sheet.State} */
     this.state_ = {
       url: '',
       open: false,
+      title: this.DEFAULT_TITLE_,
     };
   }
   /**
    * @param {!JsonObject} action
    */
   update(action) {
-    this.state_ = {
-      url: action['url'] !== undefined ? action['url'] : this.state_.url,
-      open: action['open'],
-    };
+    let changed = false;
 
-    this.render_(this.state_);
+    switch (action['_scramp']) {
+      case 'au':
+        changed = this.updateHorizontalLayout(action);
+        ['open', 'url', 'title'].forEach(key => {
+          if (hasOwn(action, key) && action[key] !== this.state_[key]) {
+            this.state_[key] = action[key];
+            changed = true;
+          }
+        });
+        break;
+      case 'st':
+        ['revealed'].forEach(key => {
+          if (hasOwn(action, key) && action[key] !== this.state_[key]) {
+            this.state_[key] = action[key];
+            changed = true;
+          }
+        });
+        break;
+    }
+
+    if (changed) {
+      this.render_(this.state_);
+    }
   }
 
   /**
-   * @param {!Audio.State} state
+   * @param {!Sheet.State} state
    * @private
    */
   render_(state) {
-    this.mutate_(() => {
+    this.mutate(() => {
       if (!this.frame_) {
-        this.frame_ = this.makeIframe_();
+        this.makeIframe_();
         this.setWindow_(this.frame_.contentWindow);
       }
 
       if (this.frame_.src !== state.url) {
         this.frame_.setAttribute('src', state.url);
       }
+      this.renderHorizontalLayout();
+      this.frame_.setAttribute('title', state.title);
       toggle(this.frame_, state.open);
     });
   }
 
   /**
-   * @return {!HTMLIFrameElement}
    * @private
    * */
   makeIframe_() {
-    const frame = this.el(
+    this.frame_ = /** @type {!HTMLIFrameElement} */ (this.el(
       'iframe',
       dict({
-        'class': 'amp-access-scroll-audio',
+        'class': 'amp-access-scroll-sheet',
         'scrolling': 'no',
         'frameborder': '0',
         'allowtransparency': 'true',
-        'title': 'Scroll Audio',
+        'title': this.DEFAULT_TITLE_,
         'sandbox':
           'allow-scripts allow-same-origin ' +
           'allow-top-navigation allow-popups ' +
           'allow-popups-to-escape-sandbox',
       })
-    );
-
-    this.mount_(frame);
-    return /** @type {!HTMLIFrameElement} */ (frame);
+    ));
+    this.root_ = this.frame_;
+    this.toggleClass(this.HOLDBACK_CLASS, this.holdback_);
+    this.mount();
   }
 }
 
 /**
  * @typedef {{
  *    open: boolean,
- *    url: string
+ *    url: string,
+ *    title: string
  * }}
  */
-Audio.State;
+Sheet.State;
