@@ -1261,6 +1261,7 @@ describes.realWin(
 
       it('should resolve if element has already upgrade', () => {
         const element = doc.createElement('amp-img');
+        element.setAttribute('layout', 'nodisplay');
         doc.body.appendChild(element);
         return dom.whenUpgradedToCustomElement(element).then(element => {
           expect(element.whenBuilt).to.exist;
@@ -1269,6 +1270,7 @@ describes.realWin(
 
       it('should resolve when element upgrade', () => {
         const element = doc.createElement('amp-test');
+        element.setAttribute('layout', 'nodisplay');
         doc.body.appendChild(element);
         env.win.setTimeout(() => {
           env.win.customElements.define(
