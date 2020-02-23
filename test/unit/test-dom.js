@@ -951,13 +951,15 @@ describes.sandboxed('DOM', {}, env => {
         .withExactArgs('https://example.com/', '_top')
         .returns(dialog)
         .once();
-      const res = dom.openWindowDialog(
-        windowApi,
-        'https://example.com/',
-        '_blank',
-        'width=1'
-      );
-      expect(res).to.equal(dialog);
+      allowConsoleError(() => {
+        const res = dom.openWindowDialog(
+          windowApi,
+          'https://example.com/',
+          '_blank',
+          'width=1'
+        );
+        expect(res).to.equal(dialog);
+      });
     });
 
     it('should return the final result', () => {
@@ -1261,6 +1263,7 @@ describes.realWin(
 
       it('should resolve if element has already upgrade', () => {
         const element = doc.createElement('amp-img');
+        element.setAttribute('layout', 'nodisplay');
         doc.body.appendChild(element);
         return dom.whenUpgradedToCustomElement(element).then(element => {
           expect(element.whenBuilt).to.exist;
@@ -1269,6 +1272,7 @@ describes.realWin(
 
       it('should resolve when element upgrade', () => {
         const element = doc.createElement('amp-test');
+        element.setAttribute('layout', 'nodisplay');
         doc.body.appendChild(element);
         env.win.setTimeout(() => {
           env.win.customElements.define(
