@@ -18,6 +18,8 @@ import {VariableSource} from '../../src/service/variable-source';
 import {installUrlReplacementsForEmbed} from '../../src/service/url-replacements-impl';
 
 describes.realWin('amp-pixel', {amp: true}, env => {
+  const urlErrorRegex = /src attribute must start with/;
+
   let win;
   let whenFirstVisiblePromise, whenFirstVisibleResolver;
   let pixel;
@@ -99,24 +101,21 @@ describes.realWin('amp-pixel', {amp: true}, env => {
   });
 
   it('should disallow http URLs', () => {
+    expectAsyncConsoleError(urlErrorRegex);
     const url = 'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
-    return expect(trigger(url)).to.eventually.be.rejectedWith(
-      /src attribute must start with/
-    );
+    return expect(trigger(url)).to.eventually.be.rejectedWith(urlErrorRegex);
   });
 
   it('should disallow relative URLs', () => {
+    expectAsyncConsoleError(urlErrorRegex);
     const url = '/activity;dc_iu=1/abc;ord=2';
-    return expect(trigger(url)).to.eventually.be.rejectedWith(
-      /src attribute must start with/
-    );
+    return expect(trigger(url)).to.eventually.be.rejectedWith(urlErrorRegex);
   });
 
   it('should disallow fake-protocol URLs', () => {
+    expectAsyncConsoleError(urlErrorRegex);
     const url = 'https/activity;dc_iu=1/abc;ord=2';
-    return expect(trigger(url)).to.eventually.be.rejectedWith(
-      /src attribute must start with/
-    );
+    return expect(trigger(url)).to.eventually.be.rejectedWith(urlErrorRegex);
   });
 
   it('should replace URL parameters', () => {
