@@ -40,9 +40,11 @@ describes.realWin('inabox-resources', {amp: true}, env => {
     const resource2 = resources.getResourceForElement(element2);
     expect(resource1.getId()).to.not.equal(resource2.getId());
 
-    expect(() => {
-      resources.getResourceForElement(element3);
-    }).to.throw(/Missing resource prop on/);
+    allowConsoleError(() => {
+      expect(() => {
+        resources.getResourceForElement(element3);
+      }).to.throw(/Missing resource prop on/);
+    });
 
     resources.remove(element1);
     expect(resources.get()).to.have.length(1);
