@@ -951,13 +951,15 @@ describes.sandboxed('DOM', {}, env => {
         .withExactArgs('https://example.com/', '_top')
         .returns(dialog)
         .once();
-      const res = dom.openWindowDialog(
-        windowApi,
-        'https://example.com/',
-        '_blank',
-        'width=1'
-      );
-      expect(res).to.equal(dialog);
+      allowConsoleError(() => {
+        const res = dom.openWindowDialog(
+          windowApi,
+          'https://example.com/',
+          '_blank',
+          'width=1'
+        );
+        expect(res).to.equal(dialog);
+      });
     });
 
     it('should return the final result', () => {
