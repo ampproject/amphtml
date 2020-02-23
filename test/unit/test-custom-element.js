@@ -336,6 +336,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
 
       it('should tolerate errors in onLayoutMeasure', () => {
+        expectAsyncConsoleError(/intentional/, 1);
         const element = new ElementClass();
         env.sandbox
           .stub(element.implementation_, 'onLayoutMeasure')
@@ -519,7 +520,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
 
       it('Element - re-upgrade with a failed promised', () => {
-        expectAsyncConsoleError('upgrade failed', 1);
+        expectAsyncConsoleError(/upgrade failed/, 1);
         const element = new ElementClass();
         expect(element.isUpgraded()).to.equal(false);
         const oldImpl = element.implementation_;
@@ -684,6 +685,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
 
       it('should anticipate build errors', () => {
+        expectAsyncConsoleError(/intentional/, 2);
         const element = new ElementClass();
         env.sandbox
           .stub(element.implementation_, 'buildCallback')
@@ -2085,6 +2087,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('should toggle loading off after layout complete', () => {
         stubInA4A(false);
         const toggle = env.sandbox.spy(element, 'toggleLoading');
+        element.setAttribute('height', '10');
+        element.setAttribute('width', '10');
         container.appendChild(element);
         return element.buildingPromise_
           .then(() => {
@@ -2105,6 +2109,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
           .callsFake(() => {
             return Promise.reject();
           });
+        element.setAttribute('height', '10');
+        element.setAttribute('width', '10');
         container.appendChild(element);
         return element.buildingPromise_
           .then(() => {
@@ -2130,6 +2136,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
           .callsFake(() => {
             return Promise.reject();
           });
+        element.setAttribute('height', '10');
+        element.setAttribute('width', '10');
         container.appendChild(element);
         return element.buildingPromise_
           .then(() => {
