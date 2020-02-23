@@ -89,9 +89,8 @@ export function initRecaptcha(recaptchaApiBaseUrl = RECAPTCHA_API_URL) {
   let dataObject;
   try {
     dataObject = parseJson(win.name);
-  } catch (e) {
-    throw new Error(TAG + ' Could not parse the window name.');
-  }
+  } catch (e) {}
+  devAssert(dataObject, '%s Could not parse the window name.', TAG);
 
   // Get our sitekey from the iframe name attribute
   devAssert(
