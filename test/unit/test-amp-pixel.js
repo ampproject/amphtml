@@ -99,6 +99,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
   });
 
   it('should disallow http URLs', () => {
+    expectAsyncConsoleError(/src attribute must start with/);
     const url = 'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=2';
     return expect(trigger(url)).to.eventually.be.rejectedWith(
       /src attribute must start with/
@@ -106,6 +107,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
   });
 
   it('should disallow relative URLs', () => {
+    expectAsyncConsoleError(/src attribute must start with/);
     const url = '/activity;dc_iu=1/abc;ord=2';
     return expect(trigger(url)).to.eventually.be.rejectedWith(
       /src attribute must start with/
@@ -113,6 +115,7 @@ describes.realWin('amp-pixel', {amp: true}, env => {
   });
 
   it('should disallow fake-protocol URLs', () => {
+    expectAsyncConsoleError(/src attribute must start with/);
     const url = 'https/activity;dc_iu=1/abc;ord=2';
     return expect(trigger(url)).to.eventually.be.rejectedWith(
       /src attribute must start with/
