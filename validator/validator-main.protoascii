@@ -26,14 +26,14 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 997
+spec_file_revision: 1006
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
 
 css_length_spec: {
   html_format: AMP
-  max_bytes: 50000
+  max_bytes: 75000
   max_bytes_per_inline_style: 1000
   spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
 }
@@ -1058,7 +1058,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
     value_casei: "text/css"
   }
   cdata: {
-    max_bytes: 50000
+    max_bytes: 75000
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
     css_spec: {
       at_rule_spec: {
@@ -1176,7 +1176,7 @@ tags: {  # Special custom 'author' spreadsheet for transformed AMP
     value_casei: "text/css"
   }
   cdata: {
-    max_bytes: 50000
+    max_bytes: 75000
     url_bytes_included: false
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
     css_spec: {
@@ -1257,7 +1257,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP4ADS
     value_casei: "text/css"
   }
   cdata: {
-    max_bytes: 20000  # Smaller than AMP, which is 50,000.
+    max_bytes: 20000  # Smaller than AMP, which is 75,000.
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/a4a_spec#css"
     css_spec: {
       at_rule_spec: {
@@ -1901,6 +1901,7 @@ tags: {
       protocol: "itms-services"
       protocol: "fb-me"
       protocol: "fb-messenger"
+      protocol: "feed"
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
       protocol: "line"
@@ -1968,6 +1969,7 @@ tags: {
   attrs: {
     name: "type"
     value_casei: "text/html"
+    value_casei: "application/rss+xml"
   }
   attr_lists: "name-attr"
   # <amp-bind>
@@ -2109,6 +2111,10 @@ tags: {
   tag_name: "TIME"
   attrs: {
     name: "datetime"
+  }
+  attrs: {
+    name: "pubdate"
+    value: ""
   }
 }
 # 4.5.12 The code element
@@ -4509,7 +4515,6 @@ tags: {
   attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
-        "button|"
         "file|"
         "image|"
         "password|"
@@ -5485,7 +5490,8 @@ attr_lists: {
     name: "id"
     mandatory: true
     # When updating this blacklisted_value_regex, also update the entry for
-    # "id" in $GLOBAL_ATTRS and "id" in "amp-script extension local script".
+    # "id" in $GLOBAL_ATTRS, and also validator-amp-script.protoascii and
+    # validator-amp-mustache.protoascii.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
@@ -6517,7 +6523,8 @@ attr_lists: {
   attrs: {
     name: "id"
     # When updating this blacklisted_value_regex, also update for
-    # mandatory-id-attr and validator-amp-mustache.protoascii.
+    # mandatory-id-attr, validator-amp-script.protoascii, and
+    # validator-amp-mustache.protoascii.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"

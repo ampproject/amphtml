@@ -699,11 +699,6 @@ class TimeBasedAdvancement extends AdvancementConfig {
   start() {
     super.start();
 
-    this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
-      AdvancementMode.AUTO_ADVANCE_TIME
-    );
-
     if (this.remainingDelayMs_) {
       this.startTimeMs_ =
         this.getCurrentTimestampMs_() -
@@ -757,6 +752,15 @@ class TimeBasedAdvancement extends AdvancementConfig {
       (this.getCurrentTimestampMs_() - this.startTimeMs_) / this.delayMs_;
 
     return Math.min(Math.max(progress, 0), 1);
+  }
+
+  /** @override */
+  onAdvance() {
+    super.onAdvance();
+    this.storeService_.dispatch(
+      Action.SET_ADVANCEMENT_MODE,
+      AdvancementMode.AUTO_ADVANCE_TIME
+    );
   }
 
   /**
@@ -931,11 +935,6 @@ class MediaBasedAdvancement extends AdvancementConfig {
       ? this.element_.whenBuilt()
       : Promise.resolve()
     ).then(() => this.startWhenBuilt_());
-
-    this.storeService_.dispatch(
-      Action.SET_ADVANCEMENT_MODE,
-      AdvancementMode.AUTO_ADVANCE_MEDIA
-    );
   }
 
   /** @private */
@@ -1023,6 +1022,15 @@ class MediaBasedAdvancement extends AdvancementConfig {
     }
 
     return super.getProgress();
+  }
+
+  /** @override */
+  onAdvance() {
+    super.onAdvance();
+    this.storeService_.dispatch(
+      Action.SET_ADVANCEMENT_MODE,
+      AdvancementMode.AUTO_ADVANCE_MEDIA
+    );
   }
 
   /**
