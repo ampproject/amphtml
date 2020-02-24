@@ -20,11 +20,6 @@ import {
   SubscriptionAnalytics,
 } from '../../../amp-subscriptions/0.1/analytics';
 import {
-  AmpFetcher,
-  GoogleSubscriptionsPlatform,
-} from '../amp-subscriptions-google';
-import {
-  AnalyticsContext,
   ConfiguredRuntime,
   Entitlements,
   SubscribeResponse,
@@ -34,6 +29,10 @@ import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
+import {
+  GoogleSubscriptionsPlatform,
+  getAmpFetcherClassForTesting,
+} from '../amp-subscriptions-google';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
@@ -44,14 +43,17 @@ const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
 
 describes.realWin('AmpFetcher', {amp: true}, env => {
+  // Please note that AmpFetcher is only called by swg-js.
+  // Also note that sendBeach accepts a message object which is private to
+  // swg-js.
+
   let win;
   let ampdoc;
   let fetcher;
   let xhr;
 
   const sentUrl = 'url';
-  const sentContent = new AnalyticsContext([
-    'AnalyticsContext',
+  const sentArray = [
     'embed',
     'tx',
     'refer',
@@ -63,10 +65,15 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
     ['exp1', 'exp2'],
     'version',
     'baseUrl',
-  ]);
+  ];
+  const sentMessage = {
+    toArray: function() {
+      return sentArray;
+    },
+  };
   const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
-  const expectedBodyString =
-    'f.req=' + JSON.stringify(sentContent.toArray(false));
+  const expectedBodyString = 'f.req=' + JSON.stringify(sentArray);
+  const AmpFetcher = getAmpFetcherClassForTesting();
 
   beforeEach(() => {
     win = env.win;
@@ -81,7 +88,7 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
       expect(url).to.equal(sentUrl);
       expect(body).to.deep.equal(expectedBlob);
     });
-    fetcher.sendBeacon(sentUrl, sentContent);
+    fetcher.sendBeacon(sentUrl, sentMessage);
   });
 
   it('should support beacon when beacon not supported', async () => {
@@ -96,7 +103,7 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
       });
     });
 
-    fetcher.sendBeacon(sentUrl, sentContent);
+    fetcher.sendBeacon(sentUrl, sentMessage);
   });
 });
 

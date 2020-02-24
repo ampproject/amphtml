@@ -617,9 +617,9 @@ class AmpFetcher {
   }
 
   /**
-   *
+   * POST data to a URL endpoint, do not wait for a response.
    * @param {string} url
-   * @param {*} data
+   * @param {string|!Object} data
    */
   sendBeacon(url, data) {
     const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
@@ -680,6 +680,16 @@ AMP.extension(TAG, '0.1', function(AMP) {
  */
 export function getFetcherClassForTesting() {
   return Fetcher;
+}
+
+/**
+ * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * @package
+ * @visibleForTesting
+ * @return {*}
+ */
+export function getAmpFetcherClassForTesting() {
+  return AmpFetcher;
 }
 
 /**
