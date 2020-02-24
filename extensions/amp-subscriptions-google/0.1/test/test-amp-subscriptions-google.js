@@ -88,6 +88,7 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
   });
 
   it('should support beacon when beacon not supported', async () => {
+    const tempFun = win.navigator.sendBeacon;
     win.navigator.sendBeacon = null;
     env.sandbox.stub(xhr, 'fetch').callsFake((url, init) => {
       expect(url).to.equal(sentUrl);
@@ -100,6 +101,9 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
     });
 
     fetcher.sendBeacon(sentUrl, sentMessage);
+
+    // Restore the original function so we don't break Xhr tests throughout AMP.
+    win.navigator.sendBeacon = tempFun;
   });
 });
 

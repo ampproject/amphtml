@@ -683,7 +683,7 @@ export function getFetcherClassForTesting() {
 }
 
 /**
- * TODO(dvoytenko): remove once compiler type checking is fixed for third_party.
+ * TODO(mborof): remove once not required by test-amp-subscriptions-google.js
  * @package
  * @visibleForTesting
  * @return {*}
