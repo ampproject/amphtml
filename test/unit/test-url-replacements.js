@@ -1493,6 +1493,8 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should reject javascript protocol', () => {
+        const protocolErrorRegex = /invalid protocol/;
+        expectAsyncConsoleError(protocolErrorRegex);
         const win = getFakeWindow();
         const {documentElement} = win.document;
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
@@ -1504,7 +1506,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
               throw new Error('never here');
             },
             err => {
-              expect(err.message).to.match(/invalid protocol/);
+              expect(err.message).to.match(protocolErrorRegex);
             }
           );
       });
