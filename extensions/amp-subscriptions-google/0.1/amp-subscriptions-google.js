@@ -596,6 +596,9 @@ class AmpFetcher {
   constructor(win) {
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(win);
+
+    /** @private @const {!Window} */
+    this.win_ = win;
   }
 
   /** @override */
@@ -611,6 +614,34 @@ class AmpFetcher {
   /** @override */
   fetch(input, opt_init) {
     return this.xhr_.fetch(input, opt_init); //needed to kepp closure happy
+  }
+
+  /**
+   *
+   * @param {string} url
+   * @param {*} data
+   */
+  sendBeacon(url, data) {
+    const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
+    const body =
+      'f.req=' +
+      JSON.stringify(/** @type {JsonObject} */ (data.toArray(false)));
+    const {navigator} = this.win_;
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([body], {type: contentType});
+      navigator.sendBeacon(url, blob);
+      return;
+    }
+
+    // Only newer browsers support beacon.  Fallback to standard XHR POST.
+    const init = {
+      method: 'POST',
+      headers: {'Content-Type': contentType},
+      credentials: 'include',
+      body,
+    };
+    this.fetch(url, init);
   }
 }
 
