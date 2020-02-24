@@ -21,14 +21,14 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function temedya(global, data) {
-  validateData(data, ['keyid']);
+  validateData(data, ['keyid','siteid']);
   global._temedya = global._temedya || {
-    title: data['title'] || 'false',
+    title: data['title'] || false,
     keyId: data['keyid'],
     siteId: data['siteid'],
     siteUrl: data['siteurl'] || global.context.canonicalUrl,
     typeId: data['typeid'] || 7,
-    paidItem: data['paiditem'] || 4,
+    paidItem: data['paiditem'] || 3,
     organicItem: data['organicitem'] || 0,
     theme: data['theme'] || 'google',
   };
