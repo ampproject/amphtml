@@ -308,7 +308,7 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /** @override */
-  layoutCallback() {
+  internalLayoutCallback() {
     // TODO(sparhami) #19259 Tracks a more generic way to do this. Remove once
     // we have something better.
     const isScaled = closestAncestorElementBySelector(

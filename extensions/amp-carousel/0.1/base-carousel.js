@@ -15,7 +15,7 @@
  */
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
-import {setupIntersectionViewportCallback} from '../../../src/utils/viewport';
+import {listenViewportIntersection} from '../../../src/utils/viewport';
 import {toggleAttribute} from '../../../src/dom';
 
 /**
@@ -34,6 +34,9 @@ export class BaseCarousel extends AMP.BaseElement {
 
     /** @private {boolean} */
     this.showControls_ = false;
+
+    /** @private {?UnlistenDef} */
+    this.unlistenViewportIntersection_ = null;
   }
 
   /** @override */
@@ -49,7 +52,6 @@ export class BaseCarousel extends AMP.BaseElement {
     this.buildButtons();
     this.setupGestures();
     this.setControlsState();
-    setupIntersectionViewportCallback(this);
   }
 
   /** @override */
@@ -230,7 +232,25 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /** @override */
+  layoutCallback() {
+    this.unlistenViewportIntersection_ = listenViewportIntersection(this);
+    return this.internalLayoutCallback();
+  }
+
+  /**
+   * @return {!Promise}
+   * @protected
+   */
+  internalLayoutCallback() {
+    // Subclasses may override.
+    return Promise.resolve();
+  }
+
+  /** @override */
   unlayoutCallback() {
+    if (this.unlistenViewportIntersection_) {
+      this.unlistenViewportIntersection_();
+    }
     return true;
   }
 

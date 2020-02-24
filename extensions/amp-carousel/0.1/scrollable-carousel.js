@@ -104,7 +104,7 @@ export class AmpScrollableCarousel extends BaseCarousel {
   }
 
   /** @override */
-  layoutCallback() {
+  internalLayoutCallback() {
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
     this.setControlsState();

@@ -20,23 +20,28 @@
  * @param {!AMP.BaseElement} baseElement
  * @param {Object<string, *>=} options IntersectionObserver options, but with
  *   a default threshold of 0.5
- * @return {?IntersectionObserver}
+ * @return {?UnlistenDef}
  */
-export function setupIntersectionViewportCallback(baseElement, options = {}) {
+export function listenViewportIntersection(baseElement, options = {}) {
   const {IntersectionObserver} = baseElement.win;
   if (!IntersectionObserver) {
     return null;
   }
-  const observer = new IntersectionObserver(
+  let {element} = baseElement;
+  let observer = new IntersectionObserver(
     entries => {
       entries.forEach(entry => {
-        if (entry.target === baseElement.element) {
+        if (entry.target === element) {
           baseElement.viewportCallback(entry.isIntersecting);
         }
       });
     },
     {threshold: 0.5, ...options}
   );
-  observer.observe(baseElement.element);
-  return observer;
+  observer.observe(element);
+  return () => {
+    observer.unobserve(element);
+    observer = null;
+    element = null;
+  };
 }
