@@ -28,7 +28,7 @@ const log = require('fancy-log');
 const MagicString = require('magic-string');
 const minimist = require('minimist');
 const path = require('path');
-const relativePath = require('path').relative;
+const pkgUp = require('pkg-up');
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
@@ -111,12 +111,13 @@ exports.getFlags = function(config) {
     // accessing the symbol, we remedy this by attaching all public exports
     // to `_` and everything imported across modules is is accessed through `_`.
     rename_prefix_namespace: '_',
-    language_in: config.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
+    language_in: 'ECMASCRIPT_2018',
     language_out: config.esm
       ? 'NO_TRANSPILE'
       : config.language_out || 'ECMASCRIPT5',
     chunk_output_path_prefix: config.writeTo || 'out/',
     module_resolution: 'NODE',
+    package_json_entry_names: 'module,main',
     process_common_js_modules: true,
     externs: config.externs,
     define: config.define,
@@ -164,7 +165,11 @@ exports.getBundleFlags = function(g) {
   Object.keys(g.packages)
     .sort()
     .forEach(function(pkg) {
-      srcs.push(pkg);
+      g.bundles[mainBundle].modules.push(pkg);
+      fs.outputFileSync(
+        `${g.tmp}/${pkg}`,
+        JSON.stringify(JSON.parse(readFile(pkg)), null, 4)
+      );
     });
 
   // Build up the weird flag structure that closure compiler calls
@@ -263,7 +268,6 @@ exports.getBundleFlags = function(g) {
       throw new Error('Expect to build more than one bundle.');
     }
   });
-  flagsArray.push('--js_module_root', `${g.tmp}/node_modules/`);
   flagsArray.push('--js_module_root', `${g.tmp}/`);
   return flagsArray;
 };
@@ -314,6 +318,7 @@ exports.getGraph = function(entryModules, config) {
     deps: true,
     detectGlobals: false,
     fast: true,
+    browserField: 'module',
   })
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
@@ -342,14 +347,21 @@ exports.getGraph = function(entryModules, config) {
         })
         .forEach(function(row) {
           const id = unifyPath(
-            exports.maybeAddDotJs(relativePath(process.cwd(), row.id))
+            exports.maybeAddDotJs(path.relative(process.cwd(), row.id))
           );
           topo.addNode(id, id);
-          const deps = (edges[id] = Object.keys(row.deps)
+          const deps = Object.keys(row.deps)
             .sort()
-            .map(function(dep) {
-              return unifyPath(relativePath(process.cwd(), row.deps[dep]));
-            }));
+            .map(dep => {
+              dep = unifyPath(path.relative(process.cwd(), row.deps[dep]));
+              if (dep.startsWith('node_modules/')) {
+                const pkgJson = pkgUp.sync({cwd: path.dirname(dep)});
+                const jsonId = unifyPath(path.relative(process.cwd(), pkgJson));
+                graph.packages[jsonId] = true;
+              }
+              return dep;
+            });
+          edges[id] = deps;
           graph.deps[id] = deps;
           if (row.entry) {
             graph.depOf[id] = {};

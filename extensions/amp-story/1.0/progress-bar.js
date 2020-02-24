@@ -197,7 +197,7 @@ export class ProgressBar {
     );
 
     Services.viewportForDoc(this.ampdoc_).onResize(
-      debounce(this.win_, () => this.onResize_(), 30)
+      debounce(this.win_, () => this.onResize_(), 300)
     );
 
     this.segmentsAddedPromise_.then(() => {

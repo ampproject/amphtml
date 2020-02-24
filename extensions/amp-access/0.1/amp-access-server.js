@@ -81,14 +81,8 @@ export class AccessServerAdapter {
     /** @const @private {!../../../src/service/vsync-impl.Vsync} */
     this.vsync_ = Services.vsyncFor(ampdoc.win);
 
-    const stateElement = ampdoc
-      .getRootNode()
-      .querySelector('meta[name="i-amphtml-access-state"]');
-
     /** @private @const {?string} */
-    this.serverState_ = stateElement
-      ? stateElement.getAttribute('content')
-      : null;
+    this.serverState_ = ampdoc.getMetaByName('i-amphtml-access-state');
 
     const isInExperiment = isExperimentOn(ampdoc.win, 'amp-access-server');
 

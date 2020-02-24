@@ -67,7 +67,7 @@ const MAX_TWEET_WIDTH_PX = 500;
 /**
  * Components that can be expanded.
  * @const {!Object}
- * @private
+ * @package
  */
 export const EXPANDABLE_COMPONENTS = {
   'amp-twitter': {
@@ -95,11 +95,10 @@ const LAUNCHABLE_COMPONENTS = {
  * @private
  * @const {!Object}
  */
-const INTERACTIVE_COMPONENTS = Object.assign(
-  {},
-  EXPANDABLE_COMPONENTS,
-  LAUNCHABLE_COMPONENTS
-);
+const INTERACTIVE_COMPONENTS = {
+  ...EXPANDABLE_COMPONENTS,
+  ...LAUNCHABLE_COMPONENTS,
+};
 
 /**
  * Gets the list of components with their respective selectors.
@@ -138,16 +137,13 @@ export function expandableElementsSelectors() {
  * Contains all interactive component CSS selectors.
  * @type {!Object}
  */
-const interactiveSelectors = Object.assign(
-  {},
-  getComponentSelectors(LAUNCHABLE_COMPONENTS),
-  getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_EMBED_SELECTOR),
-  {
-    EXPANDED_VIEW_OVERLAY:
-      '.i-amphtml-story-expanded-view-overflow, ' +
-      '.i-amphtml-expanded-view-close-button',
-  }
-);
+const interactiveSelectors = {
+  ...getComponentSelectors(LAUNCHABLE_COMPONENTS),
+  ...getComponentSelectors(EXPANDABLE_COMPONENTS, INTERACTIVE_EMBED_SELECTOR),
+  EXPANDED_VIEW_OVERLAY:
+    '.i-amphtml-story-expanded-view-overflow, ' +
+    '.i-amphtml-expanded-view-close-button',
+};
 
 /**
  * All selectors that should delegate to the AmpStoryEmbeddedComponent class.
@@ -1079,10 +1075,9 @@ export class AmpStoryEmbeddedComponent {
           embedStyleEls[elId] = embedStyleEl;
         }
 
-        embedStyleEls[elId][AMP_EMBED_DATA] = Object.assign(
-          {},
-          updateStyleForEl(element, elId, state)
-        );
+        embedStyleEls[elId][AMP_EMBED_DATA] = {
+          ...updateStyleForEl(element, elId, state),
+        };
 
         const embedStyleEl = dev().assertElement(
           embedStyleEls[elId],

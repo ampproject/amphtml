@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import * as purifier from '../../../../src/purifier';
 import * as service from '../../../../src/service';
 import {AmpMustache} from '../amp-mustache';
+import {Purifier} from '../../../../src/purifier/purifier';
 import mustache from '../../../../third_party/mustache/mustache';
 
 describes.repeated(
@@ -81,6 +81,23 @@ describes.repeated(
       template.compileCallback();
       const result = template.render({value: 'abc'});
       expect(result./*OK*/ innerHTML).to.equal('value = abc');
+    });
+
+    // https://github.com/ampproject/amphtml/pull/17401
+    it('should render attrs with non-HTML namespaces', () => {
+      innerHtmlSetup(
+        '<svg width=50 height=50><g><image xlink:href="foo.svg" width=50 height=50></image></g></svg>'
+      );
+      template.compileCallback();
+      const result = template.render({});
+      expect(result./*OK*/ outerHTML).to.equal(
+        '<svg height="50" width="50"><g><image height="50" width="50" xlink:href="foo.svg"></image></g></svg>'
+      );
+      // Make sure [xlink:href] has the right namespace.
+      const image = result.querySelector('image');
+      const href = image.getAttributeNode('xlink:href');
+      expect(href.namespaceURI).to.equal('http://www.w3.org/1999/xlink');
+      expect(href.value).to.equal('foo.svg');
     });
 
     it('should render {{.}} from string', () => {
@@ -457,6 +474,7 @@ describes.repeated(
         const result = template.render({
           value:
             '<table class="valid-class">' +
+            '<colgroup><col><col></colgroup>' +
             '<caption>caption</caption>' +
             '<thead><tr><th colspan="2">header</th></tr></thead>' +
             '<tbody><tr><td>' +
@@ -469,6 +487,7 @@ describes.repeated(
         });
         expect(result./*OK*/ innerHTML).to.equal(
           'value = <table class="valid-class">' +
+            '<colgroup><col><col></colgroup>' +
             '<caption>caption</caption>' +
             '<thead><tr><th colspan="2">header</th></tr></thead>' +
             '<tbody><tr><td>' +
@@ -571,11 +590,11 @@ describes.repeated(
       });
 
       it('should not mustache render but still purify html', () => {
-        window.sandbox.spy(purifier, 'purifyHtml');
+        window.sandbox.spy(Purifier.prototype, 'purifyHtml');
         window.sandbox.spy(mustache, 'render');
         template.setHtml('<div>test</div>');
         expect(mustache.render).to.have.not.been.called;
-        expect(purifier.purifyHtml).to.have.been.called;
+        expect(Purifier.prototype.purifyHtml).to.have.been.called;
       });
     });
 

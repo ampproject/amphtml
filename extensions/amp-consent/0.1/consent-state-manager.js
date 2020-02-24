@@ -30,10 +30,12 @@ import {Deferred} from '../../../src/utils/promise';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
 import {dev, devAssert, user} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'CONSENT-STATE-MANAGER';
 const CID_SCOPE = 'AMP-CONSENT';
+
+/** @visibleForTesting */
+export const CONSENT_STRING_MAX_LENGTH = 200;
 
 export class ConsentStateManager {
   /**
@@ -218,12 +220,6 @@ export class ConsentInstance {
     /** @private {!../../../src/service/ampdoc-impl.AmpDoc} */
     this.ampdoc_ = ampdoc;
 
-    /** @private {boolean} */
-    this.isAmpConsentV2ExperimentOn_ = isExperimentOn(
-      ampdoc.win,
-      'amp-consent-v2'
-    );
-
     /** @private {string} */
     this.id_ = id;
 
@@ -353,14 +349,15 @@ export class ConsentInstance {
       }
 
       const consentStr = consentInfo['consentString'];
-      if (consentStr && consentStr.length > 150) {
+      if (consentStr && consentStr.length > CONSENT_STRING_MAX_LENGTH) {
         // Verify the length of consentString.
-        // 150 * 2 (utf8Encode) * 4/3 (base64) = 400 bytes.
+        // 200 * 2 (utf8Encode) * 4/3 (base64) = 533 bytes.
         // TODO: Need utf8Encode if necessary.
         user().error(
           TAG,
-          'Cannot store consentString which length exceeds 150 ' +
-            'Previous stored consentInfo will be cleared'
+          'Cannot store consentString which length exceeds %s. ' +
+            'Previous stored consentInfo will be cleared',
+          CONSENT_STRING_MAX_LENGTH
         );
         // If new consentInfo value cannot be stored, need to remove previous
         // value
@@ -369,10 +366,7 @@ export class ConsentInstance {
         return;
       }
 
-      const value = composeStoreValue(
-        consentInfo,
-        this.isAmpConsentV2ExperimentOn_
-      );
+      const value = composeStoreValue(consentInfo);
       if (value == null) {
         // Value can be false, do not use !value check
         // Nothing to store to localStorage

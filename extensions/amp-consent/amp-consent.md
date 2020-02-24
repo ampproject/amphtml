@@ -148,6 +148,8 @@ AMP expects the response to be a JSON object like the following:
 
 **Note: The legacy `promptIfUnknown` is migrating to `consentRequired` as prompt is no longer strictly required to manage consents.**
 
+The `consentStateValue` can be thought of as a signal for the runtime to block and unblock components. The value `accepted` instructs AMP that the user has given consent (or doesn't revoke consent in the opt-out case). This can be used to serve personalized ads in some scenarios. The value `rejected` means the user doesn't give consent (or has revoked consent in the opt-out case) and vendors may decide to not serve personalized ads.
+
 Optionally, additional key-value pairs can be returned in the response as the `sharedData` field.
 
 ```json
@@ -286,6 +288,23 @@ AMP will check client cache and server in parallel to find the previous consent 
 #### xssiPrefix
 
 `xssiPrefix`: Causes `<amp-consent>` to strip a prefix from the `checkConsentHref` endpoint's response. If the prefix is not present in the response, then this option will have no effect. `xssiPrefix` can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
+
+#### uiConfig
+
+`uiConfig` provides extra UI and behaviors to `<amp-consent>`. `uiConfig` is an optional JSON object that can contain the key `overlay` which is a boolean. `overlay: true` will add a light black overlay behind the consent prompt to help users focus on the prompt. Additionally, this will stop user interaction with the contents beneath the consent prompt (such as scrolling). `overlay: false` is the default.
+
+#### captions
+
+`captions` provides accessibility features for screen reader users for `<amp-consent>`. `captions` is an optional JSON an object that can contain the `consentPromptCaption` and `buttonActionCaption` strings. The default values for these fields are 'User Consent Prompt' and 'Focus Prompt' respectivly, but they can be overriden and customized for your use case (such as localization). When a consent prompt in an iframe is loaded, the screen reader will read the `consentPromptCaption` and then the `buttonActionCaption`. The `consentPromptCaption` should act as a title for the consent prompt, while the `buttonActionCaption` should inform the user that they can interact with the iframe.
+
+```json
+{
+  "captions": {
+    "consentPromptCaption": "This is an example user consent prompt",
+    "buttonActionCaption": "Click to interact with the prompt"
+  }
+}
+```
 
 ## Consent Management
 
@@ -606,7 +625,7 @@ You should try out the [advanced consent flows](https://amp.dev/documentation/ex
 
 ##### How can I show a persistent UX element for users to update their consent preferences?
 
-You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://amp.dev/documentation/examples/user-consent/basic_user_consent_flow/) for a similar implementation.
+You can use the optional [post-prompt UI](#post-prompt) to accomplish this. View this [sample on AMP By Example](https://amp.dev/documentation/examples/user-consent/client_side_user_consent_flow/) for a similar implementation.
 
 ##### Can I keep the non-EU experience unchanged and just deliver an "opt-out" experience to all EU users?
 
@@ -640,6 +659,11 @@ Join in on the discussion where we are discussing [upcoming potential features](
 
 ## Supported Consent Management Platforms
 
+- AppConsent : [Website](https://appconsent.io/en) - [Documentation](./cmps/appconsent.md)
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
-- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](https://github.com/ampproject/amphtml/blob/master/extensions/amp-consent/cmps/sourcepoint.md)
+- Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
+- Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
+- Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
+- SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
+
 - Your Integrated platform here!

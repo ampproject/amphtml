@@ -18,9 +18,11 @@
 const argv = require('minimist')(process.argv.slice(2));
 const del = require('del');
 const fs = require('fs-extra');
+const gap = require('gulp-append-prepend');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
+const pathModule = require('path');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const {
@@ -116,6 +118,13 @@ function compile(
   options,
   timeInfo
 ) {
+  function shouldAppendSourcemappingURLText(file) {
+    // Do not append sourceMappingURL if its a sourcemap
+    return (
+      pathModule.extname(file.path) !== '.map' && options.esmPassCompilation
+    );
+  }
+
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -139,6 +148,7 @@ function compile(
     'third_party/web-animations-externs/web_animations.js',
     'third_party/moment/moment.extern.js',
     'third_party/react-externs/externs.js',
+    'build-system/externs/preact.extern.js',
   ];
   const define = [`VERSION=${internalRuntimeVersion}`];
   if (argv.pseudo_names) {
@@ -205,6 +215,11 @@ function compile(
     if (options.include3pDirectories) {
       srcs.push('3p/**/*.js', 'ads/**/*.js');
     }
+    // For ESM Builds, exclude ampdoc and ampshared css from inclusion.
+    // These styles are guaranteed to already be present on elgible documents.
+    if (options.esmPassCompilation) {
+      srcs.push('!build/ampdoc.css.js', '!build/ampshared.css.js');
+    }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
@@ -270,9 +285,9 @@ function compile(
       compilation_level: options.compilationLevel || 'SIMPLE_OPTIMIZATIONS',
       // Turns on more optimizations.
       assume_function_wrapper: true,
-      // Transpile from ES6 to ES5 if not running with `--esm`
-      // otherwise transpilation is done by Babel
-      language_in: argv.esm ? 'ECMASCRIPT_2017' : 'ECMASCRIPT6',
+      language_in: 'ECMASCRIPT_2018',
+      // Do not transpile down to ES5 if running with `--esm`, since we do
+      // limited transpilation in Babel.
       language_out: argv.esm ? 'NO_TRANSPILE' : 'ECMASCRIPT5',
       // We do not use the polyfills provided by closure compiler.
       // If you need a polyfill. Manually include them in the
@@ -288,6 +303,7 @@ function compile(
       ],
       entry_point: entryModuleFilenames,
       module_resolution: 'NODE',
+      package_json_entry_names: 'module,main',
       process_common_js_modules: true,
       // This strips all files from the input set that aren't explicitly
       // required.
@@ -323,17 +339,14 @@ function compile(
       // it won't do strict type checking if its whitespace only.
       compilerOptions.define.push('TYPECHECK_ONLY=true');
       compilerOptions.jscomp_error.push(
+        'accessControls',
         'conformanceViolations',
         'checkTypes',
         'const',
         'constantProperty',
         'globalThis'
       );
-      compilerOptions.jscomp_off.push(
-        'accessControls',
-        'moduleLoad',
-        'unknownDefines'
-      );
+      compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
       compilerOptions.conformance_configs =
         'build-system/test-configs/conformance-config.textproto';
     } else {
@@ -399,6 +412,12 @@ function compile(
         )
         .on('error', reject)
         .pipe(sourcemaps.write('.'))
+        .pipe(
+          gulpIf(
+            shouldAppendSourcemappingURLText,
+            gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
+          )
+        )
         .pipe(gulp.dest(outputDir))
         .on('end', resolve);
     }

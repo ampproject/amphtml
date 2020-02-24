@@ -152,7 +152,7 @@ function applyConfig(
         configJson = enableLocalDev(config, target, configJson);
       }
       if (opt_fortesting) {
-        configJson = Object.assign({test: true}, configJson);
+        configJson = {test: true, ...configJson};
       }
       const targetString = files[1].toString();
       const configString = JSON.stringify(configJson);

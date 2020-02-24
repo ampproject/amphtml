@@ -30,4 +30,6 @@ firebase
 .firebaserc
 firebase.json
 .firebase/
-extensions/amp-analytics/0.1/vendors/*.json
+src/purifier/dist
+build-system/tasks/performance/cache
+build-system/tasks/performance/results.json

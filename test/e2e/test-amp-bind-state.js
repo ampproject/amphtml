@@ -28,6 +28,14 @@ describes.endtoend(
     });
 
     describe('+ amp-state', () => {
+      it('should update text', async () => {
+        const text = await controller.findElement('#textDisplay');
+        await expect(controller.getElementText(text)).to.equal('hello');
+        const button = await controller.findElement('#changeTextButton');
+        await controller.click(button);
+        await expect(controller.getElementText(text)).to.equal('world');
+      });
+
       // TODO(cvializ, choumx): Update server to have an endpoint that
       // would test the infinite-loop blocking behavior
       it.skip('should not loop infinitely if updates change its src binding', async () => {

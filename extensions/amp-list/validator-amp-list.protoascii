@@ -114,10 +114,6 @@ tags: {  # <amp-list> with mandatory src and/or [src] attr
     name: "[src]"
     mandatory_anyof: "['src','[src]','data-amp-bind-src']"
   }
-  attrs: {
-    name: "[state]"
-    deprecation: "[src]"
-  }
   attr_lists: "extended-amp-global"
   amp_layout: {
     supported_layouts: FILL
@@ -237,6 +233,10 @@ tags: {  # <amp-list>
   attrs: {
     name: "template"
     value_oneof_set: TEMPLATE_IDS
+  }
+  # <amp-bind>
+  attrs: {
+    name: "[is-layout-container]"
   }
   attr_lists: "extended-amp-global"
   amp_layout: {

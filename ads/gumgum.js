@@ -35,7 +35,7 @@ export function gumgum(global, data) {
     slotId = parseInt(data.slot, 10),
     onLoad = function(type) {
       return function(evt) {
-        const ad = Object.assign({width: 0, height: 0}, evt.ad || {}),
+        const ad = {width: 0, height: 0, ...(evt.ad || {})},
           identifier = ['GUMGUM', type, evt.id].join('_');
         ctx.reportRenderedEntityIdentifier(identifier);
         ctx.renderStart({

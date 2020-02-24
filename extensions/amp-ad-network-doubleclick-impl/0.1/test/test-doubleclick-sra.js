@@ -73,14 +73,12 @@ describes.realWin('Doubleclick SRA', config, env => {
   });
 
   function createAndAppendAdElement(opt_attributes, opt_type, opt_domElement) {
-    const element = createElementWithAttributes(
-      doc,
-      opt_type || 'amp-ad',
-      Object.assign(
-        {type: 'doubleclick', height: 320, width: 50},
-        opt_attributes
-      )
-    );
+    const element = createElementWithAttributes(doc, opt_type || 'amp-ad', {
+      type: 'doubleclick',
+      height: 320,
+      width: 50,
+      ...opt_attributes,
+    });
     (opt_domElement || doc.body).appendChild(element);
     return element;
   }

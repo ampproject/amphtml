@@ -252,7 +252,8 @@ export class AmpDateDisplay extends AMP.BaseElement {
     const hour12 = data.hour % 12 || 12;
 
     // Override type since Object.assign is not understood
-    return /** @type {!EnhancedVariablesDef} */ (Object.assign({}, data, {
+    return /** @type {!EnhancedVariablesDef} */ ({
+      ...data,
       yearTwoDigit: this.padStart_(data.year % 100),
       monthTwoDigit: this.padStart_(data.month),
       dayTwoDigit: this.padStart_(data.day),
@@ -262,7 +263,7 @@ export class AmpDateDisplay extends AMP.BaseElement {
       minuteTwoDigit: this.padStart_(data.minute),
       secondTwoDigit: this.padStart_(data.second),
       dayPeriod: data.hour < 12 ? 'am' : 'pm',
-    }));
+    });
   }
 
   /**

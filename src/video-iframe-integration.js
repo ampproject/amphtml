@@ -364,7 +364,7 @@ export class AmpVideoIntegration {
    */
   postToParent_(data, opt_callback) {
     const id = this.callCounter_++;
-    const completeData = Object.assign({id}, data);
+    const completeData = {id, ...data};
 
     if (!getMode(this.win_).test && this.win_.parent) {
       this.win_.parent./*OK*/ postMessage(completeData, '*');

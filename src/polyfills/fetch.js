@@ -263,24 +263,18 @@ export class Response extends FetchResponse {
    */
   constructor(body, init = {}) {
     const lowercasedHeaders = map();
-    const data = Object.assign(
-      {
-        status: 200,
-        statusText: 'OK',
-        responseText: body ? String(body) : '',
-        /**
-         * @param {string} name
-         * @return {string}
-         */
-        getResponseHeader(name) {
-          const headerName = String(name).toLowerCase();
-          return hasOwn(lowercasedHeaders, headerName)
-            ? lowercasedHeaders[headerName]
-            : null;
-        },
+    const data = {
+      status: 200,
+      statusText: 'OK',
+      responseText: body ? String(body) : '',
+      getResponseHeader(name) {
+        const headerName = String(name).toLowerCase();
+        return hasOwn(lowercasedHeaders, headerName)
+          ? lowercasedHeaders[headerName]
+          : null;
       },
-      init
-    );
+      ...init,
+    };
 
     data.status = init.status === undefined ? 200 : parseInt(init.status, 10);
 

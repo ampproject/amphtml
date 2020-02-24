@@ -115,6 +115,7 @@ import {blade} from '../ads/blade';
 import {brainy} from '../ads/brainy';
 import {bringhub} from '../ads/bringhub';
 import {broadstreetads} from '../ads/broadstreetads';
+import {byplay} from '../ads/byplay';
 import {caajainfeed} from '../ads/caajainfeed';
 import {capirs} from '../ads/capirs';
 import {caprofitx} from '../ads/caprofitx';
@@ -188,6 +189,7 @@ import {mox} from '../ads/mox';
 import {mytarget} from '../ads/mytarget';
 import {mywidget} from '../ads/mywidget';
 import {nativeroll} from '../ads/nativeroll';
+import {nativery} from '../ads/nativery';
 import {nativo} from '../ads/nativo';
 import {navegg} from '../ads/navegg';
 import {nend} from '../ads/nend';
@@ -243,6 +245,7 @@ import {sovrn} from '../ads/sovrn';
 import {speakol} from '../ads/speakol';
 import {spotx} from '../ads/spotx';
 import {springAds} from '../ads/springAds';
+import {ssp} from '../ads/ssp';
 import {strossle} from '../ads/strossle';
 import {sulvo} from '../ads/sulvo';
 import {sunmedia} from '../ads/sunmedia';
@@ -251,6 +254,7 @@ import {swoop} from '../ads/swoop';
 import {taboola} from '../ads/taboola';
 import {tcsemotion} from '../ads/tcsemotion';
 import {teads} from '../ads/teads';
+import {temedya} from '../ads/temedya';
 import {torimochi} from '../ads/torimochi';
 import {tracdelight} from '../ads/tracdelight';
 import {triplelift} from '../ads/triplelift';
@@ -260,12 +264,14 @@ import {ucfunnel} from '../ads/ucfunnel';
 import {unruly} from '../ads/unruly';
 import {uzou} from '../ads/uzou';
 import {valuecommerce} from '../ads/valuecommerce';
+import {vdoai} from '../ads/vdoai';
 import {videointelligence} from '../ads/videointelligence';
 import {videonow} from '../ads/videonow';
 import {viralize} from '../ads/viralize';
 import {vmfive} from '../ads/vmfive';
 import {webediads} from '../ads/webediads';
 import {weboramaDisplay} from '../ads/weborama';
+import {whopainfeed} from '../ads/whopainfeed';
 import {widespace} from '../ads/widespace';
 import {wisteria} from '../ads/wisteria';
 import {wpmedia} from '../ads/wpmedia';
@@ -307,6 +313,7 @@ const AMP_EMBED_ALLOWED = {
   mgid: true,
   miximedia: true,
   mywidget: true,
+  nativery: true,
   lentainform: true,
   opinary: true,
   outbrain: true,
@@ -322,6 +329,8 @@ const AMP_EMBED_ALLOWED = {
   strossle: true,
   svknative: true,
   taboola: true,
+  temedya: true,
+  whopainfeed: true,
   yahoonativeads: true,
   zen: true,
   zergnet: true,
@@ -392,6 +401,7 @@ register('bodymovinanimation', bodymovinanimation);
 register('brainy', brainy);
 register('bringhub', bringhub);
 register('broadstreetads', broadstreetads);
+register('byplay', byplay);
 register('caajainfeed', caajainfeed);
 register('capirs', capirs);
 register('caprofitx', caprofitx);
@@ -471,6 +481,7 @@ register('mox', mox);
 register('mytarget', mytarget);
 register('mywidget', mywidget);
 register('nativeroll', nativeroll);
+register('nativery', nativery);
 register('nativo', nativo);
 register('navegg', navegg);
 register('nend', nend);
@@ -517,6 +528,7 @@ register('sekindo', sekindo);
 register('sharethrough', sharethrough);
 register('shemedia', shemedia);
 register('sklik', sklik);
+register('ssp', ssp);
 register('slimcutmedia', slimcutmedia);
 register('smartadserver', smartadserver);
 register('smartclip', smartclip);
@@ -535,6 +547,7 @@ register('swoop', swoop);
 register('taboola', taboola);
 register('tcsemotion', tcsemotion);
 register('teads', teads);
+register('temedya', temedya);
 register('torimochi', torimochi);
 register('tracdelight', tracdelight);
 register('triplelift', triplelift);
@@ -545,6 +558,7 @@ register('ucfunnel', ucfunnel);
 register('unruly', unruly);
 register('uzou', uzou);
 register('valuecommerce', valuecommerce);
+register('vdoai', vdoai);
 register('videointelligence', videointelligence);
 register('videonow', videonow);
 register('viqeoplayer', viqeoplayer);
@@ -552,6 +566,7 @@ register('viralize', viralize);
 register('vmfive', vmfive);
 register('webediads', webediads);
 register('weborama-display', weboramaDisplay);
+register('whopainfeed', whopainfeed);
 register('widespace', widespace);
 register('wisteria', wisteria);
 register('wpmedia', wpmedia);
