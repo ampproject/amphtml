@@ -106,6 +106,7 @@ describes.realWin('ad-cid', {amp: true}, env => {
   });
 
   it('should return undefined on failed CID', () => {
+    expectAsyncConsoleError(/nope/);
     config.clientIdScope = cidScope;
     env.sandbox.stub(cidService, 'get').callsFake(() => {
       return Promise.reject(new Error('nope'));
