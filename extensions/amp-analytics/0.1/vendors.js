@@ -91,9 +91,11 @@ const DEFAULT_CONFIG = jsonLiteral({
   },
 });
 
+const analyticsConfig = jsonConfiguration({
+  'default': includeJsonLiteral(DEFAULT_CONFIG),
+});
+
 /**
  * @const {!JsonObject}
  */
-export const ANALYTICS_CONFIG = jsonConfiguration({
-  'default': includeJsonLiteral(DEFAULT_CONFIG),
-});
+export const ANALYTICS_CONFIG = analyticsConfig;
