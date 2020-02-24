@@ -281,10 +281,9 @@ module.exports = {
   // on Travis before stalling out after 10 minutes.
   browserDisconnectTimeout: 2 * 60 * 1000,
 
-  // If there's no message from the browser, make Karma wait 5 minutes
-  // until it disconnects. This number will need to gradually grow as the
-  // duration of a full integration test run increases.
-  browserNoActivityTimeout: 5 * 60 * 1000,
+  // If there's no message from the browser, make Karma wait 2 minutes
+  // until it disconnects.
+  browserNoActivityTimeout: 2 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
   browserDisconnectTolerance: isTravisBuild() ? 2 : 0,
