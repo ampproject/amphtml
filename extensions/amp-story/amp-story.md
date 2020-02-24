@@ -501,10 +501,6 @@ Example:
 </amp-story-grid-layer>
 ```
 
-#### Links in amp-story-grid-layer
-
-We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
-
 #### Interactive components
 
 We support embedding components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will not have any effect), but by using the `interactive` attribute, you can make them be fully interactive.
@@ -530,6 +526,10 @@ Example:
 >
 </amp-twitter>
 ```
+
+#### Links in amp-story-grid-layer
+
+We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
 
 #### Customizing tooltip for links or interactive components
 
