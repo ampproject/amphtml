@@ -724,6 +724,7 @@ export class GoogleSubscriptionsPlatform {
               element.removeAttribute('subscriptions-google-rtc');
             } else {
               user().warn(
+                TAG,
                 `Element "{elemendId}" in real time config not found`
               );
             }
