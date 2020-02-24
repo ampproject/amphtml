@@ -16,10 +16,9 @@
 'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const brotliSize = require('brotli-size');
-const fs = require('fs');
 const globby = require('globby');
 const log = require('fancy-log');
+const packageJson = require('../../../package.json');
 const path = require('path');
 const url = require('url');
 const util = require('util');
@@ -38,38 +37,38 @@ const {
   VERSION: internalRuntimeVersion,
 } = require('../../compile/internal-version');
 const {cyan, green, red, yellow} = require('ansi-colors');
+const {serialReport} = require('@ampproject/filesize');
 
 const requestPost = util.promisify(require('request').post);
 
-const fileGlobs = ['dist/*.js', 'dist/v0/*-?.?.js'];
+const fileGlobs = packageJson.filesize.track;
 const normalizedRtvNumber = '1234567890123';
 
 const expectedGitHubRepoSlug = 'ampproject/amphtml';
 const bundleSizeAppBaseUrl = 'https://amp-bundle-size-bot.appspot.com/v0/';
+const replacementExpression = new RegExp(internalRuntimeVersion, 'g');
 
 /**
- * Get the brotli bundle sizes of the current build.
+ * Get the brotli bundle sizes of the current build after normalizing the RTV number.
  *
  * @return {Map<string, number>} the bundle size in KB rounded to 2 decimal
  *   points.
  */
-function getBrotliBundleSizes() {
-  // Brotli compressed size fluctuates because of changes in the RTV number, so
-  // normalize this across pull requests by replacing that RTV with a constant.
+async function getBrotliBundleSizes() {
   const bundleSizes = {};
 
   log(cyan('brotli'), 'bundle sizes are:');
-  for (const filePath of globby.sync(fileGlobs)) {
-    const normalizedFileContents = fs
-      .readFileSync(filePath, 'utf8')
-      .replace(new RegExp(internalRuntimeVersion, 'g'), normalizedRtvNumber);
-
-    const relativeFilePath = path.relative('.', filePath);
-    const bundleSize = parseFloat(
-      (brotliSize.sync(normalizedFileContents) / 1024).toFixed(2)
-    );
-    log(' ', cyan(relativeFilePath) + ':', green(`${bundleSize}KB`));
-    bundleSizes[relativeFilePath] = bundleSize;
+  const values = serialReport(process.cwd(), content =>
+    content.replace(replacementExpression, normalizedRtvNumber)
+  );
+  let next = await values.next();
+  while (!next.done) {
+    const [filePath, brotliSize] = next.value;
+    const relativePath = path.relative('.', filePath);
+    const reportedSize = parseFloat((brotliSize / 1024).toFixed(2));
+    log(' ', cyan(relativePath) + ':', green(reportedSize + 'KB'));
+    bundleSizes[relativePath] = reportedSize;
+    next = await values.next();
   }
 
   return bundleSizes;
@@ -110,7 +109,7 @@ async function storeBundleSize() {
       json: true,
       body: {
         token: process.env.BUNDLE_SIZE_TOKEN,
-        bundleSizes: getBrotliBundleSizes(),
+        bundleSizes: await getBrotliBundleSizes(),
       },
     });
     if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -176,7 +175,7 @@ async function reportBundleSize() {
         json: true,
         body: {
           baseSha,
-          bundleSizes: getBrotliBundleSizes(),
+          bundleSizes: await getBrotliBundleSizes(),
         },
       });
       if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -200,7 +199,7 @@ async function reportBundleSize() {
   }
 }
 
-function getLocalBundleSize() {
+async function getLocalBundleSize() {
   if (globby.sync(fileGlobs).length === 0) {
     log('Could not find runtime files.');
     log('Run', cyan('gulp dist --noextensions'), 'and re-run this task.');
@@ -214,7 +213,7 @@ function getLocalBundleSize() {
       cyan(shortSha(gitCommitHash())) + '.'
     );
   }
-  getBrotliBundleSizes();
+  await getBrotliBundleSizes();
 }
 
 async function bundleSize() {
@@ -225,7 +224,7 @@ async function bundleSize() {
   } else if (argv.on_pr_build) {
     return await reportBundleSize();
   } else if (argv.on_local_build) {
-    return getLocalBundleSize();
+    return await getLocalBundleSize();
   } else {
     log(red('Called'), cyan('gulp bundle-size'), red('with no task.'));
     process.exitCode = 1;

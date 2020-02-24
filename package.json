@@ -27,6 +27,7 @@
     "web-animations-js": "2.3.1"
   },
   "devDependencies": {
+    "@ampproject/filesize": "3.2.0",
     "@babel/core": "7.8.3",
     "@babel/helper-plugin-test-runner": "7.8.3",
     "@babel/plugin-proposal-class-properties": "7.8.3",
@@ -48,7 +49,6 @@
     "baconipsum": "0.1.2",
     "base62": "2.0.1",
     "body-parser": "1.19.0",
-    "brotli-size": "4.0.0",
     "browserify": "16.5.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
@@ -177,5 +177,13 @@
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "3.11.1"
+  },
+  "filesize": {
+    "track": [
+      "dist/*.js",
+      "dist/v0/*-?.?.js",
+      "dist/*.mjs",
+      "dist/v0/*-?.?.mjs"
+    ]
   }
 }
