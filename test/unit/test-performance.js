@@ -729,7 +729,7 @@ describes.realWin('performance', {amp: true}, env => {
             viewerSendMessageStub.withArgs('prerenderComplete').firstCall
               .args[1].value
           ).to.equal(300);
-          expect(getPerformanceMarks()).to.deep.equal([
+          expect(getPerformanceMarks()).to.have.members([
             'dr',
             'ol',
             'visible',
