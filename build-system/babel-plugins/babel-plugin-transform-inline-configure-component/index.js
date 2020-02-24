@@ -206,7 +206,7 @@ module.exports = function({types: t}) {
         const currentDirname = dirname(file.opts.filename);
         const importedModule = join(currentDirname, importPath);
 
-        // TODO(go.amp.dev.issue/26948): sourcemaps
+        // TODO(go.amp.dev/issue/26948): sourcemaps
         const importedInline = redefineInline(require.resolve(importedModule), {
           propValues,
           from: relative(currentDirname, dirname(importedModule)),
