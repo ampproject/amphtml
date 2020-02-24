@@ -165,6 +165,7 @@ describes.realWin('cacheCidApi', {amp: true}, env => {
       });
 
       it('should fail if the request times out', () => {
+        expectAsyncConsoleError(/fetchCidTimeout​​​/);
         fetchJsonStub.callsFake(() => {
           return new Promise((resolve, unused) => {
             clock.setTimeout(resolve, 35000, {
