@@ -1033,10 +1033,13 @@ export class AmpAutocomplete extends AMP.BaseElement {
 
   /**
    * Finish item selection with the selected value.
-   * @param {string} value
+   * @param {?string} value
    * @private
    */
   selectItem_(value) {
+    if (value === null) {
+      return;
+    }
     this.fireSelectEvent_(value);
     this.clearAllItems_();
     this.toggleResults_(false);
