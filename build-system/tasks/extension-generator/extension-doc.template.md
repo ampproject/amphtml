@@ -4,7 +4,7 @@ formats:
   - websites
   - email
 teaser:
-  text: Fill this in with teaser text to improve SEO.
+  text: Fill this in with teaser text to improve SEO. Use the component description.
 ---
 
 <!--
@@ -40,7 +40,7 @@ limitations under the License.
 
 ## Usage
 
-One to three paragraph explaining the component usage. List important functionality. Explain why developers care about it.
+One to three paragraphs explaining the component usage. List important functionality. Explain why developers care about it.
 
 [filter formats=“websites”]
 
