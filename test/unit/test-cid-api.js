@@ -166,7 +166,8 @@ describes.realWin('test-cid-api', {amp: true}, env => {
   });
 
   it('should return null if API rejects', () => {
-    fetchJsonStub.returns(Promise.reject());
+    expectAsyncConsoleError(/fetch failed/);
+    fetchJsonStub.rejects('fetch failed');
     return api
       .getScopedCid('api-key', 'scope-a')
       .then(cid => {
