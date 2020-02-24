@@ -40,7 +40,7 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation.
+For details on the configuration semantics, please contact the ad network or refer to their documentation. You need to register to the [vidyome platform](https://www.vidyome.com) for site-id parameter. 
 
 ### Required parameters
 
