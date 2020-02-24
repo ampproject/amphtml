@@ -41,7 +41,6 @@ import {closest, closestAncestorElementBySelector} from '../../../../src/dom';
 import {dev, devAssert, user, userAssert} from '../../../../src/log';
 import {dict} from '../../../../src/utils/object';
 import {getAmpdoc} from '../../../../src/service';
-import {getJsonLd} from '../jsonld';
 import {getRequestService} from '../amp-story-request-service';
 import {isArray} from '../../../../src/types';
 import {renderAsElement} from '../simple-template';
@@ -667,19 +666,21 @@ export class AmpStoryBookend extends DraggableDrawer {
    * @private
    */
   getStoryMetadata_() {
-    const jsonLd = getJsonLd(this.getAmpDoc().getRootNode());
-
     const urlService = Services.urlForDoc(this.element);
-    const {canonicalUrl} = Services.documentInfoForDoc(this.getAmpDoc());
+    const {
+      canonicalUrl,
+      title: titleFromTag,
+      jsonLd,
+    } = Services.documentInfoForDoc(this.getAmpDoc());
     const {hostname: domainName} = urlService.parse(canonicalUrl);
 
     const title =
-      jsonLd && jsonLd['headline']
-        ? jsonLd['headline']
+      jsonLd && jsonLd['headline'] && typeof jsonLd['headline'] === 'string'
+        ? /** @type {string} */ (jsonLd['headline'])
         : user().assertElement(
-            this.win.document.head.querySelector('title'),
+            titleFromTag,
             'Please set <title> or structured data (JSON-LD).'
-          ).textContent;
+          );
 
     const metadata = {domainName, title};
     const image = jsonLd && isArray(jsonLd['image']) ? jsonLd['image'] : null;

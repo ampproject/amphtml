@@ -23,7 +23,9 @@ import {
 
 import {getRandomString64} from './cid-impl';
 import {isArray} from '../types';
+import {isJsonLdScriptTag} from '../dom';
 import {map} from '../utils/object';
+import {parseJson} from '../json';
 import {registerServiceBuilderForDoc} from '../service';
 
 /** @private @const {!Array<string>} */
@@ -31,6 +33,7 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
 
 /**
  * Properties:
+ *     - title: the title of the document extrated from the <title> tag
  *     - sourceUrl: the source url of an amp document.
  *     - canonicalUrl: The doc's canonical.
  *     - pageViewId: Id for this page view. Low entropy but should be unique
@@ -40,17 +43,20 @@ const filteredLinkRels = ['prefetch', 'preload', 'preconnect', 'dns-prefetch'];
  *       hrefs (value). rel could be 'canonical', 'icon', etc.
  *     - metaTags: A map object of meta tag's name (key) and corresponding
  *       contents (value).
+ *     - jsonLd: Contents of the json-ld script tag
  *     - replaceParams: A map object of extra query string parameter names (key)
  *       to corresponding values, used for custom analytics.
  *       Null if not applicable.
  *
  * @typedef {{
+ *   title: string,
  *   sourceUrl: string,
  *   canonicalUrl: string,
  *   pageViewId: string,
  *   pageViewId64: !Promise<string>,
  *   linkRels: !Object<string, string|!Array<string>>,
  *   metaTags: !Object<string, string|!Array<string>>,
+ *   jsonLd: !Object<string, string|!Array<string>>,
  *   replaceParams: ?Object<string, string|!Array<string>>
  * }}
  */
@@ -96,9 +102,12 @@ export class DocInfo {
     const pageViewId = getPageViewId(ampdoc.win);
     const linkRels = getLinkRels(ampdoc.win.document);
     const metaTags = getMetaTags(ampdoc.win.document);
+    const jsonLd = getJsonLd(ampdoc.win.document);
     const replaceParams = getReplaceParams(ampdoc);
+    const title = getTitle(ampdoc.win.document);
 
     return (this.info_ = {
+      title,
       /** @return {string} */
       get sourceUrl() {
         return getSourceUrl(ampdoc.getUrl());
@@ -116,6 +125,7 @@ export class DocInfo {
       },
       linkRels,
       metaTags,
+      jsonLd,
       replaceParams,
     });
   }
@@ -180,11 +190,11 @@ function getLinkRels(doc) {
 function getMetaTags(doc) {
   const metaTags = map();
   if (doc.head) {
-    const metas = doc.head.querySelectorAll('meta[name]');
+    const metas = doc.head.querySelectorAll('meta[name], meta[property]');
     for (let i = 0; i < metas.length; i++) {
       const meta = metas[i];
       const content = meta.getAttribute('content');
-      const name = meta.getAttribute('name');
+      const name = meta.getAttribute('name') || meta.getAttribute('property');
       if (!name || !content) {
         continue;
       }
@@ -202,6 +212,40 @@ function getMetaTags(doc) {
     }
   }
   return metaTags;
+}
+
+/**
+ * Returns a json object that corresponds to the jsonld script in document head
+ * if it exists.
+ * @param {!Document} doc
+ * @return {!JsonObject<string, string|!Array<string>>}
+ */
+function getJsonLd(doc) {
+  let jsonLd = map();
+  if (doc.head) {
+    const scriptTag = doc.head.querySelector(
+      'script[type="application/ld+json"]'
+    );
+
+    if (!scriptTag || !isJsonLdScriptTag(scriptTag)) {
+      return jsonLd;
+    }
+
+    const parsedJsonLd = parseJson(scriptTag.textContent);
+    if (parsedJsonLd) {
+      jsonLd = parsedJsonLd;
+    }
+  }
+  return jsonLd;
+}
+
+/**
+ * Gets the document title from the head node
+ * @param {!Document} doc
+ * @return {string}
+ */
+function getTitle(doc) {
+  return ((doc.head && doc.head.querySelector('title')) || {}).textContent;
 }
 
 /**

@@ -30,7 +30,6 @@ import {createShadowRootWithStyle} from './utils';
 import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {dict} from './../../../src/utils/object';
 import {getAmpdoc} from '../../../src/service';
-import {getJsonLd} from './jsonld';
 import {isArray} from '../../../src/types';
 import {isProtocolValid, parseUrlDeprecated} from '../../../src/url';
 import {
@@ -681,14 +680,14 @@ export class Bookend {
    */
   getStoryMetadata_() {
     const ampdoc = getAmpdoc(this.parentEl_);
-    const jsonLd = getJsonLd(ampdoc.getRootNode());
+    const {jsonLd, title} = Services.documentInfoForDoc(ampdoc);
 
     const metadata = {
       title:
-        jsonLd && jsonLd['headline']
-          ? jsonLd['headline']
+        jsonLd && jsonLd['headline'] && typeof jsonLd['headline'] === 'string'
+          ? /** @type {string} */ (jsonLd['headline'])
           : user().assertElement(
-              this.win_.document.head.querySelector('title'),
+              title,
               'Please set <title> or structured data (JSON-LD).'
             ).textContent,
 
@@ -699,8 +698,8 @@ export class Bookend {
 
     if (jsonLd && isArray(jsonLd['image']) && jsonLd['image'].length) {
       userAssert(
-        isProtocolValid(jsonLd['image']),
-        `Unsupported protocol for story image URL ${jsonLd['image']}`
+        isProtocolValid(jsonLd['image'][0]),
+        `Unsupported protocol for story image URL ${jsonLd['image'][0]}`
       );
       metadata.imageUrl = jsonLd['image'][0];
     }

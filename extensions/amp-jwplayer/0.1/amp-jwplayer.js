@@ -170,12 +170,9 @@ class AmpJWPlayer extends AMP.BaseElement {
    */
   getContextualVal() {
     if (this.contentSearch_ === '__CONTEXTUAL__') {
-      const context = this.getAmpDoc().getHeadNode();
-      const ogTitleElement = context.querySelector('meta[property="og:title"]');
-      const ogTitle = ogTitleElement
-        ? ogTitleElement.getAttribute('content')
-        : null;
-      const title = (context.querySelector('title') || {}).textContent;
+      const docInfo = Services.documentInfoForDoc(this.getAmpDoc());
+      const {title, metaTags} = docInfo;
+      const ogTitle = metaTags && metaTags['og:title'];
       return ogTitle || title || '';
     }
     return this.contentSearch_;

@@ -29,7 +29,7 @@ describe
       window.sandbox.stub(CID, 'getRandomString64').returns('abcdef');
     });
 
-    function getWin(links, metas) {
+    function getWin(links, metas, ogs) {
       return createIframePromise().then(iframe => {
         if (links) {
           for (const rel in links) {
@@ -42,6 +42,7 @@ describe
             }
           }
         }
+
         if (metas) {
           for (const name in metas) {
             const contents = metas[name];
@@ -53,6 +54,20 @@ describe
             }
           }
         }
+
+        if (ogs) {
+          for (const name in ogs) {
+            const og = iframe.doc.createElement('meta');
+            og.setAttribute('property', name);
+            og.setAttribute('content', ogs[name]);
+            iframe.doc.head.appendChild(og);
+          }
+        }
+
+        const title = iframe.doc.createElement('title');
+        title.textContent = 'Hello';
+        iframe.doc.head.appendChild(title);
+
         const {win} = iframe;
         installDocService(win, /* isSingleDoc */ true);
         window.sandbox.stub(win.Math, 'random').callsFake(() => 0.123456789);
@@ -284,6 +299,28 @@ describe
         expect(
           Services.documentInfoForDoc(win.document).metaTags['theme-color']
         ).to.equal('#123456');
+      });
+    });
+
+    it('should provide og tags', () => {
+      return getWin(
+        {},
+        {},
+        {
+          'og:image': ['https://foo.html/bar.gif'],
+        }
+      ).then(win => {
+        expect(
+          Services.documentInfoForDoc(win.document).metaTags['og:image']
+        ).to.equal('https://foo.html/bar.gif');
+      });
+    });
+
+    it('should provide the title', () => {
+      return getWin().then(win => {
+        expect(Services.documentInfoForDoc(win.document).title).to.equal(
+          'Hello'
+        );
       });
     });
 
