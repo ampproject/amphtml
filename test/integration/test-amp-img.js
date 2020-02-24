@@ -87,16 +87,19 @@ describe
           expect(largeScreen.offsetHeight).to.equal(0);
           fixture.iframe.width = 600;
           fixture.win.dispatchEvent(new fixture.win.Event('resize'));
-          return fixture.awaitEvent(AmpEvents.LOAD_START, 4).then(function() {
-            expect(smallScreen.className).to.match(
-              /i-amphtml-hidden-by-media-query/
-            );
-            expect(largeScreen.className).to.not.match(
-              /i-amphtml-hidden-by-media-query/
-            );
-            expect(smallScreen.offsetHeight).to.equal(0);
-            expect(largeScreen.offsetHeight).to.not.equal(0);
-          });
+          return fixture
+            .awaitEvent(AmpEvents.LOAD_START, 4)
+            .then(() => fixture.awaitEvent(AmpEvents.UNLOAD, 1))
+            .then(function() {
+              expect(smallScreen.className).to.match(
+                /i-amphtml-hidden-by-media-query/
+              );
+              expect(largeScreen.className).to.not.match(
+                /i-amphtml-hidden-by-media-query/
+              );
+              expect(smallScreen.offsetHeight).to.equal(0);
+              expect(largeScreen.offsetHeight).to.not.equal(0);
+            });
         });
     });
 

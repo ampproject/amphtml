@@ -1351,6 +1351,7 @@ function createBaseCustomElementClass(win) {
       if (isReLayoutNeeded) {
         this.reset_();
       }
+      this.dispatchCustomEventForTesting(AmpEvents.UNLOAD);
       return isReLayoutNeeded;
     }
 
