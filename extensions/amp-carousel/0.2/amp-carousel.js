@@ -171,6 +171,7 @@ class AmpCarousel extends AMP.BaseElement {
       // to load.
       nearbyMarginInPercent: this.isIos_ ? 200 : 100,
       viewportIntersectionCallback: (child, isIntersecting) => {
+        owners.updateInViewport(this.element, child, isIntersecting);
         if (isIntersecting) {
           owners.scheduleResume(this.element, child);
         } else {
