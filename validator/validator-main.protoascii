@@ -1346,7 +1346,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   }
   # TODO(b/68756045): Whitelist CSS properties allowed in Dynamic Mail.
   cdata: {
-    max_bytes: 50000
+    max_bytes: 75000
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
     css_spec: {
       at_rule_spec: {
