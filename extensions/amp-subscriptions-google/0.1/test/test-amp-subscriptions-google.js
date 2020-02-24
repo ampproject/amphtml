@@ -43,10 +43,6 @@ const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
 
 describes.realWin('AmpFetcher', {amp: true}, env => {
-  // Please note that AmpFetcher is only called by swg-js.
-  // Also note that sendBeach accepts a message object which is private to
-  // swg-js.
-
   let win;
   let ampdoc;
   let fetcher;
