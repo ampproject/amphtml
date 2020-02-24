@@ -15,7 +15,7 @@
       owners: [{name: 'ampproject/wg-analytics'}],
     },
     {
-      pattern: '{amp-story-*}.js',
+      pattern: 'amp-story-*.js',
       owners: [{name: 'newmuis'}, {name: 'gmajoulet'}, {name: 'enriqe'}],
     },
     {

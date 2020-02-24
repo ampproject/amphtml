@@ -37,6 +37,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
 
@@ -271,6 +272,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
       clock = env.sandbox.useFakeTimers();
@@ -563,6 +565,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
 
@@ -723,6 +726,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
       clock = env.sandbox.useFakeTimers();
@@ -1125,6 +1129,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
 
@@ -1209,6 +1214,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
       clock = env.sandbox.useFakeTimers();
@@ -1623,6 +1629,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
 
@@ -1751,6 +1758,7 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
       clock = env.sandbox.useFakeTimers();

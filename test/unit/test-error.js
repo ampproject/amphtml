@@ -46,7 +46,7 @@ describes.fakeWin('installErrorReporting', {}, env => {
     win = env.win;
     installErrorReporting(win);
     rejectedPromiseEventCancelledSpy = env.sandbox.spy();
-    rejectedPromiseError = new Error('error');
+    rejectedPromiseError = new Error('error reason');
     rejectedPromiseEvent = {
       type: 'unhandledrejection',
       reason: rejectedPromiseError,
@@ -63,18 +63,21 @@ describes.fakeWin('installErrorReporting', {}, env => {
   });
 
   it('should report the normal promise rejection', () => {
+    expectAsyncConsoleError(/error reason/);
     win.eventListeners.fire(rejectedPromiseEvent);
     expect(rejectedPromiseError.reported).to.be.true;
     expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
   });
 
   it('should allow null errors', () => {
+    expectAsyncConsoleError(/rejected promise/);
     rejectedPromiseEvent.reason = null;
     win.eventListeners.fire(rejectedPromiseEvent);
     expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
   });
 
   it('should allow string errors', () => {
+    expectAsyncConsoleError(/string error/);
     rejectedPromiseEvent.reason = 'string error';
     win.eventListeners.fire(rejectedPromiseEvent);
     expect(rejectedPromiseEventCancelledSpy).to.not.be.called;
@@ -324,11 +327,13 @@ describe('getErrorReportData', () => {
 
   it('reportError mark asserts', () => {
     let e = '';
-    try {
-      userAssert(false, 'XYZ');
-    } catch (error) {
-      e = error;
-    }
+    allowConsoleError(() => {
+      try {
+        userAssert(false, 'XYZ');
+      } catch (error) {
+        e = error;
+      }
+    });
     const data = getErrorReportData(
       undefined,
       undefined,
@@ -345,11 +350,13 @@ describe('getErrorReportData', () => {
 
   it('reportError mark asserts without error object', () => {
     let e = '';
-    try {
-      userAssert(false, 'XYZ');
-    } catch (error) {
-      e = error;
-    }
+    allowConsoleError(() => {
+      try {
+        userAssert(false, 'XYZ');
+      } catch (error) {
+        e = error;
+      }
+    });
     const data = getErrorReportData(e.message, undefined, undefined, undefined);
     expect(data.m).to.equal('XYZ');
     expect(data.a).to.equal('1');
@@ -585,11 +592,13 @@ describe('getErrorReportData', () => {
   it('should throttle user errors', () => {
     nextRandomNumber = 0.2;
     let e = '';
-    try {
-      userAssert(false, 'XYZ');
-    } catch (error) {
-      e = error;
-    }
+    allowConsoleError(() => {
+      try {
+        userAssert(false, 'XYZ');
+      } catch (error) {
+        e = error;
+      }
+    });
     const data = getErrorReportData(
       undefined,
       undefined,
@@ -760,7 +769,10 @@ describes.sandboxed('reportError', {}, env => {
 
   it('should accept Error type', () => {
     const error = new Error('error');
-    const result = reportError(error);
+    let result;
+    allowConsoleError(() => {
+      result = reportError(error);
+    });
     expect(result).to.equal(error);
     expect(result.origError).to.be.undefined;
     expect(result.reported).to.be.true;
@@ -769,7 +781,10 @@ describes.sandboxed('reportError', {}, env => {
 
   it('should accept string and report incorrect use', () => {
     window.__AMP_MODE = {localDev: true, test: false};
-    const result = reportError('error');
+    let result;
+    allowConsoleError(() => {
+      result = reportError('error');
+    });
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('error');
     expect(result.origError).to.be.equal('error');
@@ -781,7 +796,10 @@ describes.sandboxed('reportError', {}, env => {
 
   it('should accept number and report incorrect use', () => {
     window.__AMP_MODE = {localDev: true, test: false};
-    const result = reportError(101);
+    let result;
+    allowConsoleError(() => {
+      result = reportError(101);
+    });
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('101');
     expect(result.origError).to.be.equal(101);
@@ -793,7 +811,10 @@ describes.sandboxed('reportError', {}, env => {
 
   it('should accept null and report incorrect use', () => {
     window.__AMP_MODE = {localDev: true, test: false};
-    const result = reportError(null);
+    let result;
+    allowConsoleError(() => {
+      result = reportError(null);
+    });
     expect(result).to.be.instanceOf(Error);
     expect(result.message).to.contain('Unknown error');
     expect(result.origError).to.be.undefined;
