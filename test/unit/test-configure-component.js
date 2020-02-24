@@ -21,7 +21,7 @@ import {
 
 const BaseElementMock = element => ({element});
 
-describe('configureComponent', () => {
+describes.sandboxed('configureComponent', {}, () => {
   it('uses implementation', () => {
     const wrapped = configureComponent(foo => ({foo}), {});
     const foo = {};

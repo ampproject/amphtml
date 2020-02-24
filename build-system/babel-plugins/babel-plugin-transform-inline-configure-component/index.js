@@ -34,7 +34,7 @@ const replacedMember = 'STATIC_CONFIG_';
 
 /**
  * Sub-plugin that transforms inlined file that exports wrapped constructor.
- * @return {Object}
+ * @return {!Object}
  */
 function transformRedefineInline({types: t}) {
   const propValueNode = (propValues, key, opt_default) =>
@@ -119,8 +119,8 @@ function transformRedefineInline({types: t}) {
 /**
  * Transforms using transformRedefineInline sub-plugin.
  * @param {string} sourceFilename
- * @param {Object} opts
- * @return {Object}
+ * @param {!Object} opts
+ * @return {!Object}
  */
 const redefineInline = (sourceFilename, opts) =>
   transformFileSync(sourceFilename.toString(), {
@@ -133,8 +133,7 @@ const redefineInline = (sourceFilename, opts) =>
 
 /**
  * Replaces `configureComponent()` wrapping calls.
- *
- * @return {Object}
+ * @return {!Object}
  */
 module.exports = function({types: t}) {
   function getImportPath(nodes, name) {
@@ -207,7 +206,7 @@ module.exports = function({types: t}) {
         const currentDirname = dirname(file.opts.filename);
         const importedModule = join(currentDirname, importPath);
 
-        // TODO(alanorozco): sourcemaps
+        // TODO(go.amp.dev.issue/26948): sourcemaps
         const importedInline = redefineInline(require.resolve(importedModule), {
           propValues,
           from: relative(currentDirname, dirname(importedModule)),
