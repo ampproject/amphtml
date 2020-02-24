@@ -31,9 +31,9 @@ const COMMON_CHROME_FLAGS = [
 // Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
 // Reference: https://wiki.saucelabs.com/display/DOCS/Test+Configuration+Options#TestConfigurationOptions-Timeouts
 const SAUCE_TIMEOUT_CONFIG = {
-  maxDuration: 10 * 60,
+  maxDuration: 30 * 60,
   commandTimeout: 10 * 60,
-  idleTimeout: 10 * 60,
+  idleTimeout: 30 * 60,
 };
 
 const BABELIFY_CONFIG = {
@@ -281,9 +281,10 @@ module.exports = {
   // on Travis before stalling out after 10 minutes.
   browserDisconnectTimeout: 2 * 60 * 1000,
 
-  // If there's no message from the browser, make Karma wait 2 minutes
-  // until it disconnects.
-  browserNoActivityTimeout: 2 * 60 * 1000,
+  // If there's no message from the browser, make Karma wait 5 minutes
+  // until it disconnects. This number will need to gradually grow as the
+  // duration of a full integration test run increases.
+  browserNoActivityTimeout: 5 * 60 * 1000,
 
   // IF YOU CHANGE THIS, DEBUGGING WILL RANDOMLY KILL THE BROWSER
   browserDisconnectTolerance: isTravisBuild() ? 2 : 0,

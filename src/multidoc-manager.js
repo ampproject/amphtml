@@ -358,6 +358,9 @@ export class MultidocManager {
               // Ignore.
             } else if (name == 'viewport') {
               // Ignore.
+            } else if (name) {
+              // Store meta name/content pairs.
+              ampdoc.setMetaByName(name, n.getAttribute('content') || '');
             } else {
               // TODO(dvoytenko): copy other meta tags.
               dev().warn(TAG, 'meta ignored: ', n);

@@ -476,7 +476,6 @@ const adConfig = jsonConfiguration({
   },
 
   'forkmedia': {
-    prefetch: 'https://delivery.forkcdn.com/rappio/inread/v1.1/amp/inread.js',
     renderStartImplemented: true,
   },
 
@@ -1049,6 +1048,14 @@ const adConfig = jsonConfiguration({
     consentHandlingOverride: true,
   },
 
+  'temedya': {
+    prefetch: [
+      'https://vidyome-com.cdn.vidyome.com/vidyome/builds/temedya-amp.js',
+      'https://vidyome-com.cdn.vidyome.com/vidyome/builds/widgets.js',
+    ],
+    renderStartImplemented: true,
+  },
+
   'torimochi': {
     renderStartImplemented: true,
   },
@@ -1148,7 +1155,7 @@ const adConfig = jsonConfiguration({
   },
 
   'yahoo': {
-    prefetch: 'https://s.yimg.com/os/ampad/display.js',
+    prefetch: 'https://s.yimg.com/aaq/ampad/display.js',
     preconnect: 'https://us.adserver.yahoo.com',
   },
 

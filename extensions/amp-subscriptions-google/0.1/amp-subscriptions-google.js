@@ -622,7 +622,7 @@ AMP.extension(TAG, '0.1', function(AMP) {
      * @param {!../../../src/service/ampdoc-impl.AmpDoc} ampdoc
      * @return {*} TODO(#23582): Specify return type
      */
-    ampdoc => {
+    function(ampdoc) {
       const platformService = new GoogleSubscriptionsPlatformService(ampdoc);
       const element = ampdoc.getHeadNode();
       Services.subscriptionsServiceForDoc(element).then(service => {

@@ -175,40 +175,126 @@ describes.realWin(
           },
           false /** waitForLayout */
         );
-
         await allowConsoleError(() =>
           element.build().catch(err => {
             expect(err.message).to.include(
-              'amp-next-page page list should be an array'
+              'amp-next-page Page list expected an array, found: object: [object Object]'
             );
+            element.parentNode.removeChild(element);
           })
         );
       });
 
-      it('errors on invalid inline config (ampUrl instead of url)', async () => {
+      it('errors on invalid inline config (ampUrl instead of url)', () => {
+        expectAsyncConsoleError(/page url must be a string/, 1);
+
+        getAmpNextPage({
+          inlineConfig: [
+            {
+              'image': '/examples/img/hero@1x.jpg',
+              'title': 'Title 1',
+              'ampUrl': '/document1',
+            },
+            {
+              'image': '/examples/img/hero@1x.jpg',
+              'title': 'Title 2',
+              'ampUrl': '/document2',
+            },
+          ],
+        });
+      });
+    });
+
+    describe('remote config', () => {
+      it('errors when no config specified', async () => {
+        const element = await getAmpNextPage({});
+
+        await allowConsoleError(() =>
+          element.build().catch(err => {
+            expect(err.message).to.include(
+              'amp-next-page should contain a <script> child or a URL specified in [src]'
+            );
+            element.parentNode.removeChild(element);
+          })
+        );
+      });
+
+      it('builds with valid remote config (without inline config)', async () => {
+        const element = await getAmpNextPage({
+          src: 'https://example.com/config.json',
+        });
+        element.parentNode.removeChild(element);
+      });
+
+      it('fetches remote config when specified in src', async () => {
         const element = await getAmpNextPage(
           {
-            inlineConfig: [
-              {
-                'image': '/examples/img/hero@1x.jpg',
-                'title': 'Title 1',
-                'ampUrl': '/document1',
-              },
-              {
-                'image': '/examples/img/hero@1x.jpg',
-                'title': 'Title 2',
-                'ampUrl': '/document2',
-              },
-            ],
+            src: 'https://example.com/config.json',
           },
           false /** waitForLayout */
         );
 
-        await allowConsoleError(() =>
-          element.build().catch(err => {
-            expect(err.message).to.include('page url must be a string');
-          })
-        );
+        const config = {
+          pages: [
+            {
+              image: '/examples/img/hero@1x.jpg',
+              title: 'Remote config',
+              url: '/document1',
+            },
+          ],
+        };
+
+        const fetchJsonStub = env.sandbox
+          .stub(Services.batchedXhrFor(win), 'fetchJson')
+          .resolves({
+            ok: true,
+            json() {
+              return Promise.resolve(config);
+            },
+          });
+        const service = Services.nextPageServiceForDoc(doc);
+
+        await element.build();
+        await element.layoutCallback();
+
+        expect(
+          fetchJsonStub.calledWithExactly('https://example.com/config.json', {})
+        ).to.be.true;
+
+        await service.readyPromise_;
+        // Page 1
+        expect(service.pages_[1].title).to.equal('Remote config');
+        expect(service.pages_[1].url).to.include('/document1');
+        expect(service.pages_[1].image).to.equal('/examples/img/hero@1x.jpg');
+
+        element.parentNode.removeChild(element);
+      });
+
+      it('errors on invalid remote config (ampUrl instead of url)', async () => {
+        expectAsyncConsoleError(/page url must be a string/, 1);
+
+        const config = {
+          pages: [
+            {
+              image: '/examples/img/hero@1x.jpg',
+              title: 'Remote config',
+              ampUrl: '/document1',
+            },
+          ],
+        };
+
+        env.sandbox.stub(Services.batchedXhrFor(win), 'fetchJson').resolves({
+          ok: true,
+          json() {
+            return Promise.resolve(config);
+          },
+        });
+
+        const element = await getAmpNextPage({
+          src: 'https://example.com/config.json',
+        });
+
+        element.parentNode.removeChild(element);
       });
     });
 
@@ -476,7 +562,7 @@ describes.realWin(
       });
     });
 
-    describe('default separators', () => {
+    describe('default separators & footers', () => {
       let element;
       let service;
 
@@ -493,11 +579,11 @@ describes.realWin(
         element.parentNode.removeChild(element);
       });
 
-      it('adds a default separator to for the host page', async () => {
+      it('adds a default separator to the host page', async () => {
         await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
 
         expect(service.pages_[1].container.firstElementChild).to.have.class(
-          'amp-next-page-default-separator'
+          'amp-next-page-separator'
         );
       });
 
@@ -505,12 +591,18 @@ describes.realWin(
         await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
 
         expect(service.pages_[2].container.firstElementChild).to.have.class(
-          'amp-next-page-default-separator'
+          'amp-next-page-separator'
         );
+      });
+
+      it('adds a default footer to the host page', async () => {
+        await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
+
+        expect(element.lastElementChild).to.have.class('amp-next-page-footer');
       });
     });
 
-    describe('custom and templated separators', () => {
+    describe('custom and templated separators & footers', () => {
       let element;
       let service;
       let html;
@@ -611,10 +703,57 @@ describes.realWin(
         expect(template1.innerText).to.equal('Rendered 1');
         expect(template2.innerText).to.equal('Rendered 2');
       });
-    });
 
-    describe('remote config', () => {
-      // TODO (wassgha): Implement once remote config is implemented
+      it('correctly renders a templated footer', async () => {
+        const separator = html`
+          <div footer>
+            <template type="amp-mustache">
+              <div class="footer-content">
+                {{#pages}}
+                <span class="title">{{title}}</span>
+                <span class="url">{{url}}</span>
+                <span class="image">{{image}}</span>
+                {{/pages}}
+              </div>
+            </template>
+          </div>
+        `;
+
+        element = await getAmpNextPage({
+          inlineConfig: VALID_CONFIG,
+          separator,
+        });
+
+        service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(0);
+        const templateRenderStub = env.sandbox
+          .stub(service.templates_, 'findAndRenderTemplate')
+          .resolves(
+            html`
+              <span>Rendered</span>
+            `
+          );
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, '1');
+        expect(templateRenderStub).to.have.been.calledWith(
+          env.sandbox.match.any,
+          {
+            pages: [
+              {
+                title: 'Title 1',
+                url: '',
+                image: '/examples/img/hero@1x.jpg',
+              },
+              {
+                title: 'Title 2',
+                url: 'http://localhost:9876/document2',
+                image: '/examples/img/hero@1x.jpg',
+              },
+            ],
+          }
+        );
+        expect(element.lastElementChild.innerText).to.equal('Rendered');
+      });
     });
   }
 );

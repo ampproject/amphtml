@@ -291,7 +291,7 @@ The value of `max-age` should be chosen carefully:
 
 - A longer `max-age` increases the potential security impact of a [SXG downgrade](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#seccons-downgrades).
 
-- A shorter `max-age` may prevent inclusion in AMP Caches that have a [minimum SXG lifetime](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache).
+- A shorter `max-age` may prevent inclusion in AMP Caches that have a minimum SXG lifetime. For instance, the Google AMP Cache requires at least [4 days](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache) (345600 seconds). Note that there's currently no reason to select `max-age` longer than 7 days (604800 seconds), due to the [maximum](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#name-signature-validity) set by the SXG spec.
 
 If you don't publish signed exchanges, `max-age` does nothing.
 

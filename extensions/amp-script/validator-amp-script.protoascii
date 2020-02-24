@@ -33,6 +33,9 @@ tags: {  # <amp-script> (local script)
     name: "id"
     add_value_to_set: AMP_SCRIPT_IDS
     mandatory: true
+    # When updating this blacklisted_value_regex, also update for
+    # mandatory-id-attr and $GLOBAL_ATTRS in validator-main.protoascii, and
+    # validator-amp-mustache.protoascii.
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated
         "__amp_\\S*|"
         "__count__|"
