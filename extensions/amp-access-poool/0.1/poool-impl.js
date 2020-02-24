@@ -15,7 +15,7 @@
  */
 import {Services} from '../../../src/services';
 import {addParamToUrl, addParamsToUrl} from '../../../src/url';
-import {dev, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getMode} from '../../../src/mode';
 import {listenFor} from '../../../src/iframe-helper';
@@ -175,10 +175,22 @@ export class PooolVendor {
   }
 
   /**
+   * @return {!Element}
+   * @private
+   */
+  getContainer_() {
+    const paywallContainer = this.ampdoc.getElementById('poool');
+    return user().assertElement(
+      paywallContainer,
+      'No element with id #poool found to render paywall into, got'
+    );
+  }
+
+  /**
    * @private
    */
   renderPoool_() {
-    const pooolContainer = this.ampdoc.getElementById('poool');
+    const pooolContainer = this.getContainer_();
     const urlPromise = this.accessSource_.buildUrl(
       addParamsToUrl(
         this.iframeUrl_,
