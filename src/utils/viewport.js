@@ -1,0 +1,42 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Use an IntersectionObserver to trigger viewportCallbacks. NO-OP when
+ * IntersectionObserver is not available on platform.
+ * @param {!AMP.BaseElement} baseElement
+ * @param {Object<string, *>=} options IntersectionObserver options, but with
+ *   a default threshold of 0.5
+ * @return {?IntersectionObserver}
+ */
+export function setupIntersectionViewportCallback(baseElement, options = {}) {
+  const {IntersectionObserver} = baseElement.win;
+  if (!IntersectionObserver) {
+    return null;
+  }
+  const observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.target === baseElement.element) {
+          baseElement.viewportCallback(entry.isIntersecting);
+        }
+      });
+    },
+    {threshold: 0.5, ...options}
+  );
+  observer.observe(baseElement.element);
+  return observer;
+}

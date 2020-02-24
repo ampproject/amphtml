@@ -15,6 +15,7 @@
  */
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {setupIntersectionViewportCallback} from '../../../src/utils/viewport';
 import {toggleAttribute} from '../../../src/dom';
 
 /**
@@ -48,6 +49,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.buildButtons();
     this.setupGestures();
     this.setControlsState();
+    setupIntersectionViewportCallback(this);
   }
 
   /** @override */
