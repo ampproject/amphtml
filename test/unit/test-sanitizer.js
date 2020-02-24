@@ -396,13 +396,10 @@ function runSanitizerTests() {
     });
 
     it('should allow for input type file and password', () => {
-      // Given that the doc is not provided.
-      allowConsoleError(() => {
-        expect(sanitize('<input type="file">')).to.equal('<input type="file">');
-        expect(sanitize('<input type="password">')).to.equal(
-          '<input type="password">'
-        );
-      });
+      expect(sanitize('<input type="file">')).to.equal('<input type="file">');
+      expect(sanitize('<input type="password">')).to.equal(
+        '<input type="password">'
+      );
     });
 
     it('should disallow certain attributes on form for AMP4Email', () => {
@@ -421,15 +418,13 @@ function runSanitizerTests() {
 
     it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
       html.setAttribute('amp4email', '');
-      allowConsoleError(() => {
-        expect(sanitize('<amp-analytics>')).to.equal('');
-        expect(sanitize('<amp-iframe>')).to.equal('');
-        expect(sanitize('<amp-list>')).to.equal('');
-        expect(sanitize('<amp-pixel>')).to.equal('');
-        expect(sanitize('<amp-twitter>')).to.equal('');
-        expect(sanitize('<amp-video>')).to.equal('');
-        expect(sanitize('<amp-youtube>')).to.equal('');
-      });
+      expect(sanitize('<amp-analytics>')).to.equal('');
+      expect(sanitize('<amp-iframe>')).to.equal('');
+      expect(sanitize('<amp-list>')).to.equal('');
+      expect(sanitize('<amp-pixel>')).to.equal('');
+      expect(sanitize('<amp-twitter>')).to.equal('');
+      expect(sanitize('<amp-video>')).to.equal('');
+      expect(sanitize('<amp-youtube>')).to.equal('');
 
       expect(sanitize('<amp-accordion>')).to.equal('<amp-accordion>');
       expect(sanitize('<amp-anim>')).to.equal('<amp-anim>');
