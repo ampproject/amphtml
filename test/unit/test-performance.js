@@ -39,6 +39,8 @@ describes.realWin('performance', {amp: true}, env => {
       // set initial Date.now to 100, so that we can differentiate between time relative to epoch and relative to process start (value vs. delta).
       now: timeOrigin,
     });
+    Object.defineProperty(win.performance, 'timeOrigin', {value: timeOrigin}); // timeOrigin is read-only.
+    win.performance.now = clock.performance.now;
     installPlatformService(env.win);
     installPerformanceService(env.win);
     perf = Services.performanceFor(env.win);
@@ -710,20 +712,30 @@ describes.realWin('performance', {amp: true}, env => {
         perf.coreServicesAvailable();
       });
 
-      it('should call prerenderComplete on viewer', () => {
+      it('should call prerenderComplete on viewer', async () => {
         env.sandbox
           .stub(viewer, 'getParam')
           .withArgs('csi')
           .returns('1');
         env.sandbox.stub(viewer, 'isEmbedded').returns(true);
-        clock.tick(300);
+        clock.tick(100);
+        whenFirstVisibleResolve();
+        await whenFirstVisiblePromise.then(() => {
+          clock.tick(300);
+        });
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(
             viewerSendMessageStub.withArgs('prerenderComplete').firstCall
               .args[1].value
           ).to.equal(300);
-          expect(getPerformanceMarks()).to.deep.equal(['dr', 'ol', 'pc']);
+          expect(getPerformanceMarks()).to.have.members([
+            'dr',
+            'ol',
+            'visible',
+            'ofv',
+            'pc',
+          ]);
         });
       });
 
@@ -854,6 +866,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       navigator: env.win.navigator,
       performance: {
         getEntriesByType: env.sandbox.stub(),
+        now: () => 100,
+        timeOrigin: 100,
       },
     };
 
