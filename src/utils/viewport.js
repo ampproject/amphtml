@@ -27,21 +27,19 @@ export function listenViewportIntersection(baseElement, options = {}) {
   if (!IntersectionObserver) {
     return null;
   }
-  let {element} = baseElement;
   let observer = new IntersectionObserver(
     entries => {
       entries.forEach(entry => {
-        if (entry.target === element) {
+        if (entry.target === baseElement.element) {
           baseElement.viewportCallback(entry.isIntersecting);
         }
       });
     },
     {threshold: 0.5, ...options}
   );
-  observer.observe(element);
+  observer.observe(baseElement.element);
   return () => {
-    observer.unobserve(element);
+    observer.disconnect();
     observer = null;
-    element = null;
   };
 }
