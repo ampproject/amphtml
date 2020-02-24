@@ -199,7 +199,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should add element out of registration', () => {
       const ctor = function() {};
-      extensions.addElement('e1', ctor);
+      allowConsoleError(() => extensions.addElement('e1', ctor));
       expect(Object.keys(extensions.extensions_)).to.deep.equal(['_UNKNOWN_']);
       const unknown = extensions.extensions_['_UNKNOWN_'];
       expect(unknown.extension.elements['e1']).to.exist;
@@ -391,7 +391,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should add doc factory out of registration', () => {
       const factory = function() {};
-      extensions.addDocFactory(factory);
+      allowConsoleError(() => extensions.addDocFactory(factory));
 
       const holder = extensions.getExtensionHolder_('_UNKNOWN_');
       expect(holder.docFactories).to.exist;
@@ -452,7 +452,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should add service factory out of registration', () => {
       const factory = function() {};
-      extensions.addService('service1', factory);
+      allowConsoleError(() => extensions.addService('service1', factory));
 
       const holder = extensions.getExtensionHolder_('_UNKNOWN_');
       expect(holder.extension.services).to.exist;
@@ -647,7 +647,7 @@ describes.sandboxed('Extensions', {}, () => {
 
     it('should devAssert if script cannot be found', () => {
       expect(() => {
-        extensions.reloadExtension('amp-list');
+        allowConsoleError(() => extensions.reloadExtension('amp-list'));
       }).to.throw('Cannot find script for extension: amp-list');
 
       expect(extensions.preloadExtension).to.not.be.called;
@@ -661,7 +661,7 @@ describes.sandboxed('Extensions', {}, () => {
       win.document.head.appendChild(list);
 
       expect(() => {
-        extensions.reloadExtension('amp-list');
+        allowConsoleError(() => extensions.reloadExtension('amp-list'));
       }).to.throw('Cannot find script for extension: amp-list');
 
       expect(list.hasAttribute('i-amphtml-loaded-new-version')).to.be.false;
