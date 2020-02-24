@@ -21,7 +21,7 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function temedya(global, data) {
-  validateData(data, ['keyid','siteid']);
+  validateData(data, ['siteid']);
   global._temedya = global._temedya || {
     title: data['title'] || false,
     keyId: data['keyid'],
