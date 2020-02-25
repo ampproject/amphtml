@@ -216,7 +216,12 @@ export class NextPageService {
     this.maxPages_ = this.getHost_().hasAttribute('max-pages')
       ? this.getHost_().getAttribute('max-pages')
       : Infinity;
-    this.initializePageQueue_();
+    this.initializePageQueue_().then(() => {
+      // Render the initial footer template with all pages
+      this.refreshFooter_();
+      // Mark the page as ready
+      this.readyResolver_();
+    });
 
     this.getHost_().classList.add(NEXT_PAGE_CLASS);
 
@@ -741,25 +746,23 @@ export class NextPageService {
    */
   initializePageQueue_() {
     const inlinePages = this.getInlinePages_(this.getHost_());
+    if (inlinePages.length) {
+      return this.queuePages_(inlinePages);
+    }
+
     userAssert(
-      inlinePages || this.nextSrc_,
+      this.nextSrc_,
       '%s should contain a <script> child or a URL specified in [src]',
       TAG
     );
-    return this.getRemotePages_()
-      .then(remotePages => [].concat(inlinePages, remotePages))
-      .then(pages => {
-        if (pages.length === 0) {
-          user().warn(TAG, 'Could not find recommendations');
-          return Promise.resolve();
-        }
-        return this.queuePages_(pages).then(() => {
-          // Render the initial footer template with all pages
-          this.refreshFooter_();
-          // Mark the page as ready
-          this.readyResolver_();
-        });
-      });
+
+    return this.getRemotePages_().then(remotePages => {
+      if (remotePages.length === 0) {
+        user().warn(TAG, 'Could not find recommendations');
+        return Promise.resolve();
+      }
+      return this.queuePages_(remotePages);
+    });
   }
 
   /**
