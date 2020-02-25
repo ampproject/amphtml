@@ -89,7 +89,7 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
   });
 
   it('should support beacon when beacon not supported', async () => {
-    env.sandbox.stub(WindowInterface, 'getSendBeacon', () => null);
+    env.sandbox.stub(WindowInterface, 'getSendBeacon').callsFake(() => null);
     env.sandbox.stub(xhr, 'fetch').callsFake((url, init) => {
       expect(url).to.equal(sentUrl);
       expect(init).to.deep.equal({
