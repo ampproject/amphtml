@@ -955,7 +955,7 @@ describe
           });
         });
 
-        describe.only('getStateWithWait', () => {
+        describe('getStateWithWait', () => {
           function addAmpState(id, valuePromise) {
             const ampState = document.createElement('amp-state', id);
             ampState.createdCallback = () => {};
