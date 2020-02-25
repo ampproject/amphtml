@@ -957,7 +957,7 @@ describe
 
         describe.only('getStateWithWait', () => {
           function addAmpState(id, valuePromise) {
-            let ampState = document.createElement('amp-state', id);
+            const ampState = document.createElement('amp-state', id);
             ampState.createdCallback = () => {};
             ampState.getImpl = () =>
               Promise.resolve({
