@@ -564,17 +564,17 @@ export class Bind {
    */
   getStateWithWait(expr) {
     const asyncLoadingAmpStates = {};
-    const ampStatesEls = root.querySelectorAll('AMP-STATE');
+    const ampStateEls = this.ampdoc.getRootNode().querySelectorAll('AMP-STATE');
     let hasLoadingAmpState = false;
     const gatherAsyncAmpStates = Promise.all(
-      toArray(ampStatesEls).map(el => {
+      toArray(ampStateEls).map(el => {
         return whenUpgradedToCustomElement(el)
           .then(() => el.getImpl(/* waitForBuild */ false))
           .then(impl => {
             const id = impl.element.getAttribute('id');
             const loadingPromise = impl.getFetchAndUpdatePromise();
             if (loadingPromise) {
-              asyncLoadingAmpStates[id] = loadedPromise;
+              asyncLoadingAmpStates[id] = loadingPromise;
               hasLoadingAmpState = true;
             }
           });
@@ -592,7 +592,7 @@ export class Bind {
         wait = Promise.all(Object.values(asyncLoadingAmpStates));
       } else {
         const stateKey = expr.split('.')[0];
-        wait = asyncLoadingAmpStates[stateKey];
+        wait = Promise.resolve(asyncLoadingAmpStates[stateKey]);
       }
 
       return wait.catch(() => {}).then(() => this.getState(expr));
