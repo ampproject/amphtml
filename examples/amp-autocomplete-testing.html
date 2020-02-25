@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html amp data-ampdevmode>
+<html amp>
   <head>
     <meta charset="utf-8">
     <title>autocomplete testing</title>
@@ -11,7 +11,7 @@
     <script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js"></script>
     <script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js"></script>
     <script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js"></script>
-    <!-- <meta name="amp-script-src" content="sha384-DYxIFXpU4kmJjfzvb4W5twGuG3Rn__B7WPoTFqdXBrJHylbvFKQJEv-tBUq7lSiC"></head> -->
+    <meta name="amp-script-src" content="sha384-lkZe5hu5T1z7PF2HQkxeneF_vgDxtjTso8jfxHdHe6obPTTZoYiBhm9tjU9Qsre1"></head>
     <style amp-custom>
       body {
         margin: 0;
@@ -43,7 +43,7 @@
   <body>
     <h3>amp-autocomplete + amp-bind + amp-script testing</h3>
     <amp-autocomplete filter="substring">
-      <amp-script script="search-script" sandbox="allow-forms" data-ampdevmode>
+      <amp-script script="search-script" sandbox="allow-forms">
         <div>
           <span>Search <input type="text" name="search" id="search" on="input-debounced:AMP.setState({search: event.value});change:AMP.setState({search: event.value})"></span> <span>Value set by amp-script: <output id="asout"></output></span>
         </div>
