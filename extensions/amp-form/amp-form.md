@@ -302,6 +302,8 @@ For example, a common use case is to submit a form on input change (selecting a 
 
 See the [full example here](../../examples/forms.amp.html).
 
+[filter formats="websites, ads"]
+
 ### Analytics triggers
 
 The `amp-form` extension triggers the following events that you can track in your [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
@@ -363,6 +365,8 @@ When the `amp-form-submit`, `amp-form-submit-success`, or `amp-form-submit-error
 - `formId`
 - `formFields[comment]`
 
+[/filter]<!-- formats="websites, ads" -->
+
 ## Success/error response rendering
 
 You can render success or error responses in your form by using [extended templates](https://www.ampproject.org/docs/fundamentals/spec#extended-templates), such as [amp-mustache](https://amp.dev/documentation/components/amp-mustache), or success responses through data binding with [amp-bind](https://amp.dev/documentation/components/amp-bind) and the following response attributes:
@@ -391,12 +395,6 @@ In the following example, the responses are rendered in an inline template insid
     <input type="text" name="firstName" />
     ...
   </fieldset>
-  <div verify-error>
-    <template type="amp-mustache">
-      There is a mistake in the form!
-      {{#verifyErrors}}{{message}}{{/verifyErrors}}
-    </template>
-  </div>
   <div submitting>
     <template type="amp-mustache">
       Form submitting... Thank you for waiting {{name}}.
