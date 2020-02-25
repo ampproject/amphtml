@@ -177,7 +177,7 @@ export class SubscriptionService {
     return new Promise((resolve, unusedReject) => {
       const rawContent = tryParseJson(this.configElement_.textContent, e => {
         throw user().createError(
-          'Failed to parse "amp-subscriptions" JSON: ' + e
+          'Failed to parse "amp-subscriptions" JSON: ',  e
         );
       });
       resolve(rawContent);
