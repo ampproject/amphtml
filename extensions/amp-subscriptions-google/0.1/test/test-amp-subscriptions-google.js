@@ -29,7 +29,10 @@ import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
-import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
+import {
+  GoogleSubscriptionsPlatform,
+  getAmpFetcherClassForTesting,
+} from '../amp-subscriptions-google';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
@@ -38,6 +41,71 @@ import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
+
+describes.realWin('AmpFetcher', {amp: true}, env => {
+  let win;
+  let ampdoc;
+  let fetcher;
+  let xhr;
+
+  const sentUrl = 'url';
+  const sentArray = [
+    'embed',
+    'tx',
+    'refer',
+    'utmS',
+    'utmC',
+    'utmM',
+    'sku',
+    true,
+    ['exp1', 'exp2'],
+    'version',
+    'baseUrl',
+  ];
+  const sentMessage = {
+    toArray: function() {
+      return sentArray;
+    },
+  };
+  const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
+  const expectedBodyString = 'f.req=' + JSON.stringify(sentArray);
+  const AmpFetcher = getAmpFetcherClassForTesting();
+
+  beforeEach(() => {
+    win = env.win;
+    ampdoc = env.ampdoc;
+    fetcher = new AmpFetcher(ampdoc.win);
+    xhr = Services.xhrFor(env.win);
+  });
+
+  it('should support beacon when beacon supported', async () => {
+    const expectedBlob = new Blob([expectedBodyString], {type: contentType});
+    env.sandbox.stub(win.navigator, 'sendBeacon').callsFake((url, body) => {
+      expect(url).to.equal(sentUrl);
+      expect(body).to.deep.equal(expectedBlob);
+    });
+    fetcher.sendBeacon(sentUrl, sentMessage);
+  });
+
+  it('should support beacon when beacon not supported', async () => {
+    const tempFun = win.navigator.sendBeacon;
+    win.navigator.sendBeacon = null;
+    env.sandbox.stub(xhr, 'fetch').callsFake((url, init) => {
+      expect(url).to.equal(sentUrl);
+      expect(init).to.deep.equal({
+        method: 'POST',
+        headers: {'Content-Type': contentType},
+        credentials: 'include',
+        body: expectedBodyString,
+      });
+    });
+
+    fetcher.sendBeacon(sentUrl, sentMessage);
+
+    // Restore the original function so we don't break Xhr tests throughout AMP.
+    win.navigator.sendBeacon = tempFun;
+  });
+});
 
 describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let ampdoc;
