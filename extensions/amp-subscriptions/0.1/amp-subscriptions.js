@@ -176,7 +176,9 @@ export class SubscriptionService {
   getPlatformConfig_() {
     return new Promise((resolve, reject) => {
       const rawContent = tryParseJson(this.configElement_.textContent, e => {
-        reject('Failed to parse "amp-subscriptions" JSON: ' + e);
+        throw user().createError(
+          'Failed to parse "amp-subscriptions" JSON: ' + e
+        );
       });
       resolve(rawContent);
     });
