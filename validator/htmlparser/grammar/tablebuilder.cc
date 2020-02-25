@@ -179,18 +179,18 @@ bool TableBuilder::OutputHeaderFile(
   std::ofstream fd(header_options_.output_file_path);
   htmlparser::Defer ____([&]() {fd.close();});
 
+  fd << "// -*- C++ -*-\n";
+
   if (!header_options_.license_header.empty()) {
     fd << header_options_.license_header << "\n";
   }
-
   fd << "\n// AUTO GENERATED; DO NOT EDIT.\n";
   fd << "// To regenerate this file, see comments in bin/jsongrammargen\n\n";
   if (!header_options_.ifdef_guard.empty()) {
     fd << "#ifndef " << header_options_.ifdef_guard << "\n";
     fd << "#define " << header_options_.ifdef_guard << "\n\n";
   } else {
-    fd << "#ifndef PARSE_STATES_H_\n";
-    fd << "#define PARSE_STATES_H_\n\n";
+    fd << "#pragma once\n";
   }
 
   fd << "#include <array>\n\n";
@@ -312,8 +312,6 @@ inline static uint32_t CodeForToken(unsigned char c, uint8_t state) {
 
   if (!header_options_.ifdef_guard.empty()) {
     fd << "#endif  // " << header_options_.ifdef_guard << std::endl;
-  } else {
-    fd << "#endif  // GRAMMAR_PARSE_STATES_H_\n";
   }
 
   return true;
