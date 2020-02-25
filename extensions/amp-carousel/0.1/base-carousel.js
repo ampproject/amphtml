@@ -15,6 +15,7 @@
  */
 import {Keys} from '../../../src/utils/key-codes';
 import {Services} from '../../../src/services';
+import {isAmp4Email} from '../../../src/format';
 import {toggleAttribute} from '../../../src/dom';
 
 /**
@@ -38,8 +39,11 @@ export class BaseCarousel extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const input = Services.inputFor(this.win);
+    const doc = /** @type {!Document} */ (this.element.ownerDocument);
     this.showControls_ =
-      input.isMouseDetected() || this.element.hasAttribute('controls');
+      isAmp4Email(doc) ||
+      input.isMouseDetected() ||
+      this.element.hasAttribute('controls');
 
     if (this.showControls_) {
       this.element.classList.add('i-amphtml-carousel-has-controls');
