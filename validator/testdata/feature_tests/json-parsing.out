@@ -33,7 +33,7 @@ PASS
 |  <!-- The JSON string contains a carriage return `\r` between `:` and `false` -->
 |  <amp-state id="td_amp_menu_state"><script type="application/json">
 |  {"visible":
-false}</script></amp-state>
+|  false}</script></amp-state>
 |
 |  </body>
 |  </html>
