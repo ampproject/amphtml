@@ -6810,11 +6810,11 @@ attr_lists: {
   # amp-next-page specific attributes, see
   # https://amp.dev/documentation/components/amp-next-page
   attrs: {
-    name: "next-page-hide",
+    name: "next-page-hide"
     requires_extension: "amp-next-page"
   }
   attrs: {
-    name: "next-page-replace",
+    name: "next-page-replace"
     requires_extension: "amp-next-page"
   }
   # <amp-bind>
