@@ -947,9 +947,10 @@ Bind `Node.textContent` using the `[text]` attribute. The `[text]` attribute is 
 
 Bind an element's `class` using the `[class]` attribute. A `[class]` expression must result in a space-delimited string. Meaning, if you are binding multiple classes, use a space between names. A comma or dash will be evaluated as the class name.
 
-[example preview="inline" playground="true" imports="amp-bind"]
+[example preview="top-frame" playground="true" imports="amp-bind"]
 
 ```html
+<head>
 <style amp-custom>
   .background-green {
     background: green;
@@ -963,6 +964,8 @@ Bind an element's `class` using the `[class]` attribute. A `[class]` expression 
     border-style: solid;
   }
 </style>
+</head>
+<body>
 <div class="background-red" [class]="myClass">Hello World</div>
 <!-- This button adds both classes -->
 <button on="tap:AMP.setState({ myClass: 'background-green border-red' })">
@@ -978,6 +981,7 @@ Bind an element's `class` using the `[class]` attribute. A `[class]` expression 
 <button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">
   Broken: Change Class
 </button>
+</body>
 ```
 
 [/example]
