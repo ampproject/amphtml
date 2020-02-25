@@ -19,18 +19,14 @@ import {ConsentConfig, expandPolicyConfig} from '../consent-config';
 import {GEO_IN_GROUP} from '../../../amp-geo/0.1/amp-geo-in-group';
 import {Services} from '../../../../src/services';
 import {dict} from '../../../../src/utils/object';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin('ConsentConfig', {amp: 1}, env => {
-  let win;
   let doc;
   let element;
   let defaultConfig;
   beforeEach(() => {
-    win = env.win;
     doc = env.win.document;
     element = doc.createElement('div');
-    toggleExperiment(win, 'amp-consent-v2', true);
     defaultConfig = dict({
       'consentInstanceId': 'ABC',
       'checkConsentHref': 'https://response1',

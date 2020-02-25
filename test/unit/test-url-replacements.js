@@ -228,7 +228,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(64);
+          expect(variables.length).to.equal(61);
         });
       });
 
@@ -808,24 +808,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it('should replace TIMEZONE', () => {
         return expandUrlAsync('?tz=TIMEZONE').then(res => {
           expect(res).to.match(/tz=-?\d+/);
-        });
-      });
-
-      it('should replace TIMEZONE_CODE', () => {
-        return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
-          expect(res).to.match(/tz_code=\w+|^$/);
-        });
-      });
-
-      it('should replace SCROLL_TOP', () => {
-        return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
-          expect(res).to.match(/scrollTop=\d+/);
-        });
-      });
-
-      it('should replace SCROLL_LEFT', () => {
-        return expandUrlAsync('?scrollLeft=SCROLL_LEFT').then(res => {
-          expect(res).to.match(/scrollLeft=\d+/);
         });
       });
 

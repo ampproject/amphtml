@@ -245,7 +245,7 @@ class AmpDelightPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(getData(event));
-    if (data === undefined || data['type'] === undefined) {
+    if (data == null || !data['type']) {
       return; // We only process valid JSON.
     }
 

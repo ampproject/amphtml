@@ -179,6 +179,7 @@ describes.sandboxed('Storage', {}, env => {
       });
 
       it('should recover from binding failure', () => {
+        expectAsyncConsoleError(/Failed to load store/);
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
@@ -193,6 +194,7 @@ describes.sandboxed('Storage', {}, env => {
       });
 
       it('should recover from binding error', () => {
+        expectAsyncConsoleError(/Failed to load store/);
         bindingMock
           .expects('loadBlob')
           .withExactArgs('https://acme.com')
@@ -499,7 +501,7 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
     expect(errorSpy).to.have.not.been.called;
 
     delete windowApi.localStorage;
-    new LocalStorageBinding(windowApi);
+    allowConsoleError(() => new LocalStorageBinding(windowApi));
     expect(errorSpy).to.be.calledOnce;
     expect(errorSpy.args[0][1].message).to.match(/localStorage not supported/);
   });
@@ -564,6 +566,7 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
   });
 
   it('should bypass loading from localStorage if getItem throws', () => {
+    expectAsyncConsoleError(/localStorage not supported/);
     localStorageMock
       .expects('getItem')
       .throws(new Error('unknown'))
@@ -626,6 +629,7 @@ describes.sandboxed('LocalStorageBinding', {}, env => {
   });
 
   it('should bypass saving to localStorage if getItem throws', () => {
+    expectAsyncConsoleError(/localStorage not supported/);
     const setItemSpy = env.sandbox.spy(windowApi.localStorage, 'setItem');
 
     localStorageMock

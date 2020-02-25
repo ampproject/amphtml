@@ -25,7 +25,7 @@
 #include <string>
 #include <string_view>
 
-#include "htmlparser/comparators.h"
+#include "comparators.h"
 
 namespace htmlparser {
 

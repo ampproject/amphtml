@@ -417,23 +417,6 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
-    // Returns the IANA timezone code
-    this.set('TIMEZONE_CODE', () => {
-      let tzCode;
-      if ('Intl' in win && 'DateTimeFormat' in win.Intl) {
-        // It could be undefined (i.e. IE11)
-        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
-      }
-
-      return tzCode || '';
-    });
-
-    // Returns a promise resolving to viewport.getScrollTop.
-    this.set('SCROLL_TOP', () => viewport.getScrollTop());
-
-    // Returns a promise resolving to viewport.getScrollLeft.
-    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
-
     // Returns a promise resolving to viewport.getScrollHeight.
     this.set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
 
@@ -641,7 +624,7 @@ export class GlobalVariableSource extends VariableSource {
         if (!bind) {
           return '';
         }
-        return bind.getStateValue(/** @type {string} */ (key));
+        return bind.getStateValue(/** @type {string} */ (key)) || '';
       });
     });
   }

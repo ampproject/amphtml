@@ -55,16 +55,21 @@ describes.integration(
       shadowDoc = env.win.document.getElementById('host').shadowRoot;
     });
 
-    it('should attach shadow AMP document', () => {
+    // TODO(kevinkimball, #26863): Flaky on Safari.
+    it.configure().skipSafari('should attach shadow AMP document', () => {
       return expect(shadowDoc.body.innerText).to.include('Shadow AMP document');
     });
 
-    it('should layout amp-img component in shadow AMP document', async () => {
-      const shadowDocController = new BrowserController(env.win, shadowDoc);
-      await shadowDocController.waitForElementLayout('amp-img');
-      return expect(
-        shadowDoc.querySelectorAll('amp-img img[src]')
-      ).to.have.length(1);
-    });
+    // TODO(kevinkimball, #26863): Flaky on Safari.
+    it.configure().skipSafari(
+      'should layout amp-img component in shadow AMP document',
+      async () => {
+        const shadowDocController = new BrowserController(env.win, shadowDoc);
+        await shadowDocController.waitForElementLayout('amp-img');
+        return expect(
+          shadowDoc.querySelectorAll('amp-img img[src]')
+        ).to.have.length(1);
+      }
+    );
   }
 );

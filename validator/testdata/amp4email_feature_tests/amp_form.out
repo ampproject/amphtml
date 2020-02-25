@@ -44,6 +44,7 @@ FAIL
 |          <span>Your email</span>
 |          <input type="email" name="email" required>
 |        </label>
+|        <input type="button" name="button">
 |        <input type="submit" value="Subscribe">
 |      </fieldset>
 |      <div submit-success>
@@ -80,29 +81,29 @@ FAIL
 |    <!-- Invalid: only https protocol is supported. -->
 |    <form method="GET" action-xhr="http://someserver.com/endpoint">
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:80:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form)
+amp4email_feature_tests/amp_form.html:81:2 Invalid URL protocol 'http:' for attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form)
 |      <input name="googlesearch">
 |      <input type="submit" value="OK">
 |    </form>
 |    <!-- Invalid: only absolute URL is allowed. -->
 |    <form method="GET" action-xhr="endpoint">
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:85:2 The relative URL 'endpoint' for attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is disallowed. (see https://amp.dev/documentation/components/amp-form)
+amp4email_feature_tests/amp_form.html:86:2 The relative URL 'endpoint' for attribute 'action-xhr' in tag 'FORM [method=GET] (AMP4EMAIL)' is disallowed. (see https://amp.dev/documentation/components/amp-form)
 |      <input name="googlesearch">
 |      <input type="submit" value="OK">
 |    </form>
 |    <form method="POST" action-xhr="endpoint">
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:89:2 The relative URL 'endpoint' for attribute 'action-xhr' in tag 'FORM [method=POST] (AMP4EMAIL)' is disallowed. (see https://amp.dev/documentation/components/amp-form)
+amp4email_feature_tests/amp_form.html:90:2 The relative URL 'endpoint' for attribute 'action-xhr' in tag 'FORM [method=POST] (AMP4EMAIL)' is disallowed. (see https://amp.dev/documentation/components/amp-form)
 |      <input name="googlesearch">
 |      <input type="submit" value="OK">
 |    </form>
 |    <!-- Invalid: the action and target attributes are disallowed. -->
 |    <form method="GET"
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:94:2 The attribute 'action' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form)
+amp4email_feature_tests/amp_form.html:95:2 The attribute 'action' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form)
 >>   ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:94:2 The attribute 'target' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form)
+amp4email_feature_tests/amp_form.html:95:2 The attribute 'target' may not appear in tag 'FORM [method=GET] (AMP4EMAIL)'. (see https://amp.dev/documentation/components/amp-form)
 |      action="/components/amp-form/submit-form"
 |      target="_top">
 |      <div>
@@ -110,11 +111,8 @@ amp4email_feature_tests/amp_form.html:94:2 The attribute 'target' may not appear
 |      </div>
 |      <input type="submit" value="OK">
 |    </form>
-|    <!-- Invalid: input can not be type="button|file|image". -->
+|    <!-- Invalid: input can not be type="file|image". -->
 |    <form method="post" action-xhr="https://example.com/subscribe">
-|      <input type="button" name="button">
->>     ^~~~~~~~~
-amp4email_feature_tests/amp_form.html:104:4 The attribute 'type' in tag 'input' is set to the invalid value 'button'. (see https://amp.dev/documentation/components/amp-form)
 |      <input type="image" name="image">
 >>     ^~~~~~~~~
 amp4email_feature_tests/amp_form.html:105:4 The attribute 'type' in tag 'input' is set to the invalid value 'image'. (see https://amp.dev/documentation/components/amp-form)
