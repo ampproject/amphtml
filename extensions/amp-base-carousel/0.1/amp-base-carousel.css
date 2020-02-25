@@ -61,8 +61,8 @@ amp-base-carousel[dir="rtl"] .i-amphtml-base-carousel-arrow-next-slot {
 
 amp-base-carousel[loop="false"] .i-amphtml-base-carousel-arrow-prev-slot > [disabled],
 amp-base-carousel[loop="false"] .i-amphtml-base-carousel-arrow-next-slot > [disabled],
-amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-prev-slot,
-amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-next-slot {
+amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-prev-slot > *,
+amp-base-carousel[i-amphtml-base-carousel-hide-buttons] .i-amphtml-base-carousel-arrow-next-slot > * {
   opacity: 0;
   /** 
    * Note, screen readers can still activate the buttons when hide buttons is

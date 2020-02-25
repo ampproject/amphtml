@@ -177,8 +177,8 @@ export class Bind {
      */
     this.maxNumberOfBindings_ = 1000;
 
-    /** @const @private {!../../../src/service/resources-interface.ResourcesInterface} */
-    this.resources_ = Services.resourcesForDoc(ampdoc);
+    /** @const @private {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(ampdoc);
 
     /**
      * The current values of all bound expressions on the page.
@@ -250,14 +250,13 @@ export class Bind {
 
   /**
    * Merges `state` into the current state and immediately triggers an
-   * evaluation unless `opt_skipEval` is false.
+   * evaluation unless `skipEval` is false.
    * @param {!JsonObject} state
-   * @param {boolean=} opt_skipEval
-   * @param {boolean=} opt_skipAmpState
+   * @param {!BindSetStateOptionsDef} opts options bag
    * @return {!Promise}
    */
-  setState(state, opt_skipEval, opt_skipAmpState) {
-    dev().info(TAG, 'setState (init=%s):', opt_skipEval, state);
+  setState(state, opts = {}) {
+    dev().info(TAG, 'setState (init=%s):', opts.skipEval, state);
 
     try {
       deepMerge(this.state_, state, MAX_MERGE_DEPTH);
@@ -265,13 +264,18 @@ export class Bind {
       user().error(TAG, 'Failed to merge result from AMP.setState().', e);
     }
 
-    if (opt_skipEval) {
+    if (opts.skipEval) {
       return Promise.resolve();
     }
 
     const promise = this.initializePromise_
       .then(() => this.evaluate_())
-      .then(results => this.apply_(results, opt_skipAmpState));
+      .then(results =>
+        this.apply_(results, {
+          skipAmpState: opts.skipAmpState,
+          constrain: opts.constrain,
+        })
+      );
 
     if (getMode().test) {
       promise.then(() => {
@@ -485,7 +489,7 @@ export class Bind {
     return rescanPromise.then(() => {
       if (options.update) {
         return this.evaluate_().then(results =>
-          this.applyElements_(results, addedElements)
+          this.apply_(results, {constrain: addedElements})
         );
       }
     });
@@ -553,11 +557,13 @@ export class Bind {
    * Returns the stringified value of the global state for a given field-based
    * expression, e.g. "foo.bar.baz".
    * @param {string} expr
-   * @return {string}
+   * @return {?string}
    */
   getStateValue(expr) {
     const value = getValueForExpr(this.state_, expr);
-    if (isObject(value) || isArray(value)) {
+    if (value === undefined || value === null) {
+      return null;
+    } else if (isObject(value) || isArray(value)) {
       return JSON.stringify(/** @type {JsonObject} */ (value));
     } else {
       return String(value);
@@ -1186,39 +1192,37 @@ export class Bind {
   }
 
   /**
-   * Applies expression results to all elements in the document.
+   * Applies expression results to elements in the document.
+   *
    * @param {Object<string, BindExpressionResultDef>} results
-   * @param {boolean=} opt_skipAmpState
+   * @param {Object} opts options bag
+   * @param {boolean=} opts.skipAmpState
+   * @param {Array<!Element>=} opts.constrain restricts the application to children of specified elements.
    * @return {!Promise}
    * @private
    */
-  apply_(results, opt_skipAmpState) {
-    const promises = this.boundElements_.map(boundElement => {
+  apply_(results, opts) {
+    const promises = [];
+
+    this.boundElements_.forEach(boundElement => {
       // If this evaluation is triggered by an <amp-state> mutation, we must
       // ignore updates to any <amp-state> element to prevent update cycles.
-      if (opt_skipAmpState && boundElement.element.tagName === 'AMP-STATE') {
-        return Promise.resolve();
+      if (opts.skipAmpState && boundElement.element.tagName === 'AMP-STATE') {
+        return;
       }
-      return this.applyBoundElement_(results, boundElement);
-    });
-    return Promise.all(promises);
-  }
 
-  /**
-   * Applies expression results to only given elements and their descendants.
-   * @param {Object<string, BindExpressionResultDef>} results
-   * @param {!Array<!Element>} elements
-   * @return {!Promise}
-   */
-  applyElements_(results, elements) {
-    const promises = [];
-    this.boundElements_.forEach(boundElement => {
-      elements.forEach(element => {
-        if (element.contains(boundElement.element)) {
-          promises.push(this.applyBoundElement_(results, boundElement));
-        }
-      });
+      // If this is a constrained application, then restrict to specified
+      // elements and their subtrees.
+      if (
+        opts.constrain &&
+        !opts.constrain.some(el => el.contains(boundElement.element))
+      ) {
+        return;
+      }
+
+      promises.push(this.applyBoundElement_(results, boundElement));
     });
+
     return Promise.all(promises);
   }
 
@@ -1234,7 +1238,7 @@ export class Bind {
     if (updates.length === 0) {
       return Promise.resolve();
     }
-    return this.resources_.mutateElement(element, () => {
+    return this.mutator_.mutateElement(element, () => {
       const mutations = map();
       let width, height;
 
@@ -1256,10 +1260,9 @@ export class Bind {
       });
 
       if (width !== undefined || height !== undefined) {
-        // TODO(choumx): Add new Resources method for adding change-size
         // request without scheduling vsync pass since `mutateElement()`
         // will schedule a pass after a short delay anyways.
-        this.resources_./*OK*/ changeSize(element, height, width);
+        this.mutator_./*OK*/ changeSize(element, height, width);
       }
 
       if (typeof element.mutatedAttributesCallback === 'function') {

@@ -22,6 +22,7 @@ import '../polyfills';
 import {Navigation} from '../service/navigation';
 import {Services} from '../services';
 import {adopt} from '../runtime';
+import {allowLongTasksInChunking, startupChunk} from '../chunk';
 import {cssText as ampSharedCss} from '../../build/ampshared.css';
 import {doNotTrackImpression} from '../impression';
 import {fontStylesheetTimeout} from '../font-stylesheet-timeout';
@@ -35,6 +36,7 @@ import {
 import {installDocService} from '../service/ampdoc-impl';
 import {installErrorReporting} from '../error';
 import {installPerformanceService} from '../service/performance-impl';
+import {installPlatformService} from '../service/platform-impl';
 import {
   installStylesForDoc,
   makeBodyVisible,
@@ -42,7 +44,6 @@ import {
 } from '../style-installer';
 import {internalRuntimeVersion} from '../internal-version';
 import {maybeValidate} from '../validator-integration';
-import {startupChunk} from '../chunk';
 import {stubElementsForDoc} from '../service/custom-element-registry';
 
 getMode(self).runtime = 'inabox';
@@ -68,9 +69,11 @@ try {
   makeBodyVisibleRecovery(self.document);
   throw e;
 }
+allowLongTasksInChunking();
 startupChunk(self.document, function initial() {
   /** @const {!../service/ampdoc-impl.AmpDoc} */
   const ampdoc = ampdocService.getAmpDoc(self.document);
+  installPlatformService(self);
   installPerformanceService(self);
   /** @const {!../service/performance-impl.Performance} */
   const perf = Services.performanceFor(self);

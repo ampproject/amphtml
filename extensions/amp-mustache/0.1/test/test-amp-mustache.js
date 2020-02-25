@@ -459,6 +459,7 @@ describes.repeated(
         const result = template.render({
           value:
             '<table class="valid-class">' +
+            '<colgroup><col><col></colgroup>' +
             '<caption>caption</caption>' +
             '<thead><tr><th colspan="2">header</th></tr></thead>' +
             '<tbody><tr><td>' +
@@ -471,6 +472,7 @@ describes.repeated(
         });
         expect(result./*OK*/ innerHTML).to.equal(
           'value = <table class="valid-class">' +
+            '<colgroup><col><col></colgroup>' +
             '<caption>caption</caption>' +
             '<thead><tr><th colspan="2">header</th></tr></thead>' +
             '<tbody><tr><td>' +

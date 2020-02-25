@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+import {
+  clickThroughPages,
+  switchToAdFrame,
+} from './test-amp-story-auto-ads-utils';
+
 const viewport = {
   HEIGHT: 823,
   WIDTH: 500,
@@ -27,7 +32,9 @@ describes.endtoend(
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
     // TODO(ccordry): reenable shadow demo? fails while waiting for
     // .amp-doc-host[style="visibility: visible;"]
-    environments: ['single', 'viewer-demo'],
+    // TODO(ccordry): re-enable viewer-demo that should handle the 64px
+    // offset set by the viewer header.
+    environments: ['single' /*, 'viewer-demo'*/],
   },
   env => {
     let controller;
@@ -68,7 +75,9 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/fixtures/e2e/amp-story-auto-ads/dv3-request.html',
     initialRect: {width: viewport.WIDTH, height: viewport.HEIGHT},
-    environments: ['single', 'viewer-demo'],
+    // TODO(ccordry): re-enable viewer-demo that should handle the 64px
+    // offset set by the viewer header.
+    environments: ['single' /*, 'viewer-demo'*/],
   },
   env => {
     let controller;
@@ -99,13 +108,6 @@ describes.endtoend(
     });
   }
 );
-
-async function clickThroughPages(controller, numPages) {
-  for (let i = 0; i < numPages; i++) {
-    const page = await controller.findElement('[active]');
-    await controller.click(page);
-  }
-}
 
 async function validateAdOverlay(controller) {
   const overlayHost = await controller.findElement(
@@ -186,9 +188,4 @@ async function validateAdAttribution(controller, iconUrl) {
   });
 
   await controller.switchToLight();
-}
-
-async function switchToAdFrame(controller) {
-  const frame = await controller.findElement('#i-amphtml-ad-page-1 iframe');
-  await controller.switchToFrame(frame);
 }

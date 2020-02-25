@@ -195,7 +195,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">script</td>
-    <td>Prohibited unless the type is <code>application/ld+json</code> or <code>text/plain</code>. (Other non-executable values may be added as needed.) Exception is the mandatory script tag to load the AMP runtime and the script tags to load extended components.</td>
+    <td>Prohibited unless the type is <code>application/ld+json</code>, <code>application/json</code>, or <code>text/plain</code>. (Other non-executable values may be added as needed.) Exception is the mandatory script tag to load the AMP runtime and the script tags to load extended components.</td>
   </tr>
   <tr>
     <td width="30%">noscript</td>
@@ -256,7 +256,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
   </tr>
   <tr>
     <td width="30%">input elements</td>
-    <td>Mostly allowed with <a href="https://amp.dev/documentation/components/amp-form#inputs-and-fields">exception of some input types</a>, namely, <code>&lt;input[type=image]&gt;</code>, <code>&lt;input[type=button]&gt;</code>, <code>&lt;input[type=password]&gt;</code>, <code>&lt;input[type=file]&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
+    <td>Mostly allowed with <a href="https://amp.dev/documentation/components/amp-form#inputs-and-fields">exception of some input types</a>, namely, <code>&lt;input type=button&gt;</code>, <code>&lt;button type=image&gt;</code> are invalid. Related tags are also allowed: <code>&lt;fieldset&gt;</code>, <code>&lt;label&gt;</code></td>
   </tr>
   <tr>
     <td width="30%">button</td>
@@ -308,11 +308,11 @@ All other authored class names are allowed in AMP HTML markup.
 
 ### IDs
 
-Internal AMP IDs prefixed with `-amp-` and `i-amp-` are disallowed in AMP HTML.
+Certain ID names are disallowed in AMP HTML, such as IDs prefixed with `-amp-` and `i-amp-` that may conflict with internal AMP IDs.
 
-Consult AMP documentation for specific extensions before using `amp-` and `AMP` IDs to avoid conflict with the features provided by these extensions, such as `amp-access`.
+Consult the AMP documentation for specific extensions before using `amp-` and `AMP` IDs to avoid conflict with the features provided by these extensions, such as `amp-access`.
 
-All other authored IDs are allowed in AMP HTML markup.
+View the full list of disallowed ID names by searching for `mandatory-id-attr` [here](../validator/validator-main.protoascii).
 
 ### Links
 
@@ -363,7 +363,7 @@ In the following examples `<property>` needs to be in the white list above.
 
 #### Maximum size
 
-It is a validation error if the author stylesheet or inline styles together are larger than 50,000 bytes.
+It is a validation error if the author stylesheet or inline styles together are larger than 75,000 bytes.
 
 ### Keyframes stylesheet
 

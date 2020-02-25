@@ -15,6 +15,9 @@
  */
 
 .amp-video-docked-controls {
+  /* Override in case of RTL so that buttons match their DOM order visually. */
+  direction: ltr !important;
+
   opacity: 0;
   pointer-events: none !important;
   transition: 0.3s opacity ease;

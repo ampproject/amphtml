@@ -1,0 +1,54 @@
+{
+  "transport": {
+    "beacon": true,
+    "xhrpost": true,
+    "useBody": true,
+    "image": false
+  },
+  "vars": {
+    "hostDomain": "photon.captainmetrics.com",
+    "deviceId": "CLIENT_ID(_cm_cid)",
+    "sessionId": "$HASH(PAGE_VIEW_IDCLIENT_ID(_cm_cid))",
+    "page": "SOURCE_URL",
+    "projectId": ""
+  },
+  "requests": {
+    "hit": {
+      "baseUrl": "https://${hostDomain}/amp/"
+    }
+  },
+  "extraUrlParams": {
+    "cId": "${deviceId}",
+    "sId": "${sessionId}",
+    "ts": "${timestamp}",
+    "rand": "${random}",
+    "pId": "${projectId}",
+    "ampV": "${ampVersion}",
+    "v": "1",
+    "lang": "${browserLanguage}",
+    "ua": "${userAgent}",
+    "res": "${screenHeight}x${screenWidth}",
+    "aRes": "${availableScreenHeight}x${availableScreenWidth}",
+    "off": "${timezone}",
+    "tz": "${timezoneCode}",
+    "lp": "${page}",
+    "ref": "${externalReferrer}",
+    "ampRef": "${ampdocUrl}",
+    "pageId": "${pageViewId}"
+  },
+  "linkers": {
+    "_cm_amp": {
+      "ids": {
+        "cId": "${deviceId}",
+        "sId": "${sessionId}"
+      },
+      "enabled": true,
+      "proxyOnly": false
+    }
+  },
+  "cookies": {
+    "_cm_cid": {
+      "value": "LINKER_PARAM(_cm_amp, cId)"
+    }
+  }
+}

@@ -62,10 +62,7 @@ describes.realWin(
 
     describe('amp-recaptcha-input', () => {
       it('Rejects because data-name is missing', () => {
-        const ampRecaptchaInputConfig = Object.assign(
-          {},
-          ampRecaptchaInputAttributes
-        );
+        const ampRecaptchaInputConfig = {...ampRecaptchaInputAttributes};
         delete ampRecaptchaInputConfig['name'];
 
         return allowConsoleError(() => {
@@ -78,10 +75,7 @@ describes.realWin(
       });
 
       it('Rejects because data-sitekey is missing', () => {
-        const ampRecaptchaInputConfig = Object.assign(
-          {},
-          ampRecaptchaInputAttributes
-        );
+        const ampRecaptchaInputConfig = {...ampRecaptchaInputAttributes};
         delete ampRecaptchaInputConfig['data-sitekey'];
 
         return allowConsoleError(() => {
@@ -94,10 +88,7 @@ describes.realWin(
       });
 
       it('Rejects because data-action is missing', () => {
-        const ampRecaptchaInputConfig = Object.assign(
-          {},
-          ampRecaptchaInputAttributes
-        );
+        const ampRecaptchaInputConfig = {...ampRecaptchaInputAttributes};
         delete ampRecaptchaInputConfig['data-action'];
 
         return allowConsoleError(() => {

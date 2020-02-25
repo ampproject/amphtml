@@ -56,7 +56,6 @@ import {VideoUtils} from '../../../src/utils/video';
 import {
   childElement,
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   isAmpElement,
   iterateCursor,
   matches,
@@ -75,7 +74,8 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isMediaDisplayed, setTextBackgroundColor} from './utils';
-import {toggle} from '../../../src/style';
+import {px, toggle} from '../../../src/style';
+import {renderPageDescription} from './semantic-render';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -191,17 +191,17 @@ export const NavigationDirection = {
  * animation.
  * @param {!Window} win
  * @param {!Element} page
- * @param {!../../../src/service/resources-interface.ResourcesInterface} resources
+ * @param {!../../../src/service/mutator-interface.MutatorInterface} mutator
  * @return {function(!Element, ?UnlistenDef)}
  */
-function debounceEmbedResize(win, page, resources) {
+function debounceEmbedResize(win, page, mutator) {
   return debounce(
     win,
     (el, unlisten) => {
       AmpStoryEmbeddedComponent.prepareForAnimation(
         page,
         dev().assertElement(el),
-        resources
+        mutator
       );
       if (unlisten) {
         unlisten();
@@ -233,6 +233,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       100
     );
 
+    /** @private {boolean}  */
+    this.isFirstPage_ = false;
+
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
@@ -247,6 +250,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private @const {!../../../src/service/resources-interface.ResourcesInterface} */
     this.resources_ = Services.resourcesForDoc(getAmpdoc(this.win.document));
+
+    /** @private @const {!../../../src/service/mutator-interface.MutatorInterface} */
+    this.mutator_ = Services.mutatorForDoc(getAmpdoc(this.win.document));
 
     const deferred = new Deferred();
 
@@ -267,14 +273,17 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!function(*)} */
     this.mediaPoolRejectFn_ = deferred.reject;
 
-    /** @private {boolean}  */
-    this.prerenderAllowed_ = false;
-
     /** @private {!PageState} */
     this.state_ = PageState.NOT_ACTIVE;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
+
+    /** @private {?Element} */
+    this.cssVariablesStyleEl_ = null;
+
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -292,9 +301,6 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     /** @private {?number} Time at which an audio element failed playing. */
     this.playAudioElementFromTimestamp_ = null;
-
-    /** @private {?string} A textual description of the content of the page. */
-    this.description_ = null;
   }
 
   /**
@@ -317,10 +323,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   firstAttachedCallback() {
     // Only prerender the first story page.
-    this.prerenderAllowed_ = matches(
-      this.element,
-      'amp-story-page:first-of-type'
-    );
+    this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
   }
 
   /** @override */
@@ -468,7 +471,9 @@ export class AmpStoryPage extends AMP.BaseElement {
 
     if (this.isActive()) {
       this.advancement_.start();
-      this.maybeStartAnimations();
+      this.prefersReducedMotion_()
+        ? this.maybeFinishAnimations_()
+        : this.maybeStartAnimations_();
       this.checkPageHasAudio_();
       this.renderOpenAttachmentUI_();
       this.findAndPrepareEmbeddedComponents_();
@@ -495,6 +500,67 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
+  // TODO(26866): switch back to onMeasuredChange and remove the layoutBox
+  // equality checks.
+  /** @override */
+  onLayoutMeasure() {
+    const layoutBox = this.getLayoutBox();
+    // Only measures from the first story page, that always gets built because
+    // of the prerendering optimizations in place.
+    if (
+      !this.isFirstPage_ ||
+      (this.layoutBox_ &&
+        this.layoutBox_.width === layoutBox.width &&
+        this.layoutBox_.height === layoutBox.height)
+    ) {
+      return;
+    }
+
+    this.layoutBox_ = layoutBox;
+
+    return this.getVsync().runPromise(
+      {
+        measure: state => {
+          const uiState = this.storeService_.get(StateProperty.UI_STATE);
+          // The desktop panels UI uses CSS scale. Retrieving clientHeight/Width
+          // ensures we are getting the raw size, ignoring the scale.
+          const {width, height} =
+            uiState === UIType.DESKTOP_PANELS
+              ? {
+                  height: this.element./*OK*/ clientHeight,
+                  width: this.element./*OK*/ clientWidth,
+                }
+              : layoutBox;
+          state.vh = height / 100;
+          state.vw = width / 100;
+          state.fiftyVw = Math.round(width / 2);
+          state.vmin = Math.min(state.vh, state.vw);
+          state.vmax = Math.max(state.vh, state.vw);
+        },
+        mutate: state => {
+          if (state.vh === 0 && state.vw === 0) {
+            return;
+          }
+          if (!this.cssVariablesStyleEl_) {
+            const doc = this.win.document;
+            this.cssVariablesStyleEl_ = doc.createElement('style');
+            this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
+            doc.head.appendChild(this.cssVariablesStyleEl_);
+          }
+          this.cssVariablesStyleEl_.textContent =
+            `:root {` +
+            `--story-page-vh: ${px(state.vh)};` +
+            `--story-page-vw: ${px(state.vw)};` +
+            `--story-page-vmin: ${px(state.vmin)};` +
+            `--story-page-vmax: ${px(state.vmax)};` +
+            `--i-amphtml-story-page-50vw: ${px(state.fiftyVw)};` +
+            `}`;
+        },
+      },
+      {}
+    );
+  }
+
   /**
    * @private
    */
@@ -509,13 +575,8 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   onUIStateUpdate_(uiState) {
     // On vertical rendering, render all the animations with their final state.
-    if (uiState === UIType.VERTICAL && this.animationManager_) {
-      this.signals()
-        .whenSignal(CommonSignals.LOAD_END)
-        .then(() => this.maybeApplyFirstAnimationFrame())
-        .then(() => {
-          this.animationManager_.finishAll();
-        });
+    if (uiState === UIType.VERTICAL) {
+      this.maybeFinishAnimations_();
     }
   }
 
@@ -610,7 +671,7 @@ export class AmpStoryPage extends AMP.BaseElement {
       const debouncePrepareForAnimation = debounceEmbedResize(
         this.win,
         this.element,
-        this.resources_
+        this.mutator_
       );
 
       if (forceResize) {
@@ -654,7 +715,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return this.prerenderAllowed_;
+    return this.isFirstPage_;
   }
 
   /**
@@ -1015,12 +1076,39 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /**
    * Starts playing animations, if the animation manager is available.
+   * @private
    */
-  maybeStartAnimations() {
+  maybeStartAnimations_() {
     if (!this.animationManager_) {
       return;
     }
     this.animationManager_.animateIn();
+  }
+
+  /**
+   * Finishes playing animations instantly, if the animation manager is
+   * available.
+   * @private
+   */
+  maybeFinishAnimations_() {
+    if (!this.animationManager_) {
+      return;
+    }
+    this.signals()
+      .whenSignal(CommonSignals.LOAD_END)
+      .then(() => this.maybeApplyFirstAnimationFrame())
+      .then(() => {
+        this.animationManager_.finishAll();
+      });
+  }
+
+  /**
+   * Whether the device opted in prefers-reduced-motion.
+   * @return {boolean}
+   * @private
+   */
+  prefersReducedMotion_() {
+    return this.win.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 
   /**
@@ -1569,14 +1657,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         '.i-amphtml-story-page-open-attachment-label'
       );
 
-      const openAttachmentLabel =
-        attachmentEl.getAttribute('data-cta-text') ||
+      const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+      const openLabel =
+        (openLabelAttr && openLabelAttr.trim()) ||
         Services.localizationService(this.win).getLocalizedString(
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 
       this.mutateElement(() => {
-        textEl.textContent = openAttachmentLabel;
+        textEl.textContent = openLabel;
         this.element.appendChild(this.openAttachmentEl_);
       });
     }
@@ -1616,51 +1705,28 @@ export class AmpStoryPage extends AMP.BaseElement {
   }
 
   /**
-   * Sets the description of the page.
+   * Sets the description of the page, from its title and its videos
+   * alt/title attributes.
    * @private
    */
   setPageDescription_() {
-    this.description_ = this.element.getAttribute('title');
-
     if (this.isBotUserAgent_) {
-      this.renderPageDescription_();
-    } else {
+      renderPageDescription(
+        this,
+        this.getMediaBySelector_(Selectors.ALL_AMP_VIDEO, true)
+      );
+    }
+
+    if (!this.isBotUserAgent_ && this.element.hasAttribute('title')) {
       // Strip the title attribute from the page on non-bot user agents, to
       // prevent the browser tooltip.
       if (!this.element.getAttribute('aria-label')) {
-        this.element.setAttribute('aria-label', this.description_);
+        this.element.setAttribute(
+          'aria-label',
+          this.element.getAttribute('title')
+        );
       }
       this.element.removeAttribute('title');
-    }
-  }
-
-  /**
-   * Renders the page description in the page.
-   * @private
-   */
-  renderPageDescription_() {
-    if (!this.description_) {
-      return;
-    }
-
-    const descriptionElId = `i-amphtml-story-${this.element.id}-description`;
-    const descriptionEl = createElementWithAttributes(
-      this.win.document,
-      'h2',
-      dict({
-        'class': 'i-amphtml-story-page-description',
-        'id': descriptionElId,
-      })
-    );
-    descriptionEl./* OK */ textContent = this.description_;
-
-    this.element.parentElement.insertBefore(
-      descriptionEl,
-      this.element.nextElementSibling
-    );
-
-    if (!this.element.getAttribute('aria-labelledby')) {
-      this.element.setAttribute('aria-labelledby', descriptionElId);
     }
   }
 

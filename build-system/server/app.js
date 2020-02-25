@@ -35,6 +35,12 @@ const pc = process;
 const autocompleteEmailData = require('./autocomplete-test-data');
 const runVideoTestBench = require('./app-video-testbench');
 const {
+  getVariableRequest,
+  runVariableSubstitution,
+  saveVariableRequest,
+  saveVariables,
+} = require('./variable-substitution');
+const {
   recaptchaFrameRequestHandler,
   recaptchaRouter,
 } = require('./recaptcha-router');
@@ -407,7 +413,7 @@ app.use('/form/autocomplete/query', (req, res) => {
 });
 
 app.use('/form/autocomplete/error', (req, res) => {
-  res(500);
+  res.status(500).end();
 });
 
 app.use('/form/mention/query', (req, res) => {
@@ -491,6 +497,27 @@ function proxyToAmpProxy(req, res, mode) {
     // TODO(ccordry): Remove this when story v01 is depricated.
     const storyV1 = req.query['story_v'] === '1';
     const urlPrefix = getUrlPrefix(req);
+    if (req.query['mraid']) {
+      body = body
+        .replace(
+          '</head>',
+          '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
+            '</script>' +
+            '</head>'
+        )
+        // Change cdnUrl from the default so amp-mraid requests the (mock)
+        // mraid.js from the local server. In a real environment this doesn't
+        // matter as the local environment would intercept this request.
+        .replace(
+          '<head>',
+          ' <head>' +
+            ' <script>' +
+            ' window.AMP_CONFIG = {' +
+            `   cdnUrl: "${urlPrefix}",` +
+            ' };' +
+            ' </script>'
+        );
+    }
     body = replaceUrls(mode, body, urlPrefix, inabox, storyV1);
     if (inabox) {
       // Allow CORS requests for A4A.
@@ -663,7 +690,7 @@ function getLiveBlogItem() {
         <div class="social-box">
           <amp-social-share type="facebook"
               data-param-text="Hello world"
-              data-param-href="https://example.com/?ref=URL"
+              data-param-href="https://example.test/?ref=URL"
               data-param-app_id="145634995501895"></amp-social-share>
           <amp-social-share type="twitter"></amp-social-share>
         </div>
@@ -733,6 +760,26 @@ app.use('/impression-proxy/', (req, res) => {
 
   // Or fake response with status 204 if viewer replaceUrl is provided
 });
+
+/**
+ * Acts in a similar fashion to /serve_mode_change. Saves
+ * analytics requests via /run-variable-substitution, and
+ * then returns the encoded/substituted/replaced request
+ * via /get-variable-request.
+ */
+
+// Saves the variables input to be used in run-variable-substitution
+app.get('/save-variables', saveVariables);
+
+// Creates an iframe with amp-analytics. Analytics request
+// uses save-variable-request as its endpoint.
+app.get('/run-variable-substitution', runVariableSubstitution);
+
+// Saves the analytics request to the dev server.
+app.get('/save-variable-request', saveVariableRequest);
+
+// Returns the saved analytics request.
+app.get('/get-variable-request', getVariableRequest);
 
 let forcePromptOnNext = false;
 app.post('/get-consent-v1/', (req, res) => {
@@ -879,17 +926,40 @@ app.get(['/dist/v0/amp-*.js'], (req, res, next) => {
 app.get('/test/manual/amp-video.amp.html', runVideoTestBench);
 
 app.get(
-  ['/examples/*.html', '/test/manual/*.html', '/test/fixtures/e2e/*/*.html'],
+  [
+    '/examples/(**/)?*.html',
+    '/test/manual/(**/)?*.html',
+    '/test/fixtures/e2e/(**/)?*.html',
+  ],
   (req, res, next) => {
     const filePath = req.path;
     const mode = SERVE_MODE;
     const inabox = req.query['inabox'];
     const stream = Number(req.query['stream']);
+    const urlPrefix = getUrlPrefix(req);
     fs.promises
       .readFile(pc.cwd() + filePath, 'utf8')
       .then(file => {
         if (req.query['amp_js_v']) {
           file = addViewerIntegrationScript(req.query['amp_js_v'], file);
+        }
+        if (req.query['mraid']) {
+          file = file
+            .replace(
+              '</head>',
+              '<script async host-service="amp-mraid" src="https://cdn.ampproject.org/v0/amp-mraid-0.1.js">' +
+                '</script>' +
+                '</head>'
+            )
+            .replace(
+              '<head>',
+              ' <head>' +
+                ' <script>' +
+                ' window.AMP_CONFIG = {' +
+                `   cdnUrl: "${urlPrefix}",` +
+                ' };' +
+                ' </script>'
+            );
         }
         file = file.replace(/__TEST_SERVER_PORT__/g, TEST_SERVER_PORT);
 
@@ -935,7 +1005,7 @@ app.get(
 
         // Extract amp-consent for the given 'type' specified in URL query.
         if (
-          req.path.indexOf('/examples/cmp-vendors.amp.html') == 0 &&
+          req.path.indexOf('/examples/amp-consent/cmp-vendors.amp.html') == 0 &&
           req.query.type
         ) {
           const consent = file.match(
@@ -1174,7 +1244,7 @@ app.get('/dist/iframe-transport-client-lib.js', (req, res, next) => {
 
 app.get('/dist/amp-inabox-host.js', (req, res, next) => {
   const mode = SERVE_MODE;
-  if (mode == 'compiled') {
+  if (mode != 'default') {
     req.url = req.url.replace('amp-inabox-host', 'amp4ads-host-v0');
   }
   next();
@@ -1288,6 +1358,11 @@ app.get('/dist/ww(.max)?.js', (req, res) => {
   });
 });
 
+app.get('/mraid.js', (req, res, next) => {
+  req.url = req.url.replace('mraid.js', 'examples/mraid/mraid.js');
+  next();
+});
+
 /**
  * Shadow viewer. Fetches shadow runtime from cdn by default.
  * Setting the param useLocal=1 will load the runtime from the local build.
@@ -1310,6 +1385,10 @@ app.use('/shadow/', (req, res) => {
     return;
   }
   res.end(replaceUrls(SERVE_MODE, viewerHtml));
+});
+
+app.use('/mraid/', (req, res) => {
+  res.redirect(req.url + '?inabox=1&mraid=1');
 });
 
 /**

@@ -13,8 +13,8 @@ assignees: ''
 <!--
 Note to onduty:
 
-Use this issue to track a release from the initial canary release build through
-production. The community uses this issue to keep track of what is going on
+Use this issue to track a release from the initial experimental/beta release build through
+promotion to stable and LTS. The community uses this issue to keep track of what is going on
 with the release so please keep this issue up to date:
 
 - As you reach each stage of the release, check the appropriate checkbox and replace <CL submit time> with the "Submitted" text from the corresponding CL, e.g. "2:49 PM, Jul 25, 2018 UTC-4".
@@ -23,25 +23,34 @@ with the release so please keep this issue up to date:
   release number to the GitHub tag page the first time a given release number
   appears in the checkboxes.
 - Add any updates that may be of interest to the community (such as delays) as
-  comments on this issue, including after the release is pushed to production.
+  comments on this issue, including after the release is promoted to Stable (and, in some cases, LTS).
 - Keep the title of the issue updated to reflect whether this issue is tracking
-  the Canary or the build in Production.
+  the Experimental/Beta builds or the build in Stable.
 
 Note: remove the backticks (``) from the link.
 -->
 
 - [x] Release `[<RELEASE_NUMBER>](https://github.com/ampproject/amphtml/releases/tag/<RELEASE_NUMBER>)` is cut as a new canary release
-- [ ] Release <RELEASE_NUMBER> pushed to dev channel (<CL submit time>)
-- [ ] Release <RELEASE_NUMBER> pushed to 1% (<CL submit time>)
-- [ ] Release <RELEASE_NUMBER> pushed to production (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta (opt-in) channels (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to Experimental and Beta (1% traffic) channels (<CL submit time>)
+- [ ] Release <RELEASE_NUMBER> promoted to Stable channel (<CL submit time>)
 
 <!--
+On the second Monday of each month, the current stable version will be promoted to the LTS release channel. In other words: 
+
+- If this release is promoted to stable on the first Tuesday of a given month, it needs to be promoted to LTS on the second Monday of the same month.
+- If this release is promoted to stable on the second, third, fourth, or fifth Monday of a given month, it is not an LTS release candidate (but will be included in a later LTS release).
+
+Based on the above, if this release must be promoted to LTS, copy-paste the following checkbox into the list above.
+
+- [ ] Release <RELEASE_NUMBER> promoted to LTS (<CL submit time>)
+
 If you perform cherry picks, add/update the checkboxes above as needed e.g.
 
-- [ ] Release `[<CHERRY_PICK_RELEASE_NUMBER>](...)` created with cherry picks.
-- [ ] Release <CHERRY_PICK_RELEASE_NUMBER> pushed to Dev Channel
+- [ ] Release `[<CHERRY_PICK_RELEASE_NUMBER>](...)` created with cherry picks
+- [ ] Release <CHERRY_PICK_RELEASE_NUMBER> promoted to Experimental and Beta channels
 -->
 
-See the [release documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Dev Channel.
+See the [release documentation](https://github.com/ampproject/amphtml/blob/master/contributing/release-schedule.md) for more information on the release process, including how to test changes in the Experimental channel.
 
-If you find a bug in this build, please file an [issue](https://github.com/ampproject/amphtml/issues/new). If you believe the bug should be fixed in this build, follow the instructions in the [cherry picks documentation](https://bit.ly/amp-cherry-pick).
+If you find a bug in this build, please file an [issue](https://github.com/ampproject/amphtml/issues/new). If you believe the bug should be fixed in this build, follow the instructions in the [cherry picks documentation](https://go.amp.dev/cherry-picks).

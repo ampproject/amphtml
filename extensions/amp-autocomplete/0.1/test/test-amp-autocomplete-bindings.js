@@ -18,7 +18,6 @@ import '../amp-autocomplete';
 import {AutocompleteBindingInline} from '../autocomplete-binding-inline';
 import {AutocompleteBindingSingle} from '../autocomplete-binding-single';
 import {createElementWithAttributes} from '../../../../src/dom';
-import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-autocomplete bindings',
@@ -118,14 +117,14 @@ describes.realWin(
       });
 
       it('should prevent submission when "submit-on-enter" is absent', () => {
-        expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.true;
-        expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.true;
+        expect(binding.shouldPreventDefaultOnEnter(true)).to.be.true;
+        expect(binding.shouldPreventDefaultOnEnter(false)).to.be.true;
       });
 
       it('should not prevent submission when "submit-on-enter" is true', () => {
         binding = getBindingSingle({'submit-on-enter': 'true'});
-        expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.false;
-        expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.false;
+        expect(binding.shouldPreventDefaultOnEnter(true)).to.be.false;
+        expect(binding.shouldPreventDefaultOnEnter(false)).to.be.false;
       });
     });
 
@@ -135,7 +134,6 @@ describes.realWin(
         new AutocompleteBindingInline(stubAmpAutocomplete(attributes));
 
       beforeEach(() => {
-        toggleExperiment(win, 'amp-autocomplete', true);
         pre = 'My friend is ';
         userInput = 'har';
         match = {0: '@' + userInput, index: pre.length};
@@ -211,8 +209,8 @@ describes.realWin(
       });
 
       it('should prevent default whenever there are active suggestions shown', () => {
-        expect(binding.shouldPreventFormSubmissionOnEnter(true)).to.be.true;
-        expect(binding.shouldPreventFormSubmissionOnEnter(false)).to.be.false;
+        expect(binding.shouldPreventDefaultOnEnter(true)).to.be.true;
+        expect(binding.shouldPreventDefaultOnEnter(false)).to.be.false;
       });
     });
   }

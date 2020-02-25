@@ -44,7 +44,7 @@ transformed_feature_tests/transformed_but_not_identified_transformed.html:31:2 T
 transformed_feature_tests/transformed_but_not_identified_transformed.html:31:2 The attribute 'i-amphtml-layout' may not appear in tag 'amp-img'. (see https://amp.dev/documentation/components/amp-img)
 |      <i-amphtml-sizer style=display:block;padding-top:171.4370%;></i-amphtml-sizer>
 >>     ^~~~~~~~~
-transformed_feature_tests/transformed_but_not_identified_transformed.html:32:4 The tag 'i-amphtml-sizer' is disallowed.
+transformed_feature_tests/transformed_but_not_identified_transformed.html:32:4 The tag 'i-amphtml-sizer' is disallowed except in specific forms.
 |    </amp-img>
 |  </body>
 |  </html>

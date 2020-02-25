@@ -396,14 +396,12 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
 
   describe('selectAndActivatePlatform_', () => {
     function resolveRequiredPromises(entitlementSpec, grantEntitlementSpec) {
-      entitlementSpec = Object.assign(
-        {
-          service: 'local',
-          source: 'local',
-          raw: 'raw',
-        },
-        entitlementSpec
-      );
+      entitlementSpec = {
+        service: 'local',
+        source: 'local',
+        raw: 'raw',
+        ...entitlementSpec,
+      };
       if (!grantEntitlementSpec && entitlementSpec.granted) {
         grantEntitlementSpec = entitlementSpec;
       }
@@ -699,6 +697,92 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
         origPlatforms
       );
     });
+
+    it('should return empty Entitlement on granted and empty decryptedDocumentKey', async () => {
+      const entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+      });
+      env.sandbox
+        .stub(platform, 'getEntitlements')
+        .callsFake(() => Promise.resolve(entitlement));
+      env.sandbox
+        .stub(subscriptionService.cryptoHandler_, 'isDocumentEncrypted')
+        .callsFake(() => true);
+
+      const ent = await subscriptionService.fetchEntitlements_(platform);
+      expect(ent).to.be.deep.equal(Entitlement.empty('local'));
+    });
+  });
+
+  describe('getEntitlements_', () => {
+    let platform;
+    beforeEach(() => {
+      subscriptionService.pageConfig_ = pageConfig;
+      platform = localSubscriptionPlatformFactory(
+        ampdoc,
+        serviceConfig.services[0],
+        new ServiceAdapter(subscriptionService)
+      );
+      subscriptionService.platformStore_ = new PlatformStore(['local']);
+    });
+
+    it('should return null Entitlement on granted and empty decryptedDocumentKey', async () => {
+      const entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: true,
+        grantReason: GrantReason.SUBSCRIBER,
+      });
+      env.sandbox
+        .stub(platform, 'getEntitlements')
+        .callsFake(() => Promise.resolve(entitlement));
+      env.sandbox
+        .stub(subscriptionService.cryptoHandler_, 'isDocumentEncrypted')
+        .callsFake(() => true);
+
+      const ent = await subscriptionService.getEntitlements_(platform);
+      expect(ent).to.be.null;
+    });
+
+    it('should return Entitlement on not granted and empty decryptedDocumentKey', async () => {
+      const entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: false,
+        grantReason: GrantReason.SUBSCRIBER,
+      });
+      env.sandbox
+        .stub(platform, 'getEntitlements')
+        .callsFake(() => Promise.resolve(entitlement));
+      env.sandbox
+        .stub(subscriptionService.cryptoHandler_, 'isDocumentEncrypted')
+        .callsFake(() => true);
+
+      const ent = await subscriptionService.getEntitlements_(platform);
+      expect(ent).to.be.deep.equal(entitlement);
+    });
+
+    it('should return Entitlement on granted and decryptedDocumentKey', async () => {
+      const entitlement = new Entitlement({
+        source: 'local',
+        raw: 'raw',
+        granted: false,
+        grantReason: GrantReason.SUBSCRIBER,
+        decryptedDocumentKey: 'key',
+      });
+      env.sandbox
+        .stub(platform, 'getEntitlements')
+        .callsFake(() => Promise.resolve(entitlement));
+      env.sandbox
+        .stub(subscriptionService.cryptoHandler_, 'isDocumentEncrypted')
+        .callsFake(() => true);
+
+      const ent = await subscriptionService.getEntitlements_(platform);
+      expect(ent).to.be.deep.equal(entitlement);
+    });
   });
 
   describe('viewer authorization', () => {
@@ -822,7 +906,7 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       rejecter();
 
       // Wait for sendMessageAwaitResponse() to be rejected.
-      let ticks = 4;
+      let ticks = 5;
       while (ticks--) {
         await 'Event loop tick';
       }

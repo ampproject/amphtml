@@ -105,6 +105,28 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
     expect(domStub.getCall(0).args[0]).to.be.equals('click');
   });
 
+  it('initializeListeners_ should listen to clicks on rootNode body', () => {
+    const domStub = env.sandbox.stub(
+      localSubscriptionPlatform.rootNode_.body,
+      'addEventListener'
+    );
+
+    localSubscriptionPlatform.initializeListeners_();
+    expect(domStub).calledOnce;
+    expect(domStub.getCall(0).args[0]).to.be.equals('click');
+  });
+
+  it('initializeListeners_ should handle clicks once per event', () => {
+    const handleClickStub = env.sandbox.stub(
+      localSubscriptionPlatform,
+      'handleClick_'
+    );
+
+    localSubscriptionPlatform.initializeListeners_();
+    localSubscriptionPlatform.rootNode_.body.click();
+    expect(handleClickStub).calledOnce;
+  });
+
   it('should return baseScore', () => {
     expect(localSubscriptionPlatform.getBaseScore()).to.be.equal(99);
   });
@@ -115,9 +137,10 @@ describes.fakeWin('LocalSubscriptionsPlatform', {amp: true}, env => {
   });
 
   it('pingbackReturnsAllEntitlements should "pingbackAllEntitlements" config value', () => {
-    const testConfig = Object.assign({}, serviceConfig.services[0], {
+    const testConfig = {
+      ...serviceConfig.services[0],
       'pingbackAllEntitlements': true,
-    });
+    };
     const testLocalPlatform = localSubscriptionPlatformFactory(
       ampdoc,
       testConfig,

@@ -90,9 +90,6 @@ class AmpJWPlayer extends AMP.BaseElement {
     );
 
     this.contentSearch_ = element.getAttribute('data-content-search') || '';
-    this.contentContextual_ =
-      element.getAttribute('data-content-contextual') || '';
-    this.contentRecency_ = element.getAttribute('data-content-recency') || '';
     this.contentBackfill_ = element.getAttribute('data-content-backfill') || '';
   }
 

@@ -20,7 +20,7 @@ import * as describes from '../testing/describes';
 import * as log from '../src/log';
 import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
-import {adopt} from '../src/runtime';
+import {adoptWithMultidocDeps} from '../src/runtime';
 import {cancelTimersForTesting} from '../src/service/timer-impl';
 import {
   installAmpdocServices,
@@ -37,7 +37,7 @@ import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen'
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
-import sinon from 'sinon'; // eslint-disable-line local/no-import
+import sinon from /*OK*/ 'sinon';
 import stringify from 'json-stable-stringify';
 
 // Used to print warnings for unexpected console errors.
@@ -62,7 +62,7 @@ const BEFORE_AFTER_TIMEOUT = 5000;
 
 // Needs to be called before the custom elements are first made.
 beforeTest();
-adopt(window);
+adoptWithMultidocDeps(window);
 
 // Override AMP.extension to buffer extension installers.
 /**

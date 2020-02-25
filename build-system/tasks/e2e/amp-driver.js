@@ -57,6 +57,8 @@ const EnvironmentBehaviorMap = {
         'swipe',
         'iframeScroll',
       ];
+      // Correctly append extra params in original url
+      url = url.replace('#', '&');
       // TODO(estherkim): somehow allow non-8000 port and domain
       return (
         `http://localhost:8000/examples/viewer.html#href=${url}` +

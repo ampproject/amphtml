@@ -295,9 +295,7 @@ export class AmpStoryAccess extends AMP.BaseElement {
       // If there is only one configuration and the publisher provided a
       // namespace, we want to allow actions with or without namespace.
       if (accessConfig[0].namespace) {
-        accessConfig.push(
-          Object.assign({}, accessConfig[0], {namespace: undefined})
-        );
+        accessConfig.push({...accessConfig[0], namespace: undefined});
       }
     }
 

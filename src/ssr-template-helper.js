@@ -48,12 +48,12 @@ export class SsrTemplateHelper {
   }
 
   /**
-   * Whether the viewer can render templates. A doc-level opt in as
+   * Whether the viewer should render templates. A doc-level opt in as
    * trusted viewers must set this capability explicitly, as a security
    * measure for potential abuse of feature.
    * @return {boolean}
    */
-  isSupported() {
+  isEnabled() {
     const ampdoc = this.viewer_.getAmpDoc();
     if (ampdoc.isSingleDoc()) {
       const htmlElement = ampdoc.getRootNode().documentElement;
@@ -118,7 +118,7 @@ export class SsrTemplateHelper {
    */
   applySsrOrCsrTemplate(element, data) {
     let renderTemplatePromise;
-    if (this.isSupported()) {
+    if (this.isEnabled()) {
       userAssert(
         typeof data['html'] === 'string',
         'Server side html response must be defined'

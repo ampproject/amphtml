@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 import {CSS} from '../../../build/amp-apester-media-0.1.css';
-import {CustomEventReporterBuilder} from '../../../src/extension-analytics';
 import {IntersectionObserverApi} from '../../../src/intersection-observer-polyfill';
 import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
@@ -22,16 +21,15 @@ import {dev, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {
   extractTags,
-  generatePixelURL,
   getPlatform,
   registerEvent,
   setFullscreenOff,
   setFullscreenOn,
 } from './utils';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {handleCompanionAds} from './monetization';
 import {removeElement} from '../../../src/dom';
 import {setStyles} from '../../../src/style';
-
 /** @const */
 const TAG = 'amp-apester-media';
 /**
@@ -65,7 +63,7 @@ class AmpApesterMedia extends AMP.BaseElement {
     /**
      * @const @private {string}
      */
-    this.loaderUrl_ = 'https://static.apester.com/js/assets/loader.gif';
+    this.loaderUrl_ = 'https://static.apester.com/js/assets/loader_100x100.gif';
     /** @private {boolean}  */
     this.seen_ = false;
     /** @private {?Element}  */
@@ -225,7 +223,8 @@ class AmpApesterMedia extends AMP.BaseElement {
       });
   }
 
-  /** @param {string} id
+  /**
+   *  @param {string} id
    *  @param {boolean} usePlayer
    *  @return {string}
    * */
@@ -290,23 +289,6 @@ class AmpApesterMedia extends AMP.BaseElement {
     return overflow;
   }
 
-  /**
-   * @param {JsonObject} publisher
-   */
-  report3rdPartyPixel_(publisher) {
-    if (publisher && publisher['trackingPixel']) {
-      const affiliateId = publisher['trackingPixel']['affiliateId'];
-      const publisherId = publisher['publisherId'];
-      if (affiliateId) {
-        const eventName = 'interactionLoaded';
-        const builder = new CustomEventReporterBuilder(this.element);
-        builder.track(eventName, generatePixelURL(publisherId, affiliateId));
-        const reporter = builder.build();
-        reporter.trigger(eventName);
-      }
-    }
-  }
-
   /** @override */
   layoutCallback() {
     this.element.classList.add('amp-apester-container');
@@ -320,13 +302,11 @@ class AmpApesterMedia extends AMP.BaseElement {
         const payload = response['payload'];
         // If it's a playlist we choose a media randomly.
         // The response will be an array.
-        const media = /** @type {JsonObject} */ (this.embedOptions_.playlist
+        const media = /** @type {!JsonObject} */ (this.embedOptions_.playlist
           ? payload[Math.floor(Math.random() * payload.length)]
           : payload);
-
         const interactionId = media['interactionId'];
         const usePlayer = media['usePlayer'];
-
         const src = this.constructUrlFromMedia_(interactionId, usePlayer);
         const iframe = this.constructIframe_(src);
         this.intersectionObserverApi_ = new IntersectionObserverApi(
@@ -343,6 +323,7 @@ class AmpApesterMedia extends AMP.BaseElement {
             const overflow = this.constructOverflow_();
             this.element.appendChild(overflow);
             this.element.appendChild(iframe);
+            handleCompanionAds(media, this.element);
           })
           .then(() => {
             return this.loadPromise(iframe).then(() => {
@@ -360,7 +341,6 @@ class AmpApesterMedia extends AMP.BaseElement {
                   }
                 }
                 this.togglePlaceholder(false);
-                this.report3rdPartyPixel_(media['publisher']);
                 this.ready_ = true;
                 let height = 0;
                 if (media && media['data'] && media['data']['size']) {

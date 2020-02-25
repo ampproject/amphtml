@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {RequestBankE2E} from './request-bank';
-
 // import to install chromedriver and geckodriver
 require('chromedriver'); // eslint-disable-line no-unused-vars
 require('geckodriver'); // eslint-disable-line no-unused-vars
@@ -23,11 +21,15 @@ const chrome = require('selenium-webdriver/chrome');
 const firefox = require('selenium-webdriver/firefox');
 const puppeteer = require('puppeteer');
 const {
+  clearLastExpectError,
+  getLastExpectError,
+  installBrowserAssertions,
+} = require('./expect');
+const {
   SeleniumWebDriverController,
 } = require('./selenium-webdriver-controller');
 const {AmpDriver, AmpdocEnvironment} = require('./amp-driver');
-const {Builder, Capabilities} = require('selenium-webdriver');
-const {clearLastExpectError, getLastExpectError} = require('./expect');
+const {Builder, Capabilities, logging} = require('selenium-webdriver');
 const {installRepl, uninstallRepl} = require('./repl');
 const {isTravisBuild} = require('../../common/travis');
 const {PuppeteerController} = require('./puppeteer-controller');
@@ -36,7 +38,7 @@ const {PuppeteerController} = require('./puppeteer-controller');
 const SUB = ' ';
 const TEST_TIMEOUT = 40000;
 const SETUP_TIMEOUT = 30000;
-const SETUP_RETRIES = 1;
+const SETUP_RETRIES = 3;
 const DEFAULT_E2E_INITIAL_RECT = {width: 800, height: 600};
 const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
 /**
@@ -45,7 +47,15 @@ const supportedBrowsers = new Set(['chrome', 'firefox', 'safari']);
  * {@link https://github.com/GoogleChrome/puppeteer/blob/master/experimental/puppeteer-firefox/README.md}
  */
 const PUPPETEER_BROWSERS = new Set(['chrome']);
-const REQUESTBANK_URL_PREFIX = 'http://localhost:8000';
+
+/**
+ * Engine types for e2e testing.
+ * @enum {string}
+ */
+const EngineType = {
+  SELENIUM: 'selenium',
+  PUPPETEER: 'puppeteer',
+};
 
 /**
  * @typedef {{
@@ -74,18 +84,6 @@ let SeleniumConfigDef;
 let describesConfig = null;
 
 /**
- * Map the browserName to the capabilities name. (firefox for example has a
- * prefix.
- *
- * @enum {string}
- */
-const capabilitiesKeys = {
-  'chrome': 'chromeOptions',
-  'firefox': 'moz:firefoxOptions',
-  'safari': 'safariOptions',
-};
-
-/**
  * Configure all tests. This may only be called once, since it is only read once
  * and writes after reading will not have any effect.
  * @param {!DescribesConfigDef} config
@@ -95,7 +93,7 @@ function configure(config) {
     throw new Error('describes.configure should only be called once');
   }
 
-  describesConfig = Object.assign({}, config);
+  describesConfig = {...config};
 }
 
 /**
@@ -132,9 +130,9 @@ async function createPuppeteer(opt_config = {}) {
  * @param {string} browserName
  * @param {!SeleniumConfigDef=} args
  * @param {?string} deviceName
- * @return {!SeleniumDriver}
+ * @return {!WebDriver}
  */
-async function createSelenium(browserName, args = {}, deviceName) {
+function createSelenium(browserName, args = {}, deviceName) {
   switch (browserName) {
     case 'safari':
       // Safari's only option is setTechnologyPreview
@@ -147,11 +145,19 @@ async function createSelenium(browserName, args = {}, deviceName) {
   }
 }
 
-async function createDriver(browserName, args, deviceName) {
+/**
+ *
+ * @param {string} browserName
+ * @param {!SeleniumConfigDef=} args
+ * @param {?string} deviceName
+ * @return {!WebDriver}
+ */
+function createDriver(browserName, args, deviceName) {
   const capabilities = Capabilities[browserName]();
-  capabilities.set(capabilitiesKeys[browserName], {'args': args});
-  const builder = new Builder().withCapabilities(capabilities);
 
+  const prefs = new logging.Preferences();
+  prefs.setLevel(logging.Type.PERFORMANCE, logging.Level.ALL);
+  capabilities.setLoggingPrefs(prefs);
   switch (browserName) {
     case 'firefox':
       const firefoxOptions = new firefox.Options();
@@ -160,17 +166,22 @@ async function createDriver(browserName, args, deviceName) {
         width: DEFAULT_E2E_INITIAL_RECT.width,
         height: DEFAULT_E2E_INITIAL_RECT.height,
       });
-      builder.setFirefoxOptions(firefoxOptions);
+      return new Builder()
+        .forBrowser('firefox')
+        .setFirefoxOptions(firefoxOptions)
+        .build();
     case 'chrome':
-      const chromeOptions = new chrome.Options();
+      const chromeOptions = new chrome.Options(capabilities);
       chromeOptions.addArguments(args);
       if (deviceName) {
         chromeOptions.setMobileEmulation({deviceName});
       }
-      builder.setChromeOptions(chromeOptions);
+      const driver = chrome.Driver.createSession(chromeOptions);
+      //TODO(estherkim): workaround. `onQuit()` was added in selenium-webdriver v4.0.0-alpha.5
+      //which is also when `Server terminated early with status 1` began appearing. Coincidence? Maybe.
+      driver.onQuit = null;
+      return driver;
   }
-
-  return await builder.build();
 }
 
 /**
@@ -373,7 +384,7 @@ function describeEnv(factory) {
         ? new Set(browsers.split(',').map(x => x.trim()))
         : supportedBrowsers;
 
-      if (engine === 'puppeteer') {
+      if (engine === EngineType.PUPPETEER) {
         const result = intersect(allowedBrowsers, PUPPETEER_BROWSERS);
         if (result.size === 0) {
           const browsersList = Array.from(allowedBrowsers).join(',');
@@ -485,35 +496,20 @@ class EndToEndFixture {
    * @param {number} retries
    */
   async setup(env, browserName, retries = 0) {
+    const config = getConfig();
+    const driver = getDriver(config, browserName, this.spec.deviceName);
+    const controller =
+      config.engine == EngineType.PUPPETEER
+        ? new PuppeteerController(driver)
+        : new SeleniumWebDriverController(driver);
+    const ampDriver = new AmpDriver(controller);
+    env.controller = controller;
+    env.ampDriver = ampDriver;
+
+    installBrowserAssertions(controller.networkLogger);
+
     try {
-      const {testUrl, experiments = [], initialRect, deviceName} = this.spec;
-      const config = getConfig();
-      const controller = await getController(config, browserName, deviceName);
-      const ampDriver = new AmpDriver(controller);
-      const requestBank = new RequestBankE2E(REQUESTBANK_URL_PREFIX, 'e2e');
-      env.controller = controller;
-      env.ampDriver = ampDriver;
-      env.requestBank = requestBank;
-
-      const {environment} = env;
-
-      const url = new URL(testUrl);
-      if (experiments.length > 0) {
-        if (environment.includes('inabox')) {
-          // inabox experiments are toggled at server side using <meta> tag
-          url.searchParams.set('exp', experiments.join(','));
-        } else {
-          // AMP doc experiments are toggled via cookies
-          await toggleExperiments(ampDriver, url.href, experiments);
-        }
-      }
-
-      if (initialRect) {
-        const {width, height} = initialRect;
-        await controller.setWindowRect({width, height});
-      }
-
-      await ampDriver.navigateToEnvironment(environment, url.href);
+      await setUpTest(env, this.spec);
     } catch (ex) {
       if (retries > 0) {
         await this.setup(env, browserName, --retries);
@@ -524,36 +520,56 @@ class EndToEndFixture {
   }
 
   async teardown(env) {
-    const {controller, requestBank} = env;
-    if (controller) {
+    const {controller} = env;
+    if (controller && controller.driver) {
       await controller.switchToParent();
       await controller.dispose();
     }
-    await requestBank.tearDown();
   }
 }
 
 /**
- * Get the controller object for the configured engine.
+ * Get the driver for the configured engine.
  * @param {!DescribesConfigDef} describesConfig
  * @param {string} browserName
  * @param {?string} deviceName
- * @return {!SeleniumWebDriverController}
+ * @return {!ThenableWebDriver}
  */
-async function getController(
-  {engine = 'selenium', headless = false},
+function getDriver(
+  {engine = EngineType.SELENIUM, headless = false},
   browserName,
   deviceName
 ) {
-  if (engine == 'puppeteer') {
-    const browser = await createPuppeteer({headless});
-    return new PuppeteerController(browser);
+  if (engine == EngineType.PUPPETEER) {
+    return createPuppeteer({headless});
   }
 
-  if (engine == 'selenium') {
-    const driver = await createSelenium(browserName, {headless}, deviceName);
-    return new SeleniumWebDriverController(driver);
+  if (engine == EngineType.SELENIUM) {
+    return createSelenium(browserName, {headless}, deviceName);
   }
+}
+
+async function setUpTest(
+  {environment, ampDriver, controller},
+  {testUrl, experiments = [], initialRect}
+) {
+  const url = new URL(testUrl);
+  if (experiments.length > 0) {
+    if (environment.includes('inabox')) {
+      // inabox experiments are toggled at server side using <meta> tag
+      url.searchParams.set('exp', experiments.join(','));
+    } else {
+      // AMP doc experiments are toggled via cookies
+      await toggleExperiments(ampDriver, url.href, experiments);
+    }
+  }
+
+  if (initialRect) {
+    const {width, height} = initialRect;
+    await controller.setWindowRect({width, height});
+  }
+
+  await ampDriver.navigateToEnvironment(environment, url.href);
 }
 
 /**

@@ -336,6 +336,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
 
       it('should tolerate errors in onLayoutMeasure', () => {
+        expectAsyncConsoleError(/intentional/, 1);
         const element = new ElementClass();
         env.sandbox
           .stub(element.implementation_, 'onLayoutMeasure')
@@ -519,7 +520,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
 
       it('Element - re-upgrade with a failed promised', () => {
-        expectAsyncConsoleError('upgrade failed', 1);
+        expectAsyncConsoleError(/upgrade failed/, 1);
         const element = new ElementClass();
         expect(element.isUpgraded()).to.equal(false);
         const oldImpl = element.implementation_;
@@ -684,6 +685,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       });
 
       it('should anticipate build errors', () => {
+        expectAsyncConsoleError(/intentional/, 2);
         const element = new ElementClass();
         env.sandbox
           .stub(element.implementation_, 'buildCallback')
@@ -2085,6 +2087,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('should toggle loading off after layout complete', () => {
         stubInA4A(false);
         const toggle = env.sandbox.spy(element, 'toggleLoading');
+        element.setAttribute('height', '10');
+        element.setAttribute('width', '10');
         container.appendChild(element);
         return element.buildingPromise_
           .then(() => {
@@ -2105,6 +2109,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
           .callsFake(() => {
             return Promise.reject();
           });
+        element.setAttribute('height', '10');
+        element.setAttribute('width', '10');
         container.appendChild(element);
         return element.buildingPromise_
           .then(() => {
@@ -2130,6 +2136,8 @@ describes.realWin('CustomElement', {amp: true}, env => {
           .callsFake(() => {
             return Promise.reject();
           });
+        element.setAttribute('height', '10');
+        element.setAttribute('width', '10');
         container.appendChild(element);
         return element.buildingPromise_
           .then(() => {
@@ -2183,8 +2191,8 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   let element;
   let overflowElement;
   let vsync;
-  let resources;
-  let resourcesMock;
+  let mutator;
+  let mutatorMock;
 
   class TestElement extends BaseElement {
     isLayoutSupported(unusedLayout) {
@@ -2201,12 +2209,13 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
       TestElement
     );
     win.customElements.define('amp-test-overflow', ElementClass);
-    resources = Services.resourcesForDoc(doc);
-    resourcesMock = env.sandbox.mock(resources);
+    mutator = Services.mutatorForDoc(doc);
+    mutatorMock = env.sandbox.mock(mutator);
     element = new ElementClass();
+    element.ampdoc_ = doc;
     element.layoutWidth_ = 300;
     element.layout_ = Layout.FIXED;
-    element.resources_ = resources;
+    element.mutator_ = mutator;
     overflowElement = doc.createElement('div');
     overflowElement.setAttribute('overflow', '');
     element.appendChild(overflowElement);
@@ -2222,7 +2231,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   });
 
   afterEach(() => {
-    resourcesMock.verify();
+    mutatorMock.verify();
   });
 
   it('should NOT be initialized by default', () => {
@@ -2278,7 +2287,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
   it('should force change size when clicked', () => {
     element.overflowCallback(true, 117, 113);
     expect(overflowElement).to.have.class('amp-visible');
-    resourcesMock
+    mutatorMock
       .expects('changeSize')
       .withExactArgs(element, 117, 113)
       .once();

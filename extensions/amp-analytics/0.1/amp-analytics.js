@@ -175,10 +175,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   resumeCallback() {
     if (this.iniPromise_) {
       this.iniPromise_.then(() => {
-        this.transport_.maybeInitIframeTransport(
-          this.getAmpDoc().win,
-          this.element
-        );
+        this.transport_.maybeInitIframeTransport(this.element);
       });
     }
   }
@@ -294,16 +291,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.element
     );
 
-    this.transport_.maybeInitIframeTransport(
-      // In the case of FIE rendering, we should be using the parent doc win.
-      // Currently, getAmpDoc returns the parent doc for FIE elements.
-      // This behavior will be changed by ampdoc-fie launch.
-      // TODO: this will be a blocker to launch ampdoc-fie.
-      // We should find a different way to get the parent win in case of FIE.
-      this.getAmpDoc().win,
-      this.element,
-      Services.preconnectFor(this.win)
-    );
+    this.transport_.maybeInitIframeTransport(this.element);
 
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -313,8 +301,8 @@ export class AmpAnalytics extends AMP.BaseElement {
         const expansionOptions = this.expansionOptions_(
           dict({}),
           trigger,
-          undefined,
-          true
+          undefined /* opt_iterations */,
+          true /* opt_noEncode */
         );
         const TAG = this.getName_();
         if (!trigger) {
@@ -373,7 +361,11 @@ export class AmpAnalytics extends AMP.BaseElement {
             } else if (trigger['selector']) {
               // Expand the selector using variable expansion.
               return this.variableService_
-                .expandTemplate(trigger['selector'], expansionOptions)
+                .expandTemplate(
+                  trigger['selector'],
+                  expansionOptions,
+                  this.element
+                )
                 .then(selector => {
                   trigger['selector'] = selector;
                   this.addTrigger_(trigger);
@@ -765,7 +757,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   expandTemplateWithUrlParams_(spec, expansionOptions) {
     return this.variableService_
-      .expandTemplate(spec, expansionOptions)
+      .expandTemplate(spec, expansionOptions, this.element)
       .then(key =>
         Services.urlReplacementsForDoc(this.element).expandUrlAsync(
           key,

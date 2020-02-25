@@ -92,9 +92,9 @@ describes.realWin(
 
       installStylesForDoc(ampdoc, CSS, () => {}, false, 'amp-subscriptions');
 
-      const resources = Services.resourcesForDoc(ampdoc);
+      const mutator = Services.mutatorForDoc(ampdoc);
       env.sandbox
-        .stub(resources, 'mutateElement')
+        .stub(mutator, 'mutateElement')
         .callsFake((element, mutator) => {
           mutator();
         });

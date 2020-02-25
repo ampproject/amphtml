@@ -49,7 +49,7 @@ const LOAD_TIMEOUT = 16000;
  *
  * @typedef {{
  *   implementationClass:
- *       function(new:../base-element.BaseElement, !Element),
+ *       typeof ../base-element.BaseElement,
  *   css: (?string|undefined),
  * }}
  */
@@ -152,7 +152,7 @@ export class Extensions {
     try {
       this.currentExtensionId_ = extensionId;
       factory(arg, arg['_']);
-      if (getMode().localDev || getMode().test) {
+      if (getMode(this.win).localDev || getMode(this.win).test) {
         if (Object.freeze) {
           const m = holder.extension;
           m.elements = Object.freeze(m.elements);
@@ -294,7 +294,7 @@ export class Extensions {
    * class when the extension has been loaded. If necessary, adds the extension
    * script to the page.
    * @param {string} elementName
-   * @return {!Promise<function(new:../base-element.BaseElement, !Element)>}
+   * @return {!Promise<typeof ../base-element.BaseElement>}
    */
   loadElementClass(elementName) {
     return this.preloadExtension(elementName).then(extension => {
@@ -312,7 +312,7 @@ export class Extensions {
    * restricted method and it's allowed to be called only during the overall
    * extension registration.
    * @param {string} name
-   * @param {function(new:../base-element.BaseElement, !Element)} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @param {?string|undefined} css
    * @restricted
    */
@@ -328,7 +328,7 @@ export class Extensions {
    * Installs the specified element implementation in the ampdoc.
    * @param {!./ampdoc-impl.AmpDoc} ampdoc
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @param {?string|undefined} css
    * @private
    */
@@ -351,7 +351,7 @@ export class Extensions {
   /**
    * @param {!Window} win
    * @param {string} name
-   * @param {!Function} implementationClass
+   * @param {typeof ../base-element.BaseElement} implementationClass
    * @private
    */
   registerElementInWindow_(win, name, implementationClass) {
@@ -483,7 +483,7 @@ export class Extensions {
    * @private
    */
   getCurrentExtensionHolder_(opt_forName) {
-    if (!this.currentExtensionId_ && !getMode().test) {
+    if (!this.currentExtensionId_ && !getMode(this.win).test) {
       dev().error(TAG, 'unknown extension for ', opt_forName);
     }
     return this.getExtensionHolder_(
@@ -572,18 +572,24 @@ export class Extensions {
     scriptElement.setAttribute('data-script', extensionId);
     scriptElement.setAttribute('i-amphtml-inserted', '');
 
+    // Propagate nonce to all generated script tags.
+    const currentScript = this.win.document.head.querySelector('script[nonce]');
+    if (currentScript) {
+      scriptElement.setAttribute('nonce', currentScript.getAttribute('nonce'));
+    }
+
     // Allow error information to be collected
     // https://github.com/ampproject/amphtml/issues/7353
     scriptElement.setAttribute('crossorigin', 'anonymous');
     let loc = this.win.location;
-    if (getMode().test && this.win.testLocation) {
+    if (getMode(this.win).test && this.win.testLocation) {
       loc = this.win.testLocation;
     }
     const scriptSrc = calculateExtensionScriptUrl(
       loc,
       extensionId,
       opt_extensionVersion,
-      getMode().localDev
+      getMode(this.win).localDev
     );
     scriptElement.src = scriptSrc;
     return scriptElement;

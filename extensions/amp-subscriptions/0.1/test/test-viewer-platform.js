@@ -21,6 +21,7 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
 import {Services} from '../../../../src/services';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
+import {dict} from '../../../../src/utils/object';
 import {getWinOrigin} from '../../../../src/url';
 
 describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
@@ -35,6 +36,13 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
     raw: 'raw',
     service: 'local',
     products: [currentProductId],
+    subscriptionToken: 'token',
+  };
+  const nonGrantingEntitlementData = {
+    source: 'local',
+    raw: 'raw',
+    service: 'local',
+    products: ['example.org:registered_user'],
     subscriptionToken: 'token',
   };
   const fakeAuthToken = {
@@ -120,6 +128,36 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         expect(sendAuthTokenStub).to.be.calledWith(reason);
       }
     });
+
+    it('should use domain in cryptokeys param to get encrypted doc key', async () => {
+      env.sandbox
+        .stub(viewerPlatform.viewer_, 'getParam')
+        .withArgs('cryptokeys')
+        .returns('test.com,hello.com');
+      serviceAdapter.getEncryptedDocumentKey.restore();
+      env.sandbox
+        .stub(serviceAdapter, 'getEncryptedDocumentKey')
+        .withArgs('hello.com')
+        .returns('encryptedDocKey');
+      viewerPlatform.viewer_.sendMessageAwaitResponse.restore();
+      const sendMessageStub = env.sandbox
+        .stub(viewerPlatform.viewer_, 'sendMessageAwaitResponse')
+        .callsFake(() => Promise.resolve(fakeAuthToken));
+      env.sandbox
+        .stub(viewerPlatform, 'verifyAuthToken_')
+        .callsFake(() => Promise.resolve({}));
+
+      await viewerPlatform.getEntitlements();
+      expect(sendMessageStub).to.be.calledWith(
+        'auth',
+        dict({
+          'publicationId': 'example.org',
+          'productId': 'example.org:basic',
+          'origin': 'origin',
+          'encryptedDocumentKey': 'encryptedDocKey',
+        })
+      );
+    });
   });
 
   describe('subscriptionchange message', () => {
@@ -169,7 +207,32 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       }
     });
 
-    it('should resolve promise with entitlement', async () => {
+    it('should resolve promise with entitlement (single entitlement)', async () => {
+      env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => ({
+        'aud': getWinOrigin(win),
+        'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+        'entitlements': entitlementData,
+      }));
+
+      const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
+        'faketoken'
+      );
+      expect(resolvedEntitlement).to.be.not.undefined;
+      expect(resolvedEntitlement.service).to.equal(entitlementData.service);
+      expect(resolvedEntitlement.source).to.equal('viewer');
+      expect(resolvedEntitlement.granted).to.be.equal(
+        entitlementData.products.indexOf(currentProductId) !== -1
+      );
+      expect(resolvedEntitlement.grantReason).to.be.equal(
+        GrantReason.SUBSCRIBER
+      );
+      // raw should be the data which was resolved via
+      // sendMessageAwaitResponse.
+      expect(resolvedEntitlement.raw).to.equal('faketoken');
+      expect(resolvedEntitlement.decryptedDocumentKey).to.be.undefined;
+    });
+
+    it('should resolve promise with entitlement (array of entitlements)', async () => {
       env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => ({
         'aud': getWinOrigin(win),
         'exp': Math.floor(Date.now() / 1000) + 5 * 60,
@@ -217,6 +280,36 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => ({
           'aud': getWinOrigin(win),
           'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+          'metering': {
+            left: 3,
+          },
+        }));
+
+        const resolvedEntitlement = await viewerPlatform.verifyAuthToken_(
+          'faketoken'
+        );
+        expect(resolvedEntitlement).to.be.not.undefined;
+        expect(resolvedEntitlement.service).to.equal('local');
+        expect(resolvedEntitlement.granted).to.be.equal(true);
+        expect(resolvedEntitlement.grantReason).to.be.equal(
+          GrantReason.METERING
+        );
+        // raw should be the data which was resolved via
+        // sendMessageAwaitResponse.
+        expect(resolvedEntitlement.data).to.deep.equal({
+          left: 3,
+        });
+      }
+    );
+
+    it(
+      'should resolve granted entitlement, with metering in data if ' +
+        'viewer non granting entitlement and metering',
+      async () => {
+        env.sandbox.stub(viewerPlatform.jwtHelper_, 'decode').callsFake(() => ({
+          'aud': getWinOrigin(win),
+          'exp': Math.floor(Date.now() / 1000) + 5 * 60,
+          'entitlements': [nonGrantingEntitlementData],
           'metering': {
             left: 3,
           },

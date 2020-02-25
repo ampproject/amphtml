@@ -21,6 +21,7 @@ import {Observable} from '../../../../src/observable';
 import {Services} from '../../../../src/services';
 import {cidServiceForDocForTesting} from '../../../../src/service/cid-impl';
 import {installPerformanceService} from '../../../../src/service/performance-impl';
+import {installPlatformService} from '../../../../src/service/platform-impl';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.fakeWin(
@@ -36,10 +37,12 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       element = document.createElement('script');
@@ -269,12 +272,14 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
       clock = env.sandbox.useFakeTimers();
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -321,7 +326,7 @@ describes.fakeWin(
       adapterMock = env.sandbox.mock(adapter);
 
       env.sandbox
-        .stub(service.resources_, 'mutateElement')
+        .stub(service.mutator_, 'mutateElement')
         .callsFake((unusedElement, mutator) => {
           mutator();
           return Promise.resolve();
@@ -560,10 +565,12 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -588,7 +595,7 @@ describes.fakeWin(
       service = new AccessService(ampdoc);
 
       mutateElementStub = env.sandbox
-        .stub(service.resources_, 'mutateElement')
+        .stub(service.mutator_, 'mutateElement')
         .callsFake((unusedElement, mutator) => {
           mutator();
           return Promise.resolve();
@@ -719,11 +726,13 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
       clock = env.sandbox.useFakeTimers();
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -1120,10 +1129,12 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -1203,11 +1214,13 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
       clock = env.sandbox.useFakeTimers();
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -1616,10 +1629,12 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -1743,12 +1758,14 @@ describes.fakeWin(
 
     beforeEach(() => {
       win = env.win;
+      win.performance = {timeOrigin: 1};
       ampdoc = env.ampdoc;
       document = win.document;
       clock = env.sandbox.useFakeTimers();
       clock.tick(0);
 
       cidServiceForDocForTesting(ampdoc);
+      installPlatformService(win);
       installPerformanceService(win);
 
       configElement = document.createElement('script');
@@ -1814,7 +1831,7 @@ describes.fakeWin(
       adapterDonutsMock = env.sandbox.mock(adapterDonuts);
 
       env.sandbox
-        .stub(service.resources_, 'mutateElement')
+        .stub(service.mutator_, 'mutateElement')
         .callsFake((unusedElement, mutator) => {
           mutator();
           return Promise.resolve();
