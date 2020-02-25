@@ -27,7 +27,24 @@ const TAG = 'inabox-resources';
 const FOUR_FRAME_DELAY = 70;
 
 /**
+ * Only a few components require viewportCallback.
+ * Allow them to observe intersections explicitly.
+ * @private @const {!Array<string>}
+ */
+const triggerViewportCallbackOn = ['AMP-CAROUSEL'];
+
+/** @param {!IntersectionObserverEntry} entry */
+function triggerViewportCallbackFromIntersection(entry) {
+  const {target, isIntersecting} = entry;
+  if (!target.viewportCallback) {
+    return;
+  }
+  target.viewportCallback(isIntersecting);
+}
+
+/**
  * @implements {../service/resources-interface.ResourcesInterface}
+ * @implements {../service.Disposable}
  * @visibleForTesting
  */
 export class InaboxResources {
@@ -56,8 +73,19 @@ export class InaboxResources {
     /** @const @private {!Deferred} */
     this.firstPassDone_ = new Deferred();
 
+    /** @private {?IntersectionObserver} */
+    this.intersectionObserver_ = null;
+
     const input = Services.inputFor(this.win);
     input.setupInputModeClasses(ampdoc);
+  }
+
+  /** @override */
+  dispose() {
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.disconnect();
+      this.intersectionObserver_ = null;
+    }
   }
 
   /** @override */
@@ -89,6 +117,7 @@ export class InaboxResources {
   add(element) {
     const resource = new Resource(++this.resourceIdCounter_, element, this);
     this.resources_.push(resource);
+    this.maybeObserveIntersections_(resource);
     dev().fine(TAG, 'resource added:', resource.debugid);
   }
 
@@ -182,6 +211,41 @@ export class InaboxResources {
     this.ampdoc_.signals().signal(READY_SCAN_SIGNAL);
     this.passObservable_.fire();
     this.firstPassDone_.resolve();
+  }
+
+  /**
+   * @return {?IntersectionObserver}
+   * @private
+   */
+  initIntersectionObserver_() {
+    if (this.intersectionObserver_) {
+      return this.intersectionObserver_;
+    }
+    const {IntersectionObserver} = this.win;
+    if (!IntersectionObserver) {
+      return null;
+    }
+    return (this.intersectionObserver_ = new IntersectionObserver(
+      entries => entries.forEach(triggerViewportCallbackFromIntersection),
+      {threshold: 0.5}
+    ));
+  }
+
+  /**
+   * @param {!Resource} resource
+   * @private
+   */
+  maybeObserveIntersections_(resource) {
+    const {element, debugid} = resource;
+    if (!triggerViewportCallbackOn.includes(element.tagName)) {
+      return;
+    }
+    const observer = this.initIntersectionObserver_();
+    if (!observer) {
+      return;
+    }
+    observer.observe(element);
+    dev().fine(TAG, 'will trigger viewportCallback:', debugid);
   }
 }
 
