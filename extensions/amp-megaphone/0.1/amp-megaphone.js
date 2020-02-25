@@ -78,6 +78,7 @@ class AmpMegaphone extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.element.classList.add('i-amphtml-media-component');
     this.updateBaseUrl_();
   }
 

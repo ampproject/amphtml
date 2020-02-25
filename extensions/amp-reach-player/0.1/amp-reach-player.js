@@ -44,6 +44,11 @@ class AmpReachPlayer extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    this.element.classList.add('i-amphtml-media-component');
+  }
+
+  /** @override */
   layoutCallback() {
     const embedId = this.element.getAttribute('data-embed-id') || 'default';
     const iframe = this.element.ownerDocument.createElement('iframe');

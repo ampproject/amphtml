@@ -45,6 +45,11 @@ class AmpHulu extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    this.element.classList.add('i-amphtml-media-component');
+  }
+
+  /** @override */
   layoutCallback() {
     const iframe = document.createElement('iframe');
     const src = this.getVideoIframeSrc_();

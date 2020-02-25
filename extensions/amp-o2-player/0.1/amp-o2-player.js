@@ -59,6 +59,8 @@ class AmpO2Player extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.element.classList.add('i-amphtml-media-component');
+
     this.pid_ = userAssert(
       this.element.getAttribute('data-pid'),
       'data-pid attribute is required for <amp-o2-player> %s',

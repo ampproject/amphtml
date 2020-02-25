@@ -58,6 +58,11 @@ class AmpSoundcloud extends AMP.BaseElement {
     return isLayoutSizeDefined(layout);
   }
 
+  /** @override */
+  buildCallback() {
+    this.element.classList.add('i-amphtml-media-component');
+  }
+
   /**@override*/
   layoutCallback() {
     const height = this.element.getAttribute('height');

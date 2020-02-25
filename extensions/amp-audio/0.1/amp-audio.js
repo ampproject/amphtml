@@ -63,6 +63,8 @@ export class AmpAudio extends AMP.BaseElement {
       this.buildAudioElement();
     }
 
+    this.element.classList.add('i-amphtml-media-component');
+
     this.registerAction('play', this.play_.bind(this));
     this.registerAction('pause', this.pause_.bind(this));
   }

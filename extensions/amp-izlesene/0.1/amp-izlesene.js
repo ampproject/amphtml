@@ -60,6 +60,8 @@ class AmpIzlesene extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.element.classList.add('i-amphtml-media-component');
+
     this.videoid_ = userAssert(
       this.element.getAttribute('data-videoid'),
       'The data-videoid attribute is required for <amp-izlesene> %s',

@@ -74,6 +74,8 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.element.classList.add('i-amphtml-media-component');
+
     const {element} = this;
     this.contentid_ = userAssert(
       element.getAttribute('data-playlist-id') ||

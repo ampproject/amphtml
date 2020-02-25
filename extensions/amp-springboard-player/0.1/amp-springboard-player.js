@@ -66,6 +66,8 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.element.classList.add('i-amphtml-media-component');
+
     this.mode_ = userAssert(
       this.element.getAttribute('data-mode'),
       'The data-mode attribute is required for <amp-springboard-player> %s',

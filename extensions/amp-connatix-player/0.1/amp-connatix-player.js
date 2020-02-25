@@ -93,6 +93,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   buildCallback() {
     const {element} = this;
 
+    element.classList.add('i-amphtml-media-component');
+
     // Player id is mandatory
     this.playerId_ = userAssert(
       element.getAttribute('data-player-id'),

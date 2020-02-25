@@ -61,6 +61,8 @@ class AmpKaltura extends AMP.BaseElement {
       this.element
     );
 
+    this.element.classList.add('i-amphtml-media-component');
+
     this.entryId_ = this.element.getAttribute('data-entryid') || 'default';
   }
 
