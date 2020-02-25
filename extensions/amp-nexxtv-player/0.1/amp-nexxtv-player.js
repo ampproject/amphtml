@@ -217,7 +217,7 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
     }
 
     const data = objOrParseJson(eventData);
-    if (!data) {
+    if (data == null) {
       return;
     }
 

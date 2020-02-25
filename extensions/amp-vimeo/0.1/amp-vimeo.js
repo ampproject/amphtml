@@ -222,6 +222,10 @@ class AmpVimeo extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
 
+    if (data == null) {
+      return; // we only process valid json
+    }
+
     if (data['event'] == 'ready' || data['method'] == 'ping') {
       this.onReadyOnce_();
       return;

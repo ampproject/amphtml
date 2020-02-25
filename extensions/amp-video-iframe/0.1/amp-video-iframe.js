@@ -298,6 +298,10 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
 
+    if (data == null) {
+      return; // we only process valid json
+    }
+
     const messageId = data['id'];
     const methodReceived = data['method'];
 
