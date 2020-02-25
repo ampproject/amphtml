@@ -87,6 +87,17 @@ describes.realWin('inabox-resources', {amp: true}, env => {
     expect(observe.withArgs(element)).to.have.been.calledOnce;
   });
 
+  it('unobserves element intersections when removed', () => {
+    const unobserve = env.sandbox.spy();
+    win.IntersectionObserver = () => ({observe: () => {}, unobserve});
+
+    const element = env.createAmpElement('amp-carousel');
+    resources.add(element);
+    resources.remove(element);
+
+    expect(unobserve.withArgs(element)).to.have.been.calledOnce;
+  });
+
   it('does not observe element intersections for those not opted in', () => {
     const observe = env.sandbox.spy();
     win.IntersectionObserver = () => ({observe});

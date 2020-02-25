@@ -31,7 +31,7 @@ const FOUR_FRAME_DELAY = 70;
  * Allow them to observe intersections explicitly.
  * @private @const {!Array<string>}
  */
-const triggerViewportCallbackOn = ['AMP-CAROUSEL'];
+const receivesViewportCallback = ['AMP-CAROUSEL'];
 
 /** @param {!IntersectionObserverEntry} entry */
 function triggerViewportCallbackFromIntersection(entry) {
@@ -74,7 +74,7 @@ export class InaboxResources {
     this.firstPassDone_ = new Deferred();
 
     /** @private {?IntersectionObserver} */
-    this.intersectionObserver_ = null;
+    this.inViewportObserver_ = null;
 
     const input = Services.inputFor(this.win);
     input.setupInputModeClasses(ampdoc);
@@ -82,9 +82,9 @@ export class InaboxResources {
 
   /** @override */
   dispose() {
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.disconnect();
-      this.intersectionObserver_ = null;
+    if (this.inViewportObserver_) {
+      this.inViewportObserver_.disconnect();
+      this.inViewportObserver_ = null;
     }
   }
 
@@ -117,7 +117,7 @@ export class InaboxResources {
   add(element) {
     const resource = new Resource(++this.resourceIdCounter_, element, this);
     this.resources_.push(resource);
-    this.maybeObserveIntersections_(resource);
+    this.maybeObserveInViewport_(element);
     dev().fine(TAG, 'resource added:', resource.debugid);
   }
 
@@ -136,6 +136,9 @@ export class InaboxResources {
     const resource = Resource.forElementOptional(element);
     if (!resource) {
       return;
+    }
+    if (this.inViewportObserver_) {
+      this.inViewportObserver_.unobserve(element);
     }
     const index = this.resources_.indexOf(resource);
     if (index !== -1) {
@@ -214,38 +217,37 @@ export class InaboxResources {
   }
 
   /**
+   * Instantiates an IntersectionObserver (if available) that triggers
+   * viewportCallbacks.
    * @return {?IntersectionObserver}
    * @private
    */
-  initIntersectionObserver_() {
-    if (this.intersectionObserver_) {
-      return this.intersectionObserver_;
-    }
+  maybeInitInViewportObserver_() {
     const {IntersectionObserver} = this.win;
     if (!IntersectionObserver) {
       return null;
     }
-    return (this.intersectionObserver_ = new IntersectionObserver(
-      entries => entries.forEach(triggerViewportCallbackFromIntersection),
-      {threshold: 0.5}
-    ));
+    if (this.inViewportObserver_ === null) {
+      this.inViewportObserver_ = new IntersectionObserver(entries =>
+        entries.forEach(triggerViewportCallbackFromIntersection)
+      );
+    }
+    return this.inViewportObserver_;
   }
 
   /**
-   * @param {!Resource} resource
+   * Observes an element so it will receive viewportCallbacks when allowed.
+   * @param {!Element} element
    * @private
    */
-  maybeObserveIntersections_(resource) {
-    const {element, debugid} = resource;
-    if (!triggerViewportCallbackOn.includes(element.tagName)) {
+  maybeObserveInViewport_(element) {
+    if (!receivesViewportCallback.includes(element.tagName)) {
       return;
     }
-    const observer = this.initIntersectionObserver_();
-    if (!observer) {
-      return;
+    const observer = this.maybeInitInViewportObserver_();
+    if (observer) {
+      observer.observe(element);
     }
-    observer.observe(element);
-    dev().fine(TAG, 'will trigger viewportCallback:', debugid);
   }
 }
 
