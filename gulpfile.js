@@ -25,9 +25,6 @@ const {
   checkExactVersions,
 } = require('./build-system/tasks/check-exact-versions');
 const {
-  generateVendorJsons,
-} = require('./build-system/tasks/generate-vendor-jsons');
-const {
   process3pGithubPr,
 } = require('./build-system/tasks/process-3p-github-pr');
 const {
@@ -143,7 +140,6 @@ createTask('dev-dashboard-tests', devDashboardTests);
 createTask('dist', dist);
 createTask('e2e', e2e);
 createTask('firebase', firebase);
-createTask('generate-vendor-jsons', generateVendorJsons);
 createTask('get-zindex', getZindex);
 createTask('integration', integration);
 createTask('lint', lint);

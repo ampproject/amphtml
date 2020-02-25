@@ -174,7 +174,6 @@ const forbiddenTerms = {
       'build-system/server/routes/analytics.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
-      'extensions/amp-analytics/0.1/vendors.js',
     ],
   },
   // Service factories that should only be installed once.
@@ -664,8 +663,6 @@ const forbiddenTerms = {
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/server/amp4test.js',
-      // TODO: @jonathantyng cleanup #22757
-      'build-system/tasks/generate-vendor-jsons.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {

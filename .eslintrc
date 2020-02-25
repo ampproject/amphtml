@@ -20,7 +20,6 @@
     "sourceType": "module"
   },
   "globals": {
-    "ANALYTICS_VENDOR_SPLIT": "readonly",
     "NATIVE_CUSTOM_ELEMENTS_V1": "readonly",
     "IS_ESM": "readonly",
 
@@ -68,7 +67,12 @@
         ]
       }
     ],
-    "jsdoc/check-types": [2, {"noDefaults": true}],
+    "jsdoc/check-types": [
+      2,
+      {
+        "noDefaults": true
+      }
+    ],
     "jsdoc/require-param": 2,
     "jsdoc/require-param-name": 2,
     "jsdoc/require-param-type": 2,
@@ -123,7 +127,12 @@
     "no-eval": 2,
     "no-extend-native": 2,
     "no-extra-bind": 2,
-    "no-implicit-coercion": [2, {"boolean": false}],
+    "no-implicit-coercion": [
+      2,
+      {
+        "boolean": false
+      }
+    ],
     "no-implied-eval": 2,
     "no-iterator": 2,
     "no-lone-blocks": 2,
@@ -148,7 +157,10 @@
     "no-var": 2,
     "no-warning-comments": [
       2,
-      {"terms": ["do not submit"], "location": "anywhere"}
+      {
+        "terms": ["do not submit"],
+        "location": "anywhere"
+      }
     ],
     "notice/notice": [
       2,
@@ -160,7 +172,13 @@
         }
       }
     ],
-    "object-shorthand": [2, "properties", {"avoidQuotes": true}],
+    "object-shorthand": [
+      2,
+      "properties",
+      {
+        "avoidQuotes": true
+      }
+    ],
     "prefer-const": 2,
     "prettier/prettier": 2,
     "radix": 2,
