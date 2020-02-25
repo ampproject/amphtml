@@ -1046,27 +1046,38 @@ export class AmpAutocomplete extends AMP.BaseElement {
   }
 
   /**
-   * Triggers a 'select' event with the given value as the value emitted.
+   * Triggers select event on amp-autocomplete element and change events (bind
+   * and native, for amp-script) on child input/textarea with the given value
+   * as the value emitted.
    * @param {string} value
    * @private
    */
   fireSelectEvent_(value) {
-    const name = 'select';
-    const selectEvent = createCustomEvent(
+    let name = 'select';
+    let event = createCustomEvent(
       this.win,
       `amp-autocomplete.${name}`,
       /** @type {!JsonObject} */ ({value})
     );
-    this.action_.trigger(this.element, name, selectEvent, ActionTrust.HIGH);
-  }
+    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
 
-  /**
-   * Triggers a native 'change' event on the input.
-   * @private
-   */
-  fireNativeChangeEvent_() {
-    const changeEvent = createCustomEvent(this.win, 'change', null);
-    this.inputElement_.dispatchEvent(changeEvent);
+    // Appease type checking
+    if (!this.inputElement_) {
+      return;
+    }
+
+    // Ensure on="change" is triggered for input
+    name = 'change';
+    event = createCustomEvent(
+      this.win,
+      `amp-autocomplete.${name}`,
+      /** @type {!JsonObject} */ ({value})
+    );
+    this.action_.trigger(this.inputElement_, name, event, ActionTrust.HIGH);
+
+    // Ensure native change listeners in user amp-scripts are triggered
+    event = createCustomEvent(this.win, 'change', null);
+    this.inputElement_.dispatchEvent(event);
   }
 
   /**
@@ -1236,7 +1247,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
           const selectedValue = this.setInputValue_(this.activeElement_);
           return this.mutateElement(() => {
             this.selectItem_(selectedValue);
-            this.fireNativeChangeEvent_();
             this.resetActiveElement_();
           });
         }
@@ -1258,7 +1268,6 @@ export class AmpAutocomplete extends AMP.BaseElement {
           const selectedValue = this.setInputValue_(this.activeElement_);
           return this.mutateElement(() => {
             this.selectItem_(selectedValue);
-            this.fireNativeChangeEvent_();
           });
         }
         return this.mutateElement(() => {

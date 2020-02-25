@@ -824,15 +824,17 @@ describes.realWin(
         });
     });
 
-    it('should fire select event from selectItem_', () => {
+    it('should fire events from selectItem_', () => {
       const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
       const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
+      const dispatchSpy = env.sandbox.spy(impl.inputElement_, 'dispatchEvent');
       return impl.layoutCallback().then(() => {
         impl.toggleResults_(true);
         impl.selectItem_('test');
         expect(fireEventSpy).to.have.been.calledOnce;
         expect(fireEventSpy).to.have.been.calledWith('test');
-        expect(triggerSpy).to.have.been.calledOnce;
+        expect(triggerSpy).to.have.been.calledTwice;
+        expect(dispatchSpy).to.have.been.calledOnce;
       });
     });
 
