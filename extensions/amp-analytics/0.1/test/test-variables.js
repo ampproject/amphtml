@@ -462,24 +462,6 @@ describes.fakeWin('amp-analytics.VariableService', {amp: true}, env => {
       doc.cookie = '';
     });
 
-    it('should replace SCROLL_TOP', () => {
-      env.sandbox.stub(Services, 'viewportForDoc').returns({
-        getScrollTop() {
-          return 10;
-        },
-      });
-      return check('?scrollTop=SCROLL_TOP', '?scrollTop=10');
-    });
-
-    it('should replace SCROLL_LEFT', () => {
-      env.sandbox.stub(Services, 'viewportForDoc').returns({
-        getScrollLeft() {
-          return 5;
-        },
-      });
-      return check('?scrollLeft=SCROLL_LEFT', '?scrollLeft=5');
-    });
-
     it('should replace FIRST_CONTENTFUL_PAINT', () => {
       env.sandbox.stub(Services, 'performanceFor').returns({
         getFirstContentfulPaint() {
