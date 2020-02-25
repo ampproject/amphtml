@@ -281,7 +281,7 @@ Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Si
 
 - `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
 
-**max-age (optional, but required for signed exchanges)**
+**max-age (optional, but required for signed exchanges if `script` is specified)**
 
 Requires the `script` attribute.
 
