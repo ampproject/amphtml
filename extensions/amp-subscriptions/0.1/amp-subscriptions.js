@@ -174,7 +174,7 @@ export class SubscriptionService {
    * @private
    */
   getPlatformConfig_() {
-    return new Promise((resolve, unusedReject) => {
+    return new Promise(resolve => {
       const rawContent = tryParseJson(this.configElement_.textContent, e => {
         throw user().createError(
           'Failed to parse "amp-subscriptions" JSON: ',  e
