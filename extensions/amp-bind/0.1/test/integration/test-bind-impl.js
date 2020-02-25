@@ -955,8 +955,22 @@ describe
           });
         });
 
-        describe('getStateWithWait', () => {
-          // TODO: fix all these tests if impl looks okay.
+        describe.only('getStateWithWait', () => {
+          function addAmpState(id, valuePromise) {
+            let ampState = document.createElement('amp-state', id);
+            ampState.createdCallback = () => {};
+            ampState.getImpl = () =>
+              Promise.resolve({
+                getFetchAndUpdatePromise() {
+                  return valuePromise;
+                },
+                parseAndUpdate: () => {},
+                element: ampState,
+              });
+
+            container.appendChild(ampState);
+          }
+
           it('should return the same result as getState if already present', async () => {
             await bind.initializePromiseForTesting();
             await bind.setState({mystate: {mykey: 'myval'}});
@@ -968,7 +982,7 @@ describe
           it('should not wait if the still-loading state is irrelevant', async () => {
             await bind.initializePromiseForTesting();
             await bind.setState({mystate: {mykey: 'myval'}});
-            bind.registerAsyncAmpState('otherkey', new Promise(unused => {})); // never going to resolve
+            addAmpState('otherkey', {}, new Promise(unused => {})); // never going to resolve
 
             const state = await bind.getStateWithWait('mystate.mykey');
             expect(state).to.equal('myval');
@@ -976,7 +990,7 @@ describe
 
           it('should wait for a relevant key', async () => {
             const {promise, resolve} = new Deferred();
-            bind.registerAsyncAmpState('mystate', promise);
+            addAmpState('mystate', promise);
 
             await bind.initializePromiseForTesting();
             const statePromise = bind.getStateWithWait('mystate.mykey');
@@ -987,7 +1001,7 @@ describe
 
           it('should stop waiting for a key if its fetch rejects', async () => {
             const {promise, reject} = new Deferred();
-            bind.registerAsyncAmpState('mystate', promise);
+            addAmpState('mystate', promise);
 
             await bind.initializePromiseForTesting();
             const statePromise = bind.getStateWithWait('mystate.mykey');
@@ -999,8 +1013,8 @@ describe
           it('should wait for all keys if given "."', async () => {
             const {promise: p1, resolve: r1} = new Deferred();
             const {promise: p2, resolve: r2} = new Deferred();
-            bind.registerAsyncAmpState('mystate1', p1); // never going to resolve
-            bind.registerAsyncAmpState('mystate2', p2); // never going to resolve
+            addAmpState('mystate1', p1);
+            addAmpState('mystate2', p2);
 
             await bind.initializePromiseForTesting();
             const statePromise = bind.getStateWithWait('.');
