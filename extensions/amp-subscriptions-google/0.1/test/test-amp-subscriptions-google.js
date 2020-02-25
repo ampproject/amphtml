@@ -44,8 +44,6 @@ const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
 
 describes.realWin('AmpFetcher', {amp: true}, env => {
-  let win;
-  let ampdoc;
   let fetcher;
   let xhr;
 
@@ -73,17 +71,18 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
   const AmpFetcher = getAmpFetcherClassForTesting();
 
   beforeEach(() => {
-    win = env.win;
-    ampdoc = env.ampdoc;
-    fetcher = new AmpFetcher(ampdoc.win);
-    xhr = Services.xhrFor(env.win);
+    const {win} = env.ampdoc;
+    fetcher = new AmpFetcher(win);
+    xhr = Services.xhrFor(win);
   });
 
   it('should support beacon when beacon supported', async () => {
     const expectedBlob = new Blob([expectedBodyString], {type: contentType});
-    env.sandbox.stub(win.navigator, 'sendBeacon').callsFake((url, body) => {
-      expect(url).to.equal(sentUrl);
-      expect(body).to.deep.equal(expectedBlob);
+    env.sandbox.stub(WindowInterface, 'getSendBeacon').callsFake(() => {
+      return (url, body) => {
+        expect(url).to.equal(sentUrl);
+        expect(body).to.deep.equal(expectedBlob);
+      };
     });
     fetcher.sendBeacon(sentUrl, sentMessage);
   });
