@@ -45,11 +45,6 @@ class AmpHulu extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
-    this.element.classList.add('i-amphtml-media-component');
-  }
-
-  /** @override */
   layoutCallback() {
     const iframe = document.createElement('iframe');
     const src = this.getVideoIframeSrc_();
@@ -79,6 +74,8 @@ class AmpHulu extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.element.classList.add('i-amphtml-media-component');
+
     this.eid_ = userAssert(
       this.element.getAttribute('data-eid'),
       'The data-eid attribute is required for <amp-hulu> %s',
