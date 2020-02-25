@@ -172,7 +172,7 @@ class AmpMinuteMediaPlayer extends AMP.BaseElement {
       return;
     }
     const data = objOrParseJson(eventData);
-    if (data === undefined) {
+    if (data == null) {
       return; // We only process valid JSON.
     }
 
