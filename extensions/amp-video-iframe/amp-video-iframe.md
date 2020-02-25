@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Embeds an iframe containing a video player.
+  text: Embeds a video player within an iframe.
 ---
 
 <!--
@@ -26,7 +26,7 @@ limitations under the License.
 
 [TOC]
 
-Displays an [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) containing a video player.
+Embeds a video player within an [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe).
 
 <table>
   <tr>
@@ -39,46 +39,287 @@ Displays an [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/i
   </tr>
 </table>
 
-## When should I use this?
+## Usage
 
-This component is useful if you've built your own Javascript-based
-video player and would like to embed it in an AMP document, or if your player is provided by a third party not
-supported by the AMP component library.
+Use `<amp-video-iframe>` to embed a video player that has no stand-alone AMP component or to embed your own custom JavaScript-based video player. See the list of [third-party stand-alone components here](TODO). 
 
-1. If you'd like to **include a video directly on the AMP document**, you should use [`amp-video`](https://amp.dev/documentation/components/amp-video).
+The example below demonstrates how to use `amp-video-iframe` in your AMP document:
 
-2. If you're using a **common 3rd party** like Youtube, Vimeo or [others supported in AMP](../../spec/amp-video-interface.md), you should use their supported component (e.g. [`amp-youtube`](https://amp.dev/documentation/components/amp-youtube), [`amp-vimeo`](https://amp.dev/documentation/components/amp-vimeo)).
+```html
+<amp-video-iframe
+  layout="responsive"
+  width="16"
+  height="9"
+  src="/my-video-player.html"
+  poster="/my-video-poster.jpg"
+>
+</amp-video-iframe>
+```
 
-3. If you've built a **custom player** or are using one provided by an **unsupported 3rd party**, **you should use `amp-video-iframe`**. This is different from using [`amp-iframe`](https://amp.dev/documentation/components/amp-iframe) in that it enables
-   [Video Features on AMP](../../spec/amp-video-interface.md). See [behavior](#behavior) below for more details.
+The `src` attribute points to `my-video-player.html`, the inner document loaded inside the iframe. This document plays the video. It must include and bootstrap an [integration script](TODO). The integration script allows `<amp-video-iframe>` to coordinate the video's playback.
 
-4. If you're a **3rd party video vendor**, **you can use `amp-video-iframe`** to [provide a simple way for authors to embed video.](#vendors)
+The `<amp-video-iframe>` component differs from [`<amp-iframe>`](../amp-iframe/amp-iframe.md) and non-AMP iframeas in the following ways:
 
-## Behavior
+- `<amp-video-iframe>` implements all [video features](../../spec/amp-video-interface.md). Features include but are not limited to autoplay, minimize-to-corner and rotate-to-fullscreen.
+- `<amp-video-iframe>` must request resources via HTTPS.
+- `<amp-video-iframe>` is not scrollable.
+- `<amp-video-iframe>` enforces sandboxing to itself and child iframes. This discourages misuse of <amp-video-iframe> as a means for advertising. 
 
-`amp-video-iframe` has several important differences from vanilla iframes and `amp-iframe`.
+### Video player integration
 
-- By default, an `amp-video-iframe` is sandboxed (see [details](#sandbox)).
+The `<amp-video-iframe>` component requires the embedded html document to include the [video-iframe-integration library](todo). The library is separate from the component's required script. This is because the embedded html document is non-AMP and iframed.
 
-- `amp-video-iframe` implements all [Video Features](../../spec/amp-video-interface.md), like autoplay, minimize-to-corner and rotate-to-fullscreen.
+```html
+<script
+  async
+  src="https://cdn.ampproject.org/video-iframe-integration-v0.js"
+></script>
 
-- `amp-video-iframe` must only request resources via HTTPS.
+<!-- Wait for API to initialize -->
+<script>
+  (window.AmpVideoIframe = window.AmpVideoIframe || []).push(
+    onAmpIntegrationReady
+  );
 
-- `amp-video-iframe` is not scrollable.
+  function onAmpIntegrationReady(ampIntegration) {
+    // `ampIntegration` is an object containing the tools required to integrate.
+    // This callback specifies how the AMP document and the iframed video document
+    // talk to each other.
+    // YOU NEED TO IMPLEMENT THIS. See below.
+  }
+</script>
+```
 
-In short, `amp-video-iframe` plugs AMP video features into an embedded document that hosts a video player.
+Provide a callback that specifies how the AMP document and the iframes video document communicate. You must implement a set of playback methods and event dispatchers to sync the documents together. Implement support by:
 
-## Usage of amp-video-iframe for advertising
+- Using an existing [third party provided readymade integration](todo).
+- Writing a [custom integration](todo) if your solution doesn't use supported tools.
+- [Contributing a third party integration](todo) for future use.  
 
-`amp-video-iframe` **must not** be used for the primary purpose of displaying advertising. It is OK to use `amp-video-iframe` for the purpose of displaying videos, where part of the videos are advertising. This AMP policy may be enforced by not rendering the respective iframes.
+#### Third party integrations
 
-Advertising use cases should use [`amp-ad`](https://amp.dev/documentation/components/amp-ad) instead.
+Third party video frameworks contributed their integrations for use with `<amp-video-iframe>`.
 
-The reasons for this policy are that:
+##### [JwPlayer](https://developer.jwplayer.com/jwplayer/docs)
 
-- `amp-video-iframe` enforces sandboxing and the sandbox is also applied to child iframes. This means landing pages may be broken, even if the ad itself appears to work.
+Pass your [`jwplayer` instance object](https://developer.jwplayer.com/jw-player/docs/javascript-api-reference/)
+through the signature `ampIntegration.listenTo('jwplayer', myJwplayer)`. The `ampIntegration` object setups the player through the instance API.
 
-- `amp-video-iframe` has no controlled resize mechanism.
+```js
+function onAmpIntegrationReady(ampIntegration) {
+  var myJwplayer = jwplayer('my-video');
+  ampIntegration.listenTo('jwplayer', myJwplayer);
+}
+```
+
+
+##### [Video.js](https://videojs.com/)
+
+Pass your [`<video>` element](https://docs.videojs.com/docs/api/player.html)
+through the signature `ampIntegration.listenTo('videojs', myVideo)`. Video.js overloads this element to provide methods
+that the `ampIntegration` object uses to setup the player.
+
+```js
+function onAmpIntegrationReady(ampIntegration) {
+  var myVideo = document.querySelector('#my-video');
+  ampIntegration.listenTo('videojs', myVideo);
+}
+```
+
+`listenTo` initializes the Video.js instance on the `<video>` element if required. This uses the global `videojs` function by default. If your page provides the initializer differently, you must pass it in as the third argument:
+
+```js
+function onAmpIntegrationReady(ampIntegration) {
+  var myVideo = document.querySelector('#my-video');
+
+  // ampIntegration initializes player with `myVideojsInitializer(myVideo)`
+  ampIntegration.listenTo('videojs', myVideo, myVideojsInitializer);
+}
+```
+
+#### Custom integrations
+
+You can create a custom implementation for your solution to communicate with `<amp-video-iframe>`. 
+
+The following communication methods are available:
+
+- [`method`](#method) to control playback.
+- [`postEvent`](#postEvent) to inform the host document about playback events.
+- [`getIntersection`](#getIntersection) to get video's viewability on the host document.
+- [`getMetadata`](#getMetadata) to get information about the host document.
+
+##### <a name="method"></a> `method(name, callback)`
+
+Implements a method that calls playback functions on the video. For example:
+
+```js
+ampIntegration.method('play', function() {
+  myVideo.play();
+});
+```
+
+You should implement these methods:
+
+- `play`
+- `pause`
+- `mute`
+- `unmute`
+- `showcontrols`
+- `hidecontrols`
+- `fullscreenenter`
+- `fullscreenexit`
+
+Enabling playback [actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/) require the `play` and `pause` methods. 
+
+Use of `autoplay` requires `play`, `pause`, `mute` and `unmute`.
+
+When minimizing the video to the corner, it displays a custom controls overlay. Use `showcontrols` and `hidecontrols` for the best possible user experience and avoid showing two sets of controls. 
+
+Allow users to enter and exit fullscreen viewing by enabling `fullscreenenter` and `fullscreenexit`.
+
+#### <a name="postEvent"></a> `postEvent(name)`
+
+Posts a playback event to the frame. For example:
+
+```js
+myVideoElement.addEventListener('pause', function() {
+  ampIntegration.postEvent('pause');
+});
+```
+
+The valid events are as follows.
+
+<table>
+  <thead>
+    <tr>
+      <td>Event</td>
+      <td>Description</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>canplay</code></td>
+      <td>
+        Triggered when your player is ready. This event must be posted before
+        the player can become interactive.
+      </td>
+    </tr>
+    <tr>
+      <td><code>playing</code></td>
+      <td>
+        Triggered when your player has started playing a video after load or
+        pause.
+      </td>
+    </tr>
+    <tr>
+      <td><code>pause</code></td>
+      <td>
+        Triggered when your video has been paused.
+      </td>
+    </tr>
+    <tr>
+      <td><code>ended</code></td>
+      <td>
+        Triggered when your video has ended playback. Note that you must also
+        post a <code>pause</code> event alongside the <code>ended</code> event.
+      </td>
+    </tr>
+    <tr>
+      <td><code>muted</code></td>
+      <td>
+        Triggered when your video has been muted.
+      </td>
+    </tr>
+    <tr>
+      <td><code>unmuted</code></td>
+      <td>
+        Triggered when your video has been unmuted.
+      </td>
+    </tr>
+    <tr>
+      <td><code>ad_start</code></td>
+      <td>
+        Triggered when a pre/mid/post-roll ad is playing. This hides the
+        autoplay shim displayed on the video.
+      </td>
+    </tr>
+    <tr>
+      <td><code>ad_end</code></td>
+      <td>
+        Triggered when a pre/mid/post-roll ad has ended. This re-displays the
+        autoplay shim if the user has not yet interacted with the video.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+#### <a name="postAnalyticsEvent"></a> `postAnalyticsEvent(eventType[, vars])`
+
+Posts a custom analytics event to be consumed by `amp-analytics`. The
+`eventType` must be prefixed with `video-custom-` to prevent naming collisions
+with other analytics event types.
+
+This method takes an optional `vars` param that should define an object with
+custom variables to log. These are available as `VIDEO_STATE`, keyed by name
+prefixed with `custom_`, i.e. the object `{myVar: 'foo'}` will be available as
+`{'custom_myVar': 'foo}`.
+
+#### <a name="getIntersection"></a> `getIntersection(callback)`
+
+Gets the intersection ratio (between 0 and 1) for the video element. This is useful for viewability information, e.g.
+
+```js
+// Will log intersection every 2 seconds
+setInterval(function() {
+  integration.getIntersection(function(intersection) {
+    console.log('Intersection ratio:', intersection.intersectionRatio);
+  });
+}, 2000);
+```
+
+The `callback` passed to the function will be executed with an object that looks
+like this:
+
+```json
+{"time": 33333.33, "intersectionRatio": 0.761}
+```
+
+⚠ This should be considered a low-fidelity reading. Currently, the value for
+`intersectionRatio` will be 0 as long as the video is under 50% visible. This
+value is bound to change at any time, and the callbacks may be delayed or
+debounced.
+
+#### <a name="getMetadata"></a> `getMetadata()`
+
+Returns an object containing metadata about the host document:
+
+```json
+{
+  "canonicalUrl": "foo.html",
+  "sourceUrl": "bar.html"
+}
+```
+
+
+### Disallowed usage of `<amp-video-iframe>`
+
+Use `<amp-video-iframe>` to embed a video player. Do not use it to embed a video directly or for advertisement purposes. 
+
+#### Embed a video directly 
+
+Use `<amp-video>` to directly embed a video on the AMP document.
+
+#### Advertising 
+
+Use `<amp-ad>` for advertising purposes. `<amp-video-iframe>` may display videos where part of the videos is advertising.
+
+Do not use `<amp-video-iframe>` for the _primary purpose_ of displaying advertising.  This component is not rendered when in violation of this policy. The reasons for this policy:
+
+- `<amp-video-iframe> `enforces sandboxing to itself and child iframes. This means landing pages may break, even if the ad itself appears to work.
+
+- `<amp-video-iframe>` has no controlled resize mechanism.
+
+
 
 ## Attributes
 
