@@ -33,6 +33,21 @@ const WEBENGAGE_CONFIG = jsonLiteral({
       'request': 'wePageview',
     },
   },
+  'linkers': {
+    '_we_linker': {
+      'enabled': true,
+      'ids': {
+        'we_luid': '${clientId(we_luid)}',
+      },
+      'proxyOnly': false,
+    },
+  },
+  'cookies': {
+    'we_luid': {
+      'value':
+        '$IF(LINKER_PARAM(_we_linker, we_luid),LINKER_PARAM(_we_linker, we_luid))',
+    },
+  },
 });
 
 export {WEBENGAGE_CONFIG};
