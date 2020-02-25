@@ -37,6 +37,7 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {WindowInterface} from '../../../../src/window-interface';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
@@ -88,8 +89,7 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
   });
 
   it('should support beacon when beacon not supported', async () => {
-    const tempFun = win.navigator.sendBeacon;
-    win.navigator.sendBeacon = null;
+    env.sandbox.stub(WindowInterface, 'getSendBeacon', () => null);
     env.sandbox.stub(xhr, 'fetch').callsFake((url, init) => {
       expect(url).to.equal(sentUrl);
       expect(init).to.deep.equal({
@@ -101,9 +101,6 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
     });
 
     fetcher.sendBeacon(sentUrl, sentMessage);
-
-    // Restore the original function so we don't break Xhr tests throughout AMP.
-    win.navigator.sendBeacon = tempFun;
   });
 });
 
