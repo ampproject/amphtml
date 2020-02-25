@@ -24,7 +24,7 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
-  const timestampRef = useRef(getFuzzyTimestampValue(props));
+  const timestampRef = useRef(null);
   const ref = useRef(null);
   const isIntersecting = useIsIntersecting(ref);
   if (isIntersecting === null || isIntersecting) {
