@@ -220,24 +220,25 @@ export class AmpState extends AMP.BaseElement {
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
       .then(json => this.updateState_(json, isInit));
 
-    if (isInit) {
-      Services.bindForDocOrNull(this.element).then(bind => {
-        devAssert(bind);
-        bind.registerAsyncAmpState(
-          this.element.getAttribute('id'),
-          fetchAndUpdatePromise
-        );
+    if (/* TODO: should we gate this on isInit?  */ true) {
+      this.fetchAndUpdatePromise_ = fetchAndUpdatePromise;
+
+      // Cleanup when complete
+      fetchAndUpdatePromise.then(() => {
+        if (this.fetchAndUpdatePromise_ === fetchAndUpdatePromise) {
+          this.fetchAndUpdatePromise_ = null;
+        }
       });
     }
 
-    return /** @type {!Promise} */ (this.fetchAndUpdatePromise_ = fetchAndUpdatePromise);
+    return fetchAndUpdatePromise;
   }
 
   /**
+   * Returns a promise that resolves after the fetch and update completes.
    * @return {Promise}
-   * @visibleForTesting
    */
-  getFetchAndUpdatePromiseForTesting() {
+  getFetchAndUpdatePromise() {
     return this.fetchAndUpdatePromise_;
   }
 

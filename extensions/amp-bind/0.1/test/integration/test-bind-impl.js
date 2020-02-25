@@ -956,6 +956,7 @@ describe
         });
 
         describe('getStateWithWait', () => {
+          // TODO: fix all these tests if impl looks okay.
           it('should return the same result as getState if already present', async () => {
             await bind.initializePromiseForTesting();
             await bind.setState({mystate: {mykey: 'myval'}});

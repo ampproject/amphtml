@@ -75,7 +75,6 @@ describes.realWin(
 
       bind = {
         setState: env.sandbox.stub(),
-        registerAsyncAmpState: env.sandbox.stub(),
       };
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
@@ -113,34 +112,6 @@ describes.realWin(
         {myAmpState: {remote: 'data'}},
         {skipEval: true, skipAmpState: false}
       );
-    });
-
-    it('should register itself with bind if performing a fetch', async () => {
-      element.setAttribute('src', 'https://foo.com/bar?baz=1');
-      element.build();
-
-      whenFirstVisiblePromiseResolve();
-      await whenFirstVisiblePromise;
-
-      // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
-
-      expect(bind.registerAsyncAmpState).to.have.been.calledWith(
-        'myAmpState',
-        ampState.getFetchAndUpdatePromiseForTesting()
-      );
-    });
-
-    it('should not register itself if not init', async () => {
-      element.mutatedAttributesCallback({src: 'https://foo.com/bar?baz=1'});
-
-      whenFirstVisiblePromiseResolve();
-      await whenFirstVisiblePromise;
-
-      // await one macro-task to let viewer/fetch promise chains resolve.
-      await new Promise(resolve => setTimeout(resolve, 0));
-
-      expect(bind.registerAsyncAmpState).to.not.have.been.called;
     });
 
     it('should trigger "fetch-error" if fetch fails', async () => {
