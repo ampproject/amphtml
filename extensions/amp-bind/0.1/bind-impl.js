@@ -164,9 +164,6 @@ export class Bind {
     /** @private {!Array<string>} */
     this.overridableKeys_ = [];
 
-    /** @private {!Object<string, !Promise<*>>} */
-    this.asyncLoadingAmpStates_ = map();
-
     /**
      * Upper limit on total number of bindings.
      *
@@ -566,22 +563,40 @@ export class Bind {
    * @return {!Promise<*>}
    */
   getStateWithWait(expr) {
-    const hasLoadingAmpState =
-      Object.keys(this.asyncLoadingAmpStates_).length > 0;
-    if (!hasLoadingAmpState) {
-      return Promise.resolve(this.getState(expr));
-    }
+    const asyncLoadingAmpStates = {};
+    const ampStatesEls = root.querySelectorAll('AMP-STATE');
+    let hasLoadingAmpState = false;
+    const gatherAsyncAmpStates = Promise.all(
+      toArray(ampStatesEls).map(el => {
+        return whenUpgradedToCustomElement(el)
+          .then(() => el.getImpl(/* waitForBuild */ false))
+          .then(impl => {
+            const id = impl.element.getAttribute('id');
+            const loadingPromise = impl.getFetchAndUpdatePromise();
+            if (loadingPromise) {
+              asyncLoadingAmpStates[id] = loadedPromise;
+              hasLoadingAmpState = true;
+            }
+          });
+      })
+    );
 
-    let wait;
-    if (expr === '.') {
-      // If getting everything, then wait for all async amp states.
-      wait = Promise.all(Object.values(this.asyncLoadingAmpStates_));
-    } else {
-      const stateKey = expr.split('.')[0];
-      wait = Promise.resolve(this.asyncLoadingAmpStates_[stateKey]);
-    }
+    return gatherAsyncAmpStates.then(() => {
+      if (!hasLoadingAmpState) {
+        return this.getState(expr);
+      }
 
-    return wait.catch(() => {}).then(() => this.getState(expr));
+      let wait;
+      if (expr === '.') {
+        // If getting everything, then wait for all async amp states.
+        wait = Promise.all(Object.values(asyncLoadingAmpStates));
+      } else {
+        const stateKey = expr.split('.')[0];
+        wait = asyncLoadingAmpStates[stateKey];
+      }
+
+      return wait.catch(() => {}).then(() => this.getState(expr));
+    });
   }
 
   /**
@@ -1826,16 +1841,5 @@ export class Bind {
       }
       this.localWin_.dispatchEvent(event);
     }
-  }
-
-  /**
-   *
-   * @param {string} id
-   * @param {!Promise} promise
-   */
-  registerAsyncAmpState(id, promise) {
-    this.asyncLoadingAmpStates_[id] = promise;
-
-    promise.catch(() => {}).then(() => delete this.asyncLoadingAmpStates_[id]);
   }
 }
