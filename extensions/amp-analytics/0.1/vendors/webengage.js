@@ -38,7 +38,6 @@ const WEBENGAGE_CONFIG = jsonLiteral({
   },
   'linkers': {
     '_we_linker': {
-      'destinationDomains': ['*'],
       'enabled': true,
       'ids': {
         'we_luid': '${clientId}',

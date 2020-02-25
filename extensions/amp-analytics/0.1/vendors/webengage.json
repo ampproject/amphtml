@@ -16,7 +16,6 @@
   },
   "linkers": {
     "_we_linker": {
-      "destinationDomains": ["*"],
       "enabled": true,
       "ids": {
         "we_luid": "${clientId(we_luid)}"
