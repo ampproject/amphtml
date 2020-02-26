@@ -164,11 +164,12 @@ export class NextPageService {
    * Builds the next-page service by fetching the required elements
    * and the initial list of pages and installing scoll listeners
    * @param {!AmpElement} element <amp-next-page> element on the host page
+   * @return {!Promise}
    */
   build(element) {
     // Prevent multiple amp-next-page on the same document
     if (this.isBuilt()) {
-      return;
+      return Promise.resolve();
     }
 
     if (this.ampdoc_.getBody().lastElementChild !== element) {
@@ -216,7 +217,7 @@ export class NextPageService {
     this.maxPages_ = this.getHost_().hasAttribute('max-pages')
       ? this.getHost_().getAttribute('max-pages')
       : Infinity;
-    this.initializePageQueue_().then(() => {
+    this.initializePageQueue_().finally(() => {
       // Render the initial footer template with all pages
       this.refreshFooter_();
       // Mark the page as ready
@@ -228,6 +229,8 @@ export class NextPageService {
     this.viewport_.onScroll(() => this.updateScroll_());
     this.viewport_.onResize(() => this.updateScroll_());
     this.updateScroll_();
+
+    return this.readyPromise_;
   }
 
   /**

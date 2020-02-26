@@ -232,6 +232,43 @@ _on the second document_
 </div>
 ```
 
+### Migrating from 0.1
+
+The experimental `0.1` version of `amp-next-page` had a similar but more restricted API. Version `1.0` allows for an infinite number of suggestions and has advanced features such as templated separators and footers. To make use of these features, follow these instructions:
+
+1. Update your `<script custom-element>` tag to link to the `1.0` bundle of `amp-next-page`
+2. Make sure that `amp-next-page` is the last child of the body element, move any footers or other components that used to follow `<amp-next-page>` inside the `<amp-next-page>` tag.
+3. If you were using an inline configuration, the JSON config is now an `array` of pages instead of an `object` with a `pages` entry. Additionally, the `ampUrl` key of each page entry was renamed to `url`.
+   ```html
+   <amp-next-page>
+     <!-- BEFORE: amp-next-page 0.1 -->
+     <script type="application/json">
+       {
+         "pages": [
+           {
+             "image": "https://example.com/image1.jpg",
+             "title": "This article shows first",
+             "ampUrl": "https://example.com/article1.amp.html"
+           }
+         ],
+         "hideSelectors": [".header", ".main footer", "#navigation"]
+       }
+     </script>
+     <!-- AFTER: amp-next-page 1.0 -->
+     <script type="application/json">
+       [
+         {
+           "image": "https://example.com/image1.jpg",
+           "title": "This article shows first",
+           // `ampUrl` was renamed to `url`
+           "url": "https://example.com/article1.amp.html"
+         }
+       ]
+       // Instead of `hideSelectors`, use the `next-page-hide` attribute
+     </script>
+   </amp-next-page>
+   ```
+
 ## Attributes
 
 ### `src`

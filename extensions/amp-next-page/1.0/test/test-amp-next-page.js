@@ -211,16 +211,11 @@ describes.realWin(
 
     describe('remote config', () => {
       it('errors when no config specified', async () => {
-        const element = await getAmpNextPage({});
-
-        await allowConsoleError(() =>
-          element.build().catch(err => {
-            expect(err.message).to.include(
-              'amp-next-page should contain a <script> child or a URL specified in [src]'
-            );
-            element.parentNode.removeChild(element);
-          })
+        expectAsyncConsoleError(
+          /amp-next-page should contain a <script> child or a URL specified/,
+          1
         );
+        getAmpNextPage({});
       });
 
       it('builds with valid remote config (without inline config)', async () => {
