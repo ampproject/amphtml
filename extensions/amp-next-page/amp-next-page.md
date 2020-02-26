@@ -76,19 +76,23 @@ To enable for an infinite loading experience without the need for a server-side 
 
 The following configuration will recommend two more documents for the user to read.
 
-```json
-[
-  {
-    "image": "https://example.com/image1.jpg",
-    "title": "This article shows first",
-    "url": "https://example.com/article1.amp.html"
-  },
-  {
-    "image": "https://example.com/image2.jpg",
-    "title": "This article shows second",
-    "url": "https://example.com/article2.amp.html"
-  }
-]
+```html
+<amp-next-page>
+  <script type="application/json">
+    [
+      {
+        "image": "https://example.com/image1.jpg",
+        "title": "This article shows first",
+        "url": "https://example.com/article1.amp.html"
+      },
+      {
+        "image": "https://example.com/image2.jpg",
+        "title": "This article shows second",
+        "url": "https://example.com/article2.amp.html"
+      }
+    ]
+  </script>
+</amp-next-page>
 ```
 
 #### Load configuration from a remote URL
@@ -307,7 +311,7 @@ Both `<amp-next-page>` specific triggers provide the variables `url` and `title`
 
 ## Accessibility
 
-The default footer and default separator both present a generic, non-localized `aria-label` describing their content. If this label is not satisfactory, please consider using a custom footer/separator element to improve accessibility.
+The default footer and default separator both present a generic, non-localized `aria-label` describing their content. If this label is not satisfactory, please consider using a custom footer or separator element to improve accessibility.
 
 Both the default footer and default separator are keyboard-focusable. When a custom separator is provided, its `tabindex` is preserved if present, otherwise a `tabindex` of `0` will be added to the given element.
 
