@@ -316,6 +316,7 @@ const forbiddenTerms = {
       // Please keep list alphabetically sorted.
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
       'extensions/amp-list/0.1/amp-list.js',
+      'extensions/amp-list/0.2/amp-list.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
@@ -798,6 +799,7 @@ const forbiddenTerms = {
       'extensions/amp-fx-collection/0.1/test/integration/test-amp-fx-fly-in.js',
       'extensions/amp-lightbox-gallery/0.1/test/integration/test-amp-lightbox-gallery.js',
       'extensions/amp-list/0.1/test/integration/test-amp-list.js',
+      'extensions/amp-list/0.2/test/integration/test-amp-list.js',
       'extensions/amp-live-list/0.1/test/test-poller.js',
       'extensions/amp-next-page/0.1/test/test-config.js',
       'extensions/amp-script/0.1/test/unit/test-amp-script.js',

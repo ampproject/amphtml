@@ -16,7 +16,7 @@
 
 import {ActionTrust} from '../../../src/action-constants';
 import {AmpEvents} from '../../../src/amp-events';
-import {CSS} from '../../../build/amp-list-0.1.css';
+import {CSS} from '../../../build/amp-list-0.2.css';
 import {
   DIFFABLE_AMP_ELEMENTS,
   DIFF_IGNORE,
@@ -1454,6 +1454,6 @@ export class AmpList extends AMP.BaseElement {
   }
 }
 
-AMP.extension(TAG, '0.1', AMP => {
+AMP.extension(TAG, '0.2', AMP => {
   AMP.registerElement(TAG, AmpList, CSS);
 });
