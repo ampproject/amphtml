@@ -1018,8 +1018,9 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (element === null || element.hasAttribute('data-disabled')) {
       return null;
     }
+
     const selectedValue =
-      element.getAttribute('data-value') || element.textContent;
+      element.getAttribute('data-value') || element.textContent || '';
 
     this.inputElement_.value = this.binding_.getUserInputForUpdateWithSelection(
       selectedValue,
@@ -1040,7 +1041,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     if (value === null) {
       return;
     }
-    this.fireSelectEvent_(value);
+    this.fireSelectAndChangeEvents_(value);
     this.clearAllItems_();
     this.toggleResults_(false);
   }
@@ -1052,32 +1053,43 @@ export class AmpAutocomplete extends AMP.BaseElement {
    * @param {string} value
    * @private
    */
-  fireSelectEvent_(value) {
-    let name = 'select';
-    let event = createCustomEvent(
+  fireSelectAndChangeEvents_(value) {
+    const selectName = 'select';
+    const selectEvent = createCustomEvent(
       this.win,
-      `amp-autocomplete.${name}`,
+      `amp-autocomplete.${selectName}`,
       /** @type {!JsonObject} */ ({value})
     );
-    this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
+    this.action_.trigger(
+      this.element,
+      selectName,
+      selectEvent,
+      ActionTrust.HIGH
+    );
 
-    // Appease type checking
-    if (!this.inputElement_) {
-      return;
-    }
+    dev().assertElement(this.inputElement_);
 
     // Ensure on="change" is triggered for input
-    name = 'change';
-    event = createCustomEvent(
+    const changeName = 'change';
+    const changeEvent = createCustomEvent(
       this.win,
-      `amp-autocomplete.${name}`,
+      `amp-autocomplete.${changeName}`,
       /** @type {!JsonObject} */ ({value})
     );
-    this.action_.trigger(this.inputElement_, name, event, ActionTrust.HIGH);
+    this.action_.trigger(
+      this.inputElement_,
+      changeName,
+      changeEvent,
+      ActionTrust.HIGH
+    );
 
     // Ensure native change listeners in user amp-scripts are triggered
-    event = createCustomEvent(this.win, 'change', null);
-    this.inputElement_.dispatchEvent(event);
+    const nativeChangeEvent = createCustomEvent(
+      this.win,
+      'change',
+      /** @type {!JsonObject} */ ({value})
+    );
+    this.inputElement_.dispatchEvent(nativeChangeEvent);
   }
 
   /**
@@ -1270,9 +1282,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
             this.selectItem_(selectedValue);
           });
         }
-        return this.mutateElement(() => {
-          this.toggleResults_(false);
-        });
+        return Promise.resolve();
       case Keys.BACKSPACE:
         this.detectBackspace_ = this.shouldSuggestFirst_;
         return Promise.resolve();

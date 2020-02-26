@@ -722,7 +722,7 @@ describes.realWin(
       impl.activeElement_ = doc.createElement('div');
       expect(impl.userInput_).not.to.equal(impl.inputElement_.value);
       env.sandbox.stub(impl, 'areResultsDisplayed_').returns(true);
-      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
       return impl
         .layoutCallback()
         .then(() => {
@@ -825,7 +825,7 @@ describes.realWin(
     });
 
     it('should fire events from selectItem_', () => {
-      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectEvent_');
+      const fireEventSpy = env.sandbox.spy(impl, 'fireSelectAndChangeEvents_');
       const triggerSpy = env.sandbox.spy(impl.action_, 'trigger');
       const dispatchSpy = env.sandbox.spy(impl.inputElement_, 'dispatchEvent');
       return impl.layoutCallback().then(() => {
@@ -833,7 +833,11 @@ describes.realWin(
         impl.selectItem_('test');
         expect(fireEventSpy).to.have.been.calledOnce;
         expect(fireEventSpy).to.have.been.calledWith('test');
-        expect(triggerSpy).to.have.been.calledTwice;
+        expect(triggerSpy).to.have.been.calledWith(impl.element, 'select');
+        expect(triggerSpy).to.have.been.calledWith(
+          impl.inputElement_,
+          'change'
+        );
         expect(dispatchSpy).to.have.been.calledOnce;
       });
     });
