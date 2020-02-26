@@ -51,4 +51,3 @@ validatorWebui.description = 'Builds and tests the AMP validator web UI.';
 validatorWebui.flags = {
   'update_tests': '  Updates validation test output files',
 };
-
