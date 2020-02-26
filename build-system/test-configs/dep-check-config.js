@@ -55,11 +55,14 @@ exports.rules = [
   },
   {
     filesMatching: '**/*.js',
-    mustNotDependOn: 'src/purifier.js',
+    mustNotDependOn: 'src/purifier/**/*.js',
     whitelist: [
       // WARNING: Importing purifier.js will also bundle DOMPurify (13KB).
-      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier.js',
-      'extensions/amp-script/0.1/amp-script.js->src/purifier.js',
+      'extensions/amp-list/0.1/amp-list.js->src/purifier/sanitation.js',
+      'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier/purifier.js',
+      'extensions/amp-script/0.1/amp-script.js->src/purifier/purifier.js',
+      'src/purifier/purifier.js->src/purifier/sanitation.js',
+      'src/sanitizer.js->src/purifier/sanitation.js',
     ],
   },
   {
@@ -74,23 +77,16 @@ exports.rules = [
     filesMatching: '**/*.js',
     mustNotDependOn: 'third_party/**/*.js',
     whitelist: [
-      '3p/polyfills.js->third_party/babel/custom-babel-helpers.js',
-      'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->third_party/mustache/mustache.js',
       'extensions/amp-autocomplete/**/*.js->third_party/fuzzysearch/index.js',
       'extensions/amp-crypto-polyfill/**/*.js->third_party/closure-library/sha384-generated.js',
-      'extensions/amp-date-picker/**->third_party/react-dates/bundle.js',
       'extensions/amp-list/**->third_party/set-dom/set-dom.js',
       'extensions/amp-mustache/**/amp-mustache.js->third_party/mustache/mustache.js',
       'extensions/amp-recaptcha-input/**/*.js->third_party/amp-toolbox-cache-url/dist/amp-toolbox-cache-url.esm.js',
-      'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-subscriptions-google/**/*.js->third_party/subscriptions-project/swg.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
-      'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/apis.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
-      'extensions/amp-viz-vega/**->third_party/d3/d3.js',
-      'extensions/amp-viz-vega/**->third_party/vega/vega.js',
       'src/css.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
@@ -115,7 +111,6 @@ exports.rules = [
       '3p/**->src/3p-frame-messaging.js',
       '3p/**->src/observable.js',
       '3p/**->src/amp-events.js',
-      '3p/**->src/consent-state.js',
       '3p/**->src/internal-version.js',
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
@@ -135,7 +130,6 @@ exports.rules = [
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: 'src/**/*.js',
     whitelist: [
-      'ads/**->src/utils/base64.js',
       'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/utils/object.js',
       'ads/**->src/utils/rate-limit.js',
@@ -147,22 +141,15 @@ exports.rules = [
       'ads/**->src/style.js',
       'ads/**->src/consent-state.js',
       'ads/**->src/internal-version.js',
-      'ads/google/adsense-amp-auto-ads-responsive.js->src/experiments.js',
-      'ads/google/doubleclick.js->src/experiments.js',
       // ads/google/a4a doesn't contain 3P ad code and should probably move
       // somewhere else at some point
       'ads/google/a4a/**->src/ad-cid.js',
       'ads/google/a4a/**->src/consent.js',
-      'ads/google/a4a/**->src/consent-state.js',
       'ads/google/a4a/**->src/dom.js',
       'ads/google/a4a/**->src/experiments.js',
       'ads/google/a4a/**->src/services.js',
       'ads/google/a4a/utils.js->src/service/variable-source.js',
       'ads/google/a4a/utils.js->src/ini-load.js',
-      'ads/google/a4a/utils.js->src/layout.js',
-      // alp handler needs to depend on src files
-      'ads/alp/handler.js->src/dom.js',
-      'ads/alp/handler.js->src/config.js',
       // Some ads need to depend on json.js
       'ads/**->src/json.js',
       // IMA, similar to other non-Ad 3Ps above, needs access to event-helper
@@ -174,13 +161,6 @@ exports.rules = [
     mustNotDependOn: 'extensions/**/*.js',
     whitelist: [
       // See todo note in ads/_a4a-config.js
-      'ads/_a4a-config.js->' +
-        'extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
-      'ads/_a4a-config.js->' +
-        'extensions/amp-ad-network-doubleclick-impl/0.1/' +
-        'doubleclick-a4a-config.js',
-      'ads/_a4a-config.js->' +
-        'extensions/amp-ad-network-fake-impl/0.1/fake-a4a-config.js',
       'ads/_a4a-config.js->' +
         'extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config.js',
       'ads/_a4a-config.js->' +
@@ -232,9 +212,6 @@ exports.rules = [
       // AMP access depends on AMP access
       'extensions/amp-access-scroll/0.1/scroll-impl.js->extensions/amp-access/0.1/amp-access-client.js',
 
-      // Ads depends on a4a?
-      'extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler.js->extensions/amp-ad-network-adsense-impl/0.1/adsense-a4a-config.js',
-
       // Ads needs concurrent loading
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-ad/0.1/concurrent-load.js',
@@ -261,7 +238,6 @@ exports.rules = [
       'extensions/amp-facebook-comments/0.1/amp-facebook-comments.js->extensions/amp-facebook/0.1/facebook-loader.js',
 
       // Amp geo in group enum
-      'extensions/amp-consent/0.1/amp-consent.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-consent/0.1/consent-config.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js->extensions/amp-geo/0.1/amp-geo-in-group.js',
 
@@ -301,8 +277,6 @@ exports.rules = [
         'src/service/variable-source.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->' +
         'src/service/url-replacements-impl.js',
-      'extensions/amp-video-service/**->' +
-        'src/service/video-service-interface.js',
       'extensions/amp-video/0.1/amp-video.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-video-iframe/0.1/amp-video-iframe.js->' +
@@ -323,7 +297,6 @@ exports.rules = [
         'src/service/video-manager-impl.js',
       'extensions/amp-gfycat/0.1/amp-gfycat.js->' +
         'src/service/video-manager-impl.js',
-      'extensions/amp-a4a/0.1/amp-a4a.js->src/service/variable-source.js',
       'extensions/amp-a4a/0.1/friendly-frame-util.js->' +
         'src/service/url-replacements-impl.js',
       'extensions/amp-nexxtv-player/0.1/amp-nexxtv-player.js->' +
@@ -343,8 +316,6 @@ exports.rules = [
       'extensions/amp-delight-player/0.1/amp-delight-player.js->' +
         'src/service/video-manager-impl.js',
       'extensions/amp-analytics/0.1/iframe-transport.js->' +
-        'src/service/extension-location.js',
-      'extensions/amp-analytics/0.1/iframe-transport.js->' +
         'src/service/jank-meter.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js->' +
         'src/service/position-observer/position-observer-impl.js',
@@ -354,24 +325,16 @@ exports.rules = [
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-list/0.1/amp-list.js->' +
-        'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-list/0.1/amp-list.js->' +
-        'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-analytics/0.1/amp-analytics.js->' +
-        'src/service/cid-impl.js',
       'extensions/amp-analytics/0.1/cookie-writer.js->' +
         'src/service/cid-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-next-page/0.1/next-page-service.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-next-page/1.0/service.js->' +
-        'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-next-page/1.0/visibility-observer.js->' +
         'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-next-page/1.0/visibility-observer.js->' +
@@ -380,14 +343,7 @@ exports.rules = [
         'src/service/notification-ui-manager.js',
       'extensions/amp-consent/0.1/amp-consent.js->' +
         'src/service/notification-ui-manager.js',
-      // For autoplay delegation:
-      'extensions/amp-story/0.1/amp-story-page.js->' +
-        'src/service/video-service-sync-impl.js',
-      'extensions/amp-story/1.0/amp-story-page.js->' +
-        'src/service/video-service-sync-impl.js',
       // Accessing USER_INTERACTED constant:
-      'extensions/amp-story/1.0/media-pool.js->' +
-        'src/service/video-service-interface.js',
       'extensions/amp-story/1.0/page-advancement.js->' +
         'src/service/action-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->' +
@@ -400,308 +356,19 @@ exports.rules = [
         'src/service/navigation.js',
       'extensions/amp-skimlinks/0.1/link-rewriter/link-rewriter-manager.js->' +
         'src/service/navigation.js',
-      'extensions/amp-list/0.1/amp-list.js->src/service/xhr-impl.js',
-      'extensions/amp-form/0.1/amp-form.js->src/service/xhr-impl.js',
       // Accessing extension-location.calculateExtensionScriptUrl().
       'extensions/amp-script/0.1/amp-script.js->' +
         'src/service/extension-location.js',
       // Origin experiments.
-      'extensions/amp-list/0.1/amp-list.js->' +
-        'src/service/origin-experiments-impl.js',
-      'extensions/amp-recaptcha-input/0.1/amp-recaptcha-input.js->' +
-        'src/service/origin-experiments-impl.js',
       'extensions/amp-experiment/1.0/amp-experiment.js->' +
         'src/service/origin-experiments-impl.js',
-      'extensions/amp-script/0.1/amp-script.js->' +
-        'src/service/origin-experiments-impl.js',
       // For action macros.
-      'extensions/amp-action-macro/0.1/amp-action-macro.js->' +
-        'src/service/action-impl.js',
       'extensions/amp-link-rewriter/0.1/amp-link-rewriter.js->' +
         'src/service/navigation.js',
       // For localization.
       'extensions/amp-story/0.1/amp-story.js->src/service/localization.js',
       'extensions/amp-story/1.0/amp-story.js->src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/af.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/am.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ar.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/bg.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/bn.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/bs.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ca.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/cs.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/da.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/de.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/default.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/el.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/en-GB.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/en.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/es-419.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/es.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/et.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/eu.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/fa.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/fi.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/fil.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/fr.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/gl.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/gu.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/hi.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/hr.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/hu.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/id.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/is.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/it.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/iw.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ja.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ka.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/km.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/kn.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ko.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/lo.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/lt.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/lv.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/mk.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ml.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/mn.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/mr.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ms.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/my.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ne.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/nl.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/no.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/pa.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/pt-BR.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/pt-PT.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ro.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ru.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/si.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/sk.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/sl.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/sq.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/sr.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/sv.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/sw.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ta.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/te.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/th.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/tr.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/uk.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/ur.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/vi.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/zh-CN.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/zh-TW.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story/1.0/_locales/zu.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/af.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/am.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ar.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/bg.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/bn.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/bs.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ca.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/cs.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/da.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/de.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/el.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/en-GB.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/en.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/es-419.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/es.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/et.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/eu.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/fa.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/fi.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/fil.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/fr.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/gl.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/gu.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/hi.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/hr.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/hu.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/id.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/is.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/it.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/iw.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ja.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ka.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/km.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/kn.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ko.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/lo.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/lt.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/lv.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/mk.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ml.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/mn.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/mr.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ms.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/my.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ne.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/nl.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/no.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/pa.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/pt-BR.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/pt-PT.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ro.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ru.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/si.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/sk.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/sl.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/sq.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/sr.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/sv.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/sw.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ta.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/te.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/th.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/tr.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/uk.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/ur.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/vi.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/zh-CN.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/zh-TW.js->' +
-        'src/service/localization.js',
-      'extensions/amp-story-auto-ads/0.1/_locales/zu.js->' +
-        'src/service/localization.js',
+      'extensions/amp-story-auto-ads/0.1/story-ad-localization.js->src/service/localization.js',
       // Accessing calculateScriptBaseUrl() for vendor config URLs
       'extensions/amp-analytics/0.1/config.js->' +
         'src/service/extension-location.js',
@@ -738,9 +405,6 @@ exports.rules = [
     mustNotDependOn: 'src/polyfills.js',
     whitelist: [
       'src/amp.js->src/polyfills.js',
-      'src/service.js->src/polyfills.js',
-      'src/service/timer-impl.js->src/polyfills.js',
-      'src/service/extensions-impl.js->src/polyfills.js',
     ],
   },
 
@@ -780,10 +444,7 @@ exports.rules = [
       'ads/google/deprecated_doubleclick.js',
       /** DO NOT WHITELIST ANY FILES */
     ],
-    whitelist: [
-      'ads/google/doubleclick.js->ads/google/deprecated_doubleclick.js',
-      '3p/integration.js->ads/google/deprecated_doubleclick.js',
-    ],
+    whitelist: [],
   },
 
   // Delayed fetch for Doubleclick will be deprecated on March 29, 2018.
@@ -798,13 +459,10 @@ exports.rules = [
       /** DO NOT ADD TO WHITELIST */
       'ads/ix.js->ads/google/doubleclick.js',
       'ads/imonomy.js->ads/google/doubleclick.js',
-      'ads/medianet.js->ads/google/doubleclick.js',
       'ads/navegg.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO WHITELIST */
       'ads/openx.js->ads/google/doubleclick.js',
       'ads/pulsepoint.js->ads/google/doubleclick.js',
-      'ads/rubicon.js->ads/google/doubleclick.js',
-      'ads/yieldbot.js->ads/google/doubleclick.js',
       /** DO NOT ADD TO WHITELIST */
     ],
   },

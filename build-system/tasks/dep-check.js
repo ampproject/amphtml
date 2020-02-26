@@ -78,6 +78,9 @@ function Rule(config) {
 
   /** @private @const {!Array<string>} */
   this.whitelist_ = toArrayOrDefault(config.whitelist, []);
+
+  /** @private @const {!Set<string>} */
+  this.unusedAllowlistEntries = new Set(this.whitelist_);
 }
 
 /**
@@ -86,15 +89,13 @@ function Rule(config) {
  * @return {!Array<string>}
  */
 Rule.prototype.run = function(moduleName, deps) {
-  const errors = [];
-
   // If forbidden rule and current module has no dependencies at all
   // then no need to match.
   if (this.type_ == 'forbidden' && !deps.length) {
-    return errors;
+    return [];
   }
 
-  return errors.concat(this.matchBadDeps(moduleName, deps));
+  return this.matchBadDeps(moduleName, deps);
 };
 
 /**
@@ -130,17 +131,19 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
           }
         }
 
-        const inWhitelist = this.whitelist_.some(entry => {
+        for (const entry of this.whitelist_) {
           const pair = entry.split('->');
           const whitelistedModuleName = pair[0];
           const whitelistedDep = pair[1];
           if (!minimatch(moduleName, whitelistedModuleName)) {
-            return false;
+            continue;
           }
-          return dep == whitelistedDep;
-        });
-        if (inWhitelist) {
-          return;
+
+          const inWhitelist = dep == whitelistedDep;
+          if (inWhitelist) {
+            this.unusedAllowlistEntries.delete(entry);
+            return;
+          }
         }
         mustNotDependErrors.push(
           cyan(moduleName) + ' must not depend on ' + cyan(dep)
@@ -148,6 +151,7 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
       }
     });
   });
+
   return mustNotDependErrors;
 };
 
@@ -280,20 +284,26 @@ function flattenGraph(entryPoints) {
  * @return {boolean}
  */
 function runRules(modules) {
-  let errorsFound = false;
-  Object.keys(modules).forEach(moduleName => {
-    const deps = modules[moduleName];
+  const errors = [];
+  Object.entries(modules).forEach(([moduleName, deps]) => {
     // Run Rules against the modules and flatten for reporting.
-    const errors = flatten(rules.map(rule => rule.run(moduleName, deps)));
-
-    if (errors.length) {
-      errorsFound = true;
-      errors.forEach(error => {
-        log(red('ERROR:'), error);
-      });
-    }
+    entries.push(...rules.flatMap(rule => rule.run(moduleName, deps)));
   });
-  return errorsFound;
+
+  rules
+    .flatMap(r => Array.from(r.unusedAllowlistEntries))
+    .forEach(unusedEntry => {
+      errors.push(cyan(unusedEntry) + ' is an unused allowlist entry');
+    });
+
+  if (errors.length) {
+    errorsFound = true;
+    errors.forEach(error => {
+      log(red('ERROR:'), error);
+    });
+  }
+
+  return errors.length > 0;
 }
 
 async function depCheck() {
@@ -316,7 +326,7 @@ async function depCheck() {
       if (errorsFound) {
         log(
           yellow('NOTE:'),
-          'If a dependency is valid, add it to one of the whitelists in',
+          'Valid dependencies should be added whereas unused ones should be deleted. Please fix',
           cyan('build-system/test-configs/dep-check-config.js')
         );
         const reason = new Error('Dependency checks failed');
