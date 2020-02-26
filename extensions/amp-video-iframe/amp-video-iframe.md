@@ -208,12 +208,16 @@ In order for the video integration to work, the embedded document (e.g. `my-vide
 
 <!-- Wait for API to initialize -->
 <script>
-  (window.AmpVideoIframe = window.AmpVideoIframe || []).push(amp => {
-    // `amp` is an object containing the tools required to integrate.
-    // This callback specifies how the AMP document and the iframed video
-    // document talk to each other.
+  (window.AmpVideoIframe = window.AmpVideoIframe || []).push(
+    onAmpIntegrationReady
+  );
+
+  function onAmpIntegrationReady(ampIntegration) {
+    // `ampIntegration` is an object containing the tools required to integrate.
+    // This callback specifies how the AMP document and the iframed video document
+    // talk to each other.
     // YOU NEED TO IMPLEMENT THIS. See below.
-  });
+  }
 </script>
 ```
 
@@ -232,9 +236,13 @@ playback methods and event dispatchers to plug these together. For common video 
 
 If you're using a common video framework like [JwPlayer](https://www.jwplayer.com/) or [Video.js](http://videojs.com/), you can call **`listenTo()`** for a basic, readymade integration. These integrations support all playback and UI controls when the framework provides them, see each for supported methods.
 
+{% call callout('Framework APIs', type='note') %}
 Depending on which video framework you use, you'll call the `listenTo` method differently. Read on the specific APIs below.
+{% endcall %}
 
-Note: You can additionally use [methods for custom integration](#custom-integrations) if you require a feature not available in readymade implementations.
+{% call callout('Expanded support', type='note') %}
+You can additionally use [custom integration methods](#custom-integrations) if you require a feature not available in readymade implementations.
+{% endcall %}
 
 ##### For JwPlayer
 
@@ -274,19 +282,21 @@ through the signature `ampIntegration.listenTo('videojs', myVideo)`. Video.js ov
 that the `ampIntegration` object uses to setup the player.
 
 ```js
-(window.AmpVideoIframe = window.AmpVideoIframe || []).push(amp => {
-  amp.listenTo('videojs', document.querySelector('#my-video'));
-});
+function onAmpIntegrationReady(ampIntegration) {
+  var myVideo = document.querySelector('#my-video');
+  ampIntegration.listenTo('videojs', myVideo);
+}
 ```
 
 `listenTo` initializes the Video.js instance on the `<video>` element if required. This uses the global `videojs` function by default. If your page provides the initializer differently, you must pass it in as the third argument:
 
 ```js
-(window.AmpVideoIframe = window.AmpVideoIframe || []).push(amp => {
-  // Initializes player using `myVideojsInitializer(myVideo)`
-  const myVideo = document.querySelector('#my-video');
-  amp.listenTo('videojs', myVideo, myVideojsInitializer);
-});
+function onAmpIntegrationReady(ampIntegration) {
+  var myVideo = document.querySelector('#my-video');
+
+  // ampIntegration initializes player with `myVideojsInitializer(myVideo)`
+  ampIntegration.listenTo('videojs', myVideo, myVideojsInitializer);
+}
 ```
 
 ### Custom integrations
@@ -307,7 +317,7 @@ If you use a supported framework, it's possible to have more fine-grained contro
 Implements a method that calls playback functions on the video. For example:
 
 ```js
-amp.method('play', () => {
+ampIntegration.method('play', function() {
   myVideo.play();
 });
 ```
@@ -343,8 +353,8 @@ You can choose to only implement this interface partially, with a few caveats:
 Posts a playback event to the frame. For example:
 
 ```js
-myVideoElement.addEventListener('pause', () => {
-  amp.postEvent('pause');
+myVideoElement.addEventListener('pause', function() {
+  ampIntegration.postEvent('pause');
 });
 ```
 
@@ -418,30 +428,21 @@ The valid events are as follows.
 
 Posts a custom analytics event to be consumed by `amp-analytics`. The
 `eventType` must be prefixed with `video-custom-` to prevent naming collisions
-with other analytics event types:
+with other analytics event types.
 
-```js
-amp.postAnalyticsEvent('video-custom-foo');
-```
-
-Also takes an optional second `vars` argument as an object with custom variables
-to log. These are available as `VIDEO_STATE`, keyed by name prefixed with
-`custom_`, i.e. the object `{baz: 'my value'}` will be available as
-`{'custom_baz': 'myValue'}`.
-
-```js
-amp.postAnalyticsEvent('video-custom-bar', {baz: 'my value'});
-```
+This method takes an optional `vars` param that should define an object with
+custom variables to log. These are available as `VIDEO_STATE`, keyed by name
+prefixed with `custom_`, i.e. the object `{myVar: 'foo'}` will be available as
+`{'custom_myVar': 'foo}`.
 
 #### <a name="getIntersection"></a> `getIntersection(callback)`
 
-Gets the intersection ratio (between 0 and 1) for the video element in the host
-document. This is useful for viewability information, e.g.
+Gets the intersection ratio (between 0 and 1) for the video element. This is useful for viewability information, e.g.
 
 ```js
 // Will log intersection every 2 seconds
-setInterval(() => {
-  amp.getIntersection(intersection => {
+setInterval(function() {
+  integration.getIntersection(function(intersection) {
     console.log('Intersection ratio:', intersection.intersectionRatio);
   });
 }, 2000);
@@ -450,31 +451,22 @@ setInterval(() => {
 The `callback` passed to the function will be executed with an object that looks
 like this:
 
-```js
-{
-  time: 33333.33,
-  intersectionRatio: 0.761,
-}
+```json
+{"time": 33333.33, "intersectionRatio": 0.761}
 ```
 
-Important: This should be considered a low-fidelity reading. Currently, the value for
+⚠ This should be considered a low-fidelity reading. Currently, the value for
 `intersectionRatio` will be 0 as long as the video is under 50% visible. This
 value is bound to change at any time, and the callbacks may be delayed or
 debounced.
 
 #### <a name="getMetadata"></a> `getMetadata()`
 
-Returns an object containing metadata about the host document.
+Returns an object containing metadata about the host document:
 
-```js
-const {canonicalUrl, sourceUrl} = amp.getMetadata();
-```
-
-This object contains fields for the host's [canonical and source URLs](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/discovery/):
-
-```js
+```json
 {
-  canonicalUrl: "https://my.example/my-page",
-  sourceUrl: "https://my.example/my-page/amp",
+  "canonicalUrl": "foo.html",
+  "sourceUrl": "bar.html"
 }
 ```
