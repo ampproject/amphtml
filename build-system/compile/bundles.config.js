@@ -705,6 +705,13 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-list',
+    version: '0.2',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-live-list',
     version: '0.1',
     latestVersion: '0.1',
