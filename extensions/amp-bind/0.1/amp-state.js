@@ -220,16 +220,14 @@ export class AmpState extends AMP.BaseElement {
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
       .then(json => this.updateState_(json, isInit));
 
-    if (/* TODO: should we gate this on isInit?  */ true) {
-      this.fetchAndUpdatePromise_ = fetchAndUpdatePromise;
+    this.fetchAndUpdatePromise_ = fetchAndUpdatePromise;
 
-      // Cleanup when complete
-      fetchAndUpdatePromise.then(() => {
-        if (this.fetchAndUpdatePromise_ === fetchAndUpdatePromise) {
-          this.fetchAndUpdatePromise_ = null;
-        }
-      });
-    }
+    // Cleanup when complete
+    fetchAndUpdatePromise.then(() => {
+      if (this.fetchAndUpdatePromise_ === fetchAndUpdatePromise) {
+        this.fetchAndUpdatePromise_ = null;
+      }
+    });
 
     return fetchAndUpdatePromise;
   }
