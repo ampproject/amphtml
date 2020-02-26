@@ -443,8 +443,19 @@ describes.realWin(
       env.sandbox.stub(urls, 'geoApi').value('/geoapi');
       env.sandbox.stub(Services, 'timerFor').returns({
         timeoutPromise: function(delay, racePromise, msg) {
-          return Promise.reject(user().createError(msg));
+          return Promise.race([
+            racePromise,
+            Promise.reject(user().createError(msg)),
+          ]);
         },
+      });
+      xhr.fetchJson.resolves({
+        json: () =>
+          new Promise(res => {
+            setTimeout(() => {
+              res(JSON.parse('{"country": "ca"}'));
+            }, 10);
+          }),
       });
       addConfigElement('script');
 
