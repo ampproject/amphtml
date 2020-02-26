@@ -281,11 +281,11 @@ Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Si
 
 - `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
 
-**max-age (optional)**
+**max-age (optional, but required for signed exchanges if `script` is specified)**
 
 Requires the `script` attribute.
 
-The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange (SXG)](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing.
+The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange (SXG)](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing. [AMP Packager](https://github.com/ampproject/amppackager) uses this value to compute the SXG `expires` time.
 
 The value of `max-age` should be chosen carefully:
 
