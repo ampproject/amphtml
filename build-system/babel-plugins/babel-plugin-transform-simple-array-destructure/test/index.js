@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-import {useResourcesNotify} from '../../../src/preact/utils';
-import {useState} from '../../../src/preact';
+const runner = require('@babel/helper-plugin-test-runner').default;
 
-/**
- * Renders the children prop, waiting for it to resolve if it is a promise.
- *
- * @param {!JsonObject} props
- * @return {Preact.Renderable}
- */
-export function AsyncRender(props) {
-  const children = props['children'];
-  const [state, set] = useState(children);
-  useResourcesNotify();
-
-  if (state && state.then) {
-    Promise.resolve(children).then(set);
-    return null;
-  }
-
-  return state;
-}
+runner(__dirname);
