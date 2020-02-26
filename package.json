@@ -137,7 +137,7 @@
     "markdown-link-check": "3.8.0",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
-    "mocha": "7.0.1",
+    "mocha": "7.1.0",
     "mocha-silent-reporter": "1.0.0",
     "morgan": "1.9.1",
     "multer": "1.4.2",
