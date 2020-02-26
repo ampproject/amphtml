@@ -22,33 +22,33 @@
  * - filesMatching - Is assumed to be all files if not provided.
  * - mustNotDependOn - If type is "forbidden" (default) then the files
  *     matched must not match the glob(s) provided.
- * - whitelist - Skip rule if this particular dependency is found.
+ * - allowlist - Skip rule if this particular dependency is found.
  *     Syntax: fileAGlob->fileB where -> reads "depends on"
  * @typedef {{
  *   type: (string|undefined),
  *   filesMatching: (string|!Array<string>|undefined),
  *   mustNotDependOn: (string|!Array<string>|undefined),
- *   whitelist: (string|!Array<string>|undefined),
+ *   allowlist: (string|!Array<string>|undefined),
  * }}
  */
 let RuleConfigDef;
 
-// It is often OK to add things to the whitelist, but make sure to highlight
+// It is often OK to add things to the allowlist, but make sure to highlight
 // this in review.
 exports.rules = [
   // Global rules
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/video-iframe-integration.js',
-    whitelist: [
-      // Do not extend this whitelist.
+    allowlist: [
+      // Do not extend this allowlist.
       // video-iframe-integration.js is an entry point.
     ],
   },
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/sanitizer.js',
-    whitelist: [
+    allowlist: [
       // DEPRECATED: Use src/purifier.js instead. @choumx for questions.
       'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
     ],
@@ -56,7 +56,7 @@ exports.rules = [
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/purifier/**/*.js',
-    whitelist: [
+    allowlist: [
       // WARNING: Importing purifier.js will also bundle DOMPurify (13KB).
       'extensions/amp-list/0.1/amp-list.js->src/purifier/sanitation.js',
       'extensions/amp-mustache/0.2/amp-mustache.js->src/purifier/purifier.js',
@@ -68,7 +68,7 @@ exports.rules = [
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/module.js',
-    whitelist: [
+    allowlist: [
       'extensions/amp-date-picker/0.1/**->src/module.js',
       'extensions/amp-inputmask/0.1/**->src/module.js',
     ],
@@ -76,7 +76,7 @@ exports.rules = [
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'third_party/**/*.js',
-    whitelist: [
+    allowlist: [
       'extensions/amp-autocomplete/**/*.js->third_party/fuzzysearch/index.js',
       'extensions/amp-crypto-polyfill/**/*.js->third_party/closure-library/sha384-generated.js',
       'extensions/amp-list/**->third_party/set-dom/set-dom.js',
@@ -97,7 +97,7 @@ exports.rules = [
   {
     filesMatching: '3p/**/*.js',
     mustNotDependOn: 'src/**/*.js',
-    whitelist: [
+    allowlist: [
       '3p/**->src/utils/function.js',
       '3p/**->src/utils/object.js',
       '3p/**->src/log.js',
@@ -129,7 +129,7 @@ exports.rules = [
   {
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: 'src/**/*.js',
-    whitelist: [
+    allowlist: [
       'ads/**->src/utils/dom-fingerprint.js',
       'ads/**->src/utils/object.js',
       'ads/**->src/utils/rate-limit.js',
@@ -159,7 +159,7 @@ exports.rules = [
   {
     filesMatching: 'ads/**/*.js',
     mustNotDependOn: 'extensions/**/*.js',
-    whitelist: [
+    allowlist: [
       // See todo note in ads/_a4a-config.js
       'ads/_a4a-config.js->' +
         'extensions/amp-ad-network-triplelift-impl/0.1/triplelift-a4a-config.js',
@@ -185,7 +185,7 @@ exports.rules = [
     // Extensions can't depend on other extensions.
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'extensions/**/*.js',
-    whitelist: [
+    allowlist: [
       // a4a ads depend on a4a.
       'extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-gmossp-impl/0.1/amp-ad-network-gmossp-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
@@ -272,7 +272,7 @@ exports.rules = [
   {
     filesMatching: 'extensions/**/*.js',
     mustNotDependOn: 'src/service/**/*.js',
-    whitelist: [
+    allowlist: [
       'extensions/amp-a4a/0.1/a4a-variable-source.js->' +
         'src/service/variable-source.js',
       'extensions/amp-a4a/0.1/amp-a4a.js->' +
@@ -381,7 +381,7 @@ exports.rules = [
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/polyfills/**/*.js',
-    whitelist: [
+    allowlist: [
       // DO NOT add extensions/ files
       '3p/polyfills.js->src/polyfills/math-sign.js',
       '3p/polyfills.js->src/polyfills/object-assign.js',
@@ -403,7 +403,7 @@ exports.rules = [
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/polyfills.js',
-    whitelist: ['src/amp.js->src/polyfills.js'],
+    allowlist: ['src/amp.js->src/polyfills.js'],
   },
 
   // Rules for main src.
@@ -414,7 +414,7 @@ exports.rules = [
   {
     filesMatching: 'src/**/*.js',
     mustNotDependOn: 'ads/**/*.js',
-    whitelist: 'src/ad-cid.js->ads/_config.js',
+    allowlist: 'src/ad-cid.js->ads/_config.js',
   },
 
   // A4A
@@ -425,7 +425,7 @@ exports.rules = [
       'src/3p-frame.js',
       'src/iframe-helper.js',
     ],
-    whitelist:
+    allowlist:
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js->src/3p-frame.js',
   },
 
@@ -440,19 +440,19 @@ exports.rules = [
   // Doubleclick.js will be deleted from the repository at that time.
   // Please see https://github.com/ampproject/amphtml/issues/11834
   // for more information.
-  // Do not add any additional files to this whitelist without express
+  // Do not add any additional files to this allowlist without express
   // permission from @bradfrizzell, @keithwrightbos, or @robhazan.
   {
     mustNotDependOn: ['ads/google/doubleclick.js'],
-    whitelist: [
-      /** DO NOT ADD TO WHITELIST */
+    allowlist: [
+      /** DO NOT ADD TO allowlist */
       'ads/ix.js->ads/google/doubleclick.js',
       'ads/imonomy.js->ads/google/doubleclick.js',
       'ads/navegg.js->ads/google/doubleclick.js',
-      /** DO NOT ADD TO WHITELIST */
+      /** DO NOT ADD TO allowlist */
       'ads/openx.js->ads/google/doubleclick.js',
       'ads/pulsepoint.js->ads/google/doubleclick.js',
-      /** DO NOT ADD TO WHITELIST */
+      /** DO NOT ADD TO allowlist */
     ],
   },
 ];

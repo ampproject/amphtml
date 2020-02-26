@@ -77,10 +77,10 @@ function Rule(config) {
   this.mustNotDependOn_ = toArrayOrDefault(config.mustNotDependOn, []);
 
   /** @private @const {!Array<string>} */
-  this.whitelist_ = toArrayOrDefault(config.whitelist, []);
+  this.allowlist_ = toArrayOrDefault(config.allowlist, []);
 
   /** @const {!Set<string>} */
-  this.unusedAllowlistEntries = new Set(this.whitelist_);
+  this.unusedAllowlistEntries = new Set(this.allowlist_);
 }
 
 /**
@@ -131,15 +131,15 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
           }
         }
 
-        for (const entry of this.whitelist_) {
+        for (const entry of this.allowlist_) {
           const pair = entry.split('->');
-          const whitelistedModuleName = pair[0];
-          const whitelistedDep = pair[1];
-          if (!minimatch(moduleName, whitelistedModuleName)) {
+          const allowlistedModuleName = pair[0];
+          const allowlistedDep = pair[1];
+          if (!minimatch(moduleName, allowlistedModuleName)) {
             continue;
           }
 
-          if (dep == whitelistedDep) {
+          if (dep == allowlistedDep) {
             this.unusedAllowlistEntries.delete(entry);
             return;
           }
