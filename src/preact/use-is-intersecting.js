@@ -17,7 +17,10 @@
 import {dev} from '../log';
 import {useEffect, useState} from './index';
 
-/** @type {null|IntersectionObserver} */ let sharedObserver = null;
+/** @type {Map<!Element, function(*):undefined>} */ const setters = new Map();
+/** @type {null|IntersectionObserver} */ const sharedObserver = new IntersectionObserver(
+  setLastEntriesByTarget
+);
 
 /**
  * @param {{current: HTMLElement}} ref
@@ -25,23 +28,34 @@ import {useEffect, useState} from './index';
  */
 export function useIsIntersecting(ref) {
   const {0: isIntersecting, 1: setIsIntersecting} = useState(null);
-  if (sharedObserver === null) {
-    sharedObserver = new IntersectionObserver(entries => {
-      const last = entries[entries.length - 1];
-      setIsIntersecting(last.isIntersecting);
-    });
-  }
   useEffect(() => {
     const node = ref.current;
     if (node) {
       sharedObserver.observe(dev().assertElement(node));
+      setters.set(node, setIsIntersecting);
     }
     return () => {
       if (node) {
         sharedObserver.unobserve(dev().assertElement(node));
+        setters.delete(node);
       }
     };
   }, [ref.current]);
 
   return isIntersecting;
+}
+
+/**
+ * @param {!Array<IntersectionObserverEntry>} entries
+ */
+function setLastEntriesByTarget(entries) {
+  entries.reduceRight((seen, entry) => {
+    if (!seen.has(entry.target)) {
+      const set = setters.get(entry.target);
+      if (set) {
+        set(entry.isIntersecting);
+      }
+      return seen.add(entry.target);
+    }
+  }, new Set([]));
 }
