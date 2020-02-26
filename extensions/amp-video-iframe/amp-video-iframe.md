@@ -256,8 +256,10 @@ If you're embedding your player [using a video-specific script](https://support.
 ```html
 <script src="https://cdn.jwplayer.com/players/UVQWMA4o-kGWxh33Q.js"></script>
 <script>
-  (window.AmpVideoIframe = window.AmpVideoIframe || []).push(amp =>
-    amp.listenTo('jwplayer')
+  (window.AmpVideoIframe = window.AmpVideoIframe || []).push(
+    function(ampIntegration) {
+      ampIntegration.listenTo('jwplayer')
+    }
   );
 </script>
 ```
@@ -266,9 +268,11 @@ Otherwise, pass in your [JwPlayer instance](https://developer.jwplayer.com/jwpla
 through the signature `amp.listenTo('jwplayer', instance)`:
 
 ```js
-(window.AmpVideoIframe = window.AmpVideoIframe || []).push(amp => {
-  amp.listenTo('jwplayer', jwplayer('my-video'));
-});
+(window.AmpVideoIframe = window.AmpVideoIframe || []).push(
+  function(ampIntegration) {
+    ampIntegration.listenTo('jwplayer', jwplayer('my-video'));
+  }
+);
 ```
 
 ##### For Video.js
