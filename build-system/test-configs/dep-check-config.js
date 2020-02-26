@@ -47,14 +47,6 @@ exports.rules = [
   },
   {
     filesMatching: '**/*.js',
-    mustNotDependOn: 'src/sanitizer.js',
-    whitelist: [
-      // DEPRECATED: Use src/purifier.js instead. @choumx for questions.
-      'extensions/amp-mustache/0.1/amp-mustache.js->src/sanitizer.js',
-    ],
-  },
-  {
-    filesMatching: '**/*.js',
     mustNotDependOn: 'src/purifier.js',
     whitelist: [
       // WARNING: Importing purifier.js will also bundle DOMPurify (13KB).
