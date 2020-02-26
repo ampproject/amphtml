@@ -155,19 +155,8 @@ describes.sandboxed('UrlReplacements', {}, env => {
           },
           document: {
             nodeType: /* document */ 9,
-            querySelector: selector => {
-              if (selector.startsWith('meta')) {
-                return {
-                  getAttribute: () => {
-                    return 'https://whitelisted.com https://greylisted.com http://example.com';
-                  },
-                  hasAttribute: () => {
-                    return true;
-                  },
-                };
-              } else {
-                return {href: canonical};
-              }
+            querySelector: () => {
+              return {href: canonical};
             },
             getElementById: () => {},
             cookie: '',
@@ -204,7 +193,16 @@ describes.sandboxed('UrlReplacements', {}, env => {
         win.document.head = {
           nodeType: /* element */ 1,
           // Fake query selectors needed to bypass <meta> tag checks.
-          querySelector: () => null,
+          querySelector: selector => {
+            if (selector === 'meta[name="amp-link-variable-allowed-origin"]') {
+              return {
+                getAttribute: () => {
+                  return 'https://whitelisted.com https://greylisted.com http://example.com';
+                },
+              };
+            }
+            return null;
+          },
           querySelectorAll: () => [],
           getRootNode() {
             return win.document;

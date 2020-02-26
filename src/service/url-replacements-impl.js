@@ -1004,15 +1004,9 @@ export class UrlReplacements {
       return true;
     }
 
-    const meta = this.ampdoc
-      .getRootNode()
-      .querySelector('meta[name=amp-link-variable-allowed-origin]');
-
-    if (meta && meta.hasAttribute('content')) {
-      const whitelist = meta
-        .getAttribute('content')
-        .trim()
-        .split(/\s+/);
+    const meta = this.ampdoc.getMetaByName('amp-link-variable-allowed-origin');
+    if (meta) {
+      const whitelist = meta.trim().split(/\s+/);
       for (let i = 0; i < whitelist.length; i++) {
         if (url.origin == parseUrlDeprecated(whitelist[i]).origin) {
           return true;
