@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AnalyticsEventType} from '../events';
 import {FIE_EMBED_PROP} from '../../../../src/iframe-helper';
 import {
   IntersectionObserverPolyfill,

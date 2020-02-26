@@ -419,6 +419,23 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
       expect(callbackSpy).to.not.be.called;
     });
 
+    it('should tick with right threshold on non-amp element', async () => {
+      io = new IntersectionObserverPolyfill(callbackSpy, {
+        threshold: [0, 1],
+      });
+      element.getBoundingClientRect = () => {
+        return layoutRectLtwh(0, 0, 100, 100);
+      };
+      io.observe(element);
+      // 1st tick with 0 doesn't fire
+      io.tick(layoutRectLtwh(0, 100, 100, 100));
+      expect(callbackSpy).to.not.be.called;
+      // 2nd tick with 0.1 does fire
+      io.tick(layoutRectLtwh(0, 90, 100, 100));
+      await macroTask();
+      expect(callbackSpy).to.be.calledOnce;
+    });
+
     it('should trigger for new observed element', async () => {
       io = new IntersectionObserverPolyfill(callbackSpy, {
         threshold: [0, 1],

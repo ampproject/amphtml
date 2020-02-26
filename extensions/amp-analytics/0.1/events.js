@@ -27,6 +27,7 @@ import {dict, hasOwn} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isEnumValue, isFiniteNumber} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {startsWith} from '../../../src/string';
 
 const SCROLL_PRECISION_PERCENT = 5;
@@ -1424,7 +1425,10 @@ export class VisibilityTracker extends EventTracker {
     const waitForSpec = visibilitySpec['waitFor'];
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
-
+    const multiSelectorVisibilityOn = isExperimentOn(
+      this.root.ampdoc.win,
+      'multi-selector-visibility-trigger'
+    );
     if (reportWhenSpec) {
       userAssert(
         !visibilitySpec['repeat'],
@@ -1468,6 +1472,20 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
+    const getUnlistenPromiseForElement = element =>
+      visibilityManagerPromise.then(
+        visibilityManager => {
+          return visibilityManager.listenElement(
+            element,
+            visibilitySpec,
+            this.getReadyPromise(waitForSpec, selector, element),
+            createReportReadyPromiseFunc,
+            this.onEvent_.bind(this, eventType, listener, element)
+          );
+        },
+        () => {}
+      );
+
     let unlistenPromise;
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
@@ -1494,27 +1512,62 @@ export class VisibilityTracker extends EventTracker {
       // false missed searches.
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
-      unlistenPromise = this.root
-        .getElement(context.parentElement || context, selector, selectionMethod)
-        .then(element => {
-          return visibilityManagerPromise.then(
-            visibilityManager => {
-              return visibilityManager.listenElement(
-                element,
-                visibilitySpec,
-                this.getReadyPromise(waitForSpec, selector, element),
-                createReportReadyPromiseFunc,
-                this.onEvent_.bind(this, eventType, listener, element)
-              );
-            },
-            () => {}
+
+      if (multiSelectorVisibilityOn && Array.isArray(selector)) {
+        userAssert(
+          !selectionMethod,
+          'Cannot have selectionMethod defined with an array selector: ',
+          selector
+        );
+        unlistenPromise = Promise.all(
+          selector.map(individualSelector => {
+            return this.root.getElements(individualSelector);
+          })
+        ).then(selectorArrayOfElements => {
+          const uniqueElements = [];
+          for (let i = 0; i < selectorArrayOfElements.length; i++) {
+            for (let j = 0; j < selectorArrayOfElements[i].length; j++) {
+              if (
+                uniqueElements.indexOf(selectorArrayOfElements[i][j]) === -1
+              ) {
+                uniqueElements.push(selectorArrayOfElements[i][j]);
+              }
+            }
+          }
+          return Promise.all(
+            uniqueElements.map(element => getUnlistenPromiseForElement(element))
           );
         });
+      } else {
+        if (multiSelectorVisibilityOn) {
+          unlistenPromise = this.root
+            .getElement(
+              context.parentElement || context,
+              selector,
+              selectionMethod
+            )
+            .then(element => getUnlistenPromiseForElement(element));
+        } else {
+          unlistenPromise = this.root
+            .getAmpElement(
+              context.parentElement || context,
+              selector,
+              selectionMethod
+            )
+            .then(element => getUnlistenPromiseForElement(element));
+        }
+      }
     }
 
     return function() {
       unlistenPromise.then(unlisten => {
-        unlisten();
+        if (multiSelectorVisibilityOn && Array.isArray(unlisten)) {
+          for (let i = 0; i < unlisten.length; i++) {
+            unlisten[i]();
+          }
+        } else {
+          unlisten();
+        }
       });
     };
   }

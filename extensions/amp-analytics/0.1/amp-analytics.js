@@ -39,6 +39,7 @@ import {expandTemplate} from '../../../src/string';
 import {getMode} from '../../../src/mode';
 import {installLinkerReaderService} from './linker-reader';
 import {isArray, isEnumValue} from '../../../src/types';
+import {isExperimentOn} from '../../../src/experiments';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
 import {toggle} from '../../../src/style';
@@ -105,6 +106,12 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?boolean} */
     this.isInFie_ = null;
+
+    /** @private {boolean} */
+    this.multiSelectorVisibilityOn_ = isExperimentOn(
+      this.win,
+      'multi-selector-visibility-trigger'
+    );
   }
 
   /** @override */
@@ -360,6 +367,21 @@ export class AmpAnalytics extends AMP.BaseElement {
               this.addTrigger_(trigger);
             } else if (trigger['selector']) {
               // Expand the selector using variable expansion.
+              if (this.multiSelectorVisibilityOn_) {
+                if (Array.isArray(trigger['selector'])) {
+                  const selectorPromises = trigger['selector'].map(s => {
+                    return this.variableService_.expandTemplate(
+                      s,
+                      expansionOptions,
+                      this.element
+                    );
+                  });
+                  return Promise.all(selectorPromises).then(selectors => {
+                    trigger['selector'] = selectors;
+                    this.addTrigger_(trigger);
+                  });
+                }
+              }
               return this.variableService_
                 .expandTemplate(
                   trigger['selector'],

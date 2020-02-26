@@ -34,6 +34,7 @@ import {
 import {installCryptoService} from '../../../../src/service/crypto-impl';
 import {installUserNotificationManagerForTesting} from '../../../amp-user-notification/0.1/amp-user-notification';
 import {instrumentationServiceForDocForTesting} from '../instrumentation';
+import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
   'amp-analytics',
@@ -815,6 +816,74 @@ describes.realWin(
           expect(config['selector']).to.equal('My Test Title');
         });
       });
+    });
+
+    describe('expand multi-selector visibility', () => {
+      beforeEach(() => {
+        toggleExperiment(win, 'multi-selector-visibility-trigger', true);
+      });
+
+      afterEach(() => {
+        toggleExperiment(win, 'multi-selector-visibility-trigger', false);
+      });
+
+      it('expands selector with config variable', () => {
+        const tracker = ins.root_.getTracker('visible', VisibilityTracker);
+        const addStub = env.sandbox.stub(tracker, 'add');
+        const analytics = getAnalyticsTag({
+          requests: {foo: 'https://example.test/bar'},
+          triggers: [
+            {on: 'visible', selector: ['${foo}', '${title}'], request: 'foo'},
+          ],
+          vars: {foo: 'bar'},
+        });
+        return waitForNoSendRequest(analytics).then(() => {
+          expect(addStub).to.be.calledOnce;
+          const config = addStub.args[0][2];
+          expect(config['selector']).to.deep.equal(['bar', 'My Test Title']);
+        });
+      });
+
+      function selectorExpansionTest(selector) {
+        it('expand selector value: ' + selector, () => {
+          const tracker = ins.root_.getTracker('visible', VisibilityTracker);
+          const addStub = env.sandbox.stub(tracker, 'add');
+          const analytics = getAnalyticsTag({
+            requests: {foo: 'https://example.test/bar'},
+            triggers: [
+              {on: 'visible', selector: ['${foo}, ${bar}'], request: 'foo'},
+            ],
+            vars: {foo: selector, bar: '123'},
+          });
+          return waitForNoSendRequest(analytics).then(() => {
+            expect(addStub).to.be.calledOnce;
+            const config = addStub.args[0][2];
+            expect(config['selector']).to.deep.equal([selector + ', 123']);
+          });
+        });
+      }
+
+      [
+        '.clazz',
+        'a, div',
+        'a .foo',
+        'a #foo',
+        'a > div',
+        'div + p',
+        'div ~ ul',
+        '[target=_blank]',
+        '[title~=flower]',
+        '[lang|=en]',
+        'a[href^="https"]',
+        'a[href$=".pdf"]',
+        'a[href="w3schools"]',
+        'a:active',
+        'p::after',
+        'p:first-child',
+        'p:lang(it)',
+        ':not(p)',
+        'p:nth-child(2)',
+      ].map(selectorExpansionTest);
     });
 
     describe('optout by function', () => {

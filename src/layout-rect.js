@@ -288,15 +288,13 @@ export function cloneLayoutMarginsChangeDef(marginsChange) {
  * @return {!Promise<!LayoutRectDef>}
  */
 export function getLayoutRectAsync(element, hostViewport, vsync) {
-  const rectPromise = vsync.measurePromise(() => {
-    return element./*OK*/ getBoundingClientRect();
-  });
+  return vsync.measurePromise(() => {
+    const elementRect = element./*OK*/ getBoundingClientRect();
 
-  return rectPromise.then(rect => {
     // getBoundingClientRect() returns position relative to viewport. We want
     // position relative to top-left of document so we add top/left of viewport
     return hostViewport
-      ? moveLayoutRect(rect, hostViewport.left, hostViewport.top)
-      : layoutRectFromDomRect(rect);
+      ? moveLayoutRect(elementRect, hostViewport.left, hostViewport.top)
+      : layoutRectFromDomRect(elementRect);
   });
 }

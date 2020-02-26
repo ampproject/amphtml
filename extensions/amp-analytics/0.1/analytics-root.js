@@ -20,6 +20,7 @@ import {Services} from '../../../src/services';
 import {VisibilityManagerForMApp} from './visibility-manager-for-mapp';
 import {
   closestAncestorElementBySelector,
+  getDataParamsFromAttributes,
   matches,
   scopedQuerySelector,
 } from '../../../src/dom';
@@ -32,6 +33,7 @@ import {tryResolve} from '../../../src/utils/promise';
 import {whenContentIniLoad} from '../../../src/ini-load';
 
 const TAG = 'amp-analytics/analytics-root';
+const VARIABLE_DATA_ATTRIBUTE_KEY = /^vars(.+)/;
 
 /**
  * An analytics root. Analytics can be scoped to either ampdoc, embed or
@@ -276,6 +278,58 @@ export class AnalyticsRoot {
   }
 
   /**
+   * @param {string} selector DOM query selector.
+   * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
+   */
+  getElements_(selector) {
+    // Wait for document-ready to avoid false missed searches
+    return this.ampdoc.whenReady().then(() => {
+      const results = [];
+      const foundElements = this.getRoot().querySelectorAll(selector);
+
+      // DOM search can "look" outside the boundaries of the root, thus make
+      // sure the result is contained. Length is not supported in all browsers
+      if (foundElements && foundElements.length) {
+        for (let i = 0; i < foundElements.length; i++) {
+          if (this.contains(foundElements[i])) {
+            results.push(foundElements[i]);
+          }
+        }
+      }
+      userAssert(results.length, `Element "${selector}" not found`);
+      return results;
+    });
+  }
+
+  /**
+   * Searches for the elements that matches from the root.
+   * Only return elements that have the data-vars-* attribute.
+   *
+   * @param {string} selector DOM query selector.
+   * @return {!Promise<!Array<!Element>>} Array of elements corresponding to the selector if found.
+   */
+  getElements(selector) {
+    return this.getElements_(selector).then(elements => {
+      const dataVarsElements = [];
+      for (let i = 0; i < elements.length; i++) {
+        if (this.elementContainsDataVarsAttribute_(elements[i])) {
+          dataVarsElements.push(elements[i]);
+        }
+      }
+      if (dataVarsElements.length !== elements.length) {
+        user().warn(
+          TAG,
+          '%s AMP elements were ommited from selector "%s"' +
+            ' because no data-vars-* attribute was found.',
+          elements.length - dataVarsElements.length,
+          selector
+        );
+      }
+      return dataVarsElements;
+    });
+  }
+
+  /**
    * Searches the AMP element that matches the selector within the scope of the
    * analytics root in relationship to the specified context node.
    *
@@ -287,13 +341,37 @@ export class AnalyticsRoot {
    */
   getAmpElement(context, selector, selectionMethod) {
     return this.getElement(context, selector, selectionMethod).then(element => {
-      userAssert(
-        element.classList.contains('i-amphtml-element'),
-        'Element "%s" is required to be an AMP element',
-        selector
-      );
+      this.verifyAmpElement_(element, selector);
       return element;
     });
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {string} selector
+   */
+  verifyAmpElement_(element, selector) {
+    userAssert(
+      element.classList.contains('i-amphtml-element'),
+      'Element "%s" is required to be an AMP element',
+      selector
+    );
+  }
+
+  /**
+   * @param {!Element} element
+   * @return {boolean}
+   */
+  elementContainsDataVarsAttribute_(element) {
+    return (
+      Object.keys(
+        getDataParamsFromAttributes(
+          element,
+          /* computeParamNameFunc */ undefined,
+          VARIABLE_DATA_ATTRIBUTE_KEY
+        )
+      ).length !== 0
+    );
   }
 
   /**

@@ -56,6 +56,38 @@
       }
     </script>
   </amp-analytics>
+  <!-- `"selector": [".myClass", "#ad2"]` will only fire 1 request for ad2 -->
+  <!-- `"selector": [".myClass"]` will not pick up ad1 because it does not have the specifed class -->
+  <!-- `"selector": [".myClass"]` will not pick up ad4 because it has not data-vars-* attribute -->
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "transport": {"beacon": false, "xhrpost": false},
+        "requests": {
+          "base": "fake.com/ad?multiVisible=true&adId=${id}",
+          "queryAll": "fake.com/ad?querySelectorAll=true&adId=${id}",
+          "paragraph": "fake.com/paragraph?allParagraphs=true&pId=${id}"
+        },
+        "triggers": {
+          "multiVisible": {
+            "on": "visible",
+            "request": "base",
+            "selector": ["#ad1","#ad2"]
+          },
+          "querySelectorAll": {
+            "on": "visible",
+            "request": "queryAll",
+            "selector": [".myClass"]
+          },
+          "allParagraphs": {
+            "on": "visible",
+            "request": "paragraph",
+            "selector": ["p"]
+          }
+        }
+      }
+    </script>
+  </amp-analytics>
   <amp-analytics>
     <script type="application/json">
       {
@@ -126,6 +158,7 @@
         type="_ping_"
         data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
         data-valid='true'
+        data-vars-id='ad1'
         data-ad-width=300
         data-ad-height=250>
     </amp-ad>
@@ -134,11 +167,53 @@
         type="_ping_"
         data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
         data-valid='true'
+        data-vars-id='ad2'
         data-ad-width=300
-        data-ad-height=250>
+        data-ad-height=250
+        class="myClass">
     </amp-ad>
+
+    <amp-ad id='ad3' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-vars-id='ad3'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+    </amp-ad>
+
+    <amp-ad id='ad4' width=300 height=250
+        type="_ping_"
+        data-url='https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n'
+        data-valid='true'
+        data-ad-width=300
+        data-ad-height=250
+        class="myClass">
+    </amp-ad>
+    <p data-vars-id='pId1'>
+      Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+    </p>
+    <p data-vars-id='pId2'>
+      There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.
+    </p>
+    <p>
+      Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
+
+      The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.
+    </p>
+    <p data-vars-id='pId4'>
+      Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, "Lorem ipsum dolor sit amet..", comes from a line in section 1.10.32.
+
+      The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.
+    </p>
 
 
   </div>
+  <script>
+    setTimeout(() => {
+      AMP.toggleExperiment('multi-selector-visibility-trigger', true);
+    }, 500);
+  </script>
 </body>
 </html>
