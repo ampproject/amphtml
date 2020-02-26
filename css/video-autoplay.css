@@ -35,7 +35,7 @@ i-amphtml-video-mask {
 }
 
 amp-video[controls] .amp-video-eq,
-.i-amphtml-video-component:not(amp-video) .amp-video-eq,
+.i-amphtml-video-interface:not(amp-video) .amp-video-eq,
 amp-story .amp-video-eq {
   display: flex;
 }

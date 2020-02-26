@@ -19,6 +19,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpKaltura extends AMP.BaseElement {
@@ -60,6 +61,8 @@ class AmpKaltura extends AMP.BaseElement {
       'The data-partner attribute is required for <amp-kaltura-player> %s',
       this.element
     );
+
+    setIsMediaComponent(this.element);
 
     this.entryId_ = this.element.getAttribute('data-entryid') || 'default';
   }

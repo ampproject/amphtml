@@ -29,6 +29,7 @@ import {
   VideoAttributes,
   VideoEvents,
   VideoServiceSignals,
+  setIsMediaComponent,
   userInteractedWith,
   videoAnalyticsCustomEventTypeKey,
 } from '../video-interface';
@@ -192,7 +193,7 @@ export class VideoManager {
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
-    element.classList.add('i-amphtml-video-component');
+    setIsMediaComponent(element);
 
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
