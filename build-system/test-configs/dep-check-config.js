@@ -403,9 +403,7 @@ exports.rules = [
   {
     filesMatching: '**/*.js',
     mustNotDependOn: 'src/polyfills.js',
-    whitelist: [
-      'src/amp.js->src/polyfills.js',
-    ],
+    whitelist: ['src/amp.js->src/polyfills.js'],
   },
 
   // Rules for main src.

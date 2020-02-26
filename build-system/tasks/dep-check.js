@@ -79,7 +79,7 @@ function Rule(config) {
   /** @private @const {!Array<string>} */
   this.whitelist_ = toArrayOrDefault(config.whitelist, []);
 
-  /** @private @const {!Set<string>} */
+  /** @const {!Set<string>} */
   this.unusedAllowlistEntries = new Set(this.whitelist_);
 }
 
