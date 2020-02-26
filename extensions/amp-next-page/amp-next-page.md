@@ -44,6 +44,23 @@ Documents append to the end of the current document as a child of the `<amp-next
 
 #### Inline Configuration
 
+Inline a JSON configuration in the `<amp-next-page>` component by placing it inside a child `<script>` element.
+
+```html
+<amp-next-page>
+  <script type="application/json">
+    [
+      {
+        "url": ...,
+        "title": ...,
+        "image": ...
+      },
+      ...
+    ]
+  </script>
+</amp-next-page>
+```
+
 The inline configuration defines the documents recommended by `amp-next-page` to
 the user as an ordered array of page objects in JSON format.
 
@@ -76,14 +93,13 @@ The following configuration will recommend two more documents for the user to re
 
 #### Load configuration from a remote URL
 
-For remote configuration, the destination server is required to return a JSON object that has the following structure:
+Use the `src` attribute to point to the remote JSON configuration.
 
-| Key                | Value                                                                                                                                                                |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pages` (required) | Array of pages, exactly the same format as the in the inline configration section above.                                                                             |
-| `next` (optional)  | Optional string url pointing to the next remote to query for more pages (should abide by the same rules as the initial URL, namely implement the CORS requirements.) |
+```html
+<amp-next-page src="https://example.com/next-page-config.json"></amp-next-page>
+```
 
-The following configuration returned from the server will recommend two more documents for the user to read and tell `amp-next-page` to query `https://example.com/more-pages` when the user finishes reading the provided recommendations.
+Structure remote configurations like the example below. The following configuration returned from the server will recommend two more documents for the user to read and tell `amp-next-page` to query `https://example.com/more-pages` once the user scrolls through both provided documents.
 
 ```json
 {
@@ -103,6 +119,13 @@ The following configuration returned from the server will recommend two more doc
 }
 ```
 
+For remote configuration, the destination server is required to return a JSON object that has the following key/value pairs:
+
+| Key                | Value                                                                                                                                                                |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pages` (required) | Array of pages, exactly the same format as the in the inline configration section above.                                                                             |
+| `next` (optional)  | Optional string url pointing to the next remote to query for more pages (should abide by the same rules as the initial URL, namely implement the CORS requirements.) |
+
 ##### URL substitutions
 
 The `amp-next-page` `src` allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info. For example:
@@ -119,9 +142,9 @@ The `<amp-next-page>` component renders the footer recommendation box if one of 
 
 - The user reaches the end of the page before the next page had loaded.
 - The next page fails to load.
-- If the `max-pages` attribute is specified and the number of displayed pages is met.
+- If the [`max-pages`](https://amp.dev/documentation/components/amp-next-page/#max-pages) attribute is specified and the number of displayed pages is met.
 
-The footer recommendation box contains links to the remaining pages. The default footer recommendation box renders the specified image and title used in the JSON configuration and can be styled as specified in the Styling section.
+The footer recommendation box contains links to the remaining pages. The default footer recommendation box renders the specified image and title used in the JSON configuration and can be styled as specified in the [Styling](https://amp.dev/documentation/components/amp-next-page/#Styling) section.
 
 The footer recommendation box can also be provided as a custom component inside `<amp-next-page>` as any element that has the `footer`. It can also be templated via `amp-mustache` or other templating engines, in which case it will be passed an array of the remaining `pages`, each being an object with a `title`, `url` and `image`. Example:
 
@@ -145,7 +168,7 @@ The footer recommendation box can also be provided as a custom component inside 
 ### Separator
 
 A separator is rendered between each loaded document. By default this is
-rendered as a full-width hairline. Refer to the Styling section for information on customizing this default behavior.
+rendered as a full-width horizontal rule. Refer to the [Styling](https://amp.dev/documentation/components/amp-next-page/#Styling) section for information on customizing this default behavior.
 
 Alternatively, you can specify a custom separator containing arbitrary HTML
 content as a child of the `amp-next-page` component by using the `separator`
@@ -209,15 +232,13 @@ _on the second document_
 
 ### `src`
 
-The URL of the remote endpoint that returns the JSON that will be used to
-configure this `amp-next-page` component. This must be a CORS HTTP service.
-The URL's protocol must be HTTPS.
+The `src` attribute points to the remote endpoint that returns `amp-next-page`'s JSON configuration. This must be A CORS HTTP service. The URL's protocol must be HTTPS.
 
 [tip type="important"]
 Your endpoint must implement the requirements specified in the [CORS Requests in AMP](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests) spec.
 [/tip]
 
-The `src` attribute is required unless a config has been specified inline.
+The `src` attribute is a required attribute, unless the `<amp-next-page>` component contains an inline JSON configuration.
 
 ### `max-pages` (optional)
 
@@ -237,9 +258,9 @@ When specified, this attribute enables `amp-next-page` to strip a prefix before 
 
 The `<amp-next-page>` component renders a default recommendation box and separator. You may style the appearance of these two elements as follows:
 
-### Styling the default footer recommendation box
+### Style the default footer recommendation box
 
-The default footer recommendation box (that appears when no more suggestions are available or the suggestions exceed the maximum specified number of pages) can be styled by appling CSS styles to the following classes:
+You may add custom CSS styles to the default footer recommendation box. It exposes the following classes:
 
 - `.amp-next-page-footer` for the parent container element
 - `.amp-next-page-footer-content` for the wrapping element
@@ -247,13 +268,13 @@ The default footer recommendation box (that appears when no more suggestions are
 - `.amp-next-page-footer-image` for the link image
 - `.amp-next-page-footer-text` for the link text
 
-### Styling the default separator
+### Style the default page separator
 
-The default separator (shown between article recommendations) is a simple gray hairline, although this can be customized through CSS by applying styles to the `.amp-next-page-separator` class, templating the separator allows for more flexibility in styling and allows the integration of the title, image and URL of the upcoming article into the separator's appearance.
+The default separator (shown between article recommendations) is a simple gray horizontal rule, although this can be customized through CSS by applying styles to the `.amp-next-page-separator` class, templating the separator allows for more flexibility in styling and allows the integration of the title, image and URL of the upcoming article into the separator's appearance.
 
 ## Analytics
 
-Full support for analytics is included on the host page as well as subsequently loaded articles. It is recommended to simply use the same analytics triggers used on standalone articles (including scroll-bound triggers). However, a single custom analytics event is also provided on the host page to indicate transitioning between pages. This event can be tracked in the [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config:
+The `<amp-next-page>` component supports analytics on the hosted page as well as on subsequently loaded articles. We recommend using the same analytics triggers used on standalone articles, including scroll-bound triggers. Two custom analytics events are also provided on the host page to indicate transitioning between pages. These events can be tracked in the [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config as follows:
 
 | Event                  | Fired when                                                       |
 | ---------------------- | ---------------------------------------------------------------- |

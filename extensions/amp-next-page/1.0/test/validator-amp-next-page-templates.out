@@ -46,7 +46,7 @@ FAIL
 |      </div>
 |      <footer>
 >>     ^~~~~~~~~
-amp-next-page/1.0/test/validator-amp-next-page-templates.html:46:4 The tag 'footer', a child tag of 'amp-next-page with src attribute', does not satisfy one of the acceptable reference points: AMP-NEXT-PAGE > [separator], AMP-NEXT-PAGE > [footer], AMP-NEXT-PAGE > SCRIPT. (see https://amp.dev/documentation/components/amp-next-page)
+amp-next-page/1.0/test/validator-amp-next-page-templates.html:46:4 The tag 'footer', a child tag of 'amp-next-page with src attribute', does not satisfy one of the acceptable reference points: AMP-NEXT-PAGE > [separator], AMP-NEXT-PAGE > [footer], AMP-NEXT-PAGE > SCRIPT[type=application/json]. (see https://amp.dev/documentation/components/amp-next-page)
 |          Footer
 |      </footer>   
 |    </amp-next-page>
