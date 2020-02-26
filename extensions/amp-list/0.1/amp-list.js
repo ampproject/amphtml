@@ -915,7 +915,6 @@ export class AmpList extends AMP.BaseElement {
         .rescan(elements, removedElements, {
           'fast': true,
           'update': true,
-          'wait': true,
         })
         .then(
           () => elements,
