@@ -25,7 +25,7 @@ export class BaseSlides extends BaseCarousel {
   constructor(element) {
     super(element);
 
-    /** @private {?number} */
+    /** @protected {?number} */
     this.autoplayTimeoutId_ = null;
 
     /** @private {boolean} */

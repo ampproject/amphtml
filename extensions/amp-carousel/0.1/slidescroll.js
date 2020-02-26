@@ -761,6 +761,7 @@ export class AmpSlideScroll extends BaseSlides {
 
     if (slideChanged) {
       const name = 'slideChange';
+      const trust = actionTrustToString(opt_trust);
       const event = createCustomEvent(
         this.win,
         `slidescroll.${name}`,
@@ -768,7 +769,10 @@ export class AmpSlideScroll extends BaseSlides {
       );
       this.action_.trigger(this.element, name, event, opt_trust);
 
-      this.element.dispatchCustomEvent(name, {index: newIndex});
+      this.element.dispatchCustomEvent(name, {
+        index: newIndex,
+        ampTrust: trust,
+      });
     }
   }
 
