@@ -62,6 +62,8 @@
     "dev-null": "0.1.1",
     "doctrine": "3.0.0",
     "envify": "4.1.0",
+    "enzyme": "3.11.0",
+    "enzyme-adapter-preact-pure": "2.2.0",
     "escodegen": "1.14.1",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.0",
