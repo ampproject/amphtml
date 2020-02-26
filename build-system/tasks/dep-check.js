@@ -281,13 +281,14 @@ function flattenGraph(entryPoints) {
  * Run Module dependency graph against the rules.
  *
  * @param {!ModuleDef} modules
- * @return {boolean}
+ * @return {boolean} true if violations were discovered.
  */
 function runRules(modules) {
   const errors = [];
   Object.entries(modules).forEach(([moduleName, deps]) => {
     // Run Rules against the modules and flatten for reporting.
-    entries.push(...rules.flatMap(rule => rule.run(moduleName, deps)));
+    const results = rules.flatMap(rule => rule.run(moduleName, deps));
+    errors.push(...results);
   });
 
   rules
@@ -296,12 +297,9 @@ function runRules(modules) {
       errors.push(cyan(unusedEntry) + ' is an unused allowlist entry');
     });
 
-  if (errors.length) {
-    errorsFound = true;
-    errors.forEach(error => {
-      log(red('ERROR:'), error);
-    });
-  }
+  errors.forEach(error => {
+    log(red('ERROR:'), error);
+  });
 
   return errors.length > 0;
 }
