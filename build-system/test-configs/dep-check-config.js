@@ -354,14 +354,6 @@ exports.rules = [
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js->' +
         'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-list/0.1/amp-list.js->' +
-        'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-list/0.2/amp-list.js->' +
-        'src/service/position-observer/position-observer-impl.js',
-      'extensions/amp-list/0.1/amp-list.js->' +
-        'src/service/position-observer/position-observer-worker.js',
-      'extensions/amp-list/0.2/amp-list.js->' +
-        'src/service/position-observer/position-observer-worker.js',
       'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
         'src/service/position-observer/position-observer-impl.js',
       'extensions/amp-video-docking/0.1/amp-video-docking.js->' +
@@ -409,10 +401,6 @@ exports.rules = [
       'extensions/amp-script/0.1/amp-script.js->' +
         'src/service/extension-location.js',
       // Origin experiments.
-      'extensions/amp-list/0.1/amp-list.js->' +
-        'src/service/origin-experiments-impl.js',
-      'extensions/amp-list/0.2/amp-list.js->' +
-        'src/service/origin-experiments-impl.js',
       'extensions/amp-recaptcha-input/0.1/amp-recaptcha-input.js->' +
         'src/service/origin-experiments-impl.js',
       'extensions/amp-experiment/1.0/amp-experiment.js->' +

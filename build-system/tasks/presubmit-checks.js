@@ -315,8 +315,6 @@ const forbiddenTerms = {
     whitelist: [
       // Please keep list alphabetically sorted.
       'extensions/amp-fx-collection/0.1/providers/fx-provider.js',
-      'extensions/amp-list/0.1/amp-list.js',
-      'extensions/amp-list/0.2/amp-list.js',
       'extensions/amp-next-page/0.1/next-page-service.js',
       'extensions/amp-next-page/1.0/visibility-observer.js',
       'extensions/amp-position-observer/0.1/amp-position-observer.js',
