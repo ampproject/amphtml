@@ -27,6 +27,7 @@ import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user} from '../../../src/log';
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {triggerAnalyticsEvent} from '../../../src/analytics';
 
 const TAG = 'amp-audio';
@@ -62,6 +63,8 @@ export class AmpAudio extends AMP.BaseElement {
       this.element.removeAttribute('autoplay');
       this.buildAudioElement();
     }
+
+    setIsMediaComponent(this.element);
 
     this.registerAction('play', this.play_.bind(this));
     this.registerAction('pause', this.pause_.bind(this));

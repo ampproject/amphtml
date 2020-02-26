@@ -560,3 +560,26 @@ export function delegateAutoplay(video) {
 export function userInteractedWith(video) {
   video.signals().signal(VideoServiceSignals.USER_INTERACTED);
 }
+
+/**
+ * Classname that media components should annotate themselves with.
+ * This applies to all video and audio playback components, regardless of
+ * whether they implement a common interface or not.
+ *
+ * TODO(go.amp.dev/issue/26984): This isn't exclusive to video, but there's no
+ * better place to put this now due to OWNERShip. Move.
+ */
+export const MEDIA_COMPONENT_CLASSNAME = 'i-amphtml-media-component';
+
+/**
+ * Annotates media component element with a common classname.
+ * This applies to all video and audio playback components, regardless of
+ * whether they implement a common interface or not.
+ * @param {!Element} element
+ *
+ * TODO(go.amp.dev/issue/26984): This isn't exclusive to video, but there's no
+ * better place to put this now due to OWNERShip. Move.
+ */
+export function setIsMediaComponent(element) {
+  element.classList.add(MEDIA_COMPONENT_CLASSNAME);
+}

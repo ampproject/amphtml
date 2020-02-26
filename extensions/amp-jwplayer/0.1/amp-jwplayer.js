@@ -19,6 +19,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpJWPlayer extends AMP.BaseElement {
@@ -74,6 +75,8 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    setIsMediaComponent(this.element);
+
     const {element} = this;
     this.contentid_ = userAssert(
       element.getAttribute('data-playlist-id') ||
