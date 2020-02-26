@@ -88,8 +88,8 @@ The component will render a total maximum of three documents on screen in a
 component will render a maximum of three documents (total) on screen at one single instance. This limit may be changed or removed in the future.
 
 [tip type="important"]
-**Important** [`<amp-analytics>`](../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`.
-Tracking page views is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md) or `<amp-analytics>` on the host page.
+**Important** [`<amp-analytics>`](../../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`.
+Tracking page views is supported through [`<amp-pixel>`](../../../builtins/amp-pixel.md) or `<amp-analytics>` on the host page.
 [/tip]
 
 ### Analytics triggers
@@ -242,7 +242,7 @@ read, and hides the header and footer elements from each child document.
 ## Substitutions
 
 The `amp-next-page` src allows all standard URL variable substitutions. See
-the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
+the [Substitutions Guide](../../../spec/amp-var-substitutions.md) for more info.
 
 For example:
 
