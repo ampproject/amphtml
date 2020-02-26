@@ -1113,8 +1113,7 @@ export class Bind {
    * @private
    */
   evaluate_() {
-    const evaluatePromise = this.ww_('bind.evaluateBindings', [this.state_]);
-
+    const evaluatePromise = this.ww_('bind.evaluateBindings', [this.state_]); 
     return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;
       // Report evaluation errors.
