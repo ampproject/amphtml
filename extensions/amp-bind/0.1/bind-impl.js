@@ -488,7 +488,7 @@ export class Bind {
 
     return rescanPromise.then(() => {
       if (options.update) {
-        return this.evaluate_(options.wait).then(results =>
+        return this.evaluate_().then(results =>
           this.apply_(results, {constrain: addedElements})
         );
       }
@@ -1110,17 +1110,11 @@ export class Bind {
 
   /**
    * Reevaluates all expressions and returns a map of expressions to results.
-   * @param {boolean=} opt_wait - whether to wait for an amp-state to complete its fetch/parse.
    * @return {!Promise<!Object<string, BindExpressionResultDef>>}
    * @private
    */
-  evaluate_(opt_wait) {
-    const statePromise = opt_wait
-      ? this.getStateWithWait('.')
-      : Promise.resolve(this.state_);
-    const evaluatePromise = statePromise.then(state =>
-      this.ww_('bind.evaluateBindings', [state])
-    );
+  evaluate_() {
+    const evaluatePromise = this.ww_('bind.evaluateBindings', [this.state_]);
 
     return evaluatePromise.then(returnValue => {
       const {results, errors} = returnValue;

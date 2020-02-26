@@ -1306,28 +1306,6 @@ describe
             toAdd = createElement(env, /* container */ null, '[text]="1+1"');
           });
 
-          it('{update: true, wait: true}', async () => {
-            const options = {update: true, fast: false, wait: true};
-            toAdd = createElement(env, null, '[text]=foo');
-
-            await bind.initializePromiseForTesting();
-            let resolveFetch;
-            addAmpState(
-              env,
-              container,
-              'foo',
-              new Promise(r => (resolveFetch = r))
-            );
-            const rescanPromise = bind.rescan([toAdd], [], options);
-            expect(toAdd.textContent).to.equal('');
-
-            await bind
-              .setState({foo: 'hello'}, {skipEval: true, skipAmpState: false})
-              .then(resolveFetch);
-            await rescanPromise;
-            expect(toAdd.textContent).to.equal('hello');
-          });
-
           it('{update: true, fast: true}', async () => {
             const options = {update: true, fast: true};
 

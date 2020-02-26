@@ -73,9 +73,7 @@ describes.realWin(
         .stub(ampState, 'fetch_')
         .returns(Promise.resolve({remote: 'data'}));
 
-      bind = {
-        setState: env.sandbox.stub(),
-      };
+      bind = {setState: env.sandbox.stub()};
       env.sandbox.stub(Services, 'bindForDocOrNull').resolves(bind);
     });
 
