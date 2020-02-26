@@ -26,6 +26,7 @@ import {
 import {Services} from '../../src/services';
 import {installHiddenObserverForDoc} from '../../src/service/hidden-observer-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
+import {macroTask} from '../../testing/yield';
 
 const fakeAmpDoc = {
   getRootNode: () => {
@@ -372,7 +373,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
       element = null;
     });
 
-    it('should tick with right threshold', () => {
+    it('should tick with right threshold', async () => {
       io = new IntersectionObserverPolyfill(callbackSpy, {
         threshold: [0, 1],
       });
@@ -385,6 +386,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
       expect(callbackSpy).to.not.be.called;
       // 2nd tick with 0.1 does fire
       io.tick(layoutRectLtwh(0, 90, 100, 100));
+      await macroTask();
       expect(callbackSpy).to.be.calledOnce;
       callbackSpy.resetHistory();
       // 3rd tick with 0.9 doesn't fire
@@ -393,6 +395,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
       callbackSpy.resetHistory();
       // 4rd tick with 1 does fire
       io.tick(layoutRectLtwh(0, 0, 100, 100));
+      await macroTask();
       expect(callbackSpy).to.be.calledOnce;
       callbackSpy.resetHistory();
       // 5th tick with 1 doesn't fire
@@ -400,6 +403,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
       expect(callbackSpy).to.not.be.called;
       // 6th tick with 0.9 does fire
       io.tick(layoutRectLtwh(0, 10, 100, 100));
+      await macroTask();
       expect(callbackSpy).to.be.calledOnce;
       callbackSpy.resetHistory();
       // 7th tick with 0.1 doesn't fire
@@ -407,6 +411,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
       expect(callbackSpy).to.not.be.called;
       // 8th tick with 0 does fire
       io.tick(layoutRectLtwh(0, 100, 100, 100));
+      await macroTask();
       expect(callbackSpy).to.be.calledOnce;
       callbackSpy.resetHistory();
       // 9th tick with 0 doesn't fire
@@ -414,7 +419,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
       expect(callbackSpy).to.not.be.called;
     });
 
-    it('should trigger for new observed element', () => {
+    it('should trigger for new observed element', async () => {
       io = new IntersectionObserverPolyfill(callbackSpy, {
         threshold: [0, 1],
       });
@@ -422,9 +427,9 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         return layoutRectLtwh(0, 0, 100, 100);
       };
       io.tick(layoutRectLtwh(0, 90, 100, 100));
-
       // Observe after tick.
       io.observe(element);
+      await macroTask();
       expect(callbackSpy).to.be.calledOnce;
     });
 
@@ -455,13 +460,14 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
     });
 
     describe('w/o container should get IntersectionChangeEntry when', () => {
-      it('completely in viewport', () => {
+      it('completely in viewport', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(0, 100, 50, 50);
         };
         io.observe(element);
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
         io.tick(rootBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith([
           {
@@ -475,7 +481,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('intersects on the edge', () => {
+      it('intersects on the edge', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 200, 150, 200);
         };
@@ -483,7 +489,9 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         io.observe(element);
         // Tick once before to set threshold to value other than 0;
         io.tick(layoutRectLtwh(50, 200, 100, 100));
+        await macroTask();
         io.tick(rootBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledTwice;
         expect(callbackSpy.secondCall).to.be.calledWith([
           {
@@ -497,13 +505,14 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('intersects the viewport (bottom right)', () => {
+      it('intersects the viewport (bottom right)', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 199, 150, 200);
         };
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
         io.observe(element);
         io.tick(rootBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith([
           {
@@ -517,13 +526,14 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('intersects the viewport (top left)', () => {
+      it('intersects the viewport (top left)', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 100, 150, 200);
         };
         const rootBounds = layoutRectLtwh(198, 299, 100, 100);
         io.observe(element);
         io.tick(rootBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith([
           {
@@ -537,7 +547,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('NOT intersects when element outside (top left) viewport', () => {
+      it('NOT intersects when element outside (top left) viewport', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 100, 150, 200);
         };
@@ -545,7 +555,9 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         io.observe(element);
         // Tick once before to set threshold to value other than 0;
         io.tick(layoutRectLtwh(50, 100, 100, 100));
+        await macroTask();
         io.tick(rootBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledTwice;
         expect(callbackSpy.secondCall).to.be.calledWith([
           {
@@ -559,7 +571,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('NOT intersects with element outside (bottom) viewport', () => {
+      it('NOT intersects with element outside (bottom) viewport', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 225, 100, 100);
         };
@@ -567,7 +579,9 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         io.observe(element);
         // Tick once before to set threshold to value other than 0;
         io.tick(layoutRectLtwh(50, 225, 100, 100));
+        await macroTask();
         io.tick(rootBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledTwice;
         expect(callbackSpy.secondCall).to.be.calledWith([
           {
@@ -581,7 +595,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('element has owner', () => {
+      it('element has owner', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 50, 150, 200);
         };
@@ -595,6 +609,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         io.observe(element);
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
         io.tick(rootBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith([
           {
@@ -610,7 +625,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
     });
 
     describe('w/ container should get IntersectionChangeEntry when', () => {
-      it('nested element in container in viewport', () => {
+      it('nested element in container in viewport', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(10, 10, 10, 10);
         };
@@ -618,6 +633,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         const containerBounds = layoutRectLtwh(2, 102, 50, 50);
         io.observe(element);
         io.tick(rootBounds, containerBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith([
           {
@@ -631,7 +647,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('nested element in container, container intersect viewport', () => {
+      it('nested element in container, container intersect viewport', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(75, 0, 50, 50);
         };
@@ -639,6 +655,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         const containerBounds = layoutRectLtwh(100, 100, 200, 200);
         io.observe(element);
         io.tick(rootBounds, containerBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith([
           {
@@ -652,7 +669,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('nested element in container, container not in viewport', () => {
+      it('nested element in container, container not in viewport', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(0, 0, 50, 50);
         };
@@ -661,7 +678,9 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         io.observe(element);
         // Tick once before to set threshold to value other than 0;
         io.tick(rootBounds, layoutRectLtwh(0, 200, 200, 200));
+        await macroTask();
         io.tick(rootBounds, containerBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledTwice;
         expect(callbackSpy.secondCall).to.be.calledWith([
           {
@@ -675,7 +694,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('nested element outside container but in viewport', () => {
+      it('nested element outside container but in viewport', async () => {
         const rootBounds = layoutRectLtwh(0, 100, 200, 200);
         const containerBounds = layoutRectLtwh(0, 301, 100, 100);
         // Tick once before to set threshold to value other than 0;
@@ -684,10 +703,12 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         };
         io.observe(element);
         io.tick(rootBounds, layoutRectLtwh(0, 200, 200, 200));
+        await macroTask();
         element.getLayoutBox = () => {
           return layoutRectLtwh(0, -101, 50, 50);
         };
         io.tick(rootBounds, containerBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledTwice;
         expect(callbackSpy.secondCall).to.be.calledWith([
           {
@@ -701,7 +722,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('element has an owner', () => {
+      it('element has an owner', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(75, 0, 50, 50);
         };
@@ -716,6 +737,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         const containerBounds = layoutRectLtwh(100, 100, 200, 200);
         io.observe(element);
         io.tick(rootBounds, containerBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith([
           {
@@ -750,7 +772,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         element2 = null;
       });
 
-      it('should tick on multi elements', () => {
+      it('should tick on multi elements', async () => {
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
         element.getLayoutBox = () => {
           return layoutRectLtwh(0, 100, 25, 25);
@@ -758,6 +780,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         io.observe(element);
         io.observe(element2);
         io.tick(rootBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith([
           {
@@ -779,7 +802,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('should only fire for elements that crossed threshold', () => {
+      it('should only fire for elements that crossed threshold', async () => {
         const rootBounds = layoutRectLtwh(0, 100, 100, 100);
         element.getLayoutBox = () => {
           return layoutRectLtwh(50, 200, 150, 200);
@@ -787,6 +810,7 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         io.observe(element);
         io.observe(element2);
         io.tick(rootBounds);
+        await macroTask();
         expect(callbackSpy).to.be.calledOnce;
         expect(callbackSpy).to.be.calledWith([
           {
@@ -800,16 +824,18 @@ describes.sandboxed('IntersectionObserverPolyfill', {}, env => {
         ]);
       });
 
-      it('should stop observing after unobserve', () => {
+      it('should stop observing after unobserve', async () => {
         element.getLayoutBox = () => {
           return layoutRectLtwh(0, 50, 50, 50);
         };
         io.observe(element);
         io.observe(element2);
         io.tick(layoutRectLtwh(0, 0, 200, 200));
+        await macroTask();
         expect(callbackSpy).to.be.calledOnce;
         io.unobserve(element);
         io.tick(layoutRectLtwh(0, 0, 10, 10));
+        await macroTask();
         expect(callbackSpy).to.be.calledTwice;
         expect(callbackSpy.secondCall).to.be.calledWith([
           {

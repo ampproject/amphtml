@@ -1687,12 +1687,12 @@ describes.realWin('Events', {amp: 1}, env => {
     let saveCallback;
     let matchEmptySpec;
     let matchFunc;
-    let getAmpElementSpy;
+    let getElementSpy;
 
     beforeEach(() => {
       tracker = root.getTracker('visible', VisibilityTracker);
       visibilityManagerMock = env.sandbox.mock(root.getVisibilityManager());
-      getAmpElementSpy = env.sandbox.spy(root, 'getAmpElement');
+      getElementSpy = env.sandbox.spy(root, 'getElement');
       tracker.waitForTrackers_['ini-load'] = root.getTracker(
         'ini-load',
         IniLoadTracker
@@ -1849,8 +1849,8 @@ describes.realWin('Events', {amp: 1}, env => {
         eventResolver
       );
       expect(res).to.be.a('function');
-      const unlistenReady = getAmpElementSpy.returnValues[0];
-      // #getAmpElement Promise
+      const unlistenReady = getElementSpy.returnValues[0];
+      // #getElement Promise
       yield unlistenReady;
       // #assertMeasurable_ Promise
       yield macroTask();
@@ -1862,6 +1862,50 @@ describes.realWin('Events', {amp: 1}, env => {
         yield macroTask();
         expect(unlisten).to.be.calledOnce;
       });
+    });
+
+    it('should add target listener on non-amp-element', async () => {
+      target.classList.remove('i-amphtml-element');
+      const config = {visibilitySpec: {selector: '.target'}};
+      const unlisten = env.sandbox.spy();
+      iniLoadTrackerMock.expects('getRootSignal').once();
+      const readyPromise = Promise.resolve();
+      iniLoadTrackerMock
+        .expects('getElementSignal')
+        .withExactArgs('ini-load', target)
+        .returns(readyPromise)
+        .once();
+      visibilityManagerMock
+        .expects('listenElement')
+        .withExactArgs(
+          target,
+          config.visibilitySpec,
+          readyPromise,
+          /* createReportReadyPromiseFunc */ null,
+          saveCallback
+        )
+        .returns(unlisten)
+        .once();
+      const res = tracker.add(
+        analyticsElement,
+        'visible',
+        config,
+        eventResolver
+      );
+      expect(res).to.be.a('function');
+      const unlistenReady = getElementSpy.returnValues[0];
+      // #getElement Promise
+      await unlistenReady;
+      // #assertMeasurable_ Promise
+      await macroTask();
+      saveCallback.callback({totalVisibleTime: 10});
+      const event = await eventPromise;
+      expect(event.target).to.equal(target);
+      expect(event.type).to.equal('visible');
+      expect(event.vars.totalVisibleTime).to.equal(10);
+      expect(unlisten).to.not.be.called;
+      await res();
+      expect(unlisten).to.be.calledOnce;
     });
 
     it('should expand data params', function*() {
@@ -1889,8 +1933,8 @@ describes.realWin('Events', {amp: 1}, env => {
         .returns(unlisten)
         .once();
       tracker.add(analyticsElement, 'visible', config, eventResolver);
-      const unlistenReady = getAmpElementSpy.returnValues[0];
-      // #getAmpElement Promise
+      const unlistenReady = getElementSpy.returnValues[0];
+      // #getElement Promise
       yield unlistenReady;
       // #assertMeasurable_ Promise
       yield macroTask();
@@ -1917,8 +1961,8 @@ describes.realWin('Events', {amp: 1}, env => {
         .returns(null)
         .once();
       tracker.add(analyticsElement, 'hidden', config, eventResolver);
-      const unlistenReady = getAmpElementSpy.returnValues[0];
-      // #getAmpElement Promise
+      const unlistenReady = getElementSpy.returnValues[0];
+      // #getElement Promise
       yield unlistenReady;
       // #assertMeasurable_ Promise
       yield macroTask();

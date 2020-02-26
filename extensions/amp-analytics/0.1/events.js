@@ -1490,16 +1490,12 @@ export class VisibilityTracker extends EventTracker {
         () => {}
       );
     } else {
-      // An AMP-element. Wait for DOM to be fully parsed to avoid
+      // An element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
       unlistenPromise = this.root
-        .getAmpElement(
-          context.parentElement || context,
-          selector,
-          selectionMethod
-        )
+        .getElement(context.parentElement || context, selector, selectionMethod)
         .then(element => {
           return visibilityManagerPromise.then(
             visibilityManager => {
