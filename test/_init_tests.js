@@ -22,6 +22,7 @@ import {Services} from '../src/services';
 import {activateChunkingForTesting} from '../src/chunk';
 import {adoptWithMultidocDeps} from '../src/runtime';
 import {cancelTimersForTesting} from '../src/service/timer-impl';
+import {configure as configureEnzyme} from 'enzyme';
 import {
   installAmpdocServices,
   installRuntimeServices,
@@ -37,6 +38,7 @@ import {resetEvtListenerOptsSupportForTesting} from '../src/event-helper-listen'
 import {resetExperimentTogglesForTesting} from '../src/experiments';
 import {setDefaultBootstrapBaseUrlForTesting} from '../src/3p-frame';
 import {setReportError} from '../src/log';
+import PreactEnzyme from 'enzyme-adapter-preact-pure';
 import sinon from /*OK*/ 'sinon';
 import stringify from 'json-stable-stringify';
 
@@ -63,6 +65,7 @@ const BEFORE_AFTER_TIMEOUT = 5000;
 // Needs to be called before the custom elements are first made.
 beforeTest();
 adoptWithMultidocDeps(window);
+configureEnzyme({adapter: new PreactEnzyme()});
 
 // Override AMP.extension to buffer extension installers.
 /**
