@@ -387,6 +387,7 @@ Behaviors specify additional properties of the exit action.
 The `clickTarget` behavior specifies where a target's click should try to open. A click defaults to opening a new tab, if it is possible in the environment. With this behavior a user can specify that the click should try open the same tab, by setting this to `"_top"`. If this is not set to `"_top"`, then it will fall back to opening a new tab.
 
 ## Actions
+
 ### `setVariable` action
 
 `amp-ad-exit` also supports variable targets. The variable targets do not define exit URLs by themselves, but instead point to one of the named `NavigationTarget`s in the `ExitConfig`. Not to be confused with the URL custom variables, these are state variables maintained by the `amp-ad-exit` element that can be updated at runtime which enable stateful exit behavior. See the example below.
@@ -452,26 +453,32 @@ _Example: Using variable targets_
 ```html
 <amp-ad-exit id="exit-api" layout="nodisplay">
   <script type="application/json">
-  {
-    "targets": {
-      "product1": {
-        "finalUrl": "https://example.com/product1"
-      },
-      "product2": {
-        "finalUrl": "https://example.com/product2"
+    {
+      "targets": {
+        "product1": {
+          "finalUrl": "https://example.com/product1"
+        },
+        "product2": {
+          "finalUrl": "https://example.com/product2"
+        }
       }
     }
-  }
   </script>
 </amp-ad-exit>
-<amp-selector id="exit-selector" layout="nodisplay"
-    on="select:exit-api.setVariable(name='currentProduct', target=event.targetOption)">
+<amp-selector
+  id="exit-selector"
+  layout="nodisplay"
+  on="select:exit-api.setVariable(name='currentProduct', target=event.targetOption)"
+>
   <option option="product1" selected></option>
   <option option="product2"></option>
 </amp-selector>
-<amp-carousel type="slides" autoplay
-    on="slideChange:exit-selector.toggle(index=event.index, value=true),
-        tap:exit-api.exit(variable='currentProduct', default='product1')">
+<amp-carousel
+  type="slides"
+  autoplay
+  on="slideChange:exit-selector.toggle(index=event.index, value=true),
+        tap:exit-api.exit(variable='currentProduct', default='product1')"
+>
   <div>product 1</div>
   <div>product 2</div>
 </amp-carousel>
