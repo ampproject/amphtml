@@ -988,7 +988,13 @@ describe
           it('should not wait if the still-loading state is irrelevant', async () => {
             await bind.initializePromiseForTesting();
             await bind.setState({mystate: {mykey: 'myval'}});
-            addAmpState(env, container, 'otherkey', {}, new Promise(unused => {})); // never going to resolve
+            addAmpState(
+              env,
+              container,
+              'otherkey',
+              {},
+              new Promise(unused => {})
+            ); // never going to resolve
 
             const state = await bind.getStateWithWait('mystate.mykey');
             expect(state).to.equal('myval');
@@ -1306,7 +1312,12 @@ describe
 
             await bind.initializePromiseForTesting();
             let resolveFetch;
-            addAmpState(env, container, 'foo', new Promise(r => (resolveFetch = r)));
+            addAmpState(
+              env,
+              container,
+              'foo',
+              new Promise(r => (resolveFetch = r))
+            );
             const rescanPromise = bind.rescan([toAdd], [], options);
             expect(toAdd.textContent).to.equal('');
 
