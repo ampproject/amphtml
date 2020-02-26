@@ -91,7 +91,7 @@ export function shouldBlockOnConsentByMeta(element) {
   }
 
   // Handles whitespace
-  content = content.toUpperCase().replace(/\s/g, '');
+  content = content.toUpperCase().replace(/\s+/g, '');
 
   const contents = /** @type {Array<string>} */ (content.split(','));
   return contents.includes(element.tagName);

@@ -24,7 +24,6 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
 import {dev, devAssert} from '../log';
-import {escapeCssSelectorIdent} from '../css';
 import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
@@ -318,8 +317,8 @@ export class AmpDoc {
     /** @private {!Object<string, string>} */
     this.params_ = (opt_options && opt_options.params) || map();
 
-    /** @protected {!Object<string, string>} */
-    this.meta_ = (opt_options && opt_options.meta) || map();
+    /** @protected {?Object<string, string>} */
+    this.meta_ = null;
 
     /** @private @const {!Array<string>} */
     this.declaredExtensions_ = [];
@@ -419,30 +418,32 @@ export class AmpDoc {
   }
 
   /**
-   * Returns map of an ampdoc's meta name value to content value
+   * Initializes (if necessary) cached map of an ampdoc's meta name values to
+   * their associated content values and returns the map.
    * @return {!Object<string, string>}
    */
   getMeta() {
-    const metaMap = map();
-    if (!this.win.document || !this.win.document.head) {
-      return metaMap;
+    if (this.meta_) {
+      return map(this.meta_);
     }
 
-    const metas = this.win.document.head.querySelectorAll('meta[name]');
-    iterateCursor(metas, meta => {
-      const content = meta.getAttribute('content');
-      const name = meta.getAttribute('name');
+    this.meta_ = map();
+    const metaEls = dev()
+      .assertElement(this.win.document.head)
+      .querySelectorAll('meta[name]');
+    iterateCursor(metaEls, metaEl => {
+      const name = metaEl.getAttribute('name');
+      const content = metaEl.getAttribute('content');
       if (!name || content === null) {
         return;
       }
 
-      // Retain only the first meta content value for a given name, consistent
-      // with getMetaByName.
-      if (metaMap[name] === undefined) {
-        metaMap[name] = content;
+      // Retain only the first meta content value for a given name
+      if (this.meta_[name] === undefined) {
+        this.meta_[name] = content;
       }
     });
-    return metaMap;
+    return map(this.meta_);
   }
 
   /**
@@ -456,11 +457,8 @@ export class AmpDoc {
       return null;
     }
 
-    const el = dev()
-      .assertElement(this.win.document.head)
-      .querySelector(`meta[name="${escapeCssSelectorIdent(name)}"]`);
-
-    return el ? el.getAttribute('content') || '' : null;
+    const content = this.getMeta()[name];
+    return content !== undefined ? content : null;
   }
 
   /**
@@ -933,26 +931,15 @@ export class AmpDocShadow extends AmpDoc {
 
   /** @override */
   getMeta() {
-    const copy = map();
-    for (const k in this.meta_) {
-      copy[k] = this.meta_[k];
-    }
-    return copy;
-  }
-
-  /** @override */
-  getMetaByName(name) {
-    return this.meta_[name] !== undefined ? this.meta_[name] : null;
+    return /** @type {!Object<string,string>} */ (map(this.meta_));
   }
 
   /** @override */
   setMetaByName(name, content) {
-    if (!name) {
-      throw dev().createError(
-        'Attempted to store invalid meta name/content pair'
-      );
+    devAssert(name, 'Attempted to store invalid meta name/content pair');
+    if (!this.meta_) {
+      this.meta_ = map();
     }
-
     this.meta_[name] = content;
   }
 }

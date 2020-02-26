@@ -96,12 +96,8 @@ describes.sandboxed('cid', {}, env => {
         querySelector: () => {},
         head: {
           nodeType: /* ELEMENT */ 1,
-          querySelector() {
-            return null;
-          },
-          querySelectorAll() {
-            return [];
-          },
+          querySelector: () => null,
+          querySelectorAll: () => [],
         },
       },
       navigator: window.navigator,
