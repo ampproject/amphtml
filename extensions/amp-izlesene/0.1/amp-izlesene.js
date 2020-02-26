@@ -20,6 +20,7 @@ import {devAssert, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpIzlesene extends AMP.BaseElement {
   /**
@@ -60,7 +61,7 @@ class AmpIzlesene extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.element.classList.add('i-amphtml-media-component');
+    setIsMediaComponent(this.element);
 
     this.videoid_ = userAssert(
       this.element.getAttribute('data-videoid'),

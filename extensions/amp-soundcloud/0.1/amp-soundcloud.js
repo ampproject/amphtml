@@ -30,6 +30,7 @@
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpSoundcloud extends AMP.BaseElement {
@@ -60,7 +61,7 @@ class AmpSoundcloud extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.element.classList.add('i-amphtml-media-component');
+    setIsMediaComponent(this.element);
   }
 
   /**@override*/

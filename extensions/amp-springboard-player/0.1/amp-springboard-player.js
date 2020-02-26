@@ -16,6 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
@@ -66,7 +67,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.element.classList.add('i-amphtml-media-component');
+    setIsMediaComponent(this.element);
 
     this.mode_ = userAssert(
       this.element.getAttribute('data-mode'),

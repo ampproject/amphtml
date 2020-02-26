@@ -16,6 +16,7 @@
 
 import {Services} from '../../../src/services';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 
 class AmpReachPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
@@ -45,7 +46,7 @@ class AmpReachPlayer extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.element.classList.add('i-amphtml-media-component');
+    setIsMediaComponent(this.element);
   }
 
   /** @override */

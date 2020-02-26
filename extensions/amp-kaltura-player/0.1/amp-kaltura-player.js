@@ -19,6 +19,7 @@ import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 class AmpKaltura extends AMP.BaseElement {
@@ -61,7 +62,7 @@ class AmpKaltura extends AMP.BaseElement {
       this.element
     );
 
-    this.element.classList.add('i-amphtml-media-component');
+    setIsMediaComponent(this.element);
 
     this.entryId_ = this.element.getAttribute('data-entryid') || 'default';
   }
