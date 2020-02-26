@@ -117,6 +117,9 @@ export class NextPageService {
     /** @private {?../../../src/service/history-impl.History} */
     this.history_ = null;
 
+    /** @private {?../../../src/service/navigation.Navigation} */
+    this.navigation_ = null;
+
     /** @private {?Array<!Page>} */
     this.pages_;
 
@@ -193,6 +196,8 @@ export class NextPageService {
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
 
+    this.navigation_ = Services.navigationForDoc(this.ampdoc_);
+
     this.multidocManager_ = new MultidocManager(
       this.win_,
       Services.ampdocServiceFor(this.win_),
@@ -215,7 +220,7 @@ export class NextPageService {
         this.getHost_().getAttribute('deep-parsing') !== 'false') ||
       !this.nextSrc_;
     this.maxPages_ = this.getHost_().hasAttribute('max-pages')
-      ? this.getHost_().getAttribute('max-pages')
+      ? parseInt(this.getHost_().getAttribute('max-pages'), 10)
       : Infinity;
     this.initializePageQueue_().finally(() => {
       // Render the initial footer template with all pages
@@ -432,10 +437,14 @@ export class NextPageService {
     const {title, url} = page;
     this.doc_.title = title;
     this.history_.replace({title, url});
-    triggerAnalyticsEvent(this.getHost_(), 'amp-next-page-scroll', {
-      'title': title,
-      'url': url,
-    });
+    triggerAnalyticsEvent(
+      this.getHost_(),
+      'amp-next-page-scroll',
+      /** @type {JsonObject} */ ({
+        'title': title,
+        'url': url,
+      })
+    );
   }
 
   /**
@@ -1029,10 +1038,14 @@ export class NextPageService {
       title.textContent = page.title;
       article.href = page.url;
       article.addEventListener('click', e => {
-        triggerAnalyticsEvent(this.getHost_(), 'amp-next-page-click', {
-          'title': page.title,
-          'url': page.url,
-        });
+        triggerAnalyticsEvent(
+          this.getHost_(),
+          'amp-next-page-click',
+          /** @type {JsonObject} */ ({
+            'title': page.title,
+            'url': page.url,
+          })
+        );
         const a2a = this.navigation_.navigateToAmpUrl(
           page.url,
           'content-discovery'
