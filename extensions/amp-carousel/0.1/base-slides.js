@@ -20,6 +20,12 @@ import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
+/** @enum {string} */
+export const EngagementSignals = {
+  USER_INTERACTED: 'user-interacted',
+  AUTOPLAY_DELEGATED: 'autoplay-delegated',
+};
+
 export class BaseSlides extends BaseCarousel {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -111,6 +117,7 @@ export class BaseSlides extends BaseCarousel {
     if (opt_autoplay) {
       this.autoplay_();
     } else {
+      this.userInteractedWith();
       this.clearAutoplay();
     }
   }
@@ -235,5 +242,20 @@ export class BaseSlides extends BaseCarousel {
     }
     this.hasAutoplay_ = false;
     this.shouldAutoplay_ = this.hasAutoplay_ && this.isLoopingEligible();
+  }
+
+  /**
+   * @protected
+   */
+  userInteractedWith() {
+    this.signals().signal(EngagementSignals.USER_INTERACTED);
+  }
+
+  /**
+   * @protected
+   * @return {boolean}
+   */
+  userInteracted() {
+    return this.signals().get(EngagementSignals.USER_INTERACTED) != null;
   }
 }
