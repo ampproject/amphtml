@@ -27,10 +27,10 @@ limitations under the License.
 
 ## Version notes
 
-| Version | Description                                                                                                                                                                                                                                                                          |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1.0     | Support for an infinite number of page recommendations, reduced bundle size, improved API, support for amp-analytics, templated separators and footers, better handling of fixed elements.<br><br>API changes are breaking, please take a look at the migration section for details. |
-| 0.1     | Initial experimental implementation. Limited to three recommended documents                                                                                                                                                                                                          |
+| Version | Description                                                                                                                                                                                                                                                                                                                                                        |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1.0     | Support for an infinite number of page recommendations, reduced bundle size, improved API, support for amp-analytics, templated separators and footers, better handling of fixed elements.<br><br>API changes are breaking, please take a look at the [migration section](https://amp.dev/documentation/components/amp-next-page/#migrating-from-0.1) for details. |
+| 0.1     | Initial experimental implementation. Limited to three recommended documents                                                                                                                                                                                                                                                                                        |
 
 ## Usage
 
@@ -38,9 +38,29 @@ The `<amp-next-page>` component loads content pages one after another creating a
 
 ### Configure and load pages
 
-Specify pages in a JSON configuration. Load the JSON configuration from a remote URL with the `src` attribute, or inline it within a `<script>` child element of `<amp-next-page>`. You may choose to both specify a remote URL and inline the JSON object in order to speed up the initial loading of suggestions. In case the `deep-parsing` attribute is present, `<amp-next-page>` will also recursively read suggestions from each loaded document's `<amp-next-page>` element. The component automatically handles loading and unloading the documents from memory for a smooth user experience.
+Specify pages in a JSON configuration. Load the JSON configuration from a remote URL with the `src` attribute, or inline it within a `<script>` child element of `<amp-next-page>`. You may specify both a remote URL and inline a JSON object for a quicker suggestion loading speed.
+
+In case the `deep-parsing` attribute is present, `<amp-next-page>` will also recursively read suggestions from each loaded document's `<amp-next-page>` element. The component automatically handles loading and unloading the documents from memory for a smooth user experience.
 
 Documents append to the end of the current document as a child of the `<amp-next-page>` element. To prevent shifting page content down, this component must be the last child of the document `<body>`. If needed, any footer content should be embedded inside the `<amp-next-page>` tag and will be displayed once no more article suggestions are available.
+
+The code sample below shows an example configuration for one article, which is the same format used by both the inline and remote configurations
+
+```json
+{
+  "image": "https://example.com/image.jpg",
+  "title": "This article shows next",
+  "url": "https://example.com/article.amp.html"
+}
+```
+
+Each page object should have the following key/value pairs:
+
+| Key                | Value                                                                                                                                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url` (required)   | String URL of the page. Must be on the same origin as the current document. URLs will automatically be rewritten to point to the Google AMP cache when required. |
+| `title` (required) | String title of the page, will be used when rendering the recommendation box.                                                                                    |
+| `image` (required) | String URL of the image to display in the recommendation box.                                                                                                    |
 
 #### Inline Configuration
 
@@ -63,14 +83,6 @@ Inline a JSON configuration in the `<amp-next-page>` component by placing it ins
 
 The inline configuration defines the documents recommended by `amp-next-page` to
 the user as an ordered array of page objects in JSON format.
-
-Each page object should have the following key/value pairs:
-
-| Key                | Value                                                                                                                                                            |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `url` (required)   | String URL of the page. Must be on the same origin as the current document. URLs will automatically be rewritten to point to the Google AMP cache when required. |
-| `title` (required) | String title of the page, will be used when rendering the recommendation box.                                                                                    |
-| `image` (required) | String URL of the image to display in the recommendation box.                                                                                                    |
 
 To enable for an infinite loading experience without the need for a server-side configuration (remote-loading), `amp-next-page` automatically enables `deep-parsing` (see Attributes), which allows it to parse more suggestions by recursively looking at inline configurations inside `<amp-next-page>` tags on the loaded documents. To disable this behavior, set `deep-parsing` to `false`.
 
@@ -146,9 +158,9 @@ The `<amp-next-page>` component renders the footer recommendation box if one of 
 
 - The user reaches the end of the page before the next page had loaded.
 - The next page fails to load.
-- If the [`max-pages`](https://amp.dev/documentation/components/amp-next-page/#max-pages) attribute is specified and the number of displayed pages is met.
+- If the [`max-pages`](<https://amp.dev/documentation/components/amp-next-page/#max-pages+(optional)>) attribute is specified and the number of displayed pages is met.
 
-The footer recommendation box contains links to the remaining pages. The default footer recommendation box renders the specified image and title used in the JSON configuration and can be styled as specified in the [Styling](https://amp.dev/documentation/components/amp-next-page/#Styling) section.
+The footer recommendation box contains links to the remaining pages. The default footer recommendation box renders the specified image and title used in the JSON configuration and can be styled as specified in the [Styling](https://amp.dev/documentation/components/amp-next-page/#styling) section.
 
 The footer recommendation box can also be provided as a custom component inside `<amp-next-page>` as any element that has the `footer`. It can also be templated via `amp-mustache` or other templating engines, in which case it will be passed an array of the remaining `pages`, each being an object with a `title`, `url` and `image`. Example:
 
@@ -172,7 +184,7 @@ The footer recommendation box can also be provided as a custom component inside 
 ### Separator
 
 A separator is rendered between each loaded document. By default this is
-rendered as a full-width horizontal rule. Refer to the [Styling](https://amp.dev/documentation/components/amp-next-page/#Styling) section for information on customizing this default behavior.
+rendered as a full-width horizontal rule. Refer to the [Styling](https://amp.dev/documentation/components/amp-next-page/#styling) section for information on customizing this default behavior.
 
 Alternatively, you can specify a custom separator containing arbitrary HTML
 content as a child of the `amp-next-page` component by using the `separator`

@@ -18,7 +18,8 @@ FAIL
 |  </head>
 |  <body>
 |    <h2>Content discovery</h2>
-|    <amp-next-page src="https://foo.com/data.json" xssi-prefix=")]}" deep-parsing="false" max-pages="5">
+|      <!-- Valid: Correct use of amp-next-page with an src and xssi-prefix -->
+|      <amp-next-page src="https://foo.com/data.json" xssi-prefix=")]}" deep-parsing="false" max-pages="5">
 |      <script type="application/json">
 |        [
 |          {
@@ -51,7 +52,7 @@ FAIL
 |      </div>
 |      <footer>
 >>     ^~~~~~~~~
-amp-next-page/1.0/test/validator-amp-next-page-remote.html:51:4 The tag 'footer', a child tag of 'amp-next-page with src attribute', does not satisfy one of the acceptable reference points: AMP-NEXT-PAGE > [separator], AMP-NEXT-PAGE > [footer], AMP-NEXT-PAGE > SCRIPT[type=application/json]. (see https://amp.dev/documentation/components/amp-next-page)
+amp-next-page/1.0/test/validator-amp-next-page-remote.html:52:4 The tag 'footer', a child tag of 'amp-next-page with src attribute', does not satisfy one of the acceptable reference points: AMP-NEXT-PAGE > [separator], AMP-NEXT-PAGE > [footer], AMP-NEXT-PAGE > SCRIPT[type=application/json]. (see https://amp.dev/documentation/components/amp-next-page)
 |        Footer
 |      </footer>   
 |    </amp-next-page>

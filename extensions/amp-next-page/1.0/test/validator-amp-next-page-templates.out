@@ -21,6 +21,7 @@ FAIL
 |    <h2>Content discovery</h2>
 |    <amp-next-page src="https://foo.com/data.json">
 |      <div separator class="my-custom-separator">
+|        <!-- Valid: Correct use of templated separators in amp-next-page -->
 |        <template type="amp-mustache">
 |          <div class="my-custom-separator-content">
 |            <amp-img
@@ -34,6 +35,7 @@ FAIL
 |        </template>
 |      </div>
 |      <div footer>
+|        <!-- Valid: Correct use of templated footers in amp-next-page -->
 |        <template type="amp-mustache">
 |          <div class="footer-content">
 |            {{#pages}}
@@ -46,7 +48,7 @@ FAIL
 |      </div>
 |      <footer>
 >>     ^~~~~~~~~
-amp-next-page/1.0/test/validator-amp-next-page-templates.html:46:4 The tag 'footer', a child tag of 'amp-next-page with src attribute', does not satisfy one of the acceptable reference points: AMP-NEXT-PAGE > [separator], AMP-NEXT-PAGE > [footer], AMP-NEXT-PAGE > SCRIPT[type=application/json]. (see https://amp.dev/documentation/components/amp-next-page)
+amp-next-page/1.0/test/validator-amp-next-page-templates.html:48:4 The tag 'footer', a child tag of 'amp-next-page with src attribute', does not satisfy one of the acceptable reference points: AMP-NEXT-PAGE > [separator], AMP-NEXT-PAGE > [footer], AMP-NEXT-PAGE > SCRIPT[type=application/json]. (see https://amp.dev/documentation/components/amp-next-page)
 |          Footer
 |      </footer>   
 |    </amp-next-page>

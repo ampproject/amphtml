@@ -13,7 +13,9 @@ PASS
 |  </head>
 |  <body>
 |    <h2>Content discovery</h2>
+|    <!-- Valid: Correct use of amp-next-page with next-page-hidden -->
 |    <div next-page-hide></div>
+|    <!-- Valid: Correct use of amp-next-page with next-page-replace -->
 |    <div next-page-replace></div>
 |  </body>
 |  </html>
