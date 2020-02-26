@@ -37,14 +37,13 @@ import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {WindowInterface} from '../../../../src/window-interface';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
 const AMP_URL = 'myAMPurl.amp';
 
 describes.realWin('AmpFetcher', {amp: true}, env => {
-  let win;
-  let ampdoc;
   let fetcher;
   let xhr;
 
@@ -72,24 +71,24 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
   const AmpFetcher = getAmpFetcherClassForTesting();
 
   beforeEach(() => {
-    win = env.win;
-    ampdoc = env.ampdoc;
-    fetcher = new AmpFetcher(ampdoc.win);
-    xhr = Services.xhrFor(env.win);
+    const {win} = env.ampdoc;
+    fetcher = new AmpFetcher(win);
+    xhr = Services.xhrFor(win);
   });
 
   it('should support beacon when beacon supported', async () => {
     const expectedBlob = new Blob([expectedBodyString], {type: contentType});
-    env.sandbox.stub(win.navigator, 'sendBeacon').callsFake((url, body) => {
-      expect(url).to.equal(sentUrl);
-      expect(body).to.deep.equal(expectedBlob);
+    env.sandbox.stub(WindowInterface, 'getSendBeacon').callsFake(() => {
+      return (url, body) => {
+        expect(url).to.equal(sentUrl);
+        expect(body).to.deep.equal(expectedBlob);
+      };
     });
     fetcher.sendBeacon(sentUrl, sentMessage);
   });
 
   it('should support beacon when beacon not supported', async () => {
-    const tempFun = win.navigator.sendBeacon;
-    win.navigator.sendBeacon = null;
+    env.sandbox.stub(WindowInterface, 'getSendBeacon').callsFake(() => null);
     env.sandbox.stub(xhr, 'fetch').callsFake((url, init) => {
       expect(url).to.equal(sentUrl);
       expect(init).to.deep.equal({
@@ -101,9 +100,6 @@ describes.realWin('AmpFetcher', {amp: true}, env => {
     });
 
     fetcher.sendBeacon(sentUrl, sentMessage);
-
-    // Restore the original function so we don't break Xhr tests throughout AMP.
-    win.navigator.sendBeacon = tempFun;
   });
 });
 

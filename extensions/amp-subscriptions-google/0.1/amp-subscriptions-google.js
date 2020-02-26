@@ -36,6 +36,7 @@ import {
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
 import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
+import {WindowInterface} from '../../../src/window-interface';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -626,11 +627,11 @@ class AmpFetcher {
     const body =
       'f.req=' +
       JSON.stringify(/** @type {JsonObject} */ (data.toArray(false)));
-    const {navigator} = this.win_;
+    const sendBeacon = WindowInterface.getSendBeacon(this.win_);
 
-    if (navigator.sendBeacon) {
+    if (sendBeacon) {
       const blob = new Blob([body], {type: contentType});
-      navigator.sendBeacon(url, blob);
+      sendBeacon(url, blob);
       return;
     }
 
