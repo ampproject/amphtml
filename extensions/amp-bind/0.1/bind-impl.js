@@ -555,8 +555,7 @@ export class Bind {
 
   /**
    * Returns a copy of the global state for a given field-based expression.
-   * If called during initial load and pointed to an amp-state, this will wait
-   * for it to finish its fetch.
+   * It will wait for relevant amp-state components to finish fetching before returning.
    *
    * e.g. "foo.bar".
    * @param {string} expr
