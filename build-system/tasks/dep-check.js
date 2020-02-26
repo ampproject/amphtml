@@ -139,8 +139,7 @@ Rule.prototype.matchBadDeps = function(moduleName, deps) {
             continue;
           }
 
-          const inWhitelist = dep == whitelistedDep;
-          if (inWhitelist) {
+          if (dep == whitelistedDep) {
             this.unusedAllowlistEntries.delete(entry);
             return;
           }
