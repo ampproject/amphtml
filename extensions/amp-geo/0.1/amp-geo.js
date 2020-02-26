@@ -53,7 +53,6 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {isJsonScriptTag} from '../../../src/dom';
-import {isProxyOrigin, isSecureUrlDeprecated} from '../../../src/url';
 import {tryParseJson} from '../../../src/json';
 import {urls} from '../../../src/config';
 
@@ -243,13 +242,8 @@ export class AmpGeo extends AMP.BaseElement {
       return null;
     }
 
-    if (!isSecureUrlDeprecated(url)) {
+    if (!Services.urlForDoc(this.element).isSecure(url)) {
       user().error(TAG, 'geoApiUrl must be secure (https)');
-      return null;
-    }
-
-    if (isProxyOrigin(url)) {
-      user().error(TAG, 'geoApiUrl cannot point to the AMP project CDN');
       return null;
     }
 
