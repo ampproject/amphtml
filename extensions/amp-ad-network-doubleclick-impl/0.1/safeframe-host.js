@@ -69,8 +69,7 @@ const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
  */
 export function safeframeListener(event) {
   const data = tryParseJson(getData(event));
-  /** Only process messages that are valid Safeframe messages */
-  if (!event.origin.endsWith('googlesyndication.com') || !data) {
+  if (!data) {
     return;
   }
   const payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]) || {};
