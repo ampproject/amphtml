@@ -107,7 +107,7 @@ through the signature `ampIntegration.listenTo('jwplayer', myJwplayer)`. The `am
 
 ```js
 (window.AmpVideoIframe = window.AmpVideoIframe || []).push(amp => {
-  amp.listenTo('videojs', document.querySelector('#my-video'));
+  amp.listenTo('jwplayer', jwplayer('my-video'));
 });
 ```
 
