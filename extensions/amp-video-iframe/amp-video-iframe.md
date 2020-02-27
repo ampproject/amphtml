@@ -453,7 +453,7 @@ Use the `referrerpolicy` attribute to set a [referrerpolicy](https://developer.m
 
 ### `data-param-*` (optional)
 
-The `data-param-*` attributes are added as query parameters to the iframe's `src`. They may be used to pass custom values through to the player document.
+The `data-param-*` attributes are added as query parameters to the `src` attributes of the `iframe` and the `poster` image. They may be used to pass custom values through to the player document.
 
 Keys and values will be URI encoded. Keys will be camel cased:
 
