@@ -190,12 +190,12 @@ export class AmpVideoIntegration {
 
   /**
    * @param {string} type
-   * @param {*} obj
+   * @param {*=} opt_obj
    * @param {function()=} opt_initializer For VideoJS, this optionally takes a
-   *    reference to the `videojs` function. If not provided, this reference
-   *    will be taken from the `window` object.
+   * reference to the `videojs` function. If not provided, this reference
+   * will be taken from the `window` object.
    */
-  listenTo(type, obj, opt_initializer) {
+  listenTo(type, opt_obj, opt_initializer) {
     userAssert(
       !this.usedListenToHelper_,
       '`listenTo` is meant to be used once per page.'
@@ -203,17 +203,19 @@ export class AmpVideoIntegration {
     const types = {
       'jwplayer': () => {
         userAssert(
-          obj.on,
-          'jwplayer integration takes a jwplayer instance as first argument.'
-        );
-        userAssert(
           !opt_initializer,
-          'jwplayer integration does not take an initializer.'
+          "listenTo('jwplayer', opt_instance) does not take an initializer."
         );
-        this.listenToJwPlayer_(obj);
+        this.listenToJwPlayer_(this.getJwplayer_(opt_obj));
       },
       'videojs': () => {
-        this.listenToVideoJs_(obj, opt_initializer);
+        this.listenToVideoJs_(
+          userAssert(
+            opt_obj,
+            "listenTo('videojs', element) expects a second argument"
+          ),
+          opt_initializer
+        );
       },
     };
     userAssert(
@@ -222,6 +224,26 @@ export class AmpVideoIntegration {
       `Valid types are [${Object.keys(types).join(', ')}]`
     )(); // notice the call here ;)
     this.usedListenToHelper_ = true;
+  }
+
+  /**
+   * Checks comformity for opt_player, or obtains global singleton instance.
+   * @param {?JwplayerPartialInterfaceDef=} opt_player
+   * @return {!JwplayerPartialInterfaceDef}
+   */
+  getJwplayer_(opt_player) {
+    if (opt_player) {
+      userAssert(
+        opt_player.on,
+        "listenTo('jwplayer', myjwplayer) takes a jwplayer instance as ",
+        'second argument'
+      );
+      return opt_player;
+    }
+    return userAssert(
+      this.win_.jwplayer,
+      "listenTo('jwplayer') expects a global jwplayer() in window."
+    )(); // notice the call here ;)
   }
 
   /**
