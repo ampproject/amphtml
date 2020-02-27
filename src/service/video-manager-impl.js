@@ -223,7 +223,14 @@ export class VideoManager {
     registerAction('pause', () => video.pause());
     registerAction('mute', () => video.mute());
     registerAction('unmute', () => video.unmute());
-    registerAction('fullscreen', () => video.fullscreenEnter());
+
+    // fullscreen/fullscreenenter are a special case.
+    // fullscreenenter is kept as a standard name for symmetry
+    // with internal interfaces, while fullscreen is an undocumented alias
+    // for backwards compatibility.
+    const fullscreenEnter = video.fullscreenEnter.bind(video);
+    registerAction('fullscreen', fullscreenEnter);
+    registerAction('fullscreenenter', fullscreenEnter);
 
     /**
      * @param {string} action
