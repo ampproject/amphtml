@@ -74,6 +74,15 @@ describe
       const win = {
         document: {
           nodeType: /* DOCUMENT */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -102,6 +111,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -274,22 +292,16 @@ describe
       }
     );
 
-    it('should provide the metaTags', () => {
+    it('should provide the viewport', () => {
       return getWin(
         {},
         {
-          'theme-color': ['#123456'],
+          'viewport': ['width=device-width'],
         }
       ).then(win => {
-        expect(
-          Services.documentInfoForDoc(win.document).metaTags['theme-color']
-        ).to.equal('#123456');
-      });
-    });
-
-    it('should provide empty metaTags if there are no meta tags', () => {
-      return getWin().then(win => {
-        expect(Services.documentInfoForDoc(win.document).metaTags).to.be.empty;
+        expect(Services.documentInfoForDoc(win.document).viewport).to.equal(
+          'width=device-width'
+        );
       });
     });
 
@@ -298,6 +310,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -327,6 +348,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
@@ -355,6 +385,15 @@ describe
       const win = {
         document: {
           nodeType: /* document */ 9,
+          head: {
+            nodeType: /* ELEMENT */ 1,
+            querySelector() {
+              return null;
+            },
+            querySelectorAll() {
+              return [];
+            },
+          },
           querySelector() {
             return 'http://www.origin.com/foo/?f=0';
           },
