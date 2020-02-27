@@ -21,7 +21,7 @@
 #include <string_view>
 #include <tuple>
 
-#include "htmlparser/node.h"
+#include "node.h"
 
 namespace htmlparser {
 

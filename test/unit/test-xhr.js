@@ -933,6 +933,7 @@ describe
       });
 
       it('should be rejected when response undefined', () => {
+        expectAsyncConsoleError(/Object expected/);
         sendMessageStub.returns(Promise.resolve());
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -942,6 +943,7 @@ describe
       });
 
       it('should be rejected when response null', () => {
+        expectAsyncConsoleError(/Object expected/);
         sendMessageStub.returns(Promise.resolve(null));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
@@ -951,6 +953,7 @@ describe
       });
 
       it('should be rejected when response is string', () => {
+        expectAsyncConsoleError(/Object expected/);
         sendMessageStub.returns(Promise.resolve('response text'));
         const xhr = xhrServiceForTesting(interceptionEnabledWin);
 
