@@ -129,9 +129,9 @@ This attribute is required for `method=POST`, and is optional for `method=GET`.
 
 The value for `action-xhr` can be the same or a different endpoint than `action` and has the same `action` requirements above.
 
-To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
-
 [filter formats="websites, ads"]
+
+To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
 
 ##### data-initialize-from-url (optional)
 
