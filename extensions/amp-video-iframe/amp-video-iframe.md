@@ -389,7 +389,7 @@ Requirements to contribute to `<amp-video-iframe>`:
 </amp-video-iframe>
 ```
 
-For most video providers, <amp-video-iframe> provides enough tools for common playback actions. See methods and events to confirm. Refer to the  vendor player spec to confirm amp-video-iframe fits your needs. 
+For most video providers, `<amp-video-iframe>` provides enough tools for common playback actions. See methods and events to confirm. Refer to the  vendor player spec to confirm amp-video-iframe fits your needs. 
 
 ### Disallowed usage of `<amp-video-iframe>`
 
