@@ -387,16 +387,6 @@ export class VideoManager {
   isRollingAd(videoOrElement) {
     return this.getEntry_(videoOrElement).isRollingAd();
   }
-
-  /**
-   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
-   * @return {boolean}
-   */
-  isPlaying(videoOrElement) {
-    return (
-      this.getEntry_(videoOrElement).getPlayingState() !== PlayingStates.PAUSED
-    );
-  }
 }
 
 /**

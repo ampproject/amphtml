@@ -421,7 +421,7 @@ export class Controls {
 
     const isRollingAd = manager.isRollingAd(video);
     const isMuted = manager.isMuted(video);
-    const isPlaying = manager.isPlaying(video);
+    const isPlaying = manager.getPlayingState(video) !== PlayingStates.PAUSED;
 
     const {container, overlay} = this;
 
