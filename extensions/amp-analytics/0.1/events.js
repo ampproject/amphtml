@@ -1427,7 +1427,7 @@ export class VisibilityTracker extends EventTracker {
     let createReportReadyPromiseFunc = null;
     const multiSelectorVisibilityOn = isExperimentOn(
       this.root.ampdoc.win,
-      'multi-selector-visibility-trigger'
+      'visibility-trigger-improvements'
     );
     if (reportWhenSpec) {
       userAssert(

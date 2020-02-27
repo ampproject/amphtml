@@ -306,8 +306,8 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
   },
   {
-    id: 'multi-selector-visibility-trigger',
-    name: 'AMP Analytics Multi-selector Visibility Trigger',
+    id: 'visibility-trigger-improvements',
+    name: 'AMP Analytics Visibility Trigger Improvements',
     spec: 'https://github.com/ampproject/amphtml/issues/26823',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
   },
