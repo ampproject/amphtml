@@ -445,7 +445,7 @@ Include the `implements-media-session` attribute if the document inside the ifra
 
 ### `implements-rotate-to-fullscreen` (optional)
 
-Include the `mplements-rotate-to-fullscreen` attribute if the document inside the iframe implements rotate-to-fullscreen independently.
+Include the `implements-rotate-to-fullscreen` attribute if the document inside the iframe implements rotate-to-fullscreen independently.
 
 ### `referrerpolicy` (optional)
 
