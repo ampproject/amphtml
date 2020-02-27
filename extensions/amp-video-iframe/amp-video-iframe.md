@@ -397,7 +397,7 @@ Use `<amp-video-iframe>` to embed a video player. Do not use it to embed a video
 
 #### Embed a video directly 
 
-Use `<amp-video>` to directly embed a video on the AMP document.
+Use [`<amp-video>`](https://go.amp.dev/c/amp-video) to directly embed a video on the AMP document.
 
 #### Advertising 
 
