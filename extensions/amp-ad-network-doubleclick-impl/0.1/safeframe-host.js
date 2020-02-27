@@ -61,9 +61,6 @@ export const SERVICE = {
 /** @private {string} */
 const TAG = 'AMP-DOUBLECLICK-SAFEFRAME';
 
-/** @const {string} */
-export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
-
 /**
  * Event listener callback for message events. If message is a Safeframe
  * message, handles the message. This listener is registered within
@@ -73,7 +70,7 @@ export const SAFEFRAME_ORIGIN = 'https://tpc.googlesyndication.com';
 export function safeframeListener(event) {
   const data = tryParseJson(getData(event));
   /** Only process messages that are valid Safeframe messages */
-  if (event.origin != SAFEFRAME_ORIGIN || !data) {
+  if (!event.origin.endsWith('googlesyndication.com') || !data) {
     return;
   }
   const payload = tryParseJson(data[MESSAGE_FIELDS.PAYLOAD]) || {};
@@ -465,7 +462,7 @@ export class SafeframeHostApi {
     message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.endpointIdentity_;
     this.iframe_.contentWindow./*OK*/ postMessage(
       JSON.stringify(message),
-      SAFEFRAME_ORIGIN
+      "*"
     );
   }
 
@@ -769,7 +766,7 @@ export class SafeframeHostApi {
     this.baseInstance_.fireFluidDelayedImpression();
     this.iframe_.contentWindow./*OK*/ postMessage(
       JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
-      SAFEFRAME_ORIGIN
+      "*"
     );
   }
 
