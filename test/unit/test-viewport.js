@@ -191,6 +191,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should not set singledoc class', () => {
+      expectAsyncConsoleError(/Expected service/);
       env.sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
       new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.not.have.class('i-amphtml-singledoc');
