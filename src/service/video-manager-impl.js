@@ -317,11 +317,11 @@ export class VideoManager {
     return this.getAutoFullscreenManager_();
   }
 
-  // TODO(alanorozco): For getters below, let's expose VideoEntry instead and
-  // use directly. This is better for size and sanity. Users can also then
-  // keep the entry reference for their own use.
+  // TODO(go.amp.dev/issue/27010): For getters below, let's expose VideoEntry
+  // instead and use directly. This is better for size and sanity. Users can
+  // also then keep the entry reference for their own use.
   // (Can't expose yet due to package-level methods to be restructured, e.g
-  // videoLoaded())
+  // videoLoaded(). See issue)
 
   /**
    * Gets the current analytics details property for the given video.
@@ -383,8 +383,7 @@ export class VideoManager {
    *   isPlaying: boolean,
    *   userInteracted: boolean,
    * }}
-   * TODO(alanorozco): These should be part of an exposed VideoEntry instead,
-   * but we need to restructure public methods first.
+   * TODO(go.amp.dev/issue/27010): These should be part of an exposed VideoEntry
    */
   getState(videoOrElement) {
     const entry = devAssert(this.getEntry_(videoOrElement));

@@ -348,8 +348,7 @@ export class Controls {
    *   isPlaying: boolean,
    * }} state
    * @private
-   * TODO(alanorozco): Bookkeep entry before showing on next frame as a small
-   * optimization. If using a VideoEntry then we can destructure that instead.
+   * TODO(go.amp.dev/issue/27010): Bookkeep VideoEntry instead.
    */
   get videoState_() {
     const video = dev().assert(this.video_);
