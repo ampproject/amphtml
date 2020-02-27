@@ -27,7 +27,7 @@ limitations under the License.
 <figure class="centered-fig">
   <amp-anim alt="amp-story-player example" width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif">
     <noscript>
-    <img alt="amp-story-player example" src="https://github.com/ampproject/spec/img/amp-story-player.gif" />
+    <img alt="amp-story-player example" src="https://github.com/ampproject/amphtml/raw/master/spec/img/amp-story-player.gif" />
   </noscript>
   </amp-anim>
 </figure>
