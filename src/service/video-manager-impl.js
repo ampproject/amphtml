@@ -288,42 +288,40 @@ export class VideoManager {
   }
 
   /**
-   * Returns the entry in the video manager corresponding to the video or
-   * element provided
-   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+   * Returns the entry in the video manager corresponding to the video
+   * provided
+   *
+   * @param {!../video-interface.VideoInterface} video
    * @return {VideoEntry} entry
+   * @private
    */
-  getEntry_(videoOrElement) {
-    if (isEntryFor(this.lastFoundEntry_, videoOrElement)) {
-      return this.lastFoundEntry_;
-    }
-
+  getEntryForVideo_(video) {
     for (let i = 0; i < this.entries_.length; i++) {
-      const entry = this.entries_[i];
-      if (isEntryFor(entry, videoOrElement)) {
-        this.lastFoundEntry_ = entry;
-        return entry;
+      if (this.entries_[i].video === video) {
+        return this.entries_[i];
       }
     }
-
-    return devAssert(
-      null,
-      '%s not registered to VideoManager',
-      videoOrElement.element || videoOrElement
-    );
-  }
-
-  /** @param {!VideoEntry} entry */
-  registerForAutoFullscreen(entry) {
-    this.getAutoFullscreenManager_().register(entry);
+    dev().error(TAG, 'video is not registered to this video manager');
+    return null;
   }
 
   /**
-   * @return {!AutoFullscreenManager}
-   * @visibleForTesting
+   * Returns the entry in the video manager corresponding to the element
+   * provided
+   *
+   * @param {!AmpElement} element
+   * @return {VideoEntry} entry
+   * @private
    */
-  getAutoFullscreenManagerForTesting_() {
-    return this.getAutoFullscreenManager_();
+  getEntryForElement_(element) {
+    for (let i = 0; i < this.entries_.length; i++) {
+      const entry = this.entries_[i];
+      if (entry.video.element === element) {
+        return entry;
+      }
+    }
+    dev().error(TAG, 'video is not registered to this video manager');
+    return null;
   }
 
   /**
