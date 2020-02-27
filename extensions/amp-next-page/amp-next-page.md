@@ -34,7 +34,7 @@ limitations under the License.
 
 ## Usage
 
-The `<amp-next-page>` component loads content pages one after another creating an infinite-scroll experience.
+The `<amp-next-page>` component loads content pages one after another creating an infinite scroll experience.
 
 ### Configure and load pages
 
@@ -186,9 +186,7 @@ The `<amp-next-page>` component renders a separator between each document. The d
 
 #### Custom separator
 
-Customize the separator by defining an element with the `separator` attribute inside the `<amp-next-page>` component. Suggest remaining pages by templating the custom separator with `amp-mustache` or another templating engine. Then pass it the array of documents by including the `title`, `url`, and `image` in the templated custom solution.
-
-Alternatively, it is possible to create a custom separator by defining an element with the `separator` attribute inside the `<amp-next-page>` component. Display information about the next article by templating the custom separator with `amp-mustache` or another templating engine. Whem using templates, the `title`, `url` and `image` of the upcoming article are passed to the template.
+Alternatively, it is possible to create a custom separator by defining an element with the `separator` attribute inside the `<amp-next-page>` component. Display information about the next article by templating the custom separator with `amp-mustache` or another templating engine. When using templates, the `title`, `url` and `image` of the upcoming article are passed to the template.
 
 ```html
 <amp-next-page src="https://example.com/config.json">
@@ -208,7 +206,7 @@ Alternatively, it is possible to create a custom separator by defining an elemen
 </amp-next-page>
 ```
 
-### Element hiding/replacing
+### Preventing page element duplication
 
 Hide elements which are common across multiple loaded pages by using the `next-page-hide` attribute. Hiding certain elements helps create an uncluttered infinite scroll experience. Such considerations include:
 
