@@ -1078,15 +1078,7 @@ export class UrlReplacements {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
 
-    const isAllowedOrigin = this.isAllowedOrigin_(url);
-    if (additionalUrlParameters) {
-      additionalUrlParameters = isAllowedOrigin
-        ? this.expandSyncIfWhitelist_(additionalUrlParameters, whitelist)
-        : additionalUrlParameters;
-      href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
-    }
-
-    if (!isAllowedOrigin) {
+    if (!this.isAllowedOrigin_(url)) {
       if (whitelist) {
         user().warn(
           'URL',
@@ -1097,6 +1089,14 @@ export class UrlReplacements {
         );
       }
       return (element.href = href);
+    }
+
+    if (additionalUrlParameters) {
+      additionalUrlParameters = this.expandSyncIfAllowedList_(
+        additionalUrlParameters,
+        whitelist
+      );
+      href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
     }
 
     // Note that defaultUrlParams is treated differently than
@@ -1120,23 +1120,23 @@ export class UrlReplacements {
       href = addParamsToUrl(href, parseQueryString(defaultUrlParams));
     }
 
-    href = this.expandSyncIfWhitelist_(href, whitelist);
+    href = this.expandSyncIfAllowedList_(href, whitelist);
 
     return (element.href = href);
   }
 
   /**
    * @param {string} href
-   * @param {!Object<string, boolean>|undefined} whitelist
+   * @param {!Object<string, boolean>|undefined} allowedList
    * @return {string}
    */
-  expandSyncIfWhitelist_(href, whitelist) {
-    return whitelist
+  expandSyncIfAllowedList_(href, allowedList) {
+    return allowedList
       ? this.expandUrlSync(
           href,
           /* opt_bindings */ undefined,
           /* opt_collectVars */ undefined,
-          /* opt_whitelist */ whitelist
+          /* opt_whitelist */ allowedList
         )
       : href;
   }
