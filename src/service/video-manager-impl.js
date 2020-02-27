@@ -225,9 +225,9 @@ export class VideoManager {
     registerAction('unmute', () => video.unmute());
 
     // fullscreen/fullscreenenter are a special case.
-    // fullscreenenter is kept as a standard name for symmetry
-    // with internal interfaces, while fullscreen is an undocumented alias
-    // for backwards compatibility.
+    // - fullscreenenter is kept as a standard name for symmetry with internal
+    // internal interfaceswhile
+    // - fullscreen is an undocumented alias for backwards compatibility.
     const fullscreenEnter = video.fullscreenEnter.bind(video);
     registerAction('fullscreen', fullscreenEnter);
     registerAction('fullscreenenter', fullscreenEnter);
@@ -288,40 +288,42 @@ export class VideoManager {
   }
 
   /**
-   * Returns the entry in the video manager corresponding to the video
-   * provided
-   *
-   * @param {!../video-interface.VideoInterface} video
+   * Returns the entry in the video manager corresponding to the video or
+   * element provided
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
    * @return {VideoEntry} entry
-   * @private
    */
-  getEntryForVideo_(video) {
-    for (let i = 0; i < this.entries_.length; i++) {
-      if (this.entries_[i].video === video) {
-        return this.entries_[i];
-      }
+  getEntry_(videoOrElement) {
+    if (isEntryFor(this.lastFoundEntry_, videoOrElement)) {
+      return this.lastFoundEntry_;
     }
-    dev().error(TAG, 'video is not registered to this video manager');
-    return null;
-  }
 
-  /**
-   * Returns the entry in the video manager corresponding to the element
-   * provided
-   *
-   * @param {!AmpElement} element
-   * @return {VideoEntry} entry
-   * @private
-   */
-  getEntryForElement_(element) {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
-      if (entry.video.element === element) {
+      if (isEntryFor(entry, videoOrElement)) {
+        this.lastFoundEntry_ = entry;
         return entry;
       }
     }
-    dev().error(TAG, 'video is not registered to this video manager');
-    return null;
+
+    return devAssert(
+      null,
+      '%s not registered to VideoManager',
+      videoOrElement.element || videoOrElement
+    );
+  }
+
+  /** @param {!VideoEntry} entry */
+  registerForAutoFullscreen(entry) {
+    this.getAutoFullscreenManager_().register(entry);
+  }
+
+  /**
+   * @return {!AutoFullscreenManager}
+   * @visibleForTesting
+   */
+  getAutoFullscreenManagerForTesting_() {
+    return this.getAutoFullscreenManager_();
   }
 
   /**
