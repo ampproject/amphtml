@@ -185,7 +185,7 @@ The following communication methods are available:
 
 - [`method()`](#method) to control playback.
 - [`postEvent()`](#postEvent) to inform the host document about playback events.
-- [`getIntersection`](#getIntersection) to get video's viewability on the host document.
+- [`getIntersection()`](#getIntersection) to get video's viewability on the host document.
 - [`getMetadata`](#getMetadata) to get information about the host document.
 
 ##### <a name="method"></a> `method(name, callback)`
