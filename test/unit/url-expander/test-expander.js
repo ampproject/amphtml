@@ -16,7 +16,6 @@
 
 import {Expander} from '../../../src/service/url-expander/expander';
 import {GlobalVariableSource} from '../../../src/service/url-replacements-impl';
-import {createElementWithAttributes} from '../../../src/dom';
 import {macroTask} from '../../../testing/yield';
 
 describes.realWin(
@@ -100,12 +99,9 @@ describes.realWin(
       };
 
       function createExpanderWithWhitelist(whitelist, mockBindings) {
-        env.win.document.head.appendChild(
-          createElementWithAttributes(env.win.document, 'meta', {
-            name: 'amp-allowed-url-macros',
-            content: whitelist,
-          })
-        );
+        env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+          'amp-allowed-url-macros': whitelist,
+        });
 
         variableSource = new GlobalVariableSource(env.ampdoc);
         return new Expander(variableSource, mockBindings);

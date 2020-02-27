@@ -19,8 +19,6 @@ import {
   getTimingDataAsync,
 } from '../../src/service/variable-source';
 
-import {createElementWithAttributes} from '../../src/dom';
-
 describes.fakeWin(
   'VariableSource',
   {
@@ -130,12 +128,9 @@ describes.fakeWin(
       env => {
         let variableSource;
         beforeEach(() => {
-          env.win.document.head.appendChild(
-            createElementWithAttributes(env.win.document, 'meta', {
-              name: 'amp-allowed-url-macros',
-              content: 'ABC,ABCD,CANONICAL',
-            })
-          );
+          env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+            'amp-allowed-url-macros': 'ABC,ABCD,CANONICAL',
+          });
           variableSource = new VariableSource(env.ampdoc);
         });
 
@@ -168,12 +163,9 @@ describes.fakeWin(
     );
 
     it('Should not work with empty variable whitelist', () => {
-      env.win.document.head.appendChild(
-        createElementWithAttributes(env.win.document, 'meta', {
-          name: 'amp-allowed-url-macros',
-          content: '',
-        })
-      );
+      env.sandbox.stub(env.ampdoc, 'getMeta').returns({
+        'amp-allowed-url-macros': '',
+      });
       const variableSource = new VariableSource(env.ampdoc);
 
       variableSource.setAsync('RANDOM', () => Promise.resolve('0.1234'));
