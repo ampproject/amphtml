@@ -235,8 +235,9 @@ export class AmpGeo extends AMP.BaseElement {
    * Ensure API URL definition is usable and cast its type
    * @param {*} url
    * @return {?string}
+   * @private
    */
-  validateApiUrl(url) {
+  validateApiUrl_(url) {
     if (typeof url !== 'string') {
       user().error(TAG, 'geoApiUrl must be a string URL');
       return null;
@@ -276,9 +277,10 @@ export class AmpGeo extends AMP.BaseElement {
    * }
    *
    * @return {Promise<?string>}
+   * @private
    */
   fetchCountry_() {
-    const url = this.validateApiUrl(urls.geoApi);
+    const url = this.validateApiUrl_(urls.geoApi);
     if (!url) {
       return Promise.resolve(null);
     }
