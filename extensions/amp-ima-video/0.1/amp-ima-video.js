@@ -18,7 +18,6 @@ import {Deferred} from '../../../src/utils/promise';
 import {ImaPlayerData} from '../../../ads/google/ima-player-data';
 import {Services} from '../../../src/services';
 import {VideoEvents} from '../../../src/video-interface';
-import {addUnsafeAllowAutoplay} from '../../../src/iframe-video';
 import {assertHttpsUrl} from '../../../src/url';
 import {
   childElementsByTag,
@@ -182,10 +181,6 @@ class AmpImaVideo extends AMP.BaseElement {
 
       this.applyFillContent(iframe);
 
-      // This is temporary until M74 launches.
-      // TODO(aghassemi, #21247)
-      addUnsafeAllowAutoplay(iframe);
-
       this.iframe_ = iframe;
 
       const deferred = new Deferred();
@@ -241,9 +236,10 @@ class AmpImaVideo extends AMP.BaseElement {
    * fires.
    * @param {string} command
    * @param {Object=} opt_args
+   * @param {string=} opt_allow
    * @private
    */
-  sendCommand_(command, opt_args) {
+  sendCommand_(command, opt_args, opt_allow) {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.playerReadyPromise_.then(() => {
         this.iframe_.contentWindow./*OK*/ postMessage(
@@ -254,7 +250,7 @@ class AmpImaVideo extends AMP.BaseElement {
               'args': opt_args || '',
             })
           ),
-          '*'
+          {targetOrigin: '*', allow: opt_allow}
         );
       });
     }
@@ -315,23 +311,31 @@ class AmpImaVideo extends AMP.BaseElement {
   }
 
   /** @override */
-  play(unusedIsAutoplay) {
-    this.sendCommand_('playVideo');
+  play(isAutoplay) {
+    this.sendCommand_(
+      'playVideo',
+      null /** opt_args */,
+      isAutoplay ? 'autoplay' : '' /** opt_allow */
+    );
   }
 
   /** @override */
   pause() {
-    this.sendCommand_('pauseVideo');
+    this.sendCommand_('pauseVideo', null /** opt_args */, '' /** opt_allow */);
   }
 
   /** @override */
   mute() {
-    this.sendCommand_('mute');
+    this.sendCommand_('mute', null /** opt_args */, '' /** opt_allow */);
   }
 
   /** @override */
   unmute() {
-    this.sendCommand_('unMute');
+    this.sendCommand_(
+      'unMute',
+      null /** opt_args */,
+      'autoplay' /** opt_allow */
+    );
   }
 
   /** @override */
