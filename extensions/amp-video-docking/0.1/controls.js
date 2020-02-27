@@ -341,21 +341,6 @@ export class Controls {
     );
   }
 
-  /**
-   * @return {{
-   *   isMuted: boolean,
-   *   isRollingAd: boolean,
-   *   isPlaying: boolean,
-   * }} state
-   * @private
-   * TODO(go.amp.dev/issue/27010): Bookkeep VideoEntry instead.
-   */
-  get videoState_() {
-    const video = dev().assert(this.video_);
-    const manager = Services.videoManagerForDoc(this.ampdoc_);
-    return manager.getState(video);
-  }
-
   /** @private */
   onPlay_() {
     const {playButton_, pauseButton_} = this;
@@ -431,7 +416,13 @@ export class Controls {
 
   /** @private */
   showOnNextAnimationFrame_() {
-    const {isRollingAd, isMuted, isPlaying} = this.videoState_;
+    const manager = Services.videoManagerForDoc(this.ampdoc_);
+    const video = devAssert(this.video_);
+
+    const isRollingAd = manager.isRollingAd(video);
+    const isMuted = manager.isMuted(video);
+    const isPlaying = manager.isPlaying(video);
+
     const {container, overlay} = this;
 
     toggle(container, true);

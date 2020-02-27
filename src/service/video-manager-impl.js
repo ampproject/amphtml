@@ -93,6 +93,13 @@ export class VideoManager {
     /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
 
+    /**
+     * Keeps last found entry as a small optimization for multiple state calls
+     * during one task.
+     * @private {?VideoEntry}
+     */
+    this.lastFoundEntry_ = null;
+
     /** @private {boolean} */
     this.scrollListenerInstalled_ = false;
 
@@ -287,12 +294,14 @@ export class VideoManager {
    * @return {VideoEntry} entry
    */
   getEntry_(videoOrElement) {
+    const lastFoundEntry = this.lastFoundEntry_;
+    if (lastFoundEntry && isEntryFor(lastFoundEntry, videoOrElement)) {
+      return lastFoundEntry;
+    }
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
-      if (
-        entry.video === videoOrElement ||
-        entry.video.element === videoOrElement
-      ) {
+      if (isEntryFor(entry, videoOrElement)) {
+        this.lastFoundEntry_ = entry;
         return entry;
       }
     }
@@ -317,12 +326,6 @@ export class VideoManager {
     return this.getAutoFullscreenManager_();
   }
 
-  // TODO(go.amp.dev/issue/27010): For getters below, let's expose VideoEntry
-  // instead and use directly. This is better for size and sanity. Users can
-  // also then keep the entry reference for their own use.
-  // (Can't expose yet due to package-level methods to be restructured, e.g
-  // videoLoaded(). See issue)
-
   /**
    * Gets the current analytics details property for the given video.
    * Fails silently if the video is not registered.
@@ -342,6 +345,12 @@ export class VideoManager {
       : Promise.resolve()
     ).then(details => (details ? details[property] : ''));
   }
+
+  // TODO(go.amp.dev/issue/27010): For getters below, let's expose VideoEntry
+  // instead and use directly. This is better for size and sanity. Users can
+  // also then keep the entry reference for their own use.
+  // (Can't expose yet due to package-level methods to be restructured, e.g
+  // videoLoaded(). See issue)
 
   /**
    * Returns whether the video is paused or playing after the user interacted
@@ -370,31 +379,27 @@ export class VideoManager {
     return this.getEntry_(videoOrElement).userInteracted();
   }
 
-  /** @param {*} unusedVideo */
-  isRollingAd(unusedVideo) {
-    devAssert(false, "Don't implement. Use .getState()");
+  /**
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+   * @return {boolean}
+   */
+  isRollingAd(videoOrElement) {
+    return this.getEntry_(videoOrElement).isRollingAd();
   }
 
   /**
    * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
-   * @return {{
-   *   isMuted: boolean,
-   *   isRollingAd: boolean,
-   *   isPlaying: boolean,
-   *   userInteracted: boolean,
-   * }}
-   * TODO(go.amp.dev/issue/27010): These should be part of an exposed VideoEntry
+   * @return {boolean}
    */
-  getState(videoOrElement) {
-    const entry = devAssert(this.getEntry_(videoOrElement));
-    return {
-      isPlaying: entry.getPlayingState() !== PlayingStates.PAUSED,
-      isRollingAd: entry.isRollingAd(),
-      isMuted: entry.isMuted(),
-      userInteracted: entry.userInteracted(),
-    };
+  isPlaying(videoOrElement) {
+    return (
+      this.getEntry_(videoOrElement).getPlayingState() !== PlayingStates.PAUSED
+    );
   }
 }
+
+const isEntryFor = (entry, videoOrElement) =>
+  entry.video === videoOrElement || entry.video.element === videoOrElement;
 
 /**
  * VideoEntry represents an entry in the VideoManager's list.
