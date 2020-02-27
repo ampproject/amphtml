@@ -294,9 +294,8 @@ export class VideoManager {
    * @return {VideoEntry} entry
    */
   getEntry_(videoOrElement) {
-    const lastFoundEntry = this.lastFoundEntry_;
-    if (lastFoundEntry && isEntryFor(lastFoundEntry, videoOrElement)) {
-      return lastFoundEntry;
+    if (isEntryFor(this.lastFoundEntry_, videoOrElement)) {
+      return this.lastFoundEntry_;
     }
 
     for (let i = 0; i < this.entries_.length; i++) {
@@ -390,12 +389,13 @@ export class VideoManager {
 }
 
 /**
- * @param {!VideoEntry} entry
- * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+ * @param {?VideoEntry=} entry
+ * @param {?../video-interface.VideoOrBaseElementDef|!Element=} videoOrElement
  * @return {boolean}
  */
 const isEntryFor = (entry, videoOrElement) =>
-  entry.video === videoOrElement || entry.video.element === videoOrElement;
+  entry &&
+  (entry.video === videoOrElement || entry.video.element === videoOrElement);
 
 /**
  * VideoEntry represents an entry in the VideoManager's list.
