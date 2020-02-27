@@ -477,9 +477,6 @@ describes.realWin(
 
         it('should show error and send messages back to iframe', async () => {
           const errorSpy = env.sandbox.spy(user(), 'warn');
-          const windowMock = window.sandbox.mock({
-            postMessage: () => {},
-          });
 
           consentUI = new ConsentUI(mockInstance, {
             'promptUISrc': 'https//promptUISrc',
@@ -489,21 +486,29 @@ describes.realWin(
           consentUI.iframeReady_.resolve();
           await macroTask();
 
+          const windowSpy = env.sandbox.spy(
+            consentUI.ui_.contentWindow,
+            'postMessage'
+          );
+
           // Unsuccessful fullscreen event
           sendMessageConsentUi(consentUI, 'enter-fullscreen');
 
           expect(errorSpy).to.be.calledOnce;
           expect(errorSpy.args[0][1]).to.match(/Could not enter fullscreen/);
-          windowMock
-            .expects('postMessage')
-            .withExactArgs(
-              {
-                type: 'Error',
-                message: 'Could not enter fullscreen',
-              },
-              '*'
-            )
-            .once();
+
+          expect(windowSpy).to.be.calledOnce;
+          expect(windowSpy.args[0][0]).to.deep.equal({
+            'type': 'amp-consent-response',
+            'requestType': 'consent-ui',
+            'requestAction': 'enter-fullscreen',
+            'state': 'error',
+            'info':
+              'Could not enter fullscreen. Fullscreen is only supported when the iframe is visible and after user interaction.',
+          });
+
+          errorSpy.resetHistory();
+          windowSpy.resetHistory();
 
           // focus on iframe
           consentUI.ui_.focus();
@@ -511,18 +516,15 @@ describes.realWin(
           // Successful fullscreen event
           sendMessageConsentUi(consentUI, 'enter-fullscreen');
 
-          // Error not called another time
-          expect(errorSpy).to.be.calledOnce;
-          windowMock
-            .expects('postMessage')
-            .withExactArgs(
-              {
-                type: 'Success',
-                message: 'Entering fullscreen',
-              },
-              '*'
-            )
-            .once();
+          expect(errorSpy).to.not.be.called;
+          expect(windowSpy).to.be.calledOnce;
+          expect(windowSpy.args[0][0]).to.deep.equal({
+            'type': 'amp-consent-response',
+            'requestType': 'consent-ui',
+            'requestAction': 'enter-fullscreen',
+            'state': 'success',
+            'info': 'Entering fullscreen.',
+          });
         });
       });
     });

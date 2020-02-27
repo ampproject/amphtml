@@ -63,8 +63,11 @@ Action `'enter-fullscreen'` requests the AMP runtime to expand the iframe to ful
 
 ```javascript
   {
-    type: 'success',
-    message: 'Entering fullscreen.'
+    type: 'amp-consent-response',
+    requestType: 'consent-ui',
+    requestAction: 'enter-fullscreen',
+    state: 'success',
+    info: 'Entering fullscreen.'
   }
 ```
 

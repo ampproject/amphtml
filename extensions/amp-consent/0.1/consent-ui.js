@@ -42,15 +42,17 @@ const FULLSCREEN_SUCCESS = 'Entering fullscreen.';
 const FULLSCREEN_ERROR =
   'Could not enter fullscreen. Fullscreen is only supported ' +
   'when the iframe is visible and after user interaction.';
+const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
+const BUTTON_ACTION_CAPTION = 'Focus Prompt';
 
-export const messageType = {
+export const actionState = {
   error: 'error',
   success: 'success',
 };
 
-const CONSENT_PROMPT_CAPTION = 'User Consent Prompt';
-const BUTTON_ACTION_CAPTION = 'Focus Prompt';
-
+export const ampConsentMessageType = {
+  response: 'amp-consent-response',
+};
 
 // Classes for consent UI
 export const consentUiClasses = {
@@ -759,11 +761,14 @@ export class ConsentUI {
       return;
     }
 
-    if (data['action'] === 'ready') {
+    const requestAction = data['action'];
+    const requestType = data['type'];
+
+    if (requestAction === 'ready') {
       this.handleReady_(/** @type {!JsonObject} */ (data));
     }
 
-    if (data['action'] === 'enter-fullscreen') {
+    if (requestAction === 'enter-fullscreen') {
       // Do nothing if iframe not visible or it's not the active element.
       if (
         !this.isIframeVisible_ ||
@@ -771,10 +776,10 @@ export class ConsentUI {
           this.document_.activeElement !== this.ui_)
       ) {
         user().warn(TAG, FULLSCREEN_ERROR);
-        this.sendIframeMessage_(messageType.error, FULLSCREEN_ERROR);
+        this.sendEnterFullscreenResponse_(requestType, requestAction, true);
         return;
       }
-      this.sendIframeMessage_(messageType.success, FULLSCREEN_SUCCESS);
+      this.sendEnterFullscreenResponse_(requestType, requestAction);
 
       this.baseInstance_.mutateElement(() => {
         this.enterFullscreen_();
@@ -783,26 +788,49 @@ export class ConsentUI {
   }
 
   /**
-   * Send messages to iframe (for error logging).
-   * Silently die if iframe does not have content
-   * window.
+   * @param {string} requestType
+   * @param {string} requestAction
+   * @param {boolean} isError
+   * */
+  sendEnterFullscreenResponse_(requestType, requestAction, isError = false) {
+    this.sendIframeMessage_(
+      ampConsentMessageType.response,
+      requestType,
+      requestAction,
+      isError ? actionState.error : actionState.success,
+      isError ? FULLSCREEN_ERROR : FULLSCREEN_SUCCESS
+    );
+  }
+
+  /**
+   * Send message to iframe, regarding action response or other info.
+   * Silently die if iframe does not have content window.
    *
    * Example message:
    * {
-   *   type: 'type',
-   *   message: 'message',
+   *  type: 'amp-consent-response'
+   *  requestType:'consent-ui'
+   *  requestAction: 'enter-fullscreen'
+   *  state: 'error/success'
+   *  info: 'msg'
    * }
    * @param {string} type
-   * @param {string} message
+   * @param {string} requestType
+   * @param {string} requestAction
+   * @param {string} state
+   * @param {string} info
    */
-  sendIframeMessage_(type, message) {
+  sendIframeMessage_(type, requestType, requestAction, state, info) {
     const iframeWindow = this.ui_.contentWindow;
     if (iframeWindow) {
       // No sensitive information sent, so safe to use '*'
       iframeWindow./*OK*/ postMessage(
         /** @type {!JsonObject} */ ({
           type,
-          message,
+          requestType,
+          requestAction,
+          state,
+          info,
         }),
         '*'
       );

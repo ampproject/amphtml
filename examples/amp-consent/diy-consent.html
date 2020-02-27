@@ -143,14 +143,14 @@ if (window && window.name) {
 
 window.addEventListener('message', (event) => {
   const data = event.data;
-  if (data.type === 'error') {
+  if (data.reqestType === 'enter-fullscreen' && data.state === 'error') {
     console.log('Could not complete fullscreen request:', data.message);
   }
-  else if (data.type === 'success') {
+  else if (data.reqestType === 'enter-fullscreen' && data.state === 'success') {
     console.log('Fullscreen command successfuly sent:', data.message);
   }
   else {
-    console.log('Unexpected message type:', data.type);
+    console.log('Unknown request type:', data.reqestType);
   }
 });
 
