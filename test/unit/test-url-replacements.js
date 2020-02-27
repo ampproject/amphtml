@@ -155,19 +155,8 @@ describes.sandboxed('UrlReplacements', {}, env => {
           },
           document: {
             nodeType: /* document */ 9,
-            querySelector: selector => {
-              if (selector.startsWith('meta')) {
-                return {
-                  getAttribute: () => {
-                    return 'https://whitelisted.com https://greylisted.com http://example.com';
-                  },
-                  hasAttribute: () => {
-                    return true;
-                  },
-                };
-              } else {
-                return {href: canonical};
-              }
+            querySelector: () => {
+              return {href: canonical};
             },
             getElementById: () => {},
             cookie: '',
@@ -204,7 +193,16 @@ describes.sandboxed('UrlReplacements', {}, env => {
         win.document.head = {
           nodeType: /* element */ 1,
           // Fake query selectors needed to bypass <meta> tag checks.
-          querySelector: () => null,
+          querySelector: selector => {
+            if (selector === 'meta[name="amp-link-variable-allowed-origin"]') {
+              return {
+                getAttribute: () => {
+                  return 'https://whitelisted.com https://greylisted.com http://example.com';
+                },
+              };
+            }
+            return null;
+          },
           querySelectorAll: () => [],
           getRootNode() {
             return win.document;
@@ -228,7 +226,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(62);
+          expect(variables.length).to.equal(61);
         });
       });
 
@@ -808,12 +806,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it('should replace TIMEZONE', () => {
         return expandUrlAsync('?tz=TIMEZONE').then(res => {
           expect(res).to.match(/tz=-?\d+/);
-        });
-      });
-
-      it('should replace TIMEZONE_CODE', () => {
-        return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
-          expect(res).to.match(/tz_code=\w+|^$/);
         });
       });
 
