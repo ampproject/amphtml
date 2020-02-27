@@ -25,7 +25,6 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/basic-rtl.amp.html',
-    experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
     // TODO(sparhami) Make other environments work too
     environments: ['single'],

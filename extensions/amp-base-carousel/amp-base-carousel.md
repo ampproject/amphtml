@@ -4,7 +4,6 @@ formats:
   - websites
 teaser:
   text: Displays multiple similar pieces of content along a horizontal axis or vertical axis.
-experimental: true
 ---
 
 <!---
@@ -28,10 +27,6 @@ limitations under the License.
 A generic carousel for displaying multiple similar pieces of content along a horizontal or vertical axis.
 
 <table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; You must turn on the <code>amp-base-carousel</code> experiment to use this component.</div></td>
-  </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel-0.1.js">&lt;/script></code></td>

@@ -25,7 +25,6 @@ describes.endtoend(
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/' +
       'grouping-move-by-2.amp.html',
-    experiments: ['amp-base-carousel', 'layers'],
     initialRect: {width: pageWidth, height: pageHeight},
   },
   async env => {

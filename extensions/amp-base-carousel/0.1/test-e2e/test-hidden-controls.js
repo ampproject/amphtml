@@ -21,7 +21,6 @@ describes.endtoend(
   {
     testUrl:
       'http://localhost:8000/test/manual/amp-base-carousel/hidden-controls.amp.html',
-    experiments: ['amp-base-carousel'],
     environments: ['single'],
   },
   async function(env) {
