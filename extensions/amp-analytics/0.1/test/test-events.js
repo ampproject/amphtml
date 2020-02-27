@@ -198,8 +198,9 @@ describes.realWin('Events', {amp: 1}, env => {
           .returns({top: 0, left: 0, height: 200, width: 200}),
         'getScrollTop': env.sandbox.stub().returns(0),
         'getScrollLeft': env.sandbox.stub().returns(0),
-        'getScrollHeight': env.sandbox.stub().returns(500),
-        'getScrollWidth': env.sandbox.stub().returns(500),
+        'getLayoutRect': env.sandbox
+          .stub()
+          .returns({width: 500, height: 500, top: 0, left: 0}),
         'onChanged': env.sandbox.stub(),
       };
       scrollManager = tracker.root_.getScrollManager();
@@ -234,7 +235,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
     });
 
-    it('fires on scroll', () => {
+    it('fires on scroll', async () => {
       const fn1 = env.sandbox.stub();
       const fn2 = env.sandbox.stub();
       tracker.add(
@@ -256,6 +257,8 @@ describes.realWin('Events', {amp: 1}, env => {
         fn2
       );
 
+      await scrollManager.measureRootElement_(true);
+
       function matcher(expected) {
         return actual => {
           return (
@@ -264,31 +267,103 @@ describes.realWin('Events', {amp: 1}, env => {
           );
         };
       }
+
+      function expectNthCallToMatch(fn, callIndex, expected) {
+        expect(
+          fn
+            .getCall(callIndex)
+            .calledWithMatch(env.sandbox.match(matcher(expected)))
+        ).to.be.true;
+      }
+
       expect(fn1).to.have.callCount(2);
-      expect(fn1.getCall(0).calledWithMatch(env.sandbox.match(matcher(0)))).to
-        .be.true;
-      expect(fn1.getCall(1).calledWithMatch(env.sandbox.match(matcher(0)))).to
-        .be.true;
+      expectNthCallToMatch(fn1, 0, 0);
+      expectNthCallToMatch(fn1, 1, 0);
       expect(fn2).to.have.not.been.called;
 
       // Scroll Down
       fakeViewport.getScrollTop.returns(500);
       fakeViewport.getScrollLeft.returns(500);
-      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
+      await tracker.root_
+        .getScrollManager()
+        .onScroll_(getFakeViewportChangedEvent());
 
       expect(fn1).to.have.callCount(4);
-      expect(fn1.getCall(2).calledWithMatch(env.sandbox.match(matcher(100)))).to
-        .be.true;
-      expect(fn1.getCall(3).calledWithMatch(env.sandbox.match(matcher(100)))).to
-        .be.true;
+      expectNthCallToMatch(fn1, 2, 100);
+      expectNthCallToMatch(fn1, 3, 100);
       expect(fn2).to.have.callCount(2);
-      expect(fn2.getCall(0).calledWithMatch(env.sandbox.match(matcher(90)))).to
-        .be.true;
-      expect(fn2.getCall(1).calledWithMatch(env.sandbox.match(matcher(90)))).to
-        .be.true;
+      expectNthCallToMatch(fn2, 0, 90);
+      expectNthCallToMatch(fn2, 1, 90);
     });
 
-    it('does not fire duplicates on scroll', () => {
+    it('ignores resize changes if needed', async () => {
+      const fn1 = env.sandbox.stub();
+      const fn2 = env.sandbox.stub();
+      tracker.add(
+        undefined,
+        AnalyticsEventType.SCROLL,
+        {
+          'on': AnalyticsEventType.SCROLL,
+          'scrollSpec': {
+            'verticalBoundaries': [0, 50, 100],
+          },
+        },
+        fn1
+      );
+      tracker.add(
+        undefined,
+        AnalyticsEventType.SCROLL,
+        {
+          'on': AnalyticsEventType.SCROLL,
+          'scrollSpec': {
+            'verticalBoundaries': [0, 50, 100],
+            'useInitialPageSize': true,
+          },
+        },
+        fn2
+      );
+
+      await scrollManager.measureRootElement_(true);
+
+      function matcher(expected) {
+        return actual => {
+          return actual.vars.verticalScrollBoundary === String(expected);
+        };
+      }
+
+      function expectNthCallToMatch(fn, callIndex, expected) {
+        expect(
+          fn
+            .getCall(callIndex)
+            .calledWithMatch(env.sandbox.match(matcher(expected)))
+        ).to.be.true;
+      }
+
+      expect(fn1).to.have.callCount(1);
+      expectNthCallToMatch(fn1, 0, 0);
+      expect(fn2).to.have.callCount(1);
+      expectNthCallToMatch(fn2, 0, 0);
+
+      // Scroll Down
+      fakeViewport.getScrollTop.returns(500);
+      fakeViewport.getLayoutRect.returns({
+        width: 500,
+        height: 1000,
+        top: 0,
+        left: 0,
+      });
+      await tracker.root_
+        .getScrollManager()
+        .onScroll_(getFakeViewportChangedEvent());
+
+      expect(fn1).to.have.callCount(2);
+      expectNthCallToMatch(fn1, 1, 50);
+      expect(fn2).to.have.callCount(3);
+      expectNthCallToMatch(fn2, 1, 50);
+      expectNthCallToMatch(fn2, 2, 100);
+    });
+
+    it('does not fire duplicates on scroll', async () => {
       const fn1 = env.sandbox.stub();
       tracker.add(
         undefined,
@@ -300,7 +375,9 @@ describes.realWin('Events', {amp: 1}, env => {
       // Scroll Down
       fakeViewport.getScrollTop.returns(10);
       fakeViewport.getScrollLeft.returns(10);
-      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
+      await tracker.root_
+        .getScrollManager()
+        .onScroll_(getFakeViewportChangedEvent());
 
       expect(fn1).to.have.callCount(2);
     });
@@ -387,7 +464,7 @@ describes.realWin('Events', {amp: 1}, env => {
       });
     });
 
-    it('fires events on normalized boundaries.', () => {
+    it('fires events on normalized boundaries.', async () => {
       const fn1 = env.sandbox.stub();
       const fn2 = env.sandbox.stub();
       tracker.add(
@@ -412,6 +489,7 @@ describes.realWin('Events', {amp: 1}, env => {
         },
         fn2
       );
+      await scrollManager.measureRootElement_(true);
       expect(fn2).to.be.calledOnce;
     });
   });

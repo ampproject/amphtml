@@ -690,7 +690,28 @@ In addition to the variables provided as part of triggers you can also specify a
 
 Use the scroll trigger (`"on": "scroll"`) to fire a request under certain conditions when the page is scrolled. This trigger provides [special vars](./analytics-vars.md#interaction) that indicate the boundaries that triggered a request to be sent. Use `scrollSpec` to control when this will fire:
 
-- `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width. To keep the page performant, the scroll boundaries are rounded to the nearest multiple of `5`.
+- `scrollSpec` is an object that contains the properties:
+
+  - `horizontalBoundaries`, `verticalBoundaries`
+    (At least one of these is required for a scroll event to fire.)
+
+    These should be number arrays containing the percentage
+    boundaries on which a scroll event is fired.
+
+    (To keep the page performant, these percentages are rounded
+    to multiples of `5`.)
+
+  - `useInitialPageSize` (optional, default `false`)
+
+    If set to `true`, scroll position scroll position is calculated based
+    on the initial sizing of the page, ignoring its new dimensions when
+    resized.
+
+    {% call callout('Note', type='note') %}
+    When using `<amp-analytics>` with infinitely scrolling experiences such as `<amp-next-page>` and `<amp-list>`, you might find it helpful to use `useInitialPageSize` in order to have scroll triggers report on the initial height of the pages (before `<amp-next-page>` or `<amp-list>` elements get added). Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead.
+    {% endcall %}
+
+For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width.
 
 ```json
 "triggers": {
