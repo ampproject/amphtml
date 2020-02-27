@@ -65,7 +65,7 @@ The `<amp-video-iframe>` component differs from [`<amp-iframe>`](../amp-iframe/a
 - `<amp-video-iframe>` is not scrollable.
 - `<amp-video-iframe>` enforces sandboxing to itself and child iframes. This discourages misuse of <amp-video-iframe> as a means for advertising. 
 
-### Video player integration
+### <a id="integration"></a> Video player integration
 
 The `<amp-video-iframe>` component requires the embedded html document to include the [video-iframe-integration library](../../src/video-iframe-integration.js). The library is separate from the component's required script. This is because the embedded html document is non-AMP and iframed.
 
