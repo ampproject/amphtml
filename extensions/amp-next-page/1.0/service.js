@@ -594,9 +594,6 @@ export class NextPageService {
    * @param {!Document} doc Document to attach.
    */
   sanitizeDoc(doc) {
-    // TODO(wassgha): Allow amp-analytics after bug bash
-    toArray(doc.querySelectorAll('amp-analytics')).forEach(removeElement);
-
     // Parse for more pages and queue them
     toArray(doc.querySelectorAll('amp-next-page')).forEach(el => {
       if (this.hasDeepParsing_) {
