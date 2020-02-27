@@ -226,7 +226,7 @@ export class VideoManager {
 
     // fullscreen/fullscreenenter are a special case.
     // - fullscreenenter is kept as a standard name for symmetry with internal
-    // internal interfaceswhile
+    //   internal interfaces
     // - fullscreen is an undocumented alias for backwards compatibility.
     const fullscreenEnter = video.fullscreenEnter.bind(video);
     registerAction('fullscreen', fullscreenEnter);
