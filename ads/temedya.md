@@ -1,5 +1,6 @@
 <!---
 Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -50,4 +51,4 @@ For details on the configuration semantics, please contact the ad network or ref
 - `data-typeId`: Widget Type ID (7)
 - `data-paidItem`: Paid Item Count
 - `data-organicItem`: Organic Item Count
-- `data-theme`: Theme Type (light or dark)
+- `data-theme`: Theme Type (light | dark | google)

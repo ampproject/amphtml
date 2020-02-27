@@ -209,6 +209,44 @@ export class VariableService {
     this.register_('LINKER_PARAM', (name, id) =>
       this.linkerReader_.get(name, id)
     );
+
+    // Returns the IANA timezone code
+    this.register_('TIMEZONE_CODE', () => {
+      let tzCode = '';
+      if (
+        'Intl' in this.ampdoc_.win &&
+        'DateTimeFormat' in this.ampdoc_.win.Intl
+      ) {
+        // It could be undefined (i.e. IE11)
+        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+      }
+
+      return tzCode;
+    });
+
+    // Returns a promise resolving to viewport.getScrollTop.
+    this.register_('SCROLL_TOP', () =>
+      Services.viewportForDoc(this.ampdoc_).getScrollTop()
+    );
+
+    // Returns a promise resolving to viewport.getScrollLeft.
+    this.register_('SCROLL_LEFT', () =>
+      Services.viewportForDoc(this.ampdoc_).getScrollLeft()
+    );
+    // Was set async before
+    this.register_('FIRST_CONTENTFUL_PAINT', () => {
+      return Services.performanceFor(
+        this.ampdoc_.win
+      ).getFirstContentfulPaint();
+    });
+
+    this.register_('FIRST_VIEWPORT_READY', () => {
+      return Services.performanceFor(this.ampdoc_.win).getFirstViewportReady();
+    });
+
+    this.register_('MAKE_BODY_VISIBLE', () => {
+      return Services.performanceFor(this.ampdoc_.win).getMakeBodyVisible();
+    });
   }
 
   /**
@@ -226,6 +264,9 @@ export class VariableService {
   }
 
   /**
+   * TODO (micajuineho): If we add new synchronous macros, we
+   * will need to split this method and getMacros into sync and
+   * async version (currently all macros are async).
    * @param {string} name
    * @param {*} macro
    */
