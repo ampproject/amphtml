@@ -734,6 +734,8 @@ class AmpFixture {
       installAmpdocServices(ampdoc);
       adopt(win);
       Services.resourcesForDoc(ampdoc).ampInitComplete();
+      // Ensure cached meta name/content pairs are cleared before each test
+      ampdoc.meta_ = null;
     } else if (ampdocType == 'multi' || ampdocType == 'shadow') {
       adoptShadowMode(win);
       // Notice that ampdoc's themselves install runtime styles in shadow roots.

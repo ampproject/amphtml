@@ -94,6 +94,11 @@ describes.sandboxed('cid', {}, env => {
         nodeType: /* DOCUMENT */ 9,
         body: {},
         querySelector: () => {},
+        head: {
+          nodeType: /* ELEMENT */ 1,
+          querySelector: () => null,
+          querySelectorAll: () => [],
+        },
       },
       navigator: window.navigator,
       setTimeout: window.setTimeout,

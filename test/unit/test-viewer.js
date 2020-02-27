@@ -100,6 +100,15 @@ describes.sandboxed('Viewer', {}, env => {
       querySelector() {
         return parseUrlDeprecated('http://www.example.com/');
       },
+      head: {
+        nodeType: /* ELEMENT */ 1,
+        querySelector() {
+          return null;
+        },
+        querySelectorAll() {
+          return [];
+        },
+      },
     };
     windowApi.navigator = window.navigator;
     windowApi.history = {

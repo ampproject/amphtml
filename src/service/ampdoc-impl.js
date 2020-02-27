@@ -24,14 +24,13 @@ import {
   removeDocumentVisibilityChangeListener,
 } from '../utils/document-visibility';
 import {dev, devAssert} from '../log';
-import {escapeCssSelectorIdent} from '../css';
 import {getParentWindowFrameElement, registerServiceBuilder} from '../service';
 import {getShadowRootNode} from '../shadow-embed';
 import {isDocumentReady, whenDocumentReady} from '../document-ready';
 import {isInAmpdocFieExperiment} from '../ampdoc-fie';
+import {iterateCursor, rootNodeFor, waitForBodyOpenPromise} from '../dom';
 import {map} from '../utils/object';
 import {parseQueryString} from '../url';
-import {rootNodeFor, waitForBodyOpenPromise} from '../dom';
 
 /** @const {string} */
 const AMPDOC_PROP = '__AMPDOC';
@@ -318,8 +317,8 @@ export class AmpDoc {
     /** @private {!Object<string, string>} */
     this.params_ = (opt_options && opt_options.params) || map();
 
-    /** @protected {!Object<string, string>} */
-    this.meta_ = (opt_options && opt_options.meta) || map();
+    /** @protected {?Object<string, string>} */
+    this.meta_ = null;
 
     /** @private @const {!Array<string>} */
     this.declaredExtensions_ = [];
@@ -419,6 +418,35 @@ export class AmpDoc {
   }
 
   /**
+   * Initializes (if necessary) cached map of an ampdoc's meta name values to
+   * their associated content values and returns the map.
+   * @return {!Object<string, string>}
+   */
+  getMeta() {
+    if (this.meta_) {
+      return map(this.meta_);
+    }
+
+    this.meta_ = map();
+    const metaEls = dev()
+      .assertElement(this.win.document.head)
+      .querySelectorAll('meta[name]');
+    iterateCursor(metaEls, metaEl => {
+      const name = metaEl.getAttribute('name');
+      const content = metaEl.getAttribute('content');
+      if (!name || content === null) {
+        return;
+      }
+
+      // Retain only the first meta content value for a given name
+      if (this.meta_[name] === undefined) {
+        this.meta_[name] = content;
+      }
+    });
+    return map(this.meta_);
+  }
+
+  /**
    * Returns the value of an ampdoc's meta tag content for a given name, or
    * `null` if the meta tag does not exist.
    * @param {string} name
@@ -429,11 +457,8 @@ export class AmpDoc {
       return null;
     }
 
-    const el = dev()
-      .assertElement(this.win.document.head)
-      .querySelector(`meta[name="${escapeCssSelectorIdent(name)}"]`);
-
-    return el ? el.getAttribute('content') || '' : null;
+    const content = this.getMeta()[name];
+    return content !== undefined ? content : null;
   }
 
   /**
@@ -905,18 +930,16 @@ export class AmpDocShadow extends AmpDoc {
   }
 
   /** @override */
-  getMetaByName(name) {
-    return this.meta_[name] !== undefined ? this.meta_[name] : null;
+  getMeta() {
+    return /** @type {!Object<string,string>} */ (map(this.meta_));
   }
 
   /** @override */
   setMetaByName(name, content) {
-    if (!name) {
-      throw dev().createError(
-        'Attempted to store invalid meta name/content pair'
-      );
+    devAssert(name, 'Attempted to store invalid meta name/content pair');
+    if (!this.meta_) {
+      this.meta_ = map();
     }
-
     this.meta_[name] = content;
   }
 }

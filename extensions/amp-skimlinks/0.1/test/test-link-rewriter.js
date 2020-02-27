@@ -24,7 +24,6 @@ import {
   PRIORITY_META_TAG_NAME,
   EVENTS as linkRewriterEvents,
 } from '../link-rewriter/constants';
-import {Services} from '../../../../src/services';
 import {TwoStepsResponse} from '../link-rewriter/two-steps-response';
 import {createCustomEvent} from '../../../../src/event-helper';
 
@@ -67,9 +66,10 @@ describes.fakeWin('LinkRewriterManager', {amp: true}, env => {
     };
 
     addPriorityMetaTagHelper = priorityRule => {
-      env.sandbox.stub(Services, 'documentInfoForDoc').returns({
-        metaTags: {[PRIORITY_META_TAG_NAME]: priorityRule},
-      });
+      env.sandbox
+        .stub(env.ampdoc, 'getMetaByName')
+        .withArgs(PRIORITY_META_TAG_NAME)
+        .returns(priorityRule);
 
       linkRewriterManager = new LinkRewriterManager(env.ampdoc);
     };
