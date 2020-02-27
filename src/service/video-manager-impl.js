@@ -372,7 +372,7 @@ export class VideoManager {
 
   /** @param {*} unusedVideo */
   isRollingAd(unusedVideo) {
-    dev().assert(false, "Don't implement. Use getEntryState().");
+    devAssert(false, "Don't implement. Use getEntryState().");
   }
 
   /**
@@ -387,7 +387,7 @@ export class VideoManager {
    * but we need to restructure public methods first.
    */
   getState(videoOrElement) {
-    const entry = dev().assert(this.getEntry_(videoOrElement));
+    const entry = devAssert(this.getEntry_(videoOrElement));
     return {
       isPlaying: entry.getPlayingState() !== PlayingStates.PAUSED,
       isRollingAd: entry.isRollingAd(),
