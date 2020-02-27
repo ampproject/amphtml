@@ -440,7 +440,7 @@ export class NextPageService {
     triggerAnalyticsEvent(
       this.getHost_(),
       'amp-next-page-scroll',
-      /** @type {JsonObject} */ ({
+      /** @type {!JsonObject} */ ({
         'title': title,
         'url': url,
       })
@@ -1041,7 +1041,7 @@ export class NextPageService {
         triggerAnalyticsEvent(
           this.getHost_(),
           'amp-next-page-click',
-          /** @type {JsonObject} */ ({
+          /** @type {!JsonObject} */ ({
             'title': page.title,
             'url': page.url,
           })

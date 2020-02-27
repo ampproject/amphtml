@@ -40,8 +40,6 @@ The `<amp-next-page>` component loads content pages one after another creating a
 
 Specify pages in a JSON configuration. Load the JSON configuration from a remote URL with the `src` attribute, or inline it within a `<script>` child element of `<amp-next-page>`. You may specify both a remote URL and inline a JSON object for a quicker suggestion loading speed.
 
-In case the `deep-parsing` attribute is present, `<amp-next-page>` will also recursively read suggestions from each loaded document's `<amp-next-page>` element. The component automatically handles loading and unloading the documents from memory for a smooth user experience.
-
 Documents append to the end of the current document as a child of the `<amp-next-page>` element. To prevent shifting page content down, this component must be the last child of the document `<body>`. If needed, any footer content should be embedded inside the `<amp-next-page>` tag and will be displayed once no more article suggestions are available.
 
 The code sample below shows an example configuration for one article, which is the same format used by both the inline and remote configurations
@@ -54,13 +52,13 @@ The code sample below shows an example configuration for one article, which is t
 }
 ```
 
-Each page object should have the following key/value pairs:
+Each page object must have the following key/value pairs:
 
-| Key                | Value                                                                                                                                                            |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `url` (required)   | String URL of the page. Must be on the same origin as the current document. URLs will automatically be rewritten to point to the Google AMP cache when required. |
-| `title` (required) | String title of the page, will be used when rendering the recommendation box.                                                                                    |
-| `image` (required) | String URL of the image to display in the recommendation box.                                                                                                    |
+| Key     | Value                                                                                                                                                            |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url`   | String URL of the page. Must be on the same origin as the current document. URLs will automatically be rewritten to point to the Google AMP cache when required. |
+| `title` | String title of the page, will be used when rendering the recommendation box.                                                                                    |
+| `image` | String URL of the image to display in the recommendation box.                                                                                                    |
 
 #### Inline Configuration
 
@@ -81,12 +79,11 @@ Inline a JSON configuration in the `<amp-next-page>` component by placing it ins
 </amp-next-page>
 ```
 
-The inline configuration defines the documents recommended by `amp-next-page` to
-the user as an ordered array of page objects in JSON format.
+When only using an inline configuration, `deep-parsing` (see the [Attributes section](https://amp.dev/documentation/components/amp-next-page/#attributes)) is enabled by default. This allows it to parse more suggestions by recursively looking at inline configurations inside `<amp-next-page>` tags on the loaded documents.
 
-To enable for an infinite loading experience without the need for a server-side configuration (remote-loading), `amp-next-page` automatically enables `deep-parsing` (see Attributes), which allows it to parse more suggestions by recursively looking at inline configurations inside `<amp-next-page>` tags on the loaded documents. To disable this behavior, set `deep-parsing` to `false`.
+The documents render in the order they appear on the JSON configuration. `amp-next-page` queues all defined document suggestions in the original host document's `<amp-next-page>` configuration then appends the rendered pages defined documents to the queue as the user scrolls through them.
 
-The following configuration will recommend two more documents for the user to read.
+The following configuration recommends two more documents for the user to read.
 
 ```html
 <amp-next-page>
@@ -115,7 +112,7 @@ Use the `src` attribute to point to the remote JSON configuration.
 <amp-next-page src="https://example.com/next-page-config.json"></amp-next-page>
 ```
 
-Structure remote configurations like the example below. The following configuration returned from the server will recommend two more documents for the user to read and tell `amp-next-page` to query `https://example.com/more-pages` once the user scrolls through both provided documents.
+Structure remote configurations like the example below. This configuration provides two more documents and tells `amp-next-page` to query `https://example.com/more-pages` once the user scrolls through both.
 
 ```json
 {
@@ -135,12 +132,12 @@ Structure remote configurations like the example below. The following configurat
 }
 ```
 
-For remote configuration, the destination server is required to return a JSON object that has the following key/value pairs:
+Remote configurations require the server to return a JSON object with the `pages` key/value pair and allows for an optional `next` key/value pair.
 
-| Key                | Value                                                                                                                                                                |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pages` (required) | Array of pages, exactly the same format as the in the inline configration section above.                                                                             |
-| `next` (optional)  | Optional string url pointing to the next remote to query for more pages (should abide by the same rules as the initial URL, namely implement the CORS requirements.) |
+| Key               | Value                                                                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pages`           | Array of pages. The array contains all page object definitions as defined above.                                                                        |
+| `next` (optional) | String URL pointing to the next remote JSON configuration. This should abide by the same rules as the initial URL, implementing the CORS requirements.) |
 
 ##### URL substitutions
 
@@ -160,9 +157,11 @@ The `<amp-next-page>` component renders the footer recommendation box if one of 
 - The next page fails to load.
 - If the [`max-pages`](<https://amp.dev/documentation/components/amp-next-page/#max-pages+(optional)>) attribute is specified and the number of displayed pages is met.
 
-The footer recommendation box contains links to the remaining pages. The default footer recommendation box renders the specified image and title used in the JSON configuration and can be styled as specified in the [Styling](https://amp.dev/documentation/components/amp-next-page/#styling) section.
+The footer recommendation box contains links to the remaining pages. The default footer recommendation box renders the specified `image` and `title` used in the JSON configuration. It can be styled as specified in the [Styling](https://amp.dev/documentation/components/amp-next-page/#styling) section.
 
-The footer recommendation box can also be provided as a custom component inside `<amp-next-page>` as any element that has the `footer`. It can also be templated via `amp-mustache` or other templating engines, in which case it will be passed an array of the remaining `pages`, each being an object with a `title`, `url` and `image`. Example:
+#### Custom footer recommendation box
+
+Customize the footer recommendation box by defining an element with the `footer` attribute inside the `<amp-next-page>` component. Display the remaining pages by templating the footer recommendation box with `amp-mustache` or another templating engine. Whem using templates, an array `pages` of remaining documents is passed to the template, including the `title`, `url`, and `image`.
 
 ```html
 <amp-next-page src="https://example.com/config.json">
@@ -183,12 +182,13 @@ The footer recommendation box can also be provided as a custom component inside 
 
 ### Separator
 
-A separator is rendered between each loaded document. By default this is
-rendered as a full-width horizontal rule. Refer to the [Styling](https://amp.dev/documentation/components/amp-next-page/#styling) section for information on customizing this default behavior.
+The `<amp-next-page>` component renders a separator between each document. The default separator is a full-width grey line. Refer to the [Styling](https://amp.dev/documentation/components/amp-next-page/#styling) section to change the default style.
 
-Alternatively, you can specify a custom separator containing arbitrary HTML
-content as a child of the `amp-next-page` component by using the `separator`
-attribute. Similar to the footer box, custom separator can be templated via `amp-mustache` or other templating engines, and will be passed the `title`, `url` and `image` of the upcoming article.
+#### Custom separator
+
+Customize the separator by defining an element with the `separator` attribute inside the `<amp-next-page>` component. Suggest remaining pages by templating the custom separator with `amp-mustache` or another templating engine. Then pass it the array of documents by including the `title`, `url`, and `image` in the templated custom solution.
+
+Alternatively, it is possible to create a custom separator by defining an element with the `separator` attribute inside the `<amp-next-page>` component. Display information about the next article by templating the custom separator with `amp-mustache` or another templating engine. Whem using templates, the `title`, `url` and `image` of the upcoming article are passed to the template.
 
 ```html
 <amp-next-page src="https://example.com/config.json">
@@ -250,7 +250,7 @@ The experimental `0.1` version of `amp-next-page` had a similar but more restric
 
 1. Update your `<script custom-element>` tag to link to the `1.0` bundle of `amp-next-page`
 2. Make sure that `amp-next-page` is the last child of the body element, move any footers or other components that used to follow `<amp-next-page>` inside the `<amp-next-page>` tag.
-3. If you were using an inline configuration, the JSON config is now an `array` of pages instead of an `object` with a `pages` entry. Additionally, the `ampUrl` key of each page entry was renamed to `url`.
+3. If you were using an inline configuration, the JSON config is now an `array` of pages instead of an `object` with a `pages` entry. Additionally, you must rename the `ampUrl` key of each page to `url`.
    ```html
    <amp-next-page>
      <!-- BEFORE: amp-next-page 0.1 -->
@@ -299,9 +299,9 @@ The maximum number of pages to load and show to the user. The maximum number sho
 
 ### `deep-parsing` (optional)
 
-When specified, the `deep-parsing` attribute enables recursive parsing of inline JSON configurations from subsequently loaded documents. This only works if the loaded documents contain an `<amp-next-page>` tag.
+The `deep-parsing` attribute enables recursive parsing of subsequently loaded documents's `<amp-next-page>` JSON configurations.
 
-This behavior is the default if the `<amp-next-page>` component only specifies an inline configuration. If the `<amp-next-page>` component loads the configuration remotely this behavior is disabled by default unless `deep-parsing` is set to `true`.
+This is the default behavior when `<amp-next-page>` inlines the JSON configuration. You may disable it by setting `deep-parsing="false"`. This is not the default behavior when `<amp-next-page>` points to a remote JSON configuration. You may enable it by setting `deep-parsing="true"`.
 
 ### `xssi-prefix` (optional)
 
@@ -323,7 +323,14 @@ You may add custom CSS styles to the default footer recommendation box. It expos
 
 ### Style the default page separator
 
-The default separator (shown between article recommendations) is a simple gray horizontal rule, although this can be customized through CSS by applying styles to the `.amp-next-page-separator` class, templating the separator allows for more flexibility in styling and allows the integration of the title, image and URL of the upcoming article into the separator's appearance.
+Each document loads with a full-width gray horizontal line to separate it from the previous page. It is possible to customize the default separator through CSS using the `.amp-next-page-separator` class:
+
+```css
+.amp-next-page-separator {
+  background-color: red;
+  height: 5px;
+}
+```
 
 ## Analytics
 
