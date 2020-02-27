@@ -326,7 +326,7 @@ setInterval(() => {
 
 The function executes the passed `callback` with an object that looks like the following:
 
-```json
+```js
 {
   time: 33333.33,
   intersectionRatio: 0.761,
