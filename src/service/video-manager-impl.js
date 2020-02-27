@@ -372,7 +372,7 @@ export class VideoManager {
 
   /** @param {*} unusedVideo */
   isRollingAd(unusedVideo) {
-    devAssert(false, "Don't implement. Use getEntryState().");
+    devAssert(false, "Don't implement. Use .getState()");
   }
 
   /**
