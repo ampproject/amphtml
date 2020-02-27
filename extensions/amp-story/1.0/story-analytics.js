@@ -71,7 +71,9 @@ export const getAnalyticsService = (win, el) => {
 
   if (!service) {
     service = new StoryAnalyticsService(win, el);
-    registerServiceBuilder(win, 'story-analytics', () => service);
+    registerServiceBuilder(win, 'story-analytics', function() {
+      return service;
+    });
   }
 
   return service;

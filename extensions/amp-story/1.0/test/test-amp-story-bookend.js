@@ -140,7 +140,9 @@ describes.fakeWin('amp-story-bookend', {win: {location}, amp: true}, env => {
     env.sandbox.stub(Services, 'storyRequestService').returns(requestService);
 
     const localizationService = new LocalizationService(win);
-    registerServiceBuilder(win, 'localization', () => localizationService);
+    registerServiceBuilder(win, 'localization', function() {
+      return localizationService;
+    });
 
     bookend = new AmpStoryBookend(bookendElem);
     bookend.buildCallback();

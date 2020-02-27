@@ -26,6 +26,7 @@ import {tryResolve} from '../src/utils/promise';
 /** @fileoverview Entry point for documents inside an <amp-video-iframe>. */
 
 const TAG = '<amp-video-iframe>';
+const DOCS_URL = 'https://go.amp.dev/c/amp-video-iframe';
 const __AMP__ = '__AMP__VIDEO_IFRAME__';
 
 /**
@@ -56,7 +57,7 @@ let JwplayerPartialInterfaceDef;
  */
 function userAssert(shouldBeTrueish, ...args) {
   if (!shouldBeTrueish) {
-    throw new Error(args.join(' '));
+    throw new Error(`[${TAG}] ${args.join(' ')} ${DOCS_URL}`);
   }
   return shouldBeTrueish;
 }
@@ -197,15 +198,17 @@ export class AmpVideoIntegration {
   listenTo(type, obj, opt_initializer) {
     userAssert(
       !this.usedListenToHelper_,
-      '%s `listenTo` is meant to be used once per page.',
-      TAG
+      '`listenTo` is meant to be used once per page.'
     );
     const types = {
       'jwplayer': () => {
         userAssert(
+          obj.on,
+          'jwplayer integration takes a jwplayer instance as first argument.'
+        );
+        userAssert(
           !opt_initializer,
-          '%s jwplayer integration does not take an initializer',
-          TAG
+          'jwplayer integration does not take an initializer.'
         );
         this.listenToJwPlayer_(obj);
       },
@@ -215,9 +218,8 @@ export class AmpVideoIntegration {
     };
     userAssert(
       types[type.toLowerCase()],
-      `%s Invalid listener type [${type}]. ` +
-        `Valid types are [${Object.keys(types).join(', ')}]`,
-      TAG
+      `Invalid listener type [${type}].`,
+      `Valid types are [${Object.keys(types).join(', ')}]`
     )(); // notice the call here ;)
     this.usedListenToHelper_ = true;
   }
@@ -421,7 +423,7 @@ function listenTo(win, onMessage) {
 export function adopt(global) {
   userAssert(
     !global[__AMP__],
-    '%s video-iframe-integration-v0.js should only be included once.'
+    'video-iframe-integration-v0.js should only be included once.'
   );
 
   global[__AMP__] = true;
