@@ -103,7 +103,7 @@ Third party video frameworks contributed their integrations for use with `<amp-v
 ##### [JwPlayer](https://developer.jwplayer.com/jwplayer/docs)
 
 Pass your [`jwplayer` instance object](https://developer.jwplayer.com/jw-player/docs/javascript-api-reference/)
-through the signature `ampIntegration.listenTo('jwplayer', myJwplayer)`. The `ampIntegration` object setups the player through the instance API.
+through the signature `amp.listenTo('jwplayer', myJwplayer)`. The `amp` object sets up the player through the instance API.
 
 ```js
 (window.AmpVideoIframe = window.AmpVideoIframe || []).push(amp => {
