@@ -298,6 +298,7 @@ export class VideoManager {
     if (lastFoundEntry && isEntryFor(lastFoundEntry, videoOrElement)) {
       return lastFoundEntry;
     }
+
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
       if (isEntryFor(entry, videoOrElement)) {
@@ -398,6 +399,11 @@ export class VideoManager {
   }
 }
 
+/**
+ * @param {!VideoEntry} entry
+ * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+ * @return {boolean}
+ */
 const isEntryFor = (entry, videoOrElement) =>
   entry.video === videoOrElement || entry.video.element === videoOrElement;
 
