@@ -100,7 +100,7 @@ Here's an example of a basic form:
 
 ## Attributes
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 ##### target
 
@@ -115,7 +115,7 @@ Specifies a server endpoint to handle the form input. The value must be an `http
 
 [tip type="note"]
 The `target` and `action` attributes are only used for non-xhr GET requests. The AMP runtime will use `action-xhr` to make the request and will ignore `action` and `target`. When `action-xhr` is not provided, AMP makes a GET request to the `action` endpoint and uses `target` to open a new window (if `_blank`). The AMP runtime might also fallback to using `action` and `target` in cases where the `amp-form` extension fails to load.
-[/tip][/filter] <!-- formats="websites, stories, ads" -->
+[/tip][/filter] <!-- formats="websites, ads" -->
 
 ##### action-xhr
 
@@ -131,7 +131,7 @@ The value for `action-xhr` can be the same or a different endpoint than `action`
 
 To learn about redirecting the user after successfully submitting the form, see the [Redirecting after a submission](#redirecting-after-a-submission) section below.
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 ##### data-initialize-from-url (optional)
 
@@ -162,13 +162,13 @@ Limitations:
 Specifies that a prefix should be stripped prior to parsing the fetched json from the `action-xhr` endpoint. If the prefix is not present in the response, then this attribute will have no effect.
 This can be useful for APIs that include [security prefixes](http://patorjk.com/blog/2013/02/05/crafty-tricks-for-avoiding-xssi/) like `)]}` to help prevent cross site scripting attacks.
 
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 ##### Other form attributes
 
 All other [form attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form) are optional.
 
-[filter formats="websites, stories, ads"]
+[filter formats="websites, ads"]
 
 ##### custom-validation-reporting
 
@@ -176,7 +176,7 @@ This is an optional attribute that enables and selects a custom validation repor
 
 See the [Custom Validation](#custom-validations) section for more details.
 
-[/filter] <!-- formats="websites, stories, ads" -->
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="email"]
 
