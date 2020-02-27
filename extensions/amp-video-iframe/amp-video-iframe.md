@@ -183,7 +183,7 @@ You can create a custom implementation for your solution to communicate with `<a
 
 The following communication methods are available:
 
-- [`method`](#method) to control playback.
+- [`method()`](#method) to control playback.
 - [`postEvent`](#postEvent) to inform the host document about playback events.
 - [`getIntersection`](#getIntersection) to get video's viewability on the host document.
 - [`getMetadata`](#getMetadata) to get information about the host document.
