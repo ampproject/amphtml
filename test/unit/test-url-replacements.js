@@ -1936,13 +1936,13 @@ describes.sandboxed('UrlReplacements', {}, env => {
           a.setAttribute('data-amp-replace', 'QUERY_PARAM');
           a.setAttribute(
             'data-amp-addparams',
-            'second=QUERY_PARAM(baz,XXXX)&third=CLIENT_ID(_ga)&' +
+            'second=QUERY_PARAM(baz,XXXX)&third=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&' +
               'fourth=link123'
           );
           urlReplacements.maybeExpandLink(a, null);
           expect(a.href).to.equal(
             'http://example.com/link?first=YYYY&second=XXXX&' +
-              'third=CLIENT_ID(_ga)&fourth=link123'
+              'third=CLIENT_ID(AMP_ECID_GOOGLE%2C%2C_ga)&fourth=link123'
           );
         });
 

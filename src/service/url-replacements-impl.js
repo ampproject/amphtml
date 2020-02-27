@@ -1079,13 +1079,6 @@ export class UrlReplacements {
     }
 
     const isAllowedOrigin = this.isAllowedOrigin_(url);
-    if (additionalUrlParameters) {
-      additionalUrlParameters = isAllowedOrigin
-        ? this.expandSyncIfWhitelist_(additionalUrlParameters, whitelist)
-        : additionalUrlParameters;
-      href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
-    }
-
     if (!isAllowedOrigin) {
       if (whitelist) {
         user().warn(
@@ -1097,6 +1090,13 @@ export class UrlReplacements {
         );
       }
       return (element.href = href);
+    }
+
+    if (additionalUrlParameters) {
+      additionalUrlParameters = isAllowedOrigin
+        ? this.expandSyncIfAllowedList_(additionalUrlParameters, whitelist)
+        : additionalUrlParameters;
+      href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
     }
 
     // Note that defaultUrlParams is treated differently than
@@ -1120,7 +1120,7 @@ export class UrlReplacements {
       href = addParamsToUrl(href, parseQueryString(defaultUrlParams));
     }
 
-    href = this.expandSyncIfWhitelist_(href, whitelist);
+    href = this.expandSyncIfAllowedList_(href, whitelist);
 
     return (element.href = href);
   }
@@ -1130,7 +1130,7 @@ export class UrlReplacements {
    * @param {!Object<string, boolean>|undefined} whitelist
    * @return {string}
    */
-  expandSyncIfWhitelist_(href, whitelist) {
+  expandSyncIfAllowedList_(href, whitelist) {
     return whitelist
       ? this.expandUrlSync(
           href,
