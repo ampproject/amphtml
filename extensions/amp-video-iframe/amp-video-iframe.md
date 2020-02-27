@@ -209,7 +209,13 @@ You should implement these methods:
 - `fullscreenenter`
 - `fullscreenexit`
 
-Enabling playback [actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/) require the `play` and `pause` methods. 
+Enabling playback [actions](https://amp.dev/documentation/guides-and-tutorials/learn/amp-actions-and-events/#video-elements) require specific methods:
+
+- `element.play`: `method('play', ...)`
+- `element.pause`: `method('pause', ...)`
+- `element.mute`: `method('mute', ...)`
+- `element.unmute`: `method('unmute', ...)`
+- `element.fullscreen`: `method('fullscreenenter', ...)`
 
 Use of `autoplay` requires `play`, `pause`, `mute` and `unmute`.
 
