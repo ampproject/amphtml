@@ -401,7 +401,7 @@ Use [`<amp-video>`](https://go.amp.dev/c/amp-video) to directly embed a video on
 
 #### Advertising 
 
-Use `<amp-ad>` for advertising purposes. `<amp-video-iframe>` may display videos where part of the videos is advertising.
+Use [`<amp-ad>`](https://go.amp.dev/c/amp-ad) for advertising purposes. `<amp-video-iframe>` may display videos where part of the videos is advertising.
 
 Do not use `<amp-video-iframe>` for the _primary purpose_ of displaying advertising.  This component is not rendered when in violation of this policy. The reasons for this policy:
 
