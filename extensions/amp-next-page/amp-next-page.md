@@ -89,7 +89,7 @@ component will render a maximum of three documents (total) on screen at one sing
 
 [tip type="important"]
 **Important** [`<amp-analytics>`](../amp-analytics/amp-analytics.md) is [currently unsupported](https://github.com/ampproject/amphtml/issues/15807) on pages users land on through `<amp-next-page>`.
-Tracking page views is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md) or `<amp-analytics>` on the host page.
+Tracking page views is supported through [`<amp-pixel>`](../../builtins/amp-pixel.md) or `<amp-analytics>` on the host page. It is recommended to use the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll triggers otherwise the host page's `100%` trigger point would only be fired after the user scrolled past all sub-documents. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead.
 [/tip]
 
 ### Analytics triggers

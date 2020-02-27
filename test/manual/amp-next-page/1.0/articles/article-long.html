@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-fx-collection" src="https://cdn.ampproject.org/v0/amp-fx-collection-0.1.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-custom>
     .spacer {
       margin-top: 10px;
@@ -77,6 +77,51 @@
   </style>
 </head>
 <body>
+  <amp-analytics>
+    <script type="application/json">
+      {
+        "requests": {
+          "scroll": "https://article-long/${eventId}/${eventLabel}/${account}",
+          "pageview": "https://article-long/${ampdocUrl}/${title}/${account}",
+          "imageview": "https://article-long/image-view/?initialScrollDepth=${initialScrollDepth}&maxScrollDepth=${maxScrollDepth}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&firstVisibleTime=${firstVisibleTime}"
+        },
+        "vars": {
+          "account": "ABC123"
+        },
+        "triggers": {
+          "scrollPings": {
+            "on": "scroll",
+            "request": "scroll",
+            "scrollSpec": {
+              "verticalBoundaries": [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+              "horizontalBoundaries": [90]
+            },
+            "vars": {
+              "eventId": "scroll",
+              "eventLabel": "${verticalScrollBoundary}"
+            }
+          },
+          "trackPageview": {
+            "on": "visible",
+            "request": "pageview",
+            "vars": {
+              "eventCategory": "${canonicalUrl}",
+              "eventAction": "view"
+            }
+          },
+          "image_viewed": {
+            "on": "visible",
+            "request": ["imageview"],
+            "selector": "#target1",
+            "visibilitySpec": {
+              "visiblePercentageMin": "0",
+              "repeat": true
+            }
+          }    
+        }
+      }
+    </script>
+  </amp-analytics>
   <main>
     <h2>Long Article</h2>
 
@@ -96,7 +141,7 @@
             at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
         </p>
 
-        <amp-img layout=responsive width=1600 height=900 src="https://picsum.photos/1600/900?image=981"></amp-img>
+        <amp-img id="target1" layout=responsive width=1600 height=900 src="https://picsum.photos/1600/900?image=981"></amp-img>
 
         <p>
             Vestibulum a nisi est. Fusce consequat iaculis vehicula. Aliquam luctus

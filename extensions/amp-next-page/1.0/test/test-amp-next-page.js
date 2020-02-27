@@ -439,15 +439,6 @@ describes.realWin(
         expect(service.pages_[2].document.querySelector('[instance="1"]')).to
           .not.be.ok;
       });
-
-      it('removes amp-analytics tags from child documents', async () => {
-        await fetchDocuments(
-          service,
-          `${MOCK_NEXT_PAGE} <amp-analytics id="analytics1"></amp-analytics>`
-        );
-        expect(service.pages_[1].document.getElementById('analytics1')).to.be
-          .null;
-      });
     });
 
     describe('infinite loading', () => {

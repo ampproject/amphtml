@@ -143,7 +143,11 @@ export class AnalyticsRoot {
    */
   getRootElement() {
     const root = this.getRoot();
-    return dev().assertElement(root.documentElement || root.body || root);
+    // In the case of a shadow doc, its host will be used as
+    // a refrence point
+    return dev().assertElement(
+      root.host || root.documentElement || root.body || root
+    );
   }
 
   /**
@@ -400,7 +404,7 @@ export class AnalyticsRoot {
   getScrollManager() {
     // TODO (zhouyx@): Disallow scroll trigger with host API
     if (!this.scrollManager_) {
-      this.scrollManager_ = new ScrollManager(this.ampdoc);
+      this.scrollManager_ = new ScrollManager(this);
     }
 
     return this.scrollManager_;
