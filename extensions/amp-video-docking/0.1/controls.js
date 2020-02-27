@@ -170,9 +170,6 @@ export class Controls {
     /** @public @const {!Element} */
     this.overlay = renderDockedOverlay(html);
 
-    /** @private @const */
-    this.manager_ = once(() => Services.videoManagerForDoc(ampdoc));
-
     const refs = htmlRefs(this.container);
     const assertRef = ref => dev().assertElement(refs[ref]);
 
@@ -255,7 +252,8 @@ export class Controls {
   setVideo(video, area) {
     this.area_ = area;
 
-    if (this.video_ != video) {
+    // TODO(alanorozco): We could keep a plain Element instead.
+    if (this.video_ !== video) {
       this.video_ = video;
       this.listen_(video);
     }
@@ -344,12 +342,19 @@ export class Controls {
   }
 
   /**
-   * @return {boolean}
+   * @return {{
+   *   isMuted: boolean,
+   *   isInAdPlayback: boolean,
+   *   isPlaying: boolean,
+   * }} state
    * @private
+   * TODO(alanorozco): Bookkeep entry before showing on next frame as a small
+   * optimization. If using a VideoEntry then we can destructure that instead.
    */
-  isPlaying_() {
-    devAssert(this.video_);
-    return this.manager_().getPlayingState(this.video_) != PlayingStates.PAUSED;
+  get videoState_() {
+    const video = dev().assert(this.video_);
+    const manager = Services.videoManagerForDoc(this.ampdoc_);
+    return manager.getState(video);
   }
 
   /** @private */
@@ -427,6 +432,7 @@ export class Controls {
 
   /** @private */
   showOnNextAnimationFrame_() {
+    const {isInAdPlayback, isMuted, isPlaying} = this.videoState_;
     const {container, overlay} = this;
 
     toggle(container, true);
@@ -434,12 +440,12 @@ export class Controls {
     container.classList.add('amp-video-docked-controls-shown');
     overlay.classList.add('amp-video-docked-controls-bg');
 
-    const isPlaying = this.isPlaying_();
+    this.useControlSet_(
+      isInAdPlayback ? ControlSet.SCROLL_BACK : ControlSet.PLAYBACK
+    );
 
     toggle(this.playButton_, !isPlaying);
     toggle(this.pauseButton_, isPlaying);
-
-    const isMuted = this.manager_().isMuted(this.video_);
 
     toggle(this.muteButton_, !isMuted);
     toggle(this.unmuteButton_, isMuted);
