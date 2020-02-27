@@ -223,6 +223,13 @@ describes.realWin('video-iframe-integration', {amp: false}, env => {
         });
       });
 
+      it('uses global jwplayer() to get instance when not passed in', () => {
+        const instance = {on: env.sandbox.spy()};
+        env.win.jwplayer = env.sandbox.stub().returns(instance);
+        new AmpVideoIntegration(env.win).listenTo('jwplayer');
+        expect(instance.on).to.have.been.called;
+      });
+
       function mockVideoJsPlayer() {
         return {
           ready(fn) {

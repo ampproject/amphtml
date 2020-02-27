@@ -250,15 +250,29 @@ You can additionally use [custom integration methods](#custom-integrations) if y
 
 **Default supported methods:** `pause`/`play`, `mute`/`unmute`, `hidecontrols`/`showcontrols`, `fullscreenenter`/`fullscreenexit`
 
-Pass in your [`jwplayer` instance object](https://developer.jwplayer.com/jw-player/docs/javascript-api-reference/)
-through the signature `ampIntegration.listenTo('jwplayer', myJwplayer)`. The `ampIntegration` object then knows how
-to setup the player through the instance API.
+The `amp` object knows how to setup a JwPlayer instance by using `listenTo('jwplayer')`.
+If you're embedding your player [using a video-specific script](https://support.jwplayer.com/articles/how-to-embed-a-jwplayer), you only need to register Jwplayer usage:
+
+```html
+<script src="https://cdn.jwplayer.com/players/UVQWMA4o-kGWxh33Q.js"></script>
+<script>
+  (window.AmpVideoIframe = window.AmpVideoIframe || []).push(function(
+    ampIntegration
+  ) {
+    ampIntegration.listenTo('jwplayer');
+  });
+</script>
+```
+
+Otherwise, pass in your [JwPlayer instance](https://developer.jwplayer.com/jwplayer/docs/jw8-javascript-api-reference)
+through the signature `amp.listenTo('jwplayer', instance)`:
 
 ```js
-function onAmpIntegrationReady(ampIntegration) {
-  var myJwplayer = jwplayer('my-video');
-  ampIntegration.listenTo('jwplayer', myJwplayer);
-}
+(window.AmpVideoIframe = window.AmpVideoIframe || []).push(function(
+  ampIntegration
+) {
+  ampIntegration.listenTo('jwplayer', jwplayer('my-video'));
+});
 ```
 
 ##### For Video.js
