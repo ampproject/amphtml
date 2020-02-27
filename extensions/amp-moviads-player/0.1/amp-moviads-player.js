@@ -121,9 +121,6 @@ class AmpMoviadsPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.detectedAdBlock();
-    if (typeof mapConfig !== 'undefined') {
-      this.configMap_ = mapConfig;
-    }
     if (this.element.getAttribute('data-video-custom-conf')) {
       this.config_ = new Function(
         'return (' + this.element.getAttribute('data-video-custom-conf') + ')'
