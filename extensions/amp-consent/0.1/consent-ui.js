@@ -493,8 +493,7 @@ export class ConsentUI {
     if (!elementByTag(this.parent_, 'placeholder')) {
       insertAfterOrAtStart(
         this.parent_,
-        dev().assertElement(this.placeholder_),
-        null
+        dev().assertElement(this.placeholder_)
       );
     }
     classList.add(consentUiClasses.loading);
@@ -505,7 +504,7 @@ export class ConsentUI {
     ).then(clientInfo => {
       this.ui_.setAttribute('name', JSON.stringify(clientInfo));
       this.win_.addEventListener('message', this.boundHandleIframeMessages_);
-      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_), null);
+      insertAfterOrAtStart(this.parent_, dev().assertElement(this.ui_));
     });
 
     return Promise.all([

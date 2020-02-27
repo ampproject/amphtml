@@ -37,8 +37,10 @@ export const ViewportRelativePos = {
 };
 
 /** @const {number} */
-const SCROLL_DIRECTION_THRESHOLD = 20;
+const SCROLL_THROTTLE_THRESHOLD = 20;
 
+// TODO(wassgha): Consolidate with amp-video-docking
+// and other places where ScrollDirection is used
 /** @enum {number} */
 export const ScrollDirection = {UP: 1, DOWN: -1};
 
@@ -136,13 +138,13 @@ class VisibilityObserverHostEntry extends VisibilityObserverEntry {
   /**
    * @param {!VisibilityObserver} observer
    * @param {function(!ViewportRelativePos)} callback
-   * @param {!Element} limitingElement
+   * @param {!Element} nextPageEl
    */
-  constructor(observer, callback, limitingElement) {
+  constructor(observer, callback, nextPageEl) {
     super(observer, callback);
 
     /** @private {!Element} */
-    this.limitingElement_ = limitingElement;
+    this.nextPageEl_ = nextPageEl;
   }
 
   /**
@@ -155,8 +157,8 @@ class VisibilityObserverHostEntry extends VisibilityObserverEntry {
   /**
    * @return {!Element}
    */
-  get limitingElement() {
-    return this.limitingElement_;
+  get nextPageEl() {
+    return this.nextPageEl_;
   }
 }
 
@@ -228,7 +230,7 @@ export default class VisibilityObserver {
         const scrollTop = this.viewport_.getScrollTop();
         const delta = scrollTop - this.lastScrollTop_;
         // Throttle
-        if (Math.abs(delta) < SCROLL_DIRECTION_THRESHOLD) {
+        if (Math.abs(delta) < SCROLL_THROTTLE_THRESHOLD) {
           return;
         }
         const scrollDirection =
@@ -281,15 +283,11 @@ export default class VisibilityObserver {
   }
 
   /**
-   * @param {!Element} limitingElement element that delimits the host page
+   * @param {!Element} nextPageEl delimits the host page's document
    * @param {function(!ViewportRelativePos)} callback
    */
-  observeHost(limitingElement, callback) {
-    const entry = new VisibilityObserverHostEntry(
-      this,
-      callback,
-      limitingElement
-    );
+  observeHost(nextPageEl, callback) {
+    const entry = new VisibilityObserverHostEntry(this, callback, nextPageEl);
     this.entries_.push(entry);
   }
 
@@ -328,12 +326,14 @@ export default class VisibilityObserver {
     const {viewportHeight_: vh, lastScrollTop_: scroll} = this;
     // Document height is the same as the distance from the top
     // to the <amp-next-page> element
-    const {top: height} = entry.limitingElement.getLayoutBox();
+    const {top: height} = entry.nextPageEl.getLayoutBox();
     if (scroll < height - vh) {
       return ViewportRelativePos.CONTAINS_VIEWPORT;
-    } else if (scroll < height && height <= vh && scroll <= 0) {
+    }
+    if (scroll < height && height <= vh && scroll <= 0) {
       return ViewportRelativePos.INSIDE_VIEWPORT;
-    } else if (scroll < height) {
+    }
+    if (scroll < height) {
       return this.isScrollingDown()
         ? ViewportRelativePos.LEAVING_VIEWPORT
         : ViewportRelativePos.ENTERING_VIEWPORT;
@@ -352,17 +352,20 @@ export default class VisibilityObserver {
       // Early exit if this an intersection change happening before a
       // sentinel position change
       return null;
-    } else if (top === INSIDE && bottom === INSIDE) {
+    }
+    if (top === INSIDE && bottom === INSIDE) {
       // Both the top and bottom sentinel elements are within the
       // viewport bounds meaning that the document is short enough
       // to be contained inside the viewport
       return ViewportRelativePos.INSIDE_VIEWPORT;
-    } else if ((!top || top === TOP) && (!bottom || bottom === BOTTOM)) {
+    }
+    if ((!top || top === TOP) && (!bottom || bottom === BOTTOM)) {
       // The head of the document is above the viewport and the
       // foot of the document is below it, meaning that the viewport
       // is looking at a section of the document
       return ViewportRelativePos.CONTAINS_VIEWPORT;
-    } else if (
+    }
+    if (
       ((!top || top === TOP) && bottom === TOP) ||
       (top === BOTTOM && (!bottom || bottom === BOTTOM))
     ) {
@@ -370,16 +373,15 @@ export default class VisibilityObserver {
       // above or below the document meaning that the viewport hasn't
       // reached the document yet or has passed it
       return ViewportRelativePos.OUTSIDE_VIEWPORT;
-    } else {
-      const atBottom =
-        (top === TOP || top === INSIDE) && (!bottom || bottom === BOTTOM);
-      const scrollingUp = this.isScrollingUp();
-      // The remaining case is the case where the document is halfway
-      // through being scrolling into/out of the viewport in which case
-      // we don't need to update the visibility
-      return !!atBottom === !!scrollingUp
-        ? ViewportRelativePos.LEAVING_VIEWPORT
-        : ViewportRelativePos.ENTERING_VIEWPORT;
     }
+    const atBottom =
+      (top === TOP || top === INSIDE) && (!bottom || bottom === BOTTOM);
+    const scrollingUp = this.isScrollingUp();
+    // The remaining case is the case where the document is halfway
+    // through being scrolling into/out of the viewport in which case
+    // we don't need to update the visibility
+    return !!atBottom === !!scrollingUp
+      ? ViewportRelativePos.LEAVING_VIEWPORT
+      : ViewportRelativePos.ENTERING_VIEWPORT;
   }
 }

@@ -42,7 +42,6 @@ import {
   parseSchemaImage,
 } from '../../../src/mediasession-helper';
 import {setStyles, toggle} from '../../../src/style';
-
 import {toArray} from '../../../src/types';
 import {tryParseJson} from '../../../src/json';
 import {validatePage, validateUrl} from './utils';
@@ -175,7 +174,7 @@ export class NextPageService {
     this.hostPage_ = this.createHostPage();
     this.toggleHiddenAndReplaceableElements(this.doc_);
     // Have the footer be always visible
-    insertAfterOrAtStart(this.host_, this.footer_, null /** after */);
+    insertAfterOrAtStart(this.host_, this.footer_);
 
     this.history_ = Services.historyForDoc(this.ampdoc_);
     this.initializeHistory();
@@ -523,7 +522,7 @@ export class NextPageService {
 
       // Insert the separator
       const separatorInstance = this.separator_.cloneNode(true);
-      insertAfterOrAtStart(container, separatorInstance, null /** after */);
+      insertAfterOrAtStart(container, separatorInstance);
       const separatorPromise = this.maybeRenderSeparatorTemplate_(
         separatorInstance,
         page

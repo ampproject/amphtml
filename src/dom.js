@@ -146,9 +146,9 @@ export function copyChildren(from, to) {
  * if that is null at the beginning.
  * @param {!Element|!ShadowRoot} root
  * @param {!Element} element
- * @param {?Node} after
+ * @param {?Node=} after
  */
-export function insertAfterOrAtStart(root, element, after) {
+export function insertAfterOrAtStart(root, element, after = null) {
   const before = after ? after.nextSibling : root.firstChild;
   root.insertBefore(element, before);
 }
