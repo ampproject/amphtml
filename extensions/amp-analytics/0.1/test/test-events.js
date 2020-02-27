@@ -1739,7 +1739,6 @@ describes.realWin('Events', {amp: 1}, env => {
     });
 
     it('should add doc listener', async () => {
-      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').never();
       iniLoadTrackerMock.expects('getElementSignal').never();
       visibilityManagerMock
@@ -1750,7 +1749,6 @@ describes.realWin('Events', {amp: 1}, env => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .returns(unlisten)
         .once();
       const res = tracker.add(analyticsElement, 'visible', {}, eventResolver);
       expect(res).to.be.a('function');
@@ -1760,14 +1758,10 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(event.target).to.equal(root.getRootElement());
       expect(event.type).to.equal('visible');
       expect(event.vars.totalVisibleTime).to.equal(10);
-      expect(unlisten).to.be.not.called;
-      await res();
-      expect(unlisten).to.be.calledOnce;
     });
 
     it('should add root listener', async () => {
       const config = {selector: ':root'};
-      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getElementSignal').never();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
@@ -1777,7 +1771,6 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
         .expects('listenRoot')
         .withExactArgs(matchEmptySpec, readyPromise, null, saveCallback)
-        .returns(unlisten)
         .once();
       const res = tracker.add(
         analyticsElement,
@@ -1792,14 +1785,10 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(event.target).to.equal(root.getRootElement());
       expect(event.type).to.equal('visible');
       expect(event.vars.totalVisibleTime).to.equal(10);
-      expect(unlisten).to.be.not.called;
-      await res();
-      expect(unlisten).to.be.calledOnce;
     });
 
     it('should add host listener and spec', async () => {
       const config = {visibilitySpec: {selector: ':host'}};
-      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getElementSignal').never();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
@@ -1814,7 +1803,6 @@ describes.realWin('Events', {amp: 1}, env => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .returns(unlisten)
         .once();
       const res = tracker.add(
         analyticsElement,
@@ -1829,14 +1817,10 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(event.target).to.equal(root.getRootElement());
       expect(event.type).to.equal('visible');
       expect(event.vars.totalVisibleTime).to.equal(10);
-      expect(unlisten).to.not.be.called;
-      await res();
-      expect(unlisten).to.be.calledOnce;
     });
 
     it('should add target listener', async () => {
       const config = {visibilitySpec: {selector: '.target'}};
-      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').once();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
@@ -1853,7 +1837,6 @@ describes.realWin('Events', {amp: 1}, env => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .returns(unlisten)
         .once();
       const res = tracker.add(
         analyticsElement,
@@ -1872,16 +1855,12 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(event.target).to.equal(target);
       expect(event.type).to.equal('visible');
       expect(event.vars.totalVisibleTime).to.equal(10);
-      expect(unlisten).to.not.be.called;
-      await res();
-      expect(unlisten).to.be.calledOnce;
     });
 
     it('should expand data params', async () => {
       target.setAttribute('data-vars-foo', 'bar');
 
       const config = {selector: '.target'};
-      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').never();
       const readyPromise = Promise.resolve();
 
@@ -1899,7 +1878,6 @@ describes.realWin('Events', {amp: 1}, env => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .returns(unlisten)
         .once();
       const res = tracker.add(
         analyticsElement,
@@ -1917,9 +1895,6 @@ describes.realWin('Events', {amp: 1}, env => {
       const event = await eventPromise;
       expect(event.vars.totalVisibleTime).to.equal(10);
       expect(event.vars.foo).to.equal('bar');
-      expect(unlisten).to.not.be.called;
-      await res();
-      expect(unlisten).to.be.calledOnce;
     });
 
     it('should pass func to get reportReady with "hidden" trigger', function*() {
