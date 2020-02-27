@@ -22,9 +22,8 @@ import {dict} from '../../../src/utils/object';
  * UI for Scroll users.
  *
  * Presents a fixed bar at the bottom of the screen with Scroll content.
- * @abstract
  */
-class Bar extends ScrollComponent {
+export class ScrollBar extends ScrollComponent {
   /**
    * @param {!../../../src/service/ampdoc-impl.AmpDoc} doc
    * @param {!../../amp-access/0.1/amp-access-source.AccessSource} accessSource
@@ -84,28 +83,7 @@ class Bar extends ScrollComponent {
 
     this.toggleClass(this.HOLDBACK_CLASS, this.holdback_);
     this.mount();
-  }
 
-  /**
-   * @param {!JsonObject} action
-   */
-  update(action) {
-    const changed = this.updateHorizontalLayout(action);
-
-    if (changed) {
-      this.render_();
-    }
-  }
-}
-
-export class ScrollUserBar extends Bar {
-  /**
-   * Load the scrollbar URL in the iframe.
-   * @protected
-   * @override
-   * */
-  makeIframe_() {
-    Bar.prototype.makeIframe_.call(this);
     // Set iframe to scrollbar URL.
     this.accessSource_
       .buildUrl(
@@ -123,31 +101,15 @@ export class ScrollUserBar extends Bar {
         this.frame_.setAttribute('src', scrollbarUrl);
       });
   }
-}
-/**
- * Add link to the Scroll App connect page.
- */
-export class ActivateBar extends Bar {
-  /**
-   * @protected
-   * @override
-   * */
-  makeIframe_() {
-    Bar.prototype.makeIframe_.call(this);
 
-    this.accessSource_
-      .buildUrl(
-        `${this.baseUrl_}/html/amp/activate` +
-          '?rid=READER_ID' +
-          '&cid=CLIENT_ID(scroll1)' +
-          '&c=CANONICAL_URL' +
-          '&o=AMPDOC_URL' +
-          '&x=QUERY_PARAM(scrollx)' +
-          `&p=${PROTOCOL_VERSION}`,
-        false
-      )
-      .then(url => {
-        this.frame_.setAttribute('src', url);
-      });
+  /**
+   * @param {!JsonObject} action
+   */
+  update(action) {
+    const changed = this.updateHorizontalLayout(action);
+
+    if (changed) {
+      this.render_();
+    }
   }
 }
