@@ -252,7 +252,6 @@ export class Controls {
   setVideo(video, area) {
     this.area_ = area;
 
-    // TODO(alanorozco): We could keep a plain Element instead.
     if (this.video_ !== video) {
       this.video_ = video;
       this.listen_(video);
