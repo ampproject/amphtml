@@ -344,7 +344,7 @@ export class Controls {
   /**
    * @return {{
    *   isMuted: boolean,
-   *   isInAdPlayback: boolean,
+   *   isRollingAd: boolean,
    *   isPlaying: boolean,
    * }} state
    * @private
@@ -432,7 +432,7 @@ export class Controls {
 
   /** @private */
   showOnNextAnimationFrame_() {
-    const {isInAdPlayback, isMuted, isPlaying} = this.videoState_;
+    const {isRollingAd, isMuted, isPlaying} = this.videoState_;
     const {container, overlay} = this;
 
     toggle(container, true);
@@ -441,7 +441,7 @@ export class Controls {
     overlay.classList.add('amp-video-docked-controls-bg');
 
     this.useControlSet_(
-      isInAdPlayback ? ControlSet.SCROLL_BACK : ControlSet.PLAYBACK
+      isRollingAd ? ControlSet.SCROLL_BACK : ControlSet.PLAYBACK
     );
 
     toggle(this.playButton_, !isPlaying);
