@@ -595,6 +595,9 @@ export class ResourcesImpl {
       this.firstPassAfterDocumentReady_ = false;
       const doc = this.win.document;
       const documentInfo = Services.documentInfoForDoc(this.ampdoc);
+
+      // TODO(choumx, #26687): Update viewers to read data.viewport instead of
+      // data.metaTags.viewport from 'documentLoaded' message.
       this.viewer_.sendMessage(
         'documentLoaded',
         dict({
@@ -602,7 +605,8 @@ export class ResourcesImpl {
           'sourceUrl': getSourceUrl(this.ampdoc.getUrl()),
           'serverLayout': doc.documentElement.hasAttribute('i-amphtml-element'),
           'linkRels': documentInfo.linkRels,
-          'metaTags': documentInfo.metaTags,
+          'metaTags': {'viewport': documentInfo.viewport} /* deprecated */,
+          'viewport': documentInfo.viewport,
         }),
         /* cancelUnsent */ true
       );
