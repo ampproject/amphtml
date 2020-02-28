@@ -29,6 +29,7 @@ import {
   VideoAttributes,
   VideoEvents,
   VideoServiceSignals,
+  setIsMediaComponent,
   userInteractedWith,
   videoAnalyticsCustomEventTypeKey,
 } from '../video-interface';
@@ -192,7 +193,7 @@ export class VideoManager {
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
-    element.classList.add('i-amphtml-video-component');
+    setIsMediaComponent(element);
 
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
@@ -222,7 +223,14 @@ export class VideoManager {
     registerAction('pause', () => video.pause());
     registerAction('mute', () => video.mute());
     registerAction('unmute', () => video.unmute());
-    registerAction('fullscreen', () => video.fullscreenEnter());
+
+    // fullscreen/fullscreenenter are a special case.
+    // - fullscreenenter is kept as a standard name for symmetry with internal
+    //   internal interfaces
+    // - fullscreen is an undocumented alias for backwards compatibility.
+    const fullscreenEnter = () => video.fullscreenEnter();
+    registerAction('fullscreenenter', fullscreenEnter);
+    registerAction('fullscreen', fullscreenEnter);
 
     /**
      * @param {string} action

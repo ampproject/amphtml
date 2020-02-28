@@ -14,11 +14,11 @@
 // limitations under the license.
 //
 
-#include "htmlparser/doctype.h"
+#include "doctype.h"
 
 #include <sstream>
 
-#include "htmlparser/strings.h"
+#include "strings.h"
 
 namespace htmlparser {
 

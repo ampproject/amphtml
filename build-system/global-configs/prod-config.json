@@ -14,6 +14,7 @@
   "amp-ad-ff-adx-ady": 0.01,
   "amp-auto-ads-adsense-holdout": 0.1,
   "amp-auto-ads-no-op-experiment": 0.05,
+  "amp-consent-restrict-fullscreen": 1,
   "amp-mega-menu": 1,
   "amp-nested-menu": 1,
   "amp-playbuzz": 1,
