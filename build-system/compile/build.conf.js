@@ -20,6 +20,7 @@ const localPlugin = name =>
   require.resolve(`../babel-plugins/babel-plugin-${name}`);
 
 const defaultPlugins = isEsmBuild => [
+  localPlugin('transform-fix-leading-comments'),
   '@babel/plugin-transform-react-constant-elements',
   [
     '@babel/plugin-transform-react-jsx',

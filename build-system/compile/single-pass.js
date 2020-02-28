@@ -734,7 +734,7 @@ function eliminateIntermediateBundles() {
       }
       const {code, map: babelMap} = babel.transformFileSync(path, {
         plugins: conf.eliminateIntermediateBundles(),
-        retainLines: true,
+        compact: false,
         sourceMaps: true,
         inputSourceMap: false,
       });
