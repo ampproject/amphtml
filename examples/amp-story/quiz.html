@@ -63,9 +63,16 @@
           layout="responsive">
       </amp-story-grid-layer>
       <amp-story-grid-layer>
+        <style>
+          #cat-question-appear {
+            --accent-color: cadetblue;
+          }
+        </style>
         <amp-story-quiz
           id='cat-question-appear'
-          endpoint="http://localhost:3000/reactions">
+          endpoint="http://localhost:3000/reactions"
+          chip-corner="sharp"
+          theme="dark">
           <h1>When did the domestic cat first appear on the scene?</h1>
           <option>7,000 years ago</option>
           <option correct>500,000 years ago</option>
@@ -82,7 +89,8 @@
         </amp-story-grid-layer>
         <amp-story-grid-layer>
           <amp-story-quiz
-            id='cat-question-handedness'>
+            id='cat-question-handedness'
+            chip-style="shadow">
             <h2>True or False: Cats can be right-pawed or left-pawed.</h2>
             <option correct>True</option>
             <option>False</option>

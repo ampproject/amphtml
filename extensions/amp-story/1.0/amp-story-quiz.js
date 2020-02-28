@@ -232,27 +232,31 @@ export class AmpStoryQuiz extends AMP.BaseElement {
   attachContent_() {
     // TODO(jackbsteinberg): Optional prompt behavior must be implemented here
     const promptInput = this.element.children[0];
+    const promptContainer = this.quizEl_.querySelector(
+      '.i-amphtml-story-quiz-prompt-container'
+    );
+
     // First child must be heading h1-h3
     if (!['h1', 'h2', 'h3'].includes(promptInput.tagName.toLowerCase())) {
       dev().error(
         TAG,
         'The first child must be a heading element <h1>, <h2>, or <h3>'
       );
-    }
+      this.quizEl_.removeChild(promptContainer);
+    } else {
+      const prompt = document.createElement(promptInput.tagName);
 
-    const prompt = document.createElement(promptInput.tagName);
-    prompt.textContent = promptInput.textContent;
-    prompt.classList.add('i-amphtml-story-quiz-prompt');
-    this.element.removeChild(promptInput);
+      prompt.textContent = promptInput.textContent;
+      prompt.classList.add('i-amphtml-story-quiz-prompt');
+
+      this.element.removeChild(promptInput);
+      promptContainer.appendChild(prompt);
+    }
 
     const options = toArray(this.element.querySelectorAll('option'));
     if (options.length < 2 || options.length > 4) {
       dev().error(TAG, 'Improper number of options');
     }
-
-    this.quizEl_
-      .querySelector('.i-amphtml-story-quiz-prompt-container')
-      .appendChild(prompt);
 
     // Localize the answer choice options
     this.answerChoiceOptions_ = this.answerChoiceOptions_.map(choice => {
