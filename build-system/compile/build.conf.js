@@ -29,7 +29,15 @@ const defaultPlugins = isEsmBuild => [
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
   localPlugin('transform-simple-array-destructure'),
-  localPlugin('@babel/plugin-transform-react-jsx'),
+  '@babel/plugin-transform-react-constant-elements',
+  [
+    '@babel/plugin-transform-react-jsx',
+    {
+      pragma: 'Preact.createElement',
+      pragmaFrag: 'Preact.Fragment',
+      useSpread: true,
+    },
+  ],
   getReplacePlugin(isEsmBuild),
 ];
 

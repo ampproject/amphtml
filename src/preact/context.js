@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {createContext, createElement, useContext} from './index';
+import * as Preact from './index';
+import {createContext, useContext} from './index';
 
 /** @type {Preact.Context} */
 let context;
@@ -46,8 +47,9 @@ export function getAmpContext() {
  * @param {!JsonObject} props
  * @return {!Preact.VNode}
  */
-export function withAmpContext(props) {
-  const parent = useContext(getAmpContext());
+export function WithAmpContext(props) {
+  const AmpContext = getAmpContext();
+  const parent = useContext(AmpContext);
   const current = {
     ...props,
     'renderable': parent['renderable'] && props['renderable'],
@@ -55,8 +57,5 @@ export function withAmpContext(props) {
     'children': undefined,
   };
 
-  return createElement(getAmpContext().Provider, {
-    children: props['children'],
-    value: current,
-  });
+  return <AmpContext.Provider children={props['children']} value={current} />;
 }

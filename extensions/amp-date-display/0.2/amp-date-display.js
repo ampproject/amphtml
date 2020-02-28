@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-/** @jsx createElement */
-/** @jsxFrag Fragment */
-
+import * as Preact from '../../../src/preact';
 import {AsyncRender} from './async-render';
 import {DateDisplay} from './date-display';
-import {Fragment, createElement} from '../../../src/preact';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {RenderDomTree} from './render-dom-tree';
 import {Services} from '../../../src/services';

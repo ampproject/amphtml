@@ -64,6 +64,17 @@ module.exports = function(api) {
             },
           ],
     ],
+    'plugins': [
+      '@babel/plugin-transform-react-constant-elements',
+      [
+        '@babel/plugin-transform-react-jsx',
+        {
+          pragma: 'Preact.createElement',
+          pragmaFrag: 'Preact.Fragment',
+          useSpread: true,
+        },
+      ],
+    ],
     'compact': false,
     'sourceType': 'module',
   };
