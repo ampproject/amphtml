@@ -258,10 +258,6 @@ export class AmpStoryQuiz extends AMP.BaseElement {
       dev().error(TAG, 'Improper number of options');
     }
 
-    this.quizEl_
-      .querySelector('.i-amphtml-story-quiz-prompt-container')
-      .appendChild(prompt);
-
     // Localize the answer choice options
     this.answerChoiceOptions_ = this.answerChoiceOptions_.map(choice => {
       return this.localizationService_.getLocalizedString(
