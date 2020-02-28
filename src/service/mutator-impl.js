@@ -231,34 +231,33 @@ export class MutatorImpl {
         // on element size changes since enter/exit viewport will be detected.
         if (this.intersect_) {
           this.resources_.maybeHeightChanged();
-        } else {
-          if (element.classList.contains('i-amphtml-element')) {
-            const r = Resource.forElement(element);
-            r.requestMeasure();
-          }
-          const ampElements = element.getElementsByClassName(
-            'i-amphtml-element'
-          );
-          for (let i = 0; i < ampElements.length; i++) {
-            const r = Resource.forElement(ampElements[i]);
-            r.requestMeasure();
-          }
-          if (relayoutTop != -1) {
-            this.resources_.setRelayoutTop(relayoutTop);
-          }
-          this.resources_.schedulePass(FOUR_FRAME_DELAY_);
-
-          // Need to measure again in case the element has become visible or
-          // shifted.
-          this.vsync_.measure(() => {
-            const updatedRelayoutTop = calcRelayoutTop();
-            if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
-              this.resources_.setRelayoutTop(updatedRelayoutTop);
-              this.resources_.schedulePass(FOUR_FRAME_DELAY_);
-            }
-            this.resources_.maybeHeightChanged();
-          });
+          return;
         }
+
+        if (element.classList.contains('i-amphtml-element')) {
+          const r = Resource.forElement(element);
+          r.requestMeasure();
+        }
+        const ampElements = element.getElementsByClassName('i-amphtml-element');
+        for (let i = 0; i < ampElements.length; i++) {
+          const r = Resource.forElement(ampElements[i]);
+          r.requestMeasure();
+        }
+        if (relayoutTop != -1) {
+          this.resources_.setRelayoutTop(relayoutTop);
+        }
+        this.resources_.schedulePass(FOUR_FRAME_DELAY_);
+
+        // Need to measure again in case the element has become visible or
+        // shifted.
+        this.vsync_.measure(() => {
+          const updatedRelayoutTop = calcRelayoutTop();
+          if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
+            this.resources_.setRelayoutTop(updatedRelayoutTop);
+            this.resources_.schedulePass(FOUR_FRAME_DELAY_);
+          }
+          this.resources_.maybeHeightChanged();
+        });
       },
     });
   }

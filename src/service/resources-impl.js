@@ -25,7 +25,7 @@ import {TaskQueue} from './task-queue';
 import {VisibilityState} from '../visibility-state';
 import {dev, devAssert} from '../log';
 import {dict} from '../utils/object';
-import {expandLayoutRect, layoutRectsOverlap} from '../layout-rect';
+import {expandLayoutRect, rectsOverlap} from '../layout-rect';
 import {getSourceUrl} from '../url';
 import {hasNextNodeInDocumentOrder, isIframed} from '../dom';
 import {checkAndFix as ieMediaCheckAndFix} from './ie-media-bug';
@@ -299,10 +299,14 @@ export class ResourcesImpl {
 
     const promises = entries.map(entry => {
       const {boundingClientRect, isIntersecting, target, rootBounds} = entry;
-      // Closure Compiler doesn't recognize boundingClientRect as a ClientRect.
+
+      // Strangely, JSC is missing x/y from typedefs of boundingClientRect and
+      // rootBounds despite them being DOMRectReadOnly (ClientRect) by spec.
       const clientRect = /** @type {!ClientRect} */ (boundingClientRect);
+      const bounds = /** @type {!ClientRect} */ (rootBounds);
+
       devAssert(target.isUpgraded());
-      const r = devAssert(Resource.forElementOptional(target));
+      const r = Resource.forElement(target);
 
       // discoverWork_():
       // [x] Phase 1: Build and relayout as needed. All mutations happen here.
@@ -345,7 +349,7 @@ export class ResourcesImpl {
           // actually hidden! This happens due to stale clientRect values during
           // animations e.g. while an amp-accordion[animate] is collapsing.
           // Override with the correct `isIntersecting` value in these cases.
-          if (isDisplayed && layoutRectsOverlap(clientRect, rootBounds)) {
+          if (isDisplayed && rectsOverlap(clientRect, bounds)) {
             // TODO(willchou): Sometimes causes an unnecessary unload when
             // expanding an accordion with [animate] due to extra intersection
             // callbacks during the animation.
@@ -1226,7 +1230,9 @@ export class ResourcesImpl {
       // We apply sizes/media query here before the first intersection callback
       // so that the correct element size and hidden state will be measured
       // by the observer (which avoids the need for a remeasure).
-      this.resources_.forEach(r => {
+      const numberOfResources = this.resources_.length;
+      for (let i = 0; i < numberOfResources; i++) {
+        const r = this.resources_[i];
         // NOT_LAID_OUT is the state after build() but before measure().
         if (this.relayoutAll_ || r.getState() == ResourceState.NOT_LAID_OUT) {
           // TODO(willchou): May need to add another ResourceState to avoid
@@ -1234,12 +1240,13 @@ export class ResourcesImpl {
           r.applySizesAndMediaQuery();
           dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         }
-      });
+      }
 
       // Phase 2.
       // Remeasures for viewport size changes (relayoutAll) and requestMeasure.
       const toUnload = [];
-      this.resources_.forEach(r => {
+      for (let i = 0; i < numberOfResources; i++) {
+        const r = this.resources_[i];
         if (r.hasOwner()) {
           return;
         }
@@ -1250,7 +1257,7 @@ export class ResourcesImpl {
           }
           dev().fine(TAG_, 'force remeasure:', r.debugid);
         }
-      });
+      }
       this.unloadResources_(toUnload);
 
       // Reset relayoutAll_ flag.

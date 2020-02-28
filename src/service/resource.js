@@ -23,8 +23,8 @@ import {isBlockedByConsent} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
-  layoutRectsOverlap,
   moveLayoutRect,
+  rectsOverlap,
 } from '../layout-rect';
 import {startsWith} from '../string';
 import {toWin} from '../types';
@@ -655,7 +655,7 @@ export class Resource {
    * @return {boolean}
    */
   overlaps(rect) {
-    return layoutRectsOverlap(this.getLayoutBox(), rect);
+    return rectsOverlap(this.getLayoutBox(), rect);
   }
 
   /**
