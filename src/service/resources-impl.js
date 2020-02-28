@@ -1221,7 +1221,8 @@ export class ResourcesImpl {
       //    AND remeasure elements. The latter makes sure that we call
       //    onLayoutMeasure/onMeasureChanged e.g. for owner components to
       //    reposition children.
-      // 2. Support on-demand measurements via Resource.requestMeasure.
+      // 2. Support requested measures which can only happen via expand()
+      //    and changeSize().
 
       // TODO(willchou): Do we need to build _all_ elements (instead of
       // just near-viewport elements) on page-ready?
