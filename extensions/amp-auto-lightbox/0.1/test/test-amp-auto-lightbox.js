@@ -22,7 +22,6 @@ import {
   ENABLED_LD_JSON_TYPES,
   ENABLED_OG_TYPE_ARTICLE,
   LIGHTBOXABLE_ATTR,
-  Mutation,
   RENDER_AREA_RATIO,
   REQUIRED_EXTENSION,
   Scanner,
@@ -116,13 +115,17 @@ describes.realWin(
       return element;
     }
 
+    function stubMutatorForDoc() {
+      env.sandbox.stub(Services, 'mutatorForDoc').returns({
+        mutateElement: (_, fn) => tryResolve(fn),
+      });
+    }
+
     beforeEach(() => {
       any = env.sandbox.match.any;
       html = htmlFor(env.win.document);
 
-      env.sandbox
-        .stub(Mutation, 'mutate')
-        .callsFake((_, mutator) => tryResolve(mutator));
+      stubMutatorForDoc();
     });
 
     describe('meetsTreeShapeCriteria', () => {
@@ -544,6 +547,21 @@ describes.realWin(
     });
 
     describe('runCandidates', () => {
+      it('ignores amp-img load signal after being unlaid out', async () => {
+        const img = html`
+          <amp-img src="bla.png" layout="flex-item"></amp-img>
+        `;
+
+        const signals = new Signals();
+        img.signals = () => signals;
+
+        signals.signal(CommonSignals.UNLOAD);
+        signals.signal(CommonSignals.LOAD_END);
+
+        const elected = await Promise.all(runCandidates(env.ampdoc, [img]));
+        expect(elected[0]).to.be.undefined;
+      });
+
       it('filters out candidates that fail to load', async () => {
         const shouldNotLoad = mockLoadedSignal(
           html`
