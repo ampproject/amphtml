@@ -43,6 +43,8 @@ amp-accordion > section:not([expanded]) > :last-child[rendersubtree] {
 }
 
 /* Media should never play when a section is collapsed */
-amp-accordion > section:not([expanded]) .i-amphtml-media-component {
+amp-accordion > section:not([expanded]) .i-amphtml-media-component,
+amp-accordion > section:not([expanded]) .i-amphtml-media-component * {
   display: none !important;
+  visibility: hidden !important;
 }
