@@ -35,6 +35,7 @@ describe.configure().run('Configuration', function() {
     config.thirdPartyUrl = 'http://bar.baz.com';
     config.thirdPartyFrameRegex = /a-website\.com/;
     config.errorReportingUrl = 'http://error.foo.com';
+    config.geoApiUrl = 'http://geo.bar.com';
 
     return fixture.awaitEvent(AmpEvents.LOAD_START, 1).then(() => {
       expect(fixture.win.AMP.config.urls.cdn).to.equal(config.cdnUrl);
@@ -47,6 +48,7 @@ describe.configure().run('Configuration', function() {
       expect(fixture.win.AMP.config.urls.errorReporting).to.equal(
         config.errorReportingUrl
       );
+      expect(fixture.win.AMP.config.urls.geoApi).to.equal(config.geoApiUrl);
     });
   });
 });

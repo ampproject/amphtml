@@ -17,6 +17,7 @@
 import {AmpGeo} from '../amp-geo';
 import {GEO_IN_GROUP} from '../amp-geo-in-group';
 import {Services} from '../../../../src/services';
+import {urls} from '../../../../src/config';
 import {user} from '../../../../src/log';
 import {vsyncForTesting} from '../../../../src/service/vsync-impl';
 
@@ -63,6 +64,7 @@ describes.realWin(
     let geo;
     let el;
     let userErrorStub;
+    let xhr;
 
     beforeEach(() => {
       userErrorStub = env.sandbox.stub(user(), 'error');
@@ -77,6 +79,10 @@ describes.realWin(
       vsync.schedule_ = () => {
         vsync.runScheduledTasks_();
       };
+      xhr = {
+        fetchJson: env.sandbox.stub(),
+      };
+      env.sandbox.stub(Services, 'xhrFor').returns(xhr);
 
       geo = new AmpGeo(el);
     });
@@ -383,6 +389,80 @@ describes.realWin(
       return Services.geoForDocOrNull(el).then(geo => {
         expect(geo.ISOCountry).to.equal('unknown');
         expectBodyHasClass(['amp-geo-error'], true);
+      });
+    });
+
+    it('should recognize country if API has valid schema', () => {
+      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(urls, 'geoApi').value('/geoapi');
+      xhr.fetchJson.resolves({
+        json: () => Promise.resolve(JSON.parse('{"country": "ca", "x": "y"}')),
+      });
+      addConfigElement('script');
+
+      geo.buildCallback();
+      return Services.geoForDocOrNull(el).then(geo => {
+        expect(userErrorStub).to.not.be.called;
+        expect(geo.ISOCountry).to.equal('ca');
+      });
+    });
+
+    it('should not recognize country if API has invalid schema', () => {
+      expectAsyncConsoleError(/GEONOTPATCHED/);
+      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(urls, 'geoApi').value('/geoapi');
+      xhr.fetchJson.resolves({
+        json: () => Promise.resolve(JSON.parse('{"country": "abc"}')),
+      });
+      addConfigElement('script');
+
+      geo.buildCallback();
+      return Services.geoForDocOrNull(el).then(geo => {
+        expect(userErrorStub).to.be.called;
+        expect(geo.ISOCountry).to.equal('unknown');
+      });
+    });
+
+    it('should not recognize country if API unreachable', () => {
+      expectAsyncConsoleError(/GEONOTPATCHED/);
+      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(urls, 'geoApi').value('/geoapi');
+      xhr.fetchJson.rejects({status: 404});
+      addConfigElement('script');
+
+      geo.buildCallback();
+      return Services.geoForDocOrNull(el).then(geo => {
+        expect(userErrorStub).to.be.called;
+        expect(geo.ISOCountry).to.equal('unknown');
+      });
+    });
+
+    it('should not recognize country if API times out', () => {
+      expectAsyncConsoleError(/GEONOTPATCHED/);
+      env.sandbox.stub(win.__AMP_MODE, 'localDev').value(false);
+      env.sandbox.stub(urls, 'geoApi').value('/geoapi');
+      env.sandbox.stub(Services, 'timerFor').returns({
+        timeoutPromise: function(delay, racePromise, msg) {
+          return Promise.race([
+            racePromise,
+            Promise.reject(user().createError(msg)),
+          ]);
+        },
+      });
+      xhr.fetchJson.resolves({
+        json: () =>
+          new Promise(res => {
+            setTimeout(() => {
+              res(JSON.parse('{"country": "ca"}'));
+            }, 10);
+          }),
+      });
+      addConfigElement('script');
+
+      geo.buildCallback();
+      return Services.geoForDocOrNull(el).then(geo => {
+        expect(userErrorStub).to.be.called;
+        expect(geo.ISOCountry).to.equal('unknown');
       });
     });
 
