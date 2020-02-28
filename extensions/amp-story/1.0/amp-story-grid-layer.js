@@ -27,7 +27,7 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
@@ -106,6 +106,43 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   /** @override */
   prerenderAllowed() {
     return this.prerenderAllowed_;
+  }
+
+  // TODO(26866): switch back to onMeasuredChange and remove the layoutBox
+  // equality checks.
+  /** @override */
+  onLayoutMeasure() {
+    super.onLayoutMeasure();
+
+    const format = this.element.getAttribute('format');
+    if (!format) {
+      return;
+    }
+
+    const formatSplits = format.split(':');
+    const horiz = parseInt(formatSplits[0], 10);
+    const vert = parseInt(formatSplits[1], 10);
+
+    return this.getVsync().runPromise(
+      {
+        measure: state => {
+          const parent = this.element.parentElement;
+          const vw = parent./*OK*/ clientWidth;
+          const vh = parent./*OK*/ clientHeight;
+          state.width = Math.min(vw, vh * horiz / vert);
+          state.height = Math.min(vh, vw * vert / horiz);
+        },
+        mutate: ({width, height}) => {
+          if (width === 0 && height === 0) {
+            return;
+          }
+          this.element.classList.add('i-amphtml-story-grid-template-aspect');
+          this.element.style.setProperty('--i-amphtml-story-layer-width', px(width));
+          this.element.style.setProperty('--i-amphtml-story-layer-height', px(height));
+        },
+      },
+      {}
+    );
   }
 
   /**
