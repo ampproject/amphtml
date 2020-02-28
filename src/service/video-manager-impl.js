@@ -511,12 +511,6 @@ class VideoEntry {
       this.logCustomAnalytics_(eventType, data['vars']);
     });
 
-    // TODO(alanorozco): Listeners below could be symmetrical (ie. just one)
-    // if consolidating VideoEvents with VideoAnalyticsEvents,
-    // e.g. `video-` prefix. This also applies to most other handlers that
-    // trigger an analyticsEvent.
-    // (Ensure symmetry between types via unit test.)
-
     listen(video.element, VideoEvents.ENDED, () => {
       this.isRollingAd_ = false;
       analyticsEvent(this, VideoAnalyticsEvents.ENDED);
