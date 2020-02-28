@@ -15,21 +15,34 @@
  */
 
 import {Deferred} from './promise';
+import {Services} from '../services';
+import {devAssert, user} from '../log';
+import {removeNoScriptElements} from './dom-writer';
 
-export class StreamHandler {
+export class DomTransformStream {
   /**
-   *
+   * @param {!Window} win
    */
-  constructor() {
-    const {promise, resolve} = new Deferred();
-    /** @const @private {!Promise(!Element)} */
-    this.headPromise_ = promise;
+  constructor(win) {
+    const headDefer = new Deferred();
+    /** @const @private {!Promise<!Element>} */
+    this.headPromise_ = headDefer.promise;
 
     /** @const @private {!function()} */
-    this.headResolver_ = resolve;
+    this.headResolver_ = headDefer.resolve;
+
+    const transferDefer = new Deferred();
+    /** @const @private {!Promise} */
+    this.bodyTransferPromise_ = transferDefer.promise;
+
+    /** @const @private {!function()} */
+    this.bodyTransferResolver_ = transferDefer.resolve;
 
     /** @private {?Element} */
     this.detachedBody_ = null;
+
+    /** @private {?Promise} */
+    this.currentChunkTransferPromise_ = null;
 
     /** @private {boolean} */
     this.shouldTransfer_ = false;
@@ -37,10 +50,8 @@ export class StreamHandler {
     /** @private {boolean} */
     this.mergeScheduled_ = false;
 
-    // Fake vsync for glitch demo.
-    // TODO: switch to real vsync service.
     /** @const @private */
-    this.vsync_ = {mutate: cb => Promise.resolve(cb())};
+    this.vsync_ = Services.vsyncFor(win);
   }
 
   /**
@@ -55,8 +66,9 @@ export class StreamHandler {
       this.headResolver_(detachedDoc.head);
     }
 
-    if (this.shouldTransfer_ && !this.mergeScheduled_) {
-      this.transferBody_(detachedDoc);
+    // If bodyTransfer has already been called, keep transferring on new chunks.
+    if (this.shouldTransfer_) {
+      this.transferBodyChunk_();
     }
   }
 
@@ -66,7 +78,7 @@ export class StreamHandler {
    * @param {!Document} unusedCompleteDoc
    */
   onEnd(unusedCompleteDoc) {
-    console.log('stream done.');
+    this.bodyTransferResolver_(this.transferBodyChunk_);
   }
 
   /**
@@ -79,39 +91,45 @@ export class StreamHandler {
 
   /**
    * Start the body transfer process. Should only be called once.
-   * Returns a promise indicating that the first body chunk has been transfered.
    * @param {!Element} target DOM element to be appended to.
-   * @return {!Promise} resolves when first chunk has been transfered.
+   * @return {!Promise} resolves when doc has been fully transferred.
    */
   transferBody(target) {
-    if (!target) {
-      // Throw on no target given.
-    }
+    user().assertElement(target, 'No target given to #transferBody');
 
-    if (this.shouldTransfer_) {
-      // Maybe throw on subsequent calls?
-      return Promise.resolve();
-    }
+    devAssert(
+      !this.shouldTransfer_,
+      '#transferBody should only be called once'
+    );
 
     this.shouldTransfer_ = true;
     this.target_ = target;
 
-    return this.headPromise_.then(() => this.transferBody_());
+    this.transferBodyChunk_();
+
+    return this.bodyTransferPromise_;
   }
 
   /**
    * Transfers available body elements in vsync cycle.
    * @return {!Promise}
    */
-  transferBody_() {
+  transferBodyChunk_() {
+    if (this.mergeScheduled_) {
+      return this.currentChunkTransferPromise_;
+    }
+
     this.mergeScheduled_ = true;
 
-    return this.vsync_.mutate(() => {
-      this.mergeScheduled_ = false;
-      // TODO: removeNoScriptElements
-      while (this.detachedBody_.firstChild) {
-        this.target_.appendChild(this.detachedBody_.firstChild);
-      }
-    });
+    return this.headPromise_.then(
+      () =>
+        (this.currentChunkTransferPromise_ = this.vsync_.mutatePromise(() => {
+          this.mergeScheduled_ = false;
+          removeNoScriptElements(this.detachedBody_);
+          while (this.detachedBody_.firstChild) {
+            this.target_.appendChild(this.detachedBody_.firstChild);
+          }
+        }))
+    );
   }
 }

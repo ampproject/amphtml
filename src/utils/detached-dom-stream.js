@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export class DetachedDomWriter {
+export class DetachedDomStream {
   /**
    * @param {!Window} win
    * @param {function(!Document):void} onChunk
