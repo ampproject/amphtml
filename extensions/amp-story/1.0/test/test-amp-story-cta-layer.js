@@ -31,9 +31,11 @@ describes.realWin(
 
     beforeEach(() => {
       win = env.win;
-      registerServiceBuilder(win, 'performance', () => ({
-        isPerformanceTrackingOn: () => false,
-      }));
+      registerServiceBuilder(win, 'performance', function() {
+        return {
+          isPerformanceTrackingOn: () => false,
+        };
+      });
       const ampStoryCtaLayerEl = win.document.createElement(
         'amp-story-cta-layer'
       );

@@ -29,6 +29,7 @@ import {
   VideoAttributes,
   VideoEvents,
   VideoServiceSignals,
+  setIsMediaComponent,
   userInteractedWith,
   videoAnalyticsCustomEventTypeKey,
 } from '../video-interface';
@@ -192,7 +193,7 @@ export class VideoManager {
     const {element} = entry.video;
     element.dispatchCustomEvent(VideoEvents.REGISTERED);
 
-    element.classList.add('i-amphtml-video-component');
+    setIsMediaComponent(element);
 
     // Unlike events, signals are permanent. We can wait for `REGISTERED` at any
     // moment in the element's lifecycle and the promise will resolve
@@ -222,7 +223,14 @@ export class VideoManager {
     registerAction('pause', () => video.pause());
     registerAction('mute', () => video.mute());
     registerAction('unmute', () => video.unmute());
-    registerAction('fullscreen', () => video.fullscreenEnter());
+
+    // fullscreen/fullscreenenter are a special case.
+    // - fullscreenenter is kept as a standard name for symmetry with internal
+    //   internal interfaces
+    // - fullscreen is an undocumented alias for backwards compatibility.
+    const fullscreenEnter = () => video.fullscreenEnter();
+    registerAction('fullscreenenter', fullscreenEnter);
+    registerAction('fullscreen', fullscreenEnter);
 
     /**
      * @param {string} action
@@ -317,14 +325,23 @@ export class VideoManager {
   }
 
   /**
-   * Gets the current analytics details for the given video.
+   * Gets the current analytics details property for the given video.
    * Fails silently if the video is not registered.
-   * @param {!AmpElement} videoElement
-   * @return {!Promise<!VideoAnalyticsDetailsDef|undefined>}
+   * @param {string} id
+   * @param {string} property
+   * @return {!Promise<string>}
    */
-  getAnalyticsDetails(videoElement) {
+  getVideoStateProperty(id, property) {
+    const root = this.ampdoc.getRootNode();
+    const videoElement = user().assertElement(
+      root.getElementById(/** @type {string} */ (id)),
+      `Could not find an element with id="${id}" for VIDEO_STATE`
+    );
     const entry = this.getEntryForElement_(videoElement);
-    return entry ? entry.getAnalyticsDetails() : Promise.resolve();
+    return (entry
+      ? entry.getAnalyticsDetails()
+      : Promise.resolve()
+    ).then(details => (details ? details[property] : ''));
   }
 
   /**

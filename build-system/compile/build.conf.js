@@ -19,7 +19,8 @@ const experimentsConstantBackup = require('../global-configs/experiments-const.j
 const localPlugin = name =>
   require.resolve(`../babel-plugins/babel-plugin-${name}`);
 
-const defaultPlugins = [
+const defaultPlugins = isEsmBuild => [
+  localPlugin('transform-inline-configure-component'),
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
   [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
   localPlugin('transform-parenthesize-expression'),
@@ -27,7 +28,8 @@ const defaultPlugins = [
   localPlugin('transform-amp-extension-call'),
   localPlugin('transform-html-template'),
   localPlugin('transform-version-call'),
-  getReplacePlugin(),
+  localPlugin('transform-simple-array-destructure'),
+  getReplacePlugin(isEsmBuild),
 ];
 
 const esmRemovedImports = {
@@ -41,11 +43,18 @@ const esmRemovedImports = {
   './polyfills/array-includes': ['installArrayIncludes'],
 };
 
+// Removable imports that are not needed for valid transformed documents.
+const validTransformedRemovableImports = {
+  '../build/ampshared.css': ['cssText', 'ampSharedCss'],
+  '../build/ampdoc.css': ['cssText', 'ampDocCss'],
+};
+
 /**
+ * @param {boolean} isEsmBuild a boolean indicating if this build is for ESM output.
  * @return {Array<string|Object>} the minify-replace plugin options that can be
  * pushed into the babel plugins array
  */
-function getReplacePlugin() {
+function getReplacePlugin(isEsmBuild) {
   /**
    * @param {string} identifierName the identifier name to replace
    * @param {boolean} value the value to replace with
@@ -61,7 +70,7 @@ function getReplacePlugin() {
     };
   }
 
-  const replacements = [];
+  const replacements = [createReplacement('IS_ESM', isEsmBuild)];
   const defineFlag = argv.defineExperimentConstant;
 
   // add define flags from arguments
@@ -121,7 +130,7 @@ function getJsonConfigurationPlugin() {
  * @return {!Array<string|!Array<string|!Object>>}
  */
 function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
-  const applied = [...defaultPlugins];
+  const applied = [...defaultPlugins(isEsmBuild || false)];
   // TODO(erwinm): This is temporary until we remove the assert/log removals
   // from the java transformation to the babel transformation.
   // There is currently a weird interaction where when we do the transform
@@ -133,7 +142,15 @@ function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
     applied.push(localPlugin('transform-amp-asserts'));
   }
   if (isEsmBuild) {
-    applied.push(['filter-imports', {imports: esmRemovedImports}]);
+    applied.push([
+      'filter-imports',
+      {
+        imports: {
+          ...esmRemovedImports,
+          ...validTransformedRemovableImports,
+        },
+      },
+    ]);
   }
   if (isChecktypes) {
     applied.push(localPlugin('transform-simple-object-destructure'));

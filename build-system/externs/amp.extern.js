@@ -220,8 +220,12 @@ window.AMP.viewport = {};
 window.AMP.viewport.getScrollLeft;
 window.AMP.viewport.getScrollWidth;
 window.AMP.viewport.getWidth;
-window.AMP.attachShadowDoc;
-window.AMP.attachShadowDocAsStream;
+
+/** @type {function(!HTMLElement, !Document, !string, Object)} */
+window.AMP.attachShadowDoc = function(element, document, url, options) {};
+
+/** @type {function(!HTMLElement, !string, Object)} */
+window.AMP.attachShadowDocAsStream = function(element, url, options) {};
 
 /** @constructor */
 function AmpConfigType() {}
@@ -256,6 +260,10 @@ AmpConfigType.prototype.test;
 AmpConfigType.prototype.spt;
 /* @public {boolean|undefined} */
 AmpConfigType.prototype.esm;
+/* @public {string} */
+AmpConfigType.prototype.geoApi;
+/* @public {string} */
+AmpConfigType.prototype.geoApiUrl;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;

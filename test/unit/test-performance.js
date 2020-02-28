@@ -39,6 +39,8 @@ describes.realWin('performance', {amp: true}, env => {
       // set initial Date.now to 100, so that we can differentiate between time relative to epoch and relative to process start (value vs. delta).
       now: timeOrigin,
     });
+    Object.defineProperty(win.performance, 'timeOrigin', {value: timeOrigin}); // timeOrigin is read-only.
+    win.performance.now = clock.performance.now;
     installPlatformService(env.win);
     installPerformanceService(env.win);
     perf = Services.performanceFor(env.win);
@@ -710,20 +712,30 @@ describes.realWin('performance', {amp: true}, env => {
         perf.coreServicesAvailable();
       });
 
-      it('should call prerenderComplete on viewer', () => {
+      it('should call prerenderComplete on viewer', async () => {
         env.sandbox
           .stub(viewer, 'getParam')
           .withArgs('csi')
           .returns('1');
         env.sandbox.stub(viewer, 'isEmbedded').returns(true);
-        clock.tick(300);
+        clock.tick(100);
+        whenFirstVisibleResolve();
+        await whenFirstVisiblePromise.then(() => {
+          clock.tick(300);
+        });
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
           expect(
             viewerSendMessageStub.withArgs('prerenderComplete').firstCall
               .args[1].value
           ).to.equal(300);
-          expect(getPerformanceMarks()).to.deep.equal(['dr', 'ol', 'pc']);
+          expect(getPerformanceMarks()).to.have.members([
+            'dr',
+            'ol',
+            'visible',
+            'ofv',
+            'pc',
+          ]);
         });
       });
 
@@ -854,6 +866,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       navigator: env.win.navigator,
       performance: {
         getEntriesByType: env.sandbox.stub(),
+        now: () => 100,
+        timeOrigin: 100,
       },
     };
 
@@ -896,11 +910,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     env.sandbox.stub(Services, 'viewportForDoc').returns({
       getSize: () => viewportSize,
     });
-  }
-
-  function getPerformance() {
-    installPerformanceService(fakeWin);
-    return Services.performanceFor(fakeWin);
   }
 
   function toggleVisibility(win, on) {
@@ -997,7 +1006,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
           return entries;
         },
       };
-      // Fake a triggering of the firstInput event.
+      // Fake a triggering of the first-input event.
       performanceObserver.triggerCallback(list);
       expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0]).to.be.jsonEqual(
@@ -1090,73 +1099,8 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       );
       PerformanceObserverConstructorStub.callsFake(PerformanceObserverStub);
     });
-    it('created before performance service registered', () => {
-      // Pretend that the EventTiming API exists.
-      PerformanceObserverConstructorStub.supportedEntryTypes = ['firstInput'];
 
-      const entries = [
-        {
-          cancelable: true,
-          duration: 8,
-          entryType: 'firstInput',
-          name: 'mousedown',
-          processingEnd: 105,
-          processingStart: 103,
-          startTime: 100,
-        },
-      ];
-      const getEntriesByType = env.sandbox.stub();
-      getEntriesByType.withArgs('firstInput').returns(entries);
-      getEntriesByType.returns([]);
-      env.sandbox
-        .stub(env.win.performance, 'getEntriesByType')
-        .callsFake(getEntriesByType);
-
-      installPerformanceService(env.win);
-
-      const perf = Services.performanceFor(env.win);
-
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'fid',
-        delta: 3,
-      });
-    });
-
-    it('created after performance service registered', () => {
-      // Pretend that the EventTiming API exists.
-      PerformanceObserverConstructorStub.supportedEntryTypes = ['firstInput'];
-
-      installPerformanceService(env.win);
-
-      const perf = Services.performanceFor(env.win);
-
-      const entries = [
-        {
-          cancelable: true,
-          duration: 8,
-          entryType: 'firstInput',
-          name: 'mousedown',
-          processingEnd: 105,
-          processingStart: 103,
-          startTime: 100,
-        },
-      ];
-      const list = {
-        getEntries() {
-          return entries;
-        },
-      };
-      // Fake a triggering of the firstInput event.
-      performanceObserver.triggerCallback(list);
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'fid',
-        delta: 3,
-      });
-    });
-
-    it('created before performance service registered for Chrome 77', () => {
+    it('created before performance service registered for Chromium 77', () => {
       // Pretend that the EventTiming API exists.
       PerformanceObserverConstructorStub.supportedEntryTypes = ['first-input'];
 
@@ -1171,7 +1115,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
             {
               cancelable: true,
               duration: 8,
-              entryType: 'firstInput',
+              entryType: 'first-input',
               name: 'mousedown',
               processingEnd: 105,
               processingStart: 103,
@@ -1223,98 +1167,6 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
     }
   });
 
-  describe('forwards layout jank metric', () => {
-    beforeEach(() => {
-      setupFakesForVisibilityStateManipulation();
-      fakeWin.PerformanceLayoutJank = true;
-    });
-    it('for browsers that support the visibilitychange event', () => {
-      // Specify an Android Chrome user agent, which supports the
-      // visibilitychange event.
-      env.sandbox
-        .stub(Services.platformFor(fakeWin), 'isAndroid')
-        .returns(true);
-      env.sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
-      env.sandbox
-        .stub(Services.platformFor(fakeWin), 'isSafari')
-        .returns(false);
-
-      // Document should be initially visible.
-      expect(fakeWin.document.visibilityState).to.equal('visible');
-
-      // Fake layoutJank that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType.withArgs('layoutJank').returns([
-        {entryType: 'layoutJank', fraction: 0.25},
-        {entryType: 'layoutJank', fraction: 0.3},
-      ]);
-
-      const perf = getPerformance();
-      // visibilitychange/beforeunload listeners are now added.
-      perf.coreServicesAvailable();
-
-      // The document has become hidden, e.g. via the user switching tabs.
-      toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'lj',
-        delta: 0.55,
-      });
-
-      // The user returns to the tab, and more layout jank occurs.
-      toggleVisibility(fakeWin, true);
-      const list = {
-        getEntries() {
-          return [
-            {entryType: 'layoutJank', fraction: 1},
-            {entryType: 'layoutJank', fraction: 0.0001},
-          ];
-        },
-      };
-      performanceObserver.triggerCallback(list);
-
-      toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(2);
-      expect(perf.events_[1]).to.be.jsonEqual({
-        label: 'lj-2',
-        delta: 1.5501,
-      });
-
-      // Any more layout jank shouldn't be reported.
-      toggleVisibility(fakeWin, true);
-      performanceObserver.triggerCallback(list);
-
-      toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(2);
-    });
-
-    it('forwards layout jank metric on viewer visibility change to inactive', () => {
-      // Specify an Android Chrome user agent.
-      env.sandbox
-        .stub(Services.platformFor(fakeWin), 'isAndroid')
-        .returns(true);
-      env.sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
-      env.sandbox
-        .stub(Services.platformFor(fakeWin), 'isSafari')
-        .returns(false);
-
-      // Fake layoutJank that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType.withArgs('layoutJank').returns([
-        {entryType: 'layoutJank', fraction: 0.25},
-        {entryType: 'layoutJank', fraction: 0.3},
-      ]);
-      const perf = getPerformance();
-      perf.coreServicesAvailable();
-      viewerVisibilityState = VisibilityState.INACTIVE;
-      perf.onAmpDocVisibilityChange_();
-
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'lj',
-        delta: 0.55,
-      });
-    });
-  });
-
   describe('forwards cumulative layout shift metric', () => {
     beforeEach(() => {
       setupFakesForVisibilityStateManipulation();
@@ -1335,72 +1187,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, env => {
       (windowEventListeners[eventName] || []).forEach(cb => cb(event));
     }
 
-    it('for Chrome 76', () => {
-      // Specify an Android Chrome user agent, which supports the
-      // visibilitychange event.
-      env.sandbox
-        .stub(Services.platformFor(fakeWin), 'isAndroid')
-        .returns(true);
-      env.sandbox.stub(Services.platformFor(fakeWin), 'isChrome').returns(true);
-      env.sandbox
-        .stub(Services.platformFor(fakeWin), 'isSafari')
-        .returns(false);
-
-      // Fake the Performance API.
-      fakeWin.PerformanceObserver.supportedEntryTypes = ['layoutShift'];
-
-      // Document should be initially visible.
-      expect(fakeWin.document.visibilityState).to.equal('visible');
-
-      // Fake layoutShift that occured before the Performance service is started.
-      fakeWin.performance.getEntriesByType.withArgs('layoutShift').returns([
-        {entryType: 'layoutShift', value: 0.25},
-        {entryType: 'layoutShift', value: 0.3},
-      ]);
-
-      const perf = getPerformance();
-      // visibilitychange/beforeunload listeners are now added.
-      perf.coreServicesAvailable();
-
-      // The document has become hidden, e.g. via the user switching tabs.
-      toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(1);
-      expect(perf.events_[0]).to.be.jsonEqual({
-        label: 'cls',
-        delta: 0.55,
-      });
-
-      // The user returns to the tab, and more layout shift occurs.
-      toggleVisibility(fakeWin, true);
-      performanceObserver.triggerCallback({
-        getEntries() {
-          return [
-            {entryType: 'layoutShift', value: 1},
-            {entryType: 'layoutShift', value: 0.0001},
-          ];
-        },
-      });
-
-      toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(2);
-      expect(perf.events_[1]).to.be.jsonEqual({
-        label: 'cls-2',
-        delta: 1.5501,
-      });
-
-      // Any more layout shift shouldn't be reported.
-      toggleVisibility(fakeWin, true);
-      performanceObserver.triggerCallback({
-        getEntries() {
-          return [{entryType: 'layoutShift', value: 2}];
-        },
-      });
-
-      toggleVisibility(fakeWin, false);
-      expect(perf.events_.length).to.equal(2);
-    });
-
-    it('for Chrome 77', () => {
+    it('for Chromium 77', () => {
       // Specify an Android Chrome user agent, which supports the
       // visibilitychange event.
       env.sandbox

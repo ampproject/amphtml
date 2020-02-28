@@ -369,6 +369,32 @@ async function doBuildExtension(extensions, extension, options) {
 }
 
 /**
+ * Watches the contents of an extension directory. When a file in the given path
+ * changes, the extension is rebuilt.
+ *
+ * @param {string} path
+ * @param {string} name
+ * @param {string} version
+ * @param {string} latestVersion
+ * @param {boolean} hasCss
+ * @param {?Object} options
+ */
+function watchExtension(path, name, version, latestVersion, hasCss, options) {
+  watch(path + '/**/*', function() {
+    const bundleComplete = buildExtension(
+      name,
+      version,
+      latestVersion,
+      hasCss,
+      {...options, continueOnError: true}
+    );
+    if (options.onWatchBuild) {
+      options.onWatchBuild(bundleComplete);
+    }
+  });
+}
+
+/**
  * Copies extensions from
  * extensions/$name/$version/$name.js
  * to
@@ -408,18 +434,12 @@ async function buildExtension(
   // recompiles JS.
   if (options.watch) {
     options.watch = false;
-    watch(path + '/**/*', function() {
-      const bundleComplete = buildExtension(
-        name,
-        version,
-        latestVersion,
-        hasCss,
-        {...options, continueOnError: true}
-      );
-      if (options.onWatchBuild) {
-        options.onWatchBuild(bundleComplete);
-      }
-    });
+    watchExtension(path, name, version, latestVersion, hasCss, options);
+    // When an ad network extension is being watched, also watch amp-a4a.
+    if (name.match(/amp-ad-network-.*-impl/)) {
+      const a4aPath = `extensions/amp-a4a/${version}`;
+      watchExtension(a4aPath, name, version, latestVersion, hasCss, options);
+    }
   }
   if (hasCss) {
     mkdirSync('build');
