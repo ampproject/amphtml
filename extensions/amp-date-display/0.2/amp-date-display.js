@@ -59,10 +59,10 @@ class AmpDateDisplay extends PreactBaseElement {
           });
 
         return (
-          <Fragment>
+          <>
             {children}
             <AsyncRender>{domPromise}</AsyncRender>
-          </Fragment>
+          </>
         );
       },
     });
