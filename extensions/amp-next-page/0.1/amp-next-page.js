@@ -78,6 +78,18 @@ export class AmpNextPage extends AMP.BaseElement {
       const {element} = this;
       element.classList.add('i-amphtml-next-page');
 
+      // Warning for validation conflicts between 1.0 and 0.1
+      const prohibitedAttribute = element.hasAttribute('deep-parsing')
+        ? 'deep-parsing'
+        : element.hasAttribute('xssi-prefix')
+        ? 'xssi-prefix'
+        : element.hasAttribute('max-pages')
+        ? 'max-pages'
+        : null;
+      if (prohibitedAttribute) {
+        this.unsupportedFeatureWarn_(prohibitedAttribute);
+      }
+
       const src = element.getAttribute('src');
       let configPromise;
       let pagesPromise = Promise.resolve([]);
@@ -134,6 +146,10 @@ export class AmpNextPage extends AMP.BaseElement {
         );
       } else {
         configPromise = Promise.resolve(inlineConfig);
+      }
+
+      if (inlineConfig && (src || type)) {
+        this.unsupportedFeatureWarn_('mixing configuration types');
       }
 
       userAssert(
@@ -257,6 +273,17 @@ export class AmpNextPage extends AMP.BaseElement {
     const ampdoc = this.getAmpDoc();
     const policy = UrlReplacementPolicy.ALL;
     return batchFetchJsonFor(ampdoc, this.element, {urlReplacement: policy});
+  }
+
+  /**
+   * @param {string} feature unsupported feature
+   * @private
+   */
+  unsupportedFeatureWarn_(feature) {
+    user().warn(
+      TAG,
+      `${feature} is a feature of ${TAG} 1.0, please update your version to use it`
+    );
   }
 }
 
