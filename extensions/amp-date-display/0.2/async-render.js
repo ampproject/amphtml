@@ -21,7 +21,7 @@ import {useState} from '../../../src/preact';
  * Renders the children prop, waiting for it to resolve if it is a promise.
  *
  * @param {!JsonObject} props
- * @return {Preact.Renderable}
+ * @return {PreactDef.Renderable}
  */
 export function AsyncRender(props) {
   const children = props['children'];

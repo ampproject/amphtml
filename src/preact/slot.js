@@ -27,7 +27,7 @@ import {useMountEffect} from './utils';
  * @param {!Element} element
  * @param {string} name
  * @param {!Object|undefined} props
- * @return {!Preact.VNode}
+ * @return {!PreactDef.VNode}
  */
 export function createSlot(element, name, props) {
   element.setAttribute('slot', name);
@@ -38,7 +38,7 @@ export function createSlot(element, name, props) {
  * Slot component.
  *
  * @param {!JsonObject} props
- * @return {!Preact.VNode}
+ * @return {!PreactDef.VNode}
  */
 export function Slot(props) {
   const context = useContext(getAmpContext());

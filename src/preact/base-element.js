@@ -193,7 +193,7 @@ export class PreactBaseElement extends AMP.BaseElement {
 /**
  * Override to provide the Component definition.
  *
- * @protected {!Preact.FunctionalComponent}
+ * @protected {!PreactDef.FunctionalComponent}
  */
 PreactBaseElement.Component = function() {
   devAssert(false, 'Must provide Component');

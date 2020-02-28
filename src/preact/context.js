@@ -17,7 +17,7 @@
 import * as Preact from './index';
 import {createContext, useContext} from './index';
 
-/** @type {Preact.Context} */
+/** @type {PreactDef.Context} */
 let context;
 
 /**
@@ -29,7 +29,7 @@ let context;
  * - playable: whether the playback is allowed in this vDOM area. If playback
  *   is not allow, the component must immediately stop the playback.
  *
- * @return {!Preact.Context}
+ * @return {!PreactDef.Context}
  */
 export function getAmpContext() {
   return (
@@ -45,7 +45,7 @@ export function getAmpContext() {
  * A wrapper-component that recalculates and propagates AmpContext properties.
  *
  * @param {!JsonObject} props
- * @return {!Preact.VNode}
+ * @return {!PreactDef.VNode}
  */
 export function WithAmpContext(props) {
   const AmpContext = getAmpContext();
