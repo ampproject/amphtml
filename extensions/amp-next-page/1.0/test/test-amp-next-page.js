@@ -585,14 +585,14 @@ describes.realWin(
         );
       });
 
-      it('adds a default footer to the host page', async () => {
+      it('adds a default recommendation box to the host page', async () => {
         await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
 
-        expect(element.lastElementChild).to.have.class('amp-next-page-footer');
+        expect(element.lastElementChild).to.have.class('amp-next-page-links');
       });
     });
 
-    describe('custom and templated separators & footers', () => {
+    describe('custom and templated separators & recommendation box', () => {
       let element;
       let service;
       let html;
@@ -694,11 +694,11 @@ describes.realWin(
         expect(template2.innerText).to.equal('Rendered 2');
       });
 
-      it('correctly renders a templated footer', async () => {
+      it('correctly renders a templated recommendation-box', async () => {
         const separator = html`
-          <div footer>
+          <div recommendation-box>
             <template type="amp-mustache">
-              <div class="footer-content">
+              <div class="recommendation-box-content">
                 {{#pages}}
                 <span class="title">{{title}}</span>
                 <span class="url">{{url}}</span>

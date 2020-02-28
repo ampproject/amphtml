@@ -18,6 +18,10 @@
 <body>
   <h2>Content discovery</h2>
   <amp-next-page src="https://foo.com/data.json">
+      <!-- Valid: footer elements should be inside amp-next-page (currently not enforced due to 0.1) -->
+      <div footer>
+        My footer
+      </div>
   </amp-next-page>
   <!-- Invalid: amp-next-page should be the last element of body (currently not enforced due to 0.1) -->
   <footer>

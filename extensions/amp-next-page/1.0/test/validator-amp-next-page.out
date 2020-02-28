@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!doctype html>
 |  <html ⚡>
 |  <head>
@@ -20,11 +20,10 @@ FAIL
 |    <h2>Content discovery</h2>
 |    <!-- Valid: Correct use of amp-next-page -->
 |    <amp-next-page src="https://foo.com/data.json">
-|      <footer>
->>     ^~~~~~~~~
-amp-next-page/1.0/test/validator-amp-next-page.html:22:4 The tag 'footer', a child tag of 'amp-next-page with src attribute', does not satisfy one of the acceptable reference points: AMP-NEXT-PAGE > [separator], AMP-NEXT-PAGE > [footer], AMP-NEXT-PAGE > SCRIPT[type=application/json]. (see https://amp.dev/documentation/components/amp-next-page)
+|      <!-- Valid: Footers should be inside amp-next-page -->
+|      <div footer>
 |          Footer
-|      </footer>   
+|      </div>   
 |    </amp-next-page>
 |  </body>
 |  </html>

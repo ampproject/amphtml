@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!doctype html>
 |  <html ⚡>
 |  <head>
@@ -47,14 +47,12 @@ FAIL
 |      <div separator class="my-custom-separator">
 |        Separator
 |      </div>
-|      <div footer>
+|      <div recommendation-box>
 |        Next page recommendation box
 |      </div>
-|      <footer>
->>     ^~~~~~~~~
-amp-next-page/1.0/test/validator-amp-next-page-remote.html:52:4 The tag 'footer', a child tag of 'amp-next-page with src attribute', does not satisfy one of the acceptable reference points: AMP-NEXT-PAGE > [separator], AMP-NEXT-PAGE > [footer], AMP-NEXT-PAGE > SCRIPT[type=application/json]. (see https://amp.dev/documentation/components/amp-next-page)
+|      <div footer>
 |        Footer
-|      </footer>   
+|      </div>   
 |    </amp-next-page>
 |  </body>
 |  </html>

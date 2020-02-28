@@ -27,10 +27,10 @@ limitations under the License.
 
 ## Version notes
 
-| Version | Description                                                                                                                                                                                                                                                                                                                                                        |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1.0     | Support for an infinite number of page recommendations, reduced bundle size, improved API, support for amp-analytics, templated separators and footers, better handling of fixed elements.<br><br>API changes are breaking, please take a look at the [migration section](https://amp.dev/documentation/components/amp-next-page/#migrating-from-0.1) for details. |
-| 0.1     | Initial experimental implementation. Limited to three recommended documents                                                                                                                                                                                                                                                                                        |
+| Version | Description                                                                                                                                                                                                                                                                                                                                                                   |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | Support for an infinite number of page recommendations, reduced bundle size, improved API, support for amp-analytics, templated separators and recommendation box, better handling of fixed elements.<br><br>API changes are breaking, please take a look at the [migration section](https://amp.dev/documentation/components/amp-next-page/#migrating-from-0.1) for details. |
+| 0.1     | Initial experimental implementation. Limited to three recommended documents                                                                                                                                                                                                                                                                                                   |
 
 ## Usage
 
@@ -40,7 +40,7 @@ The `<amp-next-page>` component loads content pages one after another creating a
 
 Specify pages in a JSON configuration. Load the JSON configuration from a remote URL with the `src` attribute, or inline it within a `<script>` child element of `<amp-next-page>`. You may specify both a remote URL and inline a JSON object for a quicker suggestion loading speed.
 
-Documents append to the end of the current document as a child of the `<amp-next-page>` element. To prevent shifting page content down, this component must be the last child of the document `<body>`. If needed, any footer content should be embedded inside the `<amp-next-page>` tag and will be displayed once no more article suggestions are available.
+Documents append to the end of the current document as a child of the `<amp-next-page>` element. To prevent shifting page content down, this component must be the last child of the document `<body>`. If needed, any footer content should be embedded inside the `<amp-next-page>` tag (by adding a container that has the `footer` attribute) and will be displayed once no more article suggestions are available.
 
 The code sample below shows an example configuration for one article, which is the same format used by both the inline and remote configurations
 
@@ -149,26 +149,26 @@ The `amp-next-page` `src` allows all standard URL variable substitutions. See th
 
 This URL may make a request to something like `https://foo.com/config.json?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
 
-### Footer recommendation box
+### Recommendation box (more suggested links)
 
-The `<amp-next-page>` component renders the footer recommendation box if one of the following situations arise:
+The `<amp-next-page>` component renders the recommendation box if one of the following situations arise:
 
 - The user reaches the end of the page before the next page had loaded.
 - The next page fails to load.
 - If the [`max-pages`](<https://amp.dev/documentation/components/amp-next-page/#max-pages+(optional)>) attribute is specified and the number of displayed pages is met.
 
-The footer recommendation box contains links to the remaining pages. The default footer recommendation box renders the specified `image` and `title` used in the JSON configuration. It can be styled as specified in the [Styling](https://amp.dev/documentation/components/amp-next-page/#styling) section.
+The recommendation box contains links to the remaining pages. The default recommendation box renders the specified `image` and `title` used in the JSON configuration. It can be styled as specified in the [Styling](https://amp.dev/documentation/components/amp-next-page/#styling) section.
 
-#### Custom footer recommendation box
+#### Custom recommendation box
 
-Customize the footer recommendation box by defining an element with the `footer` attribute inside the `<amp-next-page>` component. Display the remaining pages by templating the footer recommendation box with `amp-mustache` or another templating engine. Whem using templates, an array `pages` of remaining documents is passed to the template, including the `title`, `url`, and `image`.
+Customize the recommendation box by defining an element with the `recommendation-box` attribute inside the `<amp-next-page>` component. Display the remaining pages by templating the recommendation box with `amp-mustache` or another templating engine. Whem using templates, an array `pages` of remaining documents is passed to the template, including the `title`, `url`, and `image`.
 
 ```html
 <amp-next-page src="https://example.com/config.json">
-  <div footer class="my-custom-footer">
+  <div recommendation-box class="my-custom-recommendation-box">
     Here are a few more articles:
     <template type="amp-mustache">
-      <div class="footer-content">
+      <div class="recommendation-box-content">
         {{#pages}}
         <span class="title">{{title}}</span>
         <span class="url">{{url}}</span>
@@ -242,12 +242,27 @@ _on the second document_
 </div>
 ```
 
+### Footer elements
+
+Since `<amp-next-page>` should be the last element of the body, footer content (that should be displayed after all documents are shown) must go inside the `<amp-next-page>`. Add a container element that has the `footer` attribute and have your content be a descendent of it.
+
+```html
+<amp-next-page>
+  <script type="application/json">
+    ...
+  </script>
+  <div footer>
+    My footer content here
+  </div>
+</amp-next-page>
+```
+
 ### Migrating from 0.1
 
-The experimental `0.1` version of `amp-next-page` had a similar but more restricted API. Version `1.0` allows for an infinite number of suggestions and has advanced features such as templated separators and footers. To make use of these features, follow these instructions:
+The experimental `0.1` version of `amp-next-page` had a similar but more restricted API. Version `1.0` allows for an infinite number of suggestions and has advanced features such as templated separators and recommendation box. To make use of these features, follow these instructions:
 
 1. Update your `<script custom-element>` tag to link to the `1.0` bundle of `amp-next-page`
-2. Make sure that `amp-next-page` is the last child of the body element, move any footers or other components that used to follow `<amp-next-page>` inside the `<amp-next-page>` tag.
+2. Make sure that `amp-next-page` is the last child of the body element, move any footers or other components that used to follow `<amp-next-page>` inside a container that has the `footer` attribute within the `<amp-next-page>` tag.
 3. If you were using an inline configuration, the JSON config is now an `array` of pages instead of an `object` with a `pages` entry. Additionally, you must rename the `ampUrl` key of each page to `url`.
    ```html
    <amp-next-page>
@@ -293,7 +308,7 @@ The `src` attribute is a required attribute, unless the `<amp-next-page>` compon
 
 ### `max-pages` (optional)
 
-The maximum number of pages to load and show to the user. The maximum number should be less than the total amount of pages. After meeting the number, <amp-next-page> displays the footer recommendation box. The default is `Infinity`.
+The maximum number of pages to load and show to the user. The maximum number should be less than the total amount of pages. After meeting the number, <amp-next-page> displays the recommendation box. The default is `Infinity`.
 
 ### `deep-parsing` (optional)
 
@@ -309,15 +324,14 @@ When specified, this attribute enables `amp-next-page` to strip a prefix before 
 
 The `<amp-next-page>` component renders a default recommendation box and separator. You may style the appearance of these two elements as follows:
 
-### Style the default footer recommendation box
+### Style the default recommendation box
 
-You may add custom CSS styles to the default footer recommendation box. It exposes the following classes:
+You may add custom CSS styles to the default recommendation box. It exposes the following classes:
 
-- `.amp-next-page-footer` for the parent container element
-- `.amp-next-page-footer-content` for the wrapping element
-- `.amp-next-page-footer-article` for an individual article which contains:
-- `.amp-next-page-footer-image` for the link image
-- `.amp-next-page-footer-text` for the link text
+- `.amp-next-page-links` for the parent container element
+- `.amp-next-page-link` for an individual article which contains:
+- `.amp-next-page-image` for the link image
+- `.amp-next-page-text` for the link text
 
 ### Style the default page separator
 
@@ -340,10 +354,10 @@ Tracking page views is supported through [`<amp-pixel>`](../../builtins/amp-pixe
 
 Two custom analytics events are also provided on the host page to indicate transitioning between pages. These events can be tracked in the [amp-analytics](https://amp.dev/documentation/components/amp-analytics) config as follows:
 
-| Event                  | Fired when                                                       |
-| ---------------------- | ---------------------------------------------------------------- |
-| `amp-next-page-scroll` | The user scrolls to a new page.                                  |
-| `amp-next-page-click`  | The user click on an article from the footer/recommendation box. |
+| Event                  | Fired when                                                |
+| ---------------------- | --------------------------------------------------------- |
+| `amp-next-page-scroll` | The user scrolls to a new page.                           |
+| `amp-next-page-click`  | The user click on an article from the recommendation box. |
 
 Both `<amp-next-page>` specific triggers provide the variables `url` and `title`. The `title` and `url` refer to the scrolled-to page or the clicked article. The following code sample demonstrates their use:
 
@@ -371,9 +385,9 @@ Both `<amp-next-page>` specific triggers provide the variables `url` and `title`
 
 ## Accessibility
 
-The default footer and default separator both present a generic, non-localized `aria-label` describing their content. If this label is not satisfactory, please consider using a custom footer or separator element to improve accessibility.
+The default recommendation box and default separator both have a generic, non-localized `aria-label` describing their content. If this label is not satisfactory, please consider using a custom recommendation box or separator element to improve accessibility.
 
-Both the default footer and default separator are keyboard-focusable. When a custom separator is provided, its `tabindex` is preserved if present, otherwise a `tabindex` of `0` will be added to the given element.
+Both the default recommendation box and default separator are keyboard-focusable. When a custom separator is provided, its `tabindex` is preserved if present, otherwise a `tabindex` of `0` will be added to the given element.
 
 ## Validation
 

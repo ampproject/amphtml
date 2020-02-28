@@ -97,10 +97,10 @@ export class NextPageService {
     this.separator_ = null;
 
     /** @private {?Element} */
-    this.footer_ = null;
+    this.recBox_ = null;
 
     /** @private {function():!Promise} */
-    this.refreshFooter_ = ASYNC_NOOP;
+    this.refreshRecBox_ = ASYNC_NOOP;
 
     /** @private {boolean} */
     this.finished_ = false;
@@ -178,7 +178,7 @@ export class NextPageService {
     if (this.ampdoc_.getBody().lastElementChild !== element) {
       user().warn(
         TAG,
-        'should be the last element in the body of the document, footer elements can be children of <amp-next-page>'
+        'should be the last element in the body of the document, a footer element can be added as a child of <amp-next-page> if it has the `footer` attribute'
       );
     }
 
@@ -187,7 +187,7 @@ export class NextPageService {
 
     // Get the separator and more box (and remove the provided elements in the process)
     this.separator_ = this.getSeparatorElement_(element);
-    this.footer_ = this.getFooterElement_(element);
+    this.recBox_ = this.getRecBox_(element);
 
     // Create a reference to the host page
     this.hostPage_ = this.createHostPage();
@@ -211,8 +211,8 @@ export class NextPageService {
       this.setLastFetchedPage(this.hostPage_);
     }
 
-    // Have the footer be always visible
-    insertAfterOrAtStart(this.host_, this.footer_, null /** after */);
+    // Have the recommendation box be always visible
+    insertAfterOrAtStart(this.host_, this.recBox_, null /** after */);
 
     this.nextSrc_ = this.getHost_().getAttribute('src');
     this.hasDeepParsing_ =
@@ -223,8 +223,8 @@ export class NextPageService {
       ? parseInt(this.getHost_().getAttribute('max-pages'), 10)
       : Infinity;
     this.initializePageQueue_().finally(() => {
-      // Render the initial footer template with all pages
-      this.refreshFooter_();
+      // Render the initial recommendation box template with all pages
+      this.refreshRecBox_();
       // Mark the page as ready
       this.readyResolver_();
     });
@@ -280,10 +280,10 @@ export class NextPageService {
     if (nextPage) {
       return nextPage.fetch().then(() => {
         if (nextPage.is(PageState.FAILED)) {
-          // Silently skip this page and get the footer ready in case
-          // this page is the last one
+          // Silently skip this page and get the recommendation box
+          // ready in case this page is the last one
           this.setLastFetchedPage(nextPage);
-          return this.refreshFooter_();
+          return this.refreshRecBox_();
         }
       });
     }
@@ -296,9 +296,9 @@ export class NextPageService {
         // returned an empty array or the suggestions already exist in the queue)
         .then(() => {
           if (this.pages_.length <= pageCount) {
-            // Remote server did not return any new pages, update the footer and lock the state
+            // Remote server did not return any new pages, update the recommendation box and lock the state
             this.finished_ = true;
-            return this.refreshFooter_();
+            return this.refreshRecBox_();
           }
           return this.maybeFetchNext(true /** force */);
         })
@@ -490,7 +490,7 @@ export class NextPageService {
   createDocumentContainerForPage(page) {
     const container = this.doc_.createElement('div');
     container.classList.add(DOC_CONTAINER_CLASS);
-    this.host_.insertBefore(container, dev().assertElement(this.footer_));
+    this.host_.insertBefore(container, dev().assertElement(this.recBox_));
 
     // Insert the document
     const shadowRoot = this.doc_.createElement('div');
@@ -944,40 +944,40 @@ export class NextPageService {
    * @return {!Element}
    * @private
    */
-  getFooterElement_(element) {
-    const providedFooter = childElementByAttr(element, 'footer');
-    if (providedFooter) {
-      this.refreshFooter_ = this.templates_.hasTemplate(providedFooter)
-        ? () => this.renderFooterTemplate_()
+  getRecBox_(element) {
+    const providedRecBox = childElementByAttr(element, 'recommendation-box');
+    if (providedRecBox) {
+      this.refreshRecBox_ = this.templates_.hasTemplate(providedRecBox)
+        ? () => this.renderRecBoxTemplate_()
         : ASYNC_NOOP;
-      removeElement(providedFooter);
-      return providedFooter;
+      removeElement(providedRecBox);
+      return providedRecBox;
     }
-    // If no footer is provided then we build a default one
-    this.refreshFooter_ = () => this.refreshDefaultFooter_();
-    return this.buildDefaultFooter_();
+    // If no recommendation box is provided then we build a default one
+    this.refreshRecBox_ = () => this.refreshDefaultRecBox_();
+    return this.buildDefaultRecBox_();
   }
 
   /**
    * @return {!Element}
    * @private
    */
-  buildDefaultFooter_() {
+  buildDefaultRecBox_() {
     const html = htmlFor(this.getHost_());
     return html`
-      <div class="amp-next-page-footer" aria-label="Read more articles"></div>
+      <div class="amp-next-page-links" aria-label="Read more articles"></div>
     `;
   }
 
   /**
-   * Renders the template inside the footer element using
+   * Renders the template inside the recommendation box using
    * data from the current articles
    *
    * @return {!Promise}
    */
-  renderFooterTemplate_() {
-    const footer = dev().assertElement(this.footer_);
-    devAssert(this.templates_.hasTemplate(footer));
+  renderRecBoxTemplate_() {
+    const recBox = dev().assertElement(this.recBox_);
+    devAssert(this.templates_.hasTemplate(recBox));
 
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
@@ -989,26 +989,24 @@ export class NextPageService {
         })),
     });
 
-    // Re-render templated footer (if needed)
+    // Re-render templated recommendation box (if needed)
     return this.templates_
-      .findAndRenderTemplate(footer, data)
+      .findAndRenderTemplate(recBox, data)
       .then(rendered => {
-        return this.mutator_.mutateElement(footer, () => {
-          removeChildren(dev().assertElement(footer));
-          footer.appendChild(rendered);
+        return this.mutator_.mutateElement(recBox, () => {
+          removeChildren(dev().assertElement(recBox));
+          recBox.appendChild(rendered);
         });
       });
   }
 
   /**
-   * Renders the template inside the footer element using
-   * data from the current articles (if a template is present)
-   * otherwise rehydrates the default footer element
+   * Rehydrates the default recommendation box element
    *
    * @return {!Promise}
    */
-  refreshDefaultFooter_() {
-    const footer = dev().assertElement(this.footer_);
+  refreshDefaultRecBox_() {
+    const recBox = dev().assertElement(this.recBox_);
     const data = /** @type {!JsonObject} */ ({
       pages: (this.pages_ || [])
         .filter(page => !page.isLoaded() && !page.is(PageState.FETCHING))
@@ -1020,21 +1018,18 @@ export class NextPageService {
     });
 
     const html = htmlFor(this.getHost_());
-    const content = this.doc_.createElement('div');
-    content.classList.add('amp-next-page-footer-content');
-
-    data['pages'].forEach(page => {
-      const article = html`
-        <a class="amp-next-page-footer-article">
-          <img ref="image" class="amp-next-page-footer-image" />
-          <span ref="title" class="amp-next-page-footer-title"></span>
+    const links = data['pages'].map(page => {
+      const link = html`
+        <a class="amp-next-page-link">
+          <img ref="image" class="amp-next-page-image" />
+          <span ref="title" class="amp-next-page-text"></span>
         </a>
       `;
-      const {image, title} = htmlRefs(article);
+      const {image, title} = htmlRefs(link);
       image.src = page.image;
       title.textContent = page.title;
-      article.href = page.url;
-      article.addEventListener('click', e => {
+      link.href = page.url;
+      link.addEventListener('click', e => {
         triggerAnalyticsEvent(
           this.getHost_(),
           'amp-next-page-click',
@@ -1053,12 +1048,12 @@ export class NextPageService {
         }
       });
 
-      content.appendChild(article);
+      return link;
     });
 
-    return this.mutator_.mutateElement(footer, () => {
-      removeChildren(dev().assertElement(footer));
-      footer.appendChild(content);
+    return this.mutator_.mutateElement(recBox, () => {
+      removeChildren(dev().assertElement(recBox));
+      links.forEach(link => recBox.appendChild(link));
     });
   }
 }

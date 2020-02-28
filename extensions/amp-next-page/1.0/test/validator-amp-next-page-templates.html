@@ -33,10 +33,11 @@
         </div>
       </template>
     </div>
-    <div footer>
-      <!-- Valid: Correct use of templated footers in amp-next-page -->
+    <!-- Valid: Custom amp-next-page recommendation-box -->
+    <div recommendation-box>
+      <!-- Valid: Correct use of templated recommendation box in amp-next-page -->
       <template type="amp-mustache">
-        <div class="footer-content">
+        <div class="rec-box-content">
           {{#pages}}
           <span class="title">{{title}}</span>
           <span class="url">{{url}}</span>
@@ -45,9 +46,9 @@
         </div>
       </template>
     </div>
-    <footer>
+    <div ooter>
         Footer
-    </footer>   
+    </div>   
   </amp-next-page>
 </body>
 </html>

@@ -51,6 +51,16 @@ tags: {
 tags: {
   html_format: AMP
   tag_name: "$REFERENCE_POINT"
+  spec_name: "AMP-NEXT-PAGE > [recommendation-box]"
+  mandatory_parent: "AMP-NEXT-PAGE"
+  attrs: {
+    name: "recommendation-box"
+    mandatory: true
+  }
+}
+tags: {
+  html_format: AMP
+  tag_name: "$REFERENCE_POINT"
   spec_name: "AMP-NEXT-PAGE > [footer]"
   mandatory_parent: "AMP-NEXT-PAGE"
   attrs: {
@@ -71,6 +81,10 @@ tags: {  # <amp-next-page>
   attrs: { name: "max-pages" }
   reference_points: {
     tag_spec_name: "AMP-NEXT-PAGE > [separator]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [recommendation-box]"
     unique: true
   }
   reference_points: {
@@ -110,6 +124,10 @@ tags: {  # <amp-next-page src>
     unique: true
   }
   reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [recommendation-box]"
+    unique: true
+  }
+  reference_points: {
     tag_spec_name: "AMP-NEXT-PAGE > [footer]"
     unique: true
   }
@@ -145,6 +163,10 @@ tags: {  # <amp-next-page type="adsense">
   }
   reference_points: {
     tag_spec_name: "AMP-NEXT-PAGE > [separator]"
+    unique: true
+  }
+  reference_points: {
+    tag_spec_name: "AMP-NEXT-PAGE > [recommendation-box]"
     unique: true
   }
   reference_points: {
