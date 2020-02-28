@@ -9,7 +9,7 @@ PASS
 |    <link href="https://fonts.googleapis.com/css?family=Questrial" rel="stylesheet" type="text/css">
 |    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 |    <script async src="https://cdn.ampproject.org/v0.js"></script>
-|    <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-0.1.js"></script>
+|    <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-1.0.js"></script>
 |    <style amp-custom>
 |      .amp-next-page-text {
 |        font-family: serif;
@@ -18,13 +18,41 @@ PASS
 |  </head>
 |  <body>
 |    <h2>Content discovery</h2>
-|    <amp-next-page src="https://foo.com/data.json">
-|      <div separator>
-|          READ ANOTHER ARTICLE FROM OUR SITE!
+|      <!-- Valid: Correct use of amp-next-page with an src and xssi-prefix -->
+|      <amp-next-page src="https://foo.com/data.json" xssi-prefix=")]}" deep-parsing="false" max-pages="5">
+|      <script type="application/json">
+|        [
+|          {
+|            "image": "/examples/img/hero@1x.jpg",
+|            "title": "Page 1",
+|            "url": "./articles/article-short.html"
+|          },
+|          {
+|            "image": "/examples/img/hero@1x.jpg",
+|            "title": "Page 2",
+|            "url": "./articles/article-with-fixed.html"
+|          },
+|          {
+|            "image": "/examples/img/hero@1x.jpg",
+|            "title": "Page 3",
+|            "url": "./articles/article-long.html"
+|          },
+|          {
+|            "image": "/examples/img/hero@1x.jpg",
+|            "title": "Page 4",
+|            "url": "./amp-next-page.amp.html"
+|          }
+|        ]
+|      </script>
+|      <div separator class="my-custom-separator">
+|        Separator
 |      </div>
+|      <div recommendation-box>
+|        Next page recommendation box
+|      </div>
+|      <div footer>
+|        Footer
+|      </div>   
 |    </amp-next-page>
-|    <footer>
-|      Footer
-|    </footer>
 |  </body>
 |  </html>
