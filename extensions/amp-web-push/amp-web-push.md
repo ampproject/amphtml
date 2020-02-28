@@ -90,7 +90,6 @@ The `amp-web-push` component requires extra integration on your site. You will n
 
 ```html
 <amp-web-push
-  id="amp-web-push"
   layout="nodisplay"
   helper-iframe-url="https://example.com/helper-iframe.html"
   permission-dialog-url="https://example.com/permission-dialog.html"
