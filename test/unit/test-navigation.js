@@ -179,18 +179,16 @@ describes.sandboxed('Navigation', {}, () => {
       });
 
       describe('anchor mutators', () => {
-        it('should throw error if priority is already in use', () => {
+        it('should not throw error if priority is already in use', () => {
           const priority = 10;
           handler.registerAnchorMutator(element => {
             element.href += '?am=1';
           }, priority);
-          allowConsoleError(() => {
-            expect(() =>
-              handler.registerAnchorMutator(element => {
-                element.href += '?am=2';
-              }, priority)
-            ).to.not.throw();
-          });
+          expect(() =>
+            handler.registerAnchorMutator(element => {
+              element.href += '?am=2';
+            }, priority)
+          ).to.not.throw();
         });
 
         it('should execute in order', () => {
@@ -648,10 +646,7 @@ describes.sandboxed('Navigation', {}, () => {
             return 'https://www.pub.com/dir/abc.html';
           });
 
-          allowConsoleError(() => {
-            handler.navigateTo(win, 'abc.html');
-          });
-
+          handler.navigateTo(win, 'abc.html');
           expect(win.location.href).to.equal(
             'https://www.pub.com/dir/abc.html'
           );
