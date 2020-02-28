@@ -92,6 +92,9 @@ void JsonObject::ToString(std::stringbuf* buf) const {
           [buf](NullValue n) { buf->sputn("null", 4); },
           [buf](const JsonArray& a) { a.ToString(buf); },
           [buf](const JsonDict& d) { d.ToString(buf); },
+          [buf](const Any<JsonArray>& a) { a.ToString(buf); },
+          [buf](const Any<JsonDict>& a) { a.ToString(buf); },
+          [buf](const Any<JsonObject>& a) { a.ToString(buf); },
       },
       v_);
 }

@@ -86,29 +86,6 @@
 //
 // See types_test.cc for detailed usage of generating nested json objects.
 //
-// TODO(amaltas): Add support for user defined objects:
-// class Person {...};
-// Person p(...);
-// JsonArray array;
-// array.Append(p, true, "foo");
-//
-// Things to consider:
-// Assume developers cannot modify Person class. (Add ToJson or ToString
-// methods).
-// Create a Wrapper type. Lets call it AnyObject.
-// object to JsonObject.
-// Person p(...);
-// AnyObject myobject(p, [](Person p) -> JsonObject {
-//   JsonObject obj;
-//   obj.Insert("first_name", p.FirstName());
-//   obj.Insert("last_name", p.LastName());
-//   return obj;
-// });
-// JsonArray array;
-// array.Append(myobject, true, 100);
-// array.ToString => [{"first_name": "myname", "last_name": "mylastname"},
-//                    true, 100]
-//
 #ifndef HTMLPARSER__JSON_JSON_H_
 #define HTMLPARSER__JSON_JSON_H_
 
@@ -200,7 +177,60 @@ class NullValue {
   std::string ToString() const { return "null"; }
 };
 
-// This is intentionally not templated.
+template<typename JsonType>
+class Any {
+ public:
+  template<typename T>  // Erased by Wrapper.
+  Any(const T* object,
+      std::function<JsonType(const T& object)> apply) :
+    wrapper_(new Wrapper<T>(object, apply)) {}
+
+  ~Any() {
+    delete wrapper_;
+  }
+
+  Any(const Any& from) {
+    if (wrapper_) delete wrapper_;
+    wrapper_ = from.wrapper_->Clone();
+  }
+
+  std::string ToString() const {
+    return wrapper_->ToJson().ToString();
+  }
+
+  void ToString(std::stringbuf* buf) const {
+  }
+
+ private:
+  class WrapperBase {
+   public:
+    virtual JsonType ToJson() = 0;
+    virtual WrapperBase* Clone() = 0;
+    virtual ~WrapperBase() {}
+  };
+
+  template<typename O>
+  class Wrapper : public WrapperBase {
+   public:
+    Wrapper(const O* obj,
+            std::function<JsonType(const O& obj)> apply) :
+      obj_(obj), apply_(apply) {}
+
+    virtual JsonType ToJson() {
+      return apply_(*obj_);
+    }
+
+    virtual WrapperBase* Clone() {
+      return new Wrapper(obj_, apply_);
+    }
+
+    const O* obj_;
+    std::function<JsonType(const O& obj)> apply_;
+  };
+
+  WrapperBase* wrapper_;
+};
+
 class JsonObject {
  public:
   // The json types.
@@ -208,22 +238,26 @@ class JsonObject {
   explicit JsonObject(int64_t i) : v_(i) {}
   explicit JsonObject(double d) : v_(d) {}
   explicit JsonObject(float f) : v_(f) {}
-  explicit JsonObject(const char* s) : v_(std::string(s)) {}
-  explicit JsonObject(std::string s) : v_(s) {}
+  explicit JsonObject(const char* s) {
+    v_.emplace<std::string>(s);
+  }
+  explicit JsonObject(const std::string& s) : v_(s) {}
   explicit JsonObject(bool b) : v_(b) {}
   explicit JsonObject(std::nullptr_t n) : v_(NullValue()) {}
   explicit JsonObject(JsonArray l) : v_(l) {}
   explicit JsonObject(JsonDict o) : v_(o) {}
+  explicit JsonObject(JsonArray&& l) : v_(std::move(l)) {}
+  explicit JsonObject(JsonDict&& o) : v_(std::move(o)) {}
+  explicit JsonObject(Any<JsonArray> a) : v_(a) {}
+  explicit JsonObject(Any<JsonDict> a) : v_(a) {}
+  explicit JsonObject(Any<JsonObject> j) : v_(j) {}
+  explicit JsonObject(Any<JsonArray>&& a) : v_(std::move(a)) {}
+  explicit JsonObject(Any<JsonDict>&& a) : v_(std::move(a)) {}
 
   template <typename T>
   JsonObject& operator=(T i) {
     v_ = i;
     return *this;
-  }
-
-  template <typename T>
-  void Append(const T& i) {
-    std::get<JsonArray>(i).Append(i);
   }
 
   // Gets the underlying value inside this JsonObject.
@@ -241,7 +275,8 @@ class JsonObject {
 
  private:
   std::variant<int32_t, int64_t, double, float, bool, std::string,
-               NullValue, JsonArray, JsonDict> v_;
+               NullValue, JsonArray, JsonDict,
+               Any<JsonArray>, Any<JsonDict>, Any<JsonObject>> v_;
 };
 
 }  // namespace htmlparser::json

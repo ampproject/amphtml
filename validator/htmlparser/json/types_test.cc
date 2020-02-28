@@ -1,12 +1,35 @@
 #include "json/types.h"
 
 #include <cmath>
+#include <type_traits>
 
 #include "gtest/gtest.h"
 
+using htmlparser::json::Any;
 using htmlparser::json::JsonArray;
 using htmlparser::json::JsonDict;
 using htmlparser::json::JsonObject;
+
+// Ensures the following copy and move constructible traits are not implicitly
+// deleted.
+TEST(TypesTest, PerformanceConditionsTests) {
+  EXPECT_TRUE(std::is_copy_constructible<JsonArray>::value);
+  EXPECT_TRUE(std::is_copy_assignable<JsonArray>::value);
+  EXPECT_TRUE(std::is_copy_constructible<JsonDict>::value);
+  EXPECT_TRUE(std::is_copy_assignable<JsonDict>::value);
+  EXPECT_TRUE(std::is_copy_constructible<JsonObject>::value);
+  EXPECT_TRUE(std::is_copy_assignable<JsonObject>::value);
+  EXPECT_TRUE(std::is_copy_constructible<Any<JsonDict>>::value);
+  EXPECT_TRUE(std::is_copy_assignable<Any<JsonDict>>::value);
+  EXPECT_TRUE(std::is_move_constructible<JsonArray>::value);
+  EXPECT_TRUE(std::is_move_assignable<JsonArray>::value);
+  EXPECT_TRUE(std::is_move_constructible<JsonDict>::value);
+  EXPECT_TRUE(std::is_move_assignable<JsonDict>::value);
+  EXPECT_TRUE(std::is_move_constructible<JsonObject>::value);
+  EXPECT_TRUE(std::is_move_assignable<JsonObject>::value);
+  EXPECT_TRUE(std::is_move_constructible<Any<JsonDict>>::value);
+  EXPECT_TRUE(std::is_move_assignable<Any<JsonDict>>::value);
+}
 
 TEST(TypesTest, BasicAllTypesTest) {
   // Represents the following json in JsonObject object.
@@ -24,7 +47,7 @@ TEST(TypesTest, BasicAllTypesTest) {
   json.Insert("age", 18);
   JsonArray friends;
   friends.Append("Alice", "Bob");
-  json.Insert("friends", friends);
+  json.Insert("friends", std::move(friends));
   JsonArray address;
   address.Append(123, "foo street", "3rd floor", "New york", 91234, true,
                  nullptr, false);
@@ -114,4 +137,120 @@ TEST(TypesTest, OverflowIntegerTest) {
 TEST(TypesTest, UnicodeTest) {
   JsonObject str("한국어");
   EXPECT_EQ("\"한국어\"", str.ToString());
+}
+
+namespace testing::data {
+
+struct Greeting {
+  std::string message;
+};
+
+struct LottoDrawing {
+  int n1;
+  int n2;
+  int n3;
+  int n4;
+  int n5;
+  int powerball;
+};
+
+struct Age {
+  int age;
+};
+
+struct Name {
+  std::string first;
+  std::string last;
+};
+
+struct Nested {
+  Name name;
+  Age age;
+  Greeting greeting;
+  LottoDrawing drawing;
+};
+
+}  // namespace testing::data
+
+using testing::data::Age;
+using testing::data::Greeting;
+using testing::data::LottoDrawing;
+using testing::data::Name;
+using testing::data::Nested;
+
+TEST(TypesTest, AnyObjectTest) {
+  // Output as dict.
+  Greeting greet{.message = "Hello World!"};
+  std::function<JsonDict(const Greeting&)> serializer1 = [](
+      const Greeting& g) {
+    JsonDict dict;
+    dict.Insert("greeting", g.message);
+    return dict;
+  };
+  Any<JsonDict> any(&greet, serializer1);
+  EXPECT_EQ(any.ToString(), "{\"greeting\": \"Hello World!\"}");
+
+  // Output as JsonObject.
+  std::function<JsonObject(const Greeting&)> serializer2 = [](
+      const Greeting& g) {
+    JsonDict dict;
+    dict.Insert("greeting", g.message);
+    return JsonObject(dict);
+  };
+  Any<JsonObject> any2(&greet, serializer2);
+  EXPECT_EQ(any2.ToString(), "{\"greeting\": \"Hello World!\"}");
+
+  // Output as json array.
+  LottoDrawing drawing{.n1 = 18, .n2 = 33, .n3 = 36, .n4 = 45, .n5 = 50,
+    .powerball = 10};
+  std::function<JsonArray(const LottoDrawing&)> serializer3 = [](
+      const LottoDrawing& draw) {
+    JsonArray jarray;
+    jarray.Append(draw.n1, draw.n2, draw.n3, draw.n4, draw.n5,
+                  draw.powerball);
+    return jarray;
+  };
+  Any<JsonArray> any3(&drawing, serializer3);
+  EXPECT_EQ(any3.ToString(), "[18, 33, 36, 45, 50, 10]");
+
+  // Output as int.
+  Age age{.age = 18};
+  std::function<JsonObject(const Age&)> serializer4 = [](
+      const Age& age) {
+    return JsonObject(age.age);
+  };
+  Any<JsonObject> any4(&age, serializer4);
+  EXPECT_EQ(any4.ToString(), "18");
+
+  // Output as string.
+  Name name{.first = "John", .last = "Doe"};
+  std::function<JsonObject(const Name&)> serializer5 = [](
+      const Name& name) {
+    return JsonObject(name.first + " " + name.last);
+  };
+  Any<JsonObject> any5(&name, serializer5);
+  EXPECT_EQ("\"John Doe\"", any5.ToString());
+
+  // Nested object.
+  Nested nested{.name = name, .age = age, .greeting = greet,
+    .drawing = drawing};
+  std::function<JsonObject(const Nested&)> serializer6 = [&](
+      const Nested& nested) {
+    JsonDict dict;
+    dict.Insert("name", nested.name.first + " " + nested.name.last);
+    dict.Insert("age", nested.age.age);
+    dict.Insert("greeting", nested.greeting.message);
+    JsonArray draw_numbers;
+    draw_numbers.Append(nested.drawing.n1,
+                        nested.drawing.n2,
+                        nested.drawing.n3,
+                        nested.drawing.n4,
+                        nested.drawing.n5,
+                        nested.drawing.powerball);
+    dict.Insert("drawing", draw_numbers);
+    return JsonObject(dict);
+  };
+  Any<JsonObject> any6(&nested, serializer6);
+  EXPECT_EQ(any6.ToString(),
+            R"({"name": "John Doe", "age": 18, "greeting": "Hello World!", "drawing": [18, 33, 36, 45, 50, 10]})");
 }
