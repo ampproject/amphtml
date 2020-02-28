@@ -47,10 +47,7 @@ async function main() {
 
     await startSauceConnect(FILENAME);
     timedExecOrDie('gulp unit --nobuild --saucelabs');
-    timedExecOrDie(
-      'gulp integration --nobuild --compiled --saucelabs --stable'
-    );
-    timedExecOrDie('gulp integration --nobuild --compiled --saucelabs --beta');
+    timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
 
     stopSauceConnect(FILENAME);
   } else {
@@ -84,12 +81,7 @@ async function main() {
       buildTargets.has('FLAG_CONFIG') ||
       buildTargets.has('INTEGRATION_TEST')
     ) {
-      timedExecOrDie(
-        'gulp integration --nobuild --compiled --saucelabs --stable'
-      );
-      timedExecOrDie(
-        'gulp integration --nobuild --compiled --saucelabs --beta'
-      );
+      timedExecOrDie('gulp integration --nobuild --compiled --saucelabs');
     }
     stopSauceConnect(FILENAME);
   }
