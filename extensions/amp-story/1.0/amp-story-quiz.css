@@ -18,24 +18,25 @@
 
 .i-amphtml-story-quiz-container {
     --correct-color: #5BBA74 !important;
-    --correct-color-shaded: #2D8E42 !important;
+    --correct-color-shaded: #00600f !important;
     --incorrect-color: #F34E4E !important;
-    --incorrect-color-shaded: #cc4141 !important;
-    --accent-color: #005AF0;
+    --incorrect-color-shaded: #B71C1C !important;
     --option-1-percentage: 0%;
     --option-2-percentage: 0%;
     --option-3-percentage: 0%;
     --option-4-percentage: 0%;
     font-family: 'Poppins-bold', sans-serif !important;
-    background: var(--accent-color) !important;
+    background: var(--reaction-accent-color) !important;
     border-radius: 32px !important;
 }
+
+/* TODO: remove bg on no-prompt attribute here */
 
 .i-amphtml-story-quiz-prompt-container {
     display: flex !important;
     justify-items: center !important;
     padding: 20px !important;
-    color: white !important;
+    color: var(--reaction-prompt-text-color) !important;
 }
 
 .i-amphtml-story-quiz-prompt {
@@ -69,8 +70,8 @@ h3.i-amphtml-story-quiz-prompt {
 .i-amphtml-story-quiz-option-container {
     display: flex !important;
     flex-direction: column;
-    background-color: white !important;
-    border-radius: 30px !important;
+    background-color: var(--reaction-theme-background) !important;
+    border-radius: var(--reaction-chip-radius) !important;
     padding: 8px 8px 0px 8px !important;
 }
 
@@ -79,12 +80,15 @@ h3.i-amphtml-story-quiz-prompt {
     display: flex !important;
     justify-items: start !important;
     align-items: center !important;
-    border-radius: 30px !important;
+    border-radius: var(--reaction-chip-radius) !important;
     padding: 8px 16px 8px 8px !important;
-    background-color: transparent !important;
+    background-color: var(--reaction-theme-background) !important;
     margin-bottom: 8px !important;
-    color: #5F6368 !important;
-    border: solid 1px #DADCE0 !important;
+    color: var(--reaction-option-text-color) !important;
+    border: solid 1px var(--reaction-theme-border) !important;
+    box-shadow: var(--reaction-chip-shadow) !important;
+    -webkit-box-shadow: var(--reaction-chip-shadow) !important;
+    -moz-box-shadow: var(--reaction-chip-shadow) !important;
     font-size: 16px !important;
     line-height: 20px !important;
     overflow: hidden !important;
@@ -122,7 +126,8 @@ h3.i-amphtml-story-quiz-prompt {
     border: solid 2px !important;
     padding: 5px !important;
     margin-right: 16px !important;
-    color: var(--accent-color) !important;
+    color: var(--reaction-accent-color) !important;
+    border-color: var(--reaction-answer-choice-border) !important;
     font-size: 16px !important;
     line-height: 16px !important;
     font-weight: bold !important;
@@ -158,21 +163,23 @@ h3.i-amphtml-story-quiz-prompt {
 
 .i-amphtml-story-quiz-post-selection :not([correct]) > .i-amphtml-story-quiz-answer-choice {
     color: var(--incorrect-color) !important;
+    border-color: var(--incorrect-color) !important;
 }
 
 .i-amphtml-story-quiz-post-selection [correct] > .i-amphtml-story-quiz-answer-choice {
     color: var(--correct-color) !important;
+    border-color: var(--correct-color) !important;
 }
 
 .i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected > .i-amphtml-story-quiz-answer-choice {
-    border: solid 2px white !important;
+    border: solid 2px var(--reaction-answer-choice-border) !important;
     animation: answer-choice-bounce forwards 600ms linear;
+    background-color: var(--reaction-answer-choice-background) !important;
 }
 
 /** TODO(jackbsteinberg): Use a more a11y-friendly approach than font-size: 0px; */
 
 .i-amphtml-story-quiz-post-selection [correct] > .i-amphtml-story-quiz-answer-choice {
-    background-color: white !important;
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%235BBA74'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: center !important;
@@ -180,8 +187,21 @@ h3.i-amphtml-story-quiz-prompt {
 }
 
 .i-amphtml-story-quiz-post-selection :not([correct]) > .i-amphtml-story-quiz-answer-choice {
-    background-color: white !important;
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%23F34E4E'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    font-size: 0 !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected:not([correct]) .i-amphtml-story-quiz-answer-choice {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%23FFFFFF'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3Cpath d='M0 0h24v24H0z' fill='none'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    font-size: 0 !important;
+}
+
+.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected[correct] .i-amphtml-story-quiz-answer-choice {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24px' height='24px' viewBox='0 0 24 24' fill='%23FFFFFF'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: center !important;
     font-size: 0 !important;
@@ -198,7 +218,7 @@ h3.i-amphtml-story-quiz-prompt {
     left: -1px !important;
     width: 100% !important;
     height: 100% !important;
-    border-radius: 32px !important;
+    border-radius: var(--reaction-chip-radius) !important;
     font-size: 16px !important;
     line-height: 20px !important;
 }
@@ -251,8 +271,8 @@ h3.i-amphtml-story-quiz-prompt {
     width: 100% !important;
     height: 100% !important;
     border-radius: 0px !important;
-    background: #ECEDEF !important;
-    color: #ECEDEF !important;
+    background: var(--reaction-theme-shading) !important;
+    color: var(--reaction-theme-shading) !important;
     transition: transform 1s !important;
     border: solid 2px !important;
 }
@@ -263,23 +283,23 @@ h3.i-amphtml-story-quiz-prompt {
 
 .i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option {
     background: var(--correct-color) !important;
-    border: none !important;
 }
 
 .i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected:not([correct]).i-amphtml-story-quiz-option {
     background: var(--incorrect-color) !important;
-    border: none !important;
 }
 
-.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected.i-amphtml-story-quiz-option {
+.i-amphtml-story-quiz-post-selection .i-amphtml-story-quiz-option-selected.i-amphtml-story-quiz-option {
     /* Ups the padding by one to account for the border which must be removed
      * to allow the shading to reach the edge of the box */
      padding: 9px 17px 9px 9px !important;
+     border: none !important;
 }
 
-.i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data[dir=rtl] .i-amphtml-story-quiz-option-selected.i-amphtml-story-quiz-option {
+.i-amphtml-story-quiz-post-selection[dir=rtl] .i-amphtml-story-quiz-option-selected.i-amphtml-story-quiz-option {
     /* Switches the extra padding to the left from the right, since the answer choice and the percentage switch */
     padding: 9px 9px 9px 17px !important;
+    border: none !important;
 }
 
 .i-amphtml-story-quiz-post-selection.i-amphtml-story-quiz-has-data .i-amphtml-story-quiz-option-selected[correct].i-amphtml-story-quiz-option::before {
@@ -303,7 +323,7 @@ h3.i-amphtml-story-quiz-prompt {
 @keyframes answer-choice-bounce {
     0% {
         visibility: hidden;
-        border: solid 2px transparent;
+        border: solid 2px var(--reaction-answer-choice-background);
         transform: scale(0);
     }
     20% {
@@ -394,7 +414,7 @@ h3.i-amphtml-story-quiz-prompt {
     98% { transform: scale(0.9992426461382049); }
     99% { transform: scale(0.9988663284742909); }
     100% { 
-        border: solid 2px white;
+        border: solid 2px var(--reaction-answer-choice-background);
         transform: scale(1); 
     }
 }
