@@ -61,6 +61,8 @@ export const urls = {
     /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2}|cat)$/,
     /(^|\.)gmail\.(com|dev)$/,
   ],
+  // Optional fallback API if amp-geo is left unpatched
+  geoApi: env['geoApiUrl'],
 };
 
 export const config = {

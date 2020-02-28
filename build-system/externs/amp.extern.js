@@ -260,6 +260,10 @@ AmpConfigType.prototype.test;
 AmpConfigType.prototype.spt;
 /* @public {boolean|undefined} */
 AmpConfigType.prototype.esm;
+/* @public {string} */
+AmpConfigType.prototype.geoApi;
+/* @public {string} */
+AmpConfigType.prototype.geoApiUrl;
 
 /** @type {!AmpConfigType}  */
 window.AMP_CONFIG;
