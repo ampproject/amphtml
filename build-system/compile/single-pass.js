@@ -734,9 +734,10 @@ function eliminateIntermediateBundles() {
       }
       const {code, map: babelMap} = babel.transformFileSync(path, {
         plugins: conf.eliminateIntermediateBundles(),
+        compact: false,
+        inputSourceMap: false,
         retainLines: true,
         sourceMaps: true,
-        inputSourceMap: false,
       });
       let remapped = resorcery(
         babelMap,

@@ -717,6 +717,7 @@ function transferSrcsToTempDir(options = {}) {
         isForTesting: options.isForTesting,
         isChecktypes: options.isChecktypes,
       }),
+      compact: false,
       retainLines: true,
       sourceMaps: true,
     });

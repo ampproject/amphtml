@@ -20,15 +20,6 @@ const localPlugin = name =>
   require.resolve(`../babel-plugins/babel-plugin-${name}`);
 
 const defaultPlugins = isEsmBuild => [
-  localPlugin('transform-inline-configure-component'),
-  // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
-  [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
-  localPlugin('transform-parenthesize-expression'),
-  localPlugin('is_minified-constant-transformer'),
-  localPlugin('transform-amp-extension-call'),
-  localPlugin('transform-html-template'),
-  localPlugin('transform-version-call'),
-  localPlugin('transform-simple-array-destructure'),
   '@babel/plugin-transform-react-constant-elements',
   [
     '@babel/plugin-transform-react-jsx',
@@ -38,6 +29,15 @@ const defaultPlugins = isEsmBuild => [
       useSpread: true,
     },
   ],
+  localPlugin('transform-inline-configure-component'),
+  // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
+  [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
+  localPlugin('transform-parenthesize-expression'),
+  localPlugin('is_minified-constant-transformer'),
+  localPlugin('transform-amp-extension-call'),
+  localPlugin('transform-html-template'),
+  localPlugin('transform-version-call'),
+  localPlugin('transform-simple-array-destructure'),
   getReplacePlugin(isEsmBuild),
 ];
 

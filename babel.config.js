@@ -47,6 +47,17 @@ module.exports = function(api) {
     return {};
   }
   return {
+    'plugins': [
+      '@babel/plugin-transform-react-constant-elements',
+      [
+        '@babel/plugin-transform-react-jsx',
+        {
+          pragma: 'Preact.createElement',
+          pragmaFrag: 'Preact.Fragment',
+          useSpread: true,
+        },
+      ],
+    ],
     'presets': [
       esm
         ? [
@@ -63,17 +74,6 @@ module.exports = function(api) {
               'targets': noModuleTarget,
             },
           ],
-    ],
-    'plugins': [
-      '@babel/plugin-transform-react-constant-elements',
-      [
-        '@babel/plugin-transform-react-jsx',
-        {
-          pragma: 'Preact.createElement',
-          pragmaFrag: 'Preact.Fragment',
-          useSpread: true,
-        },
-      ],
     ],
     'compact': false,
     'sourceType': 'module',
