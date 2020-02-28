@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {createElement, useRef} from '../../../src/preact';
+import {createElement, useEffect, useRef, useState} from '../../../src/preact';
 import {timeago} from '../../../third_party/timeagojs/timeago';
-import {useIsIntersecting} from '../../../src/preact/use-is-intersecting';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
@@ -24,18 +23,30 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
-  /** @type {{current: ?string}} */ const timestampRef = useRef(null);
+  const {1: setIsIntersecting} = useState(null);
   const ref = useRef(null);
-  const isIntersecting = useIsIntersecting(ref);
-  if (isIntersecting === null || isIntersecting) {
-    // Only update DOM on prop mutation or enter viewport
-    timestampRef.current = getFuzzyTimestampValue(props);
-  }
+
+  useEffect(() => {
+    const node = ref.current;
+    const observer = new IntersectionObserver(entries => {
+      const last = entries[entries.length - 1];
+      setIsIntersecting(last.isIntersecting);
+    });
+    if (node) {
+      observer.observe(node);
+    }
+    return () => {
+      if (node) {
+        observer.unobserve(node);
+      }
+    };
+  }, []);
+
   useResourcesNotify();
   return createElement(
     'time',
     {datetime: props['datetime'], ref},
-    timestampRef.current
+    getFuzzyTimestampValue(props)
   );
 }
 
