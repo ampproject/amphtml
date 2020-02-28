@@ -710,7 +710,7 @@ function transferSrcsToTempDir(options = {}) {
       return;
     }
 
-    const {code} = babel.transformFileSync(file, {
+    const {code, map} = babel.transformFileSync(file, {
       plugins: conf.plugins({
         isEsmBuild: options.isEsmBuild,
         isSinglePass: options.isSinglePass,
@@ -718,10 +718,11 @@ function transferSrcsToTempDir(options = {}) {
         isChecktypes: options.isChecktypes,
       }),
       retainLines: true,
-      compact: false,
+      sourceMaps: true,
     });
     const name = `${SRC_TEMP_DIR}/${file}`;
     fs.outputFileSync(name, code);
+    fs.outputFileSync(`${name}.map`, JSON.stringify(map));
     process.stdout.write('.');
   });
   console.log('\n');
