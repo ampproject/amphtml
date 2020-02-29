@@ -656,22 +656,36 @@ describes.realWin(
         });
       });
 
-      it('non-resizable iframes should only error once for embed-size requests', function*() {
-        const userError = env.sandbox.stub(user(), 'error');
+      it('should only error once for embed-size requests when non-resizable', function*() {
+        const srcdoc = `
+          <!doctype html>
+          <html>
+          <body>
+            <script>
+              setInterval(() => {
+                window.parent.postMessage({
+                  sentinel: 'amp',
+                  type: 'embed-size',
+                  height: 200,
+                  width: 300,
+                }, '*');
+              }, 100);
+            </script>
+          </body>
+          </html>
+        `;
         expectAsyncConsoleError(/Ignoring embed-size request/);
         const ampIframe = createAmpIframe(env, {
-          src: iframeSrc,
+          srcdoc,
           sandbox: 'allow-scripts',
           width: 100,
           height: 100,
         });
         yield waitForAmpIframeLayoutPromise(doc, ampIframe);
-        const impl = ampIframe.implementation_;
-        expect(impl.hasErroredEmbedSize_).to.be.false;
-        impl.updateSize_(217, 114);
-        expect(impl.hasErroredEmbedSize_).to.be.true;
-        impl.updateSize_(328, 225);
-        impl.updateSize_(439, 336);
+
+        const userError = env.sandbox.stub(user(), 'error');
+
+        // const impl = ampIframe.implementation_;
         expect(userError).to.have.callCount(1);
       });
 
