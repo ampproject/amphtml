@@ -90,7 +90,7 @@ export const urls = {
     /(^|\.)gmail\.(com|dev)$/,
   ],
   // Optional fallback API if amp-geo is left unpatched
-  geoApi: env['geoApiUrl'],
+  geoApi: env['geoApiUrl'] || getMetaUrl('amp-geo-api'),
 };
 
 export const config = {
