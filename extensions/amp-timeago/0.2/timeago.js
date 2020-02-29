@@ -35,11 +35,7 @@ export function Timeago(props) {
     if (node) {
       observer.observe(node);
     }
-    return () => {
-      if (node) {
-        observer.unobserve(node);
-      }
-    };
+    return () => observer.disconnect();
   }, []);
 
   useResourcesNotify();
