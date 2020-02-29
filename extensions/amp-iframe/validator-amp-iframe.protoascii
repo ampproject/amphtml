@@ -78,6 +78,7 @@ tags: {  # <amp-iframe>
     name: "srcdoc"
     mandatory_oneof: "['src', 'srcdoc']"
   }
+  attrs: { name: "title" }
   # <amp-bind>
   attrs: {
     name: "[src]"
