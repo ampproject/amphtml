@@ -656,6 +656,22 @@ describes.realWin(
         });
       });
 
+      it('should not error after first error when sending embed-size requests to non-resizable iframes', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts',
+          width: 100,
+          height: 100,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        const userError = env.sandbox.stub(user(), 'error');
+        impl.updateSize_(217, 114);
+        impl.updateSize_(328, 225);
+        impl.updateSize_(439, 336);
+        expect(userError).to.have.callCount(1);
+      });
+
       it('should resize amp-iframe', function*() {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
