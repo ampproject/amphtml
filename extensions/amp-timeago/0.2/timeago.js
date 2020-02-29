@@ -23,7 +23,7 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
-  const {1: setIsIntersecting} = useState(null);
+  const [, setIsIntersecting] = useState(null);
   const ref = useRef(null);
 
   useEffect(() => {
