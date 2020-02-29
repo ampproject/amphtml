@@ -281,17 +281,17 @@ Applies extra restrictions to DOM that may be mutated by this `<amp-script>`. Si
 
 - `allow-forms`: Allows [form elements](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements) to be created and modified. AMP requires special handling to prevent unauthorized state changing requests from user input. See amp-form's [security considerations](https://amp.dev/documentation/components/amp-form#security-considerations) for more detail.
 
-**max-age (optional)**
+**max-age (optional, but required for signed exchanges if `script` is specified)**
 
 Requires the `script` attribute.
 
-The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange (SXG)](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing.
+The `max-age` attribute specifies the maximum lifetime in seconds the local script is allowed to be served from the time of [signed exchange (SXG)](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/signed-exchange/) publishing. [AMP Packager](https://github.com/ampproject/amppackager) uses this value to compute the SXG `expires` time.
 
 The value of `max-age` should be chosen carefully:
 
 - A longer `max-age` increases the potential security impact of a [SXG downgrade](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#seccons-downgrades).
 
-- A shorter `max-age` may prevent inclusion in AMP Caches that have a [minimum SXG lifetime](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache).
+- A shorter `max-age` may prevent inclusion in AMP Caches that have a minimum SXG lifetime. For instance, the Google AMP Cache requires at least [4 days](https://github.com/ampproject/amppackager/blob/releases/docs/cache_requirements.md#google-amp-cache) (345600 seconds). Note that there's currently no reason to select `max-age` longer than 7 days (604800 seconds), due to the [maximum](https://wicg.github.io/webpackage/draft-yasskin-http-origin-signed-responses.html#name-signature-validity) set by the SXG spec.
 
 If you don't publish signed exchanges, `max-age` does nothing.
 

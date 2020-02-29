@@ -439,6 +439,7 @@ describe('service', () => {
     });
 
     it('should dispose disposable services', () => {
+      expectAsyncConsoleError(/intentional/);
       const disposableFactory = function() {
         return {
           dispose: window.sandbox.spy(),
@@ -478,7 +479,7 @@ describe('service', () => {
       // Window disposable is not touched.
       expect(windowDisposable.dispose).to.not.be.called;
 
-      // Deffered.
+      // Deferred.
       registerServiceBuilderForDoc(node, 'c', disposableFactory);
       const disposableDeferred = getServiceForDoc(node, 'c');
       expect(disposableDeferred.dispose).to.not.be.called;

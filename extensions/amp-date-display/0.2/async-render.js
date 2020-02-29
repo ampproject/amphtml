@@ -25,7 +25,7 @@ import {useState} from '../../../src/preact';
  */
 export function AsyncRender(props) {
   const children = props['children'];
-  const {0: state, 1: set} = useState(children);
+  const [state, set] = useState(children);
   useResourcesNotify();
 
   if (state && state.then) {
