@@ -682,10 +682,14 @@ describes.realWin(
           height: 100,
         });
         yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        console.error.restore();
+        const userError = env.sandbox.spy(console, 'error');
 
-        const userError = env.sandbox.stub(user(), 'error');
-
-        // const impl = ampIframe.implementation_;
+        const impl = ampIframe.implementation_;
+        impl.updateSize_(217, 114);
+        expect(impl.hasErroredEmbedSize_).to.be.true;
+        impl.updateSize_(328, 225);
+        impl.updateSize_(439, 336);
         expect(userError).to.have.callCount(1);
       });
 
