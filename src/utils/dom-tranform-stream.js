@@ -78,7 +78,7 @@ export class DomTransformStream {
    * @param {!Document} unusedCompleteDoc
    */
   onEnd(unusedCompleteDoc) {
-    this.bodyTransferResolver_(this.transferBodyChunk_);
+    this.transferBodyChunk_().then(this.bodyTransferResolver_);
   }
 
   /**
@@ -121,15 +121,16 @@ export class DomTransformStream {
 
     this.mergeScheduled_ = true;
 
-    return this.headPromise_.then(
-      () =>
-        (this.currentChunkTransferPromise_ = this.vsync_.mutatePromise(() => {
-          this.mergeScheduled_ = false;
-          removeNoScriptElements(this.detachedBody_);
-          while (this.detachedBody_.firstChild) {
-            this.target_.appendChild(this.detachedBody_.firstChild);
-          }
-        }))
+    this.currentChunkTransferPromise_ = this.headPromise_.then(() =>
+      this.vsync_.mutatePromise(() => {
+        this.mergeScheduled_ = false;
+        removeNoScriptElements(this.detachedBody_);
+        while (this.detachedBody_.firstChild) {
+          this.target_.appendChild(this.detachedBody_.firstChild);
+        }
+      })
     );
+
+    return this.currentChunkTransferPromise_;
   }
 }
