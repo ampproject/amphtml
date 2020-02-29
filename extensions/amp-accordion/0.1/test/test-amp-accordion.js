@@ -19,6 +19,7 @@ import {ActionTrust} from '../../../../src/action-constants';
 import {Keys} from '../../../../src/utils/key-codes';
 import {computedStyle} from '../../../../src/style';
 import {poll} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
 import {tryFocus} from '../../../../src/dom';
 
 describes.realWin(
@@ -92,7 +93,7 @@ describes.realWin(
       impl.executeAction(invocation);
     }
 
-    it('should expand when toggle action is triggered on a collapsed section', () => {
+    it('should expand when high trust toggle action is triggered on a collapsed section', () => {
       return getAmpAccordion().then(ampAccordion => {
         const impl = ampAccordion.implementation_;
         const headerElements = doc.querySelectorAll('section > *:first-child');
@@ -124,7 +125,7 @@ describes.realWin(
       });
     });
 
-    it('should collapse when toggle action is triggered on a expanded section', () => {
+    it('should collapse when high trust toggle action is triggered on a expanded section', () => {
       return getAmpAccordion().then(ampAccordion => {
         const impl = ampAccordion.implementation_;
         const headerElements = doc.querySelectorAll('section > *:first-child');
@@ -196,6 +197,59 @@ describes.realWin(
         });
       }
     );
+
+    it('should expand when low trust toggle action is triggered on a collapsed section', () => {
+      return getAmpAccordion().then(ampAccordion => {
+        const impl = ampAccordion.implementation_;
+        const headerElements = doc.querySelectorAll('section > *:first-child');
+        expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
+          .false;
+        expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
+          'false'
+        );
+        impl.toggle_(headerElements[0].parentNode, ActionTrust.LOW);
+        expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be
+          .true;
+        expect(headerElements[0].getAttribute('aria-expanded')).to.equal(
+          'true'
+        );
+      });
+    });
+
+    it('should collapse when low trust toggle action is triggered on an expanded section', () => {
+      return getAmpAccordion().then(ampAccordion => {
+        const impl = ampAccordion.implementation_;
+        const headerElements = doc.querySelectorAll('section > *:first-child');
+        expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
+          .true;
+        expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
+          'true'
+        );
+
+        impl.toggle_(headerElements[1].parentNode, ActionTrust.LOW);
+
+        expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be
+          .false;
+        expect(headerElements[1].getAttribute('aria-expanded')).to.equal(
+          'false'
+        );
+      });
+    });
+
+    it('should expand when rendersubtreeactivation event is triggered on a collapsed section', () => {
+      toggleExperiment(win, 'amp-accordion-display-locking', true);
+      return getAmpAccordion().then(() => {
+        const section = doc.querySelector('section:not([expanded])');
+        const header = section.firstElementChild;
+        const content = section.children[1];
+        expect(section.hasAttribute('expanded')).to.be.false;
+        expect(header.getAttribute('aria-expanded')).to.equal('false');
+        content.dispatchEvent(new Event('rendersubtreeactivation'));
+        expect(section.hasAttribute('expanded')).to.be.true;
+        expect(header.getAttribute('aria-expanded')).to.equal('true');
+        toggleExperiment(win, 'amp-accordion-display-locking', false);
+      });
+    });
 
     it(
       "should trigger a section's expand event the section is expanded " +
