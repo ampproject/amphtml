@@ -4,7 +4,6 @@ formats:
   - websites
 teaser:
   text: Infinite scrolling experience for document-level page recommendations.
-experimental: true
 ---
 
 <!--
