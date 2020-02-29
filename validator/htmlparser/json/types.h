@@ -19,9 +19,9 @@
 // JsonDict = Key value pairs of hetrogenous values, key is always std::string.
 // {"foo": "bar", "count": 1,...}
 //
-// JsonObject = Encapsulates any type including itself (for nested objects):
+// JsonObject = Encapsulates any type:
 //   - int32, int64, float, double, string, bool, null,
-//     JsonArray, JsonDict and JsonObject
+//     JsonArray, JsonDict and Any<T>.
 //
 // When serializing to string, if int64 is greater than 2^53, serializes the
 // number as string.
@@ -185,13 +185,17 @@ class Any {
       std::function<JsonType(const T& object)> apply) :
     wrapper_(new Wrapper<T>(object, apply)) {}
 
-  ~Any() {
-    delete wrapper_;
+  Any(const Any& from) {
+    wrapper_ = from.wrapper_->Clone();
   }
 
-  Any(const Any& from) {
-    if (wrapper_) delete wrapper_;
+  Any(Any&& from) {
+    wrapper_ = std::move(from.wrapper_);
+  }
+
+  Any& operator=(const Any& from) {
     wrapper_ = from.wrapper_->Clone();
+    return *this;
   }
 
   std::string ToString() const {
@@ -205,7 +209,7 @@ class Any {
   class WrapperBase {
    public:
     virtual JsonType ToJson() = 0;
-    virtual WrapperBase* Clone() = 0;
+    virtual std::unique_ptr<WrapperBase>&& Clone() = 0;
     virtual ~WrapperBase() {}
   };
 
@@ -220,15 +224,15 @@ class Any {
       return apply_(*obj_);
     }
 
-    virtual WrapperBase* Clone() {
-      return new Wrapper(obj_, apply_);
+    virtual std::unique_ptr<WrapperBase>&& Clone() {
+      return std::make_unique<Wrapper>(obj_, apply_);
     }
 
     const O* obj_;
     std::function<JsonType(const O& obj)> apply_;
   };
 
-  WrapperBase* wrapper_;
+  std::unique_ptr<WrapperBase> wrapper_;
 };
 
 class JsonObject {
@@ -253,6 +257,20 @@ class JsonObject {
   explicit JsonObject(Any<JsonObject> j) : v_(j) {}
   explicit JsonObject(Any<JsonArray>&& a) : v_(std::move(a)) {}
   explicit JsonObject(Any<JsonDict>&& a) : v_(std::move(a)) {}
+  explicit JsonObject(Any<JsonObject>&& j) : v_(std::move(j)) {}
+
+  JsonObject(JsonObject&& from) {
+    v_ = std::move(from.v_);
+  }
+
+  JsonObject(const JsonObject& from) {
+    v_ = from.v_;
+  }
+
+  JsonObject& operator=(const JsonObject& from) {
+    v_ = from.v_;
+    return *this;
+  }
 
   template <typename T>
   JsonObject& operator=(T i) {
