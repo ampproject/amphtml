@@ -657,26 +657,9 @@ describes.realWin(
       });
 
       it('should only error once for embed-size requests when non-resizable', function*() {
-        const srcdoc = `
-          <!doctype html>
-          <html>
-          <body>
-            <script>
-              setInterval(() => {
-                window.parent.postMessage({
-                  sentinel: 'amp',
-                  type: 'embed-size',
-                  height: 200,
-                  width: 300,
-                }, '*');
-              }, 100);
-            </script>
-          </body>
-          </html>
-        `;
         expectAsyncConsoleError(/Ignoring embed-size request/);
         const ampIframe = createAmpIframe(env, {
-          srcdoc,
+          src: iframeSrc,
           sandbox: 'allow-scripts',
           width: 100,
           height: 100,
