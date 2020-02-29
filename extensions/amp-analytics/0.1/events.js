@@ -1478,29 +1478,6 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    const getUnlistenPromiseForSelector = (selector, selectionMethod) => {
-      return this.root
-        .getAmpElement(
-          context.parentElement || context,
-          selector,
-          selectionMethod
-        )
-        .then(element => {
-          return visibilityManagerPromise.then(
-            visibilityManager => {
-              return visibilityManager.listenElement(
-                element,
-                visibilitySpec,
-                this.getReadyPromise(waitForSpec, selector, element),
-                createReportReadyPromiseFunc,
-                this.onEvent_.bind(this, eventType, listener, element)
-              );
-            },
-            () => {}
-          );
-        });
-    };
-
     let unlistenPromise;
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
@@ -1529,13 +1506,34 @@ export class VisibilityTracker extends EventTracker {
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
 
       if (multiSelectorVisibilityOn && Array.isArray(selector)) {
-        unlistenPromise = Promise.all(
-          selector.map(s => getUnlistenPromiseForSelector(s, selectionMethod))
-        );
+        const promises = [];
+        for (let i = 0; i < selector.length; i++) {
+          promises.push(
+            this.getUnlistenPromiseForSelector_(
+              context,
+              selector[i],
+              selectionMethod,
+              visibilityManagerPromise,
+              visibilitySpec,
+              waitForSpec,
+              createReportReadyPromiseFunc,
+              eventType,
+              listener
+            )
+          );
+        }
+        unlistenPromise = Promise.all(promises);
       } else {
-        unlistenPromise = getUnlistenPromiseForSelector(
+        unlistenPromise = this.getUnlistenPromiseForSelector_(
+          context,
           selector,
-          selectionMethod
+          selectionMethod,
+          visibilityManagerPromise,
+          visibilitySpec,
+          waitForSpec,
+          createReportReadyPromiseFunc,
+          eventType,
+          listener
         );
       }
     }
@@ -1551,6 +1549,51 @@ export class VisibilityTracker extends EventTracker {
         }
       });
     };
+  }
+
+  /**
+   * @param {!Element} context
+   * @param {string} selector
+   * @param {string} selectionMethod
+   * @param {Promise<!./visibility-manager.VisibilityManager>} visibilityManagerPromise
+   * @param {!JsonObject} visibilitySpec
+   * @param {string} waitForSpec
+   * @param {?function()} createReportReadyPromiseFunc
+   * @param {string} eventType
+   * @param {function(!AnalyticsEvent)} listener
+   * @return {!Promise<!UnlistenDef>}
+   */
+  getUnlistenPromiseForSelector_(
+    context,
+    selector,
+    selectionMethod,
+    visibilityManagerPromise,
+    visibilitySpec,
+    waitForSpec,
+    createReportReadyPromiseFunc,
+    eventType,
+    listener
+  ) {
+    return this.root
+      .getAmpElement(
+        context.parentElement || context,
+        selector,
+        selectionMethod
+      )
+      .then(element => {
+        return visibilityManagerPromise.then(
+          visibilityManager => {
+            return visibilityManager.listenElement(
+              element,
+              visibilitySpec,
+              this.getReadyPromise(waitForSpec, selector, element),
+              createReportReadyPromiseFunc,
+              this.onEvent_.bind(this, eventType, listener, element)
+            );
+          },
+          () => {}
+        );
+      });
   }
 
   /**
