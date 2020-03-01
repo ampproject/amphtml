@@ -21,7 +21,6 @@ import {ViewportRelativePos} from '../visibility-observer';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {htmlFor} from '../../../../src/static-template';
 import {setStyle} from '../../../../src/style';
-import {toggleExperiment} from '../../../../src/experiments';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>
     <div style="height:1000px"></div>
@@ -81,8 +80,6 @@ describes.realWin(
       win = env.win;
       doc = win.document;
       ampdoc = env.ampdoc;
-
-      toggleExperiment(win, 'amp-next-page-v2', true);
 
       // Mocks
       ampdoc.getUrl = () => document.location.href;
@@ -147,10 +144,6 @@ describes.realWin(
         await service.maybeFetchNext();
       }
     }
-
-    afterEach(() => {
-      toggleExperiment(win, 'amp-next-page-v2', false);
-    });
 
     describe('inline config', () => {
       it('builds with valid inline config', async () => {

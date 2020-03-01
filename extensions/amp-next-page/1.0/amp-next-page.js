@@ -18,8 +18,6 @@ import {CSS} from '../../../build/amp-next-page-1.0.css';
 import {Layout} from '../../../src/layout';
 import {NextPageService} from './service';
 import {Services} from '../../../src/services';
-import {isExperimentOn} from '../../../src/experiments';
-import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-next-page';
 const SERVICE = 'next-page';
@@ -40,11 +38,6 @@ export class AmpNextPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    userAssert(
-      isExperimentOn(this.win, 'amp-next-page-v2'),
-      'Experiment amp-next-page-v2 disabled'
-    );
-
     this.nextPageService_ = Services.nextPageServiceForDoc(this.element);
     return this.nextPageService_.build(this.element);
   }
