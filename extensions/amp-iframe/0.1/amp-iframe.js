@@ -669,13 +669,15 @@ export class AmpIframe extends AMP.BaseElement {
    * @private
    */
   updateSize_(height, width) {
-    if (!this.isResizable_ && !this.hasErroredEmbedSize_) {
-      this.user().error(
-        TAG_,
-        'Ignoring embed-size request because this iframe is not resizable',
-        this.element
-      );
-      this.hasErroredEmbedSize_ = true;
+    if (!this.isResizable_) {
+      if (!this.hasErroredEmbedSize_) {
+        this.user().error(
+          TAG_,
+          'Ignoring embed-size request because this iframe is not resizable',
+          this.element
+        );
+        this.hasErroredEmbedSize_ = true;
+      }
       return;
     }
 
