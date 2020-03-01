@@ -754,7 +754,7 @@ exports.extensionBundles = [
   {
     name: 'amp-next-page',
     version: ['0.1', '1.0'],
-    latestVersion: '0.1',
+    latestVersion: '1.0',
     options: {hasCss: true},
     type: TYPES.MISC,
   },
