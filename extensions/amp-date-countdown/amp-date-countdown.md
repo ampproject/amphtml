@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays GL Transmission Format (gITF) 3D models.
+  text: Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.
 ---
 
 <!--
