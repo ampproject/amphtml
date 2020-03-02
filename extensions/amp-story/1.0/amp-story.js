@@ -104,7 +104,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex} from '../../../src/utils/array';
+import {findIndex, lastItem} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
@@ -359,6 +359,7 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
+    const localizationService = this.localizationService_;
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)
       .registerLocalizedStringBundle('ar', LocalizedStringsAr)
@@ -392,11 +393,9 @@ export class AmpStory extends AMP.BaseElement {
       enXaPseudoLocaleBundle
     );
 
-    registerServiceBuilder(
-      this.win,
-      'localization',
-      () => this.localizationService_
-    );
+    registerServiceBuilder(this.win, 'localization', function() {
+      return localizationService;
+    });
   }
 
   /** @override */
@@ -738,10 +737,6 @@ export class AmpStory extends AMP.BaseElement {
       this.onBookendStateUpdate_(isActive);
     });
 
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
-      this.onCurrentPageIdUpdate_(pageId);
-    });
-
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, isPaused => {
       this.onPausedStateUpdate_(isPaused);
     });
@@ -1016,6 +1011,7 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
+        this.initializeStoryPlayer_();
       });
 
     // Story is being prerendered: resolve the layoutCallback when the first
@@ -1068,16 +1064,17 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
-    const historyPage = /** @type {string} */ (getHistoryState(
-      this.win,
-      HistoryState.PAGE_ID
-    ));
-
     const maybePageId = parseQueryString(this.win.location.hash)['page'];
     if (maybePageId && this.isActualPage_(maybePageId)) {
       return maybePageId;
     }
 
+    const pages =
+      /**  @type {!Array} */ (getHistoryState(
+        this.win,
+        HistoryState.NAVIGATION_PATH
+      ) || []);
+    const historyPage = lastItem(pages);
     if (historyPage && this.isActualPage_(historyPage)) {
       return historyPage;
     }
@@ -1288,6 +1285,21 @@ export class AmpStory extends AMP.BaseElement {
       'No active page set when navigating to next page.'
     );
     activePage.next(opt_isAutomaticAdvance);
+  }
+
+  /**
+   * Installs amp-viewer-integration script in case story is inside an
+   * amp-story-player.
+   * @private
+   */
+  initializeStoryPlayer_() {
+    if (this.viewer_.getParam('storyPlayer') !== 'v0') {
+      return;
+    }
+    Services.extensionsFor(this.getAmpDoc().win).installExtensionForDoc(
+      this.getAmpDoc(),
+      'amp-viewer-integration'
+    );
   }
 
   /**
@@ -1680,20 +1692,6 @@ export class AmpStory extends AMP.BaseElement {
         rtlState ? this.previous_() : this.next_();
         break;
     }
-  }
-
-  /**
-   * @param {string} pageId new current page id
-   * @private
-   * */
-  onCurrentPageIdUpdate_(pageId) {
-    // Never save ad pages to history as they are unique to each visit.
-    const page = this.getPageById(pageId);
-    if (page.isAd()) {
-      return;
-    }
-
-    setHistoryState(this.win, HistoryState.PAGE_ID, pageId);
   }
 
   /**

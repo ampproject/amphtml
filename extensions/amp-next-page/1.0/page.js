@@ -127,37 +127,44 @@ export class Page {
   }
 
   /**
+   * @param {!PageState} state
+   * @return {boolean}
+   */
+  is(state) {
+    return this.state_ === state;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isLoaded() {
+    return (
+      this.state_ === PageState.LOADED ||
+      this.state_ === PageState.INSERTED ||
+      this.state_ === PageState.PAUSED
+    );
+  }
+
+  /**
    * @return {boolean}
    */
   isVisible() {
-    return this.visibilityState_ === VisibilityState.VISIBLE;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isPaused() {
-    return this.state_ === PageState.PAUSED;
-  }
-
-  /**
-   * @return {!VisibilityState}
-   * @visibleForTesting
-   */
-  getVisibilityState() {
-    return this.visibilityState_;
+    return this.isLoaded() && this.visibilityState_ === VisibilityState.VISIBLE;
   }
 
   /**
    * @param {VisibilityState} visibilityState
    */
   setVisibility(visibilityState) {
-    if (visibilityState == this.visibilityState_) {
+    if (!this.isLoaded() || visibilityState == this.visibilityState_) {
       return;
     }
 
     //Reload the page if necessary
-    if (this.isPaused() && visibilityState === VisibilityState.VISIBLE) {
+    if (
+      this.is(PageState.PAUSED) &&
+      visibilityState === VisibilityState.VISIBLE
+    ) {
       this.resume();
     }
 
@@ -189,7 +196,7 @@ export class Page {
       return Promise.resolve();
     }
     return this.shadowDoc_.close().then(() => {
-      this.manager_.closeDocument(this /** page */).then(() => {
+      return this.manager_.closeDocument(this /** page */).then(() => {
         this.shadowDoc_ = null;
         this.visibilityState_ = VisibilityState.HIDDEN;
         this.state_ = PageState.PAUSED;
@@ -200,25 +207,10 @@ export class Page {
   /**
    * Removes the placeholder and re-renders the page after its shadow
    * root has been removed
+   * @return {!Promise}
    */
   resume() {
-    this.attach_();
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isFetching() {
-    return this.state_ === PageState.FETCHING;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isLoaded() {
-    return (
-      this.state_ === PageState.LOADED || this.state_ === PageState.INSERTED
-    );
+    return this.attach_();
   }
 
   /**
@@ -244,40 +236,40 @@ export class Page {
       .then(content => {
         this.state_ = PageState.LOADED;
         this.content_ = content;
-        return this.manager_.createDocumentContainerForPage(this /** page */);
-      })
-      .then(container => {
-        this.container_ = container;
+        this.container_ = this.manager_.createDocumentContainerForPage(
+          this /** page */
+        );
         // TODO(wassgha): To further optimize, this should ideally
         // be parsed from the service worker instead of stored in memory
-        this.attach_();
+        return this.attach_();
       })
       .catch(() => {
         this.state_ = PageState.FAILED;
-        // TOOD(wassgha): Silently skips this page, should we re-try or show an error state?
-        this.manager_.setLastFetchedPage(this);
       });
   }
 
   /**
    * Inserts the fetched (or cached) HTML as the document's content
+   * @return {!Promise}
    */
   attach_() {
-    const shadowDoc = this.manager_.attachDocumentToPage(
-      this /** page */,
-      /** @type {!Document} */ (devAssert(this.content_)),
-      this.isPaused() /** force */
-    );
-
-    if (shadowDoc) {
-      this.shadowDoc_ = shadowDoc;
-      if (!this.isPaused()) {
-        this.manager_.setLastFetchedPage(this);
-      }
-      this.state_ = PageState.INSERTED;
-    } else {
-      this.state_ = PageState.FAILED;
-    }
+    return this.manager_
+      .attachDocumentToPage(
+        this /** page */,
+        /** @type {!Document} */ (devAssert(this.content_)),
+        this.is(PageState.PAUSED) /** force */
+      )
+      .then(shadowDoc => {
+        if (!shadowDoc) {
+          this.state_ = PageState.FAILED;
+          return;
+        }
+        this.state_ = PageState.INSERTED;
+        this.shadowDoc_ = shadowDoc;
+        if (!this.is(PageState.PAUSED)) {
+          this.manager_.setLastFetchedPage(this);
+        }
+      });
   }
 }
 

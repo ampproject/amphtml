@@ -21,7 +21,6 @@ import {ViewportRelativePos} from '../visibility-observer';
 import {VisibilityState} from '../../../../src/visibility-state';
 import {htmlFor} from '../../../../src/static-template';
 import {setStyle} from '../../../../src/style';
-import {toggleExperiment} from '../../../../src/experiments';
 
 const MOCK_NEXT_PAGE = `<header>Header</header>
     <div style="height:1000px"></div>
@@ -82,8 +81,6 @@ describes.realWin(
       doc = win.document;
       ampdoc = env.ampdoc;
 
-      toggleExperiment(win, 'amp-next-page-v2', true);
-
       // Mocks
       ampdoc.getUrl = () => document.location.href;
       win.document.title = 'Host page';
@@ -112,6 +109,10 @@ describes.realWin(
 
       if (options.src) {
         element.setAttribute('src', options.src);
+      }
+
+      if (options.maxPages) {
+        element.setAttribute('max-pages', options.maxPages);
       }
 
       doc.body.appendChild(element);
@@ -143,10 +144,6 @@ describes.realWin(
         await service.maybeFetchNext();
       }
     }
-
-    afterEach(() => {
-      toggleExperiment(win, 'amp-next-page-v2', false);
-    });
 
     describe('inline config', () => {
       it('builds with valid inline config', async () => {
@@ -207,16 +204,11 @@ describes.realWin(
 
     describe('remote config', () => {
       it('errors when no config specified', async () => {
-        const element = await getAmpNextPage({});
-
-        await allowConsoleError(() =>
-          element.build().catch(err => {
-            expect(err.message).to.include(
-              'amp-next-page should contain a <script> child or a URL specified in [src]'
-            );
-            element.parentNode.removeChild(element);
-          })
+        expectAsyncConsoleError(
+          /amp-next-page should contain a <script> child or a URL specified/,
+          1
         );
+        getAmpNextPage({});
       });
 
       it('builds with valid remote config (without inline config)', async () => {
@@ -439,15 +431,6 @@ describes.realWin(
         expect(service.pages_[2].document.querySelector('[instance="1"]')).to
           .not.be.ok;
       });
-
-      it('removes amp-analytics tags from child documents', async () => {
-        await fetchDocuments(
-          service,
-          `${MOCK_NEXT_PAGE} <amp-analytics id="analytics1"></amp-analytics>`
-        );
-        expect(service.pages_[1].document.getElementById('analytics1')).to.be
-          .null;
-      });
     });
 
     describe('infinite loading', () => {
@@ -562,7 +545,7 @@ describes.realWin(
       });
     });
 
-    describe('default separators', () => {
+    describe('default separators & footers', () => {
       let element;
       let service;
 
@@ -579,11 +562,11 @@ describes.realWin(
         element.parentNode.removeChild(element);
       });
 
-      it('adds a default separator to for the host page', async () => {
+      it('adds a default separator to the host page', async () => {
         await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
 
         expect(service.pages_[1].container.firstElementChild).to.have.class(
-          'amp-next-page-default-separator'
+          'amp-next-page-separator'
         );
       });
 
@@ -591,12 +574,18 @@ describes.realWin(
         await fetchDocuments(service, MOCK_NEXT_PAGE, 2);
 
         expect(service.pages_[2].container.firstElementChild).to.have.class(
-          'amp-next-page-default-separator'
+          'amp-next-page-separator'
         );
+      });
+
+      it('adds a default recommendation box to the host page', async () => {
+        await fetchDocuments(service, MOCK_NEXT_PAGE_WITH_RECOMMENDATIONS);
+
+        expect(element.lastElementChild).to.have.class('amp-next-page-links');
       });
     });
 
-    describe('custom and templated separators', () => {
+    describe('custom and templated separators & recommendation box', () => {
       let element;
       let service;
       let html;
@@ -696,6 +685,84 @@ describes.realWin(
 
         expect(template1.innerText).to.equal('Rendered 1');
         expect(template2.innerText).to.equal('Rendered 2');
+      });
+
+      it('correctly renders a templated recommendation-box', async () => {
+        const separator = html`
+          <div recommendation-box>
+            <template type="amp-mustache">
+              <div class="recommendation-box-content">
+                {{#pages}}
+                <span class="title">{{title}}</span>
+                <span class="url">{{url}}</span>
+                <span class="image">{{image}}</span>
+                {{/pages}}
+              </div>
+            </template>
+          </div>
+        `;
+
+        element = await getAmpNextPage({
+          inlineConfig: VALID_CONFIG,
+          separator,
+        });
+
+        service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(0);
+        const templateRenderStub = env.sandbox
+          .stub(service.templates_, 'findAndRenderTemplate')
+          .resolves(
+            html`
+              <span>Rendered</span>
+            `
+          );
+
+        await fetchDocuments(service, MOCK_NEXT_PAGE, '1');
+        expect(templateRenderStub).to.have.been.calledWith(
+          env.sandbox.match.any,
+          {
+            pages: [
+              {
+                title: 'Title 1',
+                url: '',
+                image: '/examples/img/hero@1x.jpg',
+              },
+              {
+                title: 'Title 2',
+                url: 'http://localhost:9876/document2',
+                image: '/examples/img/hero@1x.jpg',
+              },
+            ],
+          }
+        );
+        expect(element.lastElementChild.innerText).to.equal('Rendered');
+      });
+    });
+
+    describe('page suggestion limiting', () => {
+      it('should register all pages if a limit is not specified', async () => {
+        const element = await getAmpNextPage({
+          inlineConfig: VALID_CONFIG,
+        });
+
+        const service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
+        expect(service.pages_.length).to.equal(3);
+        element.parentNode.removeChild(element);
+      });
+
+      it('should only register pages up to the given limit', async () => {
+        const element = await getAmpNextPage({
+          inlineConfig: VALID_CONFIG,
+          maxPages: 1,
+        });
+
+        const service = Services.nextPageServiceForDoc(doc);
+        env.sandbox.stub(service, 'getViewportsAway_').returns(2);
+
+        expect(service.pages_.length).to.equal(2);
+        element.parentNode.removeChild(element);
       });
     });
   }

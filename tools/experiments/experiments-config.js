@@ -68,13 +68,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26432',
   },
   {
-    id: 'amp-consent-geo-override',
-    name: 'AMP consent modified to support CCPA',
-    spec:
-      'https://github.com/ampproject/amphtml/blob/lannka-consent-design/extensions/amp-consent/amp-consent.md',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25623',
-  },
-  {
     id: 'amp-sidebar-v2',
     name: 'Updated sidebar component with nested menu and animations',
     spec: 'https://github.com/ampproject/amphtml/issues/25049',
@@ -209,12 +202,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
-    id: 'amp-next-page-v2',
-    name: 'Document-level (true) infinite scroll experience',
-    spec: 'https://github.com/ampproject/amphtml/issues/25500',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25634',
-  },
-  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
@@ -243,11 +230,6 @@ export const EXPERIMENTS = [
     cleanupIssue: 'X',
   },
   {
-    id: 'amp-consent-v2',
-    name: 'Enables CMP support to amp-consent component',
-    spec: 'https://github.com/ampproject/amphtml/issues/17742',
-  },
-  {
     id: 'video-dock',
     name: 'Enables <amp-video dock>',
     spec: 'https://github.com/ampproject/amphtml/issues/14061',
@@ -266,14 +248,6 @@ export const EXPERIMENTS = [
       'within friendly iframe',
     spec: 'https://github.com/ampproject/amphtml/issues/19869',
     cleanupIssue: 'TODO',
-  },
-  {
-    id: 'fie-css-cleanup',
-    name:
-      'Experiment to prevent regression after a major CSS clean up' +
-      ' for AMPHTML Ads in FIE rendering mode',
-    spec: 'https://github.com/ampproject/amphtml/issues/22418',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/22418',
   },
   {
     id: 'amp-user-location',
@@ -318,5 +292,11 @@ export const EXPERIMENTS = [
       'after that scroller scrolls.',
     spec: 'https://github.com/ampproject/amphtml/issues/24929',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25203',
+  },
+  {
+    id: 'amp-stream-gallery',
+    name: 'Enables component',
+    spec: 'https://github.com/ampproject/amphtml/issues/20595',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
   },
 ];

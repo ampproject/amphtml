@@ -15,6 +15,7 @@
  */
 
 import {Services} from '../services';
+import {registerServiceBuilderForDoc} from '../service';
 
 /**
  * @implements {../service/mutator-interface.MutatorInterface}
@@ -22,11 +23,10 @@ import {Services} from '../services';
 export class InaboxMutator {
   /**
    * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
-   * @param {!../service/resources-interface.ResourcesInterface} resources
    */
-  constructor(ampdoc, resources) {
+  constructor(ampdoc) {
     /** @const @private {!../service/resources-interface.ResourcesInterface} */
-    this.resources_ = resources;
+    this.resources_ = Services.resourcesForDoc(ampdoc);
 
     /** @private @const {!../service/vsync-impl.Vsync} */
     this.vsync_ = Services./*OK*/ vsyncFor(ampdoc.win);
@@ -100,4 +100,11 @@ export class InaboxMutator {
       },
     });
   }
+}
+
+/**
+ * @param {!../service/ampdoc-impl.AmpDoc} ampdoc
+ */
+export function installInaboxMutatorServiceForDoc(ampdoc) {
+  registerServiceBuilderForDoc(ampdoc, 'mutator', InaboxMutator);
 }

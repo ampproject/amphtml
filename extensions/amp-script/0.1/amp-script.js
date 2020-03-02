@@ -344,11 +344,14 @@ export class AmpScript extends AMP.BaseElement {
           const contentType = response.headers.get('Content-Type');
           if (
             !contentType ||
-            !startsWith(contentType, 'application/javascript')
+            !(
+              startsWith(contentType, 'application/javascript') ||
+              startsWith(contentType, 'text/javascript')
+            )
           ) {
             user().error(
               TAG,
-              'Same-origin "src" requires "Content-Type: application/javascript". ' +
+              'Same-origin "src" requires "Content-Type: text/javascript" or "Content-Type: application/javascript". ' +
                 'Fetched source for %s has "Content-Type: %s". ' +
                 'See https://amp.dev/documentation/components/amp-script/#security-features.',
               debugId,
@@ -491,12 +494,9 @@ export class AmpScriptService {
     this.sources_ = [];
 
     // Query the meta tag once per document.
-    const allowedHashes = ampdoc
-      .getHeadNode()
-      .querySelector('meta[name="amp-script-src"]');
-    if (allowedHashes && allowedHashes.hasAttribute('content')) {
-      const content = allowedHashes.getAttribute('content');
-      this.sources_ = content
+    const allowedHashes = ampdoc.getMetaByName('amp-script-src');
+    if (allowedHashes) {
+      this.sources_ = allowedHashes
         .split(' ')
         .map(s => s.trim())
         .filter(s => s.length);

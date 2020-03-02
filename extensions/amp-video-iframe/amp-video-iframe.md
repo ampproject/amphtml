@@ -121,6 +121,22 @@ to be played, <a href="https://github.com/ampproject/amphtml/blob/master/spec/am
     <td width="40%"><strong>referrerpolicy</strong></td>
     <td>The <a href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLIFrameElement/referrerPolicy"><code>referrerpolicy</code></a> to be set on the iframe element.</td>
   </tr>
+  <tr>
+    <td width="40%"><a id="data-param"></a><strong>data-param-*</strong></td>
+    <td>
+      All <code>data-param-*</code> attributes are added as query parameters
+      to the iframe's <code>src</code>. They may be used to pass custom values
+      through to the player document.<br />
+      Keys and values will be URI encoded. Keys will be camel cased.
+      <ul>
+        <li><code>data-param-foo="bar"</code> becomes <code>&foo=bar</code></li>
+        <li>
+          <code>data-param-channel-id="SOME_VALUE"</code> becomes
+          <code>&channelId=SOME_VALUE</code>
+        </li>
+      </ul>
+    </td>
+  </tr>
 </table>
 
 ## Usage
@@ -140,26 +156,45 @@ Include an `amp-video-iframe` on your AMP document:
 
 `my-video-player.html` is the inner document loaded inside the frame that plays the video. This document must include and bootstrap [an integration script](#integration) so that the AMP document including the `<amp-video-iframe>` can coordinate the video's playback.
 
-### <a id="vendors"></a> For third-party video vendors
+### <a id="vendors"></a> Third-party video vendors
 
-If you're a vendor that does _not_ provide a [custom video player component](../../spec/amp-video-interface.md), you can use `amp-video-iframe` to allow AMP document authors to embed video provided through your service.
+If you're a vendor that does _not_ provide a [custom video player component](../../spec/amp-video-interface.md), you can integrate with AMP in the form of an `amp-video-iframe` configuration, so authors can embed video provided through your service.
 
-By hosting a generic [integration document](#integration) that can reference videos with URL parameters, authors don't need to provide the inner player document themselves, but only include an `<amp-video-iframe>` tag in the AMP document:
+Note: For most video providers, `amp-video-iframe` provides enough tools for common playback actions (see [methods](#method) and [events](#postEvent)). Refer to the [vendor player spec](../../spec/amp-3p-video.md) for more details on whether you can use `amp-video-iframe` or you should build a third-party player component instead.
+
+As a vendor, you can serve a generic [integration document](#integration) that references provided videos via URL parameters. AMP authors who use your video service only need to include an `<amp-video-iframe>` tag in their documents:
 
 ```html
+<!--
+  data-param-* attributes are added to src and poster, so this would use the
+  following composed urls:
+
+  src: https://vendor.example/amp-video-iframe
+      ?videoid=MY_VIDEO_ID
+      &channelid=MY_CHANNEL_ID
+
+  poster: https://vendor.example/poster.jpg
+      ?videoid=MY_VIDEO_ID
+      &channelid=MY_CHANNEL_ID
+-->
 <amp-video-iframe
   layout="responsive"
   width="16"
   height="9"
-  src="https://video-provider.example/amp-video-iframe.html?videoid=PROVIDED_VIDEO_ID"
-  poster="https://video-provider.example/amp-video-iframe-poster.jpg?videoid=PROVIDED_VIDEO_ID"
+  src="https://vendor.example/amp-video-iframe"
+  poster="https://vendor.example/poster.jpg"
+  data-param-videoid="MY_VIDEO_ID"
+  data-param-channelid="MY_CHANNEL_ID"
 >
 </amp-video-iframe>
 ```
 
-The dynamic server-side document `amp-video-iframe.html` includes the video as necessary per the configurable `PROVIDED_VIDEO_ID` parameter. This document bootstraps the [iframe integration script](#integration) so that the AMP document can coordinate with the player.
+The `src` and `poster` URLs are appended with [`data-param-*` attributes as query string](#data-param).
 
-Note: For most video providers, `amp-video-iframe` provides enough tools for common playback actions (see possible [methods](#method) and [events](#postEvent)). Refer to the [vendor-specific video player spec](../../spec/amp-3p-video.md) for more details on whether you can use `amp-video-iframe` or you should build a third-party player component instead.
+The `/amp-video-iframe` document bootstraps the [integration script](#integration) so that the AMP document can coordinate with the player.
+
+Note: If you're a vendor hosting an integration document, feel free to [contribute a code sample to this page,](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-iframe/amp-video-iframe.md) specifying your provided
+`src` and usable `data-param-*` attributes.
 
 ## <a id="integration"></a> Integration inside the frame
 
@@ -215,15 +250,29 @@ You can additionally use [custom integration methods](#custom-integrations) if y
 
 **Default supported methods:** `pause`/`play`, `mute`/`unmute`, `hidecontrols`/`showcontrols`, `fullscreenenter`/`fullscreenexit`
 
-Pass in your [`jwplayer` instance object](https://developer.jwplayer.com/jw-player/docs/javascript-api-reference/)
-through the signature `ampIntegration.listenTo('jwplayer', myJwplayer)`. The `ampIntegration` object then knows how
-to setup the player through the instance API.
+The `amp` object knows how to setup a JwPlayer instance by using `listenTo('jwplayer')`.
+If you're embedding your player [using a video-specific script](https://support.jwplayer.com/articles/how-to-embed-a-jwplayer), you only need to register Jwplayer usage:
+
+```html
+<script src="https://cdn.jwplayer.com/players/UVQWMA4o-kGWxh33Q.js"></script>
+<script>
+  (window.AmpVideoIframe = window.AmpVideoIframe || []).push(function(
+    ampIntegration
+  ) {
+    ampIntegration.listenTo('jwplayer');
+  });
+</script>
+```
+
+Otherwise, pass in your [JwPlayer instance](https://developer.jwplayer.com/jwplayer/docs/jw8-javascript-api-reference)
+through the signature `amp.listenTo('jwplayer', instance)`:
 
 ```js
-function onAmpIntegrationReady(ampIntegration) {
-  var myJwplayer = jwplayer('my-video');
-  ampIntegration.listenTo('jwplayer', myJwplayer);
-}
+(window.AmpVideoIframe = window.AmpVideoIframe || []).push(function(
+  ampIntegration
+) {
+  ampIntegration.listenTo('jwplayer', jwplayer('my-video'));
+});
 ```
 
 ##### For Video.js

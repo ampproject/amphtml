@@ -22,7 +22,6 @@ import {
   ENABLED_LD_JSON_TYPES,
   ENABLED_OG_TYPE_ARTICLE,
   LIGHTBOXABLE_ATTR,
-  Mutation,
   RENDER_AREA_RATIO,
   REQUIRED_EXTENSION,
   Scanner,
@@ -116,13 +115,17 @@ describes.realWin(
       return element;
     }
 
+    function stubMutatorForDoc() {
+      env.sandbox.stub(Services, 'mutatorForDoc').returns({
+        mutateElement: (_, fn) => tryResolve(fn),
+      });
+    }
+
     beforeEach(() => {
       any = env.sandbox.match.any;
       html = htmlFor(env.win.document);
 
-      env.sandbox
-        .stub(Mutation, 'mutate')
-        .callsFake((_, mutator) => tryResolve(mutator));
+      stubMutatorForDoc();
     });
 
     describe('meetsTreeShapeCriteria', () => {
