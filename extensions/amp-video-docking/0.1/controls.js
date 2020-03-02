@@ -170,9 +170,6 @@ export class Controls {
     /** @public @const {!Element} */
     this.overlay = renderDockedOverlay(html);
 
-    /** @private @const */
-    this.manager_ = once(() => Services.videoManagerForDoc(ampdoc));
-
     const refs = htmlRefs(this.container);
     const assertRef = ref => dev().assertElement(refs[ref]);
 
@@ -255,7 +252,7 @@ export class Controls {
   setVideo(video, area) {
     this.area_ = area;
 
-    if (this.video_ != video) {
+    if (this.video_ !== video) {
       this.video_ = video;
       this.listen_(video);
     }
@@ -343,15 +340,6 @@ export class Controls {
     );
   }
 
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isPlaying_() {
-    devAssert(this.video_);
-    return this.manager_().getPlayingState(this.video_) != PlayingStates.PAUSED;
-  }
-
   /** @private */
   onPlay_() {
     const {playButton_, pauseButton_} = this;
@@ -427,6 +415,13 @@ export class Controls {
 
   /** @private */
   showOnNextAnimationFrame_() {
+    const manager = Services.videoManagerForDoc(this.ampdoc_);
+    const video = devAssert(this.video_);
+
+    const isRollingAd = manager.isRollingAd(video);
+    const isMuted = manager.isMuted(video);
+    const isPlaying = manager.getPlayingState(video) !== PlayingStates.PAUSED;
+
     const {container, overlay} = this;
 
     toggle(container, true);
@@ -434,12 +429,12 @@ export class Controls {
     container.classList.add('amp-video-docked-controls-shown');
     overlay.classList.add('amp-video-docked-controls-bg');
 
-    const isPlaying = this.isPlaying_();
+    this.useControlSet_(
+      isRollingAd ? ControlSet.SCROLL_BACK : ControlSet.PLAYBACK
+    );
 
     toggle(this.playButton_, !isPlaying);
     toggle(this.pauseButton_, isPlaying);
-
-    const isMuted = this.manager_().isMuted(this.video_);
 
     toggle(this.muteButton_, !isMuted);
     toggle(this.unmuteButton_, isMuted);

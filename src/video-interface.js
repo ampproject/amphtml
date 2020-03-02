@@ -528,7 +528,7 @@ export const videoAnalyticsCustomEventTypeKey = '__amp:eventType';
  * Helper union type to be used internally, so that the compiler treats
  * `VideoInterface` objects as `BaseElement`s, which they should be anyway.
  *
- * WARNING: Don't use this at the service level. Its `register` method should
+ * WARNING: Don't use to `register` at the Service level. Registering should
  * only allow `VideoInterface` as a guarding measure.
  *
  * @typedef {!VideoInterface|!./base-element.BaseElement}
