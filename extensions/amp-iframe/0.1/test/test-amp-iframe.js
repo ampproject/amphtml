@@ -216,6 +216,7 @@ describes.realWin(
           src: iframeSrc,
           width: 100,
           height: 100,
+          title: 'example title',
           allowfullscreen: '',
           allowpaymentrequest: '',
           allowtransparency: '',
@@ -235,7 +236,8 @@ describes.realWin(
         expect(iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
         expect(iframe.getAttribute('frameborder')).to.equal('3');
         expect(iframe.getAttribute('tabindex')).to.equal('-1');
-        // unsupproted attributes
+        expect(iframe.getAttribute('title')).to.equal('example title');
+        // unsupported attributes
         expect(iframe.getAttribute('longdesc')).to.be.null;
         expect(iframe.getAttribute('marginwidth')).to.be.null;
       });
