@@ -93,6 +93,13 @@ export class VideoManager {
     /** @private {?Array<!VideoEntry>} */
     this.entries_ = null;
 
+    /**
+     * Keeps last found entry as a small optimization for multiple state calls
+     * during one task.
+     * @private {?VideoEntry}
+     */
+    this.lastFoundEntry_ = null;
+
     /** @private {boolean} */
     this.scrollListenerInstalled_ = false;
 
@@ -288,40 +295,42 @@ export class VideoManager {
   }
 
   /**
-   * Returns the entry in the video manager corresponding to the video
-   * provided
-   *
-   * @param {!../video-interface.VideoInterface} video
+   * Returns the entry in the video manager corresponding to the video or
+   * element provided
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
    * @return {VideoEntry} entry
-   * @private
    */
-  getEntryForVideo_(video) {
-    for (let i = 0; i < this.entries_.length; i++) {
-      if (this.entries_[i].video === video) {
-        return this.entries_[i];
-      }
+  getEntry_(videoOrElement) {
+    if (isEntryFor(this.lastFoundEntry_, videoOrElement)) {
+      return this.lastFoundEntry_;
     }
-    dev().error(TAG, 'video is not registered to this video manager');
-    return null;
-  }
 
-  /**
-   * Returns the entry in the video manager corresponding to the element
-   * provided
-   *
-   * @param {!AmpElement} element
-   * @return {VideoEntry} entry
-   * @private
-   */
-  getEntryForElement_(element) {
     for (let i = 0; i < this.entries_.length; i++) {
       const entry = this.entries_[i];
-      if (entry.video.element === element) {
+      if (isEntryFor(entry, videoOrElement)) {
+        this.lastFoundEntry_ = entry;
         return entry;
       }
     }
-    dev().error(TAG, 'video is not registered to this video manager');
-    return null;
+
+    return devAssert(
+      null,
+      '%s not registered to VideoManager',
+      videoOrElement.element || videoOrElement
+    );
+  }
+
+  /** @param {!VideoEntry} entry */
+  registerForAutoFullscreen(entry) {
+    this.getAutoFullscreenManager_().register(entry);
+  }
+
+  /**
+   * @return {!AutoFullscreenManager}
+   * @visibleForTesting
+   */
+  getAutoFullscreenManagerForTesting_() {
+    return this.getAutoFullscreenManager_();
   }
 
   /**
@@ -337,53 +346,63 @@ export class VideoManager {
       root.getElementById(/** @type {string} */ (id)),
       `Could not find an element with id="${id}" for VIDEO_STATE`
     );
-    const entry = this.getEntryForElement_(videoElement);
+    const entry = this.getEntry_(videoElement);
     return (entry
       ? entry.getAnalyticsDetails()
       : Promise.resolve()
     ).then(details => (details ? details[property] : ''));
   }
 
+  // TODO(go.amp.dev/issue/27010): For getters below, let's expose VideoEntry
+  // instead and use directly. This is better for size and sanity. Users can
+  // also then keep the entry reference for their own use.
+  // (Can't expose yet due to package-level methods to be restructured, e.g
+  // videoLoaded(). See issue)
+
   /**
    * Returns whether the video is paused or playing after the user interacted
    * with it or playing through autoplay
    *
-   * @param {!../video-interface.VideoInterface} video
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
    * @return {!../video-interface.PlayingStateDef}
    */
-  getPlayingState(video) {
-    return this.getEntryForVideo_(video).getPlayingState();
+  getPlayingState(videoOrElement) {
+    return this.getEntry_(videoOrElement).getPlayingState();
   }
 
   /**
-   * @param {!../video-interface.VideoInterface} video
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
    * @return {boolean}
    */
-  isMuted(video) {
-    return this.getEntryForVideo_(video).isMuted();
+  isMuted(videoOrElement) {
+    return this.getEntry_(videoOrElement).isMuted();
   }
 
   /**
-   * @param {!../video-interface.VideoInterface} video
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
    * @return {boolean}
    */
-  userInteracted(video) {
-    return this.getEntryForVideo_(video).userInteracted();
-  }
-
-  /** @param {!VideoEntry} entry */
-  registerForAutoFullscreen(entry) {
-    this.getAutoFullscreenManager_().register(entry);
+  userInteracted(videoOrElement) {
+    return this.getEntry_(videoOrElement).userInteracted();
   }
 
   /**
-   * @return {!AutoFullscreenManager}
-   * @visibleForTesting
+   * @param {!../video-interface.VideoOrBaseElementDef|!Element} videoOrElement
+   * @return {boolean}
    */
-  getAutoFullscreenManagerForTesting_() {
-    return this.getAutoFullscreenManager_();
+  isRollingAd(videoOrElement) {
+    return this.getEntry_(videoOrElement).isRollingAd();
   }
 }
+
+/**
+ * @param {?VideoEntry=} entry
+ * @param {?../video-interface.VideoOrBaseElementDef|!Element=} videoOrElement
+ * @return {boolean}
+ */
+const isEntryFor = (entry, videoOrElement) =>
+  !!entry &&
+  (entry.video === videoOrElement || entry.video.element === videoOrElement);
 
 /**
  * VideoEntry represents an entry in the VideoManager's list.
@@ -411,6 +430,9 @@ class VideoEntry {
 
     /** @private {boolean} */
     this.isPlaying_ = false;
+
+    /** @private {boolean} */
+    this.isRollingAd_ = false;
 
     /** @private {boolean} */
     this.isVisible_ = false;
@@ -483,15 +505,6 @@ class VideoEntry {
     listen(video.element, VideoEvents.PLAYING, () => this.videoPlayed_());
     listen(video.element, VideoEvents.MUTED, () => (this.muted_ = true));
     listen(video.element, VideoEvents.UNMUTED, () => (this.muted_ = false));
-    listen(video.element, VideoEvents.ENDED, () => this.videoEnded_());
-
-    listen(video.element, VideoEvents.AD_START, () =>
-      analyticsEvent(this, VideoAnalyticsEvents.AD_START)
-    );
-
-    listen(video.element, VideoEvents.AD_END, () =>
-      analyticsEvent(this, VideoAnalyticsEvents.AD_END)
-    );
 
     listen(video.element, VideoEvents.CUSTOM_TICK, e => {
       const data = getData(e);
@@ -503,6 +516,21 @@ class VideoEntry {
         return;
       }
       this.logCustomAnalytics_(eventType, data['vars']);
+    });
+
+    listen(video.element, VideoEvents.ENDED, () => {
+      this.isRollingAd_ = false;
+      analyticsEvent(this, VideoAnalyticsEvents.ENDED);
+    });
+
+    listen(video.element, VideoEvents.AD_START, () => {
+      this.isRollingAd_ = true;
+      analyticsEvent(this, VideoAnalyticsEvents.AD_START);
+    });
+
+    listen(video.element, VideoEvents.AD_END, () => {
+      this.isRollingAd_ = false;
+      analyticsEvent(this, VideoAnalyticsEvents.AD_END);
     });
 
     video
@@ -649,15 +677,6 @@ class VideoEntry {
       this.pauseCalledByAutoplay_ = false;
     }
   }
-
-  /**
-   * Callback for when the video has ended
-   * @private
-   */
-  videoEnded_() {
-    analyticsEvent(this, VideoAnalyticsEvents.ENDED);
-  }
-
   /**
    * Called when the video is loaded and can play.
    */
@@ -947,6 +966,11 @@ class VideoEntry {
     }
 
     return PlayingStates.PLAYING_MANUAL;
+  }
+
+  /** @return {boolean} */
+  isRollingAd() {
+    return this.isRollingAd_;
   }
 
   /**
