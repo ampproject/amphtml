@@ -4,7 +4,7 @@ formats:
   - websites
   - ads
 teaser:
-  text: Provides configurable behavior for ad exits for A4A (AMP for Ads).
+  text: Provides configurable behavior for ad exits for [AMPHTML ads](https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads).
 ---
 
 <!--
@@ -24,23 +24,6 @@ limitations under the License.
 -->
 
 # amp-ad-exit
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides configurable behavior for ad exits for <a href="https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads">AMPHTML ads</a>.</td>
-  </tr>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-ad-exit" src="https://cdn.ampproject.org/v0/amp-ad-exit-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay or do not specify a layout</td>
-  </tr>
-</table>
 
 ## Overview
 
