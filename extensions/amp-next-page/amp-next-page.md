@@ -24,7 +24,6 @@ limitations under the License.
 
 # amp-next-page
 
-
 ## Behavior
 
 Given a list of pages, `amp-next-page` tries to load them after the current
@@ -71,7 +70,6 @@ Each page object must have the following key/value pairs:
 #### Inline Configuration
 
 Inline a JSON configuration in the `<amp-next-page>` component by placing it inside a child `<script>` element.
-
 
 ```html
 <amp-next-page>
@@ -203,10 +201,10 @@ Alternatively, it is possible to create a custom separator by defining an elemen
     <template type="amp-mustache">
       <div class="my-custom-separator-content">
         <amp-img
-            src="{{image}}"
-            layout="fixed"
-            height="16"
-            width="16"
+          src="{{image}}"
+          layout="fixed"
+          height="16"
+          width="16"
         ></amp-img>
         <span>Next article: {{title}}</span>
       </div>
