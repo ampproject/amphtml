@@ -193,16 +193,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
         win.document.head = {
           nodeType: /* element */ 1,
           // Fake query selectors needed to bypass <meta> tag checks.
-          querySelector: selector => {
-            if (selector === 'meta[name="amp-link-variable-allowed-origin"]') {
-              return {
-                getAttribute: () => {
-                  return 'https://whitelisted.com https://greylisted.com http://example.com';
-                },
-              };
-            }
-            return null;
-          },
+          querySelector: () => null,
           querySelectorAll: () => [],
           getRootNode() {
             return win.document;
@@ -213,6 +204,10 @@ describes.sandboxed('UrlReplacements', {}, env => {
         win.__AMP_SERVICES.documentInfo = null;
         installDocumentInfoServiceForDoc(ampdoc);
         win.ampdoc = ampdoc;
+        env.sandbox.stub(win.ampdoc, 'getMeta').returns({
+          'amp-link-variable-allowed-origin':
+            'https://whitelisted.com https://greylisted.com http://example.com',
+        });
         installUrlReplacementsServiceForDoc(ampdoc);
         return win;
       }
@@ -1485,6 +1480,8 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should reject javascript protocol', () => {
+        const protocolErrorRegex = /invalid protocol/;
+        expectAsyncConsoleError(protocolErrorRegex);
         const win = getFakeWindow();
         const {documentElement} = win.document;
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
@@ -1496,7 +1493,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
               throw new Error('never here');
             },
             err => {
-              expect(err.message).to.match(/invalid protocol/);
+              expect(err.message).to.match(protocolErrorRegex);
             }
           );
       });
