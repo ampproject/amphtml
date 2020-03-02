@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Appends a reCAPTCHA v3 token to AMP form submissions.
+  text: Appends a [reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) token to [AMP form](https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md) submissions.
 ---
 
 <!---
@@ -23,25 +23,6 @@ limitations under the License.
 -->
 
 # amp-recaptcha-input
-
-Appends a <a href="https://developers.google.com/recaptcha/docs/v3">reCAPTCHA v3</a> token to <a href="https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md">AMP form</a> submissions.
-
-<table>
-<tr>
-<td width="40%"><strong>Required Script</strong></td>
-<td><code>&lt;script async custom-element="amp-recaptcha-input" src="https://cdn.ampproject.org/v0/amp-recaptcha-input-0.1.js">&lt;/script></code></td>
-</tr>
-<tr>
-<td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-<td>nodisplay</td>
-</tr>
-<tr>
-<td width="40%"><strong>Examples</strong></td>
-<td><a href="https://amp.dev/documentation/examples/components/amp-recaptcha-input">Example on amp.dev</a></td>
-</tr>
-</table>
-
-[TOC]
 
 ## Behavior
 

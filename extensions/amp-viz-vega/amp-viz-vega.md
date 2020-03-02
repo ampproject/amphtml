@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays visualizations created by using Vega visualization grammar.
+  text: Displays visualizations created by using [Vega](https://vega.github.io/vega/) visualization grammar.
 experimental: true
 ---
 
@@ -24,29 +24,6 @@ limitations under the License.
 -->
 
 # amp-viz-vega
-
-Displays visualizations created using <a href="https://vega.github.io/vega/">Vega</a> visualization grammar.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-viz-vega" src="https://cdn.ampproject.org/v0/amp-viz-vega-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/viz-vega.amp.html">viz-vega.amp.html</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 ## What is Vega?
 

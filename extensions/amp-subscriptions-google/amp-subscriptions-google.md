@@ -24,36 +24,6 @@ limitations under the License.
 
 # amp-subscriptions-google
 
-Implements subscription-style access protocol for Subscribe with Google.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Beta.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <code>
-        &lt;script async custom-element="amp-subscriptions-google"
-        src="https://cdn.ampproject.org/v0/amp-subscriptions-google-0.1.js">&lt;/script>
-      </code>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty">
-      <strong>
-        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
-          Supported Layouts
-        </a>
-      </strong>
-    </td>
-    <td>N/A</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Introduction
 
 The `amp-subscriptions-google` is the extension that enables Subscribe with Google in an AMP page.

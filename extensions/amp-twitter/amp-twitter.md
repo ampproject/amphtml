@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Displays a Twitter tweet.
+  text: Displays a Twitter Tweet or Moment.
 ---
 
 <!---
@@ -24,25 +24,6 @@ limitations under the License.
 -->
 
 # amp-twitter
-
-Displays a Twitter Tweet or Moment.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-twitter/">Annotated code example for amp-twitter</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Behavior
 

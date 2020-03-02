@@ -23,24 +23,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-mega-menu`
+# amp-mega-menu
 
 Horizontal navigation bar with menu items that open/close content containers on click.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; activated by the <code>amp-mega-menu</code> experiment.</div></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-mega-menu" src="https://cdn.ampproject.org/v0/amp-mega-menu-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed-height</td>
-  </tr>
-</table>
 
 ## Overview
 

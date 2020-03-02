@@ -24,25 +24,6 @@ limitations under the License.
 
 # amp-geo
 
-Provides an approximate country-level geolocation interface.
-
-<table>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-geo" src="https://cdn.ampproject.org/v0/amp-geo-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-geo/">amp-geo example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Usage
 
 The `amp-geo` component provides country-level geolocation. The `amp-geo` component also provides a simple mechanism to group countries, making it easier to apply attributes to several countries at once.

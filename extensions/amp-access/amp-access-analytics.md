@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-access-analytics"></a>AMP Access and Analytics
+# AMP Access and Analytics
 
 ## Access analytics triggers
 

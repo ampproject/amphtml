@@ -25,25 +25,6 @@ limitations under the License.
 
 # amp-selector
 
-Represents a control that presents a menu of options and lets the user choose from it.
-
-<table>
-  <tr>
-    <td class="col-fourty" width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-selector" src="https://cdn.ampproject.org/v0/amp-selector-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>All</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-selector/">amp-selector example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 The AMP selector is a control that presents a list of options and lets the user choose one or many options; the contents of the options aren't just limited to text.

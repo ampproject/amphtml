@@ -26,26 +26,7 @@ limitations under the License.
 
 # amp-video
 
-[TOC]
-
-A replacement for the HTML5 <code>video</code> tag; only to be used for direct HTML5 video file embeds.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-video" src="https://cdn.ampproject.org/v0/amp-video-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>AMP By Example's:<ul>
-      <li><a href="https://amp.dev/documentation/examples/components/amp-video/">amp-video example</a></li>
-      <li><a href="https://amp.dev/documentation/examples/multimedia-animations/click-to-play_overlay_for_amp-video/">Click-to-play overlay for amp-video</a></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
+A replacement for the HTML5 `video` tag; only to be used for direct HTML5 video file embeds.
 
 ## Behavior
 

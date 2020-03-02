@@ -26,21 +26,6 @@ limitations under the License.
 
 # amp-analytics
 
-Capture analytics data from an AMP document.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-analytics/">amp-analytics example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Sending analytics to a vendor or in-house?
 
 Before you start using AMP analytics on your site, you need to decide whether you will use third-party analytics tools to analyze user engagement, or your own in-house solution.

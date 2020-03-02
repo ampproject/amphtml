@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Embeds a VK post or poll widget.
+  text: Embeds a [VK](https://vk.com/) post or poll widget.
 ---
 
 <!--
@@ -23,19 +23,6 @@ limitations under the License.
 -->
 
 # amp-vk
-
-Embeds a <a href="https://vk.com/">VK</a> post or poll widget.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-vk" src="https://cdn.ampproject.org/v0/amp-vk-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed, responsive, flex-item</td>
-  </tr>
-</table>
 
 ## Behavior
 

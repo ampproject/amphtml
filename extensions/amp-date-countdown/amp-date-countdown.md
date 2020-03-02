@@ -26,23 +26,6 @@ limitations under the License.
 
 Display a sequence of backward counting to indicate the time remaining before an event is scheduled to occur.
 
-<table>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-date-countdown" src="https://cdn.ampproject.org/v0/amp-date-countdown-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-date-countdown/">amp-date-countdown example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 <amp-img alt="countdown timer example" layout="responsive" src="https://user-images.githubusercontent.com/2099009/28486908-71f03336-6e3c-11e7-9822-3bac6528b148.png" width="816" height="294">

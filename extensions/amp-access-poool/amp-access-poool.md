@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Displays a Poool paywall. See poool.tech and demo.poool.tech for more details. amp-access-poool is based on, and requires, AMP Access.
+  text: Displays a Poool paywall.
 ---
 
 <!---
@@ -22,29 +22,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name=”amp-access-poool></a> `amp-access-poool`
+# amp-access-poool
 
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>Displays a Poool paywall<br />.
-    See <a href="https://poool.tech">poool.tech</a> and <a href="https://demo.poool.tech">demo.poool.tech</a> for more details. <code>amp-access-poool</code> is based on, and requires, <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Required Scripts</strong></td>
-    <td>
-        <small>Notice that you need scripts for "amp-access-poool" and "amp-access".</small>
-      <div>
-        <code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code>
-      </div>
-      <div>
-        <code>&lt;script async custom-element="amp-access-poool" src="https://cdn.ampproject.org/v0/amp-access-poool-0.1.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-</table>
-
-[TOC]
+See [poool.tech](https://poool.tech) and [demo.poool.tech](https://demo.poool.tech) for more details. `amp-access-poool` is based on, and requires,
+[AMP Access](https://amp.dev/documentation/components/amp-access).
 
 ## Behavior
 

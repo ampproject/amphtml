@@ -24,23 +24,6 @@ limitations under the License.
 
 # amp-imgur
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays an <a href="http://imgur.com">Imgur</a> post.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-imgur" src="https://cdn.ampproject.org/v0/amp-imgur-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 This extension creates an iframe and displays an [imgur](http://imgur.com) post.

@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Allows publishers to easily integrate with the LaterPay micropayments platform.
+  text: Allows publishers to easily integrate with the [LaterPay](https://www.laterpay.net) micropayments platform.
 ---
 
 <!---
@@ -24,31 +24,7 @@ limitations under the License.
 
 # amp-access-laterpay
 
-Allows publishers to easily integrate with the <a href="https://www.laterpay.net">LaterPay</a> micropayments platform. <code>amp-access-laterpay</code> is based on, and requires <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Scripts</strong></td>
-    <td>
-        <small>Notice that you need scripts for "amp-access-laterpay", "amp-access" and "amp-analytics".</small>
-      <div>
-        <code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code>
-      </div>
-      <div>
-        <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
-      </div>
-      <div>
-        <code>&lt;script async custom-element="amp-access-laterpay" src="https://cdn.ampproject.org/v0/amp-access-laterpay-0.2.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-access-laterpay/">annotated amp-access-laterpay</a> example.</td>
-  </tr>
-</table>
-
-[TOC]
+`amp-access-laterpay` is based on, and requires <a href="https://amp.dev/documentation/components/amp-access">AMP Access</a>.
 
 ## Behavior
 

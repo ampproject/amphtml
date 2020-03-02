@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Installs a ServiceWorker.
+  text: Installs a [ServiceWorker](https://developers.google.com/web/fundamentals/primers/service-worker/) for the current page.
 ---
 
 <!---
@@ -24,27 +24,6 @@ limitations under the License.
 -->
 
 # amp-install-serviceworker
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Installs a <a href="https://developers.google.com/web/fundamentals/primers/service-worker/">ServiceWorker</a> for the current page.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-install-serviceworker" src="https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-install-serviceworker/">Annotated code example for amp-install-serviceworker</a></td>
-  </tr>
-</table>
 
 ## Behavior
 

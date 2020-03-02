@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Displays a Pinterest widget or Save button.
+  text: Displays a Pinterest widget, Save button, or Follow button.
 ---
 
 <!---
@@ -23,25 +23,6 @@ limitations under the License.
 -->
 
 # amp-pinterest
-
-Displays a Pinterest widget, Save button, or Follow button.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-pinterest" src="https://cdn.ampproject.org/v0/amp-pinterest-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-pinterest/">Annotated code example for amp-pinterest</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Examples
 

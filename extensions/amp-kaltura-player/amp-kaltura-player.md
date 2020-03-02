@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays the Kaltura Player as used in Kaltura's Video Platform.
+  text: Displays the Kaltura Player as used in Kaltura's [Video Platform](https://corp.kaltura.com/).
 ---
 
 <!---
@@ -23,25 +23,6 @@ limitations under the License.
 -->
 
 # amp-kaltura-player
-
-An <code>amp-kaltura-player</code> component displays the Kaltura Player as used in Kaltura's <a href="https://corp.kaltura.com/">Video Platform</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-kaltura-player" src="https://cdn.ampproject.org/v0/amp-kaltura-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-kaltura-player/">Annotated code example for amp-kaltura-player</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Example
 

@@ -24,21 +24,6 @@ limitations under the License.
 
 # amp-embedly-card
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides you with responsive and shareable embeds to drive the reach of your websites, blog posts, and articles from any URL using <a href="http://docs.embed.ly/docs/cards">Embedly cards</a>.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-embedly-card" src="https://cdn.ampproject.org/v0/amp-embedly-card-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>responsive</td>
-  </tr>
-</table>
-
 ## Behavior
 
 The `amp-embedly-card` component provides you with responsive and shareable embeds to drive the reach of your websites,

@@ -21,21 +21,6 @@ limitations under the License.
 
 # amp-action-macro
 
-Creates reusable actions.
-
- <table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-action-macro" src="https://cdn.ampproject.org/v0/amp-action-macro-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-action-macro.html">amp-action-macro.html</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Overview
 
 The `amp-action-macro` component allows for the creation of reusable actions.

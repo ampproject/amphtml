@@ -4,7 +4,7 @@ formats:
   - websites
   - ads
 teaser:
-  text: Displays a YouTube video.
+  text: Displays a [YouTube](https://www.youtube.com/) video.
 ---
 
 <!---
@@ -24,25 +24,6 @@ limitations under the License.
 -->
 
 # amp-youtube
-
-Displays a <a href="https://www.youtube.com/">YouTube</a> video.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-youtube/">Annotated code example for amp-youtube</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Example
 

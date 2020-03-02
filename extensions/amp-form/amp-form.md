@@ -24,28 +24,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-form`"></a> `amp-form`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Allows you to create <code>form</code> and <code>input</code> tags.</td>
-  </tr>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-form" src="https://cdn.ampproject.org/v0/amp-form-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute">Supported Layouts</a></strong></td>
-    <td>N/A</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-form/">amp-form</a> examples.</td>
-  </tr>
-</table>
-
-[TOC]
+# amp-form
 
 ## Behavior
 
