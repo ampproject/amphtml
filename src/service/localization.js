@@ -19,6 +19,7 @@
 // eslint-disable-next-line no-unused-vars
 import {LocalizedStringId} from '../localized-strings';
 import {closest} from '../dom';
+import {parseQueryString} from '../url';
 
 /**
  * Language code used if there is no language code specified by the document.
@@ -92,12 +93,20 @@ export class LocalizationService {
    * @param {!Window} win
    */
   constructor(win) {
-    const rootEl = win.document.documentElement;
+    /**
+     * @private @const {!Element}
+     */
+    this.rootEl_ = win.document.documentElement;
+
+    /**
+     * @private {?string}
+     */
+    this.viewerLanguageCode_ = parseQueryString(win.location.hash)['lang'];
 
     /**
      * @private @const {!Array<string>}
      */
-    this.rootLanguageCodes_ = this.getLanguageCodesForElement_(rootEl);
+    this.rootLanguageCodes_ = this.getLanguageCodesForElement_(this.rootEl_);
 
     /**
      * A mapping of language code to localized string bundle.
@@ -114,7 +123,13 @@ export class LocalizationService {
   getLanguageCodesForElement_(element) {
     const languageEl = closest(element, el => el.hasAttribute('lang'));
     const languageCode = languageEl ? languageEl.getAttribute('lang') : null;
-    return getLanguageCodesFromString(languageCode || '');
+    const languageCodesToUse = getLanguageCodesFromString(languageCode || '');
+
+    if (this.viewerLanguageCode_) {
+      languageCodesToUse.unshift(this.viewerLanguageCode_);
+    }
+
+    return languageCodesToUse;
   }
 
   /**

@@ -158,3 +158,64 @@ describes.fakeWin('localization', {}, env => {
     });
   });
 });
+
+describes.fakeWin(
+  'viewer localization',
+  {
+    win: {
+      location: 'https://example.com/story.html#lang=fr&otherParam=test',
+    },
+  },
+  env => {
+    describe('viewer language override', () => {
+      it('should take precedence over document language', () => {
+        const localizationService = new LocalizationService(env.win);
+        localizationService.registerLocalizedStringBundle('fr', {
+          'test_string_id': {
+            string: 'oui',
+          },
+        });
+        localizationService.registerLocalizedStringBundle('en', {
+          'test_string_id': {
+            string: 'yes',
+          },
+        });
+
+        expect(
+          localizationService.getLocalizedString('test_string_id')
+        ).to.equal('oui');
+      });
+
+      it('should fall back if string is not found', () => {
+        const localizationService = new LocalizationService(env.win);
+        localizationService.registerLocalizedStringBundle('fr', {
+          'incorrect_test_string_id': {
+            string: 'non',
+          },
+        });
+        localizationService.registerLocalizedStringBundle('en', {
+          'correct_test_string_id': {
+            string: 'yes',
+          },
+        });
+
+        expect(
+          localizationService.getLocalizedString('correct_test_string_id')
+        ).to.equal('yes');
+      });
+
+      it('should fall back if language code is not registered', () => {
+        const localizationService = new LocalizationService(env.win);
+        localizationService.registerLocalizedStringBundle('en', {
+          'test_string_id': {
+            string: 'yes',
+          },
+        });
+
+        expect(
+          localizationService.getLocalizedString('test_string_id')
+        ).to.equal('yes');
+      });
+    });
+  }
+);
