@@ -619,7 +619,7 @@ export class AmpIframe extends AMP.BaseElement {
         );
       }
     }
-    if (this.iframe_) {
+    if (this.iframe_ && mutations['title']) {
       this.propagateAttributes(['title'], this.iframe_);
     }
   }
