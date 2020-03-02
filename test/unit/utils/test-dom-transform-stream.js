@@ -17,7 +17,7 @@
 import {DomTransformStream} from '../../../src/utils/dom-tranform-stream';
 import {macroTask} from '../../../testing/yield';
 
-describes.realWin('DomTransformStream', {amp: true}, env => {
+describes.fakeWin('DomTransformStream', {amp: true}, env => {
   async function flush() {
     await macroTask();
     env.flushVsync();
@@ -199,6 +199,25 @@ describes.realWin('DomTransformStream', {amp: true}, env => {
       await flush();
 
       expect(tranferCompleteSpy).not.to.have.been.called;
+    });
+
+    it('should throw if no target given', () => {
+      allowConsoleError(() => {
+        expect(() => transformer.transferBody()).to.throw(
+          'No target given to DomTransformStream.transferBody'
+        );
+      });
+    });
+
+    it('should throw if called more than once', () => {
+      const {body} = win.document;
+      // No problem here.
+      transformer.transferBody(body /* target */);
+      allowConsoleError(() => {
+        expect(() => transformer.transferBody()).to.throw(
+          'No target given to DomTransformStream.transferBody'
+        );
+      });
     });
   });
 });

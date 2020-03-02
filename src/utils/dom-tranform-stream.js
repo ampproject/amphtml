@@ -95,11 +95,14 @@ export class DomTransformStream {
    * @return {!Promise} resolves when doc has been fully transferred.
    */
   transferBody(target) {
-    user().assertElement(target, 'No target given to #transferBody');
+    user().assertElement(
+      target,
+      'No target given to DomTransformStream.transferBody'
+    );
 
     devAssert(
       !this.shouldTransfer_,
-      '#transferBody should only be called once'
+      'DomTransformStream.transferBody should only be called once'
     );
 
     this.shouldTransfer_ = true;
