@@ -35,7 +35,10 @@ import {userAssert} from '../../../src/log';
 /** @const */
 const TAG = 'amp-delight-player';
 
-/** @private @const */
+/**
+ * TODO: export this from a lower level, like 'src'
+ * @private @const
+ * */
 const ANALYTICS_EVENT_TYPE_PREFIX = 'video-custom-';
 
 /** @const @enum {string} */
