@@ -25,25 +25,6 @@ limitations under the License.
 
 # amp-image-lightbox
 
-Provides a lightbox effect for a specified image.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-image-lightbox/">amp-image-lightbox</a> sample.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 The `amp-image-lightbox` component provides a lightbox experience for a specified image. When the user clicks the image, the image displays in the center of a full-viewport lightbox.

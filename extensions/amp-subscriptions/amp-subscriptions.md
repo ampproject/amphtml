@@ -24,36 +24,6 @@ limitations under the License.
 
 # amp-subscriptions
 
-Implements subscription-style access protocol.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <code>
-        &lt;script async custom-element="amp-subscriptions"
-        src="https://cdn.ampproject.org/v0/amp-subscriptions-0.1.js">&lt;/script>
-      </code>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty">
-      <strong>
-        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
-          Supported Layouts
-        </a>
-      </strong>
-    </td>
-    <td>N/A</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Introduction
 
 The `amp-subscriptions` extension implements subscription-style access/paywall rules.

@@ -112,19 +112,6 @@ export class ConsentUI {
     /** @private {boolean} */
     this.srAlertShown_ = false;
 
-    /** @private {string} */
-    this.consentPromptCaption_ =
-      (config['captions'] && config['captions']['consentPromptCaption']) ||
-      CONSENT_PROMPT_CAPTION;
-
-    /** @private {string} */
-    this.buttonActionCaption_ =
-      (config['captions'] && config['captions']['buttonActionCaption']) ||
-      BUTTON_ACTION_CAPTION;
-
-    /** @private {boolean} */
-    this.srAlertShown_ = false;
-
     /** @private {boolean} */
     this.restrictFullscreenOn_ = isExperimentOn(
       baseInstance.win,

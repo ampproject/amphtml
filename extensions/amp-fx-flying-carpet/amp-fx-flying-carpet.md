@@ -24,22 +24,9 @@ limitations under the License.
 
 # amp-fx-flying-carpet
 
-A flying carpet wraps its children in a unique full-screen scrolling container. In particular, this allows you to display a full-screen ad without taking up the entire viewport, making for a better user experience.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-fx-flying-carpet/">Annotated code example for amp-fx-flying-carpet</a></td>
-  </tr>
-</table>
-
 [tip type="note"]
 Check if your ad network permits use of flying carpets when implementing the `amp-fx-flying-carpet` to display adds.
-[/tip][toc]
+[/tip]
 
 ## Behavior
 
