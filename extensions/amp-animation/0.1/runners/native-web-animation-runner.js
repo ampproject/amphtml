@@ -84,7 +84,7 @@ export class NativeWebAnimationRunner extends AnimationRunner {
       }
       const player = request.target.animate(
         /** @type {!Array<Object>} */ (request.keyframes),
-        request.timing
+        /** @type {KeyframeAnimationOptions} */ (request.timing)
       );
       player.pause();
       return player;

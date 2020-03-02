@@ -86,7 +86,7 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
           const keyframeEffect = new KeyframeEffect(
             request.target,
             request.keyframes,
-            request.timing
+            /** @type {AnimationEffectTimingProperties} */ (request.timing)
           );
           const player = new this.win_.WorkletAnimation(
             `${moduleName}`,

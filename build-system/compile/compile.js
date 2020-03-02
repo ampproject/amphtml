@@ -344,7 +344,8 @@ function compile(
         'checkTypes',
         'const',
         'constantProperty',
-        'globalThis'
+        'globalThis',
+        'misplacedTypeAnnotation'
       );
       compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
       compilerOptions.conformance_configs =
