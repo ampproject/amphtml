@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {userAssert} from '../log';
+
 export class DetachedDomStream {
   /**
    * @param {!Window} win
@@ -41,9 +43,8 @@ export class DetachedDomStream {
    * @param {string} chunk
    */
   write(chunk) {
-    if (this.eof_) {
-      throw new Error('Detached doc already closed.');
-    }
+    userAssert(!this.eof_, 'Detached doc already closed.');
+
     if (chunk) {
       this.detachedDoc_.write(chunk);
     }
