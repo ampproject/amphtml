@@ -283,9 +283,9 @@ export class AmpSlideScroll extends BaseSlides {
       const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
       if (this.hasNativeSnapPoints_) {
-        this.updateOnScroll_(currentScrollLeft, ActionTrust.HIGH);
+        this.updateOnScroll_(currentScrollLeft, ActionTrust.LOW);
       } else {
-        this.customSnap_(currentScrollLeft, ActionTrust.HIGH);
+        this.customSnap_(currentScrollLeft, undefined, ActionTrust.LOW);
       }
     }, timeout));
   }
@@ -492,7 +492,7 @@ export class AmpSlideScroll extends BaseSlides {
       toScrollLeft = 0;
     }
     return this.animateScrollLeft_(currentScrollLeft, toScrollLeft).then(() => {
-      this.updateOnScroll_(toScrollLeft, opt_trust || ActionTrust.HIGH);
+      this.updateOnScroll_(toScrollLeft, opt_trust || ActionTrust.LOW);
     });
   }
 
