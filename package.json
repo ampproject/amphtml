@@ -27,6 +27,7 @@
     "web-animations-js": "2.3.1"
   },
   "devDependencies": {
+    "@ampproject/filesize": "3.2.0",
     "@babel/core": "7.8.3",
     "@babel/helper-plugin-test-runner": "7.8.3",
     "@babel/plugin-proposal-class-properties": "7.8.3",
@@ -48,7 +49,6 @@
     "baconipsum": "0.1.2",
     "base62": "2.0.1",
     "body-parser": "1.19.0",
-    "brotli-size": "4.0.0",
     "browserify": "16.5.0",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
@@ -62,6 +62,8 @@
     "dev-null": "0.1.1",
     "doctrine": "3.0.0",
     "envify": "4.1.0",
+    "enzyme": "3.11.0",
+    "enzyme-adapter-preact-pure": "2.2.0",
     "escodegen": "1.14.1",
     "eslint": "6.8.0",
     "eslint-config-prettier": "6.10.0",
@@ -84,7 +86,7 @@
     "fs-extra": "8.1.0",
     "fuse.js": "3.4.6",
     "globby": "11.0.0",
-    "google-closure-compiler": "20200204.0.0",
+    "google-closure-compiler": "20200224.0.0",
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.8",
     "gulp-ava": "3.0.0",
@@ -137,7 +139,7 @@
     "markdown-link-check": "3.8.0",
     "minimatch": "3.0.4",
     "minimist": "1.2.0",
-    "mocha": "7.0.1",
+    "mocha": "7.1.0",
     "mocha-silent-reporter": "1.0.0",
     "morgan": "1.9.1",
     "multer": "1.4.2",
@@ -162,7 +164,7 @@
     "require-hijack": "1.2.1",
     "rocambole": "0.7.0",
     "sinon": "9.0.0",
-    "sinon-chai": "3.4.0",
+    "sinon-chai": "3.5.0",
     "sleep-promise": "8.0.1",
     "tcp-port-used": "1.0.1",
     "tempy": "0.4.0",
@@ -172,10 +174,18 @@
     "topological-sort": "0.3.0",
     "traverse": "0.6.6",
     "tsickle": "0.38.0",
-    "typescript": "3.7.5",
+    "typescript": "3.8.2",
     "uglifyify": "5.0.2",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "2.0.0",
     "watchify": "3.11.1"
+  },
+  "filesize": {
+    "track": [
+      "dist/*.js",
+      "dist/v0/*-?.?.js",
+      "dist/*.mjs",
+      "dist/v0/*-?.?.mjs"
+    ]
   }
 }

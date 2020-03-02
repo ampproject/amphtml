@@ -24,21 +24,6 @@ limitations under the License.
 
 # amp-3q-player
 
-Embeds videos from <a href="https://www.3qsdn.com/en/">3Q SDN</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-3q-player" src="https://cdn.ampproject.org/v0/amp-3q-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, flex-item, responsive</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Example
 
 With the `responsive` layout, the width and height in this should yield correct layouts for 16:9 aspect ratio videos:

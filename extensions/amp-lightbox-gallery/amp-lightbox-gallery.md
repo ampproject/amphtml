@@ -25,23 +25,6 @@ limitations under the License.
 
 # amp-lightbox-gallery
 
-Provides a "lightbox” experience. Upon user interaction, a UI component expands to fill the viewport until it is closed by the user.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-lightbox-gallery" src="https://cdn.ampproject.org/v0/amp-lightbox-gallery-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-lightbox-gallery/">amp-lightbox-gallery</a> sample.</td>
-  </tr>
-</table>
-
 ## Overview
 
 The `amp-lightbox-gallery` component provides a "lightbox” experience for AMP components (e.g., `amp-img`, `amp-carousel`). When the user interacts with the AMP element, a UI component expands to fill the viewport until it is closed by the user. Currently, only images are supported.

@@ -27,6 +27,7 @@ const {linkCheckGlobs} = require('../test-configs/config');
 const {maybeUpdatePackages} = require('./update-packages');
 
 const LARGE_REFACTOR_THRESHOLD = 20;
+const GITHUB_BASE_PATH = 'https://github.com/ampproject/amphtml/blob/master/';
 
 let filesIntroducedByPr;
 
@@ -135,8 +136,14 @@ function checkLinksInFile(file) {
       let containsDeadLinks = false;
       for (const {link, status, statusCode} of results) {
         // Skip links to files that were introduced by the PR.
-        if (isLinkToFileIntroducedByPR(link)) {
-          continue;
+        if (isLinkToFileIntroducedByPR(link) && status == 'dead') {
+          // Log links with the correct github base as alive, otherwise flag deadlinks.
+          const isValid = filesIntroducedByPr.some(file => {
+            return link === GITHUB_BASE_PATH + file;
+          });
+          if (isValid) {
+            status = 'alive';
+          }
         }
         switch (status) {
           case 'alive':

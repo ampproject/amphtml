@@ -8,8 +8,6 @@ teaser:
   text: Allows elements to mutate in response to user actions or data changes via data binding and simple JS-like expressions.
 ---
 
-# amp-bind
-
 <!---
 Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
@@ -26,38 +24,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-[TOC]
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Description</strong></td>
-    <td>
-        Adds custom interactivity with data binding and expressions.
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-bind" src="https://cdn.ampproject.org/v0/amp-bind-0.1.js">&lt;/script&gt;</code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/examples/components/amp-bind/">Introductory code example with annotations</a></li>
-        <li><a href="https://amp.dev/documentation/examples/multimedia-animations/image_galleries_with_amp-carousel/#linking-carousels-with-amp-bind">Linked image carousels example with annotations</a></li>
-        <li><a href="https://amp.dev/documentation/examples/e-commerce/product_page/">E-commerce product page example with annotations</a></li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Tutorials</strong></td>
-    <td><a href="https://amp.dev/documentation/guides-and-tutorials/develop/interactivity/">Create interactive AMP pages</a></td>
-  </tr>
-</table>
+# amp-bind
 
 ## Usage
 
@@ -947,37 +914,41 @@ Bind `Node.textContent` using the `[text]` attribute. The `[text]` attribute is 
 
 Bind an element's `class` using the `[class]` attribute. A `[class]` expression must result in a space-delimited string. Meaning, if you are binding multiple classes, use a space between names. A comma or dash will be evaluated as the class name.
 
-[example preview="inline" playground="true" imports="amp-bind"]
+[example preview="top-frame" playground="true" imports="amp-bind"]
 
 ```html
-<style amp-custom>
-  .background-green {
-    background: green;
-  }
-  .background-red {
-    background: red;
-  }
-  .border-red {
-    border-color: red;
-    border-width: 5px;
-    border-style: solid;
-  }
-</style>
-<div class="background-red" [class]="myClass">Hello World</div>
-<!-- This button adds both classes -->
-<button on="tap:AMP.setState({ myClass: 'background-green border-red' })">
-  Working: Change Class
-</button>
-<!-- String arrays also work -->
-<button
-  on="tap:AMP.setState({ myClass: ['background-green'], ['border-red'] })"
->
-  Working string array: Change Class
-</button>
-<!-- This expression evaluates to class="background-green,border-red" -->
-<button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">
-  Broken: Change Class
-</button>
+<head>
+  <style amp-custom>
+    .background-green {
+      background: green;
+    }
+    .background-red {
+      background: red;
+    }
+    .border-red {
+      border-color: red;
+      border-width: 5px;
+      border-style: solid;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-red" [class]="myClass">Hello World</div>
+  <!-- This button adds both classes -->
+  <button on="tap:AMP.setState({ myClass: 'background-green border-red' })">
+    Working: Change Class
+  </button>
+  <!-- String arrays also work -->
+  <button
+    on="tap:AMP.setState({ myClass: ['background-green'], ['border-red'] })"
+  >
+    Working string array: Change Class
+  </button>
+  <!-- This expression evaluates to class="background-green,border-red" -->
+  <button on="tap:AMP.setState({ myClass: 'background-green,border-red' })">
+    Broken: Change Class
+  </button>
+</body>
 ```
 
 [/example]

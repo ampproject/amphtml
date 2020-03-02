@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Gulp visual diff",
   "devDependencies": {
-    "@percy/agent": "0.21.0",
+    "@percy/agent": "0.22.0",
     "@percy/puppeteer": "1.1.0",
     "puppeteer": "2.1.1"
   }
