@@ -34,13 +34,13 @@ const TAG = 'amp-img';
  */
 const ATTRIBUTES_TO_PROPAGATE = [
   'alt',
-  'aria-label',
   'aria-describedby',
+  'aria-label',
   'aria-labelledby',
   'referrerpolicy',
-  'srcset',
-  'src',
   'sizes',
+  'src',
+  'srcset',
   'title',
 ];
 
