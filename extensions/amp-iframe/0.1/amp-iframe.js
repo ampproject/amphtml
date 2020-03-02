@@ -620,10 +620,7 @@ export class AmpIframe extends AMP.BaseElement {
       }
     }
     if (this.iframe_) {
-      const attrs = ATTRIBUTES_TO_PROPAGATE.filter(
-        value => mutations[value] !== undefined
-      );
-      this.propagateAttributes(attrs, this.iframe_);
+      this.propagateAttributes(['title'], this.iframe_);
     }
   }
 
