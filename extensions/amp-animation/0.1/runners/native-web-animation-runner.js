@@ -77,20 +77,18 @@ export class NativeWebAnimationRunner extends AnimationRunner {
    */
   init() {
     devAssert(!this.players_);
-    this.players_ = this.requests_.map(
-      /** @type {KeyframeAnimationOptions} */ request => {
-        // Apply vars.
-        if (request.vars) {
-          setStyles(request.target, assertDoesNotContainDisplay(request.vars));
-        }
-        const player = request.target.animate(
-          /** @type {!Array<Object>} */ (request.keyframes),
-          request.timing
-        );
-        player.pause();
-        return player;
+    this.players_ = this.requests_.map(request => {
+      // Apply vars.
+      if (request.vars) {
+        setStyles(request.target, assertDoesNotContainDisplay(request.vars));
       }
-    );
+      const player = request.target.animate(
+        /** @type {!Array<Object>} */ (request.keyframes),
+        /** @type {KeyframeAnimationOptions} */ (request.timing)
+      );
+      player.pause();
+      return player;
+    });
     this.runningCount_ = this.players_.length;
     this.players_.forEach(player => {
       player.onfinish = () => {

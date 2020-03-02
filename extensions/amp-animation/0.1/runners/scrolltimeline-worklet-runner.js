@@ -68,44 +68,42 @@ export class ScrollTimelineWorkletRunner extends AnimationRunner {
     const adjustedTimeRange = (1 - this.initialInViewPercent_) * timeRange;
     const initialElementOffset = this.initialInViewPercent_ * timeRange;
 
-    this.requests_.map(
-      /** @type {AnimationEffectTimingProperties} */ request => {
-        // Apply vars.
-        if (request.vars) {
-          setStyles(request.target, assertDoesNotContainDisplay(request.vars));
-        }
-        getOrAddWorkletModule(this.win_).then(
-          () => {
-            const scrollTimeline = new this.win_.ScrollTimeline({
-              scrollSource,
-              orientation: 'block',
-              startScrollOffset: `${px(this.startScrollOffset_)}`,
-              endScrollOffset: `${px(this.endScrollOffset_)}`,
-              timeRange: adjustedTimeRange,
-              fill: 'both',
-            });
-            const keyframeEffect = new KeyframeEffect(
-              request.target,
-              request.keyframes,
-              request.timing
-            );
-            const player = new this.win_.WorkletAnimation(
-              `${moduleName}`,
-              [keyframeEffect],
-              scrollTimeline,
-              {
-                'initial-element-offset': initialElementOffset,
-              }
-            );
-            player.play();
-            this.players_.push(player);
-          },
-          e => {
-            dev().error('AMP-ANIMATION', e);
-          }
-        );
+    this.requests_.map(request => {
+      // Apply vars.
+      if (request.vars) {
+        setStyles(request.target, assertDoesNotContainDisplay(request.vars));
       }
-    );
+      getOrAddWorkletModule(this.win_).then(
+        () => {
+          const scrollTimeline = new this.win_.ScrollTimeline({
+            scrollSource,
+            orientation: 'block',
+            startScrollOffset: `${px(this.startScrollOffset_)}`,
+            endScrollOffset: `${px(this.endScrollOffset_)}`,
+            timeRange: adjustedTimeRange,
+            fill: 'both',
+          });
+          const keyframeEffect = new KeyframeEffect(
+            request.target,
+            request.keyframes,
+            /** @type {AnimationEffectTimingProperties} */ (request.timing)
+          );
+          const player = new this.win_.WorkletAnimation(
+            `${moduleName}`,
+            [keyframeEffect],
+            scrollTimeline,
+            {
+              'initial-element-offset': initialElementOffset,
+            }
+          );
+          player.play();
+          this.players_.push(player);
+        },
+        e => {
+          dev().error('AMP-ANIMATION', e);
+        }
+      );
+    });
   }
 
   /**
