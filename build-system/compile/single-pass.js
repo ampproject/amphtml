@@ -321,9 +321,9 @@ exports.getGraph = function(entryModules, config) {
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
     .transform(babelify, {
-      compact: false,
       overrides: [
         {
+          compact: false,
           plugins: ['transform-es2015-modules-commonjs'],
         },
       ],
