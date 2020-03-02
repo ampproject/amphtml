@@ -115,8 +115,8 @@ class JsonDict {
 
   bool empty() { return values_.empty(); }
 
-  std::string ToString() const;
-  void ToString(std::stringbuf*) const;
+  std::string ToString(int indent_columns = 0) const;
+  void ToString(std::stringbuf*, int indent_columns = 0) const;
 
   // Facilitates range based iterator directly on JsonDict object.
   // for (auto& [k, v] : my_json_dict) {
@@ -153,8 +153,8 @@ class JsonArray {
   std::size_t size() { return items_.size(); }
 
   bool empty() { return items_.empty(); }
-  std::string ToString() const;
-  void ToString(std::stringbuf*) const;
+  std::string ToString(int indent_columns = 0) const;
+  void ToString(std::stringbuf*, int indent_columns = 0) const;
 
   // Facilitates range based for loop.
   // for (const auto& item : my_json_array) {
@@ -172,9 +172,8 @@ class JsonArray {
 
 class NullValue {
  public:
-  void ToString(std::stringbuf* buf) const { buf->sputn("null", 4); }
-
-  std::string ToString() const { return "null"; }
+  void ToString(std::stringbuf* buf, int indent_columns = 0) const;
+  std::string ToString(int indent_columns = 0) const;
 };
 
 template<typename JsonType>
@@ -198,11 +197,12 @@ class Any {
     return *this;
   }
 
-  std::string ToString() const {
-    return wrapper_->ToJson().ToString();
+  std::string ToString(int indent_columns = 0) const {
+    return wrapper_->ToJson().ToString(indent_columns);
   }
 
-  void ToString(std::stringbuf* buf) const {
+  void ToString(std::stringbuf* buf, int indent_columns = 0) const {
+    wrapper_->ToJson().ToString(buf, indent_columns);
   }
 
  private:
@@ -288,11 +288,16 @@ class JsonObject {
     return std::get<T>(v_);
   }
 
-  std::string ToString() const;
-  void ToString(std::stringbuf*) const;
+  template<typename... Types>
+  constexpr bool Has() const {
+    return (std::holds_alternative<Types>(v_) || ...);
+  }
+
+  std::string ToString(int indent_columns = 0) const;
+  void ToString(std::stringbuf* buf, int indent_columns = 0) const;
 
  private:
-  std::variant<int32_t, int64_t, double, float, bool, std::string,
+  std::variant<bool, int32_t, int64_t, double, float, std::string,
                NullValue, JsonArray, JsonDict,
                Any<JsonArray>, Any<JsonDict>, Any<JsonObject>> v_;
 };

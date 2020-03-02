@@ -75,8 +75,43 @@ TEST(TypesTest, BasicAllTypesTest) {
   json.Insert("married", true);
 
   EXPECT_EQ(
-      R"({"name": "John", "age": 18, "friends": ["Alice", "Bob"], "address": [123, "foo street", "3rd floor", "New york", 91234, true, null, false], "devices": {"phone": "android", "laptop": "macbook", "camera": null, "music": ["spotify", "youtube", "apple"], "sdcards": [64, 128, 256.250000, 255]}, "gender": "male", "employed": false, "married": true})",
-      json.ToString());
+      R"({
+  "name": "John",
+  "age": 18,
+  "friends":  [
+    "Alice",
+    "Bob"
+  ],
+  "address":  [
+    123,
+    "foo street",
+    "3rd floor",
+    "New york",
+    91234,
+    true,
+    null,
+    false
+  ],
+  "devices":  {
+    "phone": "android",
+    "laptop": "macbook",
+    "camera": null,
+    "music":    [
+      "spotify",
+      "youtube",
+      "apple"
+    ],
+    "sdcards":    [
+      64,
+      128,
+      256.250000,
+      255
+    ]
+  },
+  "gender": "male",
+  "employed": false,
+  "married": true
+})", json.ToString());
 }
 
 TEST(TypesTest, SingleValue) {
@@ -99,17 +134,28 @@ TEST(TypesTest, SingleValue) {
   EXPECT_EQ(j6.ToString(), "null");
 
   JsonArray jarr;
-  EXPECT_EQ(jarr.ToString(), "[]");
+  EXPECT_EQ(jarr.ToString(), "[\n\n]");
   // Bulk append.
   jarr.Append(1, 2, 3, 1.200000, 2.200000, 3.300000, "hello", "world");
   EXPECT_EQ(jarr.ToString(),
-            "[1, 2, 3, 1.200000, 2.200000, 3.300000, "
-            "\"hello\", \"world\"]");
+            R"([
+  1,
+  2,
+  3,
+  1.200000,
+  2.200000,
+  3.300000,
+  "hello",
+  "world"
+])");
 
   JsonDict keyval;
-  EXPECT_EQ(keyval.ToString(), "{}");
+  EXPECT_EQ(keyval.ToString(), "{\n\n}");
   keyval.Insert("foo", "bar");
-  EXPECT_EQ(keyval.ToString(), "{\"foo\": \"bar\"}");
+  EXPECT_EQ(keyval.ToString(),
+            R"({
+  "foo": "bar"
+})");
 }
 
 TEST(TypesTest, GetAndAssignmentOperatorTest) {
@@ -188,7 +234,9 @@ TEST(TypesTest, AnyObjectTest) {
     return dict;
   };
   Any<JsonDict> any(&greet, serializer1);
-  EXPECT_EQ(any.ToString(), "{\"greeting\": \"Hello World!\"}");
+  EXPECT_EQ(any.ToString(), R"({
+  "greeting": "Hello World!"
+})");
 
   // Output as JsonObject.
   std::function<JsonObject(const Greeting&)> serializer2 = [](
@@ -198,7 +246,9 @@ TEST(TypesTest, AnyObjectTest) {
     return JsonObject(dict);
   };
   Any<JsonObject> any2(&greet, serializer2);
-  EXPECT_EQ(any2.ToString(), "{\"greeting\": \"Hello World!\"}");
+  EXPECT_EQ(any2.ToString(), R"({
+  "greeting": "Hello World!"
+})");
 
   // Output as json array.
   LottoDrawing drawing{.n1 = 18, .n2 = 33, .n3 = 36, .n4 = 45, .n5 = 50,
@@ -211,7 +261,14 @@ TEST(TypesTest, AnyObjectTest) {
     return jarray;
   };
   Any<JsonArray> any3(&drawing, serializer3);
-  EXPECT_EQ(any3.ToString(), "[18, 33, 36, 45, 50, 10]");
+  EXPECT_EQ(any3.ToString(), R"([
+  18,
+  33,
+  36,
+  45,
+  50,
+  10
+])");
 
   // Output as int.
   Age age{.age = 18};
@@ -252,5 +309,17 @@ TEST(TypesTest, AnyObjectTest) {
   };
   Any<JsonObject> any6(&nested, serializer6);
   EXPECT_EQ(any6.ToString(),
-            R"({"name": "John Doe", "age": 18, "greeting": "Hello World!", "drawing": [18, 33, 36, 45, 50, 10]})");
+            R"({
+  "name": "John Doe",
+  "age": 18,
+  "greeting": "Hello World!",
+  "drawing":  [
+    18,
+    33,
+    36,
+    45,
+    50,
+    10
+  ]
+})");
 }
