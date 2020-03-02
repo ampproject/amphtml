@@ -184,9 +184,7 @@ export class LinkRewriterManager {
    * @private
    */
   getPriorityList_(ampdoc) {
-    const docInfo = Services.documentInfoForDoc(ampdoc);
-    const value = docInfo.metaTags[PRIORITY_META_TAG_NAME];
-
+    const value = ampdoc.getMetaByName(PRIORITY_META_TAG_NAME);
     return value ? value.trim().split(/\s+/) : [];
   }
 

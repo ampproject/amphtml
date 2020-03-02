@@ -50,7 +50,6 @@ import {
 } from '../../../ads/google/a4a/utils';
 import {CONSENT_POLICY_STATE} from '../../../src/consent-state';
 import {Deferred} from '../../../src/utils/promise';
-import {FIE_CSS_CLEANUP_EXP} from '../../../src/friendly-iframe-embed';
 import {
   FlexibleAdSlotDataTypeDef,
   getFlexibleAdSlotData,
@@ -400,13 +399,6 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           key => DOUBLECLICK_SRA_EXP_BRANCHES[key]
         ),
       },
-      [[FIE_CSS_CLEANUP_EXP.branch]]: {
-        isTrafficEligible: () => true,
-        branches: [
-          [FIE_CSS_CLEANUP_EXP.control],
-          [FIE_CSS_CLEANUP_EXP.experiment],
-        ],
-      },
       [ZINDEX_EXP]: {
         isTrafficEligible: () => true,
         branches: Object.values(ZINDEX_EXP_BRANCHES),
@@ -755,6 +747,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     };
     return {
       PAGEVIEWID: () => Services.documentInfoForDoc(this.element).pageViewId,
+      PAGEVIEWID_64: () =>
+        Services.documentInfoForDoc(this.element).pageViewId64,
       HREF: () => this.win.location.href,
       REFERRER: opt_timeout => this.getReferrer_(opt_timeout),
       TGT: () =>
@@ -775,6 +769,12 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
           return this.element.getAttribute(name);
         }
       },
+      ELEMENT_POS: () => this.element.getPageLayoutBox().top,
+      SCROLL_TOP: () =>
+        Services.viewportForDoc(this.getAmpDoc()).getScrollTop(),
+      PAGE_HEIGHT: () =>
+        Services.viewportForDoc(this.getAmpDoc()).getScrollHeight(),
+      BKG_STATE: () => (this.getAmpDoc().isVisible() ? 'visible' : 'hidden'),
       CANONICAL_URL: () =>
         Services.documentInfoForDoc(this.element).canonicalUrl,
     };
