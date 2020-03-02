@@ -561,7 +561,7 @@ export class Bind {
    * @param {string} expr
    * @return {!Promise<*>}
    */
-  getStateWithWait(expr) {
+  getStateAsync(expr) {
     const asyncLoadingAmpStates = {};
     const ampStateEls = this.ampdoc.getRootNode().querySelectorAll('AMP-STATE');
     let hasLoadingAmpState = false;

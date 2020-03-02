@@ -976,11 +976,11 @@ describe
           });
         });
 
-        describe('getStateWithWait', () => {
+        describe('getStateAsync', () => {
           it('should return the same result as getState if already present', async () => {
             await bind.initializePromiseForTesting();
             await bind.setState({mystate: {mykey: 'myval'}});
-            const state = await bind.getStateWithWait('mystate.mykey');
+            const state = await bind.getStateAsync('mystate.mykey');
 
             expect(state).to.equal('myval');
           });
@@ -996,7 +996,7 @@ describe
               new Promise(unused => {})
             ); // never going to resolve
 
-            const state = await bind.getStateWithWait('mystate.mykey');
+            const state = await bind.getStateAsync('mystate.mykey');
             expect(state).to.equal('myval');
           });
 
@@ -1005,7 +1005,7 @@ describe
             addAmpState(env, container, 'mystate', promise);
 
             await bind.initializePromiseForTesting();
-            const statePromise = bind.getStateWithWait('mystate.mykey');
+            const statePromise = bind.getStateAsync('mystate.mykey');
 
             await bind.setState({mystate: {mykey: 'myval'}}).then(resolve);
             expect(await statePromise).to.equal('myval');
@@ -1016,7 +1016,7 @@ describe
             addAmpState(env, container, 'mystate', promise);
 
             await bind.initializePromiseForTesting();
-            const statePromise = bind.getStateWithWait('mystate.mykey');
+            const statePromise = bind.getStateAsync('mystate.mykey');
             reject();
 
             expect(await statePromise).to.equal(undefined);
@@ -1029,7 +1029,7 @@ describe
             addAmpState(env, container, 'mystate2', p2);
 
             await bind.initializePromiseForTesting();
-            const statePromise = bind.getStateWithWait('.');
+            const statePromise = bind.getStateAsync('.');
             r1();
 
             await bind.setState({mystate: {mykey: 'myval'}}).then(r2);
