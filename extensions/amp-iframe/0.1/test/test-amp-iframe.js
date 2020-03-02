@@ -913,6 +913,23 @@ describes.realWin(
         expect(iframe.getAttribute('src')).to.contain(newSrc);
       });
 
+      it('should propagate `title` when container attribute is mutated', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          width: 100,
+          height: 100,
+          title: 'foo',
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        const iframe = ampIframe.querySelector('iframe');
+        const newTitle = 'bar';
+        ampIframe.setAttribute('title', newTitle);
+        impl.mutatedAttributesCallback({title: newTitle});
+        expect(impl.iframe_.title).to.equal(newTitle);
+        expect(iframe.getAttribute('title')).to.equal(newTitle);
+      });
+
       describe('throwIfCannotNavigate()', () => {
         it('should do nothing if top navigation is allowed', function*() {
           const ampIframe = createAmpIframe(env, {
