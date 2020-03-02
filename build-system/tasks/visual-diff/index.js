@@ -84,9 +84,6 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   'utf8'
 );
 
-let browser_;
-let percyAgentProcess_;
-
 /**
  * Override PERCY_* environment variables if passed via gulp task parameters.
  */
@@ -131,36 +128,50 @@ function setPercyTargetCommit() {
  * Launches a @percy/agent instance.
  */
 async function launchPercyAgent() {
-  if (argv.percy_disabled) {
-    return;
-  }
-
-  const env = argv.percy_agent_debug ? {LOG_LEVEL: 'debug'} : {};
-  percyAgentProcess_ = execScriptAsync(
-    `npx percy start --port ${PERCY_AGENT_PORT}`,
-    {
-      cwd: __dirname,
-      env: Object.assign(env, process.env),
-      stdio: ['ignore', process.stdout, process.stderr],
+  try {
+    if (argv.percy_disabled) {
+      return;
     }
-  );
-  await waitUntilUsed(
-    PERCY_AGENT_PORT,
-    PERCY_AGENT_RETRY_MS,
-    PERCY_AGENT_TIMEOUT_MS
-  );
-  log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
+
+    const env = argv.percy_agent_debug ? {LOG_LEVEL: 'debug'} : {};
+    const percyAgentProcess = execScriptAsync(
+      `npx percy start --port ${PERCY_AGENT_PORT}`,
+      {
+        cwd: __dirname,
+        env: Object.assign(env, process.env),
+        stdio: ['ignore', process.stdout, process.stderr],
+      }
+    );
+    await waitUntilUsed(
+      PERCY_AGENT_PORT,
+      PERCY_AGENT_RETRY_MS,
+      PERCY_AGENT_TIMEOUT_MS
+    );
+    log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
+
+    addCleanupStep_(() => {
+      exitPercyAgent_(percyAgentProcess);
+    });
+    return percyAgentProcess;
+  } catch (reason) {
+    log('fatal', `Failed to start the Percy agent: ${reason}`);
+  }
 }
 
 /**
  * Launches an AMP webserver for minified js.
  */
 async function launchWebServer() {
-  await startServer(
-    {host: HOST, port: PORT},
-    {quiet: !argv.webserver_debug},
-    {compiled: true}
-  );
+  try {
+    await startServer(
+      {host: HOST, port: PORT},
+      {quiet: !argv.webserver_debug},
+      {compiled: true}
+    );
+    addCleanupStep_(stopServer);
+  } catch (reason) {
+    log('fatal', `Failed to start a web server: ${reason}`);
+  }
 }
 
 /**
@@ -179,18 +190,16 @@ async function launchBrowser() {
   };
 
   try {
-    browser_ = await puppeteer.launch(browserOptions);
+    const browser = await puppeteer.launch(browserOptions);
+    // Every action on the browser or its pages adds a listener to the
+    // Puppeteer.Connection.Events.Disconnected event. This is a temporary
+    // workaround for the Node runtime warning that is emitted once 11 listeners
+    // are added to the same object.
+    browser._connection.setMaxListeners(9999);
+    return browser;
   } catch (error) {
     log('fatal', error);
   }
-
-  // Every action on the browser or its pages adds a listener to the
-  // Puppeteer.Connection.Events.Disconnected event. This is a temporary
-  // workaround for the Node runtime warning that is emitted once 11 listeners
-  // are added to the same object.
-  browser_._connection.setMaxListeners(9999);
-
-  return browser_;
 }
 
 /**
@@ -679,6 +688,9 @@ async function createEmptyBuild() {
       () => {}
     );
   await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
+  addCleanupStep_(async () => {
+    await browser.close();
+  });
 }
 
 /**
@@ -689,7 +701,6 @@ async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
   ensureOrBuildAmpRuntimeInTestMode_();
   installPercy_();
-  setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
   setPercyTargetCommit();
@@ -699,7 +710,6 @@ async function visualDiff() {
   }
 
   await performVisualTests();
-  await cleanup_();
   exitCtrlcHandler(handlerProcess);
 }
 
@@ -781,34 +791,31 @@ function installPercy_() {
   percySnapshot = require('@percy/puppeteer').percySnapshot;
 }
 
-function setupCleanup_() {
-  process.on('exit', cleanup_);
-  process.on('SIGINT', cleanup_);
-  process.on('uncaughtException', cleanup_);
-  process.on('unhandledRejection', cleanup_);
+/**
+ * Add a cleanup action on exit or crashes.
+ *
+ * @param {Function} callback function to execute when cleaning up.
+ */
+function addCleanupStep_(callback) {
+  process.on('exit', callback);
+  process.on('SIGINT', callback);
+  process.on('uncaughtException', callback);
+  process.on('unhandledRejection', callback);
 }
 
-async function exitPercyAgent_() {
-  if (percyAgentProcess_ && !percyAgentProcess_.killed) {
+async function exitPercyAgent_(percyAgentProcess) {
+  if (percyAgentProcess && !percyAgentProcess.killed) {
     let resolver;
     const percyAgentExited_ = new Promise(resolverIn => {
       resolver = resolverIn;
     });
-    percyAgentProcess_.on('exit', () => {
+    percyAgentProcess.on('exit', () => {
       resolver();
     });
     // Explicitly exit the process by "Ctrl+C"-ing it.
-    await percyAgentProcess_.kill('SIGINT');
+    await percyAgentProcess.kill('SIGINT');
     await percyAgentExited_;
   }
-}
-
-async function cleanup_() {
-  if (browser_) {
-    await browser_.close();
-  }
-  stopServer();
-  await exitPercyAgent_();
 }
 
 module.exports = {
