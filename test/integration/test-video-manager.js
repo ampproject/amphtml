@@ -79,7 +79,7 @@ describe
 
         it('should be paused if autoplay is not set', () => {
           videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
+          const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = false;
 
           const curState = videoManager.getPlayingState(impl);
@@ -91,7 +91,7 @@ describe
 
           videoManager.register(impl);
 
-          const entry = videoManager.getEntryForVideo_(impl);
+          const entry = videoManager.getEntry_(impl);
           env.sandbox.stub(entry, 'userInteracted').returns(true);
           entry.isVisible_ = true;
           entry.loaded_ = true;
@@ -110,7 +110,7 @@ describe
           const visibilityStub = env.sandbox.stub(env.ampdoc, 'isVisible');
           visibilityStub.onFirstCall().returns(true);
 
-          const entry = videoManager.getEntryForVideo_(impl);
+          const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = true;
           entry.loaded_ = true;
           entry.videoVisibilityChanged_();
@@ -132,7 +132,7 @@ describe
             const visibilityStub = env.sandbox.stub(env.ampdoc, 'isVisible');
             visibilityStub.onFirstCall().returns(true);
 
-            const entry = videoManager.getEntryForVideo_(impl);
+            const entry = videoManager.getEntry_(impl);
 
             const supportsAutoplayStub = env.sandbox.stub(
               entry,
@@ -166,7 +166,7 @@ describe
 
           impl.play();
 
-          const entry = videoManager.getEntryForVideo_(impl);
+          const entry = videoManager.getEntry_(impl);
           env.sandbox.stub(entry, 'userInteracted').returns(true);
           entry.isVisible_ = false;
 
@@ -181,7 +181,7 @@ describe
           video.setAttribute('autoplay', '');
 
           videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
+          const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = false;
 
           expect(videoManager.userInteracted(impl)).to.be.false;
@@ -191,7 +191,7 @@ describe
           video.setAttribute('autoplay', '');
 
           videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
+          const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = true;
           entry.loaded_ = true;
           entry.videoVisibilityChanged_();
@@ -216,7 +216,7 @@ describe
           const visibilityStub = env.sandbox.stub(env.ampdoc, 'isVisible');
           visibilityStub.onFirstCall().returns(true);
 
-          const entry = videoManager.getEntryForVideo_(impl);
+          const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = true;
           entry.loaded_ = true;
           entry.videoVisibilityChanged_();
@@ -229,7 +229,7 @@ describe
 
         it('no autoplay - should pause if user presses pause after playing', () => {
           videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
+          const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = false;
 
           impl.play();
@@ -244,7 +244,7 @@ describe
 
         it('no autoplay - should be playing manual whenever playing', () => {
           videoManager.register(impl);
-          const entry = videoManager.getEntryForVideo_(impl);
+          const entry = videoManager.getEntry_(impl);
           entry.isVisible_ = false;
 
           impl.play();
