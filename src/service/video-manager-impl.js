@@ -394,7 +394,7 @@ export class VideoManager {
  * @return {boolean}
  */
 const isEntryFor = (entry, videoOrElement) =>
-  entry &&
+  !!entry &&
   (entry.video === videoOrElement || entry.video.element === videoOrElement);
 
 /**
