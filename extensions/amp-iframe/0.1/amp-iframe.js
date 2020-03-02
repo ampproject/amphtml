@@ -46,6 +46,7 @@ const TAG_ = 'amp-iframe';
 
 /** @const {!Array<string>} */
 const ATTRIBUTES_TO_PROPAGATE = [
+  'title',
   'allowfullscreen',
   'allowpaymentrequest',
   'allowtransparency',
@@ -617,6 +618,9 @@ export class AmpIframe extends AMP.BaseElement {
           this.sandbox_
         );
       }
+    }
+    if (this.iframe_) {
+      this.propagateAttributes(ATTRIBUTES_TO_PROPAGATE, this.iframe_);
     }
   }
 
