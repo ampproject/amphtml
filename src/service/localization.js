@@ -93,10 +93,7 @@ export class LocalizationService {
    * @param {!Window} win
    */
   constructor(win) {
-    /**
-     * @private @const {!Element}
-     */
-    this.rootEl_ = win.document.documentElement;
+    const rootEl = win.document.documentElement;
 
     /**
      * @private {?string}
@@ -106,7 +103,7 @@ export class LocalizationService {
     /**
      * @private @const {!Array<string>}
      */
-    this.rootLanguageCodes_ = this.getLanguageCodesForElement_(this.rootEl_);
+    this.rootLanguageCodes_ = this.getLanguageCodesForElement_(rootEl);
 
     /**
      * A mapping of language code to localized string bundle.
