@@ -5425,7 +5425,7 @@ tags: {
   }
   attrs: {
     name: "src"
-    value_regex: "data:image\\/svg\\+xml;charset=utf-8,<svg height=\"\\d+\" width=\"\\d+\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>"
+    value_regex: "data:image\\/svg\\+xml;charset=utf-8,<svg height=\"\\d+\" width=\"\\d+\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>|data:image\\/svg\\+xml;charset=utf-8,<svg height='100' width='300' xmlns='http:\\/\\/www\\.w3\\.org\\/2000\\/svg' version='1\\.1'\\/>"
     mandatory: true
   }
 }
