@@ -322,9 +322,11 @@ exports.getGraph = function(entryModules, config) {
     // directly and which we don't want to apply during deps finding.
     .transform(babelify, {
       compact: false,
-      overrides: [{
-        plugins: ['transform-es2015-modules-commonjs'],
-      }],
+      overrides: [
+        {
+          plugins: ['transform-es2015-modules-commonjs'],
+        },
+      ],
     });
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
