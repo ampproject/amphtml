@@ -1055,7 +1055,15 @@ export class UrlReplacements {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
 
-    if (!this.isAllowedOrigin_(url)) {
+    const isAllowedOrigin = this.isAllowedOrigin_(url);
+    if (additionalUrlParameters) {
+      additionalUrlParameters = isAllowedOrigin
+        ? this.expandSyncIfAllowedList_(additionalUrlParameters, whitelist)
+        : additionalUrlParameters;
+      href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
+    }
+
+    if (!isAllowedOrigin) {
       if (whitelist) {
         user().warn(
           'URL',
@@ -1066,14 +1074,6 @@ export class UrlReplacements {
         );
       }
       return (element.href = href);
-    }
-
-    if (additionalUrlParameters) {
-      additionalUrlParameters = this.expandSyncIfAllowedList_(
-        additionalUrlParameters,
-        whitelist
-      );
-      href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
     }
 
     // Note that defaultUrlParams is treated differently than
