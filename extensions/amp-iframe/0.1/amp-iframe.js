@@ -46,7 +46,6 @@ const TAG_ = 'amp-iframe';
 
 /** @const {!Array<string>} */
 const ATTRIBUTES_TO_PROPAGATE = [
-  'title',
   'allowfullscreen',
   'allowpaymentrequest',
   'allowtransparency',
@@ -55,6 +54,7 @@ const ATTRIBUTES_TO_PROPAGATE = [
   'referrerpolicy',
   'scrolling',
   'tabindex',
+  'title',
 ];
 
 /** @type {number}  */
