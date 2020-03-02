@@ -87,7 +87,7 @@ describes.fakeWin('DetachedDomStream', {amp: true}, env => {
       expect(finalDoc.querySelector('child-one')).to.exist;
     });
 
-    it('throws if write() called after end()', () => {
+    it('throws if write() called after close()', () => {
       stream.close();
       allowConsoleError(() => {
         expect(() => stream.write('<child-one></child-one>')).to.throw(

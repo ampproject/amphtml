@@ -55,8 +55,10 @@ export class DomTransformStream {
   }
 
   /**
-   * Callback passed into DetachedDomWriter constructor. Receives updated
+   * Callback passed into DetachedDomStream constructor. Receives updated
    * document everytime a new chunk is written.
+   * Resolves headPromise when body is available, and streams to body iff
+   * bodyTransfer() has been called.
    * @param {!Document} detachedDoc
    */
   onChunk(detachedDoc) {
@@ -73,8 +75,9 @@ export class DomTransformStream {
   }
 
   /**
-   * Callback passed into DetachedDomWriter constructor. Called with complete
+   * Callback passed into DetachedDomStream constructor. Called with complete
    * doc when stream is closed.
+   * Schedules final transfer, then resovles body complete promise.
    * @param {!Document} unusedCompleteDoc
    */
   onEnd(unusedCompleteDoc) {
