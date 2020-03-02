@@ -94,7 +94,8 @@ export class ScrollBar extends ScrollComponent {
           '&cid=CLIENT_ID(scroll1)' +
           '&c=CANONICAL_URL' +
           '&o=AMPDOC_URL' +
-          `&p=${PROTOCOL_VERSION}`,
+          `&p=${PROTOCOL_VERSION}` +
+          '&x=QUERY_PARAM(scrollx)',
         false
       )
       .then(scrollbarUrl => {
