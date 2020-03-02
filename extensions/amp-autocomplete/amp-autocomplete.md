@@ -22,30 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-autocomplete`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>An autocomplete-enabled input field suggests completed results corresponding to the user input as they type into the input field.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-     <td>Launched</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-autocomplete" src="https://cdn.ampproject.org/v0/amp-autocomplete-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-autocomplete/">amp-autocomplete</a> sample.</td>
-  </tr>
-</table>
+# amp-autocomplete
 
 ## Behavior
 

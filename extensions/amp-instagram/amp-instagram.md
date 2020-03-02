@@ -24,25 +24,6 @@ limitations under the License.
 
 # amp-instagram
 
-Displays an Instagram embed.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-instagram/">Annotated code example for amp-instagram</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 The `width` and `height` attributes are special for the Instagram embed.

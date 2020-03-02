@@ -24,27 +24,6 @@ limitations under the License.
 
 # amp-orientation-observer
 
-Monitors the orientation of an element within the viewport as a user scrolls, and dispatches events that can be used with
-other AMP components.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-orientation-observer" src="https://cdn.ampproject.org/v0/amp-orientation-observer-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://codepen.io/nainar92/project/full/XwzYOd/">CodePen project with samples</a>
-    </td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Overview
 
 The `amp-orientation-observer` component monitors the orientation of a device, and dispatches low-trust level events (`alpha`, `beta`, `gamma`) that report changes in the device's orientation along the `alpha`, `beta` and `gamma` axises in terms of `angle` and `percent`. These can be used to trigger actions (_Only Low Trust Actions_) on other components (e.g., [amp-animation](https://amp.dev/documentation/components/amp-animation)).

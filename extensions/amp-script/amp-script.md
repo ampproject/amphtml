@@ -7,10 +7,6 @@ teaser:
 experimental: true
 ---
 
-# amp-script
-
-Allows running custom JavaScript to render UI.
-
 <!---
 Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 
@@ -27,39 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-[TOC]
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-script" src="https://cdn.ampproject.org/v0/amp-script-0.1.js">&lt;/script&gt;</code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://github.com/ampproject/amphtml/tree/master/examples/amp-script">Unannotated code samples</a></li>
-      </ul>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container, fill, fixed, fixed-height, flex-item, intrinsic, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Tutorials</strong></td>
-    <td>
-      <ul>
-        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript">Getting started with amp-script</a></li>
-        <li><a href="https://amp.dev/documentation/guides-and-tutorials/develop/custom-javascript-tutorial?format=websites">Custom password requirements with amp-script</a></li>
-      </ul>
-    </td>
-  </tr>
-</table>
+# amp-script
 
 ## Overview
 

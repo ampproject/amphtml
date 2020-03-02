@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Displays AddThis customizable social share buttons.
+  text: Displays [AddThis](https://www.addthis.com) customizable social share buttons.
 ---
 
 <!---
@@ -23,21 +23,6 @@ limitations under the License.
 -->
 
 # amp-addthis
-
-Displays <a href="https://www.addthis.com">AddThis</a> customizable social share buttons.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-addthis" src="https://cdn.ampproject.org/v0/amp-addthis-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Why AddThis?
 

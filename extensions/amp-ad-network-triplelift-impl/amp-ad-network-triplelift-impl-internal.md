@@ -18,17 +18,6 @@ limitations under the License.
 
 TripleLift implementation of AMP Ad tag which requests early by XHR and renders natively within the page if a valid AMP Ad is returned. Should not be directly referenced by pages and instead is dynamically loaded via the amp-ad tag. However, in order to remove an async script load of this library, publishers can include its script declaration.
 
-<table>
-  <tr>
-    <td class="col-fourty" width="40%"><strong>Availability</strong></td>
-    <td>In Development</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js">&lt;/script></code></td>
-  </tr>
-</table>
-
 ## Behavior
 
 The TripleLift ad network produces only a single ad request to `amp.3lift.com` and

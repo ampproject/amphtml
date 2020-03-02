@@ -5,7 +5,7 @@ formats:
   - ads
   - email
 teaser:
-  text: Allows rendering of Mustache.js templates.
+  text: Allows rendering of [Mustache.js](https://github.com/janl/mustache.js/) templates.
 ---
 
 <!---
@@ -25,25 +25,6 @@ limitations under the License.
 -->
 
 # amp-mustache
-
-Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-mustache/">annotated amp-mustache</a> example.</td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Version notes
 

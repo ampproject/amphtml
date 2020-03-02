@@ -22,27 +22,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-story-page-attachment`
+# amp-story-page-attachment
 
 Story page attachments allow you to provide additional AMPHTML content to specific pages. This content can be revealed by users through a "swipe up" gesture, or a tap on the call to action element.
 A UI prompt to open the attachment will automatically be added at the bottom of every page that configured an attachment.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/introduction/stories_in_amp">Annotated code example for stories</a></td>
-  </tr>
-</table>
-
-[TOC]
 
 <amp-img alt="AMP Story page attachment" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story-page-attachment.gif" width="240" height="480">
   <noscript>

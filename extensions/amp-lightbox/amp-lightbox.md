@@ -26,27 +26,6 @@ limitations under the License.
 
 # amp-lightbox
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Displays elements in a full-viewport “lightbox” modal.</td>
-</tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-lightbox/">amp-lightbox</a> sample.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 The `amp-lightbox` component defines child elements that display in a full-viewport overlay/modal. When the user taps or clicks an element (e.g., a button), the `amp-lightbox` ID referenced in the clicked element's `on` attribute triggers the lightbox to take up the full viewport and displays the child elements of the `amp-lightbox`.

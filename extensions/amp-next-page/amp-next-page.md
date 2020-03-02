@@ -1,5 +1,5 @@
 ---
-\$category@: dynamic-content
+$category@: dynamic-content
 formats:
   - websites
 teaser:
@@ -23,6 +23,14 @@ limitations under the License.
 -->
 
 # amp-next-page
+
+## Behavior
+
+Given a list of pages, `amp-next-page` tries to load them after the current
+document, providing an infinite-scroll type experience.
+
+Pages should be specified in a JSON config loaded from a remote URL listed in
+the element `src`, or inlined as a `script` element child.
 
 ## Version notes
 

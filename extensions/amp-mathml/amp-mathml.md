@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays a MathML formula.
+  text: Displays a [MathML formula](https://www.w3.org/Math/).
 ---
 
 <!--
@@ -23,23 +23,6 @@ limitations under the License.
 -->
 
 # amp-mathml
-
-Displays a <a href="https://www.w3.org/Math/">MathML formula</a>.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-mathml" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/amp-mathml.amp.html">amp-mathml.amp.html</a></td>
-  </tr>
-</table>
 
 ## Behavior
 

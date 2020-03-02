@@ -24,28 +24,7 @@ limitations under the License.
 
 # amp-app-banner
 
-A wrapper and minimal UI for a cross-platform, fixed-position banner showing a call-to-action to install an app. Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-app-banner" src="https://cdn.ampproject.org/v0/amp-app-banner-0.1.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-app-banner/">Annotated code example for amp-app-banner</a></td>
-  </tr>
-</table>
-
-[TOC]
+Includes conditional logic to direct to the right app on the right platform, and to hide permanently if the user dismisses the banner.
 
 ## Behavior
 

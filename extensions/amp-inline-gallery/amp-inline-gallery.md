@@ -3,8 +3,7 @@ $category@: layout
 formats:
   - websites
 teaser:
-  text: Displays multiple similar pieces of content along a horizontal axis,
-  with optional pagination dots and thumbnails.
+  text: Displays multiple similar pieces of content along a horizontal axis, with optional pagination dots and thumbnails.
 ---
 
 <!---
@@ -24,32 +23,6 @@ limitations under the License.
 -->
 
 # amp-inline-gallery
-
-A carousel for displaying content such as images along a horizontal axis along with optional pagination dots and preview thumbnails.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td><div><a href="https://amp.dev/documentation/guides-and-tutorials/learn/experimental">Experimental</a>; You must turn on the <code>amp-base-carousel</code> experiment to use this component.</div></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Scripts</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-inline-gallery" src="https://cdn.ampproject.org/v0/amp-inline-gallery.js">&lt;/script></code>
-      </div>
-      <div>
-        <code>&lt;script async custom-element="amp-base-carousel" src="https://cdn.ampproject.org/v0/amp-base-carousel.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>
-      container
-    </td>
-  </tr>
-</table>
 
 ## Usage
 

@@ -22,22 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# `amp-link-rewriter`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Run link-rewriter inside your AMP page</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-link-rewriter" src="https://cdn.ampproject.org/v0/amp-link-rewriter-0.1.js`>&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-</table>
+# amp-link-rewriter
 
 ## Overview
 

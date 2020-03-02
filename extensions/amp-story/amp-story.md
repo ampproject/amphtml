@@ -23,33 +23,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-story`"></a> `amp-story`
+# amp-story
 
 The `amp-story` extension provides a format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>A rich, visual storytelling format.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>none</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><ul>
-      <li>See AMP By Example's <a href="https://amp.dev/documentation/examples/introduction/stories_in_amp/">Hello World</a> sample.</li>
-      <li>Learn from the <a href="https://amp.dev/documentation/guides-and-tutorials/start/visual_story/">Create a visual AMP story</a> tutorial.</li>
-    </ul></td>
-  </tr>
-</table>
-
-[TOC]
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">

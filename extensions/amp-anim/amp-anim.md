@@ -26,25 +26,6 @@ limitations under the License.
 
 # amp-anim
 
-A runtime-managed animated image, typically a GIF.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://amp.dev/documentation/examples/components/amp-anim/">Annotated code example for amp-anim</a></td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 The `amp-anim` component is almost identical to the `amp-img` element, but allows the AMP runtime to reduce CPU usage when the animation is off-screen. Like [other elements](https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/placeholders), it supports an optional `placeholder` child, to display while the `src` file is loading:

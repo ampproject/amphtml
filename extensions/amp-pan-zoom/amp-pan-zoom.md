@@ -24,25 +24,6 @@ limitations under the License.
 
 # amp-pan-zoom
 
-Provides zooming and panning for arbitrary content.
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-pan-zoom" src="https://cdn.ampproject.org/v0/amp-pan-zoom-0.1.js">&lt;/script></code></td>
-  </tr>
-    <tr>
-    <td><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout#the-layout-attribute">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, responsive</td>
-  </tr>
-</table>
-
 ## Behavior
 
 The `<amp-pan-zoom>` component takes one child of arbitrary content and enables the ability for the user to zoom and pan the content via double tap or pinch-to-zoom actions. Tap events registered on the zoomable content or its children will trigger after a 300ms delay.

@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Embeds a video player for instream video ads that are integrated with the IMA SDK.
+  text: Embeds a video player for instream video ads that are integrated with the [IMA SDK](https://developers.google.com/interactive-media-ads/docs/sdks/html5/).
 ---
 
 <!---
@@ -23,27 +23,6 @@ limitations under the License.
 -->
 
 # amp-ima-video
-
-Embeds a video player for instream video ads that are integrated with
-the
-<a href="https://developers.google.com/interactive-media-ads/docs/sdks/html5/">IMA SDK</a>.
-
-[TOC]
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-ima-video" src="https://cdn.ampproject.org/v0/amp-ima-video-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fixed, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-ima-video/">amp-ima-video example</a>.</td></td>
-  </tr>
-</table>
 
 ## Overview
 

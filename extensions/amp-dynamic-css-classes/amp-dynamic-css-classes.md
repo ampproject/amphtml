@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Adds several dynamic CSS class names onto the HTML element.
+  text: Adds several dynamic CSS class names onto the <body> element.
 ---
 
 <!---
@@ -23,21 +23,6 @@ limitations under the License.
 -->
 
 # AMP Dynamic CSS Classes
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Adds several dynamic CSS class names onto the <code>&lt;body></code> element.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-dynamic-css-classes/">amp-dynamic-css-classes</a> example.</td>
-  </tr>
-</table>
 
 ## Behavior
 

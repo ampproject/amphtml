@@ -26,23 +26,7 @@ limitations under the License.
 
 # amp-list
 
-Fetches content dynamically from a CORS JSON endpoint and renders it
-using a supplied template.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-list/">amp-list example</a>.</td>
-  </tr>
-</table>
+Fetches content dynamically from a CORS JSON endpoint and renders it using a supplied template.
 
 ## Usage
 
