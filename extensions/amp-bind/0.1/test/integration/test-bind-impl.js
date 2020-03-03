@@ -982,8 +982,14 @@ describe
             await onBindReadyAndSetState(env, bind, {
               mystate: {mykey: 'myval'},
             });
-            const state = bind.getStateAsync('mystate.mykey');
-            expect(state).eventually.rejectedWith('mystate');
+
+            // Integration tests may not use chai-as-promised.
+            try {
+              await bind.getStateAsync('mystate.mykey');
+              expect.fail();
+            } catch (err) {
+              expect(err).match('#mystate');
+            }
           });
 
           it('should not wait if the still-loading state is irrelevant', async () => {
