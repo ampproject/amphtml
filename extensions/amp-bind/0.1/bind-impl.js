@@ -565,7 +565,7 @@ export class Bind {
   getStateAsync(expr) {
     const stateKey = expr.split('.')[0];
     this.rootNodePromise_.then(root => {
-      const ampStateEl = root.querySelect(`#${stateKey}`);
+      const ampStateEl = root.querySelector(`#${stateKey}`);
       if (!ampStateEl) {
         throw new Error(`#${stateKey} does not exist.`);
       }
