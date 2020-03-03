@@ -263,27 +263,9 @@ async function runTestInSauceLabs(config) {
   }
 
   if (argv.stable) {
-    config.browsers = browsers.stable;
-    return createKarmaServer(config, reportTestRunComplete);
-  }
-
-  if (argv.beta) {
-    config.browsers = browsers.beta;
-    const betaExitCode = await createKarmaServer(config, reportTestRunComplete);
-    if (betaExitCode != 0) {
-      log(
-        yellow('Some tests have failed on'),
-        cyan('beta'),
-        yellow('browsers.')
-      );
-      log(
-        yellow('This is not currently a fatal error, but will become an'),
-        yellow('error once the beta browsers are released as next stable'),
-        yellow('version!')
-      );
-    }
-
-    return 0;
+    browsers.beta = [];
+  } else if (argv.beta) {
+    browsers.stable = [];
   }
 
   return await runTestInBatches_(config, browsers);
