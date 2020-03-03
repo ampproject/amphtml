@@ -620,7 +620,7 @@ export class AmpIframe extends AMP.BaseElement {
       }
     }
     if (this.iframe_ && mutations['title']) {
-      // only propagating `title` because propagating all causes e2e error:
+      // only propagating title attr because propagating all causes e2e error:
       // See <https://travis-ci.org/ampproject/amphtml/jobs/657440421>
       this.propagateAttributes(['title'], this.iframe_);
     }
