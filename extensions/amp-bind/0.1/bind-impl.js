@@ -31,7 +31,8 @@ import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
-import {dev, devAssert, user, userAssert} from '../../../src/log';
+import {dev, devAssert, user} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, remove} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
@@ -564,8 +565,10 @@ export class Bind {
    */
   getStateAsync(expr) {
     const stateKey = expr.split('.')[0];
-    this.rootNodePromise_.then(root => {
-      const ampStateEl = root.querySelector(`#${stateKey}`);
+    return this.rootNodePromise_.then(root => {
+      const ampStateEl = root.querySelector(
+        `#${escapeCssSelectorIdent(stateKey)}`
+      );
       if (!ampStateEl) {
         throw new Error(`#${stateKey} does not exist.`);
       }

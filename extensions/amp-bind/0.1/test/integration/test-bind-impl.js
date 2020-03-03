@@ -62,13 +62,14 @@ function createElement(env, container, binding, opt_tag, opt_amp, opt_head) {
  * @param {string} id
  * @param {!Promise} valuePromise
  */
-function addAmpState(env, container, id, valuePromise) {
-  const ampState = document.createElement('amp-state', id);
+function addAmpState(env, container, id, fetchingPromise) {
+  const ampState = env.win.document.createElement('amp-state');
+  ampState.setAttribute('id', id);
   ampState.createdCallback = () => {};
   ampState.getImpl = () =>
     Promise.resolve({
-      getFetchAndUpdatePromise() {
-        return valuePromise;
+      getFetchingPromise() {
+        return fetchingPromise;
       },
       parseAndUpdate: () => {},
       element: ampState,
@@ -977,26 +978,28 @@ describe
         });
 
         describe('getStateAsync', () => {
-          it('should return the same result as getState if already present', async () => {
-            await bind.initializePromiseForTesting();
-            await bind.setState({mystate: {mykey: 'myval'}});
-            const state = await bind.getStateAsync('mystate.mykey');
-
-            expect(state).to.equal('myval');
+          it('should reject if there is no associated "amp-state"', async () => {
+            await onBindReadyAndSetState(env, bind, {
+              mystate: {mykey: 'myval'},
+            });
+            const state = bind.getStateAsync('mystate.mykey');
+            expect(state).eventually.rejectedWith('mystate');
           });
 
           it('should not wait if the still-loading state is irrelevant', async () => {
-            await bind.initializePromiseForTesting();
-            await bind.setState({mystate: {mykey: 'myval'}});
+            await onBindReadyAndSetState(env, bind, {
+              mystate: {myKey: 'myval'},
+            });
+            addAmpState(env, container, 'mystate', Promise.resolve());
             addAmpState(
+              // never resolves
               env,
               container,
-              'otherkey',
-              {},
+              'irrelevant',
               new Promise(unused => {})
-            ); // never going to resolve
+            );
 
-            const state = await bind.getStateAsync('mystate.mykey');
+            const state = await bind.getStateAsync('mystate.myKey');
             expect(state).to.equal('myval');
           });
 
@@ -1004,7 +1007,7 @@ describe
             const {promise, resolve} = new Deferred();
             addAmpState(env, container, 'mystate', promise);
 
-            await bind.initializePromiseForTesting();
+            await onBindReady(env, bind);
             const statePromise = bind.getStateAsync('mystate.mykey');
 
             await bind.setState({mystate: {mykey: 'myval'}}).then(resolve);
@@ -1015,27 +1018,11 @@ describe
             const {promise, reject} = new Deferred();
             addAmpState(env, container, 'mystate', promise);
 
-            await bind.initializePromiseForTesting();
+            await onBindReady(env, bind);
             const statePromise = bind.getStateAsync('mystate.mykey');
             reject();
 
             expect(await statePromise).to.equal(undefined);
-          });
-
-          it('should wait for all keys if given "."', async () => {
-            const {promise: p1, resolve: r1} = new Deferred();
-            const {promise: p2, resolve: r2} = new Deferred();
-            addAmpState(env, container, 'mystate1', p1);
-            addAmpState(env, container, 'mystate2', p2);
-
-            await bind.initializePromiseForTesting();
-            const statePromise = bind.getStateAsync('.');
-            r1();
-
-            await bind.setState({mystate: {mykey: 'myval'}}).then(r2);
-            expect(await statePromise).to.deep.equal({
-              mystate: {mykey: 'myval'},
-            });
           });
         });
 
