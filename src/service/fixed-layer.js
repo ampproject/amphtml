@@ -854,9 +854,7 @@ export class FixedLayer {
       return this.transferLayer_;
     }
     const doc = this.ampdoc.win.document;
-    this.transferLayer_ = doc.body.shadowRoot
-      ? new TransferLayerShadow(doc, this.vsync_)
-      : new TransferLayerBody(doc, this.vsync_);
+    this.transferLayer_ = new TransferLayerBody(doc, this.vsync_);
     return this.transferLayer_;
   }
 
@@ -1146,81 +1144,5 @@ class TransferLayerBody {
       dev().error(TAG, 'Failed to test query match:', e);
       return false;
     }
-  }
-}
-
-const FIXED_LAYER_SLOT = 'i-amphtml-fixed';
-
-/**
- * The fixed layer is created inside the shadow root of the `<body>` element
- * and fixed elements are distributed into this element via slots.
- * @implements {TransferLayerDef}
- */
-class TransferLayerShadow {
-  /**
-   * @param {!Document} doc
-   * @param {!./vsync-impl.Vsync} vsync
-   */
-  constructor(doc, vsync) {
-    /** @private @const {!./vsync-impl.Vsync} */
-    this.vsync_ = vsync;
-
-    /** @private @const {!Element} */
-    this.layer_ = doc.createElement('div');
-    this.layer_.id = 'i-amphtml-fixed-layer';
-    setImportantStyles(this.layer_, {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      height: 0,
-      width: 0,
-      overflow: 'hidden',
-    });
-
-    // The slot where all fixed elements will be distributed.
-    const slot = doc.createElement('slot');
-    slot.setAttribute('name', FIXED_LAYER_SLOT);
-    this.layer_.appendChild(slot);
-
-    doc.body.shadowRoot.appendChild(this.layer_);
-  }
-
-  /** @override */
-  getRoot() {
-    return this.layer_;
-  }
-
-  /** @override */
-  setLightboxMode(on) {
-    this.vsync_.mutate(() => {
-      setStyle(this.getRoot(), 'visibility', on ? 'hidden' : 'visible');
-    });
-  }
-
-  /** @override */
-  update() {
-    // Nothing to do.
-  }
-
-  /** @override */
-  transferTo(fe) {
-    const {element} = fe;
-
-    dev().fine(TAG, 'transfer to fixed:', fe.id, fe.element);
-    user().warn(
-      TAG,
-      'In order to improve scrolling performance in Safari,' +
-        ' we now move the element to a fixed positioning layer:',
-      fe.element
-    );
-
-    // Distribute to the slot.
-    element.setAttribute('slot', FIXED_LAYER_SLOT);
-  }
-
-  /** @override */
-  returnFrom(fe) {
-    dev().fine(TAG, 'return from fixed:', fe.id, fe.element);
-    fe.element.removeAttribute('slot');
   }
 }
