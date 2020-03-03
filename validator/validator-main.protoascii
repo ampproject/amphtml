@@ -6820,16 +6820,6 @@ attr_lists: {
     name: "next-page-replace"
     requires_extension: "amp-next-page"
   }
-  # amp-next-page specific attributes, see
-  # https://amp.dev/documentation/components/amp-next-page
-  attrs: {
-    name: "next-page-hide"
-    requires_extension: "amp-next-page"
-  }
-  attrs: {
-    name: "next-page-replace"
-    requires_extension: "amp-next-page"
-  }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
   attrs: { name: "[aria-atomic]" }
