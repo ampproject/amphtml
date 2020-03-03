@@ -29,7 +29,10 @@ const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
 const {Server} = require('karma');
 
-const BATCHSIZE = 3; // Number of Sauce Lab browsers
+// Number of Sauce Lab browsers. Three was determined to be the lowest number we
+// could set without causing a significant increase in Travis job time. See
+// https://github.com/ampproject/amphtml/pull/27016 for the relevant discussion.
+const BATCHSIZE = 3;
 const CHROMEBASE = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
 const chromeFlags = [];
 
