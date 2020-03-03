@@ -461,7 +461,7 @@ export class SafeframeHostApi {
     message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.endpointIdentity_;
     this.iframe_.contentWindow./*OK*/ postMessage(
       JSON.stringify(message),
-      "*"
+      '*'
     );
   }
 
@@ -765,7 +765,7 @@ export class SafeframeHostApi {
     this.baseInstance_.fireFluidDelayedImpression();
     this.iframe_.contentWindow./*OK*/ postMessage(
       JSON.stringify(dict({'message': 'resize-complete', 'c': this.channel})),
-      "*"
+      '*'
     );
   }
 

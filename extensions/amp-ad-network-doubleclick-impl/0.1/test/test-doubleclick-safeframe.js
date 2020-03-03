@@ -22,7 +22,6 @@ import '../../../amp-ad/0.1/amp-ad';
 import {AmpAdNetworkDoubleclickImpl} from '../amp-ad-network-doubleclick-impl';
 import {
   MESSAGE_FIELDS,
-  SAFEFRAME_ORIGIN,
   SERVICE,
   SafeframeHostApi,
   removeSafeframeListener,
@@ -110,7 +109,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
   function receiveMessage(messageData) {
     const messageEvent = {
       data: JSON.stringify(messageData),
-      origin: SAFEFRAME_ORIGIN,
     };
     safeframeListener(messageEvent);
   }
