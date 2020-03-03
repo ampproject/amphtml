@@ -492,7 +492,7 @@ export class AmpSlideScroll extends BaseSlides {
       toScrollLeft = 0;
     }
     return this.animateScrollLeft_(currentScrollLeft, toScrollLeft).then(() => {
-      this.updateOnScroll_(toScrollLeft, opt_trust || ActionTrust.LOW);
+      this.updateOnScroll_(toScrollLeft, opt_trust);
     });
   }
 
@@ -592,9 +592,9 @@ export class AmpSlideScroll extends BaseSlides {
   /**
    * Updates to the right state of the new index on scroll.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
-   * @param {!ActionTrust} trust
+   * @param {ActionTrust=} opt_trust
    */
-  updateOnScroll_(currentScrollLeft, trust) {
+  updateOnScroll_(currentScrollLeft, opt_trust = ActionTrust.LOW) {
     if (!isFiniteNumber(currentScrollLeft) || this.slideIndex_ === null) {
       return;
     }
@@ -602,7 +602,7 @@ export class AmpSlideScroll extends BaseSlides {
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
       // Scroll to new slide and update scrollLeft to the correct slide.
-      this.showSlideAndTriggerAction_(newIndex, trust);
+      this.showSlideAndTriggerAction_(newIndex, opt_trust);
       this.vsync_.mutate(() => {
         this.snappingInProgress_ = false;
       });
