@@ -15,6 +15,7 @@
  */
 
 import '../amp-carousel';
+import {ActionTrust} from '../../../../src/action-constants';
 import {Services} from '../../../../src/services';
 
 describes.realWin(
@@ -1281,14 +1282,16 @@ describes.realWin(
           expect(triggerSpy).to.have.been.calledWith(
             ampSlideScroll,
             'slideChange',
-            /* CustomEvent */ env.sandbox.match.has('detail', {index: 4})
+            /* CustomEvent */ env.sandbox.match.has('detail', {index: 4}),
+            ActionTrust.HIGH
           );
 
           impl.goCallback(1, /* animate */ false);
           expect(triggerSpy).to.have.been.calledWith(
             ampSlideScroll,
             'slideChange',
-            /* CustomEvent */ env.sandbox.match.has('detail', {index: 0})
+            /* CustomEvent */ env.sandbox.match.has('detail', {index: 0}),
+            ActionTrust.HIGH
           );
         });
       });
