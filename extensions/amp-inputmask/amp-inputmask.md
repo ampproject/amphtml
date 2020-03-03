@@ -22,27 +22,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# \`amp-inputmask\`
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>Provides input masking capabilities to inputs in AMP forms</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-inputmask" src="https://cdn.ampproject.org/v0/amp-inputmask-0.1.js">&lt;/script></code></td>
-  </tr>
-  <!-- TODO(@cvializ) after the experiment is in PROD so AMP By Example can use the component -->
-  <!-- <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
-  </tr> -->
-</table>
+# amp-inputmask
 
 ## Behavior
 

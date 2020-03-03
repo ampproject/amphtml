@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Embeds an iframe containing a video player.
+  text: Embeds an [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) containing a video player.
 ---
 
 <!--
@@ -23,21 +23,6 @@ limitations under the License.
 -->
 
 # amp-video-iframe
-
-[TOC]
-
-Displays an [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) containing a video player.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-video-iframe" src="https://cdn.ampproject.org/v0/amp-video-iframe-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, intrinsic, nodisplay, responsive</td>
-  </tr>
-</table>
 
 ## When should I use this?
 
@@ -156,11 +141,13 @@ Include an `amp-video-iframe` on your AMP document:
 
 `my-video-player.html` is the inner document loaded inside the frame that plays the video. This document must include and bootstrap [an integration script](#integration) so that the AMP document including the `<amp-video-iframe>` can coordinate the video's playback.
 
-### <a id="vendors"></a> For third-party video vendors
+### <a id="vendors"></a> Third-party video vendors
 
-If you're a vendor that does _not_ provide a [custom video player component](../../spec/amp-video-interface.md), you can use `amp-video-iframe` to allow AMP document authors to embed video provided through your service.
+If you're a vendor that does _not_ provide a [custom video player component](../../spec/amp-video-interface.md), you can integrate with AMP in the form of an `amp-video-iframe` configuration, so authors can embed video provided through your service.
 
-By hosting a generic [integration document](#integration) that can reference videos with URL parameters, authors don't need to provide the inner player document themselves, but only include an `<amp-video-iframe>` tag in the AMP document:
+Note: For most video providers, `amp-video-iframe` provides enough tools for common playback actions (see [methods](#method) and [events](#postEvent)). Refer to the [vendor player spec](../../spec/amp-3p-video.md) for more details on whether you can use `amp-video-iframe` or you should build a third-party player component instead.
+
+As a vendor, you can serve a generic [integration document](#integration) that references provided videos via URL parameters. AMP authors who use your video service only need to include an `<amp-video-iframe>` tag in their documents:
 
 ```html
 <!--
@@ -191,7 +178,8 @@ The `src` and `poster` URLs are appended with [`data-param-*` attributes as quer
 
 The `/amp-video-iframe` document bootstraps the [integration script](#integration) so that the AMP document can coordinate with the player.
 
-Note: For most video providers, `amp-video-iframe` provides enough tools for common playback actions (see [methods](#method) and [events](#postEvent)). Refer to the [vendor player spec](../../spec/amp-3p-video.md) for more details on whether you can use `amp-video-iframe` or you should build a third-party player component instead.
+Note: If you're a vendor hosting an integration document, feel free to [contribute a code sample to this page,](https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-iframe/amp-video-iframe.md) specifying your provided
+`src` and usable `data-param-*` attributes.
 
 ## <a id="integration"></a> Integration inside the frame
 
@@ -247,15 +235,29 @@ You can additionally use [custom integration methods](#custom-integrations) if y
 
 **Default supported methods:** `pause`/`play`, `mute`/`unmute`, `hidecontrols`/`showcontrols`, `fullscreenenter`/`fullscreenexit`
 
-Pass in your [`jwplayer` instance object](https://developer.jwplayer.com/jw-player/docs/javascript-api-reference/)
-through the signature `ampIntegration.listenTo('jwplayer', myJwplayer)`. The `ampIntegration` object then knows how
-to setup the player through the instance API.
+The `amp` object knows how to setup a JwPlayer instance by using `listenTo('jwplayer')`.
+If you're embedding your player [using a video-specific script](https://support.jwplayer.com/articles/how-to-embed-a-jwplayer), you only need to register Jwplayer usage:
+
+```html
+<script src="https://cdn.jwplayer.com/players/UVQWMA4o-kGWxh33Q.js"></script>
+<script>
+  (window.AmpVideoIframe = window.AmpVideoIframe || []).push(function(
+    ampIntegration
+  ) {
+    ampIntegration.listenTo('jwplayer');
+  });
+</script>
+```
+
+Otherwise, pass in your [JwPlayer instance](https://developer.jwplayer.com/jwplayer/docs/jw8-javascript-api-reference)
+through the signature `amp.listenTo('jwplayer', instance)`:
 
 ```js
-function onAmpIntegrationReady(ampIntegration) {
-  var myJwplayer = jwplayer('my-video');
-  ampIntegration.listenTo('jwplayer', myJwplayer);
-}
+(window.AmpVideoIframe = window.AmpVideoIframe || []).push(function(
+  ampIntegration
+) {
+  ampIntegration.listenTo('jwplayer', jwplayer('my-video'));
+});
 ```
 
 ##### For Video.js

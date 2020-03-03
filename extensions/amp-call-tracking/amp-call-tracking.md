@@ -27,23 +27,6 @@ limitations under the License.
 Dynamically replaces a phone number in a hyperlink to enable call
 tracking. Executes a CORS request to substitute the number.
 
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-call-tracking" src="https://cdn.ampproject.org/v0/amp-call-tracking-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>container, fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-call-tracking/">amp-call-tracking example</a>.</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Usage
 
 The `<amp-call-tracking>` tag must wrap a normal anchor tag that hyperlinks a

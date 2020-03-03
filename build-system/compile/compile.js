@@ -215,6 +215,11 @@ function compile(
     if (options.include3pDirectories) {
       srcs.push('3p/**/*.js', 'ads/**/*.js');
     }
+    // For ESM Builds, exclude ampdoc and ampshared css from inclusion.
+    // These styles are guaranteed to already be present on elgible documents.
+    if (options.esmPassCompilation) {
+      srcs.push('!build/ampdoc.css.js', '!build/ampshared.css.js');
+    }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
@@ -339,7 +344,8 @@ function compile(
         'checkTypes',
         'const',
         'constantProperty',
-        'globalThis'
+        'globalThis',
+        'misplacedTypeAnnotation'
       );
       compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
       compilerOptions.conformance_configs =
@@ -353,9 +359,7 @@ function compile(
       delete compilerOptions.define;
     }
 
-    if (!argv.single_pass) {
-      compilerOptions.js_module_root.push(SRC_TEMP_DIR);
-    }
+    compilerOptions.js_module_root.push(SRC_TEMP_DIR);
 
     const compilerOptionsArray = [];
     Object.keys(compilerOptions).forEach(function(option) {
@@ -373,12 +377,11 @@ function compile(
       }
     });
 
-    const gulpSrcs = !argv.single_pass ? convertPathsToTmpRoot(srcs) : srcs;
-    const gulpBase = !argv.single_pass ? SRC_TEMP_DIR : '.';
+    const gulpSrcs = convertPathsToTmpRoot(srcs);
 
     if (options.typeCheckOnly) {
       return gulp
-        .src(gulpSrcs, {base: gulpBase})
+        .src(gulpSrcs, {base: SRC_TEMP_DIR})
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
         .on('error', err => {
@@ -390,7 +393,7 @@ function compile(
     } else {
       timeInfo.startTime = Date.now();
       return gulp
-        .src(gulpSrcs, {base: gulpBase})
+        .src(gulpSrcs, {base: SRC_TEMP_DIR})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))

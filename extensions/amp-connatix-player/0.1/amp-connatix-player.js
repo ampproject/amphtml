@@ -20,6 +20,7 @@ import {dict} from '../../../src/utils/object';
 import {getData} from '../../../src/event-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {removeElement} from '../../../src/dom';
+import {setIsMediaComponent} from '../../../src/video-interface';
 import {userAssert} from '../../../src/log';
 
 export class AmpConnatixPlayer extends AMP.BaseElement {
@@ -92,6 +93,8 @@ export class AmpConnatixPlayer extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const {element} = this;
+
+    setIsMediaComponent(element);
 
     // Player id is mandatory
     this.playerId_ = userAssert(

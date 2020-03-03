@@ -223,7 +223,7 @@ export class AmpViewerIntegration {
       this.handleUnload_.bind(this, messaging)
     );
 
-    if (viewer.hasCapability('swipe')) {
+    if (viewer.hasCapability('swipe') || viewer.hasCapability('touch')) {
       this.initTouchHandler_(messaging);
     }
     if (viewer.hasCapability('keyboard')) {
