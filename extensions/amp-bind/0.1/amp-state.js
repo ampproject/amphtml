@@ -46,7 +46,7 @@ export class AmpState extends AMP.BaseElement {
      */
     this.localData_ = undefined;
 
-    /** @private {Deferred} */
+    /** @private {!Deferred} */
     this.loadingDeferred_ = new Deferred();
   }
 
@@ -215,7 +215,7 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   fetchAndUpdate_(isInit, opt_refresh) {
-    if (!this.loadingDeferred_) {
+    if (!isInit) {
       this.loadingDeferred_ = new Deferred();
     }
 
@@ -226,12 +226,14 @@ export class AmpState extends AMP.BaseElement {
       .then(json => this.updateState_(json, isInit))
       .then(() => {
         this.loadingDeferred_.resolve();
-        this.loadingDeferred_ = null;
       });
   }
 
   /**
-   * Returns a promise that resolves after the fetch and update completes.
+   * For an "amp-state" with a src attribute, this returns a promise that
+   * resolves after the fetch and update completes. For non-src "amp-state"s,
+   * return null.
+   *
    * @return {Promise}
    */
   getFetchingPromise() {
