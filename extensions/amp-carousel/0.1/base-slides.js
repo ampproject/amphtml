@@ -20,12 +20,6 @@ import {Services} from '../../../src/services';
 import {isFiniteNumber} from '../../../src/types';
 import {userAssert} from '../../../src/log';
 
-/** @enum {string} */
-export const EngagementSignals = {
-  USER_INTERACTED: 'user-interacted',
-  AUTOPLAY_DELEGATED: 'autoplay-delegated',
-};
-
 export class BaseSlides extends BaseCarousel {
   /** @param {!AmpElement} element */
   constructor(element) {
