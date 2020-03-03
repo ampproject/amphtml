@@ -358,7 +358,7 @@ export class AmpStory extends AMP.BaseElement {
     this.liveStoryManager_ = null;
 
     /** @private @const {!LocalizationService} */
-    this.localizationService_ = new LocalizationService(this.win);
+    this.localizationService_ = new LocalizationService(this.win, this.viewer_);
     const localizationService = this.localizationService_;
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)

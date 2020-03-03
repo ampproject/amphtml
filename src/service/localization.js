@@ -91,14 +91,15 @@ export function getLanguageCodesFromString(languageCode) {
 export class LocalizationService {
   /**
    * @param {!Window} win
+   * @param {!./viewer-interface.ViewerInterface} viewer
    */
-  constructor(win) {
+  constructor(win, viewer = undefined) {
     const rootEl = win.document.documentElement;
 
     /**
      * @private {?string}
      */
-    this.viewerLanguageCode_ = parseQueryString(win.location.hash)['lang'];
+    this.viewerLanguageCode_ = viewer ? viewer.getParam('lang') : null;
 
     /**
      * @private @const {!Array<string>}
