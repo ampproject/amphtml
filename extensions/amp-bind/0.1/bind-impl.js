@@ -556,7 +556,7 @@ export class Bind {
   /**
    * Returns a copy of the global state for an expression, after waiting for its
    * associated 'amp-state' element to finish fetching data. If there is no
-   * corresponding 'amp-state' element in the DOM, it will throw. 
+   * corresponding 'amp-state' element in the DOM, then reject.
    *
    * e.g. "foo.bar".
    * @param {string} expr

@@ -232,13 +232,13 @@ export class AmpState extends AMP.BaseElement {
   /**
    * For an "amp-state" with a src attribute, this returns a promise that
    * resolves after the fetch and update completes. For non-src "amp-state"s,
-   * return null.
+   * return a resolved promise.
    *
-   * @return {Promise}
+   * @return {!Promise}
    */
   getFetchingPromise() {
     if (!this.element.hasAttribute('src')) {
-      return null;
+      return Promise.resolve();
     }
     return this.loadingDeferred_.promise;
   }
