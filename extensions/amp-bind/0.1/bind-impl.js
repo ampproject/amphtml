@@ -31,7 +31,7 @@ import {createCustomEvent, getDetail} from '../../../src/event-helper';
 import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
-import {dev, devAssert, user} from '../../../src/log';
+import {dev, devAssert, user, userAssert} from '../../../src/log';
 import {findIndex, remove} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
@@ -196,25 +196,25 @@ export class Bind {
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
     this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
+    /** @const @private {!Promise<!Document>} */
+    this.rootNodePromise_ = ampdoc.whenFirstVisible().then(() => {
+      if (opt_win) {
+        // In FIE, scan the document node of the iframe window.
+        const {document} = opt_win;
+        return whenDocumentReady(document).then(() => document);
+      } else {
+        // Otherwise, scan the root node of the ampdoc.
+        return ampdoc.whenReady().then(() => ampdoc.getRootNode());
+      }
+    });
+
     /**
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ = ampdoc
-      .whenFirstVisible()
-      .then(() => {
-        if (opt_win) {
-          // In FIE, scan the document node of the iframe window.
-          const {document} = opt_win;
-          return whenDocumentReady(document).then(() => document);
-        } else {
-          // Otherwise, scan the root node of the ampdoc.
-          return ampdoc.whenReady().then(() => ampdoc.getRootNode());
-        }
-      })
-      .then(root => {
-        return this.initialize_(root);
-      });
+    this.initializePromise_ = this.rootNodePromise_.then(root =>
+      this.initialize_(root)
+    );
 
     /** @const @private {!Deferred} */
     this.addMacrosDeferred_ = new Deferred();
@@ -554,47 +554,27 @@ export class Bind {
   }
 
   /**
-   * Returns a copy of the global state for a given field-based expression.
-   * It will wait for relevant amp-state components to finish fetching before returning.
+   * Returns a copy of the global state for an expression, after waiting for its
+   * associated 'amp-state' element to finish fetching data. If there is no
+   * corresponding 'amp-state' element in the DOM, it will throw. 
    *
    * e.g. "foo.bar".
    * @param {string} expr
    * @return {!Promise<*>}
    */
   getStateAsync(expr) {
-    const asyncLoadingAmpStates = {};
-    const ampStateEls = this.ampdoc.getRootNode().querySelectorAll('AMP-STATE');
-    let hasLoadingAmpState = false;
-    const gatherAsyncAmpStates = Promise.all(
-      toArray(ampStateEls).map(el => {
-        return whenUpgradedToCustomElement(el)
-          .then(() => el.getImpl(/* waitForBuild */ false))
-          .then(impl => {
-            const id = impl.element.getAttribute('id');
-            const loadingPromise = impl.getFetchAndUpdatePromise();
-            if (loadingPromise) {
-              asyncLoadingAmpStates[id] = loadingPromise;
-              hasLoadingAmpState = true;
-            }
-          });
-      })
-    );
-
-    return gatherAsyncAmpStates.then(() => {
-      if (!hasLoadingAmpState) {
-        return this.getState(expr);
+    const stateKey = expr.split('.')[0];
+    this.rootNodePromise_.then(root => {
+      const ampStateEl = root.querySelect(`#${stateKey}`);
+      if (!ampStateEl) {
+        throw new Error(`#${stateKey} does not exist.`);
       }
 
-      let wait;
-      if (expr === '.') {
-        // If getting everything, then wait for all async amp states.
-        wait = Promise.all(Object.values(asyncLoadingAmpStates));
-      } else {
-        const stateKey = expr.split('.')[0];
-        wait = Promise.resolve(asyncLoadingAmpStates[stateKey]);
-      }
-
-      return wait.catch(() => {}).then(() => this.getState(expr));
+      return whenUpgradedToCustomElement(ampStateEl)
+        .then(el => el.getImpl(true))
+        .then(ampState => ampState.getFetchingPromise())
+        .catch(() => {})
+        .then(() => this.getState(expr));
     });
   }
 

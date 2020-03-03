@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {Deferred} from '../../../src/utils/promise';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -45,8 +46,8 @@ export class AmpState extends AMP.BaseElement {
      */
     this.localData_ = undefined;
 
-    /** @private {Promise} */
-    this.fetchAndUpdatePromise_ = null;
+    /** @private {Deferred} */
+    this.loadingDeferred_ = new Deferred();
   }
 
   /** @override */
@@ -214,30 +215,30 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   fetchAndUpdate_(isInit, opt_refresh) {
+    if (!this.loadingDeferred_) {
+      this.loadingDeferred_ = new Deferred();
+    }
+
     // Don't fetch in prerender mode.
-    const fetchAndUpdatePromise = this.getAmpDoc()
+    return this.getAmpDoc()
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
-      .then(json => this.updateState_(json, isInit));
-
-    this.fetchAndUpdatePromise_ = fetchAndUpdatePromise;
-
-    // Cleanup when complete
-    fetchAndUpdatePromise.then(() => {
-      if (this.fetchAndUpdatePromise_ === fetchAndUpdatePromise) {
-        this.fetchAndUpdatePromise_ = null;
-      }
-    });
-
-    return fetchAndUpdatePromise;
+      .then(json => this.updateState_(json, isInit))
+      .then(() => {
+        this.loadingDeferred_.resolve();
+        this.loadingDeferred_ = null;
+      });
   }
 
   /**
    * Returns a promise that resolves after the fetch and update completes.
    * @return {Promise}
    */
-  getFetchAndUpdatePromise() {
-    return this.fetchAndUpdatePromise_;
+  getFetchingPromise() {
+    if (!this.element.hasAttribute('src')) {
+      return null;
+    }
+    return this.loadingDeferred_.promise;
   }
 
   /**

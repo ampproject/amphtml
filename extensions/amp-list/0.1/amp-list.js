@@ -376,7 +376,14 @@ export class AmpList extends AMP.BaseElement {
         );
 
         const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-        return bind.getStateAsync(ampStatePath);
+        return bind.getStateAsync(ampStatePath).catch(err => {
+          const stateKey = expr.split('.')[0];
+          user().warn(
+            TAG,
+            `'amp-state' element with id '${stateKey}' was not found.`
+          );
+          throw err;
+        });
       })
       .then(json => {
         userAssert(
