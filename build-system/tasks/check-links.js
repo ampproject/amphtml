@@ -134,7 +134,8 @@ function checkLinksInFile(file) {
         return;
       }
       let containsDeadLinks = false;
-      for (const {link, status, statusCode} of results) {
+      // eslint-disable-next-line prefer-const
+      for (let {link, status, statusCode} of results) {
         // Skip links to files that were introduced by the PR.
         if (isLinkToFileIntroducedByPR(link) && status == 'dead') {
           // Log links with the correct github base as alive, otherwise flag deadlinks.
