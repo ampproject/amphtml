@@ -694,6 +694,10 @@ function createBaseCustomElementClass(win) {
         );
       }
 
+      if (this.hasAttribute('disable-inline-width')) {
+        return;
+      }
+
       // Sizes.
       if (this.sizeList_ === undefined) {
         const sizesAttr = this.getAttribute('sizes');
