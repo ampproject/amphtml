@@ -101,15 +101,11 @@ async function dist() {
   await compileCss();
   await compileJison();
 
-  // This is the temp directory processing for multi-pass (single-pass does its
-  // own processing). Executed after `compileCss` and `compileJison` so their
-  // results can be copied too.
-  if (!argv.single_pass) {
-    transferSrcsToTempDir({
-      isForTesting: argv.fortesting,
-      isEsmBuild: argv.esm,
-    });
-  }
+  transferSrcsToTempDir({
+    isForTesting: !!argv.fortesting,
+    isEsmBuild: !!argv.esm,
+    isSinglePass: !!argv.single_pass,
+  });
 
   await copyCss();
   await copyParsers();
