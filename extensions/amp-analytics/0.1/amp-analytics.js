@@ -803,5 +803,5 @@ AMP.extension(TAG, '0.1', AMP => {
   installLinkerReaderService(AMP.win);
   AMP.registerServiceForDoc('amp-analytics-variables', VariableService);
   // Register the element.
-  AMP.registerElement(TAG, AmpAnalytics);
+  AMP.registerElement(TAG, AmpAnalytics)
 });
