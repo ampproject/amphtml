@@ -359,9 +359,7 @@ function compile(
       delete compilerOptions.define;
     }
 
-    if (!argv.single_pass) {
-      compilerOptions.js_module_root.push(SRC_TEMP_DIR);
-    }
+    compilerOptions.js_module_root.push(SRC_TEMP_DIR);
 
     const compilerOptionsArray = [];
     Object.keys(compilerOptions).forEach(function(option) {
@@ -379,12 +377,11 @@ function compile(
       }
     });
 
-    const gulpSrcs = !argv.single_pass ? convertPathsToTmpRoot(srcs) : srcs;
-    const gulpBase = !argv.single_pass ? SRC_TEMP_DIR : '.';
+    const gulpSrcs = convertPathsToTmpRoot(srcs);
 
     if (options.typeCheckOnly) {
       return gulp
-        .src(gulpSrcs, {base: gulpBase})
+        .src(gulpSrcs, {base: SRC_TEMP_DIR})
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
         .on('error', err => {
@@ -396,7 +393,7 @@ function compile(
     } else {
       timeInfo.startTime = Date.now();
       return gulp
-        .src(gulpSrcs, {base: gulpBase})
+        .src(gulpSrcs, {base: SRC_TEMP_DIR})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
