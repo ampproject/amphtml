@@ -15,6 +15,7 @@
  */
 
 const fs = require('fs');
+const log = require('fancy-log');
 const {
   CONTROL,
   EXPERIMENT,
@@ -201,9 +202,19 @@ async function measureDocuments(urls, {headless, runs}) {
     ])
   );
 
+  const startTime = Date.now();
+  function timeLeft() {
+    const elapsed = (Date.now() - startTime) / 1000;
+    const secondsPerTask = elapsed / i;
+    return Math.floor(secondsPerTask * (tasks.length - i));
+  }
+
   // Excecute the tasks serially
-  const [first, ...rest] = tasks;
-  await rest.reduce((prev, task) => prev.then(task), first());
+  let i = 0;
+  for (const task of tasks) {
+    log(`Progress: ${i++}/${tasks.length}. ${timeLeft()} seconds left.`);
+    await task();
+  }
 }
 
 module.exports = measureDocuments;
