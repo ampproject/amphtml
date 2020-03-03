@@ -594,7 +594,7 @@ export class AmpSlideScroll extends BaseSlides {
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    * @param {ActionTrust=} opt_trust
    */
-  updateOnScroll_(currentScrollLeft, opt_trust = ActionTrust.LOW) {
+  updateOnScroll_(currentScrollLeft, opt_trust) {
     if (!isFiniteNumber(currentScrollLeft) || this.slideIndex_ === null) {
       return;
     }
@@ -753,10 +753,10 @@ export class AmpSlideScroll extends BaseSlides {
   /**
    * Shows the slide at the given index and triggers a `slideChange` event.
    * @param {number} newIndex
-   * @param {!ActionTrust} trust
+   * @param {ActionTrust=} opt_trust LOW by default.
    * @private
    */
-  showSlideAndTriggerAction_(newIndex, trust) {
+  showSlideAndTriggerAction_(newIndex, opt_trust = ActionTrust.LOW) {
     const slideChanged = this.showSlide_(newIndex);
 
     if (slideChanged) {
@@ -766,7 +766,7 @@ export class AmpSlideScroll extends BaseSlides {
         `slidescroll.${name}`,
         dict({'index': newIndex})
       );
-      this.action_.trigger(this.element, name, event, trust);
+      this.action_.trigger(this.element, name, event, opt_trust);
 
       this.element.dispatchCustomEvent(name, {index: newIndex});
     }
