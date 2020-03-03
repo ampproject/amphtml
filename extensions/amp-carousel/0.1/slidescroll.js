@@ -232,7 +232,7 @@ export class AmpSlideScroll extends BaseSlides {
       invocation => {
         const {args} = invocation;
         if (args) {
-          this.goToSlide(args['index']);
+          this.goToSlide(args['index'], ActionTrust.HIGH);
         }
       },
       ActionTrust.LOW
@@ -248,7 +248,7 @@ export class AmpSlideScroll extends BaseSlides {
   mutatedAttributesCallback(mutations) {
     const slide = mutations['slide'];
     if (slide !== undefined) {
-      this.goToSlide(slide);
+      this.goToSlide(slide, ActionTrust.HIGH);
     }
   }
 
@@ -283,9 +283,9 @@ export class AmpSlideScroll extends BaseSlides {
       const currentScrollLeft = this.slidesContainer_./*OK*/ scrollLeft;
 
       if (this.hasNativeSnapPoints_) {
-        this.updateOnScroll_(currentScrollLeft);
+        this.updateOnScroll_(currentScrollLeft, ActionTrust.LOW);
       } else {
-        this.customSnap_(currentScrollLeft);
+        this.customSnap_(currentScrollLeft, undefined, ActionTrust.LOW);
       }
     }, timeout));
   }
@@ -373,7 +373,7 @@ export class AmpSlideScroll extends BaseSlides {
   }
 
   /** @override */
-  moveSlide(dir, animate) {
+  moveSlide(dir, animate, trust) {
     if (this.slideIndex_ !== null) {
       const hasNext = this.hasNext();
       const hasPrev = this.hasPrev();
@@ -386,9 +386,9 @@ export class AmpSlideScroll extends BaseSlides {
         }
         if (animate) {
           const currentScrollLeft = dir == 1 && !hasPrev ? 0 : this.slideWidth_;
-          this.customSnap_(currentScrollLeft, dir);
+          this.customSnap_(currentScrollLeft, dir, trust);
         } else {
-          this.showSlideAndTriggerAction_(newIndex);
+          this.showSlideAndTriggerAction_(newIndex, trust);
         }
       }
     }
@@ -468,10 +468,11 @@ export class AmpSlideScroll extends BaseSlides {
    * Animate and snap to the correct slide for a given scrollLeft.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
    * @param {number=} opt_forceDir if a valid direction is given force it to
-   *    move 1 slide in that direction.
+   * move 1 slide in that direction.
+   * @param {ActionTrust=} opt_trust
    * @return {!Promise}
    */
-  customSnap_(currentScrollLeft, opt_forceDir) {
+  customSnap_(currentScrollLeft, opt_forceDir, opt_trust) {
     this.snappingInProgress_ = true;
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     // Default behavior should be stays on current slide
@@ -491,7 +492,7 @@ export class AmpSlideScroll extends BaseSlides {
       toScrollLeft = 0;
     }
     return this.animateScrollLeft_(currentScrollLeft, toScrollLeft).then(() => {
-      this.updateOnScroll_(toScrollLeft);
+      this.updateOnScroll_(toScrollLeft, opt_trust);
     });
   }
 
@@ -591,8 +592,9 @@ export class AmpSlideScroll extends BaseSlides {
   /**
    * Updates to the right state of the new index on scroll.
    * @param {number} currentScrollLeft scrollLeft value of the slides container.
+   * @param {ActionTrust=} opt_trust
    */
-  updateOnScroll_(currentScrollLeft) {
+  updateOnScroll_(currentScrollLeft, opt_trust) {
     if (!isFiniteNumber(currentScrollLeft) || this.slideIndex_ === null) {
       return;
     }
@@ -600,7 +602,7 @@ export class AmpSlideScroll extends BaseSlides {
     const newIndex = this.getNextSlideIndex_(currentScrollLeft);
     this.vsync_.mutate(() => {
       // Scroll to new slide and update scrollLeft to the correct slide.
-      this.showSlideAndTriggerAction_(newIndex);
+      this.showSlideAndTriggerAction_(newIndex, opt_trust);
       this.vsync_.mutate(() => {
         this.snappingInProgress_ = false;
       });
@@ -611,8 +613,9 @@ export class AmpSlideScroll extends BaseSlides {
    * Parses given value as integer and shows the slide with that index value
    * when element has been laid out.
    * @param {*} value
+   * @param {!ActionTrust} trust
    */
-  goToSlide(value) {
+  goToSlide(value, trust) {
     const index = parseInt(value, 10);
 
     if (!isFinite(index) || index < 0 || index >= this.noOfSlides_) {
@@ -626,7 +629,7 @@ export class AmpSlideScroll extends BaseSlides {
       return;
     }
 
-    this.showSlideAndTriggerAction_(index);
+    this.showSlideAndTriggerAction_(index, trust);
   }
 
   /**
@@ -750,9 +753,10 @@ export class AmpSlideScroll extends BaseSlides {
   /**
    * Shows the slide at the given index and triggers a `slideChange` event.
    * @param {number} newIndex
+   * @param {ActionTrust=} opt_trust LOW by default.
    * @private
    */
-  showSlideAndTriggerAction_(newIndex) {
+  showSlideAndTriggerAction_(newIndex, opt_trust = ActionTrust.LOW) {
     const slideChanged = this.showSlide_(newIndex);
 
     if (slideChanged) {
@@ -762,7 +766,7 @@ export class AmpSlideScroll extends BaseSlides {
         `slidescroll.${name}`,
         dict({'index': newIndex})
       );
-      this.action_.trigger(this.element, name, event, ActionTrust.HIGH);
+      this.action_.trigger(this.element, name, event, opt_trust);
 
       this.element.dispatchCustomEvent(name, {index: newIndex});
     }
