@@ -114,14 +114,14 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   onLayoutMeasure() {
     super.onLayoutMeasure();
 
-    const format = this.element.getAttribute('format');
-    if (!format) {
+    const aspectRatio = this.element.getAttribute('aspect-ratio');
+    if (!aspectRatio) {
       return;
     }
 
-    const formatSplits = format.split(':');
-    const horiz = parseInt(formatSplits[0], 10);
-    const vert = parseInt(formatSplits[1], 10);
+    const aspectRatioSplits = aspectRatio.split(':');
+    const horiz = parseInt(aspectRatioSplits[0], 10);
+    const vert = parseInt(aspectRatioSplits[1], 10);
 
     return this.getVsync().runPromise(
       {
