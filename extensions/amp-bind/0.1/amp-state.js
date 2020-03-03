@@ -215,6 +215,7 @@ export class AmpState extends AMP.BaseElement {
    * @private
    */
   fetchAndUpdate_(isInit, opt_refresh) {
+    // On init, we reuse the deferred created in the constructor.
     if (!isInit) {
       this.loadingDeferred_ = new Deferred();
     }
