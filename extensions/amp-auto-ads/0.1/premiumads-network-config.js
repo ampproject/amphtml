@@ -17,8 +17,6 @@
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
-import {parseUrlDeprecated} from '../../../src/url';
-import {toWin} from '../../../src/types';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -45,18 +43,10 @@ export class PremiumadsNetworkConfig {
 
   /** @override */
   getConfigUrl() {
-    const docInfo = Services.documentInfoForDoc(this.autoAmpAdsElement_);
-    const canonicalHostname = parseUrlDeprecated(docInfo.canonicalUrl).hostname;
-    const win = toWin(this.autoAmpAdsElement_.ownerDocument.defaultView);
     return buildUrl(
       'https://localhost:5001/autoads',
       {
-        'client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
-        'plah': canonicalHostname,
-        'ama_t': 'amp',
-        'url': docInfo.canonicalUrl,
-        'debug_experiment_id':
-          (/(?:#|,)deid=([\d,]+)/i.exec(win.location.hash) || [])[1] || null,
+        'publisher': this.autoAmpAdsElement_.getAttribute('data-publisher'),
       },
       4096
     );
@@ -65,20 +55,13 @@ export class PremiumadsNetworkConfig {
   /** @override */
   getAttributes() {
     const attributesObj = dict({
-      'type': 'adsense',
+      'type': 'doubleclick',
       'data-ad': 'premiumads',
-      'data-ad-client': this.autoAmpAdsElement_.getAttribute('data-ad-client'),
+      'width': '336',
+      'height': '280',
+      'layout': 'responsive',
+      'sizes': '(min-width: 320px) 320px, 100vw'
     });
-    const dataAdHost = this.autoAmpAdsElement_.getAttribute('data-ad-host');
-    const dataAdHostChannel = this.autoAmpAdsElement_.getAttribute(
-      'data-ad-host-channel'
-    );
-    if (dataAdHost) {
-      attributesObj['data-ad-host'] = dataAdHost;
-      if (dataAdHostChannel) {
-        attributesObj['data-ad-host-channel'] = dataAdHostChannel;
-      }
-    }
     return attributesObj;
   }
 
