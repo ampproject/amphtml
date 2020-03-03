@@ -1237,22 +1237,18 @@ describes.realWin(
         return getAmpSlideScroll(true).then(ampSlideScroll => {
           const impl = ampSlideScroll.implementation_;
           const showSlideSpy = env.sandbox.spy(impl, 'showSlide_');
-          expect(impl.userInteracted()).to.be.false;
 
           impl.goCallback(-1);
           expect(showSlideSpy).to.have.been.calledWith(4);
           expect(showSlideSpy).to.be.calledOnce;
-          expect(impl.userInteracted()).to.be.true;
 
           impl.goCallback(1);
           expect(showSlideSpy).to.have.been.calledWith(0);
           expect(showSlideSpy).to.have.callCount(2);
-          expect(impl.userInteracted()).to.be.true;
 
           impl.goCallback(1);
           expect(showSlideSpy).to.have.been.calledWith(1);
           expect(showSlideSpy).to.have.callCount(3);
-          expect(impl.userInteracted()).to.be.true;
         });
       });
 
