@@ -23,7 +23,12 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
-  const {datetime, locale, cutoff, cutoffText} = props;
+  const {
+    'datetime': datetime,
+    'locale': locale,
+    'cutoff': cutoff,
+    'cutoffText': cutoffText,
+  } = props;
   const [timestamp, setTimestamp] = useState(null);
   const ref = useRef(null);
 
@@ -33,7 +38,7 @@ export function Timeago(props) {
       const last = entries[entries.length - 1];
       if (last.isIntersecting) {
         setTimestamp(
-          getFuzzyTimestampValue(datetime, locale, cutoff, cutoffText)
+          getFuzzyTimestampValue(datetime, locale, cutoffText, cutoff)
         );
       }
     });
@@ -50,11 +55,11 @@ export function Timeago(props) {
 /**
  * @param {string} datetime
  * @param {string} locale
- * @param {number=} opt_cutoff
  * @param {string} cutoffText
+ * @param {number=} opt_cutoff
  * @return {string}
  */
-function getFuzzyTimestampValue(datetime, locale, opt_cutoff, cutoffText) {
+function getFuzzyTimestampValue(datetime, locale, cutoffText, opt_cutoff) {
   if (!opt_cutoff) {
     return timeago(datetime, locale);
   }
