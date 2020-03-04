@@ -91,7 +91,7 @@ export class AmpScript extends AMP.BaseElement {
      * If true, most production constraints are disabled including script size,
      * script hash sum for local scripts, etc. Default is false.
      *
-     * Enabled by the "development" attribute which is intentionally invalid.
+     * Enabled by the "data-ampdevmode" attribute which is intentionally invalid.
      *
      * @private {boolean}
      */
@@ -105,16 +105,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /*
-     * Development mode is enabled by satisfying two constraints:
-     *   1. Root html element has 'data-ampdevmode'
-     *   2. The amp-script tag or any of its parents must also have 'data-ampdevmode'.
-     */
-    const htmlEl = this.element.ownerDocument.documentElement;
-    this.development_ =
-      htmlEl.hasAttribute('data-ampdevmode') &&
-      closestAncestorElementBySelector(this.element, '[data-ampdevmode]') !=
-        htmlEl;
+    this.development_ = htmlEl.hasAttribute('data-ampdevmode');
 
     if (this.development_) {
       user().warn(
@@ -122,13 +113,6 @@ export class AmpScript extends AMP.BaseElement {
         'JavaScript size and script hash requirements are disabled in development mode.',
         this.element
       );
-      if (this.element.hasAttribute('development')) {
-        user().warn(
-          TAG,
-          "The 'development' flag is deprecated. Please use 'data-ampdevmode' on the root html element instead",
-          this.element
-        );
-      }
     }
 
     return getElementServiceForDoc(this.element, TAG, TAG).then(service => {
