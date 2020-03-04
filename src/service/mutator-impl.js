@@ -60,7 +60,7 @@ export class MutatorImpl {
     });
 
     /** @private @const {boolean} */
-    this.intersect_ = this.resources_.isExperimentOn('intersect-resources');
+    this.intersect_ = this.resources_.isIntersectionExperimentOn();
   }
 
   /** @override */

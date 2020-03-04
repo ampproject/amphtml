@@ -280,11 +280,8 @@ export class ResourcesImpl {
   }
 
   /** @override */
-  isExperimentOn(name) {
-    if (name == 'intersect-resources') {
-      return !!this.intersectionObserver_;
-    }
-    return false;
+  isIntersectionExperimentOn() {
+    return !!this.intersectionObserver_;
   }
 
   /**

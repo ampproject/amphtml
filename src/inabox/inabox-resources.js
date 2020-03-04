@@ -158,7 +158,7 @@ export class InaboxResources {
   }
 
   /** @override */
-  isExperimentOn(unusedName) {
+  isIntersectionExperimentOn() {
     return false;
   }
 
