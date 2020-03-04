@@ -23,47 +23,45 @@ import {useResourcesNotify} from '../../../src/preact/utils';
  * @return {Preact.Renderable}
  */
 export function Timeago(props) {
-  const [, setIsIntersecting] = useState(null);
+  const {datetime, locale, cutoff, cutoffText} = props;
+  const [timestamp, setTimestamp] = useState(null);
   const ref = useRef(null);
 
   useEffect(() => {
     const node = ref.current;
     const observer = new IntersectionObserver(entries => {
       const last = entries[entries.length - 1];
-      setIsIntersecting(last.isIntersecting);
+      if (last.isIntersecting) {
+        setTimestamp(
+          getFuzzyTimestampValue(datetime, locale, cutoff, cutoffText)
+        );
+      }
     });
     if (node) {
       observer.observe(node);
     }
     return () => observer.disconnect();
-  }, []);
+  }, [datetime, locale, cutoff, cutoffText]);
 
   useResourcesNotify();
-  return createElement(
-    'time',
-    {datetime: props['datetime'], ref},
-    getFuzzyTimestampValue(props)
-  );
+  return createElement('time', {datetime, ref}, timestamp);
 }
 
 /**
- * @param {!JsonObject} props
+ * @param {string} datetime
+ * @param {string} locale
+ * @param {number=} opt_cutoff
+ * @param {string} cutoffText
  * @return {string}
  */
-function getFuzzyTimestampValue(props) {
-  const {
-    'datetime': datetime,
-    'locale': locale,
-    'cutoff': cutoff,
-    'cutoffText': cutoffText,
-  } = props;
-  if (!cutoff) {
+function getFuzzyTimestampValue(datetime, locale, opt_cutoff, cutoffText) {
+  if (!opt_cutoff) {
     return timeago(datetime, locale);
   }
   const elDate = new Date(datetime);
   const secondsAgo = Math.floor((Date.now() - elDate.getTime()) / 1000);
 
-  if (secondsAgo > cutoff) {
+  if (secondsAgo > opt_cutoff) {
     return cutoffText;
   }
   return timeago(datetime, locale);
