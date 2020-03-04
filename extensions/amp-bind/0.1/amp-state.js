@@ -220,14 +220,16 @@ export class AmpState extends AMP.BaseElement {
       this.loadingDeferred_ = new Deferred();
     }
 
+    // Store the deferred locally, in case a new fetch overwrites
+    // it before it resolves.
+    const loadingDeferred = this.loadingDeferred_;
+
     // Don't fetch in prerender mode.
     return this.getAmpDoc()
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
       .then(json => this.updateState_(json, isInit))
-      .then(() => {
-        this.loadingDeferred_.resolve();
-      });
+      .then(() => loadingDeferred.resolve());
   }
 
   /**
