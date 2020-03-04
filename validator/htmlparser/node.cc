@@ -454,7 +454,7 @@ std::string Node::DebugString() {
   std::ostringstream ost;
   switch (node_type_) {
     case NodeType::ELEMENT_NODE:
-      ost << "<" << data_ << ">";
+      ost << "<" << AtomUtil::ToString(atom_) << ">";
       break;
     case NodeType::TEXT_NODE:
       ost << "TEXT[" << data_.size() << "]";
