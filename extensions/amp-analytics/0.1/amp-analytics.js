@@ -223,7 +223,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then(services => {
         this.instrumentation_ = services[0];
         this.variableService_ = services[1];
-        return new AnalyticsConfig(this.element).loadConfig();
+        return [];
+        //return new AnalyticsConfig(this.element).loadConfig();
       })
       .then(config => {
         this.config_ = /** @type {!JsonObject} */ (config);
