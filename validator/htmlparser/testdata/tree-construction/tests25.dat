@@ -86,7 +86,7 @@ eof
 |   <head>
 |   <body>
 |     <command>
-|       "A"
+|     "A"
 
 #data
 <!DOCTYPE html><body><embed>A

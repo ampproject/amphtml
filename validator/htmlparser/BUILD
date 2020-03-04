@@ -261,6 +261,16 @@ cc_library(
 )
 
 cc_library(
+    name = "url",
+    srcs = [
+        "url.cc",
+    ],
+    hdrs = [
+        "url.h",
+    ],
+)
+
+cc_library(
     name = "navigator",
     srcs = [
         "navigator.cc",
@@ -447,6 +457,17 @@ cc_test(
     ],
     deps = [
         ":htmlentities",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "url_test",
+    srcs = [
+        "url_test.cc",
+    ],
+    deps = [
+        ":url",
         "@com_google_googletest//:gtest_main",
     ],
 )

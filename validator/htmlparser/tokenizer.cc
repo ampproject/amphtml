@@ -50,7 +50,9 @@ inline char Tokenizer::ReadByte() {
     current_line_col_.second -= (multi_byte - 1);
   }
 
-  if (c == '\n') {
+  if (c == '\n' || (c == '\r' &&
+                    raw_.end < buffer_.size() &&
+                    buffer_.at(raw_.end) != '\n')) {
     lines_cols_.back() = current_line_col_;
     // Increment line number and reset column number.
     current_line_col_.first++;
