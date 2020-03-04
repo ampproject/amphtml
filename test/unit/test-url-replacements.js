@@ -1908,6 +1908,21 @@ describes.sandboxed('UrlReplacements', {}, env => {
           );
         });
 
+        it('should concatenate and expand additional params w/ whitelist', () => {
+          a.href = 'http://example.com/link?first=QUERY_PARAM(src,YYYY)';
+          a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+          a.setAttribute(
+            'data-amp-addparams',
+            'second=QUERY_PARAM(baz,XXXX)&third=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&' +
+              'fourth=link123'
+          );
+          urlReplacements.maybeExpandLink(a, null);
+          expect(a.href).to.equal(
+            'http://example.com/link?first=YYYY&second=XXXX&' +
+              'third=CLIENT_ID(AMP_ECID_GOOGLE%2C%2C_ga)&fourth=link123'
+          );
+        });
+
         it(
           'should add URL parameters and repalce whitelisted' +
             " values for http whitelisted URL's(non-secure)",
