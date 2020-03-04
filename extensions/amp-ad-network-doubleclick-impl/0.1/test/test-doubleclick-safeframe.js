@@ -89,7 +89,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
     const messageData = {};
     messageData[MESSAGE_FIELDS.SENTINEL] = doubleclickImpl.sentinel;
     messageData[MESSAGE_FIELDS.CHANNEL] = safeframeChannel;
-    receiveMessage(messageData);
+    receiveMessage(messageData, doubleclickImpl.iframe.contentWindow);
   }
 
   function sendRegisterDoneMessage() {
@@ -102,13 +102,14 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       initialWidth: '100',
       sentinel: safeframeHost.sentinel_,
     });
-    receiveMessage(message);
+    receiveMessage(message, safeframeHost.contentWindow);
   }
 
   // Simulates receiving a post message from the safeframe.
-  function receiveMessage(messageData) {
+  function receiveMessage(messageData, source) {
     const messageEvent = {
       data: JSON.stringify(messageData),
+      source: source,
     };
     safeframeListener(messageEvent);
   }
@@ -126,6 +127,10 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         safeframeMock.contentWindow,
         'postMessage'
       );
+
+      doubleclickImpl.iframe = safeframeMock;
+      safeframeHost.iframe_ = safeframeMock;
+
       sendSetupMessage();
 
       // Verify that the channel was set up
@@ -533,6 +538,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {});
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
+      safeframeHost.iframe_ = safeframeMock;
 
       const onScrollStub = env.sandbox./*OK*/ stub(
         safeframeHost.viewport_,
@@ -705,6 +711,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
+      safeframeHost.iframe_ = safeframeMock;
       resizeSafeframeSpy = env.sandbox./*OK*/ spy(
         safeframeHost,
         'resizeSafeframe'
@@ -751,7 +758,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'push': true,
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(expandMessage);
+      receiveMessage(expandMessage, safeframeHost.iframe_.contentWindow);
     }
 
     /**
@@ -908,7 +915,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'sentinel': safeframeHost.sentinel_,
       });
       allowConsoleError(() => {
-        receiveMessage(expandMessage);
+        receiveMessage(expandMessage, safeframeHost.iframe_.contentWindow);
       });
       return Services.timerFor(env.win)
         .promise(100)
@@ -958,7 +965,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'push': false,
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(collapseMessage);
+      receiveMessage(collapseMessage, safeframeHost.iframe_.contentWindow);
     }
 
     it('should collapse safeframe on amp-ad resize failure', () => {
@@ -1064,7 +1071,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'resize_l': left,
         'sentinel': safeframeHost.sentinel_,
       });
-      receiveMessage(resizeMessage);
+      receiveMessage(resizeMessage, safeframeHost.iframe_.contentWindow);
     }
 
     it('should resize safeframe on amp-ad resize success', () => {

@@ -83,6 +83,10 @@ export function safeframeListener(event) {
     dev().warn(TAG, `Safeframe Host for sentinel: ${sentinel} not found.`);
     return;
   }
+  if (!safeframeHost.equalsSafeframeContentWindow(event.source)) {
+    dev().warn(TAG, `Safeframe source did not match event.source.`);
+    return;
+  }
   if (!safeframeHost.channel) {
     safeframeHost.connectMessagingChannel(data[MESSAGE_FIELDS.CHANNEL]);
   } else if (payload) {
@@ -194,6 +198,14 @@ export class SafeframeHostApi {
 
     this.registerSafeframeHost();
   }
+
+  /**
+   * Returns true if the given window matches the Safeframe's content window.
+   * @return {Boolean}
+   */  
+   equalsSafeframeContentWindow(otherWindow) {
+    return otherWindow === this.iframe_.contentWindow;
+   }
 
   /**
    * Returns the Safeframe specific name attributes that are needed for the
