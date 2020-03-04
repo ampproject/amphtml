@@ -564,7 +564,7 @@ export class Bind {
    * @return {!Promise<*>}
    */
   getStateAsync(expr) {
-    const stateKey = expr.split('.')[0];
+    const stateKey = /^[^.]*/.exec(expr)[0];
     return this.rootNodePromise_.then(root => {
       const ampStateEl = root.querySelector(
         `#${escapeCssSelectorIdent(stateKey)}`
