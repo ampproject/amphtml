@@ -17,6 +17,7 @@
 import {Services} from '../../../src/services';
 import {buildUrl} from '../../../ads/google/a4a/shared/url-builder';
 import {dict} from '../../../src/utils/object';
+import {Layout} from '../../../src/layout';
 
 /**
  * @implements {./ad-network-config.AdNetworkConfigDef}
@@ -59,7 +60,8 @@ export class PremiumadsNetworkConfig {
       'data-ad': 'premiumads',
       'width': '336',
       'height': '280',
-      'layout': 'responsive',
+      'layout': Layout.RESPONSIVE,
+      // 'layout': Layout.FIXED_HEIGHT,
       'sizes': '(min-width: 320px) 320px, 100vw'
     });
     return attributesObj;
