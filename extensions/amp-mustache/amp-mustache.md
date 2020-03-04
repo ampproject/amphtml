@@ -35,7 +35,7 @@ limitations under the License.
 
 ## Syntax
 
-Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.com/janl/mustache.js/) for more details. Some of the core Mustache tags are:
+Mustache is a logic-less template syntax. See [Mustache specification](http://mustache.github.io/mustache.5.html) for more details. Some of the core Mustache tags are:
 
 - `{{variable}}`: A variable tag. It outputs the the HTML-escaped value of a variable.
 - `{{#section}} {{/section}}`: A section tag. It can test the existence of a variable and iterate over it if it's an array.
