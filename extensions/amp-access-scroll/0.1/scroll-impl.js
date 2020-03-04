@@ -15,11 +15,11 @@
  */
 
 import {AccessClientAdapter} from '../../amp-access/0.1/amp-access-client';
-import {ActivateBar, ScrollUserBar} from './scroll-bar';
 import {CSS} from '../../../build/amp-access-scroll-0.1.css';
 import {PROTOCOL_VERSION} from './scroll-protocol';
 import {ReadDepthTracker} from './read-depth-tracker.js';
 import {Relay} from './scroll-relay';
+import {ScrollBar} from './scroll-bar';
 import {Services} from '../../../src/services';
 import {Sheet} from './scroll-sheet';
 import {createElementWithAttributes} from '../../../src/dom';
@@ -160,7 +160,7 @@ export class ScrollAccessVendor extends AccessClientAdapter {
       if (response && response['scroll']) {
         if (!isStory) {
           // Display Scrollbar and set up features
-          const bar = new ScrollUserBar(
+          const bar = new ScrollBar(
             this.ampdoc,
             this.accessSource_,
             this.baseUrl_,
@@ -250,12 +250,21 @@ class ScrollContentBlocker {
           // TODO(dbow): Ideally we would automatically redirect to the page
           // here, but for now we are adding a button so we redirect on user
           // action.
-          new ActivateBar(
+          const baseUrl = connectHostname(
+            this.accessSource_.getAdapterConfig()
+          );
+          const bar = new ScrollBar(
             this.ampdoc_,
             this.accessSource_,
-            connectHostname(this.accessSource_.getAdapterConfig()),
+            baseUrl,
             holdback
           );
+          const relay = new Relay(baseUrl);
+          relay.register(bar.window, message => {
+            if (message['_scramp'] === 'st') {
+              bar.update(message);
+            }
+          });
         }
       });
   }
