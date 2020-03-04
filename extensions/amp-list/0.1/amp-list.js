@@ -24,12 +24,7 @@ import {
   markElementForDiffing,
 } from '../../../src/purifier/sanitation';
 import {Deferred} from '../../../src/utils/promise';
-import {
-  Layout,
-  getLayoutClass,
-  isLayoutSizeDefined,
-  parseLayout,
-} from '../../../src/layout';
+import {Layout, getLayoutClass, parseLayout} from '../../../src/layout';
 import {LoadMoreService} from './service/load-more-service';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
