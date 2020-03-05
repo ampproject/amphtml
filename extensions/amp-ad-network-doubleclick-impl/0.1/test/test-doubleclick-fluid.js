@@ -41,7 +41,6 @@ const realWinConfig = {
 
 const rawCreative = `
   <script>
-  debugger;
   parent./*OK*/postMessage(
       JSON.stringify(/** @type {!JsonObject} */ ({
         e: 'sentinel',
@@ -62,7 +61,6 @@ const mockPromise = {
     };
   },
 };
-
 
 /**
  * Sets up the necessary mocks and stubs to render a fake fluid creative in unit
@@ -242,20 +240,8 @@ describes.realWin('DoubleClick Fast Fetch Fluid', realWinConfig, env => {
       impl.safeframeApi_,
       'onFluidResize_'
     );
-
-    console.log('safeframeAPI iframe', impl.safeframeApi_.iframe_)
-    console.log('IMPL iframe', impl.iframe)
-
-    // impl.safeframeApi_.iframe_ = impl.iframe; 
-
     return impl.adPromise_.then(() => {
-
-      console.log('safeframeAPI iframe', impl.safeframeApi_.iframe_)
-      console.log('IMPL iframe', impl.iframe)
       return impl.layoutCallback().then(() => {
-
-        console.log('safeframeAPI iframe', impl.safeframeApi_.iframe_)
-        console.log('IMPL iframe', impl.iframe)
         expect(connectMessagingChannelSpy).to.be.calledOnce;
         expect(onFluidResizeSpy).to.be.calledOnce;
       });

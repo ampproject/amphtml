@@ -128,9 +128,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         'postMessage'
       );
 
-      doubleclickImpl.iframe = safeframeMock;
-      safeframeHost.iframe_ = safeframeMock;
-
       sendSetupMessage();
 
       // Verify that the channel was set up
@@ -538,7 +535,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       const safeframeMock = createElementWithAttributes(doc, 'iframe', {});
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      safeframeHost.iframe_ = safeframeMock;
 
       const onScrollStub = env.sandbox./*OK*/ stub(
         safeframeHost.viewport_,
@@ -711,7 +707,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       });
       ampAd.appendChild(safeframeMock);
       doubleclickImpl.iframe = safeframeMock;
-      safeframeHost.iframe_ = safeframeMock;
       resizeSafeframeSpy = env.sandbox./*OK*/ spy(
         safeframeHost,
         'resizeSafeframe'
