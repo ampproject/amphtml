@@ -245,11 +245,11 @@ function karmaRunStart_() {
 }
 
 /**
- * Runs tests in sauce labs
+ * Runs tests in Sauce Labs in batches.
  *
- * If --stable is provided, runs tests only on stable browsers in sauce labs without batching.
- * If --beta is provided, runs tests only on beta browsers in sauce labs without batching. Does not fail.
- * If neither --stable nor --beta are provided, runs test on all browsers in sauce labs with batching.
+ * If --stable is provided, runs tests only on stable browsers in Sauce Labs.
+ * If --beta is provided, runs tests only on beta browsers in Sauce Labs. Does not fail the build.
+ * If neither --stable nor --beta are provided, runs test on all browsers in Sauce Labs.
  *
  * @param {Object} config karma config
  * @return {!Promise<number>} exitCode
@@ -259,7 +259,7 @@ async function runTestInSauceLabs(config) {
 
   return await runTestInBatches_(config, {
     stable: argv.beta ? [] : browsers.filter(name => name.endsWith('_beta')),
-    beta: argv.stable ? [] : browsers.filter(name => !name.endsWith('_beta')),   
+    beta: argv.stable ? [] : browsers.filter(name => !name.endsWith('_beta')),
   });
 }
 
