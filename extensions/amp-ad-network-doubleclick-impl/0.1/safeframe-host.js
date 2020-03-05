@@ -201,11 +201,13 @@ export class SafeframeHostApi {
 
   /**
    * Returns true if the given window matches the Safeframe's content window.
-   * @return {Boolean}
+   *
+   * @param {!Window} otherWindow
+   * @return {boolean}
    */
-   equalsSafeframeContentWindow(otherWindow) {
-    return otherWindow === this.baseInstance_.iframe.contentWindow
-   }
+  equalsSafeframeContentWindow(otherWindow) {
+    return otherWindow === this.baseInstance_.iframe.contentWindow;
+  }
 
   /**
    * Returns the Safeframe specific name attributes that are needed for the
@@ -471,10 +473,7 @@ export class SafeframeHostApi {
     message[MESSAGE_FIELDS.SERVICE] = serviceName;
     message[MESSAGE_FIELDS.SENTINEL] = this.sentinel_;
     message[MESSAGE_FIELDS.ENDPOINT_IDENTITY] = this.endpointIdentity_;
-    this.iframe_.contentWindow./*OK*/ postMessage(
-      JSON.stringify(message),
-      '*'
-    );
+    this.iframe_.contentWindow./*OK*/ postMessage(JSON.stringify(message), '*');
   }
 
   /**

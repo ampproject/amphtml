@@ -109,7 +109,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
   function receiveMessage(messageData, source) {
     const messageEvent = {
       data: JSON.stringify(messageData),
-      source: source,
+      source,
     };
     safeframeListener(messageEvent);
   }
