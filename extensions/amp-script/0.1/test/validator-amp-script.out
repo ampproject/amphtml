@@ -124,7 +124,7 @@ amp-script/0.1/test/validator-amp-script.html:94:2 Custom JavaScript is not allo
 amp-script/0.1/test/validator-amp-script.html:99:2 The attribute 'type' in tag 'amp-script extension local script' is set to the invalid value 'text/amp-script'. (see https://amp.dev/documentation/components/amp-script)
 |      document.body.textContent = "Hello World!";
 |    </script>
-|    
+|
 |    <!-- Invalid: Local script with invalid 'target'. -->
 |    <script type=text/plain target=amp-js id=hello>
 >>   ^~~~~~~~~
