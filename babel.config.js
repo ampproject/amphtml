@@ -38,6 +38,19 @@ const noModuleTarget = {
     : ['Last 2 versions'],
 };
 
+const plugins = [
+  './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
+  '@babel/plugin-transform-react-constant-elements',
+  [
+    '@babel/plugin-transform-react-jsx',
+    {
+      pragma: 'Preact.createElement',
+      pragmaFrag: 'Preact.Fragment',
+      useSpread: true,
+    },
+  ],
+];
+
 // eslint-disable-next-line local/no-module-exports
 module.exports = function(api) {
   api.cache(true);
@@ -47,18 +60,7 @@ module.exports = function(api) {
     return {};
   }
   return {
-    'plugins': [
-      './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
-      '@babel/plugin-transform-react-constant-elements',
-      [
-        '@babel/plugin-transform-react-jsx',
-        {
-          pragma: 'Preact.createElement',
-          pragmaFrag: 'Preact.Fragment',
-          useSpread: true,
-        },
-      ],
-    ],
+    'plugins': plugins,
     'presets': [
       esm
         ? [

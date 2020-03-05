@@ -48,8 +48,8 @@ let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
 
 /**
- * Prefixes the the tmp directory if we need to shadow files that have been
- * preprocess by babel in the `dist` task.
+ * Prefixes the tmp directory if we need to shadow files that have been
+ * preprocessed by babel in the `dist` task.
  *
  * @param {!Array<string>} paths
  * @return {!Array<string>}
