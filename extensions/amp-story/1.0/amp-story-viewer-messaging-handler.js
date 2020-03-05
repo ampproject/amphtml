@@ -21,7 +21,8 @@ import {
 } from './amp-story-store-service';
 import {AnalyticsVariable, getVariableService} from './variable-service';
 import {HistoryState, getHistoryState} from './utils';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
+import {dict} from '../../../src/utils/object';
 
 /** @type {string} */
 const TAG = 'amp-story-viewer-messaging-handler';
@@ -101,6 +102,9 @@ export class AmpStoryViewerMessagingHandler {
     this.viewer_.onMessageRespond('getDocumentState', data =>
       this.onGetDocumentState_(data)
     );
+    this.viewer_.onMessage('onDocumentState', data =>
+      this.onOnDocumentState_(data)
+    );
     this.viewer_.onMessageRespond('setDocumentState', data =>
       this.onSetDocumentState_(data)
     );
@@ -147,6 +151,28 @@ export class AmpStoryViewerMessagingHandler {
     }
 
     return Promise.resolve({state, value});
+  }
+
+  /**
+   * Handles 'onDocumentState' viewer messages.
+   * @param {!Object=} data
+   * @private
+   */
+  onOnDocumentState_(data = {}) {
+    const {state} = data;
+    const config = GET_STATE_CONFIGURATIONS[state];
+
+    if (!config) {
+      user().error(TAG, `Invalid 'state' parameter`);
+      return;
+    }
+
+    this.storeService_.subscribe(config.property, value => {
+      this.viewer_.sendMessage(
+        'documentStateUpdate',
+        dict({'state': state, 'value': value})
+      );
+    });
   }
 
   /**
