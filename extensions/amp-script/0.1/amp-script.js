@@ -22,7 +22,6 @@ import {Services} from '../../../src/services';
 import {UserActivationTracker} from './user-activation-tracker';
 import {calculateExtensionScriptUrl} from '../../../src/service/extension-location';
 import {cancellation} from '../../../src/error';
-import {closestAncestorElementBySelector} from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
@@ -105,7 +104,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.development_ = htmlEl.hasAttribute('data-ampdevmode');
+    this.development_ = this.element.hasAttribute('data-ampdevmode');
 
     if (this.development_) {
       user().warn(
