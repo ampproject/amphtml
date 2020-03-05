@@ -41,12 +41,10 @@ describes.realWin(
     });
 
     describe('Premiumads', () => {
-      const PUBLISHER_ID = '1000';
-      const TAG_ID = '2819896d-f724';
+      const PUBLISHER_ID = 'f326cb3e-4302-4f7b-ac75-0b31153d0c59';
 
       beforeEach(() => {
-        ampAutoAdsElem.setAttribute('data-publisher-id', PUBLISHER_ID);
-        ampAutoAdsElem.setAttribute('data-tag-id', TAG_ID);
+        ampAutoAdsElem.setAttribute('data-publisher', PUBLISHER_ID);
       });
 
       it('should report enabled always', () => {
@@ -58,9 +56,7 @@ describes.realWin(
         const adNetwork = getAdNetworkConfig('premiumads', ampAutoAdsElem);
         const configUrl = adNetwork.getConfigUrl();
 
-        expect(configUrl).to.contain('//v2.premiumads.com/ad-request/amp');
-        expect(configUrl).to.contain('p=' + PUBLISHER_ID);
-        expect(configUrl).to.contain('t=' + TAG_ID);
+        expect(configUrl).to.contain(`https://tags.premiumads.com.br/autoads/${PUBLISHER_ID}`);
         expect(configUrl).to.contain('u=https%3A%2F%2Ffoo.bar%2Fbaz');
       });
 
@@ -74,7 +70,6 @@ describes.realWin(
         env.sandbox.stub(docInfo, 'canonicalUrl').callsFake(canonicalUrl);
 
         const url = adNetwork.getConfigUrl();
-        expect(url).to.contain('ama_t=amp');
         expect(url).to.contain('url=http%3A%2F%2Ffoo.bar');
         expect(url).not.to.contain('shouldnt_be_included');
       });
@@ -82,8 +77,6 @@ describes.realWin(
       it('should generate the attributes', () => {
         const adNetwork = getAdNetworkConfig('premiumads', ampAutoAdsElem);
         expect(adNetwork.getAttributes()).to.deep.equal({
-          'layout': 'fixed',
-          'data-multi-size-validation': 'false',
           'type': 'doubleclick',
           'data-ad': 'premiumads',
         });
