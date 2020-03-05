@@ -48,7 +48,7 @@ describes.realWin(
       });
 
       element = win.document.createElement('amp-date-display');
-      const template = document.createElement('template');
+      const template = win.document.createElement('template');
       template.setAttribute('type', 'amp-mustache');
       template.content.textContent = JSON.stringify({
         year: '{{year}}',

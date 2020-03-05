@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import * as Preact from '../../../../src/preact';
 import {DateDisplay} from '../date-display';
-import {createElement} from '../../../../src/preact';
 import {mount} from 'enzyme';
 
 describes.sandboxed('date-display preact component', {}, env => {
@@ -48,7 +48,7 @@ describes.sandboxed('date-display preact component', {}, env => {
       datetime: '2001-02-03T04:05:06.007Z',
       displayIn: 'UTC',
     };
-    const jsx = createElement(DateDisplay, props);
+    const jsx = <DateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -79,7 +79,7 @@ describes.sandboxed('date-display preact component', {}, env => {
       render,
       datetime: '2001-02-03T04:05:06.007',
     };
-    const jsx = createElement(DateDisplay, props);
+    const jsx = <DateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -111,7 +111,7 @@ describes.sandboxed('date-display preact component', {}, env => {
         render,
         datetime: 'now',
       };
-      const jsx = createElement(DateDisplay, props);
+      const jsx = <DateDisplay {...props} />;
 
       const wrapper = mount(jsx);
       const data = JSON.parse(wrapper.text());
@@ -126,7 +126,7 @@ describes.sandboxed('date-display preact component', {}, env => {
         render,
         datetime: '2001-02-03',
       };
-      const jsx = createElement(DateDisplay, props);
+      const jsx = <DateDisplay {...props} />;
 
       const wrapper = mount(jsx);
       const data = JSON.parse(wrapper.text());
@@ -139,7 +139,7 @@ describes.sandboxed('date-display preact component', {}, env => {
         render,
         datetime: '2001-02-03T04:05:06.007Z',
       };
-      const jsx = createElement(DateDisplay, props);
+      const jsx = <DateDisplay {...props} />;
 
       const wrapper = mount(jsx);
       const data = JSON.parse(wrapper.text());
@@ -152,7 +152,7 @@ describes.sandboxed('date-display preact component', {}, env => {
         render,
         datetime: '2001-02-03T04:05:06.007',
       };
-      const jsx = createElement(DateDisplay, props);
+      const jsx = <DateDisplay {...props} />;
 
       const wrapper = mount(jsx);
       const data = JSON.parse(wrapper.text());
@@ -168,7 +168,7 @@ describes.sandboxed('date-display preact component', {}, env => {
         render,
         datetime: '2001-02-03T04:05:06.007+08:00',
       };
-      const jsx = createElement(DateDisplay, props);
+      const jsx = <DateDisplay {...props} />;
 
       const wrapper = mount(jsx);
       const data = JSON.parse(wrapper.text());
@@ -181,7 +181,7 @@ describes.sandboxed('date-display preact component', {}, env => {
         render,
         timestampSeconds: 981173106,
       };
-      const jsx = createElement(DateDisplay, props);
+      const jsx = <DateDisplay {...props} />;
 
       const wrapper = mount(jsx);
       const data = JSON.parse(wrapper.text());
@@ -194,7 +194,7 @@ describes.sandboxed('date-display preact component', {}, env => {
         render,
         timestampMs: 981173106007,
       };
-      const jsx = createElement(DateDisplay, props);
+      const jsx = <DateDisplay {...props} />;
 
       const wrapper = mount(jsx);
       const data = JSON.parse(wrapper.text());
@@ -209,7 +209,7 @@ describes.sandboxed('date-display preact component', {}, env => {
       datetime: '2001-02-03T04:05:06.007Z',
       offsetSeconds: 1234567,
     };
-    const jsx = createElement(DateDisplay, props);
+    const jsx = <DateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -223,7 +223,7 @@ describes.sandboxed('date-display preact component', {}, env => {
       datetime: '2001-02-03T04:05:06.007Z',
       offsetSeconds: -1234567,
     };
-    const jsx = createElement(DateDisplay, props);
+    const jsx = <DateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
@@ -238,7 +238,7 @@ describes.sandboxed('date-display preact component', {}, env => {
       displayIn: 'UTC',
       locale: 'cs',
     };
-    const jsx = createElement(DateDisplay, props);
+    const jsx = <DateDisplay {...props} />;
 
     const wrapper = mount(jsx);
     const data = JSON.parse(wrapper.text());
