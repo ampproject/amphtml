@@ -208,7 +208,7 @@ export class SafeframeHostApi {
    */
   equalsSafeframeContentWindow(otherWindow) {
     return (
-      otherWindow && otherWindow === this.baseInstance_.iframe.contentWindow
+      !!otherWindow && otherWindow === this.baseInstance_.iframe.contentWindow
     );
   }
 
