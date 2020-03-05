@@ -102,7 +102,7 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
       initialWidth: '100',
       sentinel: safeframeHost.sentinel_,
     });
-    receiveMessage(message, safeframeHost.contentWindow);
+    receiveMessage(message, safeframeHost.iframe_.contentWindow);
   }
 
   // Simulates receiving a post message from the safeframe.
