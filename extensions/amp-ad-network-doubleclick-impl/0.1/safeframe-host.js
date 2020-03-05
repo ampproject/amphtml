@@ -204,7 +204,6 @@ export class SafeframeHostApi {
    * @return {Boolean}
    */
    equalsSafeframeContentWindow(otherWindow) {
-    devAssert(this.baseInstance_.iframe, "SafeframeAPI doesn't have an iframe to compare against.");
     return otherWindow === this.baseInstance_.iframe.contentWindow
    }
 
