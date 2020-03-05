@@ -167,6 +167,10 @@ tags: {  # <amp-script> (local script)
     mandatory: true
     value_casei: "text/plain"
   }
+  attrs: {
+    name: "data-ampdevmode"
+    value: "false"
+  }
   attr_lists: "mandatory-id-attr"
   attr_lists: "nonce-attr"
   cdata: {
