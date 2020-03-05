@@ -988,7 +988,7 @@ describe
               await bind.getStateAsync('mystate.mykey');
               expect.fail();
             } catch (err) {
-              expect(err).match('#mystate');
+              expect(err).match(/#mystate/);
             }
           });
 
