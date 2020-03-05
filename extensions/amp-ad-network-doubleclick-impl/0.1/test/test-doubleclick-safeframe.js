@@ -127,7 +127,6 @@ describes.realWin('DoubleClick Fast Fetch - Safeframe', realWinConfig, env => {
         safeframeMock.contentWindow,
         'postMessage'
       );
-
       sendSetupMessage();
 
       // Verify that the channel was set up
