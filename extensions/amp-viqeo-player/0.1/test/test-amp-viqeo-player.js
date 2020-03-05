@@ -207,7 +207,7 @@ describes.realWin(
         .then(() => viqeoElement.layoutCallback())
         .then(() => {
           const videoManager = Services.videoManagerForDoc(doc);
-          const entry = videoManager.getEntryForElement_(viqeoElement);
+          const entry = videoManager.getEntry_(viqeoElement);
           return Promise.resolve({
             viqeoElement,
             videoManager,

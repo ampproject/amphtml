@@ -155,19 +155,8 @@ describes.sandboxed('UrlReplacements', {}, env => {
           },
           document: {
             nodeType: /* document */ 9,
-            querySelector: selector => {
-              if (selector.startsWith('meta')) {
-                return {
-                  getAttribute: () => {
-                    return 'https://whitelisted.com https://greylisted.com http://example.com';
-                  },
-                  hasAttribute: () => {
-                    return true;
-                  },
-                };
-              } else {
-                return {href: canonical};
-              }
+            querySelector: () => {
+              return {href: canonical};
             },
             getElementById: () => {},
             cookie: '',
@@ -215,6 +204,10 @@ describes.sandboxed('UrlReplacements', {}, env => {
         win.__AMP_SERVICES.documentInfo = null;
         installDocumentInfoServiceForDoc(ampdoc);
         win.ampdoc = ampdoc;
+        env.sandbox.stub(win.ampdoc, 'getMeta').returns({
+          'amp-link-variable-allowed-origin':
+            'https://whitelisted.com https://greylisted.com http://example.com',
+        });
         installUrlReplacementsServiceForDoc(ampdoc);
         return win;
       }
@@ -228,7 +221,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
           // Restrict the number of replacement params to globalVariableSource
           // Please consider adding the logic to amp-analytics instead.
           // Please contact @lannka or @zhouyx if the test fail.
-          expect(variables.length).to.equal(64);
+          expect(variables.length).to.equal(61);
         });
       });
 
@@ -808,24 +801,6 @@ describes.sandboxed('UrlReplacements', {}, env => {
       it('should replace TIMEZONE', () => {
         return expandUrlAsync('?tz=TIMEZONE').then(res => {
           expect(res).to.match(/tz=-?\d+/);
-        });
-      });
-
-      it('should replace TIMEZONE_CODE', () => {
-        return expandUrlAsync('?tz_code=TIMEZONE_CODE').then(res => {
-          expect(res).to.match(/tz_code=\w+|^$/);
-        });
-      });
-
-      it('should replace SCROLL_TOP', () => {
-        return expandUrlAsync('?scrollTop=SCROLL_TOP').then(res => {
-          expect(res).to.match(/scrollTop=\d+/);
-        });
-      });
-
-      it('should replace SCROLL_LEFT', () => {
-        return expandUrlAsync('?scrollLeft=SCROLL_LEFT').then(res => {
-          expect(res).to.match(/scrollLeft=\d+/);
         });
       });
 
@@ -1505,6 +1480,8 @@ describes.sandboxed('UrlReplacements', {}, env => {
       });
 
       it('should reject javascript protocol', () => {
+        const protocolErrorRegex = /invalid protocol/;
+        expectAsyncConsoleError(protocolErrorRegex);
         const win = getFakeWindow();
         const {documentElement} = win.document;
         const urlReplacements = Services.urlReplacementsForDoc(documentElement);
@@ -1516,7 +1493,7 @@ describes.sandboxed('UrlReplacements', {}, env => {
               throw new Error('never here');
             },
             err => {
-              expect(err.message).to.match(/invalid protocol/);
+              expect(err.message).to.match(protocolErrorRegex);
             }
           );
       });
@@ -1928,6 +1905,21 @@ describes.sandboxed('UrlReplacements', {}, env => {
           urlReplacements.maybeExpandLink(a, null);
           expect(a.href).to.equal(
             'http://whitelisted.com/link?out=QUERY_PARAM(foo)&guid=123'
+          );
+        });
+
+        it('should concatenate and expand additional params w/ whitelist', () => {
+          a.href = 'http://example.com/link?first=QUERY_PARAM(src,YYYY)';
+          a.setAttribute('data-amp-replace', 'QUERY_PARAM');
+          a.setAttribute(
+            'data-amp-addparams',
+            'second=QUERY_PARAM(baz,XXXX)&third=CLIENT_ID(AMP_ECID_GOOGLE,,_ga)&' +
+              'fourth=link123'
+          );
+          urlReplacements.maybeExpandLink(a, null);
+          expect(a.href).to.equal(
+            'http://example.com/link?first=YYYY&second=XXXX&' +
+              'third=CLIENT_ID(AMP_ECID_GOOGLE%2C%2C_ga)&fourth=link123'
           );
         });
 

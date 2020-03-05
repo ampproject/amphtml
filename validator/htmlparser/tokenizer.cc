@@ -14,12 +14,12 @@
 // limitations under the license.
 //
 
-#include "htmlparser/tokenizer.h"
+#include "tokenizer.h"
 
-#include "htmlparser/atom.h"
-#include "htmlparser/atomutil.h"
-#include "htmlparser/defer.h"
-#include "htmlparser/strings.h"
+#include "atom.h"
+#include "atomutil.h"
+#include "defer.h"
+#include "strings.h"
 
 namespace htmlparser {
 
@@ -50,7 +50,9 @@ inline char Tokenizer::ReadByte() {
     current_line_col_.second -= (multi_byte - 1);
   }
 
-  if (c == '\n') {
+  if (c == '\n' || (c == '\r' &&
+                    raw_.end < buffer_.size() &&
+                    buffer_.at(raw_.end) != '\n')) {
     lines_cols_.back() = current_line_col_;
     // Increment line number and reset column number.
     current_line_col_.first++;
