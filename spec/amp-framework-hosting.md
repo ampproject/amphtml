@@ -51,7 +51,7 @@ The AMP framework can be copied from `cdn.ampproject.org`. The latest weekly rel
 
 #### Copy files
 
-A listing of files in each release can be found in `files.txt` at the root of the framework distribution. For example, the files included in the current weekly release are listed in [https://cdn.ampproject.org/files.txt](). Use your favorite HTTP client to download all of the files in `files.txt`, retaining path structures.
+A listing of files in each release can be found in `files.txt` at the root of the framework distribution. For example, the files included in the current weekly release are listed in [cdn.ampproject.org/files.txt](https://cdn.ampproject.org/files.txt). Use your favorite HTTP client to download all of the files in `files.txt`, retaining path structures.
 
 #### Undo amp-geo dynamic modification
 
@@ -126,7 +126,7 @@ The simplest option for hosting the AMP framework is to host it from an RTV-spec
 - Config: Numerical codes are used to identify the config: `00` is canary, `01` is production, and `02`, `03`, etc. are experiments.
 - Version: Regardless of whether you built or downloaded the AMP framework, the version of the framework is available from  `version.txt` at the root of the framework distribution.
 
-The runtime version is the concatenation of the numerical config and the version. For example, AMP Project release versions are listed at [https://github.com/ampproject/amphtml/releases/](). Those versions can be prepended by `00`, `01`, etc. to find the runtime version. For version `2002191527100`, the canary RTV is `002002191527100` and the production RTV is `012002191527100`. As long as this release version has not been [deprecated](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#version-deprecations), the AMP framework for each config can be found at `https://cdn.ampproject.org/rtv/002002191527100` and `https://cdn.ampproject.org/rtv/012002191527100`, respectively.
+The runtime version is the concatenation of the numerical config and the version. For example, AMP Project release versions are listed at [github.com/ampproject/amphtml/releases](https://github.com/ampproject/amphtml/releases/). Those versions can be prepended by `00`, `01`, etc. to find the runtime version. For version `2002191527100`, the canary RTV is `002002191527100` and the production RTV is `012002191527100`. As long as this release version has not been [deprecated](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#version-deprecations), the AMP framework for each config can be found at `https://cdn.ampproject.org/rtv/002002191527100` and `https://cdn.ampproject.org/rtv/012002191527100`, respectively.
 
 At a minimum, your AMP framework should be hosted in an RTV-specific path. For example, if you expect to host a production AMP framework with version `200229061636` from `https://example.com/amp`, then AMP framework files should be available from `https://example.com/amp/rtv/01200229061636`. As concrete examples, the [AMP runtime](https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#amp-runtime) should be available at `https://example.com/amp/rtv/01200229061636/v0.js` and component [amp-geo](https://amp.dev/documentation/components/amp-geo/) should be available at `https://example.com/amp/rtv/01200229061636/v0/amp-geo-0.1.js`.
 
@@ -145,7 +145,7 @@ The `amp-runtime-version` and `amp-optimizer` tools in [amp-toolbox](https://git
 
 If you have no intention of using any amp-toolbox tools, then this endpoint is optional and you can skip to the next section.
 
-Consider the following sample from [https://cdn.ampproject.org/rtv/metadata]():
+Consider the following sample from [cdn.ampproject.org/rtv/metadata](https://cdn.ampproject.org/rtv/metadata):
 ```
 {
   "ampRuntimeVersion": "012002192257490",
