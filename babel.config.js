@@ -51,6 +51,21 @@ const plugins = [
   ],
 ];
 
+const esmPresets = [
+  'babel-preset-modules',
+  {
+    'loose': true,
+  },
+];
+const presets = [
+  '@babel/preset-env',
+  {
+    'modules': isClosureCompiler ? false : 'commonjs',
+    'loose': true,
+    'targets': noModuleTarget,
+  },
+];
+
 // eslint-disable-next-line local/no-module-exports
 module.exports = function(api) {
   api.cache(true);
@@ -61,23 +76,7 @@ module.exports = function(api) {
   }
   return {
     'plugins': plugins,
-    'presets': [
-      esm
-        ? [
-            'babel-preset-modules',
-            {
-              'loose': true,
-            },
-          ]
-        : [
-            '@babel/preset-env',
-            {
-              'modules': isClosureCompiler ? false : 'commonjs',
-              'loose': true,
-              'targets': noModuleTarget,
-            },
-          ],
-    ],
+    'presets': [esm ? esmPresets : presets],
     'compact': false,
     'sourceType': 'module',
   };
