@@ -20,7 +20,7 @@ import {useResourcesNotify} from '../../../src/preact/utils';
 
 /**
  * @param {!JsonObject} props
- * @return {Preact.Renderable}
+ * @return {PreactDef.Renderable}
  */
 export function Timeago(props) {
   const {
