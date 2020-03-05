@@ -189,7 +189,7 @@ export const Action = {
   TOGGLE_UI: 'toggleUi',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
-  UPDATE_PAGE_SIZE: 'updatePageSize',
+  SET_PAGE_SIZE: 'updatePageSize',
 };
 
 /**
@@ -397,7 +397,7 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.PAGE_IDS]: data,
       });
-    case Action.UPDATE_PAGE_SIZE:
+    case Action.SET_PAGE_SIZE:
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.PAGE_SIZE]: data,

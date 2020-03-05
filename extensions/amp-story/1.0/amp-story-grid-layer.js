@@ -133,7 +133,7 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
   }
 
   /**
-   * @param {{width: number, height: number}} pageSize
+   * @param {?{width: number, height: number}} pageSize
    * @private
    */
   updatePageSize_(pageSize) {
