@@ -88,9 +88,8 @@ describes.realWin(
               .stub(urlReplacements.getVariableSource(), 'get')
               .callsFake(function(name) {
                 expect(this.replacements_).to.have.property(name);
-                const defaultValue = `_${name.toLowerCase()}_`;
                 return {
-                  sync: () => defaultValue,
+                  sync: (...args) => mockMacrosBinding(name, args),
                 };
               });
 
@@ -123,15 +122,7 @@ describes.realWin(
                 const keys = Object.keys(merged);
                 for (let i = 0; i < keys.length; i++) {
                   const key = keys[i];
-                  merged[key] = (...args) => {
-                    let params = args
-                      .filter(val => val !== undefined)
-                      .join(',');
-                    if (params) {
-                      params = '(' + params + ')';
-                    }
-                    return `_${key.replace('$', '').toLowerCase()}${params}_`;
-                  };
+                  merged[key] = (...args) => mockMacrosBinding(key, args);
                 }
                 return /** @type {!JsonObject} */ (merged);
               });
@@ -245,4 +236,18 @@ function writeOutput(vendor, output) {
   const out = top.document.createElement('div');
   out.textContent = JSON.stringify(output, null, '  ');
   top.document.body.insertBefore(out, firstChild);
+}
+
+/**
+ * CLIENT_ID(_ga) -> _client_id(_ga)_
+ * $NOT(true) -> _not(true)_
+ * @param {string} macroName
+ * @param {!Array<string>} argumentsList
+ */
+function mockMacrosBinding(macroName, argumentsList) {
+  let params = argumentsList.filter(val => val !== undefined).join(',');
+  if (params) {
+    params = '(' + params + ')';
+  }
+  return `_${macroName.replace('$', '').toLowerCase()}${params}_`;
 }
