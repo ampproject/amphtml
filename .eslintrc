@@ -8,6 +8,7 @@
     "local",
     "notice",
     "prettier",
+    "react",
     "sort-imports-es6-autofix",
     "sort-requires"
   ],
@@ -17,6 +18,7 @@
   },
   "parserOptions": {
     "ecmaVersion": 6,
+    "jsx": true,
     "sourceType": "module"
   },
   "globals": {
@@ -37,6 +39,9 @@
         "returns": "return"
       },
       "allowOverrideWithoutParam": true
+    },
+    "react": {
+      "pragma": "Preact"
     }
   },
   "rules": {
@@ -63,7 +68,9 @@
           "struct",
           "suppress",
           "template",
-          "visibleForTesting"
+          "visibleForTesting",
+          "jsx",
+          "jsxFrag"
         ]
       }
     ],
@@ -108,6 +115,7 @@
     "local/no-style-property-setting": 2,
     "local/no-swallow-return-from-allow-console-error": 2,
     "local/no-unload-listener": 2,
+    "local/preact": 2,
     "local/prefer-deferred-promise": 0,
     "local/prefer-destructuring": 2,
     "local/prefer-spread-props": 2,
@@ -182,6 +190,8 @@
     "prefer-const": 2,
     "prettier/prettier": 2,
     "radix": 2,
+    "react/jsx-uses-react": 2,
+    "react/jsx-uses-vars": 2,
     "require-jsdoc": [
       2,
       {

@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-import {useResourcesNotify} from '../../../src/preact/utils';
-import {useState} from '../../../src/preact';
+/**
+ * @protected {!Object<string, !ChildDef>|null}
+ */
+foo().bar;
 
 /**
- * Renders the children prop, waiting for it to resolve if it is a promise.
- *
- * @param {!JsonObject} props
- * @return {PreactDef.Renderable}
+ * @return {number}
  */
-export function AsyncRender(props) {
-  const children = props['children'];
-  const [state, set] = useState(children);
-  useResourcesNotify();
-
-  if (state && state.then) {
-    Promise.resolve(children).then(set);
-    return null;
-  }
-
-  return state;
+function collectProps() {
+  return 1;
 }

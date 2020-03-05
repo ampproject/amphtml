@@ -312,21 +312,19 @@ exports.getGraph = function(entryModules, config) {
 
   // Use browserify with babel to learn about deps.
   const b = browserify(entryModules, {
+    basedir: SRC_TEMP_DIR,
+    browserField: 'module',
     debug: true,
     deps: true,
     detectGlobals: false,
     fast: true,
-    browserField: 'module',
   })
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
     .transform(babelify, {
-      overrides: [
-        {
-          compact: false,
-          plugins: ['transform-es2015-modules-commonjs'],
-        },
-      ],
+      compact: false,
+      cwd: process.cwd(),
+      plugins: ['transform-es2015-modules-commonjs'],
     });
   // This gets us the actual deps. We collect them in an array, so
   // we can sort them prior to building the dep tree. Otherwise the tree
@@ -349,13 +347,13 @@ exports.getGraph = function(entryModules, config) {
         })
         .forEach(function(row) {
           const id = unifyPath(
-            exports.maybeAddDotJs(path.relative(process.cwd(), row.id))
+            exports.maybeAddDotJs(path.relative(SRC_TEMP_DIR, row.id))
           );
           topo.addNode(id, id);
           const deps = Object.keys(row.deps)
             .sort()
             .map(dep => {
-              dep = unifyPath(path.relative(process.cwd(), row.deps[dep]));
+              dep = unifyPath(path.relative(SRC_TEMP_DIR, row.deps[dep]));
               if (dep.startsWith('node_modules/')) {
                 const pkgJson = pkgUp.sync({cwd: path.dirname(dep)});
                 const jsonId = unifyPath(path.relative(process.cwd(), pkgJson));
@@ -734,7 +732,7 @@ function eliminateIntermediateBundles() {
       }
       const {code, map: babelMap} = babel.transformFileSync(path, {
         plugins: conf.eliminateIntermediateBundles(),
-        retainLines: true,
+        compact: false,
         sourceMaps: true,
         inputSourceMap: false,
       });
