@@ -1229,7 +1229,7 @@ describes.repeated(
             });
           });
 
-          describe.only('Using amp-state: protocol', () => {
+          describe('Using amp-state: protocol', () => {
             const experimentName = 'amp-list-init-from-state';
 
             beforeEach(() => {
