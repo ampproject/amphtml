@@ -55,7 +55,7 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
  * @return {!Array<string>}
  */
 function convertPathsToTmpRoot(paths) {
-  return paths.map(path => path.replace(/^(\!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
+  return paths.map(path => path.replace(/^(!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
 }
 
 // Compiles AMP with the closure compiler. This is intended only for
