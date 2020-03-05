@@ -150,7 +150,7 @@ export function getStyle(element, property, opt_bypassCache) {
     return undefined;
   }
   if (isVar(propertyName)) {
-    return element.getProperty(propertyName);
+    return element.style.getPropertyValue(propertyName);
   }
   return element.style[propertyName];
 }
