@@ -64,16 +64,19 @@ export class TemplateRenderer extends Renderer {
       }
       const templateHelper = getAmpAdTemplateHelper(context.win);
       return templateHelper
-        .render(data, iframe.contentWindow.document.body)
+        .render(
+          data,
+          (iframe.contentDocument || iframe.contentWindow.document).body
+        )
         .then(renderedElement => {
           const {analytics} = templateData;
           if (analytics) {
             templateHelper.insertAnalytics(renderedElement, analytics);
           }
           // This element must exist, or #render() would have thrown.
-          const templateElement = iframe.contentWindow.document.querySelector(
-            'template'
-          );
+          const templateElement = (
+            iframe.contentDocument || iframe.contentWindow.document
+          ).querySelector('template');
           templateElement.parentNode.replaceChild(
             renderedElement,
             templateElement
