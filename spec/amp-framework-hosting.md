@@ -35,9 +35,11 @@ It is not necessary to modify `cdnProxyRegex`, which helps AMP pages identify wh
 #### Build the framework
 
 Build an AMP release with
+
 ```
 gulp dist --config=<config> --version=<version>
 ```
+
 where
 
 - `<config>` is one of `canary` or `prod`, indicating whether the build is meant to be served as a canary release or a production release, respectively. When the `--config` flag is omitted, the build system defaults to `prod`.
@@ -62,15 +64,19 @@ When `cdn.ampproject.org` serves `amp-geo-0.1.js`, it replaces string `{{AMP_ISO
 ## Modify AMP pages
 
 AMP pages should be updated to fetch all scripts from your host. For example,
+
 ```
 <script async src="https://cdn.ampproject.org/v0.js"></script>
 <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 ```
+
 becomes
+
 ```
 <script async src="https://example.com/amp/v0.js"></script>
 <script async custom-element="amp-carousel" src="https://example.com/amp/v0/amp-carousel-0.1.js"></script>
 ```
+
 Versioned URLs are also possible and discussed in section [Serve the framework](#serve-the-framework).
 
 ### Meta tags
@@ -78,13 +84,17 @@ Versioned URLs are also possible and discussed in section [Serve the framework](
 If you opted for [Option 2: Copy the framework from cdn.ampproject.org](#option-2-copy-the-framework-from-cdn-ampproject-org), then the framework was built under the assumption that it would be hosted from its default location, `cdn.ampproject.org`. While `<script>` tags included in `<head>` will download from the URLs specified in their `src` attributes, dynamically loaded components like `amp-loader-0.1.js` will download from `cdn.ampproject.org`. Mixing a self-hosted AMP runtime with AMP components from `cdn.ampproject.org` is not supported and can lead to unpredictable end user experiences.
 
 The default host used by the AMP runtime can be updated by including the following `<meta>` tag in the `<head>` of your AMP pages:
+
 ```
 <meta name="runtime-host" content="...">
 ```
+
 where the `content` attribute should contain a URL to your hosted AMP framework. Similarly, an amp-geo fallback API URL (described in section [amp-geo hotpatching](#amp-geo-hotpatching)) can be defined with the following `<meta>` tag:
+
 ```
 <meta name="amp-geo-api" content="...">
 ```
+
 In each case, the value of the `content` attribute can be an absolute or relative URL, but must be secure (HTTPS). Importantly, **these meta tags must appear before the first `<script>` tag**. For example, if your AMP framework is hosted at `https://example.com/amp`, then your AMPHTML should look similar to:
 
 ```
@@ -124,7 +134,7 @@ When the AMP runtime is initialized, all components are verified to belong to th
 The simplest option for hosting the AMP framework is to host it from an RTV-specific path. The runtime version is derived from the config (production or canary) and the AMP framework version:
 
 - Config: Numerical codes are used to identify the config: `00` is canary, `01` is production, and `02`, `03`, etc. are experiments.
-- Version: Regardless of whether you built or downloaded the AMP framework, the version of the framework is available from  `version.txt` at the root of the framework distribution.
+- Version: Regardless of whether you built or downloaded the AMP framework, the version of the framework is available from `version.txt` at the root of the framework distribution.
 
 The runtime version is the concatenation of the numerical config and the version. For example, AMP Project release versions are listed at [github.com/ampproject/amphtml/releases](https://github.com/ampproject/amphtml/releases/). Those versions can be prepended by `00`, `01`, etc. to find the runtime version. For version `2002191527100`, the canary RTV is `002002191527100` and the production RTV is `012002191527100`. As long as this release version has not been [deprecated](https://github.com/ampproject/amphtml/blob/master/spec/amp-versioning-policy.md#version-deprecations), the AMP framework for each config can be found at `https://cdn.ampproject.org/rtv/002002191527100` and `https://cdn.ampproject.org/rtv/012002191527100`, respectively.
 
@@ -146,6 +156,7 @@ The `amp-runtime-version` and `amp-optimizer` tools in [amp-toolbox](https://git
 If you have no intention of using any amp-toolbox tools, then this endpoint is optional and you can skip to the next section.
 
 Consider the following sample from [cdn.ampproject.org/rtv/metadata](https://cdn.ampproject.org/rtv/metadata):
+
 ```
 {
   "ampRuntimeVersion": "012002192257490",
@@ -196,6 +207,7 @@ The API must meet the following requirements:
   ```
 
 A sample response for a user in Germany looks like:
+
 ```
 {
   "country": "de"
