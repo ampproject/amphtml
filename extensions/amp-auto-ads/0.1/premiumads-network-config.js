@@ -45,13 +45,7 @@ export class PremiumadsNetworkConfig {
 
   /** @override */
   getConfigUrl() {
-    return buildUrl(
-      'https://localhost:5001/autoads',
-      {
-        'publisher': this.autoAmpAdsElement_.getAttribute('data-publisher'),
-      },
-      4096
-    );
+    return buildUrl(`https://tags.premiumads.com.br/autoads/${this.autoAmpAdsElement_.getAttribute('data-publisher')}`, {}, 4096);
   }
 
   /** @override */
