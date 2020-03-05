@@ -26,8 +26,8 @@
  * </code>
  */
 
-import {StateProperty, getStoreService} from './amp-story-store-service';
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
+import {StateProperty, getStoreService} from './amp-story-store-service';
 import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 
@@ -147,14 +147,10 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     if (width > 0 && height > 0) {
       this.getVsync().mutate(() => {
         this.element.classList.add('i-amphtml-story-grid-template-aspect');
-        this.element.style.setProperty(
-          '--i-amphtml-story-layer-width',
-          px(width)
-        );
-        this.element.style.setProperty(
-          '--i-amphtml-story-layer-height',
-          px(height)
-        );
+        setStyles(this.element, {
+          '--i-amphtml-story-layer-width': px(width),
+          '--i-amphtml-story-layer-height': px(height),
+        });
       });
     }
   }
