@@ -241,10 +241,7 @@ export class AnalyticsRoot {
     if (selector == ':host') {
       return new Promise(resolve => {
         resolve(
-          user().assertElement(
-            this.getHostElement(),
-            `Element "${selector}" not found`
-          )
+          window.document.body
         );
       });
     }

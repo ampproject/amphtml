@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -199,6 +200,14 @@ export class AnalyticsConfig {
       );
   }
 
+  expensive_() {
+    let expensive = 0;
+    for (let i = 1; i<1000000; i++) {
+      expensive = expensive + Math.random();
+    }
+    return expensive;
+  }
+
   /**
    * Returns a promise that resolves when configuration is re-written if
    * configRewriter is configured by a vendor.
@@ -211,8 +220,20 @@ export class AnalyticsConfig {
     const config = dict({});
     const inlineConfig = this.getInlineConfig_();
     this.validateTransport_(inlineConfig);
-    mergeObjects(inlineConfig, config);
-    mergeObjects(this.remoteConfig_, config);
+    console.log('merge objects');
+    //mergeObjects(inlineConfig, config);
+    //mergeObjects(this.remoteConfig_, config);
+    console.log('invoke web worker', Date.now());
+    const p = invokeWebWorker(self.window, 'deepMerge', {
+      from: inlineConfig,
+      to: config
+    }).then(data => {
+      console.log('returned data is ', data.result);
+      //console.log('config is ', config);
+    });
+    setTimeout(() => {
+      console.log('expensive call', this.expensive_());
+    }, 1);
 
     if (!configRewriterUrl || this.isSandbox_) {
       this.config_ = this.mergeConfigs_(config);
@@ -325,6 +346,7 @@ export class AnalyticsConfig {
     const allPromises = [];
     // Merge publisher && vendor varGroups to see what has been enabled.
     const mergedConfig = pubVarGroups || dict();
+    console.log('invoke web worker');
     deepMerge(mergedConfig, vendorVarGroups);
 
     Object.keys(mergedConfig).forEach(groupName => {

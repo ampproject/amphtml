@@ -43,11 +43,13 @@ let PendingMessageDef;
  * @return {!Promise}
  */
 export function invokeWebWorker(win, method, opt_args, opt_localWin) {
+  console.log('within invoke web worker');
   if (!win.Worker) {
     return Promise.reject('Worker not supported in window.');
   }
   registerServiceBuilder(win, 'amp-worker', AmpWorker);
   const worker = getService(win, 'amp-worker');
+  console.log('send message');
   return worker.sendMessage_(method, opt_args || [], opt_localWin);
 }
 
@@ -108,6 +110,8 @@ class AmpWorker {
           type: 'text/javascript',
         });
         const blobUrl = win.URL.createObjectURL(blob);
+        console.log('blob url is ', blobUrl);
+        console.log('AMP to start worker', Date.now());
         this.worker_ = new win.Worker(blobUrl);
         this.worker_.onmessage = this.receiveMessage_.bind(this);
       });
@@ -143,6 +147,7 @@ class AmpWorker {
    * @restricted
    */
   sendMessage_(method, args, opt_localWin) {
+    console.log('send message');
     return this.fetchPromise_.then(() => {
       return new Promise((resolve, reject) => {
         const id = this.counter_++;
@@ -156,6 +161,7 @@ class AmpWorker {
           scope,
           id,
         });
+        console.log('postmessag', message);
         this.worker_./*OK*/ postMessage(message);
       });
     });
@@ -173,7 +179,7 @@ class AmpWorker {
       returnValue,
       id,
     } = /** @type {FromWorkerMessageDef} */ (event.data);
-
+    console.log('received message');
     const message = this.messages_[id];
     if (!message) {
       dev().error(
