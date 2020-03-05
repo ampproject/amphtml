@@ -167,10 +167,6 @@ tags: {  # <amp-script> (local script)
     mandatory: true
     value_casei: "text/plain"
   }
-  attrs: {
-    name: "data-ampdevmode"
-    value: "false"
-  }
   attr_lists: "mandatory-id-attr"
   attr_lists: "nonce-attr"
   cdata: {
@@ -195,6 +191,10 @@ tags: {  # <amp-script>
       # max-age only applies to inline scripts.
       also_requires_attr: "script"
     }
+  }
+  attrs: {
+    name: "data-ampdevmode"
+    value: "false"
   }
   attrs: { name: "sandbox" }
   attrs: {

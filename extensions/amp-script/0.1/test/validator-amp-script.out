@@ -110,6 +110,8 @@ amp-script/0.1/test/validator-amp-script.html:88:2 The attribute 'development' m
 |
 |    <!-- Invalid: 'data-ampdevmode' attribute. -->
 |    <amp-script layout=container src="https://example.com/foo.js" data-ampdevmode></amp-script>
+>>   ^~~~~~~~~
+amp-script/0.1/test/validator-amp-script.html:91:2 The attribute 'data-ampdevmode' in tag 'amp-script' is set to the invalid value ''. (see https://amp.dev/documentation/components/amp-script)
 |
 |    <!-- Invalid: Local script without 'target' or 'id' attributes. -->
 |    <script type=text/plain>
