@@ -77,7 +77,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, env => {
       expect(body.querySelector('child-one')).not.to.exist;
       expect(body.querySelector('child-two')).not.to.exist;
 
-      transformer.transferBody(body /* target */);
+      transformer.transferBody(body /* targetBody */);
       await flush();
 
       expect(body.querySelector('child-one')).to.exist;
@@ -97,7 +97,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, env => {
             <child-two></child-two>
      `);
       transformer.onChunk(detachedDoc);
-      transformer.transferBody(body /* target */);
+      transformer.transferBody(body /* targetBody */);
       await flush();
 
       expect(body.querySelector('child-one')).to.exist;
@@ -117,7 +117,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, env => {
     it('should resolve only after onEnd is called', async () => {
       const {body} = win.document;
       const tranferCompleteSpy = env.sandbox.spy();
-      transformer.transferBody(body /* target */).then(tranferCompleteSpy);
+      transformer.transferBody(body /* targetBody */).then(tranferCompleteSpy);
 
       detachedDoc.write(`
         <!doctype html>
@@ -158,7 +158,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, env => {
      `);
       transformer.onChunk(detachedDoc);
 
-      transformer.transferBody(body /* target */).then(tranferCompleteSpy);
+      transformer.transferBody(body /* targetBody */).then(tranferCompleteSpy);
       await flush();
 
       expect(tranferCompleteSpy).not.to.have.been.called;
@@ -182,7 +182,7 @@ describes.fakeWin('DomTransformStream', {amp: true}, env => {
     it('should not resolve if no body / onEnd called before body written', async () => {
       const {body} = win.document;
       const tranferCompleteSpy = env.sandbox.spy();
-      transformer.transferBody(body /* target */).then(tranferCompleteSpy);
+      transformer.transferBody(body /* targetBody */).then(tranferCompleteSpy);
 
       detachedDoc.write(`
         <!doctype html>
@@ -201,10 +201,10 @@ describes.fakeWin('DomTransformStream', {amp: true}, env => {
       expect(tranferCompleteSpy).not.to.have.been.called;
     });
 
-    it('should throw if no target given', () => {
+    it('should throw if no targetBody given', () => {
       allowConsoleError(() => {
         expect(() => transformer.transferBody()).to.throw(
-          'No target given to DomTransformStream.transferBody'
+          'No target body given to DomTransformStream.transferBody'
         );
       });
     });
@@ -212,10 +212,10 @@ describes.fakeWin('DomTransformStream', {amp: true}, env => {
     it('should throw if called more than once', () => {
       const {body} = win.document;
       // No problem here.
-      transformer.transferBody(body /* target */);
+      transformer.transferBody(body /* targetBody */);
       allowConsoleError(() => {
-        expect(() => transformer.transferBody()).to.throw(
-          'No target given to DomTransformStream.transferBody'
+        expect(() => transformer.transferBody(body)).to.throw(
+          'DomTransformStream.transferBody should only be called once'
         );
       });
     });

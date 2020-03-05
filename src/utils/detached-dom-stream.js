@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {userAssert} from '../log';
+import {devAssert} from '../log';
 
 export class DetachedDomStream {
   /**
@@ -43,7 +43,7 @@ export class DetachedDomStream {
    * @param {string} chunk
    */
   write(chunk) {
-    userAssert(!this.eof_, 'Detached doc already closed.');
+    devAssert(!this.eof_, 'Detached doc already closed.');
 
     if (chunk) {
       this.detachedDoc_.write(chunk);

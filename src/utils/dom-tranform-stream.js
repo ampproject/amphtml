@@ -16,7 +16,7 @@
 
 import {Deferred} from './promise';
 import {Services} from '../services';
-import {devAssert, user} from '../log';
+import {dev, devAssert} from '../log';
 import {removeNoScriptElements} from './dom-writer';
 
 export class DomTransformStream {
@@ -41,14 +41,14 @@ export class DomTransformStream {
     /** @private {?Element} */
     this.detachedBody_ = null;
 
+    /** @private {?Element} */
+    this.targetBody_ = null;
+
     /** @private {?Promise} */
     this.currentChunkTransferPromise_ = null;
 
     /** @private {boolean} */
     this.shouldTransfer_ = false;
-
-    /** @private {boolean} */
-    this.mergeScheduled_ = false;
 
     /** @const @private */
     this.vsync_ = Services.vsyncFor(win);
@@ -81,7 +81,7 @@ export class DomTransformStream {
    * @param {!Document} unusedCompleteDoc
    */
   onEnd(unusedCompleteDoc) {
-    this.transferBodyChunk_().then(this.bodyTransferResolver_);
+    this.bodyTransferResolver_(this.transferBodyChunk_());
   }
 
   /**
@@ -94,13 +94,13 @@ export class DomTransformStream {
 
   /**
    * Start the body transfer process. Should only be called once.
-   * @param {!Element} target DOM element to be appended to.
+   * @param {!Element} targetBody body element to be appended to.
    * @return {!Promise} resolves when doc has been fully transferred.
    */
-  transferBody(target) {
-    user().assertElement(
-      target,
-      'No target given to DomTransformStream.transferBody'
+  transferBody(targetBody) {
+    dev().assertElement(
+      targetBody,
+      'No target body given to DomTransformStream.transferBody'
     );
 
     devAssert(
@@ -109,7 +109,7 @@ export class DomTransformStream {
     );
 
     this.shouldTransfer_ = true;
-    this.target_ = target;
+    this.targetBody_ = targetBody;
 
     this.transferBodyChunk_();
 
@@ -121,18 +121,16 @@ export class DomTransformStream {
    * @return {!Promise}
    */
   transferBodyChunk_() {
-    if (this.mergeScheduled_) {
+    if (this.currentChunkTransferPromise_) {
       return this.currentChunkTransferPromise_;
     }
 
-    this.mergeScheduled_ = true;
-
     this.currentChunkTransferPromise_ = this.headPromise_.then(() =>
       this.vsync_.mutatePromise(() => {
-        this.mergeScheduled_ = false;
+        this.currentChunkTransferPromise_ = null;
         removeNoScriptElements(this.detachedBody_);
         while (this.detachedBody_.firstChild) {
-          this.target_.appendChild(this.detachedBody_.firstChild);
+          this.targetBody_.appendChild(this.detachedBody_.firstChild);
         }
       })
     );
