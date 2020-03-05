@@ -52,7 +52,7 @@ should be specified on the tag.
 - [AdSense](../../ads/google/adsense.md)
 - [Denakop](https://denakop.com)
 - [DoubleClick (experimental)](../../ads/google/doubleclick.md)
-- [Premium Programmatic (experimental)](https://premiumads.com.br/)
+- [Premium Programmatic](https://premiumads.com.br)
 
 ## Attributes
 
