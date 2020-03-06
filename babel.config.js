@@ -38,6 +38,34 @@ const noModuleTarget = {
     : ['Last 2 versions'],
 };
 
+const plugins = [
+  './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
+  '@babel/plugin-transform-react-constant-elements',
+  [
+    '@babel/plugin-transform-react-jsx',
+    {
+      pragma: 'Preact.createElement',
+      pragmaFrag: 'Preact.Fragment',
+      useSpread: true,
+    },
+  ],
+];
+
+const esmPresets = [
+  'babel-preset-modules',
+  {
+    'loose': true,
+  },
+];
+const presets = [
+  '@babel/preset-env',
+  {
+    'modules': isClosureCompiler ? false : 'commonjs',
+    'loose': true,
+    'targets': noModuleTarget,
+  },
+];
+
 // eslint-disable-next-line local/no-module-exports
 module.exports = function(api) {
   api.cache(true);
@@ -47,35 +75,8 @@ module.exports = function(api) {
     return {};
   }
   return {
-    'plugins': [
-      './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
-      '@babel/plugin-transform-react-constant-elements',
-      [
-        '@babel/plugin-transform-react-jsx',
-        {
-          pragma: 'Preact.createElement',
-          pragmaFrag: 'Preact.Fragment',
-          useSpread: true,
-        },
-      ],
-    ],
-    'presets': [
-      esm
-        ? [
-            'babel-preset-modules',
-            {
-              'loose': true,
-            },
-          ]
-        : [
-            '@babel/preset-env',
-            {
-              'modules': isClosureCompiler ? false : 'commonjs',
-              'loose': true,
-              'targets': noModuleTarget,
-            },
-          ],
-    ],
+    'plugins': plugins,
+    'presets': [esm ? esmPresets : presets],
     'compact': false,
     'sourceType': 'module',
   };

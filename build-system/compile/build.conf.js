@@ -19,17 +19,16 @@ const experimentsConstantBackup = require('../global-configs/experiments-const.j
 const localPlugin = name =>
   require.resolve(`../babel-plugins/babel-plugin-${name}`);
 
+const jsxOpts = {
+  pragma: 'Preact.createElement',
+  pragmaFrag: 'Preact.Fragment',
+  useSpread: true,
+};
+
 const defaultPlugins = isEsmBuild => [
   localPlugin('transform-fix-leading-comments'),
   '@babel/plugin-transform-react-constant-elements',
-  [
-    '@babel/plugin-transform-react-jsx',
-    {
-      pragma: 'Preact.createElement',
-      pragmaFrag: 'Preact.Fragment',
-      useSpread: true,
-    },
-  ],
+  ['@babel/plugin-transform-react-jsx', jsxOpts],
   localPlugin('transform-inline-configure-component'),
   // TODO(alanorozco): Remove `replaceCallArguments` once serving infra is up.
   [localPlugin('transform-log-methods'), {replaceCallArguments: false}],
