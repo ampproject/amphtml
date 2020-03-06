@@ -32,7 +32,7 @@ export function temedya(global, data) {
   // load the temedya  AMP JS file script asynchronously
   loadScript(
     global,
-    'https://widget.cdn.vidyome.com/builds/loader.js',
+    'https://widget.cdn.vidyome.com/builds/loader-amp.js',
     () => {},
     global.context.noContentAvailable
   );
