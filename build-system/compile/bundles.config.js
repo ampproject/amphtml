@@ -1036,7 +1036,7 @@ exports.extensionBundles = [
   {
     name: 'amp-social-share',
     version: '0.2',
-    latestVersion: '0.2',
+    latestVersion: '0.1',
     type: TYPES.MISC,
   },
   {
