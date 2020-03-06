@@ -1,7 +1,7 @@
 ---
 $category@: presentation
 formats:
-  - websites
+  - stories
 teaser:
   text: Dynamically inserts ads into a Story.
 ---
