@@ -145,10 +145,7 @@ export function getStyle(element, property, opt_bypassCache) {
   if (!propertyName) {
     return undefined;
   }
-  if (isVar(propertyName)) {
-    return element.style.getPropertyValue(propertyName);
-  }
-  return element.style[propertyName];
+  return element.style.getPropertyValue(propertyName);
 }
 
 /**
