@@ -69,8 +69,8 @@ Example:
 ```html
 <amp-story-grid-layer aspect-ratio="9:16" template="vertical">
   <div style="width: 10%; height: 10%; font-size: 2em;">
-    This block will be in 9:16 aspect ratio and font size will be set at the
-    20% of the layer's height.
+    This block will be in 9:16 aspect ratio and font size will be set at the 20%
+    of the layer's height.
   </div>
 </amp-story-grid-layer>
 ```
