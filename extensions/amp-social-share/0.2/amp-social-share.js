@@ -31,11 +31,6 @@ const TAG = 'amp-social-share';
 class AmpSocialShare extends PreactBaseElement {
   /** @override */
   init() {
-    const renderDict = dict({
-      'render': (_, ...children) => {
-        return createElement(Fragment, null, children);
-      },
-    });
     const viewer = Services.viewerForDoc(this.element);
     const platform = Services.platformFor(window);
     const typeConfig = this.getTypeConfigOrUndefined_(
@@ -46,10 +41,9 @@ class AmpSocialShare extends PreactBaseElement {
     // Hide/ignore component if typeConfig is undefined
     if (!typeConfig) {
       toggle(this.element, false);
-      return renderDict;
+      return;
     }
     this.setHrefAndTargetContext_(typeConfig, platform);
-    return renderDict;
   }
 
   /** @override */
@@ -169,7 +163,7 @@ class AmpSocialShare extends PreactBaseElement {
 AmpSocialShare.Component = SocialShare;
 
 /** @override */
-AmpSocialShare.passthrough = true;
+AmpSocialShare.passthrough = false;
 
 /** @override */
 AmpSocialShare.props = {
