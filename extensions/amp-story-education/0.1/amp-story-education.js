@@ -18,9 +18,6 @@ import {CSS} from '../../../build/amp-story-education-0.1.css';
 import {Layout} from '../../../src/layout';
 import {htmlFor} from '../../../src/static-template';
 
-/** @const {string} */
-const TAG = 'amp-story-education';
-
 /**
  * Generates the amp-story-education template.
  * @param {!Element} element
