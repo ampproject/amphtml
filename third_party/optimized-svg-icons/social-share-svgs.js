@@ -5,8 +5,7 @@ import * as Preact from '../../src/preact';
  * @return {PreactDef.Renderable}
  */
 export function SocialShareIcon(props) {
-  const {'style': style, 'styleType': styleType} = props;
-  switch (styleType) {
+  switch (props['styleType']) {
     case 'SOCIAL_SHARE_FACEBOOK':
       return (
         <svg {...props} viewBox="0 0 512 512">
