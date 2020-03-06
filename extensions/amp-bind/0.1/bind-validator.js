@@ -368,6 +368,7 @@ function createElementRules_() {
           'twitter': true,
           'viber': true,
           'whatsapp': true,
+          'facetime': true,
         },
       },
     },
