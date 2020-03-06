@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import * as CSS from './social-share.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
 import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
