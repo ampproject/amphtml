@@ -25,6 +25,9 @@ import {parseQueryString} from '../../../src/url';
 import {startsWith} from '../../../src/string';
 import {useResourcesNotify} from '../../../src/preact/utils';
 
+const DEFAULT_WIDTH = 60;
+const DEFAULT_HEIGHT = 44;
+
 /**
  * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
@@ -68,7 +71,10 @@ export function SocialShare(props) {
   const size =
     props['layout'] === 'responsive'
       ? {}
-      : {width: props['width'] || 60, height: props['height'] || 44};
+      : {
+          width: props['width'] || DEFAULT_WIDTH,
+          height: props['height'] || DEFAULT_HEIGHT,
+        };
   useResourcesNotify();
   return (
     <SocialShareIcon
