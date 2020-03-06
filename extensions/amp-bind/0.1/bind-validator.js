@@ -284,6 +284,7 @@ function createElementRules_() {
     },
     'AMP-IFRAME': {
       'src': null,
+      'title': null,
     },
     'AMP-IMG': {
       'alt': null,
