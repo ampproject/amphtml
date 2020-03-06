@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import * as Preact from '../../../src/preact';
 import {AsyncRender} from './async-render';
 import {DateDisplay} from './date-display';
-import {Fragment, createElement} from '../../../src/preact';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {RenderDomTree} from './render-dom-tree';
 import {Services} from '../../../src/services';
@@ -55,13 +55,15 @@ class AmpDateDisplay extends PreactBaseElement {
             const container = document.createElement('div');
             container.appendChild(rendered);
 
-            return createElement(RenderDomTree, {
-              'dom': container,
-              'host': host,
-            });
+            return <RenderDomTree dom={container} host={host} />;
           });
-        const asyncRender = createElement(AsyncRender, null, domPromise);
-        return createElement(Fragment, null, children, asyncRender);
+
+        return (
+          <>
+            {children}
+            <AsyncRender>{domPromise}</AsyncRender>
+          </>
+        );
       },
     });
   }
