@@ -203,20 +203,17 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     });
 
     it('data-ampdevmode on just the element should enable dev mode', () => {
-      element.setAttribute('data-ampdevmode', true);
+      element.setAttribute('data-ampdevmode', '');
       script = new AmpScript(element);
       script.buildCallback();
       expect(script.development_).true;
     });
 
-    it('data-ampdevmode on just the root html element should not enable dev mode', () => {
-      element.ownerDocument.documentElement.setAttribute(
-        'data-ampdevmode',
-        true
-      );
+    it('data-ampdevmode on just the root html element should enable dev mode', () => {
+      element.ownerDocument.documentElement.setAttribute('data-ampdevmode', '');
       script = new AmpScript(element);
       script.buildCallback();
-      expect(script.development_).false;
+      expect(script.development_).true;
     });
   });
 });

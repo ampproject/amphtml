@@ -222,7 +222,7 @@ Example of script hashes:
 ```
 
 [tip type="default"]
-The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to the `amp-script` element.
+The JavaScript size and script hash requirements can be disabled during development by adding a `data-ampdevmode` attribute to either the `amp-script` element or the root html node.
 [/tip]
 
 ## Attributes

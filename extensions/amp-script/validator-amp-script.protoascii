@@ -193,8 +193,10 @@ tags: {  # <amp-script>
     }
   }
   attrs: {
+    # This attribute should always be invalid.
     name: "data-ampdevmode"
     value: "false"
+    blacklisted_value_regex: "false"
   }
   attrs: { name: "sandbox" }
   attrs: {
