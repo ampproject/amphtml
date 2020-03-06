@@ -5,8 +5,8 @@
   rules: [
     {
       owners: [
-          {name: 'ampproject/wg-ads'},
-          {name: 'jeffkaufman', requestReviews: false},
+        {name: 'ampproject/wg-ads'},
+        {name: 'jeffkaufman', requestReviews: false},
       ],
     },
   ],
