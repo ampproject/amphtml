@@ -34,14 +34,14 @@ const TAG = 'amp-img';
  */
 const ATTRIBUTES_TO_PROPAGATE = [
   'alt',
-  'title',
-  'referrerpolicy',
-  'aria-label',
   'aria-describedby',
+  'aria-label',
   'aria-labelledby',
-  'srcset',
-  'src',
+  'referrerpolicy',
   'sizes',
+  'src',
+  'srcset',
+  'title',
 ];
 
 export class AmpImg extends BaseElement {
