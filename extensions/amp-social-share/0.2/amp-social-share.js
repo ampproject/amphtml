@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CSS} from '../../../build/amp-social-share-0.2.css';
 import {Fragment, createElement} from '../../../src/preact';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
@@ -180,5 +179,5 @@ AmpSocialShare.props = {
 };
 
 AMP.extension(TAG, '0.2', AMP => {
-  AMP.registerElement(TAG, AmpSocialShare, CSS);
+  AMP.registerElement(TAG, AmpSocialShare);
 });
