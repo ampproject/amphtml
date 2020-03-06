@@ -216,6 +216,7 @@ describes.realWin(
           src: iframeSrc,
           width: 100,
           height: 100,
+          title: 'example title',
           allowfullscreen: '',
           allowpaymentrequest: '',
           allowtransparency: '',
@@ -235,7 +236,8 @@ describes.realWin(
         expect(iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
         expect(iframe.getAttribute('frameborder')).to.equal('3');
         expect(iframe.getAttribute('tabindex')).to.equal('-1');
-        // unsupproted attributes
+        expect(iframe.getAttribute('title')).to.equal('example title');
+        // unsupported attributes
         expect(iframe.getAttribute('longdesc')).to.be.null;
         expect(iframe.getAttribute('marginwidth')).to.be.null;
       });
@@ -929,6 +931,23 @@ describes.realWin(
         impl.mutatedAttributesCallback({src: newSrc});
         expect(impl.iframeSrc).to.contain(newSrc);
         expect(iframe.getAttribute('src')).to.contain(newSrc);
+      });
+
+      it('should propagate `title` when container attribute is mutated', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          width: 100,
+          height: 100,
+          title: 'foo',
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        const iframe = ampIframe.querySelector('iframe');
+        const newTitle = 'bar';
+        ampIframe.setAttribute('title', newTitle);
+        impl.mutatedAttributesCallback({title: newTitle});
+        expect(impl.iframe_.title).to.equal(newTitle);
+        expect(iframe.getAttribute('title')).to.equal(newTitle);
       });
 
       describe('throwIfCannotNavigate()', () => {
