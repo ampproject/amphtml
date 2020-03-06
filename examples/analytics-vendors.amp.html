@@ -1384,7 +1384,7 @@ For complete documentation and additional examples please see: https://marketing
   {
     "vars": {
       "collectorHost": "collector.snplow.net",
-      "appId": "amp-examples-v2.0.1",
+      "appId": "amp-examples-v2.0.2",
       "userId": "someUserId",
       "customContexts":  "{\"schema\":\"iglu:com.snowplowanalytics.snowplow/gdpr/jsonschema/1-0-0\",\"data\":{\"basisForProcessing\":\"legitimate_interests\"}}"
     },
@@ -1400,7 +1400,7 @@ For complete documentation and additional examples please see: https://marketing
       },
       "trackFirstPagePing": {
         "on": "timer",
-        "request": "pagePing",
+        "request": "ampPagePing",
         "timerSpec": {
           "interval": 10,
           "maxTimerLength": 9.99,
@@ -1417,7 +1417,7 @@ For complete documentation and additional examples please see: https://marketing
       },
       "trackPagePings": {
         "on": "timer",
-        "request": "pagePing",
+        "request": "ampPagePing",
         "timerSpec": {
           "interval": 30,
           "maxTimerLength": 1800,
