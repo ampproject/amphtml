@@ -179,7 +179,7 @@ With regard to dynamic creation of AMP elements (e.g. via `document.createElemen
 
 Since custom JS run in `amp-script` is not subject to normal [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP), we've included some additional measures that are checked at runtime:
 
-1. Same-origin `src` must have [`Content-Type: application/javascript`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type).
+1. Same-origin `src` must have [`Content-Type`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Type): `application/javascript` or `text/javascript`.
 2. Cross-origin `src` and `script` must have matching script hashes in a `meta[name=amp-script-src]` element in the document head. A console error will be emitted with the expected hash string.
 
 Example of script hashes:
@@ -231,7 +231,7 @@ The JavaScript size and script hash requirements can be disabled during developm
 
 For executing remote scripts.
 
-The URL of a JS file that will be executed in the context of this `<amp-script>`. The URL's protocol must be HTTPS and the HTTP response's `Content-Type` must be `application/javascript`.
+The URL of a JS file that will be executed in the context of this `<amp-script>`. The URL's protocol must be HTTPS and the HTTP response's `Content-Type` must be `application/javascript` or `text/javascript`.
 
 **script**
 
