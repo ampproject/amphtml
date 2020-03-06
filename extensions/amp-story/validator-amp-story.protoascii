@@ -380,6 +380,7 @@ tags: {  # amp-story-bookend (json)
     value_casei: "application/json"
     dispatch_key: NAME_VALUE_PARENT_DISPATCH
   }
+  attr_lists: "nonce-attr"
 }
 tags: {  # amp-story-consent (json)
   html_format: AMP
