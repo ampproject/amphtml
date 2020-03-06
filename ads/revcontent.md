@@ -58,6 +58,7 @@ Supported parameters:
 - `data-ssl`
 - `data-testing`
 - `data-loadscript`
+- `data-sub-ids`
 
 ## Auto-sizing of Ads
 
