@@ -207,14 +207,7 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       script = new AmpScript(element);
       script.buildCallback();
       expect(script.development_).true;
-    });
-
-    it('data-ampdevmode on just the root html element should enable dev mode', () => {
-      element.ownerDocument.documentElement.setAttribute('data-ampdevmode', '');
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).true;
-    });
+    }); 
   });
 });
 

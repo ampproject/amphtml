@@ -104,10 +104,7 @@ export class AmpScript extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    const htmlEl = this.element.ownerDocument.documentElement;
-    this.development_ =
-      this.element.hasAttribute('data-ampdevmode') ||
-      htmlEl.hasAttribute('data-ampdevmode');
+    this.development_ = this.element.hasAttribute('data-ampdevmode');
 
     if (this.development_) {
       user().warn(
