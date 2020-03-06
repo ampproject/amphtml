@@ -1,5 +1,5 @@
 /**
- * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+@import "../../../third_party/optimized-svg-icons/amp-social-share-svgs.css";
+
+amp-social-share {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+}
 
 /**
  * Note: Attribute selectors were used initially here but we switched to using
@@ -67,7 +78,7 @@
 
 /* SMS Styling */
 .amp-social-share-sms {
-  background-color: #ca2b63;
+  background-color: #CA2B63;
 }
 
 /* "system" styling */
