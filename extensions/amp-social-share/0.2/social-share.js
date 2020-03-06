@@ -63,6 +63,12 @@ export function SocialShare(props) {
   }
 
   const styleType = `SOCIAL_SHARE_${props['type'].toUpperCase()}`;
+  const base = CSS.BASE_STYLE;
+  const background = CSS[styleType];
+  const size =
+    props['layout'] === 'responsive'
+      ? {}
+      : {width: props['width'] || 60, height: props['height'] || 44};
   useResourcesNotify();
   return (
     <SocialShareIcon
@@ -70,7 +76,7 @@ export function SocialShare(props) {
       onClick={handleActivation}
       onKeydown={handleKeyPress}
       role="button"
-      style={CSS.BASE_STYLE + CSS[styleType] + props['style']}
+      style={{...size, ...base, ...background}}
       styleType={styleType}
       tabIndex={props['tabIndex'] || '0'}
     />

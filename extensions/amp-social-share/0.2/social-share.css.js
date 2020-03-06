@@ -14,43 +14,43 @@
  * limitations under the License.
  */
 
-export const BASE_STYLE =
-  'background-repeat: no-repeat; ' +
-  'background-position: center; ' +
-  'background-size: contain; ' +
-  'text-decoration: none; ' +
-  'cursor: pointer; ' +
-  'position: relative; ';
+export const BASE_STYLE = {
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'center',
+  textDecoration: 'none',
+  cursor: 'pointer',
+  position: 'relative',
+};
 
 /* Twitter Styling */
-export const SOCIAL_SHARE_TWITTER = 'background-color: #1da1f2;';
+export const SOCIAL_SHARE_TWITTER = {backgroundColor: '1da1f2'};
 
 /* Facebook Styling */
-export const SOCIAL_SHARE_FACEBOOK = 'background-color: #32529f;';
+export const SOCIAL_SHARE_FACEBOOK = {backgroundColor: '#32529f'};
 
 /* Pinterest Styling */
-export const SOCIAL_SHARE_PINTEREST = 'background-color: #e60023;';
+export const SOCIAL_SHARE_PINTEREST = {backgroundColor: 'e60023'};
 
 /* LinkedIn Styling */
-export const SOCIAL_SHARE_LINKEDIN = 'background-color: #0077b5;';
+export const SOCIAL_SHARE_LINKEDIN = {backgroundColor: '0077b5'};
 
 /* Google+ Styling */
-export const SOCIAL_SHARE_GPLUS = 'background-color: #dc4e41;';
+export const SOCIAL_SHARE_GPLUS = {backgroundColor: 'dc4e41'};
 
 /* Tumblr Styling */
-export const SOCIAL_SHARE_TUMBLR = 'background-color: #3c5a77;';
+export const SOCIAL_SHARE_TUMBLR = {backgroundColor: '3c5a77'};
 
 /* Email Styling */
-export const SOCIAL_SHARE_EMAIL = 'background-color: #000000;';
+export const SOCIAL_SHARE_EMAIL = {backgroundColor: '000000'};
 
 /* Whatsapp Styling */
-export const SOCIAL_SHARE_WHATSAPP = 'background-color: #25d366;';
+export const SOCIAL_SHARE_WHATSAPP = {backgroundColor: '25d366'};
 
 /* line Styling */
-export const SOCIAL_SHARE_LINE = 'background-color: #52b448;';
+export const SOCIAL_SHARE_LINE = {backgroundColor: '52b448'};
 
 /* SMS Styling */
-export const SOCIAL_SHARE_SMS = 'background-color: #ca2b63;';
+export const SOCIAL_SHARE_SMS = {backgroundColor: 'ca2b63'};
 
 /* "system" styling */
-export const SOCIAL_SHARE_SYSTEM = 'background-color: #000000;';
+export const SOCIAL_SHARE_SYSTEM = {backgroundColor: '000000'};

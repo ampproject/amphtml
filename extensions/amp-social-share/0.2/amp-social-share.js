@@ -166,7 +166,9 @@ AmpSocialShare.passthrough = false;
 
 /** @override */
 AmpSocialShare.props = {
-  'style': {attr: 'style'},
+  'layout': {attr: 'layout'},
+  'width': {attr: 'width'},
+  'height': {attr: 'height'},
   'tabIndex': {attr: 'tabindex'},
   'type': {attr: 'type'},
 };
