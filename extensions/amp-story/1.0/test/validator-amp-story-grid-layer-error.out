@@ -1,6 +1,6 @@
 FAIL
 |  <!--
-|    Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+|    Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 |    Licensed under the Apache License, Version 2.0 (the "License");
 |    you may not use this file except in compliance with the License.
 |    You may obtain a copy of the License at
@@ -32,9 +32,10 @@ FAIL
 |    <body>
 |      <amp-story standalone title="My Story" publisher="Me" publisher-logo-src="http://me.com/logo.png" poster-portrait-src="http://me.com/poster.jpg">
 |        <amp-story-page id="cover">
+|          <!-- Invalid: aspect-ratio does not contain a numeric value -->
 |          <amp-story-grid-layer aspect-ratio="a:b" template="vertical">
 >>         ^~~~~~~~~
-amp-story/1.0/test/validator-amp-story-grid-layer-error.html:34:8 The attribute 'aspect-ratio' in tag 'amp-story-grid-layer' is set to the invalid value 'a:b'.
+amp-story/1.0/test/validator-amp-story-grid-layer-error.html:35:8 The attribute 'aspect-ratio' in tag 'amp-story-grid-layer' is set to the invalid value 'a:b'.
 |          </amp-story-grid-layer>
 |        </amp-story-page>
 |      </amp-story>
