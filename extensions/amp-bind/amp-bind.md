@@ -261,8 +261,6 @@ An `amp-state` element must contain a child `<script>` element.
 
 #### Attributes
 
-[filter formats="websites, stories, ads"]
-
 ##### `src` (optional)
 
 The URL of the remote endpoint that must return JSON, which is used to this `amp-state`. This must be a HTTP service with a proper CORS configuration for the page. The `src` attribute allows all standard URL variable substitutions. See the [Substitutions Guide](../../spec/amp-var-substitutions.md) for more info.
@@ -281,8 +279,6 @@ Defines a `credentials` option as specified by the [Fetch API](https://fetch.spe
 To send credentials, pass the value of `include`. If this value is set, the response must follow the [AMP CORS security guidelines](https://amp.dev/documentation/guides-and-tutorials/learn/amp-caches-and-cors/amp-cors-requests/#cors-security-in-amp).
 [/filter] <!-- formats="websites, stories, ads" -->
 
-[filter formats="email"]
-
 #### Actions
 
 ##### `refresh`
@@ -300,6 +296,8 @@ The `refresh` action refetches data from data point the `src` attribute points t
 ```
 
 [/example]
+
+[filter formats="websites, stories, ads"]
 
 We recommend [`amp-script`](../amp-script/amp-script.md) for most use cases working with live content. In a subset of cases, `refresh` with `amp-bind` will work.
 
