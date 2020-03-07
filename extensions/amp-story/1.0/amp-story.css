@@ -450,6 +450,13 @@ amp-story-grid-layer .i-amphtml-embedded-component::after {
                        "lower-third" !important;
 }
 
+.i-amphtml-story-grid-template-aspect {
+  margin: auto;
+  width: var(--i-amphtml-story-layer-width, 100%);
+  height: var(--i-amphtml-story-layer-height, 100%);
+  font-size: calc(var(--i-amphtml-story-layer-height, 100vh) / 10);
+}
+
 /**
  * Development mode
  */

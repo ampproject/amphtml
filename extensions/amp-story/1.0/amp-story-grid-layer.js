@@ -27,7 +27,8 @@
  */
 
 import {AmpStoryBaseLayer} from './amp-story-base-layer';
-import {assertDoesNotContainDisplay, setStyles} from '../../../src/style';
+import {StateProperty, getStoreService} from './amp-story-store-service';
+import {assertDoesNotContainDisplay, px, setStyles} from '../../../src/style';
 import {matches, scopedQuerySelectorAll} from '../../../src/dom';
 
 /**
@@ -84,6 +85,9 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
 
     /** @private {boolean} */
     this.prerenderAllowed_ = false;
+
+    /** @private {?{horiz: number, vert: number}} */
+    this.aspectRatio_ = null;
   }
 
   /** @override */
@@ -101,11 +105,54 @@ export class AmpStoryGridLayer extends AmpStoryBaseLayer {
     this.applyTemplateClassName_();
     this.setOwnCssGridStyles_();
     this.setDescendentCssGridStyles_();
+    this.initializeListeners_();
   }
 
   /** @override */
   prerenderAllowed() {
     return this.prerenderAllowed_;
+  }
+
+  /** @private */
+  initializeListeners_() {
+    const aspectRatio = this.element.getAttribute('aspect-ratio');
+    if (aspectRatio) {
+      const aspectRatioSplits = aspectRatio.split(':');
+      const horiz = parseInt(aspectRatioSplits[0], 10);
+      const vert = parseInt(aspectRatioSplits[1], 10);
+      if (horiz > 0 && vert > 0) {
+        this.aspectRatio_ = {horiz, vert};
+        const storeService = getStoreService(this.win);
+        storeService.subscribe(
+          StateProperty.PAGE_SIZE,
+          this.updatePageSize_.bind(this),
+          true /* callToInitialize */
+        );
+      }
+    }
+  }
+
+  /**
+   * @param {?{width: number, height: number}} pageSize
+   * @private
+   */
+  updatePageSize_(pageSize) {
+    if (!pageSize) {
+      return;
+    }
+    const {width: vw, height: vh} = pageSize;
+    const {horiz, vert} = this.aspectRatio_;
+    const width = Math.min(vw, (vh * horiz) / vert);
+    const height = Math.min(vh, (vw * vert) / horiz);
+    if (width > 0 && height > 0) {
+      this.getVsync().mutate(() => {
+        this.element.classList.add('i-amphtml-story-grid-template-aspect');
+        setStyles(this.element, {
+          '--i-amphtml-story-layer-width': px(width),
+          '--i-amphtml-story-layer-height': px(height),
+        });
+      });
+    }
   }
 
   /**

@@ -531,6 +531,8 @@ export class AmpStoryPage extends AMP.BaseElement {
                   width: this.element./*OK*/ clientWidth,
                 }
               : layoutBox;
+          state.height = height;
+          state.width = width;
           state.vh = height / 100;
           state.vw = width / 100;
           state.fiftyVw = Math.round(width / 2);
@@ -538,9 +540,11 @@ export class AmpStoryPage extends AMP.BaseElement {
           state.vmax = Math.max(state.vh, state.vw);
         },
         mutate: state => {
+          const {height, width} = state;
           if (state.vh === 0 && state.vw === 0) {
             return;
           }
+          this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
           if (!this.cssVariablesStyleEl_) {
             const doc = this.win.document;
             this.cssVariablesStyleEl_ = doc.createElement('style');
