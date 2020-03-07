@@ -151,6 +151,10 @@ tags: {  # <amp-story-grid-layer>
     value: "landscape-half-left"
     value: "landscape-half-right"
   }
+  attrs: {
+    name: "aspect-ratio"
+    value_regex: "\\d+:\\d+"
+  }
   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
   reference_points: {
     tag_spec_name: "AMP-STORY-GRID-LAYER default"
