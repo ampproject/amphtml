@@ -60,6 +60,21 @@ Example:
 </amp-story-grid-layer>
 ```
 
+### aspect-ratio [optional]
+
+The value specifies an aspect ratio in the "horizontal:vertical" format, where both "horizontal" and "vertical" are integer numbers. If this attribute is specified, the layout of the grid layer is set to conform to the specified proportions. The font size, in this case, is automatically set to the 1/10th of the resulting height to enable proportional content scaling.
+
+Example:
+
+```html
+<amp-story-grid-layer aspect-ratio="9:16" template="vertical">
+  <div style="width: 10%; height: 10%; font-size: 2em;">
+    This block will be in 9:16 aspect ratio and font size will be set at the 20%
+    of the layer's height.
+  </div>
+</amp-story-grid-layer>
+```
+
 ## Templates
 
 The following are available templates to specify for the layout of the grid layer.
