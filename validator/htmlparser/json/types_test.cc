@@ -362,9 +362,28 @@ TEST(TypesTest, ImmutablityTest) {
   json.Insert("array", array);
   EXPECT_EQ(json.Get<JsonArray>("array")->size(), 3);
   EXPECT_EQ(json.Get<JsonArray>("array")->ToString(),
-            "[1, 2, 3]");
+            R"([
+  1,
+  2,
+  3
+])");
   json.Get<JsonArray>("array")->Append(4, 5, 6);
   EXPECT_EQ(json.Get<JsonArray>("array")->size(), 6);
   EXPECT_EQ(json.Get<JsonArray>("array")->ToString(),
-            "[1, 2, 3, 4, 5, 6]");
+            R"([
+  1,
+  2,
+  3,
+  4,
+  5,
+  6
+])");
+}
+
+TEST(TypesTest, ArrayAppendTest) {
+  JsonDict dict;
+  dict.Insert("name", "foo");
+  JsonArray array;
+  array.Append(dict, 1, true, nullptr, "hello");
+  EXPECT_EQ(array.size(), 5);
 }

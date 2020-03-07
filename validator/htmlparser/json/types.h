@@ -111,9 +111,9 @@ class JsonDict {
     values_.emplace_back(std::pair<std::string, V>{key, value});
   }
 
-  std::size_t size() { return values_.size(); }
+  std::size_t size() const { return values_.size(); }
 
-  bool empty() { return values_.empty(); }
+  bool empty() const { return values_.empty(); }
 
   std::string ToString(int indent_columns = 0) const;
   void ToString(std::stringbuf*, int indent_columns = 0) const;
@@ -153,9 +153,9 @@ class JsonArray {
     int unused[] = {0, (items_.emplace_back(std::forward<Ts>(items)), 0)...};
   }
 
-  std::size_t size() { return items_.size(); }
+  std::size_t size() const { return items_.size(); }
+  bool empty() const { return items_.empty(); }
 
-  bool empty() { return items_.empty(); }
   std::string ToString(int indent_columns = 0) const;
   void ToString(std::stringbuf*, int indent_columns = 0) const;
 
@@ -312,6 +312,7 @@ T* JsonDict::Get(const std::string& key) {
       return v.Get<T>();
     }
   }
+  return nullptr;
 }
 
 }  // namespace htmlparser::json
