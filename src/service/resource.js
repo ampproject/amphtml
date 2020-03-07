@@ -210,6 +210,12 @@ export class Resource {
 
     /** @private {?Function} */
     this.loadPromiseResolve_ = deferred.resolve;
+
+    /**
+     * The most recent value of IntersectionObserverEntry.isIntersecting.
+     * @package @type {boolean|undefined}
+     */
+    this.isIntersecting = undefined;
   }
 
   /**

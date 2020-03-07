@@ -135,7 +135,7 @@ export class ResourcesImpl {
     /** @const @private {!Pass} */
     this.remeasurePass_ = new Pass(this.win, () => {
       // With IntersectionObserver, "remeasuring" hack no longer needed.
-      devAssert(!this.intersectionObserver_);
+      devAssert(!this.oneViewportObserver_);
 
       this.relayoutAll_ = true;
       this.schedulePass();
@@ -193,8 +193,17 @@ export class ResourcesImpl {
       this.ampdoc.getVisibilityState()
     );
 
-    /** @private {?IntersectionObserver} */
-    this.intersectionObserver_ = null;
+    /**
+     * Observes elements within current viewport (1vp).
+     * @private {?IntersectionObserver}
+     */
+    this.oneViewportObserver_ = null;
+
+    /**
+     * Observes elements within current viewport +/- one viewport length (3vp).
+     * @private {?IntersectionObserver}
+     */
+    this.threeViewportsObserver_ = null;
 
     if (isExperimentOn(this.win, 'intersect-resources')) {
       const iframed = isIframed(this.win);
@@ -207,15 +216,9 @@ export class ResourcesImpl {
           ? /** @type {*} */ (this.win.document)
           : null);
       try {
-        this.intersectionObserver_ = new IntersectionObserver(
-          this.intersects_.bind(this),
-          {
-            root,
-            // TODO(willchou): Is 3x viewport loading rectangle too large given that
-            // IntersectionObserver is more responsive than scroll-bound measure?
-            // TODO(willchou): Support prerenderSize_ loading rectangle.
-            rootMargin: '200% 25%',
-          }
+        this.oneViewportObserver_ = new IntersectionObserver(
+          e => this.intersectsOneViewport_(e),
+          {root}
         );
 
         // Wait for intersection callback instead of measuring all elements
@@ -236,7 +239,7 @@ export class ResourcesImpl {
         this.maybeChangeHeight_ = true;
       }
       // With IntersectionObserver, we only need to handle viewport resize.
-      if (this.relayoutAll_ || !this.intersectionObserver_) {
+      if (this.relayoutAll_ || !this.oneViewportObserver_) {
         this.schedulePass();
       }
     });
@@ -281,19 +284,66 @@ export class ResourcesImpl {
 
   /** @override */
   isIntersectionExperimentOn() {
-    return !!this.intersectionObserver_;
+    return !!this.oneViewportObserver_;
   }
 
   /**
    * @param {!Array<!IntersectionObserverEntry>} entries
-   * @param {!IntersectionObserver} unusedObserver
    * @private
    */
-  intersects_(entries, unusedObserver) {
-    dev().fine(TAG_, 'intersect', entries);
+  intersectsOneViewport_(entries) {
+    if (this.prerenderSize_ == 0) {
+      // TODO(willchou): Store entries and process when visible,
+      // or unobserve/reobserver all resources when visible.
+      devAssert(false, 'Not implemented');
+      return;
+    }
+    devAssert(this.prerenderSize_ == 1);
+
+    const whenBuilt = this.intersects_(entries, /* viewports */ 1);
+
+    // To prioritize in-viewport elements, delay handling of 2vp/3vp until
+    // all 1vp elements are built (and we're not in prerender, of course).
+    Promise.all([whenBuilt, this.ampdoc.whenFirstVisible()]).then(() => {
+      if (this.threeViewportsObserver_) {
+        return;
+      }
+      this.threeViewportsObserver_ = new IntersectionObserver(
+        e => this.intersectsThreeViewports_(e),
+        {
+          root: this.oneViewportObserver_.root,
+          rootMargin: '200% 25%',
+        }
+      );
+      const elements = this.resources_.map(r => r.element);
+      elements.forEach(el => {
+        el.whenUpgraded().then(() => {
+          this.threeViewportsObserver_.observe(el);
+        });
+      });
+    });
+  }
+
+  /**
+   * @param {!Array<!IntersectionObserverEntry>} entries
+   * @private
+   */
+  intersectsThreeViewports_(entries) {
+    devAssert(this.visible_);
+    // TODO(willchou): Avoid double-processing of 1vp elements in first callback?
+    this.intersects_(entries, /* viewports */ 3);
+  }
+
+  /**
+   * @param {!Array<!IntersectionObserverEntry>} entries
+   * @param {number} viewports
+   * @return {!Promise}
+   * @private
+   */
+  intersects_(entries, viewports) {
+    dev().fine(TAG_, 'intersect', viewports, entries);
 
     const toUnload = [];
-
     const promises = entries.map(entry => {
       const {boundingClientRect, isIntersecting, target, rootBounds} = entry;
 
@@ -305,16 +355,22 @@ export class ResourcesImpl {
       devAssert(target.isUpgraded());
       const r = Resource.forElement(target);
 
-      // discoverWork_():
-      // [x] Phase 1: Build and relayout as needed. All mutations happen here.
-      // [x]   1A: Apply sizes/media-queries to un-measured/un-laid-out resources.
-      // [~] Phase 2: Remeasure if there were any relayouts. All reads happen here.
-      // [x]   2A: Unload non-displayed resources.
-      // [x] Phase 3: Trigger "viewport enter/exit" events.
-      // [x] Phase 4: Schedule elements for layout within a reasonable distance from current viewport.
-      // [x]   4A: Force build for all resources visible, measured, and in the viewport.
-      // [ ] Phase 5: Idle Render Outside Viewport layout: layout up to 4 items with idleRenderOutsideViewport true.
-      // [ ] Phase 6: Idle layout: layout more if we are otherwise not doing much.
+      // Early-out if this intersection was already handled by another observer.
+      if (isIntersecting === r.isIntersecting) {
+        return;
+      }
+
+      // Update isIntersecting state.
+      const wasIntersecting = r.isIntersecting;
+      r.isIntersecting = isIntersecting;
+
+      // In the first callback, every observed element gets an entry.
+      // Nothing to do for non-intersecting elements in the first callback.
+      // TODO(willchou): Should we store their layout box in the first callback?
+      const firstCallback = wasIntersecting === undefined;
+      if (firstCallback && !isIntersecting) {
+        return;
+      }
 
       // Force all intersecting, non-zero-sized, non-owned elements to be built.
       // E.g. ensures that all in-viewport elements are built in prerender mode.
@@ -331,16 +387,14 @@ export class ResourcesImpl {
           r,
           /* checkForDupes */ true,
           /* scheduleWhenBuilt */ false,
-          /* force */ true
+          /* ignoreQuota */ true
         );
         dev().fine(TAG_, 'force build:', r.debugid);
       }
 
       // TODO(willchou): Risk of long task due to long microtask queue?
       return r.whenBuilt().then(() => {
-        const wasIntersecting = r.isInViewport();
         let isDisplayed = this.measureResource_(r, clientRect);
-
         if (wasIntersecting && !isIntersecting) {
           // Sometimes `isDisplayed` is incorrectly `true` when the element is
           // actually hidden! This happens due to stale clientRect values during
@@ -353,7 +407,6 @@ export class ResourcesImpl {
             isDisplayed = false;
           }
         }
-
         if (!isDisplayed) {
           toUnload.push(r);
           return;
@@ -363,11 +416,14 @@ export class ResourcesImpl {
           return;
         }
 
-        // For just-unloaded resources, setInViewport() will be called
-        // as part of Resource.unlayout().
-        // TODO(willchou): Decouple toggleLoading(true) from viewportCallback()
-        // and make it lazier (only trigger on 1vp).
-        r.setInViewport(isIntersecting);
+        if (viewports == 1) {
+          // For just-unloaded resources, setInViewport() will be called
+          // as part of Resource.unlayout().
+          // TODO(willchou): When visible, consider the viewport to be 25% larger.
+          // TODO(willchou): Decouple toggleLoading(true) from viewportCallback()
+          // and make it lazier (only trigger on 1vp).
+          r.setInViewport(isIntersecting);
+        }
 
         // TODO(willchou): The lack of "update on scroll throttling" means
         // that scrolled-over elements are no longer deferred, which results
@@ -383,7 +439,7 @@ export class ResourcesImpl {
       });
     });
 
-    Promise.all(promises).then(() => {
+    return Promise.all(promises).then(() => {
       this.unloadResources_(toUnload);
       this.signalIfReady_();
     });
@@ -401,7 +457,7 @@ export class ResourcesImpl {
       input.setupInputModeClasses(this.ampdoc);
 
       // With IntersectionObserver, no need for remeasuring hacks.
-      if (!this.intersectionObserver_) {
+      if (!this.oneViewportObserver_) {
         const fixPromise = ieMediaCheckAndFix(this.win);
         const remeasure = () => this.remeasurePass_.schedule();
         if (fixPromise) {
@@ -478,7 +534,7 @@ export class ResourcesImpl {
     ) {
       // With IntersectionObserver, no need to request remeasure
       // on reuse since initial intersection callback will trigger soon.
-      if (!this.intersectionObserver_) {
+      if (!this.oneViewportObserver_) {
         resource.requestMeasure();
       }
       dev().fine(TAG_, 'resource reused:', resource.debugid);
@@ -489,13 +545,16 @@ export class ResourcesImpl {
     }
     this.resources_.push(resource);
 
-    if (this.intersectionObserver_) {
+    if (this.oneViewportObserver_) {
       // Wait until upgrade to start observing intersections to give
       // the browser a chance to layout first. This results in fresher
       // client rects in the intersection entry, e.g. [overflow] elements
       // can affect element size since they're `position: relative`.
       element.whenUpgraded().then(() => {
-        this.intersectionObserver_.observe(resource.element);
+        this.oneViewportObserver_.observe(element);
+        if (this.threeViewportsObserver_) {
+          this.threeViewportsObserver_.observe(element);
+        }
       });
     } else {
       this.remeasurePass_.schedule(1000);
@@ -525,14 +584,14 @@ export class ResourcesImpl {
    * @param {!Resource} resource
    * @param {boolean=} checkForDupes
    * @param {boolean=} scheduleWhenBuilt
-   * @param {boolean=} force
+   * @param {boolean=} ignoreQuota
    * @private
    */
   buildOrScheduleBuildForResource_(
     resource,
     checkForDupes = false,
     scheduleWhenBuilt = true,
-    force = false
+    ignoreQuota = false
   ) {
     const buildingEnabled = this.isRuntimeOn_ || this.isBuildOn_;
 
@@ -546,7 +605,7 @@ export class ResourcesImpl {
     if (buildingEnabled && shouldBuildResource) {
       if (this.documentReady_) {
         // Build resource immediately, the document has already been parsed.
-        this.buildResourceUnsafe_(resource, scheduleWhenBuilt, force);
+        this.buildResourceUnsafe_(resource, scheduleWhenBuilt, ignoreQuota);
       } else if (!resource.isBuilt() && !resource.isBuilding()) {
         if (!checkForDupes || !this.pendingBuildResources_.includes(resource)) {
           // Otherwise add to pending resources and try to build any ready ones.
@@ -601,14 +660,15 @@ export class ResourcesImpl {
   /**
    * @param {!Resource} resource
    * @param {boolean} schedulePass
-   * @param {boolean=} force
+   * @param {boolean=} ignoreQuota
    * @return {?Promise}
    * @private
    */
-  buildResourceUnsafe_(resource, schedulePass, force = false) {
+  buildResourceUnsafe_(resource, schedulePass, ignoreQuota = false) {
     if (
       !this.isUnderBuildQuota_() &&
-      !force &&
+      !ignoreQuota &&
+      // Special case: amp-experiment is allowed to bypass prerender build quota.
       !resource.isBuildRenderBlocking()
     ) {
       return null;
@@ -620,7 +680,7 @@ export class ResourcesImpl {
     this.buildAttemptsCount_++;
     // With IntersectionObserver, no need to schedule measurements after build
     // since these are handled in the initial intersection callback.
-    if (!schedulePass || this.intersectionObserver_) {
+    if (!schedulePass || this.oneViewportObserver_) {
       return promise;
     }
     return promise.then(
@@ -657,8 +717,11 @@ export class ResourcesImpl {
     if (resource.isBuilt()) {
       resource.pauseOnRemove();
     }
-    if (this.intersectionObserver_) {
-      this.intersectionObserver_.unobserve(resource.element);
+    if (this.oneViewportObserver_) {
+      this.oneViewportObserver_.unobserve(resource.element);
+    }
+    if (this.threeViewportsObserver_) {
+      this.threeViewportsObserver_.unobserve(resource.element);
     }
     this.cleanupTasks_(resource, /* opt_removePending */ true);
     dev().fine(TAG_, 'resource removed:', resource.debugid);
@@ -667,6 +730,8 @@ export class ResourcesImpl {
   /** @override */
   upgraded(element) {
     const resource = Resource.forElement(element);
+    // TODO(willchou): Delay this until after 1vp loads. This should improve
+    // LCP and be safe since we already do something similar in prerender mode.
     this.buildOrScheduleBuildForResource_(resource);
     dev().fine(TAG_, 'resource upgraded:', resource.debugid);
   }
@@ -815,7 +880,7 @@ export class ResourcesImpl {
 
     // With IntersectionObserver, elements are not measured until the first
     // intersection callback (vs. after first pass), so wait until then.
-    if (!this.intersectionObserver_) {
+    if (!this.oneViewportObserver_) {
       this.signalIfReady_();
     }
 
@@ -1215,7 +1280,7 @@ export class ResourcesImpl {
    * @private
    */
   discoverWork_() {
-    if (this.intersectionObserver_) {
+    if (this.oneViewportObserver_) {
       // With IntersectionObserver, we typically defer measurements to the
       // intersection callback. However, we still need:
       // 1. On viewport size changes (relayoutAll), apply sizes/media queries
@@ -1238,7 +1303,7 @@ export class ResourcesImpl {
         // NOT_LAID_OUT is the state after build() but before measure().
         if (this.relayoutAll_ || r.getState() == ResourceState.NOT_LAID_OUT) {
           // TODO(willchou): May need to add another ResourceState to avoid
-          // multiple invocations before the first intersection callback.
+          // multiple invocations (relayoutAll requires reinvocation).
           r.applySizesAndMediaQuery();
           dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         }
@@ -1398,7 +1463,7 @@ export class ResourcesImpl {
         const r = this.resources_[i];
         // TODO(dvoytenko): This extra build has to be merged with the
         // scheduleLayoutOrPreload method below.
-        // Force build for all resources visible, measured, and in the viewport.
+        // Build all resources visible, measured, and in the viewport.
         if (
           !r.isBuilt() &&
           !r.hasOwner() &&
@@ -1410,7 +1475,7 @@ export class ResourcesImpl {
             r,
             /* checkForDupes */ true,
             /* scheduleWhenBuilt */ undefined,
-            /* force */ true
+            /* ignoreQuota */ true
           );
         }
         if (r.getState() != ResourceState.READY_FOR_LAYOUT || r.hasOwner()) {
@@ -1519,7 +1584,7 @@ export class ResourcesImpl {
       } else {
         // With IntersectionObserver, the element's client rect measurement
         // is recent so immediate remeasuring shouldn't be necessary.
-        if (!this.intersectionObserver_) {
+        if (!this.oneViewportObserver_) {
           task.resource.measure();
         }
         // Check if the element has exited the viewport or the page has changed
@@ -1536,7 +1601,7 @@ export class ResourcesImpl {
             )
             .catch(/** @type {function (*)} */ (reportError));
         } else {
-          devAssert(!this.intersectionObserver_);
+          devAssert(!this.oneViewportObserver_);
           dev().fine(TAG_, 'cancelled', task.id);
           task.resource.layoutCanceled();
         }
