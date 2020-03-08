@@ -25,20 +25,6 @@
       "vars": {
         "type": "engagement"
       }
-    },
-    "v100-0": {
-      "on": "visible",
-      "request": "visibility",
-      "selector": "amp-ad[data-amp-slot-index='0']",
-      "visibilitySpec": {
-        "visiblePercentageMin": 100,
-        "continuousTimeMin": 1000,
-        "repeat": false
-      },
-      "vars": {
-        "type": "v100",
-        "index": 0
-      }
     }
   }
 }
