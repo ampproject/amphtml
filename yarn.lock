@@ -2297,7 +2297,15 @@ accepts@~1.3.0, accepts@~1.3.4, accepts@~1.3.7:
     mime-types "~2.1.24"
     negotiator "0.6.2"
 
-acorn-globals@4.3.4, acorn-globals@^4.1.0, acorn-globals@^4.3.4:
+acorn-globals@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/acorn-globals/-/acorn-globals-5.0.0.tgz#321f3dcb9786a9a8968b741d199b57cdcbd7ae12"
+  integrity sha512-GO75d2uQ00xmo8ZzdaWIFeTSZRRwCj1hllQI90b5Slz/QwXkPYTAKWmRN+IHZvq8xcAJUA2OUDxTV4mpaD8+kg==
+  dependencies:
+    acorn "^6.0.1"
+    acorn-walk "^6.0.1"
+
+acorn-globals@^4.1.0, acorn-globals@^4.3.4:
   version "4.3.4"
   resolved "https://registry.yarnpkg.com/acorn-globals/-/acorn-globals-4.3.4.tgz#9fa1926addc11c97308c4e66d7add0d40c3272e7"
   integrity sha512-clfQEh21R+D0leSbUdWf3OcfqyaCSAQ8Ryq00bofSekfr9W8u1jyYZo6ir0xu9Gtcf7BjcHJpnbZH7JOCpP60A==
