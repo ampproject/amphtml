@@ -69,6 +69,7 @@ describe('includes', () => {
 });
 
 describe('expandTemplate', () => {
+  const regex = /\${([^}]*)}/g;
   const data = {
     'x': 'Test 1',
     'y': 'Test 2',
@@ -88,43 +89,57 @@ describe('expandTemplate', () => {
   }
 
   it('should replace place holders with values.', () => {
-    expect(expandTemplate('${x}', testGetter)).to.equal('Test 1');
-    expect(expandTemplate('${y}', testGetter)).to.equal('Test 2');
-    expect(expandTemplate('${x} ${y}', testGetter)).to.equal('Test 1 Test 2');
-    expect(expandTemplate('a${x}', testGetter)).to.equal('aTest 1');
-    expect(expandTemplate('${x}a', testGetter)).to.equal('Test 1a');
-    expect(expandTemplate('a${x}a', testGetter)).to.equal('aTest 1a');
-    expect(expandTemplate('${unknown}', testGetter)).to.equal('not found');
+    expect(expandTemplate('${x}', testGetter, regex)).to.equal('Test 1');
+    expect(expandTemplate('${y}', testGetter, regex)).to.equal('Test 2');
+    expect(expandTemplate('${x} ${y}', testGetter, regex)).to.equal(
+      'Test 1 Test 2'
+    );
+    expect(expandTemplate('a${x}', testGetter, regex)).to.equal('aTest 1');
+    expect(expandTemplate('${x}a', testGetter, regex)).to.equal('Test 1a');
+    expect(expandTemplate('a${x}a', testGetter, regex)).to.equal('aTest 1a');
+    expect(expandTemplate('${unknown}', testGetter, regex)).to.equal(
+      'not found'
+    );
   });
 
   it('should handle malformed place holders.', () => {
-    expect(expandTemplate('${x', testGetter)).to.equal('${x');
-    expect(expandTemplate('${', testGetter)).to.equal('${');
-    expect(expandTemplate('$x}', testGetter)).to.equal('$x}');
-    expect(expandTemplate('$x', testGetter)).to.equal('$x');
-    expect(expandTemplate('{x}', testGetter)).to.equal('{x}');
-    expect(expandTemplate('${{x}', testGetter)).to.equal('not found');
+    expect(expandTemplate('${x', testGetter, regex)).to.equal('${x');
+    expect(expandTemplate('${', testGetter, regex)).to.equal('${');
+    expect(expandTemplate('$x}', testGetter, regex)).to.equal('$x}');
+    expect(expandTemplate('$x', testGetter, regex)).to.equal('$x');
+    expect(expandTemplate('{x}', testGetter, regex)).to.equal('{x}');
+    expect(expandTemplate('${{x}', testGetter, regex)).to.equal('not found');
   });
 
   it('should default to one iteration.', () => {
-    expect(expandTemplate('${tox}', testGetter)).to.equal('${x}');
-    expect(expandTemplate('${toxy}', testGetter)).to.equal('${x}${y}');
+    expect(expandTemplate('${tox}', testGetter, regex)).to.equal('${x}');
+    expect(expandTemplate('${toxy}', testGetter, regex)).to.equal('${x}${y}');
   });
 
   it('should handle multiple iterations when asked to.', () => {
-    expect(expandTemplate('${tox}', testGetter, 2)).to.equal('Test 1');
-    expect(expandTemplate('${toxy}', testGetter, 2)).to.equal('Test 1Test 2');
-    expect(expandTemplate('${totoxy}', testGetter, 2)).to.equal('${x}${y}');
-    expect(expandTemplate('${totoxy}', testGetter, 3)).to.equal('Test 1Test 2');
-    expect(expandTemplate('${totoxy}', testGetter, 10)).to.equal(
+    expect(expandTemplate('${tox}', testGetter, regex, 2)).to.equal('Test 1');
+    expect(expandTemplate('${toxy}', testGetter, regex, 2)).to.equal(
+      'Test 1Test 2'
+    );
+    expect(expandTemplate('${totoxy}', testGetter, regex, 2)).to.equal(
+      '${x}${y}'
+    );
+    expect(expandTemplate('${totoxy}', testGetter, regex, 3)).to.equal(
+      'Test 1Test 2'
+    );
+    expect(expandTemplate('${totoxy}', testGetter, regex, 10)).to.equal(
       'Test 1Test 2'
     );
   });
 
   it('should handle circular expansions without hanging', () => {
-    expect(expandTemplate('${loop}', testGetter)).to.equal('${loop}');
-    expect(expandTemplate('${loop}', testGetter), 10).to.equal('${loop}');
-    expect(expandTemplate('${loop1}', testGetter), 10).to.equal('${loop2}');
+    expect(expandTemplate('${loop}', testGetter, regex)).to.equal('${loop}');
+    expect(expandTemplate('${loop}', testGetter, regex), 10).to.equal(
+      '${loop}'
+    );
+    expect(expandTemplate('${loop1}', testGetter, regex), 10).to.equal(
+      '${loop2}'
+    );
   });
 });
 

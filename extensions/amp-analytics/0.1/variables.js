@@ -35,6 +35,9 @@ const TAG = 'amp-analytics/variables';
 /** @const {RegExp} */
 const VARIABLE_ARGS_REGEXP = /^(?:([^\s]*)(\([^)]*\))|[^]+)$/;
 
+/** @const {RegExp} */
+const ANALYTICS_MACROS_REGEXP = /\${([^}]*)}/g;
+
 const EXTERNAL_CONSENT_POLICY_STATE_STRING = {
   1: 'sufficient',
   2: 'insufficient',
@@ -286,79 +289,87 @@ export class VariableService {
    * @return {!Promise<string>} The expanded string.
    */
   expandTemplate(template, options, element, opt_bindings, opt_whitelist) {
-    return asyncStringReplace(template, /\${([^}]*)}/g, (match, key) => {
-      if (options.iterations < 0) {
-        user().error(
-          TAG,
-          'Maximum depth reached while expanding variables. ' +
-            'Please ensure that the variables are not recursive.'
-        );
-        return match;
-      }
-
-      if (!key) {
-        return '';
-      }
-
-      // Split the key to name and args
-      // e.g.: name='SOME_MACRO', args='(arg1, arg2)'
-      const {name, argList} = getNameArgs(key);
-      if (options.freezeVars[name]) {
-        // Do nothing with frozen params
-        return match;
-      }
-
-      let value = options.getVar(name);
-
-      if (typeof value == 'string') {
-        value = this.expandValue_(
-          value,
-          options,
-          element,
-          opt_bindings,
-          opt_whitelist
-        );
-      } else if (isArray(value)) {
-        // Treat each value as a template and expand
-        for (let i = 0; i < value.length; i++) {
-          value[i] =
-            typeof value[i] == 'string'
-              ? this.expandValue_(
-                  value[i],
-                  options,
-                  element,
-                  opt_bindings,
-                  opt_whitelist
-                )
-              : value[i];
+    return asyncStringReplace(
+      template,
+      ANALYTICS_MACROS_REGEXP,
+      (match, key) => {
+        if (options.iterations < 0) {
+          user().error(
+            TAG,
+            'Maximum depth reached while expanding variables. ' +
+              'Please ensure that the variables are not recursive.'
+          );
+          return match;
         }
-      }
 
-      const bindings = opt_bindings || this.getMacros(element);
-      const urlReplacements = Services.urlReplacementsForDoc(element);
+        if (!key) {
+          return '';
+        }
 
-      return Promise.resolve(value)
-        .then(value => {
-          if (isArray(value)) {
-            return Promise.all(
-              value.map(item =>
-                urlReplacements.expandStringAsync(item, bindings, opt_whitelist)
-              )
-            );
-          }
-          return urlReplacements.expandStringAsync(
-            value + argList,
-            bindings,
+        // Split the key to name and args
+        // e.g.: name='SOME_MACRO', args='(arg1, arg2)'
+        const {name, argList} = getNameArgs(key);
+        if (options.freezeVars[name]) {
+          // Do nothing with frozen params
+          return match;
+        }
+
+        let value = options.getVar(name);
+
+        if (typeof value == 'string') {
+          value = this.expandValue_(
+            value,
+            options,
+            element,
+            opt_bindings,
             opt_whitelist
           );
-        })
-        .then(value => {
-          if (!options.noEncode) {
-            value = encodeVars(/** @type {string|?Array<string>} */ (value));
+        } else if (isArray(value)) {
+          // Treat each value as a template and expand
+          for (let i = 0; i < value.length; i++) {
+            value[i] =
+              typeof value[i] == 'string'
+                ? this.expandValue_(
+                    value[i],
+                    options,
+                    element,
+                    opt_bindings,
+                    opt_whitelist
+                  )
+                : value[i];
           }
-          return value;
-        });
-    });
+        }
+
+        const bindings = opt_bindings || this.getMacros(element);
+        const urlReplacements = Services.urlReplacementsForDoc(element);
+
+        return Promise.resolve(value)
+          .then(value => {
+            if (isArray(value)) {
+              return Promise.all(
+                value.map(item =>
+                  urlReplacements.expandStringAsync(
+                    item,
+                    bindings,
+                    opt_whitelist
+                  )
+                )
+              );
+            }
+            return urlReplacements.expandStringAsync(
+              value + argList,
+              bindings,
+              opt_whitelist
+            );
+          })
+          .then(value => {
+            if (!options.noEncode) {
+              value = encodeVars(/** @type {string|?Array<string>} */ (value));
+            }
+            return value;
+          });
+      }
+    );
   }
 
   /**

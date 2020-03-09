@@ -45,6 +45,9 @@ import {toggle} from '../../../src/style';
 
 const TAG = 'amp-analytics';
 
+/** @const {RegExp} */
+const ANALYTICS_MACROS_REGEXP = /\${([^}]*)}/g;
+
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
 const WHITELIST_EVENT_IN_SANDBOX = [
@@ -530,6 +533,7 @@ export class AmpAnalytics extends AMP.BaseElement {
             const request = this.config_['requests'][key];
             return (request && request['baseUrl']) || '${' + key + '}';
           },
+          ANALYTICS_MACROS_REGEXP,
           5
         );
       }

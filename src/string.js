@@ -108,17 +108,18 @@ export function includes(string, substring, start) {
  * @param {string} template The template string to expand.
  * @param {function(string):*} getter Function used to retrieve a value for a
  *   placeholder. Returns values will be coerced into strings.
+ * @param {RegExp} regexp
  * @param {number=} opt_maxIterations Number of times to expand the template.
  *   Defaults to 1, but should be set to a larger value your placeholder tokens
  *   can be expanded to other placeholder tokens. Take caution with large values
  *   as recursively expanding a string can be exponentially expensive.
  * @return {string}
  */
-export function expandTemplate(template, getter, opt_maxIterations) {
+export function expandTemplate(template, getter, regexp, opt_maxIterations) {
   const maxIterations = opt_maxIterations || 1;
   for (let i = 0; i < maxIterations; i++) {
     let matches = 0;
-    template = template.replace(/\${([^}]*)}/g, (_a, b) => {
+    template = template.replace(regexp, (_a, b) => {
       matches++;
       return getter(b);
     });
