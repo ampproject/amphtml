@@ -1899,6 +1899,7 @@ tags: {
       # IOS over-the-air app installation
       # (https://github.com/nifcblm/AHPP-iOS-App/wiki/How-to-distribute-enterprise-iOS-App)
       protocol: "itms-services"
+      protocol: "facetime"
       protocol: "fb-me"
       protocol: "fb-messenger"
       protocol: "feed"
