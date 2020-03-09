@@ -39,6 +39,7 @@ const {
   shortSha,
 } = require('../../common/git');
 const {execOrDie, execScriptAsync} = require('../../common/exec');
+const {installPackages} = require('../../common/utils');
 const {isTravisBuild} = require('../../common/travis');
 const {startServer, stopServer} = require('../serve');
 const {waitUntilUsed} = require('tcp-port-used');
@@ -773,10 +774,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
 
 function installPercy_() {
   if (!argv.noyarn) {
-    log('info', 'Running', colors.cyan('yarn'), 'to install Percy...');
-    execOrDie('npx yarn --cwd build-system/tasks/visual-diff', {
-      'stdio': 'ignore',
-    });
+    installPackages(__dirname);
   }
 
   puppeteer = require('puppeteer');

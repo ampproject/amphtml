@@ -18,9 +18,13 @@ const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs-extra');
 const globby = require('globby');
 const log = require('fancy-log');
-const {gitDiffNameOnlyMaster} = require('../common/git');
+const path = require('path');
+const {execOrDie} = require('./exec');
+const {gitDiffNameOnlyMaster} = require('./git');
 const {green, cyan, yellow} = require('ansi-colors');
-const {isTravisBuild} = require('../common/travis');
+const {isTravisBuild} = require('./travis');
+
+const ROOT_DIR = path.resolve(__dirname, '../../');
 
 /**
  * Logs a message on the same line to indicate progress
@@ -117,9 +121,25 @@ function usesFilesOrLocalChanges(taskName) {
   return validUsage;
 }
 
+/**
+ * Runs 'yarn' to install packages in a given directory.
+ *
+ * @param {string} dir
+ */
+function installPackages(dir) {
+  log(
+    'Running',
+    cyan('yarn'),
+    'to install packages in',
+    cyan(path.relative(ROOT_DIR, dir)) + '...'
+  );
+  execOrDie(`npx yarn --cwd ${dir}`, {'stdio': 'ignore'});
+}
+
 module.exports = {
   getFilesChanged,
   getFilesToCheck,
+  installPackages,
   logOnSameLine,
   usesFilesOrLocalChanges,
 };
