@@ -6338,6 +6338,7 @@ attr_lists: {
     css_declaration: { name: "caret-color" }
     css_declaration: { name: "clear" }
     css_declaration: { name: "clip" }
+    css_declaration: { name: "clip-path" }
     css_declaration: { name: "color" }
     css_declaration: { name: "column-count" }
     css_declaration: { name: "column-fill" }
