@@ -97,7 +97,7 @@ public class ExtensionsContextTest {
         final ParsedTagSpec mockParsedTagSpec = Mockito.mock(ParsedTagSpec.class);
         final ValidatorProtos.TagSpec tagSpec = ValidatorProtos.TagSpec.newBuilder()
                 .setExtensionSpec(ValidatorProtos.ExtensionSpec.newBuilder().setName("amp-date-picker")
-                        .setRequiresUsage(ValidatorProtos.ExtensionSpec.ExtensionUsageRequirement.GRANDFATHERED).build())
+                        .setRequiresUsage(ValidatorProtos.ExtensionSpec.ExtensionUsageRequirement.EXEMPTED).build())
                 .addRequiresExtension("amp-form")
                 .setSpecName("test_parent").build();
 
