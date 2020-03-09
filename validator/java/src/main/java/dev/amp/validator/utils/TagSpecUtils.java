@@ -871,14 +871,14 @@ public final class TagSpecUtils {
     }
 
     /** List identifiers for AMP format. */
-    public static final List AMP_IDENTIFIERS = Arrays.asList("⚡", "amp", "transformed", "data-ampdevmode");
+    public static final List AMP_IDENTIFIERS = Arrays.asList("\u26a1", "\u26a1\ufe0f", "amp", "transformed", "data-ampdevmode");
 
     /** List identifiers for AMP4ADS format. */
-    public static final List AMP4ADS_IDENTIFIERS = Arrays.asList("⚡4ads", "amp4ads", "data-ampdevmode");
+    public static final List AMP4ADS_IDENTIFIERS = Arrays.asList("\u26a14ads", "\u26a1\ufe0f4ads", "amp4ads", "data-ampdevmode");
 
     /** List identifiers for AMP4EMAIL format. */
-    public static final List AMP4EMAIL_IDENTIFIERS = Arrays.asList("⚡4email", "amp4email", "data-ampdevmode");
+    public static final List AMP4EMAIL_IDENTIFIERS = Arrays.asList("\u26a14email", "\u26a1\ufe0f4email", "amp4email", "data-ampdevmode");
 
     /** List identifiers for ACTIONS format. */
-    public static final List ACTIONS_IDENTIFIERS = Arrays.asList("⚡", "amp", "actions", "data-ampdevmode");
+    public static final List ACTIONS_IDENTIFIERS = Arrays.asList("\u26a1", "\u26a1\ufe0f", "amp", "actions", "data-ampdevmode");
 }

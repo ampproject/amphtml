@@ -314,7 +314,8 @@ public class AMPHtmlHandler extends DefaultHandler {
      */
     public void cdata(@Nonnull final String text) throws TagValidationException, CssValidationException, IOException {
         // Validate that JSON can be parsed.
-        if (this.context.getTagStack().isScriptTypeJsonChild()) {
+        if (!this.context.getTagStack().hasAncestor("TEMPLATE")
+          && this.context.getTagStack().isScriptTypeJsonChild()) {
             try {
                 new JSONObject(text);
             } catch (JSONException e) {
