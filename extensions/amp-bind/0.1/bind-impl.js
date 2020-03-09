@@ -564,13 +564,13 @@ export class Bind {
    * @return {!Promise<*>}
    */
   getStateAsync(expr) {
-    const stateKey = /^[^.]*/.exec(expr)[0];
+    const stateId = /^[^.]*/.exec(expr)[0];
     return this.rootNodePromise_.then(root => {
       const ampStateEl = root.querySelector(
-        `#${escapeCssSelectorIdent(stateKey)}`
+        `#${escapeCssSelectorIdent(stateId)}`
       );
       if (!ampStateEl) {
-        throw new Error(`#${stateKey} does not exist.`);
+        throw new Error(`#${stateId} does not exist.`);
       }
 
       return whenUpgradedToCustomElement(ampStateEl)
