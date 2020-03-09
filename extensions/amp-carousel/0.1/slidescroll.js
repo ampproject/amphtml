@@ -770,7 +770,7 @@ export class AmpSlideScroll extends BaseSlides {
 
       this.element.dispatchCustomEvent(name, {
         index: newIndex,
-        actionTrust: actionTrustToString(opt_trust),
+        actionTrust: opt_trust,
       });
     }
   }
