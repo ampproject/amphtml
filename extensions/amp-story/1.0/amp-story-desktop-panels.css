@@ -128,7 +128,7 @@ amp-story[standalone].i-amphtml-story-desktop-panels {
   right: auto !important;
   margin: auto !important;
   max-height: 75vh !important;
-  max-width: calc(3/5 * 75vh) !important;
+  max-width: calc(9/16 * 75vh) !important;
   min-width: 320px !important;
-  min-height: 533px !important;
+  min-height: 569px !important;
 }
