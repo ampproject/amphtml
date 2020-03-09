@@ -194,7 +194,7 @@ export class AmpList extends AMP.BaseElement {
     );
 
     const layout = parseLayout(this.element.getAttribute('layout'));
-    this.isLayoutSizeDefined_ = isLayoutSizeDefined(layout);
+    this.isLayoutSizeDefined_ = layout ? isLayoutSizeDefined(layout) : null;
 
     this.loadMoreEnabled_ = this.element.hasAttribute('load-more');
 
