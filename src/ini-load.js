@@ -76,8 +76,6 @@ export function getMeasuredResources(ampdoc, hostWin, filterFn) {
   // First, wait for the `ready-scan` signal. Waiting for each element
   // individually is too expensive and `ready-scan` will cover most of
   // the initially parsed elements.
-  // TODO(jridgewell): this path should be switched to use a future
-  // "layer has been measured" signal.
   return ampdoc
     .signals()
     .whenSignal(READY_SCAN_SIGNAL)

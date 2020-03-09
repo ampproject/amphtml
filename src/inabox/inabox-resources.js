@@ -189,6 +189,11 @@ export class InaboxResources {
     return this.firstPassDone_.promise;
   }
 
+  /** @override */
+  isIntersectionExperimentOn() {
+    return false;
+  }
+
   /**
    * @private
    */
