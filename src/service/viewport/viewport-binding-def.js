@@ -179,9 +179,15 @@ export class ViewportBindingDef {
    *     pass in, if they cached these values and would like to avoid
    *     remeasure. Requires appropriate updating the values on scroll.
    * @param {number=} unusedScrollTop Same comment as above.
+   * @param {!ClientRect=} unusedPremeasuredRect
    * @return {!../../layout-rect.LayoutRectDef}
    */
-  getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
+  getLayoutRect(
+    unusedEl,
+    unusedScrollLeft,
+    unusedScrollTop,
+    unusedPremeasuredRect
+  ) {}
 
   /**
    * Returns the client rect of the current window.

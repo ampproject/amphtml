@@ -19,8 +19,8 @@ import {devAssert} from '../../log';
 import {
   layoutRectEquals,
   layoutRectLtwh,
-  layoutRectsOverlap,
   layoutRectsRelativePos,
+  rectsOverlap,
 } from '../../layout-rect';
 
 /** @enum {number} */
@@ -103,7 +103,7 @@ export class PositionObserverWorker {
       position.viewportRect
     );
 
-    if (layoutRectsOverlap(positionRect, position.viewportRect)) {
+    if (rectsOverlap(positionRect, position.viewportRect)) {
       // Update position
       this.prevPosition_ = position;
       // Only call handler if entry element overlap with viewport.
