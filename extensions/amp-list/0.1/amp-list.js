@@ -432,6 +432,7 @@ export class AmpList extends AMP.BaseElement {
 
     const isLayoutContainer = mutations['is-layout-container'];
     if (isLayoutContainer) {
+      this.isLayoutSizeDefined_ = false;
       this.changeToLayoutContainer_();
     }
 
