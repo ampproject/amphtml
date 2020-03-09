@@ -98,7 +98,7 @@ amp-story-page amp-ad[type="adsense"] > iframe {
   margin: auto !important;
   min-height: 75vh !important;
   max-height: 75vh !important;
-  min-width: calc(3/5 * 75vh) !important;
-  max-width: calc(3/5 * 75vh) !important;
+  min-width: calc(9/16 * 75vh) !important;
+  max-width: calc(9/16 * 75vh) !important;
   transform: translateX(-50%) !important;
 }
