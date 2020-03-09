@@ -33,7 +33,7 @@
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@babel/plugin-transform-react-constant-elements": "7.8.3",
     "@babel/plugin-transform-react-jsx": "7.8.3",
-    "@babel/preset-env": "7.8.3",
+    "@babel/preset-env": "7.8.7",
     "@jridgewell/resorcery": "0.0.3",
     "acorn-globals": "4.3.4",
     "amphtml-validator": "1.0.30",

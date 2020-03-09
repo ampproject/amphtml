@@ -70,6 +70,7 @@ async function main() {
 
       const process = timedExecWithError('gulp dist --fortesting', FILENAME);
       if (process.error) {
+        console.log(colors.red('ERROR'), colors.yellow(process.error.message));
         await signalDistUpload('errored');
         stopTimedJob(FILENAME, startTime);
         return;
