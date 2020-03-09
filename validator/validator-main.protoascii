@@ -1882,6 +1882,7 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      # When updating this list, make sure to also update bind-validator.js.
       protocol: "ftp"
       protocol: "geo"
       protocol: "http"

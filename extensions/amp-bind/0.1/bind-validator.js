@@ -352,6 +352,7 @@ function createElementRules_() {
     },
     'A': {
       'href': {
+        // This should be kept in sync with validator-main.protoascii.
         'allowedProtocols': {
           'ftp': true,
           'geo': true,
