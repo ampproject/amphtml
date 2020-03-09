@@ -176,13 +176,13 @@ TEST(TypesTest, SingleValue) {
 
 TEST(TypesTest, GetAndAssignmentOperatorTest) {
   JsonObject int_value(3);
-  EXPECT_EQ(3, int_value.Get<int>().value());
+  EXPECT_EQ(3, *int_value.Get<int>());
   // int_value is now bool.
   int_value = false;
-  EXPECT_EQ(false, int_value.Get<bool>().value());
+  EXPECT_EQ(false, *int_value.Get<bool>());
   // int_value is now string.
   int_value = "Hello World!";
-  EXPECT_EQ("Hello World!", int_value.Get<std::string>().value());
+  EXPECT_EQ("Hello World!", *int_value.Get<std::string>());
 }
 
 TEST(TypesTest, OverflowIntegerTest) {
@@ -338,4 +338,52 @@ TEST(TypesTest, AnyObjectTest) {
     10
   ]
 })");
+}
+
+TEST(TypesTest, JsonDictTypedGetter) {
+  JsonDict json;
+  json.Insert("name", "John");
+  json.Insert("age", 18);
+  EXPECT_EQ(*json.Get<int>("age"), 18);
+  EXPECT_EQ(*json.Get<std::string>("name"), "John");
+}
+
+TEST(TypesTest, ImmutablityTest) {
+  JsonDict json;
+  json.Insert("name", "John");
+  json.Insert("age", 18);
+  *json.Get<int>("age") = 20;
+  *json.Get<std::string>("name") = "Foo";
+  EXPECT_EQ(*json.Get<int>("age"), 20);
+  EXPECT_EQ(*json.Get<std::string>("name"), "Foo");
+
+  JsonArray array;
+  array.Append(1, 2, 3);
+  json.Insert("array", array);
+  EXPECT_EQ(json.Get<JsonArray>("array")->size(), 3);
+  EXPECT_EQ(json.Get<JsonArray>("array")->ToString(),
+            R"([
+  1,
+  2,
+  3
+])");
+  json.Get<JsonArray>("array")->Append(4, 5, 6);
+  EXPECT_EQ(json.Get<JsonArray>("array")->size(), 6);
+  EXPECT_EQ(json.Get<JsonArray>("array")->ToString(),
+            R"([
+  1,
+  2,
+  3,
+  4,
+  5,
+  6
+])");
+}
+
+TEST(TypesTest, ArrayAppendTest) {
+  JsonDict dict;
+  dict.Insert("name", "foo");
+  JsonArray array;
+  array.Append(dict, 1, true, nullptr, "hello");
+  EXPECT_EQ(array.size(), 5);
 }

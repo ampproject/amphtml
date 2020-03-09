@@ -111,12 +111,15 @@ class JsonDict {
     values_.emplace_back(std::pair<std::string, V>{key, value});
   }
 
-  std::size_t size() { return values_.size(); }
+  std::size_t size() const { return values_.size(); }
 
-  bool empty() { return values_.empty(); }
+  bool empty() const { return values_.empty(); }
 
   std::string ToString(int indent_columns = 0) const;
   void ToString(std::stringbuf*, int indent_columns = 0) const;
+
+  template<typename T>
+  T* Get(const std::string& key);
 
   // Facilitates range based iterator directly on JsonDict object.
   // for (auto& [k, v] : my_json_dict) {
@@ -150,9 +153,9 @@ class JsonArray {
     int unused[] = {0, (items_.emplace_back(std::forward<Ts>(items)), 0)...};
   }
 
-  std::size_t size() { return items_.size(); }
+  std::size_t size() const { return items_.size(); }
+  bool empty() const { return items_.empty(); }
 
-  bool empty() { return items_.empty(); }
   std::string ToString(int indent_columns = 0) const;
   void ToString(std::stringbuf*, int indent_columns = 0) const;
 
@@ -280,12 +283,12 @@ class JsonObject {
 
   // Gets the underlying value inside this JsonObject.
   // Returns nullopt if JsonObject doesn't hold this type.
-  template <typename T>
-  std::optional<T> Get() {
+  template<typename T>
+  T* Get() {
     if (!std::holds_alternative<T>(v_)) {
-      return std::nullopt;
+      return nullptr;
     }
-    return std::get<T>(v_);
+    return &std::get<T>(v_);
   }
 
   template<typename... Types>
@@ -301,6 +304,16 @@ class JsonObject {
                NullValue, JsonArray, JsonDict,
                Any<JsonArray>, Any<JsonDict>, Any<JsonObject>> v_;
 };
+
+template<typename T>
+T* JsonDict::Get(const std::string& key) {
+  for (auto& [k, v] : values_) {
+    if (k == key) {
+      return v.Get<T>();
+    }
+  }
+  return nullptr;
+}
 
 }  // namespace htmlparser::json
 
