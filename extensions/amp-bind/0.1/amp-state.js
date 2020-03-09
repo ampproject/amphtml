@@ -229,7 +229,11 @@ export class AmpState extends AMP.BaseElement {
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
       .then(json => this.updateState_(json, isInit))
-      .then(() => loadingDeferred.resolve());
+      .then(() => loadingDeferred.resolve())
+      .catch(err => {
+        loadingDeferred.resolve();
+        throw err;
+      });
   }
 
   /**
