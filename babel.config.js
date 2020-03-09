@@ -25,10 +25,10 @@
 
 'use strict';
 
-const {isTravisBuild} = require('./build-system/common/travis');
 const argv = require('minimist')(process.argv.slice(2));
 const experimentsConfig = require('./build-system/global-configs/experiments-config.json');
 const experimentsConstantBackup = require('./build-system/global-configs/experiments-const.json');
+const {isTravisBuild} = require('./build-system/common/travis');
 
 const jsxOpts = {
   pragma: 'Preact.createElement',
@@ -112,6 +112,7 @@ function getReplacePlugin(isEsmBuild) {
     const experimentDefine =
       experimentsConfig[experiment]['defineExperimentConstant'];
 
+    // eslint-disable-next-line require-jsdoc
     function flagExists(element) {
       return element['identifierName'] === experimentDefine;
     }
@@ -123,9 +124,11 @@ function getReplacePlugin(isEsmBuild) {
   });
 
   // default each backup experiment constant to the customized value
+  // eslint-disable-next-line local/no-for-of-statement, local/no-array-destructuring
   for (const [experimentDefine, value] of Object.entries(
     experimentsConstantBackup
   )) {
+    // eslint-disable-next-line require-jsdoc
     function flagExists(element) {
       return element['identifierName'] === experimentDefine;
     }
@@ -151,7 +154,9 @@ const getJsonConfigurationPlugin = () =>
  * @param {!Object<string, boolean>} buildFlags
  * @return {!Array<string|!Array<string|!Object>>}
  */
-function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
+function plugins(buildFlags) {
+  const {isEsmBuild, isForTesting, isSinglePass, isChecktypes} = buildFlags;
+  // eslint-disable-next-line local/no-spread
   const applied = [...defaultPlugins(isEsmBuild || false)];
   // TODO(erwinm): This is temporary until we remove the assert/log removals
   // from the java transformation to the babel transformation.
@@ -243,6 +248,7 @@ module.exports = function(api) {
   };
 };
 
+// eslint-disable-next-line local/no-module-exports
 Object.assign(module.exports, {
   plugins,
   eliminateIntermediateBundles,
