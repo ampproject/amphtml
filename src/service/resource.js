@@ -23,8 +23,8 @@ import {isBlockedByConsent} from '../error';
 import {
   layoutRectLtwh,
   layoutRectSizeEquals,
-  layoutRectsOverlap,
   moveLayoutRect,
+  rectsOverlap,
 } from '../layout-rect';
 import {startsWith} from '../string';
 import {toWin} from '../types';
@@ -416,8 +416,10 @@ export class Resource {
   /**
    * Measures the resource's boundaries. An upgraded element will be
    * transitioned to the "ready for layout" state.
+   * @param {!ClientRect=} opt_premeasuredRect If provided, use this
+   *    premeasured ClientRect instead of calling getBoundingClientRect.
    */
-  measure() {
+  measure(opt_premeasuredRect) {
     // Check if the element is ready to be measured.
     // Placeholders are special. They are technically "owned" by parent AMP
     // elements, sized by parents, but laid out independently. This means
@@ -448,14 +450,14 @@ export class Resource {
     this.isMeasureRequested_ = false;
 
     const oldBox = this.layoutBox_;
-    this.measureViaResources_();
-    const box = this.layoutBox_;
+    this.computeMeasurements_(opt_premeasuredRect);
+    const newBox = this.layoutBox_;
 
     // Note that "left" doesn't affect readiness for the layout.
-    const sizeChanges = !layoutRectSizeEquals(oldBox, box);
+    const sizeChanges = !layoutRectSizeEquals(oldBox, newBox);
     if (
       this.state_ == ResourceState.NOT_LAID_OUT ||
-      oldBox.top != box.top ||
+      oldBox.top != newBox.top ||
       sizeChanges
     ) {
       if (
@@ -469,17 +471,20 @@ export class Resource {
     }
 
     if (!this.hasBeenMeasured()) {
-      this.initialLayoutBox_ = box;
+      this.initialLayoutBox_ = newBox;
     }
 
-    this.element.updateLayoutBox(box, sizeChanges);
+    this.element.updateLayoutBox(newBox, sizeChanges);
   }
 
-  /** Use resources for measurement */
-  measureViaResources_() {
+  /**
+   * Computes the current layout box and position-fixed state of the element.
+   * @param {!ClientRect=} opt_premeasuredRect
+   * @private
+   */
+  computeMeasurements_(opt_premeasuredRect) {
     const viewport = Services.viewportForDoc(this.element);
-    const box = viewport.getLayoutRect(this.element);
-    this.layoutBox_ = box;
+    this.layoutBox_ = viewport.getLayoutRect(this.element, opt_premeasuredRect);
 
     // Calculate whether the element is currently is or in `position:fixed`.
     let isFixed = false;
@@ -507,7 +512,7 @@ export class Resource {
       // viewport. When accessing the layoutBox through #getLayoutBox, we'll
       // return the new absolute position.
       this.layoutBox_ = moveLayoutRect(
-        box,
+        this.layoutBox_,
         -viewport.getScrollLeft(),
         -viewport.getScrollTop()
       );
@@ -621,12 +626,13 @@ export class Resource {
   /**
    * Whether the resource is displayed, i.e. if it has non-zero width and
    * height.
+   * @param {!ClientRect=} opt_premeasuredRect If provided, use this
+   *    premeasured ClientRect instead of using the cached layout box.
    * @return {boolean}
    */
-  isDisplayed() {
+  isDisplayed(opt_premeasuredRect) {
     const isFluid = this.element.getLayout() == Layout.FLUID;
-    // TODO(jridgewell): #getSize
-    const box = this.getLayoutBox();
+    const box = opt_premeasuredRect || this.getLayoutBox();
     const hasNonZeroSize = box.height > 0 && box.width > 0;
     return (
       (isFluid || hasNonZeroSize) &&
@@ -649,7 +655,7 @@ export class Resource {
    * @return {boolean}
    */
   overlaps(rect) {
-    return layoutRectsOverlap(this.getLayoutBox(), rect);
+    return rectsOverlap(this.getLayoutBox(), rect);
   }
 
   /**

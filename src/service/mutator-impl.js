@@ -21,7 +21,7 @@ import {Services} from '../services';
 import {areMarginsChanged} from '../layout-rect';
 import {closest} from '../dom';
 import {computedStyle} from '../style';
-import {dev} from '../log';
+import {dev, devAssert} from '../log';
 import {isExperimentOn} from '../experiments';
 import {registerServiceBuilderForDoc} from '../service';
 
@@ -58,6 +58,9 @@ export class MutatorImpl {
     this.activeHistory_.onFocus(element => {
       this.checkPendingChangeSize_(element);
     });
+
+    /** @private @const {boolean} */
+    this.intersect_ = this.resources_.isIntersectionExperimentOn();
   }
 
   /** @override */
@@ -132,17 +135,27 @@ export class MutatorImpl {
 
   /** @override */
   collapseElement(element) {
-    const box = this.viewport_.getLayoutRect(element);
-    const resource = Resource.forElement(element);
-    if (box.width != 0 && box.height != 0) {
-      if (isExperimentOn(this.win, 'dirty-collapse-element')) {
-        this.dirtyElement(element);
-      } else {
-        this.resources_.setRelayoutTop(box.top);
+    // With IntersectionObserver, no need to relayout or remeasure
+    // due to a single element collapse (similar to "relayout top").
+    if (!this.intersect_) {
+      const box = this.viewport_.getLayoutRect(element);
+      if (box.width != 0 && box.height != 0) {
+        if (isExperimentOn(this.win, 'dirty-collapse-element')) {
+          this.dirtyElement(element);
+        } else {
+          this.resources_.setRelayoutTop(box.top);
+        }
       }
     }
+
+    const resource = Resource.forElement(element);
     resource.completeCollapse();
-    this.resources_.schedulePass(FOUR_FRAME_DELAY_);
+
+    // Unlike completeExpand(), there's no requestMeasure() call here that
+    // requires another pass (with IntersectionObserver).
+    if (!this.intersect_) {
+      this.resources_.schedulePass(FOUR_FRAME_DELAY_);
+    }
   }
 
   /** @override */
@@ -199,10 +212,27 @@ export class MutatorImpl {
         if (measurer) {
           measurer();
         }
-        relayoutTop = calcRelayoutTop();
+        // With IntersectionObserver, "relayout top" is no longer needed since
+        // relative positional changes won't affect correctness.
+        if (!this.intersect_) {
+          relayoutTop = calcRelayoutTop();
+        }
       },
       mutate: () => {
         mutator();
+
+        // TODO(willchou): IntersectionObserver won't catch size changes,
+        // which means layout boxes may be stale. However, always requesting
+        // measure after any mutation is overkill and probably expensive.
+        // Instead, survey measureMutateElement() callers to determine which
+        // should explicitly call requestMeasure() to fix this.
+
+        // With IntersectionObserver, no need to remeasure and set relayout
+        // on element size changes since enter/exit viewport will be detected.
+        if (this.intersect_) {
+          this.resources_.maybeHeightChanged();
+          return;
+        }
 
         if (element.classList.contains('i-amphtml-element')) {
           const r = Resource.forElement(element);
@@ -245,6 +275,7 @@ export class MutatorImpl {
    * @param {!Element} element
    */
   dirtyElement(element) {
+    devAssert(!this.intersect_);
     let relayoutAll = false;
     const isAmpElement = element.classList.contains('i-amphtml-element');
     if (isAmpElement) {
@@ -402,7 +433,10 @@ export class MutatorImpl {
         callback: opt_callback,
       }
     );
-    this.resources_.schedulePassVsync();
+    // With IntersectionObserver, remeasuring after size changes are no longer needed.
+    if (!this.intersect_) {
+      this.resources_.schedulePassVsync();
+    }
   }
 }
 
