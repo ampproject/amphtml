@@ -179,18 +179,18 @@ bool TableBuilder::OutputHeaderFile(
   std::ofstream fd(header_options_.output_file_path);
   htmlparser::Defer ____([&]() {fd.close();});
 
+  fd << "// -*- C++ -*-\n";
+
   if (!header_options_.license_header.empty()) {
     fd << header_options_.license_header << "\n";
   }
-
   fd << "\n// AUTO GENERATED; DO NOT EDIT.\n";
   fd << "// To regenerate this file, see comments in bin/jsongrammargen\n\n";
   if (!header_options_.ifdef_guard.empty()) {
     fd << "#ifndef " << header_options_.ifdef_guard << "\n";
     fd << "#define " << header_options_.ifdef_guard << "\n\n";
   } else {
-    fd << "#ifndef PARSE_STATES_H_\n";
-    fd << "#define PARSE_STATES_H_\n\n";
+    fd << "#pragma once\n";
   }
 
   fd << "#include <array>\n\n";
@@ -220,7 +220,7 @@ inline static uint8_t ToPushStateCode(uint32_t code);
 inline static uint8_t ToCurrentStateCode(uint32_t code);
 
 // Returns code for current token and active state.
-inline static uint32_t CodeForToken(char c, uint8_t state);
+inline static uint32_t CodeForToken(unsigned char c, uint8_t state);
 
 // Checks the push bit is on.
 inline static bool HasPushBit(uint32_t code);
@@ -295,15 +295,14 @@ inline static bool HasPopBit(uint32_t code) {
 // TODO: In follow up change modify the signature to accept a unicode
 // character, that is char32_t and based on the charset for this state return
 // the code from second last or last column accordingly.
-inline static uint32_t CodeForToken(char c, uint8_t state) {
-  int c_int = static_cast<int>(c);
-  if (c_int > 127) {
+inline static uint32_t CodeForToken(unsigned char c, uint8_t state) {
+  if (c > 127) {
 )";
 
   fd << "    return kParseStates[state][";
   fd << std::dec << charset_.size() - 1 << "];\n";
   fd << "  }\n";
-  fd << "  int index = kTokenIndexes[c_int];\n";
+  fd << "  int index = kTokenIndexes[c];\n";
   fd << "  if (index == -1) index = " << std::dec << charset_.size() << ";\n";
   fd << "  return kParseStates[state][index];\n}\n\n";
 
@@ -313,8 +312,6 @@ inline static uint32_t CodeForToken(char c, uint8_t state) {
 
   if (!header_options_.ifdef_guard.empty()) {
     fd << "#endif  // " << header_options_.ifdef_guard << std::endl;
-  } else {
-    fd << "#endif  // GRAMMAR_PARSE_STATES_H_\n";
   }
 
   return true;
