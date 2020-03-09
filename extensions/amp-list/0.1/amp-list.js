@@ -179,8 +179,7 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
-    this.isLayoutSizeDefined_ = isLayoutSizeDefined(layout);
+  isLayoutSupported(unusedLayout) {
     return true;
   }
 
@@ -193,6 +192,9 @@ export class AmpList extends AMP.BaseElement {
       viewer,
       this.templates_
     );
+
+    const layout = parseLayout(this.element.getAttribute('layout'));
+    this.isLayoutSizeDefined_ = isLayoutSizeDefined(layout);
 
     this.loadMoreEnabled_ = this.element.hasAttribute('load-more');
 
