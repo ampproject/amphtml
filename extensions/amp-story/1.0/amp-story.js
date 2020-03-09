@@ -1298,7 +1298,7 @@ export class AmpStory extends AMP.BaseElement {
     if (this.viewer_.getParam('storyPlayer') !== 'v0') {
       return;
     }
-    Services.extensionsFor(this.getAmpDoc().win).installExtensionForDoc(
+    Services.extensionsFor(this.win).installExtensionForDoc(
       this.getAmpDoc(),
       'amp-viewer-integration'
     );
@@ -2275,7 +2275,7 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
-    Services.extensionsFor(this.getAmpDoc().win).installExtensionForDoc(
+    Services.extensionsFor(this.win).installExtensionForDoc(
       this.getAmpDoc(),
       'amp-story-education'
     );
