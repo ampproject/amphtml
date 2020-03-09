@@ -25,6 +25,7 @@ const Mocha = require('mocha');
 const path = require('path');
 const {cyan} = require('ansi-colors');
 const {execOrDie} = require('../../common/exec');
+const {installPackages} = require('../../common/utils');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('../report-test-status');
 const {startServer, stopServer} = require('../serve');
@@ -34,11 +35,6 @@ const HOST = 'localhost';
 const PORT = 8000;
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
-
-function installPackages_() {
-  log('Running', cyan('yarn'), 'to install packages...');
-  execOrDie('npx yarn --cwd build-system/tasks/e2e', {'stdio': 'ignore'});
-}
 
 function buildRuntime_() {
   execOrDie('gulp clean');
@@ -72,7 +68,7 @@ function createMocha_() {
 
 async function e2e() {
   // install e2e-specific modules
-  installPackages_();
+  installPackages(__dirname);
 
   // set up promise to return to gulp.task()
   let resolver;

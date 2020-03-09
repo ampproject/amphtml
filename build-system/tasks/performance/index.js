@@ -18,24 +18,15 @@ const cacheDocuments = require('./cache-documents');
 const compileScripts = require('./compile-scripts');
 const getMetrics = require('./measure-documents');
 const loadConfig = require('./load-config');
-const log = require('fancy-log');
 const printReport = require('./print-report');
 const rewriteScriptTags = require('./rewrite-script-tags');
-const {cyan} = require('ansi-colors');
-const {execOrDie} = require('../../common/exec');
-
-function installPackages_() {
-  log('Running', cyan('yarn'), 'to install packages...');
-  execOrDie('npx yarn --cwd build-system/tasks/performance', {
-    'stdio': 'ignore',
-  });
-}
+const {installPackages} = require('../../common/utils');
 
 /**
  * @return {!Promise}
  */
 async function performance() {
-  installPackages_();
+  installPackages(__dirname);
   const {headless, runs, urls} = new loadConfig();
   await cacheDocuments(urls);
   await compileScripts(urls);
