@@ -24,12 +24,7 @@ import {
   markElementForDiffing,
 } from '../../../src/purifier/sanitation';
 import {Deferred} from '../../../src/utils/promise';
-import {
-  Layout,
-  getLayoutClass,
-  isLayoutSizeDefined,
-  parseLayout,
-} from '../../../src/layout';
+import {Layout, getLayoutClass, parseLayout} from '../../../src/layout';
 import {LoadMoreService} from './service/load-more-service';
 import {Pass} from '../../../src/pass';
 import {Services} from '../../../src/services';
@@ -130,8 +125,8 @@ export class AmpList extends AMP.BaseElement {
      */
     this.layoutCompleted_ = false;
 
-    /** @private {?boolean} */
-    this.isLayoutSizeDefined_ = null;
+    /** @private {boolean} */
+    this.isLayoutContainer_ = false;
 
     /**
      * The `src` attribute's initial value.
@@ -179,7 +174,8 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(unusedLayout) {
+  isLayoutSupported(layout) {
+    this.isLayoutContainer_ = layout === Layout.CONTAINER;
     return true;
   }
 
@@ -192,9 +188,6 @@ export class AmpList extends AMP.BaseElement {
       viewer,
       this.templates_
     );
-
-    const layout = parseLayout(this.element.getAttribute('layout'));
-    this.isLayoutSizeDefined_ = layout ? isLayoutSizeDefined(layout) : null;
 
     this.loadMoreEnabled_ = this.element.hasAttribute('load-more');
 
@@ -432,7 +425,7 @@ export class AmpList extends AMP.BaseElement {
 
     const isLayoutContainer = mutations['is-layout-container'];
     if (isLayoutContainer) {
-      this.isLayoutSizeDefined_ = false;
+      this.isLayoutContainer_ = true;
       this.changeToLayoutContainer_();
     }
 
@@ -462,7 +455,7 @@ export class AmpList extends AMP.BaseElement {
     // In the load-more case, we allow the container to be height auto
     // in order to reasonably make space for the load-more button and
     // load-more related UI elements underneath.
-    if (!this.loadMoreEnabled_ && this.isLayoutSizeDefined_) {
+    if (!this.loadMoreEnabled_ && !this.isLayoutContainer_) {
       this.applyFillContent(container, true);
     }
     return container;
@@ -1005,8 +998,8 @@ export class AmpList extends AMP.BaseElement {
           .getResourceForElement(this.element);
         r.resetPendingChangeSize();
 
-        if (!this.isLayoutSizeDefined_) {
-          this.measureElement(() => {
+        if (this.isLayoutContainer_) {
+          return this.measureElement(() => {
             const targetHeight = this.container_./*OK*/ scrollHeight;
             const height = this.element./*OK*/ offsetHeight;
             if (targetHeight > height) {
@@ -1133,7 +1126,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFit_(target) {
-    if (!this.isLayoutSizeDefined_) {
+    if (this.isLayoutContainer_) {
       return;
     }
     this.measureElement(() => {
@@ -1163,7 +1156,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFitLoadMoreElement_(element, target) {
-    if (!this.isLayoutSizeDefined_) {
+    if (this.isLayoutContainer_) {
       return;
     }
     this.measureElement(() => {
