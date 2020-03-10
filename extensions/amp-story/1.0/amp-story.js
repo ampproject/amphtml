@@ -94,7 +94,6 @@ import {
 } from '../../../src/dom';
 import {
   computedStyle,
-  px,
   resetStyles,
   setImportantStyles,
   toggle,
@@ -105,7 +104,7 @@ import {dev, devAssert, user} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {endsWith} from '../../../src/string';
 import {escapeCssSelectorIdent} from '../../../src/css';
-import {findIndex} from '../../../src/utils/array';
+import {findIndex, lastItem} from '../../../src/utils/array';
 import {getConsentPolicyState} from '../../../src/consent';
 import {getDetail} from '../../../src/event-helper';
 import {getMediaQueryService} from './amp-story-media-query-service';
@@ -360,6 +359,7 @@ export class AmpStory extends AMP.BaseElement {
 
     /** @private @const {!LocalizationService} */
     this.localizationService_ = new LocalizationService(this.win);
+    const localizationService = this.localizationService_;
     this.localizationService_
       .registerLocalizedStringBundle('default', LocalizedStringsDefault)
       .registerLocalizedStringBundle('ar', LocalizedStringsAr)
@@ -393,11 +393,9 @@ export class AmpStory extends AMP.BaseElement {
       enXaPseudoLocaleBundle
     );
 
-    registerServiceBuilder(
-      this.win,
-      'localization',
-      () => this.localizationService_
-    );
+    registerServiceBuilder(this.win, 'localization', function() {
+      return localizationService;
+    });
   }
 
   /** @override */
@@ -420,6 +418,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
     this.initializePageIds_();
+    this.initializeStoryPlayer_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
@@ -610,40 +609,6 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @private
-   */
-  updateViewportSizeStyles_() {
-    const pageEl =
-      (this.activePage_ && this.activePage_.element) ||
-      this.element.querySelector('amp-story-page');
-
-    if (!pageEl || !this.isStandalone_()) {
-      return;
-    }
-
-    return this.vsync_.runPromise(
-      {
-        measure: state => {
-          state.vh = pageEl./*OK*/ clientHeight / 100;
-          state.vw = pageEl./*OK*/ clientWidth / 100;
-          state.vmin = Math.min(state.vh, state.vw);
-          state.vmax = Math.max(state.vh, state.vw);
-        },
-        mutate: state => {
-          this.win.document.documentElement.setAttribute(
-            'style',
-            `--story-page-vh: ${px(state.vh)};` +
-              `--story-page-vw: ${px(state.vw)};` +
-              `--story-page-vmin: ${px(state.vmin)};` +
-              `--story-page-vmax: ${px(state.vmax)};`
-          );
-        },
-      },
-      {}
-    );
-  }
-
-  /**
    * Builds the system layer DOM.
    * @param {string} initialPageId
    * @private
@@ -771,10 +736,6 @@ export class AmpStory extends AMP.BaseElement {
 
     this.storeService_.subscribe(StateProperty.BOOKEND_STATE, isActive => {
       this.onBookendStateUpdate_(isActive);
-    });
-
-    this.storeService_.subscribe(StateProperty.CURRENT_PAGE_ID, pageId => {
-      this.onCurrentPageIdUpdate_(pageId);
     });
 
     this.storeService_.subscribe(StateProperty.PAUSED_STATE, isPaused => {
@@ -1023,7 +984,6 @@ export class AmpStory extends AMP.BaseElement {
         }
       })
       .then(() => this.switchTo_(initialPageId, NavigationDirection.NEXT))
-      .then(() => this.updateViewportSizeStyles_())
       .then(() => {
         const shouldReOpenAttachmentForPageId = getHistoryState(
           this.win,
@@ -1054,15 +1014,14 @@ export class AmpStory extends AMP.BaseElement {
         this.initializeLiveStory_();
       });
 
+    this.maybeLoadStoryEducation_();
+
     // Story is being prerendered: resolve the layoutCallback when the first
     // page is built. Other pages will only build if the document becomes
     // visible.
     if (!this.getAmpDoc().hasBeenVisible()) {
       return whenUpgradedToCustomElement(firstPageEl).then(() => {
-        return Promise.all([
-          firstPageEl.whenBuilt(),
-          this.updateViewportSizeStyles_(),
-        ]);
+        return firstPageEl.whenBuilt();
       });
     }
 
@@ -1107,16 +1066,17 @@ export class AmpStory extends AMP.BaseElement {
    * @private
    */
   getInitialPageId_(firstPageEl) {
-    const historyPage = /** @type {string} */ (getHistoryState(
-      this.win,
-      HistoryState.PAGE_ID
-    ));
-
     const maybePageId = parseQueryString(this.win.location.hash)['page'];
     if (maybePageId && this.isActualPage_(maybePageId)) {
       return maybePageId;
     }
 
+    const pages =
+      /**  @type {!Array} */ (getHistoryState(
+        this.win,
+        HistoryState.NAVIGATION_PATH
+      ) || []);
+    const historyPage = lastItem(pages);
     if (historyPage && this.isActualPage_(historyPage)) {
       return historyPage;
     }
@@ -1327,6 +1287,21 @@ export class AmpStory extends AMP.BaseElement {
       'No active page set when navigating to next page.'
     );
     activePage.next(opt_isAutomaticAdvance);
+  }
+
+  /**
+   * Installs amp-viewer-integration script in case story is inside an
+   * amp-story-player.
+   * @private
+   */
+  initializeStoryPlayer_() {
+    if (this.viewer_.getParam('storyPlayer') !== 'v0') {
+      return;
+    }
+    Services.extensionsFor(this.win).installExtensionForDoc(
+      this.getAmpDoc(),
+      'amp-viewer-integration'
+    );
   }
 
   /**
@@ -1722,26 +1697,10 @@ export class AmpStory extends AMP.BaseElement {
   }
 
   /**
-   * @param {string} pageId new current page id
-   * @private
-   * */
-  onCurrentPageIdUpdate_(pageId) {
-    // Never save ad pages to history as they are unique to each visit.
-    const page = this.getPageById(pageId);
-    if (page.isAd()) {
-      return;
-    }
-
-    setHistoryState(this.win, HistoryState.PAGE_ID, pageId);
-  }
-
-  /**
    * Handle resize events and set the story's desktop state.
    * @visibleForTesting
    */
   onResize() {
-    this.updateViewportSizeStyles_();
-
     const uiState = this.getUIType_();
     this.storeService_.dispatch(Action.TOGGLE_UI, uiState);
 
@@ -2305,6 +2264,21 @@ export class AmpStory extends AMP.BaseElement {
           }
         ));
       });
+  }
+
+  /**
+   * Loads amp-story-education if the viewer capability is provided.
+   * @private
+   */
+  maybeLoadStoryEducation_() {
+    if (!this.viewer_.hasCapability('education')) {
+      return;
+    }
+
+    Services.extensionsFor(this.win).installExtensionForDoc(
+      this.getAmpDoc(),
+      'amp-story-education'
+    );
   }
 
   /**

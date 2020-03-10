@@ -94,6 +94,11 @@ describes.sandboxed('cid', {}, env => {
         nodeType: /* DOCUMENT */ 9,
         body: {},
         querySelector: () => {},
+        head: {
+          nodeType: /* ELEMENT */ 1,
+          querySelector: () => null,
+          querySelectorAll: () => [],
+        },
       },
       navigator: window.navigator,
       setTimeout: window.setTimeout,
@@ -1024,9 +1029,7 @@ describes.realWin('cid', {amp: true}, env => {
     it('should not work if vendor not whitelisted', () => {
       ampdoc.win.document.head.innerHTML +=
         '<meta name="amp-google-client-id-api" content="abodeanalytics">';
-      allowConsoleError(() => {
-        expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
-      });
+      expect(cid.isScopeOptedIn_('AMP_ECID_GOOGLE')).to.equal(undefined);
     });
   });
 });

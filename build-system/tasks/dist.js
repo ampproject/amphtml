@@ -22,9 +22,11 @@ const log = require('fancy-log');
 const {
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
+  compileCoreRuntime,
   compileJs,
   endBuildStep,
   hostname,
+  maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,
@@ -99,12 +101,11 @@ async function dist() {
   await compileCss();
   await compileJison();
 
-  // This is the temp directory processing for multi-pass (single-pass does its
-  // own processing). Executed after `compileCss` and `compileJison` so their
-  // results can be copied too.
-  if (!argv.single_pass) {
-    transferSrcsToTempDir({isForTesting: argv.fortesting});
-  }
+  transferSrcsToTempDir({
+    isForTesting: !!argv.fortesting,
+    isEsmBuild: !!argv.esm,
+    isSinglePass: !!argv.single_pass,
+  });
 
   await copyCss();
   await copyParsers();
@@ -112,24 +113,29 @@ async function dist() {
 
   // Steps that use closure compiler. Small ones before large (parallel) ones.
   await startNailgunServer(distNailgunPort, /* detached */ false);
-  await buildExperiments({minify: true, watch: false});
-  await buildLoginDone('0.1', {minify: true, watch: false});
-  await buildWebPushPublisherFiles({minify: true, watch: false});
-  await compileAllMinifiedJs();
-  await buildExtensions({minify: true, watch: false});
+  if (argv.core_runtime_only) {
+    await compileCoreRuntime(/* watch */ false, /* minify */ true);
+  } else {
+    await buildExperiments({minify: true, watch: false});
+    await buildLoginDone('0.1', {minify: true, watch: false});
+    await buildWebPushPublisherFiles({minify: true, watch: false});
+    await compileAllMinifiedJs();
+    await buildExtensions({minify: true, watch: false});
+  }
   await stopNailgunServer(distNailgunPort);
 
   if (argv.esm) {
-    await Promise.all([
-      createModuleCompatibleES5Bundle('v0.js'),
-      createModuleCompatibleES5Bundle('amp4ads-v0.js'),
-      createModuleCompatibleES5Bundle('shadow-v0.js'),
-    ]);
+    await createModuleCompatibleES5Bundle('v0.mjs');
+    if (!argv.core_runtime_only) {
+      await createModuleCompatibleES5Bundle('amp4ads-v0.mjs');
+      await createModuleCompatibleES5Bundle('shadow-v0.mjs');
+    }
   }
 
-  await formatExtractedMessages();
-  await generateFileListing();
-
+  if (!argv.core_runtime_only) {
+    await formatExtractedMessages();
+    await generateFileListing();
+  }
   return exitCtrlcHandler(handlerProcess);
 }
 
@@ -148,7 +154,7 @@ function buildExperiments(options) {
       watch: false,
       minify: options.minify || argv.minify,
       includePolyfills: true,
-      minifiedName: 'experiments.js',
+      minifiedName: maybeToEsmName('experiments.js'),
     }
   );
 }
@@ -190,7 +196,7 @@ async function buildWebPushPublisherFiles(options) {
     WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
       const tempBuildDir = `build/all/amp-web-push-${version}/`;
       const builtName = fileName + '.js';
-      const minifiedName = fileName + '.js';
+      const minifiedName = maybeToEsmName(fileName + '.js');
       const p = compileJs('./' + tempBuildDir, builtName, './' + distDir, {
         watch: options.watch,
         includePolyfills: true,
@@ -271,7 +277,7 @@ async function generateFileListing() {
   const filesOut = `${distDir}/files.txt`;
   fs.writeFileSync(filesOut, '');
   const files = (await walk(distDir)).map(f => f.replace(`${distDir}/`, ''));
-  fs.writeFileSync(filesOut, files.join('\n'));
+  fs.writeFileSync(filesOut, files.join('\n') + '\n');
   endBuildStep('Generated', filesOut, startTime);
 }
 
@@ -313,7 +319,7 @@ function postBuildWebPushPublisherFilesVersion() {
   WEB_PUSH_PUBLISHER_VERSIONS.forEach(version => {
     const basePath = `extensions/amp-web-push/${version}/`;
     WEB_PUSH_PUBLISHER_FILES.forEach(fileName => {
-      const minifiedName = fileName + '.js';
+      const minifiedName = maybeToEsmName(fileName + '.js');
       if (!fs.existsSync(distDir + '/' + minifiedName)) {
         throw new Error(`Cannot find ${distDir}/${minifiedName}`);
       }
@@ -420,7 +426,8 @@ module.exports = {
 
 /* eslint "google-camelcase/google-camelcase": 0 */
 
-dist.description = 'Build production binaries';
+dist.description =
+  'Compiles AMP production binaries and applies AMP_CONFIG to runtime files';
 dist.flags = {
   pseudo_names:
     '  Compiles with readable names. ' +
@@ -429,15 +436,19 @@ dist.flags = {
     '  Outputs compiled code with whitespace. ' +
     'Great for debugging production code.',
   fortesting: '  Compiles production binaries for local testing',
+  noconfig: '  Compiles production binaries without applying AMP_CONFIG',
   config: '  Sets the runtime\'s AMP_CONFIG to one of "prod" or "canary"',
   single_pass: "Compile AMP's primary JS bundles in a single invocation",
   extensions: '  Builds only the listed extensions.',
   extensions_from: '  Builds only the extensions from the listed AMP(s).',
   noextensions: '  Builds with no extensions.',
+  core_runtime_only: '  Builds only the core runtime.',
   single_pass_dest:
     '  The directory closure compiler will write out to ' +
     'with --single_pass mode. The default directory is `dist`',
   full_sourcemaps: '  Includes source code content in sourcemaps',
   disable_nailgun:
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
+  type: '  Points sourcemap to fetch files from the correct GitHub tag',
+  esm: '  Does not transpile down to ES5',
 };

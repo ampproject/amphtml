@@ -56,7 +56,6 @@ import {VideoUtils} from '../../../src/utils/video';
 import {
   childElement,
   closestAncestorElementBySelector,
-  createElementWithAttributes,
   isAmpElement,
   iterateCursor,
   matches,
@@ -75,7 +74,8 @@ import {getMode} from '../../../src/mode';
 import {htmlFor} from '../../../src/static-template';
 import {isExperimentOn} from '../../../src/experiments';
 import {isMediaDisplayed, setTextBackgroundColor} from './utils';
-import {toggle} from '../../../src/style';
+import {px, toggle} from '../../../src/style';
+import {renderPageDescription} from './semantic-render';
 import {upgradeBackgroundAudio} from './audio';
 
 /**
@@ -233,6 +233,9 @@ export class AmpStoryPage extends AMP.BaseElement {
       100
     );
 
+    /** @private {boolean}  */
+    this.isFirstPage_ = false;
+
     /** @private {?LoadingSpinner} */
     this.loadingSpinner_ = null;
 
@@ -270,14 +273,17 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private @const {!function(*)} */
     this.mediaPoolRejectFn_ = deferred.reject;
 
-    /** @private {boolean}  */
-    this.prerenderAllowed_ = false;
-
     /** @private {!PageState} */
     this.state_ = PageState.NOT_ACTIVE;
 
     /** @private @const {!./amp-story-store-service.AmpStoryStoreService} */
     this.storeService_ = getStoreService(this.win);
+
+    /** @private {?Element} */
+    this.cssVariablesStyleEl_ = null;
+
+    /** @private {?../../../src/layout-rect.LayoutRectDef} */
+    this.layoutBox_ = null;
 
     /** @private {!Array<function()>} */
     this.unlisteners_ = [];
@@ -317,10 +323,7 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @override */
   firstAttachedCallback() {
     // Only prerender the first story page.
-    this.prerenderAllowed_ = matches(
-      this.element,
-      'amp-story-page:first-of-type'
-    );
+    this.isFirstPage_ = matches(this.element, 'amp-story-page:first-of-type');
   }
 
   /** @override */
@@ -497,6 +500,71 @@ export class AmpStoryPage extends AMP.BaseElement {
     ]);
   }
 
+  // TODO(26866): switch back to onMeasuredChange and remove the layoutBox
+  // equality checks.
+  /** @override */
+  onLayoutMeasure() {
+    const layoutBox = this.getLayoutBox();
+    // Only measures from the first story page, that always gets built because
+    // of the prerendering optimizations in place.
+    if (
+      !this.isFirstPage_ ||
+      (this.layoutBox_ &&
+        this.layoutBox_.width === layoutBox.width &&
+        this.layoutBox_.height === layoutBox.height)
+    ) {
+      return;
+    }
+
+    this.layoutBox_ = layoutBox;
+
+    return this.getVsync().runPromise(
+      {
+        measure: state => {
+          const uiState = this.storeService_.get(StateProperty.UI_STATE);
+          // The desktop panels UI uses CSS scale. Retrieving clientHeight/Width
+          // ensures we are getting the raw size, ignoring the scale.
+          const {width, height} =
+            uiState === UIType.DESKTOP_PANELS
+              ? {
+                  height: this.element./*OK*/ clientHeight,
+                  width: this.element./*OK*/ clientWidth,
+                }
+              : layoutBox;
+          state.height = height;
+          state.width = width;
+          state.vh = height / 100;
+          state.vw = width / 100;
+          state.fiftyVw = Math.round(width / 2);
+          state.vmin = Math.min(state.vh, state.vw);
+          state.vmax = Math.max(state.vh, state.vw);
+        },
+        mutate: state => {
+          const {height, width} = state;
+          if (state.vh === 0 && state.vw === 0) {
+            return;
+          }
+          this.storeService_.dispatch(Action.SET_PAGE_SIZE, {height, width});
+          if (!this.cssVariablesStyleEl_) {
+            const doc = this.win.document;
+            this.cssVariablesStyleEl_ = doc.createElement('style');
+            this.cssVariablesStyleEl_.setAttribute('type', 'text/css');
+            doc.head.appendChild(this.cssVariablesStyleEl_);
+          }
+          this.cssVariablesStyleEl_.textContent =
+            `:root {` +
+            `--story-page-vh: ${px(state.vh)};` +
+            `--story-page-vw: ${px(state.vw)};` +
+            `--story-page-vmin: ${px(state.vmin)};` +
+            `--story-page-vmax: ${px(state.vmax)};` +
+            `--i-amphtml-story-page-50vw: ${px(state.fiftyVw)};` +
+            `}`;
+        },
+      },
+      {}
+    );
+  }
+
   /**
    * @private
    */
@@ -651,7 +719,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   prerenderAllowed() {
-    return this.prerenderAllowed_;
+    return this.isFirstPage_;
   }
 
   /**
@@ -1593,14 +1661,15 @@ export class AmpStoryPage extends AMP.BaseElement {
         '.i-amphtml-story-page-open-attachment-label'
       );
 
-      const openAttachmentLabel =
-        attachmentEl.getAttribute('data-cta-text') ||
+      const openLabelAttr = attachmentEl.getAttribute('data-cta-text');
+      const openLabel =
+        (openLabelAttr && openLabelAttr.trim()) ||
         Services.localizationService(this.win).getLocalizedString(
           LocalizedStringId.AMP_STORY_PAGE_ATTACHMENT_OPEN_LABEL
         );
 
       this.mutateElement(() => {
-        textEl.textContent = openAttachmentLabel;
+        textEl.textContent = openLabel;
         this.element.appendChild(this.openAttachmentEl_);
       });
     }
@@ -1646,7 +1715,10 @@ export class AmpStoryPage extends AMP.BaseElement {
    */
   setPageDescription_() {
     if (this.isBotUserAgent_) {
-      this.renderPageDescription_();
+      renderPageDescription(
+        this,
+        this.getMediaBySelector_(Selectors.ALL_AMP_VIDEO, true)
+      );
     }
 
     if (!this.isBotUserAgent_ && this.element.hasAttribute('title')) {
@@ -1660,53 +1732,6 @@ export class AmpStoryPage extends AMP.BaseElement {
       }
       this.element.removeAttribute('title');
     }
-  }
-
-  /**
-   * Renders the page description, and videos title/alt attributes in the page.
-   * @private
-   */
-  renderPageDescription_() {
-    const descriptionElId = `i-amphtml-story-${this.element.id}-description`;
-    const descriptionEl = createElementWithAttributes(
-      this.win.document,
-      'div',
-      dict({
-        'class': 'i-amphtml-story-page-description',
-        'id': descriptionElId,
-      })
-    );
-
-    const addTagToDescriptionEl = (tagName, text) => {
-      if (!text) {
-        return;
-      }
-      const el = this.win.document.createElement(tagName);
-      el./* OK */ textContent = text;
-      descriptionEl.appendChild(el);
-    };
-
-    addTagToDescriptionEl('h2', this.element.getAttribute('title'));
-
-    this.getMediaBySelector_(Selectors.ALL_AMP_VIDEO, true).forEach(videoEl => {
-      addTagToDescriptionEl('p', videoEl.getAttribute('alt'));
-      addTagToDescriptionEl('p', videoEl.getAttribute('title'));
-    });
-
-    if (descriptionEl.childElementCount === 0) {
-      return;
-    }
-
-    this.mutateElement(() => {
-      this.element.parentElement.insertBefore(
-        descriptionEl,
-        this.element.nextElementSibling
-      );
-
-      if (!this.element.getAttribute('aria-labelledby')) {
-        this.element.setAttribute('aria-labelledby', descriptionElId);
-      }
-    });
   }
 
   /**

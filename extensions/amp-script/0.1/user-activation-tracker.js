@@ -16,7 +16,14 @@
 
 export const ACTIVATION_TIMEOUT = 5000; // 5 seconds.
 
-const ACTIVATION_EVENTS = ['click', 'input', 'dblclick', 'keypress', 'submit'];
+const ACTIVATION_EVENTS = [
+  'change',
+  'click',
+  'dblclick',
+  'input',
+  'keypress',
+  'submit',
+];
 
 /**
  * See https://github.com/dtapuska/useractivation for inspiration.

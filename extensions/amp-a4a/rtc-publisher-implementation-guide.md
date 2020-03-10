@@ -27,6 +27,7 @@ To use RTC, you must meet the following requirements:
 - IndexExchange
 - Lotame
 - Media.net
+- The Ozone Project
 - PubMatic OpenWrap
 - Purch
 - Rubicon

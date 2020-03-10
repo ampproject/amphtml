@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays an Apester smart unit.
+  text: Displays an [Apester](https://apester.com/) smart unit.
 ---
 
 <!---
@@ -23,23 +23,6 @@ limitations under the License.
 -->
 
 # amp-apester-media
-
-Displays a <a href="https://apester.com/">Apester</a> smart unit.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td> <code>&lt;script async custom-element="amp-apester-media" src="https://cdn.ampproject.org/v0/amp-apester-media-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>
-    fill, fixed, fixed-height, flex-item, nodisplay, responsive
-    </td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Examples
 

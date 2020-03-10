@@ -191,6 +191,7 @@ describes.fakeWin('Viewport', {}, env => {
     });
 
     it('should not set singledoc class', () => {
+      expectAsyncConsoleError(/Expected service/);
       env.sandbox.stub(ampdoc, 'isSingleDoc').callsFake(() => false);
       new ViewportImpl(ampdoc, binding, viewer);
       expect(root).to.not.have.class('i-amphtml-singledoc');
@@ -393,6 +394,27 @@ describes.fakeWin('Viewport', {}, env => {
     changeVisibilityState('hidden');
     expect(binding.connect).to.be.calledOnce;
     expect(binding.disconnect).to.be.calledOnce;
+  });
+
+  it('should update scroll position when visibility changes', () => {
+    binding = new ViewportBindingDef();
+    binding.getScrollTop = (() => {
+      const generator = (function*() {
+        yield 25;
+        return 100;
+      })();
+      return () => generator.next().value;
+    })();
+    viewport = new ViewportImpl(ampdoc, binding, viewer);
+
+    // Force scrollTop to be measured
+    viewport.getScrollTop();
+    expect(viewport./*OK*/ scrollTop_).to.equal(25);
+    // Toggle visibility state
+    changeVisibilityState('prerender');
+    changeVisibilityState('visible');
+    // Expect scrollTop to be remeasured
+    expect(viewport./*OK*/ scrollTop_).to.equal(100);
   });
 
   it('should resize only after size has been initialed', () => {
@@ -1131,12 +1153,12 @@ describes.fakeWin('Viewport', {}, env => {
       iframeWin.document.body.appendChild(element);
       bindingMock
         .expects('getLayoutRect')
-        .withExactArgs(element, 0, 0)
+        .withArgs(element, 0, 0)
         .returns({left: 20, top: 10})
         .once();
       bindingMock
         .expects('getLayoutRect')
-        .withExactArgs(iframe, 0, 0)
+        .withArgs(iframe, 0, 0)
         .returns({left: 211, top: 111})
         .once();
 
@@ -1152,12 +1174,12 @@ describes.fakeWin('Viewport', {}, env => {
       iframeWin.document.body.appendChild(element);
       bindingMock
         .expects('getLayoutRect')
-        .withExactArgs(element, 0, 0)
+        .withArgs(element, 0, 0)
         .returns({left: 20, top: 10})
         .once();
       bindingMock
         .expects('getLayoutRect')
-        .withExactArgs(iframe, 200, 100)
+        .withArgs(iframe, 200, 100)
         .returns({left: 211, top: 111})
         .once();
 

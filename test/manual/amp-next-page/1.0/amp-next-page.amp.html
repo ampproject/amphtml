@@ -9,19 +9,72 @@
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
     <script async custom-element="amp-next-page" src="https://cdn.ampproject.org/v0/amp-next-page-1.0.js"></script>
+    <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.2.js"></script>
     <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-    <script>
-      (self.AMP=self.AMP||[]).push(function(AMP){
-          AMP.toggleExperiment('amp-next-page-v2', true);
-      });
-    </script>    
     <style amp-custom>
       .content {
         padding: 20px;
       }
+      .amp-next-page-separator {
+        margin-top: 16px;
+        margin-bottom: 16px;
+      }
+      .my-footer {
+        padding: 24px;
+        text-align: center;
+        color: #AAAAAA;
+        display: block;
+        font-family: Arial, Helvetica, sans-serif;
+      }
     </style>
 </head>
   <body>
+  <amp-analytics>
+      <script type="application/json">
+      {
+        "requests": {
+          "scroll": "https://host-page/${eventId}/${eventLabel}/${account}",
+          "pageview": "https://host-page/${canonicalUrl}/${title}/${account}",
+          "imageview": "https://host-page/image-view/?initialScrollDepth=${initialScrollDepth}&maxScrollDepth=${maxScrollDepth}&totalTime=${totalTime}&totalVisibleTime=${totalVisibleTime}&maxContinuousVisibleTime=${maxContinuousVisibleTime}&minVisiblePercentage=${minVisiblePercentage}&maxVisiblePercentage=${maxVisiblePercentage}&firstVisibleTime=${firstVisibleTime}"
+        },
+        "vars": {
+          "account": "ABC123"
+        },
+        "triggers": {
+          "scrollPings": {
+            "on": "scroll",
+            "request": "scroll",
+            "scrollSpec": {
+              "verticalBoundaries": [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+              "horizontalBoundaries": [90],
+              "useInitialPageSize": true
+            },
+            "vars": {
+              "eventId": "scroll",
+              "eventLabel": "${verticalScrollBoundary}"
+            }
+          },
+          "trackPageview": {
+            "on": "visible",
+            "request": "pageview",
+            "vars": {
+              "eventCategory": "${canonicalUrl}",
+              "eventAction": "view"
+            }
+          },
+          "image_viewed": {
+            "on": "visible",
+            "request": ["imageview"],
+            "selector": "#target1",
+            "visibilitySpec": {
+              "visiblePercentageMin": "0",
+              "repeat": true
+            }
+          }  
+        }
+      }
+      </script>
+    </amp-analytics>          
     <div class="content">
       <h2>Host page</h2>
       <p>
@@ -38,6 +91,9 @@
         varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl
         at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
       </p>
+
+      <amp-img id="target1" layout=responsive width=1600 height=900 src="https://picsum.photos/1600/900?image=981"></amp-img>
+
       <p>
         Vestibulum a nisi est. Fusce consequat iaculis vehicula. Aliquam luctus
         nunc risus, ut congue augue tristique nec. In venenatis aliquam tristique.
@@ -166,7 +222,6 @@
         varius est suscipit vitae. Maecenas ut sapien diam. Vivamus viverra nisl
         at quam pellentesque posuere. Cras ut nibh non arcu dignissim elementum.
       </p>
-      <a href="#" id="host-halfway"></a>
       <p>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean vitae
         libero porta nulla iaculis viverra. Vestibulum consectetur scelerisque
@@ -259,7 +314,8 @@
         quis metus in mi pharetra tempus. Etiam dapibus tellus vitae blandit
         rhoncus. Fusce commodo risus id sapien ultrices vehicula.
       </p>
-    </div>
+    </div>    
+    <!-- amp-next-page configuration -->
     <amp-next-page>
       <script type="application/json">
         [
@@ -285,12 +341,22 @@
           }
         ]
       </script>
-      <div amp-next-page-separator>
-          Read more
-      </div>
-      <div amp-next-page-more-box>
-          Here are a few more articles ...
-      </div>  
+      <!-- Custom Separator & Footer Elements
+        <div separator class="my-custom-separator">
+          <template type="amp-mustache">
+            <div class="my-custom-separator-content">
+              <amp-img src={{image}} layout="fixed" height="16" width="16"></amp-img>
+              <span>Next article: {{title}}</span>
+            </div>
+          </template>
+        </div>
+        <div recommendation-box class="my-custom-footer">
+            Here are a few more articles ...
+        </div>
+      -->
+      <span class="my-footer" footer>
+        more footer content here
+      </span>
     </amp-next-page>
   </body>
 </html>

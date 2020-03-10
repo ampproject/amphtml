@@ -88,7 +88,12 @@ const UNMINIFIED_TARGETS = [
  * Note: keep this list in sync with release script. Contact @ampproject/wg-infra
  * for details.
  */
-const MINIFIED_TARGETS = ['alp.js', 'amp4ads-v0.js', 'shadow-v0.js', 'v0.js'];
+const MINIFIED_TARGETS = [
+  'alp.js',
+  'amp4ads-v0.js',
+  'shadow-v0.js',
+  'v0.js',
+].map(maybeToEsmName);
 
 /**
  * Settings for the global Babelify transform while compiling unminified code
@@ -102,7 +107,10 @@ const BABELIFY_GLOBAL_TRANSFORM = {
  * Plugins used by Babelify while compiling unminified code
  */
 const BABELIFY_PLUGINS = {
-  plugins: [conf.getReplacePlugin(), conf.getJsonConfigurationPlugin()],
+  plugins: [
+    conf.getReplacePlugin(argv.esm || false),
+    conf.getJsonConfigurationPlugin(),
+  ],
 };
 
 const hostname = argv.hostname || 'cdn.ampproject.org';
@@ -177,24 +185,33 @@ async function bootstrapThirdPartyFrames(watch, minify) {
 }
 
 /**
+ * Compile and optionally minify the core runtime.
+ * @param {boolean} watch
+ * @param {boolean} minify
+ * @return {!Promise}
+ */
+async function compileCoreRuntime(watch, minify) {
+  await doBuildJs(jsBundles, 'amp.js', {
+    watch,
+    minify,
+    wrapper: wrappers.mainBinary,
+    singlePassCompilation: argv.single_pass,
+    esmPassCompilation: argv.esm,
+    includeOnlyESMLevelPolyfills: argv.esm,
+  });
+}
+
+/**
  * Compile and optionally minify the stylesheets and the scripts for the runtime
  * and drop them in the dist folder
  * @param {boolean} watch
  * @param {boolean} minify
  * @return {!Promise}
  */
-function compileAllJs(watch, minify) {
+async function compileAllJs(watch, minify) {
   const startTime = Date.now();
-  return Promise.all([
+  await Promise.all([
     minify ? Promise.resolve() : doBuildJs(jsBundles, 'polyfills.js', {watch}),
-    doBuildJs(jsBundles, 'amp.js', {
-      watch,
-      minify,
-      wrapper: wrappers.mainBinary,
-      singlePassCompilation: argv.single_pass,
-      esmPassCompilation: argv.esm,
-      includeOnlyESMLevelPolyfills: argv.esm,
-    }),
     doBuildJs(jsBundles, 'alp.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'examiner.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'ww.max.js', {watch, minify}),
@@ -204,17 +221,17 @@ function compileAllJs(watch, minify) {
     doBuildJs(jsBundles, 'recaptcha.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-viewer-host.max.js', {watch, minify}),
     doBuildJs(jsBundles, 'video-iframe-integration.js', {watch, minify}),
-    doBuildJs(jsBundles, 'amp-story-embed.js', {watch, minify}),
+    doBuildJs(jsBundles, 'amp-story-player.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-inabox-host.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-shadow.js', {watch, minify}),
     doBuildJs(jsBundles, 'amp-inabox.js', {watch, minify}),
-  ]).then(() => {
-    endBuildStep(
-      minify ? 'Minified all' : 'Compiled all',
-      'runtime JS files',
-      startTime
-    );
-  });
+  ]);
+  await compileCoreRuntime(watch, minify);
+  endBuildStep(
+    minify ? 'Minified' : 'Compiled',
+    'all runtime JS files',
+    startTime
+  );
 }
 
 /**
@@ -248,6 +265,14 @@ function appendToCompiledFile(srcFilename, destFilePath) {
   }
 }
 
+function toEsmName(name) {
+  return name.replace(/\.js$/, '.mjs');
+}
+
+function maybeToEsmName(name) {
+  return argv.esm ? toEsmName(name) : name;
+}
+
 /**
  * Minifies a given JavaScript file entry point.
  * @param {string} srcDir
@@ -259,7 +284,7 @@ function appendToCompiledFile(srcFilename, destFilePath) {
 function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
   const timeInfo = {};
   const entryPoint = path.join(srcDir, srcFilename);
-  const {minifiedName} = options;
+  const minifiedName = maybeToEsmName(options.minifiedName);
   return closureCompile(entryPoint, destDir, minifiedName, options, timeInfo)
     .then(function() {
       const destPath = path.join(destDir, minifiedName);
@@ -269,33 +294,44 @@ function compileMinifiedJs(srcDir, srcFilename, destDir, options) {
         internalRuntimeVersion
       );
       if (options.latestName) {
-        fs.copySync(destPath, path.join(destDir, options.latestName));
+        fs.copySync(
+          destPath,
+          path.join(destDir, maybeToEsmName(options.latestName))
+        );
       }
     })
     .then(() => {
       let name = minifiedName;
       if (options.latestName) {
-        name += ` → ${options.latestName}`;
+        name += ` → ${maybeToEsmName(options.latestName)}`;
       }
       if (options.singlePassCompilation) {
         altMainBundles.forEach(bundle => {
-          name += `, ${bundle.name}.js`;
+          name += `, ${maybeToEsmName(`${bundle.name}.js`)}`;
         });
         name += ', and all extensions';
       }
       endBuildStep('Minified', name, timeInfo.startTime);
     })
     .then(() => {
-      if (argv.fortesting && MINIFIED_TARGETS.includes(minifiedName)) {
-        return enableLocalTesting(`${destDir}/${minifiedName}`);
+      if (!argv.noconfig && MINIFIED_TARGETS.includes(minifiedName)) {
+        return applyAmpConfig(
+          maybeToEsmName(`${destDir}/${minifiedName}`),
+          /* localDev */ !!argv.fortesting
+        );
       }
     })
     .then(() => {
-      if (!argv.fortesting || !options.singlePassCompilation) {
+      if (argv.noconfig || !options.singlePassCompilation) {
         return;
       }
       return Promise.all(
-        altMainBundles.map(({name}) => enableLocalTesting(`dist/${name}.js`))
+        altMainBundles.map(({name}) =>
+          applyAmpConfig(
+            maybeToEsmName(`dist/${name}.js`),
+            /* localDev */ !!argv.fortesting
+          )
+        )
       );
     });
 }
@@ -434,7 +470,10 @@ function compileUnminifiedJs(srcDir, srcFilename, destDir, options) {
       })
       .then(() => {
         if (UNMINIFIED_TARGETS.includes(destFilename)) {
-          return enableLocalTesting(`${destDir}/${destFilename}`);
+          return applyAmpConfig(
+            `${destDir}/${destFilename}`,
+            /* localDev */ true
+          );
         }
       });
   }
@@ -546,12 +585,14 @@ function printNobuildHelp() {
 }
 
 /**
- * Enables runtime to be used for local testing by writing AMP_CONFIG to file.
- * Called at the end of "gulp build" and "gulp dist --fortesting".
+ * Writes AMP_CONFIG to a runtime file. Optionally enables localDev mode and
+ * fortesting mode. Called by "gulp build" and "gulp dist" while building
+ * various runtime files.
  * @param {string} targetFile File to which the config is to be written.
+ * @param {boolean} localDev Whether or not to enable local development.
  * @return {!Promise}
  */
-async function enableLocalTesting(targetFile) {
+async function applyAmpConfig(targetFile, localDev) {
   const config = argv.config === 'canary' ? 'canary' : 'prod';
   const baseConfigFile =
     'build-system/global-configs/' + config + '-config.json';
@@ -561,7 +602,7 @@ async function enableLocalTesting(targetFile) {
       config,
       targetFile,
       baseConfigFile,
-      /* opt_localDev */ true,
+      /* opt_localDev */ localDev,
       /* opt_localBranch */ true,
       /* opt_branch */ false,
       /* opt_fortesting */ !!argv.fortesting
@@ -687,18 +728,20 @@ function transferSrcsToTempDir(options = {}) {
 }
 
 module.exports = {
+  applyAmpConfig,
   BABELIFY_GLOBAL_TRANSFORM,
   BABELIFY_PLUGINS,
   bootstrapThirdPartyFrames,
   compileAllMinifiedJs,
   compileAllUnminifiedJs,
+  compileCoreRuntime,
   compileJs,
   compileTs,
   devDependencies,
   doBuildJs,
-  enableLocalTesting,
   endBuildStep,
   hostname,
+  maybeToEsmName,
   mkdirSync,
   printConfigHelp,
   printNobuildHelp,

@@ -144,13 +144,13 @@ exports.jsBundles = {
       includePolyfills: false,
     },
   },
-  'amp-story-embed.js': {
+  'amp-story-player.js': {
     srcDir: './src/',
-    srcFilename: 'amp-story-embed.js',
+    srcFilename: 'amp-story-player.js',
     destDir: './dist',
     minifiedDestDir: './dist',
     options: {
-      minifiedName: 'amp-story-embed-v0.js',
+      minifiedName: 'amp-story-player-v0.js',
       includePolyfills: false,
     },
   },
@@ -288,30 +288,6 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-ad-network-fake-impl',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.AD,
-  },
-  {
-    name: 'amp-ad-network-triplelift-impl',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.AD,
-  },
-  {
-    name: 'amp-ad-network-cloudflare-impl',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.AD,
-  },
-  {
-    name: 'amp-ad-network-gmossp-impl',
-    version: '0.1',
-    latestVersion: '0.1',
-    type: TYPES.AD,
-  },
-  {
-    name: 'amp-ad-network-mytarget-impl',
     version: '0.1',
     latestVersion: '0.1',
     type: TYPES.AD,
@@ -754,7 +730,7 @@ exports.extensionBundles = [
   {
     name: 'amp-next-page',
     version: ['0.1', '1.0'],
-    latestVersion: '0.1',
+    latestVersion: '1.0',
     options: {hasCss: true},
     type: TYPES.MISC,
   },
@@ -928,6 +904,20 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-story-education',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
+    name: 'amp-stream-gallery',
+    version: '0.1',
+    latestVersion: '0.1',
+    options: {hasCss: true},
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-selector',
     version: '0.1',
     latestVersion: '0.1',
@@ -1021,7 +1011,7 @@ exports.extensionBundles = [
   },
   {
     name: 'amp-timeago',
-    version: '0.1',
+    version: ['0.1', '0.2'],
     latestVersion: '0.1',
     type: TYPES.MISC,
   },

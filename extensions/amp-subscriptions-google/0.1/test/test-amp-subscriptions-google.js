@@ -29,14 +29,79 @@ import {
   Entitlement,
   GrantReason,
 } from '../../../amp-subscriptions/0.1/entitlement';
-import {GoogleSubscriptionsPlatform} from '../amp-subscriptions-google';
+import {
+  GoogleSubscriptionsPlatform,
+  getAmpFetcherClassForTesting,
+} from '../amp-subscriptions-google';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
 import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {WindowInterface} from '../../../../src/window-interface';
 import {toggleExperiment} from '../../../../src/experiments';
 
 const PLATFORM_ID = 'subscribe.google.com';
+const AMP_URL = 'myAMPurl.amp';
+
+describes.realWin('AmpFetcher', {amp: true}, env => {
+  let fetcher;
+  let xhr;
+
+  const sentUrl = 'url';
+  const sentArray = [
+    'embed',
+    'tx',
+    'refer',
+    'utmS',
+    'utmC',
+    'utmM',
+    'sku',
+    true,
+    ['exp1', 'exp2'],
+    'version',
+    'baseUrl',
+  ];
+  const sentMessage = {
+    toArray: function() {
+      return sentArray;
+    },
+  };
+  const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
+  const expectedBodyString = 'f.req=' + JSON.stringify(sentArray);
+  const AmpFetcher = getAmpFetcherClassForTesting();
+
+  beforeEach(() => {
+    const {win} = env.ampdoc;
+    fetcher = new AmpFetcher(win);
+    xhr = Services.xhrFor(win);
+  });
+
+  it('should support beacon when beacon supported', async () => {
+    const expectedBlob = new Blob([expectedBodyString], {type: contentType});
+    env.sandbox.stub(WindowInterface, 'getSendBeacon').callsFake(() => {
+      return (url, body) => {
+        expect(url).to.equal(sentUrl);
+        expect(body).to.deep.equal(expectedBlob);
+      };
+    });
+    fetcher.sendBeacon(sentUrl, sentMessage);
+  });
+
+  it('should support beacon when beacon not supported', async () => {
+    env.sandbox.stub(WindowInterface, 'getSendBeacon').callsFake(() => null);
+    env.sandbox.stub(xhr, 'fetch').callsFake((url, init) => {
+      expect(url).to.equal(sentUrl);
+      expect(init).to.deep.equal({
+        method: 'POST',
+        headers: {'Content-Type': contentType},
+        credentials: 'include',
+        body: expectedBodyString,
+      });
+    });
+
+    fetcher.sendBeacon(sentUrl, sentMessage);
+  });
+});
 
 describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   let ampdoc;
@@ -61,6 +126,7 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
     element = env.win.document.createElement('script');
     element.id = 'amp-subscriptions';
     env.win.document.head.appendChild(element);
+    env.sandbox.stub(ampdoc, 'getUrl').callsFake(() => AMP_URL);
     pageConfig = new PageConfig('example.org:basic', true);
     xhr = Services.xhrFor(env.win);
     viewer = Services.viewerForDoc(ampdoc);
@@ -137,6 +203,11 @@ describes.realWin('amp-subscriptions-google', {amp: true}, env => {
   function callback(stub) {
     return stub.args[0][0];
   }
+
+  it('should set the current URL in analytics', () => {
+    const swgAnalytics = platform.runtime_.analytics();
+    expect(swgAnalytics.getContext().getUrl()).to.equal(AMP_URL);
+  });
 
   it('should reset runtime on platform reset', () => {
     expect(methods.reset).to.not.be.called;

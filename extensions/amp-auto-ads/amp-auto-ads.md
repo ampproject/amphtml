@@ -24,36 +24,6 @@ limitations under the License.
 
 # amp-auto-ads
 
-Dynamically injects ads into an AMP page by using a remotely-served configuration file.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td>Experimental</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <code>
-        &lt;script async custom-element="amp-auto-ads"
-        src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">&lt;/script>
-      </code>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty">
-      <strong>
-        <a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">
-          Supported Layouts
-        </a>
-      </strong>
-    </td>
-    <td>N/A</td>
-  </tr>
-</table>
-
-[TOC]
-
 ## Behavior
 
 Given a sufficient number of valid placements (supplied in the configuration),

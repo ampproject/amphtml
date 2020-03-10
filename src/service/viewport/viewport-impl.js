@@ -228,6 +228,11 @@ export class ViewportImpl {
           // the size has changed between `disconnect` and `connect`.
           this.resize_();
         }
+        if (this.scrollTop_) {
+          // Remeasure scrollTop when resource becomes visible to fix #11983
+          this./*OK*/ scrollTop_ = null;
+          this.getScrollTop();
+        }
       } else {
         this.binding_.disconnect();
       }
@@ -336,14 +341,14 @@ export class ViewportImpl {
   }
 
   /** @override */
-  getLayoutRect(el) {
+  getLayoutRect(el, opt_premeasuredRect) {
     const scrollLeft = this.getScrollLeft();
     const scrollTop = this.getScrollTop();
 
     // Go up the window hierarchy through friendly iframes.
     const frameElement = getParentWindowFrameElement(el, this.ampdoc.win);
     if (frameElement) {
-      const b = this.binding_.getLayoutRect(el, 0, 0);
+      const b = this.binding_.getLayoutRect(el, 0, 0, opt_premeasuredRect);
       const c = this.binding_.getLayoutRect(
         frameElement,
         scrollLeft,
@@ -357,7 +362,12 @@ export class ViewportImpl {
       );
     }
 
-    return this.binding_.getLayoutRect(el, scrollLeft, scrollTop);
+    return this.binding_.getLayoutRect(
+      el,
+      scrollLeft,
+      scrollTop,
+      opt_premeasuredRect
+    );
   }
 
   /** @override */

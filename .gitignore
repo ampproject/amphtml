@@ -31,3 +31,5 @@ firebase
 firebase.json
 .firebase/
 src/purifier/dist
+build-system/tasks/performance/cache
+build-system/tasks/performance/results.json

@@ -277,7 +277,7 @@ export class AmpDatePicker extends AMP.BaseElement {
     /** @private */
     this.type_ = DatePickerType.SINGLE;
 
-    /** @private {?function(new:React.Component, !Object)} */
+    /** @private {?typeof React.Component} */
     this.pickerClass_ = null;
 
     /** @private {!DatePickerMode} */

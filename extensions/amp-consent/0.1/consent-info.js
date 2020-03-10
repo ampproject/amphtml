@@ -123,18 +123,9 @@ export function recalculateConsentStateValue(newState, previousState) {
 /**
  * Compose the value to store to localStorage based on the consentInfo
  * @param {!ConsentInfoDef} consentInfo
- * @param {boolean=} opt_forceNew
  * @return {?boolean|Object}
  */
-export function composeStoreValue(consentInfo, opt_forceNew) {
-  if (
-    !opt_forceNew &&
-    !consentInfo['consentString'] &&
-    consentInfo['isDirty'] === undefined
-  ) {
-    // TODO: Remove after turn on amp-consent-v2
-    return calculateLegacyStateValue(consentInfo['consentState']);
-  }
+export function composeStoreValue(consentInfo) {
   const obj = map();
   const consentState = consentInfo['consentState'];
   if (consentState == CONSENT_ITEM_STATE.ACCEPTED) {

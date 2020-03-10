@@ -54,6 +54,7 @@ const forbiddenTerms = {
     whitelist: [
       'build-system/server/amp4test.js',
       'build-system/server/app-index/boilerplate.js',
+      'build-system/server/variable-substitution.js',
       'build-system/tasks/extension-generator/index.js',
       'css/ampdoc.css',
       'css/ampshared.css',
@@ -127,6 +128,7 @@ const forbiddenTerms = {
       'build-system/tasks/check-owners.js',
       'build-system/tasks/check-types.js',
       'build-system/tasks/dist.js',
+      'build-system/tasks/dns-monitor.js',
       'build-system/tasks/generate-runner.js',
       'build-system/tasks/helpers.js',
       'build-system/tasks/prettify.js',
@@ -172,7 +174,6 @@ const forbiddenTerms = {
       'build-system/server/routes/analytics.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
-      'extensions/amp-analytics/0.1/vendors.js',
     ],
   },
   // Service factories that should only be installed once.
@@ -366,6 +367,7 @@ const forbiddenTerms = {
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
+      'src/amp-story-player.js',
     ],
   },
   '\\.sendMessage\\(': {
@@ -661,8 +663,6 @@ const forbiddenTerms = {
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/server/amp4test.js',
-      // TODO: @jonathantyng cleanup #22757
-      'build-system/tasks/generate-vendor-jsons.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -1079,9 +1079,10 @@ const forbiddenTermsSrcInclusive = {
     ],
   },
   '\\.getTime\\(\\)': {
-    message: 'Unless you do weird date math (whitelist), use Date.now().',
+    message: 'Unless you do weird date math (allowlist), use Date.now().',
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
+      'extensions/amp-timeago/0.2/timeago.js',
       'build-system/compile/build.conf.js',
     ],
   },
@@ -1100,6 +1101,7 @@ const forbiddenTermsSrcInclusive = {
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/cookie-writer.js',
       'extensions/amp-analytics/0.1/requests.js',
+      'extensions/amp-analytics/0.1/variables.js',
     ],
   },
   '\\.expandInputValueSync\\(': {
@@ -1132,12 +1134,14 @@ const forbiddenTermsSrcInclusive = {
       'build-system/server/amp4test.js',
       'build-system/server/app-index/amphtml-helpers.js',
       'build-system/server/app-video-testbench.js',
+      'build-system/server/variable-substitution.js',
       'build-system/server/app.js',
       'build-system/server/app-utils.js',
       'build-system/server/shadow-viewer.js',
       'build-system/tasks/check-links.js',
       'build-system/tasks/extension-generator/index.js',
       'build-system/tasks/helpers.js',
+      'build-system/tasks/performance/helpers.js',
       'dist.3p/current/integration.js',
       'extensions/amp-iframe/0.1/amp-iframe.js',
       'src/3p-frame.js',

@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: An amp-powr-player component displays the Powr Player as configured in the Powr platform.
+  text: An `amp-powr-player` component displays the Powr Player as configured in the [Powr](https://powr.com) platform.
 ---
 
 <!---
@@ -23,21 +23,6 @@ limitations under the License.
 -->
 
 # amp-powr-player
-
-An <code>amp-powr-player</code> component displays the Powr Player as configured in the <a href="https://powr.com">Powr</a> platform.
-
-<table>
-  <tr>
-    <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-powr-player" src="https://cdn.ampproject.org/v0/amp-powr-player-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Example
 

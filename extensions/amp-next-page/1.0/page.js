@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {
-  ViewportRelativePos, // eslint-disable-line no-unused-vars
-} from './visibility-observer';
+import {ViewportRelativePos} from './visibility-observer';
 import {VisibilityState} from '../../../src/visibility-state';
+import {devAssert} from '../../../src/log';
 
 /** @enum {number} */
 export const PageState = {
@@ -26,14 +25,25 @@ export const PageState = {
   LOADED: 2,
   FAILED: 3,
   INSERTED: 4,
+  PAUSED: 5,
 };
 
-const VISIBLE_DOC_CLASS = 'amp-next-page-document-visible';
+export const VISIBLE_DOC_CLASS = 'amp-next-page-visible';
+export const HIDDEN_DOC_CLASS = 'amp-next-page-hidden';
+
+/**
+ * @typedef {{
+ *   url: string,
+ *   image: string,
+ *   title: string,
+ * }}
+ */
+export let PageMeta;
 
 export class Page {
   /**
    * @param {!./service.NextPageService} manager
-   * @param {{ url: string, title: string, image: string }} meta
+   * @param {!PageMeta} meta
    */
   constructor(manager, meta) {
     /** @private @const {!./service.NextPageService} */
@@ -42,11 +52,17 @@ export class Page {
     this.title_ = meta.title;
     /** @private {string} */
     this.url_ = meta.url;
+    /** @private {string} */
+    this.initialUrl_ = meta.url;
     /** @private @const {string} */
     this.image_ = meta.image;
 
     /** @private {?../../../src/runtime.ShadowDoc} */
     this.shadowDoc_ = null;
+    /** @private {?Element} */
+    this.container_ = null;
+    /** @private {?Document} */
+    this.content_ = null;
     /** @private {!PageState} */
     this.state_ = PageState.QUEUED;
     /** @private {!VisibilityState} */
@@ -68,6 +84,11 @@ export class Page {
   }
 
   /** @return {string} */
+  get initialUrl() {
+    return this.initialUrl_;
+  }
+
+  /** @return {string} */
   get image() {
     return this.image_;
   }
@@ -82,12 +103,22 @@ export class Page {
     return this.relativePos_;
   }
 
-  /** @return {!Document|undefined} */
+  /** @return {!Document|!ShadowRoot|undefined} */
   get document() {
     if (!this.shadowDoc_) {
       return;
     }
-    return /** @type {!Document} */ (this.shadowDoc_.ampdoc.getRootNode());
+    return this.shadowDoc_.ampdoc.getRootNode();
+  }
+
+  /** @return {?Element} */
+  get container() {
+    return this.container_;
+  }
+
+  /** @return {?../../../src/runtime.ShadowDoc} */
+  get shadowDoc() {
+    return this.shadowDoc_;
   }
 
   /** @param {!ViewportRelativePos} position */
@@ -96,47 +127,11 @@ export class Page {
   }
 
   /**
+   * @param {!PageState} state
    * @return {boolean}
    */
-  isVisible() {
-    return this.visibilityState_ === VisibilityState.VISIBLE;
-  }
-
-  /**
-   * @return {!VisibilityState}
-   * @visibleForTesting
-   */
-  getVisibilityState() {
-    return this.visibilityState_;
-  }
-
-  /**
-   * @param {VisibilityState} visibilityState
-   */
-  setVisibility(visibilityState) {
-    if (visibilityState == this.visibilityState_) {
-      return;
-    }
-    // Update visibility internally and at the shadow doc level
-    this.visibilityState_ = visibilityState;
-    if (this.shadowDoc_) {
-      this.shadowDoc_.setVisibilityState(visibilityState);
-      this.shadowDoc_.ampdoc
-        .getBody()
-        .classList.toggle(VISIBLE_DOC_CLASS, this.isVisible());
-    }
-
-    // Switch the title and url of the page to reflect this page
-    if (this.isVisible()) {
-      this.manager_.setTitlePage(this);
-    }
-  }
-
-  /**
-   * @return {boolean}
-   */
-  isFetching() {
-    return this.state_ === PageState.FETCHING;
+  is(state) {
+    return this.state_ === state;
   }
 
   /**
@@ -144,8 +139,78 @@ export class Page {
    */
   isLoaded() {
     return (
-      this.state_ === PageState.LOADED || this.state_ === PageState.INSERTED
+      this.state_ === PageState.LOADED ||
+      this.state_ === PageState.INSERTED ||
+      this.state_ === PageState.PAUSED
     );
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isVisible() {
+    return this.isLoaded() && this.visibilityState_ === VisibilityState.VISIBLE;
+  }
+
+  /**
+   * @param {VisibilityState} visibilityState
+   */
+  setVisibility(visibilityState) {
+    if (!this.isLoaded() || visibilityState == this.visibilityState_) {
+      return;
+    }
+
+    //Reload the page if necessary
+    if (
+      this.is(PageState.PAUSED) &&
+      visibilityState === VisibilityState.VISIBLE
+    ) {
+      this.resume();
+    }
+
+    // Update visibility internally and at the shadow doc level
+    this.visibilityState_ = visibilityState;
+    if (this.shadowDoc_) {
+      this.shadowDoc_.setVisibilityState(visibilityState);
+      this.shadowDoc_.ampdoc
+        .getBody()
+        .classList.toggle(VISIBLE_DOC_CLASS, this.isVisible());
+      this.shadowDoc_.ampdoc
+        .getBody()
+        .classList.toggle(HIDDEN_DOC_CLASS, !this.isVisible());
+    }
+
+    if (this.isVisible()) {
+      // Switch the title and url of the page to reflect this page
+      this.manager_.setTitlePage(this);
+    }
+  }
+
+  /**
+   * Creates a placeholder in place of the original page and unloads
+   * the shadow root from memory
+   * @return {!Promise}
+   */
+  pause() {
+    if (!this.shadowDoc_) {
+      return Promise.resolve();
+    }
+    return this.shadowDoc_.close().then(() => {
+      return this.manager_.closeDocument(this /** page */).then(() => {
+        this.shadowDoc_ = null;
+        this.visibilityState_ = VisibilityState.HIDDEN;
+        this.state_ = PageState.PAUSED;
+      });
+    });
+  }
+
+  /**
+   * Removes the placeholder and re-renders the page after its shadow
+   * root has been removed
+   * @return {!Promise}
+   */
+  resume() {
+    return this.attach_();
   }
 
   /**
@@ -170,18 +235,40 @@ export class Page {
       .fetchPageDocument(this)
       .then(content => {
         this.state_ = PageState.LOADED;
-
-        const shadowDoc = this.manager_.appendAndObservePage(this, content);
-        if (shadowDoc) {
-          this.shadowDoc_ = shadowDoc;
-          this.manager_.setLastFetchedPage(this);
-          this.state_ = PageState.INSERTED;
-        } else {
-          this.state_ = PageState.FAILED;
-        }
+        this.content_ = content;
+        this.container_ = this.manager_.createDocumentContainerForPage(
+          this /** page */
+        );
+        // TODO(wassgha): To further optimize, this should ideally
+        // be parsed from the service worker instead of stored in memory
+        return this.attach_();
       })
       .catch(() => {
         this.state_ = PageState.FAILED;
+      });
+  }
+
+  /**
+   * Inserts the fetched (or cached) HTML as the document's content
+   * @return {!Promise}
+   */
+  attach_() {
+    return this.manager_
+      .attachDocumentToPage(
+        this /** page */,
+        /** @type {!Document} */ (devAssert(this.content_)),
+        this.is(PageState.PAUSED) /** force */
+      )
+      .then(shadowDoc => {
+        if (!shadowDoc) {
+          this.state_ = PageState.FAILED;
+          return;
+        }
+        this.state_ = PageState.INSERTED;
+        this.shadowDoc_ = shadowDoc;
+        if (!this.is(PageState.PAUSED)) {
+          this.manager_.setLastFetchedPage(this);
+        }
       });
   }
 }

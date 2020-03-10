@@ -36,9 +36,13 @@ Note: remove the backticks (``) from the link.
 - [ ] Release <RELEASE_NUMBER> promoted to Stable channel (<CL submit time>)
 
 <!--
-If this release will become the next LTS release, add/update the checkboxes above as needed e.g.
+On the second Monday of each month, the current stable version will be promoted to the LTS release channel. In other words: 
 
-- [x] Release <RELEASE_NUMBER> will be the next LTS
+- If this release is promoted to stable on the first Tuesday of a given month, it needs to be promoted to LTS on the second Monday of the same month.
+- If this release is promoted to stable on the second, third, fourth, or fifth Monday of a given month, it is not an LTS release candidate (but will be included in a later LTS release).
+
+Based on the above, if this release must be promoted to LTS, copy-paste the following checkbox into the list above.
+
 - [ ] Release <RELEASE_NUMBER> promoted to LTS (<CL submit time>)
 
 If you perform cherry picks, add/update the checkboxes above as needed e.g.

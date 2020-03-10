@@ -216,6 +216,7 @@ describes.realWin(
           src: iframeSrc,
           width: 100,
           height: 100,
+          title: 'example title',
           allowfullscreen: '',
           allowpaymentrequest: '',
           allowtransparency: '',
@@ -235,7 +236,8 @@ describes.realWin(
         expect(iframe.getAttribute('referrerpolicy')).to.equal('no-referrer');
         expect(iframe.getAttribute('frameborder')).to.equal('3');
         expect(iframe.getAttribute('tabindex')).to.equal('-1');
-        // unsupproted attributes
+        expect(iframe.getAttribute('title')).to.equal('example title');
+        // unsupported attributes
         expect(iframe.getAttribute('longdesc')).to.be.null;
         expect(iframe.getAttribute('marginwidth')).to.be.null;
       });
@@ -656,6 +658,26 @@ describes.realWin(
         });
       });
 
+      it('should only error once for embed-size requests when non-resizable', function*() {
+        expectAsyncConsoleError(/Ignoring embed-size request/);
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          sandbox: 'allow-scripts',
+          width: 100,
+          height: 100,
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        console.error.restore();
+        const userError = env.sandbox.spy(console, 'error');
+
+        const impl = ampIframe.implementation_;
+        impl.updateSize_(217, 114);
+        expect(impl.hasErroredEmbedSize_).to.be.true;
+        impl.updateSize_(328, 225);
+        impl.updateSize_(439, 336);
+        expect(userError).to.have.callCount(1);
+      });
+
       it('should resize amp-iframe', function*() {
         const ampIframe = createAmpIframe(env, {
           src: iframeSrc,
@@ -911,6 +933,23 @@ describes.realWin(
         expect(iframe.getAttribute('src')).to.contain(newSrc);
       });
 
+      it('should propagate `title` when container attribute is mutated', function*() {
+        const ampIframe = createAmpIframe(env, {
+          src: iframeSrc,
+          width: 100,
+          height: 100,
+          title: 'foo',
+        });
+        yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+        const impl = ampIframe.implementation_;
+        const iframe = ampIframe.querySelector('iframe');
+        const newTitle = 'bar';
+        ampIframe.setAttribute('title', newTitle);
+        impl.mutatedAttributesCallback({title: newTitle});
+        expect(impl.iframe_.title).to.equal(newTitle);
+        expect(iframe.getAttribute('title')).to.equal(newTitle);
+      });
+
       describe('throwIfCannotNavigate()', () => {
         it('should do nothing if top navigation is allowed', function*() {
           const ampIframe = createAmpIframe(env, {
@@ -1058,6 +1097,64 @@ describes.realWin(
             eventMatcher,
             ActionTrust.HIGH
           );
+        });
+
+        it('should listen for Pym.js height event', function*() {
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            sandbox: 'allow-scripts allow-same-origin',
+            width: 200,
+            height: 200,
+            resizable: '',
+          });
+          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+          const impl = ampIframe.implementation_;
+          return new Promise((resolve, unusedReject) => {
+            impl.updateSize_ = (height, width) => {
+              resolve({height, width});
+            };
+            const iframe = ampIframe.querySelector('iframe');
+            iframe.contentWindow.postMessage(
+              {
+                sentinel: 'amp-test',
+                type: 'requestPymjsHeight',
+                height: 234,
+              },
+              '*'
+            );
+          }).then(res => {
+            expect(res.height).to.equal(234);
+            expect(res.width).to.be.an('undefined');
+          });
+        });
+
+        it('should listen for Pym.js width event', function*() {
+          const ampIframe = createAmpIframe(env, {
+            src: iframeSrc,
+            sandbox: 'allow-scripts allow-same-origin',
+            width: 200,
+            height: 200,
+            resizable: '',
+          });
+          yield waitForAmpIframeLayoutPromise(doc, ampIframe);
+          const impl = ampIframe.implementation_;
+          return new Promise((resolve, unusedReject) => {
+            impl.updateSize_ = (height, width) => {
+              resolve({height, width});
+            };
+            const iframe = ampIframe.querySelector('iframe');
+            iframe.contentWindow.postMessage(
+              {
+                sentinel: 'amp-test',
+                type: 'requestPymjsWidth',
+                width: 345,
+              },
+              '*'
+            );
+          }).then(res => {
+            expect(res.width).to.equal(345);
+            expect(res.height).to.be.an('undefined');
+          });
         });
       });
 
