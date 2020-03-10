@@ -27,6 +27,8 @@ import {Observable} from '../../src/observable';
 import {
   detectEvtListenerOptsSupport,
   resetEvtListenerOptsSupportForTesting,
+  resetPassiveSupportedForTesting,
+  supportsPassiveEventListener,
 } from '../../src/event-helper-listen';
 
 describe('EventHelper', () => {
@@ -363,3 +365,43 @@ describe('EventHelper', () => {
     expect(removeEventListenerStub.calledOnce).to.be.true;
   });
 });
+
+describes.sandboxed(
+  'addEventListener supports passive listener option',
+  {},
+  env => {
+    const win = {
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    };
+
+    function overrideEventListeners(passiveSupported) {
+      env.sandbox
+        .stub(win, 'addEventListener')
+        .callsFake((name, listener, option) => {
+          passiveSupported ? option.passive : false;
+        });
+      env.sandbox
+        .stub(win, 'removeEventListener')
+        .callsFake((name, listener, option) => {
+          passiveSupported ? option.passive : false;
+        });
+    }
+
+    beforeEach(() => {
+      resetPassiveSupportedForTesting();
+    });
+
+    it('should return true when supported', () => {
+      overrideEventListeners(true);
+      const passiveSupported = supportsPassiveEventListener(win);
+      expect(passiveSupported).to.be.true;
+    });
+
+    it('should return false when not supported', () => {
+      overrideEventListeners(false);
+      const passiveSupported = supportsPassiveEventListener(win);
+      expect(passiveSupported).to.be.false;
+    });
+  }
+);

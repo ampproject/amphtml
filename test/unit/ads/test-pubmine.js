@@ -49,6 +49,7 @@ describes.fakeWin('pubmine', {}, env => {
       ht: 2,
       tn: 'amp',
       amp: true,
+      consent: 0,
     };
     pubmine(win, mockData);
     expect(win.__ATA_PP).to.deep.equal(expectedConfig);

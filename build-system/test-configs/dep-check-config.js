@@ -87,6 +87,7 @@ exports.rules = [
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/aes_gcm.js',
       'extensions/amp-subscriptions/**/*.js->third_party/subscriptions-project/config.js',
       'extensions/amp-timeago/0.1/amp-timeago.js->third_party/timeagojs/timeago.js',
+      'extensions/amp-timeago/0.2/timeago.js->third_party/timeagojs/timeago.js',
       'src/css.js->third_party/css-escape/css-escape.js',
       'src/sanitizer.js->third_party/caja/html-sanitizer.js',
       'src/shadow-embed.js->third_party/webcomponentsjs/ShadowCSS.js',
@@ -253,6 +254,9 @@ exports.rules = [
       // TODO(ccordry): remove this after createShadowRootWithStyle is moved to src
       'extensions/amp-story-auto-ads/0.1/amp-story-auto-ads.js->extensions/amp-story/1.0/utils.js',
       'extensions/amp-story-auto-ads/0.1/story-ad-page.js->extensions/amp-story/1.0/utils.js',
+      // Story education
+      'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/amp-story-store-service.js',
+      'extensions/amp-story-education/0.1/amp-story-education.js->extensions/amp-story/1.0/utils.js',
 
       // Subscriptions.
       'extensions/amp-subscriptions/0.1/expr.js->extensions/amp-access/0.1/access-expr.js',

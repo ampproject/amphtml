@@ -418,6 +418,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
     this.initializePageIds_();
+    this.initializeStoryPlayer_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
@@ -1011,8 +1012,9 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
-        this.initializeStoryPlayer_();
       });
+
+    this.maybeLoadStoryEducation_();
 
     // Story is being prerendered: resolve the layoutCallback when the first
     // page is built. Other pages will only build if the document becomes
@@ -1296,7 +1298,7 @@ export class AmpStory extends AMP.BaseElement {
     if (this.viewer_.getParam('storyPlayer') !== 'v0') {
       return;
     }
-    Services.extensionsFor(this.getAmpDoc().win).installExtensionForDoc(
+    Services.extensionsFor(this.win).installExtensionForDoc(
       this.getAmpDoc(),
       'amp-viewer-integration'
     );
@@ -2262,6 +2264,21 @@ export class AmpStory extends AMP.BaseElement {
           }
         ));
       });
+  }
+
+  /**
+   * Loads amp-story-education if the viewer capability is provided.
+   * @private
+   */
+  maybeLoadStoryEducation_() {
+    if (!this.viewer_.hasCapability('education')) {
+      return;
+    }
+
+    Services.extensionsFor(this.win).installExtensionForDoc(
+      this.getAmpDoc(),
+      'amp-story-education'
+    );
   }
 
   /**

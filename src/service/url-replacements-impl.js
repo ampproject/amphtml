@@ -1034,7 +1034,7 @@ export class UrlReplacements {
       'PAGE_VIEW_ID_64': true,
       'NAV_TIMING': true,
     };
-    const additionalUrlParameters =
+    let additionalUrlParameters =
       element.getAttribute('data-amp-addparams') || '';
     const whitelist = this.getWhitelistForElement_(
       element,
@@ -1054,11 +1054,15 @@ export class UrlReplacements {
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
+
+    const isAllowedOrigin = this.isAllowedOrigin_(url);
     if (additionalUrlParameters) {
+      additionalUrlParameters = isAllowedOrigin
+        ? this.expandSyncIfAllowedList_(additionalUrlParameters, whitelist)
+        : additionalUrlParameters;
       href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
     }
 
-    const isAllowedOrigin = this.isAllowedOrigin_(url);
     if (!isAllowedOrigin) {
       if (whitelist) {
         user().warn(
@@ -1093,16 +1097,25 @@ export class UrlReplacements {
       href = addParamsToUrl(href, parseQueryString(defaultUrlParams));
     }
 
-    if (whitelist) {
-      href = this.expandUrlSync(
-        href,
-        /* opt_bindings */ undefined,
-        /* opt_collectVars */ undefined,
-        /* opt_whitelist */ whitelist
-      );
-    }
+    href = this.expandSyncIfAllowedList_(href, whitelist);
 
     return (element.href = href);
+  }
+
+  /**
+   * @param {string} href
+   * @param {!Object<string, boolean>|undefined} allowedList
+   * @return {string}
+   */
+  expandSyncIfAllowedList_(href, allowedList) {
+    return allowedList
+      ? this.expandUrlSync(
+          href,
+          /* opt_bindings */ undefined,
+          /* opt_collectVars */ undefined,
+          /* opt_whitelist */ allowedList
+        )
+      : href;
   }
 
   /**

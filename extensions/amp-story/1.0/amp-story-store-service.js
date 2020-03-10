@@ -109,6 +109,7 @@ export let InteractiveComponentDef;
  *    currentPageIndex: number,
  *    pageIds: !Array<string>,
  *    newPageAvailableId: string,
+ *    pageSize: {width: number, height: number},
  * }}
  */
 export let State;
@@ -156,6 +157,7 @@ export const StateProperty = {
   NAVIGATION_PATH: 'navigationPath',
   NEW_PAGE_AVAILABLE_ID: 'newPageAvailableId',
   PAGE_IDS: 'pageIds',
+  PAGE_SIZE: 'pageSize',
 };
 
 /** @const @enum {string} */
@@ -187,6 +189,7 @@ export const Action = {
   TOGGLE_UI: 'toggleUi',
   TOGGLE_VIEWPORT_WARNING: 'toggleViewportWarning',
   ADD_NEW_PAGE_ID: 'addNewPageId',
+  SET_PAGE_SIZE: 'updatePageSize',
 };
 
 /**
@@ -394,6 +397,11 @@ const actions = (state, action, data) => {
         ...state,
         [StateProperty.PAGE_IDS]: data,
       });
+    case Action.SET_PAGE_SIZE:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.PAGE_SIZE]: data,
+      });
     default:
       dev().error(TAG, 'Unknown action %s.', action);
       return state;
@@ -526,6 +534,7 @@ export class AmpStoryStoreService {
       [StateProperty.NEW_PAGE_AVAILABLE_ID]: '',
       [StateProperty.NAVIGATION_PATH]: [],
       [StateProperty.PAGE_IDS]: [],
+      [StateProperty.PAGE_SIZE]: null,
     });
   }
 
