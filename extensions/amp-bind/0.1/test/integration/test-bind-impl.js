@@ -984,7 +984,7 @@ describe
             });
 
             const state = bind.getStateAsync('mystate.mykey');
-            expect(state).to.eventually.rejectedWith(/#mystate/);
+            return expect(state).to.eventually.rejectedWith(/#mystate/);
           });
 
           it('should not wait if the still-loading state is irrelevant', async () => {

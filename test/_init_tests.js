@@ -42,8 +42,6 @@ import PreactEnzyme from 'enzyme-adapter-preact-pure';
 import sinon from /*OK*/ 'sinon';
 import stringify from 'json-stable-stringify';
 
-chai.use(require('chai-as-promised')); // eslint-disable-line
-
 // Used to print warnings for unexpected console errors.
 let that;
 let consoleErrorSandbox;
@@ -493,6 +491,8 @@ afterEach(function() {
   resetEvtListenerOptsSupportForTesting();
   cancelTimersForTesting();
 });
+
+chai.use(require('chai-as-promised')); // eslint-disable-line 
 
 chai.Assertion.addMethod('attribute', function(attr) {
   const obj = this._obj;
