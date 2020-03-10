@@ -32,6 +32,7 @@ import {debounce} from '../../../src/utils/rate-limit';
 import {deepEquals, getValueForExpr, parseJson} from '../../../src/json';
 import {deepMerge, dict, map} from '../../../src/utils/object';
 import {dev, devAssert, user} from '../../../src/log';
+import {escapeCssSelectorIdent} from '../../../src/css';
 import {findIndex, remove} from '../../../src/utils/array';
 import {getMode} from '../../../src/mode';
 import {installServiceInEmbedScope} from '../../../src/service';
@@ -196,25 +197,25 @@ export class Bind {
     this.viewer_ = Services.viewerForDoc(this.ampdoc);
     this.viewer_.onMessageRespond('premutate', this.premutate_.bind(this));
 
+    /** @const @private {!Promise<!Document>} */
+    this.rootNodePromise_ = ampdoc.whenFirstVisible().then(() => {
+      if (opt_win) {
+        // In FIE, scan the document node of the iframe window.
+        const {document} = opt_win;
+        return whenDocumentReady(document).then(() => document);
+      } else {
+        // Otherwise, scan the root node of the ampdoc.
+        return ampdoc.whenReady().then(() => ampdoc.getRootNode());
+      }
+    });
+
     /**
      * Resolved when the service finishes scanning the document for bindings.
      * @const @private {Promise}
      */
-    this.initializePromise_ = ampdoc
-      .whenFirstVisible()
-      .then(() => {
-        if (opt_win) {
-          // In FIE, scan the document node of the iframe window.
-          const {document} = opt_win;
-          return whenDocumentReady(document).then(() => document);
-        } else {
-          // Otherwise, scan the root node of the ampdoc.
-          return ampdoc.whenReady().then(() => ampdoc.getRootNode());
-        }
-      })
-      .then(root => {
-        return this.initialize_(root);
-      });
+    this.initializePromise_ = this.rootNodePromise_.then(root =>
+      this.initialize_(root)
+    );
 
     /** @const @private {!Deferred} */
     this.addMacrosDeferred_ = new Deferred();
@@ -551,6 +552,33 @@ export class Bind {
       return this.copyJsonObject_(/** @type {JsonObject} */ (value));
     }
     return value;
+  }
+
+  /**
+   * Returns a copy of the global state for an expression, after waiting for its
+   * associated 'amp-state' element to finish fetching data. If there is no
+   * corresponding 'amp-state' element in the DOM, then reject.
+   *
+   * e.g. "foo.bar".
+   * @param {string} expr
+   * @return {!Promise<*>}
+   */
+  getStateAsync(expr) {
+    const stateId = /^[^.]*/.exec(expr)[0];
+    return this.rootNodePromise_.then(root => {
+      const ampStateEl = root.querySelector(
+        `#${escapeCssSelectorIdent(stateId)}`
+      );
+      if (!ampStateEl) {
+        throw new Error(`#${stateId} does not exist.`);
+      }
+
+      return whenUpgradedToCustomElement(ampStateEl)
+        .then(el => el.getImpl(true))
+        .then(ampState => ampState.getFetchingPromise())
+        .catch(() => {})
+        .then(() => this.getState(expr));
+    });
   }
 
   /**
