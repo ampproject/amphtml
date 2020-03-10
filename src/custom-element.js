@@ -694,14 +694,12 @@ function createBaseCustomElementClass(win) {
         );
       }
 
-      if (this.hasAttribute('disable-inline-width')) {
-        return;
-      }
-
       // Sizes.
       if (this.sizeList_ === undefined) {
         const sizesAttr = this.getAttribute('sizes');
-        this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
+        const isDisabled = this.hasAttribute('disable-inline-width');
+        this.sizeList_ =
+          !isDisabled && sizesAttr ? parseSizeList(sizesAttr) : null;
       }
       if (this.sizeList_) {
         setStyle(
