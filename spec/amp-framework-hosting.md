@@ -79,6 +79,8 @@ becomes
 
 Versioned URLs are also possible and discussed in section [Serve the framework](#serve-the-framework).
 
+Important: All scripts must come from the same origin. Fetching scripts from multiple origins is not supported and can lead to unpredictable end user experiences.
+
 ### Meta tags
 
 If you opted for [Option 2: Copy the framework from cdn.ampproject.org](#option-2-copy-the-framework-from-cdn-ampproject-org), then the framework was built under the assumption that it would be hosted from its default location, `cdn.ampproject.org`. While `<script>` tags included in `<head>` will download from the URLs specified in their `src` attributes, dynamically loaded components like `amp-loader-0.1.js` will download from `cdn.ampproject.org`. Mixing a self-hosted AMP runtime with AMP components from `cdn.ampproject.org` is not supported and can lead to unpredictable end user experiences.
@@ -222,7 +224,7 @@ There are trade-offs in accuracy and performance when you set the client cache t
 
 ### HTTP response Headers
 
-In addition to following [TLS best practices](https://infosec.mozilla.org/guidelines/web_security), be sure to consider the following headers when hosting the AMP framework:
+In addition to following [TLS best practices](https://infosec.mozilla.org/guidelines/web_security), consider the following headers when hosting the AMP framework:
 
 - `content-security-policy`: If your pages implement [AMP's CSP](https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/secure-pages/), apply a matching content security policy to your hosted framework responses. Inspect the headers on `https://cdn.ampproject.org/v0.js` for a base policy that should be expanded to include resources served from your host.
 - `access-control-allow-origin`: Some runtime components are fetched via XHR. If your AMP pages will be served from a different host than your framework, be sure to include CORS headers (see also [CORS Requests in AMP](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md)).
@@ -232,3 +234,6 @@ In addition to following [TLS best practices](https://infosec.mozilla.org/guidel
   - `/amp_preconnect_polyfill_404_or_other_error_expected._Do_not_worry_about_it` - `text/html`
 
   A complete list of files in each AMP release can be found in `files.txt`, for example `https://cdn.ampproject.org/files.txt`.
+- `cache-control`: The AMP framework hosted from versioned URLs should be "immutable"; users should expect to find the same content from these URLs for as long as the URLs are active. Long cache times are appropriate. On the other hand, the AMP framework hosted from versionless URLs should be served with relatively short cache times so that minimal time is required for your latest update to reach all users.
+  - Versioned URL example: `cdn.ampproject.org` sets a 1 year client cache time on resources served under `cdn.ampproject.org/rtv/<rtv>`: `cache-control: public, max-age=31536000`.
+  - Versionless URL example: `cdn.ampproject.org` sets a 50 minute client cache time for resources served from versionless URLs, but also allows a long 2 week stale-while-revalidate time in the event that versionless URLs experience an outage: `cache-control: private, max-age=3000, stale-while-revalidate=1206600`.
