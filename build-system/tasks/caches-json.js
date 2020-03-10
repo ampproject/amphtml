@@ -20,7 +20,7 @@ const gulp = require('gulp');
 const log = require('fancy-log');
 const through2 = require('through2');
 
-const expectedCaches = ['cloudflare', 'google'];
+const expectedCaches = ['google'];
 
 const cachesJsonPath = 'build-system/global-configs/caches.json';
 
