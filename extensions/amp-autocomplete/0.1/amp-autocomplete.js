@@ -1083,7 +1083,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
       ActionTrust.HIGH
     );
 
-    // Ensure native change listeners in user amp-scripts are triggered
+    // Ensure native change listeners are triggered
     const nativeChangeEvent = createCustomEvent(
       this.win,
       'change',
