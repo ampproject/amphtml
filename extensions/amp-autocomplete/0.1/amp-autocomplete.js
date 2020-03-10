@@ -219,8 +219,8 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const doc = this.element.ownerDocument;
     const isEmail = doc && isAmp4Email(doc);
     userAssert(
-      !isEmail || doc.documentElement.hasAttribute('enable-amp-autocomplete'),
-      "<amp-autocomplete> is not turned on: 'enable-amp-autocomplete' is required in the document <html> tag."
+      !isEmail || doc.documentElement.hasAttribute('amp-autocomplete-opt-in'),
+      "<amp-autocomplete> is not turned on: 'amp-autocomplete-opt-in' is required in the document <html> tag."
     );
 
     this.action_ = Services.actionServiceForDoc(this.element);
