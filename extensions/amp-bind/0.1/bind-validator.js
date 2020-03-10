@@ -353,13 +353,24 @@ function createElementRules_() {
     },
     'A': {
       'href': {
+        // This should be kept in sync with validator-main.protoascii.
         'allowedProtocols': {
           'ftp': true,
+          'geo': true,
           'http': true,
           'https': true,
           'mailto': true,
+          'maps': true,
+          // 3rd Party Protocols
+          'bip': true,
+          'bbmi': true,
+          'chrome': true,
+          'itms-services': true,
+          'facetime': true,
+          'fb-me': true,
           'fb-messenger': true,
           'intent': true,
+          'line': true,
           'skype': true,
           'sms': true,
           'snapchat': true,
@@ -368,6 +379,9 @@ function createElementRules_() {
           'threema': true,
           'twitter': true,
           'viber': true,
+          'webcal': true,
+          'web+mastodon': true,
+          'wh': true,
           'whatsapp': true,
         },
       },

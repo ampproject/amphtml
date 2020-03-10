@@ -1882,6 +1882,7 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      # When updating this list, make sure to also update bind-validator.js.
       protocol: "ftp"
       protocol: "geo"
       protocol: "http"
@@ -1899,6 +1900,7 @@ tags: {
       # IOS over-the-air app installation
       # (https://github.com/nifcblm/AHPP-iOS-App/wiki/How-to-distribute-enterprise-iOS-App)
       protocol: "itms-services"
+      protocol: "facetime"
       protocol: "fb-me"
       protocol: "fb-messenger"
       protocol: "feed"
