@@ -111,6 +111,7 @@ export class AmpStoryPlayer {
     /** @private {number} */
     this.currentIdx_ = 0;
 
+    /** @private {?SwipingState} */
     this.swipingState_ = null;
 
     /** @private {!Object} */
