@@ -100,7 +100,14 @@ const MINIFIED_TARGETS = [
  */
 const BABELIFY_GLOBAL_TRANSFORM = {
   global: true, // Transform node_modules
-  ignore: devDependencies(), // Ignore devDependencies
+  /**
+   * Ignore devDependencies, except for 'chai-as-promised' which contains ES6 code.
+   * ES6 code is fine for most test environments, but not for integration tests
+   * running on SauceLabs since some older browsers need ES5.
+   */
+  ignore: devDependencies().filter(
+    dep => dep.indexOf('chai-as-promised') === -1
+  ),
 };
 
 /**
@@ -382,6 +389,7 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
  * @return {!Array<string>}
  */
 function devDependencies() {
+  //TODO
   const file = fs.readFileSync('package.json', 'utf8');
   const packageJson = JSON.parse(file);
   const devDependencies = Object.keys(packageJson['devDependencies']);
