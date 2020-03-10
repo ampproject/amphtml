@@ -178,6 +178,10 @@ const targetMatchers = {
         name.endsWith('.protoascii'))
     );
   },
+  {
+    targets: ['VALIDATOR_JAVA'],
+    func: file => !isOwnersFile(file) && file.startsWith('validator/java/'),
+  },
   'VALIDATOR_WEBUI': (file) => {
     if (isOwnersFile(file)) {
       return false;
