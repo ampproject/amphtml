@@ -389,7 +389,6 @@ function finishBundle(srcFilename, destDir, destFilename, options) {
  * @return {!Array<string>}
  */
 function devDependencies() {
-  //TODO
   const file = fs.readFileSync('package.json', 'utf8');
   const packageJson = JSON.parse(file);
   const devDependencies = Object.keys(packageJson['devDependencies']);
