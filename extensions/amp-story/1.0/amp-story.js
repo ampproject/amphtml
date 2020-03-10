@@ -418,6 +418,7 @@ export class AmpStory extends AMP.BaseElement {
     this.initializeListeners_();
     this.initializeListenersForDev_();
     this.initializePageIds_();
+    this.initializeStoryPlayer_();
 
     this.storeService_.dispatch(Action.TOGGLE_UI, this.getUIType_());
 
@@ -1011,7 +1012,6 @@ export class AmpStory extends AMP.BaseElement {
       .then(() => {
         this.markStoryAsLoaded_();
         this.initializeLiveStory_();
-        this.initializeStoryPlayer_();
       });
 
     this.maybeLoadStoryEducation_();
