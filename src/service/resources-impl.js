@@ -292,12 +292,7 @@ export class ResourcesImpl {
    * @private
    */
   intersectsOneViewport_(entries) {
-    if (this.prerenderSize_ == 0) {
-      // TODO(willchou): Store entries and process when visible,
-      // or unobserve/reobserver all resources when visible.
-      devAssert(false, 'Not implemented');
-      return;
-    }
+    // TODO(willchou): Remove assert once #27167 is fixed.
     devAssert(this.prerenderSize_ == 1);
 
     const whenBuilt = this.intersects_(entries, /* viewports */ 1);
