@@ -1246,6 +1246,15 @@ describes.repeated(
               expect(list.layoutCallback()).to.eventually.throw(errorMsg);
             });
 
+            it('should throw error if there is no associated amp-state el', async () => {
+              toggleExperiment(win, experimentName, true);
+              bind.getStateAsync = () => Promise.reject();
+
+              const errorMsg = /element with id 'okapis' was not found/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
             it('should log an error if amp-bind was not included', async () => {
               toggleExperiment(win, experimentName, true);
               Services.bindForDocOrNull.returns(Promise.resolve(null));
@@ -1264,7 +1273,7 @@ describes.repeated(
 
             it('should render a list using local data', async () => {
               toggleExperiment(win, experimentName, true);
-              bind.getState = () => ({items: [1, 2, 3]});
+              bind.getStateAsync = () => Promise.resolve({items: [1, 2, 3]});
 
               const ampStateEl = doc.createElement('amp-state');
               ampStateEl.setAttribute('id', 'okapis');
@@ -1280,6 +1289,29 @@ describes.repeated(
                 .once();
 
               await list.layoutCallback();
+            });
+
+            it('should render a list using async data', async () => {
+              toggleExperiment(win, experimentName, true);
+              const {resolve, promise} = new Deferred();
+              bind.getStateAsync = () => promise;
+
+              const ampStateEl = doc.createElement('amp-state');
+              ampStateEl.setAttribute('id', 'okapis');
+              const ampStateJson = doc.createElement('script');
+              ampStateJson.setAttribute('type', 'application/json');
+              ampStateEl.appendChild(ampStateJson);
+              doc.body.appendChild(ampStateEl);
+
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs([1, 2, 3], /*append*/ false, {items: [1, 2, 3]})
+                .returns(Promise.resolve())
+                .once();
+
+              const layoutPromise = list.layoutCallback();
+              resolve({items: [1, 2, 3]});
+              await layoutPromise;
             });
           });
         }); // with amp-bind

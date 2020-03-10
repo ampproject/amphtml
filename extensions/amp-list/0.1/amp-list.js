@@ -376,7 +376,14 @@ export class AmpList extends AMP.BaseElement {
         );
 
         const ampStatePath = src.slice(AMP_STATE_URI_SCHEME.length);
-        return bind.getState(ampStatePath);
+        return bind.getStateAsync(ampStatePath).catch(err => {
+          const stateKey = ampStatePath.split('.')[0];
+          user().error(
+            TAG,
+            `'amp-state' element with id '${stateKey}' was not found.`
+          );
+          throw err;
+        });
       })
       .then(json => {
         userAssert(
@@ -912,7 +919,10 @@ export class AmpList extends AMP.BaseElement {
       const removedElements = append ? [] : [this.container_];
       // Forward elements to chained promise on success or failure.
       return bind
-        .rescan(elements, removedElements, {'fast': true, 'update': true})
+        .rescan(elements, removedElements, {
+          'fast': true,
+          'update': true,
+        })
         .then(
           () => elements,
           () => elements
