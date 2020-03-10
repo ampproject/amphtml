@@ -42,6 +42,8 @@ import PreactEnzyme from 'enzyme-adapter-preact-pure';
 import sinon from /*OK*/ 'sinon';
 import stringify from 'json-stable-stringify';
 
+chai.use(require('chai-as-promised'));
+
 // Used to print warnings for unexpected console errors.
 let that;
 let consoleErrorSandbox;

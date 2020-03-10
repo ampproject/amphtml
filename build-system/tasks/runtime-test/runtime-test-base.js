@@ -127,7 +127,7 @@ function getFiles(testType) {
 
   switch (testType) {
     case 'unit':
-      files = testConfig.commonUnitTestPaths.concat(testConfig.chaiAsPromised);
+      files = testConfig.commonUnitTestPaths;
       if (argv.files) {
         return files.concat(argv.files);
       }
@@ -147,7 +147,7 @@ function getFiles(testType) {
       return files.concat(testConfig.integrationTestPaths);
 
     case 'a4a':
-      return testConfig.chaiAsPromised.concat(testConfig.a4aTestPaths);
+      return testConfig.a4aTestPaths;
 
     default:
       throw new Error(`Test type ${testType} was not recognized`);
@@ -241,8 +241,31 @@ class RuntimeTestConfig {
       // don't overwrite existing plugins
       const plugins = [instanbulPlugin].concat(this.babelifyConfig.plugins);
 
+      /**
+       * 'chai-as-promised' contains ES6 code. This is fine for most test environments,
+       * but not for integration tests running on SauceLabs, since some browsers only
+       * support ES5 code. Therefore we instruct browserify to transpile the library.
+       *
+       * Since browserify doesn't have good support for specifying a node_module to transpile,
+       * this hack works by saying "transpile everything except for thing in node_modules
+       * called 'chai-as-promised'".
+       */
+      const babelifyChaiAsPromisedHack =
+        this.testType !== 'integration'
+          ? {}
+          : {
+              global: true,
+              ignore: [/\/node_modules\/(?!chai-as-promised\/)/],
+            };
       this.browserify.transform = [
-        ['babelify', {...this.babelifyConfig, plugins}],
+        [
+          'babelify',
+          {
+            ...this.babelifyConfig,
+            ...babelifyChaiAsPromisedHack,
+            plugins,
+          },
+        ],
       ];
     }
   }
