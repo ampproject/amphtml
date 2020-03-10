@@ -20,7 +20,7 @@
     },
     {
       pattern: 'friendly-iframe-embed.js',
-      owners: [{name: 'ampproject/wg-ads'}],
+      owners: [{name: 'ampproject/wg-ads-reviewers'}],
     },
   ],
 }
