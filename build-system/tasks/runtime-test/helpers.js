@@ -255,12 +255,16 @@ function karmaRunStart_() {
  * @return {!Promise<number>} exitCode
  */
 async function runTestInSauceLabs(config) {
+  const flagSet = argv.stable || argv.beta;
+  const useStable = argv.stable || !flagSet;
+  const useBeta = argv.beta || !flagSet;
+
   const isBeta = browserId => browserId.toLowerCase().endsWith('_beta');
   const isStable = browserId => !isBeta(browserId);
 
   return await runTestInBatches_(config, {
-    beta: argv.stable ? [] : config.browsers.filter(isBeta),
-    stable: argv.beta ? [] : config.browsers.filter(isStable),
+    beta: useBeta ? config.browsers.filter(isBeta) : [],
+    stable: useStable ? config.browsers.filter(isStable) : [],
   });
 }
 
