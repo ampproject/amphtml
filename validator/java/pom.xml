@@ -87,13 +87,21 @@
                     <excludeDefaultDirectories>true</excludeDefaultDirectories>
                     <filesets>
                         <fileset>
-                            <directory>${protobuf.output.directory}/amp/validator</directory>
+                            <directory>${protobuf.output.directory}/dev/amp/validator</directory>
                             <includes>
                                 <include>
-                                    Validator.java
+                                    ValidatorProtos.java
                                 </include>
                             </includes>
                         </fileset>
+                      <fileset>
+                        <directory>${validator.main.proto.ascii.directory}</directory>
+                        <includes>
+                          <include>
+                            validator-all.protoascii
+                          </include>
+                        </includes>
+                      </fileset>
                         <fileset>
                             <directory>${project.basedir}/target</directory>
                         </fileset>
