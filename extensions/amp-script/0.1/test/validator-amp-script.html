@@ -87,6 +87,12 @@
   <!-- Invalid: 'development' attribute. -->
   <amp-script layout=container src="https://example.com/foo.js" development></amp-script>
 
+  <!-- Invalid: 'data-ampdevmode' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" data-ampdevmode></amp-script>
+
+  <!-- Invalid: 'data-ampdevmode' attribute. -->
+  <amp-script layout=container src="https://example.com/foo.js" data-ampdevmode="false"></amp-script>
+
   <!-- Invalid: Local script without 'target' or 'id' attributes. -->
   <script type=text/plain>
     document.body.textContent = "Hello World!";
