@@ -21,7 +21,7 @@
 </head>
 <body>
 
-  <div on="tap:list1.refresh,list2.refresh">
+  <div on="tap:list1.refresh,list2.refresh,list3.refresh">
     Refresh All Lists
   </div>
 
@@ -36,14 +36,14 @@
   </amp-list>
   
   <h3>Static amp-list, async state</h3>
-  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="amp-state:listAsyncExample" reset-on-refresh>
+  <amp-list id="list2" width="auto" height="100" layout="fixed-height" src="amp-state:listAsyncExample" reset-on-refresh>
     <template type="amp-mustache" id="amp-template-id">
       <div><a href="{{url}}">{{title}}</a></div>
     </template>
   </amp-list>
 
   <h3>Paging amp-list</h3>
-  <amp-list id="list2" width="auto" height="200" layout="fixed-height" src="amp-state:listAsyncExample" template="amp-template-id" class="m1" load-more="auto" load-more-bookmark="next">
+  <amp-list id="list3" width="auto" height="200" layout="fixed-height" src="amp-state:listAsyncExample" template="amp-template-id" class="m1" load-more="auto" load-more-bookmark="next">
     <div overflow role="button" aria-label="Show more">
       Show more
     </div>
