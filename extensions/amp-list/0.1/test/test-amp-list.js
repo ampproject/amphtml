@@ -805,7 +805,7 @@ describes.repeated(
               );
             });
 
-            it('"amp-state:" uri should skip rendering and emit an error', () => { 
+            it('"amp-state:" uri should skip rendering and emit an error', () => {
               const ampStateEl = doc.createElement('amp-state');
               ampStateEl.setAttribute('id', 'okapis');
               const ampStateJson = doc.createElement('script');

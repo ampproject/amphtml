@@ -60,7 +60,6 @@ import {
   setupJsonFetchInit,
 } from '../../../src/utils/xhr-utils';
 import {isArray, toArray} from '../../../src/types';
-import {isExperimentOn} from '../../../src/experiments';
 import {px, setStyles, toggle} from '../../../src/style';
 import {setDOM} from '../../../third_party/set-dom/set-dom';
 import {startsWith} from '../../../src/string';
@@ -352,7 +351,7 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   isAmpStateSrc_(src) {
-    return startsWith(src, AMP_STATE_URI_SCHEME)
+    return startsWith(src, AMP_STATE_URI_SCHEME);
   }
 
   /**
