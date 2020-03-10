@@ -25,52 +25,39 @@
     Refresh All Lists
   </div>
 
-  <h3>Static amp-list, inlined state</h3>
-  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="amp-state:list-example" class="m1" reset-on-refresh>
+  <h3>Static amp-list, inlined state.
+    <button on="tap:AMP.setState({'listExample': {'items': listExample.items.concat([{'title': 'appended item'}])}}),list1.refresh"> Append items</button>
+  </h3>
+  <amp-list id="list1" width="auto" height="100" [height]="20 * listExample.items.length"
+    layout="fixed-height" src="amp-state:listExample">
     <template type="amp-mustache" id="amp-template-id">
       <div><a href="{{url}}">{{title}}</a></div>
     </template>
   </amp-list>
   
   <h3>Static amp-list, async state</h3>
-  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="amp-state:list-async-example" class="m1" reset-on-refresh>
+  <amp-list id="list1" width="auto" height="100" layout="fixed-height" src="amp-state:listAsyncExample" reset-on-refresh>
     <template type="amp-mustache" id="amp-template-id">
       <div><a href="{{url}}">{{title}}</a></div>
     </template>
   </amp-list>
 
   <h3>Paging amp-list</h3>
-  <amp-list id="list2" width="auto" height="200" layout="fixed-height" src="amp-state:list-example" template="amp-template-id" class="m1" load-more="auto" load-more-bookmark="next">
-    <div overflow role="button" aria-label="Show more" class="list-overflow ampstart-btn caps">
+  <amp-list id="list2" width="auto" height="200" layout="fixed-height" src="amp-state:listAsyncExample" template="amp-template-id" class="m1" load-more="auto" load-more-bookmark="next">
+    <div overflow role="button" aria-label="Show more">
       Show more
     </div>
   </amp-list>
 
-  <amp-state id="list-async-example"> </amp-state>
-  <amp-state id="list-example">
+  <amp-state id="listAsyncExample" src="./list.example.json"></amp-state>
+  <amp-state id="listExample">
     <script type="application/json">
     {
       "items": [
-        {
-          "title": "amp-carousel",
-          "url": "/components/amp-carousel/",
-          "image": "img/ampicon.png"
-        },
-        {
-          "title": "amp-img",
-          "url": "/components/amp-img/",
-          "image": "img/clock.jpg"
-        },
-        {
-          "title": "amp-ad",
-          "url": "/components/amp-ad/",
-          "image": "img/sea@1x.jpg"
-        },
-        {
-          "title": "amp-accordion",
-          "url": "/components/amp-accordion/",
-          "image": "img/ampicon.png"
-        }
+        { "title": "amp-carousel" },
+        { "title": "amp-img" },
+        { "title": "amp-ad" },
+        { "title": "amp-accordion" }
       ],
       "next": "./list.example.json"
     } 
