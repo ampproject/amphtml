@@ -220,6 +220,25 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 </amp-list>
 ```
 
+### Initialization from amp-state
+
+In some cases, it may be desirable to have your `<amp-list>` component initialize off of `<amp-state>` rather than from a json endpoint.
+You may do that by utilizing the `amp-state:` protocol in the `src` attribute. The data in state must follow the same rules as the json that
+would have been retrieved from an endpoint. For example,
+
+```html
+<amp-state id="listExample">
+  <script type="application/json">
+  {
+    "items": [{"id": 1}, {"id": 2}, {"id": 2}]
+  }
+  </script>
+</amp-state>
+<amp-list src="amp-state:listExample">...</amp-list>
+```
+
+In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
+
 ## Attributes
 
 ### src (required)
