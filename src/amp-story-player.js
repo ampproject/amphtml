@@ -26,6 +26,7 @@ import {dict, map} from './utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
 import {IframePool} from './amp-story-player-iframe-pool';
 import {VisibilityState} from './visibility-state';
+import {applySandbox} from './3p-frame';
 import {cssText} from '../build/amp-story-player-iframe.css';
 import {setStyle} from './style';
 import {toArray} from './types';
@@ -158,6 +159,7 @@ export class AmpStoryPlayer {
     iframeEl.classList.add('story-player-iframe');
     this.iframes_.push(iframeEl);
 
+    applySandbox(iframeEl);
     this.initializeLoadingListeners_(iframeEl);
     this.rootEl_.appendChild(iframeEl);
   }
