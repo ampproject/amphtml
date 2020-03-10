@@ -116,7 +116,6 @@ tags: {  # <amp-autocomplete>
   attrs: {
     name: "suggest-first"
   }
-  attrs: { name: "template" }
   attrs: {
     name: "src"
     mandatory: true
