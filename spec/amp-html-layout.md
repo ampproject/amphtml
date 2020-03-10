@@ -162,7 +162,7 @@ In the following example, if the viewport is wider than `320px`, the image will 
 
 ### `disable-inline-width`
 
-All AMP elements that support the `responsive` layout, also support the `disable-inline-width` attribute. The presence of this attribute describes how the `sizes` attribute is used. When pairing `disable-inline-width` with `sizes`, the AMP element will propagate the value of `sizes` to the element's underlying tag, as with the `img` nested inside an `amp-img`, **without** getting the sizing behavior of `sizes` in AMP (which adds a width based on which media query matches).
+The `sizes` attribute on its own will set an inline `width` style on the element. When pairing `disable-inline-width` with `sizes`, the AMP element will propagate the value of `sizes` to the element's underlying tag, as with the `img` nested inside an `amp-img`, **without** setting the inline `width` as `sizes` typically does on its own in AMP.
 
 **Example**: Using the `disable-inline-width` attribute
 
