@@ -193,7 +193,7 @@ tags: {  # <amp-script>
     }
   }
   attrs: {
-    # This attribute should always be invalid. See https://github.com/ampproject/amphtml/pull/2707
+    # This attribute should always be invalid. See https://github.com/ampproject/amphtml/pull/27076
     name: "data-ampdevmode"
     value: "false"
     blacklisted_value_regex: "false"
