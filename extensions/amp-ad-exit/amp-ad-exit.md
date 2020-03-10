@@ -369,9 +369,35 @@ Behaviors specify additional properties of the exit action.
 
 The `clickTarget` behavior specifies where a target's click should try to open. A click defaults to opening a new tab, if it is possible in the environment. With this behavior a user can specify that the click should try open the same tab, by setting this to `"_top"`. If this is not set to `"_top"`, then it will fall back to opening a new tab.
 
-## `exit` action
+## Actions
 
-The `amp-ad-exit` element exposes an `exit` action that other elements reference in `on="tap:..."` attributes. The action accepts a "target" string parameter that must match a named `NavigationTarget` in the `ExitConfig`. Custom variables beginning with an underscore can also be passed in.
+### `setVariable` action
+
+`amp-ad-exit` also supports variable targets. The variable targets do not define exit URLs by themselves, but instead point to one of the named `NavigationTarget`s in the `ExitConfig`. Not to be confused with the URL custom variables, these are state variables maintained by the `amp-ad-exit` element that can be updated at runtime which enable stateful exit behavior. See the example below.
+
+`setVariable` action is used to set up the mapping from a state variable to a named `NavigationTarget` in the `ExitConfig`.
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Value</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>name</code></td>
+    <td class="col-thirty"><code>string</code></td>
+    <td>The name of the state variable.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>target</code></td>
+    <td class="col-thirty"><code>string</code></td>
+    <td>The name of the <code>NavigationTarget</code> in the <code>ExitConfig</code> that this state variable points to.</td>
+  </tr>
+</table>
+
+### `exit` action
+
+The `amp-ad-exit` element exposes an `exit` action that other elements reference in `on="tap:..."` attributes. The action accepts a "target" string parameter that must match a named `NavigationTarget` in the `ExitConfig`, or a "variable" string parameter which is a state variable that points to a `NavigationTarget`. Custom variables beginning with an underscore can also be passed in.
 
 <table>
   <tr>
@@ -385,11 +411,61 @@ The `amp-ad-exit` element exposes an `exit` action that other elements reference
     <td>The name of a  <code>NavigationTarget</code> in the <code>ExitConfig</code>.</td>
   </tr>
   <tr>
+    <td class="col-thirty"><code>variable</code></td>
+    <td class="col-thirty"><code>string</code></td>
+    <td>The name of a state variable.</td>
+  </tr>
+  <tr>
+    <td class="col-thirty"><code>default</code></td>
+    <td class="col-thirty"><code>string</code></td>
+    <td>The name of the default <code>NavigationTarget</code> that the state variable points to when it's never set, only meaningful when <code>variable</code> is used.</td>
+  </tr>
+  <tr>
     <td><code>_[a-zA-Z0-9_-]+</code></td>
     <td><code>string|boolean|number</code></td>
     <td>Replace the URL parameter with this name and value into the final and tracking URLs.</td>
   </tr>
 </table>
+
+{% call callout('Warning', type='caution') %}
+When triggering the `exit` action, either `target` or `variable` should be provided, but not both, e.g. `exit(target='product1')` or `exit(variable='currentProduct', default='product1')`.
+{% endcall %}
+
+_Example: Using variable targets_
+
+```html
+<amp-ad-exit id="exit-api" layout="nodisplay">
+  <script type="application/json">
+    {
+      "targets": {
+        "product1": {
+          "finalUrl": "https://example.com/product1"
+        },
+        "product2": {
+          "finalUrl": "https://example.com/product2"
+        }
+      }
+    }
+  </script>
+</amp-ad-exit>
+<amp-selector
+  id="exit-selector"
+  layout="nodisplay"
+  on="select:exit-api.setVariable(name='currentProduct', target=event.targetOption)"
+>
+  <option option="product1" selected></option>
+  <option option="product2"></option>
+</amp-selector>
+<amp-carousel
+  type="slides"
+  autoplay
+  on="slideChange:exit-selector.toggle(index=event.index, value=true),
+        tap:exit-api.exit(variable='currentProduct', default='product1')"
+>
+  <div>product 1</div>
+  <div>product 2</div>
+</amp-carousel>
+```
 
 ## Configuration spec
 
