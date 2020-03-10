@@ -93,7 +93,7 @@ tags: {  # <amp-autocomplete>
   }
 }
 # AMP4EMAIL disallows mustache in src attribute, filter attribute.
-tags: {  # <amp-list>
+tags: {  # <amp-autocomplete>
   html_format: AMP4EMAIL
   tag_name: "AMP-AUTOCOMPLETE"
   spec_name: "AMP-AUTOCOMPLETE (AMP4EMAIL)"
