@@ -47,7 +47,7 @@ class AmpSocialShare extends PreactBaseElement {
     }
     this.setHrefAndTargetContext_(typeConfig, platform);
     if (this.element.getAttribute('layout') === Layout.RESPONSIVE) {
-      return {'size': {}};
+      return dict({'size': {}});
     }
   }
 
