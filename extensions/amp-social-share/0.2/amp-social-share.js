@@ -32,14 +32,16 @@ class AmpSocialShare extends PreactBaseElement {
   init() {
     const viewer = Services.viewerForDoc(this.element);
     const platform = Services.platformFor(window);
-    const typeConfig = this.getTypeConfigOrUndefined_(
+    const type = userAssert(
       this.element.getAttribute('type'),
-      viewer,
-      platform
+      'The type attribute is required. %s',
+      this.element
     );
+    const typeConfig = this.getTypeConfigOrUndefined_(type, viewer, platform);
     // Hide/ignore component if typeConfig is undefined
     if (!typeConfig) {
       toggle(this.element, false);
+      user().warn(TAG, `Skipping obsolete share button ${type}`);
       return;
     }
     this.setHrefAndTargetContext_(typeConfig, platform);
@@ -56,13 +58,12 @@ class AmpSocialShare extends PreactBaseElement {
 
   /**
    * @private
-   * @param {?string} type
+   * @param {string} type
    * @param {!../../../src/service/viewer-interface.ViewerInterface} viewer
    * @param {!../../../src/service/platform-impl.Platform} platform
    * @return {!JsonObject|undefined}
    */
   getTypeConfigOrUndefined_(type, viewer, platform) {
-    userAssert(type, 'The type attribute is required. %s', this.element);
     userAssert(
       !/\s/.test(type),
       'Space characters are not allowed in type attribute value. %s',
@@ -77,7 +78,7 @@ class AmpSocialShare extends PreactBaseElement {
       // system share wants to be unique
       const systemOnly =
         this.systemShareSupported_(viewer, platform) &&
-        !!window.document.querySelector(
+        !!this.element.ownerDocument.querySelector(
           'amp-social-share[type=system][data-mode=replace]'
         );
       if (systemOnly) {
@@ -116,18 +117,14 @@ class AmpSocialShare extends PreactBaseElement {
    * @param {!../../../src/service/platform-impl.Platform} platform
    */
   setHrefAndTargetContext_(typeConfig, platform) {
-    const shareEndpoint = userAssert(
+    const shareEndpoint = user().assertString(
       this.element.getAttribute('data-share-endpoint') ||
         typeConfig['shareEndpoint'],
-      'The data-share-endpoint attribute is required. %s',
-      this.element
+      'The data-share-endpoint attribute is required. %s'
     );
     const urlParams = getDataParamsFromAttributes(this.element);
     Object.assign(urlParams, typeConfig['defaultParams']);
-    const hrefWithVars = addParamsToUrl(
-      dev().assertString(shareEndpoint),
-      urlParams
-    );
+    const hrefWithVars = addParamsToUrl(shareEndpoint, urlParams);
     const urlReplacements = Services.urlReplacementsForDoc(this.element);
     const bindingVars = typeConfig['bindings'];
     const bindings = {};
@@ -160,9 +157,6 @@ class AmpSocialShare extends PreactBaseElement {
 
 /** @override */
 AmpSocialShare.Component = SocialShare;
-
-/** @override */
-AmpSocialShare.passthrough = false;
 
 /** @override */
 AmpSocialShare.props = {
