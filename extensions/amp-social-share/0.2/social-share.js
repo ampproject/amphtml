@@ -68,13 +68,10 @@ export function SocialShare(props) {
   const styleType = `SOCIAL_SHARE_${props['type'].toUpperCase()}`;
   const base = CSS.BASE_STYLE;
   const background = CSS[styleType];
-  const size =
-    props['layout'] === 'responsive'
-      ? {}
-      : {
-          width: props['width'] || DEFAULT_WIDTH,
-          height: props['height'] || DEFAULT_HEIGHT,
-        };
+  const size = props['size'] || {
+    width: props['width'] || DEFAULT_WIDTH,
+    height: props['height'] || DEFAULT_HEIGHT,
+  };
   useResourcesNotify();
   return (
     <SocialShareIcon

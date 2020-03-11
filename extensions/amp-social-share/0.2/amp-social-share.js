@@ -13,16 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {Layout} from '../../../src/layout';
 import {PreactBaseElement} from '../../../src/preact/base-element';
 import {Services} from '../../../src/services';
 import {SocialShare} from './social-share';
 import {addParamsToUrl} from '../../../src/url';
-import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {toggle} from '../../../src/style';
+import {user, userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-social-share';
@@ -45,6 +46,9 @@ class AmpSocialShare extends PreactBaseElement {
       return;
     }
     this.setHrefAndTargetContext_(typeConfig, platform);
+    if (this.element.getAttribute('layout') === Layout.RESPONSIVE) {
+      return {'size': {}};
+    }
   }
 
   /** @override */
