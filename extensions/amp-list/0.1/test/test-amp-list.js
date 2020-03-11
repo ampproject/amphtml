@@ -398,6 +398,7 @@ describes.repeated(
               expect(list.container_.contains(foo)).to.be.true;
 
               const opts = {refresh: true, resetOnRefresh: true, expr: 'items'};
+
               expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], opts);
               return list.executeAction({
                 method: 'refresh',
