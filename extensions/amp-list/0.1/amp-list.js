@@ -514,10 +514,18 @@ export class AmpList extends AMP.BaseElement {
       (isFetch && this.element.hasAttribute('reset-on-refresh')) ||
       this.element.getAttribute('reset-on-refresh') === 'always'
     ) {
-      // Placeholder and loading don't need a mutate context.
+      let currentHeight;
+      this.measureMutateElement(
+        () => {
+          currentHeight = this.element./*OK*/ offsetHeight;
+        },
+        () => {
+          setImportantStyles(this.element, {
+            'height': `${currentHeight}px`,
+            'overflow': 'hidden',
+          });
           this.togglePlaceholder(true);
           this.toggleLoading(true, /* opt_force */ true);
-      this.mutateElement(() => {
           this.toggleFallback_(false);
           // Clean up bindings in children before removing them from DOM.
           if (this.bind_) {
@@ -531,9 +539,10 @@ export class AmpList extends AMP.BaseElement {
           if (this.loadMoreEnabled_) {
             this.getLoadMoreService_().hideAllLoadMoreElements();
           }
-      });
         }
+      );
     }
+  }
 
   /**
    * Given JSON payload data fetched from the server, modifies the
