@@ -455,6 +455,8 @@ export class AmpList extends AMP.BaseElement {
     // In the load-more case, we allow the container to be height auto
     // in order to reasonably make space for the load-more button and
     // load-more related UI elements underneath.
+    // In the layout=container case, we allow the container to take
+    // the height of its children instead, whereas fill-content forces height:0
     if (!this.loadMoreEnabled_ && !this.isLayoutContainer_) {
       this.applyFillContent(container, true);
     }
@@ -1123,13 +1125,12 @@ export class AmpList extends AMP.BaseElement {
       if (targetHeight > height) {
         this.attemptChangeHeight(targetHeight).then(
           () => {
-            if (!this.isLayoutContainer_) {
-              return;
+            if (this.isLayoutContainer_) {
+              setImportantStyles(this.element, {
+                'height': '',
+                'overflow': '',
+              });
             }
-            setImportantStyles(this.element, {
-              'height': '',
-              'overflow': '',
-            });
           },
           () => {}
         );
