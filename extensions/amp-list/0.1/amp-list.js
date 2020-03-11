@@ -522,10 +522,12 @@ export class AmpList extends AMP.BaseElement {
           currentHeight = this.element./*OK*/ offsetHeight;
         },
         () => {
-          setImportantStyles(this.element, {
-            'height': `${currentHeight}px`,
-            'overflow': 'hidden',
-          });
+          if (this.isLayoutContainer_) {
+            setImportantStyles(this.element, {
+              'height': `${currentHeight}px`,
+              'overflow': 'hidden',
+            });
+          }
           this.togglePlaceholder(true);
           this.toggleLoading(true, /* opt_force */ true);
           this.toggleFallback_(false);
@@ -973,11 +975,12 @@ export class AmpList extends AMP.BaseElement {
         currentHeight = this.element./*OK*/ offsetHeight;
       },
       () => {
-        setImportantStyles(this.element, {
-          'height': `${currentHeight}px`,
-          'overflow': 'hidden',
-        });
-
+        if (this.isLayoutContainer_) {
+          setImportantStyles(this.element, {
+            'height': `${currentHeight}px`,
+            'overflow': 'hidden',
+          });
+        }
         this.hideFallbackAndPlaceholder_();
 
         if (
