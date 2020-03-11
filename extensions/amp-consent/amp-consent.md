@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Provides the ability to collect and store a user's consent through a UI control.
+  text: Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.
 ---
 
 <!--
@@ -24,34 +24,6 @@ limitations under the License.
 -->
 
 # amp-consent
-
-Provides the ability to collect and store a user's consent through a UI control. Also provides the ability to block other AMP components based on the user's consent.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td>
-      <div>
-        <code>&lt;script async custom-element="amp-consent" src="https://cdn.ampproject.org/v0/amp-consent-0.1.js">&lt;/script></code>
-      </div>
-    </td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>nodisplay</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>
-      <li><a href="https://amp.dev/documentation/examples/user-consent/basic_user_consent_flow/">Basic user consent flow</a></li>
-      <li><a href="https://amp.dev/documentation/examples/user-consent/advanced_user_consent_flow/">Advanced user consent flow</a></li>
-    </td>
-  </tr>
-</table>
 
 ## Overview
 
@@ -663,6 +635,7 @@ Join in on the discussion where we are discussing [upcoming potential features](
 - Didomi : [Website](https://www.didomi.io/) - [Documentation](https://developers.didomi.io/cmp/amp)
 - Sirdata : [Website](http://www.sirdata.com/) - [Documentation](https://cmp.sirdata.com/#/docs)
 - Marfeel : [Website](https://www.marfeel.com/) - [Documentation](./cmps/marfeel.md)
+- Ogury : [Website](https://www.ogury.com/) - [Documentation](./cmps/ogury.md)
 - SourcePoint : [Website](https://www.sourcepoint.com/) - [Documentation](./cmps/sourcepoint.md)
 
 - Your Integrated platform here!

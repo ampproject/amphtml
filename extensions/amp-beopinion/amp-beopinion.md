@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Embeds BeOpinion content.
+  text: Embeds [BeOpinion](https://beopinion.com/) content.
 ---
 
 <!---
@@ -23,21 +23,6 @@ limitations under the License.
 -->
 
 # amp-beopinion
-
-Embeds <a href="https://beopinion.com/">BeOpinion</a> content.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-beopinion" src="https://cdn.ampproject.org/v0/amp-beopinion-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
-
-[TOC]
 
 ## Behavior
 

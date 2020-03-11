@@ -417,23 +417,6 @@ export class GlobalVariableSource extends VariableSource {
     // Returns the user's time-zone offset from UTC, in minutes.
     this.set('TIMEZONE', dateMethod('getTimezoneOffset'));
 
-    // Returns the IANA timezone code
-    this.set('TIMEZONE_CODE', () => {
-      let tzCode;
-      if ('Intl' in win && 'DateTimeFormat' in win.Intl) {
-        // It could be undefined (i.e. IE11)
-        tzCode = new Intl.DateTimeFormat().resolvedOptions().timeZone;
-      }
-
-      return tzCode || '';
-    });
-
-    // Returns a promise resolving to viewport.getScrollTop.
-    this.set('SCROLL_TOP', () => viewport.getScrollTop());
-
-    // Returns a promise resolving to viewport.getScrollLeft.
-    this.set('SCROLL_LEFT', () => viewport.getScrollLeft());
-
     // Returns a promise resolving to viewport.getScrollHeight.
     this.set('SCROLL_HEIGHT', () => viewport.getScrollHeight());
 
@@ -626,26 +609,10 @@ export class GlobalVariableSource extends VariableSource {
     });
 
     this.setAsync('VIDEO_STATE', (id, property) => {
-      const root = this.ampdoc.getRootNode();
-      const video = user().assertElement(
-        root.getElementById(/** @type {string} */ (id)),
-        `Could not find an element with id="${id}" for VIDEO_STATE`
+      return Services.videoManagerForDoc(this.ampdoc).getVideoStateProperty(
+        id,
+        property
       );
-      return Services.videoManagerForDoc(this.ampdoc)
-        .getAnalyticsDetails(video)
-        .then(details => (details ? details[property] : ''));
-    });
-
-    this.setAsync('FIRST_CONTENTFUL_PAINT', () => {
-      return Services.performanceFor(win).getFirstContentfulPaint();
-    });
-
-    this.setAsync('FIRST_VIEWPORT_READY', () => {
-      return Services.performanceFor(win).getFirstViewportReady();
-    });
-
-    this.setAsync('MAKE_BODY_VISIBLE', () => {
-      return Services.performanceFor(win).getMakeBodyVisible();
     });
 
     this.setAsync('AMP_STATE', key => {
@@ -657,7 +624,7 @@ export class GlobalVariableSource extends VariableSource {
         if (!bind) {
           return '';
         }
-        return bind.getStateValue(/** @type {string} */ (key));
+        return bind.getStateValue(/** @type {string} */ (key)) || '';
       });
     });
   }
@@ -1037,15 +1004,9 @@ export class UrlReplacements {
       return true;
     }
 
-    const meta = this.ampdoc
-      .getRootNode()
-      .querySelector('meta[name=amp-link-variable-allowed-origin]');
-
-    if (meta && meta.hasAttribute('content')) {
-      const whitelist = meta
-        .getAttribute('content')
-        .trim()
-        .split(/\s+/);
+    const meta = this.ampdoc.getMetaByName('amp-link-variable-allowed-origin');
+    if (meta) {
+      const whitelist = meta.trim().split(/\s+/);
       for (let i = 0; i < whitelist.length; i++) {
         if (url.origin == parseUrlDeprecated(whitelist[i]).origin) {
           return true;
@@ -1073,7 +1034,7 @@ export class UrlReplacements {
       'PAGE_VIEW_ID_64': true,
       'NAV_TIMING': true,
     };
-    const additionalUrlParameters =
+    let additionalUrlParameters =
       element.getAttribute('data-amp-addparams') || '';
     const whitelist = this.getWhitelistForElement_(
       element,
@@ -1093,11 +1054,15 @@ export class UrlReplacements {
     if (element[ORIGINAL_HREF_PROPERTY] == null) {
       element[ORIGINAL_HREF_PROPERTY] = href;
     }
+
+    const isAllowedOrigin = this.isAllowedOrigin_(url);
     if (additionalUrlParameters) {
+      additionalUrlParameters = isAllowedOrigin
+        ? this.expandSyncIfAllowedList_(additionalUrlParameters, whitelist)
+        : additionalUrlParameters;
       href = addParamsToUrl(href, parseQueryString(additionalUrlParameters));
     }
 
-    const isAllowedOrigin = this.isAllowedOrigin_(url);
     if (!isAllowedOrigin) {
       if (whitelist) {
         user().warn(
@@ -1132,16 +1097,25 @@ export class UrlReplacements {
       href = addParamsToUrl(href, parseQueryString(defaultUrlParams));
     }
 
-    if (whitelist) {
-      href = this.expandUrlSync(
-        href,
-        /* opt_bindings */ undefined,
-        /* opt_collectVars */ undefined,
-        /* opt_whitelist */ whitelist
-      );
-    }
+    href = this.expandSyncIfAllowedList_(href, whitelist);
 
     return (element.href = href);
+  }
+
+  /**
+   * @param {string} href
+   * @param {!Object<string, boolean>|undefined} allowedList
+   * @return {string}
+   */
+  expandSyncIfAllowedList_(href, allowedList) {
+    return allowedList
+      ? this.expandUrlSync(
+          href,
+          /* opt_bindings */ undefined,
+          /* opt_collectVars */ undefined,
+          /* opt_whitelist */ allowedList
+        )
+      : href;
   }
 
   /**

@@ -79,6 +79,19 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
     return script.layoutCallback().should.be.rejected;
   });
 
+  it('should work with "text/javascript" content-type for same-origin src', () => {
+    env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
+    element.setAttribute('src', 'https://foo.example/foo.txt');
+
+    stubFetch(
+      'https://foo.example/foo.txt',
+      {'Content-Type': 'text/javascript; charset=UTF-8'}, // Valid content-type.
+      'alert(1)'
+    );
+
+    return script.layoutCallback().should.be.fulfilled;
+  });
+
   it('should check sha384(author_js) for cross-origin src', async () => {
     env.sandbox.stub(env.ampdoc, 'getUrl').returns('https://foo.example/');
     element.setAttribute('src', 'https://bar.example/bar.js');
@@ -189,40 +202,15 @@ describes.fakeWin('AmpScript', {amp: {runtimeOn: false}}, env => {
       expect(script.development_).false;
     });
 
-    it('data-ampdevmode on just the element should not enable dev mode', () => {
-      element.setAttribute('data-ampdevmode', true);
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).false;
-    });
-
-    it('data-ampdevmode on just the root html element should not enable dev mode', () => {
-      element.ownerDocument.documentElement.setAttribute(
-        'data-ampdevmode',
-        true
-      );
-      script = new AmpScript(element);
-      script.buildCallback();
-      expect(script.development_).false;
-    });
-
-    it('data-ampdevmode on both the element and root html element should enable dev mode', () => {
-      element.setAttribute('data-ampdevmode', true);
-      element.ownerDocument.documentElement.setAttribute(
-        'data-ampdevmode',
-        true
-      );
+    it('data-ampdevmode on just the element should enable dev mode', () => {
+      element.setAttribute('data-ampdevmode', '');
       script = new AmpScript(element);
       script.buildCallback();
       expect(script.development_).true;
     });
 
-    it('data-ampdevmode on both the element and a parent element should enable dev mode', () => {
-      element.ownerDocument.documentElement.setAttribute(
-        'data-ampdevmode',
-        true
-      );
-      element.ownerDocument.body.setAttribute('data-ampdevmode', true);
+    it('data-ampdevmode on just the root html element should enable dev mode', () => {
+      element.ownerDocument.documentElement.setAttribute('data-ampdevmode', '');
       script = new AmpScript(element);
       script.buildCallback();
       expect(script.development_).true;

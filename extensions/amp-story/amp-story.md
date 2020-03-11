@@ -1,7 +1,6 @@
 ---
 $category@: presentation
 formats:
-  - websites
   - stories
 teaser:
   text: A rich, visual storytelling format.
@@ -23,33 +22,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="`amp-story`"></a> `amp-story`
+# amp-story
 
 The `amp-story` extension provides a format for displaying visual content that you can assemble into a story-telling experience. With an AMP story, you can provide users with bite-sized, visually rich information and content.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>A rich, visual storytelling format.</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story" src="https://cdn.ampproject.org/v0/amp-story-1.0.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>none</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td><ul>
-      <li>See AMP By Example's <a href="https://amp.dev/documentation/examples/introduction/stories_in_amp/">Hello World</a> sample.</li>
-      <li>Learn from the <a href="https://amp.dev/documentation/guides-and-tutorials/start/visual_story/">Create a visual AMP story</a> tutorial.</li>
-    </ul></td>
-  </tr>
-</table>
-
-[TOC]
 
 <figure class="centered-fig">
   <amp-anim width="300" height="533" layout="fixed" src="https://github.com/ampproject/amphtml/raw/master/extensions/amp-story/img/amp-story.gif">
@@ -74,7 +49,7 @@ As of 2018-07-16, version 0.1 is considered deprecated, and will be deleted on 2
 
 An [AMP story](#story:-amp-story) is a complete AMP HTML document that is comprised of [pages](#pages:-amp-story-page), within the pages are [layers](#layers:-amp-story-grid-layer), within the layers are AMP & HTML elements, like media, analytics, text, and so on.
 
-<amp-img alt="AMP story tag hierarchy" layout="fixed" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
+<amp-img alt="AMP story tag hierarchy" layout="responsive" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" width="591" height="358">
   <noscript>
     <img alt="AMP story tag hierarchy" src="https://github.com/ampproject/docs/raw/master/assets/img/docs/amp-story-tag-hierarchy.png" />
   </noscript>
@@ -501,10 +476,6 @@ Example:
 </amp-story-grid-layer>
 ```
 
-#### Links in amp-story-grid-layer
-
-We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
-
 #### Interactive components
 
 We support embedding components such as `<amp-twitter>` inside `amp-story-grid-layer`. By default they are not interactive in the story (i.e. tapping on them will not have any effect), but by using the `interactive` attribute, you can make them be fully interactive.
@@ -530,6 +501,10 @@ Example:
 >
 </amp-twitter>
 ```
+
+#### Links in amp-story-grid-layer
+
+We support inline links `<a>` as a descendant of `amp-story-grid-layer`. Whenever a link is tapped a tooltip will be shown - deferring the corresponding action until the user taps again in the tooltip.
 
 #### Customizing tooltip for links or interactive components
 

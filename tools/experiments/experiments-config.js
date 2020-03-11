@@ -202,12 +202,6 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/12945',
   },
   {
-    id: 'amp-next-page-v2',
-    name: 'Document-level (true) infinite scroll experience',
-    spec: 'https://github.com/ampproject/amphtml/issues/25500',
-    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/25634',
-  },
-  {
     id: 'amp-story-branching',
     name: 'Allow for the go to action, advance to, and fragment parameter URLs',
     spec: 'https://github.com/ampproject/amphtml/issues/20083',
@@ -234,11 +228,6 @@ export const EXPERIMENTS = [
     id: 'chrome-animation-worklet',
     name: 'Opts-in users into using AnimationWorklet',
     cleanupIssue: 'X',
-  },
-  {
-    id: 'amp-consent-v2',
-    name: 'Enables CMP support to amp-consent component',
-    spec: 'https://github.com/ampproject/amphtml/issues/17742',
   },
   {
     id: 'video-dock',
@@ -295,6 +284,12 @@ export const EXPERIMENTS = [
     name: 'Fix inconsistent responsive height selection.',
     spec: 'https://github.com/ampproject/amphtml/issues/24166',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/24167',
+  },
+  {
+    id: 'intersect-resources',
+    name: 'Use IntersectionObserver for resource scheduling.',
+    spec: 'https://github.com/ampproject/amphtml/issues/25428',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26233',
   },
   {
     id: 'layoutbox-invalidate-on-scroll',

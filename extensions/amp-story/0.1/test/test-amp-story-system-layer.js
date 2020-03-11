@@ -29,10 +29,12 @@ describes.fakeWin('amp-story system layer', {amp: true}, env => {
   beforeEach(() => {
     win = env.win;
 
-    registerServiceBuilder(win, 'story-store', () => ({
-      get: NOOP,
-      subscribe: NOOP,
-    }));
+    registerServiceBuilder(win, 'story-store', function() {
+      return {
+        get: NOOP,
+        subscribe: NOOP,
+      };
+    });
     progressBarRoot = win.document.createElement('div');
 
     progressBarStub = {

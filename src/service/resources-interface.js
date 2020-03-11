@@ -131,11 +131,13 @@ export class ResourcesInterface {
    * Enqueue, or update if already exists, a mutation task for a resource.
    * @param {./resource.Resource} resource
    * @param {ChangeSizeRequestDef} newRequest
+   * @package
    */
   updateOrEnqueueMutateTask(resource, newRequest) {}
 
   /**
    * Schedules the work pass at the latest with the specified delay.
+   * @package
    */
   schedulePassVsync() {}
 
@@ -158,11 +160,13 @@ export class ResourcesInterface {
 
   /**
    * @param {number} relayoutTop
+   * @package
    */
   setRelayoutTop(relayoutTop) {}
 
   /**
    * Flag that the height could have been changed.
+   * @package
    */
   maybeHeightChanged() {}
 
@@ -173,5 +177,12 @@ export class ResourcesInterface {
    * @param {number} newLayoutPriority
    */
   updateLayoutPriority(element, newLayoutPriority) {}
+
+  /**
+   * https://github.com/ampproject/amphtml/issues/25428
+   * @return {boolean}
+   * @package
+   */
+  isIntersectionExperimentOn() {}
 }
 /* eslint-enable no-unused-vars */

@@ -26,7 +26,7 @@ min_validator_revision_required: 375
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 999
+spec_file_revision: 1012
 
 styles_spec_url: "https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/style_pages"
 script_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#html-tags"
@@ -1346,7 +1346,7 @@ tags: {  # Special custom 'author' spreadsheet for AMP
   }
   # TODO(b/68756045): Whitelist CSS properties allowed in Dynamic Mail.
   cdata: {
-    max_bytes: 50000
+    max_bytes: 75000
     max_bytes_spec_url: "https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#maximum-size"
     css_spec: {
       at_rule_spec: {
@@ -1882,6 +1882,7 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      # When updating this list, make sure to also update bind-validator.js.
       protocol: "ftp"
       protocol: "geo"
       protocol: "http"
@@ -1899,8 +1900,10 @@ tags: {
       # IOS over-the-air app installation
       # (https://github.com/nifcblm/AHPP-iOS-App/wiki/How-to-distribute-enterprise-iOS-App)
       protocol: "itms-services"
+      protocol: "facetime"
       protocol: "fb-me"
       protocol: "fb-messenger"
+      protocol: "feed"
       protocol: "intent"
       # Line messenger (https://media.line.me/howto/en/)
       protocol: "line"
@@ -1968,6 +1971,7 @@ tags: {
   attrs: {
     name: "type"
     value_casei: "text/html"
+    value_casei: "application/rss+xml"
   }
   attr_lists: "name-attr"
   # <amp-bind>
@@ -2109,6 +2113,10 @@ tags: {
   tag_name: "TIME"
   attrs: {
     name: "datetime"
+  }
+  attrs: {
+    name: "pubdate"
+    value: ""
   }
 }
 # 4.5.12 The code element
@@ -4416,7 +4424,10 @@ attr_lists: {
   attrs: { name: "accept" }
   attrs: { name: "accesskey" }
   attrs: { name: "autocomplete" }
-  attrs: { name: "autofocus" }
+  attrs: {
+    disabled_by: "amp4email"
+    name: "autofocus"
+  }
   attrs: { name: "checked" }
   attrs: { name: "disabled" }
   attrs: { name: "height" }
@@ -4509,7 +4520,6 @@ tags: {
   attrs: {
     name: "type"
     blacklisted_value_regex: "(^|\\s)("  # Values are space separated.
-        "button|"
         "file|"
         "image|"
         "password|"
@@ -5417,7 +5427,7 @@ tags: {
   }
   attrs: {
     name: "src"
-    value_regex: "data:image\\/svg\\+xml;charset=utf-8,<svg height=\"\\d+\" width=\"\\d+\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>"
+    value_regex: "data:image\\/svg\\+xml;charset=utf-8,<svg height=\"\\d+\" width=\"\\d+\" xmlns=\"http:\\/\\/www\\.w3\\.org\\/2000\\/svg\" version=\"1\\.1\"\\/>|data:image\\/svg\\+xml;charset=utf-8,<svg height='100' width='300' xmlns='http:\\/\\/www\\.w3\\.org\\/2000\\/svg' version='1\\.1'\\/>"
     mandatory: true
   }
 }
@@ -6801,6 +6811,16 @@ attr_lists: {
   attrs: {
     name: "subscriptions-service"
     requires_extension: "amp-subscriptions"
+  }
+  # amp-next-page specific attributes, see
+  # https://amp.dev/documentation/components/amp-next-page
+  attrs: {
+    name: "next-page-hide"
+    requires_extension: "amp-next-page"
+  }
+  attrs: {
+    name: "next-page-replace"
+    requires_extension: "amp-next-page"
   }
   # <amp-bind>
   attrs: { name: "[aria-activedescendant]" }
