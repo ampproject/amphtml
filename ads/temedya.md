@@ -33,7 +33,7 @@ limitations under the License.
 
 ## Configuration
 
-For details on the configuration semantics, please contact the ad network or refer to their documentation. You need to register to the [vidyome platform](https://www.vidyome.com) for widget-id parameter. 
+For details on the configuration semantics, please contact the ad network or refer to their documentation. You need to register to the vidyome platform for widget-id parameter. 
 
 ### Required parameters
 
