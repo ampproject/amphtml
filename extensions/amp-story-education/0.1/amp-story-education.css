@@ -14,10 +14,103 @@
  * limitations under the License.
  */
 
-.i-amphtml-story-education {
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,600,700&display=swap');
+
+amp-story-education {
   position: fixed !important;
   height: 100% !important;
   width: 100% !important;
-  background: rgba(0, 0, 0, 0.3) !important;
+  pointer-events: none !important;
   z-index: 9999999 !important;
+}
+
+.i-amphtml-story-education, .i-amphtml-story-education * {
+  box-sizing: border-box !important;
+}
+
+.i-amphtml-story-education {
+  height: 100% !important;
+  width: 100% !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  font-family: 'Open Sans', sans-serif !important;
+  font-weight: 400 !important;
+  pointer-events: auto !important;
+}
+
+.i-amphtml-story-education-navigation {
+  display: flex !important;
+  height: 100% !important;
+  width: 100% !important;
+  padding: 48px;
+  align-items: center !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.i-amphtml-story-education-navigation-gesture {
+  position: relative !important;
+  display: flex !important;
+  height: 60px !important;
+  width: 60px !important;
+  margin-bottom: 60px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+[step="swipe"] .i-amphtml-story-education-navigation-gesture {
+  width: 140px !important;
+}
+
+.i-amphtml-story-education-navigation-gesture-outer {
+  height: 60px !important;
+  width: 100% !important;
+  border-radius: 60px !important;
+  border: 4px solid #FFF !important;
+}
+
+.i-amphtml-story-education-navigation-gesture-inner {
+  position: absolute !important;
+  height: 30px !important;
+  width: 30px !important;
+  background: #FFF;
+  border-radius: 50% !important;
+  opacity: 0.5 !important;
+}
+
+[step="swipe"] .i-amphtml-story-education-navigation-gesture-inner {
+  left: 15px !important;
+}
+
+[dir="rtl"] [step="swipe"] .i-amphtml-story-education-navigation-gesture-inner {
+  right: 15px !important;
+}
+
+.i-amphtml-story-education-navigation-progress {
+  height: 24px !important;
+  padding: 5px 15px !important;
+  margin-bottom: 16px !important;
+  background: rgba(255, 255, 255, 0.25) !important;
+  border-radius: 24px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 14px !important;
+}
+
+.i-amphtml-story-education-navigation-instructions {
+  max-width: 300px !important;
+  font-size: 20px !important;
+}
+
+.i-amphtml-story-education-navigation-button {
+  position: absolute !important;
+  bottom: 48px !important;
+  height: 48px !important;
+  min-width: 120px !important;
+  background: none !important;
+  border: 2px solid #FFF !important;
+  border-radius: 48px !important;
+  color: #FFF !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  line-height: 44px !important;
 }
