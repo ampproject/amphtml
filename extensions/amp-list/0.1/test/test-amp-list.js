@@ -397,12 +397,12 @@ describes.repeated(
             return list.layoutCallback().then(() => {
               expect(list.container_.contains(foo)).to.be.true;
 
-              // const opts = {refresh: true, resetOnRefresh: true, expr: 'items'};
-              // expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], opts);
-              // return list.executeAction({
-              //   method: 'refresh',
-              //   satisfiesTrust: () => true,
-              // });
+              const opts = {refresh: true, resetOnRefresh: true, expr: 'items'};
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], opts);
+              return list.executeAction({
+                method: 'refresh',
+                satisfiesTrust: () => true,
+              });
             });
           });
 
@@ -1035,13 +1035,13 @@ describes.repeated(
             return list.layoutCallback().then(() => {
               expect(list.container_.contains(foo)).to.be.true;
 
-              // expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], {
-              //   resetOnRefresh: true,
-              // });
-              // element.setAttribute('src', 'https://new.com/list.json');
-              // list.mutatedAttributesCallback({
-              //   'src': 'https://new.com/list.json',
-              // });
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], {
+                resetOnRefresh: true,
+              });
+              element.setAttribute('src', 'https://new.com/list.json');
+              list.mutatedAttributesCallback({
+                'src': 'https://new.com/list.json',
+              });
             });
           });
 
@@ -1053,16 +1053,16 @@ describes.repeated(
             return list.layoutCallback().then(() => {
               expect(list.container_.contains(foo)).to.be.true;
 
-              // expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], {
-              //   resetOnRefresh: true,
-              // });
-              // element.setAttribute('src', 'https://new.com/list.json');
-              // list.mutatedAttributesCallback({
-              //   'src': 'https://new.com/list.json',
-              // });
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], {
+                resetOnRefresh: true,
+              });
+              element.setAttribute('src', 'https://new.com/list.json');
+              list.mutatedAttributesCallback({
+                'src': 'https://new.com/list.json',
+              });
 
-              // expect(bind.rescan).to.be.calledOnce;
-              // expect(bind.rescan).to.be.calledWith([], env.sandbox.match.array);
+              expect(bind.rescan).to.be.calledOnce;
+              expect(bind.rescan).to.be.calledWith([], env.sandbox.match.array);
             });
           });
 
@@ -1098,28 +1098,28 @@ describes.repeated(
             return list.layoutCallback().then(() => {
               expect(list.container_.contains(foo)).to.be.true;
 
-              // listMock.expects('fetchList_').never();
-              // // Expect display of placeholder/loading before render.
-              // listMock
-              //   .expects('togglePlaceholder')
-              //   .withExactArgs(true)
-              //   .once();
-              // listMock
-              //   .expects('toggleLoading')
-              //   .withExactArgs(true, true)
-              //   .once();
-              // // Expect hiding of placeholder/loading after render.
-              // listMock
-              //   .expects('togglePlaceholder')
-              //   .withExactArgs(false)
-              //   .once();
-              // listMock
-              //   .expects('toggleLoading')
-              //   .withExactArgs(false)
-              //   .once();
+              listMock.expects('fetchList_').never();
+              // Expect display of placeholder/loading before render.
+              listMock
+                .expects('togglePlaceholder')
+                .withExactArgs(true)
+                .once();
+              listMock
+                .expects('toggleLoading')
+                .withExactArgs(true, true)
+                .once();
+              // Expect hiding of placeholder/loading after render.
+              listMock
+                .expects('togglePlaceholder')
+                .withExactArgs(false)
+                .once();
+              listMock
+                .expects('toggleLoading')
+                .withExactArgs(false)
+                .once();
 
-              // element.setAttribute('src', 'https://new.com/list.json');
-              // list.mutatedAttributesCallback({'src': DEFAULT_ITEMS});
+              element.setAttribute('src', 'https://new.com/list.json');
+              list.mutatedAttributesCallback({'src': DEFAULT_ITEMS});
             });
           });
 
