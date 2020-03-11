@@ -515,25 +515,25 @@ export class AmpList extends AMP.BaseElement {
       this.element.getAttribute('reset-on-refresh') === 'always'
     ) {
       // Placeholder and loading don't need a mutate context.
-      this.togglePlaceholder(true);
-      this.toggleLoading(true, /* opt_force */ true);
+          this.togglePlaceholder(true);
+          this.toggleLoading(true, /* opt_force */ true);
       this.mutateElement(() => {
-        this.toggleFallback_(false);
-        // Clean up bindings in children before removing them from DOM.
-        if (this.bind_) {
-          const removed = toArray(this.container_.children);
-          this.bind_.rescan(/* added */ [], removed, {
-            'fast': true,
-            'update': false,
-          });
-        }
-        removeChildren(dev().assertElement(this.container_));
-        if (this.loadMoreEnabled_) {
-          this.getLoadMoreService_().hideAllLoadMoreElements();
-        }
+          this.toggleFallback_(false);
+          // Clean up bindings in children before removing them from DOM.
+          if (this.bind_) {
+            const removed = toArray(this.container_.children);
+            this.bind_.rescan(/* added */ [], removed, {
+              'fast': true,
+              'update': false,
+            });
+          }
+          removeChildren(dev().assertElement(this.container_));
+          if (this.loadMoreEnabled_) {
+            this.getLoadMoreService_().hideAllLoadMoreElements();
+          }
       });
+        }
     }
-  }
 
   /**
    * Given JSON payload data fetched from the server, modifies the
@@ -998,25 +998,7 @@ export class AmpList extends AMP.BaseElement {
           .getResourceForElement(this.element);
         r.resetPendingChangeSize();
 
-        if (this.isLayoutContainer_) {
-          return this.measureElement(() => {
-            const targetHeight = this.container_./*OK*/ scrollHeight;
-            const height = this.element./*OK*/ offsetHeight;
-            if (targetHeight > height) {
-              this.attemptChangeHeight(targetHeight).then(
-                () => {
-                  setImportantStyles(this.element, {
-                    'height': '',
-                    'overflow': '',
-                  });
-                },
-                () => {}
-              );
-            }
-          });
-        } else {
-          this.maybeResizeListToFitItems_();
-        }
+        this.maybeResizeListToFitItems_();
       }
     );
   }
@@ -1126,14 +1108,22 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFit_(target) {
-    if (this.isLayoutContainer_) {
-      return;
-    }
     this.measureElement(() => {
       const targetHeight = target./*OK*/ scrollHeight;
       const height = this.element./*OK*/ offsetHeight;
       if (targetHeight > height) {
-        this.attemptChangeHeight(targetHeight).catch(() => {});
+        this.attemptChangeHeight(targetHeight).then(
+          () => {
+            if (!this.isLayoutContainer_) {
+              return;
+            }
+            setImportantStyles(this.element, {
+              'height': '',
+              'overflow': '',
+            });
+          },
+          () => {}
+        );
       }
     });
   }
@@ -1144,6 +1134,9 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFitLoadMore_(target) {
+    if (this.isLayoutContainer_) {
+      return;
+    }
     const element = !!this.loadMoreSrc_
       ? this.getLoadMoreService_().getLoadMoreButton()
       : this.getLoadMoreService_().getLoadMoreEndElement();
@@ -1156,9 +1149,6 @@ export class AmpList extends AMP.BaseElement {
    * @private
    */
   attemptToFitLoadMoreElement_(element, target) {
-    if (this.isLayoutContainer_) {
-      return;
-    }
     this.measureElement(() => {
       const targetHeight = target./*OK*/ scrollHeight;
       const height = this.element./*OK*/ offsetHeight;
