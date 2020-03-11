@@ -229,9 +229,9 @@ would have been retrieved from an endpoint. For example,
 ```html
 <amp-state id="listExample">
   <script type="application/json">
-  {
-    "items": [{"id": 1}, {"id": 2}, {"id": 2}]
-  }
+    {
+      "items": [{"id": 1}, {"id": 2}, {"id": 2}]
+    }
   </script>
 </amp-state>
 <amp-list src="amp-state:listExample">...</amp-list>
