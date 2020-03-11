@@ -49,8 +49,8 @@ const IframePosition = {
  * @enum {number}
  */
 const SwipingState = {
-  SWIPING_TO_NEXT: 0,
-  SWIPING_TO_PREVIOUS: 1,
+  SWIPING_TO_LEFT: 0,
+  SWIPING_TO_RIGHT: 1,
 };
 
 /** @const {number} */
@@ -207,8 +207,8 @@ export class AmpStoryPlayer {
             this.onTouchMove_(data);
           });
 
-          messaging.registerHandler('touchend', (event, data) => {
-            this.onTouchEnd_(data);
+          messaging.registerHandler('touchend', () => {
+            this.onTouchEnd_();
           });
 
           messaging.registerHandler('selectDocument', (event, data) => {
@@ -364,9 +364,11 @@ export class AmpStoryPlayer {
    * @private
    */
   updateIframePosition_(iframeIdx, position) {
-    const iframe = this.iframes_[iframeIdx];
-    resetStyles(iframe, ['transform', 'transition']);
-    iframe.setAttribute('i-amphtml-iframe-position', position);
+    requestAnimationFrame(() => {
+      const iframe = this.iframes_[iframeIdx];
+      resetStyles(iframe, ['transform', 'transition']);
+      iframe.setAttribute('i-amphtml-iframe-position', position);
+    });
   }
 
   /**
@@ -548,13 +550,13 @@ export class AmpStoryPlayer {
     if (gesture.last === true) {
       const delta = Math.abs(deltaX);
 
-      if (this.swipingState_ === SwipingState.SWIPING_TO_NEXT) {
+      if (this.swipingState_ === SwipingState.SWIPING_TO_LEFT) {
         delta > TOGGLE_THRESHOLD_PX && this.getSecondaryIframe_()
           ? this.next_()
           : this.resetIframeStyles_();
       }
 
-      if (this.swipingState_ === SwipingState.SWIPING_TO_PREVIOUS) {
+      if (this.swipingState_ === SwipingState.SWIPING_TO_RIGHT) {
         delta > TOGGLE_THRESHOLD_PX && this.getSecondaryIframe_()
           ? this.previous_()
           : this.resetIframeStyles_();
@@ -575,11 +577,15 @@ export class AmpStoryPlayer {
       this.stories_[this.currentIdx_][IFRAME_IDX]
     ];
 
-    resetStyles(currentIframe, ['transform', 'transition']);
+    requestAnimationFrame(() => {
+      resetStyles(currentIframe, ['transform', 'transition']);
+    });
 
     const secondaryIframe = this.getSecondaryIframe_();
     if (secondaryIframe) {
-      resetStyles(secondaryIframe, ['transform', 'transition']);
+      requestAnimationFrame(() => {
+        resetStyles(secondaryIframe, ['transform', 'transition']);
+      });
     }
   }
 
@@ -590,7 +596,7 @@ export class AmpStoryPlayer {
    */
   getSecondaryIframe_() {
     const nextStoryIdx =
-      this.swipingState_ === SwipingState.SWIPING_TO_NEXT
+      this.swipingState_ === SwipingState.SWIPING_TO_LEFT
         ? this.currentIdx_ + 1
         : this.currentIdx_ - 1;
 
@@ -610,10 +616,10 @@ export class AmpStoryPlayer {
     let secondaryTranslate;
 
     if (deltaX < 0) {
-      this.swipingState_ = SwipingState.SWIPING_TO_NEXT;
+      this.swipingState_ = SwipingState.SWIPING_TO_LEFT;
       secondaryTranslate = `translate3d(calc(100% + ${deltaX}px), 0, 0)`;
     } else {
-      this.swipingState_ = SwipingState.SWIPING_TO_PREVIOUS;
+      this.swipingState_ = SwipingState.SWIPING_TO_RIGHT;
       secondaryTranslate = `translate3d(calc(${deltaX}px - 100%), 0, 0)`;
     }
 
@@ -621,9 +627,11 @@ export class AmpStoryPlayer {
     const iframe = this.iframes_[story[IFRAME_IDX]];
     const translate = `translate3d(${deltaX}px, 0, 0)`;
 
-    setStyles(iframe, {
-      transform: translate,
-      transition: 'none',
+    requestAnimationFrame(() => {
+      setStyles(iframe, {
+        transform: translate,
+        transition: 'none',
+      });
     });
 
     const secondaryIframe = this.getSecondaryIframe_();
@@ -631,9 +639,11 @@ export class AmpStoryPlayer {
       return;
     }
 
-    setStyles(secondaryIframe, {
-      transform: secondaryTranslate,
-      transition: 'none',
+    requestAnimationFrame(() => {
+      setStyles(secondaryIframe, {
+        transform: secondaryTranslate,
+        transition: 'none',
+      });
     });
   }
 
