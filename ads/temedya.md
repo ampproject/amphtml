@@ -26,7 +26,7 @@ limitations under the License.
   height="320"
   type="temedya"
   layout="responsive"
-  data-widgetId="widget-id"
+  data-widgetId="vidyome"
 >
 </amp-embed>
 ```
