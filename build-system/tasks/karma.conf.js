@@ -19,13 +19,14 @@ const {BABELIFY_GLOBAL_TRANSFORM, BABELIFY_PLUGINS} = require('./helpers');
 const {gitCommitterEmail} = require('../common/git');
 const {isTravisBuild, travisJobNumber} = require('../common/travis');
 
-const TEST_SERVER_PORT = 8081;
+const TEST_SERVER_PORT = 8082;
 
 const COMMON_CHROME_FLAGS = [
   // Dramatically speeds up iframe creation time.
   '--disable-extensions',
   // Allows simulating user actions (e.g unmute) which otherwise will be denied.
   '--autoplay-policy=no-user-gesture-required',
+  '--auto-open-devtools-for-tabs',
 ];
 
 // Reduces the odds of Sauce labs timing out during tests. See #16135 and #24286.
@@ -120,7 +121,7 @@ module.exports = {
     },
   },
 
-  port: 9876,
+  port: 9877,
 
   colors: true,
 

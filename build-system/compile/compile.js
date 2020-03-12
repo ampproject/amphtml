@@ -216,18 +216,19 @@ function compile(
     }
     // For ESM Builds, exclude ampdoc and ampshared css from inclusion.
     // These styles are guaranteed to already be present on elgible documents.
-    if (options.esmPassCompilation) {
-      srcs.push('!build/ampdoc.css.js', '!build/ampshared.css.js');
-    }
+    //if (options.esmPassCompilation) {
+      //srcs.push('!build/ampdoc.css.js', '!build/ampshared.css.js');
+    //}
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
     if (options.includeOnlyESMLevelPolyfills) {
       const polyfills = fs.readdirSync('src/polyfills');
-      const polyfillsShadowList = polyfills.filter(p => {
+      const polyfillsExcludeList = polyfills.filter(p => {
         // custom-elements polyfill must be included.
-        return p !== 'custom-elements.js';
+        //return p !== 'custom-elements.js' && p !== 'promise.js' && p !== 'fetch.js';
       });
+      console.log('polyfillsExcludeList', polyfillsExcludeList);
       srcs.push(
         '!build/fake-module/src/polyfills.js',
         '!build/fake-module/src/polyfills/**/*.js',
@@ -235,7 +236,8 @@ function compile(
         'src/polyfills/custom-elements.js',
         'build/fake-polyfills/**/*.js'
       );
-      polyfillsShadowList.forEach(polyfillFile => {
+      polyfillsExcludeList.forEach(polyfillFile => {
+        console.log('exclude', `!src/polyfills/${polyfillFile}`);
         srcs.push(`!src/polyfills/${polyfillFile}`);
         fs.writeFileSync(
           'build/fake-polyfills/src/polyfills/' + polyfillFile,
