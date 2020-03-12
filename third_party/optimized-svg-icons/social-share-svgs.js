@@ -1,7 +1,7 @@
 import * as Preact from '../../src/preact';
 
 /**
- * @param {string} styleType
+ * @param {!JsonObject} props
  * @return {PreactDef.Renderable}
  */
 export function SocialShareIcon(props) {
