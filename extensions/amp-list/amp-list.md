@@ -222,19 +222,32 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 
 ### Initialization from amp-state
 
-In some cases, it may be desirable to have your `<amp-list>` component initialize off of `<amp-state>` rather than from a json endpoint.
-You may do that by utilizing the `amp-state:` protocol in the `src` attribute. The data in state must follow the same rules as the json that
-would have been retrieved from an endpoint. For example,
+For cases where you can server-side-render the JSON for an `<amp-list>`, it may be
+desirable to have your `<amp-list>` component initialize off of `<amp-state>` rather
+than from a JSON endpoint. This allows the component to render faster by skipping the fetch,
+but also means the data may be stale if served from the AMP Cache.
+
+You may enable this by following two steps:
+
+1. Add the [amp-bind](https://amp.dev/documentation/components/amp-bind/) script to the `<head>` of your document.
+2. Utilize an `amp-state:` protocol in the `src` attribute. The data in state
+   must follow the same rules as the JSON that would have been retrieved from an endpoint.
+
+For example,
 
 ```html
-<amp-state id="listExample">
+<amp-state id="localState">
   <script type="application/json">
     {
       "items": [{"id": 1}, {"id": 2}, {"id": 2}]
     }
   </script>
 </amp-state>
-<amp-list src="amp-state:listExample">...</amp-list>
+<amp-list src="amp-state:localState">
+  <template type="amp-mustache">
+    <li>{{id}}</li>
+  </template>
+</amp-list>
 ```
 
 ## Attributes
