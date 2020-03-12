@@ -141,8 +141,14 @@ const CLOSURE_SRC_GLOBS = [
   '!node_modules/core-js/modules/library/**.js',
 ].concat(COMMON_GLOBS);
 
+const 3P_TRANSFORM_DIRS = [
+  '!node_modules/core-js/modules/library/**.js',
+
+];
+
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
   SRC_TEMP_DIR,
+  3P_TRANSFORM_DIRS
 };
