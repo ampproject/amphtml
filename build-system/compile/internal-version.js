@@ -19,8 +19,8 @@ const argv = require('minimist')(process.argv.slice(2));
 const {gitCommitFormattedTime} = require('../common/git');
 
 function getVersion() {
-  if (argv.version) {
-    return String(argv.version);
+  if (argv.rtv_version) {
+    return String(argv.rtv_version);
   } else {
     // Generate a consistent version number by using the commit* time of the
     // latest commit on the active branch as the twelve digits. The last,
