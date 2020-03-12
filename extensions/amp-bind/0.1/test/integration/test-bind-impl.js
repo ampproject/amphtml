@@ -983,13 +983,8 @@ describe
               mystate: {mykey: 'myval'},
             });
 
-            // Integration tests may not use chai-as-promised.
-            try {
-              await bind.getStateAsync('mystate.mykey');
-              expect.fail();
-            } catch (err) {
-              expect(err).match(/#mystate/);
-            }
+            const state = bind.getStateAsync('mystate.mykey');
+            return expect(state).to.eventually.rejectedWith(/#mystate/);
           });
 
           it('should not wait if the still-loading state is irrelevant', async () => {
