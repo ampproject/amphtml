@@ -15,6 +15,7 @@
  */
 
 import {ActionTrust} from '../../../src/action-constants';
+import {Deferred} from '../../../src/utils/promise';
 import {LayoutPriority} from '../../../src/layout';
 import {Services} from '../../../src/services';
 import {
@@ -44,6 +45,9 @@ export class AmpState extends AMP.BaseElement {
      * @private {?JsonObject|undefined}
      */
     this.localData_ = undefined;
+
+    /** @private {!Deferred} */
+    this.loadingDeferred_ = new Deferred();
   }
 
   /** @override */
@@ -207,15 +211,43 @@ export class AmpState extends AMP.BaseElement {
   /**
    * @param {boolean} isInit
    * @param {boolean=} opt_refresh
-   * @return {!Promise<undefined>}
+   * @return {!Promise}
    * @private
    */
   fetchAndUpdate_(isInit, opt_refresh) {
+    // On init, we reuse the deferred created in the constructor.
+    if (!isInit) {
+      this.loadingDeferred_ = new Deferred();
+    }
+
+    // Store the deferred locally, in case a new fetch overwrites
+    // it before resolution.
+    const loadingDeferred = this.loadingDeferred_;
+
     // Don't fetch in prerender mode.
     return this.getAmpDoc()
       .whenFirstVisible()
       .then(() => this.prepareAndSendFetch_(isInit, opt_refresh))
-      .then(json => this.updateState_(json, isInit));
+      .then(json => this.updateState_(json, isInit))
+      .then(() => loadingDeferred.resolve())
+      .catch(err => {
+        loadingDeferred.resolve();
+        throw err;
+      });
+  }
+
+  /**
+   * For an "amp-state" with a src attribute, this returns a promise that
+   * resolves after the fetch and update completes. For non-src "amp-state"s,
+   * return a resolved promise.
+   *
+   * @return {!Promise}
+   */
+  getFetchingPromise() {
+    if (!this.element.hasAttribute('src')) {
+      return Promise.resolve();
+    }
+    return this.loadingDeferred_.promise;
   }
 
   /**
