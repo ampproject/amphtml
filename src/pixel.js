@@ -58,8 +58,8 @@ function createNoReferrerPixel(win, src) {
         'style': 'display:none',
       })
     );
-    iframe.onload = function() {
-      createImagePixel(this.contentWindow, src);
+    iframe.onload = () => {
+      createImagePixel(iframe.contentWindow, src);
     };
     win.document.body.appendChild(iframe);
     return iframe;
