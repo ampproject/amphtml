@@ -5877,7 +5877,7 @@ class ParsedValidatorRules {
 
   /**
    * @param {string} tagName
-   * @return {TagSpecDispatch|undefined}
+   * @return {!TagSpecDispatch|undefined}
    */
   dispatchForTagName(tagName) {
     return this.tagSpecByTagName_[tagName];
