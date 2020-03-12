@@ -406,7 +406,7 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    const {promise} = this.readyDeferred_;
+    const promise = this.readyDeferred_ && this.readyDeferred_.promise;
     if (!promise) {
       return;
     }
