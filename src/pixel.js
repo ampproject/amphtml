@@ -59,7 +59,9 @@ function createNoReferrerPixel(win, src) {
       })
     );
     win.document.body.appendChild(iframe);
-    createImagePixel(iframe.contentWindow, src);
+    iframe.onload = function() {
+      createImagePixel(this.contentWindow, src);
+    };
     return iframe;
   }
 }
