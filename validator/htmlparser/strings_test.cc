@@ -177,7 +177,7 @@ TEST(StringsTest, LowerUpperTest) {
   EXPECT_EQ(upper, "amaltas");
   htmlparser::Strings::ToUpper(&lower);
   EXPECT_EQ(lower, "AMALTAS");
-};
+}
 
 TEST(StringsTest, ConvertNewLinesTest) {
   std::string s1 = "hello\nworld";
@@ -239,7 +239,7 @@ TEST(StringsTest, DecodeUtf8SymbolTest) {
       EXPECT_TRUE(opt_decoded_symbol.has_value());
     }
   }
-};
+}
 
 TEST(StringsTest, DecodeUtf8SymbolTestImmutableStringView) {
   std::string str = "AmaltaśAś";
@@ -284,7 +284,7 @@ TEST(StringsTest, StartsEndsTest) {
   EXPECT_EQ(htmlparser::Strings::IndexAny("a maltas", whitespace), 1);
   EXPECT_EQ(htmlparser::Strings::IndexAny("amaltasssśśsś", "ś"), 9);
   EXPECT_TRUE(htmlparser::Strings::StartsWith("amaltasbohra", "amaltas"));
-};
+}
 
 TEST(StringsTest, EscapeTest) {
   std::string s("hello & world");
@@ -311,7 +311,7 @@ TEST(StringsTest, EscapeUnescapeTest) {
   std::string unescapedquotes("hello\"world\"");
   EXPECT_EQ(htmlparser::Strings::EscapeString(unescapedquotes),
             "hello&#34;world&#34;");
-};
+}
 
 TEST(StringsTest, EncodingTest) {
   EXPECT_EQ(htmlparser::Strings::EncodeUtf8Symbol(224).value(), "à");
@@ -321,7 +321,7 @@ TEST(StringsTest, EncodingTest) {
   EXPECT_EQ(htmlparser::Strings::EncodeUtf8Symbol(134071).value(), "𠮷");
   EXPECT_EQ(htmlparser::Strings::EncodeUtf8Symbol(67).value(), "C");
   EXPECT_EQ(htmlparser::Strings::EncodeUtf8Symbol(10703).value(), "⧏");
-};
+}
 
 TEST(StringsTest, TrimTest) {
   std::string s_with_space = "     amaltas.";
@@ -341,7 +341,7 @@ TEST(StringsTest, TrimTest) {
   s_with_utf = "Amaltas 안안안안안";
   htmlparser::Strings::TrimRight(&s_with_utf, "안 ");
   EXPECT_EQ(s_with_utf, "Amaltas");
-};
+}
 
 TEST(StringsTest, ReplaceTest) {
   std::string s_to_replace =
@@ -365,13 +365,16 @@ TEST(StringsTest, ReplaceTest) {
                                   "\xef\xbf\xbd"s);
   EXPECT_EQ(null_to_ufffd, "\xef\xbf\xbd"s);
   EXPECT_EQ(null_to_ufffd.size(), 3);
-  EXPECT_EQ(null_to_ufffd, "�");   // The null replacement character.
+  // The null replacement character.
+  EXPECT_EQ(null_to_ufffd, "�");   // NOLINT(readability/utf8)
 
-  std::string whitespace_and_null = "amaltas is \0\0good \0boy"s;
+  std::string whitespace_and_null =
+      "amaltas is \0\0good \0boy"s;  // NOLINT(readability/utf8)
   htmlparser::Strings::ReplaceAny(&whitespace_and_null,
                                   htmlparser::Strings::kWhitespaceOrNull,
-                                  "�");
-  EXPECT_EQ(whitespace_and_null, "amaltas�is���good��boy");
+                                  "�");  // NOLINT(readability/utf8)
+  EXPECT_EQ(whitespace_and_null,
+            "amaltas�is���good��boy");  // NOLINT(readability/utf8)
 
   std::string whitespace_and_null2 = "amaltas is \0\0good \0boy"s;
   htmlparser::Strings::ReplaceAny(&whitespace_and_null2,
@@ -382,7 +385,7 @@ TEST(StringsTest, ReplaceTest) {
   std::string many_whitespaces = "  a   m  a lta s  ";
   htmlparser::Strings::RemoveExtraSpaceChars(&many_whitespaces);
   EXPECT_EQ(many_whitespaces, " a m a lta s ");
-};
+}
 
 TEST(StringsTest, TranslateTest) {
   // Simple translate, lowercase to uppercase.
@@ -466,4 +469,26 @@ TEST(StringsTest, TranslateTest) {
       "The quick brown fox.", "brown", "red");
   EXPECT_TRUE(t9.has_value());
   EXPECT_EQ(t9.value(), "The quick red fdx.");
-};
+}
+
+TEST(Utf8UtilTest, SingleCodepointToString) {
+  char32_t bolt = 0x26A1;
+  std::string utf8_string;
+  htmlparser::Strings::AppendCodepointToUtf8String(bolt, &utf8_string);
+  EXPECT_EQ("⚡", utf8_string);
+}
+
+TEST(Utf8UtilTest, RoundTripsAndLengths) {
+  std::vector<char32_t> ascii =
+      htmlparser::Strings::Utf8ToCodepoints("Hello, world");
+  EXPECT_EQ("Hello, world",
+            htmlparser::Strings::CodepointsToUtf8String(ascii));
+
+  std::string amped = "⚡ Got Amp?";
+  EXPECT_EQ(12, amped.size());
+  std::vector<char32_t> amped_codes =
+      htmlparser::Strings::Utf8ToCodepoints(amped);
+  EXPECT_EQ(10, amped_codes.size());  // oh look there were multibyte chars.
+  EXPECT_EQ(amped,
+            htmlparser::Strings::CodepointsToUtf8String(amped_codes));
+}

@@ -18,6 +18,7 @@
 #define HTMLPARSER__STRINGS_H_
 
 #include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -138,6 +139,49 @@ class Strings {
   // Returns nullopt on error.
   static std::optional<std::string> EncodeUtf8Symbol(char32_t code_point);
 
+  static std::vector<char32_t> Utf8ToCodepoints(std::string_view utf8) {
+    std::vector<char32_t> out;
+    out.reserve(utf8.size() / 2);
+    // We use the UnicodeText abstraction because it handles
+    // validation / coersion  under the hood, so what comes out of this is
+    // surely valid UTF8.
+    auto codepoint = DecodeUtf8Symbol(&utf8);
+    while (codepoint) {
+      out.push_back(*codepoint);
+      codepoint = DecodeUtf8Symbol(&utf8);
+    }
+    return out;
+  }
+
+  static void AppendCodepointToUtf8String(char32_t code,
+                                          std::string* utf8_str) {
+    // The implementation is modified from UnicodeText::push_back to append
+    // to an existing string, rather than allocate a new one.
+    auto encoded = EncodeUtf8Symbol(code);
+    if (encoded) {
+      *utf8_str += *encoded;
+    } else {
+      utf8_str->push_back(' ');
+    }
+  }
+
+  static std::string CodepointToUtf8String(char32_t code) {
+    auto output = htmlparser::Strings::EncodeUtf8Symbol(code);
+    return output ? std::move(output.value()) : "";
+  }
+
+  // Converts unicode code points to a string.
+  static std::string CodepointsToUtf8String(std::vector<char32_t> codes) {
+    std::stringbuf buf;
+    for (auto c : codes) {
+      if (auto encoded = htmlparser::Strings::EncodeUtf8Symbol(c);
+          encoded) {
+        buf.sputn(encoded->c_str(), encoded->size());
+      }
+    }
+    return buf.str();
+  }
+
   // Returns index of the first instance of any character in chars or
   // npos if no character found. For unicode character returns the index of
   // initial byte of the sequence of bytes.
@@ -155,7 +199,7 @@ class Strings {
   // attribute should be true if passing an attribute value.
   // UnescapeString(EscapeString(s)) == s always holds, but the converse isn't
   // always true.
-  static void UnescapeString(std::string* s, bool attribute=false);
+  static void UnescapeString(std::string* s, bool attribute = false);
 
   // Converts case of string in-place.
   static void ToLower(std::string* s);
@@ -163,7 +207,7 @@ class Strings {
 
   // Checks if string contains whitespace only chracters.
   static bool IsAllWhitespaceChars(std::string_view s,
-      std::string_view whitespace_chars=kWhitespace);
+      std::string_view whitespace_chars = kWhitespace);
 
   // Case insensitive equals.
   static bool EqualFold(std::string_view l, std::string_view r);
