@@ -88,18 +88,6 @@ export class AmpTrinityTTSPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  createPlaceholderCallback() {
-    const placeholder = this.win.document.createElement('amp-img');
-    placeholder.setAttribute('src', `${CDN_URL}/images/loader.svg`);
-    placeholder.setAttribute('height', '75');
-    placeholder.setAttribute('layout', 'fixed-height');
-    placeholder.setAttribute('placeholder', '');
-    placeholder.setAttribute('alt', 'Loading player');
-
-    return placeholder;
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.FIXED_HEIGHT;
   }
