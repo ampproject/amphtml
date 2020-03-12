@@ -152,9 +152,9 @@ if (shouldMainBootstrapRun) {
     }
     fontStylesheetTimeout(self);
     perf.tick('is');
-    if (IS_ESM) {
-      bootstrap(ampdoc, perf);
-    } else {
+    //if (IS_ESM) {
+      //bootstrap(ampdoc, perf);
+    //} else {
       installStylesForDoc(
         ampdoc,
         ampDocCss + ampSharedCss,
@@ -162,7 +162,7 @@ if (shouldMainBootstrapRun) {
         /* opt_isRuntimeCss */ true,
         /* opt_ext */ 'amp-runtime'
       );
-    }
+    //}
   });
 
   // Output a message to the console and add an attribute to the <html>
