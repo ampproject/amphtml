@@ -19,9 +19,9 @@ import {jsonLiteral} from '../../../../src/json';
 const MOEENGAGE_CONFIG = jsonLiteral({
   'requests': {
     'addDevice':
-      'https://websdk.moengage.com/v2/device/add?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz_offset=${device_tz_offset}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&isAmp=true',
+      'https://websdk.moengage.com/v2/device/add?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&device_ts=${timestamp}&isAmp=true',
     'event':
-      'https://websdk.moengage.com/v2/report/add?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz_offset=${device_tz_offset}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}',
+      'https://websdk.moengage.com/v2/report/add?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&device_ts=${timestamp}',
   },
   'vars': {
     'os': 'mweb',
