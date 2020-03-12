@@ -56,7 +56,7 @@ import {escapeCssSelectorIdent} from '../../../src/css';
 import {getInternalVideoElementFor} from '../../../src/utils/video';
 import {htmlFor, htmlRefs} from '../../../src/static-template';
 import {installStylesForDoc} from '../../../src/style-installer';
-import {isRTL, removeElement, scopedQuerySelector, waitForBodyOpen} from '../../../src/dom';
+import {isRTL, removeElement, scopedQuerySelector} from '../../../src/dom';
 import {once} from '../../../src/utils/function';
 import {
   px,
@@ -271,14 +271,9 @@ export class VideoDocking {
      * Overriden when user drags the video to a different corner.
      * @private {!DirectionX}
      */
-    this.cornerDirectionX_ = DirectionX.RIGHT;
-    // Initialize to right side, then update based on whether the doc is RTL as
-    // soon as it's available.
-    waitForBodyOpen(this.getDoc_(), () => {
-      this.cornerDirectionX_ = isRTL(this.getDoc_())
-        ? DirectionX.LEFT
-        : DirectionX.RIGHT;
-    });
+    this.cornerDirectionX_ = !!this.getDoc_().body && isRTL(this.getDoc_())
+      ? DirectionX.LEFT
+      : DirectionX.RIGHT;
 
     const html = htmlFor(this.getDoc_());
 
