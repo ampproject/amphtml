@@ -19,10 +19,10 @@ FAIL
 |    Tests the additional restrictions AMP4EMAIL sets on AMP-AUTOCOMPLETE.
 |  -->
 |  <!DOCTYPE html>
-|  <!-- "enable-amp-autocomplete" is disallowed by the validator -->
-|  <html ⚡4email enable-amp-autocomplete>
+|  <!-- "amp-autocomplete-opt-in" is disallowed by the validator -->
+|  <html ⚡4email amp-autocomplete-opt-in>
 >> ^~~~~~~~~
-amp4email_feature_tests/amp-autocomplete.html:22:0 The attribute 'enable-amp-autocomplete' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
+amp4email_feature_tests/amp-autocomplete.html:22:0 The attribute 'amp-autocomplete-opt-in' may not appear in tag 'html'. (see https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml#required-markup)
 |    <head>
 |      <meta charset="utf-8" />
 |      <style amp4email-boilerplate>
