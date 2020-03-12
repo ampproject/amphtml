@@ -133,6 +133,7 @@ export function createFixtureIframe(
       // Record firing of custom events.
       for (const name in events) {
         win.addEventListener(name, () => {
+          console.log('event', name);
           events[name]++;
         });
       }

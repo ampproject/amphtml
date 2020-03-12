@@ -24,13 +24,14 @@ const globby = require('globby');
 const {isGithubActionsBuild} = require('../common/github-actions');
 const {isTravisBuild} = require('../common/travis');
 
-const TEST_SERVER_PORT = 8081;
+const TEST_SERVER_PORT = 8082;
 
 const COMMON_CHROME_FLAGS = [
   // Dramatically speeds up iframe creation time.
   '--disable-extensions',
   // Allows simulating user actions (e.g unmute) which otherwise will be denied.
   '--autoplay-policy=no-user-gesture-required',
+  '--auto-open-devtools-for-tabs',
 ];
 
 if (argv.debug) {
@@ -154,7 +155,7 @@ module.exports = {
     },
   },
 
-  port: 9876,
+  port: 9877,
 
   colors: true,
 
