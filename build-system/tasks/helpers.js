@@ -37,11 +37,15 @@ const sourcemaps = require('gulp-sourcemaps');
 const watchify = require('watchify');
 const wrappers = require('../compile/compile-wrappers');
 const {
+  BABEL_SRC_GLOBS,
+  SRC_TEMP_DIR,
+  THIRD_PARTY_TRANSFORM_DIRS,
+} = require('../compile/sources');
+const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
-const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {closureCompile} = require('../compile/compile');
 const {isTravisBuild} = require('../common/travis');
 const {thirdPartyFrames} = require('../test-configs/config');
@@ -712,7 +716,10 @@ function transferSrcsToTempDir(options = {}) {
   );
   const files = globby.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
-    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
+    if (
+      (file.startsWith('node_modules/') || file.startsWith('third_party/')) &&
+      !THIRD_PARTY_TRANSFORM_DIRS.includes(file)
+    ) {
       fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
       return;
     }
