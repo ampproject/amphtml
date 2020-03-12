@@ -937,6 +937,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-selector',
+    version: '0.2',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-web-push',
     version: '0.1',
     latestVersion: '0.1',
