@@ -244,8 +244,8 @@ class AmpImaVideo extends AMP.BaseElement {
    * @private
    */
   sendCommand_(command, opt_args) {
-    if (this.iframe_ && this.iframe_.contentWindow) {
-      this.playerReadyPromise_.then(() => {
+    this.playerReadyPromise_.then(() => {
+      if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/ postMessage(
           JSON.stringify(
             dict({
@@ -256,8 +256,8 @@ class AmpImaVideo extends AMP.BaseElement {
           ),
           '*'
         );
-      });
-    }
+      }
+    });
     // If we have an unlistener for this command, call it.
     if (this.unlisteners_[command]) {
       this.unlisteners_[command]();
