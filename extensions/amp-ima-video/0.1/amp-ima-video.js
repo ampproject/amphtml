@@ -244,6 +244,10 @@ class AmpImaVideo extends AMP.BaseElement {
    * @private
    */
   sendCommand_(command, opt_args) {
+    if (!this.playerReadyPromise_) {
+      return;
+    }
+
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         this.iframe_.contentWindow./*OK*/ postMessage(
