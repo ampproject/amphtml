@@ -492,6 +492,8 @@ afterEach(function() {
   cancelTimersForTesting();
 });
 
+chai.use(require('chai-as-promised')); // eslint-disable-line 
+
 chai.Assertion.addMethod('attribute', function(attr) {
   const obj = this._obj;
   const tagName = obj.tagName.toLowerCase();

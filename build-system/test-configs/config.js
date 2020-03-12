@@ -73,8 +73,6 @@ const a4aTestPaths = initTestsPath.concat([
   'ads/google/a4a/test/*.js',
 ]);
 
-const chaiAsPromised = ['test/chai-as-promised/chai-as-promised.js'];
-
 const unitTestPaths = [
   'test/unit/**/*.js',
   'ads/**/test/test-*.js',
@@ -204,7 +202,6 @@ const changelogIgnoreFileTypes = /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/;
 /** @const  */
 module.exports = {
   a4aTestPaths,
-  chaiAsPromised,
   changelogIgnoreFileTypes,
   commonIntegrationTestPaths,
   commonUnitTestPaths,

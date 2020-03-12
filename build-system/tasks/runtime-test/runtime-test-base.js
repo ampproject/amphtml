@@ -127,7 +127,7 @@ function getFiles(testType) {
 
   switch (testType) {
     case 'unit':
-      files = testConfig.commonUnitTestPaths.concat(testConfig.chaiAsPromised);
+      files = testConfig.commonUnitTestPaths;
       if (argv.files) {
         return files.concat(argv.files);
       }
@@ -147,7 +147,7 @@ function getFiles(testType) {
       return files.concat(testConfig.integrationTestPaths);
 
     case 'a4a':
-      return testConfig.chaiAsPromised.concat(testConfig.a4aTestPaths);
+      return testConfig.a4aTestPaths;
 
     default:
       throw new Error(`Test type ${testType} was not recognized`);
