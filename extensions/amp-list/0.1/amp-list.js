@@ -175,7 +175,17 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    this.isLayoutContainer_ = layout === Layout.CONTAINER;
+    if (layout === Layout.CONTAINER) {
+      userAssert(
+        this.getPlaceholder(),
+        '%s with layout=container relies on a placeholder to determine an initial height. ' +
+          'For more info on adding a placeholder see: ' +
+          'https://amp.dev/documentation/components/amp-list/#placeholder-and-fallback. %s',
+        TAG,
+        this.element
+      );
+      this.isLayoutContainer_ = true;
+    }
     return true;
   }
 
