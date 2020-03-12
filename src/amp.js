@@ -70,6 +70,7 @@ const shouldMainBootstrapRun = !self.IS_AMP_ALT;
  * @param {!./service/performance-impl.Performance} perf
  */
 function bootstrap(ampdoc, perf) {
+  console.log('local version bootstrap');
   startupChunk(self.document, function services() {
     // Core services.
     installRuntimeServices(self);

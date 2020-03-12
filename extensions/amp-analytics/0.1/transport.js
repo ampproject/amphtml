@@ -102,6 +102,8 @@ export class Transport {
       return request;
     }
 
+    console.log('analytics request delay is ', Date.now() - this.win_['analytics_start']);
+
     const getRequest = cacheFuncResult(generateRequest);
 
     if (this.options_['iframe']) {

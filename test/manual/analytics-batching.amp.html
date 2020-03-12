@@ -24,10 +24,12 @@
     }
 
   </style>
+   <script async src="http://localhost:8000/dist/v0.js"></script>
+   <script async custom-element="amp-analytics" src="http://localhost:8000/dist/v0/amp-analytics-0.1.js"></script>
+  <!-- <link rel="preload" href="http://localhost:8000/dist/ww.js" as="fetch" type="text/plain"> -->
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-
+  <!-- <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script> -->
 </head>
 <p>
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam pellentesque augue quis elementum tempus. Pellentesque sit amet neque bibendum, sagittis purus vitae, pellentesque magna. Vestibulum non viverra metus, eget feugiat lacus. Nulla in maximus orci. Maecenas id turpis vel ipsum vestibulum bibendum ut sit amet magna. Nullam hendrerit ex at est eleifend, nec dignissim nibh rutrum. Aliquam quis tellus et nibh faucibus laoreet in eget turpis. Nam quam nisl, porttitor vel ex eget, dapibus placerat dui. Mauris commodo pellentesque leo, eu tempus quam. In hac habitasse platea dictumst. Suspendisse non ante finibus, luctus augue non, luctus orci. Vestibulum ornare lacinia aliquam. In sollicitudin vehicula vulputate. Sed mi elit, commodo nec sapien nec, pretium bibendum leo. Donec id justo tortor. Ut in mauris dapibus, laoreet metus vitae, dictum nisi.
@@ -41,7 +43,7 @@ Nam posuere velit euismod risus pulvinar, in sollicitudin sapien consectetur. Ve
 <p>
 Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor mollis finibus, tortor elit elementum dolor, vel vulputate lorem dui id ante. Vivamus in velit at lectus blandit gravida vitae quis arcu. Nam et magna magna. Fusce condimentum diam lacus, ac ullamcorper purus malesuada eu. Mauris ullamcorper elit et venenatis faucibus. Nullam lobortis molestie purus quis pellentesque. Sed at libero id nisi rhoncus tincidunt. Praesent vestibulum vehicula tristique. Etiam rutrum, nunc id porta interdum, nulla nisi molestie leo, at fermentum justo dolor at lorem. Duis in egestas sapien.
 </p>
-<amp-analytics type="_ping_">
+<amp-analytics>
   <script type="application/json">
   {
     "requests": {
@@ -55,22 +57,14 @@ Integer in felis at lacus mattis facilisis. Curabitur tincidunt, felis porttitor
       "abc": "${timestamp}.${requestCount}"
     },
     "triggers": {
-      "batch-time": {
-        "on": "timer",
-        "request": ["batch"],
-        "timerSpec": {
-          "interval": 2,
-          "maxTimerLength": 10
-        },
-        "extraUrlParams": {
-          "event": "timer",
-          "extra2": "${abc}"
-        }
+      "pageview": {
+        "on": "visible",
+        "request": "old"
       },
       "click": {
         "on": "click",
         "selector": "#ele1",
-        "request": ["batch", "batchInterval1", "batchInterval2"],
+        "request": "batch",
         "important": true,
         "extraUrlParams": {
           "extra": "important"

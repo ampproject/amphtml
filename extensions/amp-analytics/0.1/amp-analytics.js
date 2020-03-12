@@ -125,6 +125,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    console.log('build as amp-analytics')
     this.isSandbox_ = this.element.hasAttribute('sandbox');
 
     this.element.setAttribute('aria-hidden', 'true');
@@ -202,11 +203,12 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   ensureInitialized_() {
+    console.log("ensure initialized");
     if (this.iniPromise_) {
       return this.iniPromise_;
     }
     toggle(this.element, false);
-
+    console.log('a list of promises');
     this.iniPromise_ = this.getAmpDoc()
       .whenFirstVisible()
       // Rudimentary "idle" signal.
@@ -223,6 +225,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       .then(services => {
         this.instrumentation_ = services[0];
         this.variableService_ = services[1];
+        console.log('to load config');
         return new AnalyticsConfig(this.element).loadConfig();
       })
       .then(config => {
@@ -794,7 +797,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  // Register doc-service factory.
+  AMP.win['analytics_start'] = Date.now();
   AMP.registerServiceForDoc(
     'amp-analytics-instrumentation',
     InstrumentationService

@@ -26,6 +26,7 @@ import {getMode} from '../../../src/mode';
 import {isArray, isObject, toWin} from '../../../src/types';
 import {isCanary} from '../../../src/experiments';
 import {variableServiceForDoc} from './variables';
+import {isExperimentOn} from '../../../src/experiments';
 
 const TAG = 'amp-analytics/config';
 
@@ -64,6 +65,7 @@ export class AnalyticsConfig {
    * @return {!Promise<JsonObject>}
    */
   loadConfig() {
+    console.log('load analytics config');
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
 
@@ -200,13 +202,6 @@ export class AnalyticsConfig {
       );
   }
 
-  expensive_() {
-    let expensive = 0;
-    for (let i = 1; i<1000000; i++) {
-      expensive = expensive + Math.random();
-    }
-    return expensive;
-  }
 
   /**
    * Returns a promise that resolves when configuration is re-written if
@@ -217,31 +212,32 @@ export class AnalyticsConfig {
   processConfigs_() {
     const configRewriterUrl = this.getConfigRewriter_()['url'];
 
-    const config = dict({});
+    let config = dict({});
     const inlineConfig = this.getInlineConfig_();
     this.validateTransport_(inlineConfig);
-    console.log('merge objects');
-    //mergeObjects(inlineConfig, config);
-    //mergeObjects(this.remoteConfig_, config);
-    console.log('invoke web worker', Date.now());
-    const p = invokeWebWorker(self.window, 'deepMerge', {
-      from: inlineConfig,
-      to: config
-    }).then(data => {
-      console.log('returned data is ', data.result);
-      //console.log('config is ', config);
-    });
-    setTimeout(() => {
-      console.log('expensive call', this.expensive_());
-    }, 1);
-
-    if (!configRewriterUrl || this.isSandbox_) {
-      this.config_ = this.mergeConfigs_(config);
-      // use default configuration merge.
-      return Promise.resolve();
+    let promise;
+    if (!isExperimentOn(this.win_, 'worker')) {
+      mergeObjects(inlineConfig, config);
+      mergeObjects(this.remoteConfig_, config);
+      promise = Promise.resolve();
+    } else {
+      const remoteConfig = this.remoteConfig_;
+      promise = invokeWebWorker(self.window, 'deepMerge', {
+        configs: [inlineConfig, remoteConfig, config],
+      }).then(data => {
+        //console.log('returned data is ', data.result);
+        //console.log('config is ', config);
+        config = Object.assign(config, data.result);
+      });
     }
-
-    return this.handleConfigRewriter_(config, configRewriterUrl);
+    return promise.then(() => {
+      if (!configRewriterUrl || this.isSandbox_) {
+        this.config_ = this.mergeConfigs_(config);
+        // use default configuration merge.
+        return Promise.resolve();
+      }
+      return this.handleConfigRewriter_(config, configRewriterUrl);
+     });
   }
 
   /**

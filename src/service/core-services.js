@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {installWebWorker} from '../web-worker/amp-worker';
 import {adoptServiceForEmbedDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
@@ -70,6 +71,7 @@ export function installRuntimeServices(global) {
   installXhrService(global);
   installInputService(global);
   installPreconnectService(global);
+  installWebWorker(global);
 }
 
 /**

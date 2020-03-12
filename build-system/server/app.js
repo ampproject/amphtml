@@ -1030,11 +1030,13 @@ app.get(
             if (pos < file.length) {
               setTimeout(writeChunk, 500);
             } else {
-              res.end();
+              res.end()
             }
           };
           writeChunk();
         } else {
+          //console.log('set header');
+          //res.setHeader('Link','<blob:http://localhost:8000/e841f092-0dd4-45f2-8062-6c3300e975fd>;rel="preload";as="script"');
           res.send(file);
         }
       })
