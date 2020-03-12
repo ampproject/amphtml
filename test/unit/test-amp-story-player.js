@@ -193,9 +193,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
     const fakeData = {next: true};
     fireHandler['selectDocument']('selectDocument', fakeData);
 
-    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    win.requestAnimationFrame(() => {
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    });
   });
 
   it('should navigate when swiping', async () => {
@@ -204,9 +206,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
 
     swipeLeft();
 
-    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    win.requestAnimationFrame(() => {
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    });
   });
 
   it('should not navigate when swiping last story', async () => {
@@ -217,8 +221,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, env => {
     swipeLeft();
     swipeLeft();
 
-    const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
-    expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
-    expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    win.requestAnimationFrame(() => {
+      const iframes = playerEl.shadowRoot.querySelectorAll('iframe');
+      expect(iframes[0].getAttribute('i-amphtml-iframe-position')).to.eql('-1');
+      expect(iframes[1].getAttribute('i-amphtml-iframe-position')).to.eql('0');
+    });
   });
 });

@@ -49,8 +49,9 @@ const IframePosition = {
  * @enum {number}
  */
 const SwipingState = {
-  SWIPING_TO_LEFT: 0,
-  SWIPING_TO_RIGHT: 1,
+  NOT_SWIPING: 0,
+  SWIPING_TO_LEFT: 1,
+  SWIPING_TO_RIGHT: 2,
 };
 
 /** @const {number} */
@@ -111,8 +112,8 @@ export class AmpStoryPlayer {
     /** @private {number} */
     this.currentIdx_ = 0;
 
-    /** @private {?SwipingState} */
-    this.swipingState_ = null;
+    /** @private {!SwipingState} */
+    this.swipingState_ = SwipingState.NOT_SWIPING;
 
     /** @private {!Object} */
     this.touchEventState_ = {
@@ -538,6 +539,7 @@ export class AmpStoryPlayer {
     this.touchEventState_.startY = 0;
     this.touchEventState_.lastX = 0;
     this.touchEventState_.isSwipeX = null;
+    this.swipingState_ = SwipingState.NOT_SWIPING;
   }
 
   /**
