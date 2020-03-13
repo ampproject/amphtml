@@ -28,7 +28,7 @@ import {IframePool} from './amp-story-player-iframe-pool';
 import {VisibilityState} from './visibility-state';
 import {applySandbox} from './3p-frame';
 import {cssText} from '../build/amp-story-player-iframe.css';
-import {setStyle} from './style';
+import {resetStyles, setStyle, setStyles} from './style';
 import {toArray} from './types';
 
 /** @enum {string} */
@@ -44,6 +44,18 @@ const IframePosition = {
   CURRENT: 0,
   NEXT: 1,
 };
+
+/**
+ * @enum {number}
+ */
+const SwipingState = {
+  NOT_SWIPING: 0,
+  SWIPING_TO_LEFT: 1,
+  SWIPING_TO_RIGHT: 2,
+};
+
+/** @const {number} */
+const TOGGLE_THRESHOLD_PX = 50;
 
 /** @const {number} */
 const MAX_IFRAMES = 3;
@@ -99,6 +111,17 @@ export class AmpStoryPlayer {
 
     /** @private {number} */
     this.currentIdx_ = 0;
+
+    /** @private {!SwipingState} */
+    this.swipingState_ = SwipingState.NOT_SWIPING;
+
+    /** @private {!Object} */
+    this.touchEventState_ = {
+      startX: 0,
+      startY: 0,
+      lastX: 0,
+      isSwipeX: null,
+    };
   }
 
   /**
@@ -177,6 +200,18 @@ export class AmpStoryPlayer {
       this.initializeHandshake_(story, iframeEl).then(
         messaging => {
           messaging.setDefaultHandler(() => Promise.resolve());
+          messaging.registerHandler('touchstart', (event, data) => {
+            this.onTouchStart_(data);
+          });
+
+          messaging.registerHandler('touchmove', (event, data) => {
+            this.onTouchMove_(data);
+          });
+
+          messaging.registerHandler('touchend', () => {
+            this.onTouchEnd_();
+          });
+
           messaging.registerHandler('selectDocument', (event, data) => {
             this.onSelectDocument_(data);
           });
@@ -259,7 +294,10 @@ export class AmpStoryPlayer {
     this.currentIdx_++;
 
     const previousStory = this.stories_[this.currentIdx_ - 1];
-    this.updatePreviousIframe_(previousStory[IFRAME_IDX]);
+    this.updatePreviousIframe_(
+      previousStory[IFRAME_IDX],
+      IframePosition.PREVIOUS
+    );
 
     const currentStory = this.stories_[this.currentIdx_];
     this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
@@ -285,7 +323,7 @@ export class AmpStoryPlayer {
     this.currentIdx_--;
 
     const previousStory = this.stories_[this.currentIdx_ + 1];
-    this.updatePreviousIframe_(previousStory[IFRAME_IDX]);
+    this.updatePreviousIframe_(previousStory[IFRAME_IDX], IframePosition.NEXT);
 
     const currentStory = this.stories_[this.currentIdx_];
     this.updateCurrentIframe_(currentStory[IFRAME_IDX]);
@@ -300,13 +338,14 @@ export class AmpStoryPlayer {
   }
 
   /**
-   * Updates an iframe to the `previous` state.
+   * Updates an iframe to the `inactive` state.
    * @param {number} iframeIdx
+   * @param {!IframePosition} position
    * @private
    */
-  updatePreviousIframe_(iframeIdx) {
+  updatePreviousIframe_(iframeIdx, position) {
     this.updateVisibilityState_(iframeIdx, VisibilityState.INACTIVE);
-    this.updateIframePosition_(iframeIdx, IframePosition.PREVIOUS);
+    this.updateIframePosition_(iframeIdx, position);
   }
 
   /**
@@ -326,10 +365,11 @@ export class AmpStoryPlayer {
    * @private
    */
   updateIframePosition_(iframeIdx, position) {
-    this.iframes_[iframeIdx].setAttribute(
-      'i-amphtml-iframe-position',
-      position
-    );
+    requestAnimationFrame(() => {
+      const iframe = this.iframes_[iframeIdx];
+      resetStyles(iframe, ['transform', 'transition']);
+      iframe.setAttribute('i-amphtml-iframe-position', position);
+    });
   }
 
   /**
@@ -433,6 +473,196 @@ export class AmpStoryPlayer {
     } else if (data.previous) {
       this.previous_();
     }
+  }
+
+  /**
+   * Reacts to touchstart events and caches its coordinates.
+   * @param {!Event} event
+   * @private
+   */
+  onTouchStart_(event) {
+    const coordinates = this.getClientTouchCoordinates_(event);
+    if (!coordinates) {
+      return;
+    }
+
+    this.touchEventState_.startX = coordinates.x;
+    this.touchEventState_.startY = coordinates.y;
+  }
+
+  /**
+   * Reacts to touchmove events and handles horizontal swipes.
+   * @param {!Event} event
+   * @private
+   */
+  onTouchMove_(event) {
+    if (this.touchEventState_.isSwipeX === false) {
+      return;
+    }
+
+    const coordinates = this.getClientTouchCoordinates_(event);
+    if (!coordinates) {
+      return;
+    }
+
+    const {x, y} = coordinates;
+    this.touchEventState_.lastX = x;
+
+    if (this.touchEventState_.isSwipeX === null) {
+      this.touchEventState_.isSwipeX =
+        Math.abs(this.touchEventState_.startX - x) >
+        Math.abs(this.touchEventState_.startY - y);
+      if (!this.touchEventState_.isSwipeX) {
+        return;
+      }
+    }
+
+    this.onSwipeX_({
+      deltaX: x - this.touchEventState_.startX,
+      last: false,
+    });
+  }
+
+  /**
+   * Reacts to touchend events. Resets cached touch event states.
+   * @private
+   */
+  onTouchEnd_() {
+    if (this.touchEventState_.isSwipeX === true) {
+      this.onSwipeX_({
+        deltaX: this.touchEventState_.lastX - this.touchEventState_.startX,
+        last: true,
+      });
+    }
+
+    this.touchEventState_.startX = 0;
+    this.touchEventState_.startY = 0;
+    this.touchEventState_.lastX = 0;
+    this.touchEventState_.isSwipeX = null;
+    this.swipingState_ = SwipingState.NOT_SWIPING;
+  }
+
+  /**
+   * Reacts to horizontal swipe events.
+   * @param {!Object} gesture
+   */
+  onSwipeX_(gesture) {
+    const {deltaX} = gesture;
+
+    if (gesture.last === true) {
+      const delta = Math.abs(deltaX);
+
+      if (this.swipingState_ === SwipingState.SWIPING_TO_LEFT) {
+        delta > TOGGLE_THRESHOLD_PX && this.getSecondaryIframe_()
+          ? this.next_()
+          : this.resetIframeStyles_();
+      }
+
+      if (this.swipingState_ === SwipingState.SWIPING_TO_RIGHT) {
+        delta > TOGGLE_THRESHOLD_PX && this.getSecondaryIframe_()
+          ? this.previous_()
+          : this.resetIframeStyles_();
+      }
+
+      return;
+    }
+
+    this.drag_(deltaX);
+  }
+
+  /**
+   * Resets styles for the currently swiped iframes.
+   * @private
+   */
+  resetIframeStyles_() {
+    const currentIframe = this.iframes_[
+      this.stories_[this.currentIdx_][IFRAME_IDX]
+    ];
+
+    requestAnimationFrame(() => {
+      resetStyles(currentIframe, ['transform', 'transition']);
+    });
+
+    const secondaryIframe = this.getSecondaryIframe_();
+    if (secondaryIframe) {
+      requestAnimationFrame(() => {
+        resetStyles(secondaryIframe, ['transform', 'transition']);
+      });
+    }
+  }
+
+  /**
+   * Gets accompanying iframe for the currently swiped iframe if any.
+   * @private
+   * @return {?IframeElement}
+   */
+  getSecondaryIframe_() {
+    const nextStoryIdx =
+      this.swipingState_ === SwipingState.SWIPING_TO_LEFT
+        ? this.currentIdx_ + 1
+        : this.currentIdx_ - 1;
+
+    if (nextStoryIdx < 0 || nextStoryIdx >= this.stories_.length) {
+      return;
+    }
+
+    return this.iframes_[this.stories_[nextStoryIdx][IFRAME_IDX]];
+  }
+
+  /**
+   * Drags stories following the swiping gesture.
+   * @param {number} deltaX
+   * @private
+   */
+  drag_(deltaX) {
+    let secondaryTranslate;
+
+    if (deltaX < 0) {
+      this.swipingState_ = SwipingState.SWIPING_TO_LEFT;
+      secondaryTranslate = `translate3d(calc(100% + ${deltaX}px), 0, 0)`;
+    } else {
+      this.swipingState_ = SwipingState.SWIPING_TO_RIGHT;
+      secondaryTranslate = `translate3d(calc(${deltaX}px - 100%), 0, 0)`;
+    }
+
+    const story = this.stories_[this.currentIdx_];
+    const iframe = this.iframes_[story[IFRAME_IDX]];
+    const translate = `translate3d(${deltaX}px, 0, 0)`;
+
+    requestAnimationFrame(() => {
+      setStyles(iframe, {
+        transform: translate,
+        transition: 'none',
+      });
+    });
+
+    const secondaryIframe = this.getSecondaryIframe_();
+    if (!secondaryIframe) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      setStyles(secondaryIframe, {
+        transform: secondaryTranslate,
+        transition: 'none',
+      });
+    });
+  }
+
+  /**
+   * Helper to retrieve the touch coordinates from a TouchEvent.
+   * @param {!Event} event
+   * @return {?{x: number, y: number}}
+   * @private
+   */
+  getClientTouchCoordinates_(event) {
+    const {touches} = event;
+    if (!touches || touches.length < 1) {
+      return null;
+    }
+
+    const {screenX: x, screenY: y} = touches[0];
+    return {x, y};
   }
 }
 
