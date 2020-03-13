@@ -238,7 +238,7 @@ describes.realWin('amp-story-education', {amp: true}, env => {
         .resolves();
 
       storyEducation.buildCallback();
-      await Promise.resolve(); // whenFirstVisible icrotask tick.
+      await Promise.resolve(); // whenFirstVisible microtask tick.
       await Promise.resolve(); // sendMessageAwaitResponse microtask tick.
 
       const navigationTapEl = storyEducation.containerEl_.querySelector(
