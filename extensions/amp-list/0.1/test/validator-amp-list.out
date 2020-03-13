@@ -142,8 +142,8 @@ amp-list/0.1/test/validator-amp-list.html:90:2 The attribute 'auto-resize' in ta
 |    </amp-list>
 |    <!-- Valid: container layout -->
 |    <amp-list layout="container" src="https://data.com/articles.json?ref=CANONICAL_URL">
-|        <div></div>
-|      </amp-list>
+|      <div></div>
+|    </amp-list>
 |    <!-- Valid amp-list with diffable attribute -->
 |    <amp-list width=10 height=10
 |      src="https://data.com/articles.json?ref=CANONICAL_URL"
