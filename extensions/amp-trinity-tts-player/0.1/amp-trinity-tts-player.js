@@ -21,7 +21,6 @@ import {userAssert} from '../../../src/log';
 
 const TAG = 'amp-trinity-tts-player';
 const URL = 'https://trinitymedia.ai';
-const CDN_URL = 'https://vd.trinitymedia.ai';
 
 export class AmpTrinityTTSPlayer extends AMP.BaseElement {
   /** @param {!AmpElement} element */
