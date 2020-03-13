@@ -2288,7 +2288,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     element.overflowCallback(true, 117, 113);
     expect(overflowElement).to.have.class('amp-visible');
     mutatorMock
-      .expects('applySize')
+      .expects('forceChangeSize')
       .withExactArgs(element, 117, 113)
       .once();
 
