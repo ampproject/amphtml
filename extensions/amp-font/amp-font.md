@@ -28,9 +28,9 @@ limitations under the License.
 
 ## Do not use
 
-Use the [`font-display`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display) descriptor to specify how to display a font face dependent on whether and when it is ready. 
+Use the [`font-display`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display) descriptor to specify how to display a font face dependent on whether and when it is ready.
 
-The `amp-font` component was AMP's solution to controlling timeouts on font loading. With the wide browser adoption of font-display, this component is no longer necessary. It is here for legacy users. 
+The `amp-font` component was AMP's solution to controlling timeouts on font loading. With the wide browser adoption of font-display, this component is no longer necessary. It is here for legacy users.
 
 ### Usage
 
@@ -83,23 +83,23 @@ CSS class to remove from document root after custom font is available.
 
 #### `on-error-add-class` (optional)
 
-CSS class to add to the document root if the timeout interval runs out before the font is available. 
+CSS class to add to the document root if the timeout interval runs out before the font is available.
 
 #### `on-error-remove-class` (optional)
 
-CSS class to remove from document root if the timeout interval runs out before the font is available. 
+CSS class to remove from document root if the timeout interval runs out before the font is available.
 
 #### `font-weight` (optional)
 
-Behaves same as standard CSS [`font-weight` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight). 
+Behaves same as standard CSS [`font-weight` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight).
 
 #### `font-style` (optional)
 
-Behaves same as standard CSS [`font-style` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-style). 
+Behaves same as standard CSS [`font-style` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-style).
 
 #### `font-variant` (optional)
 
-Behaves same as standard CSS [`font-variant` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant). 
+Behaves same as standard CSS [`font-variant` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant).
 
 
 #### `layout`
