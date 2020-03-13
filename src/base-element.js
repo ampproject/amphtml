@@ -824,7 +824,7 @@ export class BaseElement {
    * @public
    */
   changeHeight(newHeight) {
-    Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
+    Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
       this.element,
       newHeight,
       /* newWidth */ undefined

@@ -33,7 +33,7 @@ export class InaboxMutator {
   }
 
   /** @override */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
+  forceChangeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
     this.attemptChangeSize(element, newHeight, newWidth, opt_newMargins).then(
       () => {
         if (opt_callback) {

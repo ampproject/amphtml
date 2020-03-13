@@ -1067,8 +1067,7 @@ export class AmpList extends AMP.BaseElement {
     if (shouldReplace) {
       before.parentElement.replaceChild(after, before);
     } else {
-      // TODO(#23470): Support more attributes to manually diff by calling
-      // mutatedAttributesCallback() and changeSize().
+      // TODO(#23470): Support more attributes to manually diff.
 
       // Add new classes.
       for (let i = 0; i < after.classList.length; i++) {

@@ -1836,7 +1836,7 @@ function createBaseCustomElementClass(win) {
         if (overflown) {
           this.overflowElement_.onclick = () => {
             const mutator = Services.mutatorForDoc(this.getAmpDoc());
-            mutator./*OK*/ changeSize(this, requestedHeight, requestedWidth);
+            mutator.forceChangeSize(this, requestedHeight, requestedWidth);
             mutator./*OK*/ mutateElement(this, () => {
               this.overflowCallback(
                 /* overflown */ false,
