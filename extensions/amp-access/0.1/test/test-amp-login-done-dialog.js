@@ -19,7 +19,6 @@ import {LoginDoneDialog, buildLangSelector} from '../amp-login-done-dialog';
 describe('LoginDoneDialog', () => {
   let clock;
   let windowApi;
-  let windowMock;
   let dialog;
   let messageListener;
   let openerMock;
@@ -74,7 +73,6 @@ describe('LoginDoneDialog', () => {
         },
       },
     };
-    windowMock = window.sandbox.mock(windowApi);
     openerMock = window.sandbox.mock(windowApi.opener);
 
     dialog = new LoginDoneDialog(windowApi);
