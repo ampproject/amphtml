@@ -34,7 +34,7 @@ export class InaboxMutator {
 
   /** @override */
   forceChangeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
-    this.attemptChangeSize(element, newHeight, newWidth, opt_newMargins).then(
+    this.requestChangeSize(element, newHeight, newWidth, opt_newMargins).then(
       () => {
         if (opt_callback) {
           opt_callback();
@@ -44,7 +44,7 @@ export class InaboxMutator {
   }
 
   /** @override */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins) {
+  requestChangeSize(element, newHeight, newWidth, opt_newMargins) {
     return this.mutateElement(element, () => {
       this.resources_
         .getResourceForElement(element)

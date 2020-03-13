@@ -865,7 +865,7 @@ export class BaseElement {
    * @public
    */
   attemptChangeHeight(newHeight) {
-    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
       this.element,
       newHeight,
       /* newWidth */ undefined
@@ -889,7 +889,7 @@ export class BaseElement {
    * @public
    */
   attemptChangeSize(newHeight, newWidth, opt_event) {
-    return Services.mutatorForDoc(this.getAmpDoc()).attemptChangeSize(
+    return Services.mutatorForDoc(this.getAmpDoc()).requestChangeSize(
       this.element,
       newHeight,
       newWidth,

@@ -62,8 +62,8 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
     expect(schedulePassStub).to.be.calledOnce;
   });
 
-  it('attemptChangeSize', async () => {
-    const resultPromise = mutator.attemptChangeSize(element, 12, 34, {
+  it('requestChangeSize', async () => {
+    const resultPromise = mutator.requestChangeSize(element, 12, 34, {
       top: 4,
       right: 5,
       bottom: 6,

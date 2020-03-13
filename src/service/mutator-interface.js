@@ -49,7 +49,7 @@ export class MutatorInterface {
    * @return {!Promise}
    * @param {?Event=} opt_event
    */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {}
+  requestChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {}
 
   /**
    * Expands the element.
