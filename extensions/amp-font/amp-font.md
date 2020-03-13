@@ -24,15 +24,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# amp-font
+# amp-font (deprecated)
 
-## Do not use
-
-Use the [`font-display`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display) descriptor to specify how to display a font face dependent on whether and when it is ready.
+Replace with a sentence: "This component has been deprecated and should no longer be used. Instead, use the [`font-display`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display) descriptor to specify how to display a font face dependent on whether and when it is ready.
 
 The `amp-font` component was AMP's solution to controlling timeouts on font loading. With the wide browser adoption of font-display, this component is no longer necessary. It is here for legacy users.
 
-### Usage
+## Usage
 
 Historically, the `amp-font` extension was used for controlling timeouts on font loading. **We recommend implementing this functionality with [`font-display`](https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display) instead.**
 
@@ -67,45 +65,45 @@ Use these classes to guard against displaying a font and get the following resul
 - implement FOIT where the page renders with no text before the font comes in
 - make the timeout very short and only use a font if it was already cached.
 
-### Attributes
+## Attributes
 
-#### `font-family`
+### `font-family`
 
 The font family of the custom loaded font.
 
-#### `timeout` (optional)
+### `timeout` (optional)
 
 The allowed time in millisecond for the custom font to load. Defaults to 3000 when undefined. When set to 0 the component loads font only if the font is in the cache. If set to an invalid value it defaults back to 3000.
 
-#### `on-load-add-class` (optional)
+### `on-load-add-class` (optional)
 
 CSS class to remove from document root after custom font is available.
 
-#### `on-error-add-class` (optional)
+### `on-error-add-class` (optional)
 
 CSS class to add to the document root if the timeout interval runs out before the font is available.
 
-#### `on-error-remove-class` (optional)
+### `on-error-remove-class` (optional)
 
 CSS class to remove from document root if the timeout interval runs out before the font is available.
 
-#### `font-weight` (optional)
+### `font-weight` (optional)
 
 Behaves same as standard CSS [`font-weight` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight).
 
-#### `font-style` (optional)
+### `font-style` (optional)
 
 Behaves same as standard CSS [`font-style` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-style).
 
-#### `font-variant` (optional)
+### `font-variant` (optional)
 
 Behaves same as standard CSS [`font-variant` property](https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant).
 
 
-#### `layout`
+### `layout`
 
 The `layout` attribute must be set to `nodisplay`.
 
-### Validation
+## Validation
 
 See [amp-font rules](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/validator-amp-font.protoascii) in the AMP validator specification.
