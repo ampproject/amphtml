@@ -157,7 +157,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     if (!this.container_) {
-      if (Ctor.children || Ctor.passthrough) {
+      if (Ctor['children'] || Ctor['passthrough']) {
         this.container_ = this.element.attachShadow({mode: 'open'});
       } else {
         const container = this.win.document.createElement('i-amphtml-c');
@@ -174,7 +174,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     // this element will be reused.
     const v = (
       <WithAmpContext {...this.context_}>
-        <Ctor.Component {...props} />
+        {Preact.createElement(Ctor['Component'], props)}
       </WithAmpContext>
     );
 
@@ -237,10 +237,10 @@ function collectProps(Ctor, element, defaultProps) {
   const props = /** @type {!JsonObject} */ ({...defaultProps});
 
   const {
-    className,
-    props: propDefs,
-    passthrough,
-    children: childrenDefs,
+    'className': className,
+    'props': propDefs,
+    'passthrough': passthrough,
+    'children': childrenDefs,
   } = Ctor;
 
   // Class.
