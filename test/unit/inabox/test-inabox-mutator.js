@@ -42,9 +42,9 @@ describes.realWin('inabox-mutator', {amp: true}, env => {
     };
   });
 
-  it('changeSize', async () => {
+  it('forceChangeSize', async () => {
     const callback = env.sandbox.spy();
-    mutator.changeSize(element, 12, 34, callback, {
+    mutator.forceChangeSize(element, 12, 34, callback, {
       top: 4,
       right: 5,
       bottom: 6,
