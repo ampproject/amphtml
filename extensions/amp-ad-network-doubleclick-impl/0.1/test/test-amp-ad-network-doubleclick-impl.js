@@ -42,6 +42,7 @@ import {Deferred} from '../../../../src/utils/promise';
 import {FriendlyIframeEmbed} from '../../../../src/friendly-iframe-embed';
 import {Layout} from '../../../../src/layout';
 import {QQID_HEADER} from '../../../../ads/google/a4a/utils';
+import {SafeframeHostApi} from '../safeframe-host';
 import {Services} from '../../../../src/services';
 import {createElementWithAttributes} from '../../../../src/dom';
 import {toggleExperiment} from '../../../../src/experiments';
@@ -1936,6 +1937,54 @@ describes.realWin(
             mockHeaders
           )
         ).to.eventually.not.be.ok;
+      });
+    });
+
+    describe('#getAdditionalContextMetadata', () => {
+      const mockSafeFrameApi = {
+        destroy: () => {},
+        getSafeframeNameAttr: () => 'sf-name',
+      };
+      beforeEach(() => {
+        element = createElementWithAttributes(doc, 'amp-ad', {
+          'width': '200',
+          'height': '50',
+          'type': 'doubleclick',
+        });
+        impl = new AmpAdNetworkDoubleclickImpl(element);
+        createImplTag({width: 100, height: 100}, element, impl, env);
+        env.sandbox
+          .stub(SafeframeHostApi.prototype, 'registerSafeframeHost')
+          .callsFake(() => {});
+        env.sandbox
+          .stub(SafeframeHostApi.prototype, 'getSafeframeNameAttr')
+          .callsFake(() => 'sf-name');
+        env.sandbox
+          .stub(impl, 'getCreativeSize')
+          .returns({width: 320, height: 50});
+        env.sandbox.stub(impl, 'getViewport').returns({
+          getSize: () => ({width: 411, height: 1500}),
+          getScrollLeft: () => 0,
+          getScrollTop: () => 0,
+        });
+      });
+
+      it('should not change safeframeApi value', () => {
+        impl.safeframeApi_ = mockSafeFrameApi;
+        impl.getAdditionalContextMetadata(/* isSafeFrame= */ true);
+        expect(impl.safeframeApi_).to.equal(mockSafeFrameApi);
+      });
+
+      it('should change safeframeApi value', () => {
+        impl.safeframeApi_ = mockSafeFrameApi;
+        impl.isRefreshing = true;
+        env.sandbox
+          .stub(impl, 'getPageLayoutBox')
+          .returns({width: 411, height: 1500, left: 0, right: 0});
+        impl.getAdditionalContextMetadata(/* isSafeFrame= */ true);
+        expect(impl.safeframeApi_).to.not.equal(mockSafeFrameApi);
+        // We just want to make sure the value's changed and is not null.
+        expect(impl.safeframeApi_).to.be.ok;
       });
     });
   }
