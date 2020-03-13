@@ -33,3 +33,4 @@ firebase.json
 src/purifier/dist
 build-system/tasks/performance/cache
 build-system/tasks/performance/results.json
+build-system/updated-server/output
