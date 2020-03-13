@@ -254,6 +254,42 @@ describes.repeated(
             return list.layoutCallback();
           });
 
+          it('should unlock height for layout=container with successful attemptChangeHeight', () => {
+            const itemElement = doc.createElement('div');
+            const placeholder = doc.createElement('div');
+            placeholder.style.height = '1337px';
+            element.appendChild(placeholder);
+            element.getPlaceholder = () => placeholder;
+            element.setAttribute('layout', 'container');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+
+            listMock
+              .expects('attemptChangeHeight')
+              .withExactArgs(1337)
+              .returns(Promise.resolve());
+            listMock.expects('maybeUnlockHeight_').once();
+
+            return list.layoutCallback();
+          });
+
+          it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
+            const itemElement = doc.createElement('div');
+            const placeholder = doc.createElement('div');
+            placeholder.style.height = '1337px';
+            element.appendChild(placeholder);
+            element.getPlaceholder = () => placeholder;
+            element.setAttribute('layout', 'container');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+
+            listMock
+              .expects('attemptChangeHeight')
+              .withExactArgs(1337)
+              .returns(Promise.reject());
+            listMock.expects('maybeUnlockHeight_').never();
+
+            return list.layoutCallback();
+          });
+
           it('should attemptChangeHeight rendered contents', () => {
             const itemElement = doc.createElement('div');
             itemElement.style.height = '1337px';
