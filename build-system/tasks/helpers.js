@@ -39,7 +39,7 @@ const wrappers = require('../compile/compile-wrappers');
 const {
   BABEL_SRC_GLOBS,
   SRC_TEMP_DIR,
-  THIRD_PARTY_TRANSFORM_DIRS,
+  THIRD_PARTY_TRANSFORM_GLOBS,
 } = require('../compile/sources');
 const {
   VERSION: internalRuntimeVersion,
@@ -718,7 +718,7 @@ function transferSrcsToTempDir(options = {}) {
   files.forEach(file => {
     if (
       (file.startsWith('node_modules/') || file.startsWith('third_party/')) &&
-      !THIRD_PARTY_TRANSFORM_DIRS.includes(file)
+      !THIRD_PARTY_TRANSFORM_GLOBS.includes(file)
     ) {
       fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
       return;

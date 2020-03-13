@@ -142,7 +142,11 @@ const CLOSURE_SRC_GLOBS = [
   '!node_modules/core-js/modules/library/**.js',
 ].concat(COMMON_GLOBS);
 
-const THIRD_PARTY_TRANSFORM_DIRS = [
+/**
+ * NOTE: 3p code is generally excluded from the transform process.
+ * The globs here are force-transformed anyway.
+ */
+const THIRD_PARTY_TRANSFORM_GLOBS = [
   // JSX syntax should undergo usual transforms
   'third_party/optimized-svg-icons/social-share-svgs.js',
 ];
@@ -151,5 +155,5 @@ module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
   SRC_TEMP_DIR,
-  THIRD_PARTY_TRANSFORM_DIRS,
+  THIRD_PARTY_TRANSFORM_GLOBS,
 };
