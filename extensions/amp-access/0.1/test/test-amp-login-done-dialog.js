@@ -336,14 +336,25 @@ describe('LoginDoneDialog', () => {
         });
     });
 
-    it('should keep trying to close window for 3 seconds', () => {
+    it('should keep trying to close window for a minute', () => {
       dialog.postbackSuccess_();
       expect(windowApi.close).to.have.callCount(1);
-      clock.tick(3000);
-      expect(windowApi.close).to.have.callCount(31);
+      clock.tick(60000);
+      expect(windowApi.close).to.have.callCount(121);
       windowApi.close.resetHistory();
-      // After 3 seconds it'll stop trying.
-      clock.tick(3000);
+      // After 60 seconds it'll stop trying.
+      clock.tick(60000);
+      expect(windowApi.close).to.not.be.called;
+    });
+
+    it('should stop trying to close window after it is closed', () => {
+      dialog.postbackSuccess_();
+      clock.tick(30000);
+      expect(windowApi.close).to.have.callCount(61);
+      windowApi.close.resetHistory();
+      windowApi.closed = true;
+      // After the window is closed it'll stop trying.
+      clock.tick(30000);
       expect(windowApi.close).to.not.be.called;
     });
 
