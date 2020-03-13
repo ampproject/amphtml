@@ -529,15 +529,12 @@ export class AmpList extends AMP.BaseElement {
       let currentHeight;
       this.measureMutateElement(
         () => {
-          currentHeight = this.element./*OK*/ offsetHeight;
+          currentHeight = this.isLayoutContainer_
+            ? this.element./*OK*/ offsetHeight
+            : undefined;
         },
         () => {
-          if (this.isLayoutContainer_) {
-            setImportantStyles(this.element, {
-              'height': `${currentHeight}px`,
-              'overflow': 'hidden',
-            });
-          }
+          this.maybeLockHeight_(currentHeight);
           this.togglePlaceholder(true);
           this.toggleLoading(true, /* opt_force */ true);
           this.toggleFallback_(false);
@@ -982,15 +979,12 @@ export class AmpList extends AMP.BaseElement {
     let currentHeight;
     return this.measureMutateElement(
       () => {
-        currentHeight = this.element./*OK*/ offsetHeight;
+        currentHeight = this.isLayoutContainer_
+          ? this.element./*OK*/ offsetHeight
+          : undefined;
       },
       () => {
-        if (this.isLayoutContainer_) {
-          setImportantStyles(this.element, {
-            'height': `${currentHeight}px`,
-            'overflow': 'hidden',
-          });
-        }
+        this.maybeLockHeight_(currentHeight);
         this.hideFallbackAndPlaceholder_();
 
         if (
@@ -1123,6 +1117,35 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
+   * Height only needs to be locked when layout="container"
+   * @private
+   * @param {number=} height
+   */
+  maybeLockHeight_(height) {
+    if (!this.isLayoutContainer_ || !height) {
+      return;
+    }
+    setImportantStyles(this.element, {
+      'height': `${height}px`,
+      'overflow': 'hidden',
+    });
+  }
+
+  /**
+   * Height only needs to be unlocked when layout="container"
+   * @private
+   */
+  maybeUnlockHeight_() {
+    if (!this.isLayoutContainer_) {
+      return;
+    }
+    setImportantStyles(this.element, {
+      'height': '',
+      'overflow': '',
+    });
+  }
+
+  /**
    * Attempts to change the height of the amp-list to fit a target child.
    *
    * If the target's height is greater than the amp-list's height, attempt
@@ -1137,14 +1160,7 @@ export class AmpList extends AMP.BaseElement {
       const height = this.element./*OK*/ offsetHeight;
       if (targetHeight > height) {
         this.attemptChangeHeight(targetHeight).then(
-          () => {
-            if (this.isLayoutContainer_) {
-              setImportantStyles(this.element, {
-                'height': '',
-                'overflow': '',
-              });
-            }
-          },
+          () => this.maybeUnlockHeight_(),
           () => {}
         );
       }
