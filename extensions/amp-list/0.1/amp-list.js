@@ -339,7 +339,8 @@ export class AmpList extends AMP.BaseElement {
         setStyles(dev().assertElement(this.container_), {
           'max-height': `calc(100% - ${px(buttonHeight)})`,
         });
-        this.element./*OK*/ changeSize(listHeight + buttonHeight);
+        // TODO(wg-ui-and-a11y): Use Mutator.attemptChangeSize.
+        this.element./*OK*/ applySize(listHeight + buttonHeight);
       }
     );
   }
@@ -1185,8 +1186,9 @@ export class AmpList extends AMP.BaseElement {
       setStyles(this.element, {height: ''});
     }
 
-    // The changeSize() call removes the sizer element.
-    this.element./*OK*/ changeSize();
+    // TODO(wg-ui-and-a11y): Use a new, unprivileged API.
+    // The applySize() call removes the sizer element.
+    this.element./*OK*/ applySize();
   }
 
   /**

@@ -729,7 +729,7 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Changes the size of the element.
+     * Applies a size change to the element.
      *
      * This method is called by Resources and shouldn't be called by anyone
      * else. This method must always be called in the mutation context.
@@ -740,7 +740,7 @@ function createBaseCustomElementClass(win) {
      * @final
      * @package
      */
-    changeSize(newHeight, newWidth, opt_newMargins) {
+    applySize(newHeight, newWidth, opt_newMargins) {
       const sizer = this.getSizer_();
       if (sizer) {
         // From the moment height is changed the element becomes fully
