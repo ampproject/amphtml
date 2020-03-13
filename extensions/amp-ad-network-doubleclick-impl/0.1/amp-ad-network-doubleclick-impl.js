@@ -1604,13 +1604,24 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     }
     const creativeSize = this.getCreativeSize();
     devAssert(creativeSize, 'this.getCreativeSize returned null');
-    this.safeframeApi_ =
-      this.safeframeApi_ ||
-      new SafeframeHostApi(
+    if (this.isRefreshing) {
+      if (this.safeframeApi_) {
+        this.safeframeApi_.destroy();
+      }
+      this.safeframeApi_ = new SafeframeHostApi(
         this,
         this.isFluidRequest_,
         /** @type {{height, width}} */ (creativeSize)
       );
+    } else {
+      this.safeframeApi_ =
+        this.safeframeApi_ ||
+        new SafeframeHostApi(
+          this,
+          this.isFluidRequest_,
+          /** @type {{height, width}} */ (creativeSize)
+        );
+    }
 
     return this.safeframeApi_.getSafeframeNameAttr();
   }
