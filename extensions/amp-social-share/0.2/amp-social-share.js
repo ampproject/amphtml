@@ -160,10 +160,10 @@ class AmpSocialShare extends PreactBaseElement {
 }
 
 /** @override */
-AmpSocialShare.Component = SocialShare;
+AmpSocialShare['Component'] = SocialShare;
 
 /** @override */
-AmpSocialShare.props = {
+AmpSocialShare['props'] = {
   'layout': {attr: 'layout'},
   'width': {attr: 'width'},
   'height': {attr: 'height'},
