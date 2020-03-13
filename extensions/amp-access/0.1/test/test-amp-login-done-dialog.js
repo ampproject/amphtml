@@ -31,7 +31,7 @@ describe('LoginDoneDialog', () => {
     messageListener = undefined;
     closeButton = {};
     windowApi = {
-      close: () => {},
+      close: window.sandbox.spy(),
       navigator: {
         language: 'fr-FR',
       },
@@ -56,6 +56,8 @@ describe('LoginDoneDialog', () => {
       open: () => {},
       postMessage: () => {},
       setTimeout: (callback, t) => window.setTimeout(callback, t),
+      setInterval: (callback, t) => window.setInterval(callback, t),
+      clearInterval: (callback, t) => window.clearInterval(callback, t),
       document: {
         documentElement: document.createElement('div'),
         getElementById: id => {
@@ -336,10 +338,21 @@ describe('LoginDoneDialog', () => {
         });
     });
 
+    it('should keep trying to close window for 3 seconds', () => {
+      dialog.postbackSuccess_();
+      expect(windowApi.close).to.have.callCount(1);
+      clock.tick(3000);
+      expect(windowApi.close).to.have.callCount(31);
+      windowApi.close.resetHistory();
+      // After 3 seconds it'll stop trying.
+      clock.tick(3000);
+      expect(windowApi.close).to.not.be.called;
+    });
+
     it('should revert to error mode if window is not closed', () => {
-      windowMock.expects('close').once();
       dialog.postbackError_ = window.sandbox.spy();
       dialog.postbackSuccess_();
+      expect(windowApi.close).to.be.calledOnce;
       expect(dialog.postbackError_).to.have.not.been.called;
 
       clock.tick(10000);
@@ -355,8 +368,8 @@ describe('LoginDoneDialog', () => {
       ).to.equal('postback');
       expect(closeButton.onclick).to.exist;
 
-      windowMock.expects('close').once();
       closeButton.onclick();
+      expect(windowApi.close).to.be.calledOnce;
     });
 
     it('should configure error mode for "close"', () => {
@@ -366,8 +379,8 @@ describe('LoginDoneDialog', () => {
       expect(
         windowApi.document.documentElement.getAttribute('data-error')
       ).to.equal('postback');
-      windowMock.expects('close').once();
       closeButton.onclick();
+      expect(windowApi.close).to.be.calledOnce;
 
       clock.tick(3000);
       expect(windowApi.document.documentElement).to.have.class('amp-error');
