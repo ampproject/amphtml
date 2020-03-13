@@ -48,7 +48,7 @@ export class InaboxMutator {
     return this.mutateElement(element, () => {
       this.resources_
         .getResourceForElement(element)
-        ./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
+        .changeSize(newHeight, newWidth, opt_newMargins);
     });
   }
 

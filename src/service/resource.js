@@ -356,6 +356,7 @@ export class Resource {
    * @param {number|undefined} newHeight
    * @param {number|undefined} newWidth
    * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
+   * @package
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
     this.element./*OK*/ applySize(newHeight, newWidth, opt_newMargins);
