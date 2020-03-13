@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {installWebWorker} from '../web-worker/amp-worker';
 import {adoptServiceForEmbedDoc} from '../service';
 import {installActionServiceForDoc} from './action-impl';
 import {installBatchedXhrService} from './batched-xhr-impl';
@@ -44,6 +43,7 @@ import {installViewerServiceForDoc} from './viewer-impl';
 import {installViewportServiceForDoc} from './viewport/viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {installXhrService} from './xhr-impl';
+import {installWebWorkerService} from './worker-impl';
 
 /**
  * Install builtins.
@@ -71,7 +71,7 @@ export function installRuntimeServices(global) {
   installXhrService(global);
   installInputService(global);
   installPreconnectService(global);
-  installWebWorker(global);
+  installWebWorkerService(global);
 }
 
 /**

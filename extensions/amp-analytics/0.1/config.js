@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {invokeWebWorker} from '../../../src/web-worker/amp-worker';
+import {invokeWebWorker} from '../../../src/service/worker-impl';
 import {ANALYTICS_CONFIG} from './vendors';
 import {Services} from '../../../src/services';
 import {assertHttpsUrl} from '../../../src/url';
@@ -225,7 +225,7 @@ export class AnalyticsConfig {
       promise = invokeWebWorker(self.window, 'deepMerge', {
         configs: [inlineConfig, remoteConfig, config],
       }).then(data => {
-        //console.log('returned data is ', data.result);
+        console.log('returned data is ', data.result);
         //console.log('config is ', config);
         config = Object.assign(config, data.result);
       });

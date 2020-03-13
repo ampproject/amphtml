@@ -50,12 +50,8 @@ export function invokeWebWorker(win, method, opt_args, opt_localWin) {
   //registerServiceBuilder(win, 'amp-worker', AmpWorker);
   console.log('get worker service');
   const worker = Services.workerFor(win);
-  console.log('worker service is ', worker);
-  console.log('worker  is ', worker.worker_);
-  console.log('worker promise is ', worker.fetchPromise_);
-
   console.log('send message');
-  return worker.sendMessage_(method, opt_args || [], opt_localWin);
+  return worker.sendMessage(method, opt_args || [], opt_localWin);
 }
 export function installWebWorkerService(win) {
   registerServiceBuilder(win, 'amp-worker', AmpWorker);
@@ -107,7 +103,6 @@ class AmpWorker {
     this.worker_ = null;
 
     /** @const @private {!Promise} */
-    console.log('initiate fetch promise');
     this.fetchPromise_ = this.xhr_
       .fetchText(url, {
         ampCors: false,
@@ -155,10 +150,9 @@ class AmpWorker {
    * @param {!Array} args
    * @param {Window=} opt_localWin
    * @return {!Promise}
-   * @private
    * @restricted
    */
-  sendMessage_(method, args, opt_localWin) {
+  sendMessage(method, args, opt_localWin) {
     console.log('fetch Promise is ', this.fetchPromise_);
     return this.fetchPromise_.then(() => {
       return new Promise((resolve, reject) => {
@@ -180,7 +174,7 @@ class AmpWorker {
 
   /**
    * Receives the result of a method invocation from the worker and resolves
-   * the Promise returned from the corresponding `sendMessage_()` call.
+   * the Promise returned from the corresponding `sendMessage()` call.
    * @param {!MessageEvent} event
    * @private
    */

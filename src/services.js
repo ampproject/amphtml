@@ -670,6 +670,18 @@ export class Services {
   }
 
   /**
+   *
+   * @param {!Window} window
+   * @return {!./service/worker-impl.AmpWorker}
+   */
+  static workerFor(window) {
+    return /** @type {!./service/worker-impl.AmpWorker} */(getService(
+      window,
+      'amp-worker'
+    ));
+  }
+
+  /**
    * @param {!Element|!ShadowRoot} element
    * @return {!./service/url-replacements-impl.UrlReplacements}
    */
