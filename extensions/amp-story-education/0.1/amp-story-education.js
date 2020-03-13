@@ -54,7 +54,7 @@ const buildNavigationEl = element => {
 
 /** @enum {string} */
 const Screen = {
-  ONBOARDING_NAVIGATION: 'on',
+  ONBOARDING_NAVIGATION_TAP_AND_SWIPE: 'ontas',
 };
 
 /** @enum */
@@ -99,7 +99,10 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
     this.viewer_ = Services.viewerForDoc(this.element);
     if (this.viewer_.isEmbedded()) {
-      this.maybeShowScreen_(Screen.ONBOARDING_NAVIGATION, State.NAVIGATION_TAP);
+      this.maybeShowScreen_(
+        Screen.ONBOARDING_NAVIGATION_TAP_AND_SWIPE,
+        State.NAVIGATION_TAP
+      );
     }
   }
 
