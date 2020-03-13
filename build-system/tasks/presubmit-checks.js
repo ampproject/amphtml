@@ -954,7 +954,6 @@ const forbiddenTermsSrcInclusive = {
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,
   // Functions
-  '\\.changeHeight\\(': bannedTermsHelpString,
   '\\.applySize\\(': bannedTermsHelpString,
   '\\.attemptChangeHeight\\(0\\)': 'please consider using `attemptCollapse()`',
   '\\.collapse\\(': bannedTermsHelpString,
