@@ -64,7 +64,7 @@ export class MutatorImpl {
   }
 
   /** @override */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
+  forceChangeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
     this.scheduleChangeSize_(
       Resource.forElement(element),
       newHeight,
