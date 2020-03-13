@@ -29,7 +29,10 @@ const {green, yellow, cyan, red} = require('ansi-colors');
 const {isTravisBuild} = require('../../common/travis');
 const {Server} = require('karma');
 
-const BATCHSIZE = 4; // Number of Sauce Lab browsers
+// Number of Sauce Lab browsers. Three was determined to be the lowest number we
+// could set without causing a significant increase in Travis job time. See
+// https://github.com/ampproject/amphtml/pull/27016 for the relevant discussion.
+const BATCHSIZE = 3;
 const CHROMEBASE = argv.chrome_canary ? 'ChromeCanary' : 'Chrome';
 const chromeFlags = [];
 
@@ -242,48 +245,27 @@ function karmaRunStart_() {
 }
 
 /**
- * Runs tests in sauce labs
+ * Runs tests in Sauce Labs in batches.
  *
- * If --stable is provided, runs tests only on stable browsers in sauce labs without batching.
- * If --beta is provided, runs tests only on beta browsers in sauce labs without batching. Does not fail.
- * If neither --stable nor --beta are provided, runs test on all browsers in sauce labs with batching.
+ * If --stable is provided, runs tests only on stable browsers in Sauce Labs.
+ * If --beta is provided, runs tests only on beta browsers in Sauce Labs. Does not fail the build.
+ * If neither --stable nor --beta are provided, runs test on all browsers in Sauce Labs.
  *
  * @param {Object} config karma config
  * @return {!Promise<number>} exitCode
  */
 async function runTestInSauceLabs(config) {
-  const browsers = {stable: [], beta: []};
-  for (const browserId of config.browsers) {
-    browsers[
-      browserId.toLowerCase().endsWith('_beta') ? 'beta' : 'stable'
-    ].push(browserId);
-  }
+  const flagSet = argv.stable || argv.beta;
+  const useStable = argv.stable || !flagSet;
+  const useBeta = argv.beta || !flagSet;
 
-  if (argv.stable) {
-    config.browsers = browsers.stable;
-    return createKarmaServer(config, reportTestRunComplete);
-  }
+  const isBeta = browserId => browserId.toLowerCase().endsWith('_beta');
+  const isStable = browserId => !isBeta(browserId);
 
-  if (argv.beta) {
-    config.browsers = browsers.beta;
-    const betaExitCode = await createKarmaServer(config, reportTestRunComplete);
-    if (betaExitCode != 0) {
-      log(
-        yellow('Some tests have failed on'),
-        cyan('beta'),
-        yellow('browsers.')
-      );
-      log(
-        yellow('This is not currently a fatal error, but will become an'),
-        yellow('error once the beta browsers are released as next stable'),
-        yellow('version!')
-      );
-    }
-
-    return 0;
-  }
-
-  return await runTestInBatches_(config, browsers);
+  return await runTestInBatches_(config, {
+    beta: useBeta ? config.browsers.filter(isBeta) : [],
+    stable: useStable ? config.browsers.filter(isStable) : [],
+  });
 }
 
 /**
