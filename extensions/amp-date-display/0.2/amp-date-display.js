@@ -79,13 +79,13 @@ class AmpDateDisplay extends PreactBaseElement {
 }
 
 /** @override */
-AmpDateDisplay.Component = DateDisplay;
+AmpDateDisplay['Component'] = DateDisplay;
 
 /** @override */
-AmpDateDisplay.passthrough = true;
+AmpDateDisplay['passthrough'] = true;
 
 /** @override */
-AmpDateDisplay.props = {
+AmpDateDisplay['props'] = {
   'displayIn': {attr: 'display-in'},
   'offsetSeconds': {attr: 'offset-seconds', type: 'number'},
   'locale': {attr: 'locale'},

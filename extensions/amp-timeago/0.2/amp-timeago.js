@@ -41,13 +41,13 @@ class AmpTimeago extends PreactBaseElement {
 }
 
 /** @override */
-AmpTimeago.Component = Timeago;
+AmpTimeago['Component'] = Timeago;
 
 /** @override */
-AmpTimeago.passthrough = true;
+AmpTimeago['passthrough'] = true;
 
 /** @override */
-AmpTimeago.props = {
+AmpTimeago['props'] = {
   'datetime': {attr: 'datetime'},
   'locale': {attr: 'locale'},
   'cutoff': {attr: 'cutoff', type: 'number'},
