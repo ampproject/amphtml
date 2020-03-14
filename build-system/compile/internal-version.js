@@ -19,8 +19,10 @@ const argv = require('minimist')(process.argv.slice(2));
 const {gitCommitFormattedTime} = require('../common/git');
 
 function getVersion() {
-  if (argv.rtv_version) {
-    return String(argv.rtv_version);
+  // Flag --version has been supported since 2016, so is still supported for
+  // backwards compatibility. --release_version is the documented flag.
+  if (argv.release_version || argv.version) {
+    return String(argv.release_version || argv.version);
   } else {
     // Generate a consistent version number by using the commit* time of the
     // latest commit on the active branch as the twelve digits. The last,

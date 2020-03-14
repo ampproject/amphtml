@@ -132,8 +132,9 @@ build.flags = {
   noextensions: '  Builds with no extensions.',
   core_runtime_only: '  Builds only the core runtime.',
   coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
-  rtv_version: '  Overrides the version number written to AMP_CONFIG',
+  release_version: '  Overrides the version written to AMP_CONFIG',
 };
+build.undocumented_flags = ['version'];
 
 watch.description = 'Watches for changes in files, re-builds when detected';
 watch.flags = {
@@ -143,8 +144,9 @@ watch.flags = {
     '  Watches and builds only the extensions from the listed AMP(s).',
   noextensions: '  Watches and builds with no extensions.',
   core_runtime_only: '  Watches and builds only the core runtime.',
-  rtv_version: '  Overrides the version number written to AMP_CONFIG',
+  release_version: '  Overrides the version written to AMP_CONFIG',
 };
+watch.undocumented_flags = ['version'];
 
 defaultTask.description =
   'Starts the dev server and lazily builds JS and extensions when requested';
@@ -154,5 +156,6 @@ defaultTask.flags = {
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
   noextensions: '  Watches and builds with no extensions.',
-  rtv_version: '  Overrides the version number written to AMP_CONFIG',
+  release_version: '  Overrides the version written to AMP_CONFIG',
 };
+defaultTask.undocumented_flags = ['version'];
