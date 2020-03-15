@@ -756,10 +756,6 @@ const adConfig = jsonConfiguration({
 
   'nws': {},
 
-  'oblivki': {
-    prefetch: 'https://oblivki.biz/ads/amp.js',
-  },
-
   'onead': {
     prefetch: 'https://ad-specs.guoshipartners.com/static/js/onead-amp.min.js',
     renderStartImplemented: true,
