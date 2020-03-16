@@ -285,6 +285,9 @@ describes.repeated(
               .expects('attemptChangeHeight')
               .withExactArgs(1337)
               .returns(Promise.reject());
+            listMock
+              .expects('maybeResizeListToFitItems_')
+              .returns(Promise.reject());
             listMock.expects('maybeUnlockHeight_').never();
 
             return list.layoutCallback();

@@ -260,13 +260,13 @@ export class AmpList extends AMP.BaseElement {
     // If a placeholder exists and it's taller than amp-list, attempt a resize.
     const placeholder = this.getPlaceholder();
     if (placeholder) {
-      this.attemptToFit_(placeholder);
+      this.attemptToFit_(placeholder).catch(() => {});
     } else if (this.hasInitialContent_) {
-      this.attemptToFit_(dev().assertElement(this.container_));
+      this.attemptToFit_(dev().assertElement(this.container_)).catch(() => {});
     }
 
     this.viewport_.onResize(() => {
-      this.maybeResizeListToFitItems_();
+      this.maybeResizeListToFitItems_().catch(() => {});
     });
 
     if (this.loadMoreEnabled_) {
@@ -307,12 +307,13 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @private
+   * @return {!Promise}
    */
   maybeResizeListToFitItems_() {
     if (this.loadMoreEnabled_) {
-      this.attemptToFitLoadMore_(dev().assertElement(this.container_));
+      return this.attemptToFitLoadMore_(dev().assertElement(this.container_));
     } else {
-      this.attemptToFit_(dev().assertElement(this.container_));
+      return this.attemptToFit_(dev().assertElement(this.container_));
     }
   }
 
@@ -1026,7 +1027,10 @@ export class AmpList extends AMP.BaseElement {
           .getResourceForElement(this.element);
         r.resetPendingChangeSize();
 
-        this.maybeResizeListToFitItems_();
+        this.maybeResizeListToFitItems_().then(
+          () => this.maybeUnlockHeight_(),
+          () => {}
+        );
       }
     );
   }
@@ -1163,17 +1167,16 @@ export class AmpList extends AMP.BaseElement {
    *
    * @param {!Element} target
    * @private
+   * @return {!Promise}
    */
   attemptToFit_(target) {
-    this.measureElement(() => {
+    return this.measureElement(() => {
       const targetHeight = target./*OK*/ scrollHeight;
       const height = this.element./*OK*/ offsetHeight;
       if (targetHeight > height) {
-        this.attemptChangeHeight(targetHeight).then(
-          () => this.maybeUnlockHeight_(),
-          () => {}
-        );
+        return this.attemptChangeHeight(targetHeight);
       }
+      return Promise.resolve();
     });
   }
 
@@ -1181,45 +1184,48 @@ export class AmpList extends AMP.BaseElement {
    *
    * @param {!Element} target
    * @private
+   * @return {!Promise}
    */
   attemptToFitLoadMore_(target) {
     if (this.isLayoutContainer_) {
-      return;
+      return Promise.resolve();
     }
     const element = !!this.loadMoreSrc_
       ? this.getLoadMoreService_().getLoadMoreButton()
       : this.getLoadMoreService_().getLoadMoreEndElement();
-    this.attemptToFitLoadMoreElement_(element, target);
+    return this.attemptToFitLoadMoreElement_(element, target);
   }
 
   /**
    * @param {?Element} element
    * @param {!Element} target
    * @private
+   * @return {!Promise}
    */
   attemptToFitLoadMoreElement_(element, target) {
-    this.measureElement(() => {
+    return this.measureElement(() => {
       const targetHeight = target./*OK*/ scrollHeight;
       const height = this.element./*OK*/ offsetHeight;
       const loadMoreHeight = element ? element./*OK*/ offsetHeight : 0;
-      if (targetHeight + loadMoreHeight > height) {
-        this.attemptChangeHeight(targetHeight + loadMoreHeight)
-          .then(() => {
-            this.resizeFailed_ = false;
-            // If there were not enough items to fill the list, consider
-            // automatically loading more if load-more="auto" is enabled
-            if (this.element.getAttribute('load-more') === 'auto') {
-              this.maybeLoadMoreItems_();
-            }
-            setStyles(dev().assertElement(this.container_), {
-              'max-height': '',
-            });
-          })
-          .catch(() => {
-            this.resizeFailed_ = true;
-            this.adjustContainerForLoadMoreButton_();
-          });
+      if (targetHeight + loadMoreHeight <= height) {
+        return Promise.resolve();
       }
+      return this.attemptChangeHeight(targetHeight + loadMoreHeight)
+        .then(() => {
+          this.resizeFailed_ = false;
+          // If there were not enough items to fill the list, consider
+          // automatically loading more if load-more="auto" is enabled
+          if (this.element.getAttribute('load-more') === 'auto') {
+            this.maybeLoadMoreItems_();
+          }
+          setStyles(dev().assertElement(this.container_), {
+            'max-height': '',
+          });
+        })
+        .catch(() => {
+          this.resizeFailed_ = true;
+          this.adjustContainerForLoadMoreButton_();
+        });
     });
   }
 
@@ -1482,7 +1488,7 @@ export class AmpList extends AMP.BaseElement {
     // Displaying [fetch-error] may offset initial content, so resize to fit.
     if (childElementByAttr(this.element, 'fetch-error')) {
       // Note that we're measuring against the element instead of the container.
-      this.attemptToFit_(this.element);
+      this.attemptToFit_(this.element).catch(() => {});
     }
     this.toggleLoading(false);
     if (this.getFallback()) {
