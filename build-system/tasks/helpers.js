@@ -29,6 +29,7 @@ const gulpIf = require('gulp-if');
 const gulpWatch = require('gulp-watch');
 const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
+const micromatch = require('micromatch');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
@@ -718,7 +719,7 @@ function transferSrcsToTempDir(options = {}) {
   files.forEach(file => {
     if (
       (file.startsWith('node_modules/') || file.startsWith('third_party/')) &&
-      !THIRD_PARTY_TRANSFORM_GLOBS.includes(file)
+      !micromatch.isMatch(file, THIRD_PARTY_TRANSFORM_GLOBS)
     ) {
       fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
       return;
