@@ -263,6 +263,7 @@ export class AmpStoryEducation extends AMP.BaseElement {
 
   /**
    * Asks the viewer whether the navigation screen should be shown.
+   * Viewer responses should be treated right away, and not cached.
    * @param {!Screen} screen Screen to show
    * @param {!State} state State to set
    * @private
