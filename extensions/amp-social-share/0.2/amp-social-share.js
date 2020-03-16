@@ -45,7 +45,7 @@ const getTypeConfigOrUndefined = (type, viewer, platform) => {
     // system share wants to be unique
     const systemOnly =
       systemShareSupported(viewer, platform) &&
-      !!window.ownerDocument.querySelector(
+      !!window.document.querySelector(
         'amp-social-share[type=system][data-mode=replace]'
       );
     if (systemOnly) {
