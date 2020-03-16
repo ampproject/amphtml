@@ -142,7 +142,7 @@
     "magic-string": "0.25.6",
     "markdown-link-check": "3.8.0",
     "minimatch": "3.0.4",
-    "minimist": "1.2.0",
+    "minimist": "1.2.5",
     "mocha": "7.1.0",
     "mocha-silent-reporter": "1.0.0",
     "morgan": "1.9.1",
