@@ -203,6 +203,25 @@ export class LoginDoneDialog {
       // Ignore.
     }
 
+    // Keep trying to close the window for a minute.
+    // Sometimes `window.close()` is ignored by the browser for a stretch of time.
+    // For instance, iOS ignores the method when there is a
+    // "Save Password" or "Update Password" prompt open.
+    // https://github.com/ampproject/amphtml/issues/11369
+    const windowCloseIntervalDeadline = Date.now() + 60 * 1000;
+    const windowCloseInterval = this.win.setInterval(() => {
+      if (this.win.closed || Date.now() > windowCloseIntervalDeadline) {
+        clearInterval(windowCloseInterval);
+        return;
+      }
+
+      try {
+        this.win.close();
+      } catch (e) {
+        // Ignore.
+      }
+    }, 500);
+
     // Give the opener a chance to close the dialog, if not, show the
     // close button.
     this.win.setTimeout(() => {
