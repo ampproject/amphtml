@@ -150,6 +150,7 @@ export class ViewerImpl {
     this.prerenderSize_ =
       parseInt(ampdoc.getParam('prerenderSize'), 10) || this.prerenderSize_;
     dev().fine(TAG_, '- prerenderSize:', this.prerenderSize_);
+    this.prerenderSizeDeprecation_();
 
     /**
      * Whether the AMP document is embedded in a Chrome Custom Tab.
@@ -265,6 +266,16 @@ export class ViewerImpl {
     this.ampdoc.whenFirstVisible().then(() => {
       this.maybeUpdateFragmentForCct();
     });
+  }
+
+  /** @private */
+  prerenderSizeDeprecation_() {
+    if (this.prerenderSize_ !== 1) {
+      dev().expectedError(
+        TAG_,
+        `prerenderSize (${this.prerenderSize_}) is deprecated (#27167)`
+      );
+    }
   }
 
   /**
@@ -682,6 +693,7 @@ export class ViewerImpl {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
         dev().fine(TAG_, '- prerenderSize change:', this.prerenderSize_);
+        this.prerenderSizeDeprecation_();
       }
       this.setVisibilityState_(data['state']);
       return Promise.resolve();
