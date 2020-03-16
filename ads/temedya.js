@@ -21,16 +21,9 @@ import {loadScript, validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function temedya(global, data) {
-  validateData(data, ['keyid']);
+  validateData(data, ['widgetid']);
   global._temedya = global._temedya || {
-    title: data['title'] || 'false',
-    keyId: data['keyid'],
-    siteId: data['siteid'],
-    siteUrl: data['siteurl'] || global.context.canonicalUrl,
-    typeId: data['typeid'] || 7,
-    paidItem: data['paiditem'] || 4,
-    organicItem: data['organicitem'] || 0,
-    theme: data['theme'] || 'google',
+    widgetId: data['widgetid'],
   };
   global._temedya.AMPCallbacks = {
     renderStart: global.context.renderStart,
@@ -39,7 +32,7 @@ export function temedya(global, data) {
   // load the temedya  AMP JS file script asynchronously
   loadScript(
     global,
-    'https://vidyome-com.cdn.vidyome.com/vidyome/builds/temedya-amp.js',
+    'https://widget.cdn.vidyome.com/builds/loader-amp.js',
     () => {},
     global.context.noContentAvailable
   );

@@ -1050,7 +1050,7 @@ const adConfig = jsonConfiguration({
 
   'temedya': {
     prefetch: [
-      'https://vidyome-com.cdn.vidyome.com/vidyome/builds/temedya-amp.js',
+      'https://widget.cdn.vidyome.com/builds/loader-amp.js',
       'https://vidyome-com.cdn.vidyome.com/vidyome/builds/widgets.js',
     ],
     renderStartImplemented: true,
