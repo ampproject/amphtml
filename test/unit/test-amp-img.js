@@ -205,6 +205,22 @@ describes.sandboxed('amp-img', {}, env => {
     });
   });
 
+  it('should propagate srcset and sizes with disable-inline-width', async () => {
+    const ampImg = await getImg({
+      src: '/examples/img/sample.jpg',
+      srcset: SRCSET_STRING,
+      sizes: '(max-width: 320px) 640px, 100vw',
+      width: 320,
+      height: 240,
+      'disable-inline-width': null,
+    });
+    const img = ampImg.querySelector('img');
+    expect(img.getAttribute('srcset')).to.equal(SRCSET_STRING);
+    expect(img.getAttribute('sizes')).to.equal(
+      '(max-width: 320px) 640px, 100vw'
+    );
+  });
+
   describe('#fallback on initial load', () => {
     let el;
     let impl;

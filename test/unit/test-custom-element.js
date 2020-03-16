@@ -1164,6 +1164,13 @@ describes.realWin('CustomElement', {amp: true}, env => {
           element2.ampdoc_ = env.ampdoc;
         });
 
+        it('should not apply sizes when "disable-inline-width" is present', () => {
+          element1.setAttribute('disable-inline-width', null);
+          element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
+          element1.applySizesAndMediaQuery();
+          expect(element1.style.width).not.to.equal('200px');
+        });
+
         it('should apply media condition', () => {
           element1.setAttribute('media', '(min-width: 1px)');
           element1.applySizesAndMediaQuery();
