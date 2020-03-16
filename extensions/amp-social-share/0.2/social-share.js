@@ -18,12 +18,12 @@ import * as CSS from './social-share.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
 import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
-import {dev, devAssert, userAssert} from '../../../src/log';
 import {getAmpContext} from '../../../src/preact/context';
 import {openWindowDialog} from '../../../src/dom';
 import {parseQueryString} from '../../../src/url';
 import {startsWith} from '../../../src/string';
 import {useResourcesNotify} from '../../../src/preact/utils';
+import PropTypes from 'prop-types';
 
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;
@@ -52,11 +52,13 @@ export function SocialShare(props) {
   function handleActivation() {
     const href = context['href'] || props['href'];
     const target = context['target'] || props['target'] || '_blank';
-    userAssert(href && target, 'Clicked before href is set.');
-    dev().assertString(href);
-    dev().assertString(target);
+    if (!href) {
+      throw new Error('Clicked before href is set.');
+    }
     if (startsWith(href, 'navigator-share:')) {
-      devAssert(navigator.share !== undefined, 'navigator.share disappeared.');
+      if (navigator.share !== undefined) {
+        throw new Error('navigator.share disappeared.');
+      }
       // navigator.share() fails 'gulp check-types' validation on Travis
       navigator['share'](parseQueryString(href.substr(href.indexOf('?'))));
     } else {
@@ -89,3 +91,13 @@ export function SocialShare(props) {
     </div>
   );
 }
+
+SocialShare.propTypes = {
+  height: PropTypes.string,
+  href: PropTypes.string,
+  size: PropTypes.object,
+  tabindex: PropTypes.number,
+  target: PropTypes.string,
+  type: PropTypes.string.isRequired,
+  width: PropTypes.string,
+};
