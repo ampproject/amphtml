@@ -7331,10 +7331,10 @@ form-data@~2.3.2:
     combined-stream "^1.0.6"
     mime-types "^2.1.12"
 
-formidable@1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/formidable/-/formidable-1.2.1.tgz#70fb7ca0290ee6ff961090415f4b3df3d2082659"
-  integrity sha512-Fs9VRguL0gqGHkXS5GQiMCr1VhZBxz0JnJs4JmMp/2jL18Fmbzvv7vOFRU+U8TBkHEE/CX1qDXzJplVULgsLeg==
+formidable@1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/formidable/-/formidable-1.2.2.tgz#bf69aea2972982675f00865342b982986f6b8dd9"
+  integrity sha512-V8gLm+41I/8kguQ4/o1D3RIHRmhYFG4pnNyonvua+40rqcEmT4+V71yaZ3B457xbbgCsCfjSPi65u/W6vK1U5Q==
 
 forwarded@~0.1.2:
   version "0.1.2"
