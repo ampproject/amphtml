@@ -5439,6 +5439,7 @@ tags: {
 # their values.
 attr_lists: {
   name: "$AMP_LAYOUT_ATTRS"
+  attrs: { name: "disable-inline-width" }
   attrs: { name: "height" }
   attrs: { name: "heights" }
   attrs: { name: "layout" }
