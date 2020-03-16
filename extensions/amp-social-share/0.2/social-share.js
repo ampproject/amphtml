@@ -17,13 +17,13 @@
 import * as CSS from './social-share.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
+import {PropTypes, checkPropTypes} from 'prop-types';
 import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
 import {getAmpContext} from '../../../src/preact/context';
 import {openWindowDialog} from '../../../src/dom';
 import {parseQueryString} from '../../../src/url';
 import {startsWith} from '../../../src/string';
 import {useResourcesNotify} from '../../../src/preact/utils';
-import PropTypes from 'prop-types';
 
 const DEFAULT_WIDTH = 60;
 const DEFAULT_HEIGHT = 44;
@@ -33,13 +33,7 @@ const DEFAULT_HEIGHT = 44;
  * @return {PreactDef.Renderable}
  */
 export function SocialShare(props) {
-  PropTypes.checkPropTypes(
-    SocialShare['propTypes'],
-    props,
-    'prop',
-    'SocialShare'
-  );
-
+  checkPropTypes(SocialShare['propTypes'], props, 'prop', 'SocialShare');
   const context = Preact.useContext(getAmpContext());
 
   /**
