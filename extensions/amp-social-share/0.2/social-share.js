@@ -66,22 +66,26 @@ export function SocialShare(props) {
   }
 
   const styleType = `SOCIAL_SHARE_${props['type'].toUpperCase()}`;
-  const base = CSS.BASE_STYLE;
-  const background = CSS[styleType];
+  const baseStyle = CSS.BASE_STYLE;
+  const backgroundStyle = CSS[styleType];
   const size = props['size'] || {
     width: props['width'] || DEFAULT_WIDTH,
     height: props['height'] || DEFAULT_HEIGHT,
   };
   useResourcesNotify();
   return (
-    <SocialShareIcon
-      className={`social-share-${props['type']}`}
-      onClick={handleActivation}
-      onKeydown={handleKeyPress}
+    <div
       role="button"
-      style={{...size, ...base, ...background}}
-      styleType={styleType}
-      tabIndex={props['tabIndex'] || '0'}
-    />
+      tabindex={props['tabIndex'] || '0'}
+      onKeyDown={handleKeyPress}
+      onClick={handleActivation}
+      {...props}
+    >
+      <SocialShareIcon
+        className={`amp-social-share-${props['type']}`}
+        style={{...backgroundStyle, ...baseStyle, ...size}}
+        styleType={styleType}
+      />
+    </div>
   );
 }
