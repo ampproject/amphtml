@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-import fs from 'fs';
-import {resolve} from 'path';
+import {promises as fsPromises} from 'fs';
+// import {resolve} from 'path';
 import posthtml from 'posthtml';
 import transformModules from './transforms/modules/modules-transform';
 import transformScriptPaths from './transforms/scripts/scripts-transform';
 import transformStories from './transforms/stories/stories-transform';
 
-const html = fs.readFileSync(resolve(process.cwd(), '../../examples/travel.amp.html'), 'utf8');
+// const html = fs.readFileSync(resolve(process.cwd(), '../../examples/travel.amp.html'), 'utf8');
 
 const transforms = [transformModules, transformStories, transformScriptPaths];
 
-console.log('before', html);
-posthtml(transforms)
-  .process(html /*, options */)
-  .then(result => console.log('after', result.html));
+// console.log('before', html);
+// posthtml(transforms)
+//   .process(html /*, options */)
+//   .then(result => console.log('after', result.html));
+
+export async function transform(fileLocation: string): Promise<string> {
+  const source = await fsPromises.readFile(fileLocation, 'utf8');
+  const result = await posthtml(transforms).process(source);
+  return result.html;
+}

@@ -6,6 +6,9 @@
   },
   "dependencies": {
     "ava": "3.5.0",
+    "fastify": "2.12.1",
+    "fastify-compress": "2.0.1",
+    "fastify-url-data": "2.4.0",
     "globby": "11.0.0",
     "posthtml": "0.12.0",
     "posthtml-parser": "0.4.2"

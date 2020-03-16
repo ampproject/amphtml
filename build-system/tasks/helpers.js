@@ -151,6 +151,7 @@ function compileAllUnminifiedJs(watch) {
 function doBuildJs(jsBundles, name, extraOptions) {
   const target = jsBundles[name];
   if (target) {
+    console.log('doBuildJs', {target});
     return compileJs(
       target.srcDir,
       target.srcFilename,

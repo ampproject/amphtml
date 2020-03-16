@@ -33,6 +33,7 @@ maybeInitializeExtensions(extensionBundles, /* includeLatest */ true);
  */
 async function lazyBuild(url, matcher, bundles, buildFunc, next) {
   const match = url.match(matcher);
+  console.log('lazyBuild', {match});
   if (match && match.length == 2) {
     const bundle = match[1];
     if (bundles[bundle]) {
@@ -55,6 +56,7 @@ async function lazyBuild(url, matcher, bundles, buildFunc, next) {
  * @param {function()} buildFunc
  */
 async function build(bundles, bundle, buildFunc) {
+  console.log('build', {item: bundles[bundle]});
   bundles[bundle].pendingBuild = buildFunc(bundles, bundle, {
     watch: true,
     onWatchBuild: async bundlePromise => {
@@ -64,6 +66,7 @@ async function build(bundles, bundle, buildFunc) {
     },
   });
   await bundles[bundle].pendingBuild;
+  console.log('build finished?', {item: bundles[bundle]});
   bundles[bundle].pendingBuild = undefined;
   bundles[bundle].watched = true;
 }

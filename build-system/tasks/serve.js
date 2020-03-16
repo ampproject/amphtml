@@ -28,6 +28,10 @@ const {
   preBuildRuntimeFiles,
   preBuildExtensions,
 } = require('../server/lazy-build');
+const {
+  start: startUpdatedServer,
+  end: endUpdatedServer,
+} = require('../updated-server/output/router');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
 const {cyan, green} = require('ansi-colors');
 const {logServeMode, setServeMode} = require('../server/app-utils');
@@ -99,6 +103,7 @@ async function startServer(
     ...connectOptions,
   };
   connect.server(options, started);
+  await startUpdatedServer();
   await startedPromise;
   url = `http${options.https ? 's' : ''}://${options.host}:${options.port}`;
   log(green('Started'), cyan(options.name), green('at'), cyan(url));
@@ -118,9 +123,10 @@ function resetServerFiles() {
 /**
  * Stops the currently running server
  */
-function stopServer() {
+async function stopServer() {
   if (url) {
     connect.serverClose();
+    await endUpdatedServer();
     log(green('Stopped server at'), cyan(url));
     url = null;
   }

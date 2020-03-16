@@ -30,7 +30,7 @@ export function CDNURLToLocalDistURL(
 ): URL {
   url.protocol = 'http';
   url.hostname = 'localhost';
-  url.port = '8000';
+  url.port = extension === '.js' ? '8000' : '8001';
 
   const [overwriteablePathname, newPathname] = pathnames;
   if (url.pathname === overwriteablePathname && newPathname !== null) {

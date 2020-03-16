@@ -931,7 +931,7 @@ app.get(
     '/test/manual/(**/)?*.html',
     '/test/fixtures/e2e/(**/)?*.html',
   ],
-  (req, res, next) => {
+  async (req, res, next) => {
     const filePath = req.path;
     const mode = SERVE_MODE;
     const inabox = req.query['inabox'];
