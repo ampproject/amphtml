@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/ampproject/amphtml/tree/master/src/purifier",
   "devDependencies": {
-    "@rollup/plugin-alias": "3.0.0",
+    "@rollup/plugin-alias": "3.0.1",
     "rollup": "2.0.2"
   },
   "dependencies": {
