@@ -3,7 +3,7 @@ $category@: presentation
 formats:
   - websites
 teaser:
-  text: Displays a [MathML formula](https://www.w3.org/Math/).
+  text: Displays a MathML formula.
 ---
 
 <!--
