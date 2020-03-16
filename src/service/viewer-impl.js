@@ -20,6 +20,7 @@ import {Services} from '../services';
 import {ViewerInterface} from './viewer-interface';
 import {VisibilityState} from '../visibility-state';
 import {
+  createExpectedError,
   dev,
   devAssert,
   duplicateErrorIfNecessary,
@@ -306,11 +307,11 @@ export class ViewerImpl {
     return Services.timerFor(this.win)
       .timeoutPromise(20000, messagingPromise, timeoutMessage)
       .catch(reason => {
-        const error = getChannelError(
+        let error = getChannelError(
           /** @type {!Error|string|undefined} */ (reason)
         );
         if (error && error.message === timeoutMessage) {
-          error.expected = true;
+          error = createExpectedError(error);
         }
         reportError(error);
         throw error;
