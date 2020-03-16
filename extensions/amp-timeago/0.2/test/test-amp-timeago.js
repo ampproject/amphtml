@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 import '../amp-timeago';
+import {Timeago} from '../timeago';
+import {act} from 'react-dom/test-utils';
+import {render} from 'react-dom';
 import {toggleExperiment} from '../../../../src/experiments';
 
 describes.realWin(
@@ -83,10 +86,17 @@ describes.realWin(
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
       element.build();
-      await timeout(1000);
       const shadow = await getShadow();
       const timeElement = shadow.querySelector('time');
-      observerCallback([{target: timeElement, isIntersecting: true}]);
+      await act(async () => {
+        render(Timeago, element);
+      });
+      await timeout(1000);
+      expect(timeElement.textContent).to.equal('10 seconds ago');
+
+      await act(async () => {
+        observerCallback([{target: timeElement, isIntersecting: true}]);
+      });
       expect(timeElement.textContent).to.equal('11 seconds ago');
     });
 
