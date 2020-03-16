@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.95 */
+/** Version: 0.1.22.96 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5575,7 +5575,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.95',
+    '_client': 'SwG 0.1.22.96',
   });
 }
 
@@ -6689,7 +6689,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.95',
+        '_client': 'SwG 0.1.22.96',
         'supportsEventManager': true,
       },
       args || {}
@@ -7589,7 +7589,7 @@ class AnalyticsService {
     // These values should all be available during page load.
     context.setTransactionId(getUuid());
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.95');
+    context.setClientVersion('SwG 0.1.22.96');
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
@@ -15301,9 +15301,16 @@ class RedirectVerifierHelper {
     // b. WebCrypto (crypto.subtle);
     // c. Crypto random (crypto.getRandomValues);
     // d. SHA284 (crypto.subtle.digest).
+    let supportsLocalStorage;
+    try {
+      supportsLocalStorage = !!this.win_.localStorage;
+    } catch (e) {
+      // Note: This can happen when cookies are disabled.
+      supportsLocalStorage = false;
+    }
     const crypto = this.win_.crypto;
     if (
-      this.win_.localStorage &&
+      supportsLocalStorage &&
       crypto &&
       crypto.getRandomValues &&
       crypto.subtle &&
