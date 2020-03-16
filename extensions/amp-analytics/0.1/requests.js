@@ -267,8 +267,9 @@ export class RequestHandler {
       Promise.all(segmentPromises),
       requestOriginPromise,
     ]).then(results => {
-      const requestUrl = this.composeRequestUrl_(results[0], results[2]);
-
+      let requestUrl = this.composeRequestUrl_(results[0], results[2]);
+      console.log('request url is ', requestUrl);
+      requestUrl = `https://example.test?${requestUrl}`;
       const batchSegments = results[1];
       if (batchSegments.length === 0) {
         return;

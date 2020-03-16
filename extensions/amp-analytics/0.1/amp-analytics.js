@@ -42,7 +42,9 @@ import {isArray, isEnumValue} from '../../../src/types';
 import {isIframed} from '../../../src/dom';
 import {isInFie} from '../../../src/iframe-helper';
 import {toggle} from '../../../src/style';
-
+import { Deferred } from '../../../src/utils/promise';
+import { chunk, ChunkPriority, chunkInstanceForTesting } from '../../../src/chunk';
+import {startsWith,endsWith} from '../../../src/string'
 const TAG = 'amp-analytics';
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
@@ -105,6 +107,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     /** @private {?boolean} */
     this.isInFie_ = null;
+
+    this.t1 = 0;
   }
 
   /** @override */
@@ -235,8 +239,21 @@ export class AmpAnalytics extends AMP.BaseElement {
           this.config_['transport'] || {}
         );
       })
-      .then(this.registerTriggers_.bind(this))
-      .then(this.initializeLinker_.bind(this));
+      .then(() => {
+        const deferred = new Deferred();
+        const task = () => {
+          return this.registerTriggers_().then(() => {
+            deferred.resolve();
+          });
+        }
+        chunk(this.element, task, ChunkPriority.HIGH);
+        return deferred.promise;
+      })
+      //.then(this.registerTriggers_.bind(this))
+      .then(() => {
+        console.log("register Triggers take ", Date.now() - this.t1);
+        return this.initializeLinker_();
+      });
     return this.iniPromise_;
   }
 
@@ -263,6 +280,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   registerTriggers_() {
+    this.t1 = Date.now();
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
       const TAG = this.getName_();
@@ -271,7 +289,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     this.generateRequests_();
-
+    const t2 = Date.now();
+    console.log('generate requests takes ', t2 - this.t1);
     if (!this.config_['triggers']) {
       const TAG = this.getName_();
       this.user().error(
@@ -286,13 +305,19 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.config_['extraUrlParams'],
       this.config_['extraUrlParamsReplaceMap']
     );
+    const t3 = Date.now();
+    console.log('process extra url params take', t3 - t2);
 
     this.analyticsGroup_ = this.instrumentation_.createAnalyticsGroup(
       this.element
     );
+    const t4 = Date.now();
+    console.log('create analytics group takes', t4 - t3);
 
     this.transport_.maybeInitIframeTransport(this.element);
 
+    const t5 = Date.now();
+    console.log('init iframe takes ', t5 - t4);
     const promises = [];
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
@@ -345,6 +370,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         );
         promises.push(
           this.isSampledIn_(trigger).then(result => {
+            const t = Date.now();
             if (!result) {
               return;
             }
@@ -360,7 +386,7 @@ export class AmpAnalytics extends AMP.BaseElement {
               this.addTrigger_(trigger);
             } else if (trigger['selector']) {
               // Expand the selector using variable expansion.
-              return this.variableService_
+                return this.variableService_
                 .expandTemplate(
                   trigger['selector'],
                   expansionOptions,
@@ -403,21 +429,29 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @noinline
    */
   addTrigger_(config) {
-    if (!this.analyticsGroup_) {
-      // No need to handle trigger for component that has already been detached
-      // from DOM
-      return;
-    }
-    try {
-      this.analyticsGroup_.addTrigger(
-        config,
-        this.handleEvent_.bind(this, config)
-      );
-    } catch (e) {
-      const TAG = this.getName_();
-      const eventType = config['on'];
-      rethrowAsync(TAG, 'Failed to process trigger "' + eventType + '"', e);
-    }
+    const deferred = new Deferred();
+    const task = () => {
+      const t = Date.now();
+      if (!this.analyticsGroup_) {
+        // No need to handle trigger for component that has already been detached
+        // from DOM
+        return;
+      }
+      try {
+        this.analyticsGroup_.addTrigger(
+          config,
+          this.handleEvent_.bind(this, config)
+        );
+        console.log('add trigger takes ', Date.now() - t);
+      } catch (e) {
+        const TAG = this.getName_();
+        const eventType = config['on'];
+        rethrowAsync(TAG, 'Failed to process trigger "' + eventType + '"', e);
+      }
+      deferred.resolve();
+    };
+    chunk(this.element, task, ChunkPriority.HIGH);
+    return deferred.promise;
   }
 
   /**
@@ -497,6 +531,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   generateRequests_() {
+    const t1 = Date.now();
     if (!this.config_['requests']) {
       if (!this.allowParentPostMessage_()) {
         const TAG = this.getName_();
@@ -549,6 +584,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       }
       this.requests_ = requests;
     }
+    console.log('generate requests takes ', Date.now() - t1);
   }
 
   /**
@@ -684,15 +720,21 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.user().error(TAG, 'Invalid sampleOn value.');
       return resolve;
     }
-    const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
-    if (threshold >= 0 && threshold <= 100) {
-      const expansionOptions = this.expansionOptions_(dict({}), trigger);
-      return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
-        .then(key => this.cryptoService_.uniform(key))
-        .then(digest => digest * 100 < threshold);
+
+    const sampleDeferred = new Deferred();
+    const task = () => {
+      const threshold = parseFloat(spec['threshold']); // Threshold can be NaN.
+      if (threshold >= 0 && threshold <= 100) {
+        const expansionOptions = this.expansionOptions_(dict({}), trigger);
+        return this.expandTemplateWithUrlParams_(sampleOn, expansionOptions)
+          .then(key => this.cryptoService_.uniform(key))
+          .then(digest => {
+            sampleDeferred.resolve(digest * 100 < threshold);
+          });
+      }
     }
-    user()./*OK*/ error(TAG, 'Invalid threshold for sampling.');
-    return resolve;
+    chunk(this.element, task, ChunkPriority.LOW);
+    return sampleDeferred.promise;
   }
 
   /**
@@ -795,6 +837,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
 AMP.extension(TAG, '0.1', AMP => {
   // Register doc-service factory.
+  self['analytics-start'] = Date.now();
+  self['analytics-first'] = 1;
   AMP.registerServiceForDoc(
     'amp-analytics-instrumentation',
     InstrumentationService
