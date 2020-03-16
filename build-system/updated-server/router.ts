@@ -20,7 +20,6 @@ import fastify from 'fastify';
 import urlData from 'fastify-url-data';
 import compress from 'fastify-compress';
 import {transform} from './transform';
-// import { deliver } from './build';
 
 const fastifyInstance = fastify({
   logger: false,
