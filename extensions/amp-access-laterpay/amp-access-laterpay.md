@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Allows publishers to easily integrate with the [LaterPay](https://www.laterpay.net) micropayments platform.
+  text: Allows publishers to easily integrate with the LaterPay micropayments platform.
 ---
 
 <!---

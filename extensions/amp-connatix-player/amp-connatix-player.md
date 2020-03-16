@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a cloud-hosted [Connatix Player](https://www.connatix.com/).
+  text: Displays a cloud-hosted Connatix Player.
 ---
 
 <!--

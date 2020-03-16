@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a cloud-hosted [Mow Player](https://mowplayer.com/).
+  text: Displays a cloud-hosted Mow Player.
 ---
 
 <!--

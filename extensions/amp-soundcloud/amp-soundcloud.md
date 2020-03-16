@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a [Soundcloud](https://soundcloud.com/) clip.
+  text: Displays a Soundcloud clip.
 ---
 
 <!---

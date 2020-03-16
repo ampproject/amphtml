@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays the Kaltura Player as used in Kaltura's [Video Platform](https://corp.kaltura.com/).
+  text: Displays the Kaltura Player as used in Kaltura's Video Platform.
 ---
 
 <!---

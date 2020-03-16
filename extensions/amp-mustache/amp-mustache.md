@@ -5,7 +5,7 @@ formats:
   - ads
   - email
 teaser:
-  text: Allows rendering of [Mustache](http://mustache.github.io/mustache.5.html) templates.
+  text: Allows rendering of Mustache templates.
 ---
 
 <!---

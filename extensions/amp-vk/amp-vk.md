@@ -3,7 +3,7 @@ $category@: social
 formats:
   - websites
 teaser:
-  text: Embeds a [VK](https://vk.com/) post or poll widget.
+  text: Embeds a VK post or poll widget.
 ---
 
 <!--

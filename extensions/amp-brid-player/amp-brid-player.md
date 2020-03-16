@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a [Brid.tv](https://www.brid.tv/) player.
+  text: Displays a Brid.tv player.
 ---
 
 <!---

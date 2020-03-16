@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a [Dailymotion](http://www.dailymotion.com/) video.
+  text: Displays a Dailymotion video.
 ---
 
 <!---

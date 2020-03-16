@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a [Springboard Platform](http://publishers.springboardplatform.com) video player.
+  text: Displays a Springboard Platform video player.
 ---
 
 <!---
