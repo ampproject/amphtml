@@ -20,7 +20,6 @@ import {Services} from '../services';
 import {ViewerInterface} from './viewer-interface';
 import {VisibilityState} from '../visibility-state';
 import {
-  createExpectedError,
   dev,
   devAssert,
   duplicateErrorIfNecessary,
@@ -311,7 +310,7 @@ export class ViewerImpl {
           /** @type {!Error|string|undefined} */ (reason)
         );
         if (error && error.message === timeoutMessage) {
-          error = createExpectedError(error);
+          error = dev().createExpectedError(error);
         }
         reportError(error);
         throw error;
