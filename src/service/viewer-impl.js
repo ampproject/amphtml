@@ -302,12 +302,16 @@ export class ViewerImpl {
     if (!isEmbedded) {
       return null;
     }
+    const timeoutMessage = 'initMessagingChannel timeout';
     return Services.timerFor(this.win)
-      .timeoutPromise(20000, messagingPromise, 'initMessagingChannel')
+      .timeoutPromise(20000, messagingPromise, timeoutMessage)
       .catch(reason => {
         const error = getChannelError(
           /** @type {!Error|string|undefined} */ (reason)
         );
+        if (error && error.message === timeoutMessage) {
+          error.expected = true;
+        }
         reportError(error);
         throw error;
       });
