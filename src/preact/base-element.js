@@ -157,7 +157,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     const Ctor = this.constructor;
 
     if (!this.container_) {
-      if (Ctor.children || Ctor.passthrough) {
+      if (Ctor['children'] || Ctor['passthrough']) {
         this.container_ = this.element.attachShadow({mode: 'open'});
       } else {
         const container = this.win.document.createElement('i-amphtml-c');
@@ -174,7 +174,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     // this element will be reused.
     const v = (
       <WithAmpContext {...this.context_}>
-        <Ctor.Component {...props} />
+        {Preact.createElement(Ctor['Component'], props)}
       </WithAmpContext>
     );
 
@@ -195,7 +195,7 @@ export class PreactBaseElement extends AMP.BaseElement {
  *
  * @protected {!PreactDef.FunctionalComponent}
  */
-PreactBaseElement.Component = function() {
+PreactBaseElement['Component'] = function() {
   devAssert(false, 'Must provide Component');
 };
 
@@ -204,7 +204,7 @@ PreactBaseElement.Component = function() {
  *
  * @protected {string}
  */
-PreactBaseElement.className = '';
+PreactBaseElement['className'] = '';
 
 /**
  * Enabling passthrough mode alters the children slotting to use a single
@@ -213,19 +213,19 @@ PreactBaseElement.className = '';
  *
  * @protected {boolean}
  */
-PreactBaseElement.passthrough = false;
+PreactBaseElement['passthrough'] = false;
 
 /**
  * Provides a mapping of Preact prop to AmpElement DOM attributes.
  *
  * @protected {!Object<string, !AmpElementPropDef>}
  */
-PreactBaseElement.props = {};
+PreactBaseElement['props'] = {};
 
 /**
  * @protected {!Object<string, !ChildDef>|null}
  */
-PreactBaseElement.children = null;
+PreactBaseElement['children'] = null;
 
 /**
  * @param {typeof PreactBaseElement} Ctor
@@ -237,10 +237,10 @@ function collectProps(Ctor, element, defaultProps) {
   const props = /** @type {!JsonObject} */ ({...defaultProps});
 
   const {
-    className,
-    props: propDefs,
-    passthrough,
-    children: childrenDefs,
+    'className': className,
+    'props': propDefs,
+    'passthrough': passthrough,
+    'children': childrenDefs,
   } = Ctor;
 
   // Class.
