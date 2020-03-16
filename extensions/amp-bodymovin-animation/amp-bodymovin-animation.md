@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays an [AirBnB Bodymovin animation player](http://airbnb.io/lottie/).
+  text: Displays an AirBnB Bodymovin animation player.
 ---
 
 <!---

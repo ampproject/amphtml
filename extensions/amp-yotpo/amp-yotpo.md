@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Embeds a [Yotpo](https://support.yotpo.com/en/on-site/reviews-widget) on-site widget.
+  text: Embeds a Yotpo on-site widget.
 ---
 
 <!--

@@ -4,7 +4,7 @@ formats:
   - websites
   - stories
 teaser:
-  text: Creates an iframe and displays a [GitHub Gist](https://gist.github.com/).
+  text: Creates an iframe and displays a GitHub Gist.
 ---
 
 <!--

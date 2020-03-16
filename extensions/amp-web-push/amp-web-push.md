@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Allows users to subscribe to [web push notifications](https://developers.google.com/web/fundamentals/engage-and-retain/push-notifications/).
+  text: Allows users to subscribe to web push notifications.
 ---
 
 <!--

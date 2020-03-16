@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a [Brightcove Video Cloud](https://www.brightcove.com/en/online-video-platform) or Perform player.
+  text: Displays a Brightcove Video Cloud or Perform player.
 ---
 
 <!---

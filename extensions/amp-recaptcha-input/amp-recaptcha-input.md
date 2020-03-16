@@ -3,7 +3,7 @@ $category@: dynamic-content
 formats:
   - websites
 teaser:
-  text: Appends a [reCAPTCHA v3](https://developers.google.com/recaptcha/docs/v3) token to [AMP form](https://github.com/ampproject/amphtml/blob/master/extensions/amp-form/amp-form.md) submissions.
+  text: Appends a reCAPTCHA v3 token to AMP form submissions.
 ---
 
 <!---

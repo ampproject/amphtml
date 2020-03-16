@@ -4,7 +4,7 @@ formats:
   - websites
   - ads
 teaser:
-  text: Provides configurable behavior for ad exits for [AMPHTML ads](https://amp.dev/documentation/guides-and-tutorials/learn/intro-to-amphtml-ads).
+  text: Provides configurable behavior for ad exits for AMPHTML ads.
 ---
 
 <!--

@@ -3,7 +3,7 @@ $category@: ads-analytics
 formats:
   - websites
 teaser:
-  text: The [share tracking feature](https://github.com/ampproject/amphtml/issues/3135) is under development.
+  text: The share tracking feature is under development.
 ---
 
 <!---
