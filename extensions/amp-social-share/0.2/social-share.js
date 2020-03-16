@@ -33,6 +33,13 @@ const DEFAULT_HEIGHT = 44;
  * @return {PreactDef.Renderable}
  */
 export function SocialShare(props) {
+  PropTypes.checkPropTypes(
+    SocialShare['propTypes'],
+    props,
+    'prop',
+    'SocialShare'
+  );
+
   const context = Preact.useContext(getAmpContext());
 
   /**
@@ -92,12 +99,12 @@ export function SocialShare(props) {
   );
 }
 
-SocialShare.propTypes = {
-  height: PropTypes.string,
-  href: PropTypes.string,
-  size: PropTypes.object,
-  tabindex: PropTypes.number,
-  target: PropTypes.string,
-  type: PropTypes.string.isRequired,
-  width: PropTypes.string,
+SocialShare['propTypes'] = {
+  'height': PropTypes.string,
+  'href': PropTypes.string,
+  'size': PropTypes.object,
+  'tabindex': PropTypes.number,
+  'target': PropTypes.string,
+  'type': PropTypes.string.isRequired,
+  'width': PropTypes.string,
 };
