@@ -300,7 +300,8 @@ export class ResourcesImpl {
 
     // Store the 1vp rect for later.
     if (!this.oneViewportRect_) {
-      this.oneViewportRect_ = entries[0].rootBounds;
+      this.oneViewportRect_ =
+        /** @type {!ClientRect} */ (entries[0].rootBounds);
     }
 
     const whenBuilt = this.intersects_(entries, /* viewports */ 1);
@@ -334,7 +335,11 @@ export class ResourcesImpl {
 
     // Always ignore intersections in 1vp to avoid dupe handling.
     const outsideOneViewport = entries.filter(
-      e => !rectsOverlap(this.oneViewportRect_, e.intersectionRect)
+      e =>
+        !rectsOverlap(
+          devAssert(this.oneViewportRect_),
+          /** @type {!ClientRect} */ (e.intersectionRect)
+        )
     );
 
     const whenBuilt = this.intersects_(outsideOneViewport, /* viewports */ 3);
