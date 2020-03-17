@@ -400,6 +400,7 @@ const forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+      'extensions/amp-story-education/0.1/amp-story-education.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
       'src/service/cid-impl.js',
