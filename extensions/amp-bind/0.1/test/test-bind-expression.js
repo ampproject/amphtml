@@ -241,8 +241,8 @@ describe('BindExpression', () => {
     });
 
     it('escaped quotes', () => {
-      expect(evaluate(`"Hello \"World\""`)).to.equal(`Hello "World"`);
-      expect(evaluate(`'Hello\'s world'`)).to.equal(`Hello's world`);
+      expect(evaluate(`"Hello \\\"World\\\""`)).to.equal(`Hello "World"`);
+      expect(evaluate(`'Hello\\\'s world'`)).to.equal(`Hello's world`);
     });
 
     it('ban: non-whitelisted string methods', () => {
