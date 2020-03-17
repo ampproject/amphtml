@@ -19,13 +19,17 @@ import {
   AmpStoryStoreService,
   StateProperty,
 } from '../../../amp-story/1.0/amp-story-store-service';
+import {AmpDocSingle} from '../../../../src/service/ampdoc-impl';
 import {AmpStoryEducation, State} from '../amp-story-education';
 import {LocalizationService} from '../../../../src/service/localization';
+import {Services} from '../../../../src/services';
 import {registerServiceBuilder} from '../../../../src/service';
 
 describes.realWin('amp-story-education', {amp: true}, env => {
+  let ampdoc;
   let storeService;
   let storyEducation;
+  let viewer;
   let win;
 
   beforeEach(() => {
@@ -42,9 +46,13 @@ describes.realWin('amp-story-education', {amp: true}, env => {
     });
 
     const element = win.document.createElement('amp-story-education');
+    ampdoc = new AmpDocSingle(win);
+    element.getAmpDoc = () => ampdoc;
     win.document.body.appendChild(element);
     storyEducation = new AmpStoryEducation(element);
 
+    viewer = Services.viewerForDoc(storyEducation.element);
+    env.sandbox.stub(viewer, 'isEmbedded').returns(true);
     env.sandbox.stub(storyEducation, 'mutateElement').callsFake(fn => fn());
   });
 
@@ -172,6 +180,71 @@ describes.realWin('amp-story-education', {amp: true}, env => {
       storyEducation.containerEl_.dispatchEvent(clickEvent);
 
       expect(storyEducation.containerEl_).to.have.attribute('hidden');
+    });
+  });
+
+  describe('amp-story-education viewer messaging', () => {
+    it('should not send viewer message if not visible', async () => {
+      const sendStub = env.sandbox.stub(viewer, 'sendMessageAwaitResponse');
+      // Viewer is not visible.
+      env.sandbox
+        .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
+        .rejects();
+
+      storyEducation.buildCallback();
+      await Promise.resolve();
+
+      expect(sendStub).to.not.have.been.called;
+    });
+
+    it('should send canShowScreens for navigation on build', async () => {
+      const sendStub = env.sandbox.stub(viewer, 'sendMessageAwaitResponse');
+      env.sandbox
+        .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
+        .resolves();
+
+      storyEducation.buildCallback();
+      await Promise.resolve(); // Microtask tick.
+
+      expect(sendStub).to.have.been.calledOnceWith('canShowScreens', {
+        screens: [{screen: 'ontas'}],
+      });
+    });
+
+    it('should show navigation screen on viewer response', async () => {
+      env.sandbox.stub(viewer, 'sendMessageAwaitResponse').resolves({
+        screens: [{screen: 'ontas', show: true}],
+      });
+      env.sandbox
+        .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
+        .resolves();
+
+      storyEducation.buildCallback();
+      await Promise.resolve(); // whenFirstVisible icrotask tick.
+      await Promise.resolve(); // sendMessageAwaitResponse microtask tick.
+
+      const navigationTapEl = storyEducation.containerEl_.querySelector(
+        '[step="tap"]'
+      );
+      expect(navigationTapEl).to.exist;
+    });
+
+    it('should not show navigation screen on viewer response', async () => {
+      env.sandbox.stub(viewer, 'sendMessageAwaitResponse').resolves({
+        screens: [{screen: 'ontas', show: false}],
+      });
+      env.sandbox
+        .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
+        .resolves();
+
+      storyEducation.buildCallback();
+      await Promise.resolve(); // whenFirstVisible microtask tick.
+      await Promise.resolve(); // sendMessageAwaitResponse microtask tick.
+
+      const navigationTapEl = storyEducation.containerEl_.querySelector(
+        '[step="tap"]'
+      );
+      expect(navigationTapEl).to.not.exist;
     });
   });
 });
