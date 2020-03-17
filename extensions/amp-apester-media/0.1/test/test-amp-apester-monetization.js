@@ -37,7 +37,7 @@ describes.realWin('amp-apester-media-monetization', {}, env => {
     baseElement = doc.createElement('amp-apester-media');
 
     const mutator = {
-      attemptChangeSize: () => env.sandbox.stub(),
+      requestChangeSize: () => env.sandbox.stub(),
     };
     env.sandbox.stub(Services, 'mutatorForDoc').returns(mutator);
 
