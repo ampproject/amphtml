@@ -786,7 +786,7 @@ export class SanitizerImpl {
 
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc(TAG, AmpScriptService);
-  AMP.registerServiceForDoc('purifier-inplace', ampdoc => {
+  AMP.registerServiceForDoc('purifier-inplace', function(ampdoc) {
     return new Purifier(
       ampdoc.getRootNode(),
       dict({'IN_PLACE': true}),

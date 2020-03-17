@@ -141,7 +141,7 @@ export class AmpMustache extends BaseTemplate {
 }
 
 AMP.extension(TAG, '0.2', function(AMP) {
-  AMP.registerServiceForDoc('purifier', ampdoc => {
+  AMP.registerServiceForDoc('purifier', function(ampdoc) {
     return new Purifier(ampdoc.getRootNode(), dict(), rewriteAttributeValue);
   });
   AMP.registerTemplate(TAG, AmpMustache);
