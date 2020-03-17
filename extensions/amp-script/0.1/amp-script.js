@@ -30,6 +30,7 @@ import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Encode} from '../../../src/utils/bytes';
+import {getServiceForDoc} from '../../../src/service';
 
 /** @const {string} */
 const TAG = 'amp-script';
@@ -563,11 +564,7 @@ export class SanitizerImpl {
     this.element_ = ampScript.element;
 
     /** @private @const {!Purifier} */
-    this.purifier_ = new Purifier(
-      ampScript.win.document,
-      dict({'IN_PLACE': true}),
-      rewriteAttributeValue
-    );
+    this.purifier_ = getServiceForDoc(this.element, 'purifier-inplace');
 
     /** @private @const {!Object<string, boolean>} */
     this.allowedTags_ = this.purifier_.getAllowedTags();
@@ -789,5 +786,11 @@ export class SanitizerImpl {
 
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc(TAG, AmpScriptService);
+  AMP.registerServiceForDoc('purifier-inplace', ampdoc => {
+    return new Purifier(
+      ampdoc.getRootNode(),
+      dict({'IN_PLACE': true}, rewriteAttributeValue)
+    );
+  });
   AMP.registerElement(TAG, AmpScript, CSS);
 });
