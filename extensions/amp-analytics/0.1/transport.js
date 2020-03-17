@@ -84,6 +84,11 @@ export class Transport {
    * @param {boolean} inBatch
    */
   sendRequest(url, segments, inBatch) {
+    if (this.win_['first_request'] == 1) {
+      console.log('analytics request delay is ', Date.now() - this.win_['analytics_start']);
+      this.win_['first_request'] = 0;
+    }
+    url = `https://example.test?r=${url}`;
     if (!url || segments.length === 0) {
       dev().info(TAG_, 'Empty request not sent: ', url);
       return;
@@ -101,8 +106,6 @@ export class Transport {
       checkCorsUrl(request.url);
       return request;
     }
-
-    console.log('analytics request delay is ', Date.now() - this.win_['analytics_start']);
 
     const getRequest = cacheFuncResult(generateRequest);
 

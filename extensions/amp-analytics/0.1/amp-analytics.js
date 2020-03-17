@@ -797,7 +797,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 }
 
 AMP.extension(TAG, '0.1', AMP => {
-  AMP.win['analytics_start'] = Date.now();
+  self['analytics_start'] = Date.now();
+  self['first_request'] = 1;
   AMP.registerServiceForDoc(
     'amp-analytics-instrumentation',
     InstrumentationService

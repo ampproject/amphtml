@@ -65,7 +65,6 @@ export class AnalyticsConfig {
    * @return {!Promise<JsonObject>}
    */
   loadConfig() {
-    console.log('load analytics config');
     this.win_ = this.element_.ownerDocument.defaultView;
     this.isSandbox_ = this.element_.hasAttribute('sandbox');
 
@@ -225,8 +224,6 @@ export class AnalyticsConfig {
       promise = invokeWebWorker(self.window, 'deepMerge', {
         configs: [inlineConfig, remoteConfig, config],
       }).then(data => {
-        console.log('returned data is ', data.result);
-        //console.log('config is ', config);
         config = Object.assign(config, data.result);
       });
     }
@@ -342,7 +339,6 @@ export class AnalyticsConfig {
     const allPromises = [];
     // Merge publisher && vendor varGroups to see what has been enabled.
     const mergedConfig = pubVarGroups || dict();
-    console.log('invoke web worker');
     deepMerge(mergedConfig, vendorVarGroups);
 
     Object.keys(mergedConfig).forEach(groupName => {
