@@ -7,7 +7,7 @@
 "false"                   return 'FALSE'
 [0-9]+("."[0-9]+)?\b      return 'NUMBER'
 [a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
-\'([^\\\']|\\.)*\'        return 'STRING'
+\'([^\'\\]|\\.)*\'        return 'STRING'
 \"([^\"\\]|\\.)*\"        return 'STRING'
 '=>'                      return '=>'
 "+"                       return '+'
