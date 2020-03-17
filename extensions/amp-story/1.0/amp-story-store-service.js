@@ -88,6 +88,7 @@ export let InteractiveComponentDef;
  *    affiliateLinkState: !Element,
  *    bookendState: boolean,
  *    desktopState: boolean,
+ *    educationState: boolean,
  *    hasSidebarState: boolean,
  *    infoDialogState: boolean,
  *    interactiveEmbeddedComponentState: !InteractiveComponentDef,
@@ -130,6 +131,7 @@ export const StateProperty = {
   BOOKEND_STATE: 'bookendState',
   AFFILIATE_LINK_STATE: 'affiliateLinkState',
   DESKTOP_STATE: 'desktopState',
+  EDUCATION_STATE: 'educationState',
   HAS_SIDEBAR_STATE: 'hasSidebarState',
   INFO_DIALOG_STATE: 'infoDialogState',
   INTERACTIVE_COMPONENT_STATE: 'interactiveEmbeddedComponentState',
@@ -173,6 +175,7 @@ export const Action = {
   TOGGLE_AFFILIATE_LINK: 'toggleAffiliateLink',
   TOGGLE_BOOKEND: 'toggleBookend',
   TOGGLE_CAN_SHOW_BOOKEND: 'toggleCanShowBookend',
+  TOGGLE_EDUCATION: 'toggleEducation',
   TOGGLE_HAS_SIDEBAR: 'toggleHasSidebar',
   TOGGLE_INFO_DIALOG: 'toggleInfoDialog',
   TOGGLE_INTERACTIVE_COMPONENT: 'toggleInteractiveComponent',
@@ -270,6 +273,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.CAN_SHOW_BOOKEND]: !!data,
+      });
+    case Action.TOGGLE_EDUCATION:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.EDUCATION_STATE]: !!data,
       });
     case Action.TOGGLE_INTERACTIVE_COMPONENT:
       data = /** @type {InteractiveComponentDef} */ (data);
@@ -507,6 +515,7 @@ export class AmpStoryStoreService {
       [StateProperty.AFFILIATE_LINK_STATE]: null,
       [StateProperty.BOOKEND_STATE]: false,
       [StateProperty.DESKTOP_STATE]: false,
+      [StateProperty.EDUCATION_STATE]: false,
       [StateProperty.HAS_SIDEBAR_STATE]: false,
       [StateProperty.INFO_DIALOG_STATE]: false,
       [StateProperty.INTERACTIVE_COMPONENT_STATE]: {
