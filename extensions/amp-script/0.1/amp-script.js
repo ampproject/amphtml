@@ -26,11 +26,11 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
+import {getServiceForDoc} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
 import {utf8Encode} from '../../../src/utils/bytes';
-import {getServiceForDoc} from '../../../src/service';
 
 /** @const {string} */
 const TAG = 'amp-script';
