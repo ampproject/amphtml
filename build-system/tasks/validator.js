@@ -31,6 +31,24 @@ async function validator() {
 }
 
 /**
+ * Simple wrapper around the Java validator test suite.
+ */
+async function validatorJava() {
+  const commands = ['cd validator/java'];
+  if (argv.clean) {
+    commands.append('bazel clean');
+  }
+
+  execOrDie(commands.concat([
+    'bazel run //:fetchAMPResources',
+    'bazel build //:amphtml_validator_java_proto_lib',
+    'bazel run //:copyValidatorJavaSource',
+    'bazel build //:amphtml_validator_lib',
+    'bazel run //:amphtml_validator_test',
+  ]).join(' && '));
+}
+
+/**
  * Simple wrapper around the python based validator webui build.
  */
 async function validatorWebui() {
@@ -39,12 +57,18 @@ async function validatorWebui() {
 
 module.exports = {
   validator,
+  validatorJava,
   validatorWebui,
 };
 
 validator.description = 'Builds and tests the AMP validator.';
 validator.flags = {
   'update_tests': '  Updates validation test output files',
+};
+
+validatorJava.description = 'Builds and tests the AMP validator Java implementation.';
+validatorJava.flags = {
+  'clean': '  Cleans the build directories before running Java validator tests.'
 };
 
 validatorWebui.description = 'Builds and tests the AMP validator web UI.';
