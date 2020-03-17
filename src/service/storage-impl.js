@@ -400,14 +400,14 @@ export class ViewerStorageBinding {
 
   /** @override */
   saveBlob(origin, blob) {
-    return /** @type {!Promise} */ this.viewer_
+    return /** @type {!Promise} */ (this.viewer_
       .sendMessageAwaitResponse(
         'saveStore',
         dict({'origin': origin, 'blob': blob})
       )
       .catch(reason => {
         dev().expectedError(TAG, 'Failed to save store: ', reason);
-      });
+      }));
   }
 }
 
