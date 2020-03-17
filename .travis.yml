@@ -57,6 +57,10 @@ jobs:
         - unbuffer node build-system/pr-check/checks.js
     - stage: build
       name: 'Validator Tests'
+      addons:
+        apt:
+          packages:
+            - bazel
       script:
         - unbuffer node build-system/pr-check/validator-tests.js
     - stage: build
