@@ -789,7 +789,8 @@ AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc('purifier-inplace', ampdoc => {
     return new Purifier(
       ampdoc.getRootNode(),
-      dict({'IN_PLACE': true}, rewriteAttributeValue)
+      dict({'IN_PLACE': true}),
+      rewriteAttributeValue
     );
   });
   AMP.registerElement(TAG, AmpScript, CSS);
