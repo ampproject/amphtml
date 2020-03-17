@@ -37,13 +37,13 @@ async function performance() {
   printReport(urls);
 }
 
-performance.description = '  Runs web performance test on current branch';
+performance.description = 'Runs web performance test on current branch';
 
 performance.flags = {
-  'nobuild': 'Does not compile javascripts before running tests',
+  'nobuild': '  Does not compile javascripts before running tests',
   'threshold':
-    'Percentage above stable metrics that is passable. Number between 0 and 1',
-  'url': 'Page to test. Overrides urls set in config.json',
+    '  Percentage above stable metrics that is passable. Number between 0 and 1',
+  'url': '  Page to test. Overrides urls set in config.json',
 };
 
 module.exports = {
