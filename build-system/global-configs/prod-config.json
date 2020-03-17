@@ -1,11 +1,6 @@
 {
   "allow-doc-opt-in": ["amp-next-page", "inabox-viewport-friendly"],
-  "allow-url-opt-in": [
-    "pump-early-frame",
-    "twitter-default-placeholder",
-    "twitter-default-placeholder-fade",
-    "twitter-default-placeholder-pulse"
-  ],
+  "allow-url-opt-in": ["pump-early-frame"],
   "canary": 0,
   "a4aProfilingRate": 0.01,
   "adsense-ad-size-optimization": 0.01,
