@@ -48,6 +48,10 @@ const GET_STATE_CONFIGURATIONS = {
     dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.CURRENT_PAGE_ID,
   },
+  'EDUCATION_STATE': {
+    dataSource: DataSources.STORE_SERVICE,
+    property: StateProperty.EDUCATION_STATE,
+  },
   'MUTED_STATE': {
     dataSource: DataSources.STORE_SERVICE,
     property: StateProperty.MUTED_STATE,
