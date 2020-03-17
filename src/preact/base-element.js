@@ -60,7 +60,7 @@ export class PreactBaseElement extends AMP.BaseElement {
     /** @private {boolean} */
     this.scheduledRender_ = false;
 
-    /** @protected {!Object} */
+    /** @private {!Object} */
     this.context_ = {
       renderable: false,
       playable: false,

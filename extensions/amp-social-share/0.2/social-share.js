@@ -19,7 +19,6 @@ import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
 import {PropTypes, checkPropTypes} from 'prop-types';
 import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
-import {getAmpContext} from '../../../src/preact/context';
 import {openWindowDialog} from '../../../src/dom';
 import {parseQueryString} from '../../../src/url';
 import {startsWith} from '../../../src/string';
@@ -34,7 +33,6 @@ const DEFAULT_HEIGHT = 44;
  */
 export function SocialShare(props) {
   checkPropTypes(SocialShare['propTypes'], props, 'prop', 'SocialShare');
-  const context = Preact.useContext(getAmpContext());
 
   /**
    * Handle key presses on the element.
@@ -51,8 +49,8 @@ export function SocialShare(props) {
 
   /** @private */
   function handleActivation() {
-    const href = context['href'] || props['href'];
-    const target = context['target'] || props['target'] || '_blank';
+    const href = props['href'];
+    const target = props['target'] || '_blank';
     if (!href) {
       throw new Error('Clicked before href is set.');
     }

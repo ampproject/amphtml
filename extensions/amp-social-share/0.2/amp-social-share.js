@@ -96,10 +96,11 @@ class AmpSocialShare extends PreactBaseElement {
       user().warn(TAG, `Skipping obsolete share button ${type}`);
       return;
     }
-    this.setHrefAndTargetContext_(typeConfig, platform);
+    const data = this.getHrefAndTarget_(typeConfig, platform);
     if (this.element.getAttribute('layout') === Layout.RESPONSIVE) {
-      return dict({'size': {}});
+      return dict({'href': data['href'], 'target': data['target'], 'size': {}});
     }
+    return dict({'href': data['href'], 'target': data['target']});
   }
 
   /** @override */
@@ -112,15 +113,13 @@ class AmpSocialShare extends PreactBaseElement {
   }
 
   /**
-   * Sets 'href' and 'target' in the AmpContext based on AMP-specific conditions.
-   * These needs to be passed to the context as opposed to as properties in `init()`
-   * because their values are resolved asynchronously.
-   *
+   * Resolves 'href' and 'target' from data-param attributes using AMP services.
    * @private
    * @param {!JsonObject} typeConfig
    * @param {!../../../src/service/platform-impl.Platform} platform
+   * @return {{href: string, target: string}}
    */
-  setHrefAndTargetContext_(typeConfig, platform) {
+  getHrefAndTarget_(typeConfig, platform) {
     const shareEndpoint = user().assertString(
       this.element.getAttribute('data-share-endpoint') ||
         typeConfig['shareEndpoint'],
@@ -138,24 +137,21 @@ class AmpSocialShare extends PreactBaseElement {
         bindings[bindingName] = urlParams[name];
       });
     }
-
-    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(result => {
-      let href = result;
-      // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
-      const {protocol} = Services.urlForDoc(this.element).parse(href);
-      const isMailTo = protocol === 'mailto:';
-      const isSms = protocol === 'sms:';
-      this.context_['target'] =
-        platform.isIos() && (isMailTo || isSms)
-          ? '_top'
-          : this.element.getAttribute('data-target') || '_blank';
-      if (isSms) {
-        // http://stackoverflow.com/a/19126326
-        // This code path seems to be stable for both iOS and Android.
-        href = href.replace('?', '?&');
-      }
-      this.context_['href'] = href;
-    });
+    let href = urlReplacements.expandUrlSync(hrefWithVars, bindings);
+    // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
+    const {protocol} = Services.urlForDoc(this.element).parse(href);
+    const isMailTo = protocol === 'mailto:';
+    const isSms = protocol === 'sms:';
+    const target =
+      platform.isIos() && (isMailTo || isSms)
+        ? '_top'
+        : this.element.getAttribute('data-target') || '_blank';
+    if (isSms) {
+      // http://stackoverflow.com/a/19126326
+      // This code path seems to be stable for both iOS and Android.
+      href = href.replace('?', '?&');
+    }
+    return {'href': href, 'target': target};
   }
 }
 
