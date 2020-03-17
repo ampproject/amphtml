@@ -80,7 +80,7 @@ class AmpReddit extends AMP.BaseElement {
       iframe,
       'embed-size',
       data => {
-        this./*OK*/ changeHeight(data['height']);
+        this.forceChangeHeight(data['height']);
       },
       /* opt_is3P */ true
     );

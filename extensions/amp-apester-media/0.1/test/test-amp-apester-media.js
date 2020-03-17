@@ -81,7 +81,10 @@ describes.realWin(
           ? playlistResponse
           : regularResponse;
 
-      changeSizeSpy = env.sandbox.spy(media.implementation_, 'changeHeight');
+      changeSizeSpy = env.sandbox.spy(
+        media.implementation_,
+        'forceChangeHeight'
+      );
       attemptChangeSizeSpy = env.sandbox.spy(
         media.implementation_,
         'attemptChangeHeight'

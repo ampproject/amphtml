@@ -77,7 +77,7 @@ export class AmpMathml extends AMP.BaseElement {
           // Don't change the width if not inlined.
           data['width'] = undefined;
         }
-        Services.mutatorForDoc(this.getAmpDoc())./*OK*/ changeSize(
+        Services.mutatorForDoc(this.getAmpDoc()).forceChangeSize(
           this.element,
           data['height'],
           data['width']

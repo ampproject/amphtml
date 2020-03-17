@@ -263,7 +263,7 @@ describes.realWin(
           const ampFB = await getAmpFacebook(fbPostHref);
           return new Promise((resolve, unusedReject) => {
             const {firstChild: iframe, implementation_: impl} = ampFB;
-            impl.changeHeight = newHeight => {
+            impl.forceChangeHeight = newHeight => {
               expect(newHeight).to.equal(666);
               resolve(ampFB);
             };

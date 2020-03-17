@@ -358,7 +358,7 @@ export class Resource {
    * @param {!../layout-rect.LayoutMarginsChangeDef=} opt_newMargins
    */
   changeSize(newHeight, newWidth, opt_newMargins) {
-    this.element./*OK*/ changeSize(newHeight, newWidth, opt_newMargins);
+    this.element./*OK*/ applySize(newHeight, newWidth, opt_newMargins);
 
     // Schedule for re-measure and possible re-layout.
     this.requestMeasure();

@@ -463,7 +463,7 @@ describes.realWin(
         });
 
         const mutator = Services.mutatorForDoc(anchor);
-        env.sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(mutator, 'requestChangeSize').callsFake(() => {
           return Promise.reject();
         });
 
@@ -666,7 +666,7 @@ describes.realWin(
         container.appendChild(anchor);
 
         const mutator = Services.mutatorForDoc(anchor);
-        env.sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(mutator, 'requestChangeSize').callsFake(() => {
           return Promise.resolve();
         });
         env.sandbox.stub(mutator.viewport_, 'getWidth').callsFake(() => 2000);
@@ -719,7 +719,7 @@ describes.realWin(
         container.appendChild(anchor);
 
         const mutator = Services.mutatorForDoc(anchor);
-        env.sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(mutator, 'requestChangeSize').callsFake(() => {
           return Promise.resolve();
         });
 
@@ -750,7 +750,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
           .then(placementState => {
-            expect(mutator.attemptChangeSize).to.have.been.calledWith(
+            expect(mutator.requestChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               250,
               undefined
@@ -765,7 +765,7 @@ describes.realWin(
         container.appendChild(anchor);
 
         const mutator = Services.mutatorForDoc(anchor);
-        env.sandbox.stub(mutator, 'attemptChangeSize').callsFake(() => {
+        env.sandbox.stub(mutator, 'requestChangeSize').callsFake(() => {
           return Promise.reject(new Error('Resize failed'));
         });
 
@@ -796,7 +796,7 @@ describes.realWin(
         return placements[0]
           .placeAd(attributes, sizing, adTracker)
           .then(placementState => {
-            expect(mutator.attemptChangeSize).to.have.been.calledWith(
+            expect(mutator.requestChangeSize).to.have.been.calledWith(
               anchor.firstChild,
               250,
               undefined

@@ -247,7 +247,7 @@ export class AmpVk extends AMP.BaseElement {
         const newHeight = parseInt(matches[1], 10);
         if (this.widgetHeight_ !== newHeight) {
           this.widgetHeight_ = newHeight;
-          this./*OK*/ changeHeight(newHeight);
+          this.forceChangeHeight(newHeight);
         }
       }
     }

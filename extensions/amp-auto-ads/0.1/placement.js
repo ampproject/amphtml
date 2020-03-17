@@ -245,7 +245,7 @@ export class Placement {
           return whenUpgradedToCustomElement(this.getAdElement())
             .then(() => this.getAdElement().whenBuilt())
             .then(() => {
-              return this.mutator_.attemptChangeSize(
+              return this.mutator_.requestChangeSize(
                 this.getAdElement(),
                 placement.height,
                 placement.width,

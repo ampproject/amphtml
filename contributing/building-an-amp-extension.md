@@ -570,7 +570,7 @@ probably wants to return true in order to signal to AMP the need to call
 `layoutCallback` again once the document is active. Otherwise your
 element will never be re-laid out.
 
-### vsync, mutateElement, and changeSize
+### vsync, mutateElement, and requestChangeSize
 
 AMP provides multiple utilities to optimize many mutations and measuring
 for better performance. These include vsync service with a mutate and

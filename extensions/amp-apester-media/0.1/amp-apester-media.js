@@ -349,9 +349,9 @@ class AmpApesterMedia extends AMP.BaseElement {
                 if (height != this.height_) {
                   this.height_ = height;
                   if (this.random_) {
-                    this./*OK*/ attemptChangeHeight(height);
+                    this.attemptChangeHeight(height);
                   } else {
-                    this./*OK*/ changeHeight(height);
+                    this.forceChangeHeight(height);
                   }
                 }
               });

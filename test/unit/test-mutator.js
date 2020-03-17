@@ -317,7 +317,7 @@ describe('mutator changeSize', () => {
     expect(resources.requestsChangeSize_[1].resource).to.equal(resource1);
   });
 
-  describe('attemptChangeSize rules wrt viewport', () => {
+  describe('requestChangeSize rules wrt viewport', () => {
     let overflowCallbackSpy;
     let vsyncSpy;
     let viewportRect;
@@ -1415,7 +1415,7 @@ describe('mutator changeSize', () => {
     });
   });
 
-  describe('attemptChangeSize rules for element wrt document', () => {
+  describe('requestChangeSize rules for element wrt document', () => {
     beforeEach(() => {
       viewportMock
         .expects('getRect')
@@ -1652,11 +1652,11 @@ describes.realWin('mutator mutateElement and collapse', {amp: true}, env => {
     });
   });
 
-  it('attemptCollapse should not call attemptChangeSize', () => {
+  it('attemptCollapse should not call requestChangeSize', () => {
     // This test ensure that #attemptCollapse won't do any optimization or
-    // refactor by calling attemptChangeSize.
+    // refactor by calling requestChangeSize.
     // This to support collapsing element above viewport
-    // When attemptChangeSize succeed, resources manager will measure the new
+    // When requestChangeSize succeed, resources manager will measure the new
     // scrollHeight, and we need to make sure the newScrollHeight is measured
     // after setting element display:none
     env.sandbox.stub(resources.viewport_, 'getRect').callsFake(() => {

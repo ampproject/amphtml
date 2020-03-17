@@ -572,7 +572,7 @@ export class AmpDatePicker extends AMP.BaseElement {
             const height = this.element./*OK*/ offsetHeight;
             if (scrollHeight > height) {
               // Add 1px to allow the bottom border to show
-              this./*OK*/ changeHeight(scrollHeight + 1);
+              this.forceChangeHeight(scrollHeight + 1);
             }
           });
         }
@@ -1996,7 +1996,7 @@ export class AmpDatePicker extends AMP.BaseElement {
           const height = this.element./*OK*/ offsetHeight;
           if (scrollHeight > height) {
             // Add 1px to allow the bottom border to show
-            this./*OK*/ changeHeight(scrollHeight + 1);
+            this.forceChangeHeight(scrollHeight + 1);
           }
         }
       });
