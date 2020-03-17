@@ -210,13 +210,6 @@ export class Resource {
 
     /** @private {?Function} */
     this.loadPromiseResolve_ = deferred.resolve;
-
-    /**
-     * intersected[i] is true if this resource received a callback from
-     * IntersectionObserver with id `i`.
-     * @const {!Array<boolean|undefined>}
-     */
-    this.intersected = [];
   }
 
   /**

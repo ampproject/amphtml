@@ -200,25 +200,12 @@ export class ResourcesImpl {
     this.oneViewportObserver_ = null;
 
     /**
-     * Did the first callback for this.oneViewportObserver_ happen yet?
-     * @private {boolean}
-     */
-    this.oneViewportFirstCallback_ = false;
-
-    /**
      * Observes elements within current viewport +/- one viewport length (3vp).
      * @private {?IntersectionObserver}
      */
     this.threeViewportsObserver_ = null;
 
-    /**
-     * Did the first callback for this.threeViewportsObserver_ happen yet?
-     * @private {boolean}
-     */
-    this.threeViewportsFirstCallback_ = false;
-
-    if (true) {
-      //isExperimentOn(this.win, 'intersect-resources')) {
+    if (isExperimentOn(this.win, 'intersect-resources')) {
       const iframed = isIframed(this.win);
 
       // Classic IntersectionObserver doesn't support viewport tracking and
@@ -313,14 +300,6 @@ export class ResourcesImpl {
       this.oneViewportRect_ = entries[0].rootBounds;
     }
 
-    // Every newly observed element receives an initial entry.
-    // We only care about non-initial entries, and initial entries
-    // that are intersecting.
-    entries = entries.filter(e => {
-      const r = Resource.forElement(e.target);
-      return r.intersected[1] || e.isIntersecting;
-    });
-
     const whenBuilt = this.intersects_(entries, /* viewports */ 1);
 
     // To prioritize in-viewport elements, delay handling of 2vp/3vp until
@@ -350,18 +329,12 @@ export class ResourcesImpl {
   intersectsThreeViewports_(entries) {
     devAssert(this.visible_);
 
-    // Every newly observed element receives an initial entry.
-    // We only care about non-initial entries and initial entries that are
-    // intersecting. Always ignore intersections in 1vp to avoid dupe handling.
-    entries = entries.filter(e => {
-      const r = Resource.forElement(e.target);
-      return (
-        (r.intersected[3] || e.isIntersecting) &&
-        !rectsOverlap(this.oneViewportRect_, e.intersectionRect)
-      );
-    });
+    // Always ignore intersections in 1vp to avoid dupe handling.
+    const outsideOneViewport = entries.filter(
+      e => !rectsOverlap(this.oneViewportRect_, e.intersectionRect)
+    );
 
-    const whenBuilt = this.intersects_(entries, /* viewports */ 3);
+    const whenBuilt = this.intersects_(outsideOneViewport, /* viewports */ 3);
 
     // Defer building remaining elements on page (4vp+) until 3vp completes.
     // Note: these elements no longer receive onLayoutMeasure/onMeasureChanged
@@ -383,6 +356,10 @@ export class ResourcesImpl {
    * @private
    */
   intersects_(entries, viewports) {
+    if (!entries.length) {
+      return Promise.resolve();
+    }
+
     dev().fine(
       TAG_,
       'intersect',
@@ -390,10 +367,6 @@ export class ResourcesImpl {
       '->' + entries.filter(e => e.isIntersecting).length,
       entries
     );
-
-    if (!entries.length) {
-      return Promise.resolve();
-    }
 
     const toUnload = [];
     const promises = entries.map(entry => {
@@ -405,7 +378,6 @@ export class ResourcesImpl {
 
       devAssert(target.isUpgraded());
       const r = Resource.forElement(target);
-      r.intersected[viewports] = true;
 
       // Force all intersecting, non-zero-sized (including owned) elements to be built.
       // E.g. ensures that all in-viewport elements are built in prerender mode.
@@ -433,7 +405,7 @@ export class ResourcesImpl {
       }
 
       // TODO(willchou): Risk of long task due to long microtask queue?
-      return r.whenBuilt().then(() => {
+      const whenBuilt = r.whenBuilt().then(() => {
         const isDisplayed = this.measureResource_(r, clientRect);
         if (!isDisplayed) {
           toUnload.push(r);
@@ -441,8 +413,6 @@ export class ResourcesImpl {
         }
 
         if (viewports == 1) {
-          // For just-unloaded resources, setInViewport() will be called
-          // as part of Resource.unlayout().
           // TODO(willchou): When visible, consider the viewport to be 25% larger.
           r.setInViewport(isIntersecting);
         }
@@ -459,6 +429,8 @@ export class ResourcesImpl {
           this.scheduleLayoutOrPreload(r, /* layout */ true);
         }
       });
+
+      return isIntersecting ? whenBuilt : Promise.resolve();
     });
 
     return Promise.all(promises).then(() => {
