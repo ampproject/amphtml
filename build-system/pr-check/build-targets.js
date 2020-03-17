@@ -27,6 +27,27 @@ const path = require('path');
 const {gitDiffNameOnlyMaster} = require('../common/git');
 
 /**
+ * List of all build targets.
+ */
+const ALL_TARGETS = [
+  'AVA',
+  'BABEL_PLUGIN',
+  'CACHES_JSON',
+  'DEV_DASHBOARD',
+  'DOCS',
+  'E2E_TEST',
+  'FLAG_CONFIG',
+  'INTEGRATION_TEST',
+  'OWNERS',
+  'PACKAGE_UPGRADE',
+  'RUNTIME',
+  'UNIT_TEST',
+  'VALIDATOR',
+  'VALIDATOR_WEBUI',
+  'VISUAL_DIFF',
+];
+
+/**
  * Checks if the given file is an OWNERS file
  * @param {string} file
  * @return {boolean}
@@ -37,6 +58,7 @@ function isOwnersFile(file) {
 
 /**
  * A mapping of functions that match a given file to one or more build targets.
+ * Note: Remember to update ALL_TARGETS above when you add a new target type.
  */
 const targetMatchers = [
   {
@@ -152,6 +174,12 @@ const targetMatchers = [
     },
   },
   {
+    targets: ['PACKAGE_UPGRADE'],
+    func: file => {
+      return file == 'package.json' || file == 'yarn.lock';
+    },
+  },
+  {
     targets: ['UNIT_TEST'],
     func: file => {
       if (isOwnersFile(file)) {
@@ -252,6 +280,12 @@ function determineBuildTargets(fileName = 'build-targets.js') {
         .join(', ')
     )
   );
+  if (buildTargets.has('PACKAGE_UPGRADE')) {
+    console.log(
+      `${fileLogPrefix} Since this PR contains package upgrade(s), running all checks...`
+    );
+    ALL_TARGETS.forEach(target => buildTargets.add(target));
+  }
   return buildTargets;
 }
 
