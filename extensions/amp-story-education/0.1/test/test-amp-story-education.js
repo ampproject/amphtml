@@ -207,13 +207,13 @@ describes.realWin('amp-story-education', {amp: true}, env => {
       await Promise.resolve(); // Microtask tick.
 
       expect(sendStub).to.have.been.calledOnceWith('canShowScreens', {
-        screens: [{screen: 'on'}],
+        screens: [{screen: 'ontas'}],
       });
     });
 
     it('should show navigation screen on viewer response', async () => {
       env.sandbox.stub(viewer, 'sendMessageAwaitResponse').resolves({
-        screens: [{screen: 'on', show: true}],
+        screens: [{screen: 'ontas', show: true}],
       });
       env.sandbox
         .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
@@ -231,7 +231,7 @@ describes.realWin('amp-story-education', {amp: true}, env => {
 
     it('should not show navigation screen on viewer response', async () => {
       env.sandbox.stub(viewer, 'sendMessageAwaitResponse').resolves({
-        screens: [{screen: 'on', show: false}],
+        screens: [{screen: 'ontas', show: false}],
       });
       env.sandbox
         .stub(storyEducation.getAmpDoc(), 'whenFirstVisible')
