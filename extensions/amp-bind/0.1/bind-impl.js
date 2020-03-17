@@ -1290,7 +1290,7 @@ export class Bind {
       if (width !== undefined || height !== undefined) {
         // request without scheduling vsync pass since `mutateElement()`
         // will schedule a pass after a short delay anyways.
-        this.mutator_./*OK*/ changeSize(element, height, width);
+        this.mutator_.forceChangeSize(element, height, width);
       }
 
       if (typeof element.mutatedAttributesCallback === 'function') {

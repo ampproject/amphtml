@@ -64,7 +64,7 @@ export class MutatorImpl {
   }
 
   /** @override */
-  changeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
+  forceChangeSize(element, newHeight, newWidth, opt_callback, opt_newMargins) {
     this.scheduleChangeSize_(
       Resource.forElement(element),
       newHeight,
@@ -77,7 +77,7 @@ export class MutatorImpl {
   }
 
   /** @override */
-  attemptChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {
+  requestChangeSize(element, newHeight, newWidth, opt_newMargins, opt_event) {
     return new Promise((resolve, reject) => {
       this.scheduleChangeSize_(
         Resource.forElement(element),

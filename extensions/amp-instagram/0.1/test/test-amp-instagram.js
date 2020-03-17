@@ -196,15 +196,15 @@ describes.realWin(
       const ins = await getIns('fBwFP', true);
       const impl = ins.implementation_;
       const iframe = ins.querySelector('iframe');
-      const changeHeight = env.sandbox.spy(impl, 'changeHeight');
+      const forceChangeHeight = env.sandbox.spy(impl, 'forceChangeHeight');
       const newHeight = 977;
       expect(iframe).to.not.be.null;
       sendFakeMessage(ins, iframe, 'MEASURE', {
         height: newHeight,
       });
-      expect(changeHeight).to.be.calledOnce;
+      expect(forceChangeHeight).to.be.calledOnce;
       // Height minus padding
-      expect(changeHeight.firstCall.args[0]).to.equal(newHeight);
+      expect(forceChangeHeight.firstCall.args[0]).to.equal(newHeight);
     });
 
     function sendFakeMessage(ins, iframe, type, details) {

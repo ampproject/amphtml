@@ -1055,7 +1055,7 @@ export class ResourcesImpl {
               },
               mutate: state => {
                 if (state.resize) {
-                  request.resource./*OK*/ changeSize(
+                  request.resource.changeSize(
                     request.newHeight,
                     request.newWidth,
                     newMargins
@@ -1086,7 +1086,7 @@ export class ResourcesImpl {
           if (box.top >= 0) {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
-          request.resource./*OK*/ changeSize(
+          request.resource.changeSize(
             request.newHeight,
             request.newWidth,
             newMargins
@@ -1122,7 +1122,7 @@ export class ResourcesImpl {
               scrollAdjSet.forEach(request => {
                 const box = request.resource.getLayoutBox();
                 minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
-                request.resource./*OK*/ changeSize(
+                request.resource.changeSize(
                   request.newHeight,
                   request.newWidth,
                   request.marginChange

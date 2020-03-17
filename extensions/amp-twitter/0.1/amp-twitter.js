@@ -112,7 +112,7 @@ class AmpTwitter extends AMP.BaseElement {
       },
       () => {
         // Set an explicit height so we can animate it.
-        this./*OK*/ changeHeight(height);
+        this.forceChangeHeight(height);
       }
     );
   }
@@ -128,7 +128,7 @@ class AmpTwitter extends AMP.BaseElement {
       if (this.userPlaceholder_) {
         this.togglePlaceholder(false);
       }
-      this./*OK*/ changeHeight(height);
+      this.forceChangeHeight(height);
     });
   }
 
@@ -149,7 +149,7 @@ class AmpTwitter extends AMP.BaseElement {
       }
 
       if (content) {
-        this./*OK*/ changeHeight(content./*OK*/ offsetHeight);
+        this.forceChangeHeight(content./*OK*/ offsetHeight);
       }
     });
   }

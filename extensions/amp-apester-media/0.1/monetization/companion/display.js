@@ -85,7 +85,7 @@ function constructCompanionDisplayAd(slot, bannerSizes, apesterElement) {
   );
   ampAd.classList.add('amp-apester-companion');
   apesterElement.parentNode.insertBefore(ampAd, apesterElement.nextSibling);
-  Services.mutatorForDoc(apesterElement).attemptChangeSize(
+  Services.mutatorForDoc(apesterElement).requestChangeSize(
     ampAd,
     maxHeight,
     /* newWidth */ undefined

@@ -358,7 +358,7 @@ export class ResponsiveState {
    * @return {!Promise} a promise that resolves when we have attempted to change size
    * (whether successfully or not).
    */
-  attemptChangeSize() {
+  attemptToMatchResponsiveHeight() {
     const viewportSize = Services.viewportForDoc(
       this.element_.getAmpDoc()
     ).getSize();
