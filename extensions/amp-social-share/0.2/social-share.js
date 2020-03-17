@@ -83,7 +83,6 @@ export function SocialShare(props) {
       {...props}
     >
       <SocialShareIcon
-        className={`amp-social-share-${props['type']}`}
         style={{...backgroundStyle, ...baseStyle, ...size}}
         styleType={styleType}
       />
