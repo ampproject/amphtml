@@ -220,6 +220,35 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 </amp-list>
 ```
 
+### Initialization from amp-state
+
+In most cases, you’ll probably want to have `<amp-list>` request JSON from a server. But `<amp-list>` can also use JSON you’ve included in an `<amp-state>`, right there in your HTML! This means rendering can occur without an additional server call, although, of course, if your page is served from an AMP cache, the data may not be fresh.
+
+Here’s how to have `<amp-list>` render from an `<amp-state>`:
+
+1. Add the [amp-bind](https://amp.dev/documentation/components/amp-bind/) script to your document's `<head>`.
+2. Use the `amp-state:` protocol in your `<amp-list>`’s src attribute, like this:
+   `<amp-list src="amp-state:localState">`
+
+Note that `<amp-list>` treats your JSON in the same way whether it’s requested from your server or pulled from a state variable. The format required doesn’t change.
+
+See below for a full example,
+
+```html
+<amp-state id="localState">
+  <script type="application/json">
+    {
+      "items": [{"id": 1}, {"id": 2}, {"id": 2}]
+    }
+  </script>
+</amp-state>
+<amp-list src="amp-state:localState">
+  <template type="amp-mustache">
+    <li>{{id}}</li>
+  </template>
+</amp-list>
+```
+
 ## Attributes
 
 ### src (required)
