@@ -549,16 +549,14 @@ export class ResourcesImpl {
 
     if (this.oneViewportObserver_) {
       // applyStaticLayout() actually happens after this function (sync),
-      // so give the browser a chance to layout first via rAF.
+      // so give the browser a chance to layout first by waiting for upgrade.
       // This results in fresher client rects in the intersection entry.
-      // this.win.requestAnimationFrame(() => {
       element.whenUpgraded().then(() => {
         this.oneViewportObserver_.observe(element);
         if (this.threeViewportsObserver_) {
           this.threeViewportsObserver_.observe(element);
         }
       });
-      // });
     } else {
       this.remeasurePass_.schedule(1000);
     }
