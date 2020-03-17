@@ -240,8 +240,8 @@ describe('BindExpression', () => {
       expect(evaluate('"abc".toUpperCase()')).to.equal('ABC');
     });
 
-    it('escaped quotes', () => {
-      expect(evaluate(`"Hello \"World\\\""`)).to.equal(`Hello "World"`);
+    it.only('escaped quotes', () => {
+      expect(evaluate(`"Hello \\"World\\""`)).to.equal(`Hello "World"`);
       expect(evaluate(`'Hello\'s world'`)).to.equal(`Hello's world`);
     });
 
