@@ -199,6 +199,9 @@ export class ResourcesImpl {
      */
     this.oneViewportObserver_ = null;
 
+    /** @private {ClientRect?} */
+    this.oneViewportRect_ = null;
+
     /**
      * Observes elements within current viewport +/- one viewport length (3vp).
      * @private {?IntersectionObserver}
