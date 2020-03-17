@@ -62,15 +62,10 @@ module.exports = function({types: t}) {
         });
       },
       AssignmentExpression(path) {
-        if (!getModeFound) {
-          return;
-        }
-
         const {node} = path;
         if (t.isMemberExpression(node.left)) {
-          const value = replacementValue(node.left);
+          const value = replacementValue(node.left, t);
           if (value !== null) {
-            path.replaceWith(t.booleanLiteral(value));
             path.skip();
           }
         }

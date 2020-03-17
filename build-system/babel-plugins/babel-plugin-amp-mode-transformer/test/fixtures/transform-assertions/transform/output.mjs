@@ -18,11 +18,19 @@ const test = false;
 const localDev = false;
 const minified = true;
 const development = false;
-false;
+getMode().development = false;
 
 function foo() {
-  if (false) {
+  if (getMode().development = false) {
     return false;
   }
 }
+
+function bar() {
+  if (false == false) {
+    return false;
+  }
+}
+
+getMode().development = development;
 

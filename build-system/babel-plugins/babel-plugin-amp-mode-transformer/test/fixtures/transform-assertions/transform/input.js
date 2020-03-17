@@ -27,3 +27,11 @@ function foo() {
     return false;
   }
 }
+
+function bar() {
+  if (getMode().development == false) {
+    return false;
+  }
+}
+
+getMode().development = development;
