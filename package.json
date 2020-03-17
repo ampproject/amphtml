@@ -35,7 +35,7 @@
     "@babel/plugin-transform-react-jsx": "7.8.3",
     "@babel/preset-env": "7.8.7",
     "@jridgewell/resorcery": "0.0.3",
-    "acorn-globals": "4.3.4",
+    "acorn-globals": "6.0.0",
     "amphtml-validator": "1.0.30",
     "ansi-colors": "4.1.1",
     "ast-replace": "1.1.3",
