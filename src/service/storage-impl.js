@@ -406,7 +406,7 @@ export class ViewerStorageBinding {
         dict({'origin': origin, 'blob': blob})
       )
       .catch(reason => {
-        dev().expectedError(TAG, 'Failed to save store: ', reason);
+        throw dev().createExpectedError(TAG, 'Failed to save store: ', reason);
       }));
   }
 }
