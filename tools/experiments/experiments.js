@@ -176,10 +176,7 @@ function build() {
   });
 
   if (isExperimentOn_(RTV_CHANNEL_ID)) {
-    // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
-    // cookie.
-    rtvInput.value =
-      getCookie(window, '__Host-AMP_OPT_IN') || getCookie(window, 'AMP_CANARY');
+    rtvInput.value = getCookie(window, '__Host-AMP_OPT_IN');
     rtvInput.dispatchEvent(new Event('input'));
     document.getElementById('rtv-details').open = true;
   }
@@ -282,10 +279,7 @@ function updateExperimentRow(experiment) {
  * @return {boolean}
  */
 function isExperimentOn_(id) {
-  // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
-  // cookie.
-  const optInCookieValue =
-    getCookie(window, '__Host-AMP_OPT_IN') || getCookie(window, 'AMP_CANARY');
+  const optInCookieValue = getCookie(window, '__Host-AMP_OPT_IN');
   switch (id) {
     case EXPERIMENTAL_CHANNEL_ID:
       return [
@@ -331,11 +325,6 @@ function setAmpOptInCookie_(cookieState) {
     validUntil,
     cookieOptions
   );
-  // TODO(#25205): remove this once the CDN stops supporting the AMP_CANARY
-  // cookie.
-  // Set explicit domain, so the cookie gets sent to sub domains.
-  cookieOptions.domain = location.hostname;
-  setCookie(window, 'AMP_CANARY', cookieState, validUntil, cookieOptions);
   // Reflect default experiment state.
   self.location.reload();
 }
