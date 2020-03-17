@@ -202,6 +202,7 @@ describe
             'minified': false,
             'test': false,
             'version': '$internalRuntimeVersion$',
+            'esm': false,
           },
           'canary': true,
           'hidden': false,
