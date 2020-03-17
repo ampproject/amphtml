@@ -1254,7 +1254,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should change size without sizer', () => {
         const element = new ElementClass();
-        element.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
+        element.applySize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
         expect(element.style.height).to.equal('111px');
         expect(element.style.width).to.equal('222px');
         expect(element.style.marginTop).to.equal('1px');
@@ -1265,19 +1265,19 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should change size - height only without sizer', () => {
         const element = new ElementClass();
-        element.changeSize(111);
+        element.applySize(111);
         expect(element.style.height).to.equal('111px');
       });
 
       it('should change size - width only without sizer', () => {
         const element = new ElementClass();
-        element.changeSize(undefined, 111);
+        element.applySize(undefined, 111);
         expect(element.style.width).to.equal('111px');
       });
 
       it('should change size - margins only without sizer', () => {
         const element = new ElementClass();
-        element.changeSize(undefined, undefined, {
+        element.applySize(undefined, undefined, {
           top: 1,
           right: 2,
           bottom: 3,
@@ -1292,7 +1292,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('should change size - some margins only without sizer', () => {
         const element = new ElementClass();
         element.style.margin = '1px 2px 3px 4px';
-        element.changeSize(undefined, undefined, {top: 5, left: 6});
+        element.applySize(undefined, undefined, {top: 5, left: 6});
         expect(element.style.marginTop).to.equal('5px');
         expect(element.style.marginRight).to.equal('2px');
         expect(element.style.marginBottom).to.equal('3px');
@@ -1302,7 +1302,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
       it('should change size - some margins only without sizer', () => {
         const element = new ElementClass();
         element.style.margin = '1px 2px 3px 4px';
-        element.changeSize(undefined, undefined, {top: 5, left: 6});
+        element.applySize(undefined, undefined, {top: 5, left: 6});
         expect(element.style.marginTop).to.equal('5px');
         expect(element.style.marginRight).to.equal('2px');
         expect(element.style.marginBottom).to.equal('3px');
@@ -1313,7 +1313,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         const element = new ElementClass();
         const sizer = doc.createElement('div');
         element.sizerElement = sizer;
-        element.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
+        element.applySize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
         expect(element.style.height).to.equal('111px');
         expect(element.style.width).to.equal('222px');
         expect(element.style.marginTop).to.equal('1px');
@@ -1327,7 +1327,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         element.layout_ = Layout.RESPONSIVE;
         const sizer = doc.createElement('div');
         element.sizerElement = sizer;
-        element.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
+        element.applySize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
         expect(sizer.style.paddingTop).to.equal('0px');
         expect(element.sizerElement).to.be.null;
       });
@@ -1344,7 +1344,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
         );
         sizer.appendChild(intrinsicSizer);
         element.appendChild(sizer);
-        element.changeSize(111);
+        element.applySize(111);
         expect(intrinsicSizer.getAttribute('src')).to.equal('');
       });
 
@@ -1361,14 +1361,14 @@ describes.realWin('CustomElement', {amp: true}, env => {
 
       it('should change size to zero', () => {
         const element = new ElementClass();
-        element.changeSize(0, 0);
+        element.applySize(0, 0);
         expect(element.style.height).to.equal('0px');
         expect(element.style.width).to.equal('0px');
       });
 
       it('should change width to zero', () => {
         const element = new ElementClass();
-        element.changeSize(undefined, 0);
+        element.applySize(undefined, 0);
         expect(element.style.width).to.equal('0px');
       });
 
@@ -1381,7 +1381,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
           element.classList.add('i-amphtml-layout-awaiting-size');
 
           expect(element).to.have.class('i-amphtml-layout-awaiting-size');
-          element.changeSize(100, 100);
+          element.applySize(100, 100);
           expect(element).not.to.have.class('i-amphtml-layout-awaiting-size');
         }
       );
@@ -1393,7 +1393,7 @@ describes.realWin('CustomElement', {amp: true}, env => {
           'dispatchCustomEvent'
         );
 
-        element.changeSize();
+        element.applySize();
 
         expect(spyDispatchEvent).to.be.calledWith(AmpEvents.SIZE_CHANGED);
       });
@@ -2295,7 +2295,7 @@ describes.realWin('CustomElement Overflow Element', {amp: true}, env => {
     element.overflowCallback(true, 117, 113);
     expect(overflowElement).to.have.class('amp-visible');
     mutatorMock
-      .expects('changeSize')
+      .expects('forceChangeSize')
       .withExactArgs(element, 117, 113)
       .once();
 
