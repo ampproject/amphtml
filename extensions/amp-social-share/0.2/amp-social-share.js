@@ -98,9 +98,13 @@ class AmpSocialShare extends PreactBaseElement {
     }
     const data = this.getHrefAndTarget_(typeConfig, platform);
     if (this.element.getAttribute('layout') === Layout.RESPONSIVE) {
-      return dict({'href': data['href'], 'target': data['target'], 'size': {}});
+      return dict({'href': data['href'], 'target': data['target']});
     }
-    return dict({'href': data['href'], 'target': data['target']});
+    return dict({
+      'href': data['href'],
+      'target': data['target'],
+      'useDefaultDimensions': true,
+    });
   }
 
   /** @override */

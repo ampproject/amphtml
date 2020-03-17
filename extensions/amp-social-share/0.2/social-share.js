@@ -69,7 +69,7 @@ export function SocialShare(props) {
   const styleType = `SOCIAL_SHARE_${props['type'].toUpperCase()}`;
   const baseStyle = CSS.BASE_STYLE;
   const backgroundStyle = CSS[styleType];
-  const size = props['size'] || {
+  const size = props['useDefaultDimensions'] && {
     width: props['width'] || DEFAULT_WIDTH,
     height: props['height'] || DEFAULT_HEIGHT,
   };
@@ -91,11 +91,10 @@ export function SocialShare(props) {
 }
 
 SocialShare['propTypes'] = {
-  'height': PropTypes.string,
   'href': PropTypes.string,
   'size': PropTypes.object,
   'tabindex': PropTypes.number,
   'target': PropTypes.string,
   'type': PropTypes.string.isRequired,
-  'width': PropTypes.string,
+  'useDefaultDimensions': PropTypes.bool,
 };
