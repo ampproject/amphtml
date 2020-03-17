@@ -194,6 +194,27 @@ describes.fakeWin('AmpSubscriptions', {amp: true}, env => {
       expect(processStateStub).to.be.calledWith(true);
     });
 
+    it('should skip everything and unlock document for unocked page config', async () => {
+      const processStateStub = env.sandbox.stub(
+        subscriptionService,
+        'processGrantState_'
+      );
+      env.sandbox.stub(subscriptionService, 'initialize_').callsFake(() => {
+        subscriptionService.platformConfig_ = {
+          alwaysGrant: false,
+        };
+        subscriptionService.pageConfig_ = pageConfig = new PageConfig(
+          'scenic-2017.appspot.com:news',
+          false
+        );
+        return Promise.resolve();
+      });
+      subscriptionService.start();
+
+      await subscriptionService.initialize_();
+      expect(processStateStub).to.be.calledWith(true);
+    });
+
     it(
       'should not skip everything and unlock document for alwaysGrant ' +
         'if viewer provides authorization',

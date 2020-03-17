@@ -350,6 +350,13 @@ export class SubscriptionService {
 
       userAssert(this.pageConfig_, 'Page config is null');
 
+      if (!this.pageConfig_.isLocked()) {
+        // If the page is not locked then we treat it as granted and show any
+        // subscriptions content sections.
+        this.processGrantState_(true);
+        return;
+      }
+
       if (this.doesViewerProvideAuth_) {
         this.delegateAuthToViewer_();
         this.startAuthorizationFlow_(false);
