@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- import {Services} from '../../../src/services';
+import {Services} from '../../../src/services';
 import {addParamsToUrl} from '../../../src/url';
 import {dict} from '../../../src/utils/object';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -360,8 +360,9 @@ class AmpJWPlayer extends AMP.BaseElement {
       'backfill': this.contentBackfill_ || undefined,
     });
     const IS_DEV = true;
-    const baseUrl = IS_DEV ? 
-      `http://localhost:4000/test/public/platform/amp/iframe.html?cid=${this.contentid_}&pid=${this.playerid_}` :
+
+    const baseUrl = IS_DEV ?
+      `${new URLSearchParams(document.location.search).get('tp')}?cid=${cid}&pid=${pid}` :
       `https://content.jwplatform.com/players/${cid}-${pid}.html`;
 
     const src = addParamsToUrl(baseUrl, queryParams);
