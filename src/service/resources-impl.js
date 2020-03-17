@@ -1305,7 +1305,6 @@ export class ResourcesImpl {
           // TODO(willchou): May need to add another ResourceState to avoid
           // multiple invocations (relayoutAll requires reinvocation).
           r.applySizesAndMediaQuery();
-          // dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         }
       }
 
@@ -1364,7 +1363,6 @@ export class ResourcesImpl {
         r.getState() == ResourceState.NOT_LAID_OUT
       ) {
         r.applySizesAndMediaQuery();
-        dev().fine(TAG_, 'apply sizes/media query:', r.debugid);
         relayoutCount++;
       }
       if (r.isMeasureRequested()) {
