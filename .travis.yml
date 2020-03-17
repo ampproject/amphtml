@@ -63,6 +63,10 @@ jobs:
       name: 'Validator Tests'
       # Install bazel (not available from apt-get).
       before_install:
+        # Override Xenial's default Java version (github.com/travis-ci/travis-ci/issues/10290)
+        - export PATH=$(echo "$PATH" | sed -e 's/:\/usr\/local\/lib\/jvm\/openjdk11\/bin//')
+        - export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+        - pip install --user protobuf
         - wget https://github.com/bazelbuild/bazel/releases/download/2.2.0/bazel_2.2.0-linux-x86_64.deb
         - echo "SHA256 (bazel_2.2.0-linux-x86_64.deb) = b1b8dba9b625b10e47a6dcc027abfdaf213b454709d32473c81c146ba8ccb8e3" | sha256sum -c -
         - sudo dpkg -i bazel_2.2.0-linux-x86_64.deb
