@@ -212,10 +212,11 @@ export class Resource {
     this.loadPromiseResolve_ = deferred.resolve;
 
     /**
-     * The most recent value of IntersectionObserverEntry.isIntersecting.
-     * @package @type {boolean|undefined}
+     * intersected[i] is true if this resource received a callback from
+     * IntersectionObserver with id `i`.
+     * @const {!Array<boolean|undefined>}
      */
-    this.isIntersecting = undefined;
+    this.intersected = [];
   }
 
   /**
