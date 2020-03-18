@@ -237,7 +237,9 @@ export class Purifier {
       // Allow all AMP elements.
       if (startsWith(tagName, 'amp-')) {
         // Enforce AMP4EMAIL tag whitelist at runtime.
-        const isEmail = isAmp4Email(node.ownerDocument);
+        const isEmail = isAmp4Email(
+          /** @type {!Document} */ (node.ownerDocument) //TODO: is this safe?
+        );
         allowedTags[tagName] = !isEmail || EMAIL_WHITELISTED_AMP_TAGS[tagName];
       }
       // Set `target` attribute for <a> tags if necessary.
@@ -346,7 +348,7 @@ export class Purifier {
           tagName,
           attrName,
           attrValue,
-          element.ownerDocument,
+          /** @type {!Document} */ (element.ownerDocument), // TODO: is this safe?
           /* opt_purify */ true
         )
       ) {

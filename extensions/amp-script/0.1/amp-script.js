@@ -563,10 +563,11 @@ export class SanitizerImpl {
     /** @private @const {!Element} */
     this.element_ = ampScript.element;
 
-    /** @private @const {!Purifier} */
     registerServiceBuilder(this.win_, 'purifier-inplace', function() {
       return new Purifier(dict({'IN_PLACE': true}), rewriteAttributeValue);
     });
+
+    /** @private @const {!Purifier} */
     this.purifier_ = getService(this.win_, 'purifier-inplace');
 
     /** @private @const {!Object<string, boolean>} */

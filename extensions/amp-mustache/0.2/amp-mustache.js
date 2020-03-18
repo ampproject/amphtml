@@ -40,15 +40,15 @@ export class AmpMustache extends BaseTemplate {
   constructor(element, win) {
     super(element, win);
 
-    /** @private @const {!Purifier} */
     registerServiceBuilder(win, 'purifier', function() {
       return new Purifier(dict(), rewriteAttributeValue);
     });
+    /** @private @const {!Purifier} */
     this.purifier_ = getService(win, 'purifier');
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
     mustache.setUnescapedSanitizer(value =>
-      this.purifier_.purifyTagsForTripleMustache(win.ownerDocument, value)
+      this.purifier_.purifyTagsForTripleMustache(win.document, value)
     );
   }
 
