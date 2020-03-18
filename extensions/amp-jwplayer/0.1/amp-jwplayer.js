@@ -364,7 +364,7 @@ class AmpJWPlayer extends AMP.BaseElement {
     const IS_DEV = true;
 
     const baseUrl = IS_DEV ?
-      `${new URLSearchParams(document.location.search).get('tp')}?cid=${cid}&pid=${pid}` :
+      `${new URLSearchParams(document.location.search).get('test_page')}?cid=${cid}&pid=${pid}` :
       `https://content.jwplatform.com/players/${cid}-${pid}.html`;
 
     const src = addParamsToUrl(baseUrl, queryParams);
