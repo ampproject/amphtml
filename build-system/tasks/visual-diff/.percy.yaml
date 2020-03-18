@@ -1,0 +1,6 @@
+version: 1
+snapshot:
+  widths: [375, 411, 1400]
+agent:
+  asset-discovery:
+    network-idle-timeout: 150 # ms

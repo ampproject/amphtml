@@ -48,8 +48,6 @@ const {waitUntilUsed} = require('tcp-port-used');
 let puppeteer;
 let percySnapshot;
 
-// CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
-const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {widths: [375]};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
@@ -578,7 +576,7 @@ async function snapshotWebpages(browser, webpages) {
 
           // Create a default set of snapshot options for Percy and modify
           // them based on the test's configuration.
-          const snapshotOptions = {...DEFAULT_SNAPSHOT_OPTIONS};
+          const snapshotOptions = {};
           if (webpage.enable_percy_javascript) {
             snapshotOptions.enableJavaScript = true;
           }
