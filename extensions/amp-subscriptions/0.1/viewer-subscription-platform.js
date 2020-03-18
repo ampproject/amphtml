@@ -79,12 +79,14 @@ export class ViewerSubscriptionPlatform {
   /** @override */
   getEntitlements() {
     devAssert(this.currentProductId_, 'Current product is not set');
+
     /** @type {JsonObject} */
-    const messageData = dict({
+    const authRequest = dict({
       'publicationId': this.publicationId_,
       'productId': this.currentProductId_,
       'origin': this.origin_,
     });
+
     // Defaulting to google.com for now.
     // TODO(@elijahsoria): Remove google.com and only rely on what is returned
     // in the cryptokeys param.
@@ -102,25 +104,33 @@ export class ViewerSubscriptionPlatform {
       }
     }
     if (encryptedDocumentKey) {
-      messageData['encryptedDocumentKey'] = encryptedDocumentKey;
+      authRequest['encryptedDocumentKey'] = encryptedDocumentKey;
     }
-    const entitlementPromise = this.viewer_
-      .sendMessageAwaitResponse('auth', messageData)
+
+    return /** @type {!Promise<Entitlement>} */ (this.viewer_
+      .sendMessageAwaitResponse('auth', authRequest)
       .then(entitlementData => {
-        const authData = (entitlementData || {})['authorization'];
-        const decryptedDocumentKey = (entitlementData || {})[
-          'decryptedDocumentKey'
-        ];
+        entitlementData = entitlementData || {};
+
+        const error = entitlementData['error'];
+        const authData = entitlementData['authorization'];
+        const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
         if (!authData) {
           return Entitlement.empty('local');
         }
-        return this.verifyAuthToken_(authData, decryptedDocumentKey);
-      })
-      .catch(reason => {
-        this.sendAuthTokenErrorToViewer_(reason.message);
-        throw reason;
-      });
-    return /** @type {!Promise<Entitlement>} */ (entitlementPromise);
+
+        return this.verifyAuthToken_(authData, decryptedDocumentKey).catch(
+          reason => {
+            this.sendAuthTokenErrorToViewer_(reason.message);
+            throw reason;
+          }
+        );
+      }));
   }
 
   /**
