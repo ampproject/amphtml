@@ -19,24 +19,6 @@
  */
  {
   /**
-  * An array of glob strings to use to load assets to Percy, relative to
-  * the base amphtml/ directory. All assets accessed by the test must be
-  * relative to the server path (i.e., use relative paths such as
-  * <amp-img src="/examples/visual-tests/..."> - never external domains such as
-  * <amp-img src="https://ampbyexample.com/...">)
-  *
-  * Note that if you add a new test from a sub-directory that is not matched
-  * by any glob string in this list, it will be missing its resources!
-  *
-  * See: glob primer https://github.com/isaacs/node-glob#glob-primer
-  */
-  "asset_globs": [
-    "examples/visual-tests/**",
-    "examples/amphtml-ads/ads-tag-integration.js",
-    "test/fixtures/e2e/amphtml-ads/**"
-  ],
-
-  /**
    * List of webpages used in tests.
    */
   "webpages": [
