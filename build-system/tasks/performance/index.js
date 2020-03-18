@@ -40,9 +40,9 @@ async function performance() {
 performance.description = 'Runs web performance test on current branch';
 
 performance.flags = {
-  'nobuild': '  Does not compile javascripts before running tests',
+  'nobuild': '  Does not compile minified runtime before running tests',
   'threshold':
-    '  Percentage above stable metrics that is passable. Number between 0 and 1',
+    '  Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',
   'url': '  Page to test. Overrides urls set in config.json',
 };
 
