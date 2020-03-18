@@ -270,7 +270,10 @@ describes.repeated(
             listMock
               .expects('attemptChangeHeight')
               .withExactArgs(1337)
-              .returns(Promise.resolve());
+              .returns(Promise.resolve(true));
+            listMock
+              .expects('maybeResizeListToFitItems_')
+              .returns(Promise.resolve(true));
             listMock.expects('unlockHeight_').once();
 
             return list.layoutCallback();
@@ -288,10 +291,10 @@ describes.repeated(
             listMock
               .expects('attemptChangeHeight')
               .withExactArgs(1337)
-              .returns(Promise.reject());
+              .returns(Promise.reject(false));
             listMock
               .expects('maybeResizeListToFitItems_')
-              .returns(Promise.reject());
+              .returns(Promise.resolve(false));
             listMock.expects('unlockHeight_').never();
 
             return list.layoutCallback();

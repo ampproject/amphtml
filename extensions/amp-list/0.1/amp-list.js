@@ -307,11 +307,11 @@ export class AmpList extends AMP.BaseElement {
 
   /**
    * @private
-   * @return {!Promise}
+   * @return {Promise}
    */
   maybeResizeListToFitItems_() {
     if (this.loadMoreEnabled_) {
-      return this.attemptToFitLoadMore_(dev().assertElement(this.container_));
+      this.attemptToFitLoadMore_(dev().assertElement(this.container_));
     } else {
       return this.attemptToFit_(dev().assertElement(this.container_));
     }
@@ -534,7 +534,7 @@ export class AmpList extends AMP.BaseElement {
       (isFetch && this.element.hasAttribute('reset-on-refresh')) ||
       this.element.getAttribute('reset-on-refresh') === 'always'
     ) {
-      const mutate = () => {
+      const reset = () => {
         this.togglePlaceholder(true);
         this.toggleLoading(true, /* opt_force */ true);
         this.toggleFallback_(false);
@@ -549,11 +549,11 @@ export class AmpList extends AMP.BaseElement {
         removeChildren(dev().assertElement(this.container_));
       };
       if (!this.loadMoreEnabled_ && this.isLayoutContainer_) {
-        this.lockHeightAndMutate_(mutate);
+        this.lockHeightAndMutate_(reset);
         return;
       }
       this.measureElement(() => {
-        mutate();
+        reset();
         if (this.loadMoreEnabled_) {
           this.getLoadMoreService_().hideAllLoadMoreElements();
         }
@@ -984,7 +984,7 @@ export class AmpList extends AMP.BaseElement {
   render_(elements, opt_append = false) {
     dev().info(TAG, 'render:', this.element, elements);
     const container = dev().assertElement(this.container_);
-    const mutate = () => {
+    const renderAndResize = () => {
       this.hideFallbackAndPlaceholder_();
       if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
         this.diff_(container, elements);
@@ -1015,10 +1015,12 @@ export class AmpList extends AMP.BaseElement {
 
     if (this.isLayoutContainer_) {
       return this.lockHeightAndMutate_(() =>
-        mutate().then(resolved => (resolved ? this.unlockHeight_() : null))
+        renderAndResize().then(resized =>
+          resized ? this.unlockHeight_() : null
+        )
       );
     }
-    return this.mutateElement(mutate);
+    return this.mutateElement(renderAndResize);
   }
 
   /**
@@ -1166,11 +1168,11 @@ export class AmpList extends AMP.BaseElement {
       const height = this.element./*OK*/ offsetHeight;
       if (targetHeight > height) {
         return this.attemptChangeHeight(targetHeight).then(
-          () => Promise.resolve(true),
-          () => Promise.resolve(false)
+          () => true,
+          () => false
         );
       }
-      return Promise.resolve(true);
+      return true;
     });
   }
 
@@ -1178,33 +1180,31 @@ export class AmpList extends AMP.BaseElement {
    *
    * @param {!Element} target
    * @private
-   * @return {!Promise}
    */
   attemptToFitLoadMore_(target) {
     if (this.isLayoutContainer_) {
-      return Promise.resolve();
+      return;
     }
     const element = !!this.loadMoreSrc_
       ? this.getLoadMoreService_().getLoadMoreButton()
       : this.getLoadMoreService_().getLoadMoreEndElement();
-    return this.attemptToFitLoadMoreElement_(element, target);
+    this.attemptToFitLoadMoreElement_(element, target);
   }
 
   /**
    * @param {?Element} element
    * @param {!Element} target
    * @private
-   * @return {!Promise}
    */
   attemptToFitLoadMoreElement_(element, target) {
-    return this.measureElement(() => {
+    this.measureElement(() => {
       const targetHeight = target./*OK*/ scrollHeight;
       const height = this.element./*OK*/ offsetHeight;
       const loadMoreHeight = element ? element./*OK*/ offsetHeight : 0;
       if (targetHeight + loadMoreHeight <= height) {
-        return Promise.resolve();
+        return;
       }
-      return this.attemptChangeHeight(targetHeight + loadMoreHeight)
+      this.attemptChangeHeight(targetHeight + loadMoreHeight)
         .then(() => {
           this.resizeFailed_ = false;
           // If there were not enough items to fill the list, consider
