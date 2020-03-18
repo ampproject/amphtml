@@ -170,7 +170,7 @@ function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
   }
   if (!(isForTesting || isChecktypes)) {
     applied.push(
-      localPlugin('amp-mode-transformer'),
+      [localPlugin('amp-mode-transformer'), {isEsmBuild}],
       localPlugin('is_dev-constant-transformer')
     );
   }

@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { getMode } from '../../../../../../../src/mode';
-
-const test = getMode().test;
-const localDev = getMode().localDev;
-const minified = getMode().minified;
+const test = false;
+const localDev = false;
+const minified = true;
 const development = getMode().development;
 
 function foo() {
