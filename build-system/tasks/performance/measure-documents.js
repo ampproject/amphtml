@@ -16,11 +16,15 @@
 
 const fs = require('fs');
 const log = require('fancy-log');
+const path = require('path');
 const {
+  ANALYTICS_PARAM,
+  CDN_ANALYTICS_REGEXP,
   CONTROL,
   EXPERIMENT,
   RESULTS_PATH,
   urlToCachePath,
+  getFile,
 } = require('./helpers');
 
 // Require Puppeteer dynamically to prevent throwing error in Travis
@@ -71,6 +75,35 @@ const setupMeasurement = page =>
   });
 
 /**
+ * Handles request interception
+ *
+ * @param {Request} interceptedRequest
+ * @param {Array<number>} endTimes
+ */
+async function handleRequests(interceptedRequest, endTimes) {
+  const interceptedUrl = interceptedRequest.url();
+  const matchArray = interceptedUrl.match(CDN_ANALYTICS_REGEXP);
+  if (matchArray) {
+    const filename = matchArray[1];
+    const pathToJson = path.join(
+      'extensions/amp-analytics/0.1/vendors/',
+      filename
+    );
+    const jsonString = await getFile(pathToJson);
+    interceptedRequest.respond({
+      status: 200,
+      contentType: 'application/json; charset=utf-8',
+      body: jsonString,
+    });
+  } else if (interceptedUrl.includes(ANALYTICS_PARAM)) {
+    endTimes.push(Date.now());
+    interceptedRequest.abort();
+  } else {
+    interceptedRequest.continue();
+  }
+}
+
+/**
  * Evaluate script on the page to collect and calculate metrics
  *
  * @param {Puppeteer.page} page
@@ -119,6 +152,23 @@ const readMetrics = page =>
   });
 
 /**
+ * Adds analytics metrics
+ *
+ * @param {number} startTime
+ * @param {Array<number>} endTimes
+ * @param {object} metrics
+ * @return {object}
+ */
+function maybeAddAnalyticsMetric(startTime, endTimes, metrics) {
+  if (endTimes.length) {
+    const analyticsRequest =
+      endTimes.reduce((a, b) => a + b, 0) / endTimes.length - startTime;
+    metrics = Object.assign(metrics, {analyticsRequest});
+  }
+  return metrics;
+}
+
+/**
  * Writes measurements to ./results.json
  *
  * @param {string} url
@@ -156,16 +206,24 @@ async function measureDocument(url, version, {headless}) {
     args: [
       '--allow-file-access-from-files',
       '--enable-blink-features=LayoutInstabilityAPI',
+      '--disable-web-security',
     ],
   });
 
   const page = await browser.newPage();
   await page.setCacheEnabled(false);
+  await page.setRequestInterception(true);
   await setupMeasurement(page);
+
+  const endTimes = [];
+  const startTime = Date.now();
+  page.on('request', interceptedRequest =>
+    handleRequests(interceptedRequest, endTimes)
+  );
 
   try {
     await page.goto(`file:${urlToCachePath(url, version)}`, {
-      waitUntil: 'networkidle0',
+      waitUntil: 'networkidle2',
     });
   } catch {
     // site did not load
@@ -173,7 +231,8 @@ async function measureDocument(url, version, {headless}) {
     return;
   }
 
-  const metrics = await readMetrics(page);
+  let metrics = await readMetrics(page);
+  metrics = maybeAddAnalyticsMetric(startTime, endTimes, metrics);
   writeMetrics(url, version, metrics);
   await browser.close();
 }

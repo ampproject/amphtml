@@ -19,6 +19,7 @@ const compileScripts = require('./compile-scripts');
 const getMetrics = require('./measure-documents');
 const loadConfig = require('./load-config');
 const printReport = require('./print-report');
+const rewriteAnalyticsTags = require('./rewrite-analytics-tags');
 const rewriteScriptTags = require('./rewrite-script-tags');
 const {installPackages} = require('../../common/utils');
 
@@ -31,6 +32,7 @@ async function performance() {
   await cacheDocuments(urls);
   await compileScripts(urls);
   await rewriteScriptTags(urls);
+  await rewriteAnalyticsTags(urls);
   await getMetrics(urls, {headless, runs});
   printReport(urls);
 }

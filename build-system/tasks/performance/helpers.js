@@ -18,7 +18,14 @@ const fetch = require('node-fetch');
 const fs = require('fs');
 const path = require('path');
 
+const EXTRA_URL_PARAM = {
+  'analytics': 'amp-analytics-performance-param',
+};
+const ANALYTICS_PARAM = Object.keys(EXTRA_URL_PARAM)
+  .map(key => `${key}=${EXTRA_URL_PARAM[key]}`)
+  .toString();
 const CDN_URL = 'https://cdn.ampproject.org/';
+const CDN_ANALYTICS_REGEXP = /https:\/\/cdn.ampproject.org\/rtv\/\d{15}\/v0\/analytics-vendors\/([\.\-\_0-9A-Za-z]+\.json)/;
 const CONTROL = 'control';
 const EXPERIMENT = 'experiment';
 const CACHE_PATH = path.join(__dirname, './cache');
@@ -101,12 +108,27 @@ function copyToCache(url, version = EXPERIMENT) {
   return Promise.resolve(filePath);
 }
 
+/**
+ * Return file contents from filepath.
+ *
+ * @param {string} filePath
+ * @return {!Promise<string>} Resolves with relative path to file
+ */
+function getFile(filePath) {
+  const fromPath = path.join(__dirname, '../../../', filePath);
+  return Promise.resolve(fs.readFileSync(fromPath));
+}
+
 module.exports = {
   CDN_URL,
+  ANALYTICS_PARAM,
+  EXTRA_URL_PARAM,
+  CDN_ANALYTICS_REGEXP,
   CONTROL,
   EXPERIMENT,
   RESULTS_PATH,
   copyToCache,
   downloadToDisk,
   urlToCachePath,
+  getFile,
 };
