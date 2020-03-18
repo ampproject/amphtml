@@ -17,6 +17,7 @@
 let hasThirdPartyRegex = false;
 let hasCdnProxyRegex = false;
 
+// Only executes on the ESM build, intended to use with the Google AMP Cache.
 module.exports = function({types: t}) {
   return {
     visitor: {
