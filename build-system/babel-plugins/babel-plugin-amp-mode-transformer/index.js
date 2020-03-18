@@ -21,25 +21,6 @@
  */
 const {resolve, dirname} = require('path');
 
-function replacementValue(node) {
-  const {object: obj, property} = node;
-  const {callee} = obj;
-  if (callee && callee.name === 'getMode') {
-    if (
-      property.name === 'test' ||
-      property.name === 'localDev' ||
-      property.name === 'development'
-    ) {
-      return false;
-    }
-    if (property.name === 'minified') {
-      return true;
-    }
-  }
-
-  return null;
-}
-
 module.exports = function({types: t}) {
   let getModeFound = false;
   return {
@@ -61,23 +42,25 @@ module.exports = function({types: t}) {
           }
         });
       },
-      AssignmentExpression(path) {
-        const {node} = path;
-        if (t.isMemberExpression(node.left)) {
-          const value = replacementValue(node.left, t);
-          if (value !== null) {
-            path.skip();
-          }
-        }
-      },
       MemberExpression(path) {
         if (!getModeFound) {
           return;
         }
 
-        const value = replacementValue(path.node, t);
-        if (value !== null) {
-          path.replaceWith(t.booleanLiteral(value));
+        const {node} = path;
+        const {object: obj, property} = node;
+        const {callee} = obj;
+        if (callee && callee.name === 'getMode') {
+          if (
+            property.name === 'test' ||
+            property.name === 'localDev' ||
+            property.name === 'development'
+          ) {
+            path.replaceWith(t.booleanLiteral(false));
+          }
+          if (property.name === 'minified') {
+            path.replaceWith(t.booleanLiteral(true));
+          }
         }
       },
     },

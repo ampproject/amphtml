@@ -20,18 +20,9 @@ const test = getMode().test;
 const localDev = getMode().localDev;
 const minified = getMode().minified;
 const development = getMode().development;
-getMode().development = false;
 
 function foo() {
-  if (getMode().development = false) {
-    return false;
-  }
-}
-
-function bar() {
   if (getMode().development == false) {
     return false;
   }
 }
-
-getMode().development = development;
