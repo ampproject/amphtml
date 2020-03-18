@@ -203,7 +203,7 @@ If you want more customization for the arrow buttons, you can use the `next` and
     …
     <div slot="next-arrow"></div>
     <div slot="prev-arrow"></div>
-  </amp-carousel>
+  </amp-base-carousel>
   <button on="tap:carousel-1.prev()">Previous</button>
   <button on="tap:carousel-1.next()">Next</button>
 ```
