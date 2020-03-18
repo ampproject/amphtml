@@ -15,7 +15,7 @@
  */
 
 import {useResourcesNotify} from '../../../src/preact/utils';
-import {userAssert} from '../../../src/log';
+// import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const DEFAULT_LOCALE = 'en';
@@ -113,17 +113,19 @@ function getEpoch(props) {
     epoch = Date.now();
   } else if (datetime) {
     epoch = Date.parse(datetime);
-    userAssert(!isNaN(epoch), 'Invalid date: %s', datetime);
+    // TODO(wassgha): Discuss a replacement for userAssert
+    // userAssert(!isNaN(epoch), 'Invalid date: %s', datetime);
   } else if (timestampMs) {
     epoch = timestampMs;
   } else if (timestampSeconds) {
     epoch = timestampSeconds * 1000;
   }
 
-  userAssert(
-    epoch !== undefined,
-    'One of datetime, timestamp-ms, or timestamp-seconds is required'
-  );
+  // TODO(wassgha): Discuss a replacement for userAssert
+  // userAssert(
+  //   epoch !== undefined,
+  //   'One of datetime, timestamp-ms, or timestamp-seconds is required'
+  // );
 
   return epoch;
 }

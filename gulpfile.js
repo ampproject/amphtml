@@ -30,6 +30,10 @@ const {
 const {
   processGithubIssues,
 } = require('./build-system/tasks/process-github-issues');
+const {
+  storybookAmp,
+  storybookBento,
+} = require('./build-system/tasks/storybook');
 const {a4a} = require('./build-system/tasks/a4a');
 const {ava} = require('./build-system/tasks/ava');
 const {babelPluginTests} = require('./build-system/tasks/babel-plugin-tests');
@@ -155,6 +159,8 @@ createTask('process-3p-github-pr', process3pGithubPr);
 createTask('process-github-issues', processGithubIssues);
 createTask('serve', serve);
 createTask('size', size);
+createTask('storybook:amp', storybookAmp);
+createTask('storybook:bento', storybookBento);
 createTask('todos:find-closed', todosFindClosed);
 createTask('unit', unit);
 createTask('update-packages', updatePackages);
