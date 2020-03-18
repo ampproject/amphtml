@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line
+// eslint-disable-next-line local/no-module-exports, no-undef
 module.exports = {
-  stories: ['../../../extensions/**/*.*/stories/*.stories.amp.js'],
+  stories: ['../../../extensions/**/*.*/stories/*.amp.stories.js'],
   addons: [
     '@storybook/addon-a11y/register',
     '@storybook/addon-viewport/register',

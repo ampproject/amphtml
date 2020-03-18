@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line
+// eslint-disable-next-line local/no-module-exports, no-undef
 module.exports = {
   stories: ['../../../extensions/**/*.*/stories/*.stories.js'],
   addons: [

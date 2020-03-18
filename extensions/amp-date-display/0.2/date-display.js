@@ -15,6 +15,7 @@
  */
 
 import {useResourcesNotify} from '../../../src/preact/utils';
+// TODO(wassgha): Discuss a replacement for userAssert
 // import {userAssert} from '../../../src/log';
 
 /** @const {string} */
