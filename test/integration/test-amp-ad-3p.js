@@ -106,7 +106,6 @@ describe.configure().run('amp-ad 3P', () => {
         expect(initialIntersection.time).to.be.a('number');
         expect(context.isMaster).to.exist;
         expect(context.computeInMasterFrame).to.exist;
-        //console.log(context.location);
         expect(context.location).to.deep.equal({
           hash: '',
           host: 'localhost:9876',
