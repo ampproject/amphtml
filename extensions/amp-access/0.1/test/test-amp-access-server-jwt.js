@@ -17,7 +17,6 @@
 import * as DocumentFetcher from '../../../../src/document-fetcher';
 import * as lolex from 'lolex';
 import {AccessServerJwtAdapter} from '../amp-access-server-jwt';
-import {getMode} from '../../../../src/mode';
 import {isUserErrorMessage} from '../../../../src/log';
 import {removeFragment, serializeQueryString} from '../../../../src/url';
 
