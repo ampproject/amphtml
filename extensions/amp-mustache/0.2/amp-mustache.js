@@ -16,7 +16,7 @@
 
 import {Purifier} from '../../../src/purifier/purifier';
 import {dict} from '../../../src/utils/object';
-import {getServiceForDoc} from '../../../src/service';
+import {getService, registerServiceBuilder} from '../../../src/service';
 import {iterateCursor, templateContentClone} from '../../../src/dom';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import mustache from '../../../third_party/mustache/mustache';
@@ -41,11 +41,14 @@ export class AmpMustache extends BaseTemplate {
     super(element, win);
 
     /** @private @const {!Purifier} */
-    this.purifier_ = getServiceForDoc(element, 'purifier');
+    registerServiceBuilder(win, 'purifier', function() {
+      return new Purifier(dict(), rewriteAttributeValue);
+    });
+    this.purifier_ = getService(win, 'purifier');
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
     mustache.setUnescapedSanitizer(value =>
-      this.purifier_.purifyTagsForTripleMustache(value)
+      this.purifier_.purifyTagsForTripleMustache(win.ownerDocument, value)
     );
   }
 
@@ -141,8 +144,5 @@ export class AmpMustache extends BaseTemplate {
 }
 
 AMP.extension(TAG, '0.2', function(AMP) {
-  AMP.registerServiceForDoc('purifier', function(ampdoc) {
-    return new Purifier(ampdoc.getRootNode(), dict(), rewriteAttributeValue);
-  });
   AMP.registerTemplate(TAG, AmpMustache);
 });

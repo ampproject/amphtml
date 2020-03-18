@@ -50,11 +50,7 @@ The library has only a single export, the `Purifier` class.
 
 ### `Purifier` constructor
 
-`new Purifier(doc, config, attrRewrite)`
-
-#### `doc`
-
-The base document to use. Usually `window.document`.
+`new Purifier(config, attrRewrite)`
 
 #### `config`
 
@@ -79,7 +75,7 @@ The returned value of this function is used as the new attribute value.
 For example, this replaces the `href` of all `<a>` elements with example.com:
 
 ```js
-new Purifier(window.document, {}, (tagName, attrName, attrValue) => {
+new Purifier({}, (tagName, attrName, attrValue) => {
   if (tagName === 'a' && attrName === 'href') {
     return 'https://google.com';
   }
@@ -103,7 +99,7 @@ A <body> element containing the sanitized `html` markup.
 
 ### `purifyTagsForTripleMustache`
 
-`purifyTagsForTripleMustache(html)`
+`purifyTagsForTripleMustache(doc, html)`
 
 Uses DOMPurify to sanitize HTML with stricter policy for unescaped templates
 e.g. triple mustache. See [`amp-mustache` documentation](https://amp.dev/documentation/components/amp-mustache/#validation)
@@ -119,7 +115,7 @@ Sanitized HTML (as a string).
 
 ### `getAllowedTags`
 
-`getAllowedTags()`
+`getAllowedTags(doc)`
 
 Gets a copy of the map of allowed tag names (standard DOMPurify config).
 

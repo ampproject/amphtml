@@ -65,14 +65,10 @@ export let AttributeRewriterDef;
 
 export class Purifier {
   /**
-   * @param {!Document} doc
    * @param {!JsonObject=} opt_config
    * @param {!AttributeRewriterDef=} opt_attrRewrite
    */
-  constructor(doc, opt_config, opt_attrRewrite) {
-    /** @private {!Document} */
-    this.doc_ = doc;
-
+  constructor(opt_config, opt_attrRewrite) {
     /**
      * Monotonically increasing counter used for keying nodes.
      * @private {number}
@@ -107,10 +103,11 @@ export class Purifier {
    * Uses DOMPurify to sanitize HTML with stricter policy for unescaped templates
    * e.g. triple mustache.
    *
+   * @param {!Document} doc
    * @param {string} dirty
    * @return {string}
    */
-  purifyTagsForTripleMustache(dirty) {
+  purifyTagsForTripleMustache(doc, dirty) {
     // <template> elements are parsed by the browser as document fragments and
     // reparented to the head. So to support nested templates, we need
     // RETURN_DOM_FRAGMENT to keep the <template> and FORCE_BODY to prevent
@@ -122,23 +119,24 @@ export class Purifier {
     });
     // Serialize DocumentFragment to HTML. XMLSerializer would also work, but adds
     // namespaces for all elements and attributes.
-    const div = this.doc_.createElement('div');
+    const div = doc.createElement('div');
     div.appendChild(fragment);
     return div./*OK*/ innerHTML;
   }
 
   /**
    * Gets a copy of the map of allowed tag names (standard DOMPurify config).
+   * @param {!Document} doc
    * @return {!Object<string, boolean>}
    */
-  getAllowedTags() {
+  getAllowedTags(doc) {
     const allowedTags = {};
     // Use this hook to extract purifier's allowed tags.
     this.domPurify_.addHook('uponSanitizeElement', (node, data) => {
       Object.assign(allowedTags, data.allowedTags);
     });
     // Sanitize dummy markup so that the hook is invoked.
-    const p = this.doc_.createElement('p');
+    const p = doc.createElement('p');
     this.domPurify_.sanitize(p);
     Object.keys(BLACKLISTED_TAGS).forEach(tag => {
       allowedTags[tag] = false;
@@ -220,8 +218,6 @@ export class Purifier {
    * @private
    */
   addPurifyHooks_(purifier, attrRewrite) {
-    const isEmail = isAmp4Email(this.doc_);
-
     // Reference to DOMPurify's `allowedTags` whitelist.
     let allowedTags;
     const allowedTagsChanges = [];
@@ -241,6 +237,7 @@ export class Purifier {
       // Allow all AMP elements.
       if (startsWith(tagName, 'amp-')) {
         // Enforce AMP4EMAIL tag whitelist at runtime.
+        const isEmail = isAmp4Email(node.ownerDocument);
         allowedTags[tagName] = !isEmail || EMAIL_WHITELISTED_AMP_TAGS[tagName];
       }
       // Set `target` attribute for <a> tags if necessary.
@@ -349,7 +346,7 @@ export class Purifier {
           tagName,
           attrName,
           attrValue,
-          /* doc */ this.doc_,
+          element.ownerDocument,
           /* opt_purify */ true
         )
       ) {

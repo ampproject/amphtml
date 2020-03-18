@@ -31,11 +31,7 @@ describe
         'rewriteAttributeValue'
       );
 
-      const purifier = new Purifier(
-        document,
-        {},
-        urlRewrite.rewriteAttributeValue
-      );
+      const purifier = new Purifier({}, urlRewrite.rewriteAttributeValue);
 
       /**
        * Helper that serializes output of purifyHtml() to string.
@@ -752,7 +748,7 @@ describe
         createElement: tagName => document.createElement(tagName),
       };
 
-      const purifier = () => new Purifier(doc);
+      const purifier = () => new Purifier();
 
       /**
        * Helper that serializes output of purifyHtml() to string.
@@ -845,7 +841,7 @@ describe('validateAttributeChange', () => {
   let vac;
 
   beforeEach(() => {
-    const purify = new Purifier(document);
+    const purify = new Purifier();
     purifier = purify.domPurify_;
     purifier.isValidAttribute = () => true;
 
@@ -909,7 +905,7 @@ describe('getAllowedTags', () => {
   let allowedTags;
 
   beforeEach(() => {
-    allowedTags = new Purifier(document).getAllowedTags();
+    allowedTags = new Purifier().getAllowedTags(document);
   });
 
   it('should contain html tags', () => {

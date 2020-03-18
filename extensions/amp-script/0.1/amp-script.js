@@ -26,7 +26,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
-import {getServiceForDoc} from '../../../src/service';
+import {getServiceForDoc, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -564,10 +564,13 @@ export class SanitizerImpl {
     this.element_ = ampScript.element;
 
     /** @private @const {!Purifier} */
-    this.purifier_ = getServiceForDoc(this.element, 'purifier-inplace');
+    registerServiceBuilder(this.win_, 'purifier-inplace', function() {
+      return new Purifier(dict({'IN_PLACE': true}), rewriteAttributeValue);
+    });
+    this.purifier_ = getService(this.win_, 'purifier-inplace');
 
     /** @private @const {!Object<string, boolean>} */
-    this.allowedTags_ = this.purifier_.getAllowedTags();
+    this.allowedTags_ = this.purifier_.getAllowedTags(this.win_.document);
 
     /**
      * @private
@@ -786,12 +789,5 @@ export class SanitizerImpl {
 
 AMP.extension(TAG, '0.1', function(AMP) {
   AMP.registerServiceForDoc(TAG, AmpScriptService);
-  AMP.registerServiceForDoc('purifier-inplace', function(ampdoc) {
-    return new Purifier(
-      ampdoc.getRootNode(),
-      dict({'IN_PLACE': true}),
-      rewriteAttributeValue
-    );
-  });
   AMP.registerElement(TAG, AmpScript, CSS);
 });
