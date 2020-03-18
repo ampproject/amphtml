@@ -534,15 +534,7 @@ export class AmpList extends AMP.BaseElement {
       (isFetch && this.element.hasAttribute('reset-on-refresh')) ||
       this.element.getAttribute('reset-on-refresh') === 'always'
     ) {
-      let currentHeight;
-      this.measureMutateElement(
-        () => {
-          currentHeight = this.isLayoutContainer_
-            ? this.element./*OK*/ offsetHeight
-            : undefined;
-        },
-        () => {
-          this.maybeLockHeight_(currentHeight);
+      const mutate = () => {
           this.togglePlaceholder(true);
           this.toggleLoading(true, /* opt_force */ true);
           this.toggleFallback_(false);
@@ -555,11 +547,17 @@ export class AmpList extends AMP.BaseElement {
             });
           }
           removeChildren(dev().assertElement(this.container_));
+      };
+      if (!this.loadMoreEnabled_ && this.isLayoutContainer_) {
+        this.lockHeightAndMutate_(mutate);
+        return;
+      }
+      this.measureElement(() => {
+        mutate();
           if (this.loadMoreEnabled_) {
             this.getLoadMoreService_().hideAllLoadMoreElements();
           }
-        }
-      );
+      });
     }
   }
 
@@ -986,22 +984,9 @@ export class AmpList extends AMP.BaseElement {
   render_(elements, opt_append = false) {
     dev().info(TAG, 'render:', this.element, elements);
     const container = dev().assertElement(this.container_);
-
-    let currentHeight;
-    return this.measureMutateElement(
-      () => {
-        currentHeight = this.isLayoutContainer_
-          ? this.element./*OK*/ offsetHeight
-          : undefined;
-      },
-      () => {
-        this.maybeLockHeight_(currentHeight);
+    const mutate = () => {
         this.hideFallbackAndPlaceholder_();
-
-        if (
-          this.element.hasAttribute('diffable') &&
-          container.hasChildNodes()
-        ) {
+      if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
           this.diff_(container, elements);
         } else {
           if (!opt_append) {
@@ -1022,17 +1007,18 @@ export class AmpList extends AMP.BaseElement {
         // from previous calls to attemptToFit_(). Rejected size requests are
         // saved as "pending" and are fulfilled later on 'focus' event.
         // See resources-impl.checkPendingChangeSize_().
-        const r = this.element
-          .getResources()
-          .getResourceForElement(this.element);
+      const r = this.element.getResources().getResourceForElement(this.element);
         r.resetPendingChangeSize();
 
-        this.maybeResizeListToFitItems_().then(
-          () => this.maybeUnlockHeight_(),
-          () => {}
+      return this.maybeResizeListToFitItems_();
+    };
+
+    if (this.isLayoutContainer_) {
+      return this.lockHeightAndMutate_(() =>
+        mutate().then(resolved => (resolved ? this.unlockHeight_() : null))
         );
       }
-    );
+    return this.mutateElement(() => mutate());
   }
 
   /**
@@ -1131,28 +1117,35 @@ export class AmpList extends AMP.BaseElement {
   }
 
   /**
-   * Height only needs to be locked when layout="container"
+   * Measure and lock height before performing given mutate fn.
+   * Applicable for layout=container.
    * @private
-   * @param {number=} height
+   * @param {!Function} mutate
+   * @return {!Promise}
    */
-  maybeLockHeight_(height) {
-    if (!this.isLayoutContainer_ || !height) {
-      return;
-    }
+  lockHeightAndMutate_(mutate) {
+    let currentHeight;
+    return this.measureMutateElement(
+      () => {
+        currentHeight = this.isLayoutContainer_
+          ? this.element./*OK*/ offsetHeight
+          : undefined;
+      },
+      () => {
     setImportantStyles(this.element, {
-      'height': `${height}px`,
+          'height': `${currentHeight}px`,
       'overflow': 'hidden',
     });
+        return mutate();
+      }
+    );
   }
 
   /**
-   * Height only needs to be unlocked when layout="container"
+   * Applicable for layout=container.
    * @private
    */
-  maybeUnlockHeight_() {
-    if (!this.isLayoutContainer_) {
-      return;
-    }
+  unlockHeight_() {
     setImportantStyles(this.element, {
       'height': '',
       'overflow': '',

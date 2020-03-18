@@ -185,14 +185,18 @@ describes.repeated(
         }
 
         function expectRender() {
-          // Call mutate/measure during render.
+          // Call mutate OR measureMutate, then measure during render.
+          listMock
+            .expects('mutateElement')
+            .callsFake(m => m())
+            .atLeast(0);
           listMock
             .expects('measureMutateElement')
             .callsFake((m, n) => {
               m();
               n();
             })
-            .atLeast(1);
+            .atLeast(0);
           listMock
             .expects('measureElement')
             .callsFake(m => m())
@@ -254,20 +258,20 @@ describes.repeated(
             return list.layoutCallback();
           });
 
-          it('should unlock height for layout=container with successful attemptChangeHeight', () => {
+          it('should unlock height for layout=container with successful attemptChangeHeight', async () => {
             const itemElement = doc.createElement('div');
             const placeholder = doc.createElement('div');
             placeholder.style.height = '1337px';
             element.appendChild(placeholder);
             element.getPlaceholder = () => placeholder;
-            element.setAttribute('layout', 'container');
+            list.isLayoutSupported('container');
             expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
 
             listMock
               .expects('attemptChangeHeight')
               .withExactArgs(1337)
               .returns(Promise.resolve());
-            listMock.expects('maybeUnlockHeight_').once();
+            listMock.expects('unlockHeight_').once();
 
             return list.layoutCallback();
           });
@@ -278,7 +282,7 @@ describes.repeated(
             placeholder.style.height = '1337px';
             element.appendChild(placeholder);
             element.getPlaceholder = () => placeholder;
-            element.setAttribute('layout', 'container');
+            list.isLayoutSupported('container');
             expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
 
             listMock
@@ -288,7 +292,7 @@ describes.repeated(
             listMock
               .expects('maybeResizeListToFitItems_')
               .returns(Promise.reject());
-            listMock.expects('maybeUnlockHeight_').never();
+            listMock.expects('unlockHeight_').never();
 
             return list.layoutCallback();
           });

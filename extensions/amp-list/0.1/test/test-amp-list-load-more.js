@@ -209,6 +209,9 @@ describes.realWin(
         updateBindingsStub.onCall(1).returns(Promise.resolve([div3, div4]));
 
         const renderSpy = env.sandbox.spy(list, 'render_');
+        env.sandbox
+          .stub(list, 'attemptChangeHeight')
+          .returns(Promise.resolve());
         await list.layoutCallback();
         expect(renderSpy).to.be.calledOnce;
         expect(renderSpy).to.be.calledWith([div1, div2], false);
@@ -218,7 +221,6 @@ describes.realWin(
         expect(renderSpy).to.be.calledTwice;
         expect(renderSpy).to.be.calledWith([div3, div4], true);
 
-        list.container_;
         expect(list.container_.children).to.have.lengthOf(4);
       });
 
@@ -231,7 +233,9 @@ describes.realWin(
         env.sandbox
           .stub(list, 'maybeRenderLoadMoreTemplates_')
           .returns(Promise.resolve([]));
-
+        env.sandbox
+          .stub(list, 'attemptChangeHeight')
+          .returns(Promise.resolve());
         const div1 = doc.createElement('div');
         div1.textContent = '1';
         const div2 = doc.createElement('div');
