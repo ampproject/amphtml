@@ -1018,7 +1018,7 @@ export class AmpList extends AMP.BaseElement {
         mutate().then(resolved => (resolved ? this.unlockHeight_() : null))
       );
     }
-    return this.mutateElement(() => mutate());
+    return this.mutateElement(mutate);
   }
 
   /**
