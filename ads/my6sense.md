@@ -23,14 +23,16 @@ For more information, visit [www.My6sense.com](https://www.My6sense.com).
 ## Example
 
 ```html
-<amp-ad   height="600"
-          type="my6sense"
-          data-widget-key="your-widget-key"
-          data-zone="[ZONE]"
-          data-url="[PAGE_URL]"
-          data-organic-clicks="[ORGANIC_TRACKING_PIXEL]"
-          data-paid-clicks="[PAID_TRACKING_PIXEL]">
-  </amp-ad>
+<amp-ad
+  height="600"
+  type="my6sense"
+  data-widget-key="your-widget-key"
+  data-zone="[ZONE]"
+  data-url="[PAGE_URL]"
+  data-organic-clicks="[ORGANIC_TRACKING_PIXEL]"
+  data-paid-clicks="[PAID_TRACKING_PIXEL]"
+>
+</amp-ad>
 ```
 
 ## Configuration
