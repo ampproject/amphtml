@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays an [Izlesene](https://www.izlesene.com/) video.
+  text: Displays an Izlesene video.
 ---
 
 <!---
