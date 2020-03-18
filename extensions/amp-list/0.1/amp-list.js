@@ -1127,9 +1127,7 @@ export class AmpList extends AMP.BaseElement {
     let currentHeight;
     return this.measureMutateElement(
       () => {
-        currentHeight = this.isLayoutContainer_
-          ? this.element./*OK*/ offsetHeight
-          : undefined;
+        currentHeight = this.element./*OK*/ offsetHeight;
       },
       () => {
         setImportantStyles(this.element, {
