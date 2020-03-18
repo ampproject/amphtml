@@ -21,9 +21,18 @@
  */
 const {resolve, dirname} = require('path');
 
+let shouldResolveDevelopmentMode = true;
+
+// This plugin is not executed when AMP is building resources in isForTesting mode.
 module.exports = function({types: t}) {
   let getModeFound = false;
   return {
+    pre() {
+      const {isEsmBuild = true} = this.opts;
+      // Only apply the development resolution when building module output.
+      // This is due to the module output only applying to AMP Caches.
+      shouldResolveDevelopmentMode = isEsmBuild;
+    },
     visitor: {
       ImportDeclaration({node}, state) {
         const {specifiers, source} = node;
@@ -51,11 +60,10 @@ module.exports = function({types: t}) {
         const {object: obj, property} = node;
         const {callee} = obj;
         if (callee && callee.name === 'getMode') {
-          if (
-            property.name === 'test' ||
-            property.name === 'localDev' ||
-            property.name === 'development'
-          ) {
+          if (property.name === 'test' || property.name === 'localDev') {
+            path.replaceWith(t.booleanLiteral(false));
+          }
+          if (shouldResolveDevelopmentMode && property.name === 'development') {
             path.replaceWith(t.booleanLiteral(false));
           }
           if (property.name === 'minified') {
