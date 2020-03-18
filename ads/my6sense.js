@@ -21,7 +21,7 @@ import {validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function my6sense(global, data) {
-  validateData(data, ['widgetKey']);
+  validateData(data, ['widgetKey', 'url']);
 
   const widgetTag = global.document.createElement('script');
   widgetTag.src = `//web-clients.mynativeplatform.com/web-clients/bootloaders/${data.widgetKey}/bootloader.js`;
@@ -29,10 +29,9 @@ export function my6sense(global, data) {
     data.url && data.url !== '[PAGE_URL]'
       ? data.url
       : global.context.sourceUrl || window.document.referrer;
-
   widgetTag.setAttribute('async', 'true');
   widgetTag.setAttribute('data-version', '3');
-  widgetTag.setAttribute('data-url', url.toString());
+  widgetTag.setAttribute('data-url', url);
   widgetTag.setAttribute('data-zone', data.zone || '[ZONE]');
   widgetTag.setAttribute('data-google-amp', true);
   widgetTag.setAttribute(
