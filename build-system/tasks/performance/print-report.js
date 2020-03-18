@@ -79,8 +79,8 @@ function linesForMetric(metric, results) {
   return [
     [
       metric.padEnd(HEADER_COLUMN),
-      control.toString().padEnd(BODY_COLUMN),
       experiment.toString().padEnd(BODY_COLUMN),
+      control.toString().padEnd(BODY_COLUMN),
       percent(control, experiment),
     ].join(' | '),
     `\n${''.padEnd(FULL_TABLE, '-')}\n`,
