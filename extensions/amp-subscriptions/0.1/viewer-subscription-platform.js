@@ -117,6 +117,7 @@ export class ViewerSubscriptionPlatform {
         const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
 
         if (error) {
+          // Placeholder comment
           throw new Error(error.message);
         }
 
