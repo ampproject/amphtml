@@ -62,6 +62,21 @@ const NAVIGATE_TIMEOUT_MS = 30000;
 const MAX_PARALLEL_TABS = 5;
 const WAIT_FOR_TABS_MS = 1000;
 
+const PUPPETEER_OPTIONS = {
+  chrome: {
+    product: 'chrome',
+    headless: true,
+    args: ['--no-sandbox', '--disable-extensions', '--disable-gpu'],
+    dumpio: argv.browser_debug,
+  },
+  firefox: {
+    product: 'firefox',
+    args: ['-new-instance', '-private'],
+    headless: true,
+    dumpio: argv.browser_debug,
+  },
+};
+
 const ROOT_DIR = path.resolve(__dirname, '../../../');
 
 // JavaScript snippets that execute inside the page.
@@ -84,18 +99,17 @@ const SNAPSHOT_ERROR_SNIPPET = fs.readFileSync(
   'utf8'
 );
 
-let browser_;
-let percyAgentProcess_;
-
 /**
  * Override PERCY_* environment variables if passed via gulp task parameters.
  */
 function maybeOverridePercyEnvironmentVariables() {
-  ['percy_token', 'percy_branch'].forEach(variable => {
-    if (variable in argv) {
-      process.env[variable.toUpperCase()] = argv[variable];
+  ['percy_token_chrome', 'percy_token_firefox', 'percy_branch'].forEach(
+    variable => {
+      if (variable in argv) {
+        process.env[variable.toUpperCase()] = argv[variable];
+      }
     }
-  });
+  );
 }
 
 /**
@@ -131,36 +145,50 @@ function setPercyTargetCommit() {
  * Launches a @percy/agent instance.
  */
 async function launchPercyAgent() {
-  if (argv.percy_disabled) {
-    return;
-  }
-
-  const env = argv.percy_agent_debug ? {LOG_LEVEL: 'debug'} : {};
-  percyAgentProcess_ = execScriptAsync(
-    `npx percy start --port ${PERCY_AGENT_PORT}`,
-    {
-      cwd: __dirname,
-      env: Object.assign(env, process.env),
-      stdio: ['ignore', process.stdout, process.stderr],
+  try {
+    if (argv.percy_disabled) {
+      return;
     }
-  );
-  await waitUntilUsed(
-    PERCY_AGENT_PORT,
-    PERCY_AGENT_RETRY_MS,
-    PERCY_AGENT_TIMEOUT_MS
-  );
-  log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
+
+    const env = argv.percy_agent_debug ? {LOG_LEVEL: 'debug'} : {};
+    const percyAgentProcess = execScriptAsync(
+      `npx percy start --port ${PERCY_AGENT_PORT}`,
+      {
+        cwd: __dirname,
+        env: Object.assign(env, process.env),
+        stdio: ['ignore', process.stdout, process.stderr],
+      }
+    );
+    await waitUntilUsed(
+      PERCY_AGENT_PORT,
+      PERCY_AGENT_RETRY_MS,
+      PERCY_AGENT_TIMEOUT_MS
+    );
+    log('info', 'Percy agent is reachable on port', PERCY_AGENT_PORT);
+
+    addCleanupStep_(() => {
+      exitPercyAgent_(percyAgentProcess);
+    });
+    return percyAgentProcess;
+  } catch (reason) {
+    log('fatal', `Failed to start the Percy agent: ${reason}`);
+  }
 }
 
 /**
  * Launches an AMP webserver for minified js.
  */
 async function launchWebServer() {
-  await startServer(
-    {host: HOST, port: PORT},
-    {quiet: !argv.webserver_debug},
-    {compiled: true}
-  );
+  try {
+    await startServer(
+      {host: HOST, port: PORT},
+      {quiet: !argv.webserver_debug},
+      {compiled: true}
+    );
+    addCleanupStep_(stopServer);
+  } catch (reason) {
+    log('fatal', `Failed to start a web server: ${reason}`);
+  }
 }
 
 /**
@@ -169,28 +197,21 @@ async function launchWebServer() {
  * Waits until the browser is up and reachable, and ties its lifecycle to this
  * process's lifecycle.
  *
+ * @param {string} browserName either "chrome" or "firefox".
  * @return {!puppeteer.Browser} a Puppeteer controlled browser.
  */
-async function launchBrowser() {
-  const browserOptions = {
-    args: ['--no-sandbox', '--disable-extensions', '--disable-gpu'],
-    dumpio: argv.chrome_debug,
-    headless: true,
-  };
-
+async function launchBrowser(browserName) {
   try {
-    browser_ = await puppeteer.launch(browserOptions);
+    const browser = await puppeteer.launch(PUPPETEER_OPTIONS[browserName]);
+    // Every action on the browser or its pages adds a listener to the
+    // Puppeteer.Connection.Events.Disconnected event. This is a temporary
+    // workaround for the Node runtime warning that is emitted once 11 listeners
+    // are added to the same object.
+    browser._connection.setMaxListeners(9999);
+    return browser;
   } catch (error) {
     log('fatal', error);
   }
-
-  // Every action on the browser or its pages adds a listener to the
-  // Puppeteer.Connection.Events.Disconnected event. This is a temporary
-  // workaround for the Node runtime warning that is emitted once 11 listeners
-  // are added to the same object.
-  browser_._connection.setMaxListeners(9999);
-
-  return browser_;
 }
 
 /**
@@ -318,12 +339,11 @@ function logTestError(testError) {
 /**
  * Runs the visual tests.
  *
- * @param {!Array<string>} assetGlobs an array of glob strings to load assets
- *     from.
+ * @param {string} browserName either "chrome" or "firefox".
  * @param {!Array<JsonObject>} webpages an array of JSON objects containing
  *     details about the pages to snapshot.
  */
-async function runVisualTests(assetGlobs, webpages) {
+async function runVisualTests(browserName, webpages) {
   // Create a Percy client and start a build.
   if (process.env['PERCY_TARGET_COMMIT']) {
     log(
@@ -334,17 +354,42 @@ async function runVisualTests(assetGlobs, webpages) {
   }
 
   // Take the snapshots.
-  await generateSnapshots(webpages);
+  await generateSnapshots(browserName, webpages);
 }
 
 /**
  * Sets the AMP config, launches a server, and generates Percy snapshots for a
  * set of given webpages.
  *
+ * @param {string} browserName either "chrome" or "firefox".
  * @param {!Array<JsonObject>} webpages an array of JSON objects containing
  *     details about the pages to snapshot.
  */
-async function generateSnapshots(webpages) {
+async function generateSnapshots(browserName, webpages) {
+  webpages = filterWebPages_(webpages);
+  const browser = await launchBrowser(browserName);
+  if (argv.master) {
+    const page = await newPage(browser);
+    await page.goto(
+      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
+    );
+    await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
+  }
+
+  log('info', 'Generating snapshots...');
+  if (!(await snapshotWebpages(browser, webpages))) {
+    log('fatal', 'Some tests have failed locally.');
+  }
+}
+
+/**
+ * Filter the web pages based on the process flags.
+ *
+ * @param {!Array<!JsonObject>} webpages an array of JSON objects containing
+ *     details about the webpages to snapshot.
+ * @return {!Array<!JsonObject>} the same array, filtered.
+ */
+function filterWebPages_(webpages) {
   const numUnfilteredPages = webpages.length;
   webpages = webpages.filter(webpage => !webpage.flaky);
   if (numUnfilteredPages != webpages.length) {
@@ -410,20 +455,7 @@ async function generateSnapshots(webpages) {
       'pages'
     );
   }
-
-  const browser = await launchBrowser();
-  if (argv.master) {
-    const page = await newPage(browser);
-    await page.goto(
-      `http://${HOST}:${PORT}/examples/visual-tests/blank-page/blank.html`
-    );
-    await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
-  }
-
-  log('info', 'Generating snapshots...');
-  if (!(await snapshotWebpages(browser, webpages))) {
-    log('fatal', 'Some tests have failed locally.');
-  }
+  return webpages;
 }
 
 /**
@@ -654,7 +686,7 @@ async function snapshotWebpages(browser, webpages) {
  */
 function setDebuggingLevel() {
   if (argv.debug) {
-    argv['chrome_debug'] = true;
+    argv['browser_debug'] = true;
     argv['webserver_debug'] = true;
     argv['percy_agent_debug'] = true;
   }
@@ -665,11 +697,13 @@ function setDebuggingLevel() {
  *
  * Enables us to require percy checks on GitHub, and yet, not have to do a full
  * build for every PR.
+ *
+ * @param {string} browserName either "chrome" or "firefox".
  */
-async function createEmptyBuild() {
+async function createEmptyBuild(browserName) {
   log('info', 'Skipping visual diff tests and generating a blank Percy build');
 
-  const browser = await launchBrowser();
+  const browser = await launchBrowser(browserName);
   const page = await newPage(browser);
 
   await page
@@ -679,6 +713,9 @@ async function createEmptyBuild() {
       () => {}
     );
   await percySnapshot(page, 'Blank page', SNAPSHOT_SINGLE_BUILD_OPTIONS);
+  addCleanupStep_(async () => {
+    await browser.close();
+  });
 }
 
 /**
@@ -689,7 +726,6 @@ async function visualDiff() {
   const handlerProcess = createCtrlcHandler('visual-diff');
   ensureOrBuildAmpRuntimeInTestMode_();
   installPercy_();
-  setupCleanup_();
   maybeOverridePercyEnvironmentVariables();
   setPercyBranch();
   setPercyTargetCommit();
@@ -699,7 +735,6 @@ async function visualDiff() {
   }
 
   await performVisualTests();
-  await cleanup_();
   exitCtrlcHandler(handlerProcess);
 }
 
@@ -708,43 +743,47 @@ async function visualDiff() {
  */
 async function performVisualTests() {
   setDebuggingLevel();
-  if (!argv.percy_disabled && !process.env.PERCY_TOKEN) {
+  if (
+    !argv.percy_disabled &&
+    (!process.env.PERCY_TOKEN_CHROME || !process.env.PERCY_TOKEN_FIREFOX)
+  ) {
     log(
       'fatal',
-      'Could not find',
-      colors.cyan('PERCY_TOKEN'),
-      'environment variable'
+      'Could not find the',
+      colors.cyan('PERCY_TOKEN_CHROME'),
+      'and/or',
+      colors.cyan('PERCY_TOKEN_FIREFOX'),
+      'environment variables'
     );
-  } else {
-    try {
-      await launchPercyAgent();
-    } catch (reason) {
-      log('fatal', `Failed to start the Percy agent: ${reason}`);
-    }
   }
 
   // Launch a local web server.
-  try {
-    await launchWebServer();
-  } catch (reason) {
-    log('fatal', `Failed to start a web server: ${reason}`);
+  await launchWebServer();
+
+  for (const browserName of ['chrome', 'firefox']) {
+    log('info', 'Executing visual diff tests on', colors.cyan(browserName));
+
+    // Start the Percy agent.
+    process.env.PERCY_TOKEN =
+      process.env[`PERCY_TOKEN_${browserName.toUpperCase()}`];
+    const percyAgentProcess = await launchPercyAgent();
+
+    if (argv.empty) {
+      await createEmptyBuild();
+    } else {
+      // Load and parse the config. Use JSON5 due to JSON comments in file.
+      const visualTestsConfig = JSON5.parse(
+        fs.readFileSync(
+          path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
+          'utf8'
+        )
+      );
+      await runVisualTests(browserName, visualTestsConfig.webpages);
+    }
+    await exitPercyAgent_(percyAgentProcess);
   }
 
-  if (argv.empty) {
-    await createEmptyBuild();
-  } else {
-    // Load and parse the config. Use JSON5 due to JSON comments in file.
-    const visualTestsConfig = JSON5.parse(
-      fs.readFileSync(
-        path.resolve(__dirname, '../../../test/visual-diff/visual-tests'),
-        'utf8'
-      )
-    );
-    await runVisualTests(
-      visualTestsConfig.asset_globs,
-      visualTestsConfig.webpages
-    );
-  }
+  stopServer();
 }
 
 async function ensureOrBuildAmpRuntimeInTestMode_() {
@@ -781,34 +820,31 @@ function installPercy_() {
   percySnapshot = require('@percy/puppeteer').percySnapshot;
 }
 
-function setupCleanup_() {
-  process.on('exit', cleanup_);
-  process.on('SIGINT', cleanup_);
-  process.on('uncaughtException', cleanup_);
-  process.on('unhandledRejection', cleanup_);
+/**
+ * Add a cleanup action on exit or crashes.
+ *
+ * @param {Function} callback function to execute when cleaning up.
+ */
+function addCleanupStep_(callback) {
+  process.on('exit', callback);
+  process.on('SIGINT', callback);
+  process.on('uncaughtException', callback);
+  process.on('unhandledRejection', callback);
 }
 
-async function exitPercyAgent_() {
-  if (percyAgentProcess_ && !percyAgentProcess_.killed) {
+async function exitPercyAgent_(percyAgentProcess) {
+  if (percyAgentProcess && !percyAgentProcess.killed) {
     let resolver;
     const percyAgentExited_ = new Promise(resolverIn => {
       resolver = resolverIn;
     });
-    percyAgentProcess_.on('exit', () => {
+    percyAgentProcess.on('exit', () => {
       resolver();
     });
     // Explicitly exit the process by "Ctrl+C"-ing it.
-    await percyAgentProcess_.kill('SIGINT');
+    await percyAgentProcess.kill('SIGINT');
     await percyAgentExited_;
   }
-}
-
-async function cleanup_() {
-  if (browser_) {
-    await browser_.close();
-  }
-  stopServer();
-  await exitPercyAgent_();
 }
 
 module.exports = {
@@ -821,13 +857,14 @@ visualDiff.flags = {
   'empty': '  Creates a dummy Percy build with only a blank snapshot',
   'config':
     '  Sets the runtime\'s AMP_CONFIG to one of "prod" (default) or "canary"',
-  'chrome_debug': '  Prints debug info from Chrome',
+  'browser_debug': '  Prints debug info from the browser',
   'webserver_debug': '  Prints debug info from the local gulp webserver',
   'percy_agent_debug': '  Prints debug info from the @percy/agent instance',
   'debug': '  Sets all debugging flags',
   'verbose': '  Prints verbose log statements',
   'grep': '  Runs tests that match the pattern',
-  'percy_token': '  Override the PERCY_TOKEN environment variable',
+  'percy_token_chrome': '  Set the percy token for the Chrome Percy project',
+  'percy_token_firefox': '  Set the percy token for the Firefox Percy project',
   'percy_branch': '  Override the PERCY_BRANCH environment variable',
   'percy_disabled':
     '  Disables Percy integration (for testing local changes only)',
