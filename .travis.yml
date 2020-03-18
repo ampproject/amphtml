@@ -84,6 +84,12 @@ jobs:
       name: 'End to End Tests'
       script:
         - unbuffer node build-system/pr-check/e2e-tests.js
+      env:
+        - CACHE_NAME=E2EJOB
+    - stage: test
+      name: 'ESM Tests'
+      script:
+        - unbuffer node build-system/pr-check/esm-tests.js
     - stage: experiment
       name: 'Experiment A Tests'
       script:
