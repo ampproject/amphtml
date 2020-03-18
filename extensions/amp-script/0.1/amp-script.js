@@ -26,7 +26,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
-import {getServiceForDoc, registerServiceBuilder} from '../../../src/service';
+import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';

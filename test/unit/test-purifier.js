@@ -743,11 +743,6 @@ describe
 
     before(() => {
       html = document.createElement('html');
-      const doc = {
-        documentElement: html,
-        createElement: tagName => document.createElement(tagName),
-      };
-
       const purifier = () => new Purifier();
 
       /**
