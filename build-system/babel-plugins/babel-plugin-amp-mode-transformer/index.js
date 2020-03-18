@@ -21,28 +21,18 @@
  */
 const {resolve, dirname} = require('path');
 
-function replacementValue(node) {
-  const {object: obj, property} = node;
-  const {callee} = obj;
-  if (callee && callee.name === 'getMode') {
-    if (
-      property.name === 'test' ||
-      property.name === 'localDev' ||
-      property.name === 'development'
-    ) {
-      return false;
-    }
-    if (property.name === 'minified') {
-      return true;
-    }
-  }
+let shouldResolveDevelopmentMode = true;
 
-  return null;
-}
-
+// This plugin is not executed when AMP is building resources in isForTesting mode.
 module.exports = function({types: t}) {
   let getModeFound = false;
   return {
+    pre() {
+      const {isEsmBuild = true} = this.opts;
+      // Only apply the development resolution when building module output.
+      // This is due to the module output only applying to AMP Caches.
+      shouldResolveDevelopmentMode = isEsmBuild;
+    },
     visitor: {
       ImportDeclaration({node}, state) {
         const {specifiers, source} = node;
@@ -61,23 +51,24 @@ module.exports = function({types: t}) {
           }
         });
       },
-      AssignmentExpression(path) {
-        const {node} = path;
-        if (t.isMemberExpression(node.left)) {
-          const value = replacementValue(node.left, t);
-          if (value !== null) {
-            path.skip();
-          }
-        }
-      },
       MemberExpression(path) {
         if (!getModeFound) {
           return;
         }
 
-        const value = replacementValue(path.node, t);
-        if (value !== null) {
-          path.replaceWith(t.booleanLiteral(value));
+        const {node} = path;
+        const {object: obj, property} = node;
+        const {callee} = obj;
+        if (callee && callee.name === 'getMode') {
+          if (property.name === 'test' || property.name === 'localDev') {
+            path.replaceWith(t.booleanLiteral(false));
+          }
+          if (shouldResolveDevelopmentMode && property.name === 'development') {
+            path.replaceWith(t.booleanLiteral(false));
+          }
+          if (property.name === 'minified') {
+            path.replaceWith(t.booleanLiteral(true));
+          }
         }
       },
     },
