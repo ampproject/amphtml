@@ -25,7 +25,10 @@ export function my6sense(global, data) {
 
   const widgetTag = global.document.createElement('script');
   widgetTag.src = `//web-clients.mynativeplatform.com/web-clients/bootloaders/${data.widgetKey}/bootloader.js`;
-  let url = data.url && data.url !== '[PAGE_URL]' ? data.url : (global.context.sourceUrl || window.document.referrer);
+  const url =
+    data.url && data.url !== '[PAGE_URL]'
+      ? data.url
+      : global.context.sourceUrl || window.document.referrer;
 
   widgetTag.setAttribute('async', 'true');
   widgetTag.setAttribute('data-version', '3');
