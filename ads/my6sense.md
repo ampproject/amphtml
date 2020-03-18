@@ -50,4 +50,3 @@ For semantics of configuration and examples, sign-in and see the [My6sense platf
 ##Required parameters:
 
 - `data-widget-key`
-- `data-url`

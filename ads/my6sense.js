@@ -21,7 +21,7 @@ import {validateData} from '../3p/3p';
  * @param {!Object} data
  */
 export function my6sense(global, data) {
-  validateData(data, ['widgetKey', 'url']);
+  validateData(data, ['widgetKey']);
 
   const widgetTag = global.document.createElement('script');
   widgetTag.src = `//web-clients.mynativeplatform.com/web-clients/bootloaders/${data.widgetKey}/bootloader.js`;
