@@ -316,12 +316,10 @@ function logTestError(testError) {
 /**
  * Runs the visual tests.
  *
- * @param {!Array<string>} assetGlobs an array of glob strings to load assets
- *     from.
  * @param {!Array<JsonObject>} webpages an array of JSON objects containing
  *     details about the pages to snapshot.
  */
-async function runVisualTests(assetGlobs, webpages) {
+async function runVisualTests(webpages) {
   // Create a Percy client and start a build.
   if (process.env['PERCY_TARGET_COMMIT']) {
     log(
@@ -738,10 +736,7 @@ async function performVisualTests() {
         'utf8'
       )
     );
-    await runVisualTests(
-      visualTestsConfig.asset_globs,
-      visualTestsConfig.webpages
-    );
+    await runVisualTests(visualTestsConfig.webpages);
   }
 }
 
