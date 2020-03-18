@@ -260,13 +260,13 @@ export class AmpList extends AMP.BaseElement {
     // If a placeholder exists and it's taller than amp-list, attempt a resize.
     const placeholder = this.getPlaceholder();
     if (placeholder) {
-      this.attemptToFit_(placeholder).catch(() => {});
+      this.attemptToFit_(placeholder);
     } else if (this.hasInitialContent_) {
-      this.attemptToFit_(dev().assertElement(this.container_)).catch(() => {});
+      this.attemptToFit_(dev().assertElement(this.container_));
     }
 
     this.viewport_.onResize(() => {
-      this.maybeResizeListToFitItems_().catch(() => {});
+      this.maybeResizeListToFitItems_();
     });
 
     if (this.loadMoreEnabled_) {
@@ -535,18 +535,18 @@ export class AmpList extends AMP.BaseElement {
       this.element.getAttribute('reset-on-refresh') === 'always'
     ) {
       const mutate = () => {
-          this.togglePlaceholder(true);
-          this.toggleLoading(true, /* opt_force */ true);
-          this.toggleFallback_(false);
-          // Clean up bindings in children before removing them from DOM.
-          if (this.bind_) {
-            const removed = toArray(this.container_.children);
-            this.bind_.rescan(/* added */ [], removed, {
-              'fast': true,
-              'update': false,
-            });
-          }
-          removeChildren(dev().assertElement(this.container_));
+        this.togglePlaceholder(true);
+        this.toggleLoading(true, /* opt_force */ true);
+        this.toggleFallback_(false);
+        // Clean up bindings in children before removing them from DOM.
+        if (this.bind_) {
+          const removed = toArray(this.container_.children);
+          this.bind_.rescan(/* added */ [], removed, {
+            'fast': true,
+            'update': false,
+          });
+        }
+        removeChildren(dev().assertElement(this.container_));
       };
       if (!this.loadMoreEnabled_ && this.isLayoutContainer_) {
         this.lockHeightAndMutate_(mutate);
@@ -554,9 +554,9 @@ export class AmpList extends AMP.BaseElement {
       }
       this.measureElement(() => {
         mutate();
-          if (this.loadMoreEnabled_) {
-            this.getLoadMoreService_().hideAllLoadMoreElements();
-          }
+        if (this.loadMoreEnabled_) {
+          this.getLoadMoreService_().hideAllLoadMoreElements();
+        }
       });
     }
   }
@@ -985,30 +985,30 @@ export class AmpList extends AMP.BaseElement {
     dev().info(TAG, 'render:', this.element, elements);
     const container = dev().assertElement(this.container_);
     const mutate = () => {
-        this.hideFallbackAndPlaceholder_();
+      this.hideFallbackAndPlaceholder_();
       if (this.element.hasAttribute('diffable') && container.hasChildNodes()) {
-          this.diff_(container, elements);
-        } else {
-          if (!opt_append) {
-            removeChildren(container);
-          }
-          this.addElementsToContainer_(elements, container);
+        this.diff_(container, elements);
+      } else {
+        if (!opt_append) {
+          removeChildren(container);
         }
+        this.addElementsToContainer_(elements, container);
+      }
 
-        const event = createCustomEvent(
-          this.win,
-          AmpEvents.DOM_UPDATE,
-          /* detail */ null,
-          {bubbles: true}
-        );
-        this.container_.dispatchEvent(event);
+      const event = createCustomEvent(
+        this.win,
+        AmpEvents.DOM_UPDATE,
+        /* detail */ null,
+        {bubbles: true}
+      );
+      this.container_.dispatchEvent(event);
 
-        // Now that new contents have been rendered, clear pending size requests
-        // from previous calls to attemptToFit_(). Rejected size requests are
-        // saved as "pending" and are fulfilled later on 'focus' event.
-        // See resources-impl.checkPendingChangeSize_().
+      // Now that new contents have been rendered, clear pending size requests
+      // from previous calls to attemptToFit_(). Rejected size requests are
+      // saved as "pending" and are fulfilled later on 'focus' event.
+      // See resources-impl.checkPendingChangeSize_().
       const r = this.element.getResources().getResourceForElement(this.element);
-        r.resetPendingChangeSize();
+      r.resetPendingChangeSize();
 
       return this.maybeResizeListToFitItems_();
     };
@@ -1016,8 +1016,8 @@ export class AmpList extends AMP.BaseElement {
     if (this.isLayoutContainer_) {
       return this.lockHeightAndMutate_(() =>
         mutate().then(resolved => (resolved ? this.unlockHeight_() : null))
-        );
-      }
+      );
+    }
     return this.mutateElement(() => mutate());
   }
 
@@ -1132,10 +1132,10 @@ export class AmpList extends AMP.BaseElement {
           : undefined;
       },
       () => {
-    setImportantStyles(this.element, {
+        setImportantStyles(this.element, {
           'height': `${currentHeight}px`,
-      'overflow': 'hidden',
-    });
+          'overflow': 'hidden',
+        });
         return mutate();
       }
     );
@@ -1160,16 +1160,19 @@ export class AmpList extends AMP.BaseElement {
    *
    * @param {!Element} target
    * @private
-   * @return {!Promise}
+   * @return {!Promise<boolean>}
    */
   attemptToFit_(target) {
     return this.measureElement(() => {
       const targetHeight = target./*OK*/ scrollHeight;
       const height = this.element./*OK*/ offsetHeight;
       if (targetHeight > height) {
-        return this.attemptChangeHeight(targetHeight);
+        return this.attemptChangeHeight(targetHeight).then(
+          () => Promise.resolve(true),
+          () => Promise.resolve(false)
+        );
       }
-      return Promise.resolve();
+      return Promise.resolve(true);
     });
   }
 
@@ -1481,7 +1484,7 @@ export class AmpList extends AMP.BaseElement {
     // Displaying [fetch-error] may offset initial content, so resize to fit.
     if (childElementByAttr(this.element, 'fetch-error')) {
       // Note that we're measuring against the element instead of the container.
-      this.attemptToFit_(this.element).catch(() => {});
+      this.attemptToFit_(this.element);
     }
     this.toggleLoading(false);
     if (this.getFallback()) {
