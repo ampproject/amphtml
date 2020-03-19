@@ -25,6 +25,7 @@ const config = require('../test-configs/config');
 const minimatch = require('minimatch');
 const path = require('path');
 const {gitDiffNameOnlyMaster} = require('../common/git');
+const {isTravisBuild} = require('../common/travis');
 
 /**
  * List of all build targets.
@@ -280,7 +281,7 @@ function determineBuildTargets(fileName = 'build-targets.js') {
         .join(', ')
     )
   );
-  if (buildTargets.has('PACKAGE_UPGRADE')) {
+  if (isTravisBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
     console.log(
       `${fileLogPrefix} Since this PR contains package upgrade(s), running all checks...`
     );
