@@ -84,6 +84,14 @@ html.i-amphtml-fie > body {
 }
 
 /**
+ * iOS jitters when body overflows. See b/149328043.
+ */
+html.i-amphtml-singledoc.i-amphtml-iframed > body {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+/**
  * Set `body {overflow-x: hidden}` for iOS WebView. This is b/c iOS WebView
  * does NOT respect `html {overflow-x: hidden}`.
  * Note! For all other natural cases body's style is `body {overflow: visible}`
