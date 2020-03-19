@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
-import {SERVICE_TIMEOUT} from './amp-subscriptions';
 import {Services} from '../../../src/services';
 import {devAssert, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
@@ -113,7 +113,7 @@ export class ViewerSubscriptionPlatform {
 
     return /** @type {!Promise<Entitlement>} */ (this.timer_
       .timeoutPromise(
-        SERVICE_TIMEOUT,
+        ENTITLEMENTS_REQUEST_TIMEOUT,
         this.viewer_.sendMessageAwaitResponse('auth', authRequest)
       )
       .then(entitlementData => {
