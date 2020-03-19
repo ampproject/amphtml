@@ -79,7 +79,7 @@ html.i-amphtml-fie > body {
 /**
  * iOS jitters when body overflows. See b/149328043.
  */
-html.i-amphtml-singledoc.i-amphtml-iframed > body {
+html.i-amphtml-singledoc.i-amphtml-iframed:not(.i-amphtml-ios-embed) > body {
   overflow-x: hidden !important;
   overflow-y: visible !important;
 }
