@@ -28,7 +28,7 @@ export class Purifier {
     opt_attrRewrite?: AttributeRewriterDef
   );
 
-  purifyHtml(dirty: string): HTMLElement;
+  purifyHtml(doc:Document, dirty: string): HTMLElement;
   purifyTagsForTripleMustache(doc: Document, dirty: string): string;
   getAllowedTags(doc: Document): {[key: string]: boolean};
   validateAttributeChange(
