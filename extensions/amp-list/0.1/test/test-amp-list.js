@@ -274,7 +274,7 @@ describes.repeated(
             listMock
               .expects('maybeResizeListToFitItems_')
               .returns(Promise.resolve(true));
-            listMock.expects('unlockHeight_').once();
+            listMock.expects('unlockHeightInsideMutate_').once();
 
             return list.layoutCallback();
           });
@@ -295,7 +295,7 @@ describes.repeated(
             listMock
               .expects('maybeResizeListToFitItems_')
               .returns(Promise.resolve(false));
-            listMock.expects('unlockHeight_').never();
+            listMock.expects('unlockHeightInsideMutate_').never();
 
             return list.layoutCallback();
           });

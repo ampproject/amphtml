@@ -1016,7 +1016,7 @@ export class AmpList extends AMP.BaseElement {
     if (this.isLayoutContainer_) {
       return this.lockHeightAndMutate_(() =>
         renderAndResize().then(resized =>
-          resized ? this.unlockHeight_() : null
+          resized ? this.unlockHeightInsideMutate_() : null
         )
       );
     }
@@ -1145,7 +1145,7 @@ export class AmpList extends AMP.BaseElement {
    * Applicable for layout=container.
    * @private
    */
-  unlockHeight_() {
+  unlockHeightInsideMutate_() {
     setImportantStyles(this.element, {
       'height': '',
       'overflow': '',
