@@ -1509,10 +1509,38 @@ export class VisibilityTracker extends EventTracker {
         const promises = [];
         for (let i = 0; i < selector.length; i++) {
           promises.push(
-            this.getUnlistenPromiseForSelector_(
-              context,
-              selector[i],
-              selectionMethod,
+            this.root
+              .getAmpElement(
+                context.parentElement || context,
+                selector,
+                selectionMethod
+              )
+              .then(element =>
+                this.getUnlistenPromiseForElement_(
+                  element,
+                  selector[i],
+                  visibilityManagerPromise,
+                  visibilitySpec,
+                  waitForSpec,
+                  createReportReadyPromiseFunc,
+                  eventType,
+                  listener
+                )
+              )
+          );
+        }
+        unlistenPromise = Promise.all(promises);
+      } else {
+        unlistenPromise = this.root
+          .getAmpElement(
+            context.parentElement || context,
+            selector,
+            selectionMethod
+          )
+          .then(element =>
+            this.getUnlistenPromiseForElement_(
+              element,
+              selector,
               visibilityManagerPromise,
               visibilitySpec,
               waitForSpec,
@@ -1521,20 +1549,6 @@ export class VisibilityTracker extends EventTracker {
               listener
             )
           );
-        }
-        unlistenPromise = Promise.all(promises);
-      } else {
-        unlistenPromise = this.getUnlistenPromiseForSelector_(
-          context,
-          selector,
-          selectionMethod,
-          visibilityManagerPromise,
-          visibilitySpec,
-          waitForSpec,
-          createReportReadyPromiseFunc,
-          eventType,
-          listener
-        );
       }
     }
 
@@ -1552,9 +1566,8 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /**
-   * @param {!Element} context
+   * @param {!AmpElement} element
    * @param {string} selector
-   * @param {string} selectionMethod
    * @param {Promise<!./visibility-manager.VisibilityManager>} visibilityManagerPromise
    * @param {!JsonObject} visibilitySpec
    * @param {string} waitForSpec
@@ -1563,10 +1576,9 @@ export class VisibilityTracker extends EventTracker {
    * @param {function(!AnalyticsEvent)} listener
    * @return {!Promise<!UnlistenDef>}
    */
-  getUnlistenPromiseForSelector_(
-    context,
+  getUnlistenPromiseForElement_(
+    element,
     selector,
-    selectionMethod,
     visibilityManagerPromise,
     visibilitySpec,
     waitForSpec,
@@ -1574,26 +1586,18 @@ export class VisibilityTracker extends EventTracker {
     eventType,
     listener
   ) {
-    return this.root
-      .getAmpElement(
-        context.parentElement || context,
-        selector,
-        selectionMethod
-      )
-      .then(element => {
-        return visibilityManagerPromise.then(
-          visibilityManager => {
-            return visibilityManager.listenElement(
-              element,
-              visibilitySpec,
-              this.getReadyPromise(waitForSpec, selector, element),
-              createReportReadyPromiseFunc,
-              this.onEvent_.bind(this, eventType, listener, element)
-            );
-          },
-          () => {}
+    return visibilityManagerPromise.then(
+      visibilityManager => {
+        return visibilityManager.listenElement(
+          element,
+          visibilitySpec,
+          this.getReadyPromise(waitForSpec, selector, element),
+          createReportReadyPromiseFunc,
+          this.onEvent_.bind(this, eventType, listener, element)
         );
-      });
+      },
+      () => {}
+    );
   }
 
   /**
