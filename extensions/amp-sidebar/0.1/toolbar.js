@@ -20,6 +20,7 @@ import {toggle} from '../../../src/style';
 
 /**
  * Class representing toolbar behavior in sidebar
+ * @throws User error if element with id [toolbar-target] isn't found in DOM.
  */
 export class Toolbar {
   /**
@@ -88,8 +89,8 @@ export class Toolbar {
       this.toolbarClone_.classList.add('i-amphtml-toolbar');
       toggle(this.toolbarTarget_, false);
     } else {
-      // This error will be later rethrown as a user error and
-      // the side bar will continue to function w/o toolbar feature
+      // This error will be caught and the side bar will continue to function
+      // without the toolbar feature.
       throw new user().createError(
         `Could not find the toolbar-target element with an id: ${targetId}`
       );
