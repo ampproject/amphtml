@@ -25,7 +25,7 @@ import {
   isValidAttr,
   markElementForDiffing,
 } from './sanitation';
-import {dev, user} from '../log';
+import {dev, devAssert, user} from '../log';
 import {isAmp4Email} from '../format';
 import {removeElement} from '../dom';
 import {startsWith} from '../string';
@@ -125,9 +125,7 @@ export class Purifier {
     });
     // Serialize DocumentFragment to HTML. XMLSerializer would also work, but adds
     // namespaces for all elements and attributes.
-    const div = dev()
-      .assert(this.doc_)
-      .createElement('div');
+    const div = devAssert(this.doc_).createElement('div');
     div.appendChild(fragment);
     return div./*OK*/ innerHTML;
   }
@@ -247,7 +245,7 @@ export class Purifier {
       // Allow all AMP elements.
       if (startsWith(tagName, 'amp-')) {
         // Enforce AMP4EMAIL tag whitelist at runtime.
-        const isEmail = isAmp4Email(dev().assert(this.doc_));
+        const isEmail = isAmp4Email(devAssert(this.doc_));
         allowedTags[tagName] = !isEmail || EMAIL_WHITELISTED_AMP_TAGS[tagName];
       }
       // Set `target` attribute for <a> tags if necessary.
@@ -356,7 +354,7 @@ export class Purifier {
           tagName,
           attrName,
           attrValue,
-          dev().assert(this.doc_),
+          devAssert(this.doc_),
           /* opt_purify */ true
         )
       ) {
