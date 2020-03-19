@@ -48,13 +48,7 @@ export function invokeWebWorker(win, method, opt_args, opt_localWin) {
     return Promise.reject('Worker not supported in window.');
   }
   //registerServiceBuilder(win, 'amp-worker', AmpWorker);
-  console.log('get worker service');
   const worker = Services.workerFor(win);
-  console.log('worker service is ', worker);
-  console.log('worker  is ', worker.worker_);
-  console.log('worker promise is ', worker.fetchPromise_);
-
-  console.log('send message');
   return worker.sendMessage_(method, opt_args || [], opt_localWin);
 }
 export function installWebWorkerService(win) {
@@ -108,24 +102,29 @@ class AmpWorker {
 
     /** @const @private {!Promise} */
     console.log('initiate fetch promise');
-    this.fetchPromise_ = this.xhr_
-      .fetchText(url, {
-        ampCors: false,
-        bypassInterceptorForDev: getMode().localDev,
-      })
-      .then(res => res.text())
-      .then(text => {
-        // Workaround since Worker constructor only accepts same origin URLs.
-        const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
-          type: 'text/javascript',
-        });
-        const blobUrl = win.URL.createObjectURL(blob);
-        console.log('AMP to start worker', Date.now());
-        this.worker_ = new win.Worker(blobUrl);
-        this.worker_.onmessage = this.receiveMessage_.bind(this);
-      });
+    this.worker_ = new win.Worker('http://localhost:8000/dist/ww.js', { type: 'module' });
+    this.worker_.onmessage = this.receiveMessage_.bind(this);
 
-    console.log('fetch promise 1 is ', this.fetchPromise_);
+    this.fetchPromise_ = Promise.resolve();
+
+    // this.fetchPromise_ = this.xhr_
+    //   .fetchText(url, {
+    //     ampCors: false,
+    //     bypassInterceptorForDev: getMode().localDev,
+    //   })
+    //   .then(res => res.text())
+    //   .then(text => {
+    //     // Workaround since Worker constructor only accepts same origin URLs.
+    //     const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
+    //       type: 'text/javascript',
+    //     });
+    //     const blobUrl = win.URL.createObjectURL(blob);
+    //     console.log('AMP to start worker', Date.now());
+    //     this.worker_ = new win.Worker(blobUrl);
+    //     this.worker_.onmessage = this.receiveMessage_.bind(this);
+    //   });
+
+    // console.log('fetch promise 1 is ', this.fetchPromise_);
 
     /**
      * Array of in-flight messages pending response from worker.

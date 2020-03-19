@@ -24,6 +24,15 @@
     }
 
   </style>
+   <!-- <link rel="modulepreload" href="http://localhost:8000/dist/ww.js"> -->
+   <!-- <script>
+    addEventListener('load', () => {
+      console.log('start worker');
+      // our worker code is likely already parsed and ready to execute!
+      const worker = new Worker('http://localhost:8000/dist/ww.js', { type: 'module' });
+      console.log('start worker called');
+    });
+  </script> -->
    <!-- <script async src="http://localhost:8000/dist/v0.js"></script>
    <script async custom-element="amp-analytics" src="http://localhost:8000/dist/v0/amp-analytics-0.1.js"></script> -->
   <!-- <link rel="preload" href="http://localhost:8000/dist/ww.js" as="script"> -->

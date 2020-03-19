@@ -46,7 +46,7 @@ export function invokeWebWorker(win, method, opt_args, opt_localWin) {
   if (!win.Worker) {
     return Promise.reject('Worker not supported in window.');
   }
-  //registerServiceBuilder(win, 'amp-worker', AmpWorker);
+  registerServiceBuilder(win, 'amp-worker', AmpWorker);
   const worker = Services.workerFor(win);
   return worker.sendMessage(method, opt_args || [], opt_localWin);
 }
@@ -99,22 +99,9 @@ class AmpWorker {
     /** @private {Worker} */
     this.worker_ = null;
 
-    /** @const @private {!Promise} */
-    this.fetchPromise_ = this.xhr_
-      .fetchText(url, {
-        ampCors: false,
-        bypassInterceptorForDev: getMode().localDev,
-      })
-      .then(res => res.text())
-      .then(text => {
-        // Workaround since Worker constructor only accepts same origin URLs.
-        const blob = new win.Blob([text + '\n//# sourceurl=' + url], {
-          type: 'text/javascript',
-        });
-        const blobUrl = win.URL.createObjectURL(blob);
-        this.worker_ = new win.Worker(blobUrl);
-        this.worker_.onmessage = this.receiveMessage_.bind(this);
-      });
+    this.fetchPromise_ = Promise.resolve();
+    this.worker_ = new win.Worker('http://localhost:8000/dist/ww.js', { type: 'module' });
+    this.worker_.onmessage = this.receiveMessage_.bind(this);
 
     /**
      * Array of in-flight messages pending response from worker.

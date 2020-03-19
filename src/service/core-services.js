@@ -71,7 +71,7 @@ export function installRuntimeServices(global) {
   installXhrService(global);
   installInputService(global);
   installPreconnectService(global);
-  installWebWorkerService(global);
+  //installWebWorkerService(global);
 }
 
 /**
