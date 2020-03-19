@@ -4,4 +4,4 @@ Use `gulp performance` to run this test. It measures performance for the current
 
 The `config.json` file contains settings. If you set `headless` to `false`, you will be able to watch the test run in Chrome. The default value for `runs` is 100, which takes ~10 minutes to run, and generates results with ~5% margin of error. Differences larger than this should be investigated. The `urls` array of strings must be set before running the test, and each URL will be tested separately. If you wish to test `urls` hosted locally, use `gulp --cdn` to serve the binaries from cdn.
 
-This test measures the following metrics: `visible`, `first paint`, `first contentful paint`, `largest contentful paint`, `time to interactive`, `max first input delay`, and `cumulative layout shift`.
+This test measures the following metrics: `visible`, `first paint`, `first contentful paint`, `largest contentful paint`, `time to interactive`, `max first input delay`, `cumulative layout shift`, and `analytics request time`.

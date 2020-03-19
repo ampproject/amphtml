@@ -40,10 +40,11 @@ async function addExtraUrlParams(url, version) {
   );
   for (const tag of analyticsTags) {
     const scriptTag = tag.querySelector('script');
+    let script = {};
     if (scriptTag) {
       tag.removeChild(scriptTag);
+      script = JSON.parse(scriptTag.innerHTML);
     }
-    let script = JSON.parse(scriptTag.innerHTML) || {};
     script = Object.assign(script, {
       extraUrlParams: EXTRA_URL_PARAM,
     });

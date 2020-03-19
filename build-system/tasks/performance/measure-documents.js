@@ -80,7 +80,7 @@ const setupMeasurement = page =>
  * @param {Request} interceptedRequest
  * @param {Array<number>} endTimes
  */
-async function handleRequests(interceptedRequest, endTimes) {
+async function handleAnalyticsRequests(interceptedRequest, endTimes) {
   const interceptedUrl = interceptedRequest.url();
   const matchArray = interceptedUrl.match(CDN_ANALYTICS_REGEXP);
   if (matchArray) {
@@ -218,7 +218,7 @@ async function measureDocument(url, version, {headless}) {
   const endTimes = [];
   const startTime = Date.now();
   page.on('request', interceptedRequest =>
-    handleRequests(interceptedRequest, endTimes)
+    handleAnalyticsRequests(interceptedRequest, endTimes)
   );
 
   try {
