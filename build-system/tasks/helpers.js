@@ -277,7 +277,7 @@ function toEsmName(name) {
 }
 
 function maybeToEsmName(name) {
-  return argv.esm ? toEsmName(name) : name;
+  return argv.esm && !argv.fortesting ? toEsmName(name) : name;
 }
 
 /**
