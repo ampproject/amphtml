@@ -65,6 +65,7 @@
   color: #fff !important;
 }
 
-.i-amphtml-story-draggable-drawer-header-bookend {
+.i-amphtml-story-draggable-drawer-header-bookend,
+.i-amphtml-story-draggable-drawer-header-attachment-remote {
   display: none !important;
 }
