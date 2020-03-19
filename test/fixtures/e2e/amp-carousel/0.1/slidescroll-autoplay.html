@@ -91,16 +91,16 @@
   </head>
   <body>
     <h1>Autoplay slides</h1>
-    <button on="tap:autoplay-carousel.goToSlide(index=0)">
-      go to first slide
-    </button>
+    <button id="go-to-first" on="tap:autoplay-carousel.goToSlide(index=0)">
+      go to first slide</button
+    ><br />
     <amp-carousel
       id="autoplay-carousel"
       width="400"
       height="225"
       layout="fixed"
       type="slides"
-      autoplay="4000"
+      autoplay="3000"
     >
       <amp-layout id="slide1" layout="responsive" width="440" height="225">
         <svg viewBox="0 0 440 225">
@@ -121,5 +121,7 @@
         </svg>
       </amp-layout>
     </amp-carousel>
+    <br />
+    <div id="event-container"></div>
   </body>
 </html>

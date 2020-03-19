@@ -22,48 +22,61 @@ describes.endtoend(
     environments: ['single'],
   },
   async function(env) {
-    let controller, events;
+    const ActionTrust = {LOW: '1', HIGH: '3'};
+    let controller;
     /**
      * Attach an event listener to page to capture a custom event.
      * @param {string} type Event name.
      * @return {!Promise}
      */
-    function listenFor(type) {
-      return controller.driver.executeScript(
-        (type, events) =>
-          document.addEventListener(type, e => {
-            events.push(e);
-          }),
-        type,
-        events
-      );
+    function updateDomOn(type) {
+      return controller.driver.executeScript(type => {
+        document.addEventListener(type, e => {
+          const el = document.createElement('div');
+          el.classList.add('event');
+          el.textContent = e.data.actionTrust;
+          document.querySelector('#event-container').appendChild(el);
+        });
+      }, type);
     }
 
     beforeEach(async () => {
       controller = env.controller;
-      events = [];
     });
 
     it('should fire low trust event for autoplay advance', async () => {
-      await listenFor('slideChange');
-      const slide1 = await controller.findElement('#slide1');
-      const slide2 = await controller.findElement('#slide2');
-      const slide3 = await controller.findElement('#slide3');
+      await controller.findElement('#event-container');
+      await updateDomOn('slideChange');
 
-      await expect(
-        controller.getElementAttribute(slide1, 'aria-hidden')
-      ).to.equal('false'); // initial slide
-      await expect(events).to.have.length(0);
+      const event1 = await controller.findElement('.event:first-child');
+      await expect(controller.getElementText(event1)).to.equal(ActionTrust.LOW); //  autoplay advanced
 
-      await expect(
-        controller.getElementAttribute(slide2, 'aria-hidden')
-      ).to.equal('false'); // autoplay advanced
-      await expect(events).to.have.length(1);
+      const event2 = await controller.findElement('.event:nth-child(2)');
+      await expect(controller.getElementText(event2)).to.equal(ActionTrust.LOW); //  autoplay advanced
 
-      await expect(
-        controller.getElementAttribute(slide3, 'aria-hidden')
-      ).to.equal('false'); // autoplay advanced
-      await expect(events).to.have.length(2);
+      const event3 = await controller.findElement('.event:nth-child(3)');
+      await expect(controller.getElementText(event3)).to.equal(ActionTrust.LOW); //  autoplay advanced
+    });
+
+    it('should fire high trust event on user interaction', async () => {
+      await controller.findElement('#event-container');
+      await updateDomOn('slideChange');
+
+      const nextButton = await controller.findElement(
+        '.amp-carousel-button-next'
+      );
+      await controller.click(nextButton);
+      const event1 = await controller.findElement('.event:first-child');
+      await expect(controller.getElementText(event1)).to.equal(
+        ActionTrust.HIGH
+      );
+
+      const goToFirstSlideButton = await controller.findElement('#go-to-first');
+      await controller.click(goToFirstSlideButton);
+      const event2 = await controller.findElement('.event:nth-child(2)');
+      await expect(controller.getElementText(event2)).to.equal(
+        ActionTrust.HIGH
+      );
     });
   }
 );
