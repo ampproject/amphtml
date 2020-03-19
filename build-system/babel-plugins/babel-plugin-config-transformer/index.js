@@ -14,28 +14,44 @@
  * limitations under the License.
  */
 
-let hasThirdPartyRegex = false;
-let hasCdnProxyRegex = false;
+const {basename, dirname, relative} = require('path');
+let allowExecution = false;
 
 // Only executes on the ESM build, intended to use with the Google AMP Cache.
 module.exports = function({types: t}) {
   return {
+    pre() {
+      const {root, filename} = this.file.opts;
+      const base = relative(root, filename);
+      if (dirname(base) === 'src' && basename(base) === 'config.js') {
+        // Only use for './src/config.js'.
+        allowExecution = true;
+      }
+
+      if (dirname(filename).includes('babel-plugin')) {
+        // Ensure babel-plugin tests work.
+        allowExecution = true;
+      }
+    },
     visitor: {
       VariableDeclarator(path) {
+        if (!allowExecution) {
+          return;
+        }
+
         const {node} = path;
         const {name} = node.id;
         if (name === 'thirdPartyFrameRegex') {
-          hasThirdPartyRegex = true;
           path.parentPath.remove();
         } else if (name === 'cdnProxyRegex') {
-          hasCdnProxyRegex = true;
           path.parentPath.remove();
         }
       },
       LogicalExpression(path) {
-        if (!hasThirdPartyRegex || !hasCdnProxyRegex) {
+        if (!allowExecution) {
           return;
         }
+
         const {node} = path;
         const {left, right} = node;
         if (
@@ -54,6 +70,9 @@ module.exports = function({types: t}) {
           }
         }
       },
+    },
+    post() {
+      allowExecution = false;
     },
   };
 };
