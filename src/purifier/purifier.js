@@ -69,6 +69,9 @@ export class Purifier {
    * @param {!AttributeRewriterDef=} opt_attrRewrite
    */
   constructor(opt_config, opt_attrRewrite) {
+    /** @private {Document} */
+    this.doc_ = null;
+
     /**
      * Monotonically increasing counter used for keying nodes.
      * @private {number}
@@ -77,9 +80,6 @@ export class Purifier {
 
     /** @private {!DomPurifyDef} */
     this.domPurify_ = purify(self);
-
-    /** @private {Document} */
-    this.doc_ = null;
 
     /** @private {!DomPurifyDef} */
     this.domPurifyTriple_ = purify(self);
