@@ -218,6 +218,13 @@ export class AmpList extends AMP.BaseElement {
       this.element.setAttribute('aria-live', 'polite');
     }
 
+    // for amp-lists with 'single-item' enabled, we should not specify the
+    // role of 'list' on the container as it causes screen readers to
+    // read an extra nested list with one item
+    if (this.element.hasAttribute('single-item')) {
+      this.container_.removeAttribute('role');
+    }
+
     // auto-resize is deprecated and will be removed per deprecation schedule
     // It will relaunched under a new attribute (resizable-children) soon.
     // please see https://github.com/ampproject/amphtml/issues/18849
@@ -476,7 +483,11 @@ export class AmpList extends AMP.BaseElement {
    */
   addElementsToContainer_(elements, container) {
     elements.forEach(element => {
-      if (!element.hasAttribute('role')) {
+      if (
+        !element.hasAttribute('role') && 
+        // when 'single-item' is specified, do not add role to child element
+        !this.element.hasAttribute('single-item')
+      ) {
         element.setAttribute('role', 'listitem');
       }
       if (
