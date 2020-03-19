@@ -23,9 +23,8 @@ const glob = require('glob');
 const log = require('fancy-log');
 const Mocha = require('mocha');
 const path = require('path');
+const {buildMinifiedRuntime, installPackages} = require('../../common/utils');
 const {cyan} = require('ansi-colors');
-const {execOrDie} = require('../../common/exec');
-const {installPackages} = require('../../common/utils');
 const {isTravisBuild} = require('../../common/travis');
 const {reportTestStarted} = require('../report-test-status');
 const {startServer, stopServer} = require('../serve');
@@ -35,11 +34,6 @@ const HOST = 'localhost';
 const PORT = 8000;
 const SLOW_TEST_THRESHOLD_MS = 2500;
 const TEST_RETRIES = isTravisBuild() ? 2 : 0;
-
-function buildRuntime_() {
-  execOrDie('gulp clean');
-  execOrDie(`gulp dist --fortesting --config ${argv.config}`);
-}
 
 async function launchWebServer_() {
   await startServer(
@@ -86,7 +80,7 @@ async function e2e() {
 
   // build runtime
   if (!argv.nobuild) {
-    buildRuntime_();
+    buildMinifiedRuntime();
   }
 
   // start up web server
