@@ -18,9 +18,10 @@ const cacheDocuments = require('./cache-documents');
 const compileScripts = require('./compile-scripts');
 const getMetrics = require('./measure-documents');
 const loadConfig = require('./load-config');
-const printReport = require('./print-report');
 const rewriteScriptTags = require('./rewrite-script-tags');
+const runTests = require('./run-tests');
 const {installPackages} = require('../../common/utils');
+const {printReport} = require('./print-report');
 
 /**
  * @return {!Promise}
@@ -32,13 +33,17 @@ async function performance() {
   await compileScripts(urls);
   await rewriteScriptTags(urls);
   await getMetrics(urls, {headless, runs});
+  runTests();
   printReport(urls);
 }
 
-performance.description = '  Runs web performance test on current branch';
+performance.description = 'Runs web performance test on current branch';
 
 performance.flags = {
-  'nobuild': 'Does not compile javascripts before running tests',
+  'nobuild': '  Does not compile minified runtime before running tests',
+  'threshold':
+    '  Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',
+  'url': '  Page to test. Overrides urls set in config.json',
 };
 
 module.exports = {
