@@ -28,7 +28,7 @@ limitations under the License.
 
 The `<amp-inline-gallery>` component uses an `<amp-base-carousel>` to display slides. The page must have the required scripts for both components in the document head. Typical usage might look like:
 
-[example preview="inline" playground="true" imports="amp-inline-gallery,amp-base-carousel"]
+[example preview="inline" playground="true" imports="amp-inline-gallery,amp-base-carousel,amp-lightbox-gallery"]
 
 ```html
 <amp-inline-gallery layout="container">
