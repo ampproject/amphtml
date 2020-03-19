@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
+import {IframePool} from './amp-story-player-iframe-pool';
 import {Messaging} from '@ampproject/viewer-messaging';
+import {VisibilityState} from './visibility-state';
 import {
   addParamsToUrl,
   getFragment,
   parseUrlWithA,
   removeFragment,
 } from './url';
+import {applySandbox} from './3p-frame';
 import {dict, map} from './utils/object';
 // Source for this constant is css/amp-story-player-iframe.css
-import {IframePool} from './amp-story-player-iframe-pool';
-import {VisibilityState} from './visibility-state';
-import {applySandbox} from './3p-frame';
 import {cssText} from '../build/amp-story-player-iframe.css';
 import {resetStyles, setStyle, setStyles} from './style';
 import {toArray} from './types';
@@ -66,17 +66,19 @@ export const IFRAME_IDX = '__AMP_IFRAME_IDX__';
  * Note that this is a vanilla JavaScript class and should not depend on AMP
  * services, as v0.js is not expected to be loaded in this context.
  */
-export class AmpStoryPlayer {
+export class AmpStoryPlayer extends HTMLElement {
   /**
-   * @param {!Window} win
-   * @param {!Element} element
    * @constructor
    */
-  constructor(win, element) {
-    console./*OK*/ assert(
-      element.childElementCount > 0,
-      'Missing configuration.'
-    );
+  constructor() {
+    super();
+  }
+
+  /**
+   * @param {!Window} win
+   */
+  init(win) {
+    console./*OK*/ assert(this.childElementCount > 0, 'Missing configuration.');
 
     /** @private {!Window} */
     this.win_ = win;
@@ -85,7 +87,7 @@ export class AmpStoryPlayer {
     this.iframes_ = [];
 
     /** @private {!Element} */
-    this.element_ = element;
+    this.element_ = this;
 
     /** @private {!Document} */
     this.doc_ = win.document;

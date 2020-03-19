@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {AmpStoryPlayer} from './amp-story-player-impl';
 import {throttle} from './utils/rate-limit';
 
 /** @const {string} */
@@ -99,8 +98,8 @@ export class AmpStoryPlayerManager {
     const doc = this.win_.document;
     const players = doc.getElementsByTagName('amp-story-player');
     for (let i = 0; i < players.length; i++) {
-      const playerEl = players[i];
-      const player = new AmpStoryPlayer(this.win_, playerEl);
+      const player = players[i];
+      player.init(this.win_);
       player.buildCallback();
       this.layoutPlayer_(player);
     }
