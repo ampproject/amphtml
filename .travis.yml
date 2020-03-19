@@ -87,7 +87,7 @@ jobs:
       env:
         - CACHE_NAME=E2EJOB
     - stage: test
-      name: 'ESM Tests'
+      name: 'ESM Integration Tests'
       script:
         - unbuffer node build-system/pr-check/esm-tests.js
     - stage: experiment

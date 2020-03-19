@@ -53,7 +53,9 @@ function main() {
     ) {
       timedExecOrDie('gulp update-packages');
       timedExecOrDie('gulp dist --fortesting --esm');
-      timedExecOrDie('gulp integration --nobuild --compiled --headless');
+      timedExecOrDie(
+        'gulp integration --nobuild --compiled --headless --coverage'
+      );
     } else {
       console.log(
         `${FILELOGPREFIX} Skipping`,
