@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a [Wistia](https://wistia.com) video.
+  text: Displays a Wistia video.
 ---
 
 <!---

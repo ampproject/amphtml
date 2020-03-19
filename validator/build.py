@@ -99,7 +99,7 @@ def CheckPrereqs():
 
   # Ensure that yarn is installed.
   try:
-    subprocess.check_output(['yarn', '--version'])
+    subprocess.check_output(['npx', 'yarn', '--version'])
   except (subprocess.CalledProcessError, OSError):
     Die('Yarn package manager not found. Run '
         '"curl -o- -L https://yarnpkg.com/install.sh | bash" '
@@ -136,11 +136,11 @@ def InstallNodeDependencies():
   # node_modules.
   logging.info('installing AMP Validator engine dependencies ...')
   subprocess.check_call(
-      ['yarn', 'install'],
+      ['npx', 'yarn', 'install'],
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('installing AMP Validator nodejs dependencies ...')
   subprocess.check_call(
-      ['yarn', 'install'],
+      ['npx', 'yarn', 'install'],
       cwd='nodejs',
       stdout=(open(os.devnull, 'wb') if os.environ.get('TRAVIS') else sys.stdout))
   logging.info('... done')

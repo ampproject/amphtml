@@ -1,5 +1,5 @@
 /**
- * Copyright 2019 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-/**
- * @param {!Window} win
- * @param {!Element} element
- * @param {boolean} useRemoteHtml
- * @return {boolean}
- */
-export function myTargetIsA4AEnabled(win, element, useRemoteHtml) {
-  return (
-    !useRemoteHtml &&
-    !!element.getAttribute('data-use-a4a') &&
-    !!element.getAttribute('data-ad-slot')
-  );
+import { getMode } from '../../../../../../../src/mode';
+
+const test = getMode().test;
+const localDev = getMode().localDev;
+const minified = getMode().minified;
+const development = getMode().development;
+
+function foo() {
+  if (getMode().development == false) {
+    return false;
+  }
 }
