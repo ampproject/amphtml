@@ -16,6 +16,7 @@
 
 import {Action, SubscriptionAnalytics} from '../analytics';
 import {Dialog} from '../dialog';
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from '../constants';
 import {Entitlement, GrantReason} from '../entitlement';
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../service-adapter';
@@ -150,7 +151,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
         .callsFake(() => new Promise(() => {}));
 
       const entitlementsPromise = viewerPlatform.getEntitlements();
-      clock.tick(6000);
+      clock.tick(ENTITLEMENTS_REQUEST_TIMEOUT + 1000);
       await expect(entitlementsPromise).to.be.rejectedWith('timeout');
     });
 
