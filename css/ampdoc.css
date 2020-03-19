@@ -352,7 +352,7 @@ amp-autocomplete > textarea,
  * This only overrides horizontal sizing, so sibling amp-social-share elements
  * would not cause a row to resize.
  */
-amp-social-share:not(.i-amphtml-built):not(body):not(head):not(html) {
+amp-social-share.i-amphtml-notbuilt:not(body):not(head):not(html) {
   width: 0 !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
