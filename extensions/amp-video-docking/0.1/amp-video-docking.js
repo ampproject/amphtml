@@ -269,11 +269,9 @@ export class VideoDocking {
 
     /**
      * Overriden when user drags the video to a different corner.
-     * @private {!DirectionX}
+     * @private {?DirectionX}
      */
-    this.cornerDirectionX_ = isRTL(this.getDoc_())
-      ? DirectionX.LEFT
-      : DirectionX.RIGHT;
+    this.cornerDirectionX_ = null;
 
     const html = htmlFor(this.getDoc_());
 
@@ -1682,6 +1680,12 @@ export class VideoDocking {
         type: DockTargetType.SLOT,
         rect: letterboxRect(inlineRect, slot.getPageLayoutBox()),
       };
+    }
+
+    if (this.cornerDirectionX_ === null) {
+      this.cornerDirectionX_ = isRTL(this.getDoc_())
+        ? DirectionX.LEFT
+        : DirectionX.RIGHT;
     }
 
     return {
