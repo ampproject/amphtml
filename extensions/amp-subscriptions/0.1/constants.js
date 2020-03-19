@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/** @fileoverview Shared constants. */
+
+/**
+ * How long to wait before giving up on an entitlements request.
+ * @const
+ */
+export const ENTITLEMENTS_REQUEST_TIMEOUT = 3000;
+
 /**
  * Possible score factors.
  * @const @enum {string}
@@ -26,7 +34,7 @@ export const SubscriptionsScoreFactor = {
 };
 
 /**
- * All other score factors are ignored if not specifed in the publisher
+ * All other score factors are ignored if not specified in the publisher
  * config so adding a default here would be meaningless.
  */
 export const DEFAULT_SCORE_CONFIG = {};
