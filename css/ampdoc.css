@@ -77,6 +77,14 @@ html.i-amphtml-fie > body {
 }
 
 /**
+ * iOS jitters when body overflows. See b/149328043.
+ */
+html.i-amphtml-singledoc.i-amphtml-iframed > body {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+}
+
+/**
  * The `position: relative` is necessary to ensure that `paddingTop` can be
  * applied to a document to offset the header height, and it doesn't missplace
  * `position: absolute` elements.
