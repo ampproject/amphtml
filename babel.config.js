@@ -31,7 +31,6 @@ const argv = minimist(process.argv.slice(2));
 
 const isClosureCompiler =
   argv._.includes('dist') || argv._.includes('check-types');
-const ifForTesting = argv._.includes('unit') || argv._.includes('integration');
 const {esm} = argv;
 const noModuleTarget = {
   'browsers': isTravisBuild()
@@ -42,6 +41,12 @@ const noModuleTarget = {
 const plugins = [
   './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
   '@babel/plugin-transform-react-constant-elements',
+  [
+    '@babel/plugin-transform-classes',
+    {
+      loose: false,
+    },
+  ],
   [
     '@babel/plugin-transform-react-jsx',
     {
@@ -62,7 +67,7 @@ const presets = [
   '@babel/preset-env',
   {
     'modules': isClosureCompiler ? false : 'commonjs',
-    'loose': !ifForTesting,
+    'loose': true,
     'targets': noModuleTarget,
   },
 ];
