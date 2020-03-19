@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement, GrantReason} from './entitlement';
 import {JwtHelper} from '../../amp-access/0.1/jwt';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
@@ -69,6 +70,9 @@ export class ViewerSubscriptionPlatform {
 
     /** @private @const {string} */
     this.origin_ = origin;
+
+    /** @private @const {!../../../src/service/timer-impl.Timer} */
+    this.timer_ = Services.timerFor(ampdoc.win);
   }
 
   /** @override */
@@ -107,8 +111,11 @@ export class ViewerSubscriptionPlatform {
       authRequest['encryptedDocumentKey'] = encryptedDocumentKey;
     }
 
-    return /** @type {!Promise<Entitlement>} */ (this.viewer_
-      .sendMessageAwaitResponse('auth', authRequest)
+    return /** @type {!Promise<Entitlement>} */ (this.timer_
+      .timeoutPromise(
+        ENTITLEMENTS_REQUEST_TIMEOUT,
+        this.viewer_.sendMessageAwaitResponse('auth', authRequest)
+      )
       .then(entitlementData => {
         entitlementData = entitlementData || {};
 

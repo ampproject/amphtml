@@ -36,7 +36,7 @@ import {
 import {PageConfig} from '../../../../third_party/subscriptions-project/config';
 import {ServiceAdapter} from '../../../amp-subscriptions/0.1/service-adapter';
 import {Services} from '../../../../src/services';
-import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/score-factors';
+import {SubscriptionsScoreFactor} from '../../../amp-subscriptions/0.1/constants';
 import {WindowInterface} from '../../../../src/window-interface';
 import {toggleExperiment} from '../../../../src/experiments';
 
