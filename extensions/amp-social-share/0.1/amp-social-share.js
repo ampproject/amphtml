@@ -147,7 +147,6 @@ class AmpSocialShare extends AMP.BaseElement {
     element.addEventListener('click', () => this.handleClick_());
     element.addEventListener('keydown', this.handleKeyPress_.bind(this));
     element.classList.add(`amp-social-share-${typeAttr}`);
-    element.classList.add('i-amphtml-built');
   }
 
   /**
