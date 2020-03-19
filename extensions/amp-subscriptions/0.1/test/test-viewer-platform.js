@@ -23,9 +23,12 @@ import {Services} from '../../../../src/services';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {dict} from '../../../../src/utils/object';
 import {getWinOrigin} from '../../../../src/url';
+import {setTimeout} from 'timers';
 
 describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
-  let ampdoc, win;
+  let ampdoc;
+  let win;
+  let clock;
   let viewerPlatform;
   let serviceAdapter, sendAuthTokenStub;
   let resetPlatformsStub, messageCallback;
@@ -65,6 +68,7 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   beforeEach(() => {
     ampdoc = env.ampdoc;
     win = env.win;
+    clock = window.sandbox.useFakeTimers();
     serviceAdapter = new ServiceAdapter(null);
     const analytics = new SubscriptionAnalytics(ampdoc.getRootNode());
     env.sandbox.stub(serviceAdapter, 'getAnalytics').callsFake(() => analytics);
@@ -138,6 +142,17 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       await expect(
         viewerPlatform.getEntitlements()
       ).to.eventually.be.rejectedWith(reason);
+    });
+
+    it('should throw error if entitlements request times out', async () => {
+      viewerPlatform.viewer_.sendMessageAwaitResponse.restore();
+      env.sandbox
+        .stub(viewerPlatform.viewer_, 'sendMessageAwaitResponse')
+        .callsFake(() => new Promise(resolve => setTimeout(resolve, 10000)));
+
+      const entitlementsPromise = viewerPlatform.getEntitlements();
+      clock.tick(5000);
+      await expect(entitlementsPromise).to.be.rejectedWith('timeout');
     });
 
     it('should use domain in cryptokeys param to get encrypted doc key', async () => {

@@ -48,7 +48,7 @@ import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 const TAG = 'amp-subscriptions';
 
 /** @const */
-const SERVICE_TIMEOUT = 3000;
+export const SERVICE_TIMEOUT = 3000;
 
 /**
  * @implements {../../amp-access/0.1/access-vars.AccessVars}
