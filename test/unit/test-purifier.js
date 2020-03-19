@@ -762,6 +762,7 @@ describe
           expect(purify('<input type="image">')).to.equal('<input>');
           expect(purify('<input type="button">')).to.equal('<input>');
         });
+        html.removeAttribute('amp');
       });
 
       it('should allow input[type="file"] and input[type="password"]', () => {
@@ -772,6 +773,7 @@ describe
         expect(purify('<input type="password">')).to.equal(
           '<input type="password">'
         );
+        html.removeAttribute('amp');
       });
 
       it('should sanitize certain tag attributes for AMP4Email', () => {
@@ -786,6 +788,7 @@ describe
             /<amp-anim i-amphtml-key="(\d+)"><\/amp-anim>/
           );
         });
+        html.removeAttribute('amp4email');
       });
 
       it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
@@ -828,6 +831,7 @@ describe
         expect(purify('<amp-timeago>')).to.match(
           /<amp-timeago i-amphtml-key="(\d+)"><\/amp-timeago>/
         );
+        html.removeAttribute('amp4email');
       });
     });
   });
