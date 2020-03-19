@@ -484,7 +484,7 @@ export class AmpList extends AMP.BaseElement {
   addElementsToContainer_(elements, container) {
     elements.forEach(element => {
       if (
-        !element.hasAttribute('role') && 
+        !element.hasAttribute('role') &&
         // adding listitem to the role attribute for a single-item amp-list
         // is confusing for screen readers
         !this.element.hasAttribute('single-item')

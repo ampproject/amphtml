@@ -288,7 +288,7 @@ describes.repeated(
           it('should not include `role` attribute if single-item is set', () => {
             const fetched = {'items': {title: 'Title1'}};
             const itemElement = doc.createElement('div');
-            
+
             // single-item attribute must be set before buildCallback(), so use
             // a new test AmpList instance.
             element = createAmpListElement();
@@ -307,7 +307,8 @@ describes.repeated(
                 expect(list.container_.hasAttribute('role')).to.be.false;
                 expect(list.container_.contains(itemElement)).to.be.true;
                 expect(list.container_.children.length).to.equal(1);
-                expect(list.container_.children[0].hasAttribute('role')).to.be.false;
+                expect(list.container_.children[0].hasAttribute('role')).to.be
+                  .false;
               });
           });
 
