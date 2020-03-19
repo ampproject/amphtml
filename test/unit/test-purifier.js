@@ -38,14 +38,15 @@ describe
        * @param {string} html
        * @return {string}
        */
-      purify = html => purifier.purifyHtml(html).innerHTML;
+      purify = html => purifier.purifyHtml(document, html).innerHTML;
 
       /**
        * Helper that calls purifyTagsForTripleMustache().
        * @param {string} html
        * @return {string}
        */
-      purifyTripleMustache = html => purifier.purifyTagsForTripleMustache(html);
+      purifyTripleMustache = html =>
+        purifier.purifyTagsForTripleMustache(document, html);
     });
 
     describe('sanitizer tests', () => {
@@ -742,7 +743,7 @@ describe
     let purify;
 
     before(() => {
-      html = document.createElement('html');
+      html = document.documentElement;
       const purifier = () => new Purifier();
 
       /**
@@ -750,7 +751,7 @@ describe
        * @param {string} html
        * @return {string}
        */
-      purify = html => purifier().purifyHtml(html).innerHTML;
+      purify = html => purifier().purifyHtml(document, html).innerHTML;
     });
 
     describe('AMP formats', () => {

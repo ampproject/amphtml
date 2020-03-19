@@ -78,6 +78,9 @@ export class Purifier {
     /** @private {!DomPurifyDef} */
     this.domPurify_ = purify(self);
 
+    /** @private {Document} */
+    this.doc_ = null;
+
     /** @private {!DomPurifyDef} */
     this.domPurifyTriple_ = purify(self);
 
@@ -91,10 +94,12 @@ export class Purifier {
   /**
    * Returns a <body> element containing the sanitized `dirty` markup.
    * Uses the standard DOMPurify config.
+   * @param {!Document} doc
    * @param {string} dirty
    * @return {!Node}
    */
-  purifyHtml(dirty) {
+  purifyHtml(doc, dirty) {
+    this.doc_ = doc;
     const body = this.domPurify_.sanitize(dirty);
     return body;
   }
@@ -108,6 +113,7 @@ export class Purifier {
    * @return {string}
    */
   purifyTagsForTripleMustache(doc, dirty) {
+    this.doc_ = doc;
     // <template> elements are parsed by the browser as document fragments and
     // reparented to the head. So to support nested templates, we need
     // RETURN_DOM_FRAGMENT to keep the <template> and FORCE_BODY to prevent
@@ -119,7 +125,9 @@ export class Purifier {
     });
     // Serialize DocumentFragment to HTML. XMLSerializer would also work, but adds
     // namespaces for all elements and attributes.
-    const div = doc.createElement('div');
+    const div = dev()
+      .assert(this.doc_)
+      .createElement('div');
     div.appendChild(fragment);
     return div./*OK*/ innerHTML;
   }
@@ -130,13 +138,15 @@ export class Purifier {
    * @return {!Object<string, boolean>}
    */
   getAllowedTags(doc) {
+    this.doc_ = doc;
     const allowedTags = {};
+
     // Use this hook to extract purifier's allowed tags.
     this.domPurify_.addHook('uponSanitizeElement', (node, data) => {
       Object.assign(allowedTags, data.allowedTags);
     });
     // Sanitize dummy markup so that the hook is invoked.
-    const p = doc.createElement('p');
+    const p = this.doc_.createElement('p');
     this.domPurify_.sanitize(p);
     Object.keys(BLACKLISTED_TAGS).forEach(tag => {
       allowedTags[tag] = false;
@@ -237,9 +247,7 @@ export class Purifier {
       // Allow all AMP elements.
       if (startsWith(tagName, 'amp-')) {
         // Enforce AMP4EMAIL tag whitelist at runtime.
-        const isEmail = isAmp4Email(
-          /** @type {!Document} */ (node.ownerDocument) //TODO: is this safe?
-        );
+        const isEmail = isAmp4Email(dev().assert(this.doc_));
         allowedTags[tagName] = !isEmail || EMAIL_WHITELISTED_AMP_TAGS[tagName];
       }
       // Set `target` attribute for <a> tags if necessary.
@@ -348,7 +356,7 @@ export class Purifier {
           tagName,
           attrName,
           attrValue,
-          /** @type {!Document} */ (element.ownerDocument), // TODO: is this safe?
+          dev().assert(this.doc_),
           /* opt_purify */ true
         )
       ) {
