@@ -220,7 +220,7 @@ export class AmpAutocomplete extends AMP.BaseElement {
     const isEmail = doc && isAmp4Email(doc);
     userAssert(
       !isEmail || doc.documentElement.hasAttribute('amp-autocomplete-opt-in'),
-      "<amp-autocomplete> is not turned on: 'amp-autocomplete-opt-in' is required in the document <html> tag."
+      '<amp-autocomplete> is not currently available in AMP4Email.'
     );
 
     this.action_ = Services.actionServiceForDoc(this.element);
