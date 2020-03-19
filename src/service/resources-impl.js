@@ -202,6 +202,12 @@ export class ResourcesImpl {
     /** @private {?../layout-rect.LayoutRectDef} */
     this.viewportRect_ = null;
 
+    /**
+     * The same as viewportRect_ but 25% larger.
+     * @private {?../layout-rect.LayoutRectDef}
+     */
+    this.visibleRect_ = null;
+
     if (isExperimentOn(this.win, 'intersect-resources')) {
       const iframed = isIframed(this.win);
 
@@ -293,12 +299,20 @@ export class ResourcesImpl {
     devAssert(this.prerenderSize_ == 1);
     dev().fine(TAG_, 'intersect', entries);
 
+    if (!this.viewportRect_ || !this.visibleRect_) {
+      const {rootBounds} = entries[0];
+      const vw = rootBounds.width + rootBounds.left * 2;
+      const vh = rootBounds.height + rootBounds.top * 2;
+      this.viewportRect_ = layoutRectLtwh(0, 0, vw, vh);
+      this.visibleRect_ = expandLayoutRect(this.viewportRect_, 0.25, 0.25);
+    }
+
     const isPrerender =
       this.ampdoc.getVisibilityState() == VisibilityState.PRERENDER;
 
     const toUnload = [];
     const promises = entries.map(entry => {
-      const {boundingClientRect, isIntersecting, target, rootBounds} = entry;
+      const {boundingClientRect, isIntersecting, target} = entry;
       // Strangely, JSC is missing x/y from typedefs of boundingClientRect
       // despite it being a DOMRectReadOnly (ClientRect) by spec.
       const clientRect = /** @type {!ClientRect} */ (boundingClientRect);
@@ -306,18 +320,11 @@ export class ResourcesImpl {
       devAssert(target.isUpgraded());
       const r = Resource.forElement(target);
 
-      this.viewportRect_ =
-        this.viewportRect_ ||
-        layoutRectLtwh(
-          0,
-          0,
-          rootBounds.width + rootBounds.left * 2,
-          rootBounds.height + rootBounds.top * 2
-        );
-      const inViewport = rectsOverlap(clientRect, this.viewportRect_);
-
       // Only handle 1vp while in prerender mode.
-      if (isPrerender && !inViewport) {
+      if (
+        isPrerender &&
+        !rectsOverlap(clientRect, devAssert(this.viewportRect_))
+      ) {
         dev().fine(
           TAG_,
           'Handling queued intersections:',
@@ -360,8 +367,7 @@ export class ResourcesImpl {
           return;
         }
 
-        if (inViewport) {
-          // TODO(willchou): When visible, consider the viewport to be 25% larger.
+        if (rectsOverlap(clientRect, this.visibleRect_)) {
           r.setInViewport(isIntersecting);
         }
 
