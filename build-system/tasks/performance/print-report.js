@@ -100,4 +100,43 @@ function printReport(urls) {
   });
 }
 
-module.exports = printReport;
+/**
+ * Organizes a page's metrics for getReport()
+ */
+class PageMetrics {
+  url;
+  metrics;
+
+  constructor(url) {
+    this.url = url;
+    this.metrics = new Map();
+  }
+
+  set(metric, experiment, control) {
+    this.metrics.set(metric, {experiment, control});
+  }
+}
+
+/**
+ * Gets report in the form of metrics per page
+ * @param {Array<string>} urls
+ * @return {Array<PageMetrics>} report
+ */
+function getReport(urls) {
+  const results = JSON.parse(fs.readFileSync(RESULTS_PATH));
+  const report = [];
+  urls.forEach(url => {
+    const pageMetrics = new PageMetrics(url);
+    const metrics = Object.keys(results[url][CONTROL][0]);
+    metrics.forEach(metric => {
+      const control = average(results[url][CONTROL], metric);
+      const experiment = average(results[url][EXPERIMENT], metric);
+      pageMetrics.set(metric, experiment, control);
+    });
+    report.push(pageMetrics);
+  });
+
+  return report;
+}
+
+module.exports = {getReport, printReport};
