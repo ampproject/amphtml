@@ -122,7 +122,6 @@ class AmpWorker {
      * @const @private {!Array<!Window>}
      */
     this.windows_ = [win];
-    console.log('end of compiling');
   }
 
   /**

@@ -215,18 +215,12 @@ export class AnalyticsConfig {
     const inlineConfig = this.getInlineConfig_();
     this.validateTransport_(inlineConfig);
     let promise;
-    if (false) {
-      mergeObjects(inlineConfig, config);
-      mergeObjects(this.remoteConfig_, config);
-      promise = Promise.resolve();
-    } else {
-      const remoteConfig = this.remoteConfig_;
-      promise = invokeWebWorker(self.window, 'deepMerge', {
-        configs: [inlineConfig, remoteConfig, config],
-      }).then(data => {
-        config = Object.assign(config, data.result);
-      });
-    }
+    const remoteConfig = this.remoteConfig_;
+    promise = invokeWebWorker(self.window, 'deepMerge', {
+      configs: [inlineConfig, remoteConfig, config],
+    }).then(data => {
+      config = Object.assign(config, data.result);
+    });
     return promise.then(() => {
       if (!configRewriterUrl || this.isSandbox_) {
         this.config_ = this.mergeConfigs_(config);
