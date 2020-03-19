@@ -31,7 +31,7 @@ const argv = minimist(process.argv.slice(2));
 
 const isClosureCompiler =
   argv._.includes('dist') || argv._.includes('check-types');
-const isForUnitTesting = argv._.includes('unit');
+const ifForTesting = argv._.includes('unit') || argv._.includes('integration');
 const {esm} = argv;
 const noModuleTarget = {
   'browsers': isTravisBuild()
@@ -62,7 +62,7 @@ const presets = [
   '@babel/preset-env',
   {
     'modules': isClosureCompiler ? false : 'commonjs',
-    'loose': !isForUnitTesting,
+    'loose': !ifForTesting,
     'targets': noModuleTarget,
   },
 ];
