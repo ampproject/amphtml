@@ -90,7 +90,7 @@ export class Toolbar {
     } else {
       // This error will be caught and the side bar will continue to function
       // without the toolbar feature.
-      throw new user().createError(
+      throw user().createError(
         `Could not find the toolbar-target element with an id: ${targetId}`
       );
     }
