@@ -180,7 +180,7 @@ export class AmpList extends AMP.BaseElement {
         this.getPlaceholder(),
         '%s with layout=container relies on a placeholder to determine an initial height. ' +
           'For more info on adding a placeholder see: ' +
-          'https://amp.dev/documentation/components/amp-list/#placeholder-and-fallback. %s',
+          'https://go.amp.dev/c/amp-list/#placeholder-and-fallback. %s',
         TAG,
         this.element
       );
