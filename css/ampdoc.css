@@ -353,7 +353,6 @@ amp-autocomplete > textarea,
  * would not cause a row to resize.
  */
 amp-social-share:not(.i-amphtml-built):not(body):not(head):not(html) {
-  display: none !important;
   width: 0 !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
