@@ -23,6 +23,7 @@ import {CSS} from '../../../build/amp-subscriptions-0.1.css';
 import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
+import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
 import {Entitlement} from './entitlement';
 import {
   PageConfig,
@@ -46,9 +47,6 @@ import {localSubscriptionPlatformFactory} from './local-subscription-platform';
 
 /** @const */
 const TAG = 'amp-subscriptions';
-
-/** @const */
-const SERVICE_TIMEOUT = 3000;
 
 /**
  * @implements {../../amp-access/0.1/access-vars.AccessVars}
@@ -306,9 +304,9 @@ export class SubscriptionService {
    * @return {!Promise}
    */
   fetchEntitlements_(subscriptionPlatform) {
-    let timeout = SERVICE_TIMEOUT;
+    let timeout = ENTITLEMENTS_REQUEST_TIMEOUT;
     if (getMode().development || getMode().localDev) {
-      timeout = SERVICE_TIMEOUT * 2;
+      timeout = ENTITLEMENTS_REQUEST_TIMEOUT * 2;
     }
     // Prerender safe platforms don't have to wait for the
     // page to become visible, all others wait for whenFirstVisible()
