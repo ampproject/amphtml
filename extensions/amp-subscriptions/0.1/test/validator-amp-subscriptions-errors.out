@@ -1,4 +1,4 @@
-FAIL
+PASS
 |  <!--
 |    Copyright 2018 The AMP HTML Authors. All Rights Reserved.
 |
@@ -72,7 +72,3 @@ FAIL
 |    </template>
 |  </body>
 |  </html>
->>       ^~~~~~~~~
-amp-subscriptions/0.1/test/validator-amp-subscriptions-errors.html:73:6 The tag 'amp-access extension .json script' is present, but is excluded by the presence of 'amp-subscriptions extension .json script'. (see https://amp.dev/documentation/components/amp-access)
->>       ^~~~~~~~~
-amp-subscriptions/0.1/test/validator-amp-subscriptions-errors.html:73:6 The tag 'amp-subscriptions extension .json script' is present, but is excluded by the presence of 'amp-access extension .json script'. (see https://amp.dev/documentation/components/amp-subscriptions)
