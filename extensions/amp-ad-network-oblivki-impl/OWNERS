@@ -4,12 +4,7 @@
 {
   rules: [
     {
-      owners: [
-        {name: 'cathyxz', requestReviews: false},
-        {name: 'jeffkaufman', requestReviews: false},
-        {name: 'ampproject/wg-ads'},
-        {name: 'vvsoblivki'},
-      ],
+      owners: [{name: 'ampproject/wg-ads-reviewers'}, {name: 'vvsoblivki'}],
     },
   ],
 }
