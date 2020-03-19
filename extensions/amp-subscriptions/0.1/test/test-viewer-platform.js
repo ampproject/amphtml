@@ -23,7 +23,6 @@ import {Services} from '../../../../src/services';
 import {ViewerSubscriptionPlatform} from '../viewer-subscription-platform';
 import {dict} from '../../../../src/utils/object';
 import {getWinOrigin} from '../../../../src/url';
-import {setTimeout} from 'timers';
 
 describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
   let ampdoc;
@@ -148,10 +147,10 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       viewerPlatform.viewer_.sendMessageAwaitResponse.restore();
       env.sandbox
         .stub(viewerPlatform.viewer_, 'sendMessageAwaitResponse')
-        .callsFake(() => new Promise(resolve => setTimeout(resolve, 10000)));
+        .callsFake(() => new Promise(() => {}));
 
       const entitlementsPromise = viewerPlatform.getEntitlements();
-      clock.tick(5000);
+      clock.tick(6000);
       await expect(entitlementsPromise).to.be.rejectedWith('timeout');
     });
 
