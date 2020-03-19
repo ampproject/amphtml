@@ -27,6 +27,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
   const fireHandler = [];
   let fakeMessaging;
   let messagingMock;
+  let oldPrototype;
 
   function buildStoryPlayer(numStories = 1) {
     playerEl = win.document.createElement('amp-story-player');
@@ -69,6 +70,10 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   beforeEach(() => {
     win = env.win;
+    oldPrototype = Object.getPrototypeOf(AmpStoryPlayer);
+    // Make the AmpStoryPlayer "native" to the 'realWin' window.
+    Object.setPrototypeOf(AmpStoryPlayer, win.HTMLElement);
+    Object.setPrototypeOf(AmpStoryPlayer.prototype, win.HTMLElement.prototype);
     win.customElements.define('amp-story-player', AmpStoryPlayer);
     fakeMessaging = {
       setDefaultHandler: () => {},
@@ -83,9 +88,11 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   afterEach(() => {
     messagingMock.verify();
+    Object.setPrototypeOf(AmpStoryPlayer, oldPrototype);
+    Object.setPrototypeOf(AmpStoryPlayer.prototype, oldPrototype.prototype);
   });
 
-  it.only('should build an iframe for each story', () => {
+  it('should build an iframe for each story', () => {
     buildStoryPlayer();
     manager.loadPlayers();
 
