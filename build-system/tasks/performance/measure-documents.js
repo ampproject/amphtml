@@ -223,7 +223,7 @@ async function measureDocument(url, version, {headless}) {
 
   try {
     await page.goto(`file:${urlToCachePath(url, version)}`, {
-      waitUntil: 'networkidle2',
+      waitUntil: 'networkidle0',
     });
   } catch {
     // site did not load
