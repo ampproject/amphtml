@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2018 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { getMode } from '../../../../../../../src/mode';
+const test = false;
+const localDev = false;
+const minified = true;
+const development = getMode().development;
 
-/**
- * Determines which tags desire A4A handling
- * @param {!Window} win
- * @param {!Element} element
- * @param {boolean} useRemoteHtml
- * @return {boolean}
- */
-export function cloudflareIsA4AEnabled(win, element, useRemoteHtml) {
-  // We assume fast fetch for all content, but this will gracefully degrade,
-  // when non-a4a content is delivered
-  return !useRemoteHtml;
+function foo() {
+  if (getMode().development == false) {
+    return false;
+  }
 }

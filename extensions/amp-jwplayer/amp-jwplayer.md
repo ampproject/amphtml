@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a cloud-hosted [JW Player](https://www.jwplayer.com/).
+  text: Displays a cloud-hosted JW Player.
 ---
 
 <!---

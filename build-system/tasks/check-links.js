@@ -134,7 +134,9 @@ function checkLinksInFile(file) {
         return;
       }
       let containsDeadLinks = false;
-      for (const {link, status, statusCode} of results) {
+      for (const result of results) {
+        const {link, statusCode} = result;
+        let {status} = result;
         // Skip links to files that were introduced by the PR.
         if (isLinkToFileIntroducedByPR(link) && status == 'dead') {
           // Log links with the correct github base as alive, otherwise flag deadlinks.

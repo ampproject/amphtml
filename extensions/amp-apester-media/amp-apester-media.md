@@ -3,7 +3,7 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays an [Apester](https://apester.com/) smart unit.
+  text: Displays an Apester smart unit.
 ---
 
 <!---
