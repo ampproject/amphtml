@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {AmpStoryPlayer, IFRAME_IDX} from '../../src/amp-story-player-impl';
 import {AmpStoryPlayerManager} from '../../src/amp-story-player-manager';
-import {IFRAME_IDX} from '../../src/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {toArray} from '../../src/types';
 
@@ -69,6 +69,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   beforeEach(() => {
     win = env.win;
+    win.customElements.define('amp-story-player', AmpStoryPlayer);
     fakeMessaging = {
       setDefaultHandler: () => {},
       sendRequest: () => {},
@@ -84,7 +85,7 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
     messagingMock.verify();
   });
 
-  it('should build an iframe for each story', () => {
+  it.only('should build an iframe for each story', () => {
     buildStoryPlayer();
     manager.loadPlayers();
 
