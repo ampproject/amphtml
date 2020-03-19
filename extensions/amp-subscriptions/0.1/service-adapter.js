@@ -25,6 +25,31 @@ export class ServiceAdapter {
   }
 
   /**
+   * Returns the analytics service for subscriptions.
+   * @return {!./analytics.SubscriptionAnalytics}
+   */
+  getAnalytics() {
+    return this.subscriptionService_.getAnalytics();
+  }
+
+  /**
+   * Returns the singleton Dialog instance
+   * @return {!./dialog.Dialog}
+   */
+  getDialog() {
+    return this.subscriptionService_.getDialog();
+  }
+
+  /**
+   * Returns the encrypted document key for the specified service.
+   * @param {string} serviceId
+   * @return {?string}
+   */
+  getEncryptedDocumentKey(serviceId) {
+    return this.subscriptionService_.getEncryptedDocumentKey(serviceId);
+  }
+
+  /**
    * Returns the page config.
    * @return {!PageConfig}
    */
@@ -39,23 +64,6 @@ export class ServiceAdapter {
    */
   getReaderId(serviceId) {
     return this.subscriptionService_.getReaderId(serviceId);
-  }
-
-  /**
-   * Returns the encrypted document key for the specified service.
-   * @param {string} serviceId
-   * @return {?string}
-   */
-  getEncryptedDocumentKey(serviceId) {
-    return this.subscriptionService_.getEncryptedDocumentKey(serviceId);
-  }
-
-  /**
-   * Returns the analytics service for subscriptions.
-   * @return {!./analytics.SubscriptionAnalytics}
-   */
-  getAnalytics() {
-    return this.subscriptionService_.getAnalytics();
   }
 
   /**
@@ -106,14 +114,6 @@ export class ServiceAdapter {
    */
   resetPlatforms() {
     this.subscriptionService_.resetPlatforms();
-  }
-
-  /**
-   * Returns the singleton Dialog instance
-   * @return {!./dialog.Dialog}
-   */
-  getDialog() {
-    return this.subscriptionService_.getDialog();
   }
 
   /**
