@@ -637,16 +637,16 @@ describes.realWin('performance', {amp: true}, (env) => {
         () => {
           clock.tick(100);
           whenFirstVisibleResolve();
-          expect(tickSpy).to.have.callCount(4);
+          expect(tickSpy).to.have.callCount(12);
           return ampdoc.whenFirstVisible().then(() => {
             clock.tick(400);
-            expect(tickSpy).to.have.callCount(5);
+            expect(tickSpy).to.have.callCount(13);
             whenViewportLayoutCompleteResolve();
             return perf.whenViewportLayoutComplete_().then(() => {
-              expect(tickSpy).to.have.callCount(5);
+              expect(tickSpy).to.have.callCount(13);
               expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
               return whenFirstVisiblePromise.then(() => {
-                expect(tickSpy).to.have.callCount(6);
+                expect(tickSpy).to.have.callCount(14);
                 expect(tickSpy.withArgs('pc')).to.be.calledOnce;
                 expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
               });
