@@ -580,7 +580,6 @@ describes.realWin('performance', {amp: true}, (env) => {
       env.sandbox
         .stub(perf, 'whenViewportLayoutComplete_')
         .returns(whenViewportLayoutCompletePromise);
-      env.sandbox.stub(perf, 'navigationSupported_').returns(false);
       return viewer.whenMessagingReady();
     });
 
@@ -638,16 +637,16 @@ describes.realWin('performance', {amp: true}, (env) => {
         () => {
           clock.tick(100);
           whenFirstVisibleResolve();
-          expect(tickSpy).to.have.callCount(4);
+          const initialCount = tickSpy.callCount;
           return ampdoc.whenFirstVisible().then(() => {
             clock.tick(400);
-            expect(tickSpy).to.have.callCount(5);
+            expect(tickSpy).to.have.callCount(initialCount + 1);
             whenViewportLayoutCompleteResolve();
             return perf.whenViewportLayoutComplete_().then(() => {
-              expect(tickSpy).to.have.callCount(5);
+              expect(tickSpy).to.have.callCount(initialCount + 1);
               expect(tickSpy.withArgs('ofv')).to.be.calledOnce;
               return whenFirstVisiblePromise.then(() => {
-                expect(tickSpy).to.have.callCount(6);
+                expect(tickSpy).to.have.callCount(initialCount + 2);
                 expect(tickSpy.withArgs('pc')).to.be.calledOnce;
                 expect(Number(tickSpy.withArgs('pc').args[0][1])).to.equal(400);
               });
@@ -1277,7 +1276,7 @@ describes.realWin('PeformanceObserver metrics', {amp: true}, (env) => {
     beforeEach(() => {
       // Stub and fake the PerformanceObserver constructor.
       const PerformanceObserverStub = env.sandbox.stub();
-      PerformanceObserverStub.callsFake(callback => {
+      PerformanceObserverStub.callsFake((callback) => {
         performanceObserver = new PerformanceObserverImpl(callback);
         return performanceObserver;
       });
