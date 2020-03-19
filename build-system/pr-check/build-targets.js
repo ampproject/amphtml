@@ -224,9 +224,6 @@ function determineBuildTargets(fileName = 'build-targets.js') {
   }
   // Test all targets on Travis during package upgrades.
   if (isTravisBuild() && buildTargets.has('PACKAGE_UPGRADE')) {
-    console.log(
-      `${fileLogPrefix} Since this PR contains package upgrade(s), running all checks...`
-    );
     const allTargets = Object.keys(targetMatchers);
     allTargets.forEach(target => buildTargets.add(target));
   }
