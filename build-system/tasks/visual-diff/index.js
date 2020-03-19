@@ -38,8 +38,8 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../../common/git');
-const {execOrDie, execScriptAsync} = require('../../common/exec');
-const {installPackages} = require('../../common/utils');
+const {buildMinifiedRuntime, installPackages} = require('../../common/utils');
+const {execScriptAsync} = require('../../common/exec');
 const {isTravisBuild} = require('../../common/travis');
 const {startServer, stopServer} = require('../serve');
 const {waitUntilUsed} = require('tcp-port-used');
@@ -760,8 +760,7 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       );
     }
   } else {
-    execOrDie('gulp clean');
-    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+    buildMinifiedRuntime();
   }
 }
 
