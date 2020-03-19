@@ -90,9 +90,6 @@ function checkFlags(name, taskFunc) {
     return; // This isn't the task being run.
   }
   const validFlags = taskFunc.flags ? Object.keys(taskFunc.flags) : [];
-  if (Array.isArray(taskFunc.undocumented_flags)) {
-    Array.prototype.push.apply(validFlags, taskFunc.undocumented_flags);
-  }
   const usedFlags = Object.keys(argv).slice(1); // Skip the '_' argument
   const invalidFlags = [];
   usedFlags.forEach(flag => {
