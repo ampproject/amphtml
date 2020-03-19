@@ -15,7 +15,7 @@
  */
 
 import {AmpStoryPlayerManager} from '../../src/amp-story-player-manager';
-import {IFRAME_IDX} from '../../src/amp-story-player';
+import {IFRAME_IDX} from '../../src/amp-story-player-impl';
 import {Messaging} from '@ampproject/viewer-messaging';
 import {toArray} from '../../src/types';
 

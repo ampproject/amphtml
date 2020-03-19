@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpStoryPlayer} from './amp-story-player';
+import {AmpStoryPlayer} from './amp-story-player-impl';
 import {throttle} from './utils/rate-limit';
 
 /** @const {string} */
