@@ -325,11 +325,6 @@ export class ResourcesImpl {
         isPrerender &&
         !rectsOverlap(clientRect, devAssert(this.viewportRect_))
       ) {
-        dev().fine(
-          TAG_,
-          'Handling queued intersections:',
-          this.queuedIntersectionEntries_
-        );
         this.queuedIntersectionEntries_.push(entry);
         return;
       }
@@ -367,7 +362,7 @@ export class ResourcesImpl {
           return;
         }
 
-        if (rectsOverlap(clientRect, this.visibleRect_)) {
+        if (rectsOverlap(clientRect, devAssert(this.visibleRect_))) {
           r.setInViewport(isIntersecting);
         }
 
@@ -801,6 +796,7 @@ export class ResourcesImpl {
 
     // Process queued intersections (outside of 1vp) once we're visible.
     if (!wasVisible && this.visible_) {
+      dev().fine(TAG_, 'Handling queued intersections...');
       this.intersects_(this.queuedIntersectionEntries_);
       this.queuedIntersectionEntries_.length = 0;
     }
