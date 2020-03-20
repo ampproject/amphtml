@@ -1427,15 +1427,14 @@ export class VisibilityTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const visibilitySpec = config['visibilitySpec'] || {};
-    let selector = config['selector'] || visibilitySpec['selector'];
+    const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
     const unlistenPromises = [];
-    const multiSelectorVisibilityOn = isExperimentOn(
-      this.root.ampdoc.win,
-      'visibility-trigger-improvements'
-    );
+    const multiSelectorVisibilityOn =
+      isExperimentOn(this.root.ampdoc.win, 'visibility-trigger-improvements') &&
+      Array.isArray(selector);
     if (reportWhenSpec) {
       userAssert(
         !visibilitySpec['repeat'],
@@ -1504,29 +1503,31 @@ export class VisibilityTracker extends EventTracker {
     } else {
       // An AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
+      // Array selectors do not suppor the special cases: ':host' & ':root'
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
-      selector = Array.isArray(selector) ? selector : [selector];
-      // Array selectors do not suppor the special cases: ':host' & ':root'
-      for (let i = 0; i < selector.length; i++) {
+      const selectors = Array.isArray(selector) ? selector : [selector];
+      for (let i = 0; i < selectors.length; i++) {
         unlistenPromises.push(
           this.root
             .getAmpElement(
               context.parentElement || context,
-              selector[i],
+              selectors[i],
               selectionMethod,
               multiSelectorVisibilityOn
             )
             .then(element =>
-              this.getUnlistenPromiseForElement_(
-                element,
-                selector[i],
-                visibilityManagerPromise,
-                visibilitySpec,
-                waitForSpec,
-                createReportReadyPromiseFunc,
-                eventType,
-                listener
+              visibilityManagerPromise.then(
+                visibilityManager => {
+                  return visibilityManager.listenElement(
+                    element,
+                    visibilitySpec,
+                    this.getReadyPromise(waitForSpec, selectors[i], element),
+                    createReportReadyPromiseFunc,
+                    this.onEvent_.bind(this, eventType, listener, element)
+                  );
+                },
+                () => {}
               )
             )
         );
@@ -1540,41 +1541,6 @@ export class VisibilityTracker extends EventTracker {
         }
       });
     };
-  }
-
-  /**
-   * @param {!AmpElement} element
-   * @param {string} selector
-   * @param {Promise<!./visibility-manager.VisibilityManager>} visibilityManagerPromise
-   * @param {!JsonObject} visibilitySpec
-   * @param {string} waitForSpec
-   * @param {?function()} createReportReadyPromiseFunc
-   * @param {string} eventType
-   * @param {function(!AnalyticsEvent)} listener
-   * @return {!Promise<!UnlistenDef>}
-   */
-  getUnlistenPromiseForElement_(
-    element,
-    selector,
-    visibilityManagerPromise,
-    visibilitySpec,
-    waitForSpec,
-    createReportReadyPromiseFunc,
-    eventType,
-    listener
-  ) {
-    return visibilityManagerPromise.then(
-      visibilityManager => {
-        return visibilityManager.listenElement(
-          element,
-          visibilitySpec,
-          this.getReadyPromise(waitForSpec, selector, element),
-          createReportReadyPromiseFunc,
-          this.onEvent_.bind(this, eventType, listener, element)
-        );
-      },
-      () => {}
-    );
   }
 
   /**
