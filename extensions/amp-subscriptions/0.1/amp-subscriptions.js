@@ -703,7 +703,7 @@ export class SubscriptionService {
     return (
       !this.pageConfig_.isLocked() ||
       // If a service marks `alwaysGrant` as true, it will unlock the page
-      // UNLESS the viewer provides auth.
+      // unless the viewer provides auth.
       (this.platformConfig_['alwaysGrant'] && !this.doesViewerProvideAuth_)
     );
   }
