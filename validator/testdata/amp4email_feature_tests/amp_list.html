@@ -40,6 +40,15 @@
   </template>
 </amp-list>
 
+<!-- Valid container layout -->
+<amp-list layout="container" src="https://data.com/articles.json?ref=CANONICAL_URL">
+  <div></div>
+</amp-list>
+<!-- Width/height missing allowed because it is container layout -->
+<amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
+  <div></div>
+</amp-list>
+
 <!--
   Nested xhrs is not allowed. This example is even banned in general AMP but
   for a different reason. In general AMP a template cannot be a descendant of
