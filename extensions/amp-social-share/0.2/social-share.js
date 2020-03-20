@@ -17,7 +17,6 @@
 import * as CSS from './social-share.css';
 import * as Preact from '../../../src/preact';
 import {Keys} from '../../../src/utils/key-codes';
-import {PropTypes, checkPropTypes} from 'prop-types';
 import {SocialShareIcon} from '../../../third_party/optimized-svg-icons/social-share-svgs';
 import {openWindowDialog} from '../../../src/dom';
 import {parseQueryString} from '../../../src/url';
@@ -32,8 +31,6 @@ const DEFAULT_HEIGHT = 44;
  * @return {PreactDef.Renderable}
  */
 export function SocialShare(props) {
-  checkPropTypes(SocialShare['propTypes'], props, 'prop', 'SocialShare');
-
   /**
    * Handle key presses on the element.
    * @param {!Event} event
@@ -89,12 +86,3 @@ export function SocialShare(props) {
     </div>
   );
 }
-
-SocialShare['propTypes'] = {
-  'href': PropTypes.string,
-  'size': PropTypes.object,
-  'tabindex': PropTypes.number,
-  'target': PropTypes.string,
-  'type': PropTypes.string.isRequired,
-  'useDefaultDimensions': PropTypes.bool,
-};
