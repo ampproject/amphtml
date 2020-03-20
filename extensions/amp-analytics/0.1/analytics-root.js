@@ -287,9 +287,10 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
+   * @param {boolean=} opt_multiSelectorOn multi-selector expriment
    * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
    */
-  getAmpElement(context, selector, selectionMethod) {
+  getAmpElement(context, selector, selectionMethod, opt_multiSelectorOn) {
     return this.getElement(context, selector, selectionMethod).then(element => {
       userAssert(
         element.classList.contains('i-amphtml-element'),
