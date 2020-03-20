@@ -96,14 +96,14 @@ class AmpSocialShare extends PreactBaseElement {
       user().warn(TAG, `Skipping obsolete share button ${type}`);
       return;
     }
-    const data = this.getHrefAndTarget_(typeConfig, platform);
-    if (this.element.getAttribute('layout') === Layout.RESPONSIVE) {
-      return dict({'href': data['href'], 'target': data['target']});
-    }
+    this.getHrefAndTarget_(typeConfig, platform);
+    const isResponsive =
+      this.element.getAttribute('layout') === Layout.RESPONSIVE;
     return dict({
-      'href': data['href'],
-      'target': data['target'],
-      'useDefaultDimensions': true,
+      'width': isResponsive ? '100%' : this.element.getAttribute('width'),
+      'height': isResponsive ? '100%' : this.element.getAttribute('height'),
+      'href': null,
+      'target': null,
     });
   }
 
@@ -164,8 +164,6 @@ AmpSocialShare['Component'] = SocialShare;
 
 /** @override */
 AmpSocialShare['props'] = {
-  'width': {attr: 'width'},
-  'height': {attr: 'height'},
   'tabIndex': {attr: 'tabindex'},
   'type': {attr: 'type'},
 };

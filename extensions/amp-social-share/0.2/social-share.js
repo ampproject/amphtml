@@ -66,7 +66,7 @@ export function SocialShare(props) {
   const styleType = `SOCIAL_SHARE_${props['type'].toUpperCase()}`;
   const baseStyle = CSS.BASE_STYLE;
   const backgroundStyle = CSS[styleType];
-  const size = props['useDefaultDimensions'] && {
+  const size = {
     width: props['width'] || DEFAULT_WIDTH,
     height: props['height'] || DEFAULT_HEIGHT,
   };
