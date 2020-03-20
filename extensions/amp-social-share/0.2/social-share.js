@@ -77,6 +77,7 @@ export function SocialShare(props) {
       tabindex={props['tabIndex'] || '0'}
       onKeyDown={handleKeyPress}
       onClick={handleActivation}
+      style={{...size, ...props['style']}}
       {...props}
     >
       <SocialShareIcon
