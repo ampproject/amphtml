@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {dev, userAssert} from '../../../src/log';
+import {dev, user, userAssert} from '../../../src/log';
 import {handleAutoscroll} from './autoscroll';
 import {toggle} from '../../../src/style';
 
 /**
  * Class representing toolbar behavior in sidebar
+ * @throws User error if element with id [toolbar-target] isn't found in DOM.
  */
 export class Toolbar {
   /**
@@ -82,21 +83,18 @@ export class Toolbar {
       this.toolbarDomElement_
     );
     // Set the target element to the toolbar clone if it exists.
-    this.ampdoc_.whenReady().then(() => {
-      const targetElement = this.ampdoc_.getElementById(targetId);
-      if (targetElement) {
-        this.toolbarTarget_ = targetElement;
-        this.toolbarClone_.classList.add('i-amphtml-toolbar');
-        toggle(this.toolbarTarget_, false);
-      } else {
-        // This error will be later rethrown as a user error and
-        // the side bar will continue to function w/o toolbar feature
-        throw new Error(
-          'Could not find the ' +
-            `toolbar-target element with an id: ${targetId}`
-        );
-      }
-    });
+    const targetElement = this.ampdoc_.getElementById(targetId);
+    if (targetElement) {
+      this.toolbarTarget_ = targetElement;
+      this.toolbarClone_.classList.add('i-amphtml-toolbar');
+      toggle(this.toolbarTarget_, false);
+    } else {
+      // This error will be caught and the side bar will continue to function
+      // without the toolbar feature.
+      throw user().createError(
+        `Could not find the toolbar-target element with an id: ${targetId}`
+      );
+    }
   }
 
   /**
