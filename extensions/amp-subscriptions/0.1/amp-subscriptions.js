@@ -254,9 +254,9 @@ export class SubscriptionService {
       // rotation.
       const scope =
         'amp-access' + (serviceId == 'local' ? '' : '-' + serviceId);
-      readerId = this.cid_.then(cid => {
-        return cid.get({scope, createCookieIfNotPresent: true}, consent);
-      });
+      readerId = this.cid_.then(cid =>
+        cid.get({scope, createCookieIfNotPresent: true}, consent)
+      );
       this.readerIdPromiseMap_[serviceId] = readerId;
     }
     return readerId;
@@ -528,8 +528,8 @@ export class SubscriptionService {
     const visiblePromise = subscriptionPlatform.isPrerenderSafe()
       ? Promise.resolve()
       : this.ampdoc_.whenFirstVisible();
-    return visiblePromise.then(() => {
-      return this.timer_
+    return visiblePromise.then(() =>
+      this.timer_
         .timeoutPromise(timeout, this.getEntitlements_(subscriptionPlatform))
         .then(entitlement => {
           entitlement =
@@ -548,8 +548,8 @@ export class SubscriptionService {
             `fetch entitlements failed for ${serviceId}`,
             reason
           );
-        });
-    });
+        })
+    );
   }
 
   /**
