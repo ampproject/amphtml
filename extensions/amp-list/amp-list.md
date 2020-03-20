@@ -26,23 +26,7 @@ limitations under the License.
 
 # amp-list
 
-Fetches content dynamically from a CORS JSON endpoint and renders it
-using a supplied template.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-list" src="https://cdn.ampproject.org/v0/amp-list-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-list/">amp-list example</a>.</td>
-  </tr>
-</table>
+Fetches content dynamically from a CORS JSON endpoint and renders it using a supplied template.
 
 ## Usage
 
@@ -213,8 +197,10 @@ The `<amp-list>` element exposes a `refresh` action that other elements can refe
 
 ### Dynamic resizing
 
+`<amp-list>` can be used with `layout="CONTAINER"` with two caveats: (1) A list with changing contents must have a determinable initial height from a fixed-height placeholder, and (2) once content changes inside the list, resize will occur _only_ if it does not cause content jumping. This is enforced by locking the height of the list prior to rendering contents and conditionally unlocking it accordingly.
+
 [filter formats="websites, stories"]
-In several cases, we may need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. See the following example:
+In several cases, we need the `<amp-list>` to resize on user interaction. For example, when the `<amp-list>` contains an amp-accordion that a user may tap on, when the contents of the `<amp-list>` change size due to bound CSS classes, or when the number of items inside an `<amp-list>` changes due to a bound `[src]` attribute. The `changeToLayoutContainer` action handles this by changing the amp list to `layout="CONTAINER"` when triggering this action. If there is no placeholder, or content is known to change only on user interaction, it may be more suitable to use a different layout than "container" initially and then change accordingly. See the following example:
 [/filter]<!-- formats="websites, stories" -->
 
 [filter formats="email"]
@@ -232,6 +218,35 @@ In several cases, we may need the `<amp-list>` to resize on user interaction. Fo
 >
   <template type="amp-mustache">
     {{title}}
+  </template>
+</amp-list>
+```
+
+### Initialization from amp-state
+
+In most cases, you’ll probably want to have `<amp-list>` request JSON from a server. But `<amp-list>` can also use JSON you’ve included in an `<amp-state>`, right there in your HTML! This means rendering can occur without an additional server call, although, of course, if your page is served from an AMP cache, the data may not be fresh.
+
+Here’s how to have `<amp-list>` render from an `<amp-state>`:
+
+1. Add the [amp-bind](https://amp.dev/documentation/components/amp-bind/) script to your document's `<head>`.
+2. Use the `amp-state:` protocol in your `<amp-list>`’s src attribute, like this:
+   `<amp-list src="amp-state:localState">`
+
+Note that `<amp-list>` treats your JSON in the same way whether it’s requested from your server or pulled from a state variable. The format required doesn’t change.
+
+See below for a full example,
+
+```html
+<amp-state id="localState">
+  <script type="application/json">
+    {
+      "items": [{"id": 1}, {"id": 2}, {"id": 2}]
+    }
+  </script>
+</amp-state>
+<amp-list src="amp-state:localState">
+  <template type="amp-mustache">
+    <li>{{id}}</li>
   </template>
 </amp-list>
 ```
@@ -407,6 +422,10 @@ We've introduced the `load-more` attributes with options `manual` and `auto` to 
 ```
 
 For working examples, please see [test/manual/amp-list/infinite-scroll-1.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html) and [test/manual/amp-list/infinite-scroll-2.amp.html](../../test/manual/amp-list/infinite-scroll-1.amp.html).
+
+[tip type="important"]
+**Important** When using `<amp-list>` infinite scroll in conjunction with `<amp-analytics>` scroll triggers, it is recommended to make use of the `useInitialPageSize` property of `<amp-analytics>` to get a more accurate measurement of the scroll position that ignores the hight changes caused by `<amp-list>`. Without `useInitialPageSize`, the `100%` scroll trigger point might never fire as more documents get loaded. Note that this will also ignore the size changes caused by other extensions (such as expanding embedded content) so some scroll events might fire prematurely instead
+[/tip]
 
 ### Attributes
 

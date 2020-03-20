@@ -32,7 +32,6 @@ const pkgUp = require('pkg-up');
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
-const tempy = require('tempy');
 const terser = require('terser');
 const through = require('through2');
 const {
@@ -50,6 +49,7 @@ const {shortenLicense, shouldShortenLicense} = require('./shorten-license');
 const {TopologicalSort} = require('topological-sort');
 const TYPES_VALUES = Object.keys(TYPES).map(x => TYPES[x]);
 const wrappers = require('./compile-wrappers');
+const {SRC_TEMP_DIR} = require('../compile/sources');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
 const argv = minimist(process.argv.slice(2));
@@ -62,8 +62,6 @@ if (!singlePassDest.endsWith('/')) {
 
 const SPLIT_MARKER = `/** SPLIT_SINGLE_PASS */`;
 
-// Used to store transforms and compile v0.js
-const transformDir = tempy.directory();
 const srcs = [];
 
 const mainBundle = 'src/amp.js';
@@ -299,7 +297,7 @@ exports.getGraph = function(entryModules, config) {
       },
     },
     packages: {},
-    tmp: transformDir,
+    tmp: SRC_TEMP_DIR,
   };
 
   TYPES_VALUES.forEach(type => {
@@ -314,16 +312,18 @@ exports.getGraph = function(entryModules, config) {
 
   // Use browserify with babel to learn about deps.
   const b = browserify(entryModules, {
+    basedir: SRC_TEMP_DIR,
+    browserField: 'module',
     debug: true,
     deps: true,
     detectGlobals: false,
     fast: true,
-    browserField: 'module',
   })
     // The second stage are transforms that closure compiler supports
     // directly and which we don't want to apply during deps finding.
     .transform(babelify, {
       compact: false,
+      cwd: process.cwd(),
       plugins: ['transform-es2015-modules-commonjs'],
     });
   // This gets us the actual deps. We collect them in an array, so
@@ -347,13 +347,13 @@ exports.getGraph = function(entryModules, config) {
         })
         .forEach(function(row) {
           const id = unifyPath(
-            exports.maybeAddDotJs(path.relative(process.cwd(), row.id))
+            exports.maybeAddDotJs(path.relative(SRC_TEMP_DIR, row.id))
           );
           topo.addNode(id, id);
           const deps = Object.keys(row.deps)
             .sort()
             .map(dep => {
-              dep = unifyPath(path.relative(process.cwd(), row.deps[dep]));
+              dep = unifyPath(path.relative(SRC_TEMP_DIR, row.deps[dep]));
               if (dep.startsWith('node_modules/')) {
                 const pkgJson = pkgUp.sync({cwd: path.dirname(dep)});
                 const jsonId = unifyPath(path.relative(process.cwd(), pkgJson));
@@ -381,7 +381,6 @@ exports.getGraph = function(entryModules, config) {
       graph.sorted = Array.from(topo.sort().keys()).reverse();
 
       setupBundles(graph);
-      transformPathsToTempDir(graph, config);
       resolve(graph);
       fs.writeFileSync('deps.txt', JSON.stringify(graph, null, 2));
     })
@@ -460,43 +459,6 @@ function setupBundles(graph) {
     }
     graph.bundles[dest].modules.push(id);
   });
-}
-
-/**
- * Takes all of the nodes in the dependency graph and transfers them
- * to a temporary directory where we can run babel transformations.
- *
- * @param {!Object} graph
- * @param {!Object} config
- */
-function transformPathsToTempDir(graph, config) {
-  log(
-    'Performing single-pass',
-    colors.cyan('babel'),
-    'transforms in',
-    colors.cyan(graph.tmp) + '...'
-  );
-  // `sorted` will always have the files that we need.
-  graph.sorted.forEach(f => {
-    // For now, just copy node_module files instead of transforming them.
-    if (f.startsWith('node_modules/')) {
-      fs.copySync(f, `${graph.tmp}/${f}`);
-    } else {
-      const {code, map} = babel.transformFileSync(f, {
-        plugins: conf.plugins({
-          isEsmBuild: config.define.indexOf('ESM_BUILD=true') !== -1,
-          isForTesting: config.define.indexOf('FORTESTING=true') !== -1,
-          isSinglePass: true,
-        }),
-        retainLines: true,
-        sourceMaps: true,
-      });
-      fs.outputFileSync(`${graph.tmp}/${f}`, code);
-      fs.outputFileSync(`${graph.tmp}/${f}.map`, JSON.stringify(map));
-    }
-    process.stdout.write('.');
-  });
-  console.log('\n');
 }
 
 // Returns the extension bundle config for the given filename or null.
@@ -719,7 +681,7 @@ function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
     gulp
-      .src(srcs, {base: transformDir})
+      .src(srcs, {base: SRC_TEMP_DIR})
       .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(gulpClosureCompile(flagsArray))
@@ -770,7 +732,7 @@ function eliminateIntermediateBundles() {
       }
       const {code, map: babelMap} = babel.transformFileSync(path, {
         plugins: conf.eliminateIntermediateBundles(),
-        retainLines: true,
+        compact: false,
         sourceMaps: true,
         inputSourceMap: false,
       });

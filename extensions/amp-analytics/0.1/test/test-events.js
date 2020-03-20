@@ -209,8 +209,9 @@ describes.realWin('Events', {amp: 1}, env => {
           .returns({top: 0, left: 0, height: 200, width: 200}),
         'getScrollTop': env.sandbox.stub().returns(0),
         'getScrollLeft': env.sandbox.stub().returns(0),
-        'getScrollHeight': env.sandbox.stub().returns(500),
-        'getScrollWidth': env.sandbox.stub().returns(500),
+        'getLayoutRect': env.sandbox
+          .stub()
+          .returns({width: 500, height: 500, top: 0, left: 0}),
         'onChanged': env.sandbox.stub(),
       };
       scrollManager = tracker.root_.getScrollManager();
@@ -245,7 +246,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(scrollManager.scrollObservable_.getHandlerCount()).to.equal(0);
     });
 
-    it('fires on scroll', () => {
+    it('fires on scroll', async () => {
       const fn1 = env.sandbox.stub();
       const fn2 = env.sandbox.stub();
       tracker.add(
@@ -267,6 +268,8 @@ describes.realWin('Events', {amp: 1}, env => {
         fn2
       );
 
+      await scrollManager.measureRootElement_(true);
+
       function matcher(expected) {
         return actual => {
           return (
@@ -275,31 +278,103 @@ describes.realWin('Events', {amp: 1}, env => {
           );
         };
       }
+
+      function expectNthCallToMatch(fn, callIndex, expected) {
+        expect(
+          fn
+            .getCall(callIndex)
+            .calledWithMatch(env.sandbox.match(matcher(expected)))
+        ).to.be.true;
+      }
+
       expect(fn1).to.have.callCount(2);
-      expect(fn1.getCall(0).calledWithMatch(env.sandbox.match(matcher(0)))).to
-        .be.true;
-      expect(fn1.getCall(1).calledWithMatch(env.sandbox.match(matcher(0)))).to
-        .be.true;
+      expectNthCallToMatch(fn1, 0, 0);
+      expectNthCallToMatch(fn1, 1, 0);
       expect(fn2).to.have.not.been.called;
 
       // Scroll Down
       fakeViewport.getScrollTop.returns(500);
       fakeViewport.getScrollLeft.returns(500);
-      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
+      await tracker.root_
+        .getScrollManager()
+        .onScroll_(getFakeViewportChangedEvent());
 
       expect(fn1).to.have.callCount(4);
-      expect(fn1.getCall(2).calledWithMatch(env.sandbox.match(matcher(100)))).to
-        .be.true;
-      expect(fn1.getCall(3).calledWithMatch(env.sandbox.match(matcher(100)))).to
-        .be.true;
+      expectNthCallToMatch(fn1, 2, 100);
+      expectNthCallToMatch(fn1, 3, 100);
       expect(fn2).to.have.callCount(2);
-      expect(fn2.getCall(0).calledWithMatch(env.sandbox.match(matcher(90)))).to
-        .be.true;
-      expect(fn2.getCall(1).calledWithMatch(env.sandbox.match(matcher(90)))).to
-        .be.true;
+      expectNthCallToMatch(fn2, 0, 90);
+      expectNthCallToMatch(fn2, 1, 90);
     });
 
-    it('does not fire duplicates on scroll', () => {
+    it('ignores resize changes if needed', async () => {
+      const fn1 = env.sandbox.stub();
+      const fn2 = env.sandbox.stub();
+      tracker.add(
+        undefined,
+        AnalyticsEventType.SCROLL,
+        {
+          'on': AnalyticsEventType.SCROLL,
+          'scrollSpec': {
+            'verticalBoundaries': [0, 50, 100],
+          },
+        },
+        fn1
+      );
+      tracker.add(
+        undefined,
+        AnalyticsEventType.SCROLL,
+        {
+          'on': AnalyticsEventType.SCROLL,
+          'scrollSpec': {
+            'verticalBoundaries': [0, 50, 100],
+            'useInitialPageSize': true,
+          },
+        },
+        fn2
+      );
+
+      await scrollManager.measureRootElement_(true);
+
+      function matcher(expected) {
+        return actual => {
+          return actual.vars.verticalScrollBoundary === String(expected);
+        };
+      }
+
+      function expectNthCallToMatch(fn, callIndex, expected) {
+        expect(
+          fn
+            .getCall(callIndex)
+            .calledWithMatch(env.sandbox.match(matcher(expected)))
+        ).to.be.true;
+      }
+
+      expect(fn1).to.have.callCount(1);
+      expectNthCallToMatch(fn1, 0, 0);
+      expect(fn2).to.have.callCount(1);
+      expectNthCallToMatch(fn2, 0, 0);
+
+      // Scroll Down
+      fakeViewport.getScrollTop.returns(500);
+      fakeViewport.getLayoutRect.returns({
+        width: 500,
+        height: 1000,
+        top: 0,
+        left: 0,
+      });
+      await tracker.root_
+        .getScrollManager()
+        .onScroll_(getFakeViewportChangedEvent());
+
+      expect(fn1).to.have.callCount(2);
+      expectNthCallToMatch(fn1, 1, 50);
+      expect(fn2).to.have.callCount(3);
+      expectNthCallToMatch(fn2, 1, 50);
+      expectNthCallToMatch(fn2, 2, 100);
+    });
+
+    it('does not fire duplicates on scroll', async () => {
       const fn1 = env.sandbox.stub();
       tracker.add(
         undefined,
@@ -311,7 +386,9 @@ describes.realWin('Events', {amp: 1}, env => {
       // Scroll Down
       fakeViewport.getScrollTop.returns(10);
       fakeViewport.getScrollLeft.returns(10);
-      tracker.root_.getScrollManager().onScroll_(getFakeViewportChangedEvent());
+      await tracker.root_
+        .getScrollManager()
+        .onScroll_(getFakeViewportChangedEvent());
 
       expect(fn1).to.have.callCount(2);
     });
@@ -398,7 +475,7 @@ describes.realWin('Events', {amp: 1}, env => {
       });
     });
 
-    it('fires events on normalized boundaries.', () => {
+    it('fires events on normalized boundaries.', async () => {
       const fn1 = env.sandbox.stub();
       const fn2 = env.sandbox.stub();
       tracker.add(
@@ -423,6 +500,7 @@ describes.realWin('Events', {amp: 1}, env => {
         },
         fn2
       );
+      await scrollManager.measureRootElement_(true);
       expect(fn2).to.be.calledOnce;
     });
   });
@@ -1749,8 +1827,7 @@ describes.realWin('Events', {amp: 1}, env => {
       expect(tracker.root).to.equal(root);
     });
 
-    it('should add doc listener', function*() {
-      const unlisten = env.sandbox.spy();
+    it('should add doc listener', async () => {
       iniLoadTrackerMock.expects('getRootSignal').never();
       iniLoadTrackerMock.expects('getElementSignal').never();
       visibilityManagerMock
@@ -1761,23 +1838,19 @@ describes.realWin('Events', {amp: 1}, env => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .returns(unlisten)
         .once();
-      tracker.add(analyticsElement, 'visible', {}, eventResolver);
-      yield macroTask();
+      const res = tracker.add(analyticsElement, 'visible', {}, eventResolver);
+      expect(res).to.be.a('function');
+      await macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(function*(event) {
-        expect(event.target).to.equal(root.getRootElement());
-        expect(event.type).to.equal('visible');
-        expect(event.vars.totalVisibleTime).to.equal(10);
-        yield macroTask();
-        expect(unlisten).to.be.called;
-      });
+      const event = await eventPromise;
+      expect(event.target).to.equal(root.getRootElement());
+      expect(event.type).to.equal('visible');
+      expect(event.vars.totalVisibleTime).to.equal(10);
     });
 
-    it('should add root listener', function*() {
+    it('should add root listener', async () => {
       const config = {selector: ':root'};
-      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getElementSignal').never();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
@@ -1787,23 +1860,24 @@ describes.realWin('Events', {amp: 1}, env => {
       visibilityManagerMock
         .expects('listenRoot')
         .withExactArgs(matchEmptySpec, readyPromise, null, saveCallback)
-        .returns(unlisten)
         .once();
-      tracker.add(analyticsElement, 'visible', config, eventResolver);
-      yield macroTask();
+      const res = tracker.add(
+        analyticsElement,
+        'visible',
+        config,
+        eventResolver
+      );
+      expect(res).to.be.a('function');
+      await macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(function*(event) {
-        expect(event.target).to.equal(root.getRootElement());
-        expect(event.type).to.equal('visible');
-        expect(event.vars.totalVisibleTime).to.equal(10);
-        yield macroTask();
-        expect(unlisten).to.be.called;
-      });
+      const event = await eventPromise;
+      expect(event.target).to.equal(root.getRootElement());
+      expect(event.type).to.equal('visible');
+      expect(event.vars.totalVisibleTime).to.equal(10);
     });
 
-    it('should add host listener and spec', function*() {
+    it('should add host listener and spec', async () => {
       const config = {visibilitySpec: {selector: ':host'}};
-      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getElementSignal').never();
       const readyPromise = Promise.resolve();
       iniLoadTrackerMock
@@ -1818,40 +1892,6 @@ describes.realWin('Events', {amp: 1}, env => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .returns(unlisten)
-        .once();
-      tracker.add(analyticsElement, 'visible', config, eventResolver);
-      yield macroTask();
-      saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(function*(event) {
-        expect(event.target).to.equal(root.getRootElement());
-        expect(event.type).to.equal('visible');
-        expect(event.vars.totalVisibleTime).to.equal(10);
-        yield macroTask();
-        expect(unlisten).to.be.called;
-      });
-    });
-
-    it('should add target listener', function*() {
-      const config = {visibilitySpec: {selector: '.target'}};
-      const unlisten = env.sandbox.spy();
-      iniLoadTrackerMock.expects('getRootSignal').once();
-      const readyPromise = Promise.resolve();
-      iniLoadTrackerMock
-        .expects('getElementSignal')
-        .withExactArgs('ini-load', target)
-        .returns(readyPromise)
-        .once();
-      visibilityManagerMock
-        .expects('listenElement')
-        .withExactArgs(
-          target,
-          config.visibilitySpec,
-          readyPromise,
-          /* createReportReadyPromiseFunc */ null,
-          saveCallback
-        )
-        .returns(unlisten)
         .once();
       const res = tracker.add(
         analyticsElement,
@@ -1860,241 +1900,276 @@ describes.realWin('Events', {amp: 1}, env => {
         eventResolver
       );
       expect(res).to.be.a('function');
-      const unlistenReady = getAmpElementSpy.returnValues[0];
-      // #getAmpElement Promise
-      yield unlistenReady;
-      // #assertMeasurable_ Promise
-      yield macroTask();
+      await macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(function*(event) {
+      const event = await eventPromise;
+      expect(event.target).to.equal(root.getRootElement());
+      expect(event.type).to.equal('visible');
+      expect(event.vars.totalVisibleTime).to.equal(10);
+    });
+
+    describe('visibility tracker for target selector', () => {
+      it('should add target listener', async () => {
+        const config = {visibilitySpec: {selector: '.target'}};
+        iniLoadTrackerMock.expects('getRootSignal').once();
+        const readyPromise = Promise.resolve();
+        iniLoadTrackerMock
+          .expects('getElementSignal')
+          .withExactArgs('ini-load', target)
+          .returns(readyPromise)
+          .once();
+        visibilityManagerMock
+          .expects('listenElement')
+          .withExactArgs(
+            target,
+            config.visibilitySpec,
+            readyPromise,
+            /* createReportReadyPromiseFunc */ null,
+            saveCallback
+          )
+          .once();
+        const res = tracker.add(
+          analyticsElement,
+          'visible',
+          config,
+          eventResolver
+        );
+        expect(res).to.be.a('function');
+        const unlistenReady = getAmpElementSpy.returnValues[0];
+        // #getAmpElement Promise
+        await unlistenReady;
+        // #assertMeasurable_ Promise
+        await macroTask();
+        saveCallback.callback({totalVisibleTime: 10});
+        const event = await eventPromise;
         expect(event.target).to.equal(target);
         expect(event.type).to.equal('visible');
         expect(event.vars.totalVisibleTime).to.equal(10);
-        yield macroTask();
-        expect(unlisten).to.be.calledOnce;
+      });
+
+      describe('multi selector visibility trigger', () => {
+        let unlisten;
+        let unlisten2;
+        let config;
+        let readyPromise;
+        let targetSignals2;
+        let saveCallback2;
+        let eventsSpy;
+        let res;
+
+        beforeEach(() => {
+          toggleExperiment(win, 'visibility-trigger-improvements', true);
+          readyPromise = Promise.resolve();
+          unlisten = env.sandbox.spy();
+          unlisten2 = env.sandbox.spy();
+          config = {};
+
+          eventsSpy = env.sandbox.spy(tracker, 'onEvent_');
+
+          target2.classList.add('i-amphtml-element');
+          targetSignals2 = new Signals();
+          target2.signals = () => targetSignals2;
+
+          saveCallback2 = env.sandbox.match(arg => {
+            if (typeof arg == 'function') {
+              saveCallback2.callback = arg;
+              return true;
+            }
+            return false;
+          });
+        });
+
+        afterEach(async () => {
+          [unlisten, unlisten2].forEach(value => {
+            if (value) {
+              expect(value).to.not.be.called;
+            }
+          });
+          expect(res).to.be.a('function');
+          await res();
+          [unlisten, unlisten2].forEach(value => {
+            if (value) {
+              expect(value).to.be.calledOnce;
+            }
+          });
+
+          toggleExperiment(win, 'visibility-trigger-improvements', false);
+        });
+
+        it('should fire event per selector', async () => {
+          config['visibilitySpec'] = {selector: ['.target', '.target2']};
+          iniLoadTrackerMock.expects('getRootSignal').twice();
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('ini-load', target)
+            .returns(readyPromise)
+            .once();
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('ini-load', target2)
+            .returns(readyPromise)
+            .once();
+          visibilityManagerMock
+            .expects('listenElement')
+            .withExactArgs(
+              target,
+              config.visibilitySpec,
+              readyPromise,
+              /* createReportReadyPromiseFunc */ null,
+              saveCallback
+            )
+            .returns(unlisten)
+            .once();
+          visibilityManagerMock
+            .expects('listenElement')
+            .withExactArgs(
+              target2,
+              config.visibilitySpec,
+              readyPromise,
+              /* createReportReadyPromiseFunc */ null,
+              saveCallback2
+            )
+            .returns(unlisten2)
+            .once();
+          // Dispose function
+          res = tracker.add(analyticsElement, 'visible', config, eventResolver);
+          const unlistenReady = getAmpElementSpy.returnValues[0];
+          const unlistenReady2 = getAmpElementSpy.returnValues[1];
+          // #getAmpElement Promise
+          await unlistenReady;
+          await unlistenReady2;
+          // #assertMeasurable_ Promise
+          await macroTask();
+          await macroTask();
+          saveCallback.callback({totalVisibleTime: 10});
+          saveCallback2.callback({totalVisibleTime: 15});
+
+          // Testing that visibilty manager mock sends state to onEvent_
+          expect(eventsSpy.getCall(0).args[0]).to.equal('visible');
+          expect(eventsSpy.getCall(0).args[1]).to.equal(eventResolver);
+          expect(eventsSpy.getCall(0).args[2]).to.equal(target);
+          expect(eventsSpy.getCall(0).args[3]).to.deep.equal({
+            totalVisibleTime: 10,
+          });
+          expect(eventsSpy.getCall(1).args[0]).to.equal('visible');
+          expect(eventsSpy.getCall(1).args[1]).to.equal(eventResolver);
+          expect(eventsSpy.getCall(1).args[2]).to.equal(target2);
+          expect(eventsSpy.getCall(1).args[3]).to.deep.equal({
+            totalVisibleTime: 15,
+          });
+        });
+
+        it('should fire event for all elements of the selector', async () => {
+          target.classList.add('sameClass');
+          target2.classList.add('sameClass');
+          config['visibilitySpec'] = {selector: ['.sameClass']};
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('ini-load', target)
+            .returns(readyPromise)
+            .once();
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('ini-load', target2)
+            .returns(readyPromise)
+            .once();
+          visibilityManagerMock
+            .expects('listenElement')
+            .withExactArgs(
+              target,
+              config.visibilitySpec,
+              readyPromise,
+              /* createReportReadyPromiseFunc */ null,
+              saveCallback
+            )
+            .returns(unlisten)
+            .once();
+          visibilityManagerMock
+            .expects('listenElement')
+            .withExactArgs(
+              target2,
+              config.visibilitySpec,
+              readyPromise,
+              /* createReportReadyPromiseFunc */ null,
+              saveCallback2
+            )
+            .returns(unlisten2)
+            .once();
+          // Dispose function
+          res = tracker.add(analyticsElement, 'visible', config, eventResolver);
+          const unlistenReady = getAmpElementSpy.returnValues[0];
+          const unlistenReady2 = getAmpElementSpy.returnValues[1];
+          // #getAmpElement Promise
+          await unlistenReady;
+          await unlistenReady2;
+          // #assertMeasurable_ Promise
+          await macroTask();
+          await macroTask();
+          saveCallback.callback({totalVisibleTime: 10});
+          saveCallback2.callback({totalVisibleTime: 15});
+
+          // Testing that visibilty manager mock sends state to onEvent_
+          expect(eventsSpy.getCall(0).args[0]).to.equal('visible');
+          expect(eventsSpy.getCall(0).args[1]).to.equal(eventResolver);
+          expect(eventsSpy.getCall(0).args[2]).to.equal(target);
+          expect(eventsSpy.getCall(0).args[3]).to.deep.equal({
+            totalVisibleTime: 10,
+          });
+          expect(eventsSpy.getCall(1).args[0]).to.equal('visible');
+          expect(eventsSpy.getCall(1).args[1]).to.equal(eventResolver);
+          expect(eventsSpy.getCall(1).args[2]).to.equal(target2);
+          expect(eventsSpy.getCall(1).args[3]).to.deep.equal({
+            totalVisibleTime: 15,
+          });
+        });
+
+        it('should only fire one event for each element', async () => {
+          target.classList.add('sameClass');
+          target.classList.add('anotherClass');
+          config['visibilitySpec'] = {
+            selector: ['.sameClass', '.anotherClass'],
+          };
+          iniLoadTrackerMock
+            .expects('getElementSignal')
+            .withExactArgs('ini-load', target)
+            .returns(readyPromise)
+            .once();
+          visibilityManagerMock
+            .expects('listenElement')
+            .withExactArgs(
+              target,
+              config.visibilitySpec,
+              readyPromise,
+              /* createReportReadyPromiseFunc */ null,
+              saveCallback
+            )
+            .returns(unlisten)
+            .once();
+          res = tracker.add(analyticsElement, 'visible', config, eventResolver);
+          const unlistenReady = getAmpElementSpy.returnValues[0];
+          // #getAmpElement Promise
+          await unlistenReady;
+          // #assertMeasurable_ Promise
+          await macroTask();
+          saveCallback.callback({totalVisibleTime: 10});
+
+          // Testing that visibilty manager mock sends state to onEvent_
+          expect(eventsSpy.getCall(0).args[0]).to.equal('visible');
+          expect(eventsSpy.getCall(0).args[1]).to.equal(eventResolver);
+          expect(eventsSpy.getCall(0).args[2]).to.equal(target);
+          expect(eventsSpy.getCall(0).args[3]).to.deep.equal({
+            totalVisibleTime: 10,
+          });
+          expect(eventsSpy).to.be.calledOnce;
+          unlisten2 = null;
+        });
       });
     });
 
-    describe('multi selector visibility trigger', () => {
-      let unlisten;
-      let unlisten2;
-      let config;
-      let readyPromise;
-      let targetSignals2;
-      let saveCallback2;
-      let eventsSpy;
-      let res;
-
-      beforeEach(() => {
-        toggleExperiment(win, 'multi-selector-visibility-trigger', true);
-        readyPromise = Promise.resolve();
-        unlisten = env.sandbox.spy();
-        unlisten2 = env.sandbox.spy();
-        config = {};
-
-        eventsSpy = env.sandbox.spy(tracker, 'onEvent_');
-
-        target2.classList.add('i-amphtml-element');
-        targetSignals2 = new Signals();
-        target2.signals = () => targetSignals2;
-
-        saveCallback2 = env.sandbox.match(arg => {
-          if (typeof arg == 'function') {
-            saveCallback2.callback = arg;
-            return true;
-          }
-          return false;
-        });
-      });
-
-      afterEach(async () => {
-        [unlisten, unlisten2].forEach(value => {
-          if (value) {
-            expect(value).to.not.be.called;
-          }
-        });
-        expect(res).to.be.a('function');
-        await res();
-        [unlisten, unlisten2].forEach(value => {
-          if (value) {
-            expect(value).to.be.calledOnce;
-          }
-        });
-
-        toggleExperiment(win, 'multi-selector-visibility-trigger', false);
-      });
-
-      it('should fire event per selector', async () => {
-        config['visibilitySpec'] = {selector: ['.target', '.target2']};
-        iniLoadTrackerMock
-          .expects('getElementSignal')
-          .withExactArgs('ini-load', target)
-          .returns(readyPromise)
-          .once();
-        iniLoadTrackerMock
-          .expects('getElementSignal')
-          .withExactArgs('ini-load', target2)
-          .returns(readyPromise)
-          .once();
-        visibilityManagerMock
-          .expects('listenElement')
-          .withExactArgs(
-            target,
-            config.visibilitySpec,
-            readyPromise,
-            /* createReportReadyPromiseFunc */ null,
-            saveCallback
-          )
-          .returns(unlisten)
-          .once();
-        visibilityManagerMock
-          .expects('listenElement')
-          .withExactArgs(
-            target2,
-            config.visibilitySpec,
-            readyPromise,
-            /* createReportReadyPromiseFunc */ null,
-            saveCallback2
-          )
-          .returns(unlisten2)
-          .once();
-        // Dispose function
-        res = tracker.add(analyticsElement, 'visible', config, eventResolver);
-        const unlistenReady = getAmpElementSpy.returnValues[0];
-        const unlistenReady2 = getAmpElementSpy.returnValues[1];
-        // #getAmpElement Promise
-        await unlistenReady;
-        await unlistenReady2;
-        // #assertMeasurable_ Promise
-        await macroTask();
-        await macroTask();
-        saveCallback.callback({totalVisibleTime: 10});
-        saveCallback2.callback({totalVisibleTime: 15});
-
-        // Testing that visibilty manager mock sends state to onEvent_
-        expect(eventsSpy.getCall(0).args[0]).to.equal('visible');
-        expect(eventsSpy.getCall(0).args[1]).to.equal(eventResolver);
-        expect(eventsSpy.getCall(0).args[2]).to.equal(target);
-        expect(eventsSpy.getCall(0).args[3]).to.deep.equal({
-          totalVisibleTime: 10,
-        });
-        expect(eventsSpy.getCall(1).args[0]).to.equal('visible');
-        expect(eventsSpy.getCall(1).args[1]).to.equal(eventResolver);
-        expect(eventsSpy.getCall(1).args[2]).to.equal(target2);
-        expect(eventsSpy.getCall(1).args[3]).to.deep.equal({
-          totalVisibleTime: 15,
-        });
-      });
-
-      it('should fire event for all elements of the selector', async () => {
-        target.classList.add('sameClass');
-        target2.classList.add('sameClass');
-        config['visibilitySpec'] = {selector: ['.sameClass']};
-        iniLoadTrackerMock
-          .expects('getElementSignal')
-          .withExactArgs('ini-load', target)
-          .returns(readyPromise)
-          .once();
-        iniLoadTrackerMock
-          .expects('getElementSignal')
-          .withExactArgs('ini-load', target2)
-          .returns(readyPromise)
-          .once();
-        visibilityManagerMock
-          .expects('listenElement')
-          .withExactArgs(
-            target,
-            config.visibilitySpec,
-            readyPromise,
-            /* createReportReadyPromiseFunc */ null,
-            saveCallback
-          )
-          .returns(unlisten)
-          .once();
-        visibilityManagerMock
-          .expects('listenElement')
-          .withExactArgs(
-            target2,
-            config.visibilitySpec,
-            readyPromise,
-            /* createReportReadyPromiseFunc */ null,
-            saveCallback2
-          )
-          .returns(unlisten2)
-          .once();
-        // Dispose function
-        res = tracker.add(analyticsElement, 'visible', config, eventResolver);
-        const unlistenReady = getAmpElementSpy.returnValues[0];
-        const unlistenReady2 = getAmpElementSpy.returnValues[1];
-        // #getAmpElement Promise
-        await unlistenReady;
-        await unlistenReady2;
-        // #assertMeasurable_ Promise
-        await macroTask();
-        await macroTask();
-        saveCallback.callback({totalVisibleTime: 10});
-        saveCallback2.callback({totalVisibleTime: 15});
-
-        // Testing that visibilty manager mock sends state to onEvent_
-        expect(eventsSpy.getCall(0).args[0]).to.equal('visible');
-        expect(eventsSpy.getCall(0).args[1]).to.equal(eventResolver);
-        expect(eventsSpy.getCall(0).args[2]).to.equal(target);
-        expect(eventsSpy.getCall(0).args[3]).to.deep.equal({
-          totalVisibleTime: 10,
-        });
-        expect(eventsSpy.getCall(1).args[0]).to.equal('visible');
-        expect(eventsSpy.getCall(1).args[1]).to.equal(eventResolver);
-        expect(eventsSpy.getCall(1).args[2]).to.equal(target2);
-        expect(eventsSpy.getCall(1).args[3]).to.deep.equal({
-          totalVisibleTime: 15,
-        });
-      });
-
-      it('should only fire one event for each element', async () => {
-        target.classList.add('sameClass');
-        target.classList.add('anotherClass');
-        config['visibilitySpec'] = {selector: ['.sameClass', '.anotherClass']};
-        iniLoadTrackerMock
-          .expects('getElementSignal')
-          .withExactArgs('ini-load', target)
-          .returns(readyPromise)
-          .once();
-        visibilityManagerMock
-          .expects('listenElement')
-          .withExactArgs(
-            target,
-            config.visibilitySpec,
-            readyPromise,
-            /* createReportReadyPromiseFunc */ null,
-            saveCallback
-          )
-          .returns(unlisten)
-          .once();
-        res = tracker.add(analyticsElement, 'visible', config, eventResolver);
-        const unlistenReady = getAmpElementSpy.returnValues[0];
-        // #getAmpElement Promise
-        await unlistenReady;
-        // #assertMeasurable_ Promise
-        await macroTask();
-        saveCallback.callback({totalVisibleTime: 10});
-
-        // Testing that visibilty manager mock sends state to onEvent_
-        expect(eventsSpy.getCall(0).args[0]).to.equal('visible');
-        expect(eventsSpy.getCall(0).args[1]).to.equal(eventResolver);
-        expect(eventsSpy.getCall(0).args[2]).to.equal(target);
-        expect(eventsSpy.getCall(0).args[3]).to.deep.equal({
-          totalVisibleTime: 10,
-        });
-        expect(eventsSpy).to.be.calledOnce;
-        unlisten2 = null;
-      });
-    });
-
-    it('should expand data params', function*() {
+    it('should expand data params', async () => {
       target.setAttribute('data-vars-foo', 'bar');
 
       const config = {selector: '.target'};
-      const unlisten = env.sandbox.spy();
       iniLoadTrackerMock.expects('getRootSignal').never();
       const readyPromise = Promise.resolve();
 
@@ -2112,21 +2187,23 @@ describes.realWin('Events', {amp: 1}, env => {
           /* createReportReadyPromiseFunc */ null,
           saveCallback
         )
-        .returns(unlisten)
         .once();
-      tracker.add(analyticsElement, 'visible', config, eventResolver);
+      const res = tracker.add(
+        analyticsElement,
+        'visible',
+        config,
+        eventResolver
+      );
+      expect(res).to.be.a('function');
       const unlistenReady = getAmpElementSpy.returnValues[0];
       // #getAmpElement Promise
-      yield unlistenReady;
+      await unlistenReady;
       // #assertMeasurable_ Promise
-      yield macroTask();
+      await macroTask();
       saveCallback.callback({totalVisibleTime: 10});
-      return eventPromise.then(function*(event) {
-        expect(event.vars.totalVisibleTime).to.equal(10);
-        expect(event.vars.foo).to.equal('bar');
-        yield macroTask();
-        expect(unlisten).to.be.calledOnce;
-      });
+      const event = await eventPromise;
+      expect(event.vars.totalVisibleTime).to.equal(10);
+      expect(event.vars.foo).to.equal('bar');
     });
 
     it('should pass func to get reportReady with "hidden" trigger', function*() {

@@ -67,13 +67,14 @@ const WEB_PUSH_PUBLISHER_VERSIONS = ['0.1'];
  * Prints a useful help message prior to the gulp dist task
  */
 function printDistHelp() {
+  let cmd = 'gulp dist';
   if (argv.fortesting) {
-    let cmd = 'gulp dist --fortesting';
-    if (argv.single_pass) {
-      cmd = cmd + ' --single_pass';
-    }
-    printConfigHelp(cmd);
+    cmd = cmd + ' --fortesting';
   }
+  if (argv.single_pass) {
+    cmd = cmd + ' --single_pass';
+  }
+  printConfigHelp(cmd);
   if (argv.single_pass) {
     log(
       green('Building all AMP extensions in'),
@@ -101,15 +102,11 @@ async function dist() {
   await compileCss();
   await compileJison();
 
-  // This is the temp directory processing for multi-pass (single-pass does its
-  // own processing). Executed after `compileCss` and `compileJison` so their
-  // results can be copied too.
-  if (!argv.single_pass) {
-    transferSrcsToTempDir({
-      isForTesting: argv.fortesting,
-      isEsmBuild: argv.esm,
-    });
-  }
+  transferSrcsToTempDir({
+    isForTesting: !!argv.fortesting,
+    isEsmBuild: !!argv.esm,
+    isSinglePass: !!argv.single_pass,
+  });
 
   await copyCss();
   await copyParsers();
@@ -453,4 +450,7 @@ dist.flags = {
   full_sourcemaps: '  Includes source code content in sourcemaps',
   disable_nailgun:
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
+  type: '  Points sourcemap to fetch files from the correct GitHub tag',
+  esm: '  Does not transpile down to ES5',
+  rtv_version: '  Override the version number written to AMP_CONFIG',
 };

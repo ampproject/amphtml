@@ -8,6 +8,8 @@
     "local",
     "notice",
     "prettier",
+    "react",
+    "react-hooks",
     "sort-imports-es6-autofix",
     "sort-requires"
   ],
@@ -17,11 +19,12 @@
   },
   "parserOptions": {
     "ecmaVersion": 6,
+    "jsx": true,
     "sourceType": "module"
   },
   "globals": {
-    "ANALYTICS_VENDOR_SPLIT": "readonly",
     "NATIVE_CUSTOM_ELEMENTS_V1": "readonly",
+    "IS_ESM": "readonly",
 
     "AMP": "readonly",
     "context": "readonly",
@@ -37,6 +40,9 @@
         "returns": "return"
       },
       "allowOverrideWithoutParam": true
+    },
+    "react": {
+      "pragma": "Preact"
     }
   },
   "rules": {
@@ -63,11 +69,18 @@
           "struct",
           "suppress",
           "template",
-          "visibleForTesting"
+          "visibleForTesting",
+          "jsx",
+          "jsxFrag"
         ]
       }
     ],
-    "jsdoc/check-types": [2, {"noDefaults": true}],
+    "jsdoc/check-types": [
+      2,
+      {
+        "noDefaults": true
+      }
+    ],
     "jsdoc/require-param": 2,
     "jsdoc/require-param-name": 2,
     "jsdoc/require-param-type": 2,
@@ -103,6 +116,7 @@
     "local/no-style-property-setting": 2,
     "local/no-swallow-return-from-allow-console-error": 2,
     "local/no-unload-listener": 2,
+    "local/preact": 2,
     "local/prefer-deferred-promise": 0,
     "local/prefer-destructuring": 2,
     "local/prefer-spread-props": 2,
@@ -122,7 +136,12 @@
     "no-eval": 2,
     "no-extend-native": 2,
     "no-extra-bind": 2,
-    "no-implicit-coercion": [2, {"boolean": false}],
+    "no-implicit-coercion": [
+      2,
+      {
+        "boolean": false
+      }
+    ],
     "no-implied-eval": 2,
     "no-iterator": 2,
     "no-lone-blocks": 2,
@@ -147,7 +166,10 @@
     "no-var": 2,
     "no-warning-comments": [
       2,
-      {"terms": ["do not submit"], "location": "anywhere"}
+      {
+        "terms": ["do not submit"],
+        "location": "anywhere"
+      }
     ],
     "notice/notice": [
       2,
@@ -159,10 +181,20 @@
         }
       }
     ],
-    "object-shorthand": [2, "properties", {"avoidQuotes": true}],
+    "object-shorthand": [
+      2,
+      "properties",
+      {
+        "avoidQuotes": true
+      }
+    ],
     "prefer-const": 2,
     "prettier/prettier": 2,
     "radix": 2,
+    "react/jsx-uses-react": 2,
+    "react/jsx-uses-vars": 2,
+    "react-hooks/rules-of-hooks": 2,
+    "react-hooks/exhaustive-deps": 2,
     "require-jsdoc": [
       2,
       {

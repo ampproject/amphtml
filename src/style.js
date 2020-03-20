@@ -64,7 +64,7 @@ function getVendorJsPropertyName_(style, titleCase) {
  * @return {string}
  */
 export function getVendorJsPropertyName(style, camelCase, opt_bypassCache) {
-  if (startsWith(camelCase, '--')) {
+  if (isVar(camelCase)) {
     // CSS vars are returned as is.
     return camelCase;
   }
@@ -120,10 +120,16 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
     property,
     opt_bypassCache
   );
-  if (propertyName) {
-    element.style[propertyName] = /** @type {string} */ (opt_units
-      ? value + opt_units
-      : value);
+  if (!propertyName) {
+    return;
+  }
+  const styleValue = /** @type {string} */ (opt_units
+    ? value + opt_units
+    : value);
+  if (isVar(propertyName)) {
+    element.style.setProperty(propertyName, styleValue);
+  } else {
+    element.style[propertyName] = styleValue;
   }
 }
 
@@ -142,6 +148,9 @@ export function getStyle(element, property, opt_bypassCache) {
   );
   if (!propertyName) {
     return undefined;
+  }
+  if (isVar(propertyName)) {
+    return element.style.getPropertyValue(propertyName);
   }
   return element.style[propertyName];
 }
@@ -359,4 +368,12 @@ export function propagateObjectFitStyles(fromEl, toEl) {
   if (fromEl.hasAttribute('object-position')) {
     setStyle(toEl, 'object-position', fromEl.getAttribute('object-position'));
   }
+}
+
+/**
+ * @param {string} property
+ * @return {boolean}
+ */
+function isVar(property) {
+  return startsWith(property, '--');
 }

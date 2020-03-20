@@ -605,11 +605,13 @@ export class ScrollEventTracker extends EventTracker {
     const boundsH = this.normalizeBoundaries_(
       config['scrollSpec']['horizontalBoundaries']
     );
+    const useInitialPageSize = !!config['scrollSpec']['useInitialPageSize'];
 
     this.boundScrollHandler_ = this.scrollHandler_.bind(
       this,
-      boundsV,
       boundsH,
+      boundsV,
+      useInitialPageSize,
       listener
     );
 
@@ -620,24 +622,28 @@ export class ScrollEventTracker extends EventTracker {
 
   /**
    * Function to handle scroll events from the Scroll manager
-   * @param {!Object<number,boolean>} boundsV
    * @param {!Object<number,boolean>} boundsH
+   * @param {!Object<number,boolean>} boundsV
+   * @param {boolean} useInitialPageSize
    * @param {function(!AnalyticsEvent)} listener
    * @param {!Object} e
    * @private
    */
-  scrollHandler_(boundsV, boundsH, listener, e) {
+  scrollHandler_(boundsH, boundsV, useInitialPageSize, listener, e) {
     // Calculates percentage scrolled by adding screen height/width to
     // top/left and dividing by the total scroll height/width.
+    const {scrollWidth, scrollHeight} = useInitialPageSize ? e.initialSize : e;
+
     this.triggerScrollEvents_(
       boundsV,
-      ((e.top + e.height) * 100) / e./*OK*/ scrollHeight,
+      ((e.top + e.height) * 100) / scrollHeight,
       VAR_V_SCROLL_BOUNDARY,
       listener
     );
+
     this.triggerScrollEvents_(
       boundsH,
-      ((e.left + e.width) * 100) / e./*OK*/ scrollWidth,
+      ((e.left + e.width) * 100) / scrollWidth,
       VAR_H_SCROLL_BOUNDARY,
       listener
     );
@@ -740,13 +746,13 @@ export class SignalTracker extends EventTracker {
       // false missed searches.
       const selectionMethod = config['selectionMethod'];
       signalsPromise = this.root
-        .getAmpElement(
+        .getAmpElementOrElements(
           context.parentElement || context,
           selector,
           selectionMethod
         )
-        .then(element => {
-          target = element;
+        .then(elements => {
+          target = elements[0];
           return this.getElementSignal(eventType, target);
         });
     }
@@ -801,13 +807,13 @@ export class IniLoadTracker extends EventTracker {
       // false missed searches.
       const selectionMethod = config['selectionMethod'];
       promise = this.root
-        .getAmpElement(
+        .getAmpElementOrElements(
           context.parentElement || context,
           selector,
           selectionMethod
         )
-        .then(element => {
-          target = element;
+        .then(elements => {
+          target = elements[0];
           return this.getElementSignal('ini-load', target);
         });
     }
@@ -1425,10 +1431,10 @@ export class VisibilityTracker extends EventTracker {
     const waitForSpec = visibilitySpec['waitFor'];
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
-    const multiSelectorVisibilityOn = isExperimentOn(
-      this.root.ampdoc.win,
-      'multi-selector-visibility-trigger'
-    );
+    const unlistenPromises = [];
+    const multiSelectorVisibilityOn =
+      isExperimentOn(this.root.ampdoc.win, 'visibility-trigger-improvements') &&
+      Array.isArray(selector);
     if (reportWhenSpec) {
       userAssert(
         !visibilitySpec['repeat'],
@@ -1472,91 +1478,72 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    const getUnlistenPromiseForElement = element =>
-      visibilityManagerPromise.then(
-        visibilityManager => {
-          return visibilityManager.listenElement(
-            element,
-            visibilitySpec,
-            this.getReadyPromise(waitForSpec, selector, element),
-            createReportReadyPromiseFunc,
-            this.onEvent_.bind(this, eventType, listener, element)
-          );
-        },
-        () => {}
-      );
-
-    let unlistenPromise;
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      unlistenPromise = visibilityManagerPromise.then(
-        visibilityManager => {
-          return visibilityManager.listenRoot(
-            visibilitySpec,
-            this.getReadyPromise(waitForSpec, selector),
-            createReportReadyPromiseFunc,
-            this.onEvent_.bind(
-              this,
-              eventType,
-              listener,
-              this.root.getRootElement()
-            )
-          );
-        },
-        () => {}
+      unlistenPromises.push(
+        visibilityManagerPromise.then(
+          visibilityManager => {
+            return visibilityManager.listenRoot(
+              visibilitySpec,
+              this.getReadyPromise(waitForSpec, selector),
+              createReportReadyPromiseFunc,
+              this.onEvent_.bind(
+                this,
+                eventType,
+                listener,
+                this.root.getRootElement()
+              )
+            );
+          },
+          () => {}
+        )
       );
     } else {
       // An AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
+      // Array selectors do not suppor the special cases: ':host' & ':root'
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
-
-      if (multiSelectorVisibilityOn && Array.isArray(selector)) {
-        userAssert(
-          !selectionMethod,
-          'Cannot have selectionMethod defined with an array selector: ',
-          selector
-        );
-        unlistenPromise = Promise.all(
-          selector.map(individualSelector => {
-            return this.root.getAmpElements(individualSelector);
-          })
-        ).then(selectorArrayOfElements => {
-          const uniqueElements = [];
-          for (let i = 0; i < selectorArrayOfElements.length; i++) {
-            for (let j = 0; j < selectorArrayOfElements[i].length; j++) {
-              if (
-                uniqueElements.indexOf(selectorArrayOfElements[i][j]) === -1
-              ) {
-                uniqueElements.push(selectorArrayOfElements[i][j]);
-              }
-            }
-          }
-          return Promise.all(
-            uniqueElements.map(element => getUnlistenPromiseForElement(element))
-          );
-        });
-      } else {
-        unlistenPromise = this.root
-          .getAmpElement(
+      const selectors = Array.isArray(selector) ? selector : [selector];
+      for (let i = 0; i < selectors.length; i++) {
+        this.root
+          .getAmpElementOrElements(
             context.parentElement || context,
-            selector,
-            selectionMethod
+            selectors[i],
+            selectionMethod,
+            multiSelectorVisibilityOn
           )
-          .then(element => getUnlistenPromiseForElement(element));
+          .then(elements => {
+            for (let j = 0; j < elements.length; j++) {
+              unlistenPromises.push(
+                visibilityManagerPromise.then(
+                  visibilityManager => {
+                    return visibilityManager.listenElement(
+                      elements[j],
+                      visibilitySpec,
+                      this.getReadyPromise(
+                        waitForSpec,
+                        selectors[i],
+                        elements[j]
+                      ),
+                      createReportReadyPromiseFunc,
+                      this.onEvent_.bind(this, eventType, listener, elements[j])
+                    );
+                  },
+                  () => {}
+                )
+              );
+            }
+          });
       }
     }
 
     return function() {
-      unlistenPromise.then(unlisten => {
-        if (multiSelectorVisibilityOn && Array.isArray(unlisten)) {
-          for (let i = 0; i < unlisten.length; i++) {
-            unlisten[i]();
-          }
-        } else {
-          unlisten();
+      return Promise.all(unlistenPromises).then(unlistenCallbacks => {
+        for (let i = 0; i < unlistenCallbacks.length; i++) {
+          unlistenCallbacks[i]();
         }
       });
     };

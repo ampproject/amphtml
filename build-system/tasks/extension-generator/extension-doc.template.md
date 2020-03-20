@@ -4,7 +4,7 @@ formats:
   - websites
   - email
 teaser:
-  text: Fill this in with teaser text to improve SEO.
+  text: Fill this in with teaser text to improve SEO. Use the component description.
 ---
 
 <!--
@@ -12,6 +12,7 @@ teaser:
   and improves SEO.
   * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
   * List applicable format(s): websites, ads, stories, email
+  * Do not include markdown formatting in the frontmatter - plain text and punctionation only!
   * Remove this comment!
 -->
 
@@ -33,29 +34,6 @@ limitations under the License.
 
 # `${name}`
 
-<table>
-  <tr>
-    <td width="40%"><strong>Description</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Availability</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="${name}" src="https://cdn.ampproject.org/v0/${name}-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-  <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>FILL THIS IN</td>
-  </tr>
-</table>
-
 <!--
   If the component is relevant for more than one format and operates differently between these
   formats, include and filter multiple content blocks and code samples.
@@ -63,7 +41,7 @@ limitations under the License.
 
 ## Usage
 
-One to three paragraph explaining the component usage. List important functionality. Explain why developers care about it.
+One to three paragraphs explaining the component usage. List important functionality. Explain why developers care about it.
 
 [filter formats=“websites”]
 
