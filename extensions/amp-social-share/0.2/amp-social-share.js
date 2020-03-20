@@ -141,21 +141,23 @@ class AmpSocialShare extends PreactBaseElement {
         bindings[bindingName] = urlParams[name];
       });
     }
-    let href = urlReplacements.expandUrlSync(hrefWithVars, bindings);
-    // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
-    const {protocol} = Services.urlForDoc(this.element).parse(href);
-    const isMailTo = protocol === 'mailto:';
-    const isSms = protocol === 'sms:';
-    const target =
-      platform.isIos() && (isMailTo || isSms)
-        ? '_top'
-        : this.element.getAttribute('data-target') || '_blank';
-    if (isSms) {
-      // http://stackoverflow.com/a/19126326
-      // This code path seems to be stable for both iOS and Android.
-      href = href.replace('?', '?&');
-    }
-    return {'href': href, 'target': target};
+    urlReplacements.expandUrlAsync(hrefWithVars, bindings).then(result => {
+      let href = result;
+      // mailto:, sms: protocols breaks when opened in _blank on iOS Safari
+      const {protocol} = Services.urlForDoc(this.element).parse(href);
+      const isMailTo = protocol === 'mailto:';
+      const isSms = protocol === 'sms:';
+      const target =
+        platform.isIos() && (isMailTo || isSms)
+          ? '_top'
+          : this.element.getAttribute('data-target') || '_blank';
+      if (isSms) {
+        // http://stackoverflow.com/a/19126326
+        // This code path seems to be stable for both iOS and Android.
+        href = href.replace('?', '?&');
+      }
+      this.mutateProps({'href': href, 'target': target});
+    });
   }
 }
 
