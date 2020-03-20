@@ -18,8 +18,10 @@
 #define HTMLPARSER__STRINGS_H_
 
 #include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace htmlparser {
 
@@ -57,8 +59,7 @@ class Strings {
     '\'',
     '<',
     '>',
-    '"',
-    '\r'};
+    '"'};
 
   inline static const std::string kNullChar = {'\0'};
 
@@ -109,7 +110,7 @@ class Strings {
   // updated, meaning cursor is at the first byte of the current character
   // decoded in s.
   static std::optional<char32_t>
-      DecodeUtf8Symbol(std::string_view s, int position = 0) {
+      DecodeUtf8Symbol(std::string_view s, std::size_t position = 0) {
     if (position < 0 || position > s.size()) return std::nullopt;
 
     if (position == 0) {
@@ -138,6 +139,49 @@ class Strings {
   // Returns nullopt on error.
   static std::optional<std::string> EncodeUtf8Symbol(char32_t code_point);
 
+  static std::vector<char32_t> Utf8ToCodepoints(std::string_view utf8) {
+    std::vector<char32_t> out;
+    out.reserve(utf8.size() / 2);
+    // We use the UnicodeText abstraction because it handles
+    // validation / coersion  under the hood, so what comes out of this is
+    // surely valid UTF8.
+    auto codepoint = DecodeUtf8Symbol(&utf8);
+    while (codepoint) {
+      out.push_back(*codepoint);
+      codepoint = DecodeUtf8Symbol(&utf8);
+    }
+    return out;
+  }
+
+  static void AppendCodepointToUtf8String(char32_t code,
+                                          std::string* utf8_str) {
+    // The implementation is modified from UnicodeText::push_back to append
+    // to an existing string, rather than allocate a new one.
+    auto encoded = EncodeUtf8Symbol(code);
+    if (encoded) {
+      *utf8_str += *encoded;
+    } else {
+      utf8_str->push_back(' ');
+    }
+  }
+
+  static std::string CodepointToUtf8String(char32_t code) {
+    auto output = htmlparser::Strings::EncodeUtf8Symbol(code);
+    return output ? std::move(output.value()) : "";
+  }
+
+  // Converts unicode code points to a string.
+  static std::string CodepointsToUtf8String(std::vector<char32_t> codes) {
+    std::stringbuf buf;
+    for (auto c : codes) {
+      if (auto encoded = htmlparser::Strings::EncodeUtf8Symbol(c);
+          encoded) {
+        buf.sputn(encoded->c_str(), encoded->size());
+      }
+    }
+    return buf.str();
+  }
+
   // Returns index of the first instance of any character in chars or
   // npos if no character found. For unicode character returns the index of
   // initial byte of the sequence of bytes.
@@ -155,7 +199,7 @@ class Strings {
   // attribute should be true if passing an attribute value.
   // UnescapeString(EscapeString(s)) == s always holds, but the converse isn't
   // always true.
-  static void UnescapeString(std::string* s, bool attribute=false);
+  static void UnescapeString(std::string* s, bool attribute = false);
 
   // Converts case of string in-place.
   static void ToLower(std::string* s);
@@ -163,7 +207,7 @@ class Strings {
 
   // Checks if string contains whitespace only chracters.
   static bool IsAllWhitespaceChars(std::string_view s,
-      std::string_view whitespace_chars=kWhitespace);
+      std::string_view whitespace_chars = kWhitespace);
 
   // Case insensitive equals.
   static bool EqualFold(std::string_view l, std::string_view r);
@@ -230,6 +274,25 @@ class Strings {
   // Prefix and suffix matching functions.
   static bool StartsWith(std::string_view s, std::string_view prefix);
   static bool EndsWith(std::string_view s, std::string_view suffix);
+
+  // Splits a string at delimiter character and returns the columns.
+  static std::vector<std::string> SplitStringAt(
+      std::string_view s, char delimiter);
+
+  // Splits the string at any utf8 or ascii whitespace and returns the columns.
+  // The returned values are the views of original string argument passed to
+  // this method. If the original string goes out of scope after this method is
+  // called, the contents of the columns is undefined.
+  static std::vector<std::string_view> SplitStrAtUtf8Whitespace(
+      std::string_view s);
+
+  // Determines if a character at current position is a whitespace char.
+  // Returns the number of bytes from current character that are part of the
+  // whitespace. For multichar whitespace like ideographic space \u3000 it
+  // returns 3 as ideographic space has 3 codepoints.
+  //
+  // Returns 0, if the character at current position is not a whitespace.
+  static int IsUtf8WhiteSpaceChar(std::string_view s, std::size_t position = 0);
 
  private:
   // No instance of this class.

@@ -14,7 +14,7 @@
 // limitations under the license.
 //
 
-#include "htmlparser/error.h"
+#include "error.h"
 
 namespace htmlparser {
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const path = require('path');
 
@@ -26,6 +27,9 @@ const PATH = './config.json';
 function loadConfig() {
   const file = fs.readFileSync(path.join(__dirname, PATH));
   const config = JSON.parse(file);
+  if (argv.url) {
+    config.urls = [argv.url];
+  }
   if (config.urls.length < 1) {
     throw new Error('No URLs found in config.');
   }

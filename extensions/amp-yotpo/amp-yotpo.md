@@ -24,19 +24,6 @@ limitations under the License.
 
 # amp-yotpo
 
-Embeds a <a href="https://support.yotpo.com/en/on-site/reviews-widget">Yotpo</a> on-site widget.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-yotpo" src="https://cdn.ampproject.org/v0/amp-yotpo-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, nodisplay, responsive</td>
-  </tr>
-</table>
-
 ## Overview
 
 You can use the `amp-yotpo` extension to display [Yotpo on-site widgets](https://support.yotpo.com/en/on-site/reviews-widget).

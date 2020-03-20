@@ -144,7 +144,11 @@ export class AnalyticsRoot {
    */
   getRootElement() {
     const root = this.getRoot();
-    return dev().assertElement(root.documentElement || root.body || root);
+    // In the case of a shadow doc, its host will be used as
+    // a refrence point
+    return dev().assertElement(
+      root.host || root.documentElement || root.body || root
+    );
   }
 
   /**
@@ -280,7 +284,7 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
    */
-  getElements_(selector) {
+  getElementsByScopedQuerySelectorAll_(selector) {
     // Wait for document-ready to avoid false missed searches
     return this.ampdoc.whenReady().then(() => {
       const results = [];
@@ -301,21 +305,6 @@ export class AnalyticsRoot {
   }
 
   /**
-   * Searches for the AMP elements that matches from the root.
-   *
-   * @param {string} selector DOM query selector.
-   * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
-   */
-  getAmpElements(selector) {
-    return this.getElements_(selector).then(elements => {
-      for (let i = 0; i < elements.length; i++) {
-        this.verifyAmpElement_(elements[i], selector);
-      }
-      return elements;
-    });
-  }
-
-  /**
    * Searches the AMP element that matches the selector within the scope of the
    * analytics root in relationship to the specified context node.
    *
@@ -323,25 +312,60 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
-   * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
+   * @param {boolean=} opt_multiSelectorOn multi-selector expriment
+   * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
    */
-  getAmpElement(context, selector, selectionMethod) {
-    return this.getElement(context, selector, selectionMethod).then(element => {
-      this.verifyAmpElement_(element, selector);
-      return element;
+  getAmpElementOrElements(
+    context,
+    selector,
+    selectionMethod,
+    opt_multiSelectorOn
+  ) {
+    let elementsPromise = this.getElement(context, selector, selectionMethod);
+
+    // Return unique elements based upon selector
+    if (opt_multiSelectorOn) {
+      userAssert(
+        !selectionMethod,
+        'Cannot have selectionMethod defined with an array selector: %s',
+        selector
+      );
+      elementsPromise = this.getElementsByScopedQuerySelectorAll_(
+        selector
+      ).then(elements => {
+        const uniqueElements = [];
+        for (let i = 0; i < elements.length; i++) {
+          for (let j = 0; j < elements[i].length; j++) {
+            if (uniqueElements.indexOf(elements[i][j]) === -1) {
+              uniqueElements.push(elements[i][j]);
+            }
+          }
+        }
+        return uniqueElements;
+      });
+    }
+
+    return elementsPromise.then(elementOrElements => {
+      const elements = Array.isArray(elementOrElements)
+        ? elementOrElements
+        : [elementOrElements];
+      this.verifyAmpElements_(elements, selector);
+      return elements;
     });
   }
 
   /**
-   * @param {!Element} element
+   * @param {!Array<Element>} elements
    * @param {string} selector
    */
-  verifyAmpElement_(element, selector) {
-    userAssert(
-      element.classList.contains('i-amphtml-element'),
-      'Element "%s" is required to be an AMP element',
-      selector
-    );
+  verifyAmpElements_(elements, selector) {
+    for (let i = 0; i < elements.length; i++) {
+      userAssert(
+        elements[i].classList.contains('i-amphtml-element'),
+        'Element "%s" is required to be an AMP element',
+        selector
+      );
+    }
   }
 
   /**
@@ -448,7 +472,7 @@ export class AnalyticsRoot {
   getScrollManager() {
     // TODO (zhouyx@): Disallow scroll trigger with host API
     if (!this.scrollManager_) {
-      this.scrollManager_ = new ScrollManager(this.ampdoc);
+      this.scrollManager_ = new ScrollManager(this);
     }
 
     return this.scrollManager_;

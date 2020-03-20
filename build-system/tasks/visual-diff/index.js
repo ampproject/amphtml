@@ -38,7 +38,8 @@ const {
   gitTravisMasterBaseline,
   shortSha,
 } = require('../../common/git');
-const {execOrDie, execScriptAsync} = require('../../common/exec');
+const {buildMinifiedRuntime, installPackages} = require('../../common/utils');
+const {execScriptAsync} = require('../../common/exec');
 const {isTravisBuild} = require('../../common/travis');
 const {startServer, stopServer} = require('../serve');
 const {waitUntilUsed} = require('tcp-port-used');
@@ -47,8 +48,6 @@ const {waitUntilUsed} = require('tcp-port-used');
 let puppeteer;
 let percySnapshot;
 
-// CSS widths: iPhone: 375, Pixel: 411, Desktop: 1400.
-const DEFAULT_SNAPSHOT_OPTIONS = {widths: [375, 411, 1400]};
 const SNAPSHOT_SINGLE_BUILD_OPTIONS = {widths: [375]};
 const VIEWPORT_WIDTH = 1400;
 const VIEWPORT_HEIGHT = 100000;
@@ -317,12 +316,10 @@ function logTestError(testError) {
 /**
  * Runs the visual tests.
  *
- * @param {!Array<string>} assetGlobs an array of glob strings to load assets
- *     from.
  * @param {!Array<JsonObject>} webpages an array of JSON objects containing
  *     details about the pages to snapshot.
  */
-async function runVisualTests(assetGlobs, webpages) {
+async function runVisualTests(webpages) {
   // Create a Percy client and start a build.
   if (process.env['PERCY_TARGET_COMMIT']) {
     log(
@@ -577,7 +574,7 @@ async function snapshotWebpages(browser, webpages) {
 
           // Create a default set of snapshot options for Percy and modify
           // them based on the test's configuration.
-          const snapshotOptions = {...DEFAULT_SNAPSHOT_OPTIONS};
+          const snapshotOptions = {};
           if (webpage.enable_percy_javascript) {
             snapshotOptions.enableJavaScript = true;
           }
@@ -739,10 +736,7 @@ async function performVisualTests() {
         'utf8'
       )
     );
-    await runVisualTests(
-      visualTestsConfig.asset_globs,
-      visualTestsConfig.webpages
-    );
+    await runVisualTests(visualTestsConfig.webpages);
   }
 }
 
@@ -766,17 +760,13 @@ async function ensureOrBuildAmpRuntimeInTestMode_() {
       );
     }
   } else {
-    execOrDie('gulp clean');
-    execOrDie(`gulp dist --fortesting --config ${argv.config}`);
+    buildMinifiedRuntime();
   }
 }
 
 function installPercy_() {
   if (!argv.noyarn) {
-    log('info', 'Running', colors.cyan('yarn'), 'to install Percy...');
-    execOrDie('npx yarn --cwd build-system/tasks/visual-diff', {
-      'stdio': 'ignore',
-    });
+    installPackages(__dirname);
   }
 
   puppeteer = require('puppeteer');

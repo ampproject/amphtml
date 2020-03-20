@@ -174,7 +174,6 @@ const forbiddenTerms = {
       'build-system/server/routes/analytics.js',
       'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-analytics/0.1/requests.js',
-      'extensions/amp-analytics/0.1/vendors.js',
     ],
   },
   // Service factories that should only be installed once.
@@ -368,7 +367,7 @@ const forbiddenTerms = {
       'src/service/navigation.js',
       'src/service/url-impl.js',
       'dist.3p/current/integration.js',
-      'src/amp-story-player.js',
+      'src/amp-story-player-impl.js',
     ],
   },
   '\\.sendMessage\\(': {
@@ -401,6 +400,7 @@ const forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/login-dialog.js',
       'extensions/amp-access/0.1/signin.js',
+      'extensions/amp-story-education/0.1/amp-story-education.js',
       'extensions/amp-subscriptions/0.1/viewer-subscription-platform.js',
       'src/impression.js',
       'src/service/cid-impl.js',
@@ -664,8 +664,6 @@ const forbiddenTerms = {
       'src/web-worker/web-worker.js', // Web worker custom error reporter.
       'tools/experiments/experiments.js',
       'build-system/server/amp4test.js',
-      // TODO: @jonathantyng cleanup #22757
-      'build-system/tasks/generate-vendor-jsons.js',
     ],
   },
   'data:image/svg(?!\\+xml;charset=utf-8,)[^,]*,': {
@@ -957,8 +955,7 @@ const forbiddenTermsSrcInclusive = {
   '\\.scrollingElement(?!_)': bannedTermsHelpString,
   '\\.computeCTM(?!_)': bannedTermsHelpString,
   // Functions
-  '\\.changeHeight\\(': bannedTermsHelpString,
-  '\\.changeSize\\(': bannedTermsHelpString,
+  '\\.applySize\\(': bannedTermsHelpString,
   '\\.attemptChangeHeight\\(0\\)': 'please consider using `attemptCollapse()`',
   '\\.collapse\\(': bannedTermsHelpString,
   '\\.expand\\(': bannedTermsHelpString,
@@ -1082,9 +1079,10 @@ const forbiddenTermsSrcInclusive = {
     ],
   },
   '\\.getTime\\(\\)': {
-    message: 'Unless you do weird date math (whitelist), use Date.now().',
+    message: 'Unless you do weird date math (allowlist), use Date.now().',
     whitelist: [
       'extensions/amp-timeago/0.1/amp-timeago.js',
+      'extensions/amp-timeago/0.2/timeago.js',
       'build-system/compile/build.conf.js',
     ],
   },

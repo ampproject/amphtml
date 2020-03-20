@@ -22,6 +22,7 @@ const gap = require('gulp-append-prepend');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
+const pathModule = require('path');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
 const {
@@ -47,14 +48,14 @@ let inProgress = 0;
 const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
 
 /**
- * Prefixes the the tmp directory if we need to shadow files that have been
- * preprocess by babel in the `dist` task.
+ * Prefixes the tmp directory if we need to shadow files that have been
+ * preprocessed by babel in the `dist` task.
  *
  * @param {!Array<string>} paths
  * @return {!Array<string>}
  */
 function convertPathsToTmpRoot(paths) {
-  return paths.map(path => path.replace(/^(\!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
+  return paths.map(path => path.replace(/^(!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
 }
 
 // Compiles AMP with the closure compiler. This is intended only for
@@ -117,6 +118,13 @@ function compile(
   options,
   timeInfo
 ) {
+  function shouldAppendSourcemappingURLText(file) {
+    // Do not append sourceMappingURL if its a sourcemap
+    return (
+      pathModule.extname(file.path) !== '.map' && options.esmPassCompilation
+    );
+  }
+
   const hideWarningsFor = [
     'third_party/amp-toolbox-cache-url/',
     'third_party/caja/',
@@ -206,6 +214,11 @@ function compile(
     }
     if (options.include3pDirectories) {
       srcs.push('3p/**/*.js', 'ads/**/*.js');
+    }
+    // For ESM Builds, exclude ampdoc and ampshared css from inclusion.
+    // These styles are guaranteed to already be present on elgible documents.
+    if (options.esmPassCompilation) {
+      srcs.push('!build/ampdoc.css.js', '!build/ampshared.css.js');
     }
     // Many files include the polyfills, but we only want to deliver them
     // once. Since all files automatically wait for the main binary to load
@@ -331,7 +344,8 @@ function compile(
         'checkTypes',
         'const',
         'constantProperty',
-        'globalThis'
+        'globalThis',
+        'misplacedTypeAnnotation'
       );
       compilerOptions.jscomp_off.push('moduleLoad', 'unknownDefines');
       compilerOptions.conformance_configs =
@@ -345,9 +359,7 @@ function compile(
       delete compilerOptions.define;
     }
 
-    if (!argv.single_pass) {
-      compilerOptions.js_module_root.push(SRC_TEMP_DIR);
-    }
+    compilerOptions.js_module_root.push(SRC_TEMP_DIR);
 
     const compilerOptionsArray = [];
     Object.keys(compilerOptions).forEach(function(option) {
@@ -365,12 +377,11 @@ function compile(
       }
     });
 
-    const gulpSrcs = !argv.single_pass ? convertPathsToTmpRoot(srcs) : srcs;
-    const gulpBase = !argv.single_pass ? SRC_TEMP_DIR : '.';
+    const gulpSrcs = convertPathsToTmpRoot(srcs);
 
     if (options.typeCheckOnly) {
       return gulp
-        .src(gulpSrcs, {base: gulpBase})
+        .src(gulpSrcs, {base: SRC_TEMP_DIR})
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, checkTypesNailgunPort))
         .on('error', err => {
@@ -382,7 +393,7 @@ function compile(
     } else {
       timeInfo.startTime = Date.now();
       return gulp
-        .src(gulpSrcs, {base: gulpBase})
+        .src(gulpSrcs, {base: SRC_TEMP_DIR})
         .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
@@ -401,7 +412,7 @@ function compile(
         .pipe(sourcemaps.write('.'))
         .pipe(
           gulpIf(
-            !!argv.esm,
+            shouldAppendSourcemappingURLText,
             gap.appendText(`\n//# sourceMappingURL=${outputFilename}.map`)
           )
         )

@@ -14,9 +14,9 @@
 // limitations under the license.
 //
 
-#include "htmlparser/atomutil.h"
+#include "atomutil.h"
 
-#include "htmlparser/hash.h"
+#include "hash.h"
 
 namespace htmlparser {
 
