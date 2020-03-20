@@ -191,7 +191,7 @@ export class AmpAdNetworkAdsenseImpl extends AmpA4A {
         this.responsiveState_ = state;
       }
       if (this.responsiveState_ != null) {
-        return this.responsiveState_.attemptChangeSize();
+        return this.responsiveState_.attemptToMatchResponsiveHeight();
       }
       // This should happen last, as some diversion criteria rely on some of the
       // preceding logic (specifically responsive logic).
