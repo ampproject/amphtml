@@ -1,5 +1,5 @@
 <!---
-Copyright 2017 The AMP HTML Authors. All Rights Reserved.
+Copyright 2020 The AMP HTML Authors. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ Oblivki implementation of AMP Ad tag which requests early by XHR and renders nat
 
 ## Attributes
 
-Oblivki impl uses the same tags as `<amp-ad>`.
+Oblivki impl uses the same attributes as `<amp-ad>` .
 
 <table>
   <tr>
