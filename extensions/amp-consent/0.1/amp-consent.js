@@ -456,6 +456,9 @@ export class AmpConsent extends AMP.BaseElement {
           return Promise.resolve(consentRequired);
         }
         return this.getConsentRemote_().then(consentResponse => {
+          if (!consentResponse) {
+            return false;
+          }
           // `promptIfUnknown` is a legacy field
           return consentResponse['consentRequired'] !== undefined
             ? !!consentResponse['consentRequired']
