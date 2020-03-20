@@ -122,7 +122,6 @@ class AmpSocialShare extends PreactBaseElement {
    * @private
    * @param {!JsonObject} typeConfig
    * @param {!../../../src/service/platform-impl.Platform} platform
-   * @return {!JsonObject}
    */
   renderWithHrefAndTarget_(typeConfig, platform) {
     const shareEndpoint = user().assertString(
