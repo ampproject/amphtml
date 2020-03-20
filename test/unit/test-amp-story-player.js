@@ -70,11 +70,24 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
 
   beforeEach(() => {
     win = env.win;
+
+    // By the time this code runs, the outer window has already defined
+    // AmpStoryPlayer in the import, which still references the HTMLElement
+    // native function it extends. Then the `custom-elements.js` polyfill
+    // replaces it in the inner window `realWin`, but by this point it's no good
+    // because it's already been accessed, throwing an error.
+    //
+    // By using `Object.setPrototypeOf(AmpStoryPlayer, win.HTMLElement)`, we
+    // make `AmpStoryPlayer` native to the current inner `realWin` window,
+    // making sure it uses the polyfill and not the native function.
+    //
+    // Doing this causes the class to be poisoned, so we reset it on every test
+    // run.
     oldPrototype = Object.getPrototypeOf(AmpStoryPlayer);
-    // Make the AmpStoryPlayer "native" to the 'realWin' window.
     Object.setPrototypeOf(AmpStoryPlayer, win.HTMLElement);
     Object.setPrototypeOf(AmpStoryPlayer.prototype, win.HTMLElement.prototype);
     win.customElements.define('amp-story-player', AmpStoryPlayer);
+
     fakeMessaging = {
       setDefaultHandler: () => {},
       sendRequest: () => {},
