@@ -185,11 +185,18 @@ describes.repeated(
         }
 
         function expectRender() {
-          // Call mutate/measure during render.
+          // Call mutate OR measureMutate, then measure during render.
           listMock
             .expects('mutateElement')
             .callsFake(m => m())
-            .atLeast(1);
+            .atLeast(0);
+          listMock
+            .expects('measureMutateElement')
+            .callsFake((m, n) => {
+              m();
+              n();
+            })
+            .atLeast(0);
           listMock
             .expects('measureElement')
             .callsFake(m => m())
@@ -247,6 +254,48 @@ describes.repeated(
               .expects('attemptChangeHeight')
               .withExactArgs(1337)
               .returns(Promise.resolve());
+
+            return list.layoutCallback();
+          });
+
+          it('should unlock height for layout=container with successful attemptChangeHeight', async () => {
+            const itemElement = doc.createElement('div');
+            const placeholder = doc.createElement('div');
+            placeholder.style.height = '1337px';
+            element.appendChild(placeholder);
+            element.getPlaceholder = () => placeholder;
+            list.isLayoutSupported('container');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+
+            listMock
+              .expects('attemptChangeHeight')
+              .withExactArgs(1337)
+              .returns(Promise.resolve(true));
+            listMock
+              .expects('maybeResizeListToFitItems_')
+              .returns(Promise.resolve(true));
+            listMock.expects('unlockHeightInsideMutate_').once();
+
+            return list.layoutCallback();
+          });
+
+          it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
+            const itemElement = doc.createElement('div');
+            const placeholder = doc.createElement('div');
+            placeholder.style.height = '1337px';
+            element.appendChild(placeholder);
+            element.getPlaceholder = () => placeholder;
+            list.isLayoutSupported('container');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+
+            listMock
+              .expects('attemptChangeHeight')
+              .withExactArgs(1337)
+              .returns(Promise.reject(false));
+            listMock
+              .expects('maybeResizeListToFitItems_')
+              .returns(Promise.resolve(false));
+            listMock.expects('unlockHeightInsideMutate_').never();
 
             return list.layoutCallback();
           });
@@ -395,8 +444,8 @@ describes.repeated(
               expect(list.container_.contains(foo)).to.be.true;
 
               const opts = {refresh: true, resetOnRefresh: true, expr: 'items'};
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], opts);
 
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], opts);
               return list.executeAction({
                 method: 'refresh',
                 satisfiesTrust: () => true,
