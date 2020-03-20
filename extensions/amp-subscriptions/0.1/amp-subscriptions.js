@@ -24,7 +24,7 @@ import {CryptoHandler} from './crypto-handler';
 import {Dialog} from './dialog';
 import {DocImpl} from './doc-impl';
 import {ENTITLEMENTS_REQUEST_TIMEOUT} from './constants';
-import {Entitlement} from './entitlement';
+import {Entitlement, GrantReason} from './entitlement';
 import {
   PageConfig,
   PageConfigResolver,
@@ -140,7 +140,7 @@ export class SubscriptionService {
 
       userAssert(this.pageConfig_, 'Page config is null');
 
-      if (!this.pageConfig_.isLocked()) {
+      if (this.isPageUnlocked_()) {
         // If the page is not locked then we treat it as granted and show any
         // subscriptions content sections.
         this.processGrantState_(true);
@@ -150,11 +150,6 @@ export class SubscriptionService {
       if (this.doesViewerProvideAuth_) {
         this.delegateAuthToViewer_();
         this.startAuthorizationFlow_(false);
-        return;
-      } else if (this.platformConfig_['alwaysGrant']) {
-        // If service config has `alwaysGrant` key as true, publisher wants it
-        // to be open always until a sviewer decides otherwise.
-        this.processGrantState_(true);
         return;
       }
 
@@ -204,11 +199,19 @@ export class SubscriptionService {
   getAuthdataField(field) {
     return this.initialize_()
       .then(() => {
+        if (this.isPageUnlocked_()) {
+          return new Entitlement({
+            source: '',
+            raw: '',
+            granted: true,
+            grantReason: GrantReason.UNLOCKED,
+            dataObject: {},
+          });
+        }
+
         return this.platformStore_.getEntitlementPromiseFor('local');
       })
-      .then(entitlement => {
-        return getValueForExpr(entitlement.json(), field);
-      });
+      .then(entitlement => getValueForExpr(entitlement.json(), field));
   }
 
   /**
@@ -316,19 +319,6 @@ export class SubscriptionService {
    */
   selectPlatformForLogin() {
     return this.platformStore_.selectPlatformForLogin();
-  }
-
-  /**
-   * Selects and activates a platform.
-   */
-  maybeSelectAndActivatePlatform() {
-    this.initialize_().then(() => {
-      if (this.doesViewerProvideAuth_ || this.platformConfig_['alwaysGrant']) {
-        return;
-      }
-
-      this.selectAndActivatePlatform_();
-    });
   }
 
   /**
@@ -702,6 +692,20 @@ export class SubscriptionService {
         });
     }
     return null;
+  }
+
+  /**
+   * Returns true if page is unlocked.
+   * @return {boolean}
+   * @private
+   */
+  isPageUnlocked_() {
+    return (
+      !this.pageConfig_.isLocked() ||
+      // If a service marks `alwaysGrant` as true, it will unlock the page
+      // UNLESS the viewer provides auth.
+      (this.platformConfig_['alwaysGrant'] && !this.doesViewerProvideAuth_)
+    );
   }
 }
 
