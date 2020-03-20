@@ -131,19 +131,6 @@ describes.fakeWin('ViewerSubscriptionPlatform', {amp: true}, env => {
       expect(sendAuthTokenStub).to.be.calledWith(reason);
     });
 
-    it('should throw error if one is included with entitlements object', async () => {
-      const reason = 'RPC error';
-
-      viewerPlatform.viewer_.sendMessageAwaitResponse.restore();
-      env.sandbox
-        .stub(viewerPlatform.viewer_, 'sendMessageAwaitResponse')
-        .callsFake(() => Promise.resolve({error: {message: reason}}));
-
-      await expect(
-        viewerPlatform.getEntitlements()
-      ).to.eventually.be.rejectedWith(reason);
-    });
-
     it('should throw error if entitlements request times out', async () => {
       viewerPlatform.viewer_.sendMessageAwaitResponse.restore();
       env.sandbox

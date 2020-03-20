@@ -119,13 +119,8 @@ export class ViewerSubscriptionPlatform {
       .then(entitlementData => {
         entitlementData = entitlementData || {};
 
-        const error = entitlementData['error'];
         const authData = entitlementData['authorization'];
         const decryptedDocumentKey = entitlementData['decryptedDocumentKey'];
-
-        if (error) {
-          throw new Error(error.message);
-        }
 
         if (!authData) {
           return Entitlement.empty('local');
