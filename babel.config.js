@@ -42,6 +42,12 @@ const plugins = [
   './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
   '@babel/plugin-transform-react-constant-elements',
   [
+    '@babel/plugin-transform-classes',
+    {
+      loose: false,
+    },
+  ],
+  [
     '@babel/plugin-transform-react-jsx',
     {
       pragma: 'Preact.createElement',
