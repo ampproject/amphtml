@@ -165,15 +165,20 @@ export class AmpSidebar extends AMP.BaseElement {
     });
 
     // Get the toolbar attribute from the child navs.
-    const toolbarElements = toArray(element.querySelectorAll('nav[toolbar]'));
-
-    toolbarElements.forEach(toolbarElement => {
-      try {
-        this.toolbars_.push(new Toolbar(toolbarElement, this));
-      } catch (e) {
-        this.user().error(TAG, 'Failed to instantiate toolbar', e);
-      }
-    });
+    this.getAmpDoc()
+      .whenReady()
+      .then(() => {
+        const toolbarElements = toArray(
+          element.querySelectorAll('nav[toolbar]')
+        );
+        toolbarElements.forEach(toolbarElement => {
+          try {
+            this.toolbars_.push(new Toolbar(toolbarElement, this));
+          } catch (e) {
+            this.user().error(TAG, 'Failed to instantiate toolbar', e);
+          }
+        });
+      });
 
     if (this.isIos_) {
       this.fixIosElasticScrollLeak_();
