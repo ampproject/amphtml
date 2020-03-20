@@ -452,5 +452,6 @@ dist.flags = {
     "  Doesn't use nailgun to invoke closure compiler (much slower)",
   type: '  Points sourcemap to fetch files from the correct GitHub tag',
   esm: '  Does not transpile down to ES5',
-  rtv_version: '  Override the version number written to AMP_CONFIG',
+  version_override: '  Override the version written to AMP_CONFIG',
+  custom_version_mark: '  Set final digit (0-9) on auto-generated version',
 };
