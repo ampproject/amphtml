@@ -96,7 +96,7 @@ class AmpSocialShare extends PreactBaseElement {
       user().warn(TAG, `Skipping obsolete share button ${type}`);
       return;
     }
-    this.getHrefAndTarget_(typeConfig, platform);
+    this.renderWithHrefAndTarget_(typeConfig, platform);
     const isResponsive =
       this.element.getAttribute('layout') === Layout.RESPONSIVE;
     return dict({
@@ -117,13 +117,14 @@ class AmpSocialShare extends PreactBaseElement {
   }
 
   /**
-   * Resolves 'href' and 'target' from data-param attributes using AMP services.
+   * Resolves 'href' and 'target' from data-param attributes using AMP URL services.
+   * Then triggers render on the Component with updated props.
    * @private
    * @param {!JsonObject} typeConfig
    * @param {!../../../src/service/platform-impl.Platform} platform
-   * @return {{href: string, target: string}}
+   * @return {!JsonObject}
    */
-  getHrefAndTarget_(typeConfig, platform) {
+  renderWithHrefAndTarget_(typeConfig, platform) {
     const shareEndpoint = user().assertString(
       this.element.getAttribute('data-share-endpoint') ||
         typeConfig['shareEndpoint'],
@@ -156,7 +157,7 @@ class AmpSocialShare extends PreactBaseElement {
         // This code path seems to be stable for both iOS and Android.
         href = href.replace('?', '?&');
       }
-      this.mutateProps({'href': href, 'target': target});
+      this.mutateProps(dict({'href': href, 'target': target}));
     });
   }
 }
