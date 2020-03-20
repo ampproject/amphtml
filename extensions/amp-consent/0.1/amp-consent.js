@@ -501,7 +501,10 @@ export class AmpConsent extends AMP.BaseElement {
       ) {
         this.updateCacheIfNotNull_(
           response['consentStateValue'],
-          response['consentString'] || undefined
+          response['consentString'] || undefined,
+          response['gdprApplies'] === undefined
+            ? !!response['consentRequired']
+            : response['gdprApplies']
         );
       }
     });
@@ -509,16 +512,23 @@ export class AmpConsent extends AMP.BaseElement {
 
   /**
    * Sync with local storage if consentRequired is true.
+   * Treat all three values as a grouping, only update cache
+   * if responseStateValue is not null
    * @param {string=} responseStateValue
    * @param {string=} responseConsentString
+   * @param {boolean=} responseGdprApplies
    */
-  updateCacheIfNotNull_(responseStateValue, responseConsentString) {
+  updateCacheIfNotNull_(
+    responseStateValue,
+    responseConsentString,
+    responseGdprApplies
+  ) {
     const consentStateValue = convertEnumValueToState(responseStateValue);
-    // consentStateValue and consentString are treated as a pair that will update together
     if (consentStateValue !== null) {
       this.consentStateManager_.updateConsentInstanceState(
         consentStateValue,
-        responseConsentString
+        responseConsentString,
+        responseGdprApplies
       );
     }
   }
