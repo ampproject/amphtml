@@ -1427,10 +1427,11 @@ export class VisibilityTracker extends EventTracker {
   /** @override */
   add(context, eventType, config, listener) {
     const visibilitySpec = config['visibilitySpec'] || {};
-    const selector = config['selector'] || visibilitySpec['selector'];
+    let selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
     let reportWhenSpec = visibilitySpec['reportWhen'];
     let createReportReadyPromiseFunc = null;
+    const unlistenPromises = [];
     const multiSelectorVisibilityOn = isExperimentOn(
       this.root.ampdoc.win,
       'visibility-trigger-improvements'
@@ -1478,88 +1479,64 @@ export class VisibilityTracker extends EventTracker {
       );
     }
 
-    let unlistenPromise;
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
       // When `selector` is specified, we always use "ini-load" signal as
       // a "ready" signal.
-      unlistenPromise = visibilityManagerPromise.then(
-        visibilityManager => {
-          return visibilityManager.listenRoot(
-            visibilitySpec,
-            this.getReadyPromise(waitForSpec, selector),
-            createReportReadyPromiseFunc,
-            this.onEvent_.bind(
-              this,
-              eventType,
-              listener,
-              this.root.getRootElement()
-            )
-          );
-        },
-        () => {}
+      unlistenPromises.push(
+        visibilityManagerPromise.then(
+          visibilityManager => {
+            return visibilityManager.listenRoot(
+              visibilitySpec,
+              this.getReadyPromise(waitForSpec, selector),
+              createReportReadyPromiseFunc,
+              this.onEvent_.bind(
+                this,
+                eventType,
+                listener,
+                this.root.getRootElement()
+              )
+            );
+          },
+          () => {}
+        )
       );
     } else {
       // An AMP-element. Wait for DOM to be fully parsed to avoid
       // false missed searches.
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
-
-      if (multiSelectorVisibilityOn && Array.isArray(selector)) {
-        const promises = [];
-        for (let i = 0; i < selector.length; i++) {
-          promises.push(
-            this.root
-              .getAmpElement(
-                context.parentElement || context,
-                selector,
-                selectionMethod
-              )
-              .then(element =>
-                this.getUnlistenPromiseForElement_(
-                  element,
-                  selector[i],
-                  visibilityManagerPromise,
-                  visibilitySpec,
-                  waitForSpec,
-                  createReportReadyPromiseFunc,
-                  eventType,
-                  listener
-                )
-              )
-          );
-        }
-        unlistenPromise = Promise.all(promises);
-      } else {
-        unlistenPromise = this.root
-          .getAmpElement(
-            context.parentElement || context,
-            selector,
-            selectionMethod
-          )
-          .then(element =>
-            this.getUnlistenPromiseForElement_(
-              element,
-              selector,
-              visibilityManagerPromise,
-              visibilitySpec,
-              waitForSpec,
-              createReportReadyPromiseFunc,
-              eventType,
-              listener
+      selector = Array.isArray(selector) ? selector : [selector];
+      // Array selectors do not suppor the special cases: ':host' & ':root'
+      for (let i = 0; i < selector.length; i++) {
+        unlistenPromises.push(
+          this.root
+            .getAmpElement(
+              context.parentElement || context,
+              selector[i],
+              selectionMethod,
+              multiSelectorVisibilityOn
             )
-          );
+            .then(element =>
+              this.getUnlistenPromiseForElement_(
+                element,
+                selector[i],
+                visibilityManagerPromise,
+                visibilitySpec,
+                waitForSpec,
+                createReportReadyPromiseFunc,
+                eventType,
+                listener
+              )
+            )
+        );
       }
     }
 
     return function() {
-      unlistenPromise.then(unlisten => {
-        if (multiSelectorVisibilityOn && Array.isArray(unlisten)) {
-          for (let i = 0; i < unlisten.length; i++) {
-            unlisten[i]();
-          }
-        } else {
-          unlisten();
+      return Promise.all(unlistenPromises).then(unlistenCallbacks => {
+        for (let i = 0; i < unlistenCallbacks.length; i++) {
+          unlistenCallbacks[i]();
         }
       });
     };
