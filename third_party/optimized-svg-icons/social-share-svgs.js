@@ -99,6 +99,6 @@ export function SocialShareIcon(props) {
         </svg>
       );
     default:
-      return;
+      return <svg {...props}></svg>;
   }
 }
