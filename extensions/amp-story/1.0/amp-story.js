@@ -2275,6 +2275,12 @@ export class AmpStory extends AMP.BaseElement {
       return;
     }
 
+    this.mutateElement(() => {
+      this.element.appendChild(
+        this.win.document.createElement('amp-story-education')
+      );
+    });
+
     Services.extensionsFor(this.win).installExtensionForDoc(
       this.getAmpDoc(),
       'amp-story-education'

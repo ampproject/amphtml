@@ -697,7 +697,9 @@ function createBaseCustomElementClass(win) {
       // Sizes.
       if (this.sizeList_ === undefined) {
         const sizesAttr = this.getAttribute('sizes');
-        this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
+        const isDisabled = this.hasAttribute('disable-inline-width');
+        this.sizeList_ =
+          !isDisabled && sizesAttr ? parseSizeList(sizesAttr) : null;
       }
       if (this.sizeList_) {
         setStyle(
@@ -729,7 +731,7 @@ function createBaseCustomElementClass(win) {
     }
 
     /**
-     * Changes the size of the element.
+     * Applies a size change to the element.
      *
      * This method is called by Resources and shouldn't be called by anyone
      * else. This method must always be called in the mutation context.
@@ -740,7 +742,7 @@ function createBaseCustomElementClass(win) {
      * @final
      * @package
      */
-    changeSize(newHeight, newWidth, opt_newMargins) {
+    applySize(newHeight, newWidth, opt_newMargins) {
       const sizer = this.getSizer_();
       if (sizer) {
         // From the moment height is changed the element becomes fully
@@ -1836,7 +1838,7 @@ function createBaseCustomElementClass(win) {
         if (overflown) {
           this.overflowElement_.onclick = () => {
             const mutator = Services.mutatorForDoc(this.getAmpDoc());
-            mutator./*OK*/ changeSize(this, requestedHeight, requestedWidth);
+            mutator.forceChangeSize(this, requestedHeight, requestedWidth);
             mutator./*OK*/ mutateElement(this, () => {
               this.overflowCallback(
                 /* overflown */ false,

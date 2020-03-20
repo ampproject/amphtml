@@ -801,7 +801,7 @@ describes.realWin('Resource', {amp: true}, env => {
     expect(resource.isMeasureRequested()).to.be.false;
     resource.state_ = ResourceState.READY_FOR_LAYOUT;
     elementMock
-      .expects('changeSize')
+      .expects('applySize')
       .withExactArgs(111, 222, {top: 1, right: 2, bottom: 3, left: 4})
       .once();
     resource.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
@@ -811,7 +811,7 @@ describes.realWin('Resource', {amp: true}, env => {
   it('should change size but not state', () => {
     resource.state_ = ResourceState.NOT_BUILT;
     elementMock
-      .expects('changeSize')
+      .expects('applySize')
       .withExactArgs(111, 222, {top: 1, right: 2, bottom: 3, left: 4})
       .once();
     resource.changeSize(111, 222, {top: 1, right: 2, bottom: 3, left: 4});
@@ -1166,7 +1166,7 @@ describe('Resource idleRenderOutsideViewport', () => {
       updateLayoutBox: () => {},
       isRelayoutNeeded: () => false,
       layoutCallback: () => {},
-      changeSize: () => {},
+      applySize: () => {},
       unlayoutOnPause: () => false,
       unlayoutCallback: () => true,
       pauseCallback: () => false,
