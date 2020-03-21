@@ -24,23 +24,6 @@ limitations under the License.
 
 # amp-3d-gltf
 
-Displays GL Transmission Format (gITF) 3D models.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-3d-gltf" src="https://cdn.ampproject.org/v0/amp-3d-gltf-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>fill, fixed, fixed-height, flex-item, responsive</td>
-  </tr>
-  <tr>
-    <td><strong>Examples</strong></td>
-    <td>See AMP By Example's <a href="https://amp.dev/documentation/examples/components/amp-3d-gltf/">amp-3d-gltf example</a>.</td>
-  </tr>
-</table>
-
 ## Usage
 
 The `amp-3d-gltf` component displays 3D models that are in gITF format.

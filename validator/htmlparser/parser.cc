@@ -1194,6 +1194,7 @@ bool Parser::InBodyIM() {
         case Atom::BLOCKQUOTE:
         case Atom::CENTER:
         case Atom::DETAILS:
+        case Atom::DIALOG:
         case Atom::DIR:
         case Atom::DIV:
         case Atom::DL:
@@ -1203,6 +1204,7 @@ bool Parser::InBodyIM() {
         case Atom::FOOTER:
         case Atom::HEADER:
         case Atom::HGROUP:
+        case Atom::MAIN:
         case Atom::MENU:
         case Atom::NAV:
         case Atom::OL:
@@ -1595,7 +1597,7 @@ bool Parser::InBodyIM() {
             insertion_mode_ = std::bind(&Parser::AfterBodyIM, this);
           }
           break;
-        case Atom::HTML:
+        case Atom::HTML: {
           if (ElementInScope(Scope::DefaultScope, Atom::BODY)) {
             ParseImpliedToken(TokenType::END_TAG_TOKEN, Atom::BODY,
                 AtomUtil::ToString(Atom::BODY));
@@ -1603,6 +1605,7 @@ bool Parser::InBodyIM() {
           }
           return true;
           break;
+        }
         case Atom::ADDRESS:
         case Atom::ARTICLE:
         case Atom::ASIDE:
@@ -1610,6 +1613,7 @@ bool Parser::InBodyIM() {
         case Atom::BUTTON:
         case Atom::CENTER:
         case Atom::DETAILS:
+        case Atom::DIALOG:
         case Atom::DIR:
         case Atom::DIV:
         case Atom::DL:
@@ -1620,6 +1624,7 @@ bool Parser::InBodyIM() {
         case Atom::HEADER:
         case Atom::HGROUP:
         case Atom::LISTING:
+        case Atom::MAIN:
         case Atom::MENU:
         case Atom::NAV:
         case Atom::OL:

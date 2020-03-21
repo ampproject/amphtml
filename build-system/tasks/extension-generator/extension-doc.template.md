@@ -12,6 +12,7 @@ teaser:
   and improves SEO.
   * Include the relevant category(ies): ads-analytics, dynamic-content, layout, media, presentation, social, personalization
   * List applicable format(s): websites, ads, stories, email
+  * Do not include markdown formatting in the frontmatter - plain text and punctionation only!
   * Remove this comment!
 -->
 

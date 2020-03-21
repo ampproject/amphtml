@@ -15,6 +15,25 @@
  */
 
 import {computeInMasterFrame, loadScript, validateData} from '../3p/3p';
+import {parseJson} from '../src/json';
+
+/*
+ * How to develop:
+ * https://github.com/ampproject/amphtml/blob/master/contributing/getting-started-e2e.md
+ */
+
+/**
+ * @param {!Array.<!Object>} array
+ * @param {!Function} iteratee
+ *
+ * @return {Object}
+ */
+function keyBy(array, iteratee) {
+  return array.reduce(
+    (itemById, item) => Object.assign(itemById, {[iteratee(item)]: item}),
+    {}
+  );
+}
 
 /**
  * @param {!Window} global
@@ -22,15 +41,40 @@ import {computeInMasterFrame, loadScript, validateData} from '../3p/3p';
  */
 export function ssp(global, data) {
   // validate AMP input data- attributes
-  validateData(data, ['id', 'width', 'height', 'zoneid'], ['site']);
+  validateData(data, ['position'], ['site']);
+
+  let position = {id: -1};
+
+  try {
+    position = parseJson(data.position);
+
+    if (position['id'] === undefined) {
+      position = {id: -1};
+    }
+  } catch (error) {}
+
+  if (position['id'] === -1) {
+    global.context.noContentAvailable();
+
+    return;
+  }
+
+  // This is super important. Without this any variables on context are not shared
+  const mW = global.context.isMaster ? global : global.context.master;
 
   // create parent element
-  const adWrapper = document.createElement('div');
+  const parentElement = document.createElement('div');
 
-  adWrapper.id = data.id;
+  parentElement.id = position['id'];
+
+  if (!mW.positions) {
+    mW.positions = [];
+  }
+
+  mW.positions.push(position);
 
   // https://github.com/ampproject/amphtml/tree/master/ads#the-iframe-sandbox
-  global.document.getElementById('c').appendChild(adWrapper);
+  global.document.getElementById('c').appendChild(parentElement);
 
   // https://github.com/ampproject/amphtml/blob/master/3p/3p.js#L186
   computeInMasterFrame(
@@ -38,40 +82,44 @@ export function ssp(global, data) {
     'ssp-load',
     done => {
       loadScript(global, 'https://ssp.imedia.cz/static/js/ssp.js', () => {
+        // This callback is run just once for amp-ad with same type
         // Script will inject "sssp" object on Window
         if (!global['sssp']) {
-          done(null);
+          done([]);
 
           return;
         }
 
-        /** @type {{config: Function, getAds: Function}} */
+        /** @type {{config: Function, getAds: Function, writeAd: Function}} */
         const ssp = global['sssp'];
+
+        mW.ssp = ssp;
 
         ssp.config({
           site: data.site || global.context.canonicalUrl,
         });
 
-        ssp.getAds(
-          {
-            zoneId: data.zoneid,
-            id: data.id,
-            width: data.width,
-            height: data.height,
-          },
-          {
-            requestErrorCallback: () => done(null),
-            AMPcallback: ads => done(ads),
-          }
-        );
+        ssp.getAds(mW.positions, {
+          requestErrorCallback: () => done([]),
+          AMPcallback: done,
+        });
       });
     },
     ads => {
-      if (ads && ads[0] && ads[0].type !== 'error') {
-        global.context.renderStart();
-      } else {
+      /** @suppress {checkTypes} */
+      const adById = keyBy(ads, item => item.id);
+      const ad = adById[position['id']];
+
+      if (!ad || ['error', 'empty'].includes(ad.type)) {
         global.context.noContentAvailable();
+
+        return;
       }
+
+      // SSP need parentElement as value in "position.id"
+      mW.ssp.writeAd(ad, {...position, id: parentElement});
+
+      global.context.renderStart();
     }
   );
 }

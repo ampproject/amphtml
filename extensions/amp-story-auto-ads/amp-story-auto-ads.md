@@ -1,7 +1,7 @@
 ---
 $category@: presentation
 formats:
-  - websites
+  - stories
 teaser:
   text: Dynamically inserts ads into a Story.
 ---
@@ -25,17 +25,6 @@ limitations under the License.
 # amp-story-auto-ads
 
 Dynamically inserts ads into a Story.
-
-<table>
-  <tr>
-    <td width="40%"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-story-auto-ads" src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js">&lt;/script></code></td>
-  </tr>
-  <tr>
-    <td class="col-fourty"><strong><a href="https://amp.dev/documentation/guides-and-tutorials/develop/style_and_layout/control_layout">Supported Layouts</a></strong></td>
-    <td>N/A</td>
-  </tr>
-</table>
 
 # Getting Started
 

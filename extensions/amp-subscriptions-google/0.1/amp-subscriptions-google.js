@@ -35,7 +35,8 @@ import {
 } from '../../amp-subscriptions/0.1/entitlement';
 import {PageConfig} from '../../../third_party/subscriptions-project/config';
 import {Services} from '../../../src/services';
-import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/score-factors.js';
+import {SubscriptionsScoreFactor} from '../../amp-subscriptions/0.1/constants.js';
+import {WindowInterface} from '../../../src/window-interface';
 import {experimentToggles, isExperimentOn} from '../../../src/experiments';
 import {getData} from '../../../src/event-helper';
 import {installStylesForDoc} from '../../../src/style-installer';
@@ -596,6 +597,9 @@ class AmpFetcher {
   constructor(win) {
     /** @const @private {!../../../src/service/xhr-impl.Xhr} */
     this.xhr_ = Services.xhrFor(win);
+
+    /** @private @const {!Window} */
+    this.win_ = win;
   }
 
   /** @override */
@@ -611,6 +615,34 @@ class AmpFetcher {
   /** @override */
   fetch(input, opt_init) {
     return this.xhr_.fetch(input, opt_init); //needed to kepp closure happy
+  }
+
+  /**
+   * POST data to a URL endpoint, do not wait for a response.
+   * @param {string} url
+   * @param {string|!Object} data
+   */
+  sendBeacon(url, data) {
+    const contentType = 'application/x-www-form-urlencoded;charset=UTF-8';
+    const body =
+      'f.req=' +
+      JSON.stringify(/** @type {JsonObject} */ (data.toArray(false)));
+    const sendBeacon = WindowInterface.getSendBeacon(this.win_);
+
+    if (sendBeacon) {
+      const blob = new Blob([body], {type: contentType});
+      sendBeacon(url, blob);
+      return;
+    }
+
+    // Only newer browsers support beacon.  Fallback to standard XHR POST.
+    const init = {
+      method: 'POST',
+      headers: {'Content-Type': contentType},
+      credentials: 'include',
+      body,
+    };
+    this.fetch(url, init);
   }
 }
 
@@ -649,6 +681,16 @@ AMP.extension(TAG, '0.1', function(AMP) {
  */
 export function getFetcherClassForTesting() {
   return Fetcher;
+}
+
+/**
+ * TODO(mborof): remove once not required by test-amp-subscriptions-google.js
+ * @package
+ * @visibleForTesting
+ * @return {*}
+ */
+export function getAmpFetcherClassForTesting() {
+  return AmpFetcher;
 }
 
 /**

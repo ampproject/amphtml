@@ -298,6 +298,10 @@ class AmpVideoIframe extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
 
+    if (data == null) {
+      return; // we only process valid json
+    }
+
     const messageId = data['id'];
     const methodReceived = data['method'];
 
@@ -402,7 +406,7 @@ class AmpVideoIframe extends AMP.BaseElement {
    * @private
    */
   postMessage_(message) {
-    const {promise} = this.readyDeferred_;
+    const promise = this.readyDeferred_ && this.readyDeferred_.promise;
     if (!promise) {
       return;
     }

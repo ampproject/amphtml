@@ -4,6 +4,8 @@
   "version": "0.1.0",
   "description": "Dev dependencies used by `gulp performance`",
   "devDependencies": {
+    "chai": "4.2.0",
+    "mocha": "7.1.0",
     "puppeteer": "2.0.0"
   }
 }

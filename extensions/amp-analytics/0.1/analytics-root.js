@@ -143,7 +143,11 @@ export class AnalyticsRoot {
    */
   getRootElement() {
     const root = this.getRoot();
-    return dev().assertElement(root.documentElement || root.body || root);
+    // In the case of a shadow doc, its host will be used as
+    // a refrence point
+    return dev().assertElement(
+      root.host || root.documentElement || root.body || root
+    );
   }
 
   /**
@@ -283,9 +287,10 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
+   * @param {boolean=} opt_multiSelectorOn multi-selector expriment
    * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
    */
-  getAmpElement(context, selector, selectionMethod) {
+  getAmpElement(context, selector, selectionMethod, opt_multiSelectorOn) {
     return this.getElement(context, selector, selectionMethod).then(element => {
       userAssert(
         element.classList.contains('i-amphtml-element'),
@@ -400,7 +405,7 @@ export class AnalyticsRoot {
   getScrollManager() {
     // TODO (zhouyx@): Disallow scroll trigger with host API
     if (!this.scrollManager_) {
-      this.scrollManager_ = new ScrollManager(this.ampdoc);
+      this.scrollManager_ = new ScrollManager(this);
     }
 
     return this.scrollManager_;

@@ -185,11 +185,18 @@ describes.repeated(
         }
 
         function expectRender() {
-          // Call mutate/measure during render.
+          // Call mutate OR measureMutate, then measure during render.
           listMock
             .expects('mutateElement')
             .callsFake(m => m())
-            .atLeast(1);
+            .atLeast(0);
+          listMock
+            .expects('measureMutateElement')
+            .callsFake((m, n) => {
+              m();
+              n();
+            })
+            .atLeast(0);
           listMock
             .expects('measureElement')
             .callsFake(m => m())
@@ -247,6 +254,48 @@ describes.repeated(
               .expects('attemptChangeHeight')
               .withExactArgs(1337)
               .returns(Promise.resolve());
+
+            return list.layoutCallback();
+          });
+
+          it('should unlock height for layout=container with successful attemptChangeHeight', async () => {
+            const itemElement = doc.createElement('div');
+            const placeholder = doc.createElement('div');
+            placeholder.style.height = '1337px';
+            element.appendChild(placeholder);
+            element.getPlaceholder = () => placeholder;
+            list.isLayoutSupported('container');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+
+            listMock
+              .expects('attemptChangeHeight')
+              .withExactArgs(1337)
+              .returns(Promise.resolve(true));
+            listMock
+              .expects('maybeResizeListToFitItems_')
+              .returns(Promise.resolve(true));
+            listMock.expects('unlockHeightInsideMutate_').once();
+
+            return list.layoutCallback();
+          });
+
+          it('should not unlock height for layout=container for unsuccessful attemptChangeHeight', () => {
+            const itemElement = doc.createElement('div');
+            const placeholder = doc.createElement('div');
+            placeholder.style.height = '1337px';
+            element.appendChild(placeholder);
+            element.getPlaceholder = () => placeholder;
+            list.isLayoutSupported('container');
+            expectFetchAndRender(DEFAULT_FETCHED_DATA, [itemElement]);
+
+            listMock
+              .expects('attemptChangeHeight')
+              .withExactArgs(1337)
+              .returns(Promise.reject(false));
+            listMock
+              .expects('maybeResizeListToFitItems_')
+              .returns(Promise.resolve(false));
+            listMock.expects('unlockHeightInsideMutate_').never();
 
             return list.layoutCallback();
           });
@@ -395,8 +444,8 @@ describes.repeated(
               expect(list.container_.contains(foo)).to.be.true;
 
               const opts = {refresh: true, resetOnRefresh: true, expr: 'items'};
-              expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], opts);
 
+              expectFetchAndRender(DEFAULT_FETCHED_DATA, [foo], opts);
               return list.executeAction({
                 method: 'refresh',
                 satisfiesTrust: () => true,
@@ -1246,6 +1295,15 @@ describes.repeated(
               expect(list.layoutCallback()).to.eventually.throw(errorMsg);
             });
 
+            it('should throw error if there is no associated amp-state el', async () => {
+              toggleExperiment(win, experimentName, true);
+              bind.getStateAsync = () => Promise.reject();
+
+              const errorMsg = /element with id 'okapis' was not found/;
+              expectAsyncConsoleError(errorMsg);
+              expect(list.layoutCallback()).to.eventually.throw(errorMsg);
+            });
+
             it('should log an error if amp-bind was not included', async () => {
               toggleExperiment(win, experimentName, true);
               Services.bindForDocOrNull.returns(Promise.resolve(null));
@@ -1264,7 +1322,7 @@ describes.repeated(
 
             it('should render a list using local data', async () => {
               toggleExperiment(win, experimentName, true);
-              bind.getState = () => ({items: [1, 2, 3]});
+              bind.getStateAsync = () => Promise.resolve({items: [1, 2, 3]});
 
               const ampStateEl = doc.createElement('amp-state');
               ampStateEl.setAttribute('id', 'okapis');
@@ -1280,6 +1338,29 @@ describes.repeated(
                 .once();
 
               await list.layoutCallback();
+            });
+
+            it('should render a list using async data', async () => {
+              toggleExperiment(win, experimentName, true);
+              const {resolve, promise} = new Deferred();
+              bind.getStateAsync = () => promise;
+
+              const ampStateEl = doc.createElement('amp-state');
+              ampStateEl.setAttribute('id', 'okapis');
+              const ampStateJson = doc.createElement('script');
+              ampStateJson.setAttribute('type', 'application/json');
+              ampStateEl.appendChild(ampStateJson);
+              doc.body.appendChild(ampStateEl);
+
+              listMock
+                .expects('scheduleRender_')
+                .withExactArgs([1, 2, 3], /*append*/ false, {items: [1, 2, 3]})
+                .returns(Promise.resolve())
+                .once();
+
+              const layoutPromise = list.layoutCallback();
+              resolve({items: [1, 2, 3]});
+              await layoutPromise;
             });
           });
         }); // with amp-bind

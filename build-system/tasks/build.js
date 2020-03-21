@@ -132,6 +132,8 @@ build.flags = {
   noextensions: '  Builds with no extensions.',
   core_runtime_only: '  Builds only the core runtime.',
   coverage: '  Adds code coverage instrumentation to JS files using istanbul.',
+  version_override: '  Overrides the version written to AMP_CONFIG',
+  custom_version_mark: '  Set final digit (0-9) on auto-generated version',
 };
 
 watch.description = 'Watches for changes in files, re-builds when detected';
@@ -142,6 +144,8 @@ watch.flags = {
     '  Watches and builds only the extensions from the listed AMP(s).',
   noextensions: '  Watches and builds with no extensions.',
   core_runtime_only: '  Watches and builds only the core runtime.',
+  version_override: '  Overrides the version written to AMP_CONFIG',
+  custom_version_mark: '  Set final digit (0-9) on auto-generated version',
 };
 
 defaultTask.description =
@@ -152,4 +156,6 @@ defaultTask.flags = {
   extensions_from:
     '  Watches and builds only the extensions from the listed AMP(s).',
   noextensions: '  Watches and builds with no extensions.',
+  version_override: '  Overrides the version written to AMP_CONFIG',
+  custom_version_mark: '  Set final digit (0-9) on auto-generated version',
 };
