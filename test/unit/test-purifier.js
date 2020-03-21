@@ -31,22 +31,25 @@ describe
         'rewriteAttributeValue'
       );
 
-      const purifier = new Purifier({}, urlRewrite.rewriteAttributeValue);
+      const purifier = new Purifier(
+        document,
+        {},
+        urlRewrite.rewriteAttributeValue
+      );
 
       /**
        * Helper that serializes output of purifyHtml() to string.
        * @param {string} html
        * @return {string}
        */
-      purify = html => purifier.purifyHtml(document, html).innerHTML;
+      purify = html => purifier.purifyHtml(html).innerHTML;
 
       /**
        * Helper that calls purifyTagsForTripleMustache().
        * @param {string} html
        * @return {string}
        */
-      purifyTripleMustache = html =>
-        purifier.purifyTagsForTripleMustache(document, html);
+      purifyTripleMustache = html => purifier.purifyTagsForTripleMustache(html);
     });
 
     describe('sanitizer tests', () => {
@@ -743,15 +746,20 @@ describe
     let purify;
 
     before(() => {
-      html = document.documentElement;
-      const purifier = () => new Purifier();
+      html = document.createElement('html');
+      const doc = {
+        documentElement: html,
+        createElement: tagName => document.createElement(tagName),
+      };
+
+      const purifier = () => new Purifier(doc);
 
       /**
        * Helper that serializes output of purifyHtml() to string.
        * @param {string} html
        * @return {string}
        */
-      purify = html => purifier().purifyHtml(document, html).innerHTML;
+      purify = html => purifier().purifyHtml(html).innerHTML;
     });
 
     describe('AMP formats', () => {
@@ -762,7 +770,6 @@ describe
           expect(purify('<input type="image">')).to.equal('<input>');
           expect(purify('<input type="button">')).to.equal('<input>');
         });
-        html.removeAttribute('amp');
       });
 
       it('should allow input[type="file"] and input[type="password"]', () => {
@@ -773,7 +780,6 @@ describe
         expect(purify('<input type="password">')).to.equal(
           '<input type="password">'
         );
-        html.removeAttribute('amp');
       });
 
       it('should sanitize certain tag attributes for AMP4Email', () => {
@@ -788,7 +794,6 @@ describe
             /<amp-anim i-amphtml-key="(\d+)"><\/amp-anim>/
           );
         });
-        html.removeAttribute('amp4email');
       });
 
       it('should only allow whitelisted AMP elements in AMP4EMAIL', () => {
@@ -831,7 +836,6 @@ describe
         expect(purify('<amp-timeago>')).to.match(
           /<amp-timeago i-amphtml-key="(\d+)"><\/amp-timeago>/
         );
-        html.removeAttribute('amp4email');
       });
     });
   });
@@ -841,7 +845,7 @@ describe('validateAttributeChange', () => {
   let vac;
 
   beforeEach(() => {
-    const purify = new Purifier();
+    const purify = new Purifier(document);
     purifier = purify.domPurify_;
     purifier.isValidAttribute = () => true;
 
@@ -905,7 +909,7 @@ describe('getAllowedTags', () => {
   let allowedTags;
 
   beforeEach(() => {
-    allowedTags = new Purifier().getAllowedTags(document);
+    allowedTags = new Purifier(document).getAllowedTags();
   });
 
   it('should contain html tags', () => {

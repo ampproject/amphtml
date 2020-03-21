@@ -41,14 +41,14 @@ export class AmpMustache extends BaseTemplate {
     super(element, win);
 
     registerServiceBuilder(win, 'purifier', function() {
-      return new Purifier(dict(), rewriteAttributeValue);
+      return new Purifier(win.document, dict(), rewriteAttributeValue);
     });
     /** @private @const {!Purifier} */
     this.purifier_ = getService(win, 'purifier');
 
     // Unescaped templating (triple mustache) has a special, strict sanitizer.
     mustache.setUnescapedSanitizer(value =>
-      this.purifier_.purifyTagsForTripleMustache(win.document, value)
+      this.purifier_.purifyTagsForTripleMustache(value)
     );
   }
 
@@ -137,10 +137,7 @@ export class AmpMustache extends BaseTemplate {
    * @private
    */
   purifyAndSetHtml_(html) {
-    const body = this.purifier_.purifyHtml(
-      this.win.document,
-      `<div>${html}</div>`
-    );
+    const body = this.purifier_.purifyHtml(`<div>${html}</div>`);
     const div = body.firstElementChild;
     return this.unwrap(div);
   }
