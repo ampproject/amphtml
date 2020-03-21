@@ -448,9 +448,8 @@ export class AmpAdNetworkDoubleclickImpl extends AmpA4A {
     if (hasUSDRD) {
       warnDeprecation(usdrd);
     }
-    const useRemoteHtml = !!this.win.document.querySelector(
-      'meta[name=amp-3p-iframe-src]'
-    );
+    const useRemoteHtml =
+      this.getAmpDoc().getMetaByName('amp-3p-iframe-src') !== null;
     if (useRemoteHtml) {
       warnDeprecation('remote.html');
     }
