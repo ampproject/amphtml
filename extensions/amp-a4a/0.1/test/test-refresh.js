@@ -38,6 +38,16 @@ describe('refresh', () => {
     div.setAttribute('type', 'doubleclick');
     div.setAttribute(DATA_ATTR_NAME, '35');
     window.sandbox.replaceGetter(div, 'isConnected', () => true);
+    div.getAmpDoc = () => {
+      return {
+        getMetaByName: name => {
+          const metaTag = window.document.head.querySelector(
+            `[name="${name}"]`
+          );
+          return metaTag ? metaTag.getAttribute('content') : null;
+        },
+      };
+    };
     return div;
   }
 
