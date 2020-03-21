@@ -57,6 +57,7 @@ describe
         m.parentElement.removeChild(m);
       }
       document.body.removeChild(container);
+      Services.ampdoc(window.document).meta_ = null;
     });
 
     function addCustomBootstrap(url) {
@@ -106,12 +107,7 @@ describe
         };
       };
       div.getAmpDoc = function() {
-        return {
-          getMetaByName: function(name) {
-            const metaTag = document.head.querySelector(`[name="${name}"]`);
-            return metaTag ? metaTag.getAttribute('content') : null;
-          },
-        };
+        return Services.ampdoc(window.document);
       };
     }
 
@@ -538,12 +534,7 @@ describe
         };
       };
       div.getAmpDoc = function() {
-        return {
-          getMetaByName: function(name) {
-            const metaTag = document.head.querySelector(`[name="${name}"]`);
-            return metaTag ? metaTag.getAttribute('content') : null;
-          },
-        };
+        return Services.ampdoc(window.document);
       };
 
       container.appendChild(div);
