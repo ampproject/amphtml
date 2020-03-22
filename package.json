@@ -32,7 +32,7 @@
     "@babel/helper-plugin-test-runner": "7.8.3",
     "@babel/plugin-proposal-class-properties": "7.8.3",
     "@babel/plugin-transform-react-constant-elements": "7.9.0",
-    "@babel/plugin-transform-react-jsx": "7.9.0",
+    "@babel/plugin-transform-react-jsx": "7.9.1",
     "@babel/preset-env": "7.9.0",
     "@jridgewell/resorcery": "0.0.3",
     "acorn-globals": "6.0.0",
