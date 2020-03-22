@@ -77,18 +77,12 @@ html.i-amphtml-fie > body {
 }
 
 /**
- * iOS jitters when body overflows. See b/149328043.
- */
-html.QQQQQQ.i-amphtml-singledoc.i-amphtml-iframed:not(.i-amphtml-ios-embed) > body {
-  overflow-x: hidden !important;
-  overflow-y: visible !important;
-}
-
-/**
- * iOS jitters when body overflows. See b/149328043. This essentially cancels
- * `height: auto` from above.
+ * iOS jitters when body overflows. See b/149328043. Notice that the min-height
+ * essentially cancels `height: auto` from above.
  */
 html.i-amphtml-singledoc.i-amphtml-iframed:not(.i-amphtml-ios-embed):not([amp4ads]) > body {
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
   min-height: calc(100vh - var(--i-amphtml-padding-top, 0px));
 }
 
