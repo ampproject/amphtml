@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {Services} from '../../../../src/services';
 import {
   extractArticleTags,
   extractElementTags,
@@ -25,6 +26,9 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
   beforeEach(() => {
     document.body.textContent = '';
     document.head.textContent = '';
+  });
+  afterEach(() => {
+    Services.ampdoc(document).meta_ = null;
   });
 
   it('Extract element tags as empty array when there is no element', () => {
@@ -139,7 +143,8 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
     meta.setAttribute('name', 'keywords');
     meta.setAttribute('content', '');
     document.head.appendChild(meta);
-    const tags = extractArticleTags(document);
+    const ampdoc = Services.ampdoc(document);
+    const tags = extractArticleTags(ampdoc);
     expect(tags).to.deep.equal(expected);
   });
 
@@ -149,7 +154,8 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
     meta.setAttribute('name', 'keywords');
     meta.setAttribute('content', '');
     document.head.appendChild(meta);
-    const tags = extractArticleTags(document);
+    const ampdoc = Services.ampdoc(document);
+    const tags = extractArticleTags(ampdoc);
     expect(tags).to.deep.equal(expected);
   });
 
@@ -159,7 +165,8 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
     meta.setAttribute('name', 'keywords');
     meta.setAttribute('content', 'this is, the, tag');
     document.head.appendChild(meta);
-    const tags = extractArticleTags(document);
+    const ampdoc = Services.ampdoc(document);
+    const tags = extractArticleTags(ampdoc);
     expect(tags).to.deep.equal(expected);
   });
 
@@ -201,7 +208,8 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
     scriptElement.text = jsonLd;
     document.body.appendChild(scriptElement);
 
-    const tags = extractTags(document, element);
+    const ampdoc = Services.ampdoc(document);
+    const tags = extractTags(ampdoc, element);
     expect(tags).to.deep.equal(expected);
   });
 
@@ -233,7 +241,8 @@ describes.realWin('amp-apester-media-utils', {}, unused => {
     scriptElement.text = jsonLd;
     document.body.appendChild(scriptElement);
 
-    const tags = extractTags(document, element);
+    const ampdoc = Services.ampdoc(document);
+    const tags = extractTags(ampdoc, element);
     expect(tags).to.deep.equal(expected);
   });
 });
