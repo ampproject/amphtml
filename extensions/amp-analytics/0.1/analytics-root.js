@@ -281,17 +281,15 @@ export class AnalyticsRoot {
   }
 
   /**
+   * @param {!Element} context
    * @param {string} selector DOM query selector.
    * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
    */
-  getElementsByScopedQuerySelectorAll_(selector) {
+  getElementsByScopedQuerySelectorAll_(context, selector) {
     // Wait for document-ready to avoid false missed searches
     return this.ampdoc.whenReady().then(() => {
       const results = [];
-      const foundElements = scopedQuerySelectorAll(
-        dev().assertElement(this.ampdoc.getBody()),
-        selector
-      );
+      const foundElements = this.getRoot().querySelectorAll(selector);
 
       // Length is not supported in all browsers
       if (foundElements && foundElements.length) {
@@ -312,46 +310,64 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
+   * @return {!Promise<!AmpElement>} AMP element corresponding to the selector if found.
+   */
+  getAmpElement(context, selector, selectionMethod) {
+    return this.getElement(context, selector, selectionMethod).then(element => {
+      userAssert(
+        element.classList.contains('i-amphtml-element'),
+        'Element "%s" is required to be an AMP element',
+        selector
+      );
+      return element;
+    });
+  }
+
+  /**
+   * Searches the AMP element that matches the selector within the scope of the
+   * analytics root in relationship to the specified context node.
+   *
+   * @param {!Element} context
+   * @param {string} selector DOM query selector.
+   * @param {?string=} selectionMethod Allowed values are `null`,
+   *   `'closest'` and `'scope'`.
    * @param {boolean=} opt_multiSelectorOn multi-selector expriment
+   * @param {Array} opt_elementsReference reference to unique elements
    * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
    */
   getAmpElementOrElements(
     context,
     selector,
     selectionMethod,
-    opt_multiSelectorOn
+    opt_multiSelectorOn,
+    opt_elementsReference
   ) {
-    let elementsPromise = this.getElement(context, selector, selectionMethod);
-
     // Return unique elements based upon selector
-    if (opt_multiSelectorOn) {
+    if (opt_multiSelectorOn && opt_elementsReference) {
       userAssert(
         !selectionMethod,
         'Cannot have selectionMethod defined with an array selector: %s',
         selector
       );
-      elementsPromise = this.getElementsByScopedQuerySelectorAll_(
-        selector
-      ).then(elements => {
-        const uniqueElements = [];
-        for (let i = 0; i < elements.length; i++) {
-          for (let j = 0; j < elements[i].length; j++) {
-            if (uniqueElements.indexOf(elements[i][j]) === -1) {
-              uniqueElements.push(elements[i][j]);
+      return this.getElementsByScopedQuerySelectorAll_(selector).then(
+        elements => {
+          const uniqueElements = [];
+          for (let i = 0; i < elements.length; i++) {
+            if (opt_elementsReference.indexOf(elements[i]) === -1) {
+              uniqueElements.push(elements[i]);
+              opt_elementsReference.push(elements[i]);
             }
           }
+          this.verifyAmpElements_(uniqueElements, selector);
+          return uniqueElements;
         }
-        return uniqueElements;
-      });
+      );
     }
-
-    return elementsPromise.then(elementOrElements => {
-      const elements = Array.isArray(elementOrElements)
-        ? elementOrElements
-        : [elementOrElements];
-      this.verifyAmpElements_(elements, selector);
-      return elements;
-    });
+    return this.getAmpElement(
+      context,
+      selector,
+      selectionMethod
+    ).then(element => [element]);
   }
 
   /**

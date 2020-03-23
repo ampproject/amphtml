@@ -746,13 +746,13 @@ export class SignalTracker extends EventTracker {
       // false missed searches.
       const selectionMethod = config['selectionMethod'];
       signalsPromise = this.root
-        .getAmpElementOrElements(
+        .getAmpElement(
           context.parentElement || context,
           selector,
           selectionMethod
         )
-        .then(elements => {
-          target = elements[0];
+        .then(element => {
+          target = element;
           return this.getElementSignal(eventType, target);
         });
     }
@@ -807,13 +807,13 @@ export class IniLoadTracker extends EventTracker {
       // false missed searches.
       const selectionMethod = config['selectionMethod'];
       promise = this.root
-        .getAmpElementOrElements(
+        .getAmpElement(
           context.parentElement || context,
           selector,
           selectionMethod
         )
-        .then(elements => {
-          target = elements[0];
+        .then(element => {
+          target = element;
           return this.getElementSignal('ini-load', target);
         });
     }
@@ -1506,14 +1506,18 @@ export class VisibilityTracker extends EventTracker {
       // Array selectors do not suppor the special cases: ':host' & ':root'
       const selectionMethod =
         config['selectionMethod'] || visibilitySpec['selectionMethod'];
-      const selectors = Array.isArray(selector) ? selector : [selector];
+      const selectors = Array.isArray(selector)
+        ? selector.filter((val, index) => selectors.indexOf(val) === index)
+        : [selector];
+      const elementsReference = [];
       for (let i = 0; i < selectors.length; i++) {
         this.root
           .getAmpElementOrElements(
             context.parentElement || context,
             selectors[i],
             selectionMethod,
-            multiSelectorVisibilityOn
+            multiSelectorVisibilityOn,
+            elementsReference
           )
           .then(elements => {
             for (let j = 0; j < elements.length; j++) {
