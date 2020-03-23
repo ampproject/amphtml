@@ -246,7 +246,7 @@ describe('BindExpression', () => {
 
       expect(evaluate(`"Hello \\"World\\""`)).to.equal(`Hello "World"`);
       expect(evaluate(`'Hello\\'s world'`)).to.equal(`Hello's world`);
-      expect(evaluate(`"\t\r"`)).to.equal(`\t\r`); 
+      expect(evaluate(`"\t\r"`)).to.equal(`\t\r`);
     });
 
     it('ban: non-whitelisted string methods', () => {
