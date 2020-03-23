@@ -177,7 +177,7 @@ function plugins({
         {
           imports: {
             ...esmRemovedImports,
-          ...(isForTesting ? {} : validTransformedRemovableImports),
+            ...(isForTesting ? {} : validTransformedRemovableImports),
           },
         },
       ],
