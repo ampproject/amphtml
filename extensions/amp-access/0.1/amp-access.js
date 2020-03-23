@@ -17,6 +17,7 @@
 import {AccessSource, AccessType} from './amp-access-source';
 import {AccessVars} from './access-vars';
 import {ActionTrust} from '../../../src/action-constants';
+import {AmpAccessEvaluator} from './access-expr';
 import {AmpEvents} from '../../../src/amp-events';
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {Observable} from '../../../src/observable';
@@ -24,7 +25,6 @@ import {Services} from '../../../src/services';
 import {cancellation} from '../../../src/error';
 import {dev, user, userAssert} from '../../../src/log';
 import {dict} from '../../../src/utils/object';
-import {AmpAccessEvaluator} from './access-expr';
 import {getSourceOrigin} from '../../../src/url';
 import {getValueForExpr, tryParseJson} from '../../../src/json';
 import {installStylesForDoc} from '../../../src/style-installer';

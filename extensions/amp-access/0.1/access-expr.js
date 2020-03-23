@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {hasOwn, map} from '../../../src/utils/object';
 import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
-import {map, hasOwn} from '../../../src/utils/object';
 
 /**
  * Evaluates access expression.
@@ -46,13 +46,27 @@ export function evaluateAccessExpr(expr, data) {
   }
 }
 
+/**
+ * AmpAccessEvaluator evaluate amp-access expressions.
+ */
 export class AmpAccessEvaluator {
+  /** */
   constructor() {
     /** @const */
     this.cache = null;
+
+    /** @const */
     this.lastData = null;
   }
 
+  /**
+   * Proxies the call to evaluateAccessExpr.
+   * This function exists so that the test can spy on it.
+   *
+   * @param {string} expr
+   * @param {!JsonObject} data
+   * @return {boolean}
+   */
   eval_(expr, data) {
     return evaluateAccessExpr(expr, data);
   }
