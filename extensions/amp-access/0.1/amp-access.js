@@ -455,7 +455,7 @@ export class AccessService {
    */
   applyAuthorizationToElement_(element, response) {
     const expr = element.getAttribute('amp-access');
-    const on = this.evaluator_.eval(expr, response);
+    const on = this.evaluator_.evaluate(expr, response);
     let renderPromise = null;
     if (on) {
       renderPromise = this.renderTemplates_(element, response);
