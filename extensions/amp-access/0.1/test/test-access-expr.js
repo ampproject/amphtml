@@ -176,8 +176,10 @@ describe('evaluate', () => {
   it('should evaluate NOT expressions', () => {
     expect(evaluator.evaluate('NOT (access = true)', {})).to.be.true;
 
-    expect(evaluator.evaluate('NOT (access = true)', {access: true})).to.be.false;
-    expect(evaluator.evaluate('NOT (access = true)', {access: false})).to.be.true;
+    expect(evaluator.evaluate('NOT (access = true)', {access: true})).to.be
+      .false;
+    expect(evaluator.evaluate('NOT (access = true)', {access: false})).to.be
+      .true;
 
     expect(evaluator.evaluate('NOT (access = 1)', {access: 1})).to.be.false;
     expect(evaluator.evaluate('NOT (access = 1)', {access: 0})).to.be.true;
@@ -195,7 +197,8 @@ describe('evaluate', () => {
     expect(evaluator.evaluate('a = 1 OR b = 2', {a: 1, b: 2})).to.be.true;
     expect(evaluator.evaluate('a = 1 OR b != 2', {a: 1, b: 2})).to.be.true;
 
-    expect(evaluator.evaluate('NOT (a = 1 OR b != 2)', {a: 1, b: 2})).to.be.false;
+    expect(evaluator.evaluate('NOT (a = 1 OR b != 2)', {a: 1, b: 2})).to.be
+      .false;
 
     expect(evaluator.evaluate('a AND b = 2', {a: 1, b: 2})).to.be.true;
     expect(evaluator.evaluate('a AND b', {a: 1, b: 2})).to.be.true;
