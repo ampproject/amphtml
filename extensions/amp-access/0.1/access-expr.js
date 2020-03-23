@@ -15,6 +15,7 @@
  */
 
 import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
+import {map} from '../../../src/utils/object';
 
 /**
  * Evaluates access expression.
@@ -58,6 +59,10 @@ export class AmpAccessEvaluator {
     this.cache = map();
   }
 
+  eval_(expr, data) {
+    return evaluateAccessExpr(expr, data);
+  }
+
   /**
    * Evaluate access expressions, but turn to a cache first.
    *
@@ -67,10 +72,10 @@ export class AmpAccessEvaluator {
    */
   eval(expr, data) {
     const key = createKey(data);
-    if (!this.cache[data]) {
-      this.cache[data] = map();
+    if (!this.cache[key]) {
+      this.cache[key] = map();
       if (!this.cache[key][expr]) {
-        this.cache[key][expr] = evaluateAccessExpr(expr, data);
+        this.cache[key][expr] = this.eval_(expr, data);
       }
     }
 

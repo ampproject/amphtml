@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import * as accessExpr from '../access-expr';
+import {AmpAccessEvaluator, evaluateAccessExpr} from '../access-expr';
 
-describe('evaluateAccessExpr', () => {
-  let evaluateAccessExpr = accessExpr.evaluateAccessExpr;
-
+describe('evaluateAccessExpr', () => { 
   it('should NOT allow double equal', () => {
     expect(() => {
       evaluateAccessExpr('access == true', {});
@@ -346,24 +344,25 @@ describe('evaluateAccessExpr', () => {
   describe.only('AmpAccessEvaluator', () => {
     let evaluator;
     beforeEach(() => {
-      window.sandbox.stub(accessExpr, 'evaluateAccessExpr');
-      evaluator = new accessExpr.AmpAccessEvaluator();
+      evaluator = new AmpAccessEvaluator();
+      window.sandbox.spy(evaluator, 'eval_');
     });
 
     it('first request should go through', () => {
       expect(evaluator.eval('access = true', {access: true})).to.be.true;
+      expect(evaluator.eval_.callCount).to.equal(1);
     });
 
     it('should use the cache on subsequent calls for the same expression', () => {
       evaluator.eval('access = true', {access: true});
       evaluator.eval('access = true', {access: true});
-      expect(accessExpr.evaluateAccessExpr.calls.length).to.be(1);
+      expect(evaluator.eval_.callCount).to.equal(1);
     });
 
     it('should not use the cache on subsequent calls for the same expression if the data has changed', () => {
       evaluator.eval('access = true', {access: true});
       evaluator.eval('access = true', {access: false});
-      expect(accessExpr.evaluateAccessExpr.calls.length).to.be(2);
+      expect(evaluator.eval_.callCount).to.equal(2);
     });
   });
 });
