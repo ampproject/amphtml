@@ -29,6 +29,7 @@ const gulpIf = require('gulp-if');
 const gulpWatch = require('gulp-watch');
 const istanbul = require('gulp-istanbul');
 const log = require('fancy-log');
+const micromatch = require('micromatch');
 const path = require('path');
 const regexpSourcemaps = require('gulp-regexp-sourcemaps');
 const rename = require('gulp-rename');
@@ -37,11 +38,15 @@ const sourcemaps = require('gulp-sourcemaps');
 const watchify = require('watchify');
 const wrappers = require('../compile/compile-wrappers');
 const {
+  BABEL_SRC_GLOBS,
+  SRC_TEMP_DIR,
+  THIRD_PARTY_TRANSFORM_GLOBS,
+} = require('../compile/sources');
+const {
   VERSION: internalRuntimeVersion,
 } = require('../compile/internal-version');
 const {altMainBundles, jsBundles} = require('../compile/bundles.config');
 const {applyConfig, removeConfig} = require('./prepend-global/index.js');
-const {BABEL_SRC_GLOBS, SRC_TEMP_DIR} = require('../compile/sources');
 const {closureCompile} = require('../compile/compile');
 const {isTravisBuild} = require('../common/travis');
 const {thirdPartyFrames} = require('../test-configs/config');
@@ -712,7 +717,10 @@ function transferSrcsToTempDir(options = {}) {
   );
   const files = globby.sync(BABEL_SRC_GLOBS);
   files.forEach(file => {
-    if (file.startsWith('node_modules/') || file.startsWith('third_party/')) {
+    if (
+      (file.startsWith('node_modules/') || file.startsWith('third_party/')) &&
+      !micromatch.isMatch(file, THIRD_PARTY_TRANSFORM_GLOBS)
+    ) {
       fs.copySync(file, `${SRC_TEMP_DIR}/${file}`);
       return;
     }
