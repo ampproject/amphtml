@@ -55,7 +55,7 @@ describes.repeated(
       if (templateType == 'script') {
         templateElement.setAttribute('type', 'amp-mustache');
       }
-      template = new AmpMustache(templateElement);
+      template = new AmpMustache(templateElement, window);
       isTemplateTypeScript = templateType == 'script';
       isTemplateType = templateType == 'template';
       textContentSetup = contents => {
@@ -361,13 +361,13 @@ describes.repeated(
           outerTemplateElement./*OK*/ innerHTML =
             'outer: {{value}} ' +
             '<template type="amp-mustache">nested: {{value}}</template>';
-          const outerTemplate = new AmpMustache(outerTemplateElement);
+          const outerTemplate = new AmpMustache(outerTemplateElement, window);
           outerTemplate.compileCallback();
           const outerResult = outerTemplate.render({
             value: 'Outer',
           });
           const nestedTemplateElement = outerResult.querySelector('template');
-          const nestedTemplate = new AmpMustache(nestedTemplateElement);
+          const nestedTemplate = new AmpMustache(nestedTemplateElement, window);
           nestedTemplate.compileCallback();
           const nestedResult = nestedTemplate.render({
             value: 'Nested',
@@ -382,13 +382,13 @@ describes.repeated(
             '<template type="amp-mustache">' +
             '<div onclick="javascript:alert(\'I am evil\')">nested</div>: ' +
             '{{value}}</template>';
-          const outerTemplate = new AmpMustache(outerTemplateElement);
+          const outerTemplate = new AmpMustache(outerTemplateElement, window);
           outerTemplate.compileCallback();
           const outerResult = outerTemplate.render({
             value: 'Outer',
           });
           const nestedTemplateElement = outerResult.querySelector('template');
-          const nestedTemplate = new AmpMustache(nestedTemplateElement);
+          const nestedTemplate = new AmpMustache(nestedTemplateElement, window);
           nestedTemplate.compileCallback();
           const nestedResult = nestedTemplate.render({
             value: 'Nested',
