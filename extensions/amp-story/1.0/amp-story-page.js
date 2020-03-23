@@ -54,6 +54,7 @@ import {Services} from '../../../src/services';
 import {VideoEvents, delegateAutoplay} from '../../../src/video-interface';
 import {VideoUtils} from '../../../src/utils/video';
 import {
+  addAttributesToElement,
   childElement,
   closestAncestorElementBySelector,
   isAmpElement,
@@ -128,6 +129,12 @@ const ADVERTISEMENT_ATTR_NAME = 'ad';
 
 /** @private @const {number} */
 const REWIND_TIMEOUT_MS = 350;
+
+/** @private @const {number} */
+const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '2s';
+
+/** @private @const {number} */
+const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
 
 /**
  * @param {!Element} element
@@ -328,6 +335,7 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.maybeSetPreviewDuration_();
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
@@ -346,6 +354,24 @@ export class AmpStoryPage extends AMP.BaseElement {
       true /* callToInitialize */
     );
     this.setPageDescription_();
+  }
+
+  /** @private */
+  maybeSetPreviewDuration_() {
+    if (this.element.parentElement.hasAttribute('video-preview-experiment')) {
+      let autoPlayAfterAttr = DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
+
+      const ampVideoEl = this.element.querySelector('amp-video');
+      if (ampVideoEl) {
+        autoPlayAfterAttr = VIDEO_PREVIEW_AUTO_ADVANCE_DURATION;
+      }
+
+      addAttributesToElement(this.element, {
+        'auto-advance-after': autoPlayAfterAttr,
+      });
+
+      this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    }
   }
 
   /**
