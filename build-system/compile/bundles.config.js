@@ -1010,6 +1010,12 @@ exports.extensionBundles = [
     type: TYPES.MISC,
   },
   {
+    name: 'amp-social-share',
+    version: '0.2',
+    latestVersion: '0.1',
+    type: TYPES.MISC,
+  },
+  {
     name: 'amp-timeago',
     version: ['0.1', '0.2'],
     latestVersion: '0.1',

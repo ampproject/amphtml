@@ -34,6 +34,7 @@ const COMMON_GLOBS = [
   'third_party/inputmask/**/*.js',
   'third_party/mustache/**/*.js',
   'third_party/react-dates/bundle.js',
+  'third_party/optimized-svg-icons/social-share-svgs.js',
   'third_party/set-dom/set-dom.js',
   'third_party/subscriptions-project/*.js',
   'third_party/timeagojs/**/*.js',
@@ -141,8 +142,18 @@ const CLOSURE_SRC_GLOBS = [
   '!node_modules/core-js/modules/library/**.js',
 ].concat(COMMON_GLOBS);
 
+/**
+ * NOTE: 3p code is generally excluded from the transform process.
+ * The globs here are force-transformed anyway.
+ */
+const THIRD_PARTY_TRANSFORM_GLOBS = [
+  // JSX syntax should undergo usual transforms
+  'third_party/optimized-svg-icons/social-share-svgs.js',
+];
+
 module.exports = {
   BABEL_SRC_GLOBS,
   CLOSURE_SRC_GLOBS,
   SRC_TEMP_DIR,
+  THIRD_PARTY_TRANSFORM_GLOBS,
 };
