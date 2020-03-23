@@ -17,7 +17,6 @@ limitations under the License.
 # My6sense
 
 My6sense specializes in the development and distribution of its own ad server technology, which is called My6sense ad serving. The My6sense ad server now supports AMP.
-
 For more information, visit [www.My6sense.com](https://www.My6sense.com).
 
 ## Example
