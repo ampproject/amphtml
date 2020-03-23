@@ -280,11 +280,10 @@ export class AnalyticsRoot {
   }
 
   /**
-   * @param {!Element} context
    * @param {string} selector DOM query selector.
    * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
    */
-  getElementsByQuerySelectorAll_(context, selector) {
+  getElementsByQuerySelectorAll_(selector) {
     // Wait for document-ready to avoid false missed searches
     return this.ampdoc.whenReady().then(() => {
       let foundElements;
@@ -331,7 +330,7 @@ export class AnalyticsRoot {
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
    * @param {boolean=} opt_multiSelectorOn multi-selector expriment
-   * @param {Array} opt_elementsReference reference to unique elements
+   * @param {Array<Element>=} opt_elementsReference reference to unique elements
    * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
    */
   getAmpElementOrElements(
