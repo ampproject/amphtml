@@ -181,8 +181,7 @@ function plugins({
         {
           imports: {
             ...esmRemovedImports,
-            ...validTransformedRemovableImports,
-          ...(isForTesting ? {} : validTransformedRemovableImports),
+            ...(isForTesting ? {} : validTransformedRemovableImports),
           },
         },
       ],
