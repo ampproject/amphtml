@@ -359,12 +359,11 @@ export class AmpStoryPage extends AMP.BaseElement {
   /** @private */
   maybeSetPreviewDuration_() {
     if (this.element.parentElement.hasAttribute('video-preview-experiment')) {
-      let autoPlayAfterAttr = DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
-
       const ampVideoEl = this.element.querySelector('amp-video');
-      if (ampVideoEl) {
-        autoPlayAfterAttr = VIDEO_PREVIEW_AUTO_ADVANCE_DURATION;
-      }
+
+      const autoPlayAfterAttr = ampVideoEl
+        ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
+        : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
 
       addAttributesToElement(this.element, {
         'auto-advance-after': autoPlayAfterAttr,
