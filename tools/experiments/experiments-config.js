@@ -305,4 +305,8 @@ export const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/issues/20595',
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
   },
+  {
+    id: 'random-subdomains-for-safeframe',
+    name: "Enable Random Subdomains for SafeFrame",
+  }
 ];
