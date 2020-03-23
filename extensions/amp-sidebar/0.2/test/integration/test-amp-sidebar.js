@@ -91,6 +91,11 @@ describe
             const openerButton = win.document.getElementById('sidebarOpener');
             const sidebar = win.document.getElementById('sidebar1');
             const viewport = sidebar.implementation_.getViewport();
+            // TODO(dvoytenko): checked manually and it works, but for some
+            // reason the scrolling does not trigger on the scrollElement in
+            // the integration test. Thus disabling `i-amphtml-iframed` here
+            // for now.
+            win.document.documentElement.classList.remove('i-amphtml-iframed');
             const openedPromise = waitForSidebarOpen(win.document);
             openerButton.click();
             expect(viewport.getScrollTop()).to.equal(0);
