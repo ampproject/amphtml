@@ -41,8 +41,8 @@ const defaultPlugins = isEsmBuild => [
   getReplacePlugin(isEsmBuild),
 ];
 
-const postCompilationPlugins = [localPlugin('transform-function-declarations')];
-const postCompilationES5Plugins = [];
+const postCompilationPlugins = isEsmBuild =>
+  isEsmBuild ? [localPlugin('transform-function-declarations')] : [];
 
 const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
@@ -156,18 +156,18 @@ function plugins({
   isPostCompile,
 }) {
   if (isPostCompile) {
-    if (!isEsmBuild) {
-      return postCompilationES5Plugins;
-    }
-
-    return postCompilationPlugins;
+    return postCompilationPlugins(isEsmBuild);
   }
 
+<<<<<<< HEAD
   const applied = [...defaultPlugins];
 <<<<<<< HEAD
 >>>>>>> Broken Gulp
 =======
 >>>>>>> conflict in build conf
+=======
+  const applied = [...defaultPlugins(isEsmBuild)];
+>>>>>>> Update to latest master
   // TODO(erwinm): This is temporary until we remove the assert/log removals
   // from the java transformation to the babel transformation.
   // There is currently a weird interaction where when we do the transform
@@ -205,7 +205,7 @@ function plugins({
           },
         },
       ],
-      applied.push(localPlugin('transform-function-declarations'))
+      localPlugin('transform-function-declarations')
     );
 >>>>>>> conflict in build conf
   }
@@ -222,6 +222,7 @@ function plugins({
       localPlugin('is_dev-constant-transformer')
     );
   }
+
   return applied;
 }
 

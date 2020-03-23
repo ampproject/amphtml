@@ -724,6 +724,7 @@ function transferSrcsToTempDir(options = {}) {
         isSinglePass: options.isSinglePass,
         isForTesting: options.isForTesting,
         isChecktypes: options.isChecktypes,
+        isPostCompile: false,
       }),
       retainLines: true,
       compact: false,
