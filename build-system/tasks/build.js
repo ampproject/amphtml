@@ -27,6 +27,7 @@ const {
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {buildExtensions} = require('./extension-helpers');
+const {compileAmpScriptWorker} = require('./extension-helpers.js');
 const {compileCss} = require('./css');
 const {compileJison} = require('./compile-jison');
 const {cyan, green} = require('ansi-colors');
@@ -77,6 +78,7 @@ function printDefaultTaskHelp() {
 async function performPrerequisiteSteps(watch) {
   await compileCss(watch);
   await compileJison();
+  await compileAmpScriptWorker();
   await bootstrapThirdPartyFrames(watch);
 }
 

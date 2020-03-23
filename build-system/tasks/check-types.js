@@ -25,6 +25,7 @@ const {
   exitCtrlcHandler,
 } = require('../common/ctrlcHandler');
 const {cleanupBuildDir, closureCompile} = require('../compile/compile');
+const {compileAmpScriptWorker} = require('./extension-helpers.js');
 const {compileCss} = require('./css');
 const {extensions, maybeInitializeExtensions} = require('./extension-helpers');
 const {maybeUpdatePackages} = require('./update-packages');
@@ -40,7 +41,6 @@ async function checkTypes() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   maybeInitializeExtensions();
-  transferSrcsToTempDir({isChecktypes: true});
   const compileSrcs = [
     './src/amp.js',
     './src/amp-shadow.js',
@@ -68,7 +68,8 @@ async function checkTypes() {
       );
     })
     .sort();
-  return compileCss()
+  return Promise.all([compileCss(), compileAmpScriptWorker()])
+    .then(() => transferSrcsToTempDir({isChecktypes: true}))
     .then(async () => {
       await startNailgunServer(checkTypesNailgunPort, /* detached */ false);
     })
