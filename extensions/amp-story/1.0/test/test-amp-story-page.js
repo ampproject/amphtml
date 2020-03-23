@@ -107,10 +107,14 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should start the advancement when state becomes active', async () => {
+    page.mediaPoolHasRegisteredMedia_ = true;
     page.buildCallback();
     const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
+
+    // Microtask tick
+    await Promise.resolve();
 
     expect(advancementStartStub).to.have.been.calledOnce;
   });
