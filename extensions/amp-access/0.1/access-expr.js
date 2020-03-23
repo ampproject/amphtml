@@ -18,7 +18,7 @@ import {hasOwn, map} from '../../../src/utils/object';
 import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
 
 /**
- * Evaluates access expression.
+ * Evaluates access expressions.
  *
  * The grammar is defined in the `access-expr-impl.jison` and compiled using
  * (Jison)[https://zaach.github.io/jison/] parser. The compilation steps are
@@ -47,28 +47,17 @@ export function evaluateAccessExpr(expr, data) {
 }
 
 /**
- * AmpAccessEvaluator evaluate amp-access expressions.
+ * AmpAccessEvaluator evaluates amp-access expressions.
+ * It uses a cache to speed up repeated evals for the same expression.
  */
 export class AmpAccessEvaluator {
   /** */
   constructor() {
-    /** @const */
+    /** @type {Object<string, boolean>} */
     this.cache = null;
 
-    /** @const */
+    /** @type {JsonObject} */
     this.lastData = null;
-  }
-
-  /**
-   * Proxies the call to evaluateAccessExpr.
-   * This function exists so that the test can spy on it.
-   *
-   * @param {string} expr
-   * @param {!JsonObject} data
-   * @return {boolean}
-   */
-  eval_(expr, data) {
-    return evaluateAccessExpr(expr, data);
   }
 
   /**
@@ -90,5 +79,17 @@ export class AmpAccessEvaluator {
     }
 
     return this.cache[expr];
+  }
+
+  /**
+   * Evaluates access expressions by proxying calls to evaluateAccessExpr.
+   * This function only exists to be spied on.
+   *
+   * @param {string} expr
+   * @param {!JsonObject} data
+   * @return {boolean}
+   */
+  eval_(expr, data) {
+    return evaluateAccessExpr(expr, data);
   }
 }
