@@ -24,6 +24,7 @@ import {getMode} from '../../../src/mode';
 import {
   getSourceOrigin,
   isProxyOrigin,
+  parseQueryString,
   resolveRelativeUrl,
 } from '../../../src/url';
 import {getState} from '../../../src/history';
@@ -344,4 +345,18 @@ export function setTextBackgroundColor(element) {
     const color = el.getAttribute(TEXT_BACKGROUND_COLOR_ATTRIBUTE_NAME);
     setStyle(el, 'background-color', color);
   });
+}
+
+/**
+ * @private @const {string}
+ */
+const PREVIEW_MODE_PARAM = 'previewMode';
+
+/**
+ * @param {string} str
+ * @return {boolean}
+ */
+export function parsePreviewMode(str) {
+  const params = parseQueryString(str);
+  return PREVIEW_MODE_PARAM in params;
 }

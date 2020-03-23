@@ -19,6 +19,7 @@ import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
+import {parsePreviewMode} from './utils';
 import {registerServiceBuilder} from '../../../src/service';
 
 /** @type {string} */
@@ -77,6 +78,7 @@ export let InteractiveComponentDef;
 
 /**
  * @typedef {{
+ *    previewMode: boolean,
  *    canInsertAutomaticAd: boolean,
  *    canShowBookend: boolean,
  *    canShowNavigationOverlayHint: boolean,
@@ -117,6 +119,9 @@ export let State;
 
 /** @const @enum {string} */
 export const StateProperty = {
+  // Preview mode.
+  PREVIEW_MODE: 'previewMode',
+
   // Embed options.
   CAN_INSERT_AUTOMATIC_AD: 'canInsertAutomaticAd',
   CAN_SHOW_BOOKEND: 'canShowBookend',
@@ -434,6 +439,7 @@ export class AmpStoryStoreService {
     this.state_ = /** @type {!State} */ ({
       ...this.getDefaultState_(),
       ...this.getEmbedOverrides_(),
+      ...this.getPreviewOverride_(),
     });
   }
 
@@ -544,6 +550,7 @@ export class AmpStoryStoreService {
       [StateProperty.NAVIGATION_PATH]: [],
       [StateProperty.PAGE_IDS]: [],
       [StateProperty.PAGE_SIZE]: null,
+      [StateProperty.PREVIEW_MODE]: false,
     });
   }
 
@@ -572,5 +579,17 @@ export class AmpStoryStoreService {
       default:
         return {};
     }
+  }
+
+  /**
+   * @return {!Object<StateProperty, *>} Partial state
+   * @protected
+   */
+  getPreviewOverride_() {
+    const previewMode = parsePreviewMode(this.win_.location.hash);
+    if (previewMode) {
+      return {[StateProperty.PREVIEW_MODE]: true};
+    }
+    return {};
   }
 }

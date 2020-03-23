@@ -358,15 +358,16 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @private */
   maybeSetPreviewDuration_() {
-    if (this.element.parentElement.hasAttribute('video-preview-experiment')) {
-      const ampVideoEl = this.element.querySelector('amp-video');
+    if (this.storeService_.get(StateProperty.PREVIEW_MODE)) {
+      const videos = this.getAllVideos_();
 
-      const autoPlayAfterAttr = ampVideoEl
-        ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
-        : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
+      const autoAdvanceAttr =
+        videos.length > 0
+          ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
+          : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
 
       addAttributesToElement(this.element, {
-        'auto-advance-after': autoPlayAfterAttr,
+        'auto-advance-after': autoAdvanceAttr,
       });
 
       this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
