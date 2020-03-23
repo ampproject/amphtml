@@ -359,11 +359,15 @@ class AmpJWPlayer extends AMP.BaseElement {
       'recency': this.contentRecency_ || undefined,
       'backfill': this.contentBackfill_ || undefined,
     });
+    const baseUrl = `https://content.jwplatform.com/players/${cid}-${pid}.html`;
     const IS_DEV = true;
-
-    const baseUrl = IS_DEV ?
-      `${new URLSearchParams(document.location.search).get('test_page')}?cid=${cid}&pid=${pid}` :
-      `https://content.jwplatform.com/players/${cid}-${pid}.html`;
+  
+    if (IS_DEV) {
+      const testPage = new URLSearchParams(document.location.search).get('test_page');
+      if (testPage) {
+        baseUrl = `${testPage}?cid=${cid}&pid=${pid}`;
+      }
+    }
 
     const src = addParamsToUrl(baseUrl, queryParams);
     const frame = createFrameFor(this, src, this.element.id);
