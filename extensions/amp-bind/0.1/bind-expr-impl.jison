@@ -279,12 +279,13 @@ literal:
 primitive:
     STRING
       %{
+        const raw = yytext.substr(1, yyleng - 2);
+        // Since we accept escaped quotation marks, unescape them here.
+        const unescaped = raw.replace(/\\('|")/g, "$1");
+
         // Use JSON.parse() to process special chars e.g. '\n'.
         // JSON doesn't recognize single-quotes, so use double-quote in
         // leading/trailing chars and escape double-quote in the string.
-        const raw = yytext.substr(1, yyleng - 2);
-        // Since we accept escaped quotation marks, unescape them here.
-        const unescaped = raw.replace(/\\'/g, `'`).replace(/\\"/g, `"`);
         const parsed = tryParseJson(`"${unescaped.replace(/"/g, '\\"')}"`);
         this.$ = new AstNode(AstNodeType.LITERAL, null, parsed || unescaped);
       %}

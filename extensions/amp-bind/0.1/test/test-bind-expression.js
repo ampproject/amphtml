@@ -241,12 +241,12 @@ describe('BindExpression', () => {
     });
 
     it('escaped quotes', () => {
-      expect(evaluate(`"Hello \\"World\\""`)).to.equal(`Hello "World"`);
-      expect(evaluate(`'Hello\\'s world'`)).to.equal(`Hello's world`);
-      expect(evaluate(`"\t\r"`)).to.equal(`\t\r`);
-
       expect(evaluate(`'\\"'`)).to.equal(`'"'`);
       expect(evaluate(`"\\'"`)).to.equal(`"'"`);
+
+      expect(evaluate(`"Hello \\"World\\""`)).to.equal(`Hello "World"`);
+      expect(evaluate(`'Hello\\'s world'`)).to.equal(`Hello's world`);
+      expect(evaluate(`"\t\r"`)).to.equal(`\t\r`); 
     });
 
     it('ban: non-whitelisted string methods', () => {
