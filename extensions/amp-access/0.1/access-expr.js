@@ -45,16 +45,35 @@ export function evaluateAccessExpr(expr, data) {
   }
 }
 
+import stringify from 'json-stable-stringify';
+
+// TODO(samouri): this is bad for bundle size and performance.
+function createKey(obj) {
+  return stringify(obj);
+}
+
 export class AmpAccessEvaluator {
   constructor() {
     /** @const */
     this.cache = map();
   }
 
+  /**
+   * Evaluate access expressions, but turn to a cache first.
+   *
+   * @param {string} expr
+   * @param {!JsonObject} data
+   * @return {boolean}
+   */
   eval(expr, data) {
-    if (!this.cache[expr]) {
-      this.cache[expr] = evaluateAccessExpr(expr, data);
+    const key = createKey(data);
+    if (!this.cache[data]) {
+      this.cache[data] = map();
+      if (!this.cache[key][expr]) {
+        this.cache[key][expr] = evaluateAccessExpr(expr, data);
+      }
     }
-    return this.cache[expr];
+
+    return this.cache[key][expr];
   }
 }

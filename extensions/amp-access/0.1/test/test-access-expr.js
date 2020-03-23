@@ -343,7 +343,7 @@ describe('evaluateAccessExpr', () => {
     }).to.throw();
   });
 
-  describe('AmpAccessEvaluator', () => {
+  describe.only('AmpAccessEvaluator', () => {
     let evaluator;
     beforeEach(() => {
       window.sandbox.stub(accessExpr, 'evaluateAccessExpr');
