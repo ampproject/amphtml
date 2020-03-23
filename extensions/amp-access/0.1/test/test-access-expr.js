@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import {evaluateAccessExpr} from '../access-expr';
+import * as accessExpr from '../access-expr';
 
 describe('evaluateAccessExpr', () => {
+  let evaluateAccessExpr = accessExpr.evaluateAccessExpr;
+
   it('should NOT allow double equal', () => {
     expect(() => {
       evaluateAccessExpr('access == true', {});
@@ -339,5 +341,29 @@ describe('evaluateAccessExpr', () => {
     expect(() => {
       evaluateAccessExpr('num-1 = 10', {'num-1': 10});
     }).to.throw();
+  });
+
+  describe('AmpAccessEvaluator', () => {
+    let evaluator;
+    beforeEach(() => {
+      window.sandbox.stub(accessExpr, 'evaluateAccessExpr');
+      evaluator = new accessExpr.AmpAccessEvaluator();
+    });
+
+    it('first request should go through', () => {
+      expect(evaluator.eval('access = true', {access: true})).to.be.true;
+    });
+
+    it('should use the cache on subsequent calls for the same expression', () => {
+      evaluator.eval('access = true', {access: true});
+      evaluator.eval('access = true', {access: true});
+      expect(accessExpr.evaluateAccessExpr.calls.length).to.be(1);
+    });
+
+    it('should not use the cache on subsequent calls for the same expression if the data has changed', () => {
+      evaluator.eval('access = true', {access: true});
+      evaluator.eval('access = true', {access: false});
+      expect(accessExpr.evaluateAccessExpr.calls.length).to.be(2);
+    });
   });
 });

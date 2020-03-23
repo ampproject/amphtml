@@ -44,3 +44,17 @@ export function evaluateAccessExpr(expr, data) {
     parser.yy = null;
   }
 }
+
+export class AmpAccessEvaluator {
+  constructor() {
+    /** @const */
+    this.cache = map();
+  }
+
+  eval(expr, data) {
+    if (!this.cache[expr]) {
+      this.cache[expr] = evaluateAccessExpr(expr, data);
+    }
+    return this.cache[expr];
+  }
+}
