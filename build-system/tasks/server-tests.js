@@ -1,0 +1,124 @@
+/**
+ * Copyright 2020 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const assert = require('assert');
+const fs = require('fs');
+const globby = require('globby');
+const gulp = require('gulp');
+const log = require('fancy-log');
+const path = require('path');
+const posthtml = require('posthtml');
+const through = require('through2');
+const {buildNewServer} = require('../tasks/serve');
+const {cyan, green, red} = require('ansi-colors');
+const {isTravisBuild} = require('../common/travis');
+
+const transformsDir = path.resolve('build-system/server/new-server/transforms');
+const inputPaths = [`${transformsDir}/**/*input.html`];
+
+let passed = 0;
+let failed = 0;
+
+/**
+ * Logs a test error
+ * @param {string} testName
+ * @param {Error} err
+ */
+function logError(testName, err) {
+  const {message} = err;
+  console.log(red('✖'), 'Failed', cyan(testName));
+  console.group();
+  console.log(
+    message
+      .split('\n')
+      .splice(3)
+      .join('\n')
+  );
+  console.groupEnd();
+}
+
+/**
+ * Runs tests for a single input file
+ *
+ * @return {!ReadableStream}
+ */
+function runTest() {
+  return through.obj(async (file, enc, cb) => {
+    const inputFile = file.path;
+    const testName = path
+      .relative(transformsDir, inputFile)
+      .replace('-input.html', '');
+    const outputFile = inputFile.replace('input.html', 'output.html');
+    const dirName = path.dirname(inputFile);
+    const tsTransform = globby.sync(path.resolve(dirName, '*.ts'))[0];
+    const jsTransform = tsTransform
+      .replace('/transforms/', '/transforms/dist/')
+      .replace('.ts', '.js');
+    const input = fs.readFileSync(inputFile, 'utf8');
+    const expected = fs.readFileSync(outputFile, 'utf8');
+    const transform = require(jsTransform).default;
+    const output = (await posthtml(transform).process(input)).html;
+    try {
+      assert.strictEqual(output, expected);
+    } catch (err) {
+      ++failed;
+      logError(testName, err);
+      cb();
+      return;
+    }
+    ++passed;
+    if (!isTravisBuild()) {
+      console.log(green('✔'), 'Passed', cyan(testName));
+    }
+    cb();
+  });
+}
+
+/**
+ * Reports total number of passing / failing tests
+ */
+function reportResult() {
+  const result =
+    `Ran ${cyan(passed + failed)} tests ` +
+    `(${cyan(passed)} passed, ${cyan(failed)} failed).`;
+  if (failed > 0) {
+    log(red('ERROR:'), result);
+    const err = new Error('Tests failed');
+    err.showStack = false;
+    throw err;
+  } else {
+    log(green('SUCCESS:'), result);
+  }
+}
+
+/**
+ * Tests for AMP server custom transforms. Entry point for `gulp server-tests`.
+ *
+ * @return {!Vinyl}
+ */
+function serverTests() {
+  buildNewServer();
+  return gulp
+    .src(inputPaths)
+    .pipe(runTest())
+    .on('end', reportResult);
+}
+
+module.exports = {
+  serverTests,
+};
+
+serverTests.description = "Runs tests for the AMP server's custom transforms";

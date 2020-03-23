@@ -202,6 +202,7 @@ async function doServe(lazyBuild = false) {
 }
 
 module.exports = {
+  buildNewServer,
   serve,
   doServe,
   startServer,
