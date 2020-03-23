@@ -142,12 +142,16 @@ module.exports = function({types: t}) {
     },
     post() {
       if (REPORT) {
-        console.log(`Success Count: ${this.successCount.length}`);
-        console.log('Bail Out Reason Counts');
+        console /*OK*/
+          .log(`Success Count: ${this.successCount.length}`);
+        console /*OK*/
+          .log('Bail Out Reason Counts');
         Object.keys(this.bailoutCount).forEach(name =>
-          console.log(`${name}: ${this.bailoutCount[name].length}`)
+          console /*OK*/
+            .log(`${name}: ${this.bailoutCount[name].length}`)
         );
-        console.log('\n');
+        console /*OK*/
+          .log('\n');
       }
     },
   };
