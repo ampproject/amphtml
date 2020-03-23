@@ -68,7 +68,7 @@ export class AmpAccessEvaluator {
    * @param {!JsonObject} data
    * @return {boolean}
    */
-  eval(expr, data) {
+  evaluate(expr, data) {
     if (this.lastData !== data) {
       this.lastData = data;
       this.cache = map();
