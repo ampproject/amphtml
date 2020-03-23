@@ -26,6 +26,7 @@ import {dev, user, userAssert} from '../../../src/log';
 import {dict, map} from '../../../src/utils/object';
 import {getElementServiceForDoc} from '../../../src/element-service';
 import {getMode} from '../../../src/mode';
+import {getService, registerServiceBuilder} from '../../../src/service';
 import {rewriteAttributeValue} from '../../../src/url-rewrite';
 import {startsWith} from '../../../src/string';
 import {tryParseJson} from '../../../src/json';
@@ -562,12 +563,16 @@ export class SanitizerImpl {
     /** @private @const {!Element} */
     this.element_ = ampScript.element;
 
+    registerServiceBuilder(this.win_, 'purifier-inplace', function() {
+      return new Purifier(
+        ampScript.win.document,
+        dict({'IN_PLACE': true}),
+        rewriteAttributeValue
+      );
+    });
+
     /** @private @const {!Purifier} */
-    this.purifier_ = new Purifier(
-      ampScript.win.document,
-      dict({'IN_PLACE': true}),
-      rewriteAttributeValue
-    );
+    this.purifier_ = getService(this.win_, 'purifier-inplace');
 
     /** @private @const {!Object<string, boolean>} */
     this.allowedTags_ = this.purifier_.getAllowedTags();
