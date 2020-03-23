@@ -73,6 +73,16 @@ describes.realWin('ViewportBindingNatural', {ampCss: true}, env => {
     expect(bodyStyles.overflowY).to.not.equal('hidden');
   });
 
+  it('should override body overflow for iframes', () => {
+    win.document.documentElement.classList.add('i-amphtml-iframed');
+    win.document.documentElement.classList.add('i-amphtml-singledoc');
+    binding = new ViewportBindingNatural_(ampdoc);
+    const bodyStyles = win.getComputedStyle(win.document.body);
+    expect(bodyStyles.position).to.equal('relative');
+    expect(bodyStyles.overflowX).to.equal('hidden');
+    expect(bodyStyles.overflowY).to.not.equal('hidden');
+  });
+
   it('should NOT require fixed layer transferring', () => {
     expect(binding.requiresFixedLayerTransfer()).to.be.false;
   });
