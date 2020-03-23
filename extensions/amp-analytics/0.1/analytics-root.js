@@ -22,7 +22,6 @@ import {
   closestAncestorElementBySelector,
   matches,
   scopedQuerySelector,
-  scopedQuerySelectorAll,
 } from '../../../src/dom';
 import {dev, user, userAssert} from '../../../src/log';
 import {getMode} from '../../../src/mode';
@@ -285,20 +284,12 @@ export class AnalyticsRoot {
    * @param {string} selector DOM query selector.
    * @return {!Promise<!Array<!Element>>} Element corresponding to the selector.
    */
-  getElementsByScopedQuerySelectorAll_(context, selector) {
+  getElementsByQuerySelectorAll_(context, selector) {
     // Wait for document-ready to avoid false missed searches
     return this.ampdoc.whenReady().then(() => {
-      const results = [];
       const foundElements = this.getRoot().querySelectorAll(selector);
-
-      // Length is not supported in all browsers
-      if (foundElements && foundElements.length) {
-        for (let i = 0; i < foundElements.length; i++) {
-          results.push(foundElements[i]);
-        }
-      }
-      userAssert(results.length, `Element "${selector}" not found`);
-      return results;
+      userAssert(foundElements.length, `Element "${selector}" not found`);
+      return foundElements;
     });
   }
 
@@ -314,18 +305,15 @@ export class AnalyticsRoot {
    */
   getAmpElement(context, selector, selectionMethod) {
     return this.getElement(context, selector, selectionMethod).then(element => {
-      userAssert(
-        element.classList.contains('i-amphtml-element'),
-        'Element "%s" is required to be an AMP element',
-        selector
-      );
+      this.verifyAmpElements_([element], selector);
       return element;
     });
   }
 
   /**
-   * Searches the AMP element that matches the selector within the scope of the
-   * analytics root in relationship to the specified context node.
+   * Searches for the AMP element(s) that matches the selector
+   * within the scope of the analytics root in relationship to
+   * the specified context node.
    *
    * @param {!Element} context
    * @param {string} selector DOM query selector.
@@ -342,26 +330,23 @@ export class AnalyticsRoot {
     opt_multiSelectorOn,
     opt_elementsReference
   ) {
-    // Return unique elements based upon selector
     if (opt_multiSelectorOn && opt_elementsReference) {
       userAssert(
         !selectionMethod,
         'Cannot have selectionMethod defined with an array selector: %s',
         selector
       );
-      return this.getElementsByScopedQuerySelectorAll_(selector).then(
-        elements => {
-          const uniqueElements = [];
-          for (let i = 0; i < elements.length; i++) {
-            if (opt_elementsReference.indexOf(elements[i]) === -1) {
-              uniqueElements.push(elements[i]);
-              opt_elementsReference.push(elements[i]);
-            }
+      return this.getElementsByQuerySelectorAll_(selector).then(elements => {
+        const uniqueElements = [];
+        for (let i = 0; i < elements.length; i++) {
+          if (opt_elementsReference.indexOf(elements[i]) === -1) {
+            uniqueElements.push(elements[i]);
+            opt_elementsReference.push(elements[i]);
           }
-          this.verifyAmpElements_(uniqueElements, selector);
-          return uniqueElements;
         }
-      );
+        this.verifyAmpElements_(uniqueElements, selector);
+        return uniqueElements;
+      });
     }
     return this.getAmpElement(
       context,
