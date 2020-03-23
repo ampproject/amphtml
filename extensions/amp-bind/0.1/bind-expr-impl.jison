@@ -281,7 +281,8 @@ primitive:
       %{
         const raw = yytext.substr(1, yyleng - 2);
         // Since we accept escaped quotation marks, unescape them here.
-        const unescaped = raw.replace(/\\('|")/g, "$1");
+        // Note: We can't use $1 directly because of https://github.com/zaach/jison/issues/380.
+        const unescaped = raw.replace(/\\('|")/g, "$" + "1");
 
         // Use JSON.parse() to process special chars e.g. '\n'.
         // JSON doesn't recognize single-quotes, so use double-quote in
