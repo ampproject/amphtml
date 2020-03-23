@@ -77,6 +77,11 @@ describes.realWin(
             content = message.data.replace('content-iframe:', '');
           }
         });
+        // TODO(dvoytenko): checked manually and it works, but for some
+        // reason the scrolling does not trigger on the scrollElement in
+        // the integration test. Thus disabling `i-amphtml-iframed` here
+        // for now.
+        doc.documentElement.classList.remove('i-amphtml-iframed');
         setTrackingIframeTimeoutForTesting(20);
       });
 
