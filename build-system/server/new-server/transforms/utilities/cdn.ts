@@ -21,7 +21,6 @@ export const VALID_CDN_ORIGIN = 'https://cdn.ampproject.org';
 
 /**
  * Convert an existing URL to one from the local `serve` command.
- * @param url
  */
 export function CDNURLToLocalDistURL(
   url: URL,
@@ -49,7 +48,6 @@ export function CDNURLToLocalDistURL(
 
 /**
  * Convert an existing URL to one from a specific RTV.
- * @param url
  */
 export function CDNURLToRTVURL(
   url: URL,

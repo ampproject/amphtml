@@ -35,6 +35,9 @@ const {logServeMode, setServeMode} = require('../server/app-utils');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
 
+// Used by new server implementation
+const transformsPath = 'build-system/server/new-server/transforms';
+
 // Used for logging.
 let url = null;
 let quiet = !!argv.quiet;
@@ -42,7 +45,7 @@ let quiet = !!argv.quiet;
 // Used for live reload.
 const serverFiles = globby.sync([
   'build-system/server/**',
-  '!build-system/server/new-server/transforms/dist/**',
+  `!${transformsPath}/dist/**`,
 ]);
 
 // Used to enable / disable lazy building.
@@ -113,7 +116,6 @@ async function startServer(
  * Builds the new server by converting typescript transforms to JS
  */
 function buildNewServer() {
-  const transformsPath = 'build-system/server/new-server/transforms';
   const buildCmd = `npx typescript -p ${transformsPath}/tsconfig.json`;
   log(
     green('Building'),
