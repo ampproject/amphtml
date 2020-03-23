@@ -287,9 +287,20 @@ export class AnalyticsRoot {
   getElementsByQuerySelectorAll_(context, selector) {
     // Wait for document-ready to avoid false missed searches
     return this.ampdoc.whenReady().then(() => {
-      const foundElements = this.getRoot().querySelectorAll(selector);
-      userAssert(foundElements.length, `Element "${selector}" not found`);
-      return foundElements;
+      let foundElements;
+      try {
+        foundElements = this.getRoot().querySelectorAll(selector);
+      } catch (e) {
+        userAssert(false, `Invalid query selector ${selector}`);
+      }
+      const elements = [];
+      for (let i = 0; i < foundElements.length; i++) {
+        if (this.contains(foundElements[i])) {
+          elements.push(foundElements[i]);
+        }
+      }
+      userAssert(elements.length, `Element "${selector}" not found`);
+      return elements;
     });
   }
 
