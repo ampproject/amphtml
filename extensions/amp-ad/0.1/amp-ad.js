@@ -76,7 +76,7 @@ export class AmpAd extends AMP.BaseElement {
 
           const useRemoteHtml =
             !(adConfig[type] || {})['remoteHTMLDisabled'] &&
-            this.win.document.querySelector('meta[name=amp-3p-iframe-src]');
+            this.element.getAmpDoc().getMetaByName('amp-3p-iframe-src');
           // TODO(tdrl): Check amp-ad registry to see if they have this already.
           // TODO(a4a-cam): Shorten this predicate.
           if (
