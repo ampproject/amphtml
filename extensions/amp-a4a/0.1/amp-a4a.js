@@ -251,6 +251,9 @@ export class AmpA4A extends AMP.BaseElement {
     /** @private {?ArrayBuffer} */
     this.creativeBody_ = null;
 
+    /** @private {string} The random subdomain to load SafeFrame from */
+    this.safeFrameSubdomain_ = String(Math.random()).slice(2);
+
     /**
      * Initialize this with the slot width/height attributes, and override
      * later with what the network implementation returns via extractSize.
@@ -782,7 +785,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.safeframeVersion = safeframeVersionHeader;
           Services.preconnectFor(this.win).preload(
             this.getAmpDoc(),
-            this.getSafeframePath()
+            this.getSafeframePath()// preload here
           );
         }
         // Note: Resolving a .then inside a .then because we need to capture
@@ -1842,7 +1845,7 @@ export class AmpA4A extends AMP.BaseElement {
    */
   getSafeframePath() {
     return (
-      'https://tpc.googlesyndication.com/safeframe/' +
+      `https://${this.safeFrameSubdomain_}.safeframe.googlesyndication.com/safeframe/` +
       `${this.safeframeVersion}/html/container.html`
     );
   }
