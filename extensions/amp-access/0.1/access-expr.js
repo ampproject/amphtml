@@ -15,7 +15,7 @@
  */
 
 import {accessParser as parser} from '../../../build/parsers/access-expr-impl';
-import {map} from '../../../src/utils/object';
+import {map, hasOwn} from '../../../src/utils/object';
 
 /**
  * Evaluates access expression.
@@ -46,17 +46,11 @@ export function evaluateAccessExpr(expr, data) {
   }
 }
 
-import stringify from 'json-stable-stringify';
-
-// TODO(samouri): this is bad for bundle size and performance.
-function createKey(obj) {
-  return stringify(obj);
-}
-
 export class AmpAccessEvaluator {
   constructor() {
     /** @const */
-    this.cache = map();
+    this.cache = null;
+    this.lastData = null;
   }
 
   eval_(expr, data) {
@@ -65,20 +59,22 @@ export class AmpAccessEvaluator {
 
   /**
    * Evaluate access expressions, but turn to a cache first.
+   * Cache is invalidated when given new data.
    *
    * @param {string} expr
    * @param {!JsonObject} data
    * @return {boolean}
    */
   eval(expr, data) {
-    const key = createKey(data);
-    if (!this.cache[key]) {
-      this.cache[key] = map();
-      if (!this.cache[key][expr]) {
-        this.cache[key][expr] = this.eval_(expr, data);
-      }
+    if (this.lastData !== data) {
+      this.lastData = data;
+      this.cache = map();
     }
 
-    return this.cache[key][expr];
+    if (!hasOwn(this.cache, expr)) {
+      this.cache[expr] = this.eval_(expr, data);
+    }
+
+    return this.cache[expr];
   }
 }

@@ -16,7 +16,7 @@
 
 import {AmpAccessEvaluator, evaluateAccessExpr} from '../access-expr';
 
-describe('evaluateAccessExpr', () => { 
+describe('evaluateAccessExpr', () => {
   it('should NOT allow double equal', () => {
     expect(() => {
       evaluateAccessExpr('access == true', {});
@@ -341,7 +341,7 @@ describe('evaluateAccessExpr', () => {
     }).to.throw();
   });
 
-  describe.only('AmpAccessEvaluator', () => {
+  describe('AmpAccessEvaluator', () => {
     let evaluator;
     beforeEach(() => {
       evaluator = new AmpAccessEvaluator();
@@ -349,19 +349,20 @@ describe('evaluateAccessExpr', () => {
     });
 
     it('first request should go through', () => {
-      expect(evaluator.eval('access = true', {access: true})).to.be.true;
-      expect(evaluator.eval_.callCount).to.equal(1);
-    });
-
-    it('should use the cache on subsequent calls for the same expression', () => {
-      evaluator.eval('access = true', {access: true});
       evaluator.eval('access = true', {access: true});
       expect(evaluator.eval_.callCount).to.equal(1);
     });
 
-    it('should not use the cache on subsequent calls for the same expression if the data has changed', () => {
+    it('should use the cache on subsequent calls for the same expression and data', () => {
+      const data = {access: true};
+      evaluator.eval('access = true', data);
+      evaluator.eval('access = true', data);
+      expect(evaluator.eval_.callCount).to.equal(1);
+    });
+
+    it('should not use the cache if the data is referentially unequal', () => {
       evaluator.eval('access = true', {access: true});
-      evaluator.eval('access = true', {access: false});
+      evaluator.eval('access = true', {access: true});
       expect(evaluator.eval_.callCount).to.equal(2);
     });
   });
