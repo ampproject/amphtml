@@ -565,7 +565,7 @@ export class SanitizerImpl {
 
     registerServiceBuilder(this.win_, 'purifier-inplace', function() {
       return new Purifier(
-        this.win_.document,
+        ampScript.win.document,
         dict({'IN_PLACE': true}),
         rewriteAttributeValue
       );
