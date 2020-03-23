@@ -37,7 +37,7 @@ describes.endtoend(
       ).to.exist;
     });
 
-    // TODO(esth): re-enable this test.
+    // TODO(estherkim): re-enable this test.
     it.skip('should copy the link using the browser share menu', async () => {
       // copy link
       const shareButton = await controller.findElement(
