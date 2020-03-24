@@ -230,8 +230,8 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private {!AdvancementConfig} */
-    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
+    /** @private {?AdvancementConfig} */
+    this.advancement_ = null;
 
     /** @const @private {!function(boolean)} */
     this.debounceToggleLoadingSpinner_ = debounce(
@@ -335,11 +335,12 @@ export class AmpStoryPage extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    this.maybeSetPreviewDuration_();
     this.delegateVideoAutoplay();
     this.markMediaElementsWithPreload_();
     this.initializeMediaPool_();
     this.maybeCreateAnimationManager_();
+    this.maybeSetPreviewDuration_();
+    this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
     this.advancement_.addPreviousListener(() => this.previous());
     this.advancement_.addAdvanceListener(() =>
       this.next(/* opt_isAutomaticAdvance */ true)
@@ -372,8 +373,6 @@ export class AmpStoryPage extends AMP.BaseElement {
           'auto-advance-after': autoAdvanceAttr,
         })
       );
-
-      this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
     }
   }
 
