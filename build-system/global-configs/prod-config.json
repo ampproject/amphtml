@@ -30,7 +30,8 @@
   "ios-fixed-no-transfer": 0,
   "layoutbox-invalidate-on-scroll": 1,
   "pump-early-frame": 1,
+  "random-subdomains-for-safeframe": 1,
   "swg-gpay-api": 1,
   "swg-gpay-native": 1,
-  "version-locking": 1
+  "version-locking": 1,
 }

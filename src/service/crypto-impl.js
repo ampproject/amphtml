@@ -213,6 +213,46 @@ export class Crypto {
       data
     ));
   }
+
+
+  /**
+   * Returns a cryptographically random string with 128 bits of entropy
+   * to be used as a subdomain for SafeFrame.
+   * @return {string}
+   */
+  getSecureRandomString() {
+    // Use 16 bytes to get 128 bits of entropy.
+    // 16 bytes * 8 bits per byte = 128 bits of entropy.
+
+    // Support IE 11
+    const cryptoLib =
+        /** @type {!webCrypto.Crypto|undefined} */ (
+            window.crypto || window.msCrypto);
+    let /** !Array<number>|!Uint8Array */ randomValues;
+
+    if (cryptoLib !== undefined) {
+      randomValues = new Uint8Array(16);
+      cryptoLib.getRandomValues(randomValues);
+    } else {
+      // If crypto isn't available, just use Math.random.
+      randomValues = new Array(16);
+      for (let i = 0; i < 16; ++i) {
+        randomValues[i] = Math.floor(Math.random() * 255);
+      }
+    }
+
+    let randomSubdomain = '';
+    for (const randomValue of randomValues) {
+      // Ensure each byte is represented with two hexadecimal characters.
+      if (randomValue <= 15) {
+        randomSubdomain += '0';
+      }
+      randomSubdomain += randomValue.toString(16);
+    }
+
+    return randomSubdomain;
+  }
+
 }
 
 /**
