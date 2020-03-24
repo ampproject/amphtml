@@ -13,24 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
 const argv = require('minimist')(process.argv.slice(2));
-const babel = require('@babel/core');
-const conf = require('./build.conf');
 const del = require('del');
 const fs = require('fs-extra');
 const gap = require('gulp-append-prepend');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
-const path = require('path');
 const pathModule = require('path');
 const rename = require('gulp-rename');
-const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
-const terser = require('terser');
-const through = require('through2');
 const {
   gulpClosureCompile,
   handleCompilerError,
@@ -40,6 +33,7 @@ const {checkForUnknownDeps} = require('./check-for-unknown-deps');
 const {checkTypesNailgunPort, distNailgunPort} = require('../tasks/nailgun');
 const {CLOSURE_SRC_GLOBS, SRC_TEMP_DIR} = require('./sources');
 const {isTravisBuild} = require('../common/travis');
+const {postClosureBabel} = require('./post-closure-babel');
 const {singlePassCompile} = require('./single-pass');
 const {VERSION: internalRuntimeVersion} = require('./internal-version');
 
@@ -61,86 +55,6 @@ const MAX_PARALLEL_CLOSURE_INVOCATIONS = isTravisBuild() ? 4 : 1;
  */
 function convertPathsToTmpRoot(paths) {
   return paths.map(path => path.replace(/^(!?)(.*)$/, `$1${SRC_TEMP_DIR}/$2`));
-}
-
-function loadSourceMap(file) {
-  if (file.startsWith('dist')) {
-    return fs.readFile(`${file}.map`);
-  }
-  return null;
-}
-
-/**
- * Apply Babel Transforms on output from Closure Compuler, then cleanup added space with Terser.
- *
- * @param {string} directory directory this file lives in
- * @param {boolean} isEsmBuild
- * @return {!Promise}
- */
-function postClosureBabel(directory, isEsmBuild) {
-  return through.obj(function(file, enc, next) {
-    if (path.extname(file.path) === '.map') {
-      return next(null, file);
-    }
-
-    const babelPlugins = conf.plugins({isPostCompile: true, isEsmBuild});
-    if (babelPlugins.length === 0) {
-      return next(null, file);
-    }
-
-    function returnMapFirst(map) {
-      let first = true;
-      return function(file) {
-        if (first) {
-          first = false;
-          return map;
-        }
-        return loadSourceMap(file);
-      };
-    }
-
-    const map = loadSourceMap(file.path);
-    const {code, map: babelMap} = babel.transformSync(file.contents, {
-      plugins: babelPlugins,
-      retainLines: true,
-      sourceMaps: true,
-      inputSourceMap: false,
-    });
-    let remapped = resorcery(
-      babelMap,
-      returnMapFirst(map),
-      !argv.full_sourcemaps
-    );
-
-    const {code: compressed, map: terserMap} = terser.minify(code, {
-      mangle: false,
-      compress: {
-        defaults: false,
-        unused: true,
-      },
-      output: {
-        beautify: !!argv.pretty_print,
-        comments: /\/*/,
-        keep_quoted_props: true,
-      },
-      sourceMap: true,
-    });
-    file.contents = Buffer.from(compressed, 'utf-8');
-
-    // TODO: Resorcery should support a chain, instead of having to call
-    // multiple times.
-    remapped = resorcery(
-      terserMap,
-      returnMapFirst(remapped),
-      !argv.full_sourcemaps
-    );
-    fs.writeFileSync(
-      path.resolve(directory, `${path.basename(file.path)}.map`),
-      remapped.toString()
-    );
-
-    return next(null, file);
-  });
 }
 
 // Compiles AMP with the closure compiler. This is intended only for
