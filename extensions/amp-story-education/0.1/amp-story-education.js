@@ -17,6 +17,7 @@
 import {
   Action,
   StateProperty,
+  UIType,
 } from '../../amp-story/1.0/amp-story-store-service';
 import {CSS} from '../../../build/amp-story-education-0.1.css';
 import {Layout} from '../../../src/layout';
@@ -98,7 +99,9 @@ export class AmpStoryEducation extends AMP.BaseElement {
     createShadowRootWithStyle(this.element, this.containerEl_, CSS);
 
     this.viewer_ = Services.viewerForDoc(this.element);
-    if (this.viewer_.isEmbedded()) {
+    const isMobileUI =
+      this.storeService_.get(StateProperty.UI_STATE) === UIType.MOBILE;
+    if (this.viewer_.isEmbedded() && isMobileUI) {
       this.maybeShowScreen_(
         Screen.ONBOARDING_NAVIGATION_TAP_AND_SWIPE,
         State.NAVIGATION_TAP

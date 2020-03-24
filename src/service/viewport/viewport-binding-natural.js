@@ -138,6 +138,7 @@ export class ViewportBindingNatural_ {
   updatePaddingTop(paddingTop) {
     setImportantStyles(this.win.document.documentElement, {
       'padding-top': px(paddingTop),
+      '--i-amphtml-padding-top': px(paddingTop),
     });
   }
 

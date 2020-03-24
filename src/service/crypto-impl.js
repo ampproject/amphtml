@@ -214,7 +214,6 @@ export class Crypto {
     ));
   }
 
-
   /**
    * Returns a cryptographically random string with 128 bits of entropy
    * to be used as a subdomain for SafeFrame.
@@ -252,7 +251,6 @@ export class Crypto {
 
     return randomSubdomain;
   }
-
 }
 
 /**

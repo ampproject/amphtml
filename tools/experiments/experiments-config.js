@@ -306,6 +306,12 @@ export const EXPERIMENTS = [
     cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26709',
   },
   {
+    id: 'visibility-trigger-improvements',
+    name: 'AMP Analytics Visibility Trigger Improvements',
+    spec: 'https://github.com/ampproject/amphtml/issues/26823',
+    cleanupIssue: 'https://github.com/ampproject/amphtml/issues/26823',
+  },
+  {
     id: 'random-subdomains-for-safeframe',
     name: 'Enable Random Subdomains for SafeFrame',
   }
