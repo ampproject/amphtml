@@ -786,7 +786,7 @@ export class AmpA4A extends AMP.BaseElement {
           this.safeframeVersion = safeframeVersionHeader;
           Services.preconnectFor(this.win).preload(
             this.getAmpDoc(),
-            this.getSafeframePath()// preload here
+            this.getSafeframePath()
           );
         }
         // Note: Resolving a .then inside a .then because we need to capture
