@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/** Version: 0.1.22.96 */
+/** Version: 0.1.22.97 */
 /**
  * Copyright 2018 The Subscribe with Google Authors. All Rights Reserved.
  *
@@ -5575,7 +5575,7 @@ function feCached(url) {
  */
 function feArgs(args) {
   return Object.assign(args, {
-    '_client': 'SwG 0.1.22.96',
+    '_client': 'SwG 0.1.22.97',
   });
 }
 
@@ -6689,7 +6689,7 @@ class ActivityPorts$1 {
         'analyticsContext': context.toArray(),
         'publicationId': pageConfig.getPublicationId(),
         'productId': pageConfig.getProductId(),
-        '_client': 'SwG 0.1.22.96',
+        '_client': 'SwG 0.1.22.97',
         'supportsEventManager': true,
       },
       args || {}
@@ -7589,7 +7589,7 @@ class AnalyticsService {
     // These values should all be available during page load.
     context.setTransactionId(getUuid());
     context.setReferringOrigin(parseUrl$1(this.getReferrer_()).origin);
-    context.setClientVersion('SwG 0.1.22.96');
+    context.setClientVersion('SwG 0.1.22.97');
 
     const utmParams = parseQueryString$1(this.getQueryString_());
     const campaign = utmParams['utm_campaign'];
