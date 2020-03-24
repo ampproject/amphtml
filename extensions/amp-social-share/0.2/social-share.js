@@ -63,9 +63,9 @@ export function SocialShare(props) {
     }
   }
 
-  const styleType = `SOCIAL_SHARE_${props['type'].toUpperCase()}`;
+  const type = props['type'].toUpperCase();
   const baseStyle = CSS.BASE_STYLE;
-  const backgroundStyle = CSS[styleType];
+  const backgroundStyle = CSS[type];
   const size = {
     width: props['width'] || DEFAULT_WIDTH,
     height: props['height'] || DEFAULT_HEIGHT,
@@ -82,7 +82,7 @@ export function SocialShare(props) {
     >
       <SocialShareIcon
         style={{...backgroundStyle, ...baseStyle, ...size}}
-        styleType={styleType}
+        type={type}
       />
     </div>
   );

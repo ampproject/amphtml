@@ -23,34 +23,34 @@ export const BASE_STYLE = {
 };
 
 /* Twitter Styling */
-export const SOCIAL_SHARE_TWITTER = {'backgroundColor': '1da1f2'};
+export const TWITTER = {'backgroundColor': '1da1f2'};
 
 /* Facebook Styling */
-export const SOCIAL_SHARE_FACEBOOK = {'backgroundColor': '#32529f'};
+export const FACEBOOK = {'backgroundColor': '#32529f'};
 
 /* Pinterest Styling */
-export const SOCIAL_SHARE_PINTEREST = {'backgroundColor': 'e60023'};
+export const PINTEREST = {'backgroundColor': 'e60023'};
 
 /* LinkedIn Styling */
-export const SOCIAL_SHARE_LINKEDIN = {'backgroundColor': '0077b5'};
+export const LINKEDIN = {'backgroundColor': '0077b5'};
 
 /* Google+ Styling */
-export const SOCIAL_SHARE_GPLUS = {'backgroundColor': 'dc4e41'};
+export const GPLUS = {'backgroundColor': 'dc4e41'};
 
 /* Tumblr Styling */
-export const SOCIAL_SHARE_TUMBLR = {'backgroundColor': '3c5a77'};
+export const TUMBLR = {'backgroundColor': '3c5a77'};
 
 /* Email Styling */
-export const SOCIAL_SHARE_EMAIL = {'backgroundColor': '000000'};
+export const EMAIL = {'backgroundColor': '000000'};
 
 /* Whatsapp Styling */
-export const SOCIAL_SHARE_WHATSAPP = {'backgroundColor': '25d366'};
+export const WHATSAPP = {'backgroundColor': '25d366'};
 
 /* line Styling */
-export const SOCIAL_SHARE_LINE = {'backgroundColor': '52b448'};
+export const LINE = {'backgroundColor': '52b448'};
 
 /* SMS Styling */
-export const SOCIAL_SHARE_SMS = {'backgroundColor': 'ca2b63'};
+export const SMS = {'backgroundColor': 'ca2b63'};
 
 /* "system" styling */
-export const SOCIAL_SHARE_SYSTEM = {'backgroundColor': '000000'};
+export const SYSTEM = {'backgroundColor': '000000'};

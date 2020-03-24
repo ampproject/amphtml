@@ -5,8 +5,8 @@ import * as Preact from '../../src/preact';
  * @return {PreactDef.Renderable}
  */
 export function SocialShareIcon(props) {
-  switch (props['styleType']) {
-    case 'SOCIAL_SHARE_FACEBOOK':
+  switch (props['type']) {
+    case 'FACEBOOK':
       return (
         <svg {...props} viewBox="0 0 512 512">
           <path
@@ -15,7 +15,7 @@ export function SocialShareIcon(props) {
           ></path>
         </svg>
       );
-    case 'SOCIAL_SHARE_PINTEREST':
+    case 'PINTEREST':
       return (
         <svg {...props} viewBox="0 0 512 512">
           <path
@@ -24,7 +24,7 @@ export function SocialShareIcon(props) {
           ></path>
         </svg>
       );
-    case 'SOCIAL_SHARE_LINKEDIN':
+    case 'LINKEDIN':
       return (
         <svg {...props} viewBox="0 0 512 512">
           <path
@@ -33,7 +33,7 @@ export function SocialShareIcon(props) {
           ></path>
         </svg>
       );
-    case 'SOCIAL_SHARE_EMAIL':
+    case 'EMAIL':
       return (
         <svg {...props} viewBox="0 0 512 512">
           <path
@@ -42,7 +42,7 @@ export function SocialShareIcon(props) {
           ></path>
         </svg>
       );
-    case 'SOCIAL_SHARE_TWITTER':
+    case 'TWITTER':
       return (
         <svg {...props} viewBox="0 0 512 512">
           <path
@@ -51,7 +51,7 @@ export function SocialShareIcon(props) {
           ></path>
         </svg>
       );
-    case 'SOCIAL_SHARE_TUMBLR':
+    case 'TUMBLR':
       return (
         <svg {...props} viewBox="0 0 512 512">
           <path
@@ -60,7 +60,7 @@ export function SocialShareIcon(props) {
           ></path>
         </svg>
       );
-    case 'SOCIAL_SHARE_WHATSAPP':
+    case 'WHATSAPP':
       return (
         <svg {...props} viewBox="0 0 46 46">
           <path
@@ -69,7 +69,7 @@ export function SocialShareIcon(props) {
           ></path>
         </svg>
       );
-    case 'SOCIAL_SHARE_LINE':
+    case 'LINE':
       return (
         <svg {...props} viewBox="0 0 512 512">
           <path
@@ -79,7 +79,7 @@ export function SocialShareIcon(props) {
           ></path>
         </svg>
       );
-    case 'SOCIAL_SHARE_SMS':
+    case 'SMS':
       return (
         <svg {...props} viewBox="0 0 30 29">
           <g fill="none" fillRule="evenodd" stroke="none" strokeWidth="3">
@@ -91,7 +91,7 @@ export function SocialShareIcon(props) {
           </g>
         </svg>
       );
-    case 'SOCIAL_SHARE_SYSTEM':
+    case 'SYSTEM':
       return (
         <svg {...props} viewBox="0 0 24 24">
           <path fill="none" d="M0 0h24v24H0z"></path>
