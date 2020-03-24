@@ -26,7 +26,6 @@ const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
 const path = require('path');
 const pathModule = require('path');
-const realFs = require('fs');
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');

@@ -680,12 +680,7 @@ function compile(flagsArray) {
   // TODO(@cramforce): Run the post processing step
   return new Promise(function(resolve, reject) {
     gulp
-<<<<<<< HEAD
       .src(srcs, {base: SRC_TEMP_DIR})
-      .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-=======
-      .src(srcs, {base: transformDir})
->>>>>>> Remove broken shorten-license
       .pipe(sourcemaps.init({loadMaps: true}))
       .pipe(gulpClosureCompile(flagsArray))
       .on('error', err => {
