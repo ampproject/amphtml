@@ -141,13 +141,6 @@ function getJsonConfigurationPlugin() {
  * @param {!Object<string, boolean>} buildFlags
  * @return {!Array<string|!Array<string|!Object>>}
  */
-<<<<<<< HEAD
-<<<<<<< HEAD
-function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
-  const applied = [...defaultPlugins(isEsmBuild || false)];
-=======
-=======
->>>>>>> conflict in build conf
 function plugins({
   isEsmBuild,
   isForTesting,
@@ -159,15 +152,7 @@ function plugins({
     return postCompilationPlugins(isEsmBuild);
   }
 
-<<<<<<< HEAD
-  const applied = [...defaultPlugins];
-<<<<<<< HEAD
->>>>>>> Broken Gulp
-=======
->>>>>>> conflict in build conf
-=======
   const applied = [...defaultPlugins(isEsmBuild)];
->>>>>>> Update to latest master
   // TODO(erwinm): This is temporary until we remove the assert/log removals
   // from the java transformation to the babel transformation.
   // There is currently a weird interaction where when we do the transform
@@ -179,22 +164,6 @@ function plugins({
     applied.push(localPlugin('transform-amp-asserts'));
   }
   if (isEsmBuild) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    applied.push([
-      'filter-imports',
-      {
-        imports: {
-          ...esmRemovedImports,
-          ...validTransformedRemovableImports,
-        },
-      },
-    ]);
-=======
-    applied.push(['filter-imports', {imports: esmRemovedImports}]);
-    applied.push(localPlugin('transform-function-declarations'));
->>>>>>> Broken Gulp
-=======
     applied.push(
       [
         'filter-imports',
@@ -207,7 +176,6 @@ function plugins({
       ],
       localPlugin('transform-function-declarations')
     );
->>>>>>> conflict in build conf
   }
   if (isChecktypes) {
     applied.push(localPlugin('transform-simple-object-destructure'));
