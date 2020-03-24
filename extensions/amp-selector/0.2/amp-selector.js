@@ -23,10 +23,12 @@ import {userAssert} from '../../../src/log';
 
 /** @const {string} */
 const TAG = 'amp-selector';
+let instance = 0;
 
 class AmpSelector extends PreactBaseElement {
   /** @override */
   init() {
+    instance += 1;
     const getValueAndChildren = () => {
       const children = [];
       const optionChildren = this.element.querySelectorAll('[option]');
@@ -34,6 +36,8 @@ class AmpSelector extends PreactBaseElement {
       optionChildren.forEach(child => {
         // TODO: check that an option is not within another option.
         const option = child.getAttribute('option');
+        const name = `i-amphtml-selector${instance}-option${option}`;
+        child.setAttribute('slot', name);
         const props = {
           option,
           type: 'Slot',
@@ -43,6 +47,7 @@ class AmpSelector extends PreactBaseElement {
             // Skip mutations to avoid cycles.
             mu.takeRecords();
           },
+          name,
         };
         if (child.hasAttribute('selected')) {
           value.push(option);
@@ -71,7 +76,7 @@ class AmpSelector extends PreactBaseElement {
       // allow for this kind of intervention yet
       'options': children,
       'value': value,
-      'onChange': event => this.mutateProps({value: event.target.value}),
+      'onChange': event => this.mutateProps({'value': event.target.value}),
     });
   }
 

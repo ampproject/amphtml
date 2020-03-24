@@ -33,7 +33,7 @@ import * as CSS from './selector.css';
 import * as Preact from '../../../src/preact';
 import {useState} from '../../../src/preact';
 
-const SelectorContext = Preact.createContext();
+const SelectorContext = Preact.createContext({});
 
 /**
  * @param {!JsonObject} props
@@ -76,6 +76,7 @@ export function Selector(props) {
         }}
       >
         {props.options}
+        {props.children}
       </SelectorContext.Provider>
     </props.tagName>
   );
@@ -86,24 +87,21 @@ export function Selector(props) {
  * @return {PreactDef.Renderable}
  */
 export function Option(props) {
-  const num = props.option;
+  const {option, disabled, style} = props;
   const selectorContext = Preact.useContext(SelectorContext);
   const {selected, selectOption} = selectorContext;
-  const isSelected = selected.includes(num);
-  const onClick = () => {
-    selectOption(num);
-  };
-  const status = props['disabled']
+  const isSelected = selected.includes(option);
+  const status = disabled
     ? CSS.DISABLED
     : isSelected
     ? CSS.SELECTED
     : CSS.OPTION;
   const optionProps = {
     ...props,
-    option: num,
+    option,
     selected: isSelected,
-    onClick,
-    style: {...status, ...props.style},
+    onClick: () => selectOption(option),
+    style: {...status, ...style},
   };
   props.tagName = props.type || props.tagName || 'div';
   return <props.tagName {...optionProps}>{props.children}</props.tagName>;
