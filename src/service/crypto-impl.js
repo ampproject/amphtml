@@ -220,9 +220,6 @@ export class Crypto {
    * @return {string}
    */
   getSecureRandomString() {
-    // Use 16 bytes to get 128 bits of entropy.
-    // 16 bytes * 8 bits per byte = 128 bits of entropy.
-
     // Support IE 11
     const cryptoLib =
         /** @type {!webCrypto.Crypto|undefined} */ (
