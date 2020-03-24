@@ -34,12 +34,13 @@ describes.realWin(
   {
     amp: {
       runtimeOn: true,
-      extensions: ['amp-story:1.0', 'amp-animation:0.1'],
+      extensions: ['amp-story:1.0'],
     },
   },
   env => {
     let win;
     let storyEl;
+    let ampStory;
 
     beforeEach(() => {
       win = env.win;
@@ -69,6 +70,10 @@ describes.realWin(
       });
 
       AmpStory.isBrowserSupported = () => true;
+
+      return storyEl.getImpl().then(impl => {
+        ampStory = impl;
+      });
     });
 
     afterEach(() => {
@@ -120,17 +125,19 @@ describes.realWin(
       'Should add corresponding CSS class when a full bleed animation target is' +
         ' attached as a child of a grid layer with fill template.',
       async () => {
-        const pageEls = createPages(storyEl, 2, ['cover', 'page-1']);
+        const pageEls = createPages(ampStory.element, 1, ['page-1']);
+        const pageImpl = await pageEls[0].getImpl();
+
         // Append an image animated with a full-bleed animation inside a grid-
-        // layer with a `fill` template.
-        addAnimationToImage(pageEls[1], 'pan-down', 'fill');
+        // layer with a `fill` template of the first page.
+        addAnimationToImage(pageImpl.element, 'pan-down', 'fill');
+        pageImpl.buildCallback();
+        await pageImpl.layoutCallback();
 
-        const pages = Array.from(pageEls).map(el => el.getImpl());
-        const pagesImpl = await Promise.all(pages);
-        pagesImpl[1].buildCallback();
-        await pagesImpl[1].layoutCallback();
+        ampStory.buildCallback();
+        await ampStory.layoutCallback();
 
-        expect(pageEls[1].children[0]).to.have.class(
+        expect(pageImpl.element.firstElementChild).to.have.class(
           'i-amphtml-story-grid-template-with-full-bleed-animation'
         );
       }
@@ -141,17 +148,19 @@ describes.realWin(
         'animation is used BUT the target is a child of a grid layer with a ' +
         'template other than `fill`.',
       async () => {
-        const pageEls = createPages(storyEl, 2, ['cover', 'page-1']);
+        const pageEls = createPages(ampStory.element, 1, ['page-1']);
+        const pageImpl = await pageEls[0].getImpl();
+
         // Append an image animated with a full-bleed animation inside a grid-
         // layer with a template other than fill.
-        addAnimationToImage(pageEls[1], 'fade-in', 'vertical');
+        addAnimationToImage(pageEls[0], 'fade-in', 'vertical');
+        pageImpl.buildCallback();
+        await pageImpl.layoutCallback();
 
-        const pages = Array.from(pageEls).map(el => el.getImpl());
-        const pagesImpl = await Promise.all(pages);
-        pagesImpl[1].buildCallback();
-        await pagesImpl[1].layoutCallback();
+        ampStory.buildCallback();
+        await ampStory.layoutCallback();
 
-        expect(pageEls[1].children[0]).to.not.have.class(
+        expect(pageImpl.element.firstElementChild).to.not.have.class(
           'i-amphtml-story-grid-template-with-full-bleed-animation'
         );
       }
@@ -161,16 +170,18 @@ describes.realWin(
       'Should not add additional CSS class to the target when a non-full-bleed' +
         'animation is used.',
       async () => {
-        const pageEls = createPages(storyEl, 2, ['cover', 'page-1']);
+        const pageEls = createPages(ampStory.element, 1, ['page-1']);
+        const pageImpl = await pageEls[0].getImpl();
+
         // Append an image animated with a non-full-bleed animation.
-        addAnimationToImage(pageEls[1], 'fade-in', 'fill');
+        addAnimationToImage(pageEls[0], 'fade-in', 'fill');
+        pageImpl.buildCallback();
+        await pageImpl.layoutCallback();
 
-        const pages = Array.from(pageEls).map(el => el.getImpl());
-        const pagesImpl = await Promise.all(pages);
-        pagesImpl[1].buildCallback();
-        await pagesImpl[1].layoutCallback();
+        ampStory.buildCallback();
+        await ampStory.layoutCallback();
 
-        expect(pageEls[1].children[0]).to.not.have.class(
+        expect(pageImpl.element.firstElementChild).to.not.have.class(
           'i-amphtml-story-grid-template-with-full-bleed-animation'
         );
       }
