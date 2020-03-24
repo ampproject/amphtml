@@ -22,10 +22,10 @@ import {
 } from './ad-tracker';
 import {AnchorAdStrategy} from './anchor-ad-strategy';
 import {Attributes, getAttributesFromConfigObj} from './attributes';
-import {getPlacementsFromConfigObj} from './placement';
 import {Services} from '../../../src/services';
 import {dict} from '../../../src/utils/object';
 import {getAdNetworkConfig} from './ad-network-config';
+import {getPlacementsFromConfigObj} from './placement';
 import {userAssert} from '../../../src/log';
 
 /** @const */

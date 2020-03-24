@@ -18,7 +18,6 @@ import '../../../amp-ad/0.1/amp-ad';
 import {AdTracker} from '../ad-tracker';
 import {PlacementState, getPlacementsFromConfigObj} from '../placement';
 import {Services} from '../../../../src/services';
-import {isInExperiment} from '../../../../ads/google/a4a/traffic-experiments';
 
 describes.realWin(
   'placement',
