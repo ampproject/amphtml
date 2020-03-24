@@ -21,6 +21,7 @@ const header = require('connect-header');
 const log = require('fancy-log');
 const minimist = require('minimist');
 const morgan = require('morgan');
+const path = require('path');
 const watch = require('gulp-watch');
 const {
   lazyBuildExtensions,
@@ -110,8 +111,8 @@ async function startServer(
  * live-reload.
  */
 function resetServerFiles() {
-  for (const serverFile in serverFiles) {
-    delete require.cache[serverFiles[serverFile]];
+  for (const serverFile of serverFiles) {
+    delete require.cache[path.resolve(serverFile)];
   }
 }
 
