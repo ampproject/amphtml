@@ -1487,7 +1487,9 @@ export class VisibilityTracker extends EventTracker {
           visibilityManager => {
             return visibilityManager.listenRoot(
               visibilitySpec,
-              this.getReadyPromise(waitForSpec, selector),
+              this.getReadyPromise(
+                this.getWaitForSpecForRootSelector_(waitForSpec, selector)
+              ),
               createReportReadyPromiseFunc,
               this.onEvent_.bind(
                 this,
@@ -1509,39 +1511,34 @@ export class VisibilityTracker extends EventTracker {
       const selectors = Array.isArray(selector)
         ? selector.filter((val, index) => selectors.indexOf(val) === index)
         : [selector];
-      const elementsReference = [];
-      for (let i = 0; i < selectors.length; i++) {
-        this.root
-          .getAmpElementOrElements(
-            context.parentElement || context,
-            selectors[i],
-            selectionMethod,
-            multiSelectorVisibilityOn,
-            elementsReference
-          )
-          .then(elements => {
-            for (let j = 0; j < elements.length; j++) {
-              unlistenPromises.push(
-                visibilityManagerPromise.then(
-                  visibilityManager => {
-                    return visibilityManager.listenElement(
-                      elements[j],
-                      visibilitySpec,
-                      this.getReadyPromise(
-                        waitForSpec,
-                        selectors[i],
-                        elements[j]
-                      ),
-                      createReportReadyPromiseFunc,
-                      this.onEvent_.bind(this, eventType, listener, elements[j])
-                    );
-                  },
-                  () => {}
-                )
-              );
-            }
-          });
-      }
+      this.root
+        .getAmpElements(
+          context.parentElement || context,
+          selectors,
+          selectionMethod,
+          multiSelectorVisibilityOn
+        )
+        .then(elements => {
+          for (let i = 0; i < elements.length; i++) {
+            unlistenPromises.push(
+              visibilityManagerPromise.then(
+                visibilityManager => {
+                  return visibilityManager.listenElement(
+                    elements[i],
+                    visibilitySpec,
+                    this.getReadyPromise(
+                      waitForSpec || 'ini-load',
+                      elements[i]
+                    ),
+                    createReportReadyPromiseFunc,
+                    this.onEvent_.bind(this, eventType, listener, elements[i])
+                  );
+                },
+                () => {}
+              )
+            );
+          }
+        });
     }
 
     return function() {
@@ -1651,22 +1648,27 @@ export class VisibilityTracker extends EventTracker {
   }
 
   /**
+   * Selector being null is special case just like :host and :root.
+   * If it's null, then don't wait for anything, otherwise
+   * wait for the AMP element's load.
    * @param {string|undefined} waitForSpec
    * @param {string|undefined} selector
+   * @return {string|undefined}
+   */
+  getWaitForSpecForRootSelector_(waitForSpec, selector) {
+    return waitForSpec || (selector ? 'ini-load' : null);
+  }
+
+  /**
+   * @param {string|undefined} waitForSpec
    * @param {Element=} opt_element
    * @return {?Promise}
    * @visibleForTesting
    */
-  getReadyPromise(waitForSpec, selector, opt_element) {
+  getReadyPromise(waitForSpec, opt_element) {
     if (!waitForSpec) {
-      // Default case:
-      if (!selector) {
-        // waitFor selector is not defined, wait for nothing
-        return null;
-      } else {
-        // otherwise wait for ini-load by default
-        waitForSpec = 'ini-load';
-      }
+      // Default case, waitFor selector is not defined, wait for nothing
+      return null;
     }
 
     const trackerWhitelist = getTrackerTypesForParentType('visible');

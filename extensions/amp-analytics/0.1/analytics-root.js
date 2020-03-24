@@ -326,41 +326,40 @@ export class AnalyticsRoot {
    * the specified context node.
    *
    * @param {!Element} context
-   * @param {string} selector DOM query selector.
+   * @param {!Array<string>} selectors Array of DOM query selector.
    * @param {?string=} selectionMethod Allowed values are `null`,
    *   `'closest'` and `'scope'`.
    * @param {boolean=} opt_multiSelectorOn multi-selector expriment
-   * @param {Array<Element>=} opt_elementsReference reference to unique elements
    * @return {!Promise<!Array<!AmpElement>>} Array of AMP elements corresponding to the selector if found.
    */
-  getAmpElementOrElements(
-    context,
-    selector,
-    selectionMethod,
-    opt_multiSelectorOn,
-    opt_elementsReference
-  ) {
-    if (opt_multiSelectorOn && opt_elementsReference) {
+  getAmpElements(context, selectors, selectionMethod, opt_multiSelectorOn) {
+    if (opt_multiSelectorOn) {
       userAssert(
         !selectionMethod,
-        'Cannot have selectionMethod defined with an array selector: %s',
-        selector
+        'Cannot have selectionMethod defined with an array selector.'
       );
-      return this.getElementsByQuerySelectorAll_(selector).then(elements => {
+      const elementsListsPromise = [];
+      for (let i = 0; i < selectors.length; i++) {
+        elementsListsPromise.push(
+          this.getElementsByQuerySelectorAll_(selectors[i])
+        );
+      }
+      return Promise.all(elementsListsPromise).then(elementsLists => {
         const uniqueElements = [];
-        for (let i = 0; i < elements.length; i++) {
-          if (opt_elementsReference.indexOf(elements[i]) === -1) {
-            uniqueElements.push(elements[i]);
-            opt_elementsReference.push(elements[i]);
+        for (let i = 0; i < elementsLists.length; i++) {
+          this.verifyAmpElements_(elementsLists[i], selectors[i]);
+          for (let j = 0; j < elementsLists[i].length; j++) {
+            if (uniqueElements.indexOf(elementsLists[i][j]) === -1) {
+              uniqueElements.push(elementsLists[i][j]);
+            }
           }
         }
-        this.verifyAmpElements_(uniqueElements, selector);
         return uniqueElements;
       });
     }
     return this.getAmpElement(
       context,
-      selector,
+      selectors[0],
       selectionMethod
     ).then(element => [element]);
   }
