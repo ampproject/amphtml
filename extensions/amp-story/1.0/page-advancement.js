@@ -966,12 +966,17 @@ class MediaBasedAdvancement extends AdvancementConfig {
       this.mediaElement_,
       'Media element was unspecified.'
     );
+
     this.unlistenFns_.push(
       listenOnce(mediaElement, 'ended', () => this.onAdvance())
     );
-    this.unlistenFns_.push(
-      listenOnce(mediaElement, 'timeupdate', () => this.onProgressUpdate())
-    );
+
+    this.onProgressUpdate();
+
+    this.timer_.poll(POLL_INTERVAL_MS, () => {
+      this.onProgressUpdate();
+      return !this.isRunning();
+    });
   }
 
   /** @private */
