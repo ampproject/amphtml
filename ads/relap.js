@@ -49,7 +49,7 @@ export function relap(global, data) {
       });
     };
 
-    loadScript(global, 'https://v7.relap.io/relap.js');
+    loadScript(global, 'https://relap.io/v7/relap.js');
   } else {
     window.relapV6WidgetReady = function() {
       window.context.renderStart();

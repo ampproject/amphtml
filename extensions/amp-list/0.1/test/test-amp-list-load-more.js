@@ -82,7 +82,7 @@ describes.realWin(
 
         env.sandbox.stub(list, 'getOverflowElement').returns(null);
         env.sandbox.stub(list, 'fetchList_').returns(Promise.resolve());
-        list.element.changeSize = () => {};
+        list.element.applySize = () => {};
         list.buildCallback();
       });
 
@@ -171,7 +171,7 @@ describes.realWin(
         env.sandbox
           .stub(list, 'prepareAndSendFetch_')
           .returns(Promise.resolve(HAS_MORE_ITEMS_PAYLOAD));
-        list.element.changeSize = () => {};
+        list.element.applySize = () => {};
         list.buildCallback();
       });
 
@@ -218,7 +218,6 @@ describes.realWin(
         expect(renderSpy).to.be.calledTwice;
         expect(renderSpy).to.be.calledWith([div3, div4], true);
 
-        list.container_;
         expect(list.container_.children).to.have.lengthOf(4);
       });
 
@@ -231,7 +230,6 @@ describes.realWin(
         env.sandbox
           .stub(list, 'maybeRenderLoadMoreTemplates_')
           .returns(Promise.resolve([]));
-
         const div1 = doc.createElement('div');
         div1.textContent = '1';
         const div2 = doc.createElement('div');

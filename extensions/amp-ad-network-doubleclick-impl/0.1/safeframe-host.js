@@ -261,16 +261,13 @@ export class SafeframeHostApi {
     // Don't allow for referrer policy same-origin,
     // as Safeframe will always be a different origin.
     // Don't allow for no-referrer.
-    const {canonicalUrl} = Services.documentInfoForDoc(
-      this.baseInstance_.getAmpDoc()
-    );
-    const metaReferrer = this.win_.document.querySelector(
-      "meta[name='referrer']"
-    );
+    const ampdoc = this.baseInstance_.getAmpDoc();
+    const {canonicalUrl} = Services.documentInfoForDoc(ampdoc);
+    const metaReferrer = ampdoc.getMetaByName('referrer');
     if (!metaReferrer) {
       return canonicalUrl;
     }
-    switch (metaReferrer.getAttribute('content')) {
+    switch (metaReferrer) {
       case 'same-origin':
         return;
       case 'no-referrer':
@@ -464,7 +461,7 @@ export class SafeframeHostApi {
    * @private
    */
   sendMessage_(payload, serviceName) {
-    if (!this.iframe_.contentWindow) {
+    if (!this.iframe_ || !this.iframe_.contentWindow) {
       dev().error(TAG, 'Frame contentWindow unavailable.');
       return;
     }

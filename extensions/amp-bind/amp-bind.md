@@ -1271,6 +1271,8 @@ See corresponding [select attributes](https://developer.mozilla.org/en-US/docs/W
 
 [/filter] <!-- formats="email" -->
 
+[filter formats="websites, ads"]
+
 **`<source>`**
 
 - `[src]`
@@ -1285,6 +1287,8 @@ See corresponding [source attributes](https://developer.mozilla.org/en-US/docs/W
 - [srclang]
 
 See corresponding [track attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/track#Attributes).
+
+[/filter] <!-- formats="websites, ads" -->
 
 [filter formats="websites, ads"]
 
