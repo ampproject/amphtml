@@ -26,19 +26,20 @@ describes.endtoend(
     let controller;
     /**
      * Attach an event listener to page to capture a custom event.
-     * @param {string} type Event name.
+     * If given a selector, click on it to fire the event being listened for.
      * @return {!Promise}
      */
-    function getActionTrust() {
-      return controller.driver.executeScript(() => {
+    function getActionTrustFor(opt_selector) {
+      return controller.driver.executeScript(opt_selector => {
         return new Promise(resolve => {
           document.addEventListener('slideChange', function forwardEvent(e) {
             // Listen once
             document.removeEventListener('slideChange', forwardEvent);
             resolve(e.data.actionTrust);
           });
+          opt_selector ? document.querySelector(opt_selector).click() : null;
         });
-      });
+      }, opt_selector);
     }
 
     beforeEach(async () => {
@@ -46,27 +47,20 @@ describes.endtoend(
     });
 
     it('should fire low trust event for autoplay advance', async () => {
-      await controller.findElement('#event-container');
       for (let i = 0; i < 3; i++) {
-        const actionTrust = await getActionTrust();
-        await expect(actionTrust).to.equal(ActionTrust.LOW); //  autoplay advanced
+        const actionTrust = await getActionTrustFor(/* autoplay */);
+        await expect(actionTrust).to.equal(ActionTrust.LOW);
       }
     });
 
     it('should fire high trust event on user interaction', async () => {
-      await controller.findElement('#event-container');
+      const actionTrust = await getActionTrustFor('.amp-carousel-button-next');
+      await expect(actionTrust).to.equal(ActionTrust.HIGH);
+    });
 
-      const actionTrustNext = getActionTrust();
-      const nextButton = await controller.findElement(
-        '.amp-carousel-button-next'
-      );
-      await controller.click(nextButton);
-      await expect(await actionTrustNext).to.equal(ActionTrust.HIGH);
-
-      const actionTrustFirst = getActionTrust();
-      const goToFirstSlideButton = await controller.findElement('#go-to-first');
-      await controller.click(goToFirstSlideButton);
-      await expect(await actionTrustFirst).to.equal(ActionTrust.HIGH);
+    it('should fire high trust event on user interaction through amp-bind', async () => {
+      const actionTrust = await getActionTrustFor('#go-to-last');
+      await expect(actionTrust).to.equal(ActionTrust.HIGH);
     });
   }
 );
