@@ -52,6 +52,14 @@ const TEST_SERVER_PORT = argv.port || 8000;
 let SERVE_MODE = getServeMode();
 
 app.use(bodyParser.text());
+
+// Middleware is executed in order, so this must be at the top.
+// TODO(#24333): Migrate all server URL handlers to new-server/router and
+// deprecate this file.
+if (argv.new_server) {
+  app.use(require('./new-server/router'));
+}
+
 app.use(require('./routes/a4a-envelopes'));
 app.use('/amp4test', require('./amp4test').app);
 app.use('/analytics', require('./routes/analytics'));
@@ -72,7 +80,8 @@ app.use((req, res, next) => {
 
 function isValidServeMode(serveMode) {
   return (
-    ['default', 'compiled', 'cdn'].includes(serveMode) || isRtvMode(serveMode)
+    ['default', 'compiled', 'cdn', 'esm'].includes(serveMode) ||
+    isRtvMode(serveMode)
   );
 }
 
