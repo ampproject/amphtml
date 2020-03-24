@@ -10,6 +10,12 @@
       ],
     },
     {
+      pattern: 'amp-ad-network-*-impl/**/*',
+      owners: [
+        {name: 'ampproject/wg-ads-reviewers'},
+      ],
+    },
+    {
       pattern: '**/*-player.{js,md}',
       owners: [
         {name: 'alanorozco', notify: true},
