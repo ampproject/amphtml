@@ -32,45 +32,76 @@ const argv = minimist(process.argv.slice(2));
 const isClosureCompiler =
   argv._.includes('dist') || argv._.includes('check-types');
 const {esm} = argv;
-const noModuleTarget = {
-  'browsers': isTravisBuild()
-    ? ['Last 2 versions', 'safari >= 9']
-    : ['Last 2 versions'],
+
+const targets = esm => {
+  if (esm) {
+    return {'esmodules': true};
+  }
+
+  if (isTravisBuild()) {
+    return {'browsers': ['Last 2 versions', 'safari >= 9']};
+  }
+
+  return {'browsers': ['Last 2 versions']};
 };
 
-const plugins = [
-  './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments',
-  '@babel/plugin-transform-react-constant-elements',
-  [
-    '@babel/plugin-transform-classes',
-    {
-      loose: false,
-    },
-  ],
-  [
+const plugins = esm => {
+  const leadingComments =
+    './build-system/babel-plugins/babel-plugin-transform-fix-leading-comments';
+  const reactConstantElements =
+    '@babel/plugin-transform-react-constant-elements';
+  const transformJSX = [
     '@babel/plugin-transform-react-jsx',
     {
       pragma: 'Preact.createElement',
       pragmaFrag: 'Preact.Fragment',
       useSpread: true,
     },
-  ],
-];
+  ];
+  const transformClasses = [
+    '@babel/plugin-transform-classes',
+    {
+      loose: false,
+    },
+  ];
 
-const esmPresets = [
-  'babel-preset-modules',
-  {
-    'loose': true,
-  },
-];
-const presets = [
-  '@babel/preset-env',
-  {
-    'modules': isClosureCompiler ? false : 'commonjs',
-    'loose': true,
-    'targets': noModuleTarget,
-  },
-];
+  if (esm) {
+    return [leadingComments, reactConstantElements, transformJSX];
+  }
+
+  return [
+    leadingComments,
+    reactConstantElements,
+    transformClasses,
+    transformJSX,
+  ];
+};
+
+const presets = esm => {
+  if (esm) {
+    return [
+      [
+        '@babel/preset-env',
+        {
+          'modules': false,
+          'targets': targets(esm),
+          'bugfixes': true,
+        },
+      ],
+    ];
+  }
+
+  return [
+    [
+      '@babel/preset-env',
+      {
+        'modules': isClosureCompiler ? false : 'commonjs',
+        'loose': true,
+        'targets': targets(esm),
+      },
+    ],
+  ];
+};
 
 // eslint-disable-next-line local/no-module-exports
 module.exports = function(api) {
@@ -80,9 +111,10 @@ module.exports = function(api) {
   if (isClosureCompiler && !esm) {
     return {};
   }
+
   return {
-    'plugins': plugins,
-    'presets': [esm ? esmPresets : presets],
+    'plugins': plugins(esm),
+    'presets': presets(esm),
     'compact': false,
     'sourceType': 'module',
   };
