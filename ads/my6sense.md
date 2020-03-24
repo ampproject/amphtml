@@ -23,7 +23,8 @@ For more information, visit [www.My6sense.com](https://www.My6sense.com).
 
 ```html
 <amp-ad
-  height="600"
+  width="300"
+  height="250"
   type="my6sense"
   data-widget-key="your-widget-key"
   data-zone="[ZONE]"

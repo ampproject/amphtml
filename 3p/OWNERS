@@ -7,6 +7,8 @@
       owners: [
         {name: 'ampproject/wg-ads-reviewers'},
         {name: 'ampproject/wg-ui-and-a11y'},
+        {name: 'lannka'},
+        {name: 'sahar-alkolombra-my6sense', notify: true},
       ],
     },
   ],
