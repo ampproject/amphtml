@@ -75,12 +75,14 @@ const setupMeasurement = page =>
   });
 
 /**
- * Handles request interception
+ * Handles request interception for analytics:
+ * - rewrites vendor config requests
+ * - records first outgoing analytics request
  *
  * @param {Request} interceptedRequest
- * @param {Array<number>} endTimes
+ * @param {!Function} setEndTimeCallback
  */
-async function handleAnalyticsRequests(interceptedRequest, endTimes) {
+async function handleAnalyticsRequests(interceptedRequest, setEndTimeCallback) {
   const interceptedUrl = interceptedRequest.url();
   const matchArray = interceptedUrl.match(CDN_ANALYTICS_REGEXP);
   if (matchArray) {
@@ -96,7 +98,7 @@ async function handleAnalyticsRequests(interceptedRequest, endTimes) {
       body: jsonString,
     });
   } else if (interceptedUrl.includes(ANALYTICS_PARAM)) {
-    endTimes.push(Date.now());
+    setEndTimeCallback(Date.now());
     interceptedRequest.abort();
   } else {
     interceptedRequest.continue();
@@ -155,14 +157,13 @@ const readMetrics = page =>
  * Adds analytics metrics
  *
  * @param {number} startTime
- * @param {Array<number>} endTimes
+ * @param {?number} endTime
  * @param {object} metrics
  * @return {object}
  */
-function maybeAddAnalyticsMetric(startTime, endTimes, metrics) {
-  if (endTimes.length) {
-    const analyticsRequest =
-      endTimes.reduce((a, b) => a + b, 0) / endTimes.length - startTime;
+function maybeAddAnalyticsMetric(startTime, endTime, metrics) {
+  if (endTime) {
+    const analyticsRequest = endTime - startTime;
     metrics = Object.assign(metrics, {analyticsRequest});
   }
   return metrics;
@@ -215,10 +216,12 @@ async function measureDocument(url, version, {headless}) {
   await page.setRequestInterception(true);
   await setupMeasurement(page);
 
-  const endTimes = [];
+  let endTime;
   const startTime = Date.now();
   page.on('request', interceptedRequest =>
-    handleAnalyticsRequests(interceptedRequest, endTimes)
+    handleAnalyticsRequests(interceptedRequest, analyticsRequestTime => {
+      endTime = endTime ? endTime : analyticsRequestTime;
+    })
   );
 
   try {
@@ -232,7 +235,7 @@ async function measureDocument(url, version, {headless}) {
   }
 
   let metrics = await readMetrics(page);
-  metrics = maybeAddAnalyticsMetric(startTime, endTimes, metrics);
+  metrics = maybeAddAnalyticsMetric(startTime, endTime, metrics);
   writeMetrics(url, version, metrics);
   await browser.close();
 }
