@@ -56,6 +56,9 @@ const TAG = 'RECAPTCHA';
 /** @const {string} */
 const RECAPTCHA_API_URL = 'https://www.google.com/recaptcha/api.js?render=';
 
+/** @const {string} */
+const GLOBAL_RECAPTCHA_API_URL = 'https://www.recaptcha.net/recaptcha/api.js?render=';
+
 /** {?IframeMessaginClient} */
 let iframeMessagingClient = null;
 
@@ -99,6 +102,14 @@ export function initRecaptcha(recaptchaApiBaseUrl = RECAPTCHA_API_URL) {
     'The sitekey is required for the <amp-recaptcha-input> iframe'
   );
   sitekey = dataObject.sitekey;
+  
+  // Determine the recaptcha api URL based on global attribute
+  devAssert(
+    dataObject.global,
+    'The global attribute is required for the <amp-recaptcha-input> iframe'
+  );
+  if (dataObject.global) recaptchaApiUrl = GLOBAL_RECAPTCHA_API_URL;
+
   const recaptchaApiUrl = recaptchaApiBaseUrl + sitekey;
 
   loadScript(

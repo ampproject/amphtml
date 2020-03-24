@@ -53,6 +53,9 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
 
     /** @private {?Promise} */
     this.registerPromise_ = null;
+
+    /** @private {boolean} */
+    this.global_ = false;
   }
 
   /** @override */
@@ -75,6 +78,9 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
       AsyncInputAttributes.NAME,
       this.element
     );
+
+    this.global_ = this.element.hasAttribute('global') && 
+      this.element.getAttribute('global') !== 'false';
 
     return recaptchaServiceForDoc(this.element).then(service => {
       this.recaptchaService_ = service;
@@ -108,7 +114,7 @@ export class AmpRecaptchaInput extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     if (!this.registerPromise_ && this.sitekey_) {
-      this.registerPromise_ = this.recaptchaService_.register(this.sitekey_);
+      this.registerPromise_ = this.recaptchaService_.register(this.sitekey_, this.global_);
     }
 
     return /** @type {!Promise} */ (this.registerPromise_);

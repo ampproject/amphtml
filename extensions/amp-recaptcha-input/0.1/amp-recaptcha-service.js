@@ -88,6 +88,9 @@ export class AmpRecaptchaService {
 
     /** @private {Object} */
     this.executeMap_ = {};
+
+    /** @private {boolean} */
+    this.global_;
   }
 
   /**
@@ -96,13 +99,25 @@ export class AmpRecaptchaService {
    * @param {string} sitekey
    * @return {Promise}
    */
-  register(sitekey) {
+  register(sitekey, global) {
     if (!this.sitekey_) {
       this.sitekey_ = sitekey;
-    } else if (this.sitekey_ !== sitekey) {
+    }
+    if (this.global_ === undefined) {
+      this.global_ = global;
+    }
+    if (this.sitekey_ !== sitekey) {
       return Promise.reject(
         new Error(
           'You must supply the same sitekey ' +
+            'to all amp-recaptcha-input elements.'
+        )
+      );
+    }
+    if (this.global_ !== global) {
+      return Promise.reject(
+        new Error(
+          'You must supply the same global attribute ' +
             'to all amp-recaptcha-input elements.'
         )
       );
@@ -230,6 +245,7 @@ export class AmpRecaptchaService {
           dict({
             'sitekey': this.sitekey_,
             'sentinel': 'amp-recaptcha',
+            'global': this.global_,
           })
         )
       );
