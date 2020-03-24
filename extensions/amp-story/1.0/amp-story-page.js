@@ -130,10 +130,10 @@ const ADVERTISEMENT_ATTR_NAME = 'ad';
 /** @private @const {number} */
 const REWIND_TIMEOUT_MS = 350;
 
-/** @private @const {number} */
+/** @private @const {string} */
 const DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION = '2s';
 
-/** @private @const {number} */
+/** @private @const {string} */
 const VIDEO_PREVIEW_AUTO_ADVANCE_DURATION = '5s';
 
 /**
@@ -230,7 +230,7 @@ export class AmpStoryPage extends AMP.BaseElement {
     /** @private {?AnimationManager} */
     this.animationManager_ = null;
 
-    /** @private @const {!AdvancementConfig} */
+    /** @private {!AdvancementConfig} */
     this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
 
     /** @const @private {!function(boolean)} */
@@ -366,9 +366,12 @@ export class AmpStoryPage extends AMP.BaseElement {
           ? VIDEO_PREVIEW_AUTO_ADVANCE_DURATION
           : DEFAULT_PREVIEW_AUTO_ADVANCE_DURATION;
 
-      addAttributesToElement(this.element, {
-        'auto-advance-after': autoAdvanceAttr,
-      });
+      addAttributesToElement(
+        this.element,
+        dict({
+          'auto-advance-after': autoAdvanceAttr,
+        })
+      );
 
       this.advancement_ = AdvancementConfig.forElement(this.win, this.element);
     }
