@@ -22,22 +22,23 @@ describes.endtoend(
     environments: ['single'],
   },
   async function(env) {
-    const ActionTrust = {LOW: '1', HIGH: '3'};
+    const ActionTrust = {LOW: 1, HIGH: 3};
     let controller;
     /**
      * Attach an event listener to page to capture a custom event.
      * @param {string} type Event name.
      * @return {!Promise}
      */
-    function updateDomOn(type) {
-      return controller.driver.executeScript(type => {
-        document.addEventListener(type, e => {
-          const el = document.createElement('div');
-          el.classList.add('event');
-          el.textContent = e.data.actionTrust;
-          document.querySelector('#event-container').appendChild(el);
+    function getActionTrust() {
+      return controller.driver.executeScript(() => {
+        return new Promise(resolve => {
+          document.addEventListener('slideChange', function forwardEvent(e) {
+            // Listen once
+            document.removeEventListener('slideChange', forwardEvent);
+            resolve(e.data.actionTrust);
+          });
         });
-      }, type);
+      });
     }
 
     beforeEach(async () => {
@@ -46,37 +47,26 @@ describes.endtoend(
 
     it('should fire low trust event for autoplay advance', async () => {
       await controller.findElement('#event-container');
-      await updateDomOn('slideChange');
-
-      const event1 = await controller.findElement('.event:first-child');
-      await expect(controller.getElementText(event1)).to.equal(ActionTrust.LOW); //  autoplay advanced
-
-      const event2 = await controller.findElement('.event:nth-child(2)');
-      await expect(controller.getElementText(event2)).to.equal(ActionTrust.LOW); //  autoplay advanced
-
-      const event3 = await controller.findElement('.event:nth-child(3)');
-      await expect(controller.getElementText(event3)).to.equal(ActionTrust.LOW); //  autoplay advanced
+      for (let i = 0; i < 3; i++) {
+        const actionTrust = await getActionTrust();
+        await expect(actionTrust).to.equal(ActionTrust.LOW); //  autoplay advanced
+      }
     });
 
     it('should fire high trust event on user interaction', async () => {
       await controller.findElement('#event-container');
-      await updateDomOn('slideChange');
 
+      const actionTrustNext = getActionTrust();
       const nextButton = await controller.findElement(
         '.amp-carousel-button-next'
       );
       await controller.click(nextButton);
-      const event1 = await controller.findElement('.event:first-child');
-      await expect(controller.getElementText(event1)).to.equal(
-        ActionTrust.HIGH
-      );
+      await expect(await actionTrustNext).to.equal(ActionTrust.HIGH);
 
+      const actionTrustFirst = getActionTrust();
       const goToFirstSlideButton = await controller.findElement('#go-to-first');
       await controller.click(goToFirstSlideButton);
-      const event2 = await controller.findElement('.event:nth-child(2)');
-      await expect(controller.getElementText(event2)).to.equal(
-        ActionTrust.HIGH
-      );
+      await expect(await actionTrustFirst).to.equal(ActionTrust.HIGH);
     });
   }
 );
