@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 import '../amp-timeago';
-import {Timeago} from '../timeago';
 import {act} from 'react-dom/test-utils';
-import {render} from 'react-dom';
 import {toggleExperiment} from '../../../../src/experiments';
+import {whenCalled} from '../../../../testing/test-helper.js';
+import {whenUpgradedToCustomElement} from '../../../../src/dom';
 
 describes.realWin(
   'amp-timeago',
@@ -33,8 +33,9 @@ describes.realWin(
 
     const timeout = ms => new Promise(res => setTimeout(res, ms));
     const getShadow = async () => {
-      // TODO: Replace timeout with detect `shadowRoot` insertion.
-      await timeout(100);
+      await whenUpgradedToCustomElement(element);
+      await element.whenBuilt();
+      await whenCalled(env.sandbox.spy(element, 'attachShadow'));
       return element.shadowRoot;
     };
 
@@ -51,7 +52,6 @@ describes.realWin(
       element.setAttribute('layout', 'fixed');
       element.setAttribute('width', '160px');
       element.setAttribute('height', '20px');
-      win.document.body.appendChild(element);
     });
 
     afterEach(() => {
@@ -63,7 +63,8 @@ describes.realWin(
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.build();
+      win.document.body.appendChild(element);
+
       const shadow = await getShadow();
       const timeElement = shadow.querySelector('time');
       expect(timeElement.textContent).to.equal('2 days ago');
@@ -74,7 +75,8 @@ describes.realWin(
       element.setAttribute('datetime', date.toISOString());
       element.textContent = 'Sunday 1 January 2017';
       element.setAttribute('cutoff', '8640000');
-      element.build();
+      win.document.body.appendChild(element);
+
       const shadowRoot = await getShadow();
       const timeElement = shadowRoot.querySelector('time');
       expect(timeElement.textContent).to.equal('Sunday 1 January 2017');
@@ -85,12 +87,10 @@ describes.realWin(
       date.setSeconds(date.getSeconds() - 10);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.build();
+      win.document.body.appendChild(element);
+
       const shadow = await getShadow();
       const timeElement = shadow.querySelector('time');
-      await act(async () => {
-        render(Timeago, element);
-      });
       await timeout(1000);
       expect(timeElement.textContent).to.equal('10 seconds ago');
 
@@ -105,12 +105,14 @@ describes.realWin(
       date.setDate(date.getDate() - 2);
       element.setAttribute('datetime', date.toISOString());
       element.textContent = date.toString();
-      element.build();
+      win.document.body.appendChild(element);
+
       date.setDate(date.getDate() + 1);
       element.setAttribute('datetime', date.toString());
       element.mutatedAttributesCallback({
         'datetime': date.toString(),
       });
+
       const shadow = await getShadow();
       const timeElement = shadow.querySelector('time');
       expect(timeElement.textContent).to.equal('1 day ago');
