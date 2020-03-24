@@ -32,7 +32,7 @@ export function setInViewportForTesting(inV) {
 // Active intervals. Must be global, because people clear intervals
 // with clearInterval from a different window.
 const intervals = {};
-let intervalId = 0;
+let intervalId = 1;
 
 /**
  * Add instrumentation to a window and all child iframes.
