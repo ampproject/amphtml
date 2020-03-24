@@ -46,6 +46,8 @@ performance.flags = {
   'threshold':
     '  Fraction by which metrics are allowed to increase. Number between 0.0 and 1.0',
   'url': '  Page to test. Overrides urls set in config.json',
+  'set_timeout':
+    '  How long to wait for ads and analytics request. Default is 2000ms.',
 };
 
 module.exports = {

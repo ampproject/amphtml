@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+const argv = require('minimist')(process.argv.slice(2));
 const fs = require('fs');
 const log = require('fancy-log');
 const path = require('path');
@@ -33,6 +34,8 @@ let puppeteer;
 function requirePuppeteer_() {
   puppeteer = require('puppeteer');
 }
+
+const TIMEOUT_MS = argv.set_timeout || 2000;
 
 /**
  * Setup measurement on page before navigating to the URL. Performance
@@ -106,6 +109,16 @@ async function handleAnalyticsRequests(interceptedRequest, setEndTimeCallback) {
 }
 
 /**
+ * @param {number} timeout
+ * @return {!Promise}
+ */
+function delay(timeout) {
+  return new Promise(resolve => {
+    setTimeout(resolve, timeout);
+  });
+}
+
+/**
  * Evaluate script on the page to collect and calculate metrics
  *
  * @param {Puppeteer.page} page
@@ -161,12 +174,9 @@ const readMetrics = page =>
  * @param {object} metrics
  * @return {object}
  */
-function maybeAddAnalyticsMetric(startTime, endTime, metrics) {
-  if (endTime) {
-    const analyticsRequest = endTime - startTime;
-    metrics = Object.assign(metrics, {analyticsRequest});
-  }
-  return metrics;
+function addAnalyticsMetric(startTime, endTime, metrics) {
+  const analyticsRequest = endTime ? endTime - startTime : 0;
+  return Object.assign(metrics, {analyticsRequest});
 }
 
 /**
@@ -235,7 +245,8 @@ async function measureDocument(url, version, {headless}) {
   }
 
   let metrics = await readMetrics(page);
-  metrics = maybeAddAnalyticsMetric(startTime, endTime, metrics);
+  await delay(TIMEOUT_MS);
+  metrics = addAnalyticsMetric(startTime, endTime, metrics);
   writeMetrics(url, version, metrics);
   await browser.close();
 }
