@@ -24,18 +24,9 @@ const gap = require('gulp-append-prepend');
 const gulp = require('gulp');
 const gulpIf = require('gulp-if');
 const nop = require('gulp-nop');
-<<<<<<< HEAD
-const pathModule = require('path');
-=======
 const path = require('path');
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> Broken Gulp
-=======
+const pathModule = require('path');
 const realFs = require('fs');
->>>>>>> wrong directory output
-=======
->>>>>>> remove unused deps
 const rename = require('gulp-rename');
 const resorcery = require('@jridgewell/resorcery');
 const sourcemaps = require('gulp-sourcemaps');
@@ -488,12 +479,7 @@ function compile(
     } else {
       timeInfo.startTime = Date.now();
       return gulp
-<<<<<<< HEAD
         .src(gulpSrcs, {base: SRC_TEMP_DIR})
-        .pipe(gulpIf(shouldShortenLicense, shortenLicense()))
-=======
-        .src(gulpSrcs, {base: gulpBase})
->>>>>>> Remove broken shorten-license
         .pipe(sourcemaps.init({loadMaps: true}))
         .pipe(gulpClosureCompile(compilerOptionsArray, distNailgunPort))
         .on('error', err => {
