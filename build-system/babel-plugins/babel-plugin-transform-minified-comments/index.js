@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-// Reassigns the trailing comments of a statement to be leading comment of its
-// next sibling. This is because JSDoc comments (which should be on the next
-// statement) get erroneously assigned as trailing comments of this statement.
+// Ensure comments in minified build output is minimal.
 module.exports = function() {
   return {
     visitor: {
@@ -33,7 +31,11 @@ module.exports = function() {
         }
 
         node.trailingComments = null;
-        next.addComments('leading', trailingComments);
+        const formattedComments = (trailingComments || []).map(comment => ({
+          ...comment,
+          value: comment.value.replace(/\n +/g, `\n`),
+        }));
+        next.addComments('leading', formattedComments);
       },
     },
   };

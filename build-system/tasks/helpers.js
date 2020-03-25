@@ -709,6 +709,14 @@ function transferSrcsToTempDir(options = {}) {
     colors.cyan(SRC_TEMP_DIR)
   );
   const files = globby.sync(BABEL_SRC_GLOBS);
+  const babelPlugins = conf.plugins({
+    isEsmBuild: options.isEsmBuild,
+    isSinglePass: options.isSinglePass,
+    isForTesting: options.isForTesting,
+    isChecktypes: options.isChecktypes,
+    isPostCompile: false,
+  });
+
   files.forEach(file => {
     if (
       (file.startsWith('node_modules/') || file.startsWith('third_party/')) &&
@@ -719,13 +727,7 @@ function transferSrcsToTempDir(options = {}) {
     }
 
     const {code} = babel.transformFileSync(file, {
-      plugins: conf.plugins({
-        isEsmBuild: options.isEsmBuild,
-        isSinglePass: options.isSinglePass,
-        isForTesting: options.isForTesting,
-        isChecktypes: options.isChecktypes,
-        isPostCompile: false,
-      }),
+      plugins: babelPlugins,
       retainLines: true,
       compact: false,
     });

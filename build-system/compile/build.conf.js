@@ -42,7 +42,12 @@ const defaultPlugins = isEsmBuild => [
 ];
 
 const postCompilationPlugins = isEsmBuild =>
-  isEsmBuild ? [localPlugin('transform-function-declarations')] : [];
+  isEsmBuild
+    ? [
+        localPlugin('transform-minified-comments'),
+        localPlugin('transform-function-declarations'),
+      ]
+    : [];
 
 const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
@@ -112,9 +117,10 @@ function getReplacePlugin(isEsmBuild) {
   });
 
   // default each backup experiment constant to the customized value
-  for (const [experimentDefine, value] of Object.entries(
+  const experimentsConstantBackupEntries = Object.entries(
     experimentsConstantBackup
-  )) {
+  );
+  for (const [experimentDefine, value] of experimentsConstantBackupEntries) {
     function flagExists(element) {
       return element['identifierName'] === experimentDefine;
     }

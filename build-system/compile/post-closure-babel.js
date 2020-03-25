@@ -87,20 +87,17 @@ function terserMinify(code) {
  * @return {!Promise}
  */
 exports.postClosureBabel = function(directory, isEsmBuild) {
-  return through.obj(function(file, enc, next) {
-    if (path.extname(file.path) === '.map') {
-      return next(null, file);
-    }
+  const babelPlugins = conf.plugins({isPostCompile: true, isEsmBuild});
 
-    const babelPlugins = conf.plugins({isPostCompile: true, isEsmBuild});
-    if (babelPlugins.length === 0) {
+  return through.obj(function(file, enc, next) {
+    if (path.extname(file.path) === '.map' || babelPlugins.length === 0) {
       return next(null, file);
     }
 
     const map = loadSourceMap(file.path);
     const {code, map: babelMap} = babel.transformSync(file.contents, {
       plugins: babelPlugins,
-      retainLines: true,
+      retainLines: false,
       sourceMaps: true,
       inputSourceMap: false,
     });
