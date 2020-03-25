@@ -14,12 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.module('parse_css.Amp4AdsParseCssTest');
+goog.provide('parse_css.Amp4AdsParseCssTest');
 
-const json_testutil = goog.require('json_testutil');
-const parse_css = goog.require('parse_css');
-const tokenize_css = goog.require('tokenize_css');
-const validateAmp4AdsCss = goog.require('amp.validator.validateAmp4AdsCss');
+goog.require('json_testutil.makeJsonKeyCmpFn');
+goog.require('json_testutil.renderJSON');
+goog.require('parse_css.BlockType');
+goog.require('parse_css.parseAStylesheet');
+goog.require('parse_css.tokenize');
+goog.require('parse_css.validateAmp4AdsCss');
 
 /**
  * A strict comparison between two values that does not truncate the
@@ -63,12 +65,12 @@ describe('validateAmp4AdsCss', () => {
         '  transform: rotate(180deg); transition: transform 2s; ' +
         '}';
     const errors = [];
-    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals([], errors);
   });
 
@@ -78,24 +80,24 @@ describe('validateAmp4AdsCss', () => {
         '  -webkit-transition: -o-transform 2s; ' +
         '}';
     const errors = [];
-    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals([], errors);
   });
 
   it('reports that position fixed and position sticky are disallowed', () => {
     const css = '.box { position: fixed; position:sticky; }';
     const errors = [];
-    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals(
         [
           {
@@ -125,12 +127,12 @@ describe('validateAmp4AdsCss', () => {
         '    transition: transform 2s;' +
         '}';
     const errors = [];
-    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals([], errors);
   });
 
@@ -144,12 +146,12 @@ describe('validateAmp4AdsCss', () => {
            '    -ms-transition: -webkit-transform 2s;' +
            '}';
         const errors = [];
-        const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+        const tokens = parse_css.tokenize(css, 1, 0, errors);
         const sheet = parse_css.parseAStylesheet(
             tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
             errors);
         assertJSONEquals([], errors);
-        validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+        parse_css.validateAmp4AdsCss(sheet, errors);
         assertJSONEquals([], errors);
       });
 
@@ -159,12 +161,12 @@ describe('validateAmp4AdsCss', () => {
         '    transition: transform 2s; ' +
         '}';
     const errors = [];
-    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals([], errors);
   });
 
@@ -173,12 +175,12 @@ describe('validateAmp4AdsCss', () => {
            '    transition: background-color 2s; ' +
            '}';
     const errors = [];
-    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals(
         [{
           'line': 1,
@@ -199,12 +201,12 @@ describe('validateAmp4AdsCss', () => {
         '  to { transform: rotate(90deg); } ' +
         '}';
     const errors = [];
-    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals([], errors);
   });
 
@@ -215,12 +217,12 @@ describe('validateAmp4AdsCss', () => {
            '  to { -o-transform: rotate(90deg); } ' +
            '}';
         const errors = [];
-        const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+        const tokens = parse_css.tokenize(css, 1, 0, errors);
         const sheet = parse_css.parseAStylesheet(
             tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
             errors);
         assertJSONEquals([], errors);
-        validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+        parse_css.validateAmp4AdsCss(sheet, errors);
         assertJSONEquals([], errors);
       });
 
@@ -232,12 +234,12 @@ describe('validateAmp4AdsCss', () => {
            '  to { transform: rotate(90deg); } ' +
            '}';
         const errors = [];
-        const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+        const tokens = parse_css.tokenize(css, 1, 0, errors);
         const sheet = parse_css.parseAStylesheet(
             tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
             errors);
         assertJSONEquals([], errors);
-        validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+        parse_css.validateAmp4AdsCss(sheet, errors);
         assertJSONEquals([], errors);
       });
 
@@ -249,12 +251,12 @@ describe('validateAmp4AdsCss', () => {
            '  to { margin-left:0%; width:100%; } ' +
            '}';
     const errors = [];
-    const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+    const tokens = parse_css.tokenize(css, 1, 0, errors);
     const sheet = parse_css.parseAStylesheet(
         tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals([], errors);
-    validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+    parse_css.validateAmp4AdsCss(sheet, errors);
     assertJSONEquals(
         [
           {
@@ -308,12 +310,12 @@ describe('validateAmp4AdsCss', () => {
            '  to { margin-left:0%; width:100%; } ' +
            '}';
         const errors = [];
-        const tokens = tokenize_css.tokenize(css, 1, 0, errors);
+        const tokens = parse_css.tokenize(css, 1, 0, errors);
         const sheet = parse_css.parseAStylesheet(
             tokens, amp4AdsCssParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
             errors);
         assertJSONEquals([], errors);
-        validateAmp4AdsCss.validateAmp4AdsCss(sheet, errors);
+        parse_css.validateAmp4AdsCss(sheet, errors);
         assertJSONEquals(
             [
               {

@@ -15,8 +15,8 @@
  * limitations under the license.
  */
 
-goog.module('parse_url');
-const googString = goog.require('goog.string');
+goog.provide('parse_url.URL');
+goog.require('goog.string');
 
 /**
  * @param {number} code
@@ -159,7 +159,7 @@ function hostIsIPv6Literal(host) {
   return true;
 }
 
-const URL = class {
+parse_url.URL = class {
   /**
    * @param {string} url
    */
@@ -221,7 +221,7 @@ const URL = class {
 
     // If '//' is present as a prefix (after parsing protocol if any), then
     // we need to parse the authority section (username:password@hostname:port)
-    if (googString./*OK*/ startsWith(unparsed, '//')) {
+    if (goog.string./*OK*/ startsWith(unparsed, '//')) {
       if (this.protocol === '') {
         this./*OK*/ startsWithDoubleSlash = true;
       }
@@ -240,12 +240,12 @@ const URL = class {
    */
   parseProtocol_(unparsed) {
     // Fast paths for the most common cases
-    if (googString./*OK*/ startsWith(unparsed, 'https:')) {
+    if (goog.string./*OK*/ startsWith(unparsed, 'https:')) {
       this.hasProtocol = true;
       this.protocol = 'https';
       return unparsed.substr(6); // skip over 'https:' prefix
     }
-    if (googString./*OK*/ startsWith(unparsed, 'http:')) {
+    if (goog.string./*OK*/ startsWith(unparsed, 'http:')) {
       this.hasProtocol = true;
       this.protocol = 'http';
       return unparsed.substr(5); // skip over 'http:' prefix
@@ -312,9 +312,10 @@ const URL = class {
    * @private
    */
   processHostDots_(host) {
-    if (googString./*OK*/ startsWith(host, '.') || host.indexOf('..') !== -1) {
+    if (goog.string./*OK*/ startsWith(host, '.') ||
+        host.indexOf('..') !== -1) {
       this.isValid = false;
-    } else if (host.substr(-1) === '.') {  // strip trailing '.'.
+    } else if (host.substr(-1) === '.') { // strip trailing '.'.
       host = host.substr(0, host.length - 1);
     }
     return host;
@@ -448,4 +449,3 @@ const URL = class {
     return unparsed;
   }
 };
-exports.URL = URL;
