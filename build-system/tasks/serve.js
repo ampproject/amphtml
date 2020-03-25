@@ -21,6 +21,7 @@ const header = require('connect-header');
 const log = require('fancy-log');
 const minimist = require('minimist');
 const morgan = require('morgan');
+const path = require('path');
 const watch = require('gulp-watch');
 const {
   lazyBuildExtensions,
@@ -29,17 +30,24 @@ const {
   preBuildExtensions,
 } = require('../server/lazy-build');
 const {createCtrlcHandler} = require('../common/ctrlcHandler');
-const {cyan, green} = require('ansi-colors');
+const {cyan, green, red} = require('ansi-colors');
+const {exec} = require('../common/exec');
 const {logServeMode, setServeMode} = require('../server/app-utils');
 
 const argv = minimist(process.argv.slice(2), {string: ['rtv']});
+
+// Used by new server implementation
+const transformsPath = 'build-system/server/new-server/transforms';
 
 // Used for logging.
 let url = null;
 let quiet = !!argv.quiet;
 
 // Used for live reload.
-const serverFiles = globby.sync(['build-system/server/**']);
+const serverFiles = globby.sync([
+  'build-system/server/**',
+  `!${transformsPath}/dist/**`,
+]);
 
 // Used to enable / disable lazy building.
 let lazyBuild = false;
@@ -106,12 +114,31 @@ async function startServer(
 }
 
 /**
+ * Builds the new server by converting typescript transforms to JS
+ */
+function buildNewServer() {
+  const buildCmd = `npx typescript -p ${transformsPath}/tsconfig.json`;
+  log(
+    green('Building'),
+    cyan('AMP Dev Server'),
+    green('at'),
+    cyan(`${transformsPath}/dist`) + green('...')
+  );
+  const result = exec(buildCmd, {'stdio': ['inherit', 'inherit', 'pipe']});
+  if (result.status != 0) {
+    const err = new Error('Could not build AMP Dev Server');
+    err.showStack = false;
+    throw err;
+  }
+}
+
+/**
  * Clears server files from the require cache to allow for in-process server
  * live-reload.
  */
 function resetServerFiles() {
-  for (const serverFile in serverFiles) {
-    delete require.cache[serverFiles[serverFile]];
+  for (const serverFile of serverFiles) {
+    delete require.cache[path.resolve(serverFile)];
   }
 }
 
@@ -131,6 +158,14 @@ function stopServer() {
  */
 function restartServer() {
   stopServer();
+  if (argv.new_server) {
+    try {
+      buildNewServer();
+    } catch {
+      log(red('ERROR:'), 'Could not build', cyan('AMP Dev Server'));
+      return;
+    }
+  }
   resetServerFiles();
   startServer();
 }
@@ -157,6 +192,9 @@ async function serve() {
 async function doServe(lazyBuild = false) {
   createCtrlcHandler('serve');
   watch(serverFiles, restartServer);
+  if (argv.new_server) {
+    buildNewServer();
+  }
   await startServer({}, {lazyBuild}, {});
   if (lazyBuild) {
     await performPreBuildSteps();
@@ -170,15 +208,19 @@ module.exports = {
   stopServer,
 };
 
+/* eslint "google-camelcase/google-camelcase": 0 */
+
 serve.description = 'Starts a webserver at the project root directory';
 serve.flags = {
-  'host': '  Hostname or IP address to bind to (default: localhost)',
-  'port': '  Specifies alternative port (default: 8000)',
-  'https': '  Use HTTPS server',
-  'quiet': "  Run in quiet mode and don't log HTTP requests",
-  'cache': '  Make local resources cacheable by the browser',
-  'no_caching_extensions': '  Disable caching for extensions',
-  'compiled': '  Serve minified JS',
-  'cdn': '  Serve current prod JS',
-  'rtv': '  Serve JS from the RTV provided',
+  host: '  Hostname or IP address to bind to (default: localhost)',
+  port: '  Specifies alternative port (default: 8000)',
+  https: '  Use HTTPS server',
+  quiet: "  Run in quiet mode and don't log HTTP requests",
+  cache: '  Make local resources cacheable by the browser',
+  no_caching_extensions: '  Disable caching for extensions',
+  new_server: '  Use new server transforms',
+  compiled: '  Serve minified JS',
+  esm: '  Serve ESM JS (requires the use of --new_server)',
+  cdn: '  Serve current prod JS',
+  rtv: '  Serve JS from the RTV provided',
 };
