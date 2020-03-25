@@ -444,6 +444,8 @@ describes.fakeWin('Viewport', {}, env => {
   });
 
   it('should pass through size and scroll', () => {
+    env.sandbox.stub(viewer, 'isEmbedded').callsFake(() => true);
+    new ViewportImpl(ampdoc, binding, viewer);
     expect(viewport.getPaddingTop()).to.equal(19);
     expect(updatedPaddingTop).to.equal(19);
     expect(viewport.getSize().width).to.equal(111);
