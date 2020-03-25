@@ -55,9 +55,11 @@ goog.require('goog.asserts');
 goog.require('goog.string');
 goog.require('goog.uri.utils');
 goog.require('parse_css.BlockType');
+goog.require('parse_css.Declaration');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.ParsedCssUrl');
 goog.require('parse_css.RuleVisitor');
+goog.require('parse_css.extractImportantDeclarations');
 goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.parseInlineStyle');
@@ -2190,6 +2192,21 @@ class CdataMatcher {
       context.addError(
           errorToken.code, new LineCol(errorToken.line, errorToken.col), params,
           /* url */ '', validationResult);
+    }
+
+    // If `!important` is not allowed, record instances as errors.
+    if (!cssSpec.allowImportant) {
+      /** @type {!Array<!parse_css.Declaration>} */
+      let important = [];
+      parse_css.extractImportantDeclarations(stylesheet, important);
+      for (const decl of important) {
+        context.addError(
+            amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
+            new LineCol(decl.important_line, decl.important_col),
+            /* params */
+            [getTagSpecName(this.tagSpec_), 'CSS !important'],
+            getTagSpecUrl(this.tagSpec_), validationResult);
+      }
     }
 
     const parsedFontUrlSpec = new ParsedUrlSpec(cssSpec.fontUrlSpec);
