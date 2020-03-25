@@ -19,16 +19,10 @@ import {Observable} from '../../../src/observable';
 import {Services} from '../../../src/services';
 import {dev} from '../../../src/log';
 import {hasOwn} from '../../../src/utils/object';
-import {parseQueryString} from '../../../src/url';
 import {registerServiceBuilder} from '../../../src/service';
 
 /** @type {string} */
 const TAG = 'amp-story';
-
-/**
- * @private @const {string}
- */
-const PREVIEW_STATE_PARAM = 'previewState';
 
 /**
  * Util function to retrieve the store service. Ensures we can retrieve the
@@ -443,7 +437,6 @@ export class AmpStoryStoreService {
     this.state_ = /** @type {!State} */ ({
       ...this.getDefaultState_(),
       ...this.getEmbedOverrides_(),
-      ...this.getPreviewOverride_(),
     });
   }
 
@@ -580,29 +573,17 @@ export class AmpStoryStoreService {
         return {
           [StateProperty.CAN_SHOW_SHARING_UIS]: false,
         };
+      case EmbedMode.PREVIEW:
+        return {
+          [StateProperty.PREVIEW_STATE]: true,
+          [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
+          [StateProperty.CAN_SHOW_BOOKEND]: false,
+          [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
+          [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
+          [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
+        };
       default:
         return {};
     }
-  }
-
-  /**
-   * @return {!Object<StateProperty, *>} Partial state
-   * @protected
-   */
-  getPreviewOverride_() {
-    const params = parseQueryString(this.win_.location.hash);
-
-    if (PREVIEW_STATE_PARAM in params) {
-      return {
-        [StateProperty.PREVIEW_STATE]: true,
-        [StateProperty.CAN_INSERT_AUTOMATIC_AD]: false,
-        [StateProperty.CAN_SHOW_BOOKEND]: false,
-        [StateProperty.CAN_SHOW_NAVIGATION_OVERLAY_HINT]: false,
-        [StateProperty.CAN_SHOW_PREVIOUS_PAGE_HELP]: true,
-        [StateProperty.CAN_SHOW_SYSTEM_LAYER_BUTTONS]: false,
-      };
-    }
-
-    return {};
   }
 }
