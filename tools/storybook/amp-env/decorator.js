@@ -18,7 +18,7 @@ import {makeDecorator} from '@storybook/addons';
 import render from 'preact-render-to-string/jsx';
 
 // TODO(wassgha): Figure out what to do with JSX
-import * as Preact from 'src/preact'; // eslint-disable-line
+import * as Preact from '../../../src/preact'; // eslint-disable-line
 import {h} from 'preact'; // eslint-disable-line
 
 export default makeDecorator({

@@ -21,7 +21,7 @@ import withAmp from '../../../../tools/storybook/amp-env/decorator.js';
 
 // TODO(wassgha): Figure out what to do with JSX
 import {h} from 'preact'; // eslint-disable-line
-import * as Preact from 'src/preact'; // eslint-disable-line
+import * as Preact from '../../../../src/preact'; // eslint-disable-line
 
 // eslint-disable-next-line
 storiesOf('Youtube', module)
