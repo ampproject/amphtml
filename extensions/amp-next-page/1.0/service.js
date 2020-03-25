@@ -863,7 +863,7 @@ export class NextPageService {
     }
 
     if (this.remoteFetchingPromise_) {
-      return /** @type {!Promise<!Array<!./page.PageMeta>} */ (this
+      return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
         .remoteFetchingPromise_);
     }
 
@@ -888,7 +888,7 @@ export class NextPageService {
         return [];
       });
 
-    return /** @type {!Promise<!Array<!./page.PageMeta>} */ (this
+    return /** @type {!Promise<!Array<!./page.PageMeta>>} */ (this
       .remoteFetchingPromise_);
   }
 
