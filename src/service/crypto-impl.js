@@ -238,7 +238,7 @@ export class Crypto {
     }
 
     let randomSubdomain = '';
-    for (const i = 0; i < randomValues.length; i++) {
+    for (let i = 0; i < randomValues.length; i++) {
       // Ensure each byte is represented with two hexadecimal characters.
       if (randomValues[i] <= 15) {
         randomSubdomain += '0';
