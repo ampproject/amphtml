@@ -22,6 +22,7 @@ import {
   getAutofocusElementForShowAction,
 } from '../../src/service/standard-actions-impl';
 import {cidServiceForDocForTesting} from '../../src/service/cid-impl';
+import {getCookie, setCookie} from '../../src/cookies';
 import {htmlFor} from '../../src/static-template';
 import {installHistoryServiceForDoc} from '../../src/service/history-impl';
 import {macroTask} from '../../testing/yield';
@@ -908,6 +909,96 @@ describes.sandboxed('StandardActions', {}, env => {
       invocation.node = element;
       expect(scrollStub).to.be.calledWith(invocation);
       expect(result).to.eql('scrollToResponsePromise');
+    });
+
+    describe('setCookie', () => {
+      beforeEach(() => {
+        invocation.method = 'setCookie';
+        invocation.node = createElement();
+        invocation.args = {
+          'name': 'AMP.setCookie-Test',
+          'value': '123',
+          'max-age': 2,
+        };
+      });
+
+      afterEach(() => {
+        setCookie(window, invocation.args.name, '', 0);
+      });
+
+      it('should be implemented', () => {
+        standardActions.handleAmpTarget_(invocation);
+        expect(getCookie(window, invocation.args.name)).to.equal(
+          invocation.args.value
+        );
+      });
+
+      it('should be able to delete cookie', () => {
+        standardActions.handleAmpTarget_(invocation);
+        invocation.args['max-age'] = 0;
+        standardActions.handleAmpTarget_(invocation);
+        expect(getCookie(window, invocation.args.name)).to.equal(null);
+      });
+
+      it('should throw on invalid cookie name', () => {
+        invocation.args.name = 'AMP setCookie Test';
+        allowConsoleError(() => {
+          expect(() => {
+            standardActions.handleAmpTarget_(invocation);
+          }).to.throw(/RFC 6265​​​/);
+        });
+        expect(getCookie(window, invocation.args.name)).to.equal(null);
+      });
+
+      it('should throw on invalid cookie value', () => {
+        invocation.args.value = '1 2 3';
+        allowConsoleError(() => {
+          expect(() => {
+            standardActions.handleAmpTarget_(invocation);
+          }).to.throw(/RFC 6265​​​/);
+        });
+        expect(getCookie(window, invocation.args.name)).to.equal(null);
+      });
+
+      it('should throw on invalid max-age', () => {
+        delete invocation.args['max-age'];
+        allowConsoleError(() => {
+          expect(() => {
+            standardActions.handleAmpTarget_(invocation);
+          }).to.throw(/must contain a number/);
+        });
+        expect(getCookie(window, invocation.args.name)).to.equal(null);
+      });
+
+      it('should throw on invalid domain', () => {
+        invocation.args.domain = 'a b c';
+        allowConsoleError(() => {
+          expect(() => {
+            standardActions.handleAmpTarget_(invocation);
+          }).to.throw(/disallowed characters/);
+        });
+        expect(getCookie(window, invocation.args.name)).to.equal(null);
+      });
+
+      it('should throw on invalid samesite value', () => {
+        invocation.args.samesite = 'none';
+        allowConsoleError(() => {
+          expect(() => {
+            standardActions.handleAmpTarget_(invocation);
+          }).to.throw(/'lax' or 'strict'/);
+        });
+        expect(getCookie(window, invocation.args.name)).to.equal(null);
+      });
+
+      it('should throw on invalid secure value', () => {
+        invocation.args.secure = 'string';
+        allowConsoleError(() => {
+          expect(() => {
+            standardActions.handleAmpTarget_(invocation);
+          }).to.throw(/must be a boolean/);
+        });
+        expect(getCookie(window, invocation.args.name)).to.equal(null);
+      });
     });
   });
 

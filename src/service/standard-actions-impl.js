@@ -503,7 +503,7 @@ export class StandardActions {
     if (args['secure']) {
       options.secure = user().assertBoolean(
         args['secure'],
-        "Optional argument 'secure' must be a boolean."
+        "Optional argument 'secure' must be a boolean"
       );
     }
 
