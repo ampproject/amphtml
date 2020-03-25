@@ -107,9 +107,8 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should start the advancement when state becomes active', async () => {
-    const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
-
     page.buildCallback();
+    const advancementStartStub = env.sandbox.stub(page.advancement_, 'start');
     await page.layoutCallback();
     page.setState(PageState.PLAYING);
 
@@ -246,9 +245,8 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should stop the advancement when state becomes not active', async () => {
-    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
-
     page.buildCallback();
+    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
     await page.layoutCallback();
     page.setState(PageState.NOT_ACTIVE);
 
@@ -305,9 +303,8 @@ describes.realWin('amp-story-page', {amp: true}, env => {
   });
 
   it('should stop the advancement when state becomes paused', async () => {
-    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
-
     page.buildCallback();
+    const advancementStopStub = env.sandbox.stub(page.advancement_, 'stop');
     await page.layoutCallback();
     page.setState(PageState.PAUSED);
 
