@@ -41,6 +41,14 @@ const defaultPlugins = isEsmBuild => [
   getReplacePlugin(isEsmBuild),
 ];
 
+const postCompilationPlugins = isEsmBuild =>
+  isEsmBuild
+    ? [
+        localPlugin('transform-minified-comments'),
+        localPlugin('transform-function-declarations'),
+      ]
+    : [];
+
 const esmRemovedImports = {
   './polyfills/document-contains': ['installDocContains'],
   './polyfills/domtokenlist': ['installDOMTokenList'],
@@ -109,9 +117,10 @@ function getReplacePlugin(isEsmBuild) {
   });
 
   // default each backup experiment constant to the customized value
-  for (const [experimentDefine, value] of Object.entries(
+  const experimentsConstantBackupEntries = Object.entries(
     experimentsConstantBackup
-  )) {
+  );
+  for (const [experimentDefine, value] of experimentsConstantBackupEntries) {
     function flagExists(element) {
       return element['identifierName'] === experimentDefine;
     }
@@ -138,8 +147,18 @@ function getJsonConfigurationPlugin() {
  * @param {!Object<string, boolean>} buildFlags
  * @return {!Array<string|!Array<string|!Object>>}
  */
-function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
-  const applied = [...defaultPlugins(isEsmBuild || false)];
+function plugins({
+  isEsmBuild,
+  isForTesting,
+  isSinglePass,
+  isChecktypes,
+  isPostCompile,
+}) {
+  if (isPostCompile) {
+    return postCompilationPlugins(isEsmBuild);
+  }
+
+  const applied = [...defaultPlugins(isEsmBuild)];
   // TODO(erwinm): This is temporary until we remove the assert/log removals
   // from the java transformation to the babel transformation.
   // There is currently a weird interaction where when we do the transform
@@ -151,15 +170,18 @@ function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
     applied.push(localPlugin('transform-amp-asserts'));
   }
   if (isEsmBuild) {
-    applied.push([
-      'filter-imports',
-      {
-        imports: {
-          ...esmRemovedImports,
-          ...validTransformedRemovableImports,
+    applied.push(
+      [
+        'filter-imports',
+        {
+          imports: {
+            ...esmRemovedImports,
+            ...validTransformedRemovableImports,
+          },
         },
-      },
-    ]);
+      ],
+      localPlugin('transform-function-declarations')
+    );
   }
   if (isChecktypes) {
     applied.push(localPlugin('transform-simple-object-destructure'));
@@ -174,6 +196,7 @@ function plugins({isEsmBuild, isForTesting, isSinglePass, isChecktypes}) {
       localPlugin('is_dev-constant-transformer')
     );
   }
+
   return applied;
 }
 
