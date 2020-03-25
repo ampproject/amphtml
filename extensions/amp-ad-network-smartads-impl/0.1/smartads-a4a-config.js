@@ -29,10 +29,10 @@ const SRC_A4A_PREFIX_ = 'https://smart-ads.biz/_a4a';
  * @return {boolean}
  */
 export function smartAdsIsA4AEnabled(win, element, useRemoteHtml) {
-  let src;
+  const src = element.getAttribute('src');
   return (
     !useRemoteHtml &&
-    !!(src = element.getAttribute('src')) &&
+    !!src &&
     !!element.getAttribute('data-use-a4a') &&
     (startsWith(src, SRC_PREFIX_) || startsWith(src, SRC_A4A_PREFIX_))
   );
