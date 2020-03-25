@@ -48,6 +48,7 @@ amp-carousel {
 }
 
 amp-carousel[controls] .amp-carousel-button,
+amp-carousel.i-amphtml-carousel-has-controls .amp-carousel-button,
 .amp-mode-mouse .amp-carousel-button {
   opacity: 1;
   visibility: visible;
@@ -93,7 +94,7 @@ amp-carousel .amp-carousel-button.amp-disabled {
 amp-carousel[i-amphtml-carousel-hide-buttons] .amp-carousel-button-prev,
 amp-carousel[i-amphtml-carousel-hide-buttons] .amp-carousel-button-next {
   opacity: 0;
-  /** 
+  /**
    * Note, screen readers can still activate the buttons when hide buttons is
    * specified, even though we have `pointer-events: none`.
    */
